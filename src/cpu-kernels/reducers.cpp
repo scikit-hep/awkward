@@ -2,6 +2,15 @@
 
 #include "awkward/cpu-kernels/reducers.h"
 
+int64_t boink4(int64_t x, int64_t line) {
+  if (x != 0) {
+    throw std::runtime_error(std::string("BOINK4! on line ") + std::to_string(line));
+  }
+  else {
+    return 0;
+  }
+}
+
 ERROR awkward_reduce_count_64(
   int64_t* toptr,
   const int64_t* parents,
@@ -45,9 +54,9 @@ ERROR awkward_reduce_countnonzero_bool_64(
   return awkward_reduce_countnonzero<bool>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -62,9 +71,9 @@ ERROR awkward_reduce_countnonzero_int8_64(
   return awkward_reduce_countnonzero<int8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -79,9 +88,9 @@ ERROR awkward_reduce_countnonzero_uint8_64(
   return awkward_reduce_countnonzero<uint8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -96,9 +105,9 @@ ERROR awkward_reduce_countnonzero_int16_64(
   return awkward_reduce_countnonzero<int16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -113,9 +122,9 @@ ERROR awkward_reduce_countnonzero_uint16_64(
   return awkward_reduce_countnonzero<uint16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -130,9 +139,9 @@ ERROR awkward_reduce_countnonzero_int32_64(
   return awkward_reduce_countnonzero<int32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -147,9 +156,9 @@ ERROR awkward_reduce_countnonzero_uint32_64(
   return awkward_reduce_countnonzero<uint32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -164,9 +173,9 @@ ERROR awkward_reduce_countnonzero_int64_64(
   return awkward_reduce_countnonzero<int64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -181,9 +190,9 @@ ERROR awkward_reduce_countnonzero_uint64_64(
   return awkward_reduce_countnonzero<uint64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -198,9 +207,9 @@ ERROR awkward_reduce_countnonzero_float32_64(
   return awkward_reduce_countnonzero<float>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -215,9 +224,9 @@ ERROR awkward_reduce_countnonzero_float64_64(
   return awkward_reduce_countnonzero<double>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -266,9 +275,9 @@ ERROR awkward_reduce_sum_int64_int8_64(
   return awkward_reduce_sum<int64_t, int8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -283,9 +292,9 @@ ERROR awkward_reduce_sum_uint64_uint8_64(
   return awkward_reduce_sum<uint64_t, uint8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -300,9 +309,9 @@ ERROR awkward_reduce_sum_int64_int16_64(
   return awkward_reduce_sum<int64_t, int16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -317,9 +326,9 @@ ERROR awkward_reduce_sum_uint64_uint16_64(
   return awkward_reduce_sum<uint64_t, uint16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -334,9 +343,9 @@ ERROR awkward_reduce_sum_int64_int32_64(
   return awkward_reduce_sum<int64_t, int32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -351,9 +360,9 @@ ERROR awkward_reduce_sum_uint64_uint32_64(
   return awkward_reduce_sum<uint64_t, uint32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -368,9 +377,9 @@ ERROR awkward_reduce_sum_int64_int64_64(
   return awkward_reduce_sum<int64_t, int64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -385,9 +394,9 @@ ERROR awkward_reduce_sum_uint64_uint64_64(
   return awkward_reduce_sum<uint64_t, uint64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -402,9 +411,9 @@ ERROR awkward_reduce_sum_float32_float32_64(
   return awkward_reduce_sum<float, float>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -419,9 +428,9 @@ ERROR awkward_reduce_sum_float64_float64_64(
   return awkward_reduce_sum<double, double>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -452,9 +461,9 @@ ERROR awkward_reduce_sum_int32_int8_64(
   return awkward_reduce_sum<int32_t, int8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -469,9 +478,9 @@ ERROR awkward_reduce_sum_uint32_uint8_64(
   return awkward_reduce_sum<uint32_t, uint8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -486,9 +495,9 @@ ERROR awkward_reduce_sum_int32_int16_64(
   return awkward_reduce_sum<int32_t, int16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -503,9 +512,9 @@ ERROR awkward_reduce_sum_uint32_uint16_64(
   return awkward_reduce_sum<uint32_t, uint16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -520,9 +529,9 @@ ERROR awkward_reduce_sum_int32_int32_64(
   return awkward_reduce_sum<int32_t, int32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -537,9 +546,9 @@ ERROR awkward_reduce_sum_uint32_uint32_64(
   return awkward_reduce_sum<uint32_t, uint32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -572,9 +581,9 @@ ERROR awkward_reduce_sum_bool_bool_64(
   return awkward_reduce_sum_bool<bool>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -589,9 +598,9 @@ ERROR awkward_reduce_sum_bool_int8_64(
   return awkward_reduce_sum_bool<int8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -606,9 +615,9 @@ ERROR awkward_reduce_sum_bool_uint8_64(
   return awkward_reduce_sum_bool<uint8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -623,9 +632,9 @@ ERROR awkward_reduce_sum_bool_int16_64(
   return awkward_reduce_sum_bool<int16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -640,9 +649,9 @@ ERROR awkward_reduce_sum_bool_uint16_64(
   return awkward_reduce_sum_bool<uint16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -657,9 +666,9 @@ ERROR awkward_reduce_sum_bool_int32_64(
   return awkward_reduce_sum_bool<int32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -674,9 +683,9 @@ ERROR awkward_reduce_sum_bool_uint32_64(
   return awkward_reduce_sum_bool<uint32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -691,9 +700,9 @@ ERROR awkward_reduce_sum_bool_int64_64(
   return awkward_reduce_sum_bool<int64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -708,9 +717,9 @@ ERROR awkward_reduce_sum_bool_uint64_64(
   return awkward_reduce_sum_bool<uint64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -725,9 +734,9 @@ ERROR awkward_reduce_sum_bool_float32_64(
   return awkward_reduce_sum_bool<float>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -742,9 +751,9 @@ ERROR awkward_reduce_sum_bool_float64_64(
   return awkward_reduce_sum_bool<double>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -793,9 +802,9 @@ ERROR awkward_reduce_prod_int64_int8_64(
   return awkward_reduce_prod<int64_t, int8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -810,9 +819,9 @@ ERROR awkward_reduce_prod_uint64_uint8_64(
   return awkward_reduce_prod<uint64_t, uint8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -827,9 +836,9 @@ ERROR awkward_reduce_prod_int64_int16_64(
   return awkward_reduce_prod<int64_t, int16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -844,9 +853,9 @@ ERROR awkward_reduce_prod_uint64_uint16_64(
   return awkward_reduce_prod<uint64_t, uint16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -861,9 +870,9 @@ ERROR awkward_reduce_prod_int64_int32_64(
   return awkward_reduce_prod<int64_t, int32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -878,9 +887,9 @@ ERROR awkward_reduce_prod_uint64_uint32_64(
   return awkward_reduce_prod<uint64_t, uint32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -895,9 +904,9 @@ ERROR awkward_reduce_prod_int64_int64_64(
   return awkward_reduce_prod<int64_t, int64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -912,9 +921,9 @@ ERROR awkward_reduce_prod_uint64_uint64_64(
   return awkward_reduce_prod<uint64_t, uint64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -929,9 +938,9 @@ ERROR awkward_reduce_prod_float32_float32_64(
   return awkward_reduce_prod<float, float>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -946,9 +955,9 @@ ERROR awkward_reduce_prod_float64_float64_64(
   return awkward_reduce_prod<double, double>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -979,9 +988,9 @@ ERROR awkward_reduce_prod_int32_int8_64(
   return awkward_reduce_prod<int32_t, int8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -996,9 +1005,9 @@ ERROR awkward_reduce_prod_uint32_uint8_64(
   return awkward_reduce_prod<uint32_t, uint8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1013,9 +1022,9 @@ ERROR awkward_reduce_prod_int32_int16_64(
   return awkward_reduce_prod<int32_t, int16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1030,9 +1039,9 @@ ERROR awkward_reduce_prod_uint32_uint16_64(
   return awkward_reduce_prod<uint32_t, uint16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1047,9 +1056,9 @@ ERROR awkward_reduce_prod_int32_int32_64(
   return awkward_reduce_prod<int32_t, int32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1064,9 +1073,9 @@ ERROR awkward_reduce_prod_uint32_uint32_64(
   return awkward_reduce_prod<uint32_t, uint32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1099,9 +1108,9 @@ ERROR awkward_reduce_prod_bool_bool_64(
   return awkward_reduce_prod_bool<bool>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1116,9 +1125,9 @@ ERROR awkward_reduce_prod_bool_int8_64(
   return awkward_reduce_prod_bool<int8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1133,9 +1142,9 @@ ERROR awkward_reduce_prod_bool_uint8_64(
   return awkward_reduce_prod_bool<uint8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1150,9 +1159,9 @@ ERROR awkward_reduce_prod_bool_int16_64(
   return awkward_reduce_prod_bool<int16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1167,9 +1176,9 @@ ERROR awkward_reduce_prod_bool_uint16_64(
   return awkward_reduce_prod_bool<uint16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1184,9 +1193,9 @@ ERROR awkward_reduce_prod_bool_int32_64(
   return awkward_reduce_prod_bool<int32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1201,9 +1210,9 @@ ERROR awkward_reduce_prod_bool_uint32_64(
   return awkward_reduce_prod_bool<uint32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1218,9 +1227,9 @@ ERROR awkward_reduce_prod_bool_int64_64(
   return awkward_reduce_prod_bool<int64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1235,9 +1244,9 @@ ERROR awkward_reduce_prod_bool_uint64_64(
   return awkward_reduce_prod_bool<uint64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1252,9 +1261,9 @@ ERROR awkward_reduce_prod_bool_float32_64(
   return awkward_reduce_prod_bool<float>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1269,9 +1278,9 @@ ERROR awkward_reduce_prod_bool_float64_64(
   return awkward_reduce_prod_bool<double>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1310,9 +1319,9 @@ ERROR awkward_reduce_min_int8_int8_64(
   return awkward_reduce_min<int8_t, int8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1329,9 +1338,9 @@ ERROR awkward_reduce_min_uint8_uint8_64(
   return awkward_reduce_min<uint8_t, uint8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1348,9 +1357,9 @@ ERROR awkward_reduce_min_int16_int16_64(
   return awkward_reduce_min<int16_t, int16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1367,9 +1376,9 @@ ERROR awkward_reduce_min_uint16_uint16_64(
   return awkward_reduce_min<uint16_t, uint16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1386,9 +1395,9 @@ ERROR awkward_reduce_min_int32_int32_64(
   return awkward_reduce_min<int32_t, int32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1405,9 +1414,9 @@ ERROR awkward_reduce_min_uint32_uint32_64(
   return awkward_reduce_min<uint32_t, uint32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1424,9 +1433,9 @@ ERROR awkward_reduce_min_int64_int64_64(
   return awkward_reduce_min<int64_t, int64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1443,9 +1452,9 @@ ERROR awkward_reduce_min_uint64_uint64_64(
   return awkward_reduce_min<uint64_t, uint64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1462,9 +1471,9 @@ ERROR awkward_reduce_min_float32_float32_64(
   return awkward_reduce_min<float, float>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1481,9 +1490,9 @@ ERROR awkward_reduce_min_float64_float64_64(
   return awkward_reduce_min<double, double>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1523,9 +1532,9 @@ ERROR awkward_reduce_max_int8_int8_64(
   return awkward_reduce_max<int8_t, int8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1542,9 +1551,9 @@ ERROR awkward_reduce_max_uint8_uint8_64(
   return awkward_reduce_max<uint8_t, uint8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1561,9 +1570,9 @@ ERROR awkward_reduce_max_int16_int16_64(
   return awkward_reduce_max<int16_t, int16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1580,9 +1589,9 @@ ERROR awkward_reduce_max_uint16_uint16_64(
   return awkward_reduce_max<uint16_t, uint16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1599,9 +1608,9 @@ ERROR awkward_reduce_max_int32_int32_64(
   return awkward_reduce_max<int32_t, int32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1618,9 +1627,9 @@ ERROR awkward_reduce_max_uint32_uint32_64(
   return awkward_reduce_max<uint32_t, uint32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1637,9 +1646,9 @@ ERROR awkward_reduce_max_int64_int64_64(
   return awkward_reduce_max<int64_t, int64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1656,9 +1665,9 @@ ERROR awkward_reduce_max_uint64_uint64_64(
   return awkward_reduce_max<uint64_t, uint64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1675,9 +1684,9 @@ ERROR awkward_reduce_max_float32_float32_64(
   return awkward_reduce_max<float, float>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1694,9 +1703,9 @@ ERROR awkward_reduce_max_float64_float64_64(
   return awkward_reduce_max<double, double>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength,
     identity);
@@ -1764,11 +1773,11 @@ ERROR awkward_reduce_argmin_int8_64(
   return awkward_reduce_argmin<int64_t, int8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1785,11 +1794,11 @@ ERROR awkward_reduce_argmin_uint8_64(
   return awkward_reduce_argmin<int64_t, uint8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1806,11 +1815,11 @@ ERROR awkward_reduce_argmin_int16_64(
   return awkward_reduce_argmin<int64_t, int16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1827,11 +1836,11 @@ ERROR awkward_reduce_argmin_uint16_64(
   return awkward_reduce_argmin<int64_t, uint16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1848,11 +1857,11 @@ ERROR awkward_reduce_argmin_int32_64(
   return awkward_reduce_argmin<int64_t, int32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1869,11 +1878,11 @@ ERROR awkward_reduce_argmin_uint32_64(
   return awkward_reduce_argmin<int64_t, uint32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1890,11 +1899,11 @@ ERROR awkward_reduce_argmin_int64_64(
   return awkward_reduce_argmin<int64_t, int64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1911,11 +1920,11 @@ ERROR awkward_reduce_argmin_uint64_64(
   return awkward_reduce_argmin<int64_t, uint64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1932,11 +1941,11 @@ ERROR awkward_reduce_argmin_float32_64(
   return awkward_reduce_argmin<int64_t, float>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -1953,11 +1962,11 @@ ERROR awkward_reduce_argmin_float64_64(
   return awkward_reduce_argmin<int64_t, double>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -2024,11 +2033,11 @@ ERROR awkward_reduce_argmax_int8_64(
   return awkward_reduce_argmax<int64_t, int8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -2045,11 +2054,11 @@ ERROR awkward_reduce_argmax_uint8_64(
   return awkward_reduce_argmax<int64_t, uint8_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -2066,11 +2075,11 @@ ERROR awkward_reduce_argmax_int16_64(
   return awkward_reduce_argmax<int64_t, int16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -2087,11 +2096,11 @@ ERROR awkward_reduce_argmax_uint16_64(
   return awkward_reduce_argmax<int64_t, uint16_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -2108,11 +2117,11 @@ ERROR awkward_reduce_argmax_int32_64(
   return awkward_reduce_argmax<int64_t, int32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -2129,11 +2138,11 @@ ERROR awkward_reduce_argmax_uint32_64(
   return awkward_reduce_argmax<int64_t, uint32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -2150,11 +2159,11 @@ ERROR awkward_reduce_argmax_int64_64(
   return awkward_reduce_argmax<int64_t, int64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -2171,11 +2180,11 @@ ERROR awkward_reduce_argmax_uint64_64(
   return awkward_reduce_argmax<int64_t, uint64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -2192,11 +2201,11 @@ ERROR awkward_reduce_argmax_float32_64(
   return awkward_reduce_argmax<int64_t, float>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -2213,11 +2222,11 @@ ERROR awkward_reduce_argmax_float64_64(
   return awkward_reduce_argmax<int64_t, double>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink4(fromptroffset, __LINE__),
     starts,
-    startsoffset,
+    boink4(startsoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     lenparents,
     outlength);
 }
@@ -2237,8 +2246,8 @@ ERROR awkward_ListOffsetArray_reduce_global_startstop_64(
   const int64_t* offsets,
   int64_t offsetsoffset,
   int64_t length) {
-  *globalstart = offsets[offsetsoffset + 0];
-  *globalstop = offsets[offsetsoffset + length];
+  *globalstart = offsets[boink4(offsetsoffset, __LINE__) + 0];
+  *globalstop = offsets[boink4(offsetsoffset, __LINE__) + length];
   return success();
 }
 
@@ -2249,14 +2258,14 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(
   int64_t offsetsoffset,
   int64_t length) {
   *maxcount = 0;
-  offsetscopy[0] = offsets[offsetsoffset + 0];
+  offsetscopy[0] = offsets[boink4(offsetsoffset, __LINE__) + 0];
   for (int64_t i = 0;  i < length;  i++) {
-    int64_t count = (offsets[offsetsoffset + i + 1] -
-                     offsets[offsetsoffset + i]);
+    int64_t count = (offsets[boink4(offsetsoffset, __LINE__) + i + 1] -
+                     offsets[boink4(offsetsoffset, __LINE__) + i]);
     if (*maxcount < count) {
       *maxcount = count;
     }
-    offsetscopy[i + 1] = offsets[offsetsoffset + i + 1];
+    offsetscopy[i + 1] = offsets[boink4(offsetsoffset, __LINE__) + i + 1];
   }
   return success();
 }
@@ -2284,9 +2293,9 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
   while (k < nextlen) {
     int64_t j = 0;
     for (int64_t i = 0;  i < length;  i++) {
-      if (offsetscopy[i] < offsets[offsetsoffset + i + 1]) {
-        int64_t diff = offsetscopy[i] - offsets[offsetsoffset + i];
-        int64_t parent = parents[parentsoffset + i];
+      if (offsetscopy[i] < offsets[boink4(offsetsoffset, __LINE__) + i + 1]) {
+        int64_t diff = offsetscopy[i] - offsets[boink4(offsetsoffset, __LINE__) + i];
+        int64_t parent = parents[boink4(parentsoffset, __LINE__) + i];
 
         nextcarry[k] = offsetscopy[i];
         nextparents[k] = parent*maxcount + diff;
@@ -2330,7 +2339,7 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_findgaps_64(
   int64_t k = 0;
   int64_t last = -1;
   for (int64_t i = 0;  i < lenparents;  i++) {
-    int64_t parent = parents[parentsoffset + i];
+    int64_t parent = parents[boink4(parentsoffset, __LINE__) + i];
     if (last < parent) {
       gaps[k] = parent - last;
       k++;
@@ -2376,10 +2385,10 @@ ERROR awkward_ListOffsetArray_reduce_local_nextparents_64(
   const int64_t* offsets,
   int64_t offsetsoffset,
   int64_t length) {
-  int64_t initialoffset = offsets[offsetsoffset];
+  int64_t initialoffset = offsets[boink4(offsetsoffset, __LINE__)];
   for (int64_t i = 0;  i < length;  i++) {
-    for (int64_t j = offsets[offsetsoffset + i] - initialoffset;
-         j < offsets[offsetsoffset + i + 1] - initialoffset;
+    for (int64_t j = offsets[boink4(offsetsoffset, __LINE__) + i] - initialoffset;
+         j < offsets[boink4(offsetsoffset, __LINE__) + i + 1] - initialoffset;
          j++) {
       nextparents[j] = i;
     }
@@ -2396,7 +2405,7 @@ ERROR awkward_ListOffsetArray_reduce_local_outoffsets_64(
   int64_t k = 0;
   int64_t last = -1;
   for (int64_t i = 0;  i < lenparents;  i++) {
-    while (last < parents[parentsoffset + i]) {
+    while (last < parents[boink4(parentsoffset, __LINE__) + i]) {
       outoffsets[k] = i;
       k++;
       last++;
@@ -2447,9 +2456,9 @@ ERROR awkward_IndexedArray32_reduce_next_64(
     nextparents,
     outindex,
     index,
-    indexoffset,
+    boink4(indexoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     length);
 }
 ERROR awkward_IndexedArrayU32_reduce_next_64(
@@ -2466,9 +2475,9 @@ ERROR awkward_IndexedArrayU32_reduce_next_64(
     nextparents,
     outindex,
     index,
-    indexoffset,
+    boink4(indexoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     length);
 }
 ERROR awkward_IndexedArray64_reduce_next_64(
@@ -2485,9 +2494,9 @@ ERROR awkward_IndexedArray64_reduce_next_64(
     nextparents,
     outindex,
     index,
-    indexoffset,
+    boink4(indexoffset, __LINE__),
     parents,
-    parentsoffset,
+    boink4(parentsoffset, __LINE__),
     length);
 }
 
@@ -2500,7 +2509,7 @@ ERROR awkward_IndexedArray_reduce_next_fix_offsets_64(
   for (int64_t i = 0;  i < startslength;  i++) {
     outoffsets[i] = starts[startsoffset + i];
   }
-  outoffsets[startsoffset + startslength] = outindexlength;
+  outoffsets[boink4(startsoffset, __LINE__) + startslength] = outindexlength;
   return success();
 }
 
@@ -2514,7 +2523,7 @@ ERROR awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(
     toptr[i] = 1;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[parentsoffset + i]] = 0;
+    toptr[parents[boink4(parentsoffset, __LINE__) + i]] = 0;
   }
   return success();
 }
@@ -2531,9 +2540,9 @@ ERROR awkward_ByteMaskedArray_reduce_next_64(
   bool validwhen) {
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {
-    if ((mask[maskoffset + i] != 0) == validwhen) {
+    if ((mask[boink4(maskoffset, __LINE__) + i] != 0) == validwhen) {
       nextcarry[k] = i;
-      nextparents[k] = parents[parentsoffset + i];
+      nextparents[k] = parents[boink4(parentsoffset, __LINE__) + i];
       outindex[i] = k;
       k++;
     }

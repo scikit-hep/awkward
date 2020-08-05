@@ -2,6 +2,15 @@
 
 #include "awkward/cpu-kernels/operations.h"
 
+int64_t boink3(int64_t x, int64_t line) {
+  if (x != 0) {
+    throw std::runtime_error(std::string("BOINK3! on line ") + std::to_string(line));
+  }
+  else {
+    return 0;
+  }
+}
+
 template <typename T, typename C>
 ERROR awkward_ListArray_num(
   T* tonum,
@@ -27,9 +36,9 @@ ERROR awkward_ListArray32_num_64(
   return awkward_ListArray_num<int64_t, int32_t>(
     tonum,
     fromstarts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     fromstops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     length);
 }
 ERROR awkward_ListArrayU32_num_64(
@@ -42,9 +51,9 @@ ERROR awkward_ListArrayU32_num_64(
   return awkward_ListArray_num<int64_t, uint32_t>(
     tonum,
     fromstarts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     fromstops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     length);
 }
 ERROR awkward_ListArray64_num_64(
@@ -57,9 +66,9 @@ ERROR awkward_ListArray64_num_64(
   return awkward_ListArray_num<int64_t, int64_t>(
     tonum,
     fromstarts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     fromstops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     length);
 }
 
@@ -109,10 +118,10 @@ ERROR awkward_ListOffsetArray32_flatten_offsets_64(
   return awkward_ListOffsetArray_flatten_offsets<int64_t, int32_t>(
     tooffsets,
     outeroffsets,
-    outeroffsetsoffset,
+    boink3(outeroffsetsoffset, __LINE__),
     outeroffsetslen,
     inneroffsets,
-    inneroffsetsoffset,
+    boink3(inneroffsetsoffset, __LINE__),
     inneroffsetslen);
 }
 ERROR awkward_ListOffsetArrayU32_flatten_offsets_64(
@@ -126,10 +135,10 @@ ERROR awkward_ListOffsetArrayU32_flatten_offsets_64(
   return awkward_ListOffsetArray_flatten_offsets<int64_t, uint32_t>(
     tooffsets,
     outeroffsets,
-    outeroffsetsoffset,
+    boink3(outeroffsetsoffset, __LINE__),
     outeroffsetslen,
     inneroffsets,
-    inneroffsetsoffset,
+    boink3(inneroffsetsoffset, __LINE__),
     inneroffsetslen);
 }
 ERROR awkward_ListOffsetArray64_flatten_offsets_64(
@@ -143,10 +152,10 @@ ERROR awkward_ListOffsetArray64_flatten_offsets_64(
   return awkward_ListOffsetArray_flatten_offsets<int64_t, int64_t>(
     tooffsets,
     outeroffsets,
-    outeroffsetsoffset,
+    boink3(outeroffsetsoffset, __LINE__),
     outeroffsetslen,
     inneroffsets,
-    inneroffsetsoffset,
+    boink3(inneroffsetsoffset, __LINE__),
     inneroffsetslen);
 }
 
@@ -190,10 +199,10 @@ ERROR awkward_IndexedArray32_flatten_none2empty_64(
   return awkward_IndexedArray_flatten_none2empty<int64_t, int32_t>(
     outoffsets,
     outindex,
-    outindexoffset,
+    boink3(outindexoffset, __LINE__),
     outindexlength,
     offsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     offsetslength);
 }
 ERROR awkward_IndexedArrayU32_flatten_none2empty_64(
@@ -207,10 +216,10 @@ ERROR awkward_IndexedArrayU32_flatten_none2empty_64(
   return awkward_IndexedArray_flatten_none2empty<int64_t, uint32_t>(
     outoffsets,
     outindex,
-    outindexoffset,
+    boink3(outindexoffset, __LINE__),
     outindexlength,
     offsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     offsetslength);
 }
 ERROR awkward_IndexedArray64_flatten_none2empty_64(
@@ -224,10 +233,10 @@ ERROR awkward_IndexedArray64_flatten_none2empty_64(
   return awkward_IndexedArray_flatten_none2empty<int64_t, int64_t>(
     outoffsets,
     outindex,
-    outindexoffset,
+    boink3(outindexoffset, __LINE__),
     outindexlength,
     offsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     offsetslength);
 }
 
@@ -263,7 +272,7 @@ ERROR awkward_UnionArray32_flatten_length_64(
   return awkward_UnionArray_flatten_length<int8_t, int32_t, int64_t>(
     total_length,
     fromtags,
-    fromtagsoffset,
+    boink3(fromtagsoffset, __LINE__),
     fromindex,
     fromindexoffset,
     length,
@@ -282,9 +291,9 @@ ERROR awkward_UnionArrayU32_flatten_length_64(
   return awkward_UnionArray_flatten_length<int8_t, uint32_t, int64_t>(
     total_length,
     fromtags,
-    fromtagsoffset,
+    boink3(fromtagsoffset, __LINE__),
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     length,
     offsetsraws,
     offsetsoffsets);
@@ -301,9 +310,9 @@ ERROR awkward_UnionArray64_flatten_length_64(
   return awkward_UnionArray_flatten_length<int8_t, int64_t, int64_t>(
     total_length,
     fromtags,
-    fromtagsoffset,
+    boink3(fromtagsoffset, __LINE__),
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     length,
     offsetsraws,
     offsetsoffsets);
@@ -361,9 +370,9 @@ ERROR awkward_UnionArray32_flatten_combine_64(
     toindex,
     tooffsets,
     fromtags,
-    fromtagsoffset,
+    boink3(fromtagsoffset, __LINE__),
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     length,
     offsetsraws,
     offsetsoffsets);
@@ -388,9 +397,9 @@ ERROR awkward_UnionArrayU32_flatten_combine_64(
     toindex,
     tooffsets,
     fromtags,
-    fromtagsoffset,
+    boink3(fromtagsoffset, __LINE__),
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     length,
     offsetsraws,
     offsetsoffsets);
@@ -415,9 +424,9 @@ ERROR awkward_UnionArray64_flatten_combine_64(
     toindex,
     tooffsets,
     fromtags,
-    fromtagsoffset,
+    boink3(fromtagsoffset, __LINE__),
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     length,
     offsetsraws,
     offsetsoffsets);
@@ -452,7 +461,7 @@ ERROR awkward_IndexedArray32_flatten_nextcarry_64(
   return awkward_IndexedArray_flatten_nextcarry<int32_t, int64_t>(
     tocarry,
     fromindex,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     lenindex,
     lencontent);
 }
@@ -465,7 +474,7 @@ ERROR awkward_IndexedArrayU32_flatten_nextcarry_64(
   return awkward_IndexedArray_flatten_nextcarry<uint32_t, int64_t>(
     tocarry,
     fromindex,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     lenindex,
     lencontent);
 }
@@ -478,7 +487,7 @@ ERROR awkward_IndexedArray64_flatten_nextcarry_64(
   return awkward_IndexedArray_flatten_nextcarry<int64_t, int64_t>(
     tocarry,
     fromindex,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     lenindex,
     lencontent);
 }
@@ -507,9 +516,9 @@ ERROR awkward_IndexedArray32_overlay_mask8_to64(
   return awkward_IndexedArray_overlay_mask<int32_t, int8_t, int64_t>(
     toindex,
     mask,
-    maskoffset,
+    boink3(maskoffset, __LINE__),
     fromindex,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     length);
 }
 ERROR awkward_IndexedArrayU32_overlay_mask8_to64(
@@ -522,9 +531,9 @@ ERROR awkward_IndexedArrayU32_overlay_mask8_to64(
   return awkward_IndexedArray_overlay_mask<uint32_t, int8_t, int64_t>(
     toindex,
     mask,
-    maskoffset,
+    boink3(maskoffset, __LINE__),
     fromindex,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     length);
 }
 ERROR awkward_IndexedArray64_overlay_mask8_to64(
@@ -537,9 +546,9 @@ ERROR awkward_IndexedArray64_overlay_mask8_to64(
   return awkward_IndexedArray_overlay_mask<int64_t, int8_t, int64_t>(
     toindex,
     mask,
-    maskoffset,
+    boink3(maskoffset, __LINE__),
     fromindex,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     length);
 }
 
@@ -562,7 +571,7 @@ ERROR awkward_IndexedArray32_mask8(
   return awkward_IndexedArray_mask<int32_t, int8_t>(
     tomask,
     fromindex,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     length);
 }
 ERROR awkward_IndexedArrayU32_mask8(
@@ -573,7 +582,7 @@ ERROR awkward_IndexedArrayU32_mask8(
   return awkward_IndexedArray_mask<uint32_t, int8_t>(
     tomask,
     fromindex,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     length);
 }
 ERROR awkward_IndexedArray64_mask8(
@@ -584,7 +593,7 @@ ERROR awkward_IndexedArray64_mask8(
   return awkward_IndexedArray_mask<int64_t, int8_t>(
     tomask,
     fromindex,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     length);
 }
 
@@ -609,7 +618,7 @@ ERROR awkward_ByteMaskedArray_mask8(
   return awkward_ByteMaskedArray_mask(
     tomask,
     frommask,
-    maskoffset,
+    boink3(maskoffset, __LINE__),
     length,
     validwhen);
 }
@@ -663,10 +672,10 @@ ERROR awkward_IndexedArray32_simplify32_to64(
   return awkward_IndexedArray_simplify<int32_t, int32_t, int64_t>(
     toindex,
     outerindex,
-    outeroffset,
+    boink3(outeroffset, __LINE__),
     outerlength,
     innerindex,
-    inneroffset,
+    boink3(inneroffset, __LINE__),
     innerlength);
 }
 ERROR awkward_IndexedArray32_simplifyU32_to64(
@@ -680,10 +689,10 @@ ERROR awkward_IndexedArray32_simplifyU32_to64(
   return awkward_IndexedArray_simplify<int32_t, uint32_t, int64_t>(
     toindex,
     outerindex,
-    outeroffset,
+    boink3(outeroffset, __LINE__),
     outerlength,
     innerindex,
-    inneroffset,
+    boink3(inneroffset, __LINE__),
     innerlength);
 }
 ERROR awkward_IndexedArray32_simplify64_to64(
@@ -697,10 +706,10 @@ ERROR awkward_IndexedArray32_simplify64_to64(
   return awkward_IndexedArray_simplify<int32_t, int64_t, int64_t>(
     toindex,
     outerindex,
-    outeroffset,
+    boink3(outeroffset, __LINE__),
     outerlength,
     innerindex,
-    inneroffset,
+    boink3(inneroffset, __LINE__),
     innerlength);
 }
 ERROR awkward_IndexedArrayU32_simplify32_to64(
@@ -714,10 +723,10 @@ ERROR awkward_IndexedArrayU32_simplify32_to64(
   return awkward_IndexedArray_simplify<uint32_t, int32_t, int64_t>(
     toindex,
     outerindex,
-    outeroffset,
+    boink3(outeroffset, __LINE__),
     outerlength,
     innerindex,
-    inneroffset,
+    boink3(inneroffset, __LINE__),
     innerlength);
 }
 ERROR awkward_IndexedArrayU32_simplifyU32_to64(
@@ -731,10 +740,10 @@ ERROR awkward_IndexedArrayU32_simplifyU32_to64(
   return awkward_IndexedArray_simplify<uint32_t, uint32_t, int64_t>(
     toindex,
     outerindex,
-    outeroffset,
+    boink3(outeroffset, __LINE__),
     outerlength,
     innerindex,
-    inneroffset,
+    boink3(inneroffset, __LINE__),
     innerlength);
 }
 ERROR awkward_IndexedArrayU32_simplify64_to64(
@@ -748,10 +757,10 @@ ERROR awkward_IndexedArrayU32_simplify64_to64(
   return awkward_IndexedArray_simplify<uint32_t, int64_t, int64_t>(
     toindex,
     outerindex,
-    outeroffset,
+    boink3(outeroffset, __LINE__),
     outerlength,
     innerindex,
-    inneroffset,
+    boink3(inneroffset, __LINE__),
     innerlength);
 }
 ERROR awkward_IndexedArray64_simplify32_to64(
@@ -765,10 +774,10 @@ ERROR awkward_IndexedArray64_simplify32_to64(
   return awkward_IndexedArray_simplify<int64_t, int32_t, int64_t>(
     toindex,
     outerindex,
-    outeroffset,
+    boink3(outeroffset, __LINE__),
     outerlength,
     innerindex,
-    inneroffset,
+    boink3(inneroffset, __LINE__),
     innerlength);
 }
 ERROR awkward_IndexedArray64_simplifyU32_to64(
@@ -782,10 +791,10 @@ ERROR awkward_IndexedArray64_simplifyU32_to64(
   return awkward_IndexedArray_simplify<int64_t, uint32_t, int64_t>(
     toindex,
     outerindex,
-    outeroffset,
+    boink3(outeroffset, __LINE__),
     outerlength,
     innerindex,
-    inneroffset,
+    boink3(inneroffset, __LINE__),
     innerlength);
 }
 ERROR awkward_IndexedArray64_simplify64_to64(
@@ -799,10 +808,10 @@ ERROR awkward_IndexedArray64_simplify64_to64(
   return awkward_IndexedArray_simplify<int64_t, int64_t, int64_t>(
     toindex,
     outerindex,
-    outeroffset,
+    boink3(outeroffset, __LINE__),
     outerlength,
     innerindex,
-    inneroffset,
+    boink3(inneroffset, __LINE__),
     innerlength);
 }
 
@@ -857,8 +866,8 @@ ERROR awkward_ListArray32_compact_offsets_64(
     tooffsets,
     fromstarts,
     fromstops,
-    startsoffset,
-    stopsoffset,
+    boink3(startsoffset, __LINE__),
+    boink3(stopsoffset, __LINE__),
     length);
 }
 ERROR awkward_ListArrayU32_compact_offsets_64(
@@ -872,8 +881,8 @@ ERROR awkward_ListArrayU32_compact_offsets_64(
     tooffsets,
     fromstarts,
     fromstops,
-    startsoffset,
-    stopsoffset,
+    boink3(startsoffset, __LINE__),
+    boink3(stopsoffset, __LINE__),
     length);
 }
 ERROR awkward_ListArray64_compact_offsets_64(
@@ -887,8 +896,8 @@ ERROR awkward_ListArray64_compact_offsets_64(
     tooffsets,
     fromstarts,
     fromstops,
-    startsoffset,
-    stopsoffset,
+    boink3(startsoffset, __LINE__),
+    boink3(stopsoffset, __LINE__),
     length);
 }
 
@@ -913,7 +922,7 @@ ERROR awkward_ListOffsetArray32_compact_offsets_64(
   return awkward_ListOffsetArray_compact_offsets<int32_t, int64_t>(
     tooffsets,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     length);
 }
 ERROR awkward_ListOffsetArrayU32_compact_offsets_64(
@@ -924,7 +933,7 @@ ERROR awkward_ListOffsetArrayU32_compact_offsets_64(
   return awkward_ListOffsetArray_compact_offsets<uint32_t, int64_t>(
     tooffsets,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     length);
 }
 ERROR awkward_ListOffsetArray64_compact_offsets_64(
@@ -935,7 +944,7 @@ ERROR awkward_ListOffsetArray64_compact_offsets_64(
   return awkward_ListOffsetArray_compact_offsets<int64_t, int64_t>(
     tooffsets,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     length);
 }
 
@@ -986,12 +995,12 @@ ERROR awkward_ListArray32_broadcast_tooffsets_64(
   return awkward_ListArray_broadcast_tooffsets<int32_t, int64_t>(
     tocarry,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     offsetslength,
     fromstarts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     fromstops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     lencontent);
 }
 ERROR awkward_ListArrayU32_broadcast_tooffsets_64(
@@ -1007,12 +1016,12 @@ ERROR awkward_ListArrayU32_broadcast_tooffsets_64(
   return awkward_ListArray_broadcast_tooffsets<uint32_t, int64_t>(
     tocarry,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     offsetslength,
     fromstarts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     fromstops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     lencontent);
 }
 ERROR awkward_ListArray64_broadcast_tooffsets_64(
@@ -1028,12 +1037,12 @@ ERROR awkward_ListArray64_broadcast_tooffsets_64(
   return awkward_ListArray_broadcast_tooffsets<int64_t, int64_t>(
     tocarry,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     offsetslength,
     fromstarts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     fromstops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     lencontent);
 }
 
@@ -1063,7 +1072,7 @@ ERROR awkward_RegularArray_broadcast_tooffsets_64(
   int64_t size) {
   return awkward_RegularArray_broadcast_tooffsets<int64_t>(
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     offsetslength,
     size);
 }
@@ -1097,7 +1106,7 @@ ERROR awkward_RegularArray_broadcast_tooffsets_size1_64(
   return awkward_RegularArray_broadcast_tooffsets_size1<int64_t>(
     tocarry,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     offsetslength);
 }
 
@@ -1139,7 +1148,7 @@ ERROR awkward_ListOffsetArray32_toRegularArray(
   return awkward_ListOffsetArray_toRegularArray<int32_t>(
     size,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     offsetslength);
 }
 ERROR awkward_ListOffsetArrayU32_toRegularArray(
@@ -1150,7 +1159,7 @@ ERROR awkward_ListOffsetArrayU32_toRegularArray(
   return awkward_ListOffsetArray_toRegularArray<uint32_t>(
     size,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     offsetslength);
 }
 ERROR awkward_ListOffsetArray64_toRegularArray(
@@ -1161,7 +1170,7 @@ ERROR awkward_ListOffsetArray64_toRegularArray(
   return awkward_ListOffsetArray_toRegularArray<int64_t>(
     size,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     offsetslength);
 }
 
@@ -1187,7 +1196,7 @@ ERROR awkward_NumpyArray_fill_tobool_frombool(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint8_frombool(
@@ -1200,7 +1209,7 @@ ERROR awkward_NumpyArray_fill_toint8_frombool(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint16_frombool(
@@ -1213,7 +1222,7 @@ ERROR awkward_NumpyArray_fill_toint16_frombool(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint32_frombool(
@@ -1226,7 +1235,7 @@ ERROR awkward_NumpyArray_fill_toint32_frombool(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint64_frombool(
@@ -1239,7 +1248,7 @@ ERROR awkward_NumpyArray_fill_toint64_frombool(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint8_frombool(
@@ -1252,7 +1261,7 @@ ERROR awkward_NumpyArray_fill_touint8_frombool(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint16_frombool(
@@ -1265,7 +1274,7 @@ ERROR awkward_NumpyArray_fill_touint16_frombool(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint32_frombool(
@@ -1278,7 +1287,7 @@ ERROR awkward_NumpyArray_fill_touint32_frombool(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint64_frombool(
@@ -1291,7 +1300,7 @@ ERROR awkward_NumpyArray_fill_touint64_frombool(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat32_frombool(
@@ -1304,7 +1313,7 @@ ERROR awkward_NumpyArray_fill_tofloat32_frombool(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat64_frombool(
@@ -1317,7 +1326,7 @@ ERROR awkward_NumpyArray_fill_tofloat64_frombool(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 
@@ -1343,7 +1352,7 @@ ERROR awkward_NumpyArray_fill_toint8_fromint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint16_fromint8(
@@ -1356,7 +1365,7 @@ ERROR awkward_NumpyArray_fill_toint16_fromint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint32_fromint8(
@@ -1369,7 +1378,7 @@ ERROR awkward_NumpyArray_fill_toint32_fromint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint64_fromint8(
@@ -1382,7 +1391,7 @@ ERROR awkward_NumpyArray_fill_toint64_fromint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat32_fromint8(
@@ -1395,7 +1404,7 @@ ERROR awkward_NumpyArray_fill_tofloat32_fromint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat64_fromint8(
@@ -1408,7 +1417,7 @@ ERROR awkward_NumpyArray_fill_tofloat64_fromint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint16_fromint16(
@@ -1421,7 +1430,7 @@ ERROR awkward_NumpyArray_fill_toint16_fromint16(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint32_fromint16(
@@ -1434,7 +1443,7 @@ ERROR awkward_NumpyArray_fill_toint32_fromint16(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint64_fromint16(
@@ -1447,7 +1456,7 @@ ERROR awkward_NumpyArray_fill_toint64_fromint16(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat32_fromint16(
@@ -1460,7 +1469,7 @@ ERROR awkward_NumpyArray_fill_tofloat32_fromint16(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat64_fromint16(
@@ -1473,7 +1482,7 @@ ERROR awkward_NumpyArray_fill_tofloat64_fromint16(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint32_fromint32(
@@ -1486,7 +1495,7 @@ ERROR awkward_NumpyArray_fill_toint32_fromint32(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint64_fromint32(
@@ -1499,7 +1508,7 @@ ERROR awkward_NumpyArray_fill_toint64_fromint32(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat32_fromint32(
@@ -1512,7 +1521,7 @@ ERROR awkward_NumpyArray_fill_tofloat32_fromint32(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat64_fromint32(
@@ -1525,7 +1534,7 @@ ERROR awkward_NumpyArray_fill_tofloat64_fromint32(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint64_fromint64(
@@ -1538,7 +1547,7 @@ ERROR awkward_NumpyArray_fill_toint64_fromint64(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat32_fromint64(
@@ -1551,7 +1560,7 @@ ERROR awkward_NumpyArray_fill_tofloat32_fromint64(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat64_fromint64(
@@ -1564,7 +1573,7 @@ ERROR awkward_NumpyArray_fill_tofloat64_fromint64(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint16_fromuint8(
@@ -1577,7 +1586,7 @@ ERROR awkward_NumpyArray_fill_toint16_fromuint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint32_fromuint8(
@@ -1590,7 +1599,7 @@ ERROR awkward_NumpyArray_fill_toint32_fromuint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint64_fromuint8(
@@ -1603,7 +1612,7 @@ ERROR awkward_NumpyArray_fill_toint64_fromuint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint8_fromuint8(
@@ -1616,7 +1625,7 @@ ERROR awkward_NumpyArray_fill_touint8_fromuint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint16_fromuint8(
@@ -1629,7 +1638,7 @@ ERROR awkward_NumpyArray_fill_touint16_fromuint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint32_fromuint8(
@@ -1642,7 +1651,7 @@ ERROR awkward_NumpyArray_fill_touint32_fromuint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint64_fromuint8(
@@ -1655,7 +1664,7 @@ ERROR awkward_NumpyArray_fill_touint64_fromuint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat32_fromuint8(
@@ -1668,7 +1677,7 @@ ERROR awkward_NumpyArray_fill_tofloat32_fromuint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat64_fromuint8(
@@ -1681,7 +1690,7 @@ ERROR awkward_NumpyArray_fill_tofloat64_fromuint8(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint32_fromuint16(
@@ -1694,7 +1703,7 @@ ERROR awkward_NumpyArray_fill_toint32_fromuint16(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint64_fromuint16(
@@ -1707,7 +1716,7 @@ ERROR awkward_NumpyArray_fill_toint64_fromuint16(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint16_fromuint16(
@@ -1720,7 +1729,7 @@ ERROR awkward_NumpyArray_fill_touint16_fromuint16(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint32_fromuint16(
@@ -1733,7 +1742,7 @@ ERROR awkward_NumpyArray_fill_touint32_fromuint16(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint64_fromuint16(
@@ -1746,7 +1755,7 @@ ERROR awkward_NumpyArray_fill_touint64_fromuint16(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat32_fromuint16(
@@ -1759,7 +1768,7 @@ ERROR awkward_NumpyArray_fill_tofloat32_fromuint16(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat64_fromuint16(
@@ -1772,7 +1781,7 @@ ERROR awkward_NumpyArray_fill_tofloat64_fromuint16(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint64_fromuint32(
@@ -1785,7 +1794,7 @@ ERROR awkward_NumpyArray_fill_toint64_fromuint32(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint32_fromuint32(
@@ -1798,7 +1807,7 @@ ERROR awkward_NumpyArray_fill_touint32_fromuint32(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint64_fromuint32(
@@ -1811,7 +1820,7 @@ ERROR awkward_NumpyArray_fill_touint64_fromuint32(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat32_fromuint32(
@@ -1824,7 +1833,7 @@ ERROR awkward_NumpyArray_fill_tofloat32_fromuint32(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat64_fromuint32(
@@ -1837,7 +1846,7 @@ ERROR awkward_NumpyArray_fill_tofloat64_fromuint32(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_touint64_fromuint64(
@@ -1850,7 +1859,7 @@ ERROR awkward_NumpyArray_fill_touint64_fromuint64(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_toint64_fromuint64(
@@ -1863,7 +1872,7 @@ ERROR awkward_NumpyArray_fill_toint64_fromuint64(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat32_fromuint64(
@@ -1876,7 +1885,7 @@ ERROR awkward_NumpyArray_fill_tofloat32_fromuint64(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat64_fromuint64(
@@ -1889,7 +1898,7 @@ ERROR awkward_NumpyArray_fill_tofloat64_fromuint64(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat32_fromfloat32(
@@ -1902,7 +1911,7 @@ ERROR awkward_NumpyArray_fill_tofloat32_fromfloat32(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat64_fromfloat32(
@@ -1915,7 +1924,7 @@ ERROR awkward_NumpyArray_fill_tofloat64_fromfloat32(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 ERROR awkward_NumpyArray_fill_tofloat64_fromfloat64(
@@ -1928,7 +1937,7 @@ ERROR awkward_NumpyArray_fill_tofloat64_fromfloat64(
     toptr,
     tooffset,
     fromptr,
-    fromoffset,
+    boink3(fromoffset, __LINE__),
     length);
 }
 
@@ -1969,9 +1978,9 @@ ERROR awkward_ListArray_fill_to64_from32(
     tostops,
     tostopsoffset,
     fromstarts,
-    fromstartsoffset,
+    boink3(fromstartsoffset, __LINE__),
     fromstops,
-    fromstopsoffset,
+    boink3(fromstopsoffset, __LINE__),
     length,
     base);
 }
@@ -1992,9 +2001,9 @@ ERROR awkward_ListArray_fill_to64_fromU32(
     tostops,
     tostopsoffset,
     fromstarts,
-    fromstartsoffset,
+    boink3(fromstartsoffset, __LINE__),
     fromstops,
-    fromstopsoffset,
+    boink3(fromstopsoffset, __LINE__),
     length,
     base);
 }
@@ -2015,9 +2024,9 @@ ERROR awkward_ListArray_fill_to64_from64(
     tostops,
     tostopsoffset,
     fromstarts,
-    fromstartsoffset,
+    boink3(fromstartsoffset, __LINE__),
     fromstops,
-    fromstopsoffset,
+    boink3(fromstopsoffset, __LINE__),
     length,
     base);
 }
@@ -2047,7 +2056,7 @@ ERROR awkward_IndexedArray_fill_to64_from32(
     toindex,
     toindexoffset,
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     length,
     base);
 }
@@ -2062,7 +2071,7 @@ ERROR awkward_IndexedArray_fill_to64_fromU32(
     toindex,
     toindexoffset,
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     length,
     base);
 }
@@ -2077,7 +2086,7 @@ ERROR awkward_IndexedArray_fill_to64_from64(
     toindex,
     toindexoffset,
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     length,
     base);
 }
@@ -2129,7 +2138,7 @@ ERROR awkward_UnionArray_filltags_to8_from8(
     totags,
     totagsoffset,
     fromtags,
-    fromtagsoffset,
+    boink3(fromtagsoffset, __LINE__),
     length,
     base);
 }
@@ -2156,7 +2165,7 @@ ERROR awkward_UnionArray_fillindex_to64_from32(
     toindex,
     toindexoffset,
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     length);
 }
 ERROR awkward_UnionArray_fillindex_to64_fromU32(
@@ -2169,7 +2178,7 @@ ERROR awkward_UnionArray_fillindex_to64_fromU32(
     toindex,
     toindexoffset,
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     length);
 }
 ERROR awkward_UnionArray_fillindex_to64_from64(
@@ -2182,7 +2191,7 @@ ERROR awkward_UnionArray_fillindex_to64_from64(
     toindex,
     toindexoffset,
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     length);
 }
 
@@ -2287,13 +2296,13 @@ ERROR awkward_UnionArray8_32_simplify8_32_to8_64(
     totags,
     toindex,
     outertags,
-    outertagsoffset,
+    boink3(outertagsoffset, __LINE__),
     outerindex,
-    outerindexoffset,
+    boink3(outerindexoffset, __LINE__),
     innertags,
-    innertagsoffset,
+    boink3(innertagsoffset, __LINE__),
     innerindex,
-    innerindexoffset,
+    boink3(innerindexoffset, __LINE__),
     towhich,
     innerwhich,
     outerwhich,
@@ -2325,13 +2334,13 @@ ERROR awkward_UnionArray8_32_simplify8_U32_to8_64(
     totags,
     toindex,
     outertags,
-    outertagsoffset,
+    boink3(outertagsoffset, __LINE__),
     outerindex,
-    outerindexoffset,
+    boink3(outerindexoffset, __LINE__),
     innertags,
-    innertagsoffset,
+    boink3(innertagsoffset, __LINE__),
     innerindex,
-    innerindexoffset,
+    boink3(innerindexoffset, __LINE__),
     towhich,
     innerwhich,
     outerwhich,
@@ -2363,13 +2372,13 @@ ERROR awkward_UnionArray8_32_simplify8_64_to8_64(
     totags,
     toindex,
     outertags,
-    outertagsoffset,
+    boink3(outertagsoffset, __LINE__),
     outerindex,
-    outerindexoffset,
+    boink3(outerindexoffset, __LINE__),
     innertags,
-    innertagsoffset,
+    boink3(innertagsoffset, __LINE__),
     innerindex,
-    innerindexoffset,
+    boink3(innerindexoffset, __LINE__),
     towhich,
     innerwhich,
     outerwhich,
@@ -2401,13 +2410,13 @@ ERROR awkward_UnionArray8_U32_simplify8_32_to8_64(
     totags,
     toindex,
     outertags,
-    outertagsoffset,
+    boink3(outertagsoffset, __LINE__),
     outerindex,
-    outerindexoffset,
+    boink3(outerindexoffset, __LINE__),
     innertags,
-    innertagsoffset,
+    boink3(innertagsoffset, __LINE__),
     innerindex,
-    innerindexoffset,
+    boink3(innerindexoffset, __LINE__),
     towhich,
     innerwhich,
     outerwhich,
@@ -2439,13 +2448,13 @@ ERROR awkward_UnionArray8_U32_simplify8_U32_to8_64(
     totags,
     toindex,
     outertags,
-    outertagsoffset,
+    boink3(outertagsoffset, __LINE__),
     outerindex,
-    outerindexoffset,
+    boink3(outerindexoffset, __LINE__),
     innertags,
-    innertagsoffset,
+    boink3(innertagsoffset, __LINE__),
     innerindex,
-    innerindexoffset,
+    boink3(innerindexoffset, __LINE__),
     towhich,
     innerwhich,
     outerwhich,
@@ -2477,13 +2486,13 @@ ERROR awkward_UnionArray8_U32_simplify8_64_to8_64(
     totags,
     toindex,
     outertags,
-    outertagsoffset,
+    boink3(outertagsoffset, __LINE__),
     outerindex,
-    outerindexoffset,
+    boink3(outerindexoffset, __LINE__),
     innertags,
-    innertagsoffset,
+    boink3(innertagsoffset, __LINE__),
     innerindex,
-    innerindexoffset,
+    boink3(innerindexoffset, __LINE__),
     towhich,
     innerwhich,
     outerwhich,
@@ -2515,13 +2524,13 @@ ERROR awkward_UnionArray8_64_simplify8_32_to8_64(
     totags,
     toindex,
     outertags,
-    outertagsoffset,
+    boink3(outertagsoffset, __LINE__),
     outerindex,
-    outerindexoffset,
+    boink3(outerindexoffset, __LINE__),
     innertags,
-    innertagsoffset,
+    boink3(innertagsoffset, __LINE__),
     innerindex,
-    innerindexoffset,
+    boink3(innerindexoffset, __LINE__),
     towhich,
     innerwhich,
     outerwhich,
@@ -2553,13 +2562,13 @@ ERROR awkward_UnionArray8_64_simplify8_U32_to8_64(
     totags,
     toindex,
     outertags,
-    outertagsoffset,
+    boink3(outertagsoffset, __LINE__),
     outerindex,
-    outerindexoffset,
+    boink3(outerindexoffset, __LINE__),
     innertags,
-    innertagsoffset,
+    boink3(innertagsoffset, __LINE__),
     innerindex,
-    innerindexoffset,
+    boink3(innerindexoffset, __LINE__),
     towhich,
     innerwhich,
     outerwhich,
@@ -2591,13 +2600,13 @@ ERROR awkward_UnionArray8_64_simplify8_64_to8_64(
     totags,
     toindex,
     outertags,
-    outertagsoffset,
+    boink3(outertagsoffset, __LINE__),
     outerindex,
-    outerindexoffset,
+    boink3(outerindexoffset, __LINE__),
     innertags,
-    innertagsoffset,
+    boink3(innertagsoffset, __LINE__),
     innerindex,
-    innerindexoffset,
+    boink3(innerindexoffset, __LINE__),
     towhich,
     innerwhich,
     outerwhich,
@@ -2643,9 +2652,9 @@ ERROR awkward_UnionArray8_32_simplify_one_to8_64(
     totags,
     toindex,
     fromtags,
-    fromtagsoffset,
+    boink3(fromtagsoffset, __LINE__),
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     towhich,
     fromwhich,
     length,
@@ -2666,9 +2675,9 @@ ERROR awkward_UnionArray8_U32_simplify_one_to8_64(
     totags,
     toindex,
     fromtags,
-    fromtagsoffset,
+    boink3(fromtagsoffset, __LINE__),
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     towhich,
     fromwhich,
     length,
@@ -2689,9 +2698,9 @@ ERROR awkward_UnionArray8_64_simplify_one_to8_64(
     totags,
     toindex,
     fromtags,
-    fromtagsoffset,
+    boink3(fromtagsoffset, __LINE__),
     fromindex,
-    fromindexoffset,
+    boink3(fromindexoffset, __LINE__),
     towhich,
     fromwhich,
     length,
@@ -2733,9 +2742,9 @@ ERROR awkward_ListArray32_validity(
   int64_t lencontent) {
   return awkward_ListArray_validity<int32_t>(
     starts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     stops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     length,
     lencontent);
 }
@@ -2748,9 +2757,9 @@ ERROR awkward_ListArrayU32_validity(
   int64_t lencontent) {
   return awkward_ListArray_validity<uint32_t>(
     starts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     stops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     length,
     lencontent);
 }
@@ -2763,9 +2772,9 @@ ERROR awkward_ListArray64_validity(
   int64_t lencontent) {
   return awkward_ListArray_validity<int64_t>(
     starts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     stops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     length,
     lencontent);
 }
@@ -2798,7 +2807,7 @@ ERROR awkward_IndexedArray32_validity(
   bool isoption) {
   return awkward_IndexedArray_validity<int32_t>(
     index,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     length,
     lencontent,
     isoption);
@@ -2811,7 +2820,7 @@ ERROR awkward_IndexedArrayU32_validity(
   bool isoption) {
   return awkward_IndexedArray_validity<uint32_t>(
     index,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     length,
     lencontent,
     isoption);
@@ -2824,7 +2833,7 @@ ERROR awkward_IndexedArray64_validity(
   bool isoption) {
   return awkward_IndexedArray_validity<int64_t>(
     index,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     length,
     lencontent,
     isoption);
@@ -2868,9 +2877,9 @@ ERROR awkward_UnionArray8_32_validity(
   const int64_t* lencontents) {
   return awkward_UnionArray_validity<int8_t, int32_t>(
     tags,
-    tagsoffset,
+    boink3(tagsoffset, __LINE__),
     index,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     length,
     numcontents,
     lencontents);
@@ -2885,9 +2894,9 @@ ERROR awkward_UnionArray8_U32_validity(
   const int64_t* lencontents) {
   return awkward_UnionArray_validity<int8_t, uint32_t>(
     tags,
-    tagsoffset,
+    boink3(tagsoffset, __LINE__),
     index,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     length,
     numcontents,
     lencontents);
@@ -2902,9 +2911,9 @@ ERROR awkward_UnionArray8_64_validity(
   const int64_t* lencontents) {
   return awkward_UnionArray_validity<int8_t, int64_t>(
     tags,
-    tagsoffset,
+    boink3(tagsoffset, __LINE__),
     index,
-    indexoffset,
+    boink3(indexoffset, __LINE__),
     length,
     numcontents,
     lencontents);
@@ -2930,7 +2939,7 @@ ERROR awkward_UnionArray_fillna_from32_to64(
   return awkward_UnionArray_fillna<int64_t, int32_t>(
     toindex,
     fromindex,
-    offset,
+    boink3(offset, __LINE__),
     length);
 }
 ERROR awkward_UnionArray_fillna_fromU32_to64(
@@ -2941,7 +2950,7 @@ ERROR awkward_UnionArray_fillna_fromU32_to64(
   return awkward_UnionArray_fillna<int64_t, uint32_t>(
     toindex,
     fromindex,
-    offset,
+    boink3(offset, __LINE__),
     length);
 }
 ERROR awkward_UnionArray_fillna_from64_to64(
@@ -2952,7 +2961,7 @@ ERROR awkward_UnionArray_fillna_from64_to64(
   return awkward_UnionArray_fillna<int64_t, int64_t>(
     toindex,
     fromindex,
-    offset,
+    boink3(offset, __LINE__),
     length);
 }
 
@@ -3090,8 +3099,8 @@ ERROR awkward_ListArray32_min_range(
     fromstarts,
     fromstops,
     lenstarts,
-    startsoffset,
-    stopsoffset);
+    boink3(startsoffset, __LINE__),
+    boink3(stopsoffset, __LINE__));
 }
 ERROR awkward_ListArrayU32_min_range(
   int64_t* tomin,
@@ -3105,8 +3114,8 @@ ERROR awkward_ListArrayU32_min_range(
     fromstarts,
     fromstops,
     lenstarts,
-    startsoffset,
-    stopsoffset);
+    boink3(startsoffset, __LINE__),
+    boink3(stopsoffset, __LINE__));
 }
 ERROR awkward_ListArray64_min_range(
   int64_t* tomin,
@@ -3120,8 +3129,8 @@ ERROR awkward_ListArray64_min_range(
     fromstarts,
     fromstops,
     lenstarts,
-    startsoffset,
-    stopsoffset);
+    boink3(startsoffset, __LINE__),
+    boink3(stopsoffset, __LINE__));
 }
 
 template <typename C>
@@ -3155,8 +3164,8 @@ ERROR awkward_ListArray32_rpad_and_clip_length_axis1(
     fromstops,
     target,
     lenstarts,
-    startsoffset,
-    stopsoffset);
+    boink3(startsoffset, __LINE__),
+    boink3(stopsoffset, __LINE__));
 }
 ERROR awkward_ListArrayU32_rpad_and_clip_length_axis1(
   int64_t* tomin,
@@ -3172,8 +3181,8 @@ ERROR awkward_ListArrayU32_rpad_and_clip_length_axis1(
     fromstops,
     target,
     lenstarts,
-    startsoffset,
-    stopsoffset);
+    boink3(startsoffset, __LINE__),
+    boink3(stopsoffset, __LINE__));
 }
 ERROR awkward_ListArray64_rpad_and_clip_length_axis1(
   int64_t* tomin,
@@ -3189,8 +3198,8 @@ ERROR awkward_ListArray64_rpad_and_clip_length_axis1(
     fromstops,
     target,
     lenstarts,
-    startsoffset,
-    stopsoffset);
+    boink3(startsoffset, __LINE__),
+    boink3(stopsoffset, __LINE__));
 }
 
 template <typename T, typename C>
@@ -3237,8 +3246,8 @@ ERROR awkward_ListArray32_rpad_axis1_64(
     tostops,
     target,
     length,
-    startsoffset,
-    stopsoffset);
+    boink3(startsoffset, __LINE__),
+    boink3(stopsoffset, __LINE__));
 }
 ERROR awkward_ListArrayU32_rpad_axis1_64(
   int64_t* toindex,
@@ -3258,8 +3267,8 @@ ERROR awkward_ListArrayU32_rpad_axis1_64(
     tostops,
     target,
     length,
-    startsoffset,
-    stopsoffset);
+    boink3(startsoffset, __LINE__),
+    boink3(stopsoffset, __LINE__));
 }
 ERROR awkward_ListArray64_rpad_axis1_64(
   int64_t* toindex,
@@ -3279,8 +3288,8 @@ ERROR awkward_ListArray64_rpad_axis1_64(
     tostops,
     target,
     length,
-    startsoffset,
-    stopsoffset);
+    boink3(startsoffset, __LINE__),
+    boink3(stopsoffset, __LINE__));
 }
 
 template <typename T, typename C>
@@ -3312,7 +3321,7 @@ ERROR awkward_ListOffsetArray32_rpad_and_clip_axis1_64(
   return awkward_ListOffsetArray_rpad_and_clip_axis1<int64_t, int32_t>(
     toindex,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     length,
     target);
 }
@@ -3325,7 +3334,7 @@ ERROR awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64(
   return awkward_ListOffsetArray_rpad_and_clip_axis1<int64_t, uint32_t>(
     toindex,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     length,
     target);
 }
@@ -3338,7 +3347,7 @@ ERROR awkward_ListOffsetArray64_rpad_and_clip_axis1_64(
   return awkward_ListOffsetArray_rpad_and_clip_axis1<int64_t, int64_t>(
     toindex,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     length,
     target);
 }
@@ -3374,7 +3383,7 @@ ERROR awkward_ListOffsetArray32_rpad_length_axis1(
   return awkward_ListOffsetArray_rpad_length_axis1<int32_t>(
     tooffsets,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     fromlength,
     target,
     tolength);
@@ -3389,7 +3398,7 @@ ERROR awkward_ListOffsetArrayU32_rpad_length_axis1(
   return awkward_ListOffsetArray_rpad_length_axis1<uint32_t>(
     tooffsets,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     fromlength,
     target,
     tolength);
@@ -3404,7 +3413,7 @@ ERROR awkward_ListOffsetArray64_rpad_length_axis1(
   return awkward_ListOffsetArray_rpad_length_axis1<int64_t>(
     tooffsets,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     fromlength,
     target,
     tolength);
@@ -3441,7 +3450,7 @@ ERROR awkward_ListOffsetArray32_rpad_axis1_64(
   return awkward_ListOffsetArray_rpad_axis1<int64_t, int32_t>(
     toindex,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     fromlength,
     target);
 }
@@ -3454,7 +3463,7 @@ ERROR awkward_ListOffsetArrayU32_rpad_axis1_64(
   return awkward_ListOffsetArray_rpad_axis1<int64_t, uint32_t>(
     toindex,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     fromlength,
     target);
 }
@@ -3467,7 +3476,7 @@ ERROR awkward_ListOffsetArray64_rpad_axis1_64(
   return awkward_ListOffsetArray_rpad_axis1<int64_t, int64_t>(
     toindex,
     fromoffsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     fromlength,
     target);
 }
@@ -3512,7 +3521,7 @@ ERROR awkward_ListArray32_localindex_64(
   return awkward_ListArray_localindex<int32_t, int64_t>(
     toindex,
     offsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     length);
 }
 ERROR awkward_ListArrayU32_localindex_64(
@@ -3523,7 +3532,7 @@ ERROR awkward_ListArrayU32_localindex_64(
   return awkward_ListArray_localindex<uint32_t, int64_t>(
     toindex,
     offsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     length);
 }
 ERROR awkward_ListArray64_localindex_64(
@@ -3534,7 +3543,7 @@ ERROR awkward_ListArray64_localindex_64(
   return awkward_ListArray_localindex<int64_t, int64_t>(
     toindex,
     offsets,
-    offsetsoffset,
+    boink3(offsetsoffset, __LINE__),
     length);
 }
 
@@ -3638,9 +3647,9 @@ ERROR awkward_ListArray32_combinations_length_64(
     n,
     replacement,
     starts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     stops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     length);
 }
 ERROR awkward_ListArrayU32_combinations_length_64(
@@ -3659,9 +3668,9 @@ ERROR awkward_ListArrayU32_combinations_length_64(
     n,
     replacement,
     starts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     stops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     length);
 }
 ERROR awkward_ListArray64_combinations_length_64(
@@ -3680,9 +3689,9 @@ ERROR awkward_ListArray64_combinations_length_64(
     n,
     replacement,
     starts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     stops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     length);
 }
 
@@ -3772,9 +3781,9 @@ ERROR awkward_ListArray32_combinations_64(
     n,
     replacement,
     starts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     stops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     length);
 }
 ERROR awkward_ListArrayU32_combinations_64(
@@ -3795,9 +3804,9 @@ ERROR awkward_ListArrayU32_combinations_64(
     n,
     replacement,
     starts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     stops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     length);
 }
 ERROR awkward_ListArray64_combinations_64(
@@ -3818,9 +3827,9 @@ ERROR awkward_ListArray64_combinations_64(
     n,
     replacement,
     starts,
-    startsoffset,
+    boink3(startsoffset, __LINE__),
     stops,
-    stopsoffset,
+    boink3(stopsoffset, __LINE__),
     length);
 }
 
@@ -3895,9 +3904,9 @@ ERROR awkward_ByteMaskedArray_overlay_mask8(
   return awkward_ByteMaskedArray_overlay_mask<int8_t>(
     tomask,
     theirmask,
-    theirmaskoffset,
+    boink3(theirmaskoffset, __LINE__),
     mymask,
-    mymaskoffset,
+    boink3(mymaskoffset, __LINE__),
     length,
     validwhen);
 }
@@ -4092,7 +4101,7 @@ ERROR awkward_BitMaskedArray_to_IndexedOptionArray64(
   return awkward_BitMaskedArray_to_IndexedOptionArray<int64_t>(
     toindex,
     frombitmask,
-    bitmaskoffset,
+    boink3(bitmaskoffset, __LINE__),
     bitmasklength,
     validwhen,
     lsb_order);

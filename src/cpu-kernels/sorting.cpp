@@ -7,6 +7,15 @@
 
 #include "awkward/cpu-kernels/sorting.h"
 
+int64_t boink5(int64_t x, int64_t line) {
+  if (x != 0) {
+    throw std::runtime_error(std::string("BOINK5! on line ") + std::to_string(line));
+  }
+  else {
+    return 0;
+  }
+}
+
 ERROR awkward_sorting_ranges(
   int64_t* toindex,
   int64_t tolength,
@@ -579,9 +588,9 @@ ERROR awkward_IndexedArray_local_preparenext_64(
     int64_t nextparentsoffset) {
   int64_t j = 0;
   for (int64_t i = 0;  i < parentslength;  i++) {
-    int64_t parent = parents[i] + parentsoffset;
+    int64_t parent = parents[i] + boink5(parentsoffset, __LINE__);
     int64_t start = starts[parent];
-    int64_t nextparent = nextparents[j] + nextparentsoffset;
+    int64_t nextparent = nextparents[j] + boink5(nextparentsoffset, __LINE__);
     if (parent == nextparent) {
       tocarry[i] = j;
       ++j;

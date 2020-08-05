@@ -2,6 +2,15 @@
 
 #include "awkward/cpu-kernels/identities.h"
 
+int64_t boink2(int64_t x, int64_t line) {
+  if (x != 0) {
+    throw std::runtime_error(std::string("BOINK2! on line ") + std::to_string(line));
+  }
+  else {
+    return 0;
+  }
+}
+
 template <typename T>
 ERROR awkward_new_Identities(
   T* toptr,
@@ -86,8 +95,8 @@ ERROR awkward_Identities32_from_ListOffsetArray32(
     toptr,
     fromptr,
     fromoffsets,
-    fromptroffset,
-    offsetsoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(offsetsoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -105,8 +114,8 @@ ERROR awkward_Identities32_from_ListOffsetArrayU32(
     toptr,
     fromptr,
     fromoffsets,
-    fromptroffset,
-    offsetsoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(offsetsoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -124,8 +133,8 @@ ERROR awkward_Identities32_from_ListOffsetArray64(
     toptr,
     fromptr,
     fromoffsets,
-    fromptroffset,
-    offsetsoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(offsetsoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -143,8 +152,8 @@ ERROR awkward_Identities64_from_ListOffsetArray32(
     toptr,
     fromptr,
     fromoffsets,
-    fromptroffset,
-    offsetsoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(offsetsoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -162,8 +171,8 @@ ERROR awkward_Identities64_from_ListOffsetArrayU32(
     toptr,
     fromptr,
     fromoffsets,
-    fromptroffset,
-    offsetsoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(offsetsoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -181,8 +190,8 @@ ERROR awkward_Identities64_from_ListOffsetArray64(
     toptr,
     fromptr,
     fromoffsets,
-    fromptroffset,
-    offsetsoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(offsetsoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -243,9 +252,9 @@ ERROR awkward_Identities32_from_ListArray32(
     fromptr,
     fromstarts,
     fromstops,
-    fromptroffset,
-    startsoffset,
-    stopsoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(startsoffset, __LINE__),
+    boink2(stopsoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -268,9 +277,9 @@ ERROR awkward_Identities32_from_ListArrayU32(
     fromptr,
     fromstarts,
     fromstops,
-    fromptroffset,
-    startsoffset,
-    stopsoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(startsoffset, __LINE__),
+    boink2(stopsoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -293,9 +302,9 @@ ERROR awkward_Identities32_from_ListArray64(
     fromptr,
     fromstarts,
     fromstops,
-    fromptroffset,
-    startsoffset,
-    stopsoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(startsoffset, __LINE__),
+    boink2(stopsoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -318,9 +327,9 @@ ERROR awkward_Identities64_from_ListArray32(
     fromptr,
     fromstarts,
     fromstops,
-    fromptroffset,
-    startsoffset,
-    stopsoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(startsoffset, __LINE__),
+    boink2(stopsoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -343,9 +352,9 @@ ERROR awkward_Identities64_from_ListArrayU32(
     fromptr,
     fromstarts,
     fromstops,
-    fromptroffset,
-    startsoffset,
-    stopsoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(startsoffset, __LINE__),
+    boink2(stopsoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -368,9 +377,9 @@ ERROR awkward_Identities64_from_ListArray64(
     fromptr,
     fromstarts,
     fromstops,
-    fromptroffset,
-    startsoffset,
-    stopsoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(startsoffset, __LINE__),
+    boink2(stopsoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -412,7 +421,7 @@ ERROR awkward_Identities32_from_RegularArray(
   return awkward_Identities_from_RegularArray<int32_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink2(fromptroffset, __LINE__),
     size,
     tolength,
     fromlength,
@@ -429,7 +438,7 @@ ERROR awkward_Identities64_from_RegularArray(
   return awkward_Identities_from_RegularArray<int64_t>(
     toptr,
     fromptr,
-    fromptroffset,
+    boink2(fromptroffset, __LINE__),
     size,
     tolength,
     fromlength,
@@ -483,8 +492,8 @@ ERROR awkward_Identities32_from_IndexedArray32(
     toptr,
     fromptr,
     fromindex,
-    fromptroffset,
-    indexoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(indexoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -504,8 +513,8 @@ ERROR awkward_Identities32_from_IndexedArrayU32(
     toptr,
     fromptr,
     fromindex,
-    fromptroffset,
-    indexoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(indexoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -525,8 +534,8 @@ ERROR awkward_Identities32_from_IndexedArray64(
     toptr,
     fromptr,
     fromindex,
-    fromptroffset,
-    indexoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(indexoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -546,8 +555,8 @@ ERROR awkward_Identities64_from_IndexedArray32(
     toptr,
     fromptr,
     fromindex,
-    fromptroffset,
-    indexoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(indexoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -567,8 +576,8 @@ ERROR awkward_Identities64_from_IndexedArrayU32(
     toptr,
     fromptr,
     fromindex,
-    fromptroffset,
-    indexoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(indexoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -588,8 +597,8 @@ ERROR awkward_Identities64_from_IndexedArray64(
     toptr,
     fromptr,
     fromindex,
-    fromptroffset,
-    indexoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(indexoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth);
@@ -654,9 +663,9 @@ ERROR awkward_Identities32_from_UnionArray8_32(
     fromptr,
     fromtags,
     fromindex,
-    fromptroffset,
-    tagsoffset,
-    indexoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(tagsoffset, __LINE__),
+    boink2(indexoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth,
@@ -681,9 +690,9 @@ ERROR awkward_Identities32_from_UnionArray8_U32(
     fromptr,
     fromtags,
     fromindex,
-    fromptroffset,
-    tagsoffset,
-    indexoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(tagsoffset, __LINE__),
+    boink2(indexoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth,
@@ -708,9 +717,9 @@ ERROR awkward_Identities32_from_UnionArray8_64(
     fromptr,
     fromtags,
     fromindex,
-    fromptroffset,
-    tagsoffset,
-    indexoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(tagsoffset, __LINE__),
+    boink2(indexoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth,
@@ -735,9 +744,9 @@ ERROR awkward_Identities64_from_UnionArray8_32(
     fromptr,
     fromtags,
     fromindex,
-    fromptroffset,
-    tagsoffset,
-    indexoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(tagsoffset, __LINE__),
+    boink2(indexoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth,
@@ -762,9 +771,9 @@ ERROR awkward_Identities64_from_UnionArray8_U32(
     fromptr,
     fromtags,
     fromindex,
-    fromptroffset,
-    tagsoffset,
-    indexoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(tagsoffset, __LINE__),
+    boink2(indexoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth,
@@ -789,9 +798,9 @@ ERROR awkward_Identities64_from_UnionArray8_64(
     fromptr,
     fromtags,
     fromindex,
-    fromptroffset,
-    tagsoffset,
-    indexoffset,
+    boink2(fromptroffset, __LINE__),
+    boink2(tagsoffset, __LINE__),
+    boink2(indexoffset, __LINE__),
     tolength,
     fromlength,
     fromwidth,
@@ -823,7 +832,7 @@ ERROR awkward_Identities32_extend(
   return awkward_Identities_extend<int32_t>(
     toptr,
     fromptr,
-    fromoffset,
+    boink2(fromoffset, __LINE__),
     fromlength,
     tolength);
 }
@@ -836,7 +845,7 @@ ERROR awkward_Identities64_extend(
   return awkward_Identities_extend<int64_t>(
     toptr,
     fromptr,
-    fromoffset,
+    boink2(fromoffset, __LINE__),
     fromlength,
     tolength);
 }
