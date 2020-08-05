@@ -3,7 +3,7 @@
 #include "awkward/cpu-kernels/getitem.h"
 
 int64_t boink1(int64_t x, int64_t line) {
-  if (x != 0) {
+  if (x != 123) {
     throw std::runtime_error(std::string("BOINK1! on line ") + std::to_string(line));
   }
   else {
@@ -708,7 +708,7 @@ ERROR awkward_NumpyArray_getitem_boolean_numtrue(
   int64_t stride) {
   *numtrue = 0;
   for (int64_t i = 0;  i < length;  i += stride) {
-    *numtrue = *numtrue + (fromptr[byteoffset + i] != 0);
+    *numtrue = *numtrue + (fromptr[boink1(byteoffset, __LINE__) + i] != 0);
   }
   return success();
 }
@@ -3010,7 +3010,7 @@ ERROR awkward_ByteMaskedArray_numnull(
   bool validwhen) {
   *numnull = 0;
   for (int64_t i = 0;  i < length;  i++) {
-    if ((mask[maskoffset + i] != 0) != validwhen) {
+    if ((mask[boink1(maskoffset, __LINE__) + i] != 0) != validwhen) {
       *numnull = *numnull + 1;
     }
   }
@@ -3121,13 +3121,13 @@ ERROR awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
   int64_t length) {
   int64_t k = 0;
   for (int64_t i = 0; i < length; ++i) {
-    starts_out[i] = offsets_in[k + offsets_in_offset];
-    if (index_in[i + index_in_offset] < 0) {
+    starts_out[i] = offsets_in[k + boink1(offsets_in_offset, __LINE__)];
+    if (index_in[i + boink1(index_in_offset, __LINE__)] < 0) {
       mask_out[i] = -1;
-      stops_out[i] = offsets_in[k + offsets_in_offset];
+      stops_out[i] = offsets_in[k + boink1(offsets_in_offset, __LINE__)];
     } else {
       mask_out[i] = i;
-      stops_out[i] = offsets_in[++k + offsets_in_offset];
+      stops_out[i] = offsets_in[++k + boink1(offsets_in_offset, __LINE__)];
     }
   }
   return success();

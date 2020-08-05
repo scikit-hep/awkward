@@ -3,7 +3,7 @@
 #include "awkward/cpu-kernels/operations.h"
 
 int64_t boink3(int64_t x, int64_t line) {
-  if (x != 0) {
+  if (x != 123) {
     throw std::runtime_error(std::string("BOINK3! on line ") + std::to_string(line));
   }
   else {
@@ -3920,7 +3920,7 @@ ERROR awkward_BitMaskedArray_to_ByteMaskedArray(
   bool lsb_order) {
   if (lsb_order) {
     for (int64_t i = 0;  i < bitmasklength;  i++) {
-      uint8_t byte = frombitmask[bitmaskoffset + i];
+      uint8_t byte = frombitmask[boink3(bitmaskoffset, __LINE__) + i];
       tobytemask[i*8 + 0] = ((byte & ((uint8_t)1)) != validwhen);
       byte >>= 1;
       tobytemask[i*8 + 1] = ((byte & ((uint8_t)1)) != validwhen);
@@ -3940,7 +3940,7 @@ ERROR awkward_BitMaskedArray_to_ByteMaskedArray(
   }
   else {
     for (int64_t i = 0;  i < bitmasklength;  i++) {
-      uint8_t byte = frombitmask[bitmaskoffset + i];
+      uint8_t byte = frombitmask[boink3(bitmaskoffset, __LINE__) + i];
       tobytemask[i*8 + 0] = (((byte & ((uint8_t)128)) != 0) != validwhen);
       byte <<= 1;
       tobytemask[i*8 + 1] = (((byte & ((uint8_t)128)) != 0) != validwhen);

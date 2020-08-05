@@ -20,7 +20,6 @@ if sys.version[0] == "3":
 else:
     from collections import Iterable
 
-
 try:
     import black
 

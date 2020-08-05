@@ -8,7 +8,7 @@
 #include "awkward/cpu-kernels/sorting.h"
 
 int64_t boink5(int64_t x, int64_t line) {
-  if (x != 0) {
+  if (x != 123) {
     throw std::runtime_error(std::string("BOINK5! on line ") + std::to_string(line));
   }
   else {

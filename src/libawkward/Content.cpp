@@ -1426,6 +1426,7 @@ namespace awkward {
           that.get()->classname() + std::string(" of size ") +
           std::to_string(content.get()->length()));
     }
+
     Index64 outputmask(index.length());
     Index64 starts(index.length());
     Index64 stops(index.length());
@@ -1439,6 +1440,7 @@ namespace awkward {
       starts.data(),
       stops.data(),
       index.length());
+
     util::handle_error(err, that.get()->classname(), nullptr);
     ContentPtr tmp = content.get()->getitem_next_jagged(
         starts, stops, jagged->content(), tail);

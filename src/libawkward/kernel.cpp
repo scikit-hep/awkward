@@ -27,7 +27,7 @@ int64_t oink(int64_t x, int64_t line) {
     throw std::runtime_error(std::string("OINK! on line ") + std::to_string(line));
   }
   else {
-    return 0;
+    return 123;
   }
 }
 

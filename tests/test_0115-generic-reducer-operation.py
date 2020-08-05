@@ -696,6 +696,7 @@ def test_sumprod_types():
     content2 = awkward1.layout.NumpyArray(array.reshape(-1))
     offsets3 = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6], dtype=numpy.int64))
     depth1 = awkward1.layout.ListOffsetArray64(offsets3, content2)
+
     assert numpy.sum(array, axis=-1).dtype == numpy.asarray(depth1.sum(axis=-1)).dtype
     assert numpy.prod(array, axis=-1).dtype == numpy.asarray(depth1.prod(axis=-1)).dtype
     assert sum(awkward1.to_list(numpy.sum(array, axis=-1))) == sum(awkward1.to_list(depth1.sum(axis=-1)))

@@ -1414,6 +1414,7 @@ def firsts(array, axis=1, highlevel=True):
     out = awkward1.mask(array, awkward1.num(array, axis=axis) > 0, highlevel=False)[
         toslice
     ]
+
     if highlevel:
         return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:

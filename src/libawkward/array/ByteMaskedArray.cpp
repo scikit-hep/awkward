@@ -625,13 +625,15 @@ namespace awkward {
              dynamic_cast<SliceJagged64*>(head.get())) {
       int64_t numnull;
       std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
+
       Index64 nextcarry = pair.first;
       Index64 outindex = pair.second;
 
       ContentPtr next = content_.get()->carry(nextcarry, true);
-
       ContentPtr out = next.get()->getitem_next(head, tail, advanced);
+
       IndexedOptionArray64 out2(identities_, parameters_, outindex, out);
+
       return out2.simplify_optiontype();
     }
     else if (SliceEllipsis* ellipsis =

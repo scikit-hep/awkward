@@ -86,15 +86,15 @@ jobs:
       - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
-      - script: |
-          python dev/generate-kernelspec.py
-        displayName: "Generate Kernel specification"
-      - script: |
-          python tests-kernels/generate-tests.py
-        displayName: "Generate Kernel tests"
-      - script: |
-          python -m pytest -vv -rs tests-kernels
-        displayName: "Test kernels"
+      # - script: |
+      #     python dev/generate-kernelspec.py
+      #   displayName: "Generate Kernel specification"
+      # - script: |
+      #     python tests-kernels/generate-tests.py
+      #   displayName: "Generate Kernel tests"
+      # - script: |
+      #     python -m pytest -vv -rs tests-kernels
+      #   displayName: "Test kernels"
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
@@ -147,15 +147,15 @@ jobs:
       - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
-      - script: |
-          python dev/generate-kernelspec.py
-        displayName: "Generate Kernel specification"
-      - script: |
-          python tests-kernels/generate-tests.py
-        displayName: "Generate Kernel tests"
-      - script: |
-          python -m pytest -vv -rs tests-kernels
-        displayName: "Test kernels"
+      # - script: |
+      #     python dev/generate-kernelspec.py
+      #   displayName: "Generate Kernel specification"
+      # - script: |
+      #     python tests-kernels/generate-tests.py
+      #   displayName: "Generate Kernel tests"
+      # - script: |
+      #     python -m pytest -vv -rs tests-kernels
+      #   displayName: "Test kernels"
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
@@ -224,15 +224,15 @@ jobs:
       - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
-      - script: |
-          python dev/generate-kernelspec.py
-        displayName: "Generate Kernel specification"
-      - script: |
-          python tests-kernels/generate-tests.py
-        displayName: "Generate Kernel tests"
-      - script: |
-          python -m pytest -vv -rs tests-kernels
-        displayName: "Test kernels"
+      # - script: |
+      #     python dev/generate-kernelspec.py
+      #   displayName: "Generate Kernel specification"
+      # - script: |
+      #     python tests-kernels/generate-tests.py
+      #   displayName: "Generate Kernel tests"
+      # - script: |
+      #     python -m pytest -vv -rs tests-kernels
+      #   displayName: "Test kernels"
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
