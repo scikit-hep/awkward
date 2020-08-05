@@ -2304,7 +2304,16 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::numbers_to_type(const std::string& name) const {
-    throw std::runtime_error("FIXME: IndexedArrayOf<T, ISOPTION>::numbers_to_type is not implemented.");
+    IndexOf<T> index = index_.deep_copy();
+    ContentPtr content = content_.get()->numbers_to_type(name);
+    IdentitiesPtr identities = identities_;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities,
+                                                         parameters_,
+                                                         index,
+                                                         content);
   }
 
   template <typename T, bool ISOPTION>

@@ -1961,7 +1961,21 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   UnionArrayOf<T, I>::numbers_to_type(const std::string& name) const {
-    throw std::runtime_error("FIXME: UnionArrayOf<T, I>::numbers_to_type is not implemented.");
+    IndexOf<T> tags = tags_.deep_copy();
+    IndexOf<I> index = index_.deep_copy();
+    ContentPtrVec contents;
+    for (auto x : contents_) {
+      contents.push_back(x.get()->numbers_to_type(name));
+    }
+    IdentitiesPtr identities = identities_;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(identities,
+                                                parameters_,
+                                                tags,
+                                                index,
+                                                contents);
   }
 
   template <typename T, typename I>

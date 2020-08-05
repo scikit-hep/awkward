@@ -918,7 +918,7 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::numbers_to_type(const std::string& name) const {
-    throw std::runtime_error("FIXME: VirtualArray::numbers_to_type is not implemented.");
+    return array().get()->numbers_to_type(name);
   }
 
 }

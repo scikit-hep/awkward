@@ -586,7 +586,9 @@ namespace awkward {
 
   const ContentPtr
   Record::numbers_to_type(const std::string& name) const {
-    throw std::runtime_error("FIXME: Record::numbers_to_type is not implemented.");
+    ContentPtr out = array_.get()->numbers_to_type(name);
+    return std::make_shared<Record>(
+      std::dynamic_pointer_cast<RecordArray>(out), at_);
   }
 
 }

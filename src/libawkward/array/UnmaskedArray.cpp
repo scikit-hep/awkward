@@ -903,7 +903,12 @@ namespace awkward {
 
   const ContentPtr
   UnmaskedArray::numbers_to_type(const std::string& name) const {
-    throw std::runtime_error("FIXME: UnmaskedArray::numbers_to_type is not implemented.");
+    ContentPtr content = content_.get()->numbers_to_type(name);
+    IdentitiesPtr identities = identities_;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<UnmaskedArray>(identities, parameters_, content);
   }
 
   template <typename S>

@@ -1495,7 +1495,19 @@ namespace awkward {
 
   const ContentPtr
   RecordArray::numbers_to_type(const std::string& name) const {
-    throw std::runtime_error("FIXME: RecordArray::numbers_to_type is not implemented.");
+    ContentPtrVec contents;
+    for (auto x : contents_) {
+      contents.push_back(x.get()->numbers_to_type(name));
+    }
+    IdentitiesPtr identities = identities_;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<RecordArray>(identities,
+                                         parameters_,
+                                         contents,
+                                         recordlookup_,
+                                         length_);
   }
 
   template <typename S>

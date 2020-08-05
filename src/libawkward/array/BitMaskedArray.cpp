@@ -925,7 +925,7 @@ namespace awkward {
 
   const ContentPtr
   BitMaskedArray::numbers_to_type(const std::string& name) const {
-    throw std::runtime_error("FIXME: BitMaskedArray::numbers_to_type is not implemented.");
+    return toByteMaskedArray().get()->numbers_to_type(name);
   }
 
 }

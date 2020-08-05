@@ -338,7 +338,8 @@ namespace awkward {
 
   const ContentPtr
   None::numbers_to_type(const std::string& name) const {
-    throw std::runtime_error("FIXME: None::numbers_to_type is not implemented.");
+    throw std::runtime_error(
+      "undefined operation: None::numbers_to_type");
   }
 
   const ContentPtr none = std::make_shared<None>();

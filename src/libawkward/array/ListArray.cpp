@@ -1864,7 +1864,18 @@ namespace awkward {
   template <typename T>
   const ContentPtr
   ListArrayOf<T>::numbers_to_type(const std::string& name) const {
-    throw std::runtime_error("FIXME: ListArrayOf<T>::numbers_to_type is not implemented.");
+    IndexOf<T> starts = starts_.deep_copy();
+    IndexOf<T> stops = stops_.deep_copy();
+    ContentPtr content = content_.get()->numbers_to_type(name);
+    IdentitiesPtr identities = identities_;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<ListArrayOf<T>>(identities,
+                                            parameters_,
+                                            starts,
+                                            stops,
+                                            content);
   }
 
   template class EXPORT_SYMBOL ListArrayOf<int32_t>;
