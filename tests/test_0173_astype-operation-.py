@@ -43,3 +43,22 @@ def test_UnmaskedArray():
     assert str(awkward1.type(awkward1.Array(content_from_int8))) == "5 * float64"
     assert str(awkward1.type(array_from_int8)) == "?float64"
     assert str(awkward1.type(awkward1.Array(array_from_int8))) == "5 * ?float64"
+
+def test_RegularArray_and_ListArray():
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]));
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, content)
+    regulararray = awkward1.layout.RegularArray(listoffsetarray, 2)
+    starts = awkward1.layout.Index64(numpy.array([0, 1]))
+    stops = awkward1.layout.Index64(numpy.array([2, 3]))
+    listarray = awkward1.layout.ListArray64(starts, stops, regulararray)
+
+    assert str(awkward1.type(content)) == "float64"
+    assert str(awkward1.type(regulararray)) == "2 * var * float64"
+    assert str(awkward1.type(listarray)) == "var * 2 * var * float64"
+
+    regulararray_int8 = regulararray.numbers_to_type('int8')
+    assert str(awkward1.type(regulararray_int8)) == "2 * var * int8"
+
+    listarray_bool = listarray.numbers_to_type('bool')
+    assert str(awkward1.type(listarray_bool)) == "var * 2 * var * bool"
