@@ -181,17 +181,13 @@ def testpykernels(tests):
                             if isinstance(val, list):
                                 f.write(
                                     " " * 4
-                                    + "for i in range(len(pytest_"
-                                    + arg
-                                    + ")):\n"
-                                )
-                                f.write(
-                                    " " * 8
                                     + "assert "
                                     + arg
-                                    + "[i] == pytest_"
+                                    + "[:len(pytest_"
                                     + arg
-                                    + "[i]\n"
+                                    + ")] == pytest.approx(pytest_"
+                                    + arg
+                                    + ")\n"
                                 )
                             else:
                                 f.write(
@@ -358,15 +354,14 @@ def testcpukernels(tests):
                         f.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
                         if isinstance(val, list):
                             f.write(
-                                " " * 4 + "for i in range(len(pytest_" + arg + ")):\n"
-                            )
-                            f.write(
-                                " " * 8
+                                " " * 4
                                 + "assert "
                                 + arg
-                                + "[i] == pytest.approx(pytest_"
+                                + "[:len(pytest_"
                                 + arg
-                                + "[i])\n"
+                                + ")] == pytest.approx(pytest_"
+                                + arg
+                                + ")\n"
                             )
                         else:
                             f.write(
