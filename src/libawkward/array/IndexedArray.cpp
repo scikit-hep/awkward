@@ -1955,7 +1955,6 @@ namespace awkward {
             std::string("reduce_next with unbranching depth > negaxis expects a "
             "ListOffsetArray64 whose offsets start at zero "));
         }
-
         struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
