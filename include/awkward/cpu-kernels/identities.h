@@ -33,8 +33,6 @@ extern "C" {
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromoffsets inparam role: ListOffsetArray-offsets
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset
 /// @param tolength inparam role: ListOffsetArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -43,16 +41,12 @@ extern "C" {
       int32_t* toptr,
       const int32_t* fromptr,
       const int32_t* fromoffsets,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t offsetsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromoffsets inparam role: ListOffsetArray-offsets
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset
 /// @param tolength inparam role: ListOffsetArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -61,16 +55,12 @@ extern "C" {
       int32_t* toptr,
       const int32_t* fromptr,
       const uint32_t* fromoffsets,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t offsetsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromoffsets inparam role: ListOffsetArray-offsets
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset
 /// @param tolength inparam role: ListOffsetArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -79,16 +69,12 @@ extern "C" {
       int32_t* toptr,
       const int32_t* fromptr,
       const int64_t* fromoffsets,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t offsetsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromoffsets inparam role: ListOffsetArray-offsets
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset
 /// @param tolength inparam role: ListOffsetArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -97,16 +83,12 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const int32_t* fromoffsets,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t offsetsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromoffsets inparam role: ListOffsetArray-offsets
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset
 /// @param tolength inparam role: ListOffsetArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -115,16 +97,12 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const uint32_t* fromoffsets,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t offsetsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromoffsets inparam role: ListOffsetArray-offsets
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param offsetsoffset inparam role: ListOffsetArray-offsets-offset
 /// @param tolength inparam role: ListOffsetArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -133,8 +111,6 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const int64_t* fromoffsets,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t offsetsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -144,9 +120,6 @@ extern "C" {
 /// @param fromptr inparam role: Identities-array
 /// @param fromstarts inparam role: ListArray-starts
 /// @param fromstops inparam role: ListArray-stops
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param startsoffset inparam role: ListArray-starts-offset
-/// @param stopsoffset inparam role: ListArray-stops-offset
 /// @param tolength inparam role: ListArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -157,9 +130,6 @@ extern "C" {
       const int32_t* fromptr,
       const int32_t* fromstarts,
       const int32_t* fromstops,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t startsoffset,   // MAYBE
-      // int64_t stopsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -168,9 +138,6 @@ extern "C" {
 /// @param fromptr inparam role: Identities-array
 /// @param fromstarts inparam role: ListArray-starts
 /// @param fromstops inparam role: ListArray-stops
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param startsoffset inparam role: ListArray-starts-offset
-/// @param stopsoffset inparam role: ListArray-stops-offset
 /// @param tolength inparam role: ListArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -181,9 +148,6 @@ extern "C" {
       const int32_t* fromptr,
       const uint32_t* fromstarts,
       const uint32_t* fromstops,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t startsoffset,   // MAYBE
-      // int64_t stopsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -192,9 +156,6 @@ extern "C" {
 /// @param fromptr inparam role: Identities-array
 /// @param fromstarts inparam role: ListArray-starts
 /// @param fromstops inparam role: ListArray-stops
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param startsoffset inparam role: ListArray-starts-offset
-/// @param stopsoffset inparam role: ListArray-stops-offset
 /// @param tolength inparam role: ListArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -205,9 +166,6 @@ extern "C" {
       const int32_t* fromptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t startsoffset,   // MAYBE
-      // int64_t stopsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -216,9 +174,6 @@ extern "C" {
 /// @param fromptr inparam role: Identities-array
 /// @param fromstarts inparam role: ListArray-starts
 /// @param fromstops inparam role: ListArray-stops
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param startsoffset inparam role: ListArray-starts-offset
-/// @param stopsoffset inparam role: ListArray-stops-offset
 /// @param tolength inparam role: ListArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -229,9 +184,6 @@ extern "C" {
       const int64_t* fromptr,
       const int32_t* fromstarts,
       const int32_t* fromstops,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t startsoffset,   // MAYBE
-      // int64_t stopsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -240,9 +192,6 @@ extern "C" {
 /// @param fromptr inparam role: Identities-array
 /// @param fromstarts inparam role: ListArray-starts
 /// @param fromstops inparam role: ListArray-stops
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param startsoffset inparam role: ListArray-starts-offset
-/// @param stopsoffset inparam role: ListArray-stops-offset
 /// @param tolength inparam role: ListArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -253,9 +202,6 @@ extern "C" {
       const int64_t* fromptr,
       const uint32_t* fromstarts,
       const uint32_t* fromstops,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t startsoffset,   // MAYBE
-      // int64_t stopsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -264,9 +210,6 @@ extern "C" {
 /// @param fromptr inparam role: Identities-array
 /// @param fromstarts inparam role: ListArray-starts
 /// @param fromstops inparam role: ListArray-stops
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param startsoffset inparam role: ListArray-starts-offset
-/// @param stopsoffset inparam role: ListArray-stops-offset
 /// @param tolength inparam role: ListArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -277,16 +220,12 @@ extern "C" {
       const int64_t* fromptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t startsoffset,   // MAYBE
-      // int64_t stopsoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
 
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
-/// @param fromptroffset inparam role: Identities-array-offset
 /// @param size inparam role: RegularArray-size
 /// @param tolength inparam
 /// @param fromlength inparam
@@ -295,14 +234,12 @@ extern "C" {
     awkward_Identities32_from_RegularArray(
       int32_t* toptr,
       const int32_t* fromptr,
-      // int64_t fromptroffset,   // MAYBE
       int64_t size,
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
-/// @param fromptroffset inparam role: Identities-array-offset
 /// @param size inparam role: RegularArray-size
 /// @param tolength inparam
 /// @param fromlength inparam
@@ -311,7 +248,6 @@ extern "C" {
     awkward_Identities64_from_RegularArray(
       int64_t* toptr,
       const int64_t* fromptr,
-      // int64_t fromptroffset,   // MAYBE
       int64_t size,
       int64_t tolength,
       int64_t fromlength,
@@ -321,8 +257,6 @@ extern "C" {
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromindex inparam role: IndexedArray-index
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param indexoffset inparam role: IndexedArray-index-offset
 /// @param tolength inparam role: IndexedArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -332,8 +266,6 @@ extern "C" {
       int32_t* toptr,
       const int32_t* fromptr,
       const int32_t* fromindex,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -341,8 +273,6 @@ extern "C" {
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromindex inparam role: IndexedArray-index
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param indexoffset inparam role: IndexedArray-index-offset
 /// @param tolength inparam role: IndexedArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -352,8 +282,6 @@ extern "C" {
       int32_t* toptr,
       const int32_t* fromptr,
       const uint32_t* fromindex,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -361,8 +289,6 @@ extern "C" {
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromindex inparam role: IndexedArray-index
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param indexoffset inparam role: IndexedArray-index-offset
 /// @param tolength inparam role: IndexedArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -372,8 +298,6 @@ extern "C" {
       int32_t* toptr,
       const int32_t* fromptr,
       const int64_t* fromindex,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -381,8 +305,6 @@ extern "C" {
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromindex inparam role: IndexedArray-index
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param indexoffset inparam role: IndexedArray-index-offset
 /// @param tolength inparam role: IndexedArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -392,8 +314,6 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const int32_t* fromindex,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -401,8 +321,6 @@ extern "C" {
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromindex inparam role: IndexedArray-index
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param indexoffset inparam role: IndexedArray-index-offset
 /// @param tolength inparam role: IndexedArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -412,8 +330,6 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const uint32_t* fromindex,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -421,8 +337,6 @@ extern "C" {
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
 /// @param fromindex inparam role: IndexedArray-index
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param indexoffset inparam role: IndexedArray-index-offset
 /// @param tolength inparam role: IndexedArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -432,8 +346,6 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const int64_t* fromindex,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth);
@@ -443,9 +355,6 @@ extern "C" {
 /// @param fromptr inparam role: Identities-array
 /// @param fromtags inparam role: UnionArray-tags
 /// @param fromindex inparam role: IndexedArray-index
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param tagsoffset inparam role: UnionArray-tags-offset
-/// @param indexoffset inparam role: IndexedArray-index-offset
 /// @param tolength inparam role: IndexedArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -457,9 +366,6 @@ extern "C" {
       const int32_t* fromptr,
       const int8_t* fromtags,
       const int32_t* fromindex,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t tagsoffset,   // MAYBE
-      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -469,9 +375,6 @@ extern "C" {
 /// @param fromptr inparam role: Identities-array
 /// @param fromtags inparam role: UnionArray-tags
 /// @param fromindex inparam role: IndexedArray-index
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param tagsoffset inparam role: UnionArray-tags-offset
-/// @param indexoffset inparam role: IndexedArray-index-offset
 /// @param tolength inparam role: IndexedArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -483,9 +386,6 @@ extern "C" {
       const int32_t* fromptr,
       const int8_t* fromtags,
       const uint32_t* fromindex,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t tagsoffset,   // MAYBE
-      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -495,9 +395,6 @@ extern "C" {
 /// @param fromptr inparam role: Identities-array
 /// @param fromtags inparam role: UnionArray-tags
 /// @param fromindex inparam role: IndexedArray-index
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param tagsoffset inparam role: UnionArray-tags-offset
-/// @param indexoffset inparam role: IndexedArray-index-offset
 /// @param tolength inparam role: IndexedArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -509,9 +406,6 @@ extern "C" {
       const int32_t* fromptr,
       const int8_t* fromtags,
       const int64_t* fromindex,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t tagsoffset,   // MAYBE
-      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -521,9 +415,6 @@ extern "C" {
 /// @param fromptr inparam role: Identities-array
 /// @param fromtags inparam role: UnionArray-tags
 /// @param fromindex inparam role: IndexedArray-index
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param tagsoffset inparam role: UnionArray-tags-offset
-/// @param indexoffset inparam role: IndexedArray-index-offset
 /// @param tolength inparam role: IndexedArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -535,9 +426,6 @@ extern "C" {
       const int64_t* fromptr,
       const int8_t* fromtags,
       const int32_t* fromindex,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t tagsoffset,   // MAYBE
-      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -547,9 +435,6 @@ extern "C" {
 /// @param fromptr inparam role: Identities-array
 /// @param fromtags inparam role: UnionArray-tags
 /// @param fromindex inparam role: IndexedArray-index
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param tagsoffset inparam role: UnionArray-tags-offset
-/// @param indexoffset inparam role: IndexedArray-index-offset
 /// @param tolength inparam role: IndexedArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -561,9 +446,6 @@ extern "C" {
       const int64_t* fromptr,
       const int8_t* fromtags,
       const uint32_t* fromindex,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t tagsoffset,   // MAYBE
-      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -573,9 +455,6 @@ extern "C" {
 /// @param fromptr inparam role: Identities-array
 /// @param fromtags inparam role: UnionArray-tags
 /// @param fromindex inparam role: IndexedArray-index
-/// @param fromptroffset inparam role: Identities-array-offset
-/// @param tagsoffset inparam role: UnionArray-tags-offset
-/// @param indexoffset inparam role: IndexedArray-index-offset
 /// @param tolength inparam role: IndexedArray-length
 /// @param fromlength inparam
 /// @param fromwidth inparam
@@ -587,9 +466,6 @@ extern "C" {
       const int64_t* fromptr,
       const int8_t* fromtags,
       const int64_t* fromindex,
-      // int64_t fromptroffset,   // MAYBE
-      // int64_t tagsoffset,   // MAYBE
-      // int64_t indexoffset,   // MAYBE
       int64_t tolength,
       int64_t fromlength,
       int64_t fromwidth,
@@ -597,26 +473,22 @@ extern "C" {
 
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
-/// @param fromoffset inparam role: Identities-array-offset
 /// @param fromlength inparam
 /// @param tolength inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities32_extend(
       int32_t* toptr,
       const int32_t* fromptr,
-      // int64_t fromoffset,   // MAYBE
       int64_t fromlength,
       int64_t tolength);
 /// @param toptr outparam
 /// @param fromptr inparam role: Identities-array
-/// @param fromoffset inparam role: Identities-array-offset
 /// @param fromlength inparam
 /// @param tolength inparam
   EXPORT_SYMBOL struct Error
     awkward_Identities64_extend(
       int64_t* toptr,
       const int64_t* fromptr,
-      // int64_t fromoffset,   // MAYBE
       int64_t fromlength,
       int64_t tolength);
 

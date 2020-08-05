@@ -292,14 +292,12 @@ ERROR awkward_slicearray_ravel_64(
 ERROR awkward_slicemissing_check_same(
   bool* same,
   const int8_t* bytemask,
-  int64_t bytemaskoffset,
   const int64_t* missingindex,
-  int64_t missingindexoffset,
   int64_t length) {
   *same = true;
   for (int64_t i = 0;  i < length;  i++) {
-    bool left = (bytemask[bytemaskoffset + i] != 0);
-    bool right = (missingindex[missingindexoffset + i] < 0);
+    bool left = (bytemask[i] != 0);
+    bool right = (missingindex[i] < 0);
     if (left != right) {
       *same = false;
       return success();
