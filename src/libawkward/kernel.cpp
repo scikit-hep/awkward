@@ -22,6 +22,15 @@ namespace awkward {
 
   namespace kernel {
 
+int64_t oink(int64_t x, int64_t line) {
+  if (x != 0) {
+    throw std::runtime_error(std::string("OINK! on line ") + std::to_string(line));
+  }
+  else {
+    return 0;
+  }
+}
+
     std::shared_ptr<LibraryCallback> lib_callback = std::make_shared<LibraryCallback>();
 
     LibraryCallback::LibraryCallback() {
@@ -1264,7 +1273,7 @@ namespace awkward {
           toindex,
           fromindex,
           carry,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           lenfromindex,
           length);
       }
@@ -1292,7 +1301,7 @@ namespace awkward {
           toindex,
           fromindex,
           carry,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           lenfromindex,
           length);
       }
@@ -1320,7 +1329,7 @@ namespace awkward {
           toindex,
           fromindex,
           carry,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           lenfromindex,
           length);
       }
@@ -1348,7 +1357,7 @@ namespace awkward {
           toindex,
           fromindex,
           carry,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           lenfromindex,
           length);
       }
@@ -1376,7 +1385,7 @@ namespace awkward {
           toindex,
           fromindex,
           carry,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           lenfromindex,
           length);
       }
@@ -1403,7 +1412,7 @@ namespace awkward {
           toindex,
           fromindex,
           carry,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1429,7 +1438,7 @@ namespace awkward {
           toindex,
           fromindex,
           carry,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1455,7 +1464,7 @@ namespace awkward {
           toindex,
           fromindex,
           carry,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1481,7 +1490,7 @@ namespace awkward {
           toindex,
           fromindex,
           carry,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1507,7 +1516,7 @@ namespace awkward {
           toindex,
           fromindex,
           carry,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1557,9 +1566,9 @@ namespace awkward {
         return awkward_slicemissing_check_same(
           same,
           bytemask,
-          bytemaskoffset,
+          oink(bytemaskoffset, __LINE__),
           missingindex,
-          missingindexoffset,
+          oink(missingindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1648,7 +1657,7 @@ namespace awkward {
           identitiesptr,
           carryptr,
           lencarry,
-          offset,
+          oink(offset, __LINE__),
           width,
           length);
       }
@@ -1678,7 +1687,7 @@ namespace awkward {
           identitiesptr,
           carryptr,
           lencarry,
-          offset,
+          oink(offset, __LINE__),
           width,
           length);
       }
@@ -1728,7 +1737,7 @@ namespace awkward {
           fromptr,
           len,
           stride,
-          offset,
+          oink(offset, __LINE__),
           pos);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1780,7 +1789,7 @@ namespace awkward {
           fromptr,
           len,
           stride,
-          offset,
+          oink(offset, __LINE__),
           pos);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -1947,7 +1956,7 @@ namespace awkward {
         return awkward_NumpyArray_getitem_boolean_numtrue(
           numtrue,
           fromptr,
-          byteoffset,
+          oink(byteoffset, __LINE__),
           length,
           stride);
       }
@@ -1972,7 +1981,7 @@ namespace awkward {
         return awkward_NumpyArray_getitem_boolean_nonzero_64(
           toptr,
           fromptr,
-          byteoffset,
+          oink(byteoffset, __LINE__),
           length,
           stride);
       }
@@ -2002,8 +2011,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           lenstarts,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -2032,8 +2041,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           lenstarts,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -2062,8 +2071,8 @@ namespace awkward {
          fromstarts,
          fromstops,
          lenstarts,
-         startsoffset,
-         stopsoffset,
+         oink(startsoffset, __LINE__),
+         oink(stopsoffset, __LINE__),
          at);
      }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -2094,8 +2103,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           lenstarts,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           start,
           stop,
           step);
@@ -2128,8 +2137,8 @@ namespace awkward {
          fromstarts,
          fromstops,
          lenstarts,
-         startsoffset,
-         stopsoffset,
+         oink(startsoffset, __LINE__),
+         oink(stopsoffset, __LINE__),
          start,
          stop,
          step);
@@ -2162,8 +2171,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           lenstarts,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           start,
           stop,
           step);
@@ -2198,8 +2207,8 @@ namespace awkward {
          fromstarts,
          fromstops,
          lenstarts,
-         startsoffset,
-         stopsoffset,
+         oink(startsoffset, __LINE__),
+         oink(stopsoffset, __LINE__),
          start,
          stop,
          step);
@@ -2234,8 +2243,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           lenstarts,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           start,
           stop,
           step);
@@ -2270,8 +2279,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           lenstarts,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           start,
           stop,
           step);
@@ -2444,8 +2453,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           fromarray,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           lenstarts,
           lenarray,
           lencontent);
@@ -2480,8 +2489,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           fromarray,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           lenstarts,
           lenarray,
           lencontent);
@@ -2516,8 +2525,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           fromarray,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           lenstarts,
           lenarray,
           lencontent);
@@ -2554,8 +2563,8 @@ namespace awkward {
           fromstops,
           fromarray,
           fromadvanced,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           lenstarts,
           lenarray,
           lencontent);
@@ -2592,8 +2601,8 @@ namespace awkward {
           fromstops,
           fromarray,
           fromadvanced,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           lenstarts,
           lenarray,
           lencontent);
@@ -2630,8 +2639,8 @@ namespace awkward {
           fromstops,
           fromarray,
           fromadvanced,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           lenstarts,
           lenarray,
           lencontent);
@@ -2665,8 +2674,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           fromcarry,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           lenstarts,
           lencarry);
       }
@@ -2699,8 +2708,8 @@ namespace awkward {
          fromstarts,
          fromstops,
          fromcarry,
-         startsoffset,
-         stopsoffset,
+         oink(startsoffset, __LINE__),
+         oink(stopsoffset, __LINE__),
          lenstarts,
          lencarry);
      }
@@ -2733,8 +2742,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           fromcarry,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           lenstarts,
           lencarry);
       }
@@ -2934,7 +2943,7 @@ namespace awkward {
         return awkward_IndexedArray32_numnull(
           numnull,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           lenindex);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -2958,7 +2967,7 @@ namespace awkward {
         return awkward_IndexedArrayU32_numnull(
           numnull,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           lenindex);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -2982,7 +2991,7 @@ namespace awkward {
         return awkward_IndexedArray64_numnull(
           numnull,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           lenindex);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3009,7 +3018,7 @@ namespace awkward {
          tocarry,
          toindex,
          fromindex,
-         indexoffset,
+         oink(indexoffset, __LINE__),
          lenindex,
          lencontent);
      }
@@ -3037,7 +3046,7 @@ namespace awkward {
           tocarry,
           toindex,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -3065,7 +3074,7 @@ namespace awkward {
          tocarry,
          toindex,
          fromindex,
-         indexoffset,
+         oink(indexoffset, __LINE__),
          lenindex,
          lencontent);
      }
@@ -3093,7 +3102,7 @@ namespace awkward {
           tocarry,
           toindex,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -3121,7 +3130,7 @@ namespace awkward {
          tocarry,
          toindex,
          fromindex,
-         indexoffset,
+         oink(indexoffset, __LINE__),
          lenindex,
          lencontent);
      }
@@ -3149,7 +3158,7 @@ namespace awkward {
           tocarry,
           toindex,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -3178,10 +3187,10 @@ namespace awkward {
           tooffsets,
           tononzero,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length,
           nonzero,
-          nonzerooffset,
+          oink(nonzerooffset, __LINE__),
           nonzerolength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3215,16 +3224,16 @@ namespace awkward {
           tooffsets,
           tononzero,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length,
           index,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           indexlength,
           nonzero,
-          nonzerooffset,
+          oink(nonzerooffset, __LINE__),
           nonzerolength,
           originalmask,
-          maskoffset,
+          oink(maskoffset, __LINE__),
           masklength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3254,10 +3263,10 @@ namespace awkward {
           toindex,
           tononzero,
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           fromindexlength,
           nonzero,
-          nonzerooffset,
+          oink(nonzerooffset, __LINE__),
           nonzerolength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3282,7 +3291,7 @@ namespace awkward {
         return awkward_IndexedArray32_getitem_nextcarry_64(
           tocarry,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -3308,7 +3317,7 @@ namespace awkward {
         return awkward_IndexedArrayU32_getitem_nextcarry_64(
           tocarry,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -3334,7 +3343,7 @@ namespace awkward {
         return awkward_IndexedArray64_getitem_nextcarry_64(
           tocarry,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -3362,7 +3371,7 @@ namespace awkward {
          toindex,
          fromindex,
          fromcarry,
-         indexoffset,
+         oink(indexoffset, __LINE__),
          lenindex,
          lencarry);
      }
@@ -3390,7 +3399,7 @@ namespace awkward {
           toindex,
           fromindex,
           fromcarry,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           lenindex,
           lencarry);
       }
@@ -3418,7 +3427,7 @@ namespace awkward {
          toindex,
          fromindex,
          fromcarry,
-         indexoffset,
+         oink(indexoffset, __LINE__),
          lenindex,
          lencarry);
      }
@@ -3443,7 +3452,7 @@ namespace awkward {
         return awkward_UnionArray8_regular_index_getsize(
           size,
           fromtags,
-          tagsoffset,
+          oink(tagsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3471,7 +3480,7 @@ namespace awkward {
          current,
          size,
          fromtags,
-         tagsoffset,
+         oink(tagsoffset, __LINE__),
          length);
      }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3499,7 +3508,7 @@ namespace awkward {
           current,
           size,
           fromtags,
-          tagsoffset,
+          oink(tagsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3527,7 +3536,7 @@ namespace awkward {
          current,
          size,
          fromtags,
-         tagsoffset,
+         oink(tagsoffset, __LINE__),
          length);
      }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3556,9 +3565,9 @@ namespace awkward {
           lenout,
           tocarry,
           fromtags,
-          tagsoffset,
+          oink(tagsoffset, __LINE__),
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length,
           which);
       }
@@ -3588,9 +3597,9 @@ namespace awkward {
          lenout,
          tocarry,
          fromtags,
-         tagsoffset,
+         oink(tagsoffset, __LINE__),
          fromindex,
-         indexoffset,
+         oink(indexoffset, __LINE__),
          length,
          which);
      }
@@ -3620,9 +3629,9 @@ namespace awkward {
           lenout,
           tocarry,
           fromtags,
-          tagsoffset,
+          oink(tagsoffset, __LINE__),
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length,
           which);
       }
@@ -3648,7 +3657,7 @@ namespace awkward {
         return awkward_missing_repeat_64(
           outindex,
           index,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           indexlength,
           repetitions,
           regularsize);
@@ -3708,9 +3717,9 @@ namespace awkward {
           singleoffsets,
           tocarry,
           fromstarts,
-          fromstartsoffset,
+          oink(fromstartsoffset, __LINE__),
           fromstops,
-          fromstopsoffset,
+          oink(fromstopsoffset, __LINE__),
           jaggedsize,
           length);
       }
@@ -3744,9 +3753,9 @@ namespace awkward {
          singleoffsets,
          tocarry,
          fromstarts,
-         fromstartsoffset,
+         oink(fromstartsoffset, __LINE__),
          fromstops,
-         fromstopsoffset,
+         oink(fromstopsoffset, __LINE__),
          jaggedsize,
          length);
      }
@@ -3780,9 +3789,9 @@ namespace awkward {
           singleoffsets,
           tocarry,
           fromstarts,
-          fromstartsoffset,
+          oink(fromstartsoffset, __LINE__),
           fromstops,
-          fromstopsoffset,
+          oink(fromstopsoffset, __LINE__),
           jaggedsize,
           length);
       }
@@ -3808,9 +3817,9 @@ namespace awkward {
         return awkward_ListArray_getitem_jagged_carrylen_64(
           carrylen,
           slicestarts,
-          slicestartsoffset,
+          oink(slicestartsoffset, __LINE__),
           slicestops,
-          slicestopsoffset,
+          oink(slicestopsoffset, __LINE__),
           sliceouterlen);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3846,17 +3855,17 @@ namespace awkward {
          tooffsets,
          tocarry,
          slicestarts,
-         slicestartsoffset,
+         oink(slicestartsoffset, __LINE__),
          slicestops,
-         slicestopsoffset,
+         oink(slicestopsoffset, __LINE__),
          sliceouterlen,
          sliceindex,
-         sliceindexoffset,
+         oink(sliceindexoffset, __LINE__),
          sliceinnerlen,
          fromstarts,
-         fromstartsoffset,
+         oink(fromstartsoffset, __LINE__),
          fromstops,
-         fromstopsoffset,
+         oink(fromstopsoffset, __LINE__),
          contentlen);
      }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3892,17 +3901,17 @@ namespace awkward {
          tooffsets,
          tocarry,
          slicestarts,
-         slicestartsoffset,
+         oink(slicestartsoffset, __LINE__),
          slicestops,
-         slicestopsoffset,
+         oink(slicestopsoffset, __LINE__),
          sliceouterlen,
          sliceindex,
-         sliceindexoffset,
+         oink(sliceindexoffset, __LINE__),
          sliceinnerlen,
          fromstarts,
-         fromstartsoffset,
+         oink(fromstartsoffset, __LINE__),
          fromstops,
-         fromstopsoffset,
+         oink(fromstopsoffset, __LINE__),
          contentlen);
      }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3938,17 +3947,17 @@ namespace awkward {
          tooffsets,
          tocarry,
          slicestarts,
-         slicestartsoffset,
+         oink(slicestartsoffset, __LINE__),
          slicestops,
-         slicestopsoffset,
+         oink(slicestopsoffset, __LINE__),
          sliceouterlen,
          sliceindex,
-         sliceindexoffset,
+         oink(sliceindexoffset, __LINE__),
          sliceinnerlen,
          fromstarts,
-         fromstartsoffset,
+         oink(fromstartsoffset, __LINE__),
          fromstops,
-         fromstopsoffset,
+         oink(fromstopsoffset, __LINE__),
          contentlen);
      }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -3976,12 +3985,12 @@ namespace awkward {
         return awkward_ListArray_getitem_jagged_numvalid_64(
           numvalid,
           slicestarts,
-          slicestartsoffset,
+          oink(slicestartsoffset, __LINE__),
           slicestops,
-          slicestopsoffset,
+          oink(slicestopsoffset, __LINE__),
           length,
           missing,
-          missingoffset,
+          oink(missingoffset, __LINE__),
           missinglength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -4012,12 +4021,12 @@ namespace awkward {
           tosmalloffsets,
           tolargeoffsets,
           slicestarts,
-          slicestartsoffset,
+          oink(slicestartsoffset, __LINE__),
           slicestops,
-          slicestopsoffset,
+          oink(slicestopsoffset, __LINE__),
           length,
           missing,
-          missingoffset);
+          oink(missingoffset, __LINE__));
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -4046,14 +4055,14 @@ namespace awkward {
         return awkward_ListArray32_getitem_jagged_descend_64(
           tooffsets,
           slicestarts,
-          slicestartsoffset,
+          oink(slicestartsoffset, __LINE__),
           slicestops,
-          slicestopsoffset,
+          oink(slicestopsoffset, __LINE__),
           sliceouterlen,
           fromstarts,
-          fromstartsoffset,
+          oink(fromstartsoffset, __LINE__),
           fromstops,
-          fromstopsoffset);
+          oink(fromstopsoffset, __LINE__));
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -4082,14 +4091,14 @@ namespace awkward {
        return awkward_ListArrayU32_getitem_jagged_descend_64(
          tooffsets,
          slicestarts,
-         slicestartsoffset,
+         oink(slicestartsoffset, __LINE__),
          slicestops,
-         slicestopsoffset,
+         oink(slicestopsoffset, __LINE__),
          sliceouterlen,
          fromstarts,
-         fromstartsoffset,
+         oink(fromstartsoffset, __LINE__),
          fromstops,
-         fromstopsoffset);
+         oink(fromstopsoffset, __LINE__));
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -4118,14 +4127,14 @@ namespace awkward {
         return awkward_ListArray64_getitem_jagged_descend_64(
           tooffsets,
           slicestarts,
-          slicestartsoffset,
+          oink(slicestartsoffset, __LINE__),
           slicestops,
-          slicestopsoffset,
+          oink(slicestopsoffset, __LINE__),
           sliceouterlen,
           fromstarts,
-          fromstartsoffset,
+          oink(fromstartsoffset, __LINE__),
           fromstops,
-          fromstopsoffset);
+          oink(fromstopsoffset, __LINE__));
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -4143,13 +4152,19 @@ namespace awkward {
                                    int64_t offset,
                                    int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_Index8_getitem_at_nowrap(ptr, offset, at);
+        return awkward_Index8_getitem_at_nowrap(
+          ptr,
+          oink(offset, __LINE__),
+          at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_Index8_getitem_at_nowrap,
                     awkward_cuda_Index8_getitem_at_nowrap,
                     ptr_lib);
-        return (*awkward_cuda_Index8_getitem_at_nowrap_t)(ptr, offset, at);
+        return (*awkward_cuda_Index8_getitem_at_nowrap_t)(
+          ptr,
+          oink(offset, __LINE__),
+          at);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in int8_t index_getitem_at_nowrap");
@@ -4162,13 +4177,19 @@ namespace awkward {
                                     int64_t offset,
                                     int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_IndexU8_getitem_at_nowrap(ptr, offset, at);
+        return awkward_IndexU8_getitem_at_nowrap(
+          ptr,
+          oink(offset, __LINE__),
+          at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_IndexU8_getitem_at_nowrap,
                     awkward_cuda_IndexU8_getitem_at_nowrap,
                     ptr_lib);
-        return (*awkward_cuda_IndexU8_getitem_at_nowrap_t)(ptr, offset, at);
+        return (*awkward_cuda_IndexU8_getitem_at_nowrap_t)(
+          ptr,
+          oink(offset, __LINE__),
+          at);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in uint8_t index_getitem_at_nowrap");
@@ -4181,13 +4202,19 @@ namespace awkward {
                                     int64_t offset,
                                     int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_Index32_getitem_at_nowrap(ptr, offset, at);
+        return awkward_Index32_getitem_at_nowrap(
+          ptr,
+          oink(offset, __LINE__),
+          at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_Index32_getitem_at_nowrap,
                     awkward_cuda_Index32_getitem_at_nowrap,
                     ptr_lib);
-        return (*awkward_cuda_Index32_getitem_at_nowrap_t)(ptr, offset, at);
+        return (*awkward_cuda_Index32_getitem_at_nowrap_t)(
+          ptr,
+          oink(offset, __LINE__),
+          at);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in int32_t index_getitem_at_nowrap");
@@ -4200,13 +4227,19 @@ namespace awkward {
                                      int64_t offset,
                                      int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_IndexU32_getitem_at_nowrap(ptr, offset, at);
+        return awkward_IndexU32_getitem_at_nowrap(
+          ptr,
+          oink(offset, __LINE__),
+          at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_IndexU32_getitem_at_nowrap,
                     awkward_cuda_IndexU32_getitem_at_nowrap,
                     ptr_lib);
-        return (*awkward_cuda_IndexU32_getitem_at_nowrap_t)(ptr, offset, at);
+        return (*awkward_cuda_IndexU32_getitem_at_nowrap_t)(
+          ptr,
+          oink(offset, __LINE__),
+          at);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in uint32_t index_getitem_at_nowrap");
@@ -4219,13 +4252,19 @@ namespace awkward {
                                     int64_t offset,
                                     int64_t at) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_Index64_getitem_at_nowrap(ptr, offset, at);
+        return awkward_Index64_getitem_at_nowrap(
+          ptr,
+          oink(offset, __LINE__),
+          at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_Index64_getitem_at_nowrap,
                     awkward_cuda_Index64_getitem_at_nowrap,
                     ptr_lib);
-        return (*awkward_cuda_Index64_getitem_at_nowrap_t)(ptr, offset, at);
+        return (*awkward_cuda_Index64_getitem_at_nowrap_t)(
+          ptr,
+          oink(offset, __LINE__),
+          at);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in int64_t index_getitem_at_nowrap");
@@ -4239,13 +4278,21 @@ namespace awkward {
                                  int64_t at,
                                  int8_t value) {
       if (ptr_lib == kernel::lib::cpu) {
-        awkward_Index8_setitem_at_nowrap(ptr, offset, at, value);
+        awkward_Index8_setitem_at_nowrap(
+          ptr,
+          oink(offset, __LINE__),
+          at,
+          value);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_Index8_setitem_at_nowrap,
                     awkward_cuda_Index8_setitem_at_nowrap,
                     ptr_lib);
-        (*awkward_cuda_Index8_setitem_at_nowrap_t)(ptr, offset, at, value);
+        (*awkward_cuda_Index8_setitem_at_nowrap_t)(
+          ptr,
+          oink(offset, __LINE__),
+          at,
+          value);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
@@ -4259,13 +4306,21 @@ namespace awkward {
                                  int64_t at,
                                  uint8_t value) {
       if (ptr_lib == kernel::lib::cpu) {
-        awkward_IndexU8_setitem_at_nowrap(ptr, offset, at, value);
+        awkward_IndexU8_setitem_at_nowrap(
+          ptr,
+          oink(offset, __LINE__),
+          at,
+          value);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_IndexU8_setitem_at_nowrap,
                     awkward_cuda_IndexU8_setitem_at_nowrap,
                     ptr_lib);
-        (*awkward_cuda_IndexU8_setitem_at_nowrap_t)(ptr, offset, at, value);
+        (*awkward_cuda_IndexU8_setitem_at_nowrap_t)(
+          ptr,
+          oink(offset, __LINE__),
+          at,
+          value);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
@@ -4279,13 +4334,21 @@ namespace awkward {
                                  int64_t at,
                                  int32_t value) {
       if (ptr_lib == kernel::lib::cpu) {
-        awkward_Index32_setitem_at_nowrap(ptr, offset, at, value);
+        awkward_Index32_setitem_at_nowrap(
+          ptr,
+          oink(offset, __LINE__),
+          at,
+          value);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_Index32_setitem_at_nowrap,
                     awkward_cuda_Index32_setitem_at_nowrap,
                     ptr_lib);
-        (*awkward_cuda_Index32_setitem_at_nowrap_t)(ptr, offset, at, value);
+        (*awkward_cuda_Index32_setitem_at_nowrap_t)(
+          ptr,
+          oink(offset, __LINE__),
+          at,
+          value);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
@@ -4299,13 +4362,21 @@ namespace awkward {
                                  int64_t at,
                                  uint32_t value) {
       if (ptr_lib == kernel::lib::cpu) {
-        awkward_IndexU32_setitem_at_nowrap(ptr, offset, at, value);
+        awkward_IndexU32_setitem_at_nowrap(
+          ptr,
+          oink(offset, __LINE__),
+          at,
+          value);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_IndexU32_setitem_at_nowrap,
                     awkward_cuda_IndexU32_setitem_at_nowrap,
                     ptr_lib);
-        (*awkward_cuda_IndexU32_setitem_at_nowrap_t)(ptr, offset, at, value);
+        (*awkward_cuda_IndexU32_setitem_at_nowrap_t)(
+          ptr,
+          oink(offset, __LINE__),
+          at,
+          value);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
@@ -4319,13 +4390,21 @@ namespace awkward {
                                  int64_t at,
                                  int64_t value) {
       if (ptr_lib == kernel::lib::cpu) {
-        awkward_Index64_setitem_at_nowrap(ptr, offset, at, value);
+        awkward_Index64_setitem_at_nowrap(
+          ptr,
+          oink(offset, __LINE__),
+          at,
+          value);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_Index64_setitem_at_nowrap,
                     awkward_cuda_Index64_setitem_at_nowrap,
                     ptr_lib);
-        (*awkward_cuda_Index64_setitem_at_nowrap_t)(ptr, offset, at, value);
+        (*awkward_cuda_Index64_setitem_at_nowrap_t)(
+          ptr,
+          oink(offset, __LINE__),
+          at,
+          value);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
@@ -4344,7 +4423,7 @@ namespace awkward {
         return awkward_ByteMaskedArray_getitem_carry_64(
           tomask,
           frommask,
-          frommaskoffset,
+          oink(frommaskoffset, __LINE__),
           lenmask,
           fromcarry,
           lencarry);
@@ -4370,7 +4449,7 @@ namespace awkward {
         return awkward_ByteMaskedArray_numnull(
           numnull,
           mask,
-          maskoffset,
+          oink(maskoffset, __LINE__),
           length,
           validwhen);
       }
@@ -4395,7 +4474,7 @@ namespace awkward {
         return awkward_ByteMaskedArray_getitem_nextcarry_64(
           tocarry,
           mask,
-          maskoffset,
+          oink(maskoffset, __LINE__),
           length,
           validwhen);
       }
@@ -4422,7 +4501,7 @@ namespace awkward {
           tocarry,
           toindex,
           mask,
-          maskoffset,
+          oink(maskoffset, __LINE__),
           length,
           validwhen);
       }
@@ -4447,7 +4526,7 @@ namespace awkward {
         return awkward_ByteMaskedArray_toIndexedOptionArray64(
           toindex,
           mask,
-          maskoffset,
+          oink(maskoffset, __LINE__),
           length,
           validwhen);
       }
@@ -4463,13 +4542,24 @@ namespace awkward {
 
     ERROR Content_getitem_next_missing_jagged_getmaskstartstop(
       kernel::lib ptr_lib,
-        int64_t *index_in, int64_t index_in_offset, int64_t *offsets_in,
-        int64_t offsets_in_offset, int64_t *mask_out, int64_t *starts_out,
-        int64_t *stops_out, int64_t length) {
+      int64_t *index_in,
+      int64_t index_in_offset,
+      int64_t *offsets_in,
+      int64_t offsets_in_offset,
+      int64_t *mask_out,
+      int64_t *starts_out,
+      int64_t *stops_out,
+      int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
-            index_in, index_in_offset, offsets_in, offsets_in_offset, mask_out,
-            starts_out, stops_out, length);
+          index_in,
+          oink(index_in_offset, __LINE__),
+          offsets_in,
+          oink(offsets_in_offset, __LINE__),
+          mask_out,
+          starts_out,
+          stops_out,
+          length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -4484,13 +4574,26 @@ namespace awkward {
     template <>
     ERROR MaskedArray_getitem_next_jagged_project(
       kernel::lib ptr_lib,
-        int32_t *index, int64_t index_offset, int64_t *starts_in,
-        int64_t starts_offset, int64_t *stops_in, int64_t stops_offset,
-        int64_t *starts_out, int64_t *stops_out, int64_t length) {
+      int32_t *index,
+      int64_t index_offset,
+      int64_t *starts_in,
+      int64_t starts_offset,
+      int64_t *stops_in,
+      int64_t stops_offset,
+      int64_t *starts_out,
+      int64_t *stops_out,
+      int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_MaskedArray32_getitem_next_jagged_project(
-            index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
-            starts_out, stops_out, length);
+          index,
+          oink(index_offset, __LINE__),
+          starts_in,
+          oink(starts_offset, __LINE__),
+          stops_in,
+          oink(stops_offset, __LINE__),
+          starts_out,
+          stops_out,
+          length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -4504,13 +4607,26 @@ namespace awkward {
     template <>
     ERROR MaskedArray_getitem_next_jagged_project(
       kernel::lib ptr_lib,
-        uint32_t *index, int64_t index_offset, int64_t *starts_in,
-        int64_t starts_offset, int64_t *stops_in, int64_t stops_offset,
-        int64_t *starts_out, int64_t *stops_out, int64_t length) {
+      uint32_t *index,
+      int64_t index_offset,
+      int64_t *starts_in,
+      int64_t starts_offset,
+      int64_t *stops_in,
+      int64_t stops_offset,
+      int64_t *starts_out,
+      int64_t *stops_out,
+      int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_MaskedArrayU32_getitem_next_jagged_project(
-            index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
-            starts_out, stops_out, length);
+          index,
+          oink(index_offset, __LINE__),
+          starts_in,
+          oink(starts_offset, __LINE__),
+          stops_in,
+          oink(stops_offset, __LINE__),
+          starts_out,
+          stops_out,
+          length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -4524,13 +4640,26 @@ namespace awkward {
     template <>
     ERROR MaskedArray_getitem_next_jagged_project(
       kernel::lib ptr_lib,
-        int64_t *index, int64_t index_offset, int64_t *starts_in,
-        int64_t starts_offset, int64_t *stops_in, int64_t stops_offset,
-        int64_t *starts_out, int64_t *stops_out, int64_t length) {
+      int64_t *index,
+      int64_t index_offset,
+      int64_t *starts_in,
+      int64_t starts_offset,
+      int64_t *stops_in,
+      int64_t stops_offset,
+      int64_t *starts_out,
+      int64_t *stops_out,
+      int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_MaskedArray64_getitem_next_jagged_project(
-            index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
-            starts_out, stops_out, length);
+          index,
+          oink(index_offset, __LINE__),
+          starts_in,
+          oink(starts_offset, __LINE__),
+          stops_in,
+          oink(stops_offset, __LINE__),
+          starts_out,
+          stops_out,
+          length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -4624,8 +4753,8 @@ namespace awkward {
           toptr,
           fromptr,
           fromoffsets,
-          fromptroffset,
-          offsetsoffset,
+          oink(fromptroffset, __LINE__),
+          oink(offsetsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4656,8 +4785,8 @@ namespace awkward {
           toptr,
           fromptr,
           fromoffsets,
-          fromptroffset,
-          offsetsoffset,
+          oink(fromptroffset, __LINE__),
+          oink(offsetsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4688,8 +4817,8 @@ namespace awkward {
           toptr,
           fromptr,
           fromoffsets,
-          fromptroffset,
-          offsetsoffset,
+          oink(fromptroffset, __LINE__),
+          oink(offsetsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4720,8 +4849,8 @@ namespace awkward {
           toptr,
           fromptr,
           fromoffsets,
-          fromptroffset,
-          offsetsoffset,
+          oink(fromptroffset, __LINE__),
+          oink(offsetsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4752,8 +4881,8 @@ namespace awkward {
           toptr,
           fromptr,
           fromoffsets,
-          fromptroffset,
-          offsetsoffset,
+          oink(fromptroffset, __LINE__),
+          oink(offsetsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4784,8 +4913,8 @@ namespace awkward {
           toptr,
           fromptr,
           fromoffsets,
-          fromptroffset,
-          offsetsoffset,
+          oink(fromptroffset, __LINE__),
+          oink(offsetsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4821,9 +4950,9 @@ namespace awkward {
           fromptr,
           fromstarts,
           fromstops,
-          fromptroffset,
-          startsoffset,
-          stopsoffset,
+          oink(fromptroffset, __LINE__),
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4859,9 +4988,9 @@ namespace awkward {
           fromptr,
           fromstarts,
           fromstops,
-          fromptroffset,
-          startsoffset,
-          stopsoffset,
+          oink(fromptroffset, __LINE__),
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4897,9 +5026,9 @@ namespace awkward {
           fromptr,
           fromstarts,
           fromstops,
-          fromptroffset,
-          startsoffset,
-          stopsoffset,
+          oink(fromptroffset, __LINE__),
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4935,9 +5064,9 @@ namespace awkward {
           fromptr,
           fromstarts,
           fromstops,
-          fromptroffset,
-          startsoffset,
-          stopsoffset,
+          oink(fromptroffset, __LINE__),
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -4973,9 +5102,9 @@ namespace awkward {
           fromptr,
           fromstarts,
           fromstops,
-          fromptroffset,
-          startsoffset,
-          stopsoffset,
+          oink(fromptroffset, __LINE__),
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -5011,9 +5140,9 @@ namespace awkward {
           fromptr,
           fromstarts,
           fromstops,
-          fromptroffset,
-          startsoffset,
-          stopsoffset,
+          oink(fromptroffset, __LINE__),
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -5042,7 +5171,7 @@ namespace awkward {
         return awkward_Identities32_from_RegularArray(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           size,
           tolength,
           fromlength,
@@ -5072,7 +5201,7 @@ namespace awkward {
         return awkward_Identities64_from_RegularArray(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           size,
           tolength,
           fromlength,
@@ -5106,8 +5235,8 @@ namespace awkward {
           toptr,
           fromptr,
           fromindex,
-          fromptroffset,
-          indexoffset,
+          oink(fromptroffset, __LINE__),
+          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -5140,8 +5269,8 @@ namespace awkward {
          toptr,
          fromptr,
          fromindex,
-         fromptroffset,
-         indexoffset,
+         oink(fromptroffset, __LINE__),
+         oink(indexoffset, __LINE__),
          tolength,
          fromlength,
          fromwidth);
@@ -5174,8 +5303,8 @@ namespace awkward {
           toptr,
           fromptr,
           fromindex,
-          fromptroffset,
-          indexoffset,
+          oink(fromptroffset, __LINE__),
+          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -5208,8 +5337,8 @@ namespace awkward {
          toptr,
          fromptr,
          fromindex,
-         fromptroffset,
-         indexoffset,
+         oink(fromptroffset, __LINE__),
+         oink(indexoffset, __LINE__),
          tolength,
          fromlength,
          fromwidth);
@@ -5242,8 +5371,8 @@ namespace awkward {
           toptr,
           fromptr,
           fromindex,
-          fromptroffset,
-          indexoffset,
+          oink(fromptroffset, __LINE__),
+          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth);
@@ -5276,8 +5405,8 @@ namespace awkward {
          toptr,
          fromptr,
          fromindex,
-         fromptroffset,
-         indexoffset,
+         oink(fromptroffset, __LINE__),
+         oink(indexoffset, __LINE__),
          tolength,
          fromlength,
          fromwidth);
@@ -5314,9 +5443,9 @@ namespace awkward {
           fromptr,
           fromtags,
           fromindex,
-          fromptroffset,
-          tagsoffset,
-          indexoffset,
+          oink(fromptroffset, __LINE__),
+          oink(tagsoffset, __LINE__),
+          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth,
@@ -5354,9 +5483,9 @@ namespace awkward {
           fromptr,
           fromtags,
           fromindex,
-          fromptroffset,
-          tagsoffset,
-          indexoffset,
+          oink(fromptroffset, __LINE__),
+          oink(tagsoffset, __LINE__),
+          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth,
@@ -5394,9 +5523,9 @@ namespace awkward {
           fromptr,
           fromtags,
           fromindex,
-          fromptroffset,
-          tagsoffset,
-          indexoffset,
+          oink(fromptroffset, __LINE__),
+          oink(tagsoffset, __LINE__),
+          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth,
@@ -5434,9 +5563,9 @@ namespace awkward {
           fromptr,
           fromtags,
           fromindex,
-          fromptroffset,
-          tagsoffset,
-          indexoffset,
+          oink(fromptroffset, __LINE__),
+          oink(tagsoffset, __LINE__),
+          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth,
@@ -5474,9 +5603,9 @@ namespace awkward {
           fromptr,
           fromtags,
           fromindex,
-          fromptroffset,
-          tagsoffset,
-          indexoffset,
+          oink(fromptroffset, __LINE__),
+          oink(tagsoffset, __LINE__),
+          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth,
@@ -5514,9 +5643,9 @@ namespace awkward {
           fromptr,
           fromtags,
           fromindex,
-          fromptroffset,
-          tagsoffset,
-          indexoffset,
+          oink(fromptroffset, __LINE__),
+          oink(tagsoffset, __LINE__),
+          oink(indexoffset, __LINE__),
           tolength,
           fromlength,
           fromwidth,
@@ -5544,7 +5673,7 @@ namespace awkward {
         return awkward_Identities32_extend(
           toptr,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           fromlength,
           tolength);
       }
@@ -5570,7 +5699,7 @@ namespace awkward {
         return awkward_Identities64_extend(
           toptr,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           fromlength,
           tolength);
       }
@@ -5599,9 +5728,9 @@ namespace awkward {
         return awkward_ListArray32_num_64(
           tonum,
           fromstarts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           fromstops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5611,9 +5740,9 @@ namespace awkward {
         return (*awkward_cuda_ListArray32_num_64_t)(
           tonum,
           fromstarts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           fromstops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length);
       }
       else {
@@ -5634,9 +5763,9 @@ namespace awkward {
         return awkward_ListArrayU32_num_64(
           tonum,
           fromstarts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           fromstops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5646,9 +5775,9 @@ namespace awkward {
         return (*awkward_cuda_ListArrayU32_num_64_t)(
           tonum,
           fromstarts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           fromstops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length);
       }
       else {
@@ -5669,9 +5798,9 @@ namespace awkward {
         return awkward_ListArray64_num_64(
           tonum,
           fromstarts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           fromstops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5681,9 +5810,9 @@ namespace awkward {
         return (*awkward_cuda_ListArray64_num_64_t)(
           tonum,
           fromstarts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           fromstops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length);
       }
       else {
@@ -5730,10 +5859,10 @@ namespace awkward {
         return awkward_ListOffsetArray32_flatten_offsets_64(
           tooffsets,
           outeroffsets,
-          outeroffsetsoffset,
+          oink(outeroffsetsoffset, __LINE__),
           outeroffsetslen,
           inneroffsets,
-          inneroffsetsoffset,
+          oink(inneroffsetsoffset, __LINE__),
           inneroffsetslen);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5760,10 +5889,10 @@ namespace awkward {
         return awkward_ListOffsetArrayU32_flatten_offsets_64(
           tooffsets,
           outeroffsets,
-          outeroffsetsoffset,
+          oink(outeroffsetsoffset, __LINE__),
           outeroffsetslen,
           inneroffsets,
-          inneroffsetsoffset,
+          oink(inneroffsetsoffset, __LINE__),
           inneroffsetslen);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5790,10 +5919,10 @@ namespace awkward {
         return awkward_ListOffsetArray64_flatten_offsets_64(
           tooffsets,
           outeroffsets,
-          outeroffsetsoffset,
+          oink(outeroffsetsoffset, __LINE__),
           outeroffsetslen,
           inneroffsets,
-          inneroffsetsoffset,
+          oink(inneroffsetsoffset, __LINE__),
           inneroffsetslen);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5820,10 +5949,10 @@ namespace awkward {
         return awkward_IndexedArray32_flatten_none2empty_64(
           outoffsets,
           outindex,
-          outindexoffset,
+          oink(outindexoffset, __LINE__),
           outindexlength,
           offsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5850,10 +5979,10 @@ namespace awkward {
         return awkward_IndexedArrayU32_flatten_none2empty_64(
           outoffsets,
           outindex,
-          outindexoffset,
+          oink(outindexoffset, __LINE__),
           outindexlength,
           offsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5880,10 +6009,10 @@ namespace awkward {
         return awkward_IndexedArray64_flatten_none2empty_64(
           outoffsets,
           outindex,
-          outindexoffset,
+          oink(outindexoffset, __LINE__),
           outindexlength,
           offsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -5911,9 +6040,9 @@ namespace awkward {
         return awkward_UnionArray32_flatten_length_64(
           total_length,
           fromtags,
-          fromtagsoffset,
+          oink(fromtagsoffset, __LINE__),
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length,
           offsetsraws,
           offsetsoffsets);
@@ -5943,9 +6072,9 @@ namespace awkward {
         return awkward_UnionArrayU32_flatten_length_64(
           total_length,
           fromtags,
-          fromtagsoffset,
+          oink(fromtagsoffset, __LINE__),
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length,
           offsetsraws,
           offsetsoffsets);
@@ -5975,9 +6104,9 @@ namespace awkward {
         return awkward_UnionArray64_flatten_length_64(
           total_length,
           fromtags,
-          fromtagsoffset,
+          oink(fromtagsoffset, __LINE__),
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length,
           offsetsraws,
           offsetsoffsets);
@@ -6011,9 +6140,9 @@ namespace awkward {
           toindex,
           tooffsets,
           fromtags,
-          fromtagsoffset,
+          oink(fromtagsoffset, __LINE__),
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length,
           offsetsraws,
           offsetsoffsets);
@@ -6047,9 +6176,9 @@ namespace awkward {
           toindex,
           tooffsets,
           fromtags,
-          fromtagsoffset,
+          oink(fromtagsoffset, __LINE__),
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length,
           offsetsraws,
           offsetsoffsets);
@@ -6083,9 +6212,9 @@ namespace awkward {
           toindex,
           tooffsets,
           fromtags,
-          fromtagsoffset,
+          oink(fromtagsoffset, __LINE__),
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length,
           offsetsraws,
           offsetsoffsets);
@@ -6112,7 +6241,7 @@ namespace awkward {
         return awkward_IndexedArray32_flatten_nextcarry_64(
           tocarry,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -6138,7 +6267,7 @@ namespace awkward {
         return awkward_IndexedArrayU32_flatten_nextcarry_64(
           tocarry,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -6164,7 +6293,7 @@ namespace awkward {
         return awkward_IndexedArray64_flatten_nextcarry_64(
           tocarry,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           lenindex,
           lencontent);
       }
@@ -6191,9 +6320,9 @@ namespace awkward {
         return awkward_IndexedArray32_overlay_mask8_to64(
           toindex,
           mask,
-          maskoffset,
+          oink(maskoffset, __LINE__),
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6219,9 +6348,9 @@ namespace awkward {
         return awkward_IndexedArrayU32_overlay_mask8_to64(
           toindex,
           mask,
-          maskoffset,
+          oink(maskoffset, __LINE__),
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6247,9 +6376,9 @@ namespace awkward {
         return awkward_IndexedArray64_overlay_mask8_to64(
           toindex,
           mask,
-          maskoffset,
+          oink(maskoffset, __LINE__),
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6273,7 +6402,7 @@ namespace awkward {
         return awkward_IndexedArray32_mask8(
           tomask,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6297,7 +6426,7 @@ namespace awkward {
         return awkward_IndexedArrayU32_mask8(
           tomask,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6321,7 +6450,7 @@ namespace awkward {
         return awkward_IndexedArray64_mask8(
           tomask,
           fromindex,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6345,7 +6474,7 @@ namespace awkward {
         return awkward_ByteMaskedArray_mask8(
           tomask,
           frommask,
-          maskoffset,
+          oink(maskoffset, __LINE__),
           length,
           validwhen);
       }
@@ -6390,10 +6519,10 @@ namespace awkward {
         return awkward_IndexedArray32_simplify32_to64(
           toindex,
           outerindex,
-          outeroffset,
+          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          inneroffset,
+          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6420,10 +6549,10 @@ namespace awkward {
         return awkward_IndexedArrayU32_simplify32_to64(
           toindex,
           outerindex,
-          outeroffset,
+          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          inneroffset,
+          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6450,10 +6579,10 @@ namespace awkward {
         return awkward_IndexedArray64_simplify32_to64(
           toindex,
           outerindex,
-          outeroffset,
+          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          inneroffset,
+          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6480,10 +6609,10 @@ namespace awkward {
         return awkward_IndexedArray32_simplifyU32_to64(
           toindex,
           outerindex,
-          outeroffset,
+          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          inneroffset,
+          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6510,10 +6639,10 @@ namespace awkward {
         return awkward_IndexedArrayU32_simplifyU32_to64(
           toindex,
           outerindex,
-          outeroffset,
+          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          inneroffset,
+          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6540,10 +6669,10 @@ namespace awkward {
         return awkward_IndexedArray64_simplifyU32_to64(
           toindex,
           outerindex,
-          outeroffset,
+          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          inneroffset,
+          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6570,10 +6699,10 @@ namespace awkward {
         return awkward_IndexedArray32_simplify64_to64(
           toindex,
           outerindex,
-          outeroffset,
+          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          inneroffset,
+          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6600,10 +6729,10 @@ namespace awkward {
         return awkward_IndexedArrayU32_simplify64_to64(
           toindex,
           outerindex,
-          outeroffset,
+          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          inneroffset,
+          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6630,10 +6759,10 @@ namespace awkward {
         return awkward_IndexedArray64_simplify64_to64(
           toindex,
           outerindex,
-          outeroffset,
+          oink(outeroffset, __LINE__),
           outerlength,
           innerindex,
-          inneroffset,
+          oink(inneroffset, __LINE__),
           innerlength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6660,8 +6789,8 @@ namespace awkward {
           tooffsets,
           fromstarts,
           fromstops,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6688,8 +6817,8 @@ namespace awkward {
           tooffsets,
           fromstarts,
           fromstops,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6716,8 +6845,8 @@ namespace awkward {
           tooffsets,
           fromstarts,
           fromstops,
-          startsoffset,
-          stopsoffset,
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6762,7 +6891,7 @@ namespace awkward {
         return awkward_ListOffsetArray32_compact_offsets_64(
           tooffsets,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6786,7 +6915,7 @@ namespace awkward {
         return awkward_ListOffsetArrayU32_compact_offsets_64(
           tooffsets,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6810,7 +6939,7 @@ namespace awkward {
         return awkward_ListOffsetArray64_compact_offsets_64(
           tooffsets,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6839,12 +6968,12 @@ namespace awkward {
         return awkward_ListArray32_broadcast_tooffsets_64(
           tocarry,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           offsetslength,
           fromstarts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           fromstops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           lencontent);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6873,12 +7002,12 @@ namespace awkward {
         return awkward_ListArrayU32_broadcast_tooffsets_64(
           tocarry,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           offsetslength,
           fromstarts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           fromstops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           lencontent);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6907,12 +7036,12 @@ namespace awkward {
         return awkward_ListArray64_broadcast_tooffsets_64(
           tocarry,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           offsetslength,
           fromstarts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           fromstops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           lencontent);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6934,7 +7063,7 @@ namespace awkward {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_RegularArray_broadcast_tooffsets_64(
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           offsetslength,
           size);
       }
@@ -6958,7 +7087,7 @@ namespace awkward {
         return awkward_RegularArray_broadcast_tooffsets_size1_64(
           tocarry,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -6982,7 +7111,7 @@ namespace awkward {
         return awkward_ListOffsetArray32_toRegularArray(
           size,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7006,7 +7135,7 @@ namespace awkward {
         return awkward_ListOffsetArrayU32_toRegularArray(
           size,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7030,7 +7159,7 @@ namespace awkward {
         return awkward_ListOffsetArray64_toRegularArray(
           size,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           offsetslength);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7056,7 +7185,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7082,7 +7211,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7108,7 +7237,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7134,7 +7263,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7160,7 +7289,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7186,7 +7315,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7212,7 +7341,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7238,7 +7367,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7264,7 +7393,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7290,7 +7419,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7316,7 +7445,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7342,7 +7471,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7368,7 +7497,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7394,7 +7523,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7420,7 +7549,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7446,7 +7575,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7472,7 +7601,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7498,7 +7627,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7524,7 +7653,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7550,7 +7679,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7576,7 +7705,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7602,7 +7731,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7628,7 +7757,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7654,7 +7783,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7680,7 +7809,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7706,7 +7835,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7732,7 +7861,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7758,7 +7887,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7784,7 +7913,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7810,7 +7939,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7836,7 +7965,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7862,7 +7991,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7888,7 +8017,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7914,7 +8043,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7940,7 +8069,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7966,7 +8095,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -7992,7 +8121,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8018,7 +8147,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8044,7 +8173,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8070,7 +8199,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8096,7 +8225,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8122,7 +8251,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8148,7 +8277,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8174,7 +8303,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8200,7 +8329,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8226,7 +8355,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8252,7 +8381,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8278,7 +8407,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8304,7 +8433,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8330,7 +8459,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8356,7 +8485,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8382,7 +8511,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8408,7 +8537,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8434,7 +8563,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8460,7 +8589,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8486,7 +8615,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8512,7 +8641,7 @@ namespace awkward {
           toptr,
           tooffset,
           fromptr,
-          fromoffset,
+          oink(fromoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8545,9 +8674,9 @@ namespace awkward {
           tostops,
           tostopsoffset,
           fromstarts,
-          fromstartsoffset,
+          oink(fromstartsoffset, __LINE__),
           fromstops,
-          fromstopsoffset,
+          oink(fromstopsoffset, __LINE__),
           length,
           base);
       }
@@ -8581,9 +8710,9 @@ namespace awkward {
           tostops,
           tostopsoffset,
           fromstarts,
-          fromstartsoffset,
+          oink(fromstartsoffset, __LINE__),
           fromstops,
-          fromstopsoffset,
+          oink(fromstopsoffset, __LINE__),
           length,
           base);
       }
@@ -8617,9 +8746,9 @@ namespace awkward {
           tostops,
           tostopsoffset,
           fromstarts,
-          fromstartsoffset,
+          oink(fromstartsoffset, __LINE__),
           fromstops,
-          fromstopsoffset,
+          oink(fromstopsoffset, __LINE__),
           length,
           base);
       }
@@ -8647,7 +8776,7 @@ namespace awkward {
           toindex,
           toindexoffset,
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length,
           base);
       }
@@ -8675,7 +8804,7 @@ namespace awkward {
           toindex,
           toindexoffset,
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length,
           base);
       }
@@ -8703,7 +8832,7 @@ namespace awkward {
           toindex,
           toindexoffset,
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length,
           base);
       }
@@ -8753,7 +8882,7 @@ namespace awkward {
           totags,
           totagsoffset,
           fromtags,
-          fromtagsoffset,
+          oink(fromtagsoffset, __LINE__),
           length,
           base);
       }
@@ -8780,7 +8909,7 @@ namespace awkward {
           toindex,
           toindexoffset,
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8806,7 +8935,7 @@ namespace awkward {
           toindex,
           toindexoffset,
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8832,7 +8961,7 @@ namespace awkward {
           toindex,
           toindexoffset,
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -8912,13 +9041,13 @@ namespace awkward {
           totags,
           toindex,
           outertags,
-          outertagsoffset,
+          oink(outertagsoffset, __LINE__),
           outerindex,
-          outerindexoffset,
+          oink(outerindexoffset, __LINE__),
           innertags,
-          innertagsoffset,
+          oink(innertagsoffset, __LINE__),
           innerindex,
-          innerindexoffset,
+          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -8958,13 +9087,13 @@ namespace awkward {
           totags,
           toindex,
           outertags,
-          outertagsoffset,
+          oink(outertagsoffset, __LINE__),
           outerindex,
-          outerindexoffset,
+          oink(outerindexoffset, __LINE__),
           innertags,
-          innertagsoffset,
+          oink(innertagsoffset, __LINE__),
           innerindex,
-          innerindexoffset,
+          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9004,13 +9133,13 @@ namespace awkward {
           totags,
           toindex,
           outertags,
-          outertagsoffset,
+          oink(outertagsoffset, __LINE__),
           outerindex,
-          outerindexoffset,
+          oink(outerindexoffset, __LINE__),
           innertags,
-          innertagsoffset,
+          oink(innertagsoffset, __LINE__),
           innerindex,
-          innerindexoffset,
+          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9050,13 +9179,13 @@ namespace awkward {
           totags,
           toindex,
           outertags,
-          outertagsoffset,
+          oink(outertagsoffset, __LINE__),
           outerindex,
-          outerindexoffset,
+          oink(outerindexoffset, __LINE__),
           innertags,
-          innertagsoffset,
+          oink(innertagsoffset, __LINE__),
           innerindex,
-          innerindexoffset,
+          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9096,13 +9225,13 @@ namespace awkward {
           totags,
           toindex,
           outertags,
-          outertagsoffset,
+          oink(outertagsoffset, __LINE__),
           outerindex,
-          outerindexoffset,
+          oink(outerindexoffset, __LINE__),
           innertags,
-          innertagsoffset,
+          oink(innertagsoffset, __LINE__),
           innerindex,
-          innerindexoffset,
+          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9142,13 +9271,13 @@ namespace awkward {
           totags,
           toindex,
           outertags,
-          outertagsoffset,
+          oink(outertagsoffset, __LINE__),
           outerindex,
-          outerindexoffset,
+          oink(outerindexoffset, __LINE__),
           innertags,
-          innertagsoffset,
+          oink(innertagsoffset, __LINE__),
           innerindex,
-          innerindexoffset,
+          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9188,13 +9317,13 @@ namespace awkward {
           totags,
           toindex,
           outertags,
-          outertagsoffset,
+          oink(outertagsoffset, __LINE__),
           outerindex,
-          outerindexoffset,
+          oink(outerindexoffset, __LINE__),
           innertags,
-          innertagsoffset,
+          oink(innertagsoffset, __LINE__),
           innerindex,
-          innerindexoffset,
+          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9234,13 +9363,13 @@ namespace awkward {
           totags,
           toindex,
           outertags,
-          outertagsoffset,
+          oink(outertagsoffset, __LINE__),
           outerindex,
-          outerindexoffset,
+          oink(outerindexoffset, __LINE__),
           innertags,
-          innertagsoffset,
+          oink(innertagsoffset, __LINE__),
           innerindex,
-          innerindexoffset,
+          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9280,13 +9409,13 @@ namespace awkward {
           totags,
           toindex,
           outertags,
-          outertagsoffset,
+          oink(outertagsoffset, __LINE__),
           outerindex,
-          outerindexoffset,
+          oink(outerindexoffset, __LINE__),
           innertags,
-          innertagsoffset,
+          oink(innertagsoffset, __LINE__),
           innerindex,
-          innerindexoffset,
+          oink(innerindexoffset, __LINE__),
           towhich,
           innerwhich,
           outerwhich,
@@ -9321,9 +9450,9 @@ namespace awkward {
           totags,
           toindex,
           fromtags,
-          fromtagsoffset,
+          oink(fromtagsoffset, __LINE__),
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           towhich,
           fromwhich,
           length,
@@ -9357,9 +9486,9 @@ namespace awkward {
           totags,
           toindex,
           fromtags,
-          fromtagsoffset,
+          oink(fromtagsoffset, __LINE__),
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           towhich,
           fromwhich,
           length,
@@ -9393,9 +9522,9 @@ namespace awkward {
           totags,
           toindex,
           fromtags,
-          fromtagsoffset,
+          oink(fromtagsoffset, __LINE__),
           fromindex,
-          fromindexoffset,
+          oink(fromindexoffset, __LINE__),
           towhich,
           fromwhich,
           length,
@@ -9423,9 +9552,9 @@ namespace awkward {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray32_validity(
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           stops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length,
           lencontent);
       }
@@ -9451,9 +9580,9 @@ namespace awkward {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArrayU32_validity(
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           stops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length,
           lencontent);
       }
@@ -9479,9 +9608,9 @@ namespace awkward {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListArray64_validity(
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           stops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length,
           lencontent);
       }
@@ -9506,7 +9635,7 @@ namespace awkward {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray32_validity(
           index,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length,
           lencontent,
           isoption);
@@ -9532,7 +9661,7 @@ namespace awkward {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArrayU32_validity(
           index,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length,
           lencontent,
           isoption);
@@ -9558,7 +9687,7 @@ namespace awkward {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray64_validity(
           index,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length,
           lencontent,
           isoption);
@@ -9586,9 +9715,9 @@ namespace awkward {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_32_validity(
           tags,
-          tagsoffset,
+          oink(tagsoffset, __LINE__),
           index,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length,
           numcontents,
           lencontents);
@@ -9616,9 +9745,9 @@ namespace awkward {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_U32_validity(
           tags,
-          tagsoffset,
+          oink(tagsoffset, __LINE__),
           index,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length,
           numcontents,
           lencontents);
@@ -9646,9 +9775,9 @@ namespace awkward {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray8_64_validity(
           tags,
-          tagsoffset,
+          oink(tagsoffset, __LINE__),
           index,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           length,
           numcontents,
           lencontents);
@@ -9674,7 +9803,7 @@ namespace awkward {
         return awkward_UnionArray_fillna_from32_to64(
           toindex,
           fromindex,
-          offset,
+          oink(offset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -9698,7 +9827,7 @@ namespace awkward {
         return awkward_UnionArray_fillna_fromU32_to64(
           toindex,
           fromindex,
-          offset,
+          oink(offset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -9722,7 +9851,7 @@ namespace awkward {
         return awkward_UnionArray_fillna_from64_to64(
           toindex,
           fromindex,
-          offset,
+          oink(offset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -9838,8 +9967,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           lenstarts,
-          startsoffset,
-          stopsoffset);
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__));
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -9866,8 +9995,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           lenstarts,
-          startsoffset,
-          stopsoffset);
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__));
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -9894,8 +10023,8 @@ namespace awkward {
           fromstarts,
           fromstops,
           lenstarts,
-          startsoffset,
-          stopsoffset);
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__));
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -9924,8 +10053,8 @@ namespace awkward {
           fromstops,
           target,
           lenstarts,
-          startsoffset,
-          stopsoffset);
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__));
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -9954,8 +10083,8 @@ namespace awkward {
           fromstops,
           target,
           lenstarts,
-          startsoffset,
-          stopsoffset);
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__));
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -9984,8 +10113,8 @@ namespace awkward {
           fromstops,
           target,
           lenstarts,
-          startsoffset,
-          stopsoffset);
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__));
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -10018,8 +10147,8 @@ namespace awkward {
           tostops,
           target,
           length,
-          startsoffset,
-          stopsoffset);
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__));
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -10052,8 +10181,8 @@ namespace awkward {
           tostops,
           target,
           length,
-          startsoffset,
-          stopsoffset);
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__));
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -10086,8 +10215,8 @@ namespace awkward {
           tostops,
           target,
           length,
-          startsoffset,
-          stopsoffset);
+          oink(startsoffset, __LINE__),
+          oink(stopsoffset, __LINE__));
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -10111,7 +10240,7 @@ namespace awkward {
         return awkward_ListOffsetArray32_rpad_and_clip_axis1_64(
           toindex,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length,
           target);
       }
@@ -10163,7 +10292,7 @@ namespace awkward {
         return awkward_ListOffsetArray64_rpad_and_clip_axis1_64(
           toindex,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length,
           target);
       }
@@ -10190,7 +10319,7 @@ namespace awkward {
         return awkward_ListOffsetArray32_rpad_length_axis1(
           tooffsets,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           fromlength,
           length,
           tocount);
@@ -10218,7 +10347,7 @@ namespace awkward {
         return awkward_ListOffsetArrayU32_rpad_length_axis1(
           tooffsets,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           fromlength,
           length,
           tocount);
@@ -10246,7 +10375,7 @@ namespace awkward {
         return awkward_ListOffsetArray64_rpad_length_axis1(
           tooffsets,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           fromlength,
           length,
           tocount);
@@ -10273,7 +10402,7 @@ namespace awkward {
         return awkward_ListOffsetArray32_rpad_axis1_64(
           toindex,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           fromlength,
           target);
       }
@@ -10299,7 +10428,7 @@ namespace awkward {
         return awkward_ListOffsetArrayU32_rpad_axis1_64(
           toindex,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           fromlength,
           target);
       }
@@ -10325,7 +10454,7 @@ namespace awkward {
         return awkward_ListOffsetArray64_rpad_axis1_64(
           toindex,
           fromoffsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           fromlength,
           target);
       }
@@ -10369,7 +10498,7 @@ namespace awkward {
         return awkward_ListArray32_localindex_64(
           toindex,
           offsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10393,7 +10522,7 @@ namespace awkward {
         return awkward_ListArrayU32_localindex_64(
           toindex,
           offsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10417,7 +10546,7 @@ namespace awkward {
         return awkward_ListArray64_localindex_64(
           toindex,
           offsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10494,9 +10623,9 @@ namespace awkward {
           n,
           replacement,
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           stops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10528,9 +10657,9 @@ namespace awkward {
           n,
           replacement,
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           stops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10562,9 +10691,9 @@ namespace awkward {
           n,
           replacement,
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           stops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10598,9 +10727,9 @@ namespace awkward {
           n,
           replacement,
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           stops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10634,9 +10763,9 @@ namespace awkward {
           n,
           replacement,
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           stops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10670,9 +10799,9 @@ namespace awkward {
           n,
           replacement,
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           stops,
-          stopsoffset,
+          oink(stopsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -10727,9 +10856,9 @@ namespace awkward {
         return awkward_ByteMaskedArray_overlay_mask8(
           tomask,
           theirmask,
-          theirmaskoffset,
+          oink(theirmaskoffset, __LINE__),
           mymask,
-          mymaskoffset,
+          oink(mymaskoffset, __LINE__),
           length,
           validwhen);
       }
@@ -10755,7 +10884,7 @@ namespace awkward {
         return awkward_BitMaskedArray_to_ByteMaskedArray(
           tobytemask,
           frombitmask,
-          bitmaskoffset,
+          oink(bitmaskoffset, __LINE__),
           bitmasklength,
           validwhen,
           lsb_order);
@@ -10782,7 +10911,7 @@ namespace awkward {
         return awkward_BitMaskedArray_to_IndexedOptionArray64(
           toindex,
           frombitmask,
-          bitmaskoffset,
+          oink(bitmaskoffset, __LINE__),
           bitmasklength,
           validwhen,
           lsb_order);
@@ -10810,7 +10939,7 @@ namespace awkward {
         return awkward_reduce_count_64(
           toptr,
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -10838,9 +10967,9 @@ namespace awkward {
         return awkward_reduce_countnonzero_bool_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -10868,9 +10997,9 @@ namespace awkward {
         return awkward_reduce_countnonzero_uint8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -10898,9 +11027,9 @@ namespace awkward {
         return awkward_reduce_countnonzero_int8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -10928,9 +11057,9 @@ namespace awkward {
         return awkward_reduce_countnonzero_int16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -10958,9 +11087,9 @@ namespace awkward {
         return awkward_reduce_countnonzero_uint16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -10988,9 +11117,9 @@ namespace awkward {
         return awkward_reduce_countnonzero_int32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11018,9 +11147,9 @@ namespace awkward {
         return awkward_reduce_countnonzero_uint32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11048,9 +11177,9 @@ namespace awkward {
         return awkward_reduce_countnonzero_int64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11078,9 +11207,9 @@ namespace awkward {
         return awkward_reduce_countnonzero_uint64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11108,9 +11237,9 @@ namespace awkward {
         return awkward_reduce_countnonzero_float32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11138,9 +11267,9 @@ namespace awkward {
         return awkward_reduce_countnonzero_float64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11168,9 +11297,9 @@ namespace awkward {
         return awkward_reduce_sum_int64_bool_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11198,9 +11327,9 @@ namespace awkward {
         return awkward_reduce_sum_int64_int8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11228,9 +11357,9 @@ namespace awkward {
         return awkward_reduce_sum_uint64_uint8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11258,9 +11387,9 @@ namespace awkward {
         return awkward_reduce_sum_int64_int16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11288,9 +11417,9 @@ namespace awkward {
         return awkward_reduce_sum_uint64_uint16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11318,9 +11447,9 @@ namespace awkward {
         return awkward_reduce_sum_int64_int32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11348,9 +11477,9 @@ namespace awkward {
         return awkward_reduce_sum_uint64_uint32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11378,9 +11507,9 @@ namespace awkward {
         return awkward_reduce_sum_int64_int64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11408,9 +11537,9 @@ namespace awkward {
         return awkward_reduce_sum_uint64_uint64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11438,9 +11567,9 @@ namespace awkward {
         return awkward_reduce_sum_float32_float32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11468,9 +11597,9 @@ namespace awkward {
         return awkward_reduce_sum_float64_float64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11498,9 +11627,9 @@ namespace awkward {
         return awkward_reduce_sum_int32_bool_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11528,9 +11657,9 @@ namespace awkward {
         return awkward_reduce_sum_int32_int8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11558,9 +11687,9 @@ namespace awkward {
         return awkward_reduce_sum_uint32_uint8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11588,9 +11717,9 @@ namespace awkward {
         return awkward_reduce_sum_int32_int16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11618,9 +11747,9 @@ namespace awkward {
         return awkward_reduce_sum_uint32_uint16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11648,9 +11777,9 @@ namespace awkward {
         return awkward_reduce_sum_int32_int32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11678,9 +11807,9 @@ namespace awkward {
         return awkward_reduce_sum_uint32_uint32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11708,9 +11837,9 @@ namespace awkward {
         return awkward_reduce_sum_bool_bool_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11738,9 +11867,9 @@ namespace awkward {
         return awkward_reduce_sum_bool_int8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11768,9 +11897,9 @@ namespace awkward {
         return awkward_reduce_sum_bool_uint8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11798,9 +11927,9 @@ namespace awkward {
         return awkward_reduce_sum_bool_int16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11828,9 +11957,9 @@ namespace awkward {
         return awkward_reduce_sum_bool_uint16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11858,9 +11987,9 @@ namespace awkward {
         return awkward_reduce_sum_bool_int32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11888,9 +12017,9 @@ namespace awkward {
         return awkward_reduce_sum_bool_uint32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11918,9 +12047,9 @@ namespace awkward {
         return awkward_reduce_sum_bool_int64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11948,9 +12077,9 @@ namespace awkward {
         return awkward_reduce_sum_bool_uint64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -11978,9 +12107,9 @@ namespace awkward {
         return awkward_reduce_sum_bool_float32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12008,9 +12137,9 @@ namespace awkward {
         return awkward_reduce_sum_bool_float64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12038,9 +12167,9 @@ namespace awkward {
         return awkward_reduce_prod_int64_bool_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12068,9 +12197,9 @@ namespace awkward {
         return awkward_reduce_prod_int64_int8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12098,9 +12227,9 @@ namespace awkward {
         return awkward_reduce_prod_uint64_uint8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12128,9 +12257,9 @@ namespace awkward {
         return awkward_reduce_prod_int64_int16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12158,9 +12287,9 @@ namespace awkward {
         return awkward_reduce_prod_uint64_uint16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12188,9 +12317,9 @@ namespace awkward {
         return awkward_reduce_prod_int64_int32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12218,9 +12347,9 @@ namespace awkward {
         return awkward_reduce_prod_uint64_uint32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12248,9 +12377,9 @@ namespace awkward {
         return awkward_reduce_prod_int64_int64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12278,9 +12407,9 @@ namespace awkward {
         return awkward_reduce_prod_uint64_uint64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12308,9 +12437,9 @@ namespace awkward {
         return awkward_reduce_prod_float32_float32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12338,9 +12467,9 @@ namespace awkward {
         return awkward_reduce_prod_float64_float64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12368,9 +12497,9 @@ namespace awkward {
         return awkward_reduce_prod_int32_bool_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12398,9 +12527,9 @@ namespace awkward {
         return awkward_reduce_prod_int32_int8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12428,9 +12557,9 @@ namespace awkward {
         return awkward_reduce_prod_uint32_uint8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12458,9 +12587,9 @@ namespace awkward {
         return awkward_reduce_prod_int32_int16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12488,9 +12617,9 @@ namespace awkward {
         return awkward_reduce_prod_uint32_uint16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12518,9 +12647,9 @@ namespace awkward {
         return awkward_reduce_prod_int32_int32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12548,9 +12677,9 @@ namespace awkward {
         return awkward_reduce_prod_uint32_uint32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12578,9 +12707,9 @@ namespace awkward {
         return awkward_reduce_prod_bool_bool_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12608,9 +12737,9 @@ namespace awkward {
         return awkward_reduce_prod_bool_int8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12638,9 +12767,9 @@ namespace awkward {
         return awkward_reduce_prod_bool_uint8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12668,9 +12797,9 @@ namespace awkward {
         return awkward_reduce_prod_bool_int16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12698,9 +12827,9 @@ namespace awkward {
         return awkward_reduce_prod_bool_uint16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12728,9 +12857,9 @@ namespace awkward {
         return awkward_reduce_prod_bool_int32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12758,9 +12887,9 @@ namespace awkward {
         return awkward_reduce_prod_bool_uint32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12788,9 +12917,9 @@ namespace awkward {
         return awkward_reduce_prod_bool_int64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12818,9 +12947,9 @@ namespace awkward {
         return awkward_reduce_prod_bool_uint64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12848,9 +12977,9 @@ namespace awkward {
         return awkward_reduce_prod_bool_float32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12878,9 +13007,9 @@ namespace awkward {
         return awkward_reduce_prod_bool_float64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -12909,9 +13038,9 @@ namespace awkward {
         return awkward_reduce_min_int8_int8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -12941,9 +13070,9 @@ namespace awkward {
         return awkward_reduce_min_uint8_uint8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -12973,9 +13102,9 @@ namespace awkward {
         return awkward_reduce_min_int16_int16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13005,9 +13134,9 @@ namespace awkward {
         return awkward_reduce_min_uint16_uint16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13037,9 +13166,9 @@ namespace awkward {
         return awkward_reduce_min_int32_int32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13069,9 +13198,9 @@ namespace awkward {
         return awkward_reduce_min_uint32_uint32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13101,9 +13230,9 @@ namespace awkward {
         return awkward_reduce_min_int64_int64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13133,9 +13262,9 @@ namespace awkward {
         return awkward_reduce_min_uint64_uint64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13165,9 +13294,9 @@ namespace awkward {
         return awkward_reduce_min_float32_float32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13197,9 +13326,9 @@ namespace awkward {
         return awkward_reduce_min_float64_float64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13229,9 +13358,9 @@ namespace awkward {
         return awkward_reduce_max_int8_int8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13261,9 +13390,9 @@ namespace awkward {
         return awkward_reduce_max_uint8_uint8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13293,9 +13422,9 @@ namespace awkward {
         return awkward_reduce_max_int16_int16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13325,9 +13454,9 @@ namespace awkward {
         return awkward_reduce_max_uint16_uint16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13357,9 +13486,9 @@ namespace awkward {
         return awkward_reduce_max_int32_int32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13389,9 +13518,9 @@ namespace awkward {
         return awkward_reduce_max_uint32_uint32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13421,9 +13550,9 @@ namespace awkward {
         return awkward_reduce_max_int64_int64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13453,9 +13582,9 @@ namespace awkward {
         return awkward_reduce_max_uint64_uint64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13485,9 +13614,9 @@ namespace awkward {
         return awkward_reduce_max_float32_float32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13517,9 +13646,9 @@ namespace awkward {
         return awkward_reduce_max_float64_float64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength,
           identity);
@@ -13550,11 +13679,11 @@ namespace awkward {
         return awkward_reduce_argmin_bool_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13584,11 +13713,11 @@ namespace awkward {
         return awkward_reduce_argmin_int8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13618,11 +13747,11 @@ namespace awkward {
         return awkward_reduce_argmin_uint8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13652,11 +13781,11 @@ namespace awkward {
         return awkward_reduce_argmin_int16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13686,11 +13815,11 @@ namespace awkward {
         return awkward_reduce_argmin_uint16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13720,11 +13849,11 @@ namespace awkward {
         return awkward_reduce_argmin_int32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13754,11 +13883,11 @@ namespace awkward {
         return awkward_reduce_argmin_uint32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13788,11 +13917,11 @@ namespace awkward {
         return awkward_reduce_argmin_int64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13822,11 +13951,11 @@ namespace awkward {
         return awkward_reduce_argmin_uint64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13856,11 +13985,11 @@ namespace awkward {
         return awkward_reduce_argmin_float32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13890,11 +14019,11 @@ namespace awkward {
         return awkward_reduce_argmin_float64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13925,11 +14054,11 @@ namespace awkward {
         return awkward_reduce_argmax_bool_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13959,11 +14088,11 @@ namespace awkward {
         return awkward_reduce_argmax_int8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -13993,11 +14122,11 @@ namespace awkward {
         return awkward_reduce_argmax_uint8_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14027,11 +14156,11 @@ namespace awkward {
         return awkward_reduce_argmax_int16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14061,11 +14190,11 @@ namespace awkward {
         return awkward_reduce_argmax_uint16_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14095,11 +14224,11 @@ namespace awkward {
         return awkward_reduce_argmax_int32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14129,11 +14258,11 @@ namespace awkward {
         return awkward_reduce_argmax_uint32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14163,11 +14292,11 @@ namespace awkward {
         return awkward_reduce_argmax_int64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14197,11 +14326,11 @@ namespace awkward {
         return awkward_reduce_argmax_uint64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14231,11 +14360,11 @@ namespace awkward {
         return awkward_reduce_argmax_float32_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14265,11 +14394,11 @@ namespace awkward {
         return awkward_reduce_argmax_float64_64(
           toptr,
           fromptr,
-          fromptroffset,
+          oink(fromptroffset, __LINE__),
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14314,7 +14443,7 @@ namespace awkward {
           globalstart,
           globalstop,
           offsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14339,7 +14468,7 @@ namespace awkward {
           maxcount,
           offsetscopy,
           offsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14377,10 +14506,10 @@ namespace awkward {
           distinctslen,
           offsetscopy,
           offsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length,
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           maxcount);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14424,7 +14553,7 @@ namespace awkward {
         return awkward_ListOffsetArray_reduce_nonlocal_findgaps_64(
           gaps,
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14474,7 +14603,7 @@ namespace awkward {
         return awkward_ListOffsetArray_reduce_local_nextparents_64(
           nextparents,
           offsets,
-          offsetsoffset,
+          oink(offsetsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14498,7 +14627,7 @@ namespace awkward {
         return awkward_ListOffsetArray_reduce_local_outoffsets_64(
           outoffsets,
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14529,9 +14658,9 @@ namespace awkward {
           nextparents,
           outindex,
           index,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14561,9 +14690,9 @@ namespace awkward {
           nextparents,
           outindex,
           index,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14593,9 +14722,9 @@ namespace awkward {
           nextparents,
           outindex,
           index,
-          indexoffset,
+          oink(indexoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -14619,7 +14748,7 @@ namespace awkward {
         return awkward_IndexedArray_reduce_next_fix_offsets_64(
           outoffsets,
           starts,
-          startsoffset,
+          oink(startsoffset, __LINE__),
           startslength,
           outindexlength);
       }
@@ -14644,7 +14773,7 @@ namespace awkward {
         return awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(
           toptr,
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           lenparents,
           outlength);
       }
@@ -14675,9 +14804,9 @@ namespace awkward {
           nextparents,
           outindex,
           mask,
-          maskoffset,
+          oink(maskoffset, __LINE__),
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           length,
           validwhen);
       }
@@ -15484,10 +15613,10 @@ namespace awkward {
           tocarry,
           starts,
           parents,
-          parentsoffset,
+          oink(parentsoffset, __LINE__),
           parentslength,
           nextparents,
-          nextparentsoffset);
+          oink(nextparentsoffset, __LINE__));
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(

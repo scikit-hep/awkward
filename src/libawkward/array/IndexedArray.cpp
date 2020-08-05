@@ -2378,14 +2378,14 @@ namespace awkward {
       Index64 reducedstops(length() - numnull);
       struct Error err = kernel::MaskedArray_getitem_next_jagged_project<T>(
         kernel::lib::cpu,   // DERIVE
-        outindex.ptr().get(),
-        outindex.offset(),
-        slicestarts.ptr().get(),
-        slicestarts.offset(),
-        slicestops.ptr().get(),
-        slicestops.offset(),
-        reducedstarts.ptr().get(),
-        reducedstops.ptr().get(),
+        outindex.data(),
+        0,   // DROP
+        slicestarts.data(),
+        0,   // DROP
+        slicestops.data(),
+        0,   // DROP
+        reducedstarts.data(),
+        reducedstops.data(),
         length());
       util::handle_error(err, classname(), identities_.get());
 
@@ -2421,8 +2421,8 @@ namespace awkward {
     struct Error err1 = kernel::IndexedArray_numnull<T>(
       kernel::lib::cpu,   // DERIVE
       &numnull,
-      index_.ptr().get(),
-      index_.offset(),
+      index_.data(),
+      0,   // DROP
       index_.length());
     util::handle_error(err1, classname(), identities_.get());
 
@@ -2431,10 +2431,10 @@ namespace awkward {
     struct Error err2 =
       kernel::IndexedArray_getitem_nextcarry_outindex_64<T>(
       kernel::lib::cpu,   // DERIVE
-      nextcarry.ptr().get(),
-      outindex.ptr().get(),
-      index_.ptr().get(),
-      index_.offset(),
+      nextcarry.data(),
+      outindex.data(),
+      index_.data(),
+      0,   // DROP
       index_.length(),
       content_.get()->length());
     util::handle_error(err2, classname(), identities_.get());

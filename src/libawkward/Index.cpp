@@ -229,13 +229,22 @@ namespace awkward {
   template <typename T>
   T
   IndexOf<T>::getitem_at_nowrap(int64_t at) const {
-    return kernel::index_getitem_at_nowrap<T>(ptr_lib(), ptr_.get(), offset_, at);
+    return kernel::index_getitem_at_nowrap<T>(
+      ptr_lib(),
+      data(),
+      0,   // DROP
+      at);
   }
 
   template <typename T>
   void
   IndexOf<T>::setitem_at_nowrap(int64_t at, T value) const {
-    kernel::index_setitem_at_nowrap<T>(ptr_lib(), ptr_.get(), offset_, at, value);
+    kernel::index_setitem_at_nowrap<T>(
+      ptr_lib(),
+      data(),
+      0,   // DROP
+      at,
+      value);
   }
 
   template <typename T>
