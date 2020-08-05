@@ -6,6 +6,7 @@
 
 #include "awkward/python/index.h"
 
+
 template <typename T>
 py::class_<ak::IndexOf<T>>
 make_IndexOf(const py::handle& m, const std::string& name) {
@@ -77,7 +78,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
           if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
             if(!py::dtype(array.attr("dtype")).equal(py::dtype::of<T>())) {
                 throw std::invalid_argument(name + std::string(
-                  " must be built from a CuPy ") +
+                  " arg0: must be a ") +
                   py::cast<std::string>(py::str(py::dtype::of<T>())) +
                   std::string(" array"));
             }
@@ -100,7 +101,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
             std::vector<int64_t> shape = pytuples_to_vector<int64_t>(array.attr("shape"));
 
             return ak::IndexOf<T>(std::shared_ptr<T>(reinterpret_cast<T*>(ptr),
-                                                     pyobject_deleter<T>(array.ptr())),
+                                                           pyobject_deleter<T>(array.ptr())),
                                   0,
                                   (int64_t)shape[0],
                                   kernel::Lib::cuda_kernels);
@@ -128,15 +129,17 @@ make_IndexOf(const py::handle& m, const std::string& name) {
             cupy_memoryptr,
           pybind11::make_tuple(py::cast<ssize_t>(sizeof(T))));
 
-          return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")(py::module::import("cupy").attr("ndarray")(
-            pybind11::make_tuple(py::cast<ssize_t>(cuda_index.length())),
-            py::format_descriptor<T>::format(),
-            cupy_memoryptr,
-            pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
+          return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
+            (py::module::import("cupy").attr("ndarray")(
+                pybind11::make_tuple(py::cast<ssize_t>(cuda_index.length())),
+                py::format_descriptor<T>::format(),
+                cupy_memoryptr,
+                pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
         }
-//        else if(ptr_lib == "cpu") {
-//          return self.copy_to(kernel::Lib::cpu_kernels);
-//        }
+        else if(ptr_lib == "cpu") {
+          ak::IndexOf<T> cuda_arr = self.copy_to(kernel::Lib::cpu_kernels) ;
+          return py::cast<ak::IndexOf<T>>(cuda_arr);
+        }
         else {
           throw std::invalid_argument("Invalid kernel specified, valid kernels are cpu and cuda");
         }
