@@ -338,7 +338,7 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       &size,
       tags.data(),
-      0,   // DROP
+      999,   // DROP
       lentags);
     util::handle_error(err1, "UnionArray", nullptr);
     IndexOf<I> current(size);
@@ -349,7 +349,7 @@ namespace awkward {
       current.data(),
       size,
       tags.data(),
-      0,   // DROP
+      999,   // DROP
       lentags);
     util::handle_error(err2, "UnionArray", nullptr);
     return outindex;
@@ -436,9 +436,9 @@ namespace awkward {
       &lenout,
       tmpcarry.data(),
       tags_.data(),
-      0,   // DROP
+      999,   // DROP
       index_.data(),
-      0,   // DROP
+      999,   // DROP
       lentags,
       index);
     util::handle_error(err, classname(), identities_.get());
@@ -475,13 +475,13 @@ namespace awkward {
                 tags.data(),
                 index.data(),
                 tags_.data(),
-                0,   // DROP
+                999,   // DROP
                 index_.data(),
-                0,   // DROP
+                999,   // DROP
                 innertags.data(),
-                0,   // DROP
+                999,   // DROP
                 innerindex.data(),
-                0,   // DROP
+                999,   // DROP
                 (int64_t)k,
                 (int64_t)j,
                 (int64_t)i,
@@ -499,13 +499,13 @@ namespace awkward {
               tags.data(),
               index.data(),
               tags_.data(),
-              0,   // DROP
+              999,   // DROP
               index_.data(),
-              0,   // DROP
+              999,   // DROP
               innertags.data(),
-              0,   // DROP
+              999,   // DROP
               innerindex.data(),
-              0,   // DROP
+              999,   // DROP
               (int64_t)contents.size(),
               (int64_t)j,
               (int64_t)i,
@@ -530,13 +530,13 @@ namespace awkward {
                 tags.data(),
                 index.data(),
                 tags_.data(),
-                0,   // DROP
+                999,   // DROP
                 index_.data(),
-                0,   // DROP
+                999,   // DROP
                 innertags.data(),
-                0,   // DROP
+                999,   // DROP
                 innerindex.data(),
-                0,   // DROP
+                999,   // DROP
                 (int64_t)k,
                 (int64_t)j,
                 (int64_t)i,
@@ -554,13 +554,13 @@ namespace awkward {
               tags.data(),
               index.data(),
               tags_.data(),
-              0,   // DRop
+              999,   // DRop
               index_.data(),
-              0,   // DROP
+              999,   // DROP
               innertags.data(),
-              0,   // DROP
+              999,   // DROP
               innerindex.data(),
-              0,   // DROP
+              999,   // DROP
               (int64_t)contents.size(),
               (int64_t)j,
               (int64_t)i,
@@ -585,13 +585,13 @@ namespace awkward {
                 tags.data(),
                 index.data(),
                 tags_.data(),
-                0,   // DROP
+                999,   // DROP
                 index_.data(),
-                0,   // DROP
+                999,   // DROP
                 innertags.data(),
-                0,   // DROP
+                999,   // DROP
                 innerindex.data(),
-                0,   // DROP
+                999,   // DROP
                 (int64_t)k,
                 (int64_t)j,
                 (int64_t)i,
@@ -609,13 +609,13 @@ namespace awkward {
               tags.data(),
               index.data(),
               tags_.data(),
-              0,   // DROP
+              999,   // DROP
               index_.data(),
-              0,   // DROP
+              999,   // DROP
               innertags.data(),
-              0,   // DROP
+              999,   // DROP
               innerindex.data(),
-              0,   // DROP
+              999,   // DROP
               (int64_t)contents.size(),
               (int64_t)j,
               (int64_t)i,
@@ -635,9 +635,9 @@ namespace awkward {
               tags.data(),
               index.data(),
               tags_.data(),
-              0,   // DROP
+              999,   // DROP
               index_.data(),
-              0,   // DROP
+              999,   // DROP
               (int64_t)k,
               (int64_t)i,
               len,
@@ -654,9 +654,9 @@ namespace awkward {
             tags.data(),
             index.data(),
             tags_.data(),
-            0,   // DROP
+            999,   // DROP
             index_.data(),
-            0,   // DROP
+            999,   // DROP
             (int64_t)contents.size(),
             (int64_t)i,
             len,
@@ -783,9 +783,9 @@ namespace awkward {
             rawidentities->data(),
             tags_.data(),
             index_.data(),
-            0,   // DROP
-            0,   // DROP
-            0,   // DROP
+            999,   // DROP
+            999,   // DROP
+            999,   // DROP
             content.get()->length(),
             length(),
             rawidentities->width(),
@@ -815,9 +815,9 @@ namespace awkward {
             rawidentities->data(),
             tags_.data(),
             index_.data(),
-            0,   // DROP
-            0,   // DROP
-            0,   // DROP
+            999,   // DROP
+            999,   // DROP
+            999,   // DROP
             content.get()->length(),
             length(),
             rawidentities->width(),
@@ -1168,7 +1168,7 @@ namespace awkward {
       nexttags.data(),
       tags_.data(),
       carry.data(),
-      0,   // DROP
+      999,   // DROP
       lentags,
       lencarry);
     util::handle_error(err1, classname(), identities_.get());
@@ -1178,7 +1178,7 @@ namespace awkward {
       nextindex.data(),
       index_.data(),
       carry.data(),
-      0,   // DROP
+      999,   // DROP
       lencarry);
     util::handle_error(err2, classname(), identities_.get());
     IdentitiesPtr identities(nullptr);
@@ -1261,9 +1261,9 @@ namespace awkward {
     struct Error err = kernel::UnionArray_validity<T, I>(
       kernel::lib::cpu,   // DERIVE
       tags_.data(),
-      0,   // DROP
+      999,   // DROP
       index_.data(),
-      0,   // DROP
+      999,   // DROP
       tags_.length(),
       numcontents(),
       lencontents.data());
@@ -1342,9 +1342,9 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           &total_length,
           tags_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           tags_.length(),
           offsetsraws.data(),
           offsetsoffsets.data());   // DROP
@@ -1359,9 +1359,9 @@ namespace awkward {
           toindex.data(),
           tooffsets.data(),
           tags_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           tags_.length(),
           offsetsraws.data(),
           offsetsoffsets.data());   // DROP
@@ -1435,7 +1435,7 @@ namespace awkward {
         tags.data(),
         theirlength,
         reinterpret_cast<int8_t*>(tags_.data()),
-        0,   // DROP
+        999,   // DROP
         mylength,
         1);
       util::handle_error(err, classname(), identities_.get());
@@ -1450,7 +1450,7 @@ namespace awkward {
         index.data(),
         theirlength,
         reinterpret_cast<int32_t*>(index_.data()),
-        0,   // DROP
+        999,   // DROP
         mylength);
       util::handle_error(err, classname(), identities_.get());
     }
@@ -1460,7 +1460,7 @@ namespace awkward {
         index.data(),
         theirlength,
         reinterpret_cast<uint32_t*>(index_.data()),
-        0,   // DROP
+        999,   // DROP
         mylength);
       util::handle_error(err, classname(), identities_.get());
     }
@@ -1470,7 +1470,7 @@ namespace awkward {
         index.data(),
         theirlength,
         reinterpret_cast<int64_t*>(index_.data()),
-        0,   // DROP
+        999,   // DROP
         mylength);
       util::handle_error(err, classname(), identities_.get());
     }
@@ -1516,7 +1516,7 @@ namespace awkward {
         tags.data(),
         0,
         reinterpret_cast<int8_t*>(tags_.data()),
-        0,   // DROP
+        999,   // DROP
         mylength,
         0);
       util::handle_error(err, classname(), identities_.get());
@@ -1531,7 +1531,7 @@ namespace awkward {
         index.data(),
         0,
         reinterpret_cast<int32_t*>(index_.data()),
-        0,   // DROP
+        999,   // DROP
         mylength);
       util::handle_error(err, classname(), identities_.get());
     }
@@ -1541,7 +1541,7 @@ namespace awkward {
         index.data(),
         0,
         reinterpret_cast<uint32_t*>(index_.data()),
-        0,   // DROP
+        999,   // DROP
         mylength);
       util::handle_error(err, classname(), identities_.get());
     }
@@ -1551,7 +1551,7 @@ namespace awkward {
         index.data(),
         0,
         reinterpret_cast<int64_t*>(index_.data()),
-        0,   // DROP
+        999,   // DROP
         mylength);
       util::handle_error(err, classname(), identities_.get());
     }
@@ -1572,7 +1572,7 @@ namespace awkward {
         tags.data(),
         mylength,
         other_tags.data(),
-        0,   // DROP
+        999,   // DROP
         theirlength,
         numcontents());
       util::handle_error(err1,
@@ -1584,7 +1584,7 @@ namespace awkward {
         index.data(),
         mylength,
         other_index.data(),
-        0,   // DROP
+        999,   // DROP
         theirlength);
       util::handle_error(err2,
                          rawother->classname(),
@@ -1602,7 +1602,7 @@ namespace awkward {
         tags.data(),
         mylength,
         other_tags.data(),
-        0,   // DROP
+        999,   // DROP
         theirlength,
         numcontents());
       util::handle_error(err1,
@@ -1614,7 +1614,7 @@ namespace awkward {
         index.data(),
         mylength,
         other_index.data(),
-        0,   // DROP
+        999,   // DROP
         theirlength);
       util::handle_error(err2,
                          rawother->classname(),
@@ -1632,7 +1632,7 @@ namespace awkward {
         tags.data(),
         mylength,
         other_tags.data(),
-        0,   // DROP
+        999,   // DROP
         theirlength,
         numcontents());
       util::handle_error(err1,
@@ -1644,7 +1644,7 @@ namespace awkward {
         index.data(),
         mylength,
         other_index.data(),
-        0,   // DROP
+        999,   // DROP
         theirlength);
       util::handle_error(err2,
                          rawother->classname(),

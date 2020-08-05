@@ -1389,9 +1389,9 @@ namespace awkward {
 
     struct Error err = kernel::missing_repeat_64(
       kernel::lib::cpu,   // DERIVE
-      outindex.ptr().get(),
-      index.ptr().get(),
-      index.offset(),
+      outindex.data(),
+      index.data(),
+      999,   // DROP
       index.length(),
       length,
       raw->size());
@@ -1431,13 +1431,13 @@ namespace awkward {
     Index64 stops(index.length());
     struct Error err = kernel::Content_getitem_next_missing_jagged_getmaskstartstop(
       kernel::lib::cpu,   // DERIVE
-      index.ptr().get(),
-      index.offset(),
-      jagged->offsets().ptr().get(),
-      jagged->offsets().offset(),
-      outputmask.ptr().get(),
-      starts.ptr().get(),
-      stops.ptr().get(),
+      index.data(),
+      999,   // DROP
+      jagged->offsets().data(),
+      999,   // DROP
+      outputmask.data(),
+      starts.data(),
+      stops.data(),
       index.length());
     util::handle_error(err, that.get()->classname(), nullptr);
     ContentPtr tmp = content.get()->getitem_next_jagged(

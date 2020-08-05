@@ -366,7 +366,7 @@ namespace awkward {
         kernel::lib::cpu,   // DERIVE
         &numnull,
         index_.data(),
-        0,   // DROP
+        999,   // DROP
         index_.length());
       util::handle_error(err1, classname(), identities_.get());
 
@@ -375,7 +375,7 @@ namespace awkward {
         kernel::lib::cpu,   // DERIVE
         nextcarry.data(),
         index_.data(),
-        0,   // DROP
+        999,   // DROP
         index_.length(),
         content_.get()->length());
       util::handle_error(err2, classname(), identities_.get());
@@ -388,7 +388,7 @@ namespace awkward {
         kernel::lib::cpu,   // DERIVE
         nextcarry.data(),
         index_.data(),
-        0,   // DROP
+        999,   // DROP
         index_.length(),
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
@@ -413,9 +413,9 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       nextindex.data(),
       mask.data(),
-      0,   // DROP
+      999,   // DROP
       index_.data(),
-      0,   // DROP
+      999,   // DROP
       index_.length());
     util::handle_error(err, classname(), identities_.get());
 
@@ -432,7 +432,7 @@ namespace awkward {
         kernel::lib::cpu,   // DERIVE
         out.data(),
         index_.data(),
-        0,   // DROP
+        999,   // DROP
         index_.length());
       util::handle_error(err, classname(), identities_.get());
       return out;
@@ -460,10 +460,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -479,10 +479,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -498,10 +498,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -517,10 +517,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -536,10 +536,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -558,10 +558,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -580,10 +580,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -602,10 +602,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -626,10 +626,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedArray64>(identities_,
@@ -645,10 +645,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedArray64>(identities_,
@@ -664,10 +664,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedArray64>(identities_,
@@ -683,10 +683,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -702,10 +702,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -724,10 +724,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -746,10 +746,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -768,10 +768,10 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           result.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           inner.data(),
-          0,   // DROP
+          999,   // DROP
           inner.length());
         util::handle_error(err, classname(), identities_.get());
         return std::make_shared<IndexedOptionArray64>(identities_,
@@ -852,8 +852,8 @@ namespace awkward {
           rawsubidentitites->data(),
           rawidentities->data(),
           index_.data(),
-          0,   // DROP
-          0,   // DROP
+          999,   // DROP
+          999,   // DROP
           content_.get()->length(),
           length(),
           rawidentities->width());
@@ -881,8 +881,8 @@ namespace awkward {
           rawsubidentitites->data(),
           rawidentities->data(),
           index_.data(),
-          0,   // DROP
-          0,   // DROP
+          999,   // DROP
+          999,   // DROP
           content_.get()->length(),
           length(),
           rawidentities->width());
@@ -914,7 +914,7 @@ namespace awkward {
         reinterpret_cast<Identities32*>(newidentities.get());
       struct Error err = kernel::new_Identities<int32_t>(
         kernel::lib::cpu,   // DERIVE
-        rawidentities->ptr().get(),
+        rawidentities->data(),
         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
@@ -929,7 +929,7 @@ namespace awkward {
         reinterpret_cast<Identities64*>(newidentities.get());
       struct Error err = kernel::new_Identities<int64_t>(
         kernel::lib::cpu,   // DERIVE
-        rawidentities->ptr().get(),
+        rawidentities->data(),
         length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
@@ -1203,7 +1203,7 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           nextcarry.data(),
           index_.data(),
-          0,   // DROP
+          999,   // DROP
           index_.length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
@@ -1244,10 +1244,10 @@ namespace awkward {
     IndexOf<T> nextindex(carry.length());
     struct Error err = kernel::IndexedArray_getitem_carry_64<T>(
       kernel::lib::cpu,   // DERIVE
-      nextindex.ptr().get(),
-      index_.ptr().get(),
-      carry.ptr().get(),
-      index_.offset(),
+      nextindex.data(),
+      index_.data(),
+      carry.data(),
+      999,   // DROP
       index_.length(),
       carry.length());
     util::handle_error(err, classname(), identities_.get());
@@ -1296,8 +1296,8 @@ namespace awkward {
   IndexedArrayOf<T, ISOPTION>::validityerror(const std::string& path) const {
     struct Error err = kernel::IndexedArray_validity<T>(
       kernel::lib::cpu,   // DERIVE
-      index_.ptr().get(),
-      index_.offset(),
+      index_.data(),
+      999,   // DROP
       index_.length(),
       content_.get()->length(),
       ISOPTION);
@@ -1378,12 +1378,12 @@ namespace awkward {
         Index64 outoffsets(offsets.length() + numnull);
         struct Error err = kernel::IndexedArray_flatten_none2empty_64<T>(
           kernel::lib::cpu,   // DERIVE
-          outoffsets.ptr().get(),
-          outindex.ptr().get(),
-          outindex.offset(),
+          outoffsets.data(),
+          outindex.data(),
+          999,   // DROP
           outindex.length(),
-          offsets.ptr().get(),
-          offsets.offset(),
+          offsets.data(),
+          999,   // DROP
           offsets.length());
         util::handle_error(err, classname(), identities_.get());
         return std::pair<Index64, ContentPtr>(outoffsets, flattened);
@@ -1464,7 +1464,7 @@ namespace awkward {
     ContentPtr content = other.get()->merge(content_);
     struct Error err1 = kernel::IndexedArray_fill_to64_count(
       kernel::lib::cpu,   // DERIVE
-      index.ptr().get(),
+      index.data(),
       0,
       theirlength,
       0);
@@ -1474,10 +1474,10 @@ namespace awkward {
     if (std::is_same<T, int32_t>::value) {
       struct Error err2 = kernel::IndexedArray_fill<int32_t, int64_t>(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
+        index.data(),
         theirlength,
-        reinterpret_cast<int32_t*>(index_.ptr().get()),
-        index_.offset(),
+        reinterpret_cast<int32_t*>(index_.data()),
+        999,   // DROP
         mylength,
         mycontentlength);
       util::handle_error(err2, classname(), identities_.get());
@@ -1485,10 +1485,10 @@ namespace awkward {
     else if (std::is_same<T, uint32_t>::value) {
       struct Error err2 = kernel::IndexedArray_fill<uint32_t, int64_t>(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
+        index.data(),
         theirlength,
-        reinterpret_cast<uint32_t*>(index_.ptr().get()),
-        index_.offset(),
+        reinterpret_cast<uint32_t*>(index_.data()),
+        999,   // DROP
         mylength,
         mycontentlength);
       util::handle_error(err2, classname(), identities_.get());
@@ -1496,10 +1496,10 @@ namespace awkward {
     if (std::is_same<T, int64_t>::value) {
       struct Error err2 = kernel::IndexedArray_fill<int64_t, int64_t>(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
+        index.data(),
         theirlength,
-        reinterpret_cast<int64_t*>(index_.ptr().get()),
-        index_.offset(),
+        reinterpret_cast<int64_t*>(index_.data()),
+        999,   // DROP
         mylength,
         mycontentlength);
       util::handle_error(err2, classname(), identities_.get());
@@ -1549,10 +1549,10 @@ namespace awkward {
     if (std::is_same<T, int32_t>::value) {
       struct Error err = kernel::IndexedArray_fill<int32_t, int64_t>(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
+        index.data(),
         0,
-        reinterpret_cast<int32_t*>(index_.ptr().get()),
-        index_.offset(),
+        reinterpret_cast<int32_t*>(index_.data()),
+        999,   // DROP
         mylength,
         0);
       util::handle_error(err, classname(), identities_.get());
@@ -1560,10 +1560,10 @@ namespace awkward {
     else if (std::is_same<T, uint32_t>::value) {
       struct Error err = kernel::IndexedArray_fill<uint32_t, int64_t>(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
+        index.data(),
         0,
-        reinterpret_cast<uint32_t*>(index_.ptr().get()),
-        index_.offset(),
+        reinterpret_cast<uint32_t*>(index_.data()),
+        999,   // DROP
         mylength,
         0);
       util::handle_error(err, classname(), identities_.get());
@@ -1571,10 +1571,10 @@ namespace awkward {
     else if (std::is_same<T, int64_t>::value) {
       struct Error err = kernel::IndexedArray_fill<int64_t, int64_t>(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
+        index.data(),
         0,
-        reinterpret_cast<int64_t*>(index_.ptr().get()),
-        index_.offset(),
+        reinterpret_cast<int64_t*>(index_.data()),
+        999,   // DROP
         mylength,
         0);
       util::handle_error(err, classname(), identities_.get());
@@ -1606,10 +1606,10 @@ namespace awkward {
       Index32 other_index = rawother->index();
       struct Error err = kernel::IndexedArray_fill<int32_t, int64_t>(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
+        index.data(),
         mylength,
-        other_index.ptr().get(),
-        other_index.offset(),
+        other_index.data(),
+        999,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1622,10 +1622,10 @@ namespace awkward {
       IndexU32 other_index = rawother->index();
       struct Error err = kernel::IndexedArray_fill<uint32_t, int64_t>(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
+        index.data(),
         mylength,
-        other_index.ptr().get(),
-        other_index.offset(),
+        other_index.data(),
+        999,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1638,10 +1638,10 @@ namespace awkward {
       Index64 other_index = rawother->index();
       struct Error err = kernel::IndexedArray_fill<int64_t, int64_t>(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
+        index.data(),
         mylength,
-        other_index.ptr().get(),
-        other_index.offset(),
+        other_index.data(),
+        999,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1654,10 +1654,10 @@ namespace awkward {
       Index32 other_index = rawother->index();
       struct Error err = kernel::IndexedArray_fill<int32_t, int64_t>(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
+        index.data(),
         mylength,
-        other_index.ptr().get(),
-        other_index.offset(),
+        other_index.data(),
+        999,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1671,10 +1671,10 @@ namespace awkward {
       Index64 other_index = rawother->index();
       struct Error err = kernel::IndexedArray_fill<int64_t, int64_t>(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
+        index.data(),
         mylength,
-        other_index.ptr().get(),
-        other_index.offset(),
+        other_index.data(),
+        999,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1686,7 +1686,7 @@ namespace awkward {
       content = content_.get()->merge(replaced_other);
       struct Error err = kernel::IndexedArray_fill_to64_count(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
+        index.data(),
         mylength,
         theirlength,
         mycontentlength);
@@ -1715,8 +1715,8 @@ namespace awkward {
       struct Error err1 = kernel::IndexedArray_numnull<T>(
         kernel::lib::cpu,   // DERIVE
         &numnull,
-        index_.ptr().get(),
-        index_.offset(),
+        index_.data(),
+        999,   // DROP
         index_.length());
       util::handle_error(err1, classname(), identities_.get());
 
@@ -1724,10 +1724,10 @@ namespace awkward {
       Index64 outindex(length());
       struct Error err2 = kernel::IndexedArray_getitem_nextcarry_outindex_mask_64<T>(
         kernel::lib::cpu,   // DERIVE
-        nextcarry.ptr().get(),
-        outindex.ptr().get(),
-        index_.ptr().get(),
-        index_.offset(),
+        nextcarry.data(),
+        outindex.data(),
+        index_.data(),
+        999,   // DROP
         index_.length(),
         content_.get()->length());
       util::handle_error(err2, classname(), identities_.get());
@@ -1744,14 +1744,14 @@ namespace awkward {
           Index64 adjustednonzero(nonzero.length());
           struct Error err3 = kernel::IndexedArray_getitem_adjust_outindex_64(
             kernel::lib::cpu,   // DERIVE
-            originalmask.ptr().get(),
-            adjustedindex.ptr().get(),
-            adjustednonzero.ptr().get(),
-            outindex.ptr().get(),
-            outindex.offset(),
+            originalmask.data(),
+            adjustedindex.data(),
+            adjustednonzero.data(),
+            outindex.data(),
+            999,   // DROP
             outindex.length(),
-            nonzero.ptr().get(),
-            nonzero.offset(),
+            nonzero.data(),
+            999,   // DROP
             nonzero.length());
           util::handle_error(err3, classname(), nullptr);
 
@@ -1792,9 +1792,9 @@ namespace awkward {
       Index64 index(tags.length());
       struct Error err = kernel::UnionArray_fillna_64<T>(
         kernel::lib::cpu,   // DERIVE
-        index.ptr().get(),
-        index_.ptr().get(),
-        index_.offset(),
+        index.data(),
+        index_.data(),
+        999,   // DROP
         tags.length());
       util::handle_error(err, classname(), identities_.get());
 
@@ -1830,8 +1830,8 @@ namespace awkward {
         Index64 index(mask.length());
         struct Error err = kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
           kernel::lib::cpu,   // DERIVE
-          index.ptr().get(),
-          mask.ptr().get(),
+          index.data(),
+          mask.data(),
           mask.length());
         util::handle_error(err, classname(), identities_.get());
 
@@ -1870,8 +1870,8 @@ namespace awkward {
         Index64 index(mask.length());
         struct Error err = kernel::IndexedOptionArray_rpad_and_clip_mask_axis1_64(
           kernel::lib::cpu,   // DERIVE
-          index.ptr().get(),
-          mask.ptr().get(),
+          index.data(),
+          mask.data(),
           mask.length());
         util::handle_error(err, classname(), identities_.get());
 
@@ -1909,8 +1909,8 @@ namespace awkward {
     struct Error err1 = kernel::IndexedArray_numnull<T>(
       kernel::lib::cpu,   // DERIVE
       &numnull,
-      index_.ptr().get(),
-      index_.offset(),
+      index_.data(),
+      999,   // DROP
       index_.length());
     util::handle_error(err1, classname(), identities_.get());
 
@@ -1919,13 +1919,13 @@ namespace awkward {
     Index64 outindex(index_.length());
     struct Error err2 = kernel::IndexedArray_reduce_next_64<T>(
       kernel::lib::cpu,   // DERIVE
-      nextcarry.ptr().get(),
-      nextparents.ptr().get(),
-      outindex.ptr().get(),
-      index_.ptr().get(),
-      index_.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      nextcarry.data(),
+      nextparents.data(),
+      outindex.data(),
+      index_.data(),
+      999,   // DROP
+      parents.data(),
+      999,   // DROP
       index_.length());
     util::handle_error(err2, classname(), identities_.get());
 
@@ -1957,9 +1957,9 @@ namespace awkward {
         }
         struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
-          outoffsets.ptr().get(),
-          starts.ptr().get(),
-          starts.offset(),
+          outoffsets.data(),
+          starts.data(),
+          999,   // DROP
           starts.length(),
           outindex.length());
         util::handle_error(err3, classname(), identities_.get());
@@ -2071,8 +2071,8 @@ namespace awkward {
     struct Error err1 = kernel::IndexedArray_numnull<T>(
       kernel::lib::cpu,   // DERIVE
       &numnull,
-      index_.ptr().get(),
-      index_.offset(),
+      index_.data(),
+      999,   // DROP
       index_.length());
     util::handle_error(err1, classname(), identities_.get());
 
@@ -2081,13 +2081,13 @@ namespace awkward {
     Index64 outindex(index_.length());
     struct Error err2 = kernel::IndexedArray_reduce_next_64<T>(
       kernel::lib::cpu,   // DERIVE
-      nextcarry.ptr().get(),
-      nextparents.ptr().get(),
-      outindex.ptr().get(),
-      index_.ptr().get(),
-      index_.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      nextcarry.data(),
+      nextparents.data(),
+      outindex.data(),
+      index_.data(),
+      999,   // DROP
+      parents.data(),
+      999,   // DROP
       index_.length());
     util::handle_error(err2, classname(), identities_.get());
 
@@ -2103,13 +2103,13 @@ namespace awkward {
     Index64 nextoutindex(index_.length());
     struct Error err3 = kernel::IndexedArray_local_preparenext_64(
         kernel::lib::cpu,   // DERIVE
-        nextoutindex.ptr().get(),
-        starts.ptr().get(),
-        parents.ptr().get(),
-        parents.offset(),
+        nextoutindex.data(),
+        starts.data(),
+        parents.data(),
+        999,   // DROP
         parents.length(),
-        nextparents.ptr().get(),
-        nextparents.offset());
+        nextparents.data(),
+        999);   // DROP
     util::handle_error(err3, classname(), identities_.get());
 
     out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
@@ -2137,9 +2137,9 @@ namespace awkward {
         }
         struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
-          outoffsets.ptr().get(),
-          starts.ptr().get(),
-          starts.offset(),
+          outoffsets.data(),
+          starts.data(),
+          999,   // DROP
           starts.length(),
           outindex.length());
         util::handle_error(err4, classname(), identities_.get());
@@ -2178,8 +2178,8 @@ namespace awkward {
     struct Error err1 = kernel::IndexedArray_numnull<T>(
       kernel::lib::cpu,   // DERIVE
       &numnull,
-      index_.ptr().get(),
-      index_.offset(),
+      index_.data(),
+      999,   // DROP
       index_.length());
     util::handle_error(err1, classname(), identities_.get());
 
@@ -2188,13 +2188,13 @@ namespace awkward {
     Index64 outindex(index_.length());
     struct Error err2 = kernel::IndexedArray_reduce_next_64<T>(
       kernel::lib::cpu,   // DERIVE
-      nextcarry.ptr().get(),
-      nextparents.ptr().get(),
-      outindex.ptr().get(),
-      index_.ptr().get(),
-      index_.offset(),
-      parents.ptr().get(),
-      parents.offset(),
+      nextcarry.data(),
+      nextparents.data(),
+      outindex.data(),
+      index_.data(),
+      999,   // DROP
+      parents.data(),
+      999,   // DROP
       index_.length());
     util::handle_error(err2, classname(), identities_.get());
 
@@ -2210,13 +2210,13 @@ namespace awkward {
     Index64 nextoutindex(index_.length());
     struct Error err3 = kernel::IndexedArray_local_preparenext_64(
       kernel::lib::cpu,   // DERIVE
-      nextoutindex.ptr().get(),
-      starts.ptr().get(),
-      parents.ptr().get(),
-      parents.offset(),
+      nextoutindex.data(),
+      starts.data(),
+      parents.data(),
+      999,   // DROP
       parents.length(),
-      nextparents.ptr().get(),
-      nextparents.offset());
+      nextparents.data(),
+      999);   // DROP
     util::handle_error(err3, classname(), identities_.get());
 
     out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
@@ -2244,9 +2244,9 @@ namespace awkward {
         }
         struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
-          outoffsets.ptr().get(),
-          starts.ptr().get(),
-          starts.offset(),
+          outoffsets.data(),
+          starts.data(),
+          999,   // DROP
           starts.length(),
           outindex.length());
         util::handle_error(err4, classname(), identities_.get());
@@ -2379,11 +2379,11 @@ namespace awkward {
       struct Error err = kernel::MaskedArray_getitem_next_jagged_project<T>(
         kernel::lib::cpu,   // DERIVE
         outindex.data(),
-        0,   // DROP
+        999,   // DROP
         slicestarts.data(),
-        0,   // DROP
+        999,   // DROP
         slicestops.data(),
-        0,   // DROP
+        999,   // DROP
         reducedstarts.data(),
         reducedstops.data(),
         length());
@@ -2399,9 +2399,9 @@ namespace awkward {
       Index64 nextcarry(length());
       struct Error err = kernel::IndexedArray_getitem_nextcarry_64<T>(
         kernel::lib::cpu,   // DERIVE
-        nextcarry.ptr().get(),
-        index_.ptr().get(),
-        index_.offset(),
+        nextcarry.data(),
+        index_.data(),
+        999,   // DROP
         index_.length(),
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
@@ -2422,7 +2422,7 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       &numnull,
       index_.data(),
-      0,   // DROP
+      999,   // DROP
       index_.length());
     util::handle_error(err1, classname(), identities_.get());
 
@@ -2434,7 +2434,7 @@ namespace awkward {
       nextcarry.data(),
       outindex.data(),
       index_.data(),
-      0,   // DROP
+      999,   // DROP
       index_.length(),
       content_.get()->length());
     util::handle_error(err2, classname(), identities_.get());

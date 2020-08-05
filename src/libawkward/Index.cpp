@@ -232,7 +232,7 @@ namespace awkward {
     return kernel::index_getitem_at_nowrap<T>(
       ptr_lib(),
       data(),
-      0,   // DROP
+      999,   // DROP
       at);
   }
 
@@ -242,7 +242,7 @@ namespace awkward {
     kernel::index_setitem_at_nowrap<T>(
       ptr_lib(),
       data(),
-      0,   // DROP
+      999,   // DROP
       at,
       value);
   }

@@ -260,7 +260,7 @@ namespace awkward {
         reinterpret_cast<int32_t*>(data()),
         carry.data(),
         carry.length(),
-        0,   // DROP
+        999,   // DROP
         width_,
         length_);
       util::handle_error(err, classname(), nullptr);
@@ -272,7 +272,7 @@ namespace awkward {
         reinterpret_cast<int64_t*>(data()),
         carry.data(),
         carry.length(),
-        0,   // DROP
+        999,   // DROP
         width_,
         length_);
       util::handle_error(err, classname(), nullptr);

@@ -23,7 +23,7 @@ namespace awkward {
   namespace kernel {
 
 int64_t oink(int64_t x, int64_t line) {
-  if (x != 0) {
+  if (x != 999) {
     throw std::runtime_error(std::string("OINK! on line ") + std::to_string(line));
   }
   else {

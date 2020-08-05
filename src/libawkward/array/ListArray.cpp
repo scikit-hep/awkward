@@ -239,8 +239,8 @@ namespace awkward {
       out.data(),
       starts_.data(),
       stops_.data(),
-      0,   // DROP
-      0,   // DROP
+      999,   // DROP
+      999,   // DROP
       len);
     util::handle_error(err, classname(), identities_.get());
     return out;
@@ -266,12 +266,12 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
       offsets.data(),
-      0,   // DROP
+      999,   // DROP
       offsets.length(),
       starts_.data(),
-      0,   // DROP
+      999,   // DROP
       stops_.data(),
-      0,   // DROP
+      999,   // DROP
       content_.get()->length());
     util::handle_error(err, classname(), identities_.get());
 
@@ -359,9 +359,9 @@ namespace awkward {
           rawidentities->data(),
           starts_.data(),
           stops_.data(),
-          0,   // DROP
-          0,   // DROP
-          0,   // DROP
+          999,   // DROP
+          999,   // DROP
+          999,   // DROP
           content_.get()->length(),
           length(),
           rawidentities->width());
@@ -390,9 +390,9 @@ namespace awkward {
           rawidentities->data(),
           starts_.data(),
           stops_.data(),
-          0,   // DROP
-          0,   // DROP
-          0,   // DROP
+          999,   // DROP
+          999,   // DROP
+          999,   // DROP
           content_.get()->length(),
           length(),
           rawidentities->width());
@@ -719,8 +719,8 @@ namespace awkward {
       starts_.data(),
       stops_.data(),
       carry.data(),
-      0,   // DROP
-      0,   // DROP
+      999,   // DROP
+      999,   // DROP
       lenstarts,
       carry.length());
     util::handle_error(err, classname(), identities_.get());
@@ -771,9 +771,9 @@ namespace awkward {
     struct Error err = kernel::ListArray_validity<T>(
       kernel::lib::cpu,   // DERIVE
       starts_.data(),
-      0,   // DROP
+      999,   // DROP
       stops_.data(),
-      0,   // DROP
+      999,   // DROP
       starts_.length(),
       content_.get()->length());
     if (err.str == nullptr) {
@@ -807,9 +807,9 @@ namespace awkward {
         tonum.ptr_lib(),
         tonum.data(),
         starts_.data(),
-        0,   // DROP
+        999,   // DROP
         stops_.data(),
-        0,   // DROP
+        999,   // DROP
         length());
       util::handle_error(err, classname(), identities_.get());
       return std::make_shared<NumpyArray>(tonum);
@@ -980,9 +980,9 @@ namespace awkward {
         stops.data(),
         0,
         reinterpret_cast<int32_t*>(starts_.data()),
-        0,   // DROP
+        999,   // DROP
         reinterpret_cast<int32_t*>(stops_.data()),
-        0,   // DROP
+        999,   // DROP
         mylength,
         0);
       util::handle_error(err, classname(), identities_.get());
@@ -995,9 +995,9 @@ namespace awkward {
         stops.data(),
         0,
         reinterpret_cast<uint32_t*>(starts_.data()),
-        0,   // DROP
+        999,   // DROP
         reinterpret_cast<uint32_t*>(stops_.data()),
-        0,   // DROP
+        999,   // DROP
         mylength,
         0);
       util::handle_error(err, classname(), identities_.get());
@@ -1010,9 +1010,9 @@ namespace awkward {
         stops.data(),
         0,
         reinterpret_cast<int64_t*>(starts_.data()),
-        0,   // DROP
+        999,   // DROP
         reinterpret_cast<int64_t*>(stops_.data()),
-        0,   // DROP
+        999,   // DROP
         mylength,
         0);
       util::handle_error(err, classname(), identities_.get());
@@ -1035,9 +1035,9 @@ namespace awkward {
         stops.data(),
         mylength,
         other_starts.data(),
-        0,   // DROP
+        999,   // DROP
         other_stops.data(),
-        0,   // DROP
+        999,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1056,9 +1056,9 @@ namespace awkward {
         stops.data(),
         mylength,
         other_starts.data(),
-        0,   // DROP
+        999,   // DROP
         other_stops.data(),
-        0,   // DROP
+        999,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1077,9 +1077,9 @@ namespace awkward {
         stops.data(),
         mylength,
         other_starts.data(),
-        0,   // DROP
+        999,   // DROP
         other_stops.data(),
-        0,   // DROP
+        999,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1098,9 +1098,9 @@ namespace awkward {
         stops.data(),
         mylength,
         other_starts.data(),
-        0,   // DROP
+        999,   // DROP
         other_stops.data(),
-        0,   // DROP
+        999,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err, rawother->classname(),
@@ -1118,9 +1118,9 @@ namespace awkward {
         stops.data(),
         mylength,
         other_starts.data(),
-        0,   // DROP
+        999,   // DROP
         other_stops.data(),
-        0,   // DROP
+        999,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1139,9 +1139,9 @@ namespace awkward {
         stops.data(),
         mylength,
         other_starts.data(),
-        0,   // DROP
+        999,   // DROP
         other_stops.data(),
-        0,   // DROP
+        999,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1163,9 +1163,9 @@ namespace awkward {
         stops.data(),
         mylength,
         other_starts.data(),
-        0,   // DROP
+        999,   // DROP
         other_stops.data(),
-        0,   // DROP
+        999,   // DROP
         theirlength,
         mycontentlength);
       util::handle_error(err,
@@ -1216,8 +1216,8 @@ namespace awkward {
         starts_.data(),
         stops_.data(),
         starts_.length(),
-        0,   // DROP
-        0);   // DROP
+        999,   // DROP
+        999);   // DROP
       util::handle_error(err1, classname(), identities_.get());
       if (target < min) {
         return shallow_copy();
@@ -1232,8 +1232,8 @@ namespace awkward {
           stops_.data(),
           target,
           starts_.length(),
-          0,   // DROP
-          0);   // DROP
+          999,   // DROP
+          999);   // DROP
         util::handle_error(err2, classname(), identities_.get());
 
         Index64 index(tolength);
@@ -1248,8 +1248,8 @@ namespace awkward {
           stops.data(),
           target,
           starts_.length(),
-          0,   // DROP
-          0);   // DROP
+          999,   // DROP
+          999);   // DROP
         util::handle_error(err3, classname(), identities_.get());
 
         std::shared_ptr<IndexedOptionArray64> next =
@@ -1316,7 +1316,7 @@ namespace awkward {
         kernel::lib::cpu,   // DERIVE
         localindex.data(),
         offsets.data(),
-        0,   // DROP
+        999,   // DROP
         offsets.length() - 1);
       util::handle_error(err, classname(), identities_.get());
       return std::make_shared<ListOffsetArray64>(
@@ -1362,9 +1362,9 @@ namespace awkward {
         n,
         replacement,
         starts_.data(),
-        0,   // DROP
+        999,   // DROP
         stops_.data(),
-        0,   // DROP
+        999,   // DROP
         length());
       util::handle_error(err1, classname(), identities_.get());
 
@@ -1386,9 +1386,9 @@ namespace awkward {
         n,
         replacement,
         starts_.data(),
-        0,   // DROP
+        999,   // DROP
         stops_.data(),
-        0,   // DROP
+        999,   // DROP
         length());
       util::handle_error(err2, classname(), identities_.get());
 
@@ -1487,8 +1487,8 @@ namespace awkward {
       starts_.data(),
       stops_.data(),
       lenstarts,
-      0,   // DROP
-      0,   // DROP
+      999,   // DROP
+      999,   // DROP
       at.at());
     util::handle_error(err, classname(), identities_.get());
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
@@ -1525,8 +1525,8 @@ namespace awkward {
       starts_.data(),
       stops_.data(),
       lenstarts,
-      0,   // DROP
-      0,   // DROP
+      999,   // DROP
+      999,   // DROP
       start,
       stop,
       step);
@@ -1542,8 +1542,8 @@ namespace awkward {
       starts_.data(),
       stops_.data(),
       lenstarts,
-      0,   // DROP
-      0,   // DROP
+      999,   // DROP
+      999,   // DROP
       start,
       stop,
       step);
@@ -1607,8 +1607,8 @@ namespace awkward {
         starts_.data(),
         stops_.data(),
         flathead.data(),
-        0,   // DROP
-        0,   // DROP
+        999,   // DROP
+        999,   // DROP
         lenstarts,
         flathead.length(),
         content_.get()->length());
@@ -1631,8 +1631,8 @@ namespace awkward {
         stops_.data(),
         flathead.data(),
         advanced.data(),
-        0,   // DROP
-        0,   // DROP
+        999,   // DROP
+        999,   // DROP
         lenstarts,
         flathead.length(),
         content_.get()->length());
@@ -1670,9 +1670,9 @@ namespace awkward {
       singleoffsets.data(),
       nextcarry.data(),
       starts_.data(),
-      0,   // DROP
+      999,   // DROP
       stops_.data(),
-      0,   // DROP
+      999,   // DROP
       jagged.length(),
       len);
     util::handle_error(err, classname(), identities_.get());
@@ -1714,9 +1714,9 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       &carrylen,
       slicestarts.data(),
-      0,   // DROP
+      999,   // DROP
       slicestops.data(),
-      0,   // DROP
+      999,   // DROP
       slicestarts.length());
     util::handle_error(err1, classname(), identities_.get());
 
@@ -1728,17 +1728,17 @@ namespace awkward {
       outoffsets.data(),
       nextcarry.data(),
       slicestarts.data(),
-      0,   // DROP
+      999,   // DROP
       slicestops.data(),
-      0,   // DROP
+      999,   // DROP
       slicestarts.length(),
       sliceindex.data(),
-      0,   // DROP
+      999,   // DROP
       sliceindex.length(),
       starts_.data(),
-      0,   // DROP
+      999,   // DROP
       stops_.data(),
-      0,   // DROP
+      999,   // DROP
       content_.get()->length());
     util::handle_error(err2, classname(), nullptr);
 
@@ -1774,12 +1774,12 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       &numvalid,
       slicestarts.data(),
-      0,   // DROP
+      999,   // DROP
       slicestops.data(),
-      0,   // DROP
+      999,   // DROP
       slicestarts.length(),
       missing.data(),
-      0,   // DROP
+      999,   // DROP
       missing.length());
     util::handle_error(err1, classname(), nullptr);
 
@@ -1792,12 +1792,12 @@ namespace awkward {
       smalloffsets.data(),
       largeoffsets.data(),
       slicestarts.data(),
-      0,   // DROP
+      999,   // DROP
       slicestops.data(),
-      0,   // DROP
+      999,   // DROP
       slicestarts.length(),
       missing.data(),
-      0);   // DROP
+      999);   // DROP
     util::handle_error(err2, classname(), nullptr);
 
     ContentPtr out;
@@ -1859,14 +1859,14 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       outoffsets.data(),
       slicestarts.data(),
-      0,   // DROP
+      999,   // DROP
       slicestops.data(),
-      0,   // DROP
+      999,   // DROP
       slicestarts.length(),
       starts_.data(),
-      0,   // DROP
+      999,   // DROP
       stops_.data(),
-      0);   // DROP
+      999);   // DROP
     util::handle_error(err, classname(), identities_.get());
 
     Index64 sliceoffsets = slicecontent.offsets();

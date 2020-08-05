@@ -253,7 +253,7 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           rawsubidentities->data(),
           rawidentities->data(),
-          0,   // DROP
+          999,   // DROP
           rawidentities->length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
@@ -272,7 +272,7 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           rawsubidentities->data(),
           rawidentities->data(),
-          0,   // DROP
+          999,   // DROP
           rawidentities->length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
