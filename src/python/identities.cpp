@@ -90,6 +90,44 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
         return out;
       })
 
+      .def_static("from_cupy", [name](ak::Identities::Ref ref,
+                                const ak::Identities::FieldLoc& fieldloc,
+                                py::object array) {
+        if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
+
+          void* ptr = reinterpret_cast<void *>(py::cast<ssize_t>
+            (array.attr("data").attr("ptr")));
+
+          if (py::cast<int64_t>(array.attr("ndim")) != 2) {
+            throw std::invalid_argument(
+              name + std::string(" must be built from a two-dimensional array"));
+          }
+          std::vector<int64_t> shape, strides;
+
+          shape = pytuples_to_vector<int64_t>(array.attr("shape"));
+          strides = pytuples_to_vector<int64_t>(array.attr("strides"));
+
+          if (strides[0] != sizeof(T)*shape[1]  ||
+              strides[1] != sizeof(T)) {
+            throw std::invalid_argument(
+              name + std::string(" must be built from a contiguous array (array"
+                                 ".stries == (array.shape[1]*array.itemsize, "
+                                 "array.itemsize)); try array.copy()"));
+          }
+          return ak::IdentitiesOf<T>(ref,
+                                     fieldloc,
+                                     0,
+                                     shape[1],
+                                     shape[0],
+                                     std::shared_ptr<T>(reinterpret_cast<T*>(ptr),
+                                                        pyobject_deleter<T>(array.ptr())));
+        }
+        else {
+          throw std::invalid_argument(name + std::string(
+            ".from_cupy() can only accept CuPy Arrays!"));
+        }
+    })
+
   );
 }
 

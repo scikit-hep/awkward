@@ -552,6 +552,9 @@ namespace awkward {
     const ContentPtr
       copy_to(kernel::lib ptr_lib) const override;
 
+    const std::shared_ptr<NumpyArray>
+      cupy_copy_to(kernel::lib ptr_lib) const;
+
     const ContentPtr
       numbers_to_type(const std::string& name) const override;
 
