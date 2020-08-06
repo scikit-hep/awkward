@@ -308,7 +308,7 @@ class PandasMixin(PandasNotImportedYet):
 
 def df(array, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="values"):
     warnings.warn(
-        "ak.pandas.df is deprecated, will be removed in 1.0.0. Use\n\n"
+        "ak.pandas.df is deprecated, will be removed in 0.3.0. Use\n\n"
         "    ak.to_pandas(array)\n\ninstead.",
         DeprecationWarning,
     )
@@ -318,7 +318,7 @@ def df(array, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="v
 
 def dfs(array, levelname=lambda i: "sub" * i + "entry", anonymous="values"):
     warnings.warn(
-        "ak.pandas.dfs is deprecated, will be removed in 1.0.0. Use\n\n"
+        "ak.pandas.dfs is deprecated, will be removed in 0.3.0. Use\n\n"
         "    ak.to_pandas(array, how=None)\n\ninstead.",
         DeprecationWarning,
     )
