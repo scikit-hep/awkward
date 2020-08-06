@@ -125,43 +125,37 @@ extern "C" {
   /// @param fromindex inparam role: IndexedArray-index
   /// @param length inparam
   /// @param offsetsraws inparam role: ListOffsetArray-rawoffsets
-  /// @param offsetsoffsets inparam role: ListOffsetArray-offsets-offset
   EXPORT_SYMBOL struct Error
     awkward_UnionArray32_flatten_length_64(
       int64_t* total_length,
       const int8_t* fromtags,
       const int32_t* fromindex,
       int64_t length,
-      int64_t** offsetsraws,
-      int64_t* offsetsoffsets);
+      int64_t** offsetsraws);
   /// @param total_length outparam role: pointer
   /// @param fromtags inparam role: UnionArray-tags
   /// @param fromindex inparam role: IndexedArray-index
   /// @param length inparam
   /// @param offsetsraws inparam role: ListOffsetArray-rawoffsets
-  /// @param offsetsoffsets inparam role: ListOffsetArray-offsets-offset
   EXPORT_SYMBOL struct Error
     awkward_UnionArrayU32_flatten_length_64(
       int64_t* total_length,
       const int8_t* fromtags,
       const uint32_t* fromindex,
       int64_t length,
-      int64_t** offsetsraws,
-      int64_t* offsetsoffsets);
+      int64_t** offsetsraws);
   /// @param total_length outparam role: pointer
   /// @param fromtags inparam role: UnionArray-tags
   /// @param fromindex inparam role: IndexedArray-index
   /// @param length inparam
   /// @param offsetsraws inparam role: ListOffsetArray-rawoffsets
-  /// @param offsetsoffsets inparam role: ListOffsetArray-offsets-offset
   EXPORT_SYMBOL struct Error
     awkward_UnionArray64_flatten_length_64(
       int64_t* total_length,
       const int8_t* fromtags,
       const int64_t* fromindex,
       int64_t length,
-      int64_t** offsetsraws,
-      int64_t* offsetsoffsets);
+      int64_t** offsetsraws);
 
   /// @param totags outparam
   /// @param toindex outparam
@@ -170,7 +164,6 @@ extern "C" {
   /// @param fromindex inparam role: IndexedArray-index
   /// @param length inparam
   /// @param offsetsraws inparam role: ListOffsetArray-rawoffsets
-  /// @param offsetsoffsets inparam role: ListOffsetArray-offsets-offset
   EXPORT_SYMBOL struct Error
     awkward_UnionArray32_flatten_combine_64(
       int8_t* totags,
@@ -179,8 +172,7 @@ extern "C" {
       const int8_t* fromtags,
       const int32_t* fromindex,
       int64_t length,
-      int64_t** offsetsraws,
-      int64_t* offsetsoffsets);
+      int64_t** offsetsraws);
   /// @param totags outparam
   /// @param toindex outparam
   /// @param tooffsets outparam
@@ -188,7 +180,6 @@ extern "C" {
   /// @param fromindex inparam role: UnionArray-index
   /// @param length inparam
   /// @param offsetsraws inparam role: ListOffsetArray-rawoffsets
-  /// @param offsetsoffsets inparam role: ListOffsetArray-offsets-offset
   EXPORT_SYMBOL struct Error
     awkward_UnionArrayU32_flatten_combine_64(
       int8_t* totags,
@@ -197,8 +188,7 @@ extern "C" {
       const int8_t* fromtags,
       const uint32_t* fromindex,
       int64_t length,
-      int64_t** offsetsraws,
-      int64_t* offsetsoffsets);
+      int64_t** offsetsraws);
   /// @param totags outparam
   /// @param toindex outparam
   /// @param tooffsets outparam
@@ -206,7 +196,6 @@ extern "C" {
   /// @param fromindex inparam role: UnionArray-index
   /// @param length inparam
   /// @param offsetsraws inparam role: ListOffsetArray-rawoffsets
-  /// @param offsetsoffsets inparam role: ListOffsetArray-offsets-offset
   EXPORT_SYMBOL struct Error
     awkward_UnionArray64_flatten_combine_64(
       int8_t* totags,
@@ -215,8 +204,7 @@ extern "C" {
       const int8_t* fromtags,
       const int64_t* fromindex,
       int64_t length,
-      int64_t** offsetsraws,
-      int64_t* offsetsoffsets);
+      int64_t** offsetsraws);
 
   /// @param tocarry outparam
   /// @param fromindex inparam role: IndexedArray-index

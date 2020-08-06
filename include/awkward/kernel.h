@@ -851,8 +851,7 @@ namespace awkward {
       const T* fromtags,
       const I* fromindex,
       int64_t length,
-      int64_t** offsetsraws,
-      int64_t* offsetsoffsets);
+      int64_t** offsetsraws);
 
 
     template <typename T, typename I>
@@ -864,8 +863,7 @@ namespace awkward {
       const T* fromtags,
       const I* fromindex,
       int64_t length,
-      int64_t** offsetsraws,
-      int64_t* offsetsoffsets);
+      int64_t** offsetsraws);
 
 
     template <typename T>
