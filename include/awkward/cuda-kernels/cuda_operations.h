@@ -11,25 +11,19 @@ extern "C" {
   awkward_cuda_ListArray32_num_64(
     int64_t* tonum,
     const int32_t* fromstarts,
-    int64_t startsoffset,
     const int32_t* fromstops,
-    int64_t stopsoffset,
     int64_t length);
   EXPORT_SYMBOL Error
   awkward_cuda_ListArrayU32_num_64(
     int64_t* tonum,
     const uint32_t* fromstarts,
-    int64_t startsoffset,
     const uint32_t* fromstops,
-    int64_t stopsoffset,
     int64_t length);
   EXPORT_SYMBOL Error
   awkward_cuda_ListArray64_num_64(
     int64_t* tonum,
     const int64_t* fromstarts,
-    int64_t startsoffset,
     const int64_t* fromstops,
-    int64_t stopsoffset,
     int64_t length);
   EXPORT_SYMBOL Error
   awkward_cuda_RegularArray_num_64(

@@ -27,7 +27,7 @@ box(const std::shared_ptr<ak::Content>& content) {
            dynamic_cast<ak::NumpyArray*>(content.get())) {
     if (raw->isscalar()) {
       return py::array(py::buffer_info(
-        raw->byteptr(),
+        raw->data(),
         raw->itemsize(),
         raw->format(),
         raw->ndim(),
@@ -446,25 +446,33 @@ toslice_part(ak::Slice& slice, py::object obj) {
         obj = box(content);
       }
       else {
+        obj = py::module::import("awkward1").attr("from_iter")(obj, false);
+
         bool bad = false;
+        py::object asarray;
         try {
-          obj = py::module::import("numpy").attr("asarray")(obj);
+          asarray = py::module::import("awkward1").attr("to_numpy")(obj, false);
         }
         catch (py::error_already_set& exc) {
           exc.restore();
           PyErr_Clear();
           bad = true;
         }
+
         if (!bad) {
-          py::array array = obj.cast<py::array>();
+          py::array array = asarray.cast<py::array>();
           py::buffer_info info = array.request();
-          if (info.format.compare("O") == 0) {
+          if (ak::util::format_to_dtype(info.format, info.itemsize) ==
+              ak::util::dtype::NOT_PRIMITIVE) {
             bad = true;
           }
         }
+
         if (bad) {
-          content = unbox_content(py::module::import("awkward1")
-                    .attr("from_iter")(obj, false));
+          content = unbox_content(obj);
+        }
+        else {
+          obj = asarray;
         }
       }
 
@@ -1280,20 +1288,26 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                   bool stable) -> py::object {
                return box(self.argsort(axis, ascending, false));
           })
-          .def("copy_to",
+          .def("numbers_to_type",
                [](const T&self,
-                      std::string ptr_lib) -> py::object {
-               if(ptr_lib == "cuda") {
-                 return box(self.copy_to(kernel::Lib::cuda_kernels));
+                  const std::string& name) -> py::object {
+               return box(self.numbers_to_type(name));
+          })
+          .def("copy_to",
+               [](const T&self, const std::string& ptr_lib) -> py::object {
+               if (ptr_lib == "cpu") {
+                 return box(self.copy_to(ak::kernel::lib::cpu));
                }
-               else if(ptr_lib == "cpu") {
-                 return box(self.copy_to(kernel::Lib::cpu_kernels));
+               else if (ptr_lib == "cuda") {
+                 return box(self.copy_to(ak::kernel::lib::cuda));
                }
                else {
-                 throw std::invalid_argument("Invalid kernel specified, valid kernels are cpu and cuda");
+                 throw std::invalid_argument("specify 'cpu' or 'cuda'");
                }
-          });
+          })
+    ;
   }
+
 
 ////////// EmptyArray
 
@@ -1645,7 +1659,7 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
                          ak::Content>(m, name.c_str(), py::buffer_protocol())
       .def_buffer([](const ak::NumpyArray& self) -> py::buffer_info {
         return py::buffer_info(
-          self.byteptr(),
+          self.data(),
           self.itemsize(),
           self.format(),
           self.ndim(),

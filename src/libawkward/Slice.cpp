@@ -300,11 +300,14 @@ namespace awkward {
 
     IndexOf<T> index(length);
     if (std::is_same<T, int64_t>::value) {
-      kernel::slicearray_ravel_64(index.ptr().get(),
-                                        index_.ptr().get(),
-                                        ndim(),
-                                        shape_.data(),
-                                        strides_.data());
+      struct Error err = kernel::slicearray_ravel_64(
+        kernel::lib::cpu,   // DERIVE
+        index.ptr().get(),
+        index_.ptr().get(),
+        ndim(),
+        shape_.data(),
+        strides_.data());
+      util::handle_error(err);
     }
     else {
       throw std::runtime_error("unrecognized SliceArrayOf<T> type");

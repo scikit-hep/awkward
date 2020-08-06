@@ -23,8 +23,8 @@ namespace awkward {
     }
 
     else {
-      uint32_t bigendian =
-        *reinterpret_cast<uint32_t*>(rawdata.byteptr((ssize_t)bytepos));
+      uint32_t bigendian = *reinterpret_cast<uint32_t*>(
+        reinterpret_cast<char*>(rawdata.data()) + bytepos);
 
       // FIXME: check native endianness
       uint32_t length =

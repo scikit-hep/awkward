@@ -2,8 +2,19 @@ studies/**/sample-*
 docs/demos/countries.geojson
 docs/demos/test-program
 docs/demos/test-program.cpp
-dev/kernels.py
 .ci/logs/
+
+# Specification
+kernel-specification/kernelnames.yml
+kernel-specification/operations/
+kernel-specification/reducers/
+kernel-specification/identities/
+kernel-specification/sorting/
+kernel-specification/getitem/
+
+# Kernel tests
+tests-kernels/test*
+tests-kernels/kernels.py
 
 dependent-project/CMakeFiles
 dependent-project/CMakeCache.txt

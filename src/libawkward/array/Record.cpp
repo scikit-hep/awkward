@@ -566,7 +566,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  Record::copy_to(kernel::Lib ptr_lib) const{
+  Record::copy_to(kernel::lib ptr_lib) const{
     ContentPtrVec content_vec;
     for(auto i : array_->contents()) {
       ContentPtr ptr = i->copy_to(ptr_lib);
@@ -583,4 +583,12 @@ namespace awkward {
     return std::make_shared<Record>(record_arr,
                                     at());
   }
+
+  const ContentPtr
+  Record::numbers_to_type(const std::string& name) const {
+    ContentPtr out = array_.get()->numbers_to_type(name);
+    return std::make_shared<Record>(
+      std::dynamic_pointer_cast<RecordArray>(out), at_);
+  }
+
 }

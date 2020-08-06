@@ -110,7 +110,7 @@ namespace awkward {
                  const ArrayGeneratorPtr& generator,
                  const ArrayCachePtr& cache,
                  const std::string& cache_key,
-                 const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
+                 const kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Creates a VirtualArray with an automatically assigned #cache_key
     /// (unique per process).
@@ -118,7 +118,7 @@ namespace awkward {
                  const util::Parameters& parameters,
                  const ArrayGeneratorPtr& generator,
                  const ArrayCachePtr& cache,
-                 const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
+                 const kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Function that materializes the array and possibly
     /// checks it against an expected Form.
@@ -130,7 +130,7 @@ namespace awkward {
     const ArrayCachePtr
       cache() const;
 
-    const kernel::Lib
+    const kernel::lib
       ptr_lib() const;
 
     /// @brief Returns the array if it exists in the #cache; `nullptr`
@@ -367,7 +367,10 @@ namespace awkward {
                           const Slice& tail) const override;
 
     const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const override;
+      copy_to(kernel::lib ptr_lib) const override;
+
+    const ContentPtr
+      numbers_to_type(const std::string& name) const override;
 
   private:
     /// @brief See #generator.
@@ -377,7 +380,7 @@ namespace awkward {
     /// @brief See #cache_key.
     const std::string cache_key_;
     /// @brief See#ptr_lib
-    const kernel::Lib ptr_lib_;
+    const kernel::lib ptr_lib_;
   };
 
 }

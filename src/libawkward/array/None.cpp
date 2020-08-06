@@ -331,9 +331,15 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::copy_to(kernel::Lib ptr_lib) const {
+  None::copy_to(kernel::lib ptr_lib) const {
     throw std::runtime_error(
       "undefined operation: None::copy_to(ptr_lib)");
+  }
+
+  const ContentPtr
+  None::numbers_to_type(const std::string& name) const {
+    throw std::runtime_error(
+      "undefined operation: None::numbers_to_type");
   }
 
   const ContentPtr none = std::make_shared<None>();

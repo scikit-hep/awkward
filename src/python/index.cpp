@@ -6,7 +6,6 @@
 
 #include "awkward/python/index.h"
 
-
 template <typename T>
 py::class_<ak::IndexOf<T>>
 make_IndexOf(const py::handle& m, const std::string& name) {
@@ -41,6 +40,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
           0,
           (int64_t)info.shape[0]);
       }))
+
       .def("__repr__", &ak::IndexOf<T>::tostring)
       .def("__len__", &ak::IndexOf<T>::length)
       .def("__getitem__", [](const ak::IndexOf<T>& self, py::object& obj) {
@@ -104,7 +104,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
                                                            pyobject_deleter<T>(array.ptr())),
                                   0,
                                   (int64_t)shape[0],
-                                  kernel::Lib::cuda_kernels);
+                                  ak::kernel::lib::cuda);
           }
           else {
             throw std::invalid_argument(name + std::string(
@@ -113,13 +113,13 @@ make_IndexOf(const py::handle& m, const std::string& name) {
       })
       .def("copy_to", [name](const ak::IndexOf<T>& self, std::string& ptr_lib) {
         if(ptr_lib == "cuda") {
-          auto cuda_index = self.copy_to(kernel::Lib::cuda_kernels);
+          auto cuda_index = self.copy_to(ak::kernel::lib::cuda);
 
           auto cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
             reinterpret_cast<ssize_t>(cuda_index.ptr().get()),
             cuda_index.length() * sizeof(T),
             cuda_index);
-          
+
           auto cupy_memoryptr = py::module::import("cupy").attr("cuda").attr("MemoryPointer")(
             cupy_unowned_mem,
             0);
@@ -137,11 +137,11 @@ make_IndexOf(const py::handle& m, const std::string& name) {
                 pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
         }
         else if(ptr_lib == "cpu") {
-          ak::IndexOf<T> cuda_arr = self.copy_to(kernel::Lib::cpu_kernels) ;
+          ak::IndexOf<T> cuda_arr = self.copy_to(ak::kernel::lib::cpu) ;
           return py::cast<ak::IndexOf<T>>(cuda_arr);
         }
         else {
-          throw std::invalid_argument("Invalid kernel specified, valid kernels are cpu and cuda");
+          throw std::invalid_argument("specify 'cpu' or 'cuda'");
         }
       })
   );

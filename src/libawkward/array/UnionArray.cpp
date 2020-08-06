@@ -298,7 +298,8 @@ namespace awkward {
   UnionArrayOf<int8_t, int32_t>::sparse_index(int64_t len) {
     IndexOf<int32_t> outindex(len);
     struct Error err = kernel::carry_arange<int32_t>(
-      outindex.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      outindex.data(),
       len);
     util::handle_error(err, "UnionArray", nullptr);
     return outindex;
@@ -309,7 +310,8 @@ namespace awkward {
   UnionArrayOf<int8_t, uint32_t>::sparse_index(int64_t len) {
     IndexOf<uint32_t> outindex(len);
     struct Error err = kernel::carry_arange<uint32_t>(
-      outindex.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      outindex.data(),
       len);
     util::handle_error(err, "UnionArray", nullptr);
     return outindex;
@@ -320,7 +322,8 @@ namespace awkward {
   UnionArrayOf<int8_t, int64_t>::sparse_index(int64_t len) {
     IndexOf<int64_t> outindex(len);
     struct Error err = kernel::carry_arange<int64_t>(
-      outindex.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      outindex.data(),
       len);
     util::handle_error(err, "UnionArray", nullptr);
     return outindex;
@@ -332,19 +335,19 @@ namespace awkward {
     int64_t lentags = tags.length();
     int64_t size;
     struct Error err1 = kernel::UnionArray_regular_index_getsize<T>(
+      kernel::lib::cpu,   // DERIVE
       &size,
-      tags.ptr().get(),
-      tags.offset(),
+      tags.data(),
       lentags);
     util::handle_error(err1, "UnionArray", nullptr);
     IndexOf<I> current(size);
     IndexOf<I> outindex(lentags);
     struct Error err2 = kernel::UnionArray_regular_index<T, I>(
-      outindex.ptr().get(),
-      current.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      outindex.data(),
+      current.data(),
       size,
-      tags.ptr().get(),
-      tags.offset(),
+      tags.data(),
       lentags);
     util::handle_error(err2, "UnionArray", nullptr);
     return outindex;
@@ -427,12 +430,11 @@ namespace awkward {
     int64_t lenout;
     Index64 tmpcarry(lentags);
     struct Error err = kernel::UnionArray_project_64<T, I>(
+      kernel::lib::cpu,   // DERIVE
       &lenout,
-      tmpcarry.ptr().get(),
-      tags_.ptr().get(),
-      tags_.offset(),
-      index_.ptr().get(),
-      index_.offset(),
+      tmpcarry.data(),
+      tags_.data(),
+      index_.data(),
       lentags,
       index);
     util::handle_error(err, classname(), identities_.get());
@@ -464,18 +466,14 @@ namespace awkward {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
             if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
-              struct Error err =
-                kernel::UnionArray_simplify8_32_to8_64<T, I>(
-                tags.ptr().get(),
-                index.ptr().get(),
-                tags_.ptr().get(),
-                tags_.offset(),
-                index_.ptr().get(),
-                index_.offset(),
-                innertags.ptr().get(),
-                innertags.offset(),
-                innerindex.ptr().get(),
-                innerindex.offset(),
+              struct Error err = kernel::UnionArray_simplify8_32_to8_64<T, I>(
+                kernel::lib::cpu,   // DERIVE
+                tags.data(),
+                index.data(),
+                tags_.data(),
+                index_.data(),
+                innertags.data(),
+                innerindex.data(),
                 (int64_t)k,
                 (int64_t)j,
                 (int64_t)i,
@@ -488,18 +486,14 @@ namespace awkward {
             }
           }
           if (unmerged) {
-            struct Error err =
-              kernel::UnionArray_simplify8_32_to8_64<T, I>(
-              tags.ptr().get(),
-              index.ptr().get(),
-              tags_.ptr().get(),
-              tags_.offset(),
-              index_.ptr().get(),
-              index_.offset(),
-              innertags.ptr().get(),
-              innertags.offset(),
-              innerindex.ptr().get(),
-              innerindex.offset(),
+            struct Error err = kernel::UnionArray_simplify8_32_to8_64<T, I>(
+              kernel::lib::cpu,   // DERIVE
+              tags.data(),
+              index.data(),
+              tags_.data(),
+              index_.data(),
+              innertags.data(),
+              innerindex.data(),
               (int64_t)contents.size(),
               (int64_t)j,
               (int64_t)i,
@@ -519,18 +513,14 @@ namespace awkward {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
             if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
-              struct Error err =
-                kernel::UnionArray_simplify8_U32_to8_64<T, I>(
-                tags.ptr().get(),
-                index.ptr().get(),
-                tags_.ptr().get(),
-                tags_.offset(),
-                index_.ptr().get(),
-                index_.offset(),
-                innertags.ptr().get(),
-                innertags.offset(),
-                innerindex.ptr().get(),
-                innerindex.offset(),
+              struct Error err = kernel::UnionArray_simplify8_U32_to8_64<T, I>(
+                kernel::lib::cpu,   // DERIVE
+                tags.data(),
+                index.data(),
+                tags_.data(),
+                index_.data(),
+                innertags.data(),
+                innerindex.data(),
                 (int64_t)k,
                 (int64_t)j,
                 (int64_t)i,
@@ -543,18 +533,14 @@ namespace awkward {
             }
           }
           if (unmerged) {
-            struct Error err =
-              kernel::UnionArray_simplify8_U32_to8_64<T, I>(
-              tags.ptr().get(),
-              index.ptr().get(),
-              tags_.ptr().get(),
-              tags_.offset(),
-              index_.ptr().get(),
-              index_.offset(),
-              innertags.ptr().get(),
-              innertags.offset(),
-              innerindex.ptr().get(),
-              innerindex.offset(),
+            struct Error err = kernel::UnionArray_simplify8_U32_to8_64<T, I>(
+              kernel::lib::cpu,   // DERIVE
+              tags.data(),
+              index.data(),
+              tags_.data(),
+              index_.data(),
+              innertags.data(),
+              innerindex.data(),
               (int64_t)contents.size(),
               (int64_t)j,
               (int64_t)i,
@@ -574,18 +560,14 @@ namespace awkward {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
             if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
-              struct Error err =
-                kernel::UnionArray_simplify8_64_to8_64<T, I>(
-                tags.ptr().get(),
-                index.ptr().get(),
-                tags_.ptr().get(),
-                tags_.offset(),
-                index_.ptr().get(),
-                index_.offset(),
-                innertags.ptr().get(),
-                innertags.offset(),
-                innerindex.ptr().get(),
-                innerindex.offset(),
+              struct Error err = kernel::UnionArray_simplify8_64_to8_64<T, I>(
+                kernel::lib::cpu,   // DERIVE
+                tags.data(),
+                index.data(),
+                tags_.data(),
+                index_.data(),
+                innertags.data(),
+                innerindex.data(),
                 (int64_t)k,
                 (int64_t)j,
                 (int64_t)i,
@@ -598,18 +580,14 @@ namespace awkward {
             }
           }
           if (unmerged) {
-            struct Error err =
-              kernel::UnionArray_simplify8_64_to8_64<T, I>(
-              tags.ptr().get(),
-              index.ptr().get(),
-              tags_.ptr().get(),
-              tags_.offset(),
-              index_.ptr().get(),
-              index_.offset(),
-              innertags.ptr().get(),
-              innertags.offset(),
-              innerindex.ptr().get(),
-              innerindex.offset(),
+            struct Error err = kernel::UnionArray_simplify8_64_to8_64<T, I>(
+              kernel::lib::cpu,   // DERIVE
+              tags.data(),
+              index.data(),
+              tags_.data(),
+              index_.data(),
+              innertags.data(),
+              innerindex.data(),
               (int64_t)contents.size(),
               (int64_t)j,
               (int64_t)i,
@@ -624,14 +602,12 @@ namespace awkward {
         bool unmerged = true;
         for (size_t k = 0;  k < contents.size();  k++) {
           if (contents[k].get()->mergeable(contents_[i], mergebool)) {
-            struct Error err =
-              kernel::UnionArray_simplify_one_to8_64<T, I>(
-              tags.ptr().get(),
-              index.ptr().get(),
-              tags_.ptr().get(),
-              tags_.offset(),
-              index_.ptr().get(),
-              index_.offset(),
+            struct Error err = kernel::UnionArray_simplify_one_to8_64<T, I>(
+              kernel::lib::cpu,   // DERIVE
+              tags.data(),
+              index.data(),
+              tags_.data(),
+              index_.data(),
               (int64_t)k,
               (int64_t)i,
               len,
@@ -643,14 +619,12 @@ namespace awkward {
           }
         }
         if (unmerged) {
-          struct Error err =
-            kernel::UnionArray_simplify_one_to8_64<T, I>(
-            tags.ptr().get(),
-            index.ptr().get(),
-            tags_.ptr().get(),
-            tags_.offset(),
-            index_.ptr().get(),
-            index_.offset(),
+          struct Error err = kernel::UnionArray_simplify_one_to8_64<T, I>(
+            kernel::lib::cpu,   // DERIVE
+            tags.data(),
+            index.data(),
+            tags_.data(),
+            index_.data(),
             (int64_t)contents.size(),
             (int64_t)i,
             len,
@@ -706,8 +680,10 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = kernel::new_Identities<int32_t>(rawidentities->ptr().get(),
-                                                         length());
+      struct Error err = kernel::new_Identities<int32_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -719,8 +695,10 @@ namespace awkward {
                                        length());
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err = kernel::new_Identities<int64_t>(rawidentities->ptr().get(),
-                                                         length());
+      struct Error err = kernel::new_Identities<int64_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -767,14 +745,12 @@ namespace awkward {
           Identities32* rawsubidentities =
             reinterpret_cast<Identities32*>(subidentities.get());
           struct Error err = kernel::Identities_from_UnionArray<int32_t, T, I>(
+            kernel::lib::cpu,   // DERIVE
             &uniquecontents,
-            rawsubidentities->ptr().get(),
-            rawidentities->ptr().get(),
-            tags_.ptr().get(),
-            index_.ptr().get(),
-            rawidentities->offset(),
-            tags_.offset(),
-            index_.offset(),
+            rawsubidentities->data(),
+            rawidentities->data(),
+            tags_.data(),
+            index_.data(),
             content.get()->length(),
             length(),
             rawidentities->width(),
@@ -798,14 +774,12 @@ namespace awkward {
           Identities64* rawsubidentities =
             reinterpret_cast<Identities64*>(subidentities.get());
           struct Error err = kernel::Identities_from_UnionArray<int64_t, T, I>(
+            kernel::lib::cpu,   // DERIVE
             &uniquecontents,
-            rawsubidentities->ptr().get(),
-            rawidentities->ptr().get(),
-            tags_.ptr().get(),
-            index_.ptr().get(),
-            rawidentities->offset(),
-            tags_.offset(),
-            index_.offset(),
+            rawsubidentities->data(),
+            rawidentities->data(),
+            tags_.data(),
+            index_.data(),
             content.get()->length(),
             length(),
             rawidentities->width(),
@@ -1152,19 +1126,19 @@ namespace awkward {
     int64_t lencarry = carry.length();
     IndexOf<T> nexttags(lencarry);
     struct Error err1 = kernel::Index_carry_64<T>(
-      nexttags.ptr().get(),
-      tags_.ptr().get(),
-      carry.ptr().get(),
-      tags_.offset(),
+      kernel::lib::cpu,   // DERIVE
+      nexttags.data(),
+      tags_.data(),
+      carry.data(),
       lentags,
       lencarry);
     util::handle_error(err1, classname(), identities_.get());
     IndexOf<I> nextindex(lencarry);
     struct Error err2 = kernel::Index_carry_nocheck_64<I>(
-      nextindex.ptr().get(),
-      index_.ptr().get(),
-      carry.ptr().get(),
-      index_.offset(),
+      kernel::lib::cpu,   // DERIVE
+      nextindex.data(),
+      index_.data(),
+      carry.data(),
       lencarry);
     util::handle_error(err2, classname(), identities_.get());
     IdentitiesPtr identities(nullptr);
@@ -1245,10 +1219,9 @@ namespace awkward {
       lencontents.push_back(content(i).get()->length());
     }
     struct Error err = kernel::UnionArray_validity<T, I>(
-      tags_.ptr().get(),
-      tags_.offset(),
-      index_.ptr().get(),
-      index_.offset(),
+      kernel::lib::cpu,   // DERIVE
+      tags_.data(),
+      index_.data(),
       tags_.length(),
       numcontents(),
       lencontents.data());
@@ -1308,15 +1281,15 @@ namespace awkward {
       bool has_offsets = false;
       std::vector<std::shared_ptr<int64_t>> offsetsptrs;
       std::vector<int64_t*> offsetsraws;
-      std::vector<int64_t> offsetsoffsets;
+      std::vector<int64_t> offsetsoffsets;   // DROP
       ContentPtrVec contents;
       for (auto content : contents_) {
         std::pair<Index64, ContentPtr> pair =
           content.get()->offsets_and_flattened(posaxis, depth);
         Index64 offsets = pair.first;
         offsetsptrs.push_back(offsets.ptr());
-        offsetsraws.push_back(offsets.ptr().get());
-        offsetsoffsets.push_back(offsets.offset());
+        offsetsraws.push_back(offsets.data());
+        offsetsoffsets.push_back(0);   // DROP
         contents.push_back(pair.second);
         has_offsets = (offsets.length() != 0);
       }
@@ -1324,30 +1297,28 @@ namespace awkward {
       if (has_offsets) {
         int64_t total_length;
         struct Error err1 = kernel::UnionArray_flatten_length_64<T, I>(
+          kernel::lib::cpu,   // DERIVE
           &total_length,
-          tags_.ptr().get(),
-          tags_.offset(),
-          index_.ptr().get(),
-          index_.offset(),
+          tags_.data(),
+          index_.data(),
           tags_.length(),
           offsetsraws.data(),
-          offsetsoffsets.data());
+          offsetsoffsets.data());   // DROP
         util::handle_error(err1, classname(), identities_.get());
 
         Index8 totags(total_length);
         Index64 toindex(total_length);
         Index64 tooffsets(tags_.length() + 1);
         struct Error err2 = kernel::UnionArray_flatten_combine_64<T, I>(
-          totags.ptr().get(),
-          toindex.ptr().get(),
-          tooffsets.ptr().get(),
-          tags_.ptr().get(),
-          tags_.offset(),
-          index_.ptr().get(),
-          index_.offset(),
+          kernel::lib::cpu,   // DERIVE
+          totags.data(),
+          toindex.data(),
+          tooffsets.data(),
+          tags_.data(),
+          index_.data(),
           tags_.length(),
           offsetsraws.data(),
-          offsetsoffsets.data());
+          offsetsoffsets.data());   // DROP
         util::handle_error(err2, classname(), identities_.get());
         return std::pair<Index64, ContentPtr>(
           tooffsets,
@@ -1399,23 +1370,25 @@ namespace awkward {
     contents.insert(contents.end(), contents_.begin(), contents_.end());
 
     struct Error err1 = kernel::UnionArray_filltags_to8_const(
-      tags.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      tags.data(),
       0,
       theirlength,
       0);
     util::handle_error(err1, classname(), identities_.get());
     struct Error err2 = kernel::UnionArray_fillindex_count_64(
-      index.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      index.data(),
       0,
       theirlength);
     util::handle_error(err2, classname(), identities_.get());
 
     if (std::is_same<T, int8_t>::value) {
       struct Error err = kernel::UnionArray_filltags_to8_from8(
-        tags.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        tags.data(),
         theirlength,
-        reinterpret_cast<int8_t*>(tags_.ptr().get()),
-        tags_.offset(),
+        reinterpret_cast<int8_t*>(tags_.data()),
         mylength,
         1);
       util::handle_error(err, classname(), identities_.get());
@@ -1426,28 +1399,28 @@ namespace awkward {
 
     if (std::is_same<I, int32_t>::value) {
       struct Error err = kernel::UnionArray_fillindex<int32_t, int64_t>(
-        index.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
         theirlength,
-        reinterpret_cast<int32_t*>(index_.ptr().get()),
-        index_.offset(),
+        reinterpret_cast<int32_t*>(index_.data()),
         mylength);
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<I, uint32_t>::value) {
       struct Error err = kernel::UnionArray_fillindex<uint32_t, int64_t>(
-        index.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
         theirlength,
-        reinterpret_cast<uint32_t*>(index_.ptr().get()),
-        index_.offset(),
+        reinterpret_cast<uint32_t*>(index_.data()),
         mylength);
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<I, int64_t>::value) {
       struct Error err = kernel::UnionArray_fillindex<int64_t, int64_t>(
-        index.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
         theirlength,
-        reinterpret_cast<int64_t*>(index_.ptr().get()),
-        index_.offset(),
+        reinterpret_cast<int64_t*>(index_.data()),
         mylength);
       util::handle_error(err, classname(), identities_.get());
     }
@@ -1489,10 +1462,10 @@ namespace awkward {
 
     if (std::is_same<T, int8_t>::value) {
       struct Error err = kernel::UnionArray_filltags_to8_from8(
-        tags.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        tags.data(),
         0,
-        reinterpret_cast<int8_t*>(tags_.ptr().get()),
-        tags_.offset(),
+        reinterpret_cast<int8_t*>(tags_.data()),
         mylength,
         0);
       util::handle_error(err, classname(), identities_.get());
@@ -1503,28 +1476,28 @@ namespace awkward {
 
     if (std::is_same<I, int32_t>::value) {
       struct Error err = kernel::UnionArray_fillindex<int32_t, int64_t>(
-        index.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
         0,
-        reinterpret_cast<int32_t*>(index_.ptr().get()),
-        index_.offset(),
+        reinterpret_cast<int32_t*>(index_.data()),
         mylength);
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<I, uint32_t>::value) {
       struct Error err = kernel::UnionArray_fillindex<uint32_t, int64_t>(
-        index.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
         0,
-        reinterpret_cast<uint32_t*>(index_.ptr().get()),
-        index_.offset(),
+        reinterpret_cast<uint32_t*>(index_.data()),
         mylength);
       util::handle_error(err, classname(), identities_.get());
     }
     else if (std::is_same<I, int64_t>::value) {
       struct Error err = kernel::UnionArray_fillindex<int64_t, int64_t>(
-        index.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
         0,
-        reinterpret_cast<int64_t*>(index_.ptr().get()),
-        index_.offset(),
+        reinterpret_cast<int64_t*>(index_.data()),
         mylength);
       util::handle_error(err, classname(), identities_.get());
     }
@@ -1541,10 +1514,10 @@ namespace awkward {
                       other_contents.end());
       Index8 other_tags = rawother->tags();
       struct Error err1 = kernel::UnionArray_filltags_to8_from8(
-        tags.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        tags.data(),
         mylength,
-        other_tags.ptr().get(),
-        other_tags.offset(),
+        other_tags.data(),
         theirlength,
         numcontents());
       util::handle_error(err1,
@@ -1552,10 +1525,10 @@ namespace awkward {
                          rawother->identities().get());
       Index32 other_index = rawother->index();
       struct Error err2 = kernel::UnionArray_fillindex<int32_t, int64_t>(
-        index.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
         mylength,
-        other_index.ptr().get(),
-        other_index.offset(),
+        other_index.data(),
         theirlength);
       util::handle_error(err2,
                          rawother->classname(),
@@ -1569,10 +1542,10 @@ namespace awkward {
                       other_contents.end());
       Index8 other_tags = rawother->tags();
       struct Error err1 = kernel::UnionArray_filltags_to8_from8(
-        tags.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        tags.data(),
         mylength,
-        other_tags.ptr().get(),
-        other_tags.offset(),
+        other_tags.data(),
         theirlength,
         numcontents());
       util::handle_error(err1,
@@ -1580,10 +1553,10 @@ namespace awkward {
                          rawother->identities().get());
       IndexU32 other_index = rawother->index();
       struct Error err2 = kernel::UnionArray_fillindex<uint32_t, int64_t>(
-        index.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
         mylength,
-        other_index.ptr().get(),
-        other_index.offset(),
+        other_index.data(),
         theirlength);
       util::handle_error(err2,
                          rawother->classname(),
@@ -1597,10 +1570,10 @@ namespace awkward {
                       other_contents.end());
       Index8 other_tags = rawother->tags();
       struct Error err1 = kernel::UnionArray_filltags_to8_from8(
-        tags.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        tags.data(),
         mylength,
-        other_tags.ptr().get(),
-        other_tags.offset(),
+        other_tags.data(),
         theirlength,
         numcontents());
       util::handle_error(err1,
@@ -1608,10 +1581,10 @@ namespace awkward {
                          rawother->identities().get());
       Index64 other_index = rawother->index();
       struct Error err2 = kernel::UnionArray_fillindex<int64_t, int64_t>(
-        index.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
         mylength,
-        other_index.ptr().get(),
-        other_index.offset(),
+        other_index.data(),
         theirlength);
       util::handle_error(err2,
                          rawother->classname(),
@@ -1620,13 +1593,15 @@ namespace awkward {
     else {
       contents.push_back(other);
       struct Error err1 = kernel::UnionArray_filltags_to8_const(
-        tags.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        tags.data(),
         mylength,
         theirlength,
         numcontents());
       util::handle_error(err1, classname(), identities_.get());
       struct Error err2 = kernel::UnionArray_fillindex_count_64(
-        index.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
         mylength,
         theirlength);
       util::handle_error(err2, classname(), identities_.get());
@@ -1941,7 +1916,7 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::copy_to(kernel::Lib ptr_lib) const {
+  UnionArrayOf<T, I>::copy_to(kernel::lib ptr_lib) const {
     IndexOf<T> tags = tags_.copy_to(ptr_lib);
     IndexOf<I> index = index_.copy_to(ptr_lib);
 
@@ -1956,6 +1931,26 @@ namespace awkward {
                                                 tags,
                                                 index,
                                                 content_vec);
+  }
+
+  template <typename T, typename I>
+  const ContentPtr
+  UnionArrayOf<T, I>::numbers_to_type(const std::string& name) const {
+    IndexOf<T> tags = tags_.deep_copy();
+    IndexOf<I> index = index_.deep_copy();
+    ContentPtrVec contents;
+    for (auto x : contents_) {
+      contents.push_back(x.get()->numbers_to_type(name));
+    }
+    IdentitiesPtr identities = identities_;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(identities,
+                                                parameters_,
+                                                tags,
+                                                index,
+                                                contents);
   }
 
   template <typename T, typename I>

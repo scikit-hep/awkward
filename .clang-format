@@ -1,0 +1,24 @@
+---
+Language:        Cpp
+BasedOnStyle:  Google
+ColumnLimit:     80
+NamespaceIndentation: All
+SortIncludes:    false
+IndentWidth:     2
+AccessModifierOffset: -2
+PenaltyBreakComment: 30
+PenaltyExcessCharacter: 100
+AlignAfterOpenBracket: Align
+AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: All
+BinPackParameters: false
+AlwaysBreakTemplateDeclarations: Yes
+ReflowComments: false
+BinPackArguments: false
+BinPackParameters: false

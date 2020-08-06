@@ -442,8 +442,10 @@ namespace awkward {
                                        len);
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = kernel::new_Identities<int32_t>(rawidentities->ptr().get(),
-                                                         len);
+      struct Error err = kernel::new_Identities<int32_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        len);
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -454,8 +456,10 @@ namespace awkward {
                                        1, len);
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err =
-        kernel::new_Identities<int64_t>(rawidentities->ptr().get(), len);
+      struct Error err = kernel::new_Identities<int64_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        len);
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -1478,7 +1482,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  RecordArray::copy_to(kernel::Lib ptr_lib) const {
+  RecordArray::copy_to(kernel::lib ptr_lib) const {
     ContentPtrVec content_vec;
     for(auto i : contents_) {
       ContentPtr ptr = i->copy_to(ptr_lib);
@@ -1491,6 +1495,23 @@ namespace awkward {
                                          recordlookup(),
                                          length());
 
+  }
+
+  const ContentPtr
+  RecordArray::numbers_to_type(const std::string& name) const {
+    ContentPtrVec contents;
+    for (auto x : contents_) {
+      contents.push_back(x.get()->numbers_to_type(name));
+    }
+    IdentitiesPtr identities = identities_;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<RecordArray>(identities,
+                                         parameters_,
+                                         contents,
+                                         recordlookup_,
+                                         length_);
   }
 
   template <typename S>

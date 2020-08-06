@@ -290,7 +290,7 @@ namespace awkward {
                     int64_t width,
                     int64_t length,
                     const std::shared_ptr<T> ptr,
-                    kernel::Lib ptr_lib =kernel::Lib::cpu_kernels);
+                    kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Allocates a new array buffer with a given #ref, #fieldloc,
     /// #length and #width.
@@ -298,15 +298,19 @@ namespace awkward {
                     const FieldLoc& fieldloc,
                     int64_t width,
                     int64_t length,
-                    kernel::Lib ptr_lib =kernel::Lib::cpu_kernels);
+                    kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<T>
       ptr() const;
 
     /// @brief The Kernel Library that ptr uses.
-    kernel::Lib
+    kernel::lib
       ptr_lib() const;
+
+    /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
+    T*
+      data() const;
 
     const std::string
       classname() const override;
@@ -377,13 +381,13 @@ namespace awkward {
     ///
     /// @note This function has not been implemented to handle Multi-GPU setups
     const IdentitiesPtr
-      copy_to(kernel::Lib ptr_lib) const;
+      copy_to(kernel::lib ptr_lib) const;
 
   private:
-    /// @brief See #ptr_lib.
-    const kernel::Lib ptr_lib_;
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;
+    /// @brief See #ptr_lib.
+    const kernel::lib ptr_lib_;
   };
 
 #if !defined AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE && !defined _MSC_VER

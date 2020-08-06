@@ -592,10 +592,15 @@ namespace awkward {
   }
 
   const ContentPtr
-  EmptyArray::copy_to(kernel::Lib ptr_lib) const {
+  EmptyArray::copy_to(kernel::lib ptr_lib) const {
     return std::make_shared<EmptyArray>(identities(),
                                         parameters());
   }
 
+  const ContentPtr
+  EmptyArray::numbers_to_type(const std::string& name) const {
+    return std::make_shared<EmptyArray>(identities(),
+                                        parameters());
+  }
 
 }

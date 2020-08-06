@@ -15,3 +15,11 @@ def test_cupy_interop():
     n = numpy.arange(10)
     cupy_index_arr = awkward1.layout.Index64.from_cupy(c)
     numpy_index_arr = awkward1.layout.Index64(n)
+
+    # GPU->CPU
+    assert awkward1.to_list(numpy.asarray(cupy_index_arr.copy_to("cpu"))) == awkward1.to_list(numpy.asarray(numpy_index_arr))
+    # CPU->CPU
+    assert awkward1.to_list(numpy.asarray(numpy_index_arr.copy_to("cpu"))) == awkward1.to_list(numpy.asarray(numpy_index_arr))
+    #CPU->GPU->CPU
+    assert awkward1.to_list(numpy.asarray(numpy_index_arr)) == awkward1.to_list(numpy.asarray(numpy_index_arr.copy_to("cuda").copy_to("cpu")))
+    

@@ -55,19 +55,12 @@ namespace awkward {
   Index::~Index() = default;
 
   template <typename T>
-  IndexOf<T>::IndexOf(int64_t length, kernel::Lib ptr_lib)
-    : ptr_lib_(ptr_lib)
-    , ptr_(kernel::ptr_alloc<T>(ptr_lib, length))
-    , offset_(0)
-    , length_(length) { }
-
-  template <typename T>
   IndexOf<T>::IndexOf(const std::shared_ptr<T>& ptr,
                       int64_t offset,
                       int64_t length,
-                      kernel::Lib ptr_lib)
-      : ptr_lib_(ptr_lib)
-      , ptr_(ptr)
+                      kernel::lib ptr_lib)
+      : ptr_(ptr)
+      , ptr_lib_(ptr_lib)
       , offset_(offset)
       , length_(length) { }
 
@@ -76,6 +69,19 @@ namespace awkward {
   IndexOf<T>::ptr() const {
     return ptr_;
   }
+
+  template <typename T>
+  T*
+  IndexOf<T>::data() const {
+    return ptr_.get() + offset_;
+  }
+
+  template <typename T>
+  IndexOf<T>::IndexOf(int64_t length, kernel::lib ptr_lib)
+    : ptr_(kernel::ptr_alloc<T>(ptr_lib, length))
+    , ptr_lib_(ptr_lib)
+    , offset_(0)
+    , length_(length) { }
 
   template <typename T>
   int64_t
@@ -148,15 +154,14 @@ namespace awkward {
         out << (int64_t) getitem_at_nowrap(i);
       }
     }
-    if(ptr_lib_ == kernel::Lib::cpu_kernels) {
-      out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
-          << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
-          << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
+    out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
+        << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
+        << reinterpret_cast<ssize_t>(ptr_.get());
+    if (ptr_lib_ == kernel::lib::cpu) {
+      out << "\"/>" << post;
     }
     else {
-      out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
-          << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
-          << reinterpret_cast<ssize_t>(ptr_.get()) << "\">";
+      out << "\">";
       out << kernellib_asstring("\n" + indent + std::string("    "), "", "\n");
       out << indent << "</" << classname() << ">" << post;
     }
@@ -168,13 +173,13 @@ namespace awkward {
   IndexOf<T>::kernellib_asstring(const std::string &indent,
                                  const std::string &pre,
                                  const std::string &post) const {
-    if(ptr_lib_ == kernel::Lib::cpu_kernels) {
+    if (ptr_lib_ == kernel::lib::cpu) {
       return "";
     }
     else {
       std::stringstream out;
       out << indent << pre << "<Lib name=\"";
-      if(ptr_lib_ == kernel::Lib::cuda_kernels) {
+      if (ptr_lib_ == kernel::lib::cuda) {
         out << "cuda\" " << "device_number=\"" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
         << "\" device_name=\"" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get()) << "\"";
       }
@@ -224,13 +229,20 @@ namespace awkward {
   template <typename T>
   T
   IndexOf<T>::getitem_at_nowrap(int64_t at) const {
-    return kernel::index_getitem_at_nowrap<T>(ptr_lib(), ptr_.get(), offset_, at);
+    return kernel::index_getitem_at_nowrap<T>(
+      ptr_lib(),
+      data(),
+      at);
   }
 
   template <typename T>
   void
   IndexOf<T>::setitem_at_nowrap(int64_t at, T value) const {
-    kernel::index_setitem_at_nowrap<T>(ptr_lib(), ptr_.get(), offset_, at, value);
+    kernel::index_setitem_at_nowrap<T>(
+      ptr_lib(),
+      data(),
+      at,
+      value);
   }
 
   template <typename T>
@@ -276,8 +288,12 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       kernel::array_deleter<int64_t>());
     if (length_ != 0) {
-      kernel::Index_to_Index64<int8_t>(ptr.get(), &ptr_.get()[(size_t)offset_],
-                                       length_);
+      struct Error err = kernel::Index_to_Index64<int8_t>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        &ptr_.get()[(size_t)offset_],
+        length_);
+      util::handle_error(err);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -288,8 +304,12 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       kernel::array_deleter<int64_t>());
     if (length_ != 0) {
-      kernel::Index_to_Index64<uint8_t>(ptr.get(), &ptr_.get()[(size_t)offset_],
-                                        length_);
+      struct Error err = kernel::Index_to_Index64<uint8_t>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        &ptr_.get()[(size_t)offset_],
+        length_);
+      util::handle_error(err);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -300,8 +320,12 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       kernel::array_deleter<int64_t>());
     if (length_ != 0) {
-      kernel::Index_to_Index64<int32_t>(ptr.get(),
-                                        &ptr_.get()[(size_t)offset_], length_);
+      struct Error err = kernel::Index_to_Index64<int32_t>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        &ptr_.get()[(size_t)offset_],
+        length_);
+      util::handle_error(err);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -312,9 +336,12 @@ namespace awkward {
       length_ == 0 ? nullptr : new int64_t[(size_t)length_],
       kernel::array_deleter<int64_t>());
     if (length_ != 0) {
-      kernel::Index_to_Index64<uint32_t>(ptr.get(),
-                                         &ptr_.get()[(size_t)offset_],
-                                         length_);
+      struct Error err = kernel::Index_to_Index64<uint32_t>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        &ptr_.get()[(size_t)offset_],
+        length_);
+      util::handle_error(err);
     }
     return IndexOf<int64_t>(ptr, 0, length_);
   }
@@ -339,14 +366,14 @@ namespace awkward {
   }
 
   template<typename T>
-  kernel::Lib IndexOf<T>::ptr_lib() const {
+  kernel::lib IndexOf<T>::ptr_lib() const {
     return ptr_lib_;
   }
 
   template<typename T>
   const IndexOf<T>
-  IndexOf<T>::copy_to(kernel::Lib ptr_lib) const {
-    if(ptr_lib == ptr_lib_) {
+  IndexOf<T>::copy_to(kernel::lib ptr_lib) const {
+    if (ptr_lib == ptr_lib_) {
       return *this;
     }
 
@@ -355,12 +382,12 @@ namespace awkward {
     Error err =  kernel::copy_to<T>(ptr_lib,
                                     ptr_lib_,
                                     ptr.get(),
-                                    ptr_.get(),
+                                    data(),
                                     length_);
     util::handle_error(err);
 
     return IndexOf<T>(ptr,
-                      offset(),
+                      0,
                       length(),
                       ptr_lib);
   }

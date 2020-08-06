@@ -104,7 +104,6 @@ ERROR awkward_index_carry(
   C* toindex,
   const C* fromindex,
   const T* carry,
-  int64_t fromindexoffset,
   int64_t lenfromindex,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
@@ -112,7 +111,7 @@ ERROR awkward_index_carry(
     if (j > lenfromindex) {
       return failure("index out of range", kSliceNone, j);
     }
-    toindex[i] = fromindex[(size_t)(fromindexoffset + j)];
+    toindex[i] = fromindex[(size_t)(j)];
   }
   return success();
 }
@@ -120,14 +119,12 @@ ERROR awkward_Index8_carry_64(
   int8_t* toindex,
   const int8_t* fromindex,
   const int64_t* carry,
-  int64_t fromindexoffset,
   int64_t lenfromindex,
   int64_t length) {
   return awkward_index_carry<int8_t, int64_t>(
     toindex,
     fromindex,
     carry,
-    fromindexoffset,
     lenfromindex,
     length);
 }
@@ -135,14 +132,12 @@ ERROR awkward_IndexU8_carry_64(
   uint8_t* toindex,
   const uint8_t* fromindex,
   const int64_t* carry,
-  int64_t fromindexoffset,
   int64_t lenfromindex,
   int64_t length) {
   return awkward_index_carry<uint8_t, int64_t>(
     toindex,
     fromindex,
     carry,
-    fromindexoffset,
     lenfromindex,
     length);
 }
@@ -150,14 +145,12 @@ ERROR awkward_Index32_carry_64(
   int32_t* toindex,
   const int32_t* fromindex,
   const int64_t* carry,
-  int64_t fromindexoffset,
   int64_t lenfromindex,
   int64_t length) {
   return awkward_index_carry<int32_t, int64_t>(
     toindex,
     fromindex,
     carry,
-    fromindexoffset,
     lenfromindex,
     length);
 }
@@ -165,14 +158,12 @@ ERROR awkward_IndexU32_carry_64(
   uint32_t* toindex,
   const uint32_t* fromindex,
   const int64_t* carry,
-  int64_t fromindexoffset,
   int64_t lenfromindex,
   int64_t length) {
   return awkward_index_carry<uint32_t, int64_t>(
     toindex,
     fromindex,
     carry,
-    fromindexoffset,
     lenfromindex,
     length);
 }
@@ -180,14 +171,12 @@ ERROR awkward_Index64_carry_64(
   int64_t* toindex,
   const int64_t* fromindex,
   const int64_t* carry,
-  int64_t fromindexoffset,
   int64_t lenfromindex,
   int64_t length) {
   return awkward_index_carry<int64_t, int64_t>(
     toindex,
     fromindex,
     carry,
-    fromindexoffset,
     lenfromindex,
     length);
 }
@@ -197,10 +186,9 @@ ERROR awkward_index_carry_nocheck(
   C* toindex,
   const C* fromindex,
   const T* carry,
-  int64_t fromindexoffset,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
-    toindex[i] = fromindex[(size_t)(fromindexoffset + carry[i])];
+    toindex[i] = fromindex[(size_t)(carry[i])];
   }
   return success();
 }
@@ -208,65 +196,55 @@ ERROR awkward_Index8_carry_nocheck_64(
   int8_t* toindex,
   const int8_t* fromindex,
   const int64_t* carry,
-  int64_t fromindexoffset,
   int64_t length) {
   return awkward_index_carry_nocheck<int8_t, int64_t>(
     toindex,
     fromindex,
     carry,
-    fromindexoffset,
     length);
 }
 ERROR awkward_IndexU8_carry_nocheck_64(
   uint8_t* toindex,
   const uint8_t* fromindex,
   const int64_t* carry,
-  int64_t fromindexoffset,
   int64_t length) {
   return awkward_index_carry_nocheck<uint8_t, int64_t>(
     toindex,
     fromindex,
     carry,
-    fromindexoffset,
     length);
 }
 ERROR awkward_Index32_carry_nocheck_64(
   int32_t* toindex,
   const int32_t* fromindex,
   const int64_t* carry,
-  int64_t fromindexoffset,
   int64_t length) {
   return awkward_index_carry_nocheck<int32_t, int64_t>(
     toindex,
     fromindex,
     carry,
-    fromindexoffset,
     length);
 }
 ERROR awkward_IndexU32_carry_nocheck_64(
   uint32_t* toindex,
   const uint32_t* fromindex,
   const int64_t* carry,
-  int64_t fromindexoffset,
   int64_t length) {
   return awkward_index_carry_nocheck<uint32_t, int64_t>(
     toindex,
     fromindex,
     carry,
-    fromindexoffset,
     length);
 }
 ERROR awkward_Index64_carry_nocheck_64(
   int64_t* toindex,
   const int64_t* fromindex,
   const int64_t* carry,
-  int64_t fromindexoffset,
   int64_t length) {
   return awkward_index_carry_nocheck<int64_t, int64_t>(
     toindex,
     fromindex,
     carry,
-    fromindexoffset,
     length);
 }
 
@@ -285,11 +263,12 @@ ERROR awkward_slicearray_ravel(
   else {
     for (T i = 0;  i < shape[0];  i++) {
       ERROR err =
-        awkward_slicearray_ravel<T>(&toptr[i*shape[1]],
-                                    &fromptr[i*strides[0]],
-                                    ndim - 1,
-                                    &shape[1],
-                                    &strides[1]);
+        awkward_slicearray_ravel<T>(
+          &toptr[i*shape[1]],
+          &fromptr[i*strides[0]],
+          ndim - 1,
+          &shape[1],
+          &strides[1]);
       if (err.str != nullptr) {
         return err;
       }
@@ -314,14 +293,12 @@ ERROR awkward_slicearray_ravel_64(
 ERROR awkward_slicemissing_check_same(
   bool* same,
   const int8_t* bytemask,
-  int64_t bytemaskoffset,
   const int64_t* missingindex,
-  int64_t missingindexoffset,
   int64_t length) {
   *same = true;
   for (int64_t i = 0;  i < length;  i++) {
-    bool left = (bytemask[bytemaskoffset + i] != 0);
-    bool right = (missingindex[missingindexoffset + i] < 0);
+    bool left = (bytemask[i] != 0);
+    bool right = (missingindex[i] < 0);
     if (left != right) {
       *same = false;
       return success();
@@ -367,7 +344,6 @@ ERROR awkward_Identities_getitem_carry(
   const ID* identitiesptr,
   const T* carryptr,
   int64_t lencarry,
-  int64_t offset,
   int64_t width,
   int64_t length) {
   for (int64_t i = 0;  i < lencarry;  i++) {
@@ -376,7 +352,7 @@ ERROR awkward_Identities_getitem_carry(
     }
     for (int64_t j = 0;  j < width;  j++) {
       newidentitiesptr[width*i + j] =
-        identitiesptr[offset + width*carryptr[i] + j];
+        identitiesptr[width*carryptr[i] + j];
     }
   }
   return success();
@@ -386,7 +362,6 @@ ERROR awkward_Identities32_getitem_carry_64(
   const int32_t* identitiesptr,
   const int64_t* carryptr,
   int64_t lencarry,
-  int64_t offset,
   int64_t width,
   int64_t length) {
   return awkward_Identities_getitem_carry<int32_t, int64_t>(
@@ -394,7 +369,6 @@ ERROR awkward_Identities32_getitem_carry_64(
     identitiesptr,
     carryptr,
     lencarry,
-    offset,
     width,
     length);
 }
@@ -403,7 +377,6 @@ ERROR awkward_Identities64_getitem_carry_64(
   const int64_t* identitiesptr,
   const int64_t* carryptr,
   int64_t lencarry,
-  int64_t offset,
   int64_t width,
   int64_t length) {
   return awkward_Identities_getitem_carry<int64_t, int64_t>(
@@ -411,7 +384,6 @@ ERROR awkward_Identities64_getitem_carry_64(
     identitiesptr,
     carryptr,
     lencarry,
-    offset,
     width,
     length);
 }
@@ -442,12 +414,9 @@ ERROR awkward_NumpyArray_contiguous_copy(
   const uint8_t* fromptr,
   int64_t len,
   int64_t stride,
-  int64_t offset,
   const T* pos) {
   for (int64_t i = 0;  i < len;  i++) {
-    memcpy(&toptr[i*stride],
-           &fromptr[offset + (int64_t)pos[i]],
-           (size_t)stride);
+    memcpy(&toptr[i*stride], &fromptr[pos[i]], (size_t)stride);
   }
   return success();
 }
@@ -456,14 +425,12 @@ ERROR awkward_NumpyArray_contiguous_copy_64(
   const uint8_t* fromptr,
   int64_t len,
   int64_t stride,
-  int64_t offset,
   const int64_t* pos) {
   return awkward_NumpyArray_contiguous_copy<int64_t>(
     toptr,
     fromptr,
     len,
     stride,
-    offset,
     pos);
 }
 
@@ -471,10 +438,10 @@ template <typename T>
 ERROR awkward_NumpyArray_contiguous_next(
   T* topos,
   const T* frompos,
-  int64_t len,
+  int64_t length,
   int64_t skip,
   int64_t stride) {
-  for (int64_t i = 0;  i < len;  i++) {
+  for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < skip;  j++) {
       topos[i*skip + j] = frompos[i] + j*stride;
     }
@@ -484,13 +451,13 @@ ERROR awkward_NumpyArray_contiguous_next(
 ERROR awkward_NumpyArray_contiguous_next_64(
   int64_t* topos,
   const int64_t* frompos,
-  int64_t len,
+  int64_t length,
   int64_t skip,
   int64_t stride) {
   return awkward_NumpyArray_contiguous_next<int64_t>(
     topos,
     frompos,
-    len,
+    length,
     skip,
     stride);
 }
@@ -501,12 +468,9 @@ ERROR awkward_NumpyArray_getitem_next_null(
   const uint8_t* fromptr,
   int64_t len,
   int64_t stride,
-  int64_t offset,
   const T* pos) {
   for (int64_t i = 0;  i < len;  i++) {
-    std::memcpy(&toptr[i*stride],
-                &fromptr[offset + pos[i]*stride],
-                (size_t)stride);
+    std::memcpy(&toptr[i*stride], &fromptr[pos[i]*stride], (size_t)stride);
   }
   return success();
 }
@@ -515,14 +479,12 @@ ERROR awkward_NumpyArray_getitem_next_null_64(
   const uint8_t* fromptr,
   int64_t len,
   int64_t stride,
-  int64_t offset,
   const int64_t* pos) {
   return awkward_NumpyArray_getitem_next_null(
     toptr,
     fromptr,
     len,
     stride,
-    offset,
     pos);
 }
 
@@ -694,12 +656,11 @@ ERROR awkward_NumpyArray_getitem_next_array_advanced_64(
 ERROR awkward_NumpyArray_getitem_boolean_numtrue(
   int64_t* numtrue,
   const int8_t* fromptr,
-  int64_t byteoffset,
   int64_t length,
   int64_t stride) {
   *numtrue = 0;
   for (int64_t i = 0;  i < length;  i += stride) {
-    *numtrue = *numtrue + (fromptr[byteoffset + i] != 0);
+    *numtrue = *numtrue + (fromptr[i] != 0);
   }
   return success();
 }
@@ -708,12 +669,11 @@ template <typename T>
 ERROR awkward_NumpyArray_getitem_boolean_nonzero(
   T* toptr,
   const int8_t* fromptr,
-  int64_t byteoffset,
   int64_t length,
   int64_t stride) {
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i += stride) {
-    if (fromptr[byteoffset + i] != 0) {
+    if (fromptr[i] != 0) {
       toptr[k] = i;
       k++;
     }
@@ -724,13 +684,11 @@ ERROR awkward_NumpyArray_getitem_boolean_nonzero(
 ERROR awkward_NumpyArray_getitem_boolean_nonzero_64(
   int64_t* toptr,
   const int8_t* fromptr,
-  int64_t byteoffset,
   int64_t length,
   int64_t stride) {
   return awkward_NumpyArray_getitem_boolean_nonzero<int64_t>(
     toptr,
     fromptr,
-    byteoffset,
     length,
     stride);
 }
@@ -741,11 +699,9 @@ ERROR awkward_ListArray_getitem_next_at(
   const C* fromstarts,
   const C* fromstops,
   int64_t lenstarts,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t at) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
-    int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
+    int64_t length = fromstops[i] - fromstarts[i];
     int64_t regular_at = at;
     if (regular_at < 0) {
       regular_at += length;
@@ -753,7 +709,7 @@ ERROR awkward_ListArray_getitem_next_at(
     if (!(0 <= regular_at  &&  regular_at < length)) {
       return failure("index out of range", i, at);
     }
-    tocarry[i] = fromstarts[startsoffset + i] + regular_at;
+    tocarry[i] = fromstarts[i] + regular_at;
   }
   return success();
 }
@@ -762,16 +718,12 @@ ERROR awkward_ListArray32_getitem_next_at_64(
   const int32_t* fromstarts,
   const int32_t* fromstops,
   int64_t lenstarts,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t at) {
   return awkward_ListArray_getitem_next_at<int32_t, int64_t>(
     tocarry,
     fromstarts,
     fromstops,
     lenstarts,
-    startsoffset,
-    stopsoffset,
     at);
 }
 ERROR awkward_ListArrayU32_getitem_next_at_64(
@@ -779,16 +731,12 @@ ERROR awkward_ListArrayU32_getitem_next_at_64(
   const uint32_t* fromstarts,
   const uint32_t* fromstops,
   int64_t lenstarts,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t at) {
   return awkward_ListArray_getitem_next_at<uint32_t, int64_t>(
     tocarry,
     fromstarts,
     fromstops,
     lenstarts,
-    startsoffset,
-    stopsoffset,
     at);
 }
 ERROR awkward_ListArray64_getitem_next_at_64(
@@ -796,16 +744,12 @@ ERROR awkward_ListArray64_getitem_next_at_64(
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t lenstarts,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t at) {
   return awkward_ListArray_getitem_next_at<int64_t, int64_t>(
     tocarry,
     fromstarts,
     fromstops,
     lenstarts,
-    startsoffset,
-    stopsoffset,
     at);
 }
 
@@ -815,14 +759,12 @@ ERROR awkward_ListArray_getitem_next_range_carrylength(
   const C* fromstarts,
   const C* fromstops,
   int64_t lenstarts,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t start,
   int64_t stop,
   int64_t step) {
   *carrylength = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {
-    int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
+    int64_t length = fromstops[i] - fromstarts[i];
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0,
@@ -846,8 +788,6 @@ ERROR awkward_ListArray32_getitem_next_range_carrylength(
   const int32_t* fromstarts,
   const int32_t* fromstops,
   int64_t lenstarts,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t start,
   int64_t stop,
   int64_t step) {
@@ -856,8 +796,6 @@ ERROR awkward_ListArray32_getitem_next_range_carrylength(
     fromstarts,
     fromstops,
     lenstarts,
-    startsoffset,
-    stopsoffset,
     start,
     stop,
     step);
@@ -867,8 +805,6 @@ ERROR awkward_ListArrayU32_getitem_next_range_carrylength(
   const uint32_t* fromstarts,
   const uint32_t* fromstops,
   int64_t lenstarts,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t start,
   int64_t stop,
   int64_t step) {
@@ -877,8 +813,6 @@ ERROR awkward_ListArrayU32_getitem_next_range_carrylength(
     fromstarts,
     fromstops,
     lenstarts,
-    startsoffset,
-    stopsoffset,
     start,
     stop,
     step);
@@ -888,8 +822,6 @@ ERROR awkward_ListArray64_getitem_next_range_carrylength(
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t lenstarts,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t start,
   int64_t stop,
   int64_t step) {
@@ -898,8 +830,6 @@ ERROR awkward_ListArray64_getitem_next_range_carrylength(
     fromstarts,
     fromstops,
     lenstarts,
-    startsoffset,
-    stopsoffset,
     start,
     stop,
     step);
@@ -912,8 +842,6 @@ ERROR awkward_ListArray_getitem_next_range(
   const C* fromstarts,
   const C* fromstops,
   int64_t lenstarts,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t start,
   int64_t stop,
   int64_t step) {
@@ -921,15 +849,14 @@ ERROR awkward_ListArray_getitem_next_range(
   tooffsets[0] = 0;
   if (step > 0) {
     for (int64_t i = 0;  i < lenstarts;  i++) {
-      int64_t length =
-        fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
+      int64_t length = fromstops[i] - fromstarts[i];
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0,
                                     start != kSliceNone, stop != kSliceNone,
                                     length);
       for (int64_t j = regular_start;  j < regular_stop;  j += step) {
-        tocarry[k] = fromstarts[startsoffset + i] + j;
+        tocarry[k] = fromstarts[i] + j;
         k++;
       }
       tooffsets[i + 1] = (C)k;
@@ -937,15 +864,14 @@ ERROR awkward_ListArray_getitem_next_range(
   }
   else {
     for (int64_t i = 0;  i < lenstarts;  i++) {
-      int64_t length =
-        fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
+      int64_t length = fromstops[i] - fromstarts[i];
       int64_t regular_start = start;
       int64_t regular_stop = stop;
       awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0,
                                     start != kSliceNone, stop != kSliceNone,
                                     length);
       for (int64_t j = regular_start;  j > regular_stop;  j += step) {
-        tocarry[k] = fromstarts[startsoffset + i] + j;
+        tocarry[k] = fromstarts[i] + j;
         k++;
       }
       tooffsets[i + 1] = (C)k;
@@ -959,8 +885,6 @@ ERROR awkward_ListArray32_getitem_next_range_64(
   const int32_t* fromstarts,
   const int32_t* fromstops,
   int64_t lenstarts,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t start,
   int64_t stop,
   int64_t step) {
@@ -970,8 +894,6 @@ ERROR awkward_ListArray32_getitem_next_range_64(
     fromstarts,
     fromstops,
     lenstarts,
-    startsoffset,
-    stopsoffset,
     start,
     stop,
     step);
@@ -982,8 +904,6 @@ ERROR awkward_ListArrayU32_getitem_next_range_64(
   const uint32_t* fromstarts,
   const uint32_t* fromstops,
   int64_t lenstarts,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t start,
   int64_t stop,
   int64_t step) {
@@ -993,8 +913,6 @@ ERROR awkward_ListArrayU32_getitem_next_range_64(
     fromstarts,
     fromstops,
     lenstarts,
-    startsoffset,
-    stopsoffset,
     start,
     stop,
     step);
@@ -1005,8 +923,6 @@ ERROR awkward_ListArray64_getitem_next_range_64(
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t lenstarts,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t start,
   int64_t stop,
   int64_t step) {
@@ -1016,8 +932,6 @@ ERROR awkward_ListArray64_getitem_next_range_64(
     fromstarts,
     fromstops,
     lenstarts,
-    startsoffset,
-    stopsoffset,
     start,
     stop,
     step);
@@ -1081,8 +995,7 @@ ERROR awkward_ListArray32_getitem_next_range_spreadadvanced_64(
   const int64_t* fromadvanced,
   const int32_t* fromoffsets,
   int64_t lenstarts) {
-  return awkward_ListArray_getitem_next_range_spreadadvanced<int32_t,
-                                                             int64_t>(
+  return awkward_ListArray_getitem_next_range_spreadadvanced<int32_t, int64_t>(
     toadvanced,
     fromadvanced,
     fromoffsets,
@@ -1093,8 +1006,7 @@ ERROR awkward_ListArrayU32_getitem_next_range_spreadadvanced_64(
   const int64_t* fromadvanced,
   const uint32_t* fromoffsets,
   int64_t lenstarts) {
-  return awkward_ListArray_getitem_next_range_spreadadvanced<uint32_t,
-                                                             int64_t>(
+  return awkward_ListArray_getitem_next_range_spreadadvanced<uint32_t, int64_t>(
     toadvanced,
     fromadvanced,
     fromoffsets,
@@ -1105,8 +1017,7 @@ ERROR awkward_ListArray64_getitem_next_range_spreadadvanced_64(
   const int64_t* fromadvanced,
   const int64_t* fromoffsets,
   int64_t lenstarts) {
-  return awkward_ListArray_getitem_next_range_spreadadvanced<int64_t,
-                                                             int64_t>(
+  return awkward_ListArray_getitem_next_range_spreadadvanced<int64_t, int64_t>(
     toadvanced,
     fromadvanced,
     fromoffsets,
@@ -1120,20 +1031,18 @@ ERROR awkward_ListArray_getitem_next_array(
   const C* fromstarts,
   const C* fromstops,
   const T* fromarray,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t lenstarts,
   int64_t lenarray,
   int64_t lencontent) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
-    if (fromstops[stopsoffset + i] < fromstarts[startsoffset + i]) {
+    if (fromstops[i] < fromstarts[i]) {
       return failure("stops[i] < starts[i]", i, kSliceNone);
     }
-    if (fromstarts[startsoffset + i] != fromstops[stopsoffset + i]  &&
-        fromstops[stopsoffset + i] > lencontent) {
+    if ((fromstarts[i] != fromstops[i])  &&
+        (fromstops[i] > lencontent)) {
       return failure("stops[i] > len(content)", i, kSliceNone);
     }
-    int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
+    int64_t length = fromstops[i] - fromstarts[i];
     for (int64_t j = 0;  j < lenarray;  j++) {
       int64_t regular_at = fromarray[j];
       if (regular_at < 0) {
@@ -1142,7 +1051,7 @@ ERROR awkward_ListArray_getitem_next_array(
       if (!(0 <= regular_at  &&  regular_at < length)) {
         return failure("index out of range", i, fromarray[j]);
       }
-      tocarry[i*lenarray + j] = fromstarts[startsoffset + i] + regular_at;
+      tocarry[i*lenarray + j] = fromstarts[i] + regular_at;
       toadvanced[i*lenarray + j] = j;
     }
   }
@@ -1154,8 +1063,6 @@ ERROR awkward_ListArray32_getitem_next_array_64(
   const int32_t* fromstarts,
   const int32_t* fromstops,
   const int64_t* fromarray,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t lenstarts,
   int64_t lenarray,
   int64_t lencontent) {
@@ -1165,8 +1072,6 @@ ERROR awkward_ListArray32_getitem_next_array_64(
     fromstarts,
     fromstops,
     fromarray,
-    startsoffset,
-    stopsoffset,
     lenstarts,
     lenarray,
     lencontent);
@@ -1177,8 +1082,6 @@ ERROR awkward_ListArrayU32_getitem_next_array_64(
   const uint32_t* fromstarts,
   const uint32_t* fromstops,
   const int64_t* fromarray,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t lenstarts,
   int64_t lenarray,
   int64_t lencontent) {
@@ -1188,8 +1091,6 @@ ERROR awkward_ListArrayU32_getitem_next_array_64(
     fromstarts,
     fromstops,
     fromarray,
-    startsoffset,
-    stopsoffset,
     lenstarts,
     lenarray,
     lencontent);
@@ -1200,8 +1101,6 @@ ERROR awkward_ListArray64_getitem_next_array_64(
   const int64_t* fromstarts,
   const int64_t* fromstops,
   const int64_t* fromarray,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t lenstarts,
   int64_t lenarray,
   int64_t lencontent) {
@@ -1211,8 +1110,6 @@ ERROR awkward_ListArray64_getitem_next_array_64(
     fromstarts,
     fromstops,
     fromarray,
-    startsoffset,
-    stopsoffset,
     lenstarts,
     lenarray,
     lencontent);
@@ -1226,20 +1123,18 @@ ERROR awkward_ListArray_getitem_next_array_advanced(
   const C* fromstops,
   const T* fromarray,
   const T* fromadvanced,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t lenstarts,
   int64_t lenarray,
   int64_t lencontent) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
-    if (fromstops[stopsoffset + i] < fromstarts[startsoffset + i]) {
+    if (fromstops[i] < fromstarts[i]) {
       return failure("stops[i] < starts[i]", i, kSliceNone);
     }
-    if (fromstarts[startsoffset + i] != fromstops[stopsoffset + i]  &&
-        fromstops[stopsoffset + i] > lencontent) {
+    if ((fromstarts[i] != fromstops[i])  &&
+        (fromstops[i] > lencontent)) {
       return failure("stops[i] > len(content)", i, kSliceNone);
     }
-    int64_t length = fromstops[stopsoffset + i] - fromstarts[startsoffset + i];
+    int64_t length = fromstops[i] - fromstarts[i];
     int64_t regular_at = fromarray[fromadvanced[i]];
     if (regular_at < 0) {
       regular_at += length;
@@ -1247,7 +1142,7 @@ ERROR awkward_ListArray_getitem_next_array_advanced(
     if (!(0 <= regular_at  &&  regular_at < length)) {
       return failure("index out of range", i, fromarray[fromadvanced[i]]);
     }
-    tocarry[i] = fromstarts[startsoffset + i] + regular_at;
+    tocarry[i] = fromstarts[i] + regular_at;
     toadvanced[i] = i;
   }
   return success();
@@ -1259,8 +1154,6 @@ ERROR awkward_ListArray32_getitem_next_array_advanced_64(
   const int32_t* fromstops,
   const int64_t* fromarray,
   const int64_t* fromadvanced,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t lenstarts,
   int64_t lenarray,
   int64_t lencontent) {
@@ -1271,8 +1164,6 @@ ERROR awkward_ListArray32_getitem_next_array_advanced_64(
     fromstops,
     fromarray,
     fromadvanced,
-    startsoffset,
-    stopsoffset,
     lenstarts,
     lenarray,
     lencontent);
@@ -1284,8 +1175,6 @@ ERROR awkward_ListArrayU32_getitem_next_array_advanced_64(
   const uint32_t* fromstops,
   const int64_t* fromarray,
   const int64_t* fromadvanced,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t lenstarts,
   int64_t lenarray,
   int64_t lencontent) {
@@ -1296,8 +1185,6 @@ ERROR awkward_ListArrayU32_getitem_next_array_advanced_64(
     fromstops,
     fromarray,
     fromadvanced,
-    startsoffset,
-    stopsoffset,
     lenstarts,
     lenarray,
     lencontent);
@@ -1309,8 +1196,6 @@ ERROR awkward_ListArray64_getitem_next_array_advanced_64(
   const int64_t* fromstops,
   const int64_t* fromarray,
   const int64_t* fromadvanced,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t lenstarts,
   int64_t lenarray,
   int64_t lencontent) {
@@ -1321,8 +1206,6 @@ ERROR awkward_ListArray64_getitem_next_array_advanced_64(
     fromstops,
     fromarray,
     fromadvanced,
-    startsoffset,
-    stopsoffset,
     lenstarts,
     lenarray,
     lencontent);
@@ -1335,16 +1218,14 @@ ERROR awkward_ListArray_getitem_carry(
   const C* fromstarts,
   const C* fromstops,
   const T* fromcarry,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t lenstarts,
   int64_t lencarry) {
   for (int64_t i = 0;  i < lencarry;  i++) {
     if (fromcarry[i] >= lenstarts) {
       return failure("index out of range", i, fromcarry[i]);
     }
-    tostarts[i] = (C)(fromstarts[startsoffset + fromcarry[i]]);
-    tostops[i] = (C)(fromstops[stopsoffset + fromcarry[i]]);
+    tostarts[i] = (C)(fromstarts[fromcarry[i]]);
+    tostops[i] = (C)(fromstops[fromcarry[i]]);
   }
   return success();
 }
@@ -1354,8 +1235,6 @@ ERROR awkward_ListArray32_getitem_carry_64(
   const int32_t* fromstarts,
   const int32_t* fromstops,
   const int64_t* fromcarry,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t lenstarts,
   int64_t lencarry) {
   return awkward_ListArray_getitem_carry<int32_t, int64_t>(
@@ -1364,8 +1243,6 @@ ERROR awkward_ListArray32_getitem_carry_64(
     fromstarts,
     fromstops,
     fromcarry,
-    startsoffset,
-    stopsoffset,
     lenstarts,
     lencarry);
 }
@@ -1375,8 +1252,6 @@ ERROR awkward_ListArrayU32_getitem_carry_64(
   const uint32_t* fromstarts,
   const uint32_t* fromstops,
   const int64_t* fromcarry,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t lenstarts,
   int64_t lencarry) {
   return awkward_ListArray_getitem_carry<uint32_t, int64_t>(
@@ -1385,8 +1260,6 @@ ERROR awkward_ListArrayU32_getitem_carry_64(
     fromstarts,
     fromstops,
     fromcarry,
-    startsoffset,
-    stopsoffset,
     lenstarts,
     lencarry);
 }
@@ -1396,8 +1269,6 @@ ERROR awkward_ListArray64_getitem_carry_64(
   const int64_t* fromstarts,
   const int64_t* fromstops,
   const int64_t* fromcarry,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t lenstarts,
   int64_t lencarry) {
   return awkward_ListArray_getitem_carry<int64_t, int64_t>(
@@ -1406,8 +1277,6 @@ ERROR awkward_ListArray64_getitem_carry_64(
     fromstarts,
     fromstops,
     fromcarry,
-    startsoffset,
-    stopsoffset,
     lenstarts,
     lencarry);
 }
@@ -1416,7 +1285,7 @@ template <typename T>
 ERROR awkward_RegularArray_getitem_next_at(
   T* tocarry,
   int64_t at,
-  int64_t len,
+  int64_t length,
   int64_t size) {
   int64_t regular_at = at;
   if (regular_at < 0) {
@@ -1425,7 +1294,7 @@ ERROR awkward_RegularArray_getitem_next_at(
   if (!(0 <= regular_at  &&  regular_at < size)) {
     return failure("index out of range", kSliceNone, at);
   }
-  for (int64_t i = 0;  i < len;  i++) {
+  for (int64_t i = 0;  i < length;  i++) {
     tocarry[i] = i*size + regular_at;
   }
   return success();
@@ -1433,12 +1302,12 @@ ERROR awkward_RegularArray_getitem_next_at(
 ERROR awkward_RegularArray_getitem_next_at_64(
   int64_t* tocarry,
   int64_t at,
-  int64_t len,
+  int64_t length,
   int64_t size) {
   return awkward_RegularArray_getitem_next_at<int64_t>(
     tocarry,
     at,
-    len,
+    length,
     size);
 }
 
@@ -1447,10 +1316,10 @@ ERROR awkward_RegularArray_getitem_next_range(
   T* tocarry,
   int64_t regular_start,
   int64_t step,
-  int64_t len,
+  int64_t length,
   int64_t size,
   int64_t nextsize) {
-  for (int64_t i = 0;  i < len;  i++) {
+  for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < nextsize;  j++) {
       tocarry[i*nextsize + j] = i*size + regular_start + j*step;
     }
@@ -1461,14 +1330,14 @@ ERROR awkward_RegularArray_getitem_next_range_64(
   int64_t* tocarry,
   int64_t regular_start,
   int64_t step,
-  int64_t len,
+  int64_t length,
   int64_t size,
   int64_t nextsize) {
   return awkward_RegularArray_getitem_next_range<int64_t>(
     tocarry,
     regular_start,
     step,
-    len,
+    length,
     size,
     nextsize);
 }
@@ -1477,9 +1346,9 @@ template <typename T>
 ERROR awkward_RegularArray_getitem_next_range_spreadadvanced(
   T* toadvanced,
   const T* fromadvanced,
-  int64_t len,
+  int64_t length,
   int64_t nextsize) {
-  for (int64_t i = 0;  i < len;  i++) {
+  for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < nextsize;  j++) {
       toadvanced[i*nextsize + j] = fromadvanced[i];
     }
@@ -1489,12 +1358,12 @@ ERROR awkward_RegularArray_getitem_next_range_spreadadvanced(
 ERROR awkward_RegularArray_getitem_next_range_spreadadvanced_64(
   int64_t* toadvanced,
   const int64_t* fromadvanced,
-  int64_t len,
+  int64_t length,
   int64_t nextsize) {
   return awkward_RegularArray_getitem_next_range_spreadadvanced<int64_t>(
     toadvanced,
     fromadvanced,
-    len,
+    length,
     nextsize);
 }
 
@@ -1532,10 +1401,10 @@ ERROR awkward_RegularArray_getitem_next_array(
   T* tocarry,
   T* toadvanced,
   const T* fromarray,
-  int64_t len,
+  int64_t length,
   int64_t lenarray,
   int64_t size) {
-  for (int64_t i = 0;  i < len;  i++) {
+  for (int64_t i = 0;  i < length;  i++) {
     for (int64_t j = 0;  j < lenarray;  j++) {
       tocarry[i*lenarray + j] = i*size + fromarray[j];
       toadvanced[i*lenarray + j] = j;
@@ -1547,14 +1416,14 @@ ERROR awkward_RegularArray_getitem_next_array_64(
   int64_t* tocarry,
   int64_t* toadvanced,
   const int64_t* fromarray,
-  int64_t len,
+  int64_t length,
   int64_t lenarray,
   int64_t size) {
   return awkward_RegularArray_getitem_next_array<int64_t>(
     tocarry,
     toadvanced,
     fromarray,
-    len,
+    length,
     lenarray,
     size);
 }
@@ -1565,10 +1434,10 @@ ERROR awkward_RegularArray_getitem_next_array_advanced(
   T* toadvanced,
   const T* fromadvanced,
   const T* fromarray,
-  int64_t len,
+  int64_t length,
   int64_t lenarray,
   int64_t size) {
-  for (int64_t i = 0;  i < len;  i++) {
+  for (int64_t i = 0;  i < length;  i++) {
     tocarry[i] = i*size + fromarray[fromadvanced[i]];
     toadvanced[i] = i;
   }
@@ -1579,7 +1448,7 @@ ERROR awkward_RegularArray_getitem_next_array_advanced_64(
   int64_t* toadvanced,
   const int64_t* fromadvanced,
   const int64_t* fromarray,
-  int64_t len,
+  int64_t length,
   int64_t lenarray,
   int64_t size) {
   return awkward_RegularArray_getitem_next_array_advanced<int64_t>(
@@ -1587,7 +1456,7 @@ ERROR awkward_RegularArray_getitem_next_array_advanced_64(
     toadvanced,
     fromadvanced,
     fromarray,
-    len,
+    length,
     lenarray,
     size);
 }
@@ -1621,11 +1490,10 @@ template <typename C>
 ERROR awkward_IndexedArray_numnull(
   int64_t* numnull,
   const C* fromindex,
-  int64_t indexoffset,
   int64_t lenindex) {
   *numnull = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {
-    if (fromindex[indexoffset + i] < 0) {
+    if (fromindex[i] < 0) {
       *numnull = *numnull + 1;
     }
   }
@@ -1634,34 +1502,28 @@ ERROR awkward_IndexedArray_numnull(
 ERROR awkward_IndexedArray32_numnull(
   int64_t* numnull,
   const int32_t* fromindex,
-  int64_t indexoffset,
   int64_t lenindex) {
   return awkward_IndexedArray_numnull<int32_t>(
     numnull,
     fromindex,
-    indexoffset,
     lenindex);
 }
 ERROR awkward_IndexedArrayU32_numnull(
   int64_t* numnull,
   const uint32_t* fromindex,
-  int64_t indexoffset,
   int64_t lenindex) {
   return awkward_IndexedArray_numnull<uint32_t>(
     numnull,
     fromindex,
-    indexoffset,
     lenindex);
 }
 ERROR awkward_IndexedArray64_numnull(
   int64_t* numnull,
   const int64_t* fromindex,
-  int64_t indexoffset,
   int64_t lenindex) {
   return awkward_IndexedArray_numnull<int64_t>(
     numnull,
     fromindex,
-    indexoffset,
     lenindex);
 }
 
@@ -1670,12 +1532,11 @@ ERROR awkward_IndexedArray_getitem_nextcarry_outindex(
   T* tocarry,
   C* toindex,
   const C* fromindex,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencontent) {
   int64_t k = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {
-    C j = fromindex[indexoffset + i];
+    C j = fromindex[i];
     if (j >= lencontent) {
       return failure("index out of range", i, j);
     }
@@ -1694,14 +1555,12 @@ ERROR awkward_IndexedArray32_getitem_nextcarry_outindex_64(
   int64_t* tocarry,
   int32_t* toindex,
   const int32_t* fromindex,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencontent) {
   return awkward_IndexedArray_getitem_nextcarry_outindex<int32_t, int64_t>(
     tocarry,
     toindex,
     fromindex,
-    indexoffset,
     lenindex,
     lencontent);
 }
@@ -1709,14 +1568,12 @@ ERROR awkward_IndexedArrayU32_getitem_nextcarry_outindex_64(
   int64_t* tocarry,
   uint32_t* toindex,
   const uint32_t* fromindex,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencontent) {
   return awkward_IndexedArray_getitem_nextcarry_outindex<uint32_t, int64_t>(
     tocarry,
     toindex,
     fromindex,
-    indexoffset,
     lenindex,
     lencontent);
 }
@@ -1724,14 +1581,12 @@ ERROR awkward_IndexedArray64_getitem_nextcarry_outindex_64(
   int64_t* tocarry,
   int64_t* toindex,
   const int64_t* fromindex,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencontent) {
   return awkward_IndexedArray_getitem_nextcarry_outindex<int64_t, int64_t>(
     tocarry,
     toindex,
     fromindex,
-    indexoffset,
     lenindex,
     lencontent);
 }
@@ -1741,12 +1596,11 @@ ERROR awkward_IndexedArray_getitem_nextcarry_outindex_mask(
   T* tocarry,
   T* toindex,
   const C* fromindex,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencontent) {
   int64_t k = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {
-    C j = fromindex[indexoffset + i];
+    C j = fromindex[i];
     if (j >= lencontent) {
       return failure("index out of range", i, j);
     }
@@ -1765,15 +1619,12 @@ ERROR awkward_IndexedArray32_getitem_nextcarry_outindex_mask_64(
   int64_t* tocarry,
   int64_t* toindex,
   const int32_t* fromindex,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencontent) {
-  return awkward_IndexedArray_getitem_nextcarry_outindex_mask<int32_t,
-                                                              int64_t>(
+  return awkward_IndexedArray_getitem_nextcarry_outindex_mask<int32_t, int64_t>(
     tocarry,
     toindex,
     fromindex,
-    indexoffset,
     lenindex,
     lencontent);
 }
@@ -1781,15 +1632,12 @@ ERROR awkward_IndexedArrayU32_getitem_nextcarry_outindex_mask_64(
   int64_t* tocarry,
   int64_t* toindex,
   const uint32_t* fromindex,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencontent) {
-  return awkward_IndexedArray_getitem_nextcarry_outindex_mask<uint32_t,
-                                                              int64_t>(
+  return awkward_IndexedArray_getitem_nextcarry_outindex_mask<uint32_t, int64_t>(
     tocarry,
     toindex,
     fromindex,
-    indexoffset,
     lenindex,
     lencontent);
 }
@@ -1797,15 +1645,12 @@ ERROR awkward_IndexedArray64_getitem_nextcarry_outindex_mask_64(
   int64_t* tocarry,
   int64_t* toindex,
   const int64_t* fromindex,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencontent) {
-  return awkward_IndexedArray_getitem_nextcarry_outindex_mask<int64_t,
-                                                              int64_t>(
+  return awkward_IndexedArray_getitem_nextcarry_outindex_mask<int64_t, int64_t>(
     tocarry,
     toindex,
     fromindex,
-    indexoffset,
     lenindex,
     lencontent);
 }
@@ -1815,19 +1660,17 @@ ERROR awkward_ListOffsetArray_getitem_adjust_offsets(
   T* tooffsets,
   T* tononzero,
   const T* fromoffsets,
-  int64_t offsetsoffset,
   int64_t length,
   const T* nonzero,
-  int64_t nonzerooffset,
   int64_t nonzerolength) {
   int64_t j = 0;
-  tooffsets[0] = fromoffsets[offsetsoffset + 0];
+  tooffsets[0] = fromoffsets[0];
   for (int64_t i = 0;  i < length;  i++) {
-    T slicestart = fromoffsets[offsetsoffset + i];
-    T slicestop = fromoffsets[offsetsoffset + i + 1];
+    T slicestart = fromoffsets[i];
+    T slicestop = fromoffsets[i + 1];
     int64_t count = 0;
-    while (j < nonzerolength  &&  nonzero[nonzerooffset + j] < slicestop) {
-      tononzero[j] = nonzero[nonzerooffset + j] - slicestart;
+    while (j < nonzerolength  &&  nonzero[j] < slicestop) {
+      tononzero[j] = nonzero[j] - slicestart;
       j++;
       count++;
     }
@@ -1839,19 +1682,15 @@ ERROR awkward_ListOffsetArray_getitem_adjust_offsets_64(
   int64_t* tooffsets,
   int64_t* tononzero,
   const int64_t* fromoffsets,
-  int64_t offsetsoffset,
   int64_t length,
   const int64_t* nonzero,
-  int64_t nonzerooffset,
   int64_t nonzerolength) {
   return awkward_ListOffsetArray_getitem_adjust_offsets<int64_t>(
     tooffsets,
     tononzero,
     fromoffsets,
-    offsetsoffset,
     length,
     nonzero,
-    nonzerooffset,
     nonzerolength);
 }
 
@@ -1860,39 +1699,35 @@ ERROR awkward_ListOffsetArray_getitem_adjust_offsets_index(
   T* tooffsets,
   T* tononzero,
   const T* fromoffsets,
-  int64_t offsetsoffset,
   int64_t length,
   const T* index,
-  int64_t indexoffset,
   int64_t indexlength,
   const T* nonzero,
-  int64_t nonzerooffset,
   int64_t nonzerolength,
   const int8_t* originalmask,
-  int64_t maskoffset,
   int64_t masklength) {
   int64_t k = 0;
-  tooffsets[0] = fromoffsets[offsetsoffset + 0];
+  tooffsets[0] = fromoffsets[0];
   for (int64_t i = 0;  i < length;  i++) {
-    T slicestart = fromoffsets[offsetsoffset + i];
-    T slicestop = fromoffsets[offsetsoffset + i + 1];
+    T slicestart = fromoffsets[i];
+    T slicestop = fromoffsets[i + 1];
     int64_t numnull = 0;
     for (int64_t j = slicestart;  j < slicestop;  j++) {
-      numnull += (originalmask[maskoffset + j] != 0 ? 1 : 0);
+      numnull += (originalmask[j] != 0 ? 1 : 0);
     }
     int64_t nullcount = 0;
     int64_t count = 0;
     while (k < indexlength  &&
-           ((index[indexoffset + k] < 0  && nullcount < numnull)  ||
-            (index[indexoffset + k] >= 0  &&
-             index[indexoffset + k] < nonzerolength  &&
-             nonzero[nonzerooffset + index[indexoffset + k]] < slicestop))) {
-      if (index[indexoffset + k] < 0) {
+           ((index[k] < 0  && nullcount < numnull)  ||
+            (index[k] >= 0  &&
+             index[k] < nonzerolength  &&
+             nonzero[index[k]] < slicestop))) {
+      if (index[k] < 0) {
         nullcount++;
       }
       else {
-        int64_t j = index[indexoffset + k];
-        tononzero[j] = nonzero[nonzerooffset + j] - slicestart;
+        int64_t j = index[k];
+        tononzero[j] = nonzero[j] - slicestart;
       }
       k++;
       count++;
@@ -1905,31 +1740,23 @@ ERROR awkward_ListOffsetArray_getitem_adjust_offsets_index_64(
   int64_t* tooffsets,
   int64_t* tononzero,
   const int64_t* fromoffsets,
-  int64_t offsetsoffset,
   int64_t length,
   const int64_t* index,
-  int64_t indexoffset,
   int64_t indexlength,
   const int64_t* nonzero,
-  int64_t nonzerooffset,
   int64_t nonzerolength,
   const int8_t* originalmask,
-  int64_t maskoffset,
   int64_t masklength) {
   return awkward_ListOffsetArray_getitem_adjust_offsets_index<int64_t>(
     tooffsets,
     tononzero,
     fromoffsets,
-    offsetsoffset,
     length,
     index,
-    indexoffset,
     indexlength,
     nonzero,
-    nonzerooffset,
     nonzerolength,
     originalmask,
-    maskoffset,
     masklength);
 }
 
@@ -1939,21 +1766,19 @@ ERROR awkward_IndexedArray_getitem_adjust_outindex(
   T* toindex,
   T* tononzero,
   const T* fromindex,
-  int64_t fromindexoffset,
   int64_t fromindexlength,
   const T* nonzero,
-  int64_t nonzerooffset,
   int64_t nonzerolength) {
   int64_t j = 0;
   int64_t k = 0;
   for (int64_t i = 0;  i < fromindexlength;  i++) {
-    T fromval = fromindex[fromindexoffset + i];
+    T fromval = fromindex[i];
     tomask[i] = (fromval < 0);
     if (fromval < 0) {
       toindex[k] = -1;
       k++;
     }
-    else if (j < nonzerolength  &&  fromval == nonzero[nonzerooffset + j]) {
+    else if (j < nonzerolength  &&  fromval == nonzero[j]) {
       tononzero[j] = fromval + (k - j);
       toindex[k] = j;
       j++;
@@ -1967,20 +1792,16 @@ ERROR awkward_IndexedArray_getitem_adjust_outindex_64(
   int64_t* toindex,
   int64_t* tononzero,
   const int64_t* fromindex,
-  int64_t fromindexoffset,
   int64_t fromindexlength,
   const int64_t* nonzero,
-  int64_t nonzerooffset,
   int64_t nonzerolength) {
   return awkward_IndexedArray_getitem_adjust_outindex<int64_t>(
     tomask,
     toindex,
     tononzero,
     fromindex,
-    fromindexoffset,
     fromindexlength,
     nonzero,
-    nonzerooffset,
     nonzerolength);
 }
 
@@ -1988,12 +1809,11 @@ template <typename C, typename T>
 ERROR awkward_IndexedArray_getitem_nextcarry(
   T* tocarry,
   const C* fromindex,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencontent) {
   int64_t k = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {
-    C j = fromindex[indexoffset + i];
+    C j = fromindex[i];
     if (j < 0  ||  j >= lencontent) {
       return failure("index out of range", i, j);
     }
@@ -2007,39 +1827,33 @@ ERROR awkward_IndexedArray_getitem_nextcarry(
 ERROR awkward_IndexedArray32_getitem_nextcarry_64(
   int64_t* tocarry,
   const int32_t* fromindex,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencontent) {
   return awkward_IndexedArray_getitem_nextcarry<int32_t, int64_t>(
     tocarry,
     fromindex,
-    indexoffset,
     lenindex,
     lencontent);
 }
 ERROR awkward_IndexedArrayU32_getitem_nextcarry_64(
   int64_t* tocarry,
   const uint32_t* fromindex,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencontent) {
   return awkward_IndexedArray_getitem_nextcarry<uint32_t, int64_t>(
     tocarry,
     fromindex,
-    indexoffset,
     lenindex,
     lencontent);
 }
 ERROR awkward_IndexedArray64_getitem_nextcarry_64(
   int64_t* tocarry,
   const int64_t* fromindex,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencontent) {
   return awkward_IndexedArray_getitem_nextcarry<int64_t, int64_t>(
     tocarry,
     fromindex,
-    indexoffset,
     lenindex,
     lencontent);
 }
@@ -2049,14 +1863,13 @@ ERROR awkward_IndexedArray_getitem_carry(
   C* toindex,
   const C* fromindex,
   const T* fromcarry,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencarry) {
   for (int64_t i = 0;  i < lencarry;  i++) {
     if (fromcarry[i] >= lenindex) {
       return failure("index out of range", i, fromcarry[i]);
     }
-    toindex[i] = (C)(fromindex[indexoffset + fromcarry[i]]);
+    toindex[i] = (C)(fromindex[fromcarry[i]]);
   }
   return success();
 }
@@ -2064,14 +1877,12 @@ ERROR awkward_IndexedArray32_getitem_carry_64(
   int32_t* toindex,
   const int32_t* fromindex,
   const int64_t* fromcarry,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencarry) {
   return awkward_IndexedArray_getitem_carry<int32_t, int64_t>(
     toindex,
     fromindex,
     fromcarry,
-    indexoffset,
     lenindex,
     lencarry);
 }
@@ -2079,14 +1890,12 @@ ERROR awkward_IndexedArrayU32_getitem_carry_64(
   uint32_t* toindex,
   const uint32_t* fromindex,
   const int64_t* fromcarry,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencarry) {
   return awkward_IndexedArray_getitem_carry<uint32_t, int64_t>(
     toindex,
     fromindex,
     fromcarry,
-    indexoffset,
     lenindex,
     lencarry);
 }
@@ -2094,14 +1903,12 @@ ERROR awkward_IndexedArray64_getitem_carry_64(
   int64_t* toindex,
   const int64_t* fromindex,
   const int64_t* fromcarry,
-  int64_t indexoffset,
   int64_t lenindex,
   int64_t lencarry) {
   return awkward_IndexedArray_getitem_carry<int64_t, int64_t>(
     toindex,
     fromindex,
     fromcarry,
-    indexoffset,
     lenindex,
     lencarry);
 }
@@ -2110,11 +1917,10 @@ template <typename C>
 ERROR awkward_UnionArray_regular_index_getsize(
   int64_t* size,
   const C* fromtags,
-  int64_t tagsoffset,
   int64_t length) {
   *size = 0;
   for (int64_t i = 0;  i < length;  i++) {
-    int64_t tag = (int64_t)fromtags[tagsoffset + i];
+    int64_t tag = (int64_t)fromtags[i];
     if (*size < tag) {
       *size = tag;
     }
@@ -2126,12 +1932,10 @@ ERROR awkward_UnionArray_regular_index_getsize(
 ERROR awkward_UnionArray8_regular_index_getsize(
   int64_t* size,
   const int8_t* fromtags,
-  int64_t tagsoffset,
   int64_t length) {
   return awkward_UnionArray_regular_index_getsize<int8_t>(
     size,
     fromtags,
-    tagsoffset,
     length);
 }
 
@@ -2141,14 +1945,13 @@ ERROR awkward_UnionArray_regular_index(
   I* current,
   int64_t size,
   const C* fromtags,
-  int64_t tagsoffset,
   int64_t length) {
   int64_t count = 0;
   for (int64_t k = 0;  k < size;  k++) {
     current[k] = 0;
   }
   for (int64_t i = 0;  i < length;  i++) {
-    C tag = fromtags[tagsoffset + i];
+    C tag = fromtags[i];
     toindex[(size_t)i] = current[(size_t)tag];
     current[(size_t)tag]++;
   }
@@ -2159,14 +1962,12 @@ ERROR awkward_UnionArray8_32_regular_index(
   int32_t* current,
   int64_t size,
   const int8_t* fromtags,
-  int64_t tagsoffset,
   int64_t length) {
   return awkward_UnionArray_regular_index<int8_t, int32_t>(
     toindex,
     current,
     size,
     fromtags,
-    tagsoffset,
     length);
 }
 ERROR awkward_UnionArray8_U32_regular_index(
@@ -2174,14 +1975,12 @@ ERROR awkward_UnionArray8_U32_regular_index(
   uint32_t* current,
   int64_t size,
   const int8_t* fromtags,
-  int64_t tagsoffset,
   int64_t length) {
   return awkward_UnionArray_regular_index<int8_t, uint32_t>(
     toindex,
     current,
     size,
     fromtags,
-    tagsoffset,
     length);
 }
 ERROR awkward_UnionArray8_64_regular_index(
@@ -2189,14 +1988,12 @@ ERROR awkward_UnionArray8_64_regular_index(
   int64_t* current,
   int64_t size,
   const int8_t* fromtags,
-  int64_t tagsoffset,
   int64_t length) {
   return awkward_UnionArray_regular_index<int8_t, int64_t>(
     toindex,
     current,
     size,
     fromtags,
-    tagsoffset,
     length);
 }
 
@@ -2205,15 +2002,13 @@ ERROR awkward_UnionArray_project(
   int64_t* lenout,
   T* tocarry,
   const C* fromtags,
-  int64_t tagsoffset,
   const I* fromindex,
-  int64_t indexoffset,
   int64_t length,
   int64_t which) {
   *lenout = 0;
   for (int64_t i = 0;  i < length;  i++) {
-    if (fromtags[tagsoffset + i] == which) {
-      tocarry[(size_t)(*lenout)] = fromindex[indexoffset + i];
+    if (fromtags[i] == which) {
+      tocarry[(size_t)(*lenout)] = fromindex[i];
       *lenout = *lenout + 1;
     }
   }
@@ -2223,18 +2018,14 @@ ERROR awkward_UnionArray8_32_project_64(
   int64_t* lenout,
   int64_t* tocarry,
   const int8_t* fromtags,
-  int64_t tagsoffset,
   const int32_t* fromindex,
-  int64_t indexoffset,
   int64_t length,
   int64_t which) {
   return awkward_UnionArray_project<int64_t, int8_t, int32_t>(
     lenout,
     tocarry,
     fromtags,
-    tagsoffset,
     fromindex,
-    indexoffset,
     length,
     which);
 }
@@ -2242,18 +2033,14 @@ ERROR awkward_UnionArray8_U32_project_64(
   int64_t* lenout,
   int64_t* tocarry,
   const int8_t* fromtags,
-  int64_t tagsoffset,
   const uint32_t* fromindex,
-  int64_t indexoffset,
   int64_t length,
   int64_t which) {
   return awkward_UnionArray_project<int64_t, int8_t, uint32_t>(
     lenout,
     tocarry,
     fromtags,
-    tagsoffset,
     fromindex,
-    indexoffset,
     length,
     which);
 }
@@ -2261,18 +2048,14 @@ ERROR awkward_UnionArray8_64_project_64(
   int64_t* lenout,
   int64_t* tocarry,
   const int8_t* fromtags,
-  int64_t tagsoffset,
   const int64_t* fromindex,
-  int64_t indexoffset,
   int64_t length,
   int64_t which) {
   return awkward_UnionArray_project<int64_t, int8_t, int64_t>(
     lenout,
     tocarry,
     fromtags,
-    tagsoffset,
     fromindex,
-    indexoffset,
     length,
     which);
 }
@@ -2281,13 +2064,12 @@ template <typename T>
 ERROR awkward_missing_repeat(
   T* outindex,
   const T* index,
-  int64_t indexoffset,
   int64_t indexlength,
   int64_t repetitions,
   int64_t regularsize) {
   for (int64_t i = 0;  i < repetitions;  i++) {
     for (int64_t j = 0;  j < indexlength;  j++) {
-      T base = index[indexoffset + j];
+      T base = index[j];
       outindex[i*indexlength + j] = base + (base >= 0 ? i*regularsize : 0);
     }
   }
@@ -2297,14 +2079,12 @@ ERROR awkward_missing_repeat(
 ERROR awkward_missing_repeat_64(
   int64_t* outindex,
   const int64_t* index,
-  int64_t indexoffset,
   int64_t indexlength,
   int64_t repetitions,
   int64_t regularsize) {
   return awkward_missing_repeat<int64_t>(
     outindex,
     index,
-    indexoffset,
     indexlength,
     repetitions,
     regularsize);
@@ -2346,14 +2126,12 @@ ERROR awkward_ListArray_getitem_jagged_expand(
   const T* singleoffsets,
   T* tocarry,
   const C* fromstarts,
-  int64_t fromstartsoffset,
   const C* fromstops,
-  int64_t fromstopsoffset,
   int64_t jaggedsize,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
-    C start = fromstarts[fromstartsoffset + i];
-    C stop = fromstops[fromstopsoffset + i];
+    C start = fromstarts[i];
+    C stop = fromstops[i];
     if (stop < start) {
       return failure("stops[i] < starts[i]", i, kSliceNone);
     }
@@ -2375,9 +2153,7 @@ ERROR awkward_ListArray32_getitem_jagged_expand_64(
   const int64_t* singleoffsets,
   int64_t* tocarry,
   const int32_t* fromstarts,
-  int64_t fromstartsoffset,
   const int32_t* fromstops,
-  int64_t fromstopsoffset,
   int64_t jaggedsize,
   int64_t length) {
   return awkward_ListArray_getitem_jagged_expand<int32_t, int64_t>(
@@ -2386,9 +2162,7 @@ ERROR awkward_ListArray32_getitem_jagged_expand_64(
     singleoffsets,
     tocarry,
     fromstarts,
-    fromstartsoffset,
     fromstops,
-    fromstopsoffset,
     jaggedsize,
     length);
 }
@@ -2398,9 +2172,7 @@ ERROR awkward_ListArrayU32_getitem_jagged_expand_64(
   const int64_t* singleoffsets,
   int64_t* tocarry,
   const uint32_t* fromstarts,
-  int64_t fromstartsoffset,
   const uint32_t* fromstops,
-  int64_t fromstopsoffset,
   int64_t jaggedsize,
   int64_t length) {
   return awkward_ListArray_getitem_jagged_expand<uint32_t, int64_t>(
@@ -2409,9 +2181,7 @@ ERROR awkward_ListArrayU32_getitem_jagged_expand_64(
     singleoffsets,
     tocarry,
     fromstarts,
-    fromstartsoffset,
     fromstops,
-    fromstopsoffset,
     jaggedsize,
     length);
 }
@@ -2421,9 +2191,7 @@ ERROR awkward_ListArray64_getitem_jagged_expand_64(
   const int64_t* singleoffsets,
   int64_t* tocarry,
   const int64_t* fromstarts,
-  int64_t fromstartsoffset,
   const int64_t* fromstops,
-  int64_t fromstopsoffset,
   int64_t jaggedsize,
   int64_t length) {
   return awkward_ListArray_getitem_jagged_expand<int64_t, int64_t>(
@@ -2432,9 +2200,7 @@ ERROR awkward_ListArray64_getitem_jagged_expand_64(
     singleoffsets,
     tocarry,
     fromstarts,
-    fromstartsoffset,
     fromstops,
-    fromstopsoffset,
     jaggedsize,
     length);
 }
@@ -2443,30 +2209,23 @@ template <typename T>
 ERROR awkward_ListArray_getitem_jagged_carrylen(
   int64_t* carrylen,
   const T* slicestarts,
-  int64_t slicestartsoffset,
   const T* slicestops,
-  int64_t slicestopsoffset,
   int64_t sliceouterlen) {
   *carrylen = 0;
   for (int64_t i = 0;  i < sliceouterlen;  i++) {
-    *carrylen = *carrylen + (int64_t)(slicestops[slicestopsoffset + i] -
-                                      slicestarts[slicestartsoffset + i]);
+    *carrylen = *carrylen + (int64_t)(slicestops[i] - slicestarts[i]);
   }
   return success();
 }
 ERROR awkward_ListArray_getitem_jagged_carrylen_64(
   int64_t* carrylen,
   const int64_t* slicestarts,
-  int64_t slicestartsoffset,
   const int64_t* slicestops,
-  int64_t slicestopsoffset,
   int64_t sliceouterlen) {
   return awkward_ListArray_getitem_jagged_carrylen<int64_t>(
     carrylen,
     slicestarts,
-    slicestartsoffset,
     slicestops,
-    slicestopsoffset,
     sliceouterlen);
 }
 
@@ -2475,22 +2234,17 @@ ERROR awkward_ListArray_getitem_jagged_apply(
   T* tooffsets,
   T* tocarry,
   const T* slicestarts,
-  int64_t slicestartsoffset,
   const T* slicestops,
-  int64_t slicestopsoffset,
   int64_t sliceouterlen,
   const T* sliceindex,
-  int64_t sliceindexoffset,
   int64_t sliceinnerlen,
   const C* fromstarts,
-  int64_t fromstartsoffset,
   const C* fromstops,
-  int64_t fromstopsoffset,
   int64_t contentlen) {
   int64_t k = 0;
   for (int64_t i = 0;  i < sliceouterlen;  i++) {
-    T slicestart = slicestarts[slicestartsoffset + i];
-    T slicestop = slicestops[slicestopsoffset + i];
+    T slicestart = slicestarts[i];
+    T slicestop = slicestops[i];
     tooffsets[i] = (T)k;
     if (slicestart != slicestop) {
       if (slicestop < slicestart) {
@@ -2500,8 +2254,8 @@ ERROR awkward_ListArray_getitem_jagged_apply(
         return failure(
           "jagged slice's offsets extend beyond its content", i, slicestop);
       }
-      int64_t start = (int64_t)fromstarts[fromstartsoffset + i];
-      int64_t stop = (int64_t)fromstops[fromstopsoffset + i];
+      int64_t start = (int64_t)fromstarts[i];
+      int64_t stop = (int64_t)fromstops[i];
       if (stop < start) {
         return failure("stops[i] < starts[i]", i, kSliceNone);
       }
@@ -2510,7 +2264,7 @@ ERROR awkward_ListArray_getitem_jagged_apply(
       }
       int64_t count = stop - start;
       for (int64_t j = slicestart;  j < slicestop;  j++) {
-        int64_t index = (int64_t)sliceindex[sliceindexoffset + j];
+        int64_t index = (int64_t)sliceindex[j];
         if (index < 0) {
           index += count;
         }
@@ -2518,7 +2272,7 @@ ERROR awkward_ListArray_getitem_jagged_apply(
           return failure(
             "index out of range",
             i,
-            (int64_t)sliceindex[sliceindexoffset + j]);
+            (int64_t)sliceindex[j]);
         }
         tocarry[k] = start + index;
         k++;
@@ -2532,99 +2286,69 @@ ERROR awkward_ListArray32_getitem_jagged_apply_64(
   int64_t* tooffsets,
   int64_t* tocarry,
   const int64_t* slicestarts,
-  int64_t slicestartsoffset,
   const int64_t* slicestops,
-  int64_t slicestopsoffset,
   int64_t sliceouterlen,
   const int64_t* sliceindex,
-  int64_t sliceindexoffset,
   int64_t sliceinnerlen,
   const int32_t* fromstarts,
-  int64_t fromstartsoffset,
   const int32_t* fromstops,
-  int64_t fromstopsoffset,
   int64_t contentlen) {
   return awkward_ListArray_getitem_jagged_apply<int32_t, int64_t>(
     tooffsets,
     tocarry,
     slicestarts,
-    slicestartsoffset,
     slicestops,
-    slicestopsoffset,
     sliceouterlen,
     sliceindex,
-    sliceindexoffset,
     sliceinnerlen,
     fromstarts,
-    fromstartsoffset,
     fromstops,
-    fromstopsoffset,
     contentlen);
 }
 ERROR awkward_ListArrayU32_getitem_jagged_apply_64(
   int64_t* tooffsets,
   int64_t* tocarry,
   const int64_t* slicestarts,
-  int64_t slicestartsoffset,
   const int64_t* slicestops,
-  int64_t slicestopsoffset,
   int64_t sliceouterlen,
   const int64_t* sliceindex,
-  int64_t sliceindexoffset,
   int64_t sliceinnerlen,
   const uint32_t* fromstarts,
-  int64_t fromstartsoffset,
   const uint32_t* fromstops,
-  int64_t fromstopsoffset,
   int64_t contentlen) {
   return awkward_ListArray_getitem_jagged_apply<uint32_t, int64_t>(
     tooffsets,
     tocarry,
     slicestarts,
-    slicestartsoffset,
     slicestops,
-    slicestopsoffset,
     sliceouterlen,
     sliceindex,
-    sliceindexoffset,
     sliceinnerlen,
     fromstarts,
-    fromstartsoffset,
     fromstops,
-    fromstopsoffset,
     contentlen);
 }
 ERROR awkward_ListArray64_getitem_jagged_apply_64(
   int64_t* tooffsets,
   int64_t* tocarry,
   const int64_t* slicestarts,
-  int64_t slicestartsoffset,
   const int64_t* slicestops,
-  int64_t slicestopsoffset,
   int64_t sliceouterlen,
   const int64_t* sliceindex,
-  int64_t sliceindexoffset,
   int64_t sliceinnerlen,
   const int64_t* fromstarts,
-  int64_t fromstartsoffset,
   const int64_t* fromstops,
-  int64_t fromstopsoffset,
   int64_t contentlen) {
   return awkward_ListArray_getitem_jagged_apply<int64_t, int64_t>(
     tooffsets,
     tocarry,
     slicestarts,
-    slicestartsoffset,
     slicestops,
-    slicestopsoffset,
     sliceouterlen,
     sliceindex,
-    sliceindexoffset,
     sliceinnerlen,
     fromstarts,
-    fromstartsoffset,
     fromstops,
-    fromstopsoffset,
     contentlen);
 }
 
@@ -2632,17 +2356,14 @@ template <typename T>
 ERROR awkward_ListArray_getitem_jagged_numvalid(
   int64_t* numvalid,
   const T* slicestarts,
-  int64_t slicestartsoffset,
   const T* slicestops,
-  int64_t slicestopsoffset,
   int64_t length,
   const T* missing,
-  int64_t missingoffset,
   int64_t missinglength) {
   *numvalid = 0;
   for (int64_t i = 0;  i < length;  i++) {
-    T slicestart = slicestarts[slicestartsoffset + i];
-    T slicestop = slicestops[slicestopsoffset + i];
+    T slicestart = slicestarts[i];
+    T slicestop = slicestops[i];
     if (slicestart != slicestop) {
       if (slicestop < slicestart) {
         return failure("jagged slice's stops[i] < starts[i]", i, kSliceNone);
@@ -2652,7 +2373,7 @@ ERROR awkward_ListArray_getitem_jagged_numvalid(
           "jagged slice's offsets extend beyond its content", i, slicestop);
       }
       for (int64_t j = slicestart;  j < slicestop;  j++) {
-        *numvalid = *numvalid + (missing[missingoffset + j] >= 0 ? 1 : 0);
+        *numvalid = *numvalid + (missing[j] >= 0 ? 1 : 0);
       }
     }
   }
@@ -2661,22 +2382,16 @@ ERROR awkward_ListArray_getitem_jagged_numvalid(
 ERROR awkward_ListArray_getitem_jagged_numvalid_64(
   int64_t* numvalid,
   const int64_t* slicestarts,
-  int64_t slicestartsoffset,
   const int64_t* slicestops,
-  int64_t slicestopsoffset,
   int64_t length,
   const int64_t* missing,
-  int64_t missingoffset,
   int64_t missinglength) {
   return awkward_ListArray_getitem_jagged_numvalid<int64_t>(
     numvalid,
     slicestarts,
-    slicestartsoffset,
     slicestops,
-    slicestopsoffset,
     length,
     missing,
-    missingoffset,
     missinglength);
 }
 
@@ -2686,28 +2401,25 @@ ERROR awkward_ListArray_getitem_jagged_shrink(
   T* tosmalloffsets,
   T* tolargeoffsets,
   const T* slicestarts,
-  int64_t slicestartsoffset,
   const T* slicestops,
-  int64_t slicestopsoffset,
   int64_t length,
-  const T* missing,
-  int64_t missingoffset) {
+  const T* missing) {
   int64_t k = 0;
   if (length == 0) {
     tosmalloffsets[0] = 0;
     tolargeoffsets[0] = 0;
   }
   else {
-    tosmalloffsets[0] = slicestarts[slicestartsoffset + 0];
-    tolargeoffsets[0] = slicestarts[slicestartsoffset + 0];
+    tosmalloffsets[0] = slicestarts[0];
+    tolargeoffsets[0] = slicestarts[0];
   }
   for (int64_t i = 0;  i < length;  i++) {
-    T slicestart = slicestarts[slicestartsoffset + i];
-    T slicestop = slicestops[slicestopsoffset + i];
+    T slicestart = slicestarts[i];
+    T slicestop = slicestops[i];
     if (slicestart != slicestop) {
       T smallcount = 0;
       for (int64_t j = slicestart;  j < slicestop;  j++) {
-        if (missing[missingoffset + j] >= 0) {
+        if (missing[j] >= 0) {
           tocarry[k] = j;
           k++;
           smallcount++;
@@ -2727,48 +2439,38 @@ ERROR awkward_ListArray_getitem_jagged_shrink_64(
   int64_t* tosmalloffsets,
   int64_t* tolargeoffsets,
   const int64_t* slicestarts,
-  int64_t slicestartsoffset,
   const int64_t* slicestops,
-  int64_t slicestopsoffset,
   int64_t length,
-  const int64_t* missing,
-  int64_t missingoffset) {
+  const int64_t* missing) {
   return awkward_ListArray_getitem_jagged_shrink<int64_t>(
     tocarry,
     tosmalloffsets,
     tolargeoffsets,
     slicestarts,
-    slicestartsoffset,
     slicestops,
-    slicestopsoffset,
     length,
-    missing,
-    missingoffset);
+    missing);
 }
 
 template <typename C, typename T>
 ERROR awkward_ListArray_getitem_jagged_descend(
   T* tooffsets,
   const T* slicestarts,
-  int64_t slicestartsoffset,
   const T* slicestops,
-  int64_t slicestopsoffset,
   int64_t sliceouterlen,
   const C* fromstarts,
-  int64_t fromstartsoffset,
-  const C* fromstops,
-  int64_t fromstopsoffset) {
+  const C* fromstops) {
   if (sliceouterlen == 0) {
     tooffsets[0] = 0;
   }
   else {
-    tooffsets[0] = slicestarts[slicestartsoffset + 0];
+    tooffsets[0] = slicestarts[0];
   }
   for (int64_t i = 0;  i < sliceouterlen;  i++) {
-    int64_t slicecount = (int64_t)(slicestops[slicestopsoffset + i] -
-                                   slicestarts[slicestartsoffset + i]);
-    int64_t count = (int64_t)(fromstops[fromstopsoffset + i] -
-                              fromstarts[fromstartsoffset + i]);
+    int64_t slicecount = (int64_t)(slicestops[i] -
+                                   slicestarts[i]);
+    int64_t count = (int64_t)(fromstops[i] -
+                              fromstarts[i]);
     if (slicecount != count) {
       return failure(
         "jagged slice inner length differs from array inner length",
@@ -2782,201 +2484,155 @@ ERROR awkward_ListArray_getitem_jagged_descend(
 ERROR awkward_ListArray32_getitem_jagged_descend_64(
   int64_t* tooffsets,
   const int64_t* slicestarts,
-  int64_t slicestartsoffset,
   const int64_t* slicestops,
-  int64_t slicestopsoffset,
   int64_t sliceouterlen,
   const int32_t* fromstarts,
-  int64_t fromstartsoffset,
-  const int32_t* fromstops,
-  int64_t fromstopsoffset) {
+  const int32_t* fromstops) {
   return awkward_ListArray_getitem_jagged_descend<int32_t, int64_t>(
     tooffsets,
     slicestarts,
-    slicestartsoffset,
     slicestops,
-    slicestopsoffset,
     sliceouterlen,
     fromstarts,
-    fromstartsoffset,
-    fromstops,
-    fromstopsoffset);
+    fromstops);
 }
 ERROR awkward_ListArrayU32_getitem_jagged_descend_64(
   int64_t* tooffsets,
   const int64_t* slicestarts,
-  int64_t slicestartsoffset,
   const int64_t* slicestops,
-  int64_t slicestopsoffset,
   int64_t sliceouterlen,
   const uint32_t* fromstarts,
-  int64_t fromstartsoffset,
-  const uint32_t* fromstops,
-  int64_t fromstopsoffset) {
+  const uint32_t* fromstops) {
   return awkward_ListArray_getitem_jagged_descend<uint32_t, int64_t>(
     tooffsets,
     slicestarts,
-    slicestartsoffset,
     slicestops,
-    slicestopsoffset,
     sliceouterlen,
     fromstarts,
-    fromstartsoffset,
-    fromstops,
-    fromstopsoffset);
+    fromstops);
 }
 ERROR awkward_ListArray64_getitem_jagged_descend_64(
   int64_t* tooffsets,
   const int64_t* slicestarts,
-  int64_t slicestartsoffset,
   const int64_t* slicestops,
-  int64_t slicestopsoffset,
   int64_t sliceouterlen,
   const int64_t* fromstarts,
-  int64_t fromstartsoffset,
-  const int64_t* fromstops,
-  int64_t fromstopsoffset) {
+  const int64_t* fromstops) {
   return awkward_ListArray_getitem_jagged_descend<int64_t, int64_t>(
     tooffsets,
     slicestarts,
-    slicestartsoffset,
     slicestops,
-    slicestopsoffset,
     sliceouterlen,
     fromstarts,
-    fromstartsoffset,
-    fromstops,
-    fromstopsoffset);
+    fromstops);
 }
 
 int8_t awkward_Index8_getitem_at_nowrap(
   const int8_t* ptr,
-  int64_t offset,
   int64_t at) {
-  return ptr[(size_t)(offset + at)];
+  return ptr[(size_t)(at)];
 }
 uint8_t awkward_IndexU8_getitem_at_nowrap(
   const uint8_t* ptr,
-  int64_t offset,
   int64_t at) {
-  return ptr[(size_t)(offset + at)];
+  return ptr[(size_t)(at)];
 }
 int32_t awkward_Index32_getitem_at_nowrap(
   const int32_t* ptr,
-  int64_t offset,
   int64_t at) {
-  return ptr[(size_t)(offset + at)];
+  return ptr[(size_t)(at)];
 }
 uint32_t awkward_IndexU32_getitem_at_nowrap(
   const uint32_t* ptr,
-  int64_t offset,
   int64_t at) {
-  return ptr[(size_t)(offset + at)];
+  return ptr[(size_t)(at)];
 }
 int64_t awkward_Index64_getitem_at_nowrap(
   const int64_t* ptr,
-  int64_t offset,
   int64_t at) {
-  return ptr[(size_t)(offset + at)];
+  return ptr[(size_t)(at)];
 }
 
-bool awkward_NumpyArraybool_getitem_at(
-  const bool* ptr,
-  int64_t at) {
-  return ptr[at];
+bool awkward_NumpyArraybool_getitem_at0(
+  const bool* ptr) {
+  return ptr[0];
 }
-int8_t awkward_NumpyArray8_getitem_at(
-  const int8_t* ptr,
-  int64_t at) {
-  return ptr[at];
+int8_t awkward_NumpyArray8_getitem_at0(
+  const int8_t* ptr) {
+  return ptr[0];
 }
-uint8_t awkward_NumpyArrayU8_getitem_at(
-  const uint8_t* ptr,
-  int64_t at) {
-  return ptr[at];
+uint8_t awkward_NumpyArrayU8_getitem_at0(
+  const uint8_t* ptr) {
+  return ptr[0];
 }
-int16_t awkward_NumpyArray16_getitem_at(
-  const int16_t* ptr,
-  int64_t at) {
-  return ptr[at];
+int16_t awkward_NumpyArray16_getitem_at0(
+  const int16_t* ptr) {
+  return ptr[0];
 }
-uint16_t awkward_NumpyArrayU16_getitem_at(
-  const uint16_t* ptr,
-  int64_t at) {
-  return ptr[at];
+uint16_t awkward_NumpyArrayU16_getitem_at0(
+  const uint16_t* ptr) {
+  return ptr[0];
 }
-int32_t awkward_NumpyArray32_getitem_at(
-  const int32_t* ptr,
-  int64_t at) {
-  return ptr[at];
+int32_t awkward_NumpyArray32_getitem_at0(
+  const int32_t* ptr) {
+  return ptr[0];
 }
-uint32_t awkward_NumpyArrayU32_getitem_at(
-  const uint32_t* ptr,
-  int64_t at) {
-  return ptr[at];
+uint32_t awkward_NumpyArrayU32_getitem_at0(
+  const uint32_t* ptr) {
+  return ptr[0];
 }
-int64_t awkward_NumpyArray64_getitem_at(
-  const int64_t* ptr,
-  int64_t at) {
-  return ptr[at];
+int64_t awkward_NumpyArray64_getitem_at0(
+  const int64_t* ptr) {
+  return ptr[0];
 }
-uint64_t awkward_NumpyArrayU64_getitem_at(
-  const uint64_t* ptr,
-  int64_t at) {
-  return ptr[at];
+uint64_t awkward_NumpyArrayU64_getitem_at0(
+  const uint64_t* ptr) {
+  return ptr[0];
 }
-float awkward_NumpyArrayfloat32_getitem_at(
-  const float* ptr,
-  int64_t at) {
-  return ptr[at];
+float awkward_NumpyArrayfloat32_getitem_at0(
+  const float* ptr) {
+  return ptr[0];
 }
-double awkward_NumpyArrayfloat64_getitem_at(
-  const double* ptr,
-  int64_t at) {
-  return ptr[at];
+double awkward_NumpyArrayfloat64_getitem_at0(
+  const double* ptr) {
+  return ptr[0];
 }
 
 void awkward_Index8_setitem_at_nowrap(
   int8_t* ptr,
-  int64_t offset,
   int64_t at,
   int8_t value) {
-  ptr[(size_t)(offset + at)] = value;
+  ptr[(size_t)(at)] = value;
 }
 void awkward_IndexU8_setitem_at_nowrap(
   uint8_t* ptr,
-  int64_t offset,
   int64_t at,
   uint8_t value) {
-  ptr[(size_t)(offset + at)] = value;
+  ptr[(size_t)(at)] = value;
 }
 void awkward_Index32_setitem_at_nowrap(
   int32_t* ptr,
-  int64_t offset,
   int64_t at,
   int32_t value) {
-  ptr[(size_t)(offset + at)] = value;
+  ptr[(size_t)(at)] = value;
 }
 void awkward_IndexU32_setitem_at_nowrap(
   uint32_t* ptr,
-  int64_t offset,
   int64_t at,
   uint32_t value) {
-  ptr[(size_t)(offset + at)] = value;
+  ptr[(size_t)(at)] = value;
 }
 void awkward_Index64_setitem_at_nowrap(
   int64_t* ptr,
-  int64_t offset,
   int64_t at,
   int64_t value) {
-  ptr[(size_t)(offset + at)] = value;
+  ptr[(size_t)(at)] = value;
 }
 
 template <typename T>
 ERROR awkward_ByteMaskedArray_getitem_carry(
   int8_t* tomask,
   const int8_t* frommask,
-  int64_t frommaskoffset,
   int64_t lenmask,
   const T* fromcarry,
   int64_t lencarry) {
@@ -2984,21 +2640,19 @@ ERROR awkward_ByteMaskedArray_getitem_carry(
     if (fromcarry[i] >= lenmask) {
       return failure("index out of range", i, fromcarry[i]);
     }
-    tomask[i] = frommask[frommaskoffset + fromcarry[i]];
+    tomask[i] = frommask[fromcarry[i]];
   }
   return success();
 }
 ERROR awkward_ByteMaskedArray_getitem_carry_64(
   int8_t* tomask,
   const int8_t* frommask,
-  int64_t frommaskoffset,
   int64_t lenmask,
   const int64_t* fromcarry,
   int64_t lencarry) {
   return awkward_ByteMaskedArray_getitem_carry(
     tomask,
     frommask,
-    frommaskoffset,
     lenmask,
     fromcarry,
     lencarry);
@@ -3007,12 +2661,11 @@ ERROR awkward_ByteMaskedArray_getitem_carry_64(
 ERROR awkward_ByteMaskedArray_numnull(
   int64_t* numnull,
   const int8_t* mask,
-  int64_t maskoffset,
   int64_t length,
   bool validwhen) {
   *numnull = 0;
   for (int64_t i = 0;  i < length;  i++) {
-    if ((mask[maskoffset + i] != 0) != validwhen) {
+    if ((mask[i] != 0) != validwhen) {
       *numnull = *numnull + 1;
     }
   }
@@ -3023,12 +2676,11 @@ template <typename T>
 ERROR awkward_ByteMaskedArray_getitem_nextcarry(
   T* tocarry,
   const int8_t* mask,
-  int64_t maskoffset,
   int64_t length,
   bool validwhen) {
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {
-    if ((mask[maskoffset + i] != 0) == validwhen) {
+    if ((mask[i] != 0) == validwhen) {
       tocarry[k] = i;
       k++;
     }
@@ -3038,13 +2690,11 @@ ERROR awkward_ByteMaskedArray_getitem_nextcarry(
 ERROR awkward_ByteMaskedArray_getitem_nextcarry_64(
   int64_t* tocarry,
   const int8_t* mask,
-  int64_t maskoffset,
   int64_t length,
   bool validwhen) {
   return awkward_ByteMaskedArray_getitem_nextcarry<int64_t>(
     tocarry,
     mask,
-    maskoffset,
     length,
     validwhen);
 }
@@ -3052,36 +2702,33 @@ ERROR awkward_ByteMaskedArray_getitem_nextcarry_64(
 template <typename T>
 ERROR awkward_ByteMaskedArray_getitem_nextcarry_outindex(
   T* tocarry,
-  T* toindex,
+  T* outindex,
   const int8_t* mask,
-  int64_t maskoffset,
   int64_t length,
   bool validwhen) {
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {
-    if ((mask[maskoffset + i] != 0) == validwhen) {
+    if ((mask[i] != 0) == validwhen) {
       tocarry[k] = i;
-      toindex[i] = (T)k;
+      outindex[i] = (T)k;
       k++;
     }
     else {
-      toindex[i] = -1;
+      outindex[i] = -1;
     }
   }
   return success();
 }
 ERROR awkward_ByteMaskedArray_getitem_nextcarry_outindex_64(
   int64_t* tocarry,
-  int64_t* toindex,
+  int64_t* outindex,
   const int8_t* mask,
-  int64_t maskoffset,
   int64_t length,
   bool validwhen) {
   return awkward_ByteMaskedArray_getitem_nextcarry_outindex<int64_t>(
     tocarry,
-    toindex,
+    outindex,
     mask,
-    maskoffset,
     length,
     validwhen);
 }
@@ -3090,41 +2737,43 @@ template <typename T>
 ERROR awkward_ByteMaskedArray_toIndexedOptionArray(
   T* toindex,
   const int8_t* mask,
-  int64_t maskoffset,
   int64_t length,
   bool validwhen) {
   for (int64_t i = 0;  i < length;  i++) {
-    toindex[i] = ((mask[maskoffset + i] != 0) == validwhen ? i : -1);
+    toindex[i] = ((mask[i] != 0) == validwhen ? i : -1);
   }
   return success();
 }
 ERROR awkward_ByteMaskedArray_toIndexedOptionArray64(
   int64_t* toindex,
   const int8_t* mask,
-  int64_t maskoffset,
   int64_t length,
   bool validwhen) {
   return awkward_ByteMaskedArray_toIndexedOptionArray<int64_t>(
     toindex,
     mask,
-    maskoffset,
     length,
     validwhen);
 }
 
 ERROR awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
-    int64_t* index_in, int64_t index_in_offset, int64_t* offsets_in,
-    int64_t offsets_in_offset, int64_t* mask_out, int64_t* starts_out,
-    int64_t* stops_out, int64_t length) {
+  int64_t* index_in,
+  int64_t* offsets_in,
+  int64_t* mask_out,
+  int64_t* starts_out,
+  int64_t* stops_out,
+  int64_t length) {
   int64_t k = 0;
   for (int64_t i = 0; i < length; ++i) {
-    starts_out[i] = offsets_in[k + offsets_in_offset];
-    if (index_in[i + index_in_offset] < 0) {
+    starts_out[i] = offsets_in[k];
+    if (index_in[i] < 0) {
       mask_out[i] = -1;
-      stops_out[i] = offsets_in[k + offsets_in_offset];
-    } else {
+      stops_out[i] = offsets_in[k];
+    }
+    else {
       mask_out[i] = i;
-      stops_out[i] = offsets_in[++k + offsets_in_offset];
+      k++;
+      stops_out[i] = offsets_in[k];
     }
   }
   return success();
@@ -3132,14 +2781,17 @@ ERROR awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
 
 template <typename T>
 ERROR awkward_MaskedArray_getitem_next_jagged_project(
-    T* index, int64_t index_offset, int64_t* starts_in, int64_t starts_offset,
-    int64_t* stops_in, int64_t stops_offset, int64_t* starts_out,
-    int64_t* stops_out, int64_t length) {
+  T* index,
+  int64_t* starts_in,
+  int64_t* stops_in,
+  int64_t* starts_out,
+  int64_t* stops_out,
+  int64_t length) {
   int64_t k = 0;
   for (int64_t i = 0; i < length; ++i) {
-    if (index[i + index_offset] >= 0) {
-      starts_out[k] = starts_in[i + starts_offset];
-      stops_out[k] = stops_in[i + stops_offset];
+    if (index[i] >= 0) {
+      starts_out[k] = starts_in[i];
+      stops_out[k] = stops_in[i];
       k++;
     }
   }
@@ -3147,26 +2799,47 @@ ERROR awkward_MaskedArray_getitem_next_jagged_project(
 }
 
 ERROR awkward_MaskedArray32_getitem_next_jagged_project(
-    int32_t* index, int64_t index_offset, int64_t* starts_in,
-    int64_t starts_offset, int64_t* stops_in, int64_t stops_offset,
-    int64_t* starts_out, int64_t* stops_out, int64_t length) {
+  int32_t* index,
+  int64_t* starts_in,
+  int64_t* stops_in,
+  int64_t* starts_out,
+  int64_t* stops_out,
+  int64_t length) {
   return awkward_MaskedArray_getitem_next_jagged_project<int32_t>(
-      index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
-      starts_out, stops_out, length);
+    index,
+    starts_in,
+    stops_in,
+    starts_out,
+    stops_out,
+    length);
 }
 ERROR awkward_MaskedArrayU32_getitem_next_jagged_project(
-    uint32_t* index, int64_t index_offset, int64_t* starts_in,
-    int64_t starts_offset, int64_t* stops_in, int64_t stops_offset,
-    int64_t* starts_out, int64_t* stops_out, int64_t length) {
+  uint32_t* index,
+  int64_t* starts_in,
+  int64_t* stops_in,
+  int64_t* starts_out,
+  int64_t* stops_out,
+  int64_t length) {
   return awkward_MaskedArray_getitem_next_jagged_project<uint32_t>(
-      index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
-      starts_out, stops_out, length);
+    index,
+    starts_in,
+    stops_in,
+    starts_out,
+    stops_out,
+    length);
 }
 ERROR awkward_MaskedArray64_getitem_next_jagged_project(
-    int64_t* index, int64_t index_offset, int64_t* starts_in,
-    int64_t starts_offset, int64_t* stops_in, int64_t stops_offset,
-    int64_t* starts_out, int64_t* stops_out, int64_t length) {
+  int64_t* index,
+  int64_t* starts_in,
+  int64_t* stops_in,
+  int64_t* starts_out,
+  int64_t* stops_out,
+  int64_t length) {
   return awkward_MaskedArray_getitem_next_jagged_project<int64_t>(
-      index, index_offset, starts_in, starts_offset, stops_in, stops_offset,
-      starts_out, stops_out, length);
+    index,
+    starts_in,
+    stops_in,
+    starts_out,
+    stops_out,
+    length);
 }
