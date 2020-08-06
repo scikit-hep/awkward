@@ -8,19 +8,30 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 KERNEL_WHITELIST = ["awkward_new_Identities"]
 
 
-class FuncBody(object):
-    def __init__(self, astree):
-        self.astree = astree
-        self.code = ""
-        self.traverse(self.astree, 4, False)
+def traverse(node):
+    if node.__class__.__name__ == "For":
+        for subnode in node.body:
+            code = traverse(subnode)
+    elif node.__class__.__name__ == "Assign":
+        assert len(node.targets) == 1
+        if node.value.id == "i":
+            value = "thread_id"
+        else:
+            value = node.value.id
+        if node.targets[0].slice.value.id == "i":
+            index = "thread_id"
+        else:
+            index = node.targets[0].slice.value.id
+        code = node.targets[0].value.id + "[" + index + "] = " + value + ";\n"
+    return code
 
-    def traverse(self, item, indent, called):
-        if item.__class__.__name__ == "list":
-            for node in item:
-                self.traverse(node, indent, False)
-        # if item.__class__.__name__ == "For":
-        # if called:
-        # code += " "*indent + "for (int {0}={1}; {1}; {2}) {\n".format(item.target.id,
+
+def getbody(pycode):
+    code = ""
+    tree = ast.parse(pycode).body[0]
+    for node in tree.body:
+        code += traverse(node)
+    return code
 
 
 def getcudaname(name):
@@ -154,6 +165,7 @@ if __name__ == "__main__":
                         code += """  int64_t block_id = blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
   int64_t thread_id = block_id * blockDim.x + threadIdx.x;
 """
+                        code += getbody(indspec["definition"])
                         code += "}\n\n"
                         if "specializations" in indspec.keys():
                             for childfunc in indspec["specializations"]:
@@ -195,16 +207,3 @@ if __name__ == "__main__":
                                 code += " " * 2 + "return success();\n"
                                 code += "}\n\n"
         print(code)
-
-
-"""
-    tree = ast.parse(source)
-    for func in tree.body:
-        name = func.name
-        params = []
-        for x in func.args.args:
-            params.append(x.arg)
-        decl = FuncDecl(params)
-        body = FuncBody(tree.body[0].body)
-        print(body.code)
-"""
