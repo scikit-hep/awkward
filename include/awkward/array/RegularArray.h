@@ -357,6 +357,9 @@ namespace awkward {
     const ContentPtr
       copy_to(kernel::lib ptr_lib) const override;
 
+    const ContentPtr
+      numbers_to_type(const std::string& name) const override;
+
   private:
     const ContentPtr content_;
     int64_t size_;

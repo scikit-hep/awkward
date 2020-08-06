@@ -1219,6 +1219,10 @@ namespace awkward {
     virtual const ContentPtr
       copy_to(kernel::lib ptr_lib) const = 0;
 
+    /// @brief Change the leaf types to 'totype'.
+    virtual const ContentPtr
+      numbers_to_type(const std::string& name) const = 0;
+
   protected:
     /// @brief Internal function to wrap putative #getitem output with enough
     /// RegularArray nodes to satisfy a given `shape`.

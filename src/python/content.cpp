@@ -1288,6 +1288,11 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                   bool stable) -> py::object {
                return box(self.argsort(axis, ascending, false));
           })
+          .def("numbers_to_type",
+               [](const T&self,
+                  const std::string& name) -> py::object {
+               return box(self.numbers_to_type(name));
+          })
           .def("copy_to",
                [](const T&self, const std::string& ptr_lib) -> py::object {
                if (ptr_lib == "cpu") {
@@ -1302,6 +1307,7 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           })
     ;
   }
+
 
 ////////// EmptyArray
 

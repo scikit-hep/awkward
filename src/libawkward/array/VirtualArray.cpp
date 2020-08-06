@@ -915,4 +915,10 @@ namespace awkward {
                                             cache_key(),
                                             ptr_lib);
   }
+
+  const ContentPtr
+  VirtualArray::numbers_to_type(const std::string& name) const {
+    return array().get()->numbers_to_type(name);
+  }
+
 }

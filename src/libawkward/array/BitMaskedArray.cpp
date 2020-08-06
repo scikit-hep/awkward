@@ -926,4 +926,10 @@ namespace awkward {
                                             length(),
                                             lsb_order());
   }
+
+  const ContentPtr
+  BitMaskedArray::numbers_to_type(const std::string& name) const {
+    return toByteMaskedArray().get()->numbers_to_type(name);
+  }
+
 }

@@ -597,5 +597,10 @@ namespace awkward {
                                         parameters());
   }
 
+  const ContentPtr
+  EmptyArray::numbers_to_type(const std::string& name) const {
+    return std::make_shared<EmptyArray>(identities(),
+                                        parameters());
+  }
 
 }

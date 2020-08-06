@@ -907,6 +907,16 @@ namespace awkward {
                                            content);
   }
 
+  const ContentPtr
+  UnmaskedArray::numbers_to_type(const std::string& name) const {
+    ContentPtr content = content_.get()->numbers_to_type(name);
+    IdentitiesPtr identities = identities_;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<UnmaskedArray>(identities, parameters_, content);
+  }
+
   template <typename S>
   const ContentPtr
   UnmaskedArray::getitem_next_jagged_generic(const Index64& slicestarts,

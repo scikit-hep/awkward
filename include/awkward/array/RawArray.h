@@ -1219,6 +1219,12 @@ namespace awkward {
                                                ptr_lib);
     }
 
+  const ContentPtr
+    numbers_to_type(const std::string& name) const override {
+      throw std::runtime_error(
+        "FIXME: unimplemented operation: RawArray::numbers_to_type");
+    }
+
   private:
     const kernel::lib ptr_lib_;
     const std::shared_ptr<T> ptr_;

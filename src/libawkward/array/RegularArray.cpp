@@ -1336,4 +1336,18 @@ namespace awkward {
                                           content,
                                           size());
   }
+
+  const ContentPtr
+  RegularArray::numbers_to_type(const std::string& name) const {
+    ContentPtr content = content_.get()->numbers_to_type(name);
+    IdentitiesPtr identities = identities_;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<RegularArray>(identities,
+                                          parameters_,
+                                          content,
+                                          size_);
+  }
+
 }

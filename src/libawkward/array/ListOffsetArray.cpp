@@ -2223,6 +2223,21 @@ namespace awkward {
                                                   content);
   }
 
+  template <typename T>
+  const ContentPtr
+  ListOffsetArrayOf<T>::numbers_to_type(const std::string& name) const {
+    IndexOf<T> offsets = offsets_.deep_copy();
+    ContentPtr content = content_.get()->numbers_to_type(name);
+    IdentitiesPtr identities = identities_;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<ListOffsetArrayOf<T>>(identities,
+                                                  parameters_,
+                                                  offsets,
+                                                  content);
+  }
+
   template class EXPORT_SYMBOL ListOffsetArrayOf<int32_t>;
   template class EXPORT_SYMBOL ListOffsetArrayOf<uint32_t>;
   template class EXPORT_SYMBOL ListOffsetArrayOf<int64_t>;

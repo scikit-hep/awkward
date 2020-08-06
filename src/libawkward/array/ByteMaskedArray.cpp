@@ -1305,6 +1305,21 @@ namespace awkward {
                                              valid_when());
   }
 
+  const ContentPtr
+  ByteMaskedArray::numbers_to_type(const std::string& name) const {
+    Index8 mask = mask_.deep_copy();
+    ContentPtr content = content_.get()->numbers_to_type(name);
+    IdentitiesPtr identities = identities_;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<ByteMaskedArray>(identities,
+                                             parameters_,
+                                             mask,
+                                             content,
+                                             valid_when_);
+  }
+
   template <typename S>
   const ContentPtr ByteMaskedArray::getitem_next_jagged_generic(
       const Index64& slicestarts, const Index64& slicestops,

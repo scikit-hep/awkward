@@ -2667,6 +2667,41 @@ def atleast_1d(*arrays):
     """
     return numpy.atleast_1d(*[awkward1.operations.convert.to_numpy(x) for x in arrays])
 
+@awkward1._connect._numpy.implements(numpy.can_cast)
+def can_cast(from_, to, casting='safe'):
+    """
+    Args:
+        from: dtype, dtype specifier, scalar, or array
+            Data type, scalar, or array to cast from.
+        to: dtype or dtype specifier
+            Data type to cast to.
+        casting: {‘no’, ‘equiv’, ‘safe’, ‘same_kind’, ‘unsafe’}, optional
+            Controls what kind of data casting may occur.
+            ‘no’ means the data types should not be cast at all.
+            ‘equiv’ means only byte-order changes are allowed.
+            ‘safe’ means only casts which can preserve values are allowed.
+            ‘same_kind’ means only safe casts or casts within a kind, like float64 to float32, are allowed.
+            ‘unsafe’ means any data conversions may be done.
+
+    Returns a bool
+        True if cast can occur according to the casting rule.
+
+    Implements NumPy's
+    [can_cast](https://numpy.org/doc/stable/reference/generated/numpy.can_cast.html)
+    function in a way that accepts #ak.Array as the `array`.
+
+    """
+    return numpy.can_cast(from_, to, casting)
+
+def astype(array, to, highlevel=True):
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False)
+    out = layout.numbers_to_type(str(to))
+
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
 
 __all__ = [
     x

@@ -78,6 +78,9 @@ TEST_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_NumpyArray_getitem_next_array_advanced",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
+
+    # FIXME @reikdas: Jim added this one
+    "awkward_NumpyArray_fill_tobool",
 ]
 
 SUCCESS_TEST_BLACKLIST = TEST_BLACKLIST + [
