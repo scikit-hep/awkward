@@ -169,7 +169,7 @@ namespace awkward {
                ssize_t itemsize,
                const std::string format,
                util::dtype dtype,
-               const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
+               const kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
     NumpyArray(const Index8 index);
@@ -187,8 +187,12 @@ namespace awkward {
       ptr() const;
 
     /// @param ptr_lib Indicates the kernel libraries to use for this `ptr`.
-    kernel::Lib
+    kernel::lib
       ptr_lib() const;
+
+    /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
+    void*
+      data() const;
 
     /// @brief Number of elements in each dimension. A one-dimensional
     /// array has a shape of length one.
@@ -265,17 +269,6 @@ namespace awkward {
     bool
       isempty() const;
 
-    /// @brief An untyped pointer to item zero in the buffer.
-    void*
-      byteptr() const;
-
-    /// @brief An untyped pointer to item `at` in the buffer.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    void*
-      byteptr(ssize_t at) const;
-
     /// @brief The length of the array (or scalar, if `shape.empty()`) in
     /// bytes.
     ///
@@ -290,76 +283,6 @@ namespace awkward {
     /// Most integers in Awkward are `int64_t`.
     uint8_t
       getbyte(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `int8_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    int8_t
-      getint8(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `uint8_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    uint8_t
-      getuint8(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `int16_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    int16_t
-      getint16(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `uint16_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    uint16_t
-      getuint16(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `int32_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    int32_t
-      getint32(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `uint32_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    uint32_t
-      getuint32(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `int64_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    int64_t
-      getint64(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `uint64_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    uint64_t
-      getuint64(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `float`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    float_t
-      getfloat(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `double`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    double_t
-      getdouble(ssize_t at) const;
 
     /// @brief A contiguous version of this array with multidimensional
     /// #shape replaced by nested RegularArray nodes.
@@ -627,7 +550,7 @@ namespace awkward {
     /// @brief An utility function to create a new instance of NumpyArray on the
     /// GPU identical to this one.
     const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const override;
+      copy_to(kernel::lib ptr_lib) const override;
 
     const ContentPtr
       numbers_to_type(const std::string& name) const override;
@@ -833,7 +756,6 @@ namespace awkward {
     template<typename T>
     const std::shared_ptr<void> index_sort(const T* data,
                                            int64_t length,
-                                           int64_t offset,
                                            const Index64& starts,
                                            const Index64& parents,
                                            int64_t outlength,
@@ -843,7 +765,6 @@ namespace awkward {
     template<typename T>
     const std::shared_ptr<void> array_sort(const T* data,
                                            int64_t length,
-                                           int64_t offset,
                                            const Index64& starts,
                                            const Index64& parents,
                                            int64_t outlength,
@@ -860,17 +781,17 @@ namespace awkward {
 
   template<typename T>
   const std::shared_ptr<void> as_type(const T* data,
-                                      int64_t offset,
                                       int64_t length,
                                       const util::dtype dtype) const;
 
   template<typename TO, typename FROM>
-  const std::shared_ptr<void> cast_to_type(const FROM* data, int64_t offset, int64_t length) const;
+  const std::shared_ptr<void> cast_to_type(const FROM* data,
+                                           int64_t length) const;
 
-  /// @brief See #ptr_lib
-  const kernel::Lib ptr_lib_;
   /// @brief See #ptr.
   std::shared_ptr<void> ptr_;
+  /// @brief See #ptr_lib
+  const kernel::lib ptr_lib_;
   /// @brief See #shape.
   std::vector<ssize_t> shape_;
   /// @brief See #strides.

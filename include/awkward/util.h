@@ -43,7 +43,7 @@ namespace awkward {
         complex256,
         // datetime64,
         // timedelta64,
-        num_dtype
+        size
     };
 
     /// @brief Returns the name associated with a given dtype.

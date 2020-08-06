@@ -384,7 +384,7 @@ namespace awkward {
                           const Slice& tail) const override;
 
     const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const override;
+      copy_to(kernel::lib ptr_lib) const override;
 
     const ContentPtr
       numbers_to_type(const std::string& name) const override;

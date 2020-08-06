@@ -246,7 +246,7 @@ namespace awkward {
                              const ArrayGeneratorPtr& generator,
                              const ArrayCachePtr& cache,
                              const std::string& cache_key,
-                             const kernel::Lib ptr_lib)
+                             const kernel::lib ptr_lib)
       : Content(identities, parameters)
       , generator_(generator)
       , cache_(cache)
@@ -257,7 +257,7 @@ namespace awkward {
                              const util::Parameters& parameters,
                              const ArrayGeneratorPtr& generator,
                              const ArrayCachePtr& cache,
-                             const kernel::Lib ptr_lib)
+                             const kernel::lib ptr_lib)
       : Content(identities, parameters)
       , generator_(generator)
       , cache_(cache)
@@ -274,7 +274,7 @@ namespace awkward {
     return cache_;
   }
 
-  const kernel::Lib
+  const kernel::lib
   VirtualArray::ptr_lib() const {
     return ptr_lib_;
   }
@@ -287,24 +287,24 @@ namespace awkward {
     return ContentPtr(nullptr);
   }
 
-  kernel::Lib check_key(const std::string& cache_key) {
+  kernel::lib check_key(const std::string& cache_key) {
     auto fully_qualified_index = cache_key.find_last_of(':');
 
-    if(fully_qualified_index != std::string::npos) {
+    if (fully_qualified_index != std::string::npos) {
       if (cache_key.substr(fully_qualified_index + 1, cache_key.length()) == "cuda") {
-        return kernel::Lib::cuda_kernels;
+        return kernel::lib::cuda;
       }
     }
 
-    return kernel::Lib::cpu_kernels;
+    return kernel::lib::cpu;
   }
 
   const ContentPtr
   VirtualArray::array() const {
     ContentPtr out(nullptr);
-    kernel::Lib src_ptrlib = check_key(cache_key_);
+    kernel::lib src_ptrlib = check_key(cache_key_);
     if (cache_.get() != nullptr) {
-      if(src_ptrlib != ptr_lib_) {
+      if (src_ptrlib != ptr_lib_) {
         out = cache_.get()->get(cache_key())->copy_to(ptr_lib_);
       }
       else {
@@ -312,7 +312,7 @@ namespace awkward {
       }
     }
     if (out.get() == nullptr) {
-      if(src_ptrlib != ptr_lib_) {
+      if (src_ptrlib != ptr_lib_) {
         out = generator_.get()->generate_and_check()->copy_to(src_ptrlib);
       }
       else {
@@ -907,7 +907,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  VirtualArray::copy_to(kernel::Lib ptr_lib) const {
+  VirtualArray::copy_to(kernel::lib ptr_lib) const {
       return std::make_shared<VirtualArray>(identities(),
                                             parameters(),
                                             generator(),

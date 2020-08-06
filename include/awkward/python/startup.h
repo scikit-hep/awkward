@@ -7,8 +7,9 @@
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
+namespace ak = awkward;
 
-class StartupLibraryPathCallback : public kernel::LibraryPathCallback {
+class StartupLibraryPathCallback : public ak::kernel::LibraryPathCallback {
 public:
   StartupLibraryPathCallback() = default;
 

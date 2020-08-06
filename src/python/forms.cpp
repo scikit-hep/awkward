@@ -70,7 +70,7 @@ obj2form_key(const py::object& form_key) {
 }
 
 py::object
-form_key2obj(const FormKey& form_key) {
+form_key2obj(const ak::FormKey& form_key) {
   if (form_key.get() == nullptr) {
     return py::none();
   }

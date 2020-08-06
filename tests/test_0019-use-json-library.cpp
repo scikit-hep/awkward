@@ -44,7 +44,7 @@ int main(int, char**) {
 
   // array[-1][0][1] == 7.7
   std::shared_ptr<ak::NumpyArray> scalar = std::dynamic_pointer_cast<ak::NumpyArray>(array.get()->getitem_at(-1).get()->getitem_at(0).get()->getitem_at(1));
-  if (scalar.get()->getdouble(0) != 7.7)
+  if (*reinterpret_cast<double*>(scalar.get()->data()) != 7.7)
     return -1;
 
   ak::Slice slice;

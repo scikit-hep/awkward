@@ -286,7 +286,7 @@ make_PrimitiveType(const py::handle& m, const std::string& name) {
       .def(py::init([](const std::string& dtype,
                        const py::object& parameters,
                        const py::object& typestr) -> ak::PrimitiveType {
-        ak::util::dtype dt = util::name_to_dtype(dtype);
+        ak::util::dtype dt = ak::util::name_to_dtype(dtype);
         if (dt == ak::util::dtype::NOT_PRIMITIVE) {
           throw std::invalid_argument(
             std::string("unrecognized primitive type: ") + dtype);
@@ -299,7 +299,7 @@ make_PrimitiveType(const py::handle& m, const std::string& name) {
           py::arg("typestr") = py::none())
       .def_property_readonly("dtype",
                              [](const ak::PrimitiveType& self) -> std::string {
-        return util::dtype_to_name(self.dtype());
+        return ak::util::dtype_to_name(self.dtype());
       })
       .def(py::pickle([](const ak::PrimitiveType& self) {
         return py::make_tuple(parameters2dict(self.parameters()),

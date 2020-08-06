@@ -124,7 +124,7 @@ void cuda_RegularArray_num(
   int64_t block_id = blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
   int64_t thread_id = block_id * blockDim.x + threadIdx.x;
 
-  if(thread_id < length) {
+  if (thread_id < length) {
     tonum[thread_id] = size;
   }
 }
@@ -139,7 +139,8 @@ ERROR awkward_cuda_RegularArray_num_64(
   if (length > 1024) {
     blocks_per_grid = dim3(ceil((length) / 1024.0), 1, 1);
     threads_per_block = dim3(1024, 1, 1);
-  } else {
+  }
+  else {
     blocks_per_grid = dim3(1, 1, 1);
     threads_per_block = dim3(length, 1, 1);
   }
