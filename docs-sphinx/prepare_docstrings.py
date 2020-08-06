@@ -270,9 +270,6 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
     elif not done_extra and modulename.startswith("awkward1._"):
         done_extra = True
         toctree.extend(["ak.numba.register.rst",
-                        "ak.pandas.register.rst",
-                        "ak.pandas.df.rst",
-                        "ak.pandas.dfs.rst",
                         "ak.numexpr.evaluate.rst",
                         "ak.numexpr.re_evaluate.rst",
                         "ak.autograd.elementwise_grad.rst",
