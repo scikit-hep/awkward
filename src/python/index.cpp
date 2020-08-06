@@ -137,8 +137,8 @@ make_IndexOf(const py::handle& m, const std::string& name) {
                 pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
         }
         else if(ptr_lib == "cpu") {
-          ak::IndexOf<T> cuda_arr = self.copy_to(ak::kernel::lib::cpu) ;
-          return py::cast<ak::IndexOf<T>>(cuda_arr);
+          ak::IndexOf<T> cuda_index = self.copy_to(ak::kernel::lib::cpu) ;
+          return py::cast<ak::IndexOf<T>>(cuda_index);
         }
         else {
           throw std::invalid_argument("specify 'cpu' or 'cuda'");

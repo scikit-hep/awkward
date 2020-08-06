@@ -120,13 +120,42 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
                                      shape[1],
                                      shape[0],
                                      std::shared_ptr<T>(reinterpret_cast<T*>(ptr),
-                                                        pyobject_deleter<T>(array.ptr())));
+                                           pyobject_deleter<T>(array.ptr())));
         }
         else {
           throw std::invalid_argument(name + std::string(
             ".from_cupy() can only accept CuPy Arrays!"));
         }
     })
+    .def("copy_to",
+         [name](const ak::IdentitiesOf<T>& self, const std::string& ptr_lib) -> py::object {
+             if (ptr_lib == "cpu") {
+               auto cpu_identities = self.copy_to(ak::kernel::lib::cpu) ;
+               return py::cast<ak::IdentitiesOf<T>>(*cpu_identities);
+             }
+             else if (ptr_lib == "cuda") {
+               auto cuda_identities = self.copy_to(ak::kernel::lib::cuda);
+
+               auto cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
+                 reinterpret_cast<ssize_t>(cuda_identities->ptr().get()),
+                 cuda_identities->length() * sizeof(T),
+                 cuda_identities);
+
+               auto cupy_memoryptr = py::module::import("cupy").attr("cuda").attr("MemoryPointer")(
+                 cupy_unowned_mem,
+                 0);
+
+               return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
+                 (py::module::import("cupy").attr("ndarray")(
+                   pybind11::make_tuple(py::cast<ssize_t>(cuda_identities->length())),
+                   py::format_descriptor<T>::format(),
+                   cupy_memoryptr,
+                   pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
+             }
+             else {
+               throw std::invalid_argument("specify 'cpu' or 'cuda'");
+             }
+         })
 
   );
 }

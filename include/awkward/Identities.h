@@ -380,7 +380,7 @@ namespace awkward {
     /// on the first device(device [0])
     ///
     /// @note This function has not been implemented to handle Multi-GPU setups
-    const IdentitiesPtr
+    const std::shared_ptr<IdentitiesOf<T>>
       copy_to(kernel::lib ptr_lib) const;
 
   private:

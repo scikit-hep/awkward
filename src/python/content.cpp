@@ -1764,12 +1764,12 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
             return py::cast<ak::NumpyArray>(*cuda_arr);
           }
           else if (ptr_lib == "cuda") {
-            auto cuda_index = self.cupy_copy_to(ak::kernel::lib::cuda);
+            auto cuda_arr = self.cupy_copy_to(ak::kernel::lib::cuda);
 
             auto cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
-              reinterpret_cast<ssize_t>(cuda_index->ptr().get()),
-              cuda_index->length() * cuda_index->itemsize(),
-              cuda_index);
+              reinterpret_cast<ssize_t>(cuda_arr->ptr().get()),
+              cuda_arr->length() * cuda_arr->itemsize(),
+              cuda_arr);
 
             auto cupy_memoryptr = py::module::import("cupy").attr("cuda").attr("MemoryPointer")(
               cupy_unowned_mem,
@@ -1777,10 +1777,10 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
 
             return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
               (py::module::import("cupy").attr("ndarray")(
-                pybind11::make_tuple(py::cast<ssize_t>(cuda_index->length())),
-                ak::util::dtype_to_format(cuda_index->dtype()),
+                pybind11::make_tuple(py::cast<ssize_t>(cuda_arr->length())),
+                ak::util::dtype_to_format(cuda_arr->dtype()),
                 cupy_memoryptr,
-                pybind11::make_tuple(py::cast<ssize_t>(cuda_index->itemsize()))));
+                pybind11::make_tuple(py::cast<ssize_t>(cuda_arr->itemsize()))));
           }
           else {
             throw std::invalid_argument("specify 'cpu' or 'cuda'");
