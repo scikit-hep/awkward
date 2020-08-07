@@ -17,26 +17,30 @@ What is an Awkward Array?
 Efficiency and generality
 -------------------------
 
-Arrays are the most efficient data structures in computing, and [NumPy](https://numpy.org/) makes it easy to interact with arrays in Python. However, NumPy's arrays are rectangular tables or tensors that cannot express variable-length structures.
+Arrays are the most efficient data structures for sequential numeric processing, and [NumPy](https://numpy.org/) makes it easy to interact with arrays in Python. However, NumPy's arrays are rectangular tables or tensors that cannot express variable-length structures.
 
 General tree-like data are often expressed using [JSON](https://www.json.org/), but at the expense of memory use and processing speed.
 
-Awkward Arrays are general tree-like data structures, like JSON, but contiguous in memory and operated upon with compiled, vectorized code like NumPy. They're building blocks for data analysis, recognizing that some datasets are, well, more awkward than others.
+Awkward Arrays are general tree-like data structures, like JSON, but contiguous in memory and operated upon with compiled, vectorized code like NumPy. They're basic building blocks for data analyses that are, well, more awkward than those involving neat tables.
 
 This library was originally developed for high-energy particle physics. Particle physics datasets have rich data structures that usually can't be flattened into rectangular arrays, but physicists need to process them efficiently because the datasets are enormous. Awkward Arrays combine generic data structures with high-performance number-crunching.
 
-Let's illustrate this with a non-physics dataset: maps of bike routes in my hometown of Chicago.
+Let's illustrate this with a non-physics dataset: maps of bike routes in my hometown of Chicago. You can also follow this [as a video tutorial](https://youtu.be/WlnUF3LRBj4?t=431).
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/WlnUF3LRBj4?start=431" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 JSON to array
 -------------
 
-The city of Chicago publishes quite a lot of data; here is a [GeoJSON of bike paths](https://github.com/Chicago/osd-bike-routes/blob/master/data/Bikeroutes.geojson):
+Here is a [GeoJSON of bike paths](https://github.com/Chicago/osd-bike-routes/blob/master/data/Bikeroutes.geojson) of bike paths throughout the city of Chicago.
 
 <div style="margin-right: 15px">
   <iframe class="render-viewer " src="https://render.githubusercontent.com/view/geojson?commit=5f556dcd4ed54f5f5c926c01c34ebc6261ec7d34&amp;enc_url=68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f4368696361676f2f6f73642d62696b652d726f757465732f356635353664636434656435346635663563393236633031633334656263363236316563376433342f646174612f42696b65726f757465732e67656f6a736f6e&amp;nwo=Chicago%2Fosd-bike-routes&amp;path=data%2FBikeroutes.geojson&amp;repository_id=8065965&amp;repository_type=Repository#292b99b1-4187-4d13-8b0d-ce8fa6eb4ab1" sandbox="allow-scripts allow-same-origin allow-top-navigation" title="File display" width="100%" height="400px"></iframe>
 </div>
 
-which we load into Python by downloading it from GitHub and converting it from JSON.
+If you dig into the JSON, you'll see that it contains street names, metadata, and longitude, latitude coordinates all along the bike paths.
+
+Start by loading them into Python as Python objects,
 
 ```{code-cell}
 import urllib.request
@@ -47,119 +51,107 @@ bikeroutes_json = urllib.request.urlopen(url).read()
 bikeroutes_pyobj = json.loads(bikeroutes_json)
 ```
 
-It's a complex dataset with nested structures containing street names and variable-length polylines, and it's about 2 MB.
-
-To load it as an Awkward Array, we can use the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) constructor for an array of records or the [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html) constructor for a single record like this one.
+and then as an Awkward Array (actually an [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html) because the top-level construct is a JSON object).
 
 ```{code-cell}
 import awkward1 as ak
-bikeroutes = ak.Record(bikeroutes_pyobj)
+
+bikeroutes = ak.from_json(bikeroutes_json)
+# Alternatively, bikeroutes = ak.Record(bikeroutes_pyobj)
 bikeroutes
 ```
+
+We only see a part of the data and its type if we don't deliberately expand it out.
 
 Data types
 ----------
 
-Generic JSON is untyped, but GeoJSON is regular enough that its data type can be inferred. The [ak.type](https://awkward-array.readthedocs.io/en/latest/_auto/ak.type.html) function displays an array's type in [Datashape syntax](https://datashape.readthedocs.io/).
+To get a full view of the type (Awkward's equivalent of a NumPy dtype + shape), use the [ak.type](https://awkward-array.readthedocs.io/en/latest/_auto/ak.type.html) function. The display format adheres to [Datashape syntax](https://datashape.readthedocs.io/), when possible.
 
 ```{code-cell}
 ak.type(bikeroutes)
 ```
 
-In the above, `{"field name": type, ...}` denote record structures and `var` indicates variable-length lists. The `"coordinates"` are `var * var * var * float64`, lists of lists of lists of numbers.
+In the above, `{"field name": type, ...}` denotes a record structure, which can be nested, and `var` indicates variable-length lists. The `"coordinates"` (at the end) are `var * var * var * float64`, lists of lists of lists of numbers, and any of these lists can have an arbitrary length.
+
+In addition, there are strings (variable-length lists interpreted as text) and "option" types, meaning that values are allowed to be null.
 
 Slicing
 -------
 
-[NumPy-like slicing](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html#ak-array-getitem) extracts structures within the array. The slice may consist of integers, ranges, and many other slice types, like NumPy, and commas indicate different slices applied to different dimensions. Since our data contain records, we can use strings to select nested records by field name.
+[NumPy-like slicing](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html#ak-array-getitem) extracts structures within the array. The slice may consist of integers, ranges, and many other slice types, like NumPy, and commas indicate different slices applied to different dimensions. Since the bike routes dataset contains records, we can use strings to select nested fields sequentially.
 
 ```{code-cell}
-(bikeroutes["features", "properties", "STREET", 100],
- bikeroutes["features", "geometry", "coordinates", 100, 0])
+bikeroutes["features", "geometry", "coordinates"]
 ```
 
-Bike route `100` is on `W DEVON AVE`; it has 7 longitude-latitude coordinates. Here's another:
+Alternatively, we could use dots for record field specifiers (if the field names are syntactically allowed in Python):
 
 ```{code-cell}
-(bikeroutes["features", "properties", "STREET", -1],
- bikeroutes["features", "geometry", "coordinates", -1, 0])
+bikeroutes.features.geometry.coordinates
 ```
 
-The last bike route in the dataset (at index `-1`) is on `N ELSTON AVE` and has 11 coordinates. The type of this array is `11 * var * float64` meaning that the length of each inner list _could be_ variable, though longitude-latitude coordinates ought to all have exactly two elements.
+Slicing by field names (even if the records those fields belong to are nested within lists) slices across all elements of the lists. We can pick out just one object by putting integers in the square brackets:
+
+```{code-cell}
+bikeroutes["features", "geometry", "coordinates", 100, 0]
+```
+
+or
+
+```{code-cell}
+bikeroutes.features.geometry.coordinates[100, 0]
+```
+
+or even
+
+```{code-cell}
+bikeroutes.features[100].geometry.coordinates[0]
+```
+
+(The strings that select record fields may be placed before or after integers and other slice types.)
+
+To get full detail of one structured object, we can use the [ak.to_list](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_list.html) function, which converts Awkward records and lists into Python dicts and lists.
+
+```{code-cell}
+ak.to_list(bikeroutes.features[751])
+```
+
+Looking at one record in full detail can make it clear why, for instance, the "coordinates" field contains lists of lists of lists: they are path segments that collectively form a route, and there are many routes, each associated with a named street. This item, number `751`, is Martin Luther King Drive, a route described by 7 segments. (Presumably, you have to pick up your bike and walk it.)
 
 Variable-length lists
 ---------------------
 
-The [ak.num](https://awkward-array.readthedocs.io/en/latest/_auto/ak.num.html) function tells us how many elements are in each list. Applying it to the last bike route, we see that each list indeed has two elements.
+The last dimension of these lists always happens to have length 2. This is because it represents the longitude and latitude of each point along a path. You can see this with the [ak.num](https://awkward-array.readthedocs.io/en/latest/_auto/ak.num.html) function:
 
 ```{code-cell}
-ak.num(bikeroutes["features", "geometry", "coordinates", -1, 0])
+ak.num(bikeroutes.features[751].geometry.coordinates, axis=2)
 ```
 
-This fact was not expressed in the data type because JSON lists don't declare their lengths. In this dataset, they _happened to have_ length 2, but in principle, they could have had different lengths.
-
-The number of coordinate points in each route, on the other hand, is variable:
+The `axis` is the depth at which this function is applied; the above could alternatively have been `axis=-1` (deepest), and [ak.num](https://awkward-array.readthedocs.io/en/latest/_auto/ak.num.html) at less-deep `axis` values tells us the number of points in each segment:
 
 ```{code-cell}
-ak.num(bikeroutes["features", "geometry", "coordinates"], axis=2)
+ak.num(bikeroutes.features[751].geometry.coordinates, axis=1)
 ```
 
-because a polyline is described by an arbitrary number of longitude-latitude points, while the length of each of those points is 2.
+and the number of points:
 
 ```{code-cell}
-ak.num(bikeroutes["features", "geometry", "coordinates"], axis=3)
+ak.num(bikeroutes.features[751].geometry.coordinates, axis=0)
 ```
 
-Here, we have used the `axis` parameter to tell [ak.num](https://awkward-array.readthedocs.io/en/latest/_auto/ak.num.html) which dimension we're interested in. Most NumPy functions have an `axis` parameter with the same meaning.
-
-We can ask if all coordinates for all streets have length 2 using vectorized `==` and [ak.all](https://awkward-array.readthedocs.io/en/latest/_auto/ak.all.html).
+By verifying that all lists at this depth have length 2,
 
 ```{code-cell}
-ak.all(ak.num(bikeroutes["features", "geometry", "coordinates"], axis=3) == 2)
+ak.all(ak.num(bikeroutes.features.geometry.coordinates, axis=-1) == 2)
 ```
 
-This [ak.all](https://awkward-array.readthedocs.io/en/latest/_auto/ak.all.html) is a strict generalization of [np.all](https://numpy.org/doc/stable/reference/generated/numpy.all.html) in NumPy, and if you have NumPy 1.17 or later, they can be used interchangeably. NumPy's function knows that it needs to defer to ours when it encounters an Awkward Array.
-
-```{code-cell}
-import numpy as np
-np.all(ak.num(bikeroutes["features", "geometry", "coordinates"], axis=3) == 2)
-```
-
-Another curiosity of this dataset is that most of the lists in `axis=1` have length 1,
-
-```{code-cell}
-ak.num(bikeroutes["features", "geometry", "coordinates"], axis=1)
-```
-
-but not all.
-
-```{code-cell}
-np.all(ak.num(bikeroutes["features", "geometry", "coordinates"], axis=1) == 1)
-```
-
-Some of these bike routes are discontiguous curves, described by multiple polylines. Just as in NumPy, we can use an [array of booleans as a slice](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html#filtering).
-
-```{code-cell}
-selection = ak.num(bikeroutes["features", "geometry", "coordinates"], axis=1) != 1
-selection
-```
-
-```{code-cell}
-ak.num(bikeroutes["features", "geometry", "coordinates"])[selection]
-```
-
-They are relatively rare; there are only 11 discontiguous routes, but two of them have over 5 segments! We can apply the same slice to the street names to find out which these are and use [ak.to_list](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_list.html) to turn the result into a Python list because there are so few of them.
-
-```{code-cell}
-ak.to_list(bikeroutes["features", "properties", "STREET"][selection])
-```
+we can be confident that we can select item `0` and item `1` without errors. Note that this is a major difference between variable-length lists and rectilinear arrays: in NumPy, a given index either exists for all nested lists or for none of them. For variable-length lists, we have to check (or ensure it with another selection).
 
 Array math
 ----------
 
-Since we now know that the `"coordinates"` are longitude-latitude points, let's convert them into displacements from the center of the map in kilometers. At Chicago's latitude, one degree of longitude is 82.7 km and one degree of latitude is 111.1 km.
-
-Here are a few more tricks: field names can be selected as attributes (with a `.`) and ellipsis (`...`) can be used to pick the last dimension.
+We now know that the `"coordinates"` are longitude-latitude pairs, so let's pull them out and name them as such. Item `0` of each of the deepest lists is the longitude and item `1` of each of the deepest lists is the latitude. We want to leave the structure of all lists other than the deepest untouched, which would mean a complete slice (colon `:` by itself) at each dimension except the last, but we can also use the ellipsis (`...`) shortcut from NumPy.
 
 ```{code-cell}
 longitude = bikeroutes.features.geometry.coordinates[..., 0]
@@ -167,100 +159,161 @@ latitude = bikeroutes.features.geometry.coordinates[..., 1]
 longitude, latitude
 ```
 
-The [ak.mean](https://awkward-array.readthedocs.io/en/latest/_auto/ak.mean.html) function is equivalent to [np.mean](https://numpy.org/doc/stable/reference/generated/numpy.mean.html), but it operates on Awkward Arrays. Subtraction or multiplication of arrays [broadcast as in NumPy](https://numpy.org/doc/stable/reference/ufuncs.html#broadcasting), but with [additional rules for Awkward structures](https://awkward-array.readthedocs.io/en/latest/_auto/ak.broadcast_arrays.html).
+Note that if we wanted to do this with Python objects, the above would have required many "append" operations in nested "for" loops. As Awkward Arrays, it's just a slice.
+
+Now that we have arrays of pure numbers (albeit inside of variable-length nested lists), we can run NumPy functions on them. For example,
 
 ```{code-cell}
-km_east = (longitude - np.mean(longitude)) * 82.7
-km_north = (latitude - np.mean(latitude)) * 111.1
+import numpy as np
+
+np.add(longitude, 180)
+```
+
+rotates the longitude points 180 degrees around the world while maintaining the triply nested structure. Any "[universal function](https://numpy.org/doc/stable/reference/ufuncs.html)" (ufunc) will work, including ufuncs from libraries other than NumPy (such as SciPy, or a domain-specific package). Simple NumPy functions like addition have the usual shortcuts:
+
+```{code-cell}
+longitude + 180
+```
+
+In addition, some functions other than ufuncs have an Awkward equivalent, such as [ak.mean](https://awkward-array.readthedocs.io/en/latest/_auto/ak.mean.html), which is the equivalent of NumPy's [np.mean](https://numpy.org/doc/stable/reference/generated/numpy.mean.html) (not a ufunc because it takes a whole array and returns one value).
+
+
+```{code-cell}
+ak.mean(longitude)
+```
+
+Using an extension mechanism within NumPy ([introduced in NumPy 1.17](https://numpy.org/devdocs/release/1.17.0-notes.html#numpy-functions-now-always-support-overrides-with-array-function)), we can use [ak.mean](https://awkward-array.readthedocs.io/en/latest/_auto/ak.mean.html) and [np.mean](https://numpy.org/doc/stable/reference/generated/numpy.mean.html) interchangeably.
+
+```{code-cell}
+np.mean(longitude)
+```
+
+Awkward functions have all or most of the same arguments as their NumPy equivalents. For instance, we can compute the mean along an axis, such as `axis=1`, which gives us the mean longitude of each path, rather than a single mean of all points.
+
+```{code-cell}
+np.mean(longitude, axis=1)
+```
+
+To focus our discussion, let's say that we're trying to find the length of each path in the dataset. To do this, we need to convert the degrees longitude and latitude into common distance units, and to work with smaller numbers, we'll start by subtracting the mean.
+
+At Chicago's latitude, one degree of longitude is 82.7 km and one degree of latitude is 111.1 km, which we can use as conversion factors.
+
+```{code-cell}
+km_east = (longitude - np.mean(longitude)) * 82.7 # km/deg
+km_north = (latitude - np.mean(latitude)) * 111.1 # km/deg
 km_east, km_north
 ```
 
-Suppose we want to compute the length of each route. That would be the sum of the lengths of each segment in the route, and a segment is a line joining two consecutive points.
+To find distances between points, we first have to pair up points with their neighbors. Each path segment of $N$ points has $N-1$ pairs of neighbors. We can construct these pairs by making two partial copies of each list, one with everything except the first element and the other with everything except the last element, so that original index $i$ can be compared with original index $i+1$.
 
-We can drop the last and first point in each polyline with slices like `:-1` and `1:`,
+In plain NumPy, you would express it like this:
 
 ```{code-cell}
-km_east[0, 0, :-1], km_east[0, 0, 1:]
+path = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+path[1:] - path[:-1]
 ```
 
-and thus get the displacement of each segment by subtracting these sliced lists:
+The `array[1:]` has the first element dropped and the `array[:-1]` has the last element dropped, so their differences are the 8 distances between each of the 9 points in the original `array`. In this example, all differences are `1.1`.
+
+Here's what that looks like for the first segment of the first bike path in our sample:
 
 ```{code-cell}
-km_east[0, 0, :-1] - km_east[0, 0, 1:]
+km_east[0, 0, 1:], km_east[0, 0, :-1]
 ```
 
-Doing so for all routes in the entire dataset is one line (using a slice of `:` to mean "get everything").
+and their differences are:
 
 ```{code-cell}
-km_east[:, :, :-1] - km_east[:, :, 1:]
+km_east[0, 0, 1:] - km_east[0, 0, :-1]
 ```
 
-Using $\sqrt{(x_i - x_{i + 1})^2 + (y_i - y_{i + 1})^2}$ for the distance between points $(x_i, y_i)$ and $(x_{i + 1}, y_{i + 1})$, we can compute all the segment lengths at once
+If we can do it for one list, we can do it for all of them by swapping index `0` with slice `:` in the first two dimensions.
 
 ```{code-cell}
-segment_length = np.sqrt((km_east[:, :, 1:] - km_east[:, :, :-1])**2 +
-                         (km_north[:, :, 1:] - km_north[:, :, :-1])**2)
+km_east[:, :, 1:] - km_east[:, :, :-1]
+```
+
+This expression subtracts pairs of neighboring points in all lists, each with a different length, maintaining the segments-within-paths structure.
+
+Now that we know how to compute differences in $x$ (`km_east`) and $y$ (`km_north`) individually, we can compute distances using the distance formula: $\sqrt{(x_i - x_{i + 1})^2 + (y_i - y_{i + 1})^2}$.
+
+```{code-cell}
+segment_length = np.sqrt(
+    ( km_east[:, :, 1:] -  km_east[:, :, :-1])**2 +
+    (km_north[:, :, 1:] - km_north[:, :, :-1])**2
+)
 segment_length
 ```
 
-and then sum over the variable-length lists of segment lengths to get full route lengths using [ak.sum](https://awkward-array.readthedocs.io/en/latest/_auto/ak.sum.html) (equivalent to [np.sum](https://numpy.org/doc/stable/reference/generated/numpy.sum.html)).
+Going back to our example of Martin Luther King Drive, these pairwise distances are
 
 ```{code-cell}
-route_length = np.sum(segment_length, axis=-1)
-route_length
+ak.to_list(segment_length[751])
 ```
 
-Notice that `segment_length` has type `1061 * var * var * float64` and `route_length` has type `1061 * var * float64`. It has one fewer `var` dimension because we have summed over it. We can further sum over the discontiguous curves that 11 of the streets have to get total lengths.
+for each of the segments in this discontiguous path. Some of these segments had only two longitude, latitude points, and hence they have only one distance (single-element lists).
+
+To make path distances from the pairwise distances, we need to add them up. There's an [ak.sum](https://awkward-array.readthedocs.io/en/latest/_auto/ak.sum.html) (equivalent to [np.sum](https://numpy.org/doc/stable/reference/generated/numpy.sum.html)) that we can use with `axis=-1` to add up the innermost lists.
+
+For Martin Luther King Drive, this is
 
 ```{code-cell}
-total_length = np.sum(route_length, axis=-1)
-total_length
+ak.to_list(ak.sum(segment_length[751], axis=-1))
+```
+
+and in general, it's
+
+```{code-cell}
+path_length = np.sum(segment_length, axis=-1)
+path_length
+```
+
+Notice that `segment_length` has type
+
+```{code-cell}
+ak.type(segment_length)
+```
+
+and `path_length` has type
+
+```{code-cell}
+ak.type(path_length)
+```
+
+The `path_length` has one fewer `var` dimension because we have summed over it. We can further sum over the discontiguous curves that 11 of the streets have to get total lengths.
+
+Since there are multiple paths for each bike route, we sum up the innermost dimension again:
+
+
+```{code-cell}
+route_length = np.sum(path_length, axis=-1)
+route_length
 ```
 
 Now there's exactly one of these for each of the 1061 streets.
 
 ```{code-cell}
 for i in range(10):
-    print(bikeroutes.features.properties.STREET[i], "\t\t", total_length[i])
+    print(bikeroutes.features.properties.STREET[i], "\t\t", route_length[i])
 ```
 
-This would have been incredibly awkward to write in terms of only NumPy operations, and slow if executed in Python loops.
+This would have been incredibly awkward to write using only NumPy, and slow if executed in Python loops.
 
 Performance
 -----------
 
-Having well-defined data types and operating on whole arrays in each Python statement allows the bulk of the processing to be performed in precompiled routines. This is the principle behind NumPy as well.
-
-Another factor is that the data are not laid out in memory the way JSON or Python objects are—contiguous by record or scattered about in objects that point to each other—they are laid out as arrays, contiguous by field.
-
-For instance, if we dig down to the coordinate data, we see that it is a NumPy array of numerical values without being interrupted by any character strings from field names or street names.
-
-```{code-cell}
-bikeroutes.features.geometry.coordinates.layout.content.content.content
-```
-
-This is known as [columnar data](https://towardsdatascience.com/the-beauty-of-column-oriented-data-2945c0c9f560), which has advantages in storage and processing.
-
-Most functions in the Awkward Array library work by unpacking the whole-array structure to find the relevant columns, apply a mathematical function (usually NumPy's own) to the columns, then pack it up in a new structure.
-
-The view of data as nested records is a high-level convenience. Internally, it's all just one-dimensional arrays.
-
-![](img/how-it-works.svg)
-
-To put this in concrete numbers, it means Awkward operations are many times faster than their pure Python equivalents, besides being more concise to express.
-
-**Python for loops:**
+The full analysis, expressed in **Python for loops**, would be:
 
 ```{code-cell}
 %%timeit
 
-total_length = []
+route_length = []
 for route in bikeroutes_pyobj["features"]:
-    route_length = []
-    for polyline in route["geometry"]["coordinates"]:
+    path_length = []
+    for segment in route["geometry"]["coordinates"]:
         segment_length = []
         last = None
-        for lng, lat in polyline:
+        for lng, lat in segment:
             km_east = lng * 82.7
             km_north = lat * 111.1
             if last is not None:
@@ -268,12 +321,11 @@ for route in bikeroutes_pyobj["features"]:
                 dy2 = (km_north - last[1])**2
                 segment_length.append(np.sqrt(dx2 + dy2))
             last = (km_east, km_north)
-
-        route_length.append(sum(segment_length))
-    total_length.append(sum(route_length))
+        path_length.append(sum(segment_length))
+    route_length.append(sum(route_length))
 ```
 
-**Awkward Arrays:**
+whereas for **Awkward Arrays**, it is:
 
 ```{code-cell}
 %%timeit
@@ -284,31 +336,138 @@ km_north = bikeroutes.features.geometry.coordinates[..., 1] * 111.1
 segment_length = np.sqrt((km_east[:, :, 1:] - km_east[:, :, :-1])**2 +
                          (km_north[:, :, 1:] - km_north[:, :, :-1])**2)
 
-route_length = np.sum(segment_length, axis=-1)
-total_length = np.sum(route_length, axis=-1)
+path_length = np.sum(segment_length, axis=-1)
+route_length = np.sum(path_length, axis=-1)
 ```
+
+In addition to being more concise, the latter is typically 5‒8× faster, especially when we scale to ever-larger problems:
 
 ![](img/bikeroutes-scaling.svg)
 
-Parallel processing wasn't included in the above test, but Awkward computations are better for multithreading because compiled routines don't lock the Python interpreter the way that Python statements do (see [Python GIL](https://www.dabeaz.com/python/UnderstandingGIL.pdf)).
+The reasons for this speedup are all related to Awkward Array's data structure, that it is more suited to structured numerical math than Python objects. Like a NumPy array, its numerical data are packed in memory-contiguous arrays of homogeneous type, which means that
 
-Additionally, numerical data take about 8× less memory because they're packed into arrays without per-object overhead.
+   * only a single block of memory needs to be fetched from memory into the CPU cache (no "pointer chasing"),
+   * data for fields other than the one being operated upon are not in the same buffer, so they don't even need to be loaded ("columnar," rather than "record-oriented"),
+   * the data type can be evaluated once before applying a precompiled opeation to a whole array buffer, rather than once before each element of a Python list.
 
-These are the normal advantages of using array libraries for mathematical calculations over Python objects, but Awkward Array widens the scope of problems that can be solved with arrays.
+This memory layout is especially good for applying one operation on all values in the array, thinking about the result, and then applying another. This is the "interactive" style of data analysis that you're probably familiar with from NumPy and Pandas, especially if you use Jupyter notebooks. It does have a performance cost, however: array buffers need to be allocated and filled after each step of the process, and some of those might never be used again.
+
+Just as NumPy can be accelerated by just-in-time compiling your code with [Numba](http://numba.pydata.org/), Awkward Arrays can be accelerated in the same way. The speedups described on Numba's website are possible because they avoid creating temporary, intermediate arrays and flushing the CPU cache with multiple passes over the same data. The Numba-accelerated equivalent of our bike routes example looks very similar to the pure Python code:
+
+```{code-cell}
+import numba as nb
+
+@nb.jit
+def compute_lengths(bikeroutes):
+    route_length = np.zeros(len(bikeroutes.features))
+    for i in range(len(bikeroutes.features)):
+        for path in bikeroutes.features[i].geometry.coordinates:
+            first = True
+            last_east, last_north = 0.0, 0.0
+            for lng_lat in path:
+                km_east = lng_lat[0] * 82.7
+                km_north = lng_lat[1] * 111.1
+                if not first:
+                    dx2 = (km_east - last_east)**2
+                    dy2 = (km_north - last_north)**2
+                    route_length[i] += np.sqrt(dx2 + dy2)
+                first = False
+                last_east, last_north = km_east, km_north
+    return route_length
+
+compute_lengths(bikeroutes)
+```
+
+But it runs 250× faster than the pure Python code:
+
+```{code-cell}
+%%timeit
+
+compute_lengths(bikeroutes)
+```
+
+(Note that these are microseconds, not milliseconds.)
+
+This improvement is due to a combination of streamlined data structures, precompiled logic, and minimizing the number of passes over the data. We haven't even taken advantage of multithreading yet, which can multiply this speedup by (up to) the number of CPU cores your computer has. (See Numba's [parallel range](https://numba.pydata.org/numba-doc/0.11/prange.html), [multithreading](https://numba.pydata.org/numba-doc/latest/user/threading-layer.html), and [nogil mode](https://numba.pydata.org/numba-doc/latest/user/jit.html#nogil) for more.)
+
+Internal structure
+------------------
+
+It's possible to peek into this columnar structure (or manipulate it, if you're a developer) by accessing the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html)'s layout. All of the columnar buffers are accessible this way.
+
+If you look carefully at the following, you'll see that all values for each field is in a separate buffer; the last of these is the longitude, latitude coordinates.
+
+```{code-cell}
+bikeroutes.layout
+```
 
 Compatibility
 -------------
 
-Awkward Array is not the only library to target numerical data analysis in Python, but we think it is unique in its emphasis on manipulating columnar data structures.
+The Awkward Array library is not intended to replace your data analysis tools. It adds one key feature: the ability to manipulate JSON-like data structures with NumPy-like idioms. It "plays well" with the scientific Python ecosystem, providing functions to convert arrays into forms recognized by other libraries and adheres to standard protocols for sharing data.
 
-  * All functions that are defined in both [NumPy](https://numpy.org/) and Awkward Array are strictly generalized in the latter. Rectangular arrays behave the same way in both libraries.
-  * [Apache Arrow](https://arrow.apache.org/) is an emerging standard for general columnar data structures like Awkward's, but Arrow is more concerned with sharing arrays between applications than structure manipulation. Most Awkward Arrays can be converted to and from Arrow Arrays without copying the underlying buffers (i.e. conversion is fast and doesn't scale with the size of the dataset). Conversion to Arrow also enables saving as [Parquet files](https://parquet.apache.org/), widely used by columnar databases.
-  * [Uproot](https://github.com/scikit-hep/uproot#readme) reads and writes the [ROOT file format](https://root.cern/) as Awkward Arrays. ROOT is ubiquitous in particle physics; more than an exabyte of data is in ROOT format.
-  * Awkward Arrays can also be [Pandas](https://pandas.pydata.org/) DataFrame columns without any copying or conversion.
-  * Awkward Arrays can also be passed in and out of functions compiled by [Numba](http://numba.pydata.org/), the leading just-in-time compiler for numerical Python. This allows for fast for-loop style calculations on the same data structures.
-  * [Dask](https://dask.org/) can perform delayed, distributed, and cache-efficient calculations on Awkward Arrays.
-  * [Zarr](https://zarr.readthedocs.io/en/stable/) can store and deliver Awkward Arrays as a v3 extension.
+They can be converted to and from [Apache Arrow](https://arrow.apache.org/):
 
-**FIXME:** not all of these are implemented yet, but I didn't want to forget to write them. See [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues) for progress.
+```{code-cell}
+ak.to_arrow(bikeroutes.features).type
+```
 
-Awkward Array "plays well" with the scientific Python ecosystem, enhancing it with one new capability: the ability to analyze JSON-like data with NumPy-like idioms.
+To and from [Parquet files](https://parquet.apache.org/) (through pyarrow):
+
+```{code-cell}
+ak.to_parquet(bikeroutes.features, "/tmp/bikeroutes.parquet")
+```
+
+To and from JSON:
+
+```{code-cell}
+ak.to_json(bikeroutes.features)[:100]
+```
+
+To Pandas:
+
+```{code-cell}
+ak.to_pandas(bikeroutes.features)
+```
+
+And to NumPy, if the arrays are first padded to be rectilinear:
+
+```{code-cell}
+ak.to_numpy(
+    ak.pad_none(
+        ak.pad_none(
+            bikeroutes.features.geometry.coordinates, 1980, axis=2
+        ), 7, axis=1
+    )
+)
+```
+
+Where to go next
+----------------
+
+The rest of these tutorials show how to use Awkward Array with various libraries, as well as how to do things that only Awkward Array can do. They are organized by task: see the left-bar (≡ button on mobile) for what you're trying to do. If, however, you're looking for documentation on a specific function, see the Python and C++ references below.
+
+<table style="margin-top: 30px">
+  <tr>
+    <td width="50%" valign="top" align="center">
+      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-sphinx.png" width="80%">
+      </a>
+      <p align="center" style="margin-top: 10px"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        Python<br>API reference
+        </a>
+      </b></p>
+    </td>
+    <td width="50%" valign="top" align="center">
+      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="80%">
+      </a>
+      <p align="center" style="margin-top: 10px"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        C++<br>API reference
+        </a>
+      </b></p>
+    </td>
+  </tr>
+</table>

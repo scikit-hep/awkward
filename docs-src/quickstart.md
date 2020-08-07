@@ -20,7 +20,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 Quickstart
 ==========
 
-Use the panel on the left for tutorials, click below for reference documentation, or [here for GitHub](https://github.com/scikit-hep/awkward-1.0).
+Use the left-bar for tutorials (≡ button on mobile), click below for reference documentation, or [here for GitHub](https://github.com/scikit-hep/awkward-1.0).
 
 <table style="margin-top: 30px">
   <tr>
