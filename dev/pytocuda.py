@@ -5,24 +5,28 @@ from collections import OrderedDict
 import yaml
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-KERNEL_WHITELIST = ["awkward_new_Identities"]
+KERNEL_WHITELIST = ["awkward_new_Identities", "awkward_Identities32_to_Identities64"]
 
 
 def traverse(node):
     if node.__class__.__name__ == "For":
         for subnode in node.body:
             code = traverse(subnode)
+    elif node.__class__.__name__ == "Subscript":
+        if node.slice.value.id == "i":
+            code = node.value.id + "[thread_id]"
+        else:
+            code = node.value.id + "[" + node.slice.value.id + "]"
+    elif node.__class__.__name__ == "Call":
+        assert len(node.args) == 1
+        code = "({0})({1})".format(node.func.id, traverse(node.args[0]))
     elif node.__class__.__name__ == "Assign":
         assert len(node.targets) == 1
-        if node.value.id == "i":
+        if node.value.__class__.__name__ == "Name" and node.value.id == "i":
             value = "thread_id"
         else:
-            value = node.value.id
-        if node.targets[0].slice.value.id == "i":
-            index = "thread_id"
-        else:
-            index = node.targets[0].slice.value.id
-        code = node.targets[0].value.id + "[" + index + "] = " + value + ";\n"
+            value = traverse(node.value)
+        code = "{0} = {1};\n".format(traverse(node.targets[0]), value)
     return code
 
 
@@ -79,6 +83,13 @@ def getparentargs(templateargs, spec):
             if list(arg.keys())[0] in templateargs.keys():
                 args[argname] = templateargs[list(arg.keys())[0]]
             elif "len" not in argname and "*" not in argname:
+                args[argname] = list(arg.values())[0]
+    else:
+        for arg in spec["args"]:
+            argname = list(arg.keys())[0]
+            if argname in spec["outparams"]:
+                argname = "*" + argname
+            if "len" not in argname and "*" not in argname:
                 args[argname] = list(arg.values())[0]
     return args
 
@@ -158,7 +169,10 @@ if __name__ == "__main__":
                     if indspec["name"] in KERNEL_WHITELIST:
                         templateargs = gettemplateargs(indspec)
                         args = getparentargs(templateargs, indspec)
-                        templatestring = gettemplatestring(templateargs)
+                        if "specializations" in indspec.keys():
+                            templatestring = gettemplatestring(templateargs)
+                        else:
+                            templatestring = ""
                         code += getdecl(
                             indspec["name"], args, templatestring, parent=True
                         )
@@ -166,8 +180,8 @@ if __name__ == "__main__":
   int64_t thread_id = block_id * blockDim.x + threadIdx.x;
 """
                         code += getbody(indspec["definition"])
-                        code += "}\n\n"
                         if "specializations" in indspec.keys():
+                            code += "}\n\n"
                             for childfunc in indspec["specializations"]:
                                 args = getchildargs(childfunc, indspec)
                                 code += getdecl(childfunc["name"], args, "")
@@ -206,4 +220,8 @@ if __name__ == "__main__":
                                 code += " " * 2 + "cudaDeviceSynchronize();\n"
                                 code += " " * 2 + "return success();\n"
                                 code += "}\n\n"
+                        else:
+                            code += " " * 2 + "cudaDeviceSynchronize();\n"
+                            code += " " * 2 + "return success();\n"
+                            code += "}\n\n"
         print(code)
