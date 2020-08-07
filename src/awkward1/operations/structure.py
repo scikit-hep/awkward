@@ -2667,6 +2667,32 @@ def atleast_1d(*arrays):
     """
     return numpy.atleast_1d(*[awkward1.operations.convert.to_numpy(x) for x in arrays])
 
+_dtype_to_string = {
+    numpy.dtype(numpy.bool): "bool",
+    numpy.dtype(numpy.bool_): "bool",
+    numpy.dtype(numpy.int8): "int8",
+    numpy.dtype(numpy.int16): "int16",
+    numpy.dtype(numpy.int32): "int32",
+    numpy.dtype(numpy.int64): "int64",
+    numpy.dtype(numpy.uint8): "uint8",
+    numpy.dtype(numpy.uint16): "uint16",
+    numpy.dtype(numpy.uint32): "uint32",
+    numpy.dtype(numpy.uint64): "uint64",
+    numpy.dtype(numpy.float32): "float32",
+    numpy.dtype(numpy.float64): "float64",
+    numpy.dtype(numpy.complex64): "complex64",
+    numpy.dtype(numpy.complex128): "complex128",
+    # numpy.dtype(numpy.datetime64): "datetime64",
+    # numpy.dtype(numpy.timedelta64): "timedelta64",
+}
+
+if hasattr(numpy, "float16"):
+    _dtype_to_string[numpy.dtype(numpy.float16)] = "float16"
+if hasattr(numpy, "float128"):
+    _dtype_to_string[numpy.dtype(numpy.float128)] = "float128"
+if hasattr(numpy, "complex256"):
+    _dtype_to_string[numpy.dtype(numpy.complex256)] = "complex256"
+
 def numbers_to_type(array, to, highlevel=True):
     """
     Args:
@@ -2679,27 +2705,7 @@ def numbers_to_type(array, to, highlevel=True):
     untouched.
     """
     to_dtype = numpy.dtype(to)
-    to_str = {
-        numpy.dtype(numpy.bool): "bool",
-        numpy.dtype(numpy.bool_): "bool",
-        numpy.dtype(numpy.int8): "int8",
-        numpy.dtype(numpy.int16): "int16",
-        numpy.dtype(numpy.int32): "int32",
-        numpy.dtype(numpy.int64): "int64",
-        numpy.dtype(numpy.uint8): "uint8",
-        numpy.dtype(numpy.uint16): "uint16",
-        numpy.dtype(numpy.uint32): "uint32",
-        numpy.dtype(numpy.uint64): "uint64",
-        numpy.dtype(numpy.float16): "float16",
-        numpy.dtype(numpy.float32): "float32",
-        numpy.dtype(numpy.float64): "float64",
-        numpy.dtype(numpy.float128): "float128",
-        numpy.dtype(numpy.complex64): "complex64",
-        numpy.dtype(numpy.complex128): "complex128",
-        numpy.dtype(numpy.complex256): "complex256",
-        # numpy.dtype(numpy.datetime64): "datetime64",
-        # numpy.dtype(numpy.timedelta64): "timedelta64",
-    }.get(to_dtype)
+    to_str = _dtype_to_string.get(to_dtype)
     if to_str is None:
         raise ValueError("cannot use {0} to cast the numeric type of an array".format(to_dtype))
 
@@ -2712,6 +2718,7 @@ def numbers_to_type(array, to, highlevel=True):
         return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:
         return out
+
 
 __all__ = [
     x
