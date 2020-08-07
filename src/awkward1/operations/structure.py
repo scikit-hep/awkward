@@ -2667,36 +2667,46 @@ def atleast_1d(*arrays):
     """
     return numpy.atleast_1d(*[awkward1.operations.convert.to_numpy(x) for x in arrays])
 
-@awkward1._connect._numpy.implements(numpy.can_cast)
-def can_cast(from_, to, casting='safe'):
+def numbers_to_type(array, to, highlevel=True):
     """
     Args:
-        from: dtype, dtype specifier, scalar, or array
-            Data type, scalar, or array to cast from.
-        to: dtype or dtype specifier
-            Data type to cast to.
-        casting: {‘no’, ‘equiv’, ‘safe’, ‘same_kind’, ‘unsafe’}, optional
-            Controls what kind of data casting may occur.
-            ‘no’ means the data types should not be cast at all.
-            ‘equiv’ means only byte-order changes are allowed.
-            ‘safe’ means only casts which can preserve values are allowed.
-            ‘same_kind’ means only safe casts or casts within a kind, like float64 to float32, are allowed.
-            ‘unsafe’ means any data conversions may be done.
+        array: Array whose numbers should be converted to a new numeric type.
+        to (dtype or dtype specifier): Type to convert the numbers into.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
 
-    Returns a bool
-        True if cast can occur according to the casting rule.
-
-    Implements NumPy's
-    [can_cast](https://numpy.org/doc/stable/reference/generated/numpy.can_cast.html)
-    function in a way that accepts #ak.Array as the `array`.
-
+    Converts all numbers in the array to a new type, leaving the structure
+    untouched.
     """
-    return numpy.can_cast(from_, to, casting)
+    to_dtype = numpy.dtype(to)
+    to_str = {
+        numpy.dtype(numpy.bool): "bool",
+        numpy.dtype(numpy.bool_): "bool",
+        numpy.dtype(numpy.int8): "int8",
+        numpy.dtype(numpy.int16): "int16",
+        numpy.dtype(numpy.int32): "int32",
+        numpy.dtype(numpy.int64): "int64",
+        numpy.dtype(numpy.uint8): "uint8",
+        numpy.dtype(numpy.uint16): "uint16",
+        numpy.dtype(numpy.uint32): "uint32",
+        numpy.dtype(numpy.uint64): "uint64",
+        numpy.dtype(numpy.float16): "float16",
+        numpy.dtype(numpy.float32): "float32",
+        numpy.dtype(numpy.float64): "float64",
+        numpy.dtype(numpy.float128): "float128",
+        numpy.dtype(numpy.complex64): "complex64",
+        numpy.dtype(numpy.complex128): "complex128",
+        numpy.dtype(numpy.complex256): "complex256",
+        # numpy.dtype(numpy.datetime64): "datetime64",
+        # numpy.dtype(numpy.timedelta64): "timedelta64",
+    }.get(to_dtype)
+    if to_str is None:
+        raise ValueError("cannot use {0} to cast the numeric type of an array".format(to_dtype))
 
-def astype(array, to, highlevel=True):
     layout = awkward1.operations.convert.to_layout(
-        array, allow_record=False, allow_other=False)
-    out = layout.numbers_to_type(str(to))
+        array, allow_record=False, allow_other=False
+    )
+    out = layout.numbers_to_type(to_str)
 
     if highlevel:
         return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
