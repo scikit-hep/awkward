@@ -14,10 +14,21 @@ kernelspec:
 How to convert to/from NumPy
 ============================
 
-**This is a stub:** I intend to write this article, but haven't yet.
+As a generalization of NumPy, any NumPy array can be converted to an Awkward Array, but not vice-versa.
 
-If you need it soon, create an issue saying so and I'll make it a higher priority.
+```{code-cell} ipython3
+import awkward1 as ak
+import numpy as np
+```
 
-[![](img/github-issues-documentation.png)](https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=docs&template=documentation.md&title=)
+The general function for NumPy → Awkward is [ak.from_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_numpy.html).
 
-The text of your issue doesn't have to be much more than a link to this page, so I can be sure which page you're referring to. If you add details about how and why you need it, however, I may be able to tailor the text to help you more.
+```{code-cell} ipython3
+np_array = np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+np_array
+```
+
+```{code-cell} ipython3
+ak_array = ak.from_numpy(np_array)
+ak_array
+```
