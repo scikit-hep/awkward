@@ -191,7 +191,7 @@ class Array(
             layout = data
         elif isinstance(data, Array):
             layout = data.layout
-        elif isinstance(data, numpy.ndarray):
+        elif isinstance(data, numpy.ndarray) and data.dtype != numpy.dtype("O"):
             layout = awkward1.operations.convert.from_numpy(data, highlevel=False)
         elif isinstance(data, str):
             layout = awkward1.operations.convert.from_json(data, highlevel=False)
