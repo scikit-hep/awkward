@@ -511,7 +511,8 @@ namespace awkward {
                    std::stringstream& out,
                    T* ptr,
                    ssize_t stride,
-                   int64_t length) {
+                   int64_t length,
+                   util::dtype dtype) {
     if (length <= 10) {
       for (int64_t i = 0;  i < length;  i++) {
         T* ptr2 = reinterpret_cast<T*>(
@@ -519,13 +520,13 @@ namespace awkward {
         if (i != 0) {
           out << " ";
         }
-        if (std::is_same<T, bool>::value) {
+        if (dtype == util::dtype::boolean) {
           out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) ? "true" : "false");
         }
-        else if (std::is_same<T, char>::value) {
+        else if (dtype == util::dtype::int8) {
           out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
-        else if (std::is_same<T, unsigned char>::value) {
+        else if (dtype == util::dtype::uint8) {
           out << (unsigned int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else {
@@ -540,13 +541,13 @@ namespace awkward {
         if (i != 0) {
           out << " ";
         }
-        if (std::is_same<T, bool>::value) {
+        if (dtype == util::dtype::boolean) {
           out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) ? "true" : "false");
         }
-        else if (std::is_same<T, char>::value) {
+        else if (dtype == util::dtype::int8) {
           out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
-        else if (std::is_same<T, unsigned char>::value) {
+        else if (dtype == util::dtype::uint8) {
           out << (unsigned int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else {
@@ -560,13 +561,13 @@ namespace awkward {
         if (i != length - 5) {
           out << " ";
         }
-        if (std::is_same<T, bool>::value) {
+        if (dtype == util::dtype::boolean) {
           out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) ? "true" : "false");
         }
-        else if (std::is_same<T, char>::value) {
+        else if (dtype == util::dtype::int8) {
           out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
-        else if (std::is_same<T, unsigned char>::value) {
+        else if (dtype == util::dtype::uint8) {
           out << (unsigned int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else {
@@ -633,77 +634,88 @@ namespace awkward {
                         out,
                         reinterpret_cast<bool*>(data()),
                         strides_[0],
-                        length());
+                        length(),
+                        dtype_);
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::int8) {
       tostring_as<int8_t>(ptr_lib(),
                           out,
                           reinterpret_cast<int8_t*>(data()),
                           strides_[0],
-                          length());
+                          length(),
+                          dtype_);
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::int16) {
       tostring_as<int16_t>(ptr_lib(),
                            out,
                            reinterpret_cast<int16_t*>(data()),
                            strides_[0],
-                           length());
+                           length(),
+                           dtype_);
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::int32) {
       tostring_as<int32_t>(ptr_lib(),
                            out,
                            reinterpret_cast<int32_t*>(data()),
                            strides_[0],
-                           length());
+                           length(),
+                           dtype_);
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::int64) {
       tostring_as<int64_t>(ptr_lib(),
                            out,
                            reinterpret_cast<int64_t*>(data()),
                            strides_[0],
-                           length());
+                           length(),
+                           dtype_);
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::uint8) {
       tostring_as<uint8_t>(ptr_lib(),
                            out,
                            reinterpret_cast<uint8_t*>(data()),
                            strides_[0],
-                           length());
+                           length(),
+                           dtype_);
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::uint16) {
       tostring_as<uint16_t>(ptr_lib(),
                             out,
                             reinterpret_cast<uint16_t*>(data()),
                             strides_[0],
-                            length());
+                            length(),
+                            dtype_);
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::uint32) {
       tostring_as<uint32_t>(ptr_lib(),
                             out,
                             reinterpret_cast<uint32_t*>(data()),
                             strides_[0],
-                            length());
+                            length(),
+                            dtype_);
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::uint64) {
       tostring_as<uint64_t>(ptr_lib(),
                             out,
                             reinterpret_cast<uint64_t*>(data()),
                             strides_[0],
-                            length());
+                            length(),
+                            dtype_);
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::float32) {
       tostring_as<float>(ptr_lib(),
                          out,
                          reinterpret_cast<float*>(data()),
                          strides_[0],
-                         length());
+                         length(),
+                         dtype_);
     }
     else if (ndim() == 1  &&  dtype_ == util::dtype::float64) {
       tostring_as<double>(ptr_lib(),
                           out,
                           reinterpret_cast<double*>(data()),
                           strides_[0],
-                          length());
+                          length(),
+                          dtype_);
     }
     else {
       out << "0x ";
@@ -713,8 +725,10 @@ namespace awkward {
           if (i != 0  &&  i % 4 == 0) {
             out << " ";
           }
+          unsigned char* ptr2 = reinterpret_cast<unsigned char*>(
+              reinterpret_cast<ssize_t>(data()) + (ssize_t)i);
           out << std::hex << std::setw(2) << std::setfill('0')
-              << int(getbyte(i));
+              << int((unsigned char)kernel::NumpyArray_getitem_at0(ptr_lib_, ptr2));
         }
       }
       else {
@@ -722,16 +736,20 @@ namespace awkward {
           if (i != 0  &&  i % 4 == 0) {
             out << " ";
           }
+          unsigned char* ptr2 = reinterpret_cast<unsigned char*>(
+              reinterpret_cast<ssize_t>(data()) + (ssize_t)i);
           out << std::hex << std::setw(2) << std::setfill('0')
-              << int(getbyte(i));
+              << int((unsigned char)kernel::NumpyArray_getitem_at0(ptr_lib_, ptr2));
         }
         out << " ... ";
         for (ssize_t i = len - 16;  i < len;  i++) {
           if (i != len - 16  &&  i % 4 == 0) {
             out << " ";
           }
+          unsigned char* ptr2 = reinterpret_cast<unsigned char*>(
+              reinterpret_cast<ssize_t>(data()) + (ssize_t)i);
           out << std::hex << std::setw(2) << std::setfill('0')
-              << int(getbyte(i));
+              << int((unsigned char)kernel::NumpyArray_getitem_at0(ptr_lib_, ptr2));
         }
       }
     }
