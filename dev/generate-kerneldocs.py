@@ -21,7 +21,7 @@ A second implementation, ``libawkward-cuda-kernels.so``, is provided as a separa
 
     <img src="../_static/awkward-1-0-layers.svg" style="max-width: 500px; margin-left: auto; margin-right: auto;">
 
-The functions are implemented in C with templates for integer specializations (cpu-kernels) and as CUDA (cuda-kernels), but the function signatures and normative definitions are expressed below using a subset of the Python language. These normative definitions are used as a stable and easy-to-read standard that both implementations must reproduce in tests, regardless of how they are optimized.
+The functions are implemented in C with templates for integer specializations (cpu-kernels) and as CUDA (cuda-kernels), but the function signatures and normative definitions are expressed below using a subset of the Python language. These normative definitions are used as a stable and easy-to-read standard that both implementations must reproduce in tests, regardless of how they are optimized.\n
 """
     with open(
         os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
