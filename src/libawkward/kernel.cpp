@@ -5533,16 +5533,14 @@ namespace awkward {
       const int8_t *fromtags,
       const int32_t *fromindex,
       int64_t length,
-      int64_t **offsetsraws,
-      int64_t *offsetsoffsets) {
+      int64_t **offsetsraws) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray32_flatten_length_64(
           total_length,
           fromtags,
           fromindex,
           length,
-          offsetsraws,
-          offsetsoffsets);
+          offsetsraws);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -5561,16 +5559,14 @@ namespace awkward {
       const int8_t *fromtags,
       const uint32_t *fromindex,
       int64_t length,
-      int64_t **offsetsraws,
-      int64_t *offsetsoffsets) {
+      int64_t **offsetsraws) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArrayU32_flatten_length_64(
           total_length,
           fromtags,
           fromindex,
           length,
-          offsetsraws,
-          offsetsoffsets);
+          offsetsraws);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -5589,16 +5585,14 @@ namespace awkward {
       const int8_t *fromtags,
       const int64_t *fromindex,
       int64_t length,
-      int64_t **offsetsraws,
-      int64_t *offsetsoffsets) {
+      int64_t **offsetsraws) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray64_flatten_length_64(
           total_length,
           fromtags,
           fromindex,
           length,
-          offsetsraws,
-          offsetsoffsets);
+          offsetsraws);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -5619,8 +5613,7 @@ namespace awkward {
       const int8_t *fromtags,
       const int32_t *fromindex,
       int64_t length,
-      int64_t **offsetsraws,
-      int64_t *offsetsoffsets) {
+      int64_t **offsetsraws) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray32_flatten_combine_64(
           totags,
@@ -5629,8 +5622,7 @@ namespace awkward {
           fromtags,
           fromindex,
           length,
-          offsetsraws,
-          offsetsoffsets);
+          offsetsraws);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -5651,8 +5643,7 @@ namespace awkward {
       const int8_t *fromtags,
       const uint32_t *fromindex,
       int64_t length,
-      int64_t **offsetsraws,
-      int64_t *offsetsoffsets) {
+      int64_t **offsetsraws) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArrayU32_flatten_combine_64(
           totags,
@@ -5661,8 +5652,7 @@ namespace awkward {
           fromtags,
           fromindex,
           length,
-          offsetsraws,
-          offsetsoffsets);
+          offsetsraws);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -5683,8 +5673,7 @@ namespace awkward {
       const int8_t *fromtags,
       const int64_t *fromindex,
       int64_t length,
-      int64_t **offsetsraws,
-      int64_t *offsetsoffsets) {
+      int64_t **offsetsraws) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_UnionArray64_flatten_combine_64(
           totags,
@@ -5693,8 +5682,7 @@ namespace awkward {
           fromtags,
           fromindex,
           length,
-          offsetsraws,
-          offsetsoffsets);
+          offsetsraws);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(

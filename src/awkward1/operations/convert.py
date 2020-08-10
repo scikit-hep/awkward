@@ -20,7 +20,13 @@ import awkward1._ext
 import awkward1._util
 
 
-def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
+def from_numpy(
+    array,
+    regulararray=False,
+    recordarray=True,
+    highlevel=True,
+    behavior=None
+):
     """
     Args:
         array (np.ndarray): The NumPy array to convert into an Awkward Array.
@@ -30,6 +36,11 @@ def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
             nodes; if False and the array is multidimensional, the dimensions
             are represented by a multivalued #ak.layout.NumpyArray.shape.
             If the array is one-dimensional, this has no effect.
+        recordarray (bool): If True and the array is a NumPy structured array
+            (dtype.names is not None), the fields are represented by an
+            #ak.layout.RecordArray; if False and the array is a structured
+            array, the structure is left in the #ak.layout.NumpyArray `format`,
+            which some functions do not recognize.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (bool): Custom #ak.behavior for the output array, if
@@ -61,9 +72,19 @@ def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
 
         if mask is None:
             return data
-        elif mask is False:
+        elif mask is False or (isinstance(mask, numpy.bool_) and not mask):
             # NumPy's MaskedArray with mask == False is an UnmaskedArray
-            return awkward1.layout.UnmaskedArray(data)
+            if len(array.shape) == 1:
+                return awkward1.layout.UnmaskedArray(data)
+            else:
+                def attach(x):
+                    if isinstance(x, awkward1.layout.NumpyArray):
+                        return awkward1.layout.UnmaskedArray(x)
+                    else:
+                        return awkward1.layout.RegularArray(
+                            attach(x.content), x.size
+                        )
+                return attach(data.toRegularArray())
         else:
             # NumPy's MaskedArray is a ByteMaskedArray with valid_when=False
             return awkward1.layout.ByteMaskedArray(
@@ -79,7 +100,14 @@ def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
     else:
         mask = None
 
-    layout = recurse(array, mask)
+    if not recordarray or array.dtype.names is None:
+        layout = recurse(array, mask)
+    else:
+        contents = []
+        for name in array.dtype.names:
+            contents.append(recurse(array[name], mask))
+        layout = awkward1.layout.RecordArray(contents, array.dtype.names)
+
     if highlevel:
         return awkward1._util.wrap(layout, behavior)
     else:
@@ -204,6 +232,7 @@ def to_numpy(array, allow_missing=True):
 
     elif isinstance(array, awkward1._util.optiontypes):
         content = to_numpy(array.project(), allow_missing=allow_missing)
+
         shape = list(content.shape)
         shape[0] = len(array)
         data = numpy.empty(shape, dtype=content.dtype)
@@ -213,6 +242,11 @@ def to_numpy(array, allow_missing=True):
                 mask = numpy.broadcast_to(
                     mask0.reshape((shape[0],) + (1,) * (len(shape) - 1)), shape
                 )
+                if isinstance(content, numpy.ma.MaskedArray):
+                    mask1 = numpy.ma.getmaskarray(content)
+                    mask = mask.copy()
+                    mask[~mask0] |= mask1
+
                 data[~mask0] = content
                 return numpy.ma.MaskedArray(data, mask)
             else:
@@ -529,7 +563,12 @@ def to_json(array, destination=None, pretty=False, maxdecimals=None, buffersize=
 
 
 def from_awkward0(
-    array, keep_layout=False, regulararray=False, highlevel=True, behavior=None
+    array,
+    keep_layout=False,
+    regulararray=False,
+    recordarray=True,
+    highlevel=True,
+    behavior=None
 ):
     """
     Args:
@@ -543,6 +582,11 @@ def from_awkward0(
             nodes; if False and the array is multidimensional, the dimensions
             are represented by a multivalued #ak.layout.NumpyArray.shape.
             If the array is one-dimensional, this has no effect.
+        recordarray (bool): If True and the array is a NumPy structured array
+            (dtype.names is not None), the fields are represented by an
+            #ak.layout.RecordArray; if False and the array is a structured
+            array, the structure is left in the #ak.layout.NumpyArray `format`,
+            which some functions do not recognize.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (bool): Custom #ak.behavior for the output array, if
@@ -623,10 +667,20 @@ def from_awkward0(
             return awkward1.layout.RecordArray(values)[0]
 
         elif isinstance(array, numpy.ma.MaskedArray):
-            return from_numpy(array, regulararray=regulararray, highlevel=False)
+            return from_numpy(
+                array,
+                regulararray=regulararray,
+                recordarray=recordarray,
+                highlevel=False
+            )
 
         elif isinstance(array, numpy.ndarray):
-            return from_numpy(array, regulararray=regulararray, highlevel=False)
+            return from_numpy(
+                array,
+                regulararray=regulararray,
+                recordarray=recordarray,
+                highlevel=False
+            )
 
         elif isinstance(array, awkward0.JaggedArray):
             # starts, stops, content
@@ -3249,6 +3303,116 @@ def from_arrayset(
 def to_pandas(
     array, how="inner", levelname=lambda i: "sub" * i + "entry", anonymous="values"
 ):
+    """
+    Args:
+        array: Data to convert into one or more Pandas DataFrames.
+        how (None or str): Passed to
+            [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html)
+            to combine DataFrames for each multiplicity into one DataFrame. If
+            None, a list of Pandas DataFrames is returned.
+        levelname (int -> str): Computes a name for each level of the row index
+            from the number of levels deep.
+        anonymous (str): Column name to use if the `array` does not contain
+            records; otherwise, column names are derived from record fields.
+
+    Converts Awkward data structures into Pandas
+    [MultiIndex](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html)
+    rows and columns. The resulting DataFrame(s) contains no Awkward structures.
+
+    #ak.Array structures can't be losslessly converted into a single DataFrame;
+    different fields in a record structure might have different nested list
+    lengths, but a DataFrame can have only one index.
+
+    If `how` is None, this function always returns a list of DataFrames (even
+    if it contains only one DataFrame); otherwise `how` is passed to
+    [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html)
+    to merge them into a single DataFrame with the associated loss of data.
+
+    In the following example, nested lists are converted into MultiIndex rows.
+    The index level names `"entry"`, `"subentry"` and `"subsubentry"` can be
+    controlled with the `levelname` parameter. The column name `"values"` is
+    assigned because this array has no fields; it can be controlled with the
+    `anonymous` parameter.
+
+        >>> ak.to_pandas(ak.Array([[[1.1, 2.2], [], [3.3]],
+        ...                        [],
+        ...                        [[4.4], [5.5, 6.6]],
+        ...                        [[7.7]],
+        ...                        [[8.8]]]))
+                                    values
+        entry subentry subsubentry        
+        0     0        0               1.1
+                       1               2.2
+              2        0               3.3
+        2     0        0               4.4
+              1        0               5.5
+                       1               6.6
+        3     0        0               7.7
+        4     0        0               8.8
+
+    In this example, nested records are converted into MultiIndex columns.
+    (MultiIndex rows and columns can be mixed; these examples are deliberately
+    simple.)
+
+        >>> ak.to_pandas(ak.Array([
+        ...     {"I": {"a": _, "b": {"i": _}}, "II": {"x": {"y": {"z": _}}}}
+        ...     for _ in range(0, 50, 10)]))
+                I      II
+                a   b   x
+                    i   y
+                        z
+        entry            
+        0       0   0   0
+        1      10  10  10
+        2      20  20  20
+        3      30  30  30
+        4      40  40  40
+
+    The following two examples show how fields of different length lists are
+    merged. With `how="inner"` (default), only subentries that exist for all
+    fields are preserved; with `how="outer"`, all subentries are preserved at
+    the expense of requiring missing values.
+
+        >>> ak.to_pandas(ak.Array([{"x": [], "y": [4.4, 3.3, 2.2, 1.1]},
+        ...                        {"x": [1], "y": [3.3, 2.2, 1.1]},
+        ...                        {"x": [1, 2], "y": [2.2, 1.1]},
+        ...                        {"x": [1, 2, 3], "y": [1.1]},
+        ...                        {"x": [1, 2, 3, 4], "y": []}]),
+        ...                        how="inner")
+                        x    y
+        entry subentry        
+        1     0         1  3.3
+        2     0         1  2.2
+              1         2  1.1
+        3     0         1  1.1
+
+    The same with `how="outer"`:
+
+        >>> ak.to_pandas(ak.Array([{"x": [], "y": [4.4, 3.3, 2.2, 1.1]},
+        ...                        {"x": [1], "y": [3.3, 2.2, 1.1]},
+        ...                        {"x": [1, 2], "y": [2.2, 1.1]},
+        ...                        {"x": [1, 2, 3], "y": [1.1]},
+        ...                        {"x": [1, 2, 3, 4], "y": []}]),
+        ...                        how="outer")
+                          x    y
+        entry subentry          
+        0     0         NaN  4.4
+              1         NaN  3.3
+              2         NaN  2.2
+              3         NaN  1.1
+        1     0         1.0  3.3
+              1         NaN  2.2
+              2         NaN  1.1
+        2     0         1.0  2.2
+              1         2.0  1.1
+        3     0         1.0  1.1
+              1         2.0  NaN
+              2         3.0  NaN
+        4     0         1.0  NaN
+              1         2.0  NaN
+              2         3.0  NaN
+              3         4.0  NaN
+    """
     pandas = awkward1._connect._pandas.get_pandas()
 
     if how is not None:

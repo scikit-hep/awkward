@@ -406,6 +406,7 @@ toslice_part(ak::Slice& slice, py::object obj) {
         content = unbox_content(
             py::module::import("awkward1").attr("from_numpy")(obj,
                                                               false,
+                                                              false,
                                                               false));
       }
       else if (py::isinstance(

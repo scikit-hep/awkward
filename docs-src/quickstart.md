@@ -3,8 +3,8 @@ jupytext:
   text_representation:
     extension: .md
     format_name: myst
-    format_version: '0.8'
-    jupytext_version: 1.4.2
+    format_version: '0.10'
+    jupytext_version: 1.5.2
 kernelspec:
   display_name: Python 3
   language: python
@@ -20,7 +20,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 Quickstart
 ==========
 
-Use the panel on the left for tutorials, click below for reference documentation, or [here for GitHub](https://github.com/scikit-hep/awkward-1.0).
+Use the left-bar for tutorials (≡ button on mobile), click below for reference documentation, or [here for GitHub](https://github.com/scikit-hep/awkward-1.0).
 
 <table style="margin-top: 30px">
   <tr>

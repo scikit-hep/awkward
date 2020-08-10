@@ -37,6 +37,7 @@ docs-mkdocs/docs
 docs-sphinx/_build
 docs-sphinx/_static
 docs-sphinx/_auto
+docs-src/_build
 
 ############################################################# IDEs
 .idea

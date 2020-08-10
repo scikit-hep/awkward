@@ -1281,7 +1281,6 @@ namespace awkward {
       bool has_offsets = false;
       std::vector<std::shared_ptr<int64_t>> offsetsptrs;
       std::vector<int64_t*> offsetsraws;
-      std::vector<int64_t> offsetsoffsets;   // DROP
       ContentPtrVec contents;
       for (auto content : contents_) {
         std::pair<Index64, ContentPtr> pair =
@@ -1289,7 +1288,6 @@ namespace awkward {
         Index64 offsets = pair.first;
         offsetsptrs.push_back(offsets.ptr());
         offsetsraws.push_back(offsets.data());
-        offsetsoffsets.push_back(0);   // DROP
         contents.push_back(pair.second);
         has_offsets = (offsets.length() != 0);
       }
@@ -1302,8 +1300,7 @@ namespace awkward {
           tags_.data(),
           index_.data(),
           tags_.length(),
-          offsetsraws.data(),
-          offsetsoffsets.data());   // DROP
+          offsetsraws.data());
         util::handle_error(err1, classname(), identities_.get());
 
         Index8 totags(total_length);
@@ -1317,8 +1314,7 @@ namespace awkward {
           tags_.data(),
           index_.data(),
           tags_.length(),
-          offsetsraws.data(),
-          offsetsoffsets.data());   // DROP
+          offsetsraws.data());
         util::handle_error(err2, classname(), identities_.get());
         return std::pair<Index64, ContentPtr>(
           tooffsets,
