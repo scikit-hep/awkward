@@ -11,13 +11,51 @@ kernelspec:
   name: python3
 ---
 
-How to convert to/from Parquet with Arrow
-=========================================
+How to convert to/from Arrow and Parquet
+========================================
 
-**This is a stub:** I intend to write this article, but haven't yet.
+The [Apache Arrow](https://arrow.apache.org/) data format is very similar to Awkward Array's, but they're not exactly the same. As such, arrays can _usually_ be shared without copying, but not always.
 
-If you need it soon, create an issue saying so and I'll make it a higher priority.
+The [Apache Parquet](https://parquet.apache.org/) file format has strong connections to Arrow with a large overlap in available tools, and while it's also a columnar format like Awkward and Arrow, it is implemented in a different way, which emphasizes compact storage over random access.
 
-[![](img/github-issues-documentation.png)](https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=docs&template=documentation.md&title=)
+```{code-cell} ipython3
+import awkward1 as ak
+import pyarrow as pa
+import pyarrow.csv
+import urllib.request
+```
 
-The text of your issue doesn't have to be much more than a link to this page, so I can be sure which page you're referring to. If you add details about how and why you need it, however, I may be able to tailor the text to help you more.
+From Arrow to Awkward
+---------------------
+
+A variety of types in the pyarrow library, including
+
+   * `pyarrow.lib.Array`
+   * `pyarrow.lib.ChunkedArray`
+   * `pyarrow.lib.RecordBatch`
+   * `pyarrow.lib.Table`
+
+can all be converted to (non-partitioned, non-virtual) Awkward Arrays with [ak.from_arrow](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_arrow.html).
+
+```{code-cell} ipython3
+pa_array = pa.array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+pa_array
+```
+
+```{code-cell} ipython3
+ak.from_arrow(pa_array)
+```
+
+```{code-cell} ipython3
+avocado = urllib.request.urlopen("https://github.com/ryanhomer/dsci522-group411-data/blob/master/avocado.csv?raw=true")
+table = pyarrow.csv.read_csv(avocado)
+table
+```
+
+```{code-cell} ipython3
+ak.from_arrow(table)
+```
+
+```{code-cell} ipython3
+
+```
