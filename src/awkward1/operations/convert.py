@@ -20,7 +20,13 @@ import awkward1._ext
 import awkward1._util
 
 
-def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
+def from_numpy(
+    array,
+    regulararray=False,
+    recordarray=True,
+    highlevel=True,
+    behavior=None
+):
     """
     Args:
         array (np.ndarray): The NumPy array to convert into an Awkward Array.
@@ -30,6 +36,11 @@ def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
             nodes; if False and the array is multidimensional, the dimensions
             are represented by a multivalued #ak.layout.NumpyArray.shape.
             If the array is one-dimensional, this has no effect.
+        recordarray (bool): If True and the array is a NumPy structured array
+            (dtype.names is not None), the fields are represented by an
+            #ak.layout.RecordArray; if False and the array is a structured
+            array, the structure is left in the #ak.layout.NumpyArray `format`,
+            which some functions do not recognize.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (bool): Custom #ak.behavior for the output array, if
@@ -61,9 +72,19 @@ def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
 
         if mask is None:
             return data
-        elif mask is False:
+        elif mask is False or (isinstance(mask, numpy.bool_) and not mask):
             # NumPy's MaskedArray with mask == False is an UnmaskedArray
-            return awkward1.layout.UnmaskedArray(data)
+            if len(array.shape) == 1:
+                return awkward1.layout.UnmaskedArray(data)
+            else:
+                def attach(x):
+                    if isinstance(x, awkward1.layout.NumpyArray):
+                        return awkward1.layout.UnmaskedArray(x)
+                    else:
+                        return awkward1.layout.RegularArray(
+                            attach(x.content), x.size
+                        )
+                return attach(data.toRegularArray())
         else:
             # NumPy's MaskedArray is a ByteMaskedArray with valid_when=False
             return awkward1.layout.ByteMaskedArray(
@@ -79,7 +100,14 @@ def from_numpy(array, regulararray=False, highlevel=True, behavior=None):
     else:
         mask = None
 
-    layout = recurse(array, mask)
+    if not recordarray or array.dtype.names is None:
+        layout = recurse(array, mask)
+    else:
+        contents = []
+        for name in array.dtype.names:
+            contents.append(recurse(array[name], mask))
+        layout = awkward1.layout.RecordArray(contents, array.dtype.names)
+
     if highlevel:
         return awkward1._util.wrap(layout, behavior)
     else:
@@ -204,6 +232,7 @@ def to_numpy(array, allow_missing=True):
 
     elif isinstance(array, awkward1._util.optiontypes):
         content = to_numpy(array.project(), allow_missing=allow_missing)
+
         shape = list(content.shape)
         shape[0] = len(array)
         data = numpy.empty(shape, dtype=content.dtype)
@@ -213,6 +242,11 @@ def to_numpy(array, allow_missing=True):
                 mask = numpy.broadcast_to(
                     mask0.reshape((shape[0],) + (1,) * (len(shape) - 1)), shape
                 )
+                if isinstance(content, numpy.ma.MaskedArray):
+                    mask1 = numpy.ma.getmaskarray(content)
+                    mask = mask.copy()
+                    mask[~mask0] |= mask1
+
                 data[~mask0] = content
                 return numpy.ma.MaskedArray(data, mask)
             else:
@@ -529,7 +563,12 @@ def to_json(array, destination=None, pretty=False, maxdecimals=None, buffersize=
 
 
 def from_awkward0(
-    array, keep_layout=False, regulararray=False, highlevel=True, behavior=None
+    array,
+    keep_layout=False,
+    regulararray=False,
+    recordarray=True,
+    highlevel=True,
+    behavior=None
 ):
     """
     Args:
@@ -543,6 +582,11 @@ def from_awkward0(
             nodes; if False and the array is multidimensional, the dimensions
             are represented by a multivalued #ak.layout.NumpyArray.shape.
             If the array is one-dimensional, this has no effect.
+        recordarray (bool): If True and the array is a NumPy structured array
+            (dtype.names is not None), the fields are represented by an
+            #ak.layout.RecordArray; if False and the array is a structured
+            array, the structure is left in the #ak.layout.NumpyArray `format`,
+            which some functions do not recognize.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (bool): Custom #ak.behavior for the output array, if
@@ -623,10 +667,20 @@ def from_awkward0(
             return awkward1.layout.RecordArray(values)[0]
 
         elif isinstance(array, numpy.ma.MaskedArray):
-            return from_numpy(array, regulararray=regulararray, highlevel=False)
+            return from_numpy(
+                array,
+                regulararray=regulararray,
+                recordarray=recordarray,
+                highlevel=False
+            )
 
         elif isinstance(array, numpy.ndarray):
-            return from_numpy(array, regulararray=regulararray, highlevel=False)
+            return from_numpy(
+                array,
+                regulararray=regulararray,
+                recordarray=recordarray,
+                highlevel=False
+            )
 
         elif isinstance(array, awkward0.JaggedArray):
             # starts, stops, content
