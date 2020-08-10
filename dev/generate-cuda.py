@@ -7,13 +7,15 @@ from collections import OrderedDict
 import yaml
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-KERNEL_WHITELIST = ["awkward_new_Identities", "awkward_Identities32_to_Identities64"]
+KERNEL_WHITELIST = ["awkward_new_Identities"]
 
 
 def traverse(node):
     if node.__class__.__name__ == "For":
+        code = "if (thread_id < length) {\n"
         for subnode in node.body:
-            code = traverse(subnode)
+            code += traverse(subnode)
+        code += "}\n"
     elif node.__class__.__name__ == "Subscript":
         if node.slice.value.id == "i":
             code = node.value.id + "[thread_id]"
@@ -84,14 +86,14 @@ def getparentargs(templateargs, spec):
                 argname = "*" + argname
             if list(arg.keys())[0] in templateargs.keys():
                 args[argname] = templateargs[list(arg.keys())[0]]
-            elif "len" not in argname and "*" not in argname:
+            elif "*" not in argname:
                 args[argname] = list(arg.values())[0]
     else:
         for arg in spec["args"]:
             argname = list(arg.keys())[0]
             if argname in spec["outparams"]:
                 argname = "*" + argname
-            if "len" not in argname and "*" not in argname:
+            if "*" not in argname:
                 args[argname] = list(arg.values())[0]
     return args
 
@@ -115,20 +117,23 @@ def gettemplatestring(templateargs):
     return templatestring
 
 
-def getdecl(name, parentargs, templatestring, parent=False):
+def getdecl(name, args, templatestring, parent=False, solo=False):
     code = ""
     if templatestring != "":
         code += "<" + templatestring + ">\n"
     if parent:
         code += "__global__\n"
     count = 0
-    for key, value in parentargs.items():
+    for key, value in args.items():
         if count == 0:
             params = value + " " + key
             count += 1
         else:
             params += ", " + value + " " + key
-    code += "ERROR " + getcudaname(name) + "(" + params + ") {\n"
+    if parent:
+        code += "void cuda_" + name + "(" + params + ") {\n"
+    else:
+        code += "ERROR " + getcudaname(name) + "(" + params + ") {\n"
     return code
 
 
@@ -175,15 +180,20 @@ if __name__ == "__main__":
                             templatestring = gettemplatestring(templateargs)
                         else:
                             templatestring = ""
+                            args = getchildargs(indspec, indspec)
                         code += getdecl(
-                            indspec["name"], args, templatestring, parent=True
+                            indspec["name"],
+                            args,
+                            templatestring,
+                            parent=True,
+                            solo="specializations" in indspec.keys(),
                         )
                         code += """  int64_t block_id = blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
   int64_t thread_id = block_id * blockDim.x + threadIdx.x;
 """
                         code += getbody(indspec["definition"])
+                        code += "}\n\n"
                         if "specializations" in indspec.keys():
-                            code += "}\n\n"
                             for childfunc in indspec["specializations"]:
                                 args = getchildargs(childfunc, indspec)
                                 code += getdecl(childfunc["name"], args, "")
@@ -223,6 +233,34 @@ if __name__ == "__main__":
                                 code += " " * 2 + "return success();\n"
                                 code += "}\n\n"
                         else:
+                            code += getdecl(indspec["name"], args, "")
+                            lenarg = None
+                            for arg in args.keys():
+                                if "len" in arg:
+                                    assert lenarg is None
+                                    lenarg = arg
+                            assert lenarg is not None
+                            code += """  dim3 blocks_per_grid;
+  dim3 threads_per_block;
+
+  if ({0} > 1024) {{
+  blocks_per_grid = dim3(ceil(({0}) / 1024.0), 1, 1);
+  threads_per_block = dim3(1024, 1, 1);
+  }} else {{
+  blocks_per_grid = dim3(1, 1, 1);
+  threads_per_block = dim3({0}, 1, 1);
+  }}
+""".format(
+                                lenarg
+                            )
+                            paramnames = getparamnames(args)
+                            code += (
+                                " " * 2
+                                + indspec["name"]
+                                + "<<<blocks_per_grid, threads_per_block>>>("
+                                + paramnames
+                                + ");\n"
+                            )
                             code += " " * 2 + "cudaDeviceSynchronize();\n"
                             code += " " * 2 + "return success();\n"
                             code += "}\n\n"
