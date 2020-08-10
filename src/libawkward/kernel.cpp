@@ -4399,8 +4399,14 @@ namespace awkward {
           width);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_to_Identities64");
+        FORM_KERNEL(awkward_Identities32_to_Identities64,
+                    awkward_cuda_Identities32_to_Identities64,
+                    ptr_lib);
+        return (*awkward_cuda_Identities32_to_Identities64_t)(
+          toptr,
+          fromptr,
+          length,
+          width);
       }
       else {
         throw std::runtime_error(
