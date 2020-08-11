@@ -6,42 +6,41 @@ import sys
 
 import pytest
 
-import numpy as np
-import awkward1 as ak
-from awkward1 import mixin_class, mixin_class_method
+import numpy
+import awkward1
 
 
 def test_make_mixins():
-    @mixin_class(ak.behavior)
+    @awkward1.mixin_class(awkward1.behavior)
     class Point(object):
         def distance(self, other):
-            return np.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
+            return numpy.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
 
-        @mixin_class_method(np.equal, {"Point"})
+        @awkward1.mixin_class_method(numpy.equal, {"Point"})
         def point_equal(self, other):
-            return np.logical_and(self.x == other.x, self.y == other.y)
+            return numpy.logical_and(self.x == other.x, self.y == other.y)
 
-        @mixin_class_method(np.abs)
+        @awkward1.mixin_class_method(numpy.abs)
         def point_abs(self):
-            return np.sqrt(self.x ** 2 + self.y ** 2)
+            return numpy.sqrt(self.x ** 2 + self.y ** 2)
 
-        @mixin_class_method(np.add, {"Point"})
+        @awkward1.mixin_class_method(numpy.add, {"Point"})
         def point_add(self, other):
             print("hi")
-            return ak.zip(
+            return awkward1.zip(
                 {"x": self.x + other.x, "y": self.y + other.y}, with_name="Point",
             )
 
-    @mixin_class(ak.behavior)
+    @awkward1.mixin_class(awkward1.behavior)
     class WeightedPoint(Point):
-        @mixin_class_method(np.equal, {"WeightedPoint"})
+        @awkward1.mixin_class_method(numpy.equal, {"WeightedPoint"})
         def weighted_equal(self, other):
-            return np.logical_and(self.point_equal(other), self.weight == other.weight)
+            return numpy.logical_and(self.point_equal(other), self.weight == other.weight)
 
-        @mixin_class_method(np.add, {"WeightedPoint"})
+        @awkward1.mixin_class_method(numpy.add, {"WeightedPoint"})
         def weighted_add(self, other):
             sumw = self.weight + other.weight
-            return ak.zip(
+            return awkward1.zip(
                 {
                     "x": (self.x * self.weight + other.x * other.weight) / sumw,
                     "y": (self.y * self.weight + other.y * other.weight) / sumw,
@@ -50,7 +49,7 @@ def test_make_mixins():
                 with_name="WeightedPoint",
             )
 
-    one = ak.Array(
+    one = awkward1.Array(
         [
             [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
             [],
@@ -58,7 +57,7 @@ def test_make_mixins():
         ],
         with_name="Point",
     )
-    two = ak.Array(
+    two = awkward1.Array(
         [
             [{"x": 0.9, "y": 1}, {"x": 2, "y": 2.2}, {"x": 2.9, "y": 3}],
             [],
@@ -66,15 +65,15 @@ def test_make_mixins():
         ],
         with_name="Point",
     )
-    wone = ak.Array(ak.with_field(one, abs(one), "weight"), with_name="WeightedPoint")
-    wtwo = ak.Array(ak.with_field(two, abs(two), "weight"), with_name="WeightedPoint")
+    wone = awkward1.Array(awkward1.with_field(one, abs(one), "weight"), with_name="WeightedPoint")
+    wtwo = awkward1.Array(awkward1.with_field(two, abs(two), "weight"), with_name="WeightedPoint")
 
-    assert ak.to_list(one + wone) == [
+    assert awkward1.to_list(one + wone) == [
         [{"x": 2, "y": 2.2}, {"x": 4, "y": 4.4}, {"x": 6, "y": 6.6}],
         [],
         [{"x": 8, "y": 8.8}, {"x": 10, "y": 11.0}],
     ]
-    assert ak.to_list(wone + wtwo) == [
+    assert awkward1.to_list(wone + wtwo) == [
         [
             {
                 "x": 0.9524937500390619,
@@ -98,12 +97,12 @@ def test_make_mixins():
             {"x": 5.0, "y": 5.5, "weight": 14.866068747318506},
         ],
     ]
-    assert ak.to_list(abs(one)) == [
+    assert awkward1.to_list(abs(one)) == [
         [1.4866068747318506, 2.973213749463701, 4.459820624195552],
         [],
         [5.946427498927402, 7.433034373659253],
     ]
-    assert ak.to_list(one.distance(wtwo)) == [
+    assert awkward1.to_list(one.distance(wtwo)) == [
         [0.14142135623730953, 0.0, 0.31622776601683783],
         [],
         [0.4123105625617664, 0.0],

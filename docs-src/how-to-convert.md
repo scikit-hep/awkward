@@ -18,7 +18,6 @@ Converting arrays
    * **[Python objects](how-to-convert-python)**
    * **[JSON](how-to-convert-json)**
    * **[ROOT via Uproot](how-to-convert-uproot)**
-   * **[Parquet via Arrow](how-to-convert-arrow)**
-   * **[Pandas: Awkward columns](how-to-convert-pandas)**
-   * **[Pandas: as MultiIndex](how-to-convert-pandas-multiindex)**
-   * **[Zarr](how-to-convert-zarr)**
+   * **[Arrow and Parquet](how-to-convert-arrow)**
+   * **[Pandas](how-to-convert-pandas)**
+   * **[Generic array-sets](how-to-convert-arrayset)**
