@@ -16,6 +16,14 @@ def traverse(node):
         for subnode in node.body:
             code += traverse(subnode)
         code += "}\n"
+    elif node.__class__.__name__ == "Name":
+        code = node.id
+    elif node.__class__.__name__ == "BinOp":
+        code = "{0} {1} {2}".format(
+            traverse(node.left), traverse(node.op), traverse(node.right)
+        )
+    elif node.__class__.__name__ == "Sub":
+        code = "-"
     elif node.__class__.__name__ == "Subscript":
         if node.slice.value.id == "i":
             code = node.value.id + "[thread_id]"
@@ -31,6 +39,8 @@ def traverse(node):
         else:
             value = traverse(node.value)
         code = "{0} = {1};\n".format(traverse(node.targets[0]), value)
+    else:
+        raise Exception("Unhandled node")
     return code
 
 
@@ -63,17 +73,18 @@ def gettemplateargs(spec):
     if "specializations" in spec.keys():
         typelist = []
         count = 0
+        templascii = 65
         for childfunc in spec["specializations"]:
             for i in range(len(childfunc["args"])):
                 if len(typelist) < i + 1:
                     typelist.append(list(childfunc["args"][i].values())[0])
                 else:
                     if typelist[i] != list(childfunc["args"][i].values())[0]:
-                        if count == 0:
-                            templateargs[list(childfunc["args"][i].keys())[0]] = "T"
-                            count += 1
-                        else:
-                            templateargs[list(childfunc["args"][i].keys())[0]] = "C"
+                        templateargs[list(childfunc["args"][i].keys())[0]] = chr(
+                            templascii
+                        )
+                        count += 1
+                        templascii += 1
     return templateargs
 
 
@@ -82,12 +93,12 @@ def getparentargs(templateargs, spec):
     if "specializations" in spec.keys():
         for arg in spec["specializations"][0]["args"]:
             argname = list(arg.keys())[0]
-            if argname in spec["outparams"]:
-                argname = "*" + argname
             if list(arg.keys())[0] in templateargs.keys():
+                if "*" in getctype(list(arg.values())[0]):
+                    argname = "*" + argname
                 args[argname] = templateargs[list(arg.keys())[0]]
-            elif "*" not in argname:
-                args[argname] = list(arg.values())[0]
+            else:
+                args[argname] = getctype(list(arg.values())[0])
     else:
         for arg in spec["args"]:
             argname = list(arg.keys())[0]
@@ -113,7 +124,7 @@ def gettemplatestring(templateargs):
             templatestring = "typename " + x
             count += 1
         else:
-            templatestring = ", typename " + x
+            templatestring += ", typename " + x
     return templatestring
 
 
