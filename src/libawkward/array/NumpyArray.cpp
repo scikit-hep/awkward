@@ -4906,7 +4906,7 @@ namespace awkward {
       case util::dtype::float128:
         throw std::runtime_error("FIXME: numbers_to_type for float128 not implemented");
       case util::dtype::complex64:
-        throw std::runtime_error("FIXME: numbers_to_type for complex64 not implemented");
+        throw std::runtime_error("FIXME: values_astype for complex64 not implemented");
       case util::dtype::complex128:
         throw std::runtime_error("FIXME: numbers_to_type for complex128 not implemented");
       case util::dtype::complex256:
