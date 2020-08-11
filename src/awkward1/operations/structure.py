@@ -2693,7 +2693,7 @@ if hasattr(numpy, "float128"):
 if hasattr(numpy, "complex256"):
     _dtype_to_string[numpy.dtype(numpy.complex256)] = "complex256"
 
-def numbers_to_type(array, to, highlevel=True):
+def values_astype(array, to, highlevel=True):
     """
     Args:
         array: Array whose numbers should be converted to a new numeric type.

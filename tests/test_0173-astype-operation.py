@@ -20,7 +20,7 @@ def test_UnmaskedArray():
     assert numpy.can_cast(numpy.float64, numpy.float32, 'unsafe') == True
     assert numpy.can_cast(numpy.float64, numpy.int8, 'unsafe') == True
 
-    content_float32 = awkward1.numbers_to_type(content_float64, 'float32', highlevel=False)
+    content_float32 = awkward1.values_astype(content_float64, 'float32', highlevel=False)
     array_float32 = awkward1.layout.UnmaskedArray(content_float32)
     assert awkward1.to_list(array_float32) == [0.25, 0.5, 3.5, 4.5, 5.5]
     assert str(awkward1.type(content_float32)) == "float32"
@@ -28,7 +28,7 @@ def test_UnmaskedArray():
     assert str(awkward1.type(array_float32)) == "?float32"
     assert str(awkward1.type(awkward1.Array(array_float32))) == "5 * ?float32"
 
-    content_int8 = awkward1.numbers_to_type(content_float64, 'int8', highlevel=False)
+    content_int8 = awkward1.values_astype(content_float64, 'int8', highlevel=False)
     array_int8 = awkward1.layout.UnmaskedArray(content_int8)
     assert awkward1.to_list(array_int8) == [0, 0, 3, 4, 5]
     assert str(awkward1.type(content_int8)) == "int8"
@@ -36,7 +36,7 @@ def test_UnmaskedArray():
     assert str(awkward1.type(array_int8)) == "?int8"
     assert str(awkward1.type(awkward1.Array(array_int8))) == "5 * ?int8"
 
-    content_from_int8 = awkward1.numbers_to_type(content_int8, 'float64', highlevel=False)
+    content_from_int8 = awkward1.values_astype(content_int8, 'float64', highlevel=False)
     array_from_int8 = awkward1.layout.UnmaskedArray(content_from_int8)
     assert awkward1.to_list(array_from_int8) == [0, 0, 3, 4, 5]
     assert str(awkward1.type(content_from_int8)) == "float64"
@@ -57,8 +57,14 @@ def test_RegularArray_and_ListArray():
     assert str(awkward1.type(regulararray)) == "2 * var * float64"
     assert str(awkward1.type(listarray)) == "var * 2 * var * float64"
 
-    regulararray_int8 = awkward1.numbers_to_type(regulararray, 'int8', highlevel=False)
+    regulararray_int8 = awkward1.values_astype(regulararray, 'int8', highlevel=False)
     assert str(awkward1.type(regulararray_int8)) == "2 * var * int8"
 
-    listarray_bool = awkward1.numbers_to_type(listarray, 'bool', highlevel=False)
+    listarray_bool = awkward1.values_astype(listarray, 'bool', highlevel=False)
     assert str(awkward1.type(listarray_bool)) == "var * 2 * var * bool"
+
+def test_ufunc_afterward():
+    assert awkward1.to_list(awkward1.values_astype(awkward1.Array([{"x": 1.1}, {"x": 3.3}]), numpy.float32) + 1) == [{"x": 2.0999999046325684}, {"x": 4.300000190734863}]
+
+def test_string():
+    assert awkward1.values_astype(awkward1.Array([{"x": 1.1, "y": "hello"}]), numpy.float32).tolist() == [{'x': 1.100000023841858, 'y': 'hello'}]
