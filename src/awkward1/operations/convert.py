@@ -2864,7 +2864,7 @@ def _form_to_layout(
             partition_first,
             cache,
             cache_key,
-            numpy.max(index),
+            numpy.max(index) + 1,
         )
 
         return _form_to_layout_class[type(form), form.index](
@@ -2893,7 +2893,7 @@ def _form_to_layout(
             partition_first,
             cache,
             cache_key,
-            numpy.max(index),
+            numpy.max(index) + 1,
         )
 
         return _form_to_layout_class[type(form), form.index](
@@ -3072,7 +3072,7 @@ def _form_to_layout(
                 partition_first,
                 cache,
                 cache_key,
-                numpy.max(applicable_indices),
+                numpy.max(applicable_indices) + 1,
             ))
 
         return _form_to_layout_class[type(form), form.index](
@@ -3140,11 +3140,15 @@ def _from_arrayset_key():
 
 def _wrap_record_with_virtual(input_form):
     def modify(form):
-        if "contents" in form:
+        if form["class"] == "RecordArray":
             for item in form["contents"].values():
+                modify(item)
+        elif form["class"].startswith("UnionArray"):
+            for item in form["contents"]:
                 modify(item)
         elif "content" in form:
             modify(form["content"])
+
         if form["class"] == "RecordArray":
             for key in form["contents"].keys():
                 form["contents"][key] = {
