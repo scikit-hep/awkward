@@ -7,7 +7,10 @@ from collections import OrderedDict
 import yaml
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-KERNEL_WHITELIST = ["awkward_new_Identities"]
+KERNEL_WHITELIST = [
+    "awkward_new_Identities",
+    "awkward_RegularArray_num",
+]
 
 
 def traverse(node):
@@ -119,9 +122,10 @@ def getchildargs(childfunc, spec):
 
 def gettemplatestring(templateargs):
     count = 0
+    templatestring = ""
     for x in templateargs.values():
         if count == 0:
-            templatestring = "typename " + x
+            templatestring += "typename " + x
             count += 1
         else:
             templatestring += ", typename " + x
@@ -150,11 +154,12 @@ def getdecl(name, args, templatestring, parent=False, solo=False):
 
 def gettemplatetypes(spec, templateargs):
     count = 0
+    code = ""
     for arg in childfunc["args"]:
         for argname, typename in arg.items():
             if argname in templateargs.keys():
                 if count == 0:
-                    code = getctype(typename).replace("*", "")
+                    code += getctype(typename).replace("*", "")
                     count += 1
                 else:
                     code += ", " + getctype(typename).replace("*", "")
