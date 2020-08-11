@@ -26,6 +26,11 @@ box(const std::shared_ptr<ak::Content>& content) {
   else if (ak::NumpyArray* raw =
            dynamic_cast<ak::NumpyArray*>(content.get())) {
     if (raw->isscalar()) {
+      if(raw->ptr_lib() == ak::kernel::lib::cuda) {
+        return py::cast(ak::kernel::NumpyArray_getitem_at0<int64_t>(ak::kernel::lib::cuda,
+                                                                    reinterpret_cast<int64_t*>(raw->ptr().get()) + raw->byteoffset()));
+      }
+
       return py::array(py::buffer_info(
         raw->data(),
         raw->itemsize(),
@@ -1714,7 +1719,7 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
 
       .def_static("from_cupy", [name](py::object array,
                                                  const py::object& identities,
-                                                 const py::object& parameters) -> ak::NumpyArray {
+                                                 const py::object& parameters) -> py::object {
         if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
           std::vector<int64_t> shape, strides;
 
@@ -1735,14 +1740,15 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
               (array.attr("data").attr("ptr")));
 
 
-          ak::util::dtype cupy_dtype= ak::util::name_to_dtype(py::cast<std::string>
-                                                              (py::str(py::dtype(array.attr("dtype")))));
+          ak::util::dtype cupy_dtype= ak::util::name_to_dtype(
+              py::cast<std::string>(py::str(py::dtype(array.attr("dtype")))));
 
-          return ak::NumpyArray(
+          std::shared_ptr<ak::NumpyArray> ak_array =  std::make_shared<ak::NumpyArray>(
             unbox_identities_none(identities),
             dict2parameters(parameters),
-            std::shared_ptr<void>(ptr,
-                                  pyobject_deleter<void>(array.ptr())),
+            std::shared_ptr<void>(
+                  ptr,
+                  pyobject_deleter<void>(array.ptr())),
             shape,
             strides,
             0,
@@ -1750,6 +1756,8 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
             ak::util::dtype_to_format(cupy_dtype),
             cupy_dtype,
             ak::kernel::lib::cuda);
+
+          return box(ak_array);
         }
         else {
           throw std::invalid_argument(name + std::string(
@@ -1758,35 +1766,29 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
     }, py::arg("array"),
        py::arg("identities") = py::none(),
        py::arg("parameters") = py::none())
-    .def("copy_to",
-      [name](const ak::NumpyArray& self, const std::string& ptr_lib) -> py::object {
-          if (ptr_lib == "cpu") {
-            auto cuda_arr = self.cupy_copy_to(ak::kernel::lib::cpu) ;
-            return py::cast<ak::NumpyArray>(*cuda_arr);
-          }
-          else if (ptr_lib == "cuda") {
-            auto cuda_arr = self.cupy_copy_to(ak::kernel::lib::cuda);
+      .def("to_cupy", [name](const ak::NumpyArray& self) -> py::object {
+        if(self.ptr_lib() != ak::kernel::lib::cuda) {
+          throw std::invalid_argument(name + " is not a Awkward CUDA array, "
+                                      "use copy_to(\"cuda\") to convert it into one!");
+        }
 
-            auto cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
-              reinterpret_cast<ssize_t>(cuda_arr->ptr().get()),
-              cuda_arr->length() * cuda_arr->itemsize(),
-              cuda_arr);
+        py::object cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
+            reinterpret_cast<ssize_t>(self.ptr().get()),
+            self.shape()[0]*self.strides()[0],
+            self);
 
-            auto cupy_memoryptr = py::module::import("cupy").attr("cuda").attr("MemoryPointer")(
-              cupy_unowned_mem,
-              0);
+        py::object cupy_memoryptr = py::module::import("cupy").attr("cuda").attr("MemoryPointer")(
+            cupy_unowned_mem,
+            self.byteoffset());
 
-            return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
-              (py::module::import("cupy").attr("ndarray")(
-                pybind11::make_tuple(py::cast<ssize_t>(cuda_arr->length())),
-                ak::util::dtype_to_format(cuda_arr->dtype()),
+        return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
+            (py::module::import("cupy").attr("ndarray")(
+                pybind11::make_tuple(py::cast<ssize_t>(self.length())),
+                ak::util::dtype_to_format(self.dtype()),
                 cupy_memoryptr,
-                pybind11::make_tuple(py::cast<ssize_t>(cuda_arr->itemsize()))));
-          }
-          else {
-            throw std::invalid_argument("specify 'cpu' or 'cuda'");
-          }
-      })
+                pybind11::make_tuple(py::cast<ssize_t>(self.itemsize()))));
+    })
+
   );
 }
 

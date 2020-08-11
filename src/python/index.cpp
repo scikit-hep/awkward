@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <pybind11/numpy.h>
+#include <awkward/python/content.h>
 
 #include "awkward/python/util.h"
 
@@ -74,7 +75,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
             "Index can only be sliced by an integer or start:stop slice");
         }
       })
-      .def_static("from_cupy", [name](py::object array) -> ak::IndexOf<T> {
+      .def_static("from_cupy", [name](py::object array) -> py::object {
           if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
             if(!py::dtype(array.attr("dtype")).equal(py::dtype::of<T>())) {
                 throw std::invalid_argument(name + std::string(
@@ -88,7 +89,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
                 " must be built from a one-dimensional array; try array.ravel()"));
             }
 
-            auto strides = pytuples_to_vector<int64_t>(array.attr("strides"));
+            std::vector<int64_t> strides = pytuples_to_vector<int64_t>(array.attr("strides"));
 
             if (strides[0] != sizeof(T)) {
               throw std::invalid_argument(name + std::string(
@@ -96,54 +97,64 @@ make_IndexOf(const py::handle& m, const std::string& name) {
                 "(array.itemsize,)); try array.copy()"));
             }
 
-            void* ptr = reinterpret_cast<void*>(py::cast<ssize_t>(array.attr("data").attr("ptr")));
+            T* ptr = reinterpret_cast<T*>(py::cast<ssize_t>(array.attr("data").attr("ptr")));
 
             std::vector<int64_t> shape = pytuples_to_vector<int64_t>(array.attr("shape"));
 
-            return ak::IndexOf<T>(std::shared_ptr<T>(reinterpret_cast<T*>(ptr),
-                                                           pyobject_deleter<T>(array.ptr())),
-                                  0,
-                                  (int64_t)shape[0],
-                                  ak::kernel::lib::cuda);
+            std::shared_ptr<ak::IndexOf<T>> ak_array = std::make_shared<ak::IndexOf<T>>(
+                std::shared_ptr<T>(ptr,
+                                   pyobject_deleter<T>(array.ptr())),
+                0,
+                (int64_t)shape[0],
+                ak::kernel::lib::cuda);
+
+            return py::cast(*ak_array);
           }
           else {
             throw std::invalid_argument(name + std::string(
               ".from_cupy() can only accept CuPy Arrays!"));
           }
       })
-      .def("copy_to", [name](const ak::IndexOf<T>& self, std::string& ptr_lib) {
+      .def("copy_to", [name](const ak::IndexOf<T>& self, std::string& ptr_lib) -> py::object {
         if(ptr_lib == "cuda") {
           auto cuda_index = self.copy_to(ak::kernel::lib::cuda);
-
-          auto cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
-            reinterpret_cast<ssize_t>(cuda_index.ptr().get()),
-            cuda_index.length() * sizeof(T),
-            cuda_index);
-
-          auto cupy_memoryptr = py::module::import("cupy").attr("cuda").attr("MemoryPointer")(
-            cupy_unowned_mem,
-            0);
-          auto cuda_array = py::module::import("cupy").attr("ndarray")(
-            pybind11::make_tuple(py::cast<ssize_t>(cuda_index.length())),
-            py::format_descriptor<T>::format(),
-            cupy_memoryptr,
-          pybind11::make_tuple(py::cast<ssize_t>(sizeof(T))));
-
-          return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
-            (py::module::import("cupy").attr("ndarray")(
-                pybind11::make_tuple(py::cast<ssize_t>(cuda_index.length())),
-                py::format_descriptor<T>::format(),
-                cupy_memoryptr,
-                pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
+          return py::cast(cuda_index);
         }
         else if(ptr_lib == "cpu") {
           ak::IndexOf<T> cuda_index = self.copy_to(ak::kernel::lib::cpu) ;
-          return py::cast<ak::IndexOf<T>>(cuda_index);
+          return py::cast(cuda_index);
         }
         else {
           throw std::invalid_argument("specify 'cpu' or 'cuda'");
         }
       })
+      .def("to_cupy", [name](const ak::IndexOf<T>& self) -> py::object {
+        if(self.ptr_lib() != ak::kernel::lib::cuda) {
+          throw std::invalid_argument(name + " is not a Awkward CUDA array, "
+                                             "use copy_to(\"cuda\") to convert it into one!");
+        }
+
+        py::object cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
+            reinterpret_cast<ssize_t>(self.ptr().get()),
+            self.length() * sizeof(T),
+            self);
+
+        py::object cupy_memoryptr = py::module::import("cupy").attr("cuda").attr("MemoryPointer")(
+            cupy_unowned_mem,
+            0);
+        py::object cuda_array = py::module::import("cupy").attr("ndarray")(
+            pybind11::make_tuple(py::cast<ssize_t>(self.length())),
+            py::format_descriptor<T>::format(),
+            cupy_memoryptr,
+            pybind11::make_tuple(py::cast<ssize_t>(sizeof(T))));
+
+        return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
+            (py::module::import("cupy").attr("ndarray")(
+                pybind11::make_tuple(py::cast<ssize_t>(self.length())),
+                py::format_descriptor<T>::format(),
+                cupy_memoryptr,
+                pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
+        })
   );
 }
 

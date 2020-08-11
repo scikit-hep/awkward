@@ -415,7 +415,8 @@ namespace awkward {
 
   uint8_t
   NumpyArray::getbyte(ssize_t at) const {
-    return *(reinterpret_cast<uint8_t*>(ptr_.get()) + byteoffset_ + at*strides_[0]);
+    return kernel::NumpyArray_getitem_at0(ptr_lib(),
+                                          reinterpret_cast<uint8_t*>(ptr_.get()) + byteoffset_ + at*strides_[0]);
   }
 
   const ContentPtr
@@ -1007,7 +1008,8 @@ namespace awkward {
                                         byteoffset,
                                         itemsize_,
                                         format_,
-                                        dtype_);
+                                        dtype_,
+                                        ptr_lib_);
   }
 
   const ContentPtr
@@ -1043,7 +1045,8 @@ namespace awkward {
                                         byteoffset,
                                         itemsize_,
                                         format_,
-                                        dtype_);
+                                        dtype_,
+                                        ptr_lib_);
   }
 
   const ContentPtr
@@ -1101,7 +1104,8 @@ namespace awkward {
                       byteoffset_,
                       itemsize_,
                       format_,
-                      dtype_);
+                      dtype_,
+                      ptr_lib_);
 
       SliceItemPtr nexthead = where.head();
       Slice nexttail = where.tail();
@@ -1118,7 +1122,8 @@ namespace awkward {
                                           out.byteoffset_,
                                           itemsize_,
                                           format_,
-                                          dtype_);
+                                          dtype_,
+                                          ptr_lib_);
     }
 
     else {
@@ -1140,7 +1145,8 @@ namespace awkward {
                       safe.byteoffset_,
                       itemsize_,
                       format_,
-                      dtype_);
+                      dtype_,
+                      ptr_lib_);
 
       SliceItemPtr nexthead = where.head();
       Slice nexttail = where.tail();
@@ -1166,7 +1172,8 @@ namespace awkward {
                                           out.byteoffset_,
                                           itemsize_,
                                           format_,
-                                          dtype_);
+                                          dtype_,
+                                          ptr_lib_);
     }
   }
 

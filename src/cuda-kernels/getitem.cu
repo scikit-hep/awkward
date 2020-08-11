@@ -8,7 +8,7 @@ T awkward_cuda_Index_getitem_at_nowrap(const T* ptr,
                                        int64_t at) {
   T item;
   cudaMemcpy(&item,
-             &ptr[(int64_t) (at)],
+             &ptr[at],
              sizeof(T),
              cudaMemcpyDeviceToHost);
   return item;
@@ -51,6 +51,7 @@ int64_t awkward_cuda_Index64_getitem_at_nowrap(
 
 template <typename T>
 T awkward_cuda_NumpyArray_getitem_at0(const T* ptr) {
+
   T item;
   cudaMemcpy(&item,
              &ptr[0],
