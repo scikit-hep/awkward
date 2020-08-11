@@ -321,10 +321,16 @@ class Array(
             self._array = array
             self._valid_when = valid_when
 
-        def __str__(self, limit_value=85):
-            return self._array.__str__(limit_value=limit_value)
+        def __str__(self):
+            return self._str()
 
-        def __repr__(self, limit_value=40, limit_total=85):
+        def __repr__(self):
+            return self._repr()
+
+        def _str(self, limit_value=85):
+            return self._array._str(limit_value=limit_value)
+
+        def _repr(self, limit_value=40, limit_total=85):
             import awkward1.operations.structure
 
             layout = awkward1.operations.structure.with_cache(
@@ -1073,7 +1079,7 @@ class Array(
         """
         return self["9"]
 
-    def __str__(self, limit_value=85):
+    def __str__(self):
         """
         Args:
             limit_value (int): Maximum number of characters to use when
@@ -1126,16 +1132,9 @@ class Array(
         See #ak.to_list and #ak.to_json to convert whole Arrays into Python
         data or JSON strings without loss (except for #type).
         """
-        import awkward1.operations.structure
+        return self._str()
 
-        layout = awkward1.operations.structure.with_cache(
-            self._layout, {}, chain="last", highlevel=False
-        )
-        return awkward1._util.minimally_touching_string(
-            limit_value, layout, self._behavior
-        )
-
-    def __repr__(self, limit_value=40, limit_total=85):
+    def __repr__(self):
         """
         Args:
             limit_value (int): Maximum number of characters to use when
@@ -1150,6 +1149,19 @@ class Array(
         The #type is truncated as well, but showing only the left side
         of its string (the outermost data structures).
         """
+        return self._repr()
+
+    def _str(self, limit_value=85):
+        import awkward1.operations.structure
+
+        layout = awkward1.operations.structure.with_cache(
+            self._layout, {}, chain="last", highlevel=False
+        )
+        return awkward1._util.minimally_touching_string(
+            limit_value, layout, self._behavior
+        )
+
+    def _repr(self, limit_value=40, limit_total=85):
         import awkward1.operations.structure
 
         layout = awkward1.operations.structure.with_cache(
@@ -1787,7 +1799,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         """
         return self["9"]
 
-    def __str__(self, limit_value=85):
+    def __str__(self):
         """
         Args:
             limit_value (int): Maximum number of characters to use when
@@ -1797,16 +1809,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See #ak.Array.__str__ for a more complete description.
         """
-        import awkward1.operations.structure
+        return self._str()
 
-        layout = awkward1.operations.structure.with_cache(
-            self._layout, {}, chain="last", highlevel=False
-        )
-        return awkward1._util.minimally_touching_string(
-            limit_value + 2, layout, self._behavior
-        )[1:-1]
-
-    def __repr__(self, limit_value=40, limit_total=85):
+    def __repr__(self):
         """
         Args:
             limit_value (int): Maximum number of characters to use when
@@ -1818,6 +1823,19 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See #ak.Array.__repr__ for a more complete description.
         """
+        return self._repr()
+
+    def _str(self, limit_value=85):
+        import awkward1.operations.structure
+
+        layout = awkward1.operations.structure.with_cache(
+            self._layout, {}, chain="last", highlevel=False
+        )
+        return awkward1._util.minimally_touching_string(
+            limit_value + 2, layout, self._behavior
+        )[1:-1]
+
+    def _repr(self, limit_value=40, limit_total=85):
         import awkward1.operations.structure
 
         layout = awkward1.operations.structure.with_cache(
@@ -2097,7 +2115,7 @@ class ArrayBuilder(object):
         for x in self.snapshot():
             yield x
 
-    def __str__(self, limit_value=85, snapshot=None):
+    def __str__(self):
         """
         Args:
             limit_value (int): Maximum number of characters to use when
@@ -2108,11 +2126,9 @@ class ArrayBuilder(object):
 
         See #ak.Array.__str__ for a more complete description.
         """
-        if snapshot is None:
-            snapshot = self.snapshot()
-        return snapshot.__str__(limit_value=limit_value)
+        return self._str()
 
-    def __repr__(self, limit_value=40, limit_total=85):
+    def __repr__(self):
         """
         Args:
             limit_value (int): Maximum number of characters to use when
@@ -2125,8 +2141,16 @@ class ArrayBuilder(object):
 
         See #ak.Array.__repr__ for a more complete description.
         """
+        return self._repr()
+
+    def _str(self, limit_value=85, snapshot=None):
+        if snapshot is None:
+            snapshot = self.snapshot()
+        return snapshot._str(limit_value=limit_value)
+
+    def _repr(self, limit_value=40, limit_total=85):
         snapshot = self.snapshot()
-        value = self.__str__(limit_value=limit_value, snapshot=snapshot)
+        value = self._str(limit_value=limit_value, snapshot=snapshot)
 
         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
         typestrs = awkward1._util.typestrs(self._behavior)
@@ -2434,7 +2458,7 @@ class ArrayBuilder(object):
 
         def __repr__(self, limit_value=40, limit_total=85):
             snapshot = self._arraybuilder.snapshot()
-            value = self._arraybuilder.__str__(
+            value = self._arraybuilder._str(
                 limit_value=limit_value, snapshot=snapshot
             )
 
