@@ -49,16 +49,16 @@ def test_lazy_arrayset():
 
     class Canary(dict):
         def __init__(self):
-            super().__init__()
+            super(Canary, self).__init__()
             self.ops = []
 
         def __getitem__(self, key):
             self.ops.append(("get", key))
-            return super().__getitem__(key)
+            return super(Canary, self).__getitem__(key)
 
         def __setitem__(self, key, value):
             self.ops.append(("set", key))
-            return super().__setitem__(key, value)
+            return super(Canary, self).__setitem__(key, value)
 
 
     canary = Canary()
