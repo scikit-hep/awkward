@@ -46,16 +46,32 @@ pa_array
 ak.from_arrow(pa_array)
 ```
 
+Here is an example of an Arrow Table, derived from CSV. (Printing a table shows its field types.)
+
 ```{code-cell} ipython3
-avocado = urllib.request.urlopen("https://github.com/ryanhomer/dsci522-group411-data/blob/master/avocado.csv?raw=true")
-table = pyarrow.csv.read_csv(avocado)
+pokemon = urllib.request.urlopen("https://gist.githubusercontent.com/armgilles/194bcff35001e7eb53a2a8b441e8b2c6/raw/92200bc0a673d5ce2110aaad4544ed6c4010f687/pokemon.csv")
+table = pyarrow.csv.read_csv(pokemon)
 table
 ```
 
-```{code-cell} ipython3
-ak.from_arrow(table)
-```
+Awkward Array doesn't make a deep distinction between "arrays" and "tables" the way Arrow does: the Awkward equivalent of an Arrow table is just an Awkward Array of record type.
 
 ```{code-cell} ipython3
-
+array = ak.from_arrow(table)
+array
 ```
+
+The Awkward equivalent of Arrow's schemas is [ak.type](https://awkward-array.readthedocs.io/en/latest/_auto/ak.type.html).
+
+```{code-cell} ipython3
+ak.type(array)
+```
+
+This array is ready for data analysis.
+
+```{code-cell} ipython3
+array[array.Legendary].Attack - array[array.Legendary].Defense
+```
+
+From Awkward to Arrow
+---------------------
