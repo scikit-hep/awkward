@@ -539,16 +539,24 @@ make_RecordForm(const py::handle& m, const std::string& name) {
                       std::shared_ptr<ak::RecordForm>,
                       ak::Form>(m, name.c_str())
       .def(py::init([](const std::vector<std::shared_ptr<ak::Form>>& contents,
+                       const py::object& keys,
                        bool has_identities,
                        const py::object& parameters,
                        const py::object& form_key) -> ak::RecordForm {
         ak::util::RecordLookupPtr recordlookup(nullptr);
+        if (!keys.is(py::none())) {
+          recordlookup = std::make_shared<ak::util::RecordLookup>();
+          for (auto x : keys.cast<py::iterable>()) {
+            recordlookup.get()->push_back(x.cast<std::string>());
+          }
+        }
         return ak::RecordForm(has_identities,
                               dict2parameters(parameters),
                               obj2form_key(form_key),
                               recordlookup,
                               contents);
       }), py::arg("contents"),
+          py::arg("keys") = py::none(),
           py::arg("has_identities") = false,
           py::arg("parameters") = py::none(),
           py::arg("form_key") = py::none())

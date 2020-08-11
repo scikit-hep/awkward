@@ -2604,23 +2604,22 @@ def to_arrayset(
             )
 
         elif isinstance(layout, awkward1.layout.RecordArray):
-            forms = []
-            for x in layout.contents:
-                forms.append(fill(x, part))
             if layout.istuple:
-                return awkward1.forms.RecordForm(
-                    forms,
-                    has_identities,
-                    parameters,
-                    node_format(key_index),
-                )
+                forms = [fill(x, part) for x in layout.contents]
+                keys = None
             else:
-                return awkward1.forms.RecordForm(
-                    dict(zip(layout.keys(), forms)),
-                    has_identities,
-                    parameters,
-                    node_format(key_index),
-                )
+                forms = []
+                keys = []
+                for k in layout.keys():
+                    forms.append(fill(layout[k], part))
+                    keys.append(k)
+            return awkward1.forms.RecordForm(
+                forms,
+                keys,
+                has_identities,
+                parameters,
+                node_format(key_index),
+            )
 
         elif isinstance(layout, awkward1.layout.RegularArray):
             return awkward1.forms.RegularForm(
