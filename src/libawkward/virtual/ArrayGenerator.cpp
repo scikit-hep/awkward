@@ -26,11 +26,12 @@ namespace awkward {
   const ContentPtr
   ArrayGenerator::generate_and_check() const {
     ContentPtr out = generate();
-    if (length_ >= 0  &&  length_ != out.get()->length()) {
+    if (length_ >= 0  &&  length_ > out.get()->length()) {
       throw std::invalid_argument(
-          std::string("generated array does not have the expected length: ")
-          + std::to_string(length_) + std::string(" but generated ")
-          + std::to_string(out.get()->length()));
+          std::string(
+              "generated array does not have sufficient length: expected") +
+          std::to_string(length_) + std::string(" but generated ") +
+          std::to_string(out.get()->length()));
     }
     if (form_.get() != nullptr  &&
         !form_.get()->equal(out.get()->form(true), true, true, false, true)) {
