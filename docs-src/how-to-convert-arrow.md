@@ -69,6 +69,10 @@ The Awkward equivalent of Arrow's schemas is [ak.type](https://awkward-array.rea
 ak.type(array)
 ```
 
+```{code-cell} ipython3
+ak.to_list(array[0])
+```
+
 This array is ready for data analysis.
 
 ```{code-cell} ipython3
