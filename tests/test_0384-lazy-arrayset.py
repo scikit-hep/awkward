@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import pytest
 
+import numpy as np
 import awkward1 as ak
 
 def test_lazy_arrayset():
@@ -92,3 +93,16 @@ def test_lazy_arrayset():
     assert set(cache) == {'hello', 'hello-kitty-node17-virtual'}
     canary.ops.clear()
     cache.clear()
+
+def test_longer_than_expected():
+    array = ak.Array(
+        ak.layout.ListOffsetArray64(
+            ak.layout.Index64([0, 2, 4]),
+            ak.layout.RecordArray({
+                "item1": ak.layout.NumpyArray(np.arange(4)),
+                "longitem": ak.layout.NumpyArray(np.arange(6)),
+            }),
+        )
+    )
+    out = ak.from_arrayset(*ak.to_arrayset(array), lazy=True, lazy_lengths=2)
+    assert ak.to_list(out) == [[{'item1': 0, 'longitem': 0}, {'item1': 1, 'longitem': 1}], [{'item1': 2, 'longitem': 2}, {'item1': 3, 'longitem': 3}]]
