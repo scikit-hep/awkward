@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 
 import sys
-from collections import OrderedDict
 
 import pytest
 
@@ -26,47 +25,45 @@ class Canary(dict):
 
 
 def test_lazy_arrayset():
-    array = ak.Array([
-        OrderedDict({
+    array = ak.from_json("""
+    [
+        {
             "listcollection": [
-                OrderedDict({"item1": 1, "item2": 2}),
-                OrderedDict({"item1": 2, "item2": 4}),
-                OrderedDict({"item1": 3, "item2": 6}),
+                {"item1": 1, "item2": 2},
+                {"item1": 2, "item2": 4},
+                {"item1": 3, "item2": 6}
             ],
-            "collection": OrderedDict({"item1": 3, "item2": 4}),
+            "collection": {"item1": 3, "item2": 4},
             "singleton": 5,
             "listsingleton": [1, 2, 3],
             "unioncollection": {"item1": 3},
-            "masked": None,
-        }),
-        OrderedDict({
+            "masked": null
+        },
+        {
             "listcollection": [
-                OrderedDict({"item1": 1, "item2": 2}),
-                OrderedDict({"item1": 2, "item2": 4}),
-                OrderedDict({"item1": 3, "item2": 6}),
+                {"item1": 1, "item2": 2},
+                {"item1": 2, "item2": 4},
+                {"item1": 3, "item2": 6}
             ],
-            "collection": OrderedDict({"item1": 3, "item2": 4}),
+            "collection": {"item1": 3, "item2": 4},
             "singleton": 5,
             "listsingleton": [1, 2, 3],
             "unioncollection": [{"item1": 2}],
-            "masked": 4,
-        }),
-        OrderedDict({
+            "masked": 4
+        },
+        {
             "listcollection": [
-                OrderedDict({"item1": 1, "item2": 2}),
-                OrderedDict({"item1": 2, "item2": 4}),
-                OrderedDict({"item1": 3, "item2": 6}),
+                {"item1": 1, "item2": 2},
+                {"item1": 2, "item2": 4},
+                {"item1": 3, "item2": 6}
             ],
-            "collection": OrderedDict({"item1": 3, "item2": 4}),
+            "collection": {"item1": 3, "item2": 4},
             "singleton": 5,
             "listsingleton": [1, 2, 3],
             "unioncollection": {"item1": 4},
-            "masked": 4,
-        }),
-    ])
-
-    # some other area is having dict ordering issues, possibly RecordForm
-    ordered_dict = sys.version_info.major >= 3 and sys.version_info.minor >= 6
+            "masked": 4
+        }
+    ]""")
 
     canary = Canary()
     prefix = "kitty"
@@ -90,24 +87,17 @@ def test_lazy_arrayset():
     cache.clear()
 
     assert ak.to_list(out.unioncollection) == [{'item1': 3}, [{'item1': 2}], {'item1': 4}]
-    if ordered_dict:
-        assert set(canary.ops) == {('get', 'kitty-node11-tags'), ('get', 'kitty-node11-index'), ('get', 'kitty-node14-offsets'), ('get', 'kitty-node13'), ('get', 'kitty-node16')}
-        assert set(cache) == {'hello', 'hello-kitty-node11-virtual', 'hello-kitty-node13-virtual', 'hello-kitty-node16-virtual'}
-    else:
-        assert len(canary.ops) == 5
-        assert len(cache) == 4
+    assert set(canary.ops) == {('get', 'kitty-node11-tags'), ('get', 'kitty-node11-index'), ('get', 'kitty-node14-offsets'), ('get', 'kitty-node13'), ('get', 'kitty-node16')}
+    assert set(cache) == {'hello', 'hello-kitty-node11-virtual', 'hello-kitty-node13-virtual', 'hello-kitty-node16-virtual'}
     canary.ops = []
     cache.clear()
 
     assert ak.to_list(out.masked) == [None, 4, 4]
-    if ordered_dict:
-        assert set(canary.ops) == {('get', 'kitty-node17-index'), ('get', 'kitty-node18')}
-        assert set(cache) == {'hello', 'hello-kitty-node17-virtual'}
-    else:
-        assert len(canary.ops) == 2
-        assert len(cache) == 2
+    assert set(canary.ops) == {('get', 'kitty-node17-index'), ('get', 'kitty-node18')}
+    assert set(cache) == {'hello', 'hello-kitty-node17-virtual'}
     canary.ops = []
     cache.clear()
+
 
 def test_longer_than_expected():
     array = ak.Array(
