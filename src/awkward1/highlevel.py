@@ -27,12 +27,17 @@ class Array(
     awkward1._connect._numpy.NDArrayOperatorsMixin,
     awkward1._connect._pandas.PandasMixin,
 ):
-    """
+    u"""
     Args:
-        data (#ak.layout.Content, #ak.Array, np.ndarray, str, or iterable):
+        data (#ak.layout.Content, #ak.partition.PartitionedArray, #ak.Array,
+              np.ndarray, pyarrow.*, str, dict, or iterable):
             Data to wrap or convert into an array.
             If a NumPy array, the regularity of its dimensions is preserved
             and the data are viewed, not copied.
+            If a pyarrow object, calls #ak.from_arrow, preserving as much
+            metadata as possible, usually zero-copy.
+            If a dict of str \u2192 columns, combines the columns into an
+            array of records (like Pandas's DataFrame constructor).
             If a string, the data are assumed to be JSON.
             If an iterable, calls #ak.from_iter, which assumes all dimensions
             have irregular lengths.
@@ -189,20 +194,37 @@ class Array(
             data, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
         ):
             layout = data
+
         elif isinstance(data, Array):
             layout = data.layout
+
         elif isinstance(data, numpy.ndarray) and data.dtype != numpy.dtype("O"):
             layout = awkward1.operations.convert.from_numpy(data, highlevel=False)
+
+        elif type(data).__module__ == "pyarrow" or type(data).__module__.startswith("pyarrow."):
+            layout = awkward1.operations.convert.from_arrow(data, highlevel=False)
+
+        elif isinstance(data, dict):
+            keys = []
+            contents = []
+            for k, v in data.items():
+                keys.append(k)
+                contents.append(Array(v).layout)
+            parameters = None
+            if with_name is not None:
+                parameters = {"__record__": with_name}
+            layout = awkward1.layout.RecordArray(
+                contents, keys, parameters=parameters
+            )
+
         elif isinstance(data, str):
             layout = awkward1.operations.convert.from_json(data, highlevel=False)
-        elif isinstance(data, dict):
-            raise TypeError(
-                "could not convert dict into an awkward1.Array; " "try awkward1.Record"
-            )
+
         else:
             layout = awkward1.operations.convert.from_iter(
                 data, highlevel=False, allow_record=False
             )
+
         if not isinstance(
             layout, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
         ):
@@ -1381,19 +1403,24 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     ):
         if isinstance(data, awkward1.layout.Record):
             layout = data
+
         elif isinstance(data, Record):
             layout = data.layout
+
         elif isinstance(data, str):
             layout = awkward1.operations.convert.from_json(data, highlevel=False)
+
         elif isinstance(data, dict):
             layout = awkward1.operations.convert.from_iter([data], highlevel=False)[0]
+
         elif isinstance(data, Iterable):
             raise TypeError(
-                "could not convert non-dict into an "
-                "awkward1.Record; try awkward1.Array"
+                "could not convert non-dict into an awkward1.Record; try awkward1.Array"
             )
+
         else:
             layout = None
+
         if not isinstance(layout, awkward1.layout.Record):
             raise TypeError("could not convert data into an awkward1.Record")
 
