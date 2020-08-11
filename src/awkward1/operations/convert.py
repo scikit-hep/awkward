@@ -3340,7 +3340,7 @@ def to_pandas(
         ...                        [[7.7]],
         ...                        [[8.8]]]))
                                     values
-        entry subentry subsubentry        
+        entry subentry subsubentry
         0     0        0               1.1
                        1               2.2
               2        0               3.3
@@ -3361,7 +3361,7 @@ def to_pandas(
                 a   b   x
                     i   y
                         z
-        entry            
+        entry
         0       0   0   0
         1      10  10  10
         2      20  20  20
@@ -3380,7 +3380,7 @@ def to_pandas(
         ...                        {"x": [1, 2, 3, 4], "y": []}]),
         ...                        how="inner")
                         x    y
-        entry subentry        
+        entry subentry
         1     0         1  3.3
         2     0         1  2.2
               1         2  1.1
@@ -3395,7 +3395,7 @@ def to_pandas(
         ...                        {"x": [1, 2, 3, 4], "y": []}]),
         ...                        how="outer")
                           x    y
-        entry subentry          
+        entry subentry
         0     0         NaN  4.4
               1         NaN  3.3
               2         NaN  2.2
@@ -3425,7 +3425,10 @@ def to_pandas(
         return out
 
     def recurse(layout, row_arrays, col_names):
-        if layout.purelist_depth > 1:
+        if layout.parameter("__array__") in ("string", "bytestring"):
+            return [(to_numpy(layout), row_arrays, col_names)]
+
+        elif layout.purelist_depth > 1:
             offsets, flattened = layout.offsets_and_flatten(axis=1)
             offsets = numpy.asarray(offsets)
             starts, stops = offsets[:-1], offsets[1:]
@@ -3454,20 +3457,9 @@ def to_pandas(
             )
 
         else:
-            try:
-                return [
-                    (
-                        awkward1.operations.convert.to_numpy(layout),
-                        row_arrays,
-                        col_names,
-                    )
-                ]
-            except Exception:
-                return [(layout, row_arrays, col_names)]
+            return [(to_numpy(layout), row_arrays, col_names)]
 
-    layout = awkward1.operations.convert.to_layout(
-        array, allow_record=True, allow_other=False
-    )
+    layout = to_layout(array, allow_record=True, allow_other=False)
     if isinstance(layout, awkward1.partition.PartitionedArray):
         layout = layout.toContent()
 

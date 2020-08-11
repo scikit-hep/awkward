@@ -20,3 +20,4 @@ Converting arrays
    * **[ROOT via Uproot](how-to-convert-uproot)**
    * **[Arrow and Parquet](how-to-convert-arrow)**
    * **[Pandas](how-to-convert-pandas)**
+   * **[Generic array-sets](how-to-convert-arrayset)**

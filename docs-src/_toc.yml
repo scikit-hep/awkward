@@ -20,6 +20,8 @@
       title: "Arrow and Parquet"
     - file: how-to-convert-pandas
       title: "Pandas"
+    - file: how-to-convert-arrayset
+      title: "Generic array-sets"
 
 - file: how-to-create
   title: "Creating arrays"
