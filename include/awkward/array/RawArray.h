@@ -15,7 +15,7 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/kernel.h"
+#include "awkward/kernel-dispatch.h"
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/getitem.h"
 #include "awkward/cpu-kernels/operations.h"

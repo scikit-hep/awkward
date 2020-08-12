@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_KERNEL_H_
-#define AWKWARD_KERNEL_H_
+#ifndef AWKWARD_KERNEL_DISPATCH_H_
+#define AWKWARD_KERNEL_DISPATCH_H_
 
 #include "awkward/common.h"
 #include "awkward/util.h"
@@ -1571,4 +1571,4 @@ namespace awkward {
   }
 }
 
-#endif //AWKWARD_KERNEL_H_
+#endif //AWKWARD_KERNEL_DISPATCH_H_

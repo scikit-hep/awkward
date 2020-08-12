@@ -7,11 +7,7 @@
 #include "awkward/cpu-kernels/identities.h"
 #include "awkward/cpu-kernels/reducers.h"
 
-#ifdef BUILD_CUDA_KERNELS
-#include "awkward/cuda-kernels/identities.h"
-#endif
-
-#include "awkward/kernel.h"
+#include "awkward/kernel-dispatch.h"
 
 #define FORM_KERNEL(fromFnName, libFnName, ptr_lib) \
   auto handle = acquire_handle(ptr_lib); \
