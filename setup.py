@@ -155,7 +155,7 @@ setup(name = "awkward1",
       author_email = "pivarski@princeton.edu",
       maintainer = "Jim Pivarski",
       maintainer_email = "pivarski@princeton.edu",
-      description = "Development of awkward 1.0, to replace scikit-hep/awkward-array in 2020.",
+      description = "Manipulate JSON-like data with NumPy-like idioms.",
       long_description = """<a href="https://github.com/scikit-hep/awkward-1.0#readme"><img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/logo/logo-300px.png"></a>
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
@@ -284,8 +284,8 @@ Most users will get a precompiled binary (wheel) for your operating system and P
 #         "Development Status :: 1 - Planning",
 #         "Development Status :: 2 - Pre-Alpha",
 #         "Development Status :: 3 - Alpha",
-          "Development Status :: 4 - Beta",
-#         "Development Status :: 5 - Production/Stable",
+#         "Development Status :: 4 - Beta",
+          "Development Status :: 5 - Production/Stable",
 #         "Development Status :: 6 - Mature",
 #         "Development Status :: 7 - Inactive",
           "Intended Audience :: Developers",

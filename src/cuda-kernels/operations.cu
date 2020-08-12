@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/cuda-kernels/cuda_operations.h"
+#include "awkward/kernels/operations.h"
 #include <stdio.h>
 
 
@@ -20,9 +20,8 @@ void cuda_ListArray_num(
   tonum[thread_id] = (C) (stop - start);
 }
 
-
-Error
-awkward_cuda_ListArray32_num_64(
+ERROR
+awkward_ListArray32_num_64(
   int64_t* tonum,
   const int32_t* fromstarts,
   int64_t startsoffset,
@@ -52,8 +51,8 @@ awkward_cuda_ListArray32_num_64(
 
   return success();
 }
-Error
-awkward_cuda_ListArrayU32_num_64(
+ERROR
+awkward_ListArrayU32_num_64(
   int64_t* tonum,
   const uint32_t* fromstarts,
   int64_t startsoffset,
@@ -83,8 +82,8 @@ awkward_cuda_ListArrayU32_num_64(
 
   return success();
 }
-Error
-awkward_cuda_ListArray64_num_64(
+ERROR
+awkward_ListArray64_num_64(
   int64_t* tonum,
   const int64_t* fromstarts,
   int64_t startsoffset,
@@ -128,7 +127,8 @@ void cuda_RegularArray_num(
     tonum[thread_id] = size;
   }
 }
-ERROR awkward_cuda_RegularArray_num_64(
+ERROR
+awkward_RegularArray_num_64(
   int64_t* tonum,
   int64_t size,
   int64_t length) {

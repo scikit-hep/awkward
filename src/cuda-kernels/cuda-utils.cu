@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/cuda-kernels/cuda_utils.h"
+#include "awkward/kernels/cuda-utils.h"
 
 ERROR awkward_cuda_ptr_device_num(int& device_num, void* ptr) {
   cudaPointerAttributes att;
