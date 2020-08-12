@@ -2,10 +2,10 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
-#include "awkward/cpu-kernels/operations.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/reducers.h"
+#include "awkward/kernels/operations.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/reducers.h"
 
 #include "awkward/kernel-dispatch.h"
 
@@ -920,7 +920,7 @@ namespace awkward {
       }
     }
 
-  /////////////////////////////////// awkward/cpu-kernels/getitem.h
+  /////////////////////////////////// awkward/kernels/getitem.h
 
     template<>
     bool NumpyArray_getitem_at0(
@@ -4338,7 +4338,7 @@ namespace awkward {
       }
     }
 
-    /////////////////////////////////// awkward/cpu-kernels/identities.h
+    /////////////////////////////////// awkward/kernels/identities.h
 
     template<>
     ERROR new_Identities(
@@ -5252,7 +5252,7 @@ namespace awkward {
       }
     }
 
-    /////////////////////////////////// awkward/cpu-kernels/operations.h
+    /////////////////////////////////// awkward/kernels/operations.h
 
     template<>
     ERROR ListArray_num_64<int32_t>(
@@ -11617,7 +11617,7 @@ namespace awkward {
       }
     }
 
-    /////////////////////////////////// awkward/cpu-kernels/reducers.h
+    /////////////////////////////////// awkward/kernels/reducers.h
 
     ERROR reduce_count_64(
       kernel::lib ptr_lib,
@@ -14987,7 +14987,7 @@ namespace awkward {
       }
     }
 
-    /////////////////////////////////// awkward/cpu-kernels/sorting.h
+    /////////////////////////////////// awkward/kernels/sorting.h
 
     ERROR sorting_ranges(
       kernel::lib ptr_lib,

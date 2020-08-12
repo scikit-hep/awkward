@@ -1,7 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/cpu-kernels/allocators.h"
-
+#include "awkward/kernels/allocators.h"
 
 template <typename T>
 T *awkward_ptr_alloc(int64_t length) {

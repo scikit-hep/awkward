@@ -5,9 +5,9 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
-#include "awkward/cpu-kernels/allocators.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/sorting.h"
+#include "awkward/kernels/allocators.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/sorting.h"
 
 #include <sstream>
 
@@ -160,7 +160,7 @@ namespace awkward {
     std::shared_ptr<T> ptr_alloc(kernel::lib ptr_lib,
                                  int64_t length);
 
-    /////////////////////////////////// awkward/cpu-kernels/getitem.h
+    /////////////////////////////////// awkward/kernels/getitem.h
 
     /// @brief Internal utility kernel to avoid raw pointer access
     ///
@@ -726,7 +726,7 @@ namespace awkward {
       int64_t* stops_out,
       int64_t length);
 
-    /////////////////////////////////// awkward/cpu-kernels/identities.h
+    /////////////////////////////////// awkward/kernels/identities.h
 
     template <typename T>
     ERROR new_Identities(
@@ -808,7 +808,7 @@ namespace awkward {
       int64_t fromlength,
       int64_t tolength);
 
-    /////////////////////////////////// awkward/cpu-kernels/operations.h
+    /////////////////////////////////// awkward/kernels/operations.h
 
     template <typename T>
     ERROR ListArray_num_64(
@@ -1311,7 +1311,7 @@ namespace awkward {
       bool validwhen,
       bool lsb_order);
 
-    /////////////////////////////////// awkward/cpu-kernels/reducers.h
+    /////////////////////////////////// awkward/kernels/reducers.h
 
     ERROR reduce_count_64(
       kernel::lib ptr_lib,
@@ -1506,7 +1506,7 @@ namespace awkward {
       int64_t length,
       bool validwhen);
 
-    /////////////////////////////////// awkward/cpu-kernels/sorting.h
+    /////////////////////////////////// awkward/kernels/sorting.h
 
     ERROR sorting_ranges(
       kernel::lib ptr_lib,

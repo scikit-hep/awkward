@@ -6,8 +6,8 @@
 #include <sstream>
 #include <type_traits>
 
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
 #include "awkward/Slice.h"
 
 #define AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE

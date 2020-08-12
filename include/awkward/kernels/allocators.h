@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_ALLOCATORS_H_
-#define AWKWARD_ALLOCATORS_H_
+#ifndef AWKWARD_KERNELS_ALLOCATORS_H_
+#define AWKWARD_KERNELS_ALLOCATORS_H_
 
 #include <cstdint>
 #include <stdlib.h>
@@ -33,4 +33,5 @@ extern "C" {
   EXPORT_SYMBOL ERROR awkward_ptrfloat32_dealloc(const float* ptr);
   EXPORT_SYMBOL ERROR awkward_ptrfloat64_dealloc(const double* ptr);
 };
-#endif //AWKWARD_ALLOCATORS_H_
+
+#endif //AWKWARD_KERNELS_ALLOCATORS_H_
