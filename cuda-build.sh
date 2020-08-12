@@ -1,12 +1,28 @@
+#!/usr/bin/env bash
 # BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+set -e
+
+AWKWARD_VERSION=`cat VERSION_INFO`
+# CUDA_VERSION=`nvcc --version | grep -ho "release [0-9\.]*" | sed 's/release //'`
+# RUNTIME_CUDA_VERSION=`nvidia-smi | grep -ho "CUDA Version: [0-9\.]*" | sed 's/CUDA Version: //'`
+
+rm -rf build dist
+mkdir build
+cp -r src/awkward1_cuda_kernels build
+
+docker run -it -v`pwd`:/home -w/home docker.io/nvidia/cuda:10.1-devel-ubuntu18.04 nvcc -Xcompiler -fPIC -Iinclude src/cuda-kernels/*.cu --shared -o build/awkward1_cuda_kernels/libawkward1-cuda-kernels.so
+
+cat > build/cuda-setup.py << EOF
+
 import setuptools
-from setuptools import setup, Extension
+from setuptools import setup
 
 setup(name = "awkward1-cuda-kernels",
-      version = open("VERSION_INFO").read().strip(),
       packages = ["awkward1_cuda_kernels"],
-      package_dir = {"": "src"},
+      package_dir = {"": "build"},
+      package_data = {"awkward1_cuda_kernels": ["*.so"]},
+      version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
       maintainer = "Jim Pivarski",
@@ -48,3 +64,8 @@ setup(name = "awkward1-cuda-kernels",
           "Topic :: Software Development",
           "Topic :: Utilities",
           ])
+
+EOF
+
+python build/cuda-setup.py bdist_wheel
+pip install dist/awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-any.whl
