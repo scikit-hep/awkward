@@ -13,17 +13,19 @@ KERNEL_WHITELIST = [
 ]
 
 
-def traverse(node):
+def traverse(node, args):
     if node.__class__.__name__ == "For":
         code = "if (thread_id < length) {\n"
         for subnode in node.body:
-            code += traverse(subnode)
+            code += traverse(subnode, args)
         code += "}\n"
     elif node.__class__.__name__ == "Name":
         code = node.id
     elif node.__class__.__name__ == "BinOp":
         code = "{0} {1} {2}".format(
-            traverse(node.left), traverse(node.op), traverse(node.right)
+            traverse(node.left, args),
+            traverse(node.op, args),
+            traverse(node.right, args),
         )
     elif node.__class__.__name__ == "Sub":
         code = "-"
@@ -34,24 +36,30 @@ def traverse(node):
             code = node.value.id + "[" + node.slice.value.id + "]"
     elif node.__class__.__name__ == "Call":
         assert len(node.args) == 1
-        code = "({0})({1})".format(node.func.id, traverse(node.args[0]))
+        code = "({0})({1})".format(node.func.id, traverse(node.args[0], args))
     elif node.__class__.__name__ == "Assign":
         assert len(node.targets) == 1
         if node.value.__class__.__name__ == "Name" and node.value.id == "i":
             value = "thread_id"
         else:
-            value = traverse(node.value)
-        code = "{0} = {1};\n".format(traverse(node.targets[0]), value)
+            value = traverse(node.value, args)
+        left = traverse(node.targets[0], args)
+        if "[" in left:
+            left = left[: left.find("[")]
+        code = ""
+        if left not in args.keys() and ("*" + left) not in args.keys():
+            code += "auto "
+        code += "{0} = {1};\n".format(traverse(node.targets[0], args), value)
     else:
         raise Exception("Unhandled node")
     return code
 
 
-def getbody(pycode):
+def getbody(pycode, args):
     code = ""
     tree = ast.parse(pycode).body[0]
     for node in tree.body:
-        code += traverse(node)
+        code += traverse(node, args)
     return code
 
 
@@ -207,7 +215,7 @@ if __name__ == "__main__":
                         code += """  int64_t block_id = blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
   int64_t thread_id = block_id * blockDim.x + threadIdx.x;
 """
-                        code += getbody(indspec["definition"])
+                        code += getbody(indspec["definition"], args)
                         code += "}\n\n"
                         if "specializations" in indspec.keys():
                             for childfunc in indspec["specializations"]:
