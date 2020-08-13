@@ -1810,10 +1810,13 @@ namespace awkward {
   ListArrayOf<T>::copy_to(kernel::lib ptr_lib) const {
     IndexOf<T> starts = starts_.copy_to(ptr_lib);
     IndexOf<T> stops = stops_.copy_to(ptr_lib);
-    ContentPtr content= content_->copy_to(ptr_lib);
-
-    return std::make_shared<ListArrayOf<T>>(identities(),
-                                            parameters(),
+    ContentPtr content= content_.get()->copy_to(ptr_lib);
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->copy_to(ptr_lib);
+    }
+    return std::make_shared<ListArrayOf<T>>(identities,
+                                            parameters_,
                                             starts,
                                             stops,
                                             content);

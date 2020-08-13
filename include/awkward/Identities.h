@@ -211,6 +211,15 @@ namespace awkward {
     virtual int64_t
       value(int64_t row, int64_t col) const = 0;
 
+    /// @brief Moves the identity ptr buffer of the array between devices
+    ///
+    /// Returns a std::shared_ptr<IdentitiesOf> which is, by default, allocated
+    /// on the first device(device [0])
+    ///
+    /// @note This function has not been implemented to handle Multi-GPU setups
+    virtual const IdentitiesPtr
+      copy_to(kernel::lib ptr_lib) const = 0;
+
     /// @brief Returns a string representation of this array (multi-line XML).
     const std::string
       tostring() const;
@@ -347,6 +356,9 @@ namespace awkward {
     int64_t
       value(int64_t row, int64_t col) const override;
 
+    const IdentitiesPtr
+      copy_to(kernel::lib ptr_lib) const override;
+
     /// @brief Returns the element at a given position in the array, handling
     /// negative indexing and bounds-checking like Python.
     ///
@@ -373,15 +385,6 @@ namespace awkward {
     /// does not scale with the size of the array.
     const IdentitiesPtr
       getitem_range(int64_t start, int64_t stop) const;
-
-    /// @brief Moves the identity ptr buffer of the array between devices
-    ///
-    /// Returns a std::shared_ptr<IdentitiesOf> which is, by default, allocated
-    /// on the first device(device [0])
-    ///
-    /// @note This function has not been implemented to handle Multi-GPU setups
-    const IdentitiesPtr
-      copy_to(kernel::lib ptr_lib) const;
 
   private:
     /// @brief See #ptr.

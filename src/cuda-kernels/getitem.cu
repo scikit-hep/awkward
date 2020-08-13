@@ -46,6 +46,59 @@ int64_t awkward_Index64_getitem_at_nowrap(
 }
 
 template <typename T>
+void awkward_Index_setitem_at_nowrap(
+  const T* ptr,
+  int64_t at,
+  T value) {
+  cudaMemcpy((void *) &ptr[at], &value, sizeof(T), cudaMemcpyHostToDevice);
+}
+void awkward_Index8_setitem_at_nowrap(
+  const int8_t* ptr,
+  int64_t at,
+  int8_t value) {
+  return awkward_Index_setitem_at_nowrap<int8_t>(
+    ptr,
+    at,
+    value);
+}
+void awkward_IndexU8_setitem_at_nowrap(
+  const uint8_t* ptr,
+  int64_t at,
+  uint8_t value) {
+  return awkward_Index_setitem_at_nowrap<uint8_t>(
+    ptr,
+    at,
+    value);
+}
+void awkward_Index32_setitem_at_nowrap(
+  const int32_t* ptr,
+  int64_t at,
+  int32_t value) {
+  return awkward_Index_setitem_at_nowrap<int32_t>(
+    ptr,
+    at,
+    value);
+}
+void awkward_IndexU32_setitem_at_nowrap(
+  const uint32_t* ptr,
+  int64_t at,
+  uint32_t value) {
+  return awkward_Index_setitem_at_nowrap<uint32_t>(
+    ptr,
+    at,
+    value);
+}
+void awkward_Index64_setitem_at_nowrap(
+  const int64_t* ptr,
+  int64_t at,
+  int64_t value) {
+  return awkward_Index_setitem_at_nowrap<int64_t>(
+    ptr,
+    at,
+    value);
+}
+
+template <typename T>
 T awkward_NumpyArray_getitem_at0(const T* ptr) {
   T item;
   cudaMemcpy(&item,
@@ -97,57 +150,4 @@ float awkward_NumpyArrayfloat32_getitem_at0(
 double awkward_NumpyArrayfloat64_getitem_at0(
   const double* ptr) {
   return awkward_NumpyArray_getitem_at0<double>(ptr);
-}
-
-template <typename T>
-void awkward_Index_setitem_at_nowrap(
-  const T* ptr,
-  int64_t at,
-  T value) {
-  cudaMemcpy((void *) &ptr[at], &value, sizeof(T), cudaMemcpyHostToDevice);
-}
-void awkward_Index8_setitem_at_nowrap(
-  const int8_t* ptr,
-  int64_t at,
-  int8_t value) {
-  return awkward_Index_setitem_at_nowrap<int8_t>(
-    ptr,
-    at,
-    value);
-}
-void awkward_IndexU8_setitem_at_nowrap(
-  const uint8_t* ptr,
-  int64_t at,
-  uint8_t value) {
-  return awkward_Index_setitem_at_nowrap<uint8_t>(
-    ptr,
-    at,
-    value);
-}
-void awkward_Index32_setitem_at_nowrap(
-  const int32_t* ptr,
-  int64_t at,
-  int32_t value) {
-  return awkward_Index_setitem_at_nowrap<int32_t>(
-    ptr,
-    at,
-    value);
-}
-void awkward_IndexU32_setitem_at_nowrap(
-  const uint32_t* ptr,
-  int64_t at,
-  uint32_t value) {
-  return awkward_Index_setitem_at_nowrap<uint32_t>(
-    ptr,
-    at,
-    value);
-}
-void awkward_Index64_setitem_at_nowrap(
-  const int64_t* ptr,
-  int64_t at,
-  int64_t value) {
-  return awkward_Index_setitem_at_nowrap<int64_t>(
-    ptr,
-    at,
-    value);
 }

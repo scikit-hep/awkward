@@ -6,21 +6,25 @@
 #include "awkward/kernels/getitem.h"
 #include "awkward/kernels/identities.h"
 #include "awkward/kernels/reducers.h"
+#include "awkward/kernels/cuda-utils.h"
 
 #include "awkward/kernel-dispatch.h"
 
-#define FORM_KERNEL(libFnName, ptr_lib) \
-  auto handle = acquire_handle(ptr_lib); \
-  typedef decltype(libFnName) functor_type; \
-  auto* libFnName##_t = reinterpret_cast<functor_type*>(acquire_symbol(handle, #libFnName));
+#define FORM_KERNEL(libFnName, ptr_lib)          \
+  auto handle = acquire_handle(ptr_lib);         \
+  typedef decltype(libFnName) functor_type;      \
+  auto* libFnName##_fcn =                        \
+    reinterpret_cast<functor_type*>(acquire_symbol(handle, #libFnName));
 
 namespace awkward {
   namespace kernel {
 
-    std::shared_ptr<LibraryCallback> lib_callback = std::make_shared<LibraryCallback>();
+    std::shared_ptr<LibraryCallback> lib_callback =
+      std::make_shared<LibraryCallback>();
 
     LibraryCallback::LibraryCallback() {
-      lib_path_callbacks[kernel::lib::cuda] = std::vector<std::shared_ptr<LibraryPathCallback>>();
+      lib_path_callbacks[kernel::lib::cuda] =
+        std::vector<std::shared_ptr<LibraryPathCallback>>();
     }
 
     void LibraryCallback::add_library_path_callback(
@@ -174,399 +178,23 @@ namespace awkward {
 
     template std::string get_ptr_device_name(kernel::lib ptr_lib, double *ptr);
 
-    template<>
     ERROR copy_to(
-      kernel::lib TO,
-      kernel::lib FROM,
-      bool *to_ptr,
-      bool *from_ptr,
-      int64_t length) {
-#ifndef _MSC_VER
-      if (TO == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_H2Dbool_t)
-          (bool *to_ptr, bool *from_ptr, int64_t length);
-        func_awkward_H2Dbool_t
-          *func_awkward_H2Dbool =
-          reinterpret_cast<func_awkward_H2Dbool_t *>
-          (acquire_symbol(handle, "awkward_H2Dbool"));
-
-        return (*func_awkward_H2Dbool)(to_ptr, from_ptr, length);
+      kernel::lib to_lib,
+      kernel::lib from_lib,
+      void* to_ptr,
+      void* from_ptr,
+      int64_t bytelength) {
+      if (from_lib == lib::cpu  &&  to_lib == lib::cuda) {
+        FORM_KERNEL(awkward_cuda_host_to_device, kernel::lib::cuda);
+        return (*awkward_cuda_host_to_device_fcn)(to_ptr, from_ptr, bytelength);
       }
-      else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_D2Hbool_t)
-          (bool *to_ptr, bool *from_ptr, int64_t length);
-        func_awkward_D2Hbool_t
-          *func_awkward_D2Hbool =
-          reinterpret_cast<func_awkward_D2Hbool_t *>
-          (acquire_symbol(handle, "awkward_D2Hbool"));
-
-        return (*func_awkward_D2Hbool)(to_ptr, from_ptr, length);
+      else if (from_lib == lib::cuda  &&  to_lib == lib::cpu) {
+        FORM_KERNEL(awkward_cuda_device_to_host, kernel::lib::cuda);
+        return (*awkward_cuda_device_to_host_fcn)(to_ptr, from_ptr, bytelength);
       }
-#endif
-      throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
-    }
-
-    template<>
-    ERROR copy_to(
-      kernel::lib TO,
-      kernel::lib FROM,
-      int8_t *to_ptr,
-      int8_t *from_ptr,
-      int64_t length) {
-#ifndef _MSC_VER
-      if (TO == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_H2D8_t)
-          (int8_t *to_ptr, int8_t *from_ptr, int64_t length);
-        func_awkward_H2D8_t
-          *func_awkward_H2D8 =
-          reinterpret_cast<func_awkward_H2D8_t *>
-          (acquire_symbol(handle, "awkward_H2D8"));
-
-        return (*func_awkward_H2D8)(to_ptr, from_ptr, length);
+      else {
+        throw std::runtime_error("unrecognized combination of from_lib and to_lib");
       }
-      else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_D2H8_t)
-          (int8_t *to_ptr, int8_t *from_ptr, int64_t length);
-        func_awkward_D2H8_t
-          *func_awkward_D2H8 =
-          reinterpret_cast<func_awkward_D2H8_t *>
-          (acquire_symbol(handle, "awkward_D2H8"));
-
-        return (*func_awkward_D2H8)(to_ptr, from_ptr, length);
-      }
-#endif
-      throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
-    }
-
-    template<>
-    ERROR copy_to(
-      kernel::lib TO,
-      kernel::lib FROM,
-      uint8_t *to_ptr,
-      uint8_t *from_ptr,
-      int64_t length) {
-#ifndef _MSC_VER
-      if (TO == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_H2DU8_t)
-          (uint8_t *to_ptr, uint8_t *from_ptr, int64_t length);
-        func_awkward_H2DU8_t
-          *func_awkward_H2DU8 =
-          reinterpret_cast<func_awkward_H2DU8_t *>
-          (acquire_symbol(handle, "awkward_H2DU8"));
-
-        return (*func_awkward_H2DU8)(to_ptr, from_ptr, length);
-      }
-      else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_D2HU8_t)
-          (uint8_t *to_ptr, uint8_t *from_ptr, int64_t length);
-        func_awkward_D2HU8_t
-          *func_awkward_D2HU8 =
-          reinterpret_cast<func_awkward_D2HU8_t *>
-          (acquire_symbol(handle, "awkward_D2HU8"));
-
-        return (*func_awkward_D2HU8)(to_ptr, from_ptr, length);
-      }
-#endif
-      throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
-    }
-
-    template<>
-    ERROR copy_to(
-      kernel::lib TO,
-      kernel::lib FROM,
-      int16_t *to_ptr,
-      int16_t *from_ptr,
-      int64_t length) {
-#ifndef _MSC_VER
-      if (TO == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_H2D16_t)
-          (int16_t *to_ptr, int16_t *from_ptr, int64_t length);
-        func_awkward_H2D16_t
-          *func_awkward_H2D16 =
-          reinterpret_cast<func_awkward_H2D16_t *>
-          (acquire_symbol(handle, "awkward_H2D16"));
-
-        return (*func_awkward_H2D16)(to_ptr, from_ptr, length);
-      }
-      else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_D2H16_t)
-          (int16_t *to_ptr, int16_t *from_ptr, int64_t length);
-        func_awkward_D2H16_t
-          *func_awkward_D2H16 =
-          reinterpret_cast<func_awkward_D2H16_t *>
-          (acquire_symbol(handle, "awkward_D2H16"));
-
-        return (*func_awkward_D2H16)(to_ptr, from_ptr, length);
-      }
-#endif
-      throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
-    }
-
-    template<>
-    ERROR copy_to(
-      kernel::lib TO,
-      kernel::lib FROM,
-      uint16_t *to_ptr,
-      uint16_t *from_ptr,
-      int64_t length) {
-#ifndef _MSC_VER
-      if (TO == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_H2DU16_t)
-          (uint16_t *to_ptr, uint16_t *from_ptr, int64_t length);
-        func_awkward_H2DU16_t
-          *func_awkward_H2DU16 =
-          reinterpret_cast<func_awkward_H2DU16_t *>
-          (acquire_symbol(handle, "awkward_H2DU16"));
-
-        return (*func_awkward_H2DU16)(to_ptr, from_ptr, length);
-      }
-      else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_D2HU16_t)
-          (uint16_t *to_ptr, uint16_t *from_ptr, int64_t length);
-        func_awkward_D2HU16_t
-          *func_awkward_D2HU16 =
-          reinterpret_cast<func_awkward_D2HU16_t *>
-          (acquire_symbol(handle, "awkward_D2HU16"));
-
-        return (*func_awkward_D2HU16)(to_ptr, from_ptr, length);
-      }
-#endif
-      throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
-    }
-
-    template<>
-    ERROR copy_to(
-      kernel::lib TO,
-      kernel::lib FROM,
-      int32_t *to_ptr,
-      int32_t *from_ptr,
-      int64_t length) {
-#ifndef _MSC_VER
-      if (TO == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_H2D32_t)
-          (int32_t *to_ptr, int32_t *from_ptr, int64_t length);
-        func_awkward_H2D32_t
-          *func_awkward_H2D32 =
-          reinterpret_cast<func_awkward_H2D32_t *>
-          (acquire_symbol(handle, "awkward_H2D32"));
-
-        return (*func_awkward_H2D32)(to_ptr, from_ptr, length);
-      }
-      else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_D2H32_t)
-          (int32_t *to_ptr, int32_t *from_ptr, int64_t length);
-        func_awkward_D2H32_t
-          *func_awkward_D2H32 =
-          reinterpret_cast<func_awkward_D2H32_t *>
-          (acquire_symbol(handle, "awkward_D2H32"));
-
-        return (*func_awkward_D2H32)(to_ptr, from_ptr, length);
-      }
-#endif
-      throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
-    }
-
-    template<>
-    ERROR copy_to(
-      kernel::lib TO,
-      kernel::lib FROM,
-      uint32_t *to_ptr,
-      uint32_t *from_ptr,
-      int64_t length) {
-#ifndef _MSC_VER
-      if (TO == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_H2DU32_t)
-          (uint32_t *to_ptr, uint32_t *from_ptr, int64_t length);
-        func_awkward_H2DU32_t
-          *func_awkward_H2DU32 =
-          reinterpret_cast<func_awkward_H2DU32_t *>
-          (acquire_symbol(handle, "awkward_H2DU32"));
-
-        return (*func_awkward_H2DU32)(to_ptr, from_ptr, length);
-      }
-      else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_D2HU32_t)
-          (uint32_t *to_ptr, uint32_t *from_ptr, int64_t length);
-        func_awkward_D2HU32_t
-          *func_awkward_D2HU32 =
-          reinterpret_cast<func_awkward_D2HU32_t *>
-          (acquire_symbol(handle, "awkward_D2HU32"));
-
-        return (*func_awkward_D2HU32)(to_ptr, from_ptr, length);
-      }
-#endif
-      throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
-    }
-
-    template<>
-    ERROR copy_to(
-      kernel::lib TO,
-      kernel::lib FROM,
-      int64_t *to_ptr,
-      int64_t *from_ptr,
-      int64_t length) {
-#ifndef _MSC_VER
-      if (TO == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_H2D64_t)
-          (int64_t *to_ptr, int64_t *from_ptr, int64_t length);
-        func_awkward_H2D64_t
-          *func_awkward_H2D64 =
-          reinterpret_cast<func_awkward_H2D64_t *>
-          (acquire_symbol(handle, "awkward_H2D64"));
-
-        return (*func_awkward_H2D64)(to_ptr, from_ptr, length);
-      }
-      else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_D2H64_t)
-          (int64_t *to_ptr, int64_t *from_ptr, int64_t length);
-        func_awkward_D2H64_t
-          *func_awkward_D2H64 =
-          reinterpret_cast<func_awkward_D2H64_t *>
-          (acquire_symbol(handle, "awkward_D2H64"));
-
-        return (*func_awkward_D2H64)(to_ptr, from_ptr, length);
-      }
-#endif
-      throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
-    }
-
-    template<>
-    ERROR copy_to(
-      kernel::lib TO,
-      kernel::lib FROM,
-      uint64_t *to_ptr,
-      uint64_t *from_ptr,
-      int64_t length) {
-#ifndef _MSC_VER
-      if (TO == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_H2DU64_t)
-          (uint64_t *to_ptr, uint64_t *from_ptr, int64_t length);
-        func_awkward_H2DU64_t
-          *func_awkward_H2DU64 =
-          reinterpret_cast<func_awkward_H2DU64_t *>
-          (acquire_symbol(handle, "awkward_H2DU64"));
-
-        return (*func_awkward_H2DU64)(to_ptr, from_ptr, length);
-      }
-      else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_D2HU64_t)
-          (uint64_t *to_ptr, uint64_t *from_ptr, int64_t length);
-        func_awkward_D2HU64_t
-          *func_awkward_D2HU64 =
-          reinterpret_cast<func_awkward_D2HU64_t *>
-          (acquire_symbol(handle, "awkward_D2HU64"));
-
-        return (*func_awkward_D2HU64)(to_ptr, from_ptr, length);
-      }
-#endif
-      throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
-    }
-
-    template<>
-    ERROR copy_to(
-      kernel::lib TO,
-      kernel::lib FROM,
-      float *to_ptr,
-      float *from_ptr,
-      int64_t length) {
-#ifndef _MSC_VER
-      if (TO == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_H2Dfloat32_t)
-          (float *to_ptr, float *from_ptr, int64_t length);
-        func_awkward_H2Dfloat32_t
-          *func_awkward_H2Dfloat32 =
-          reinterpret_cast<func_awkward_H2Dfloat32_t *>
-          (acquire_symbol(handle, "awkward_H2Dfloat32"));
-
-        return (*func_awkward_H2Dfloat32)(to_ptr, from_ptr, length);
-      }
-      else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_D2Hfloat32_t)
-          (float *to_ptr, float *from_ptr, int64_t length);
-        func_awkward_D2Hfloat32_t
-          *func_awkward_D2Hfloat32 =
-          reinterpret_cast<func_awkward_D2Hfloat32_t *>
-          (acquire_symbol(handle, "awkward_D2Hfloat32"));
-
-        return (*func_awkward_D2Hfloat32)(to_ptr, from_ptr, length);
-      }
-#endif
-      throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
-    }
-
-    template<>
-    ERROR copy_to(
-      kernel::lib TO,
-      kernel::lib FROM,
-      double *to_ptr,
-      double *from_ptr,
-      int64_t length) {
-#ifndef _MSC_VER
-      if (TO == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-        typedef Error (func_awkward_H2Dfloat64_t)
-          (double *to_ptr, double *from_ptr, int64_t length);
-        func_awkward_H2Dfloat64_t
-          *func_awkward_H2Dfloat64 =
-          reinterpret_cast<func_awkward_H2Dfloat64_t *>
-          (acquire_symbol(handle, "awkward_H2Dfloat64"));
-
-        return (*func_awkward_H2Dfloat64)(to_ptr, from_ptr, length);
-      }
-      else if (TO == kernel::lib::cpu  &&  FROM == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        typedef Error (func_awkward_D2Hfloat64_t)
-          (double *to_ptr, double *from_ptr, int64_t length);
-        func_awkward_D2Hfloat64_t
-          *func_awkward_D2Hfloat64 =
-          reinterpret_cast<func_awkward_D2Hfloat64_t *>
-          (acquire_symbol(handle, "awkward_D2Hfloat64"));
-
-        return (*func_awkward_D2Hfloat64)(to_ptr, from_ptr, length);
-      }
-#endif
-      throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
     }
 
     const std::string
@@ -590,7 +218,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_NumpyArraybool_getitem_at0, ptr_lib);
-        return (*awkward_NumpyArraybool_getitem_at0_t)(ptr);
+        return (*awkward_NumpyArraybool_getitem_at0_fcn)(ptr);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in bool NumpyArray_getitem_at0");
@@ -606,7 +234,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_NumpyArray8_getitem_at0, ptr_lib);
-        return (*awkward_NumpyArray8_getitem_at0_t)(ptr);
+        return (*awkward_NumpyArray8_getitem_at0_fcn)(ptr);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in int8_t NumpyArray_getitem_at0");
@@ -622,7 +250,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_NumpyArrayU8_getitem_at0, ptr_lib);
-        return (*awkward_NumpyArrayU8_getitem_at0_t)(ptr);
+        return (*awkward_NumpyArrayU8_getitem_at0_fcn)(ptr);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in uint8_t NumpyArray_getitem_at0");
@@ -638,7 +266,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_NumpyArray16_getitem_at0, ptr_lib);
-        return (*awkward_NumpyArray16_getitem_at0_t)(ptr);
+        return (*awkward_NumpyArray16_getitem_at0_fcn)(ptr);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in int16_t NumpyArray_getitem_at0");
@@ -654,7 +282,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_NumpyArrayU16_getitem_at0, ptr_lib);
-        return (*awkward_NumpyArrayU16_getitem_at0_t)(ptr);
+        return (*awkward_NumpyArrayU16_getitem_at0_fcn)(ptr);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in uint16_t NumpyArray_getitem_at0");
@@ -670,7 +298,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_NumpyArray32_getitem_at0, ptr_lib);
-        return (*awkward_NumpyArray32_getitem_at0_t)(ptr);
+        return (*awkward_NumpyArray32_getitem_at0_fcn)(ptr);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in int32_t NumpyArray_getitem_at0");
@@ -686,7 +314,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_NumpyArrayU32_getitem_at0, ptr_lib);
-        return (*awkward_NumpyArrayU32_getitem_at0_t)(ptr);
+        return (*awkward_NumpyArrayU32_getitem_at0_fcn)(ptr);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in uint32_t NumpyArray_getitem_at0");
@@ -702,7 +330,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_NumpyArray64_getitem_at0, ptr_lib);
-        return (*awkward_NumpyArray64_getitem_at0_t)(ptr);
+        return (*awkward_NumpyArray64_getitem_at0_fcn)(ptr);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in int64_t NumpyArray_getitem_at0");
@@ -718,7 +346,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_NumpyArrayU64_getitem_at0, ptr_lib);
-        return (*awkward_NumpyArrayU64_getitem_at0_t)(ptr);
+        return (*awkward_NumpyArrayU64_getitem_at0_fcn)(ptr);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in uint64_t NumpyArray_getitem_at0");
@@ -734,7 +362,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_NumpyArrayfloat32_getitem_at0, ptr_lib);
-        return (*awkward_NumpyArrayfloat32_getitem_at0_t)(ptr);
+        return (*awkward_NumpyArrayfloat32_getitem_at0_fcn)(ptr);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in float NumpyArray_getitem_at0");
@@ -750,7 +378,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_NumpyArrayfloat64_getitem_at0, ptr_lib);
-        return (*awkward_NumpyArrayfloat64_getitem_at0_t)(ptr);
+        return (*awkward_NumpyArrayfloat64_getitem_at0_fcn)(ptr);
       }
       else {
         throw std::runtime_error("unrecognized ptr_lib in double NumpyArray_getitem_at0");
@@ -3523,7 +3151,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_Index8_getitem_at_nowrap, ptr_lib);
-        return (*awkward_Index8_getitem_at_nowrap_t)(
+        return (*awkward_Index8_getitem_at_nowrap_fcn)(
           ptr,
           at);
       }
@@ -3543,7 +3171,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_IndexU8_getitem_at_nowrap, ptr_lib);
-        return (*awkward_IndexU8_getitem_at_nowrap_t)(
+        return (*awkward_IndexU8_getitem_at_nowrap_fcn)(
           ptr,
           at);
       }
@@ -3563,7 +3191,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_Index32_getitem_at_nowrap, ptr_lib);
-        return (*awkward_Index32_getitem_at_nowrap_t)(
+        return (*awkward_Index32_getitem_at_nowrap_fcn)(
           ptr,
           at);
       }
@@ -3583,7 +3211,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_IndexU32_getitem_at_nowrap, ptr_lib);
-        return (*awkward_IndexU32_getitem_at_nowrap_t)(
+        return (*awkward_IndexU32_getitem_at_nowrap_fcn)(
           ptr,
           at);
       }
@@ -3603,7 +3231,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_Index64_getitem_at_nowrap, ptr_lib);
-        return (*awkward_Index64_getitem_at_nowrap_t)(
+        return (*awkward_Index64_getitem_at_nowrap_fcn)(
           ptr,
           at);
       }
@@ -3625,7 +3253,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_Index8_setitem_at_nowrap, ptr_lib);
-        (*awkward_Index8_setitem_at_nowrap_t)(
+        (*awkward_Index8_setitem_at_nowrap_fcn)(
           ptr,
           at,
           value);
@@ -3648,7 +3276,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_IndexU8_setitem_at_nowrap, ptr_lib);
-        (*awkward_IndexU8_setitem_at_nowrap_t)(
+        (*awkward_IndexU8_setitem_at_nowrap_fcn)(
           ptr,
           at,
           value);
@@ -3671,7 +3299,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_Index32_setitem_at_nowrap, ptr_lib);
-        (*awkward_Index32_setitem_at_nowrap_t)(
+        (*awkward_Index32_setitem_at_nowrap_fcn)(
           ptr,
           at,
           value);
@@ -3694,7 +3322,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_IndexU32_setitem_at_nowrap, ptr_lib);
-        (*awkward_IndexU32_setitem_at_nowrap_t)(
+        (*awkward_IndexU32_setitem_at_nowrap_fcn)(
           ptr,
           at,
           value);
@@ -3717,7 +3345,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_Index64_setitem_at_nowrap, ptr_lib);
-        (*awkward_Index64_setitem_at_nowrap_t)(
+        (*awkward_Index64_setitem_at_nowrap_fcn)(
           ptr,
           at,
           value);
@@ -4887,7 +4515,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_ListArray32_num_64, ptr_lib);
-        return (*awkward_ListArray32_num_64_t)(
+        return (*awkward_ListArray32_num_64_fcn)(
           tonum,
           fromstarts,
           fromstops,
@@ -4914,7 +4542,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_ListArrayU32_num_64, ptr_lib);
-        return (*awkward_ListArrayU32_num_64_t)(
+        return (*awkward_ListArrayU32_num_64_fcn)(
           tonum,
           fromstarts,
           fromstops,
@@ -4941,7 +4569,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_ListArray64_num_64, ptr_lib);
-        return (*awkward_ListArray64_num_64_t)(
+        return (*awkward_ListArray64_num_64_fcn)(
           tonum,
           fromstarts,
           fromstops,
@@ -4965,7 +4593,7 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         FORM_KERNEL(awkward_RegularArray_num_64, ptr_lib);
-        return (*awkward_RegularArray_num_64_t)(
+        return (*awkward_RegularArray_num_64_fcn)(
           tonum,
           size,
           length);

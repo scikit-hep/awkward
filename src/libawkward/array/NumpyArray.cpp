@@ -4686,154 +4686,33 @@ namespace awkward {
 
   const ContentPtr
   NumpyArray::copy_to(kernel::lib ptr_lib) const {
-    if (ptr_lib_ == ptr_lib) {
-      return std::make_shared<NumpyArray>(identities_,
+    if (ptr_lib == ptr_lib_) {
+      return shallow_copy();
+    }
+    else {
+      int64_t num_bytes = byteoffset_ + bytelength();
+      std::shared_ptr<void> ptr = kernel::malloc<void>(ptr_lib, num_bytes);
+      Error err = kernel::copy_to(ptr_lib,
+                                  ptr_lib_,
+                                  ptr.get(),
+                                  ptr_.get(),
+                                  num_bytes);
+      util::handle_error(err);
+      IdentitiesPtr identities(nullptr);
+      if (identities_.get() != nullptr) {
+        identities = identities_.get()->copy_to(ptr_lib);
+      }
+      return std::make_shared<NumpyArray>(identities,
                                           parameters_,
-                                          ptr_,
+                                          ptr,
                                           shape_,
                                           strides_,
                                           byteoffset_,
                                           itemsize_,
                                           format_,
                                           dtype_,
-                                          ptr_lib_);
+                                          ptr_lib);
     }
-
-    ssize_t length = 1;
-    for (auto i : shape_) {
-      length = length * i;
-    }
-
-    std::shared_ptr<void> ptr;
-    Error err;
-
-    switch (dtype_) {
-    case util::dtype::boolean:
-      ptr = kernel::malloc<void>(ptr_lib, (int64_t)(length * sizeof(bool)));
-      err = kernel::copy_to<bool>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<bool*>(ptr.get()),
-        reinterpret_cast<bool*>(data()),
-        length);
-      break;
-    case util::dtype::int8:
-      ptr = kernel::malloc<void>(ptr_lib, (int64_t)(length * sizeof(int8_t)));
-      err = kernel::copy_to<int8_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<int8_t*>(ptr.get()),
-        reinterpret_cast<int8_t*>(data()),
-        length);
-      break;
-    case util::dtype::int16:
-      ptr = kernel::malloc<void>(ptr_lib, (int64_t)(length * sizeof(int16_t)));
-      err = kernel::copy_to<int16_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<int16_t*>(ptr.get()),
-        reinterpret_cast<int16_t*>(data()),
-        length);
-      break;
-    case util::dtype::int32:
-      ptr = kernel::malloc<void>(ptr_lib, (int64_t)(length * sizeof(int32_t)));
-      err = kernel::copy_to<int32_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<int32_t*>(ptr.get()),
-        reinterpret_cast<int32_t*>(data()),
-        length);
-      break;
-    case util::dtype::int64:
-      ptr = kernel::malloc<void>(ptr_lib, (int64_t)(length * sizeof(int64_t)));
-      err = kernel::copy_to<int64_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<int64_t*>(ptr.get()),
-        reinterpret_cast<int64_t*>(data()),
-        length);
-      break;
-    case util::dtype::uint8:
-      ptr = kernel::malloc<void>(ptr_lib, (int64_t)(length * sizeof(uint8_t)));
-      err = kernel::copy_to<uint8_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<uint8_t*>(ptr.get()),
-        reinterpret_cast<uint8_t*>(data()),
-        length);
-      break;
-    case util::dtype::uint16:
-      ptr = kernel::malloc<void>(ptr_lib, (int64_t)(length * sizeof(uint16_t)));
-      err = kernel::copy_to<uint16_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<uint16_t*>(ptr.get()),
-        reinterpret_cast<uint16_t*>(data()),
-        length);
-      break;
-    case util::dtype::uint32:
-      ptr = kernel::malloc<void>(ptr_lib, (int64_t)(length * sizeof(uint32_t)));
-      err = kernel::copy_to<uint32_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<uint32_t*>(ptr.get()),
-        reinterpret_cast<uint32_t*>(data()),
-        length);
-      break;
-    case util::dtype::uint64:
-      ptr = kernel::malloc<void>(ptr_lib, (int64_t)(length * sizeof(uint64_t)));
-      err = kernel::copy_to<uint64_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<uint64_t*>(ptr.get()),
-        reinterpret_cast<uint64_t*>(data()),
-        length);
-      break;
-    case util::dtype::float16:
-      throw std::runtime_error("FIXME: copy_to of float16 not implemented");
-    case util::dtype::float32:
-      ptr = kernel::malloc<void>(ptr_lib, (int64_t)(length * sizeof(float)));
-      err = kernel::copy_to<float>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<float*>(ptr.get()),
-        reinterpret_cast<float*>(data()),
-        length);
-      break;
-    case util::dtype::float64:
-      ptr = kernel::malloc<void>(ptr_lib, (int64_t)(length * sizeof(double)));
-      err = kernel::copy_to<double>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<double*>(ptr.get()),
-        reinterpret_cast<double*>(data()),
-        length);
-      break;
-    case util::dtype::float128:
-      throw std::runtime_error("FIXME: copy_to of float128 not implemented");
-    case util::dtype::complex64:
-      throw std::runtime_error("FIXME: copy_to of complex64 not implemented");
-    case util::dtype::complex128:
-      throw std::runtime_error("FIXME: copy_to of complex128 not implemented");
-    case util::dtype::complex256:
-      throw std::runtime_error("FIXME: copy_to of complex256 not implemented");
-    default:
-      throw std::invalid_argument(
-        std::string("cannot copy format '") + format_ +
-        std::string(" to a device (e.g. GPU)"));
-    }
-    util::handle_error(err);
-
-    return std::make_shared<NumpyArray>(identities_,
-                                        parameters_,
-                                        ptr,
-                                        shape_,
-                                        strides_,
-                                        byteoffset_,
-                                        itemsize_,
-                                        format_,
-                                        dtype_,
-                                        ptr_lib);
   }
 
   const ContentPtr

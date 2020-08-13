@@ -901,9 +901,13 @@ namespace awkward {
 
   const ContentPtr
   UnmaskedArray::copy_to(kernel::lib ptr_lib) const {
-    ContentPtr content = content_->copy_to(ptr_lib);
-    return std::make_shared<UnmaskedArray>(identities(),
-                                           parameters(),
+    ContentPtr content = content_.get()->copy_to(ptr_lib);
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->copy_to(ptr_lib);
+    }
+    return std::make_shared<UnmaskedArray>(identities,
+                                           parameters_,
                                            content);
   }
 

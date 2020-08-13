@@ -374,19 +374,19 @@ namespace awkward {
   const IndexOf<T>
   IndexOf<T>::copy_to(kernel::lib ptr_lib) const {
     if (ptr_lib == ptr_lib_) {
-      return *this;
+      return IndexOf<T>(ptr_, offset_, length_);
     }
-
-    std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, length_ * sizeof(T));
-
-    Error err = kernel::copy_to<T>(ptr_lib,
-                                   ptr_lib_,
-                                   ptr.get(),
-                                   data(),
-                                   length_);
-    util::handle_error(err);
-
-    return IndexOf<T>(ptr, 0, length_, ptr_lib);
+    else {
+      int64_t bytelength = (offset_ + length_) * sizeof(T);
+      std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, bytelength);
+      Error err = kernel::copy_to(ptr_lib,
+                                  ptr_lib_,
+                                  ptr.get(),
+                                  ptr_.get(),
+                                  bytelength);
+      util::handle_error(err);
+      return IndexOf<T>(ptr, offset_, length_, ptr_lib);
+    }
   }
 
   template class EXPORT_SYMBOL IndexOf<int8_t>;

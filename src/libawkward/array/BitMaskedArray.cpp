@@ -917,14 +917,18 @@ namespace awkward {
   const ContentPtr
   BitMaskedArray::copy_to(kernel::lib ptr_lib) const {
     IndexU8 mask = mask_.copy_to(ptr_lib);
-    ContentPtr  content = content_->copy_to(ptr_lib);
-    return std::make_shared<BitMaskedArray>(identities(),
-                                            parameters(),
+    ContentPtr content = content_.get()->copy_to(ptr_lib);
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->copy_to(ptr_lib);
+    }
+    return std::make_shared<BitMaskedArray>(identities,
+                                            parameters_,
                                             mask,
                                             content,
-                                            valid_when(),
-                                            length(),
-                                            lsb_order());
+                                            valid_when_,
+                                            length_,
+                                            lsb_order_);
   }
 
   const ContentPtr

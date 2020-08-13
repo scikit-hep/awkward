@@ -908,11 +908,15 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::copy_to(kernel::lib ptr_lib) const {
-      return std::make_shared<VirtualArray>(identities(),
-                                            parameters(),
-                                            generator(),
-                                            cache(),
-                                            cache_key(),
+      IdentitiesPtr identities(nullptr);
+      if (identities_.get() != nullptr) {
+        identities = identities_.get()->copy_to(ptr_lib);
+      }
+      return std::make_shared<VirtualArray>(identities,
+                                            parameters_,
+                                            generator_,
+                                            cache_,
+                                            cache_key_,
                                             ptr_lib);
   }
 

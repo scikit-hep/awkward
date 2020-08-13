@@ -1297,12 +1297,16 @@ namespace awkward {
   const ContentPtr
   ByteMaskedArray::copy_to(kernel::lib ptr_lib) const {
     Index8 mask = mask_.copy_to(ptr_lib);
-    ContentPtr content = content_->copy_to(ptr_lib);
-    return std::make_shared<ByteMaskedArray>(identities(),
-                                             parameters(),
+    ContentPtr content = content_.get()->copy_to(ptr_lib);
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->copy_to(ptr_lib);
+    }
+    return std::make_shared<ByteMaskedArray>(identities,
+                                             parameters_,
                                              mask,
                                              content,
-                                             valid_when());
+                                             valid_when_);
   }
 
   const ContentPtr

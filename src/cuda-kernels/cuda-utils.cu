@@ -28,3 +28,34 @@ ERROR awkward_cuda_ptr_device_name(std::string& device_name, void* ptr) {
   return success();
 }
 
+ERROR awkward_cuda_host_to_device(
+  void* to_ptr,
+  void* from_ptr,
+  int64_t bytelength) {
+  cudaError_t memcpy_stat = cudaMemcpy(to_ptr,
+                                       from_ptr,
+                                       bytelength,
+                                       cudaMemcpyHostToDevice);
+  if (memcpy_stat != cudaError_t::cudaSuccess) {
+    return failure(cudaGetErrorString(memcpy_stat), kSliceNone, kSliceNone, true);
+  }
+  else {
+    return success();
+  }
+}
+
+ERROR awkward_cuda_device_to_host(
+  void* to_ptr,
+  void* from_ptr,
+  int64_t bytelength) {
+  cudaError_t memcpy_stat = cudMemcpy(to_ptr,
+                                      from_ptr,
+                                      bytelength,
+                                      cudaMemcpyDeviceToHost);
+  if (memcpy_stat != cudaError_t::cudaSuccess) {
+    return failure(cudaGetErrorString(memcpy_stat), kSliceNone, kSliceNone, true);
+  }
+  else {
+    return success();
+  }
+}

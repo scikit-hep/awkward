@@ -155,12 +155,12 @@ namespace awkward {
     /// `TO`, usually between main memory and a GPU.
     ///
     /// @note This function has not been implemented to handle Multi-GPU setups.
-    template <typename T>
-    ERROR copy_to(kernel::lib TO,
-                  kernel::lib FROM,
-                  T *to_ptr,
-                  T *from_ptr,
-                  int64_t length);
+    ERROR copy_to(
+      kernel::lib to_lib,
+      kernel::lib from_lib,
+      void* to_ptr,
+      void* from_ptr,
+      int64_t bytelength);
 
     /// @brief Internal Function to allocate an empty array of a given length
     /// with a given type. The `bytelength` parameter is the number of bytes,

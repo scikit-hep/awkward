@@ -2273,9 +2273,13 @@ namespace awkward {
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::copy_to(kernel::lib ptr_lib) const {
     IndexOf<T> index = index_.copy_to(ptr_lib);
-    ContentPtr content = content_->copy_to(ptr_lib);
-    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities_,
-                                                         parameters(),
+    ContentPtr content = content_.get()->copy_to(ptr_lib);
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->copy_to(ptr_lib);
+    }
+    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(identities,
+                                                         parameters_,
                                                          index,
                                                          content);
 

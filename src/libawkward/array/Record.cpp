@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #include <sstream>
+#include <memory>
 
 #include "awkward/kernels/identities.h"
 #include "awkward/kernels/getitem.h"
@@ -566,22 +567,10 @@ namespace awkward {
   }
 
   const ContentPtr
-  Record::copy_to(kernel::lib ptr_lib) const{
-    ContentPtrVec content_vec;
-    for(auto i : array_->contents()) {
-      ContentPtr ptr = i->copy_to(ptr_lib);
-      content_vec.emplace_back(ptr);
-    }
-
-    std::shared_ptr<const RecordArray> record_arr  =
-      std::make_shared<const RecordArray>(array_->identities(),
-                                          array_->parameters(),
-                                          content_vec,
-                                          array_->recordlookup(),
-                                          array_->length());
-
-    return std::make_shared<Record>(record_arr,
-                                    at());
+  Record::copy_to(kernel::lib ptr_lib) const {
+    ContentPtr array = array_.get()->copy_to(ptr_lib);
+    return std::make_shared<Record>(
+             std::dynamic_pointer_cast<RecordArray>(array), at_);
   }
 
   const ContentPtr
