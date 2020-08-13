@@ -225,9 +225,6 @@ namespace awkward {
     const ContentPtr
       carry(const Index64& carry, bool allow_lazy) const override;
 
-    const std::string
-      purelist_parameter(const std::string& key) const override;
-
     int64_t
       numfields() const override;
 
