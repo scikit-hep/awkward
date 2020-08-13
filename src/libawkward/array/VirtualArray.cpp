@@ -77,7 +77,17 @@ namespace awkward {
 
   const std::string
   VirtualForm::purelist_parameter(const std::string& key) const {
-    return parameter(key);
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      if (form_.get() == nullptr) {
+        throw std::invalid_argument(
+            "VirtualForm cannot determine its type without an expected Form");
+      }
+      return form_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
   }
 
   bool
@@ -574,7 +584,7 @@ namespace awkward {
 
   const std::string
   VirtualArray::purelist_parameter(const std::string& key) const {
-    return parameter(key);
+    return form(true).get()->purelist_parameter(key);
   }
 
   int64_t
