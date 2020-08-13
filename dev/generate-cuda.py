@@ -12,10 +12,11 @@ KERNEL_WHITELIST = [
     "awkward_new_Identities",
     "awkward_RegularArray_num",
     "awkward_IndexedArray_overlay_mask",
+    "awkward_IndexedArray_mask",
 ]
 
 
-def traverse(node, args):
+def traverse(node, args={}):
     if node.__class__.__name__ == "For":
         code = "if (thread_id < length) {\n"
         for subnode in node.body:
@@ -40,37 +41,62 @@ def traverse(node, args):
         elif node.slice.value.__class__.__name__ == "Name":
             code = node.value.id + "[" + node.slice.value.id + "]"
         else:
-            code = traverse(node.slice.value, args)
+            code = traverse(node.slice.value)
     elif node.__class__.__name__ == "Call":
         assert len(node.args) == 1
-        code = "({0})({1})".format(node.func.id, traverse(node.args[0], args))
+        code = "({0})({1})".format(node.func.id, traverse(node.args[0]))
+    elif node.__class__.__name__ == "Constant":
+        code = node.value
     elif node.__class__.__name__ == "Assign":
         assert len(node.targets) == 1
+        left = traverse(node.targets[0], args)
+        if "[" in left:
+            left = left[: left.find("[")]
+        code = ""
+        if left not in args.keys() and ("*" + left) not in args.keys():
+            flag = True
+        else:
+            flag = False
         if node.value.__class__.__name__ == "Name" and node.value.id == "i":
-            left = traverse(node.targets[0], args)
-            if "[" in left:
-                left = left[: left.find("[")]
             code = ""
-            if left not in args.keys() and ("*" + left) not in args.keys():
+            if flag:
                 code += "auto "
-            code += "{0} = thread_id;\n".format(traverse(node.targets[0], args))
+            code += "{0} = thread_id;\n".format(traverse(node.targets[0]))
         else:
             if node.value.__class__.__name__ == "IfExp":
-                code = "if ({0}) {{\n {1} = {2};\n }} else {{\n {1} = {3};\n }}\n".format(
-                    node.value.test.id,
-                    traverse(node.targets[0], args),
-                    traverse(node.value.body, args),
-                    traverse(node.value.orelse, args),
-                )
-            else:
-                left = traverse(node.targets[0], args)
-                if "[" in left:
-                    left = left[: left.find("[")]
+                if flag:
+                    code = "if ({0}) {{\n auto {1} = {2};\n }} else {{\n auto {1} = {3};\n }}\n".format(
+                        node.value.test.id,
+                        traverse(node.targets[0]),
+                        traverse(node.value.body),
+                        traverse(node.value.orelse),
+                    )
+                else:
+                    code = "if ({0}) {{\n {1} = {2};\n }} else {{\n {1} = {3};\n }}\n".format(
+                        node.value.test.id,
+                        traverse(node.targets[0]),
+                        traverse(node.value.body),
+                        traverse(node.value.orelse),
+                    )
+            elif node.value.__class__.__name__ == "Compare":
                 code = ""
-                if left not in args.keys() and ("*" + left) not in args.keys():
+                if flag:
+                    code += "auto "
+                if (
+                    len(node.value.ops) == 1
+                    and node.value.ops[0].__class__.__name__ == "Lt"
+                ):
+                    code += "{0} = {1} < {2};\n".format(
+                        traverse(node.targets[0]),
+                        traverse(node.value.left),
+                        traverse(node.value.comparators[0]),
+                    )
+            else:
+                code = ""
+                if flag:
                     code += "auto "
                 code += "{0} = {1};\n".format(
-                    traverse(node.targets[0], args), traverse(node.value, args)
+                    traverse(node.targets[0]), traverse(node.value)
                 )
     else:
         raise Exception("Unhandled node {0}".format(node.__class__.__name__))
