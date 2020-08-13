@@ -12,7 +12,7 @@
 #define FORM_KERNEL(libFnName, ptr_lib) \
   auto handle = acquire_handle(ptr_lib); \
   typedef decltype(libFnName) functor_type; \
-  auto* libFnName##_t = reinterpret_cast<functor_type *>(acquire_symbol(handle, #libFnName));
+  auto* libFnName##_t = reinterpret_cast<functor_type*>(acquire_symbol(handle, #libFnName));
 
 namespace awkward {
   namespace kernel {
@@ -75,17 +75,6 @@ namespace awkward {
       }
 #endif
       return symbol_ptr;
-    }
-
-    template <typename T>
-    void array_deleter<T>::operator()(T const *ptr) {
-      util::handle_error(awkward_free(reinterpret_cast<const void*>(ptr)));
-    }
-
-    template<typename T>
-    void cuda_array_deleter<T>::operator()(T const *ptr) {
-      FORM_KERNEL(awkward_free, kernel::lib::cuda);
-      util::handle_error((*awkward_free)(reinterpret_cast<const void*>(ptr)));
     }
 
     template<typename T>
@@ -578,22 +567,6 @@ namespace awkward {
       }
 #endif
       throw std::runtime_error("Unexpected Kernel Encountered or OS not supported");
-    }
-
-    template<typename T>
-    std::shared_ptr<T> malloc(kernel::lib ptr_lib, int64_t length) {
-      if (ptr_lib == kernel::lib::cpu) {
-        return std::shared_ptr<T>(awkward_malloc(length * sizeof(T)),
-                                  kernel::array_deleter<bool>());
-      }
-      else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_malloc, ptr_lib);
-        return std::shared_ptr<T>((*awkward_malloc)(length * sizeof(T)),
-                                  kernel::cuda_array_deleter<T>());
-      }
-      else {
-        throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<bool>");
-      }
     }
 
     const std::string
@@ -15426,53 +15399,6 @@ namespace awkward {
           "unrecognized ptr_lib for IndexedArray_local_preparenext_64");
       }
     }
-
-    template <> EXPORT_SYMBOL std::shared_ptr<bool>
-      malloc<bool>(kernel::lib ptr_lib, int64_t length);
-    template <> EXPORT_SYMBOL std::shared_ptr<int8_t>
-      malloc<int8_t>(kernel::lib ptr_lib, int64_t length);
-    template <> EXPORT_SYMBOL std::shared_ptr<int16_t>
-      malloc<int16_t>(kernel::lib ptr_lib, int64_t length);
-    template <> EXPORT_SYMBOL std::shared_ptr<int32_t>
-      malloc<int32_t>(kernel::lib ptr_lib, int64_t length);
-    template <> EXPORT_SYMBOL std::shared_ptr<int64_t>
-      malloc<int64_t>(kernel::lib ptr_lib, int64_t length);
-    template <> EXPORT_SYMBOL std::shared_ptr<uint8_t>
-      malloc<uint8_t>(kernel::lib ptr_lib, int64_t length);
-    template <> EXPORT_SYMBOL std::shared_ptr<uint16_t>
-      malloc<uint16_t>(kernel::lib ptr_lib, int64_t length);
-    template <> EXPORT_SYMBOL std::shared_ptr<uint32_t>
-      malloc<uint32_t>(kernel::lib ptr_lib, int64_t length);
-    template <> EXPORT_SYMBOL std::shared_ptr<uint64_t>
-      malloc<uint64_t>(kernel::lib ptr_lib, int64_t length);
-    template <> EXPORT_SYMBOL std::shared_ptr<float>
-      malloc<float>(kernel::lib ptr_lib, int64_t length);
-    template <> EXPORT_SYMBOL std::shared_ptr<double>
-      malloc<double>(kernel::lib ptr_lib, int64_t length);
-
-    template class EXPORT_SYMBOL array_deleter<bool>;
-    template class EXPORT_SYMBOL array_deleter<int8_t>;
-    template class EXPORT_SYMBOL array_deleter<int16_t>;
-    template class EXPORT_SYMBOL array_deleter<int32_t>;
-    template class EXPORT_SYMBOL array_deleter<int64_t>;
-    template class EXPORT_SYMBOL array_deleter<uint8_t>;
-    template class EXPORT_SYMBOL array_deleter<uint16_t>;
-    template class EXPORT_SYMBOL array_deleter<uint32_t>;
-    template class EXPORT_SYMBOL array_deleter<uint64_t>;
-    template class EXPORT_SYMBOL array_deleter<float>;
-    template class EXPORT_SYMBOL array_deleter<double>;
-
-    template class EXPORT_SYMBOL cuda_array_deleter<bool>;
-    template class EXPORT_SYMBOL cuda_array_deleter<int8_t>;
-    template class EXPORT_SYMBOL cuda_array_deleter<int16_t>;
-    template class EXPORT_SYMBOL cuda_array_deleter<int32_t>;
-    template class EXPORT_SYMBOL cuda_array_deleter<int64_t>;
-    template class EXPORT_SYMBOL cuda_array_deleter<uint8_t>;
-    template class EXPORT_SYMBOL cuda_array_deleter<uint16_t>;
-    template class EXPORT_SYMBOL cuda_array_deleter<uint32_t>;
-    template class EXPORT_SYMBOL cuda_array_deleter<uint64_t>;
-    template class EXPORT_SYMBOL cuda_array_deleter<float>;
-    template class EXPORT_SYMBOL cuda_array_deleter<double>;
 
   }
 }

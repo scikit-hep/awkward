@@ -8,8 +8,8 @@
 #include "awkward/common.h"
 
 extern "C" {
-  EXPORT_SYMBOL void* awkward_malloc(int64_t length);
-  EXPORT_SYMBOL ERROR awkward_free(const void* ptr);
+  EXPORT_SYMBOL void* awkward_malloc(int64_t bytelength);
+  EXPORT_SYMBOL void awkward_free(void const *ptr);
 };
 
 #endif //AWKWARD_KERNELS_ALLOCATORS_H_

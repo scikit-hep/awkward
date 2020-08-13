@@ -78,7 +78,7 @@ namespace awkward {
 
   template <typename T>
   IndexOf<T>::IndexOf(int64_t length, kernel::lib ptr_lib)
-    : ptr_(kernel::malloc<T>(ptr_lib, length))
+    : ptr_(kernel::malloc<T>(ptr_lib, length * sizeof(T)))
     , ptr_lib_(ptr_lib)
     , offset_(0)
     , length_(length) { }
@@ -377,7 +377,7 @@ namespace awkward {
       return *this;
     }
 
-    std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, length_);
+    std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, length_ * sizeof(T));
 
     Error err = kernel::copy_to<T>(ptr_lib,
                                    ptr_lib_,

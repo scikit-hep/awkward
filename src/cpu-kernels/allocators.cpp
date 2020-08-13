@@ -2,18 +2,17 @@
 
 #include "awkward/kernels/allocators.h"
 
-void* awkward_malloc(int64_t length) {
-  if (length == 0) {
+void* awkward_malloc(int64_t bytelength) {
+  if (bytelength == 0) {
     return nullptr;
   }
   else {
-    uint8_t* out = new uint8_t[length];
+    uint8_t* out = new uint8_t[bytelength];
     return reinterpret_cast<void*>(out);
   }
 }
 
-ERROR awkward_free(const void* ptr) {
-  const uint8_t* in = reinterpret_cast<const uint8_t*>(ptr);
+void awkward_free(void const *ptr) {
+  uint8_t const* in = reinterpret_cast<uint8_t const*>(ptr);
   delete [] in;
-  return success();
 }

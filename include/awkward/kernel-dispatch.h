@@ -76,7 +76,9 @@ namespace awkward {
     public:
         /// @brief Called by `std::shared_ptr` when its reference count reaches
         /// zero.
-        void operator()(T const *p);
+        void operator()(T const *ptr) {
+          awkward_free(reinterpret_cast<void const*>(ptr));
+        }
     };
 
     /// @class cuda_array_deleter
@@ -98,7 +100,13 @@ namespace awkward {
     public:
         /// @brief Called by `std::shared_ptr` when its reference count reaches
         /// zero.
-        void operator()(T const *p);
+        void operator()(T const *ptr) {
+          auto handle = acquire_handle(lib::cuda);
+          typedef decltype(awkward_free) functor_type;
+          auto* awkward_free_fcn = reinterpret_cast<functor_type*>(
+                                     acquire_symbol(handle, "awkward_free"));
+          (*awkward_free_fcn)(reinterpret_cast<void const*>(ptr));
+        }
     };
 
     /// @class no_deleter
@@ -120,7 +128,7 @@ namespace awkward {
     public:
         /// @brief Called by `std::shared_ptr` when its reference count reaches
         /// zero.
-        void operator()(T const *p) { }
+        void operator()(T const *ptr) { }
     };
 
     /// @brief A utility function to get the device number on which the
@@ -147,7 +155,7 @@ namespace awkward {
     /// `TO`, usually between main memory and a GPU.
     ///
     /// @note This function has not been implemented to handle Multi-GPU setups.
-    template<typename T>
+    template <typename T>
     ERROR copy_to(kernel::lib TO,
                   kernel::lib FROM,
                   T *to_ptr,
@@ -155,14 +163,32 @@ namespace awkward {
                   int64_t length);
 
     /// @brief Internal Function to allocate an empty array of a given length
-    /// with a given type. The `length` parameter is the number of items
-    /// (`length * sizeof(T)` bytes are allocated).
+    /// with a given type. The `bytelength` parameter is the number of bytes,
+    /// so be sure to multiply by sizeof(...) when using this function.
     ///
     /// @note This function has not been implemented to handle Multi-GPU setups.
-    template<typename T>
+    template <typename T>
     std::shared_ptr<T> malloc(
       kernel::lib ptr_lib,
-      int64_t length);
+      int64_t bytelength) {
+      if (ptr_lib == lib::cpu) {
+        return std::shared_ptr<T>(
+          reinterpret_cast<T*>(awkward_malloc(bytelength)),
+          kernel::array_deleter<T>());
+      }
+      else if (ptr_lib == lib::cuda) {
+        auto handle = acquire_handle(lib::cuda);
+        typedef decltype(awkward_malloc) functor_type;
+        auto* awkward_malloc_fcn = reinterpret_cast<functor_type*>(
+                                     acquire_symbol(handle, "awkward_malloc"));
+        return std::shared_ptr<T>(
+          reinterpret_cast<T*>((*awkward_malloc_fcn)(bytelength)),
+          kernel::cuda_array_deleter<T>());
+      }
+      else {
+        throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<bool>");
+      }
+    }
 
     /////////////////////////////////// awkward/kernels/getitem.h
 
@@ -1570,44 +1596,6 @@ namespace awkward {
       const int64_t* parents,
       int64_t parentslength,
       const int64_t* nextparents);
-
-#if !defined AWKWARD_INDEX_NO_EXTERN_TEMPLATE && !defined _MSC_VER
-    template <> std::shared_ptr<bool> malloc<bool>(kernel::lib ptr_lib, int64_t length);
-    template <> std::shared_ptr<int8_t> malloc<int8_t>(kernel::lib ptr_lib, int64_t length);
-    template <> std::shared_ptr<int16_t> malloc<int16_t>(kernel::lib ptr_lib, int64_t length);
-    template <> std::shared_ptr<int32_t> malloc<int32_t>(kernel::lib ptr_lib, int64_t length);
-    template <> std::shared_ptr<int64_t> malloc<int64_t>(kernel::lib ptr_lib, int64_t length);
-    template <> std::shared_ptr<uint8_t> malloc<uint8_t>(kernel::lib ptr_lib, int64_t length);
-    template <> std::shared_ptr<uint16_t> malloc<uint16_t>(kernel::lib ptr_lib, int64_t length);
-    template <> std::shared_ptr<uint32_t> malloc<uint32_t>(kernel::lib ptr_lib, int64_t length);
-    template <> std::shared_ptr<uint64_t> malloc<uint64_t>(kernel::lib ptr_lib, int64_t length);
-    template <> std::shared_ptr<float> malloc<float>(kernel::lib ptr_lib, int64_t length);
-    template <> std::shared_ptr<double> malloc<double>(kernel::lib ptr_lib, int64_t length);
-
-    extern template class array_deleter<bool>;
-    extern template class array_deleter<int8_t>;
-    extern template class array_deleter<int16_t>;
-    extern template class array_deleter<int32_t>;
-    extern template class array_deleter<int64_t>;
-    extern template class array_deleter<uint8_t>;
-    extern template class array_deleter<uint16_t>;
-    extern template class array_deleter<uint32_t>;
-    extern template class array_deleter<uint64_t>;
-    extern template class array_deleter<float>;
-    extern template class array_deleter<double>;
-
-    extern template class cuda_array_deleter<bool>;
-    extern template class cuda_array_deleter<int8_t>;
-    extern template class cuda_array_deleter<int16_t>;
-    extern template class cuda_array_deleter<int32_t>;
-    extern template class cuda_array_deleter<int64_t>;
-    extern template class cuda_array_deleter<uint8_t>;
-    extern template class cuda_array_deleter<uint16_t>;
-    extern template class cuda_array_deleter<uint32_t>;
-    extern template class cuda_array_deleter<uint64_t>;
-    extern template class cuda_array_deleter<float>;
-    extern template class cuda_array_deleter<double>;
-#endif
 
   }
 }
