@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+import argparse
 import ast
 import os
 from collections import OrderedDict
@@ -163,7 +164,7 @@ def getdecl(name, args, templatestring, parent=False, solo=False):
 def gettemplatetypes(spec, templateargs):
     count = 0
     code = ""
-    for arg in childfunc["args"]:
+    for arg in spec["args"]:
         for argname, typename in arg.items():
             if argname in templateargs.keys():
                 if count == 0:
@@ -185,7 +186,103 @@ def getparamnames(args):
     return code
 
 
+def getcode(indspec):
+    templateargs = gettemplateargs(indspec)
+    args = getparentargs(templateargs, indspec)
+    if "specializations" in indspec.keys():
+        templatestring = gettemplatestring(templateargs)
+    else:
+        templatestring = ""
+        args = getchildargs(indspec, indspec)
+    code = getdecl(
+        indspec["name"],
+        args,
+        templatestring,
+        parent=True,
+        solo="specializations" in indspec.keys(),
+    )
+    code += """  int64_t block_id = blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
+int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+"""
+    code += getbody(indspec["definition"], args)
+    code += "}\n\n"
+    if "specializations" in indspec.keys():
+        for childfunc in indspec["specializations"]:
+            args = getchildargs(childfunc, indspec)
+            code += getdecl(childfunc["name"], args, "")
+            lenarg = None
+            for arg in args.keys():
+                if "len" in arg:
+                    assert lenarg is None
+                    lenarg = arg
+            assert lenarg is not None
+            code += """  dim3 blocks_per_grid;
+dim3 threads_per_block;
+
+if ({0} > 1024) {{
+blocks_per_grid = dim3(ceil(({0}) / 1024.0), 1, 1);
+threads_per_block = dim3(1024, 1, 1);
+}} else {{
+blocks_per_grid = dim3(1, 1, 1);
+threads_per_block = dim3({0}, 1, 1);
+}}
+""".format(
+                lenarg
+            )
+            templatetypes = gettemplatetypes(childfunc, templateargs)
+            paramnames = getparamnames(args)
+            code += (
+                " " * 2
+                + getcudaname(indspec["name"])
+                + "<"
+                + templatetypes
+                + "><<<blocks_per_grid, threads_per_block>>>("
+                + paramnames
+                + ");\n"
+            )
+            code += " " * 2 + "cudaDeviceSynchronize();\n"
+            code += " " * 2 + "return success();\n"
+            code += "}\n\n"
+    else:
+        code += getdecl(indspec["name"], args, "")
+        lenarg = None
+        for arg in args.keys():
+            if "len" in arg:
+                assert lenarg is None
+                lenarg = arg
+        assert lenarg is not None
+        code += """  dim3 blocks_per_grid;
+dim3 threads_per_block;
+
+if ({0} > 1024) {{
+blocks_per_grid = dim3(ceil(({0}) / 1024.0), 1, 1);
+threads_per_block = dim3(1024, 1, 1);
+}} else {{
+blocks_per_grid = dim3(1, 1, 1);
+threads_per_block = dim3({0}, 1, 1);
+}}
+""".format(
+            lenarg
+        )
+        paramnames = getparamnames(args)
+        code += (
+            " " * 2
+            + indspec["name"]
+            + "<<<blocks_per_grid, threads_per_block>>>("
+            + paramnames
+            + ");\n"
+        )
+        code += " " * 2 + "cudaDeviceSynchronize();\n"
+        code += " " * 2 + "return success();\n"
+        code += "}\n\n"
+    return code
+
+
 if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("kernelname", nargs="?")
+    args = arg_parser.parse_args()
+    kernelname = args.kernelname
     with open(
         os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
     ) as infile:
@@ -197,95 +294,9 @@ if __name__ == "__main__":
                     os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
                 ) as specfile:
                     indspec = yaml.safe_load(specfile)[0]
-                    if indspec["name"] in KERNEL_WHITELIST:
-                        templateargs = gettemplateargs(indspec)
-                        args = getparentargs(templateargs, indspec)
-                        if "specializations" in indspec.keys():
-                            templatestring = gettemplatestring(templateargs)
-                        else:
-                            templatestring = ""
-                            args = getchildargs(indspec, indspec)
-                        code += getdecl(
-                            indspec["name"],
-                            args,
-                            templatestring,
-                            parent=True,
-                            solo="specializations" in indspec.keys(),
-                        )
-                        code += """  int64_t block_id = blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
-"""
-                        code += getbody(indspec["definition"], args)
-                        code += "}\n\n"
-                        if "specializations" in indspec.keys():
-                            for childfunc in indspec["specializations"]:
-                                args = getchildargs(childfunc, indspec)
-                                code += getdecl(childfunc["name"], args, "")
-                                lenarg = None
-                                for arg in args.keys():
-                                    if "len" in arg:
-                                        assert lenarg is None
-                                        lenarg = arg
-                                assert lenarg is not None
-                                code += """  dim3 blocks_per_grid;
-  dim3 threads_per_block;
-
-  if ({0} > 1024) {{
-    blocks_per_grid = dim3(ceil(({0}) / 1024.0), 1, 1);
-    threads_per_block = dim3(1024, 1, 1);
-  }} else {{
-    blocks_per_grid = dim3(1, 1, 1);
-    threads_per_block = dim3({0}, 1, 1);
-  }}
-""".format(
-                                    lenarg
-                                )
-                                templatetypes = gettemplatetypes(
-                                    childfunc, templateargs
-                                )
-                                paramnames = getparamnames(args)
-                                code += (
-                                    " " * 2
-                                    + getcudaname(indspec["name"])
-                                    + "<"
-                                    + templatetypes
-                                    + "><<<blocks_per_grid, threads_per_block>>>("
-                                    + paramnames
-                                    + ");\n"
-                                )
-                                code += " " * 2 + "cudaDeviceSynchronize();\n"
-                                code += " " * 2 + "return success();\n"
-                                code += "}\n\n"
-                        else:
-                            code += getdecl(indspec["name"], args, "")
-                            lenarg = None
-                            for arg in args.keys():
-                                if "len" in arg:
-                                    assert lenarg is None
-                                    lenarg = arg
-                            assert lenarg is not None
-                            code += """  dim3 blocks_per_grid;
-  dim3 threads_per_block;
-
-  if ({0} > 1024) {{
-  blocks_per_grid = dim3(ceil(({0}) / 1024.0), 1, 1);
-  threads_per_block = dim3(1024, 1, 1);
-  }} else {{
-  blocks_per_grid = dim3(1, 1, 1);
-  threads_per_block = dim3({0}, 1, 1);
-  }}
-""".format(
-                                lenarg
-                            )
-                            paramnames = getparamnames(args)
-                            code += (
-                                " " * 2
-                                + indspec["name"]
-                                + "<<<blocks_per_grid, threads_per_block>>>("
-                                + paramnames
-                                + ");\n"
-                            )
-                            code += " " * 2 + "cudaDeviceSynchronize();\n"
-                            code += " " * 2 + "return success();\n"
-                            code += "}\n\n"
+                    if indspec["name"] == kernelname and kernelname in KERNEL_WHITELIST:
+                        code = getcode(indspec)
+                        break
+                    if kernelname is None and indspec["name"] in KERNEL_WHITELIST:
+                        code += getcode(indspec)
         print(code)
