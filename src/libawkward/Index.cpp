@@ -78,7 +78,7 @@ namespace awkward {
 
   template <typename T>
   IndexOf<T>::IndexOf(int64_t length, kernel::lib ptr_lib)
-    : ptr_(kernel::ptr_alloc<T>(ptr_lib, length))
+    : ptr_(kernel::malloc<T>(ptr_lib, length))
     , ptr_lib_(ptr_lib)
     , offset_(0)
     , length_(length) { }
@@ -377,19 +377,16 @@ namespace awkward {
       return *this;
     }
 
-    std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, length());
+    std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, length_);
 
-    Error err =  kernel::copy_to<T>(ptr_lib,
-                                    ptr_lib_,
-                                    ptr.get(),
-                                    data(),
-                                    length_);
+    Error err = kernel::copy_to<T>(ptr_lib,
+                                   ptr_lib_,
+                                   ptr.get(),
+                                   data(),
+                                   length_);
     util::handle_error(err);
 
-    return IndexOf<T>(ptr,
-                      0,
-                      length(),
-                      ptr_lib);
+    return IndexOf<T>(ptr, 0, length_, ptr_lib);
   }
 
   template class EXPORT_SYMBOL IndexOf<int8_t>;

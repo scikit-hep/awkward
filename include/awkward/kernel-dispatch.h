@@ -16,7 +16,6 @@
 #endif
 
 namespace awkward {
-
   namespace kernel {
 
     enum class lib {
@@ -66,6 +65,7 @@ namespace awkward {
     /// This is necessary for `std::shared_ptr` to contain array buffers.
     ///
     /// See also
+    ///   - cuda_array_deleter, which deletes an array on a GPU.
     ///   - no_deleter, which does not free memory at all (for borrowed
     ///     references).
     ///   - pyobject_deleter, which reduces the reference count of a
@@ -87,7 +87,7 @@ namespace awkward {
     /// This is necessary for `std::shared_ptr` to contain array buffers.
     ///
     /// See also
-    ///   - array_deleter, which deletes array buffers on the main memory
+    ///   - array_deleter, which deletes array buffers in main memory.
     ///   - no_deleter, which does not free memory at all (for borrowed
     ///     references).
     ///   - pyobject_deleter, which reduces the reference count of a
@@ -99,6 +99,28 @@ namespace awkward {
         /// @brief Called by `std::shared_ptr` when its reference count reaches
         /// zero.
         void operator()(T const *p);
+    };
+
+    /// @class no_deleter
+    ///
+    /// @brief Used as a `std::shared_ptr` deleter (second argument) to
+    /// overload `delete ptr` with nothing (no dereferencing).
+    ///
+    /// This could be used to pass borrowed references with the same
+    /// C++ type as owned references.
+    ///
+    /// See also
+    ///   - array_deleter, which frees array buffers, rather than objects.
+    ///   - cuda_array_deleter, which frees array buffers on GPUs.
+    ///   - pyobject_deleter, which reduces the reference count of a
+    ///     Python object when there are no more C++ shared pointers
+    ///     referencing it.
+    template<typename T>
+    class EXPORT_SYMBOL no_deleter {
+    public:
+        /// @brief Called by `std::shared_ptr` when its reference count reaches
+        /// zero.
+        void operator()(T const *p) { }
     };
 
     /// @brief A utility function to get the device number on which the
@@ -117,34 +139,14 @@ namespace awkward {
     std::string
     get_ptr_device_name(kernel::lib ptr_lib, T* ptr);
 
+    /// @brief FIXME
     const std::string
     fully_qualified_cache_key(const std::string& cache_key, kernel::lib ptr_lib);
 
-    /// @class no_deleter
+    /// @brief Internal Function an array buffer from library `FROM` to library
+    /// `TO`, usually between main memory and a GPU.
     ///
-    /// @brief Used as a `std::shared_ptr` deleter (second argument) to
-    /// overload `delete ptr` with nothing (no dereferencing).
-    ///
-    /// This could be used to pass borrowed references with the same
-    /// C++ type as owned references.
-    ///
-    /// See also
-    ///   - array_deleter, which frees array buffers, rather than objects.
-    ///   - pyobject_deleter, which reduces the reference count of a
-    ///     Python object when there are no more C++ shared pointers
-    ///     referencing it.
-    template<typename T>
-    class EXPORT_SYMBOL no_deleter {
-    public:
-        /// @brief Called by `std::shared_ptr` when its reference count reaches
-        /// zero.
-        void operator()(T const *p) { }
-    };
-
-    /// @brief Internal Function to transfer an array buffer betweeen
-    /// main memory and the GPU memory
-    ///
-    /// @note This function has not been implemented to handle Multi-GPU setups
+    /// @note This function has not been implemented to handle Multi-GPU setups.
     template<typename T>
     ERROR copy_to(kernel::lib TO,
                   kernel::lib FROM,
@@ -152,19 +154,19 @@ namespace awkward {
                   T *from_ptr,
                   int64_t length);
 
-    /// @brief Internal Function to allocate an empty array of a given length on
-    /// the GPU
+    /// @brief Internal Function to allocate an empty array of a given length
+    /// with a given type. The `length` parameter is the number of items
+    /// (`length * sizeof(T)` bytes are allocated).
     ///
-    /// @note This function has not been implemented to handle Multi-GPU setups
+    /// @note This function has not been implemented to handle Multi-GPU setups.
     template<typename T>
-    std::shared_ptr<T> ptr_alloc(kernel::lib ptr_lib,
-                                 int64_t length);
+    std::shared_ptr<T> malloc(
+      kernel::lib ptr_lib,
+      int64_t length);
 
     /////////////////////////////////// awkward/kernels/getitem.h
 
-    /// @brief Internal utility kernel to avoid raw pointer access
-    ///
-    /// @note This does not have a corresponding cpu_kernel
+    /// @brief Internal utility kernel to avoid raw pointer access.
     template <typename T>
     T NumpyArray_getitem_at0(
       kernel::lib ptr_lib,
@@ -1568,6 +1570,45 @@ namespace awkward {
       const int64_t* parents,
       int64_t parentslength,
       const int64_t* nextparents);
+
+#if !defined AWKWARD_INDEX_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+    template <> std::shared_ptr<bool> malloc<bool>(kernel::lib ptr_lib, int64_t length);
+    template <> std::shared_ptr<int8_t> malloc<int8_t>(kernel::lib ptr_lib, int64_t length);
+    template <> std::shared_ptr<int16_t> malloc<int16_t>(kernel::lib ptr_lib, int64_t length);
+    template <> std::shared_ptr<int32_t> malloc<int32_t>(kernel::lib ptr_lib, int64_t length);
+    template <> std::shared_ptr<int64_t> malloc<int64_t>(kernel::lib ptr_lib, int64_t length);
+    template <> std::shared_ptr<uint8_t> malloc<uint8_t>(kernel::lib ptr_lib, int64_t length);
+    template <> std::shared_ptr<uint16_t> malloc<uint16_t>(kernel::lib ptr_lib, int64_t length);
+    template <> std::shared_ptr<uint32_t> malloc<uint32_t>(kernel::lib ptr_lib, int64_t length);
+    template <> std::shared_ptr<uint64_t> malloc<uint64_t>(kernel::lib ptr_lib, int64_t length);
+    template <> std::shared_ptr<float> malloc<float>(kernel::lib ptr_lib, int64_t length);
+    template <> std::shared_ptr<double> malloc<double>(kernel::lib ptr_lib, int64_t length);
+
+    extern template class array_deleter<bool>;
+    extern template class array_deleter<int8_t>;
+    extern template class array_deleter<int16_t>;
+    extern template class array_deleter<int32_t>;
+    extern template class array_deleter<int64_t>;
+    extern template class array_deleter<uint8_t>;
+    extern template class array_deleter<uint16_t>;
+    extern template class array_deleter<uint32_t>;
+    extern template class array_deleter<uint64_t>;
+    extern template class array_deleter<float>;
+    extern template class array_deleter<double>;
+
+    extern template class cuda_array_deleter<bool>;
+    extern template class cuda_array_deleter<int8_t>;
+    extern template class cuda_array_deleter<int16_t>;
+    extern template class cuda_array_deleter<int32_t>;
+    extern template class cuda_array_deleter<int64_t>;
+    extern template class cuda_array_deleter<uint8_t>;
+    extern template class cuda_array_deleter<uint16_t>;
+    extern template class cuda_array_deleter<uint32_t>;
+    extern template class cuda_array_deleter<uint64_t>;
+    extern template class cuda_array_deleter<float>;
+    extern template class cuda_array_deleter<double>;
+#endif
+
   }
 }
 

@@ -237,7 +237,7 @@ namespace awkward {
                   const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
-        , ptr_(kernel::ptr_alloc<T>(ptr_lib_, length))
+        , ptr_(kernel::malloc<T>(ptr_lib_, length))
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T)) { }
@@ -1200,7 +1200,7 @@ namespace awkward {
                                                  ptr_lib_);
         }
 
-        std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, length_);
+        std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, length_);
 
         Error err = kernel::copy_to(
            ptr_lib,

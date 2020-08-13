@@ -18,6 +18,7 @@ namespace rj = rapidjson;
 
 namespace awkward {
   namespace util {
+
     dtype
     name_to_dtype(const std::string& name) {
       if (name == "bool") {
@@ -670,5 +671,6 @@ namespace awkward {
       }
       return std::string();
     }
+
   }
 }

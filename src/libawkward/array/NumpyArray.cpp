@@ -1192,7 +1192,7 @@ namespace awkward {
   const ContentPtr
   NumpyArray::carry(const Index64& carry, bool allow_lazy) const {
     std::shared_ptr<void> ptr(
-      kernel::ptr_alloc<uint8_t>(ptr_lib_, carry.length()*((int64_t)strides_[0])));
+      kernel::malloc<uint8_t>(ptr_lib_, carry.length()*((int64_t)strides_[0])));
     struct Error err = kernel::NumpyArray_getitem_next_null_64(
       kernel::lib::cpu,   // DERIVE
       reinterpret_cast<uint8_t*>(ptr.get()),
@@ -1745,9 +1745,7 @@ namespace awkward {
         other_flatlength *= (int64_t)shape_[(size_t)i];
       }
 
-      std::shared_ptr<void> ptr(kernel::ptr_alloc<uint8_t>(
-          ptr_lib_,
-          itemsize*(self_flatlength + other_flatlength)));
+      std::shared_ptr<void> ptr(kernel::malloc<uint8_t>(ptr_lib_, itemsize*(self_flatlength + other_flatlength)));
 
       NumpyArray contiguous_other = rawother->contiguous();
 
@@ -2827,7 +2825,7 @@ namespace awkward {
     NumpyArray contiguous_other = other.get()->contiguous();
 
     std::shared_ptr<void> ptr(
-      kernel::ptr_alloc<uint8_t>(ptr_lib_, length() + other.get()->length()));
+      kernel::malloc<uint8_t>(ptr_lib_, length() + other.get()->length()));
 
     struct Error err;
 
@@ -3740,7 +3738,7 @@ namespace awkward {
   NumpyArray::contiguous_next(const Index64& bytepos) const {
     if (iscontiguous()) {
       std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>(ptr_lib_, bytepos.length()*strides_[0]));
+        kernel::malloc<uint8_t>(ptr_lib_, bytepos.length()*strides_[0]));
 
       struct Error err = kernel::NumpyArray_contiguous_copy_64(
         kernel::lib::cpu,   // DERIVE
@@ -3763,7 +3761,7 @@ namespace awkward {
 
     else if (shape_.size() == 1) {
       std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>(ptr_lib_, bytepos.length()*((int64_t)itemsize_)));
+        kernel::malloc<uint8_t>(ptr_lib_, bytepos.length()*((int64_t)itemsize_)));
       struct Error err = kernel::NumpyArray_contiguous_copy_64(
         kernel::lib::cpu,   // DERIVE
         reinterpret_cast<uint8_t*>(ptr.get()),
@@ -4028,8 +4026,8 @@ namespace awkward {
                            int64_t stride,
                            bool first) const {
     if (head.get() == nullptr) {
-      std::shared_ptr<void> ptr(kernel::ptr_alloc<uint8_t>(ptr_lib_,
-                                                carry.length()*stride));
+      std::shared_ptr<void> ptr(
+        kernel::malloc<uint8_t>(ptr_lib_, carry.length()*stride));
       struct Error err = kernel::NumpyArray_getitem_next_null_64(
         kernel::lib::cpu,   // DERIVE
         reinterpret_cast<uint8_t*>(ptr.get()),
@@ -4711,7 +4709,7 @@ namespace awkward {
 
     switch (dtype_) {
     case util::dtype::boolean:
-      ptr = kernel::ptr_alloc<bool>(ptr_lib, (int64_t)length);
+      ptr = kernel::malloc<bool>(ptr_lib, (int64_t)length);
       err = kernel::copy_to<bool>(
         ptr_lib,
         ptr_lib_,
@@ -4720,7 +4718,7 @@ namespace awkward {
         length);
       break;
     case util::dtype::int8:
-      ptr = kernel::ptr_alloc<int8_t>(ptr_lib, (int64_t)length);
+      ptr = kernel::malloc<int8_t>(ptr_lib, (int64_t)length);
       err = kernel::copy_to<int8_t>(
         ptr_lib,
         ptr_lib_,
@@ -4729,7 +4727,7 @@ namespace awkward {
         length);
       break;
     case util::dtype::int16:
-      ptr = kernel::ptr_alloc<int16_t>(ptr_lib, (int64_t)length);
+      ptr = kernel::malloc<int16_t>(ptr_lib, (int64_t)length);
       err = kernel::copy_to<int16_t>(
         ptr_lib,
         ptr_lib_,
@@ -4738,7 +4736,7 @@ namespace awkward {
         length);
       break;
     case util::dtype::int32:
-      ptr = kernel::ptr_alloc<int32_t>(ptr_lib, (int64_t)length);
+      ptr = kernel::malloc<int32_t>(ptr_lib, (int64_t)length);
       err = kernel::copy_to<int32_t>(
         ptr_lib,
         ptr_lib_,
@@ -4747,7 +4745,7 @@ namespace awkward {
         length);
       break;
     case util::dtype::int64:
-      ptr = kernel::ptr_alloc<int64_t>(ptr_lib, (int64_t)length);
+      ptr = kernel::malloc<int64_t>(ptr_lib, (int64_t)length);
       err = kernel::copy_to<int64_t>(
         ptr_lib,
         ptr_lib_,
@@ -4756,7 +4754,7 @@ namespace awkward {
         length);
       break;
     case util::dtype::uint8:
-      ptr = kernel::ptr_alloc<uint8_t>(ptr_lib, (int64_t)length);
+      ptr = kernel::malloc<uint8_t>(ptr_lib, (int64_t)length);
       err = kernel::copy_to<uint8_t>(
         ptr_lib,
         ptr_lib_,
@@ -4765,7 +4763,7 @@ namespace awkward {
         length);
       break;
     case util::dtype::uint16:
-      ptr = kernel::ptr_alloc<uint16_t>(ptr_lib, (int64_t)length);
+      ptr = kernel::malloc<uint16_t>(ptr_lib, (int64_t)length);
       err = kernel::copy_to<uint16_t>(
         ptr_lib,
         ptr_lib_,
@@ -4774,7 +4772,7 @@ namespace awkward {
         length);
       break;
     case util::dtype::uint32:
-      ptr = kernel::ptr_alloc<uint32_t>(ptr_lib, (int64_t)length);
+      ptr = kernel::malloc<uint32_t>(ptr_lib, (int64_t)length);
       err = kernel::copy_to<uint32_t>(
         ptr_lib,
         ptr_lib_,
@@ -4783,7 +4781,7 @@ namespace awkward {
         length);
       break;
     case util::dtype::uint64:
-      ptr = kernel::ptr_alloc<uint64_t>(ptr_lib, (int64_t)length);
+      ptr = kernel::malloc<uint64_t>(ptr_lib, (int64_t)length);
       err = kernel::copy_to<uint64_t>(
         ptr_lib,
         ptr_lib_,
@@ -4794,7 +4792,7 @@ namespace awkward {
     case util::dtype::float16:
       throw std::runtime_error("FIXME: copy_to of float16 not implemented");
     case util::dtype::float32:
-      ptr = kernel::ptr_alloc<float>(ptr_lib, (int64_t)length);
+      ptr = kernel::malloc<float>(ptr_lib, (int64_t)length);
       err = kernel::copy_to<float>(
         ptr_lib,
         ptr_lib_,
@@ -4803,7 +4801,7 @@ namespace awkward {
         length);
       break;
     case util::dtype::float64:
-      ptr = kernel::ptr_alloc<double>(ptr_lib, (int64_t)length);
+      ptr = kernel::malloc<double>(ptr_lib, (int64_t)length);
       err = kernel::copy_to<double>(
         ptr_lib,
         ptr_lib_,
