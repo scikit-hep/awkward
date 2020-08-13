@@ -11,6 +11,7 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 KERNEL_WHITELIST = [
     "awkward_new_Identities",
     "awkward_RegularArray_num",
+    "awkward_IndexedArray_overlay_mask",
 ]
 
 
@@ -28,31 +29,51 @@ def traverse(node, args):
             traverse(node.op, args),
             traverse(node.right, args),
         )
+    elif node.__class__.__name__ == "UnaryOp":
+        if node.op.__class__.__name__ == "USub":
+            code = "-{0}".format(node.operand.value)
     elif node.__class__.__name__ == "Sub":
         code = "-"
     elif node.__class__.__name__ == "Subscript":
-        if node.slice.value.id == "i":
+        if node.slice.value.__class__.__name__ == "Name" and node.slice.value.id == "i":
             code = node.value.id + "[thread_id]"
-        else:
+        elif node.slice.value.__class__.__name__ == "Name":
             code = node.value.id + "[" + node.slice.value.id + "]"
+        else:
+            code = traverse(node.slice.value, args)
     elif node.__class__.__name__ == "Call":
         assert len(node.args) == 1
         code = "({0})({1})".format(node.func.id, traverse(node.args[0], args))
     elif node.__class__.__name__ == "Assign":
         assert len(node.targets) == 1
         if node.value.__class__.__name__ == "Name" and node.value.id == "i":
-            value = "thread_id"
+            left = traverse(node.targets[0], args)
+            if "[" in left:
+                left = left[: left.find("[")]
+            code = ""
+            if left not in args.keys() and ("*" + left) not in args.keys():
+                code += "auto "
+            code += "{0} = thread_id;\n".format(traverse(node.targets[0], args))
         else:
-            value = traverse(node.value, args)
-        left = traverse(node.targets[0], args)
-        if "[" in left:
-            left = left[: left.find("[")]
-        code = ""
-        if left not in args.keys() and ("*" + left) not in args.keys():
-            code += "auto "
-        code += "{0} = {1};\n".format(traverse(node.targets[0], args), value)
+            if node.value.__class__.__name__ == "IfExp":
+                code = "if ({0}) {{\n {1} = {2};\n }} else {{\n {1} = {3};\n }}\n".format(
+                    node.value.test.id,
+                    traverse(node.targets[0], args),
+                    traverse(node.value.body, args),
+                    traverse(node.value.orelse, args),
+                )
+            else:
+                left = traverse(node.targets[0], args)
+                if "[" in left:
+                    left = left[: left.find("[")]
+                code = ""
+                if left not in args.keys() and ("*" + left) not in args.keys():
+                    code += "auto "
+                code += "{0} = {1};\n".format(
+                    traverse(node.targets[0], args), traverse(node.value, args)
+                )
     else:
-        raise Exception("Unhandled node")
+        raise Exception("Unhandled node {0}".format(node.__class__.__name__))
     return code
 
 
