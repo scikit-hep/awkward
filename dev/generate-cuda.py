@@ -202,7 +202,7 @@ def getdecl(name, args, templatestring, parent=False, solo=False):
         else:
             params += ", " + value + " " + key
     if parent:
-        code += "void cuda_" + name + "(" + params + ") {\n"
+        code += "void cuda" + name[len("awkward") :] + "(" + params + ") {\n"
     else:
         code += "ERROR " + getcudaname(name) + "(" + params + ") {\n"
     return code
@@ -280,7 +280,8 @@ threads_per_block = dim3({0}, 1, 1);
             paramnames = getparamnames(args)
             code += (
                 " " * 2
-                + getcudaname(indspec["name"])
+                + "cuda"
+                + indspec["name"][len("awkward") :]
                 + "<"
                 + templatetypes
                 + "><<<blocks_per_grid, threads_per_block>>>("
@@ -314,7 +315,8 @@ threads_per_block = dim3({0}, 1, 1);
         paramnames = getparamnames(args)
         code += (
             " " * 2
-            + indspec["name"]
+            + "cuda"
+            + indspec["name"][len("awkward") :]
             + "<<<blocks_per_grid, threads_per_block>>>("
             + paramnames
             + ");\n"
