@@ -3,15 +3,51 @@
 
 set -e
 
+PLATFORM=`python -c 'import platform; print(platform.system().lower() + "_" + platform.processor())'`
+
+if [[ "$PLATFORM" != "linux_x86_64" ]]; then
+    echo "Only linux_x86_64 is supported, not" $PLATFORM
+fi
+
 AWKWARD_VERSION=`cat VERSION_INFO`
 # CUDA_VERSION=`nvcc --version | grep -ho "release [0-9\.]*" | sed 's/release //'`
 # RUNTIME_CUDA_VERSION=`nvidia-smi | grep -ho "CUDA Version: [0-9\.]*" | sed 's/CUDA Version: //'`
+
+CUDA_VERSION=9.0
+
+if [[ "$CUDA_VERSION" == "11.0" ]]; then
+    export DOCKER_IMAGE_TAG=11.0-devel-ubuntu18.04
+elif [[ "$CUDA_VERSION" == "10.2" ]]; then
+    export DOCKER_IMAGE_TAG=10.2-devel-ubuntu18.04
+elif [[ "$CUDA_VERSION" == "10.1" ]]; then
+    export DOCKER_IMAGE_TAG=10.1-devel-ubuntu18.04
+elif [[ "$CUDA_VERSION" == "10.0" ]]; then
+    export DOCKER_IMAGE_TAG=10.0-devel-ubuntu18.04
+elif [[ "$CUDA_VERSION" == "9.2" ]]; then
+    export DOCKER_IMAGE_TAG=9.2-devel-ubuntu18.04
+elif [[ "$CUDA_VERSION" == "9.1" ]]; then
+    export DOCKER_IMAGE_TAG=9.1-devel-ubuntu16.04
+elif [[ "$CUDA_VERSION" == "9.0" ]]; then
+    export DOCKER_IMAGE_TAG=9.0-devel-ubuntu16.04
+elif [[ "$CUDA_VERSION" == "8.0" ]]; then
+    export DOCKER_IMAGE_TAG=8.0-devel-ubuntu16.04
+else
+    echo "Docker image for CUDA version" $CUDA_VERSION "is not known"
+    exit 1
+fi
 
 rm -rf build dist
 mkdir build
 cp -r src/awkward1_cuda_kernels build
 
-docker run -it -v`pwd`:/home -w/home docker.io/nvidia/cuda:10.1-devel-ubuntu18.04 nvcc -Xcompiler -fPIC -Iinclude src/cuda-kernels/*.cu --shared -o build/awkward1_cuda_kernels/libawkward1-cuda-kernels.so
+echo "__version__ ='"$AWKWARD_VERSION"'" >> build/awkward1_cuda_kernels/__init__.py
+echo "cuda_version ='"$CUDA_VERSION"'" >> build/awkward1_cuda_kernels/__init__.py
+echo "docker_image ='docker.io/nvidia/cuda:"$DOCKER_IMAGE_TAG"'" >> build/awkward1_cuda_kernels/__init__.py
+
+export DOCKER_ARGS="-v`pwd`:/home -w/home docker.io/nvidia/cuda:"$DOCKER_IMAGE_TAG
+export BUILD_SHARED_LIBRARY="nvcc -std=c++11 -Xcompiler -fPIC -Iinclude src/cuda-kernels/*.cu --shared -o build/awkward1_cuda_kernels/libawkward-cuda-kernels.so"
+
+docker run $DOCKER_ARGS $BUILD_SHARED_LIBRARY
 
 cat > build/cuda-setup.py << EOF
 
@@ -27,7 +63,7 @@ setup(name = "awkward1-cuda-kernels",
       author_email = "pivarski@princeton.edu",
       maintainer = "Jim Pivarski",
       maintainer_email = "pivarski@princeton.edu",
-      description = "Development of awkward 1.0, to replace scikit-hep/awkward-array in 2020.",
+      description = "CUDA plug-in for Awkward Array, enables GPU-bound arrays and operations",
       long_description = "",
       url = "https://github.com/scikit-hep/awkward-1.0",
       download_url = "https://github.com/scikit-hep/awkward-1.0/releases",
@@ -35,7 +71,6 @@ setup(name = "awkward1-cuda-kernels",
       test_suite = "tests-cuda",
       python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
       install_requires = ["cupy"],
-      tests_require = ["pytest"],
       classifiers = [
 #         "Development Status :: 1 - Planning",
 #         "Development Status :: 2 - Pre-Alpha",
@@ -48,9 +83,7 @@ setup(name = "awkward1-cuda-kernels",
           "Intended Audience :: Information Technology",
           "Intended Audience :: Science/Research",
           "License :: OSI Approved :: BSD License",
-          "Operating System :: MacOS",
-          "Operating System :: POSIX",
-          "Operating System :: Unix",
+          "Operating System :: POSIX :: Linux",
           "Programming Language :: Python",
           "Programming Language :: Python :: 2.7",
           "Programming Language :: Python :: 3.5",
@@ -68,4 +101,17 @@ setup(name = "awkward1-cuda-kernels",
 EOF
 
 python build/cuda-setup.py bdist_wheel
-pip install dist/awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-any.whl
+
+cd dist
+rm -f awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl
+
+unzip awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-any.whl
+
+cp awkward1_cuda_kernels-$AWKWARD_VERSION.dist-info/WHEEL tmp_WHEEL
+cat tmp_WHEEL | sed "s/Root-Is-Purelib: true/Root-Is-Purelib: false/" | sed "s/Tag: py3-none-any/Tag: py3-none-"$PLATFORM"/" > awkward1_cuda_kernels-$AWKWARD_VERSION.dist-info/WHEEL
+
+zip awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl -r awkward1_cuda_kernels awkward1_cuda_kernels-$AWKWARD_VERSION.dist-info
+
+cd ..
+
+pip install dist/awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl
