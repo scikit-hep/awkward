@@ -271,7 +271,7 @@ jobs:
         displayName: "Install Pip"
       - script: |
           python -m pip install twine
-        displayName: "Install Twine
+        displayName: "Install Twine"
       - script: |
           python -m pip list
         displayName: "Print versions"
