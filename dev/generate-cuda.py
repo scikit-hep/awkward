@@ -13,6 +13,7 @@ KERNEL_WHITELIST = [
     "awkward_RegularArray_num",
     "awkward_IndexedArray_overlay_mask",
     "awkward_IndexedArray_mask",
+    "awkward_zero_mask",
 ]
 
 
@@ -26,9 +27,7 @@ def traverse(node, args={}):
         code = node.id
     elif node.__class__.__name__ == "BinOp":
         code = "{0} {1} {2}".format(
-            traverse(node.left, args),
-            traverse(node.op, args),
-            traverse(node.right, args),
+            traverse(node.left), traverse(node.op), traverse(node.right),
         )
     elif node.__class__.__name__ == "UnaryOp":
         if node.op.__class__.__name__ == "USub":
