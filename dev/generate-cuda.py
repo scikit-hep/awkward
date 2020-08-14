@@ -16,6 +16,7 @@ KERNEL_WHITELIST = [
     "awkward_ByteMaskedArray_mask",
     "awkward_zero_mask",
     "awkward_RegularArray_compact_offsets",
+    "awkward_NumpyArray_fill_tobool",
 ]
 
 
@@ -53,7 +54,7 @@ def traverse(node, args={}, forflag=False):
         elif node.slice.value.__class__.__name__ == "Name":
             code = node.value.id + "[" + node.slice.value.id + "]"
         elif node.slice.value.__class__.__name__ == "Constant":
-            code = node.value.id + "[" + str(node.slice.value.value) + "]"
+            code = node.value.id + "[" + traverse(node.slice.value, args, forflag) + "]"
         elif node.slice.value.__class__.__name__ == "BinOp":
             code = node.value.id + "[" + traverse(node.slice.value, args, forflag) + "]"
         else:
@@ -62,7 +63,12 @@ def traverse(node, args={}, forflag=False):
         assert len(node.args) == 1
         code = "({0})({1})".format(node.func.id, traverse(node.args[0], args, forflag))
     elif node.__class__.__name__ == "Constant":
-        code = node.value
+        if node.value == True:
+            code = "true"
+        elif node.value == False:
+            code = "false"
+        else:
+            code = node.value
     elif node.__class__.__name__ == "Compare":
         if len(node.ops) == 1 and node.ops[0].__class__.__name__ == "Lt":
             code = "({0} < {1})".format(
@@ -71,6 +77,11 @@ def traverse(node, args={}, forflag=False):
             )
         elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "NotEq":
             code = "({0} != {1})".format(
+                traverse(node.left, args, forflag),
+                traverse(node.comparators[0], args, forflag),
+            )
+        elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "Gt":
+            code = "({0} > {1})".format(
                 traverse(node.left, args, forflag),
                 traverse(node.comparators[0], args, forflag),
             )
@@ -97,14 +108,14 @@ def traverse(node, args={}, forflag=False):
             if node.value.__class__.__name__ == "IfExp":
                 if flag:
                     code = "if ({0}) {{\n auto {1} = {2};\n }} else {{\n auto {1} = {3};\n }}\n".format(
-                        node.value.test.id,
+                        traverse(node.value.test, args, forflag),
                         traverse(node.targets[0], args, forflag),
                         traverse(node.value.body, args, forflag),
                         traverse(node.value.orelse, args, forflag),
                     )
                 else:
                     code = "if ({0}) {{\n {1} = {2};\n }} else {{\n {1} = {3};\n }}\n".format(
-                        node.value.test.id,
+                        traverse(node.value.test, args, forflag),
                         traverse(node.targets[0], args, forflag),
                         traverse(node.value.body, args, forflag),
                         traverse(node.value.orelse, args, forflag),
@@ -118,6 +129,15 @@ def traverse(node, args={}, forflag=False):
                     and node.value.ops[0].__class__.__name__ == "Lt"
                 ):
                     code += "{0} = {1} < {2};\n".format(
+                        traverse(node.targets[0], args, forflag),
+                        traverse(node.value.left, args, forflag),
+                        traverse(node.value.comparators[0], args, forflag),
+                    )
+                elif (
+                    len(node.value.ops) == 1
+                    and node.value.ops[0].__class__.__name__ == "Gt"
+                ):
+                    code += "{0} = {1} > {2};\n".format(
                         traverse(node.targets[0], args, forflag),
                         traverse(node.value.left, args, forflag),
                         traverse(node.value.comparators[0], args, forflag),
