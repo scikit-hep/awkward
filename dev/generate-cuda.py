@@ -13,6 +13,7 @@ KERNEL_WHITELIST = [
     "awkward_RegularArray_num",
     "awkward_IndexedArray_overlay_mask",
     "awkward_IndexedArray_mask",
+    "awkward_ByteMaskedArray_mask",
     "awkward_zero_mask",
 ]
 
@@ -46,6 +47,17 @@ def traverse(node, args={}):
         code = "({0})({1})".format(node.func.id, traverse(node.args[0]))
     elif node.__class__.__name__ == "Constant":
         code = node.value
+    elif node.__class__.__name__ == "Compare":
+        if len(node.ops) == 1 and node.ops[0].__class__.__name__ == "Lt":
+            code = "({0} < {1})".format(
+                traverse(node.left), traverse(node.comparators[0]),
+            )
+        elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "NotEq":
+            code = "({0} != {1})".format(
+                traverse(node.left), traverse(node.comparators[0]),
+            )
+        else:
+            raise Exception("Unhandled Compare node. Please inform the developers.")
     elif node.__class__.__name__ == "Assign":
         assert len(node.targets) == 1
         left = traverse(node.targets[0], args)
@@ -89,6 +101,19 @@ def traverse(node, args={}):
                         traverse(node.targets[0]),
                         traverse(node.value.left),
                         traverse(node.value.comparators[0]),
+                    )
+                elif (
+                    len(node.value.ops) == 1
+                    and node.value.ops[0].__class__.__name__ == "NotEq"
+                ):
+                    code += "{0} = {1} != {2};\n".format(
+                        traverse(node.targets[0]),
+                        traverse(node.value.left),
+                        traverse(node.value.comparators[0]),
+                    )
+                else:
+                    raise Exception(
+                        "Unhandled Compare node. Please inform the developers."
                     )
             else:
                 code = ""
