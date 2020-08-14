@@ -254,6 +254,12 @@ jobs:
       - checkout: self
         submodules: recursive
 
+      - task: DownloadSecureFile@1
+        name: pypirc
+        inputs:
+          secureFile: pivarski-pypirc
+        displayName: "Credentials"
+
       - task: UsePythonVersion@0
         inputs:
           versionSpec: "3.8"
@@ -264,8 +270,8 @@ jobs:
           python -m pip install --upgrade pip
         displayName: "Install Pip"
       - script: |
-          python -m pip install numpy
-        displayName: "Install NumPy"
+          python -m pip install twine
+        displayName: "Install Twine
       - script: |
           python -m pip list
         displayName: "Print versions"
