@@ -4,29 +4,26 @@
 set -e
 
 PLATFORM="manylinux2014_x86_64"
-
-AWKWARD_VERSION=`cat VERSION_INFO`
-# CUDA_VERSION=`nvcc --version | grep -ho "release [0-9\.]*" | sed 's/release //'`
-# RUNTIME_CUDA_VERSION=`nvidia-smi | grep -ho "CUDA Version: [0-9\.]*" | sed 's/CUDA Version: //'`
-
 CUDA_VERSION=9.0
 
+AWKWARD_VERSION=`cat VERSION_INFO`
+
 if [[ "$CUDA_VERSION" == "11.0" ]]; then
-    export DOCKER_IMAGE_TAG=11.0-devel-ubuntu18.04
+    export DOCKER_IMAGE_TAG="11.0-devel-ubuntu18.04"
 elif [[ "$CUDA_VERSION" == "10.2" ]]; then
-    export DOCKER_IMAGE_TAG=10.2-devel-ubuntu18.04
+    export DOCKER_IMAGE_TAG="10.2-devel-ubuntu18.04"
 elif [[ "$CUDA_VERSION" == "10.1" ]]; then
-    export DOCKER_IMAGE_TAG=10.1-devel-ubuntu18.04
+    export DOCKER_IMAGE_TAG="10.1-devel-ubuntu18.04"
 elif [[ "$CUDA_VERSION" == "10.0" ]]; then
-    export DOCKER_IMAGE_TAG=10.0-devel-ubuntu18.04
+    export DOCKER_IMAGE_TAG="10.0-devel-ubuntu18.04"
 elif [[ "$CUDA_VERSION" == "9.2" ]]; then
-    export DOCKER_IMAGE_TAG=9.2-devel-ubuntu18.04
+    export DOCKER_IMAGE_TAG="9.2-devel-ubuntu18.04"
 elif [[ "$CUDA_VERSION" == "9.1" ]]; then
-    export DOCKER_IMAGE_TAG=9.1-devel-ubuntu16.04
+    export DOCKER_IMAGE_TAG="9.1-devel-ubuntu16.04"
 elif [[ "$CUDA_VERSION" == "9.0" ]]; then
-    export DOCKER_IMAGE_TAG=9.0-devel-ubuntu16.04
+    export DOCKER_IMAGE_TAG="9.0-devel-ubuntu16.04"
 elif [[ "$CUDA_VERSION" == "8.0" ]]; then
-    export DOCKER_IMAGE_TAG=8.0-devel-ubuntu16.04
+    export DOCKER_IMAGE_TAG="8.0-devel-ubuntu16.04"
 else
     echo "Docker image for CUDA version" $CUDA_VERSION "is not known"
     exit 1
