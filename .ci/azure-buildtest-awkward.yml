@@ -245,7 +245,7 @@ jobs:
   #     #   workingDirectory: dependent-project
   #     #   displayName: "Test dependent project"
 
-  - job: "CUDA kernels"
+  - job: "CUDA"
 
     pool:
       vmImage: "ubuntu-16.04"
