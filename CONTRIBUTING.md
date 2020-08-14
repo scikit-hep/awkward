@@ -44,8 +44,8 @@ You need some additional packages installed on your system to build the document
 * [Doxygen](https://www.doxygen.nl/download.html)
 * [pycparser](https://pypi.org/project/pycparser/)
 * [black](https://pypi.org/project/black/)
-* Sphinx and its dependencies ([Jinja2](https://pypi.org/project/Jinja2/), [sphinxcontrib-serializinghtml](https://pypi.org/project/sphinxcontrib-serializinghtml/), [sphinxcontrib-applehelp](https://pypi.org/project/sphinxcontrib-applehelp/), [sphinxcontrib-devhelp](https://pypi.org/project/sphinxcontrib-devhelp/), [sphinxcontrib-jsmath](https://pypi.org/project/sphinxcontrib-jsmath/), [sphinxcontrib-htmlhelp](https://pypi.org/project/sphinxcontrib-htmlhelp/), [sphinxcontrib-qthelp](https://pypi.org/project/sphinxcontrib-qthelp/), [Pygments](https://pypi.org/project/Pygments/), [docutils](https://pypi.org/project/docutils/), [snowballstemmer](https://pypi.org/project/snowballstemmer/), [Babel](https://pypi.org/project/Babel/), [alabaster](https://pypi.org/project/alabaster/), [imagesize](https://pypi.org/project/imagesize/), [requests](https://pypi.org/project/requests/), [setuptools](https://pypi.org/project/setuptools/), [packaging](https://pypi.org/project/packaging/))  
-
+* [sphinx](https://pypi.org/project/sphinx/)
+* [sphinx-rtd-theme](https://pypi.org/project/sphinx-rtd-theme/)
 
 To build documentation locally, execute the following command from the root directory of the project.
 
@@ -77,16 +77,36 @@ Currently, we only run merge builds (the state of your branch if merged with mas
 
 ### Semi-automated testing of CUDA kernels
 
-For development on the cuda-kernels, an AWS VM with a GPU has been set up to run tests in the `tests-cuda` directory. You can email jpivarski at GMail for more information on how to get permissions to launch the AWS instance. Once inside the GPU-enabled VM, cd to `awkward-1.0` and run the following command to test your branch.
+For development on the cuda-kernels, an AWS VM with a GPU has been set up to run tests in the `tests-cuda` directory. You can email jpivarski at GMail for more information on how to get permissions to launch the AWS instance.
+
+To see if the AWS instance is running, use the launcher:
 
 ```bash
-mv .ci/tests/logs/* .ci/tests/logs-OLD/*
-.ci/launch-cuda-docker-ci.sh -l -b <branch-name>
+% ssh -i ~/.ssh/awkward1-cuda-test.pem ubuntu@WW.XX.YY.ZZ ./list-instances.py
+i-0295dd31185ce78f7     WW.XX.YY.ZZ    running ['launcher']
+i-0a1ec83c261607797     AA.BB.CC.DD    running ['awkward1-cuda-test']
+i-0a9dd553fe19610fb          (none)    stopped ['awkward1-cuda-test-2gpus']
 ```
 
-The `-l` flag logs the output to the `.ci/logs` directory. Only the files ending in `awkward1-cuda-tests` contain the output of the CUDA tests, but the others may be useful for debugging. Awkward's CUDA kernels are tested for CUDA 9.0, 10.0, and 10.2. (These are what the `900`, `100`, and `102` prefixes on the log files mean.)
+If it is `stopped`, launch it with:
 
-For debugging, you can enter the Docker container interactively.
+```bash
+ssh -i ~/.ssh/awkward1-cuda-test.pem ubuntu@WW.XX.YY.ZZ aws ec2 start-instances --instance-ids i-0a1ec83c261607797
+```
+
+Once it's `running`, use its IP address (`AA.BB.CC.DD`) to run the tests for your branch (`my-branch-name`):
+
+```bash
+ssh -i ~/.ssh/awkward1-cuda-test.pem ubuntu@AA.BB.CC.DD ./cuda-run-tests.sh my-branch-name
+```
+
+When you are done, be sure to put it back into the `stopped` state:
+
+```bash
+ssh -i ~/.ssh/awkward1-cuda-test.pem ubuntu@WW.XX.YY.ZZ aws ec2 stop-instances --instance-ids i-0a1ec83c261607797
+```
+
+and verify with `list-instances`. While the GPU instance is running, you can ssh into it interactively for debugging.
 
 ### The master branch
 

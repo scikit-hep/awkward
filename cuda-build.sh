@@ -3,11 +3,7 @@
 
 set -e
 
-PLATFORM=`python -c 'import platform; print(platform.system().lower() + "_" + platform.processor())'`
-
-if [[ "$PLATFORM" != "linux_x86_64" ]]; then
-    echo "Only linux_x86_64 is supported, not" $PLATFORM
-fi
+PLATFORM="manylinux2014_x86_64"
 
 AWKWARD_VERSION=`cat VERSION_INFO`
 # CUDA_VERSION=`nvcc --version | grep -ho "release [0-9\.]*" | sed 's/release //'`
