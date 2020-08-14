@@ -15,52 +15,70 @@ KERNEL_WHITELIST = [
     "awkward_IndexedArray_mask",
     "awkward_ByteMaskedArray_mask",
     "awkward_zero_mask",
+    "awkward_RegularArray_compact_offsets",
 ]
 
 
-def traverse(node, args={}):
+def traverse(node, args={}, forflag=False):
     if node.__class__.__name__ == "For":
         code = "if (thread_id < length) {\n"
         for subnode in node.body:
-            code += traverse(subnode, args)
+            code += traverse(subnode, args, True)
         code += "}\n"
     elif node.__class__.__name__ == "Name":
-        code = node.id
+        if forflag and node.id == "i":
+            code = "thread_id"
+        else:
+            code = node.id
     elif node.__class__.__name__ == "BinOp":
-        code = "{0} {1} {2}".format(
-            traverse(node.left), traverse(node.op), traverse(node.right),
-        )
+        left = traverse(node.left, args, forflag)
+        right = traverse(node.right, args, forflag)
+        if left == "i":
+            left = "thread_id"
+        if right == "i":
+            right = "thread_id"
+        code = "({0} {1} {2})".format(left, traverse(node.op, args, forflag), right,)
     elif node.__class__.__name__ == "UnaryOp":
         if node.op.__class__.__name__ == "USub":
             code = "-{0}".format(node.operand.value)
     elif node.__class__.__name__ == "Sub":
         code = "-"
+    elif node.__class__.__name__ == "Add":
+        code = "+"
+    elif node.__class__.__name__ == "Mult":
+        code = "*"
     elif node.__class__.__name__ == "Subscript":
         if node.slice.value.__class__.__name__ == "Name" and node.slice.value.id == "i":
             code = node.value.id + "[thread_id]"
         elif node.slice.value.__class__.__name__ == "Name":
             code = node.value.id + "[" + node.slice.value.id + "]"
+        elif node.slice.value.__class__.__name__ == "Constant":
+            code = node.value.id + "[" + str(node.slice.value.value) + "]"
+        elif node.slice.value.__class__.__name__ == "BinOp":
+            code = node.value.id + "[" + traverse(node.slice.value, args, forflag) + "]"
         else:
-            code = traverse(node.slice.value)
+            code = traverse(node.slice.value, args, forflag)
     elif node.__class__.__name__ == "Call":
         assert len(node.args) == 1
-        code = "({0})({1})".format(node.func.id, traverse(node.args[0]))
+        code = "({0})({1})".format(node.func.id, traverse(node.args[0], args, forflag))
     elif node.__class__.__name__ == "Constant":
         code = node.value
     elif node.__class__.__name__ == "Compare":
         if len(node.ops) == 1 and node.ops[0].__class__.__name__ == "Lt":
             code = "({0} < {1})".format(
-                traverse(node.left), traverse(node.comparators[0]),
+                traverse(node.left, args, forflag),
+                traverse(node.comparators[0], args, forflag),
             )
         elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "NotEq":
             code = "({0} != {1})".format(
-                traverse(node.left), traverse(node.comparators[0]),
+                traverse(node.left, args, forflag),
+                traverse(node.comparators[0], args, forflag),
             )
         else:
             raise Exception("Unhandled Compare node. Please inform the developers.")
     elif node.__class__.__name__ == "Assign":
         assert len(node.targets) == 1
-        left = traverse(node.targets[0], args)
+        left = traverse(node.targets[0], args, forflag)
         if "[" in left:
             left = left[: left.find("[")]
         code = ""
@@ -72,22 +90,24 @@ def traverse(node, args={}):
             code = ""
             if flag:
                 code += "auto "
-            code += "{0} = thread_id;\n".format(traverse(node.targets[0]))
+            code += "{0} = thread_id;\n".format(
+                traverse(node.targets[0], args, forflag)
+            )
         else:
             if node.value.__class__.__name__ == "IfExp":
                 if flag:
                     code = "if ({0}) {{\n auto {1} = {2};\n }} else {{\n auto {1} = {3};\n }}\n".format(
                         node.value.test.id,
-                        traverse(node.targets[0]),
-                        traverse(node.value.body),
-                        traverse(node.value.orelse),
+                        traverse(node.targets[0], args, forflag),
+                        traverse(node.value.body, args, forflag),
+                        traverse(node.value.orelse, args, forflag),
                     )
                 else:
                     code = "if ({0}) {{\n {1} = {2};\n }} else {{\n {1} = {3};\n }}\n".format(
                         node.value.test.id,
-                        traverse(node.targets[0]),
-                        traverse(node.value.body),
-                        traverse(node.value.orelse),
+                        traverse(node.targets[0], args, forflag),
+                        traverse(node.value.body, args, forflag),
+                        traverse(node.value.orelse, args, forflag),
                     )
             elif node.value.__class__.__name__ == "Compare":
                 code = ""
@@ -98,18 +118,18 @@ def traverse(node, args={}):
                     and node.value.ops[0].__class__.__name__ == "Lt"
                 ):
                     code += "{0} = {1} < {2};\n".format(
-                        traverse(node.targets[0]),
-                        traverse(node.value.left),
-                        traverse(node.value.comparators[0]),
+                        traverse(node.targets[0], args, forflag),
+                        traverse(node.value.left, args, forflag),
+                        traverse(node.value.comparators[0], args, forflag),
                     )
                 elif (
                     len(node.value.ops) == 1
                     and node.value.ops[0].__class__.__name__ == "NotEq"
                 ):
                     code += "{0} = {1} != {2};\n".format(
-                        traverse(node.targets[0]),
-                        traverse(node.value.left),
-                        traverse(node.value.comparators[0]),
+                        traverse(node.targets[0], args, forflag),
+                        traverse(node.value.left, args, forflag),
+                        traverse(node.value.comparators[0], args, forflag),
                     )
                 else:
                     raise Exception(
@@ -120,7 +140,8 @@ def traverse(node, args={}):
                 if flag:
                     code += "auto "
                 code += "{0} = {1};\n".format(
-                    traverse(node.targets[0]), traverse(node.value)
+                    traverse(node.targets[0], args, forflag),
+                    traverse(node.value, args, forflag),
                 )
     else:
         raise Exception("Unhandled node {0}".format(node.__class__.__name__))
