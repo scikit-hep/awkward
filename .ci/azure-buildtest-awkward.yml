@@ -27,266 +27,220 @@ pr:
       - "*"
 
 jobs:
-  # - job: Windows
-
-  #   pool:
-  #     vmImage: "vs2017-win2016"
-
-  #   strategy:
-  #     matrix:
-  #       "py27-32bit":
-  #         python.version: "2.7"
-  #         python.architecture: "x86"
-  #         numpy.version: "1.16.5"
-  #       "py27-64bit":
-  #         python.version: "2.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "1.16.5"
-  #       "py35-64bit":
-  #         python.version: "3.5"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py36-64bit":
-  #         python.version: "3.6"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py37-32bit":
-  #         python.version: "3.7"
-  #         python.architecture: "x86"
-  #         numpy.version: "latest"
-  #       "py37-64bit":
-  #         python.version: "3.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py38-32bit":
-  #         python.version: "3.8"
-  #         python.architecture: "x86"
-  #         numpy.version: "latest"
-  #       "py38-64bit":
-  #         python.version: "3.8"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-
-  #   steps:
-  #     - checkout: self
-  #       submodules: recursive
-
-  #     - task: UsePythonVersion@0
-  #       inputs:
-  #         versionSpec: '$(python.version)'
-  #         architecture: '$(python.architecture)'
-  #       displayName: 'Python $(python.version)'
-
-  #     - script: |
-  #         python -m pip install --upgrade pip
-  #       displayName: "Install Pip"
-  #     - script: |
-  #         python -m pip list
-  #       displayName: "Show versions"
-  #     - script: |
-  #         python -m pip install -v .[test,dev]
-  #       displayName: "Build"
-  #     - script: |
-  #         python dev/generate-kernelspec.py
-  #       displayName: "Generate Kernel specification"
-  #     - script: |
-  #         python tests-kernels/generate-tests.py
-  #       displayName: "Generate Kernel tests"
-  #     - script: |
-  #         python -m pytest -vv -rs tests-kernels
-  #       displayName: "Test kernels"
-  #     - script: |
-  #         python -m pytest -vv -rs tests
-  #       displayName: "Test"
-
-  # - job: MacOS
-
-  #   pool:
-  #     vmImage: "macOS-10.14"
-
-  #   strategy:
-  #     matrix:
-  #       "py27":
-  #         python.version: "2.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "1.16.5"
-  #       "py35":
-  #         python.version: "3.5"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py36":
-  #         python.version: "3.6"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py37":
-  #         python.version: "3.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py38":
-  #         python.version: "3.8"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-
-  #   steps:
-  #     - checkout: self
-  #       submodules: recursive
-
-  #     - task: UsePythonVersion@0
-  #       inputs:
-  #         versionSpec: '$(python.version)'
-  #         architecture: '$(python.architecture)'
-  #       displayName: 'Python $(python.version)'
-
-  #     - script: |
-  #         python -m pip install --upgrade pip
-  #       displayName: "Install Pip"
-  #     - script: |
-  #         python -m pip list
-  #       displayName: "Print versions"
-
-  #     - script: |
-  #         python -m pip install -v .[test,dev]
-  #       displayName: "Build"
-  #     - script: |
-  #         python dev/generate-kernelspec.py
-  #       displayName: "Generate Kernel specification"
-  #     - script: |
-  #         python tests-kernels/generate-tests.py
-  #       displayName: "Generate Kernel tests"
-  #     - script: |
-  #         python -m pytest -vv -rs tests-kernels
-  #       displayName: "Test kernels"
-  #     - script: |
-  #         python -m pytest -vv -rs tests
-  #       displayName: "Test"
-
-  #     # - script: |
-  #     #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
-  #     #   workingDirectory: dependent-project
-  #     #   displayName: "Test dependent project"
-
-  # - job: Linux
-
-  #   pool:
-  #     vmImage: "ubuntu-16.04"
-
-  #   strategy:
-  #     matrix:
-  #       "py27-np13":
-  #         python.version: "2.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "1.13.1"
-  #       "py27-np16":
-  #         python.version: "2.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "1.16.5"
-  #       "py35-np13":
-  #         python.version: "3.5"
-  #         python.architecture: "x64"
-  #         numpy.version: "1.13.1"
-  #       "py36-np*":
-  #         python.version: "3.6"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py37-np*":
-  #         python.version: "3.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py38-np*":
-  #         python.version: "3.8"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-
-  #   steps:
-  #     - checkout: self
-  #       submodules: recursive
-
-  #     - task: UsePythonVersion@0
-  #       inputs:
-  #         versionSpec: '$(python.version)'
-  #         architecture: '$(python.architecture)'
-  #       displayName: 'Python $(python.version)'
-
-  #     - script: |
-  #         python -m pip install --upgrade pip
-  #       displayName: "Install Pip"
-  #     - script: |
-  #         if [ $(numpy.version) = "latest" ]; then
-  #           python -m pip install numpy;
-  #         else
-  #           python -m pip install numpy==$(numpy.version);
-  #         fi
-  #       displayName: "Install NumPy"
-  #     - script: |
-  #         python -m pip list
-  #       displayName: "Print versions"
-
-  #     - script: |
-  #         python -m pip install -v .[test,dev]
-  #       displayName: "Build"
-  #     - script: |
-  #         python dev/generate-kernelspec.py
-  #       displayName: "Generate Kernel specification"
-  #     - script: |
-  #         python tests-kernels/generate-tests.py
-  #       displayName: "Generate Kernel tests"
-  #     - script: |
-  #         python -m pytest -vv -rs tests-kernels
-  #       displayName: "Test kernels"
-  #     - script: |
-  #         python -m pytest -vv -rs tests
-  #       displayName: "Test"
-  #     - script: |
-  #         bash cuda-build.sh
-  #       displayName: "Test-build the cuda-kernels"
-
-  #     # - script: |
-  #     #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
-  #     #   workingDirectory: dependent-project
-  #     #   displayName: "Test dependent project"
-
-  - job: "CUDA"
+  - job: Windows
 
     pool:
-      vmImage: "ubuntu-16.04"
+      vmImage: "vs2017-win2016"
+
+    strategy:
+      matrix:
+        "py27-32bit":
+          python.version: "2.7"
+          python.architecture: "x86"
+          numpy.version: "1.16.5"
+        "py27-64bit":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.16.5"
+        "py35-64bit":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36-64bit":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37-32bit":
+          python.version: "3.7"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py37-64bit":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py38-32bit":
+          python.version: "3.8"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py38-64bit":
+          python.version: "3.8"
+          python.architecture: "x64"
+          numpy.version: "latest"
 
     steps:
       - checkout: self
         submodules: recursive
 
-      - task: DownloadSecureFile@1
-        name: pypirc
-        inputs:
-          secureFile: pivarski-pypirc
-        displayName: "Credentials"
-
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: "3.8"
-          architecture: "x64"
-        displayName: "Python 3.8"
+          versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
+        displayName: 'Python $(python.version)'
 
       - script: |
           python -m pip install --upgrade pip
         displayName: "Install Pip"
       - script: |
-          python -m pip install twine wheel
-        displayName: "Install Twine & Wheel"
+          python -m pip list
+        displayName: "Show versions"
+      - script: |
+          python -m pip install -v .[test,dev]
+        displayName: "Build"
+      - script: |
+          python dev/generate-kernelspec.py
+        displayName: "Generate Kernel specification"
+      - script: |
+          python tests-kernels/generate-tests.py
+        displayName: "Generate Kernel tests"
+      - script: |
+          python -m pytest -vv -rs tests-kernels
+        displayName: "Test kernels"
+      - script: |
+          python -m pytest -vv -rs tests
+        displayName: "Test"
+
+  - job: MacOS
+
+    pool:
+      vmImage: "macOS-10.14"
+
+    strategy:
+      matrix:
+        "py27":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.16.5"
+        "py35":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py38":
+          python.version: "3.8"
+          python.architecture: "x64"
+          numpy.version: "latest"
+
+    steps:
+      - checkout: self
+        submodules: recursive
+
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
+        displayName: 'Python $(python.version)'
+
+      - script: |
+          python -m pip install --upgrade pip
+        displayName: "Install Pip"
       - script: |
           python -m pip list
         displayName: "Print versions"
 
       - script: |
-          bash cuda-build.sh
-          ls dist
-          rm -rf dist/awkward1_cuda_kernels-*-py3-none-any.whl dist/awkward1_cuda_kernels dist/awkward1_cuda_kernels-*.dist-info dist/tmp_WHEEL
+          python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
-          ls dist
-          python -m twine upload dist/awkward1_cuda_kernels-*-py3-none-manylinux2014_x86_64.whl --config-file $(pypirc.secureFilePath) --verbose
-        displayName: "Deploy"
+          python dev/generate-kernelspec.py
+        displayName: "Generate Kernel specification"
+      - script: |
+          python tests-kernels/generate-tests.py
+        displayName: "Generate Kernel tests"
+      - script: |
+          python -m pytest -vv -rs tests-kernels
+        displayName: "Test kernels"
+      - script: |
+          python -m pytest -vv -rs tests
+        displayName: "Test"
 
-      - task: PublishPipelineArtifact@0
+      # - script: |
+      #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
+      #   workingDirectory: dependent-project
+      #   displayName: "Test dependent project"
+
+  - job: Linux
+
+    pool:
+      vmImage: "ubuntu-16.04"
+
+    strategy:
+      matrix:
+        "py27-np13":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.13.1"
+        "py27-np16":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.16.5"
+        "py35-np13":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "1.13.1"
+        "py36-np*":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37-np*":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py38-np*":
+          python.version: "3.8"
+          python.architecture: "x64"
+          numpy.version: "latest"
+
+    steps:
+      - checkout: self
+        submodules: recursive
+
+      - task: UsePythonVersion@0
         inputs:
-          artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
-          targetPath: 'dist'
+          versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
+        displayName: 'Python $(python.version)'
+
+      - script: |
+          python -m pip install --upgrade pip
+        displayName: "Install Pip"
+      - script: |
+          if [ $(numpy.version) = "latest" ]; then
+            python -m pip install numpy;
+          else
+            python -m pip install numpy==$(numpy.version);
+          fi
+        displayName: "Install NumPy"
+      - script: |
+          python -m pip list
+        displayName: "Print versions"
+
+      - script: |
+          python -m pip install -v .[test,dev]
+        displayName: "Build"
+      - script: |
+          python dev/generate-kernelspec.py
+        displayName: "Generate Kernel specification"
+      - script: |
+          python tests-kernels/generate-tests.py
+        displayName: "Generate Kernel tests"
+      - script: |
+          python -m pytest -vv -rs tests-kernels
+        displayName: "Test kernels"
+      - script: |
+          python -m pytest -vv -rs tests
+        displayName: "Test"
+      - script: |
+          bash cuda-build.sh
+        displayName: "Test-build the cuda-kernels"
+
+      # - script: |
+      #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
+      #   workingDirectory: dependent-project
+      #   displayName: "Test dependent project"
