@@ -320,7 +320,7 @@ namespace awkward {
       }
     }
     if (cache_.get() != nullptr) {
-      cache_.get()->set(kernel::fully_qualified_cache_key(cache_key(), ptr_lib_),
+      cache_.get()->set(kernel::fully_qualified_cache_key(ptr_lib_, cache_key()),
                         out);
     }
     return out;

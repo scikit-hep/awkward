@@ -136,11 +136,6 @@ namespace awkward {
                     const std::string& pre,
                     const std::string& post) const;
 
-    const std::string
-      kernellib_asstring(const std::string& indent,
-                         const std::string& pre,
-                         const std::string& post) const;
-
     /// @brief Returns the enum describing this Index's integer specialization.
     Form
       form() const;

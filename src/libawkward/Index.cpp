@@ -162,30 +162,14 @@ namespace awkward {
     }
     else {
       out << "\">";
-      out << kernellib_asstring("\n" + indent + std::string("    "), "", "\n");
+      out << kernel::lib_tostring(ptr_lib_,
+                                  ptr_.get(),
+                                  "\n" + indent + std::string("    "),
+                                  "",
+                                  "\n");
       out << indent << "</" << classname() << ">" << post;
     }
     return out.str();
-  }
-
-  template <typename T>
-  const std::string
-  IndexOf<T>::kernellib_asstring(const std::string &indent,
-                                 const std::string &pre,
-                                 const std::string &post) const {
-    if (ptr_lib_ == kernel::lib::cpu) {
-      return "";
-    }
-    else {
-      std::stringstream out;
-      out << indent << pre << "<Lib name=\"";
-      if (ptr_lib_ == kernel::lib::cuda) {
-        out << "cuda\" " << "device_number=\"" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
-        << "\" device_name=\"" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get()) << "\"";
-      }
-      out << "/>" << post;
-      return out.str();
-    }
   }
 
   template <typename T>

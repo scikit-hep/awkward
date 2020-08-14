@@ -10,7 +10,7 @@
 
 #include "awkward/kernel-dispatch.h"
 
-#define FORM_KERNEL(libFnName, ptr_lib)          \
+#define CREATE_KERNEL(libFnName, ptr_lib)          \
   auto handle = acquire_handle(ptr_lib);         \
   typedef decltype(libFnName) functor_type;      \
   auto* libFnName##_fcn =                        \
@@ -35,21 +35,17 @@ namespace awkward {
     }
 
     std::string LibraryCallback::awkward_library_path(kernel::lib ptr_lib) {
-#ifndef _MSC_VER
       for (const auto& i : lib_path_callbacks.at(ptr_lib)) {
         auto handle = dlopen(i->library_path().c_str(), RTLD_LAZY);
-
         if (handle) {
           return i->library_path();
         }
       }
-#endif
       return std::string("");
     }
 
-    void *acquire_handle(kernel::lib ptr_lib) {
+    void* acquire_handle(kernel::lib ptr_lib) {
       void *handle = nullptr;
-#ifndef _MSC_VER
       std::string path = lib_callback->awkward_library_path(ptr_lib);
       if (!path.empty()) {
         handle = dlopen(path.c_str(), RTLD_LAZY);
@@ -62,121 +58,62 @@ namespace awkward {
             "pip install awkward1[cuda] --upgrade");
         }
       }
-#endif
       return handle;
     }
 
-    void *acquire_symbol(void* handle, std::string symbol_name) {
+    void *acquire_symbol(void* handle, const std::string& symbol_name) {
       void *symbol_ptr = nullptr;
-#ifndef _MSC_VER
       symbol_ptr = dlsym(handle, symbol_name.c_str());
-
       if (!symbol_ptr) {
-        std::stringstream out;
-        out << symbol_name;
-        out << " not found in .so";
-        throw std::runtime_error(out.str());
+        throw std::runtime_error(symbol_name +
+                                 std::string(" not found in kernels library"));
       }
-#endif
       return symbol_ptr;
     }
 
-    template<typename T>
-    int get_ptr_device_num(kernel::lib ptr_lib, T *ptr) {
-      if (ptr_lib == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        int device_num = -1;
-
-        typedef Error (func_awkward_cuda_ptr_device_num_t)
-          (int &device_num, void *ptr);
-
-        func_awkward_cuda_ptr_device_num_t
-          *func_awkward_cuda_ptr_device_num =
-          reinterpret_cast<func_awkward_cuda_ptr_device_num_t *>
-          (acquire_symbol(handle, "awkward_cuda_ptr_device_num"));
-
-        Error err = (*func_awkward_cuda_ptr_device_num)(device_num,
-                                                        (void *) ptr);
-        util::handle_error(err);
-        return
-          device_num;
+    const std::string
+    lib_tostring(
+      kernel::lib ptr_lib,
+      void* ptr,
+      const std::string& indent,
+      const std::string& pre,
+      const std::string& post) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return std::string("");
       }
-      return -1;
-    }
 
-    template int get_ptr_device_num(kernel::lib ptr_lib, void *ptr);
+      else if (ptr_lib == kernel::lib::cuda) {
+        int64_t num;
+        {
+          CREATE_KERNEL(awkward_cuda_ptr_device_num, ptr_lib);
+          struct Error err1 = (*awkward_cuda_ptr_device_num_fcn)(&num, ptr);
+          util::handle_error(err1);
+        }
 
-    template int get_ptr_device_num(kernel::lib ptr_lib, bool *ptr);
+        int64_t length;
+        {
+          CREATE_KERNEL(awkward_cuda_ptr_device_name_length, ptr_lib);
+          struct Error err2 = (*awkward_cuda_ptr_device_name_length_fcn)(&length, ptr);
+          util::handle_error(err2);
+        }
 
-    template int get_ptr_device_num(kernel::lib ptr_lib, int8_t *ptr);
+        char* name = new char[length + 1];
+        CREATE_KERNEL(awkward_cuda_ptr_device_name, ptr_lib);
+        struct Error err3 = (*awkward_cuda_ptr_device_name_fcn)(name, ptr);
+        std::string str_name(name);
+        delete [] name;
+        util::handle_error(err3);
 
-    template int get_ptr_device_num(kernel::lib ptr_lib, uint8_t *ptr);
-
-    template int get_ptr_device_num(kernel::lib ptr_lib, int16_t *ptr);
-
-    template int get_ptr_device_num(kernel::lib ptr_lib, uint16_t *ptr);
-
-    template int get_ptr_device_num(kernel::lib ptr_lib, int32_t *ptr);
-
-    template int get_ptr_device_num(kernel::lib ptr_lib, uint32_t *ptr);
-
-    template int get_ptr_device_num(kernel::lib ptr_lib, int64_t *ptr);
-
-    template int get_ptr_device_num(kernel::lib ptr_lib, uint64_t *ptr);
-
-    template int get_ptr_device_num(kernel::lib ptr_lib, float *ptr);
-
-    template int get_ptr_device_num(kernel::lib ptr_lib, double *ptr);
-
-    template<typename T>
-    std::string get_ptr_device_name(kernel::lib ptr_lib, T *ptr) {
-      if (ptr_lib == kernel::lib::cuda) {
-        auto handle = acquire_handle(kernel::lib::cuda);
-
-        std::string device_name = std::string("");
-
-        typedef Error (func_awkward_cuda_ptr_device_name_t)
-          (std::string &device_name, void *ptr);
-        func_awkward_cuda_ptr_device_name_t
-          *func_awkward_cuda_ptr_device_name =
-          reinterpret_cast<func_awkward_cuda_ptr_device_name_t *>
-          (acquire_symbol(handle, "awkward_cuda_ptr_device_name"));
-
-        Error err = (*func_awkward_cuda_ptr_device_name)(device_name,
-                                                         (void *) ptr);
-        util::handle_error(err);
-        return device_name;
+        std::stringstream out;
+        out << indent << pre << "<Lib name=\"cuda\" num=\"" << num
+            << "\" name=\"" << name << "\"/>" << post;
+        return out.str();
       }
-      return std::string("");
+
+      else {
+        throw std::runtime_error("unrecognized ptr_lib in kernel::lib_tostring");
+      }
     }
-
-    template std::string get_ptr_device_name(kernel::lib ptr_lib, void *ptr);
-
-    template std::string get_ptr_device_name(kernel::lib ptr_lib, bool *ptr);
-
-    template std::string get_ptr_device_name(kernel::lib ptr_lib, int8_t *ptr);
-
-    template std::string get_ptr_device_name(kernel::lib ptr_lib, uint8_t *ptr);
-
-    template std::string get_ptr_device_name(kernel::lib ptr_lib, int16_t *ptr);
-
-    template std::string
-    get_ptr_device_name(kernel::lib ptr_lib, uint16_t *ptr);
-
-    template std::string get_ptr_device_name(kernel::lib ptr_lib, int32_t *ptr);
-
-    template std::string
-    get_ptr_device_name(kernel::lib ptr_lib, uint32_t *ptr);
-
-    template std::string get_ptr_device_name(kernel::lib ptr_lib, int64_t *ptr);
-
-    template std::string
-    get_ptr_device_name(kernel::lib ptr_lib, uint64_t *ptr);
-
-    template std::string get_ptr_device_name(kernel::lib ptr_lib, float *ptr);
-
-    template std::string get_ptr_device_name(kernel::lib ptr_lib, double *ptr);
 
     ERROR copy_to(
       kernel::lib to_lib,
@@ -185,11 +122,11 @@ namespace awkward {
       void* from_ptr,
       int64_t bytelength) {
       if (from_lib == lib::cpu  &&  to_lib == lib::cuda) {
-        FORM_KERNEL(awkward_cuda_host_to_device, kernel::lib::cuda);
+        CREATE_KERNEL(awkward_cuda_host_to_device, kernel::lib::cuda);
         return (*awkward_cuda_host_to_device_fcn)(to_ptr, from_ptr, bytelength);
       }
       else if (from_lib == lib::cuda  &&  to_lib == lib::cpu) {
-        FORM_KERNEL(awkward_cuda_device_to_host, kernel::lib::cuda);
+        CREATE_KERNEL(awkward_cuda_device_to_host, kernel::lib::cuda);
         return (*awkward_cuda_device_to_host_fcn)(to_ptr, from_ptr, bytelength);
       }
       else {
@@ -198,7 +135,7 @@ namespace awkward {
     }
 
     const std::string
-    fully_qualified_cache_key(const std::string& cache_key, kernel::lib ptr_lib) {
+    fully_qualified_cache_key(kernel::lib ptr_lib, const std::string& cache_key) {
       switch (ptr_lib) {
         case kernel::lib::cuda:
           return cache_key + std::string(":cuda");
@@ -217,7 +154,7 @@ namespace awkward {
         return awkward_NumpyArraybool_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArraybool_getitem_at0, ptr_lib);
+        CREATE_KERNEL(awkward_NumpyArraybool_getitem_at0, ptr_lib);
         return (*awkward_NumpyArraybool_getitem_at0_fcn)(ptr);
       }
       else {
@@ -233,7 +170,7 @@ namespace awkward {
         return awkward_NumpyArray8_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArray8_getitem_at0, ptr_lib);
+        CREATE_KERNEL(awkward_NumpyArray8_getitem_at0, ptr_lib);
         return (*awkward_NumpyArray8_getitem_at0_fcn)(ptr);
       }
       else {
@@ -249,7 +186,7 @@ namespace awkward {
         return awkward_NumpyArrayU8_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArrayU8_getitem_at0, ptr_lib);
+        CREATE_KERNEL(awkward_NumpyArrayU8_getitem_at0, ptr_lib);
         return (*awkward_NumpyArrayU8_getitem_at0_fcn)(ptr);
       }
       else {
@@ -265,7 +202,7 @@ namespace awkward {
         return awkward_NumpyArray16_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArray16_getitem_at0, ptr_lib);
+        CREATE_KERNEL(awkward_NumpyArray16_getitem_at0, ptr_lib);
         return (*awkward_NumpyArray16_getitem_at0_fcn)(ptr);
       }
       else {
@@ -281,7 +218,7 @@ namespace awkward {
         return awkward_NumpyArrayU16_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArrayU16_getitem_at0, ptr_lib);
+        CREATE_KERNEL(awkward_NumpyArrayU16_getitem_at0, ptr_lib);
         return (*awkward_NumpyArrayU16_getitem_at0_fcn)(ptr);
       }
       else {
@@ -297,7 +234,7 @@ namespace awkward {
         return awkward_NumpyArray32_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArray32_getitem_at0, ptr_lib);
+        CREATE_KERNEL(awkward_NumpyArray32_getitem_at0, ptr_lib);
         return (*awkward_NumpyArray32_getitem_at0_fcn)(ptr);
       }
       else {
@@ -313,7 +250,7 @@ namespace awkward {
         return awkward_NumpyArrayU32_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArrayU32_getitem_at0, ptr_lib);
+        CREATE_KERNEL(awkward_NumpyArrayU32_getitem_at0, ptr_lib);
         return (*awkward_NumpyArrayU32_getitem_at0_fcn)(ptr);
       }
       else {
@@ -329,7 +266,7 @@ namespace awkward {
         return awkward_NumpyArray64_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArray64_getitem_at0, ptr_lib);
+        CREATE_KERNEL(awkward_NumpyArray64_getitem_at0, ptr_lib);
         return (*awkward_NumpyArray64_getitem_at0_fcn)(ptr);
       }
       else {
@@ -345,7 +282,7 @@ namespace awkward {
         return awkward_NumpyArrayU64_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArrayU64_getitem_at0, ptr_lib);
+        CREATE_KERNEL(awkward_NumpyArrayU64_getitem_at0, ptr_lib);
         return (*awkward_NumpyArrayU64_getitem_at0_fcn)(ptr);
       }
       else {
@@ -361,7 +298,7 @@ namespace awkward {
         return awkward_NumpyArrayfloat32_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArrayfloat32_getitem_at0, ptr_lib);
+        CREATE_KERNEL(awkward_NumpyArrayfloat32_getitem_at0, ptr_lib);
         return (*awkward_NumpyArrayfloat32_getitem_at0_fcn)(ptr);
       }
       else {
@@ -377,7 +314,7 @@ namespace awkward {
         return awkward_NumpyArrayfloat64_getitem_at0(ptr);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_NumpyArrayfloat64_getitem_at0, ptr_lib);
+        CREATE_KERNEL(awkward_NumpyArrayfloat64_getitem_at0, ptr_lib);
         return (*awkward_NumpyArrayfloat64_getitem_at0_fcn)(ptr);
       }
       else {
@@ -3150,7 +3087,7 @@ namespace awkward {
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_Index8_getitem_at_nowrap, ptr_lib);
+        CREATE_KERNEL(awkward_Index8_getitem_at_nowrap, ptr_lib);
         return (*awkward_Index8_getitem_at_nowrap_fcn)(
           ptr,
           at);
@@ -3170,7 +3107,7 @@ namespace awkward {
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_IndexU8_getitem_at_nowrap, ptr_lib);
+        CREATE_KERNEL(awkward_IndexU8_getitem_at_nowrap, ptr_lib);
         return (*awkward_IndexU8_getitem_at_nowrap_fcn)(
           ptr,
           at);
@@ -3190,7 +3127,7 @@ namespace awkward {
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_Index32_getitem_at_nowrap, ptr_lib);
+        CREATE_KERNEL(awkward_Index32_getitem_at_nowrap, ptr_lib);
         return (*awkward_Index32_getitem_at_nowrap_fcn)(
           ptr,
           at);
@@ -3210,7 +3147,7 @@ namespace awkward {
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_IndexU32_getitem_at_nowrap, ptr_lib);
+        CREATE_KERNEL(awkward_IndexU32_getitem_at_nowrap, ptr_lib);
         return (*awkward_IndexU32_getitem_at_nowrap_fcn)(
           ptr,
           at);
@@ -3230,7 +3167,7 @@ namespace awkward {
           at);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_Index64_getitem_at_nowrap, ptr_lib);
+        CREATE_KERNEL(awkward_Index64_getitem_at_nowrap, ptr_lib);
         return (*awkward_Index64_getitem_at_nowrap_fcn)(
           ptr,
           at);
@@ -3252,7 +3189,7 @@ namespace awkward {
           value);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_Index8_setitem_at_nowrap, ptr_lib);
+        CREATE_KERNEL(awkward_Index8_setitem_at_nowrap, ptr_lib);
         (*awkward_Index8_setitem_at_nowrap_fcn)(
           ptr,
           at,
@@ -3275,7 +3212,7 @@ namespace awkward {
           value);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_IndexU8_setitem_at_nowrap, ptr_lib);
+        CREATE_KERNEL(awkward_IndexU8_setitem_at_nowrap, ptr_lib);
         (*awkward_IndexU8_setitem_at_nowrap_fcn)(
           ptr,
           at,
@@ -3298,7 +3235,7 @@ namespace awkward {
           value);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_Index32_setitem_at_nowrap, ptr_lib);
+        CREATE_KERNEL(awkward_Index32_setitem_at_nowrap, ptr_lib);
         (*awkward_Index32_setitem_at_nowrap_fcn)(
           ptr,
           at,
@@ -3321,7 +3258,7 @@ namespace awkward {
           value);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_IndexU32_setitem_at_nowrap, ptr_lib);
+        CREATE_KERNEL(awkward_IndexU32_setitem_at_nowrap, ptr_lib);
         (*awkward_IndexU32_setitem_at_nowrap_fcn)(
           ptr,
           at,
@@ -3344,7 +3281,7 @@ namespace awkward {
           value);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_Index64_setitem_at_nowrap, ptr_lib);
+        CREATE_KERNEL(awkward_Index64_setitem_at_nowrap, ptr_lib);
         (*awkward_Index64_setitem_at_nowrap_fcn)(
           ptr,
           at,
@@ -4514,7 +4451,7 @@ namespace awkward {
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_ListArray32_num_64, ptr_lib);
+        CREATE_KERNEL(awkward_ListArray32_num_64, ptr_lib);
         return (*awkward_ListArray32_num_64_fcn)(
           tonum,
           fromstarts,
@@ -4541,7 +4478,7 @@ namespace awkward {
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_ListArrayU32_num_64, ptr_lib);
+        CREATE_KERNEL(awkward_ListArrayU32_num_64, ptr_lib);
         return (*awkward_ListArrayU32_num_64_fcn)(
           tonum,
           fromstarts,
@@ -4568,7 +4505,7 @@ namespace awkward {
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_ListArray64_num_64, ptr_lib);
+        CREATE_KERNEL(awkward_ListArray64_num_64, ptr_lib);
         return (*awkward_ListArray64_num_64_fcn)(
           tonum,
           fromstarts,
@@ -4592,7 +4529,7 @@ namespace awkward {
           length);
       }
       else if (ptr_lib == kernel::lib::cuda) {
-        FORM_KERNEL(awkward_RegularArray_num_64, ptr_lib);
+        CREATE_KERNEL(awkward_RegularArray_num_64, ptr_lib);
         return (*awkward_RegularArray_num_64_fcn)(
           tonum,
           size,

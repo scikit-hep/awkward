@@ -758,7 +758,11 @@ namespace awkward {
         << reinterpret_cast<ssize_t>(ptr_.get());
     if (ptr_lib() == kernel::lib::cuda) {
       out << "\">\n";
-      out << kernellib_asstring(indent + std::string("    "), "", "\n");
+      out << kernel::lib_tostring(ptr_lib_,
+                                  ptr_.get(),
+                                  indent + std::string("    "),
+                                  "",
+                                  "\n");
 
       if (identities_.get() != nullptr) {
         out << identities_.get()->tostring_part(
@@ -786,25 +790,6 @@ namespace awkward {
       }
     }
     return out.str();
-  }
-
-  const std::string
-  NumpyArray::kernellib_asstring(const std::string &indent,
-                                 const std::string &pre,
-                                 const std::string &post) const {
-    if (ptr_lib_ == kernel::lib::cpu) {
-      return "";
-    }
-    else {
-      std::stringstream out;
-      out << indent << pre << "<Lib name=\"";
-      if (ptr_lib_ == kernel::lib::cuda) {
-        out << "cuda\" " << "device_number=\"" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
-        << "\" device_name=\"" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get()) << "\"";
-      }
-      out << "/>" << post;
-      return out.str();
-    }
   }
 
   void

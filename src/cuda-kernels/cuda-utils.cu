@@ -2,29 +2,43 @@
 
 #include "awkward/kernels/cuda-utils.h"
 
-ERROR awkward_cuda_ptr_device_num(int& device_num, void* ptr) {
+ERROR awkward_cuda_ptr_device_num(int64_t* num, void* ptr) {
   cudaPointerAttributes att;
   cudaError_t status = cudaPointerGetAttributes(&att, ptr);
   if (status != cudaError::cudaSuccess) {
-    return failure(cudaGetErrorString(status), 0, kSliceNone, true);
+    return failure(cudaGetErrorString(status), kSliceNone, kSliceNone, true);
   }
-  device_num = att.device;
+  *num = att.device;
   return success();
 }
 
-ERROR awkward_cuda_ptr_device_name(std::string& device_name, void* ptr) {
+ERROR awkward_cuda_ptr_device_name_length(int64_t* length, void* ptr) {
   cudaPointerAttributes att;
   cudaError_t status = cudaPointerGetAttributes(&att, ptr);
   if (status != cudaError::cudaSuccess) {
-    return failure(cudaGetErrorString(status), 0, kSliceNone, true);
+    return failure(cudaGetErrorString(status), kSliceNone, kSliceNone, true);
   }
-
   cudaDeviceProp dev_prop;
   status = cudaGetDeviceProperties(&dev_prop, att.device);
   if (status != cudaError::cudaSuccess) {
-    return failure(cudaGetErrorString(status), 0, kSliceNone, true);
+    return failure(cudaGetErrorString(status), kSliceNone, kSliceNone, true);
   }
-  device_name = dev_prop.name;
+  *length = dev_prop.name.length();
+  return success();
+}
+
+ERROR awkward_cuda_ptr_device_name(char* name, void* ptr) {
+  cudaPointerAttributes att;
+  cudaError_t status = cudaPointerGetAttributes(&att, ptr);
+  if (status != cudaError::cudaSuccess) {
+    return failure(cudaGetErrorString(status), kSliceNone, kSliceNone, true);
+  }
+  cudaDeviceProp dev_prop;
+  status = cudaGetDeviceProperties(&dev_prop, att.device);
+  if (status != cudaError::cudaSuccess) {
+    return failure(cudaGetErrorString(status), kSliceNone, kSliceNone, true);
+  }
+  strcpy(name, dev_prop.name.c_str());
   return success();
 }
 

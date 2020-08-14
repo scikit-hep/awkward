@@ -55,7 +55,7 @@ namespace awkward {
     /// @brief Internal utility function to return an opaque ptr if an symbol is
     /// found for the corresponding handle. If not, then it raises an appropriate
     /// exception
-    void* acquire_symbol(void* handle, std::string symbol_name);
+    void* acquire_symbol(void* handle, const std::string& symbol_name);
 
     /// @class array_deleter
     ///
@@ -71,7 +71,7 @@ namespace awkward {
     ///   - pyobject_deleter, which reduces the reference count of a
     ///     Python object when there are no more C++ shared pointers
     ///     referencing it.
-    template<typename T>
+    template <typename T>
     class EXPORT_SYMBOL array_deleter {
     public:
         /// @brief Called by `std::shared_ptr` when its reference count reaches
@@ -95,7 +95,7 @@ namespace awkward {
     ///   - pyobject_deleter, which reduces the reference count of a
     ///     Python object when there are no more C++ shared pointers
     ///     referencing it.
-    template<typename T>
+    template <typename T>
     class EXPORT_SYMBOL cuda_array_deleter {
     public:
         /// @brief Called by `std::shared_ptr` when its reference count reaches
@@ -123,7 +123,7 @@ namespace awkward {
     ///   - pyobject_deleter, which reduces the reference count of a
     ///     Python object when there are no more C++ shared pointers
     ///     referencing it.
-    template<typename T>
+    template <typename T>
     class EXPORT_SYMBOL no_deleter {
     public:
         /// @brief Called by `std::shared_ptr` when its reference count reaches
@@ -131,25 +131,14 @@ namespace awkward {
         void operator()(T const *ptr) { }
     };
 
-    /// @brief A utility function to get the device number on which the
-    /// array is located
-    ///
-    /// Returns the corresponding device number, else -1 if it's on main memory
-    template<typename T>
-    int
-    get_ptr_device_num(kernel::lib ptr_lib, T *ptr);
-
-    /// @brief A utility function to get the device name on which the
-    /// array is located
-    ///
-    /// Returns the corresponding device name, else empty string if it's on main memory
-    template <typename T>
-    std::string
-    get_ptr_device_name(kernel::lib ptr_lib, T* ptr);
-
-    /// @brief FIXME
-    const std::string
-    fully_qualified_cache_key(const std::string& cache_key, kernel::lib ptr_lib);
+    /// @brief Produces a <Lib/> element for 'tostring' to indicate the kernel
+    /// library.
+    const std::string lib_tostring(
+      kernel::lib ptr_lib,
+      void* ptr,
+      const std::string& indent,
+      const std::string& pre,
+      const std::string& post);
 
     /// @brief Internal Function an array buffer from library `FROM` to library
     /// `TO`, usually between main memory and a GPU.
@@ -161,6 +150,12 @@ namespace awkward {
       void* to_ptr,
       void* from_ptr,
       int64_t bytelength);
+
+    /// @brief FIXME
+    const std::string
+      fully_qualified_cache_key(
+        kernel::lib ptr_lib,
+        const std::string& cache_key);
 
     /// @brief Internal Function to allocate an empty array of a given length
     /// with a given type. The `bytelength` parameter is the number of bytes,
