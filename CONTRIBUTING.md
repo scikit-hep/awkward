@@ -36,6 +36,37 @@ Most pull requests are merged with the "squash and merge" feature, so details ab
 
 It is unnecessary to manually edit (rebase) your commit history. If, however, you do want to save a pull request as multiple commits on `master`, ask me and we'll discuss.
 
+### Building and teseting locally
+
+As described in [the README](https://github.com/scikit-hep/awkward-1.0#installation-for-developers), you can build locally using
+
+```bash
+python localbuild.py --pytest tests
+```
+
+The `--pytest tests` runs the integration tests from the `tests` directory (drop it to build only).
+
+For more fine-grained testing, we also have tests of the low-level kernels, which can be invoked with
+
+```bash
+python dev/generate-kernelspec.py
+python tests-kernels/generate-tests.py
+python -m pytest -vv -rs tests-kernels
+```
+
+Furthermore, if you have an Nvidia GPU, you can build and locally install the experimental CUDA plug-in with
+
+```bash
+pip uninstall -y awkward1-cuda-kernels
+./cuda-build.sh --install
+```
+
+The `--install` does a local `pip install` on your system, which is the only way to use it. You can run its tests with
+
+```bash
+python -m pytest tests-cuda
+```
+
 ### Building documentation locally
 
 We use [Sphinx](https://pypi.org/project/Sphinx/) to generate documentation.  

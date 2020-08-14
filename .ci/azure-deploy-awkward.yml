@@ -45,13 +45,10 @@ jobs:
 
       - script: |
           bash cuda-build.sh
-          echo
-          echo "IGNORE failed CuPy installation messages; it's okay"
-          echo
-          ls dist
-          rm -rf dist/awkward1_cuda_kernels-*-py3-none-any.whl dist/awkward1_cuda_kernels dist/awkward1_cuda_kernels-*.dist-info dist/tmp_WHEEL
         displayName: "Build"
       - script: |
+          ls dist
+          rm -rf dist/awkward1_cuda_kernels-*-py3-none-any.whl dist/awkward1_cuda_kernels dist/awkward1_cuda_kernels-*.dist-info dist/tmp_WHEEL
           ls dist
           python -m twine upload dist/awkward1_cuda_kernels-*-py3-none-manylinux2014_x86_64.whl --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"

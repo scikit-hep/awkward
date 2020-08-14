@@ -130,6 +130,29 @@ Or you can build it locally for incremental development. The following reuses a 
 python localbuild.py --pytest tests
 ```
 
+The `--pytest tests` runs the integration tests from the `tests` directory (drop it to build only).
+
+For more fine-grained testing, we also have tests of the low-level kernels, which can be invoked with
+
+```bash
+python dev/generate-kernelspec.py
+python tests-kernels/generate-tests.py
+python -m pytest -vv -rs tests-kernels
+```
+
+Furthermore, if you have an Nvidia GPU, you can build and locally install the experimental CUDA plug-in with
+
+```bash
+pip uninstall -y awkward1-cuda-kernels
+./cuda-build.sh --install
+```
+
+The `--install` does a local `pip install` on your system, which is the only way to use it. You can run its tests with
+
+```bash
+python -m pytest tests-cuda
+```
+
    * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/).
    * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by [ReadTheDocs](https://readthedocs.org).
    * [awkward-array.org](https://awkward-array.org) is hosted by [Netlify](https://www.netlify.com).

@@ -56,8 +56,9 @@ setup(name = "awkward1-cuda-kernels",
       author_email = "pivarski@princeton.edu",
       maintainer = "Jim Pivarski",
       maintainer_email = "pivarski@princeton.edu",
-      description = "CUDA plug-in for Awkward Array, enables GPU-bound arrays and operations",
-      long_description = "",
+      description = "CUDA plug-in for Awkward Array, enables GPU-bound arrays and operations.",
+      long_description = "This plug-in is experimental. Instructions on how to use it will be provided with its first stable release.",
+      long_description_content_type = "text/markdown",
       url = "https://github.com/scikit-hep/awkward-1.0",
       download_url = "https://github.com/scikit-hep/awkward-1.0/releases",
       license = "BSD 3-clause",
@@ -107,4 +108,8 @@ zip awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl -r awkward1_cu
 
 cd ..
 
-pip install dist/awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl
+echo "WHAT" $1 "THE"
+
+if [ "$1" == "--install" ]; then
+    pip install dist/awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl
+fi
