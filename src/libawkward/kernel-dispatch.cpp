@@ -103,19 +103,10 @@ namespace awkward {
           util::handle_error(err1);
         }
 
-        int64_t length;
-        {
-          CREATE_KERNEL(awkward_cuda_ptr_device_name_length, ptr_lib);
-          struct Error err2 = (*awkward_cuda_ptr_device_name_length_fcn)(&length, ptr);
-          util::handle_error(err2);
-        }
-
-        char* name = new char[length + 1];
+        char name[256];
         CREATE_KERNEL(awkward_cuda_ptr_device_name, ptr_lib);
-        struct Error err3 = (*awkward_cuda_ptr_device_name_fcn)(name, ptr);
-        std::string str_name(name);
-        delete [] name;
-        util::handle_error(err3);
+        struct Error err2 = (*awkward_cuda_ptr_device_name_fcn)(name, ptr);
+        util::handle_error(err2);
 
         std::stringstream out;
         out << indent << pre << "<Lib name=\"cuda\" num=\"" << num

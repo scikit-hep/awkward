@@ -10,10 +10,6 @@ extern "C" {
     int64_t* device_num,
     void* ptr);
 
-  EXPORT_SYMBOL ERROR awkward_cuda_ptr_device_name_length(
-    int64_t* length,
-    void* ptr);
-
   EXPORT_SYMBOL ERROR awkward_cuda_ptr_device_name(
     char* name,
     void* ptr);

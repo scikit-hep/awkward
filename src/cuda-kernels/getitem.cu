@@ -101,10 +101,7 @@ void awkward_Index64_setitem_at_nowrap(
 template <typename T>
 T awkward_NumpyArray_getitem_at0(const T* ptr) {
   T item;
-  cudaMemcpy(&item,
-             &ptr[0],
-             sizeof(T),
-             cudaMemcpyDeviceToHost);
+  cudaMemcpy(&item, &ptr[0], sizeof(T), cudaMemcpyDeviceToHost);
   return item;
 }
 bool awkward_NumpyArraybool_getitem_at0(

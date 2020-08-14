@@ -1,13 +1,11 @@
-########################## Dockerfile.build
-
-FROM nvidia/cuda:10.2-devel-ubuntu18.04
+FROM nvidia/cuda:10.1-base-ubuntu18.04
 
 WORKDIR /awkward-1.0
 
 ENV PATH="/root/miniconda3/bin:${PATH}"
 ARG PATH="/root/miniconda3/bin:${PATH}"
 
-RUN apt-get update && apt-get install -y emacs-nox wget
+RUN apt-get update && apt-get install -y wget
 
 RUN wget \
     https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
@@ -19,8 +17,4 @@ RUN conda config --add channels conda-forge
 
 RUN conda update conda -y
 
-RUN conda install pip git gcc_linux-64 gxx_linux-64 cmake numpy cupy pytest -y
-
-RUN git config --global pull.rebase false
-
-COPY . .
+RUN conda install pip numpy cupy pytest -y

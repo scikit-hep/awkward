@@ -164,7 +164,8 @@ def test_tocuda():
     assert awkward1.to_list(copyback_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
 
 
-    bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([True, False, False], dtype=numpy.int8)), indexedarray, True)
+    bytemaskedarray = awkward1.layout.ByteMaskedArray(
+        awkward1.layout.Index8(numpy.array([True, False, False], dtype=numpy.int8)), indexedarray, True)
     cuda_bytemaskedarray = awkward1.copy_to(bytemaskedarray, "cuda")
     copyback_bytemaskedarray = awkward1.copy_to(cuda_bytemaskedarray, "cpu")
     assert awkward1.to_list(cuda_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
@@ -177,9 +178,11 @@ def test_tocuda():
     assert awkward1.to_list(cuda_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
     assert awkward1.to_list(copyback_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
 
-    ioa = awkward1.layout.IndexedOptionArray32(awkward1.layout.Index32([-30, 19, 6, 7, -3, 21, 13, 22, 17, 9, -12, 16]), awkward1.layout.NumpyArray(numpy.array([5.2, 1.7, 6.7, -0.4, 4.0, 7.8, 3.8, 6.8, 4.2, 0.3, 4.6, 6.2,
-                                                                                                                                                                 6.9, -0.7, 3.9, 1.6, 8.7, -0.7, 3.2, 4.3, 4.0, 5.8, 4.2, 7.0,
-                                                                                                                                                                 5.6, 3.8])))
+    ioa = awkward1.layout.IndexedOptionArray32(
+        awkward1.layout.Index32([-30, 19, 6, 7, -3, 21, 13, 22, 17, 9, -12, 16]),
+        awkward1.layout.NumpyArray(numpy.array([5.2, 1.7, 6.7, -0.4, 4.0, 7.8, 3.8, 6.8, 4.2, 0.3, 4.6, 6.2,
+                                                6.9, -0.7, 3.9, 1.6, 8.7, -0.7, 3.2, 4.3, 4.0, 5.8, 4.2, 7.0,
+                                                5.6, 3.8])))
     cuda_ioa = awkward1.copy_to(ioa, "cuda")
     copyback_ioa = awkward1.copy_to(cuda_ioa, "cpu")
     assert awkward1.to_list(cuda_ioa) == awkward1.to_list(ioa)
