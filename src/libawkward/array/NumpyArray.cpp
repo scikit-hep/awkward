@@ -253,6 +253,13 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  NumpyForm::getitem_field(const std::string& key) const {
+    throw std::invalid_argument(
+      std::string("key ") + util::quote(key, true)
+      + std::string(" does not exist (data are not records)"));
+  }
+
   ////////// NumpyArray
 
   NumpyArray::NumpyArray(const IdentitiesPtr& identities,

@@ -185,6 +185,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  ListOffsetForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// ListOffsetArray
 
   template <typename T>

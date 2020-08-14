@@ -248,6 +248,17 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  VirtualForm::getitem_field(const std::string& key) const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+          "Cannot determine field without an expected Form");
+    }
+    else {
+      return form_.get()->getitem_field(key);
+    }
+  }
+
   ////////// VirtualArray
 
   VirtualArray::VirtualArray(const IdentitiesPtr& identities,
@@ -529,12 +540,16 @@ namespace awkward {
     Slice slice;
     slice.append(SliceField(key));
     slice.become_sealed();
-    FormPtr form(nullptr);
+    FormPtr sliceform(nullptr);
+    util::Parameters params;
+    if ( not has_virtual_form() ) {
+      params["__record__"] = form(false).get()->getitem_field(key)->purelist_parameter("__record__");
+    }
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                 form, generator_.get()->length(), shallow_copy(), slice);
+                 sliceform, generator_.get()->length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
-                                          util::Parameters(),
+                                          params,
                                           generator,
                                           cache);
   }
@@ -549,12 +564,14 @@ namespace awkward {
     Slice slice;
     slice.append(SliceFields(keys));
     slice.become_sealed();
+    util::Parameters params;
+    params["__record__"] = purelist_parameter("__record__");
     FormPtr form(nullptr);
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  form, generator_.get()->length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
-                                          util::Parameters(),
+                                          params,
                                           generator,
                                           cache);
   }

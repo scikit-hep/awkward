@@ -193,6 +193,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  ListForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// ListArray
 
   template <typename T>
