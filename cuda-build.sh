@@ -108,8 +108,6 @@ zip awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl -r awkward1_cu
 
 cd ..
 
-echo "WHAT" $1 "THE"
-
 if [ "$1" == "--install" ]; then
     pip install dist/awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl
 fi
