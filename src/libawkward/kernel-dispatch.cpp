@@ -35,16 +35,19 @@ namespace awkward {
     }
 
     std::string LibraryCallback::awkward_library_path(kernel::lib ptr_lib) {
+#ifndef _MSC_VER
       for (const auto& i : lib_path_callbacks.at(ptr_lib)) {
         auto handle = dlopen(i->library_path().c_str(), RTLD_LAZY);
         if (handle) {
           return i->library_path();
         }
       }
+#endif
       return std::string("");
     }
 
     void* acquire_handle(kernel::lib ptr_lib) {
+#ifndef _MSC_VER
       void *handle = nullptr;
       std::string path = lib_callback->awkward_library_path(ptr_lib);
       if (!path.empty()) {
@@ -57,17 +60,27 @@ namespace awkward {
             "installed; install it with:\n\n    "
             "pip install awkward1[cuda] --upgrade");
         }
+        else {
+          throw std::runtime_error("unrecognized ptr_lib in acquire_handle");
+        }
       }
       return handle;
+#else
+      throw std::invalid_argument(
+          "array resides on a GPU, but 'awkward1-cuda-kernels' is not"
+          "supported on Windows");
+#endif
     }
 
     void *acquire_symbol(void* handle, const std::string& symbol_name) {
       void *symbol_ptr = nullptr;
+#ifndef _MSC_VER
       symbol_ptr = dlsym(handle, symbol_name.c_str());
       if (!symbol_ptr) {
         throw std::runtime_error(symbol_name +
                                  std::string(" not found in kernels library"));
       }
+#endif
       return symbol_ptr;
     }
 
