@@ -6,11 +6,11 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/operations.h"
-#include "awkward/cpu-kernels/reducers.h"
-#include "awkward/cpu-kernels/sorting.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/operations.h"
+#include "awkward/kernels/reducers.h"
+#include "awkward/kernels/sorting.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
@@ -758,7 +758,11 @@ namespace awkward {
         << reinterpret_cast<ssize_t>(ptr_.get());
     if (ptr_lib() == kernel::lib::cuda) {
       out << "\">\n";
-      out << kernellib_asstring(indent + std::string("    "), "", "\n");
+      out << kernel::lib_tostring(ptr_lib_,
+                                  ptr_.get(),
+                                  indent + std::string("    "),
+                                  "",
+                                  "\n");
 
       if (identities_.get() != nullptr) {
         out << identities_.get()->tostring_part(
@@ -786,25 +790,6 @@ namespace awkward {
       }
     }
     return out.str();
-  }
-
-  const std::string
-  NumpyArray::kernellib_asstring(const std::string &indent,
-                                 const std::string &pre,
-                                 const std::string &post) const {
-    if (ptr_lib_ == kernel::lib::cpu) {
-      return "";
-    }
-    else {
-      std::stringstream out;
-      out << indent << pre << "<Lib name=\"";
-      if (ptr_lib_ == kernel::lib::cuda) {
-        out << "cuda\" " << "device_number=\"" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
-        << "\" device_name=\"" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get()) << "\"";
-      }
-      out << "/>" << post;
-      return out.str();
-    }
   }
 
   void
@@ -1192,7 +1177,7 @@ namespace awkward {
   const ContentPtr
   NumpyArray::carry(const Index64& carry, bool allow_lazy) const {
     std::shared_ptr<void> ptr(
-      kernel::ptr_alloc<uint8_t>(ptr_lib_, carry.length()*((int64_t)strides_[0])));
+      kernel::malloc<void>(ptr_lib_, carry.length()*((int64_t)strides_[0])));
     struct Error err = kernel::NumpyArray_getitem_next_null_64(
       kernel::lib::cpu,   // DERIVE
       reinterpret_cast<uint8_t*>(ptr.get()),
@@ -1745,9 +1730,8 @@ namespace awkward {
         other_flatlength *= (int64_t)shape_[(size_t)i];
       }
 
-      std::shared_ptr<void> ptr(kernel::ptr_alloc<uint8_t>(
-          ptr_lib_,
-          itemsize*(self_flatlength + other_flatlength)));
+      std::shared_ptr<void> ptr(
+        kernel::malloc<void>(ptr_lib_, itemsize*(self_flatlength + other_flatlength)));
 
       NumpyArray contiguous_other = rawother->contiguous();
 
@@ -2827,7 +2811,7 @@ namespace awkward {
     NumpyArray contiguous_other = other.get()->contiguous();
 
     std::shared_ptr<void> ptr(
-      kernel::ptr_alloc<uint8_t>(ptr_lib_, length() + other.get()->length()));
+      kernel::malloc<void>(ptr_lib_, length() + other.get()->length()));
 
     struct Error err;
 
@@ -3740,7 +3724,7 @@ namespace awkward {
   NumpyArray::contiguous_next(const Index64& bytepos) const {
     if (iscontiguous()) {
       std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>(ptr_lib_, bytepos.length()*strides_[0]));
+        kernel::malloc<void>(ptr_lib_, bytepos.length()*strides_[0]));
 
       struct Error err = kernel::NumpyArray_contiguous_copy_64(
         kernel::lib::cpu,   // DERIVE
@@ -3763,7 +3747,7 @@ namespace awkward {
 
     else if (shape_.size() == 1) {
       std::shared_ptr<void> ptr(
-        kernel::ptr_alloc<uint8_t>(ptr_lib_, bytepos.length()*((int64_t)itemsize_)));
+        kernel::malloc<void>(ptr_lib_, bytepos.length()*((int64_t)itemsize_)));
       struct Error err = kernel::NumpyArray_contiguous_copy_64(
         kernel::lib::cpu,   // DERIVE
         reinterpret_cast<uint8_t*>(ptr.get()),
@@ -4028,8 +4012,7 @@ namespace awkward {
                            int64_t stride,
                            bool first) const {
     if (head.get() == nullptr) {
-      std::shared_ptr<void> ptr(kernel::ptr_alloc<uint8_t>(ptr_lib_,
-                                                carry.length()*stride));
+      std::shared_ptr<void> ptr(kernel::malloc<void>(ptr_lib_, carry.length()*stride));
       struct Error err = kernel::NumpyArray_getitem_next_null_64(
         kernel::lib::cpu,   // DERIVE
         reinterpret_cast<uint8_t*>(ptr.get()),
@@ -4688,154 +4671,33 @@ namespace awkward {
 
   const ContentPtr
   NumpyArray::copy_to(kernel::lib ptr_lib) const {
-    if (ptr_lib_ == ptr_lib) {
-      return std::make_shared<NumpyArray>(identities_,
+    if (ptr_lib == ptr_lib_) {
+      return shallow_copy();
+    }
+    else {
+      int64_t num_bytes = byteoffset_ + bytelength();
+      std::shared_ptr<void> ptr = kernel::malloc<void>(ptr_lib, num_bytes);
+      Error err = kernel::copy_to(ptr_lib,
+                                  ptr_lib_,
+                                  ptr.get(),
+                                  ptr_.get(),
+                                  num_bytes);
+      util::handle_error(err);
+      IdentitiesPtr identities(nullptr);
+      if (identities_.get() != nullptr) {
+        identities = identities_.get()->copy_to(ptr_lib);
+      }
+      return std::make_shared<NumpyArray>(identities,
                                           parameters_,
-                                          ptr_,
+                                          ptr,
                                           shape_,
                                           strides_,
                                           byteoffset_,
                                           itemsize_,
                                           format_,
                                           dtype_,
-                                          ptr_lib_);
+                                          ptr_lib);
     }
-
-    ssize_t length = 1;
-    for (auto i : shape_) {
-      length = length * i;
-    }
-
-    std::shared_ptr<void> ptr;
-    Error err;
-
-    switch (dtype_) {
-    case util::dtype::boolean:
-      ptr = kernel::ptr_alloc<bool>(ptr_lib, (int64_t)length);
-      err = kernel::copy_to<bool>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<bool*>(ptr.get()),
-        reinterpret_cast<bool*>(data()),
-        length);
-      break;
-    case util::dtype::int8:
-      ptr = kernel::ptr_alloc<int8_t>(ptr_lib, (int64_t)length);
-      err = kernel::copy_to<int8_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<int8_t*>(ptr.get()),
-        reinterpret_cast<int8_t*>(data()),
-        length);
-      break;
-    case util::dtype::int16:
-      ptr = kernel::ptr_alloc<int16_t>(ptr_lib, (int64_t)length);
-      err = kernel::copy_to<int16_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<int16_t*>(ptr.get()),
-        reinterpret_cast<int16_t*>(data()),
-        length);
-      break;
-    case util::dtype::int32:
-      ptr = kernel::ptr_alloc<int32_t>(ptr_lib, (int64_t)length);
-      err = kernel::copy_to<int32_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<int32_t*>(ptr.get()),
-        reinterpret_cast<int32_t*>(data()),
-        length);
-      break;
-    case util::dtype::int64:
-      ptr = kernel::ptr_alloc<int64_t>(ptr_lib, (int64_t)length);
-      err = kernel::copy_to<int64_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<int64_t*>(ptr.get()),
-        reinterpret_cast<int64_t*>(data()),
-        length);
-      break;
-    case util::dtype::uint8:
-      ptr = kernel::ptr_alloc<uint8_t>(ptr_lib, (int64_t)length);
-      err = kernel::copy_to<uint8_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<uint8_t*>(ptr.get()),
-        reinterpret_cast<uint8_t*>(data()),
-        length);
-      break;
-    case util::dtype::uint16:
-      ptr = kernel::ptr_alloc<uint16_t>(ptr_lib, (int64_t)length);
-      err = kernel::copy_to<uint16_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<uint16_t*>(ptr.get()),
-        reinterpret_cast<uint16_t*>(data()),
-        length);
-      break;
-    case util::dtype::uint32:
-      ptr = kernel::ptr_alloc<uint32_t>(ptr_lib, (int64_t)length);
-      err = kernel::copy_to<uint32_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<uint32_t*>(ptr.get()),
-        reinterpret_cast<uint32_t*>(data()),
-        length);
-      break;
-    case util::dtype::uint64:
-      ptr = kernel::ptr_alloc<uint64_t>(ptr_lib, (int64_t)length);
-      err = kernel::copy_to<uint64_t>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<uint64_t*>(ptr.get()),
-        reinterpret_cast<uint64_t*>(data()),
-        length);
-      break;
-    case util::dtype::float16:
-      throw std::runtime_error("FIXME: copy_to of float16 not implemented");
-    case util::dtype::float32:
-      ptr = kernel::ptr_alloc<float>(ptr_lib, (int64_t)length);
-      err = kernel::copy_to<float>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<float*>(ptr.get()),
-        reinterpret_cast<float*>(data()),
-        length);
-      break;
-    case util::dtype::float64:
-      ptr = kernel::ptr_alloc<double>(ptr_lib, (int64_t)length);
-      err = kernel::copy_to<double>(
-        ptr_lib,
-        ptr_lib_,
-        reinterpret_cast<double*>(ptr.get()),
-        reinterpret_cast<double*>(data()),
-        length);
-      break;
-    case util::dtype::float128:
-      throw std::runtime_error("FIXME: copy_to of float128 not implemented");
-    case util::dtype::complex64:
-      throw std::runtime_error("FIXME: copy_to of complex64 not implemented");
-    case util::dtype::complex128:
-      throw std::runtime_error("FIXME: copy_to of complex128 not implemented");
-    case util::dtype::complex256:
-      throw std::runtime_error("FIXME: copy_to of complex256 not implemented");
-    default:
-      throw std::invalid_argument(
-        std::string("cannot copy format '") + format_ +
-        std::string(" to a device (e.g. GPU)"));
-    }
-    util::handle_error(err);
-
-    return std::make_shared<NumpyArray>(identities_,
-                                        parameters_,
-                                        ptr,
-                                        shape_,
-                                        strides_,
-                                        byteoffset_,
-                                        itemsize_,
-                                        format_,
-                                        dtype_,
-                                        ptr_lib);
   }
 
   const ContentPtr

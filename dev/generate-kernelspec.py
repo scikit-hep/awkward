@@ -159,7 +159,7 @@ def getheadername(filename):
         hfile = filename[filename.rfind(delimiter) + 1 : -4] + ".h"
     else:
         hfile = filename[:-4] + ".h"
-    hfile = os.path.join(CURRENT_DIR, "..", "include", "awkward", "cpu-kernels", hfile)
+    hfile = os.path.join(CURRENT_DIR, "..", "include", "awkward", "kernels", hfile)
     return hfile
 
 

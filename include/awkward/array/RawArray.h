@@ -15,11 +15,11 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/kernel.h"
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/operations.h"
-#include "awkward/cpu-kernels/sorting.h"
+#include "awkward/kernel-dispatch.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/operations.h"
+#include "awkward/kernels/sorting.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/util.h"
 #include "awkward/Slice.h"
@@ -237,7 +237,7 @@ namespace awkward {
                   const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
-        , ptr_(kernel::ptr_alloc<T>(ptr_lib_, length))
+        , ptr_(kernel::malloc<T>(ptr_lib_, length * sizeof(T)))
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T)) { }
@@ -1191,36 +1191,33 @@ namespace awkward {
     const ContentPtr
       copy_to(kernel::lib ptr_lib) const override {
         if (ptr_lib == ptr_lib_) {
-          return std::make_shared<RawArrayOf<T>>(identities(),
-                                                 parameters(),
-                                                 ptr_,
-                                                 offset(),
-                                                 length(),
-                                                 itemsize(),
-                                                 ptr_lib_);
+          return shallow_copy();
         }
-
-        std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, length_);
-
-        Error err = kernel::copy_to(
-           ptr_lib,
-           ptr_lib_,
-           ptr.get(),
-           ptr_.get(),
-           length_);
-        util::handle_error(err);
-
-        return std::make_shared<RawArrayOf<T>>(identities(),
-                                               parameters(),
-                                               ptr,
-                                               offset(),
-                                               length(),
-                                               itemsize(),
-                                               ptr_lib);
+        else {
+          int64_t num_bytes = byteoffset() + bytelength();
+          std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, num_bytes);
+          Error err = kernel::copy_to(ptr_lib,
+                                      ptr_lib_,
+                                      ptr.get(),
+                                      ptr_.get(),
+                                      num_bytes);
+          util::handle_error(err);
+          IdentitiesPtr identities(nullptr);
+          if (identities_.get() != nullptr) {
+            identities = identities_.get()->copy_to(ptr_lib);
+          }
+          return std::make_shared<RawArrayOf<T>>(identities,
+                                                 parameters_,
+                                                 ptr,
+                                                 offset_,
+                                                 length_,
+                                                 itemsize_,
+                                                 ptr_lib);
+        }
     }
 
-  const ContentPtr
-    numbers_to_type(const std::string& name) const override {
+    const ContentPtr
+      numbers_to_type(const std::string& name) const override {
       throw std::runtime_error(
         "FIXME: unimplemented operation: RawArray::numbers_to_type");
     }

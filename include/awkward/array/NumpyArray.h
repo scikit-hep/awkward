@@ -12,7 +12,7 @@
 #include "awkward/common.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
-#include "awkward/kernel.h"
+#include "awkward/kernel-dispatch.h"
 
 namespace awkward {
   /// @class NumpyForm
@@ -322,11 +322,6 @@ namespace awkward {
       tostring_part(const std::string& indent,
                     const std::string& pre,
                     const std::string& post) const override;
-
-    const std::string
-    kernellib_asstring(const std::string& indent,
-                       const std::string& pre,
-                       const std::string& post) const;
 
     void
       tojson_part(ToJson& builder, bool include_beginendlist) const override;

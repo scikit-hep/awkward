@@ -5,7 +5,7 @@
 #include <numeric>
 #include <vector>
 
-#include "awkward/cpu-kernels/sorting.h"
+#include "awkward/kernels/sorting.h"
 
 ERROR awkward_sorting_ranges(
   int64_t* toindex,

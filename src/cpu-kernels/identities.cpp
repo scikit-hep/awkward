@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/cpu-kernels/identities.h"
+#include "awkward/kernels/identities.h"
 
 template <typename T>
 ERROR awkward_new_Identities(

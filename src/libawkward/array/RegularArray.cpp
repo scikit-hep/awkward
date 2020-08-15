@@ -4,9 +4,9 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/operations.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/operations.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -1330,11 +1330,15 @@ namespace awkward {
 
   const ContentPtr
   RegularArray::copy_to(kernel::lib ptr_lib) const {
-    ContentPtr content = content_->copy_to(ptr_lib);
-    return std::make_shared<RegularArray>(identities(),
-                                          parameters(),
+    ContentPtr content = content_.get()->copy_to(ptr_lib);
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->copy_to(ptr_lib);
+    }
+    return std::make_shared<RegularArray>(identities,
+                                          parameters_,
                                           content,
-                                          size());
+                                          size_);
   }
 
   const ContentPtr

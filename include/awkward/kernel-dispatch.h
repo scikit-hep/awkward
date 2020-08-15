@@ -1,13 +1,13 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARD_KERNEL_H_
-#define AWKWARD_KERNEL_H_
+#ifndef AWKWARD_KERNEL_DISPATCH_H_
+#define AWKWARD_KERNEL_DISPATCH_H_
 
 #include "awkward/common.h"
 #include "awkward/util.h"
-#include "awkward/cpu-kernels/allocators.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/sorting.h"
+#include "awkward/kernels/allocators.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/sorting.h"
 
 #include <sstream>
 
@@ -16,7 +16,6 @@
 #endif
 
 namespace awkward {
-
   namespace kernel {
 
     enum class lib {
@@ -56,7 +55,7 @@ namespace awkward {
     /// @brief Internal utility function to return an opaque ptr if an symbol is
     /// found for the corresponding handle. If not, then it raises an appropriate
     /// exception
-    void* acquire_symbol(void* handle, std::string symbol_name);
+    void* acquire_symbol(void* handle, const std::string& symbol_name);
 
     /// @class array_deleter
     ///
@@ -66,17 +65,20 @@ namespace awkward {
     /// This is necessary for `std::shared_ptr` to contain array buffers.
     ///
     /// See also
+    ///   - cuda_array_deleter, which deletes an array on a GPU.
     ///   - no_deleter, which does not free memory at all (for borrowed
     ///     references).
     ///   - pyobject_deleter, which reduces the reference count of a
     ///     Python object when there are no more C++ shared pointers
     ///     referencing it.
-    template<typename T>
+    template <typename T>
     class EXPORT_SYMBOL array_deleter {
     public:
         /// @brief Called by `std::shared_ptr` when its reference count reaches
         /// zero.
-        void operator()(T const *p);
+        void operator()(T const *ptr) {
+          awkward_free(reinterpret_cast<void const*>(ptr));
+        }
     };
 
     /// @class cuda_array_deleter
@@ -87,38 +89,25 @@ namespace awkward {
     /// This is necessary for `std::shared_ptr` to contain array buffers.
     ///
     /// See also
-    ///   - array_deleter, which deletes array buffers on the main memory
+    ///   - array_deleter, which deletes array buffers in main memory.
     ///   - no_deleter, which does not free memory at all (for borrowed
     ///     references).
     ///   - pyobject_deleter, which reduces the reference count of a
     ///     Python object when there are no more C++ shared pointers
     ///     referencing it.
-    template<typename T>
+    template <typename T>
     class EXPORT_SYMBOL cuda_array_deleter {
     public:
         /// @brief Called by `std::shared_ptr` when its reference count reaches
         /// zero.
-        void operator()(T const *p);
+        void operator()(T const *ptr) {
+          auto handle = acquire_handle(lib::cuda);
+          typedef decltype(awkward_free) functor_type;
+          auto* awkward_free_fcn = reinterpret_cast<functor_type*>(
+                                     acquire_symbol(handle, "awkward_free"));
+          (*awkward_free_fcn)(reinterpret_cast<void const*>(ptr));
+        }
     };
-
-    /// @brief A utility function to get the device number on which the
-    /// array is located
-    ///
-    /// Returns the corresponding device number, else -1 if it's on main memory
-    template<typename T>
-    int
-    get_ptr_device_num(kernel::lib ptr_lib, T *ptr);
-
-    /// @brief A utility function to get the device name on which the
-    /// array is located
-    ///
-    /// Returns the corresponding device name, else empty string if it's on main memory
-    template <typename T>
-    std::string
-    get_ptr_device_name(kernel::lib ptr_lib, T* ptr);
-
-    const std::string
-    fully_qualified_cache_key(const std::string& cache_key, kernel::lib ptr_lib);
 
     /// @class no_deleter
     ///
@@ -130,41 +119,75 @@ namespace awkward {
     ///
     /// See also
     ///   - array_deleter, which frees array buffers, rather than objects.
+    ///   - cuda_array_deleter, which frees array buffers on GPUs.
     ///   - pyobject_deleter, which reduces the reference count of a
     ///     Python object when there are no more C++ shared pointers
     ///     referencing it.
-    template<typename T>
+    template <typename T>
     class EXPORT_SYMBOL no_deleter {
     public:
         /// @brief Called by `std::shared_ptr` when its reference count reaches
         /// zero.
-        void operator()(T const *p) { }
+        void operator()(T const *ptr) { }
     };
 
-    /// @brief Internal Function to transfer an array buffer betweeen
-    /// main memory and the GPU memory
-    ///
-    /// @note This function has not been implemented to handle Multi-GPU setups
-    template<typename T>
-    ERROR copy_to(kernel::lib TO,
-                  kernel::lib FROM,
-                  T *to_ptr,
-                  T *from_ptr,
-                  int64_t length);
+    /// @brief Produces a <Lib/> element for 'tostring' to indicate the kernel
+    /// library.
+    const std::string lib_tostring(
+      kernel::lib ptr_lib,
+      void* ptr,
+      const std::string& indent,
+      const std::string& pre,
+      const std::string& post);
 
-    /// @brief Internal Function to allocate an empty array of a given length on
-    /// the GPU
+    /// @brief Internal Function an array buffer from library `FROM` to library
+    /// `TO`, usually between main memory and a GPU.
     ///
-    /// @note This function has not been implemented to handle Multi-GPU setups
-    template<typename T>
-    std::shared_ptr<T> ptr_alloc(kernel::lib ptr_lib,
-                                 int64_t length);
+    /// @note This function has not been implemented to handle Multi-GPU setups.
+    ERROR copy_to(
+      kernel::lib to_lib,
+      kernel::lib from_lib,
+      void* to_ptr,
+      void* from_ptr,
+      int64_t bytelength);
 
-    /////////////////////////////////// awkward/cpu-kernels/getitem.h
+    /// @brief FIXME
+    const std::string
+      fully_qualified_cache_key(
+        kernel::lib ptr_lib,
+        const std::string& cache_key);
 
-    /// @brief Internal utility kernel to avoid raw pointer access
+    /// @brief Internal Function to allocate an empty array of a given length
+    /// with a given type. The `bytelength` parameter is the number of bytes,
+    /// so be sure to multiply by sizeof(...) when using this function.
     ///
-    /// @note This does not have a corresponding cpu_kernel
+    /// @note This function has not been implemented to handle Multi-GPU setups.
+    template <typename T>
+    std::shared_ptr<T> malloc(
+      kernel::lib ptr_lib,
+      int64_t bytelength) {
+      if (ptr_lib == lib::cpu) {
+        return std::shared_ptr<T>(
+          reinterpret_cast<T*>(awkward_malloc(bytelength)),
+          kernel::array_deleter<T>());
+      }
+      else if (ptr_lib == lib::cuda) {
+        auto handle = acquire_handle(lib::cuda);
+        typedef decltype(awkward_malloc) functor_type;
+        auto* awkward_malloc_fcn = reinterpret_cast<functor_type*>(
+                                     acquire_symbol(handle, "awkward_malloc"));
+        return std::shared_ptr<T>(
+          reinterpret_cast<T*>((*awkward_malloc_fcn)(bytelength)),
+          kernel::cuda_array_deleter<T>());
+      }
+      else {
+        throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<bool>");
+      }
+    }
+
+    /////////////////////////////////// awkward/kernels/getitem.h
+
+    /// @brief Internal utility kernel to avoid raw pointer access.
     template <typename T>
     T NumpyArray_getitem_at0(
       kernel::lib ptr_lib,
@@ -726,7 +749,7 @@ namespace awkward {
       int64_t* stops_out,
       int64_t length);
 
-    /////////////////////////////////// awkward/cpu-kernels/identities.h
+    /////////////////////////////////// awkward/kernels/identities.h
 
     template <typename T>
     ERROR new_Identities(
@@ -808,7 +831,7 @@ namespace awkward {
       int64_t fromlength,
       int64_t tolength);
 
-    /////////////////////////////////// awkward/cpu-kernels/operations.h
+    /////////////////////////////////// awkward/kernels/operations.h
 
     template <typename T>
     ERROR ListArray_num_64(
@@ -1311,7 +1334,7 @@ namespace awkward {
       bool validwhen,
       bool lsb_order);
 
-    /////////////////////////////////// awkward/cpu-kernels/reducers.h
+    /////////////////////////////////// awkward/kernels/reducers.h
 
     ERROR reduce_count_64(
       kernel::lib ptr_lib,
@@ -1506,7 +1529,7 @@ namespace awkward {
       int64_t length,
       bool validwhen);
 
-    /////////////////////////////////// awkward/cpu-kernels/sorting.h
+    /////////////////////////////////// awkward/kernels/sorting.h
 
     ERROR sorting_ranges(
       kernel::lib ptr_lib,
@@ -1568,7 +1591,8 @@ namespace awkward {
       const int64_t* parents,
       int64_t parentslength,
       const int64_t* nextparents);
+
   }
 }
 
-#endif //AWKWARD_KERNEL_H_
+#endif //AWKWARD_KERNEL_DISPATCH_H_

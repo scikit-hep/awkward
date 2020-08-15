@@ -78,7 +78,7 @@ namespace awkward {
 
   template <typename T>
   IndexOf<T>::IndexOf(int64_t length, kernel::lib ptr_lib)
-    : ptr_(kernel::ptr_alloc<T>(ptr_lib, length))
+    : ptr_(kernel::malloc<T>(ptr_lib, length * sizeof(T)))
     , ptr_lib_(ptr_lib)
     , offset_(0)
     , length_(length) { }
@@ -162,30 +162,14 @@ namespace awkward {
     }
     else {
       out << "\">";
-      out << kernellib_asstring("\n" + indent + std::string("    "), "", "\n");
+      out << kernel::lib_tostring(ptr_lib_,
+                                  ptr_.get(),
+                                  "\n" + indent + std::string("    "),
+                                  "",
+                                  "\n");
       out << indent << "</" << classname() << ">" << post;
     }
     return out.str();
-  }
-
-  template <typename T>
-  const std::string
-  IndexOf<T>::kernellib_asstring(const std::string &indent,
-                                 const std::string &pre,
-                                 const std::string &post) const {
-    if (ptr_lib_ == kernel::lib::cpu) {
-      return "";
-    }
-    else {
-      std::stringstream out;
-      out << indent << pre << "<Lib name=\"";
-      if (ptr_lib_ == kernel::lib::cuda) {
-        out << "cuda\" " << "device_number=\"" << kernel::get_ptr_device_num(ptr_lib(), ptr_.get())
-        << "\" device_name=\"" << kernel::get_ptr_device_name(ptr_lib(), ptr_.get()) << "\"";
-      }
-      out << "/>" << post;
-      return out.str();
-    }
   }
 
   template <typename T>
@@ -374,22 +358,19 @@ namespace awkward {
   const IndexOf<T>
   IndexOf<T>::copy_to(kernel::lib ptr_lib) const {
     if (ptr_lib == ptr_lib_) {
-      return *this;
+      return IndexOf<T>(ptr_, offset_, length_);
     }
-
-    std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, length());
-
-    Error err =  kernel::copy_to<T>(ptr_lib,
-                                    ptr_lib_,
-                                    ptr.get(),
-                                    data(),
-                                    length_);
-    util::handle_error(err);
-
-    return IndexOf<T>(ptr,
-                      0,
-                      length(),
-                      ptr_lib);
+    else {
+      int64_t bytelength = (offset_ + length_) * sizeof(T);
+      std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, bytelength);
+      Error err = kernel::copy_to(ptr_lib,
+                                  ptr_lib_,
+                                  ptr.get(),
+                                  ptr_.get(),
+                                  bytelength);
+      util::handle_error(err);
+      return IndexOf<T>(ptr, offset_, length_, ptr_lib);
+    }
   }
 
   template class EXPORT_SYMBOL IndexOf<int8_t>;

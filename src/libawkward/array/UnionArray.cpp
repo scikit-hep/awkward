@@ -3,9 +3,9 @@
 #include <sstream>
 #include <type_traits>
 
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/operations.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/operations.h"
 #include "awkward/type/UnionType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -1915,18 +1915,19 @@ namespace awkward {
   UnionArrayOf<T, I>::copy_to(kernel::lib ptr_lib) const {
     IndexOf<T> tags = tags_.copy_to(ptr_lib);
     IndexOf<I> index = index_.copy_to(ptr_lib);
-
-    ContentPtrVec content_vec;
-    for(auto x : contents_) {
-      ContentPtr ptr = x->copy_to(ptr_lib);
-      content_vec.emplace_back(ptr);
+    ContentPtrVec contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->copy_to(ptr_lib));
     }
-
-    return std::make_shared<UnionArrayOf<T, I>>(identities(),
-                                                parameters(),
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->copy_to(ptr_lib);
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(identities,
+                                                parameters_,
                                                 tags,
                                                 index,
-                                                content_vec);
+                                                contents);
   }
 
   template <typename T, typename I>

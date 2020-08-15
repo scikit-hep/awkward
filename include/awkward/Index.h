@@ -9,7 +9,7 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
-#include "awkward/kernel.h"
+#include "awkward/kernel-dispatch.h"
 
 namespace awkward {
   template <typename T>
@@ -135,11 +135,6 @@ namespace awkward {
       tostring_part(const std::string& indent,
                     const std::string& pre,
                     const std::string& post) const;
-
-    const std::string
-      kernellib_asstring(const std::string& indent,
-                         const std::string& pre,
-                         const std::string& post) const;
 
     /// @brief Returns the enum describing this Index's integer specialization.
     Form

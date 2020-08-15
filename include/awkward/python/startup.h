@@ -3,8 +3,9 @@
 #ifndef AWKWARDPY_STARTUP_H_
 #define AWKWARDPY_STARTUP_H_
 
-#include "awkward/kernel.h"
 #include <pybind11/pybind11.h>
+
+#include "awkward/kernel-dispatch.h"
 
 namespace py = pybind11;
 namespace ak = awkward;

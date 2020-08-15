@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARDCPU_SORTING_H_
-#define AWKWARDCPU_SORTING_H_
+#ifndef AWKWARD_KERNELS_SORTING_H_
+#define AWKWARD_KERNELS_SORTING_H_
 
 #include "awkward/common.h"
 
@@ -463,4 +463,4 @@ extern "C" {
 
 }
 
-#endif // AWKWARDCPU_GETITEM_H_
+#endif // AWKWARD_KERNELS_SORTING_H_

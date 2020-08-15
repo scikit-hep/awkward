@@ -6,8 +6,8 @@
 #include <sstream>
 #include <type_traits>
 
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
 #include "awkward/Slice.h"
 
 #define AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE
@@ -71,7 +71,7 @@ namespace awkward {
                                 int64_t length,
                                 kernel::lib ptr_lib)
       : Identities(ref, fieldloc, 0, width, length)
-      , ptr_(kernel::ptr_alloc<T>(ptr_lib, width*length))
+      , ptr_(kernel::malloc<T>(ptr_lib, width * length * sizeof(T)))
       , ptr_lib_(ptr_lib) { }
 
   template <typename T>
@@ -348,30 +348,25 @@ namespace awkward {
   const IdentitiesPtr
   IdentitiesOf<T>::copy_to(kernel::lib ptr_lib) const {
     if (ptr_lib == ptr_lib_) {
-      return std::make_shared<IdentitiesOf<T>>(ref(),
-                                               fieldloc(),
-                                               offset(),
-                                               width(),
-                                               length(),
-                                               ptr_,
-                                               ptr_lib_);
+      return shallow_copy();
     }
-    std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, width_*length_);
-
-    Error err = kernel::copy_to<T>(ptr_lib,
-                                   ptr_lib_,
-                                   ptr.get(),
-                                   ptr_.get(),
-                                   width_ * length_);
-    util::handle_error(err);
-
-    return std::make_shared<IdentitiesOf<T>>(ref(),
-                                             fieldloc(),
-                                             offset(),
-                                             width(),
-                                             length(),
-                                             ptr,
-                                             ptr_lib);
+    else {
+      int64_t bytelength = (offset_ + (width_ * length_)) * sizeof(T);
+      std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, bytelength);
+      Error err = kernel::copy_to(ptr_lib,
+                                  ptr_lib_,
+                                  ptr.get(),
+                                  ptr_.get(),
+                                  bytelength);
+      util::handle_error(err);
+      return std::make_shared<IdentitiesOf<T>>(ref_,
+                                               fieldloc_,
+                                               offset_,
+                                               width_,
+                                               length_,
+                                               ptr,
+                                               ptr_lib);
+    }
   }
 
   template class EXPORT_SYMBOL IdentitiesOf<int32_t>;

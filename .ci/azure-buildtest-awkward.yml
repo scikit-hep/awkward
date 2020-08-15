@@ -236,6 +236,11 @@ jobs:
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
+      - script: |
+          python -m pip install wheel
+          bash cuda-build.sh
+        displayName: "Test-build the cuda-kernels"
+        condition: "ne(variables['python.version'], '2.7')"
 
       # - script: |
       #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py

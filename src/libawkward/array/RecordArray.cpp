@@ -3,9 +3,9 @@
 #include <sstream>
 #include <algorithm>
 
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/operations.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/operations.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/Record.h"
@@ -1483,18 +1483,19 @@ namespace awkward {
 
   const ContentPtr
   RecordArray::copy_to(kernel::lib ptr_lib) const {
-    ContentPtrVec content_vec;
-    for(auto i : contents_) {
-      ContentPtr ptr = i->copy_to(ptr_lib);
-      content_vec.emplace_back(ptr);
+    ContentPtrVec contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->copy_to(ptr_lib));
     }
-
-    return std::make_shared<RecordArray>(identities(),
-                                         parameters(),
-                                         content_vec,
-                                         recordlookup(),
-                                         length());
-
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->copy_to(ptr_lib);
+    }
+    return std::make_shared<RecordArray>(identities,
+                                         parameters_,
+                                         contents,
+                                         recordlookup_,
+                                         length_);
   }
 
   const ContentPtr
