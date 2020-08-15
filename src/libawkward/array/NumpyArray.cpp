@@ -4803,7 +4803,7 @@ namespace awkward {
                                           shape,
                                           strides,
                                           0,
-                                          util::dtype_to_itemsize(dtype),
+                                          (ssize_t)util::dtype_to_itemsize(dtype),
                                           util::dtype_to_format(dtype),
                                           dtype);
     }
