@@ -17,6 +17,7 @@ KERNEL_WHITELIST = [
     "awkward_zero_mask",
     "awkward_RegularArray_compact_offsets",
     "awkward_NumpyArray_fill_tobool",
+    "awkward_IndexedArray_fill_count",
 ]
 
 
@@ -343,16 +344,10 @@ threads_per_block = dim3({0}, 1, 1);
             )
             templatetypes = gettemplatetypes(childfunc, templateargs)
             paramnames = getparamnames(args)
-            code += (
-                " " * 2
-                + "cuda"
-                + indspec["name"][len("awkward") :]
-                + "<"
-                + templatetypes
-                + "><<<blocks_per_grid, threads_per_block>>>("
-                + paramnames
-                + ");\n"
-            )
+            code += " " * 2 + "cuda" + indspec["name"][len("awkward") :]
+            if templatetypes is not None and len(templatetypes) > 0:
+                code += "<" + templatetypes + ">"
+            code += " <<<blocks_per_grid, threads_per_block>>>(" + paramnames + ");\n"
             code += " " * 2 + "cudaDeviceSynchronize();\n"
             code += " " * 2 + "return success();\n"
             code += "}\n\n"
