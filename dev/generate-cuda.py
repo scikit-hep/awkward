@@ -18,6 +18,7 @@ KERNEL_WHITELIST = [
     "awkward_RegularArray_compact_offsets",
     "awkward_NumpyArray_fill_tobool",
     "awkward_IndexedArray_fill_count",
+    "awkward_UnionArray_fillna",
 ]
 
 
@@ -86,8 +87,17 @@ def traverse(node, args={}, forflag=False):
                 traverse(node.left, args, forflag),
                 traverse(node.comparators[0], args, forflag),
             )
+        elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "GtE":
+            code = "({0} >= {1})".format(
+                traverse(node.left, args, forflag),
+                traverse(node.comparators[0], args, forflag),
+            )
         else:
-            raise Exception("Unhandled Compare node. Please inform the developers.")
+            raise Exception(
+                "Unhandled Compare node {0}. Please inform the developers.".format(
+                    node.ops[0]
+                )
+            )
     elif node.__class__.__name__ == "Assign":
         assert len(node.targets) == 1
         left = traverse(node.targets[0], args, forflag)
@@ -145,6 +155,15 @@ def traverse(node, args={}, forflag=False):
                     )
                 elif (
                     len(node.value.ops) == 1
+                    and node.value.ops[0].__class__.__name__ == "GtE"
+                ):
+                    code += "{0} = {1} >= {2};\n".format(
+                        traverse(node.targets[0], args, forflag),
+                        traverse(node.value.left, args, forflag),
+                        traverse(node.value.comparators[0], args, forflag),
+                    )
+                elif (
+                    len(node.value.ops) == 1
                     and node.value.ops[0].__class__.__name__ == "NotEq"
                 ):
                     code += "{0} = {1} != {2};\n".format(
@@ -154,7 +173,9 @@ def traverse(node, args={}, forflag=False):
                     )
                 else:
                     raise Exception(
-                        "Unhandled Compare node. Please inform the developers."
+                        "Unhandled Compare node {0}. Please inform the developers.".format(
+                            node.value.ops[0]
+                        )
                     )
             else:
                 code = ""
