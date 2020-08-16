@@ -20,13 +20,21 @@ KERNEL_WHITELIST = [
     "awkward_IndexedArray_fill_count",
     "awkward_UnionArray_fillna",
     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
+    "awkward_index_rpad_and_clip_axis0",
     "awkward_index_rpad_and_clip_axis1",
 ]
 
 
 def traverse(node, args={}, forflag=False, declared=[]):
     if node.__class__.__name__ == "For":
-        code = "if (thread_id < length) {\n"
+        if len(node.iter.args) == 1:
+            code = "if (thread_id < {0}) {{\n".format(node.iter.args[0].id)
+        elif len(node.iter.args) == 2:
+            code = "if ((thread_id < {0}) && (thread_id >= {1})) {{\n".format(
+                node.iter.args[1].id, node.iter.args[0].id
+            )
+        else:
+            raise Exception("Unable to handle Python for loops with >2 args")
         for subnode in node.body:
             code += traverse(subnode, args, True, declared)
         code += "}\n"
