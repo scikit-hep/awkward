@@ -2,7 +2,7 @@
 
 #include <limits>
 
-#include "awkward/cpu-kernels/reducers.h"
+#include "awkward/kernels/reducers.h"
 
 #include "awkward/Reducer.h"
 

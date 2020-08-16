@@ -19,6 +19,7 @@ Builtin Python objects like dicts and lists can be converted into Awkward Arrays
 ```{code-cell} ipython3
 import awkward1 as ak
 import numpy as np
+import pandas as pd
 ```
 
 From Python to Awkward
@@ -90,6 +91,67 @@ ak_array[100].tolist()
 
 ```{code-cell} ipython3
 ak_array[100:110].tolist()
+```
+
+Pandas-style constructor
+------------------------
+
+As we have seen, the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) constructor interprets an iterable argument as the data that it is meant to represent, as in:
+
+```{code-cell} ipython3
+py_objects1 = [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+py_objects1
+```
+
+```{code-cell} ipython3
+ak.Array(py_objects1)
+```
+
+But sometimes, you have several iterables that you want to use as columns of a table. The [Pandas DataFrame constructor](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html) interprets a dict of iterables as columns:
+
+```{code-cell} ipython3
+py_objects2 = ["one", "two", "three"]
+py_objects2
+```
+
+```{code-cell} ipython3
+pd.DataFrame({"x": py_objects1, "y": py_objects2})
+```
+
+And so does the [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) constructor:
+
+```{code-cell} ipython3
+ak_array = ak.Array({"x": py_objects1, "y": py_objects2})
+ak_array
+```
+
+```{code-cell} ipython3
+ak.type(ak_array)
+```
+
+```{code-cell} ipython3
+ak.to_list(ak_array)
+```
+
+Note that this is the transpose of the way the data would be interpreted if it were in a list, rather than a dict. The `"x"` and `"y"` values are interpreted as being interleaved in each record. There is no potential for conflict between the [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html)-style and Pandas-style constructors because [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) applied to a dict would always return an [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html), rather than an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html).
+
+```{code-cell} ipython3
+ak_record = ak.from_iter({"x": py_objects1, "y": py_objects2})
+ak_record
+```
+
+```{code-cell} ipython3
+ak.type(ak_record)
+```
+
+```{code-cell} ipython3
+ak.to_list(ak_record)
+```
+
+The [ak.from_iter](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_iter.html) function applied to a dict is also equivalent to the [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html) constructor.
+
+```{code-cell} ipython3
+ak.Record({"x": py_objects1, "y": py_objects2})
 ```
 
 Conversion of numbers and booleans

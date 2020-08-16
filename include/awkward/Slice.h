@@ -7,7 +7,7 @@
 #include <vector>
 #include <memory>
 
-#include "awkward/cpu-kernels/getitem.h"
+#include "awkward/kernels/getitem.h"
 #include "awkward/type/Type.h"
 #include "awkward/Index.h"
 

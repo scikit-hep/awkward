@@ -2604,23 +2604,22 @@ def to_arrayset(
             )
 
         elif isinstance(layout, awkward1.layout.RecordArray):
-            forms = []
-            for x in layout.contents:
-                forms.append(fill(x, part))
             if layout.istuple:
-                return awkward1.forms.RecordForm(
-                    forms,
-                    has_identities,
-                    parameters,
-                    node_format(key_index),
-                )
+                forms = [fill(x, part) for x in layout.contents]
+                keys = None
             else:
-                return awkward1.forms.RecordForm(
-                    dict(zip(layout.keys(), forms)),
-                    has_identities,
-                    parameters,
-                    node_format(key_index),
-                )
+                forms = []
+                keys = []
+                for k in layout.keys():
+                    forms.append(fill(layout[k], part))
+                    keys.append(k)
+            return awkward1.forms.RecordForm(
+                forms,
+                keys,
+                has_identities,
+                parameters,
+                node_format(key_index),
+            )
 
         elif isinstance(layout, awkward1.layout.RegularArray):
             return awkward1.forms.RegularForm(
@@ -2707,6 +2706,9 @@ def _form_to_layout(
     prefix,
     sep,
     partition_first,
+    cache=None,
+    cache_key=None,
+    length=None,
 ):
     global _index_form_to_dtype, _index_form_to_index, _form_to_layout_class
 
@@ -2792,6 +2794,9 @@ def _form_to_layout(
             prefix,
             sep,
             partition_first,
+            cache,
+            cache_key,
+            len(mask),
         )
 
         return awkward1.layout.BitMaskedArray(
@@ -2824,6 +2829,9 @@ def _form_to_layout(
             prefix,
             sep,
             partition_first,
+            cache,
+            cache_key,
+            len(mask),
         )
 
         return awkward1.layout.ByteMaskedArray(
@@ -2853,6 +2861,9 @@ def _form_to_layout(
             prefix,
             sep,
             partition_first,
+            cache,
+            cache_key,
+            numpy.max(index) + 1,
         )
 
         return _form_to_layout_class[type(form), form.index](
@@ -2879,6 +2890,9 @@ def _form_to_layout(
             prefix,
             sep,
             partition_first,
+            cache,
+            cache_key,
+            numpy.max(index) + 1,
         )
 
         return _form_to_layout_class[type(form), form.index](
@@ -2916,6 +2930,9 @@ def _form_to_layout(
             prefix,
             sep,
             partition_first,
+            cache,
+            cache_key,
+            stops[-1],
         )
 
         return _form_to_layout_class[type(form), form.starts](
@@ -2942,6 +2959,9 @@ def _form_to_layout(
             prefix,
             sep,
             partition_first,
+            cache,
+            cache_key,
+            offsets[-1],
         )
 
         return _form_to_layout_class[type(form), form.offsets](
@@ -2971,43 +2991,29 @@ def _form_to_layout(
 
     elif isinstance(form, awkward1.forms.RecordForm):
         contents = []
-        length = None
-        if form.istuple:
-            keys = None
-            for x in form.contents.values():
-                contents.append(_form_to_layout(
-                    x,
-                    container,
-                    partition,
-                    prefix,
-                    sep,
-                    partition_first,
-                ))
-                if length is None:
-                    length = len(contents[-1])
-                else:
-                    length = min(length, len(contents[-1]))
-        else:
-            keys = []
-            for k, x in form.contents.items():
-                keys.append(k)
-                contents.append(_form_to_layout(
-                    x,
-                    container,
-                    partition,
-                    prefix,
-                    sep,
-                    partition_first,
-                ))
-                if length is None:
-                    length = len(contents[-1])
-                else:
-                    length = min(length, len(contents[-1]))
+        minlength = None
+        for content_form in form.contents.values():
+            content = _form_to_layout(
+                content_form,
+                container,
+                partition,
+                prefix,
+                sep,
+                partition_first,
+                cache,
+                cache_key,
+                length,
+            )
+            if minlength is None:
+                minlength = len(content)
+            else:
+                minlength = min(minlength, len(content))
+            contents.append(content)
 
         return awkward1.layout.RecordArray(
             contents,
-            keys,
-            length,
+            None if form.istuple else form.contents.keys(),
+            minlength,
             identities,
             parameters,
         )
@@ -3020,6 +3026,9 @@ def _form_to_layout(
             prefix,
             sep,
             partition_first,
+            cache,
+            cache_key,
+            length,
         )
 
         return awkward1.layout.RegularArray(
@@ -3051,7 +3060,8 @@ def _form_to_layout(
         )
 
         contents = []
-        for x in form.contents:
+        for i, x in enumerate(form.contents):
+            applicable_indices = numpy.array(index)[numpy.equal(tags, i)]
             contents.append(_form_to_layout(
                 x,
                 container,
@@ -3059,6 +3069,9 @@ def _form_to_layout(
                 prefix,
                 sep,
                 partition_first,
+                cache,
+                cache_key,
+                numpy.max(applicable_indices) + 1,
             ))
 
         return _form_to_layout_class[type(form), form.index](
@@ -3073,9 +3086,40 @@ def _form_to_layout(
             prefix,
             sep,
             partition_first,
+            cache,
+            cache_key,
+            length,
         )
 
         return awkward1.layout.UnmaskedArray(content, identities, parameters)
+
+    elif isinstance(form, awkward1.forms.VirtualForm):
+        args = (
+            form.form,
+            container,
+            partition,
+            prefix,
+            sep,
+            partition_first,
+            cache,
+            cache_key,
+            length,
+        )
+        generator = awkward1.layout.ArrayGenerator(
+            _form_to_layout,
+            args,
+            form=form.form,
+            length=length,
+        )
+        node_cache_key = _arrayset_key(
+            form.form.form_key,
+            "virtual",
+            partition,
+            prefix,
+            sep,
+            partition_first,
+        )
+        return awkward1.layout.VirtualArray(generator, cache, cache_key + sep + node_cache_key)
 
     else:
         raise AssertionError("unexpected form node type: " + str(type(form)))
@@ -3091,6 +3135,30 @@ def _from_arrayset_key():
         out = _from_arrayset_key_number
         _from_arrayset_key_number += 1
     return out
+
+
+def _wrap_record_with_virtual(input_form):
+    def modify(form):
+        if form["class"] == "RecordArray":
+            for item in form["contents"].values():
+                modify(item)
+        elif form["class"].startswith("UnionArray"):
+            for item in form["contents"]:
+                modify(item)
+        elif "content" in form:
+            modify(form["content"])
+
+        if form["class"] == "RecordArray":
+            for key in form["contents"].keys():
+                form["contents"][key] = {
+                    "class": "VirtualArray",
+                    "has_length": True,
+                    "form": form["contents"][key],
+                }
+
+    form = json.loads(input_form.tojson())
+    modify(form)
+    return awkward1.forms.Form.fromjson(json.dumps(form))
 
 
 def from_arrayset(
@@ -3137,7 +3205,8 @@ def from_arrayset(
         lazy (bool): If True, read the array or its partitions on demand (as
             #ak.layout.VirtualArray, possibly in #ak.partition.PartitionedArray
             if `num_partitions` is not None); if False, read all requested data
-            immediately.
+            immediately. Any RecordArray child nodes will additionally be
+            read on demand.
         lazy_cache (None, "attach", or MutableMapping): If lazy, pass this
             cache to the VirtualArrays. If "attach", a new dict is created
             and attached to the output array as a "cache" parameter on
@@ -3208,16 +3277,16 @@ def from_arrayset(
         partition_format = lambda x: tmp2.format(x)
 
     if lazy:
+        form = _wrap_record_with_virtual(form)
+
         if lazy_cache == "attach":
             lazy_cache = {}
             toattach = lazy_cache
         else:
             toattach = None
 
-        if lazy_cache is None:
-            cache = None
-        else:
-            cache = awkward1.layout.ArrayCache(lazy_cache)
+        if lazy_cache is not None:
+            lazy_cache = awkward1.layout.ArrayCache(lazy_cache)
 
         if lazy_cache_key is None:
             lazy_cache_key = "ak.from_arrayset:{0}".format(_from_arrayset_key())
@@ -3237,12 +3306,12 @@ def from_arrayset(
 
             generator = awkward1.layout.ArrayGenerator(
                 _form_to_layout,
-                args,
+                args + (lazy_cache, lazy_cache_key, lazy_lengths),
                 form=form,
                 length=lazy_lengths,
             )
 
-            out = awkward1.layout.VirtualArray(generator, cache, lazy_cache_key)
+            out = awkward1.layout.VirtualArray(generator, lazy_cache, lazy_cache_key)
 
         else:
             out = _form_to_layout(*args)
@@ -3272,17 +3341,17 @@ def from_arrayset(
             args = (form, container, p, prefix, sep, partition_first)
 
             if lazy:
+                cache_key = "{0}[{1}]".format(lazy_cache_key, part)
+
                 generator = awkward1.layout.ArrayGenerator(
                     _form_to_layout,
-                    args,
+                    args + (lazy_cache, cache_key, lazy_lengths[part]),
                     form=form,
                     length=lazy_lengths[part],
                 )
 
-                cache_key = "{0}[{1}]".format(lazy_cache_key, part)
-
                 partitions.append(awkward1.layout.VirtualArray(
-                    generator, cache, cache_key
+                    generator, lazy_cache, cache_key
                 ))
                 offsets.append(offsets[-1] + lazy_lengths[part])
 
@@ -3340,7 +3409,7 @@ def to_pandas(
         ...                        [[7.7]],
         ...                        [[8.8]]]))
                                     values
-        entry subentry subsubentry        
+        entry subentry subsubentry
         0     0        0               1.1
                        1               2.2
               2        0               3.3
@@ -3361,7 +3430,7 @@ def to_pandas(
                 a   b   x
                     i   y
                         z
-        entry            
+        entry
         0       0   0   0
         1      10  10  10
         2      20  20  20
@@ -3380,7 +3449,7 @@ def to_pandas(
         ...                        {"x": [1, 2, 3, 4], "y": []}]),
         ...                        how="inner")
                         x    y
-        entry subentry        
+        entry subentry
         1     0         1  3.3
         2     0         1  2.2
               1         2  1.1
@@ -3395,7 +3464,7 @@ def to_pandas(
         ...                        {"x": [1, 2, 3, 4], "y": []}]),
         ...                        how="outer")
                           x    y
-        entry subentry          
+        entry subentry
         0     0         NaN  4.4
               1         NaN  3.3
               2         NaN  2.2
@@ -3425,7 +3494,10 @@ def to_pandas(
         return out
 
     def recurse(layout, row_arrays, col_names):
-        if layout.purelist_depth > 1:
+        if layout.parameter("__array__") in ("string", "bytestring"):
+            return [(to_numpy(layout), row_arrays, col_names)]
+
+        elif layout.purelist_depth > 1:
             offsets, flattened = layout.offsets_and_flatten(axis=1)
             offsets = numpy.asarray(offsets)
             starts, stops = offsets[:-1], offsets[1:]
@@ -3454,20 +3526,9 @@ def to_pandas(
             )
 
         else:
-            try:
-                return [
-                    (
-                        awkward1.operations.convert.to_numpy(layout),
-                        row_arrays,
-                        col_names,
-                    )
-                ]
-            except Exception:
-                return [(layout, row_arrays, col_names)]
+            return [(to_numpy(layout), row_arrays, col_names)]
 
-    layout = awkward1.operations.convert.to_layout(
-        array, allow_record=True, allow_other=False
-    )
+    layout = to_layout(array, allow_record=True, allow_other=False)
     if isinstance(layout, awkward1.partition.PartitionedArray):
         layout = layout.toContent()
 

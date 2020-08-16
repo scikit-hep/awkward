@@ -17,13 +17,11 @@
     - file: how-to-convert-uproot
       title: "ROOT via Uproot"
     - file: how-to-convert-arrow
-      title: "Parquet via Arrow"
+      title: "Arrow and Parquet"
     - file: how-to-convert-pandas
-      title: "Pandas: Awkward columns"
-    - file: how-to-convert-pandas-multiindex
-      title: "Pandas: as MultiIndex"
-    - file: how-to-convert-zarr
-      title: "Zarr"
+      title: "Pandas"
+    - file: how-to-convert-arrayset
+      title: "Generic array-sets"
 
 - file: how-to-create
   title: "Creating arrays"

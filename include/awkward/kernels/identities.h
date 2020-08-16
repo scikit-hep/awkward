@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#ifndef AWKWARDCPU_IDENTITIES_H_
-#define AWKWARDCPU_IDENTITIES_H_
+#ifndef AWKWARD_KERNELS_IDENTITIES_H_
+#define AWKWARD_KERNELS_IDENTITIES_H_
 
 #include "awkward/common.h"
 
@@ -494,4 +494,4 @@ extern "C" {
 
 }
 
-#endif // AWKWARDCPU_IDENTITIES_H_
+#endif // AWKWARD_KERNELS_IDENTITIES_H_

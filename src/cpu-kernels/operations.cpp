@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/cpu-kernels/operations.h"
+#include "awkward/kernels/operations.h"
 
 template <typename T, typename C>
 ERROR awkward_ListArray_num(

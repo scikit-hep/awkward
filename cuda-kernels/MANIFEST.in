@@ -1,3 +1,0 @@
-include CMakeLists.txt
-graft include/awkward/cuda_kernels
-graft src/cuda-kernels
