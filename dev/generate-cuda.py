@@ -19,6 +19,7 @@ KERNEL_WHITELIST = [
     "awkward_NumpyArray_fill_tobool",
     "awkward_IndexedArray_fill_count",
     "awkward_UnionArray_fillna",
+    "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
 ]
 
 
@@ -27,6 +28,14 @@ def traverse(node, args={}, forflag=False):
         code = "if (thread_id < length) {\n"
         for subnode in node.body:
             code += traverse(subnode, args, True)
+        code += "}\n"
+    elif node.__class__.__name__ == "If":
+        code = "if ({0}) {{\n".format(traverse(node.test, args, forflag))
+        for subnode in node.body:
+            code += " " * 2 + traverse(subnode, args, forflag) + "\n"
+        code += "} else {\n"
+        for subnode in node.orelse:
+            code += " " * 2 + traverse(subnode, args, forflag) + "\n"
         code += "}\n"
     elif node.__class__.__name__ == "Name":
         if forflag and node.id == "i":
