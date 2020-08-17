@@ -248,7 +248,7 @@ namespace awkward {
       bytemask.data(),
       mask_.data(),
       mask_.length(),
-      false,
+      valid_when_,
       lsb_order_);
     util::handle_error(err, classname(), identities_.get());
     return bytemask.getitem_range_nowrap(0, length_);
