@@ -97,7 +97,7 @@ def from_numpy(
     if isinstance(array, numpy.ma.MaskedArray):
         mask = numpy.ma.getmask(array)
         array = numpy.ma.getdata(array)
-        if isinstance(mask, numpy.ndarray) and len(mask.shape) > 1:
+        if isinstance(mask, np.ndarray) and len(mask.shape) > 1:
             regulararray = True
             mask = mask.reshape(-1)
     else:
@@ -151,7 +151,7 @@ def to_numpy(array, allow_missing=True):
     elif awkward1._util.py27 and isinstance(array, awkward1._util.unicode):
         return numpy.array([array])[0]
 
-    elif isinstance(array, numpy.ndarray):
+    elif isinstance(array, np.ndarray):
         return array
 
     elif isinstance(array, awkward1.highlevel.Array):
@@ -218,7 +218,7 @@ def to_numpy(array, allow_missing=True):
             try:
                 out = numpy.concatenate(contents)
             except Exception:
-                raise ValueError("cannot convert {0} into numpy.ndarray".format(array))
+                raise ValueError("cannot convert {0} into np.ndarray".format(array))
 
         tags = numpy.asarray(array.tags)
         for tag, content in enumerate(contents):
@@ -281,7 +281,7 @@ def to_numpy(array, allow_missing=True):
             for i in range(array.numfields)
         ]
         if any(len(x.shape) != 1 for x in contents):
-            raise ValueError("cannot convert {0} into numpy.ndarray".format(array))
+            raise ValueError("cannot convert {0} into np.ndarray".format(array))
         out = numpy.empty(
             len(contents[0]),
             dtype=[(str(n), x.dtype) for n, x in zip(array.keys(), contents)],
@@ -300,7 +300,7 @@ def to_numpy(array, allow_missing=True):
         return numpy.asarray(array)
 
     else:
-        raise ValueError("cannot convert {0} into numpy.ndarray".format(array))
+        raise ValueError("cannot convert {0} into np.ndarray".format(array))
 
 
 def from_iter(
@@ -399,7 +399,7 @@ def to_list(array):
     elif awkward1._util.py27 and isinstance(array, awkward1._util.unicode):
         return array
 
-    elif isinstance(array, numpy.ndarray):
+    elif isinstance(array, np.ndarray):
         return array.tolist()
 
     elif isinstance(array, awkward1.behaviors.string.ByteBehavior):
@@ -531,7 +531,7 @@ def to_json(array, destination=None, pretty=False, maxdecimals=None, buffersize=
     elif awkward1._util.py27 and isinstance(array, awkward1._util.unicode):
         return json.dumps(array)
 
-    elif isinstance(array, numpy.ndarray):
+    elif isinstance(array, np.ndarray):
         out = awkward1.layout.NumpyArray(array)
 
     elif isinstance(array, awkward1.highlevel.Array):
@@ -642,11 +642,11 @@ def from_awkward0(
                         dict,
                         tuple,
                         numpy.ma.MaskedArray,
-                        numpy.ndarray,
+                        np.ndarray,
                         awkward0.array.base.AwkwardArray,
                     ),
                 ):
-                    values.append(recurse(x, level + 1)[numpy.newaxis])
+                    values.append(recurse(x, level + 1)[np.newaxis])
                 else:
                     values.append(awkward1.layout.NumpyArray(numpy.array([x])))
             return awkward1.layout.RecordArray(values, keys)[0]
@@ -660,7 +660,7 @@ def from_awkward0(
                         dict,
                         tuple,
                         numpy.ma.MaskedArray,
-                        numpy.ndarray,
+                        np.ndarray,
                         awkward0.array.base.AwkwardArray,
                     ),
                 ):
@@ -677,7 +677,7 @@ def from_awkward0(
                 highlevel=False
             )
 
-        elif isinstance(array, numpy.ndarray):
+        elif isinstance(array, np.ndarray):
             return from_numpy(
                 array,
                 regulararray=regulararray,
@@ -1206,7 +1206,7 @@ def to_layout(
             out = awkward1.layout.RegularArray(out, size)
         return out
 
-    elif isinstance(array, numpy.ndarray):
+    elif isinstance(array, np.ndarray):
         if not issubclass(array.dtype.type, numpytype):
             raise ValueError("NumPy {0} not allowed".format(repr(array.dtype)))
         out = awkward1.layout.NumpyArray(array.reshape(-1))

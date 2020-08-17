@@ -163,7 +163,7 @@ def type(array):
     elif isinstance(array, awkward1.layout.Record):
         return array.type(awkward1._util.typestrs(None))
 
-    elif isinstance(array, numpy.ndarray):
+    elif isinstance(array, np.ndarray):
         if len(array.shape) == 0:
             return type(array.reshape((1,))[0])
         else:

@@ -201,7 +201,7 @@ class Array(
         elif isinstance(data, Array):
             layout = data.layout
 
-        elif isinstance(data, numpy.ndarray) and data.dtype != np.dtype("O"):
+        elif isinstance(data, np.ndarray) and data.dtype != np.dtype("O"):
             layout = awkward1.operations.convert.from_numpy(data, highlevel=False)
 
         elif type(data).__module__ == "pyarrow" or type(data).__module__.startswith("pyarrow."):
