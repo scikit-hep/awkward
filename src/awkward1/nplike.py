@@ -9,7 +9,7 @@ def of(*arrays):
     return Numpy.instance()
 
 
-class NumpyLike(object):
+class Singleton(object):
     _instance = None
 
     @classmethod
@@ -19,7 +19,7 @@ class NumpyLike(object):
         return cls._instance
 
 
-class NumpyMetadata(NumpyLike):
+class NumpyMetadata(Singleton):
     bool = numpy.bool
     bool_ = numpy.bool_
     int8 = numpy.int8
@@ -50,31 +50,22 @@ class NumpyMetadata(NumpyLike):
     ndarray = numpy.ndarray
 
 if hasattr(numpy, "float16"):
-    NumpyLike.float16 = numpy.float16
+    NumpyMetadata.float16 = numpy.float16
 
 if hasattr(numpy, "float128"):
-    NumpyLike.float128 = numpy.float128
+    NumpyMetadata.float128 = numpy.float128
 
 if hasattr(numpy, "complex256"):
-    NumpyLike.complex256 = numpy.complex256
+    NumpyMetadata.complex256 = numpy.complex256
 
 if hasattr(numpy, "datetime64"):
-    NumpyLike.datetime64 = numpy.datetime64
+    NumpyMetadata.datetime64 = numpy.datetime64
 
 if hasattr(numpy, "timedelta64"):
-    NumpyLike.timedelta64 = numpy.timedelta64
+    NumpyMetadata.timedelta64 = numpy.timedelta64
 
 
-class Numpy(NumpyLike):
-    def __init__(self):
-        self._module = numpy
-
-    ############################ submodules
-
-    @property
-    def ma(self):
-        return self._module.ma
-
+class NumpyLike(Singleton):
     ############################ array creation
 
     def array(self, *args, **kwargs):
@@ -126,7 +117,7 @@ class Numpy(NumpyLike):
         return self._module.size(*args, **kwargs)
 
     def searchsorted(self, *args, **kwargs):
-        # stops, where, side="right"
+        # haystack, needle, side="right"
         return self._module.searchsorted(*args, **kwargs)
 
     ############################ manipulation
@@ -243,3 +234,56 @@ class Numpy(NumpyLike):
     def argmax(self, *args, **kwargs):
         # array[, axis=]
         return self._module.argmax(*args, **kwargs)
+
+
+class Numpy(NumpyLike):
+    def __init__(self):
+        self._module = numpy
+
+    @property
+    def ma(self):
+        return self._module.ma
+
+
+class Cupy(NumpyLike):
+    def __init__(self):
+        try:
+            import cupy
+        except ImportError:
+            raise ImportError(
+            """to use CUDA arrays in Python, install the 'cupy' package with:
+
+    pip install cupy --upgrade
+
+or
+
+    conda install cupy"""
+        )
+        self._module = cupy
+
+    @property
+    def ma(self):
+        raise ValueError(
+            "CUDA arrays cannot have missing values until CuPy implements numpy.ma.MaskedArray"
+        )
+
+    def frombuffer(self, *args, **kwargs):
+        np_array = numpy.frombuffer(*args, **kwargs)
+        return self._module.array(np_array)
+
+    def array_equal(self, array1, array2):
+        if array1.shape != array2.shape:
+            return False
+        else:
+            return self._module.all(array1 - array2 == 0)
+
+    def repeat(self, array, repeats):
+        if isinstance(repeats, self._module.ndarray):
+            all_stops = self._module.cumsum(repeats)
+            parents = self._module.zeros(all_stops[-1].item(), dtype=int)
+            stops, stop_counts = self._module.unique(all_stops[:-1], return_counts=True)
+            parents[stops] = stop_counts
+            self._module.cumsum(parents, out=parents)
+            return array[parents]
+        else:
+            return self._module.repeat(array, repeats)
