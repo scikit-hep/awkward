@@ -201,27 +201,41 @@ def test_repeat():
 
 def test_stack():
     # arrays
-    pass
+    assert numpy.stack([numpy.array([[0, 1, 2], [3, 4, 5]]), numpy.array([[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]])]).tolist() == [[[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]], [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]]]
+    assert cupy.stack([cupy.array([[0, 1, 2], [3, 4, 5]]), cupy.array([[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]])]).tolist() == [[[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]], [[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]]]
+
 
 def test_vstack():
     # arrays
-    pass
+    assert numpy.vstack([numpy.array([[0, 1, 2], [3, 4, 5]]), numpy.array([[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]])]).tolist() == [[0.0, 1.0, 2.0], [3.0, 4.0, 5.0], [0.0, 1.1, 2.2], [3.3, 4.4, 5.5]]
+    assert cupy.vstack([cupy.array([[0, 1, 2], [3, 4, 5]]), cupy.array([[0.0, 1.1, 2.2], [3.3, 4.4, 5.5]])]).tolist() == [[0.0, 1.0, 2.0], [3.0, 4.0, 5.0], [0.0, 1.1, 2.2], [3.3, 4.4, 5.5]]
+
 
 def test_packbits():
     # array
-    pass
+    assert numpy.packbits(numpy.array([0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0])).tolist() == [29, 8]
+    assert cupy.packbits(cupy.array([0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0])).tolist() == [29, 8]
+
 
 def test_unpackbits():
     # array
-    pass
+    assert numpy.unpackbits(numpy.array([29, 8], dtype=np.uint8)).tolist() == [0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0]
+    assert cupy.unpackbits(cupy.array([29, 8], dtype=np.uint8)).tolist() == [0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0]
+
 
 def test_atleast_1d():
     # *arrays
-    pass
+    assert numpy.atleast_1d(numpy.array([1.1, 2.2, 3.3])).tolist() == [1.1, 2.2, 3.3]
+    assert cupy.atleast_1d(cupy.array([1.1, 2.2, 3.3])).tolist() == [1.1, 2.2, 3.3]
+
 
 def test_broadcast_to():
     # array, shape
-    pass
+    assert numpy.broadcast_to(numpy.array([[1], [2], [3], [4], [5]]), (5, 2)).tolist() == [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]
+    assert numpy.broadcast_to(numpy.array([1, 2, 3, 4, 5]), (2, 5)).tolist() == [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]]
+    assert cupy.broadcast_to(cupy.array([[1], [2], [3], [4], [5]]), (5, 2)).tolist() == [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]
+    assert cupy.broadcast_to(cupy.array([1, 2, 3, 4, 5]), (2, 5)).tolist() == [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]]
+
 
 ############################ ufuncs
 
