@@ -3,9 +3,9 @@
 #include <sstream>
 #include <type_traits>
 
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/operations.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/operations.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -248,7 +248,7 @@ namespace awkward {
       bytemask.data(),
       mask_.data(),
       mask_.length(),
-      false,
+      valid_when_,
       lsb_order_);
     util::handle_error(err, classname(), identities_.get());
     return bytemask.getitem_range_nowrap(0, length_);
@@ -917,14 +917,18 @@ namespace awkward {
   const ContentPtr
   BitMaskedArray::copy_to(kernel::lib ptr_lib) const {
     IndexU8 mask = mask_.copy_to(ptr_lib);
-    ContentPtr  content = content_->copy_to(ptr_lib);
-    return std::make_shared<BitMaskedArray>(identities(),
-                                            parameters(),
+    ContentPtr content = content_.get()->copy_to(ptr_lib);
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->copy_to(ptr_lib);
+    }
+    return std::make_shared<BitMaskedArray>(identities,
+                                            parameters_,
                                             mask,
                                             content,
-                                            valid_when(),
-                                            length(),
-                                            lsb_order());
+                                            valid_when_,
+                                            length_,
+                                            lsb_order_);
   }
 
   const ContentPtr

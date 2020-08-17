@@ -27,8 +27,6 @@ extras["all"] = sum(extras.values(), [])
 
 tests_require = extras["test"]
 
-AWKWARD_BUILD_CUDA = (os.environ.get("AWKWARD_BUILD_CUDA")
-                      in ("1", "true", "True", "TRUE", "on", "On", "ON", "yes", "Yes", "YES"))
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
@@ -59,9 +57,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
            cmake_args.append("-DCMAKE_CXX_COMPILER={0}".format(compiler_path))
         except AttributeError:
             print("Not able to access compiler path (on Windows), using CMake default")
-
-        if AWKWARD_BUILD_CUDA:
-            cmake_args.append("-DBUILD_CUDA_KERNELS=ON")
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
@@ -138,9 +133,6 @@ else:
                           os.path.join(libdir, "libawkward-cpu-kernels" + shared),
                           os.path.join(libdir, "libawkward-static" + static),
                           os.path.join(libdir, "libawkward" + shared)])]
-    if AWKWARD_BUILD_CUDA:
-        libraries[0][1].append(os.path.join(libdir, "libawkward-cuda-kernels-static" + static))
-        libraries[0][1].append(os.path.join(libdir, "libawkward-cuda-kernels" + shared))
 
     Install = setuptools.command.install.install
 
@@ -152,7 +144,6 @@ setup(name = "awkward1",
       data_files = libraries + [
           ("include/awkward",              glob.glob("include/awkward/*.h")),
           ("include/awkward/cpu-kernels",  glob.glob("include/awkward/cpu-kernels/*.h")),
-          ("include/awkward/cuda-kernels", glob.glob("include/awkward/cuda-kernels/*.h")),
           ("include/awkward/python",       glob.glob("include/awkward/python/*.h")),
           ("include/awkward/array",        glob.glob("include/awkward/array/*.h")),
           ("include/awkward/builder",      glob.glob("include/awkward/builder/*.h")),
@@ -164,7 +155,7 @@ setup(name = "awkward1",
       author_email = "pivarski@princeton.edu",
       maintainer = "Jim Pivarski",
       maintainer_email = "pivarski@princeton.edu",
-      description = "Development of awkward 1.0, to replace scikit-hep/awkward-array in 2020.",
+      description = "Manipulate JSON-like data with NumPy-like idioms.",
       long_description = """<a href="https://github.com/scikit-hep/awkward-1.0#readme"><img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/logo/logo-300px.png"></a>
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
@@ -293,16 +284,17 @@ Most users will get a precompiled binary (wheel) for your operating system and P
 #         "Development Status :: 1 - Planning",
 #         "Development Status :: 2 - Pre-Alpha",
 #         "Development Status :: 3 - Alpha",
-          "Development Status :: 4 - Beta",
-#         "Development Status :: 5 - Production/Stable",
+#         "Development Status :: 4 - Beta",
+          "Development Status :: 5 - Production/Stable",
 #         "Development Status :: 6 - Mature",
 #         "Development Status :: 7 - Inactive",
           "Intended Audience :: Developers",
           "Intended Audience :: Information Technology",
           "Intended Audience :: Science/Research",
           "License :: OSI Approved :: BSD License",
-          "Operating System :: MacOS",
-          "Operating System :: POSIX",
+          "Operating System :: MacOS :: MacOS X",
+          "Operating System :: Microsoft :: Windows",
+          "Operating System :: POSIX :: Linux",
           "Operating System :: Unix",
           "Programming Language :: Python",
           "Programming Language :: Python :: 2.7",

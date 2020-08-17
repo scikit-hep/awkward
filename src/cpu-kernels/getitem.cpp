@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/cpu-kernels/getitem.h"
+#include "awkward/kernels/getitem.h"
 
 void awkward_regularize_rangeslice(
   int64_t* start,

@@ -23,7 +23,7 @@ This reference describes the
 
    * **C++ classes:** in [namespace awkward](namespaceawkward.html) (often abbreviated as "ak"), which are compiled into **libawkward.so** (or dylib or lib). This library is fully usable from C++, without Python (see [dependent-project](https://github.com/scikit-hep/awkward-1.0/tree/master/dependent-project) for an example).
    * **pybind11 interface:** no namespace, but contained entirely within the [python directory](dir_91f33a3f1dd6262845ebd1570075970c.html), which are compiled into **awkward1._ext** for use in Python.
-   * **CPU kernels:** no namespace, but contained entirely within the [cpu-kernels directory](dir_6225843069e7cc68401bbec110a1667f.html), which are compiled into **libawkward-cpu-kernels.so** (or dylib or lib). This library is fully usable from any language that can call functions through [FFI](https://en.wikipedia.org/wiki/Foreign_function_interface).
+   * **CPU kernels:** no namespace, but contained entirely within the [kernels directory](dir_6225843069e7cc68401bbec110a1667f.html), which are compiled into **libawkward-cpu-kernels.so** (or dylib or lib). This library is fully usable from any language that can call functions through [FFI](https://en.wikipedia.org/wiki/Foreign_function_interface).
    * **GPU kernels:** FIXME! (not implemented yet)
 
 ### Array layout nodes
@@ -205,11 +205,10 @@ The kernels library is separated from the C++ codebase by a pure C interface, an
 
 The CPU kernels are implemented in these files:
 
-   * [cpu-kernels/util](cpu-kernels_2util_8h.html): basic definitions used by all (both the C and the C++ codebases).
-   * [cpu-kernels/getitem](getitem_8h.html): kernels to implement [ak::Content::getitem](classawkward_1_1Content.html#afe0d7eaa5d9d72290e3211efa4003678).
-   * [cpu-kernels/identities](cpu-kernels_2identities_8h.html): kernels to implement [ak::IdentitiesOf<T>](classawkward_1_1IdentitiesOf.html).
-   * [cpu-kernels/reducers](reducers_8h.html): kernels to implement [ak::Content::reduce_next](classawkward_1_1Content.html#a4f4a15fd7609dbbc75a44e47291c186d).
-   * [cpu-kernels/operations](operations_8h.html): kernels to implement all other operations.
+   * [kernels/getitem](getitem_8h.html): kernels to implement [ak::Content::getitem](classawkward_1_1Content.html#afe0d7eaa5d9d72290e3211efa4003678).
+   * [kernels/identities](kernels_2identities_8h.html): kernels to implement [ak::IdentitiesOf<T>](classawkward_1_1IdentitiesOf.html).
+   * [kernels/reducers](reducers_8h.html): kernels to implement [ak::Content::reduce_next](classawkward_1_1Content.html#a4f4a15fd7609dbbc75a44e47291c186d).
+   * [kernels/operations](operations_8h.html): kernels to implement all other operations.
 
 The GPU kernels follow exactly the same interface, though a different implementation.
 

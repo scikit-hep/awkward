@@ -7,7 +7,7 @@
 
 #include <pybind11/pybind11.h>
 
-#include "awkward/kernel.h"
+#include "awkward/kernel-dispatch.h"
 
 namespace py = pybind11;
 namespace ak = awkward;

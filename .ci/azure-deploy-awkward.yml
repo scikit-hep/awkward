@@ -12,6 +12,53 @@ pr:
       - "*"
 
 jobs:
+  - job: "CUDA"
+
+    pool:
+      vmImage: "ubuntu-16.04"
+
+    steps:
+      - checkout: self
+        submodules: recursive
+
+      - task: DownloadSecureFile@1
+        name: pypirc
+        inputs:
+          secureFile: pivarski-pypirc
+        displayName: "Credentials"
+
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.8"
+          architecture: "x64"
+        displayName: "Python 3.8"
+
+      - script: |
+          python -m pip install --upgrade pip
+        displayName: "Install Pip"
+      - script: |
+          python -m pip install twine wheel
+        displayName: "Install Twine & Wheel"
+      - script: |
+          python -m pip list
+        displayName: "Print versions"
+
+      - script: |
+          bash cuda-build.sh
+        displayName: "Build"
+      - script: |
+          ls dist
+          rm -rf dist/awkward1_cuda_kernels-*-py3-none-any.whl dist/awkward1_cuda_kernels dist/awkward1_cuda_kernels-*.dist-info dist/tmp_WHEEL
+          ls dist
+          python -m twine upload dist/awkward1_cuda_kernels-*-py3-none-manylinux2014_x86_64.whl --config-file $(pypirc.secureFilePath) --verbose
+        displayName: "Deploy"
+        condition: contains(variables['Build.SourceBranch'], 'tags')
+
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
+          targetPath: 'dist'
+
   - job: Linux
 
     pool:
