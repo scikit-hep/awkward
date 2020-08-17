@@ -287,3 +287,67 @@ or
             return array[parents]
         else:
             return self._module.repeat(array, repeats)
+
+    def all(self, array, axis=None):
+        out = self._module.all(array, axis=axis)
+        if axis is None and isinstance(out, self._module.ndarray):
+            return out.item()
+        else:
+            return out
+
+    def any(self, array, axis=None):
+        out = self._module.any(array, axis=axis)
+        if axis is None and isinstance(out, self._module.ndarray):
+            return out.item()
+        else:
+            return out
+
+    def count_nonzero(self, array, axis=None):
+        out = self._module.count_nonzero(array, axis=axis)
+        if axis is None and isinstance(out, self._module.ndarray):
+            return out.item()
+        else:
+            return out
+
+    def sum(self, array, axis=None):
+        out = self._module.sum(array, axis=axis)
+        if axis is None and isinstance(out, self._module.ndarray):
+            return out.item()
+        else:
+            return out
+
+    def prod(self, array, axis=None):
+        out = self._module.prod(array, axis=axis)
+        if axis is None and isinstance(out, self._module.ndarray):
+            return out.item()
+        else:
+            return out
+
+    def min(self, array, axis=None):
+        out = self._module.min(array, axis=axis)
+        if axis is None and isinstance(out, self._module.ndarray):
+            return out.item()
+        else:
+            return out
+
+    def max(self, array, axis=None):
+        out = self._module.max(array, axis=axis)
+        if axis is None and isinstance(out, self._module.ndarray):
+            return out.item()
+        else:
+            return out
+
+    def argmin(self, array, axis=None):
+        out = self._module.argmin(array, axis=axis)
+        if axis is None and isinstance(out, self._module.ndarray):
+            return out.item()
+        else:
+            return out
+
+    def argmax(self, array, axis=None):
+        out = self._module.argmax(array, axis=axis)
+        if axis is None and isinstance(out, self._module.ndarray):
+            return out.item()
+        else:
+            return out
+

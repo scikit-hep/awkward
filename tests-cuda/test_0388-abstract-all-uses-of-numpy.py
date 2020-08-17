@@ -241,66 +241,105 @@ def test_broadcast_to():
 
 def test_sqrt():
     # array
-    pass
+    assert numpy.sqrt(numpy.array([1, 4, 9, 16, 25])).tolist() == cupy.sqrt(cupy.array([1, 4, 9, 16, 25])).tolist()
+    assert numpy.sqrt(numpy.array([1.1, 4.4, 9.9, 16.16, 25.25])).tolist() == cupy.sqrt(cupy.array([1.1, 4.4, 9.9, 16.16, 25.25])).tolist()
+
 
 def test_exp():
     # array
-    pass
+    assert numpy.exp(numpy.array([1, 2, 3, 4, 5])).tolist() == cupy.exp(cupy.array([1, 2, 3, 4, 5])).tolist()
+    assert numpy.exp(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5])).tolist() == cupy.exp(cupy.array([1.1, 2.2, 3.3, 4.4, 5.5])).tolist()
+
 
 def test_true_divide():
     # array1, array2
-    pass
+    assert numpy.true_divide(numpy.array([1.1, 2.2, 3.3]), numpy.array([1.0, 10.0, 7.0])).tolist() == cupy.true_divide(cupy.array([1.1, 2.2, 3.3]), cupy.array([1.0, 10.0, 7.0])).tolist()
+
 
 def test_bitwise_or():
     # array1, array2[, out=output]
-    pass
+    np_array1 = numpy.array([0, 0, 1, 1, 4, 7, 0, 1], dtype=np.uint8)
+    np_array2 = numpy.array([0, 1, 0, 1, 4, 4, 0, 5], dtype=np.uint8)
+    np_arrayout = numpy.zeros(8, dtype=np.uint8)
+
+    cp_array1 = cupy.array([0, 0, 1, 1, 4, 7, 0, 1], dtype=np.uint8)
+    cp_array2 = cupy.array([0, 1, 0, 1, 4, 4, 0, 5], dtype=np.uint8)
+    cp_arrayout = cupy.ones(8, dtype=np.uint8)
+
+    assert numpy.bitwise_or(np_array1, np_array2).tolist() == cupy.bitwise_or(cp_array1, cp_array2).tolist()
+    numpy.bitwise_or(np_array1, np_array2, np_arrayout)
+    cupy.bitwise_or(cp_array1, cp_array2, cp_arrayout)
+    assert np_arrayout.tolist() == cp_arrayout.tolist()
+
 
 def test_logical_and():
     # array1, array2
-    pass
+    assert numpy.logical_and(numpy.array([False, False, True, True]), numpy.array([False, True, False, True])).tolist() == cupy.logical_and(cupy.array([False, False, True, True]), cupy.array([False, True, False, True])).tolist()
+
 
 def test_equal():
     # array1, array2
-    pass
+    assert numpy.equal(numpy.array([3.3, 2.2, 5.5, 2.2, 1.1]), numpy.array([4.4, 2.2, 5.5, 1.1, 5.5])).tolist() == cupy.equal(cupy.array([3.3, 2.2, 5.5, 2.2, 1.1]), cupy.array([4.4, 2.2, 5.5, 1.1, 5.5])).tolist()
+
 
 def test_ceil():
     # array
-    pass
+    assert numpy.ceil(numpy.array([3.3, 2.0, 1.9, 2.1, 5.5, 1.9, 2.0, 2.1])).tolist() == cupy.ceil(cupy.array([3.3, 2.0, 1.9, 2.1, 5.5, 1.9, 2.0, 2.1])).tolist()
+    assert numpy.ceil(numpy.array([3.3, 2.0, 1.9, 2.1, 5.5, 1.9, 2.0, 2.1])).dtype.kind == "f"
+    assert cupy.ceil(cupy.array([3.3, 2.0, 1.9, 2.1, 5.5, 1.9, 2.0, 2.1])).dtype.kind == "f"
+
 
 ############################ reducers
 
 def test_all():
     # array
-    pass
+    assert numpy.all(numpy.array([])) == cupy.all(cupy.array([]))
+    assert numpy.all(numpy.array([False, False])) == cupy.all(cupy.array([False, False]))
+    assert numpy.all(numpy.array([False, True])) == cupy.all(cupy.array([False, True]))
+    assert numpy.all(numpy.array([True, True])) == cupy.all(cupy.array([True, True]))
+
 
 def test_any():
     # array
-    pass
+    assert numpy.any(numpy.array([])) == cupy.any(cupy.array([]))
+    assert numpy.any(numpy.array([False, False])) == cupy.any(cupy.array([False, False]))
+    assert numpy.any(numpy.array([False, True])) == cupy.any(cupy.array([False, True]))
+    assert numpy.any(numpy.array([True, True])) == cupy.any(cupy.array([True, True]))
+
 
 def test_count_nonzero():
     # array
-    pass
+    assert numpy.count_nonzero(numpy.array([])) == cupy.count_nonzero(cupy.array([]))
+    assert numpy.count_nonzero(numpy.array([2, 0, 0, 1])) == cupy.count_nonzero(cupy.array([2, 0, 0, 1]))
+
 
 def test_sum():
     # array
-    pass
+    assert numpy.sum(numpy.array([2, 5, 0, 4])) == cupy.sum(cupy.array([2, 5, 0, 4]))
+
 
 def test_prod():
     # array
-    pass
+    assert numpy.prod(numpy.array([2, 3, 5, 7])) == cupy.prod(cupy.array([2, 3, 5, 7]))
+
 
 def test_min():
     # array
-    pass
+    assert numpy.min(numpy.array([2, 5, 1, 4])) == cupy.min(cupy.array([2, 5, 1, 4]))
+
 
 def test_max():
     # array
-    pass
+    assert numpy.max(numpy.array([2, 5, 1, 4])) == cupy.max(cupy.array([2, 5, 1, 4]))
+
 
 def test_argmin():
     # array[, axis=]
-    pass
+    assert numpy.argmin(numpy.array([2, 5, 1, 4]), axis=None) == cupy.argmin(cupy.array([2, 5, 1, 4]), axis=None)
+    assert numpy.argmin(numpy.array([[2, 5], [1, 4]]), axis=None) == cupy.argmin(cupy.array([[2, 5], [1, 4]]), axis=None)
+
 
 def test_argmax():
     # array[, axis=]
-    pass
+    assert numpy.argmax(numpy.array([2, 5, 1, 4]), axis=None) == cupy.argmax(cupy.array([2, 5, 1, 4]), axis=None)
+    assert numpy.argmax(numpy.array([[2, 5], [1, 4]]), axis=None) == cupy.argmax(cupy.array([[2, 5], [1, 4]]), axis=None)
