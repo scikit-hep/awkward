@@ -4,7 +4,6 @@ from __future__ import absolute_import
 
 import operator
 
-import numpy
 import numba
 import numba.core.typing
 import numba.core.typing.ctypes_utils
@@ -12,9 +11,13 @@ import numba.core.typing.ctypes_utils
 import awkward1.operations.convert
 import awkward1._util
 import awkward1._connect._numba.layout
+import awkward1.nplike
+
+
+np = awkward1.nplike.NumpyMetadata.instance()
+
 
 ########## Lookup
-
 
 class Lookup(object):
     def __init__(self, layout):
@@ -51,14 +54,22 @@ class Lookup(object):
             else:
                 return x.ptr()
 
-        self.arrayptrs = numpy.array([arrayptr(x) for x in positions], dtype=numpy.intp)
-        self.sharedptrs = numpy.array(
-            [sharedptr(x) for x in sharedptrs], dtype=numpy.intp
+        self.nplike = awkward1.nplike.of(layout)
+
+        self.arrayptrs = self.nplike.array(
+            [arrayptr(x) for x in positions], dtype=np.intp
+        )
+        self.sharedptrs = self.nplike.array(
+            [sharedptr(x) for x in sharedptrs], dtype=np.intp
         )
 
     def _view_as_array(self):
-        return numpy.vstack(
-            [numpy.arange(len(self.arrayptrs)), self.arrayptrs, self.sharedptrs]
+        return self.nplike.vstack(
+            [
+                self.nplike.arange(len(self.arrayptrs)),
+                self.arrayptrs,
+                self.sharedptrs,
+            ]
         ).T
 
 
@@ -304,7 +315,7 @@ class ArrayView(object):
             array,
             allow_record=False,
             allow_other=False,
-            numpytype=(numpy.number, numpy.bool_, numpy.bool),
+            numpytype=(np.number, np.bool_, np.bool),
         )
         layout = awkward1.operations.convert.regularize_numpyarray(
             layout, allow_empty=False, highlevel=False
@@ -324,7 +335,7 @@ class ArrayView(object):
                 numba.typeof(part),
                 behavior,
                 [Lookup(x) for x in layout.partitions],
-                numpy.asarray(layout.stops, dtype=numpy.intp),
+                awkward1.nplike.of(layout).asarray(layout.stops, dtype=np.intp),
                 0,
                 len(layout),
                 (),
@@ -673,7 +684,7 @@ class RecordView(object):
             record,
             allow_record=True,
             allow_other=False,
-            numpytype=(numpy.number, numpy.bool_, numpy.bool),
+            numpytype=(np.number, np.bool_, np.bool),
         )
         assert isinstance(layout, awkward1.layout.Record)
         arraylayout = layout.array
@@ -1259,7 +1270,7 @@ def lower_getitem_at_partitioned(context, builder, sig, args):
         searchsorted_args = (partviewproxy.stops, atval)
 
         def searchsorted_impl(stops, where):
-            return numpy.searchsorted(stops, where, side="right")
+            return awkward1.nplike.numpy.searchsorted(stops, where, side="right")
 
         partitionid_val = context.compile_internal(
             builder, searchsorted_impl, searchsorted_sig, searchsorted_args

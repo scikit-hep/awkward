@@ -5,15 +5,20 @@ from __future__ import absolute_import
 import numpy
 
 
-def of(array):
+def of(*arrays):
     return Numpy.instance()
 
 
 class NumpyLike(object):
-    pass
+    _instance = None
 
+    @classmethod
+    def instance(cls):
+        if cls._instance is None:
+            cls._instance = Numpy()
+        return cls._instance
 
-class NumpyGeneric(NumpyLike):
+class NumpyMetadata(NumpyLike):
     bool = numpy.bool
     bool_ = numpy.bool_
     int8 = numpy.int8
@@ -42,38 +47,28 @@ class NumpyGeneric(NumpyLike):
     newaxis = numpy.newaxis
 
 if hasattr(numpy, "float16"):
-    NumpyGeneric.float16 = numpy.float16
+    NumpyLike.float16 = numpy.float16
 
 if hasattr(numpy, "float128"):
-    NumpyGeneric.float128 = numpy.float128
+    NumpyLike.float128 = numpy.float128
 
 if hasattr(numpy, "complex256"):
-    NumpyGeneric.complex256 = numpy.complex256
+    NumpyLike.complex256 = numpy.complex256
 
 if hasattr(numpy, "datetime64"):
-    NumpyGeneric.datetime64 = numpy.datetime64
+    NumpyLike.datetime64 = numpy.datetime64
 
 if hasattr(numpy, "timedelta64"):
-    NumpyGeneric.timedelta64 = numpy.timedelta64
-
-
-# FIXME: check NDArrayOperatorsMixin in src/awkward1/_connect/_numpy.py (especially umath)
+    NumpyLike.timedelta64 = numpy.timedelta64
 
 
 class Numpy(NumpyLike):
-    _instance = None
-
-    @classmethod
-    def instance(cls):
-        if cls._instance is None:
-            cls._instance = Numpy()
-        return cls._instance
-
     def __init__(self):
         self._module = numpy
 
     def __getattr__(self, name):
         return getattr(self._module, name)
+
 
 ######################### numpy.all
 #         return reduce([numpy.all(x) for x in awkward1._util.completely_flatten(layout)])

@@ -13,11 +13,14 @@ try:
 except ImportError:
     from collections import Iterable
 
-import numpy
-
 import awkward1.layout
 import awkward1._ext
 import awkward1._util
+import awkward1.nplike
+
+
+np = awkward1.nplike.NumpyMetadata.instance()
+numpy = awkward1.nplike.Numpy.instance()
 
 
 def from_numpy(
@@ -72,7 +75,7 @@ def from_numpy(
 
         if mask is None:
             return data
-        elif mask is False or (isinstance(mask, numpy.bool_) and not mask):
+        elif mask is False or (isinstance(mask, np.bool_) and not mask):
             # NumPy's MaskedArray with mask == False is an UnmaskedArray
             if len(array.shape) == 1:
                 return awkward1.layout.UnmaskedArray(data)
@@ -236,7 +239,7 @@ def to_numpy(array, allow_missing=True):
         shape = list(content.shape)
         shape[0] = len(array)
         data = numpy.empty(shape, dtype=content.dtype)
-        mask0 = numpy.asarray(array.bytemask()).view(numpy.bool_)
+        mask0 = numpy.asarray(array.bytemask()).view(np.bool_)
         if mask0.any():
             if allow_missing:
                 mask = numpy.broadcast_to(
@@ -661,7 +664,7 @@ def from_awkward0(
                         awkward0.array.base.AwkwardArray,
                     ),
                 ):
-                    values.append(recurse(x, level + 1)[numpy.newaxis])
+                    values.append(recurse(x, level + 1)[np.newaxis])
                 else:
                     values.append(awkward1.layout.NumpyArray(numpy.array([x])))
             return awkward1.layout.RecordArray(values)[0]
@@ -685,8 +688,8 @@ def from_awkward0(
         elif isinstance(array, awkward0.JaggedArray):
             # starts, stops, content
             # offsetsaliased(starts, stops)
-            startsmax = numpy.iinfo(array.starts.dtype.type).max
-            stopsmax = numpy.iinfo(array.stops.dtype.type).max
+            startsmax = np.iinfo(array.starts.dtype.type).max
+            stopsmax = np.iinfo(array.stops.dtype.type).max
             if (
                 len(array.starts.shape) == 1
                 and len(array.stops.shape) == 1
@@ -753,7 +756,7 @@ def from_awkward0(
 
         elif isinstance(array, awkward0.UnionArray):
             # tags, index, contents
-            indexmax = numpy.iinfo(array.index.dtype.type).max
+            indexmax = np.iinfo(array.index.dtype.type).max
             if indexmax >= from_awkward0.int64max:
                 tags = awkward1.layout.Index8(array.tags.reshape(-1))
                 index = awkward1.layout.Index64(array.index.reshape(-1))
@@ -779,7 +782,7 @@ def from_awkward0(
 
         elif isinstance(array, awkward0.MaskedArray):
             # mask, content, maskedwhen
-            mask = awkward1.layout.Index8(array.mask.view(numpy.int8).reshape(-1))
+            mask = awkward1.layout.Index8(array.mask.view(np.int8).reshape(-1))
             out = awkward1.layout.ByteMaskedArray(
                 mask,
                 recurse(array.content, level + 1),
@@ -791,7 +794,7 @@ def from_awkward0(
 
         elif isinstance(array, awkward0.BitMaskedArray):
             # mask, content, maskedwhen, lsborder
-            mask = awkward1.layout.IndexU8(array.mask.view(numpy.uint8))
+            mask = awkward1.layout.IndexU8(array.mask.view(np.uint8))
             return awkward1.layout.BitMaskedArray(
                 mask,
                 recurse(array.content, level + 1),
@@ -802,7 +805,7 @@ def from_awkward0(
 
         elif isinstance(array, awkward0.IndexedMaskedArray):
             # mask, content, maskedwhen
-            indexmax = numpy.iinfo(array.index.dtype.type).max
+            indexmax = np.iinfo(array.index.dtype.type).max
             if indexmax >= from_awkward0.int64max:
                 index = awkward1.layout.Index64(array.index.reshape(-1))
                 out = awkward1.layout.IndexedOptionArray64(
@@ -825,7 +828,7 @@ def from_awkward0(
 
         elif isinstance(array, awkward0.IndexedArray):
             # index, content
-            indexmax = numpy.iinfo(array.index.dtype.type).max
+            indexmax = np.iinfo(array.index.dtype.type).max
             if indexmax >= from_awkward0.int64max:
                 index = awkward1.layout.Index64(array.index.reshape(-1))
                 out = awkward1.layout.IndexedArray64(
@@ -930,10 +933,10 @@ def from_awkward0(
         return out
 
 
-from_awkward0.int8max = numpy.iinfo(numpy.int8).max
-from_awkward0.int32max = numpy.iinfo(numpy.int32).max
-from_awkward0.uint32max = numpy.iinfo(numpy.uint32).max
-from_awkward0.int64max = numpy.iinfo(numpy.int64).max
+from_awkward0.int8max = np.iinfo(np.int8).max
+from_awkward0.int32max = np.iinfo(np.int32).max
+from_awkward0.uint32max = np.iinfo(np.uint32).max
+from_awkward0.int64max = np.iinfo(np.int64).max
 
 
 def to_awkward0(array, keep_layout=False):
@@ -1136,7 +1139,7 @@ def to_awkward0(array, keep_layout=False):
             )
 
     layout = to_layout(
-        array, allow_record=True, allow_other=False, numpytype=(numpy.generic,)
+        array, allow_record=True, allow_other=False, numpytype=(np.generic,)
     )
     return recurse(layout)
 
@@ -1145,7 +1148,7 @@ def to_layout(
     array,
     allow_record=True,
     allow_other=False,
-    numpytype=(numpy.number, numpy.bool_, numpy.bool),
+    numpytype=(np.number, np.bool_, np.bool),
 ):
     """
     Args:
@@ -1286,7 +1289,7 @@ def to_arrow(array):
             length = len(numpy_arr)
             arrow_type = pyarrow.from_numpy_dtype(numpy_arr.dtype)
 
-            if issubclass(numpy_arr.dtype.type, (numpy.bool_, numpy.bool)):
+            if issubclass(numpy_arr.dtype.type, (np.bool_, np.bool)):
                 if len(numpy_arr) % 8 == 0:
                     ready_to_pack = numpy_arr
                 else:
@@ -1317,7 +1320,7 @@ def to_arrow(array):
             return pyarrow.Array.from_buffers(pyarrow.float64(), 0, [None, None])
 
         elif isinstance(layout, awkward1.layout.ListOffsetArray32):
-            offsets = numpy.asarray(layout.offsets, dtype=numpy.int32)
+            offsets = numpy.asarray(layout.offsets, dtype=np.int32)
 
             if layout.parameter("__array__") == "bytestring":
                 if mask is None:
@@ -1383,15 +1386,15 @@ def to_arrow(array):
         ):
             offsets = numpy.asarray(layout.offsets)
 
-            if len(offsets) == 0 or numpy.max(offsets) <= numpy.iinfo(numpy.int32).max:
+            if len(offsets) == 0 or numpy.max(offsets) <= np.iinfo(np.int32).max:
                 small_layout = awkward1.layout.ListOffsetArray32(
-                    awkward1.layout.Index32(offsets.astype(numpy.int32)),
+                    awkward1.layout.Index32(offsets.astype(np.int32)),
                     layout.content,
                     parameters=layout.parameters,
                 )
                 return recurse(small_layout, mask=mask)
 
-            offsets = numpy.asarray(layout.offsets, dtype=numpy.int64)
+            offsets = numpy.asarray(layout.offsets, dtype=np.int64)
 
             if layout.parameter("__array__") == "bytestring":
                 if mask is None:
@@ -1515,7 +1518,7 @@ def to_arrow(array):
                         pyarrow.py_buffer(mask),
                         pyarrow.py_buffer(numpy.asarray(layout.tags)),
                         pyarrow.py_buffer(
-                            numpy.asarray(layout.index).astype(numpy.int32)
+                            numpy.asarray(layout.index).astype(np.int32)
                         ),
                     ],
                     children=values,
@@ -1528,7 +1531,7 @@ def to_arrow(array):
                         None,
                         pyarrow.py_buffer(numpy.asarray(layout.tags)),
                         pyarrow.py_buffer(
-                            numpy.asarray(layout.index).astype(numpy.int32)
+                            numpy.asarray(layout.index).astype(np.int32)
                         ),
                     ],
                     children=values,
@@ -1551,7 +1554,7 @@ def to_arrow(array):
                     numpy.unpackbits(~mask)
                     .reshape(-1, 8)[:, ::-1]
                     .reshape(-1)
-                    .view(numpy.bool_)
+                    .view(np.bool_)
                 )[: len(index)]
                 return pyarrow.DictionaryArray.from_arrays(index, dictionary, bytemask)
 
@@ -1567,10 +1570,10 @@ def to_arrow(array):
             index[nulls] = 0
 
             if len(nulls) % 8 == 0:
-                this_bytemask = (~nulls).view(numpy.uint8)
+                this_bytemask = (~nulls).view(np.uint8)
             else:
                 length = int(numpy.ceil(len(nulls) / 8.0)) * 8
-                this_bytemask = numpy.empty(length, dtype=numpy.uint8)
+                this_bytemask = numpy.empty(length, dtype=np.uint8)
                 this_bytemask[: len(nulls)] = ~nulls
                 this_bytemask[len(nulls) :] = 0
 
@@ -1593,7 +1596,7 @@ def to_arrow(array):
                 return recurse(next, mask & this_bitmask)
 
         elif isinstance(layout, awkward1.layout.BitMaskedArray):
-            bitmask = numpy.asarray(layout.mask, dtype=numpy.uint8)
+            bitmask = numpy.asarray(layout.mask, dtype=np.uint8)
 
             if layout.lsb_order is False:
                 bitmask = numpy.packbits(
@@ -1608,10 +1611,10 @@ def to_arrow(array):
             )
 
         elif isinstance(layout, awkward1.layout.ByteMaskedArray):
-            mask = numpy.asarray(layout.mask, dtype=numpy.bool) == layout.valid_when
+            mask = numpy.asarray(layout.mask, dtype=np.bool) == layout.valid_when
 
             bytemask = numpy.zeros(
-                8 * math.ceil(len(layout.content) / 8), dtype=numpy.bool
+                8 * math.ceil(len(layout.content) / 8), dtype=np.bool
             )
             bytemask[: len(mask)] = mask
             bitmask = numpy.packbits(bytemask.reshape(-1, 8)[:, ::-1].reshape(-1))
@@ -1694,7 +1697,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             out = awkward1.layout.RecordArray(child_arrays, keys)
             if mask is not None:
                 mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask, dtype=numpy.uint8)
+                    numpy.frombuffer(mask, dtype=np.uint8)
                 )
                 return awkward1.layout.BitMaskedArray(mask, out, True, length, True)
             else:
@@ -1704,7 +1707,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             offsets = awkward1.layout.Index32(
-                numpy.frombuffer(buffers.pop(0), dtype=numpy.int32)[: length + 1]
+                numpy.frombuffer(buffers.pop(0), dtype=np.int32)[: length + 1]
             )
             content = popbuffers(
                 None if array is None else array.flatten(),
@@ -1716,7 +1719,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             out = awkward1.layout.ListOffsetArray32(offsets, content)
             if mask is not None:
                 mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask, dtype=numpy.uint8)
+                    numpy.frombuffer(mask, dtype=np.uint8)
                 )
                 return awkward1.layout.BitMaskedArray(mask, out, True, length, True)
             else:
@@ -1726,7 +1729,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             offsets = awkward1.layout.Index64(
-                numpy.frombuffer(buffers.pop(0), dtype=numpy.int64)[: length + 1]
+                numpy.frombuffer(buffers.pop(0), dtype=np.int64)[: length + 1]
             )
             content = popbuffers(
                 None if array is None else array.flatten(),
@@ -1738,7 +1741,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             out = awkward1.layout.ListOffsetArray64(offsets, content)
             if mask is not None:
                 mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask, dtype=numpy.uint8)
+                    numpy.frombuffer(mask, dtype=np.uint8)
                 )
                 return awkward1.layout.BitMaskedArray(mask, out, True, length, True)
             else:
@@ -1747,8 +1750,8 @@ def from_arrow(array, highlevel=True, behavior=None):
         elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "sparse":
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
-            tags = numpy.frombuffer(buffers.pop(0), dtype=numpy.int8)[:length]
-            index = numpy.arange(len(tags), dtype=numpy.int32)
+            tags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)[:length]
+            index = numpy.arange(len(tags), dtype=np.int32)
 
             contents = []
             for i in range(tpe.num_fields):
@@ -1770,7 +1773,7 @@ def from_arrow(array, highlevel=True, behavior=None):
 
             if mask is not None:
                 mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask, dtype=numpy.uint8)
+                    numpy.frombuffer(mask, dtype=np.uint8)
                 )
                 return awkward1.layout.BitMaskedArray(mask, out, True, length, True)
             else:
@@ -1779,8 +1782,8 @@ def from_arrow(array, highlevel=True, behavior=None):
         elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "dense":
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
-            tags = numpy.frombuffer(buffers.pop(0), dtype=numpy.int8)[:length]
-            index = numpy.frombuffer(buffers.pop(0), dtype=numpy.int32)[:length]
+            tags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)[:length]
+            index = numpy.frombuffer(buffers.pop(0), dtype=np.int32)[:length]
 
             contents = []
             for i in range(tpe.num_fields):
@@ -1801,7 +1804,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             out = awkward1.layout.UnionArray8_32(tags, index, contents)
             if mask is not None:
                 mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask, dtype=numpy.uint8)
+                    numpy.frombuffer(mask, dtype=np.uint8)
                 )
                 return awkward1.layout.BitMaskedArray(mask, out, True, length, True)
             else:
@@ -1811,8 +1814,8 @@ def from_arrow(array, highlevel=True, behavior=None):
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
 
-            offsets = numpy.frombuffer(buffers.pop(0), dtype=numpy.int32)
-            contents = numpy.frombuffer(buffers.pop(0), dtype=numpy.uint8)
+            offsets = numpy.frombuffer(buffers.pop(0), dtype=np.int32)
+            contents = numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
 
             offsets = awkward1.layout.Index32(offsets)
 
@@ -1826,7 +1829,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 return awk_arr
             else:
                 awk_mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask, dtype=numpy.uint8)
+                    numpy.frombuffer(mask, dtype=np.uint8)
                 )
                 return awkward1.layout.BitMaskedArray(
                     awk_mask, awk_arr, True, len(offsets) - 1, True
@@ -1836,8 +1839,8 @@ def from_arrow(array, highlevel=True, behavior=None):
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
 
-            offsets = numpy.frombuffer(buffers.pop(0), dtype=numpy.int64)
-            contents = numpy.frombuffer(buffers.pop(0), dtype=numpy.uint8)
+            offsets = numpy.frombuffer(buffers.pop(0), dtype=np.int64)
+            contents = numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
 
             offsets = awkward1.layout.Index64(offsets)
 
@@ -1851,7 +1854,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 return awk_arr
             else:
                 awk_mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask, dtype=numpy.uint8)
+                    numpy.frombuffer(mask, dtype=np.uint8)
                 )
                 return awkward1.layout.BitMaskedArray(
                     awk_mask, awk_arr, True, len(offsets) - 1, True
@@ -1861,8 +1864,8 @@ def from_arrow(array, highlevel=True, behavior=None):
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
 
-            offsets = numpy.frombuffer(buffers.pop(0), dtype=numpy.int32)
-            contents = numpy.frombuffer(buffers.pop(0), dtype=numpy.uint8)
+            offsets = numpy.frombuffer(buffers.pop(0), dtype=np.int32)
+            contents = numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
 
             offsets = awkward1.layout.Index32(offsets)
 
@@ -1876,7 +1879,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 return awk_arr
             else:
                 awk_mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask, dtype=numpy.uint8)
+                    numpy.frombuffer(mask, dtype=np.uint8)
                 )
                 return awkward1.layout.BitMaskedArray(
                     awk_mask, awk_arr, True, len(offsets) - 1, True
@@ -1886,8 +1889,8 @@ def from_arrow(array, highlevel=True, behavior=None):
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
 
-            offsets = numpy.frombuffer(buffers.pop(0), dtype=numpy.int64)
-            contents = numpy.frombuffer(buffers.pop(0), dtype=numpy.uint8)
+            offsets = numpy.frombuffer(buffers.pop(0), dtype=np.int64)
+            contents = numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
 
             offsets = awkward1.layout.Index64(offsets)
 
@@ -1901,7 +1904,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 return awk_arr
             else:
                 awk_mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask, dtype=numpy.uint8)
+                    numpy.frombuffer(mask, dtype=np.uint8)
                 )
                 return awkward1.layout.BitMaskedArray(
                     awk_mask, awk_arr, True, len(offsets) - 1, True
@@ -1911,14 +1914,14 @@ def from_arrow(array, highlevel=True, behavior=None):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             data = buffers.pop(0)
-            out = numpy.frombuffer(data, dtype=numpy.uint8)
+            out = numpy.frombuffer(data, dtype=np.uint8)
             out = numpy.unpackbits(out).reshape(-1, 8)[:, ::-1].reshape(-1)
-            out = awkward1.layout.NumpyArray(out[:length].view(numpy.bool_))
+            out = awkward1.layout.NumpyArray(out[:length].view(np.bool_))
             if mask is not None:
                 awk_mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask, dtype=numpy.uint8)
+                    numpy.frombuffer(mask, dtype=np.uint8)
                 )
-                mask = numpy.frombuffer(mask, dtype=numpy.uint8)
+                mask = numpy.frombuffer(mask, dtype=np.uint8)
                 return awkward1.layout.BitMaskedArray(awk_mask, out, True, length, True)
             else:
                 return out
@@ -1931,7 +1934,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             )
             if mask is not None:
                 mask = awkward1.layout.IndexU8(
-                    numpy.frombuffer(mask, dtype=numpy.uint8)
+                    numpy.frombuffer(mask, dtype=np.uint8)
                 )
                 return awkward1.layout.BitMaskedArray(mask, out, True, length, True)
             else:
@@ -2714,11 +2717,11 @@ def _form_to_layout(
 
     if _index_form_to_dtype is None:
         _index_form_to_dtype = {
-            "i8": numpy.dtype("<i1"),
-            "u8": numpy.dtype("<u1"),
-            "i32": numpy.dtype("<i4"),
-            "u32": numpy.dtype("<u4"),
-            "i64": numpy.dtype("<i8"),
+            "i8": np.dtype("<i1"),
+            "u8": np.dtype("<u1"),
+            "i32": np.dtype("<i4"),
+            "u32": np.dtype("<u4"),
+            "i64": np.dtype("<i8"),
         }
 
         _index_form_to_index = {
@@ -3503,7 +3506,7 @@ def to_pandas(
             starts, stops = offsets[:-1], offsets[1:]
             counts = stops - starts
             if awkward1._util.win:
-                counts = counts.astype(numpy.int32)
+                counts = counts.astype(np.int32)
             if len(row_arrays) == 0:
                 newrows = [
                     numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)
@@ -3594,5 +3597,5 @@ __all__ = [
     x
     for x in list(globals())
     if not x.startswith("_")
-    and x not in ("numbers", "json", "Iterable", "numpy", "awkward1")
+    and x not in ("numbers", "json", "Iterable", "numpy", "np", "awkward1")
 ]

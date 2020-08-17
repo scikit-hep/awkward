@@ -5,12 +5,14 @@ from __future__ import absolute_import
 import distutils.version
 import warnings
 
-import numpy
-
 import awkward1.layout
 import awkward1._util
 import awkward1.operations.convert
 import awkward1.operations.structure
+import awkward1.nplike
+
+
+np = awkward1.nplike.NumpyMetadata.instance()
 
 
 def register():
@@ -83,7 +85,7 @@ def get_dtype():
             name = "awkward1"
             type = awkward1.highlevel.Array
             kind = "O"
-            base = numpy.dtype("O")
+            base = np.dtype("O")
 
             @classmethod
             def construct_from_string(cls, string):
@@ -172,7 +174,7 @@ class PandasMixin(PandasNotImportedYet):
                 return AwkwardDtype()
 
         else:
-            return numpy.dtype(numpy.object)
+            return np.dtype(np.object)
 
     @property
     def nbytes(self):
@@ -192,7 +194,8 @@ class PandasMixin(PandasNotImportedYet):
     def isna(self):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.isna.html
         vote()
-        return numpy.array(awkward1.operations.structure.is_none(self))
+        nplike = awkward1.nplike.of(self)
+        return nplike.array(awkward1.operations.structure.is_none(self))
 
     def take(self, indices, *args, **kwargs):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray.take.html
@@ -201,12 +204,13 @@ class PandasMixin(PandasNotImportedYet):
         )
         vote()
 
+        nplike = awkward1.nplike.of(self)
         if allow_fill:
             content1 = self.layout
             if isinstance(content1, awkward1.partition.PartitionedArray):
                 content1 = content1.toContent()
 
-            indices = numpy.asarray(indices, dtype=numpy.int64)
+            indices = nplike.asarray(indices, dtype=np.int64)
             if fill_value is None:
                 index = awkward1.layout.Index64(indices)
                 layout = awkward1.layout.IndexedOptionArray64(
@@ -215,7 +219,7 @@ class PandasMixin(PandasNotImportedYet):
                 return awkward1._util.wrap(layout, awkward1._util.behaviorof(self))
 
             else:
-                tags = (indices >= 0).view(numpy.int8)
+                tags = (indices >= 0).view(np.int8)
                 index = indices.copy()
                 index[~tags] = 0
                 content0 = awkward1.operations.convert.from_iter(
