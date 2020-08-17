@@ -127,35 +127,46 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
             ".from_cupy() can only accept CuPy Arrays!"));
         }
     })
-//    .def("copy_to",
-//         [name](const ak::IdentitiesOf<T>& self, const std::string& ptr_lib) -> py::object {
-//             if (ptr_lib == "cpu") {
-//               auto cpu_identities = self.copy_to(ak::kernel::lib::cpu) ;
-//               return py::cast<ak::IdentitiesOf<T>>(*cpu_identities);
-//             }
-//             else if (ptr_lib == "cuda") {
-//               auto cuda_identities = self.copy_to(ak::kernel::lib::cuda);
+      .def("copy_to",
+         [name](const ak::IdentitiesOf<T>& self, const std::string& ptr_lib) -> py::object {
+             if (ptr_lib == "cpu") {
+               std::shared_ptr<ak::Identities> cpu_identities = self.copy_to(ak::kernel::lib::cpu) ;
+               return py::cast(*cpu_identities);
+             }
+             else if (ptr_lib == "cuda") {
+               std::shared_ptr<ak::Identities> cuda_identities = self.copy_to(ak::kernel::lib::cuda);
+               return py::cast(*cuda_identities);
+             }
+             else {
+               throw std::invalid_argument("specify 'cpu' or 'cuda'");
+             }
+         })
+//      .def("to_cupy", [name](const ak::IdentitiesOf<T>& self) -> py::object {
+//        if(self.ptr_lib() != ak::kernel::lib::cuda) {
+//          throw std::invalid_argument(name + " is not a Awkward CUDA array, "
+//                                             "use copy_to(\"cuda\") to convert it into one!");
+//        }
 //
-//               auto cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
-//                 reinterpret_cast<ssize_t>(cuda_identities->ptr().get()),
-//                 cuda_identities->length() * sizeof(T),
-//                 cuda_identities);
+//        std::shared_ptr<ak::Identities> cuda_identities = self.copy_to(ak::kernel::lib::cuda);
+//        std::shared_ptr<ak::IdentitiesOf<T>> cuda_identities_of =
+//            reinterpret_cast<std::shared_ptr<ak::IdentitiesOf<T>>>(cuda_identities);
 //
-//               auto cupy_memoryptr = py::module::import("cupy").attr("cuda").attr("MemoryPointer")(
-//                 cupy_unowned_mem,
-//                 0);
+//        auto cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
+//            reinterpret_cast<ssize_t>(cuda_identities-> ),
+//            cuda_identities->length() * sizeof(T),
+//            cuda_identities);
 //
-//               return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
-//                 (py::module::import("cupy").attr("ndarray")(
-//                   pybind11::make_tuple(py::cast<ssize_t>(cuda_identities->length())),
-//                   py::format_descriptor<T>::format(),
-//                   cupy_memoryptr,
-//                   pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
-//             }
-//             else {
-//               throw std::invalid_argument("specify 'cpu' or 'cuda'");
-//             }
-//         })
+//        auto cupy_memoryptr = py::module::import("cupy").attr("cuda").attr("MemoryPointer")(
+//            cupy_unowned_mem,
+//            0);
+//
+//        return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
+//            (py::module::import("cupy").attr("ndarray")(
+//                pybind11::make_tuple(py::cast<ssize_t>(cuda_identities->length())),
+//                py::format_descriptor<T>::format(),
+//                cupy_memoryptr,
+//                pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
+//      })
 
   );
 }
