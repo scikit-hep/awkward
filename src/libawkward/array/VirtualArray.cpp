@@ -542,7 +542,7 @@ namespace awkward {
     slice.become_sealed();
     FormPtr sliceform(nullptr);
     util::Parameters params;
-    if ( not has_virtual_form() ) {
+    if ( ! has_virtual_form() ) {
       params["__record__"] = form(false).get()->getitem_field(key)->purelist_parameter("__record__");
     }
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
