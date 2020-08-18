@@ -18,118 +18,206 @@ numpy = awkward1.nplike.Numpy.instance()
 
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
-def typeof_NumpyArray(obj, c):
-    t = numba.typeof(awkward1.nplike.of(obj).asarray(obj))
-    return NumpyArrayType(
-        numba.types.Array(t.dtype, t.ndim, "A"),
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.RegularArray)
-def typeof_RegularArray(obj, c):
-    return RegularArrayType(
-        numba.typeof(obj.content),
-        obj.size,
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.ListArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListArray64)
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray64)
-def typeof_ListArray(obj, c):
-    return ListArrayType(
-        numba.typeof(awkward1.nplike.of(obj.starts).asarray(obj.starts)),
-        numba.typeof(obj.content),
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArray64)
-def typeof_IndexedArray(obj, c):
-    return IndexedArrayType(
-        numba.typeof(awkward1.nplike.of(obj.index).asarray(obj.index)),
-        numba.typeof(obj.content),
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedOptionArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedOptionArray64)
-def typeof_IndexedOptionArray(obj, c):
-    return IndexedOptionArrayType(
-        numba.typeof(awkward1.nplike.of(obj.index).asarray(obj.index)),
-        numba.typeof(obj.content),
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.ByteMaskedArray)
-def typeof_ByteMaskedArray(obj, c):
-    return ByteMaskedArrayType(
-        numba.typeof(awkward1.nplike.of(obj.mask).asarray(obj.mask)),
-        numba.typeof(obj.content),
-        obj.valid_when,
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.BitMaskedArray)
-def typeof_BitMaskedArray(obj, c):
-    return BitMaskedArrayType(
-        numba.typeof(awkward1.nplike.of(obj.mask).asarray(obj.mask)),
-        numba.typeof(obj.content),
-        obj.valid_when,
-        obj.lsb_order,
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.UnmaskedArray)
-def typeof_UnmaskedArray(obj, c):
-    return UnmaskedArrayType(
-        numba.typeof(obj.content), numba.typeof(obj.identities), obj.parameters
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
-def typeof_RecordArray(obj, c):
-    return RecordArrayType(
-        tuple(numba.typeof(x) for x in obj.contents),
-        obj.recordlookup,
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_32)
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_U32)
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_64)
-def typeof_UnionArray(obj, c):
-    return UnionArrayType(
-        numba.typeof(awkward1.nplike.of(obj.tags).asarray(obj.tags)),
-        numba.typeof(awkward1.nplike.of(obj.index).asarray(obj.index)),
-        tuple(numba.typeof(x) for x in obj.contents),
-        numba.typeof(obj.identities),
+@numba.extending.typeof_impl.register(awkward1.layout.VirtualArray)
+@numba.extending.typeof_impl.register(awkward1.layout.Index8)
+@numba.extending.typeof_impl.register(awkward1.layout.IndexU8)
+@numba.extending.typeof_impl.register(awkward1.layout.Index32)
+@numba.extending.typeof_impl.register(awkward1.layout.IndexU32)
+@numba.extending.typeof_impl.register(awkward1.layout.Index64)
+@numba.extending.typeof_impl.register(awkward1.layout.Record)
+def fake_typeof(obj, c):
+    raise TypeError(
+        "{0} objects cannot be passed directly into Numba-compiled functions; "
+        "construct a high-level ak.Array or ak.Record instead".format(type(obj).__name__)
+    )
+
+
+def typeof(obj):
+    if isinstance(obj, awkward1.layout.NumpyArray):
+        return typeof_NumpyArray(obj)
+
+    elif isinstance(obj, awkward1.layout.RegularArray):
+        return typeof_RegularArray(obj)
+
+    elif isinstance(obj, (
+        awkward1.layout.ListArray32,
+        awkward1.layout.ListArrayU32,
+        awkward1.layout.ListArray64,
+        awkward1.layout.ListOffsetArray32,
+        awkward1.layout.ListOffsetArrayU32,
+        awkward1.layout.ListOffsetArray64,
+    )):
+        return typeof_ListArray(obj)
+
+    elif isinstance(obj, (
+        awkward1.layout.IndexedArray32,
+        awkward1.layout.IndexedArrayU32,
+        awkward1.layout.IndexedArray64,
+    )):
+        return typeof_IndexedArray(obj)
+
+    elif isinstance(obj, (
+        awkward1.layout.IndexedOptionArray32,
+        awkward1.layout.IndexedOptionArray64,
+    )):
+        return typeof_IndexedOptionArray(obj)
+
+    elif isinstance(obj, awkward1.layout.ByteMaskedArray):
+        return typeof_ByteMaskedArray(obj)
+
+    elif isinstance(obj, awkward1.layout.BitMaskedArray):
+        return typeof_BitMaskedArray(obj)
+
+    elif isinstance(obj, awkward1.layout.UnmaskedArray):
+        return typeof_UnmaskedArray(obj)
+
+    elif isinstance(obj, awkward1.layout.RecordArray):
+        return typeof_RecordArray(obj)
+
+    elif isinstance(obj, (
+        awkward1.layout.UnionArray8_32,
+        awkward1.layout.UnionArray8_U32,
+        awkward1.layout.UnionArray8_64,
+    )):
+        return typeof_UnionArray(obj)
+
+    elif isinstance(obj, awkward1.layout.VirtualArray):
+        return typeof_VirtualArray(obj)
+
+    elif isinstance(obj, (
+        awkward1.layout.Identities32,
+        awkward1.layout.Identities64,
+    )):
+        raise NotImplementedError(
+            "Awkward Identities are not yet supported for functions compiled by Numba"
+        )
+
+    elif isinstance(obj, (
+        awkward1.layout.Index8,
+        awkward1.layout.IndexU8,
+        awkward1.layout.Index32,
+        awkward1.layout.IndexU32,
+        awkward1.layout.Index64,
+    )):
+        raise RuntimeError(
+            "Awkward Indexes should not be used directly in functions compiled by Numba"
+        )
+
+    else:
+        return numba.typeof(obj)
+
+
+def typeof_NumpyArray(obj):
+    t = numba.typeof(awkward1.nplike.of(obj).asarray(obj))
+    return NumpyArrayType(
+        numba.types.Array(t.dtype, t.ndim, "A"),
+        typeof(obj.identities),
         obj.parameters,
     )
 
 
-@numba.extending.typeof_impl.register(awkward1.layout.VirtualArray)
-def typeof_VirtualArray(obj, c):
+def typeof_RegularArray(obj):
+    return RegularArrayType(
+        typeof(obj.content),
+        obj.size,
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_ListArray(obj):
+    return ListArrayType(
+        numba.typeof(awkward1.nplike.of(obj.starts).asarray(obj.starts)),
+        typeof(obj.content),
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_IndexedArray(obj):
+    return IndexedArrayType(
+        numba.typeof(awkward1.nplike.of(obj.index).asarray(obj.index)),
+        typeof(obj.content),
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_IndexedOptionArray(obj):
+    return IndexedOptionArrayType(
+        numba.typeof(awkward1.nplike.of(obj.index).asarray(obj.index)),
+        typeof(obj.content),
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_ByteMaskedArray(obj):
+    return ByteMaskedArrayType(
+        numba.typeof(awkward1.nplike.of(obj.mask).asarray(obj.mask)),
+        typeof(obj.content),
+        obj.valid_when,
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_BitMaskedArray(obj):
+    return BitMaskedArrayType(
+        numba.typeof(awkward1.nplike.of(obj.mask).asarray(obj.mask)),
+        typeof(obj.content),
+        obj.valid_when,
+        obj.lsb_order,
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_UnmaskedArray(obj):
+    return UnmaskedArrayType(
+        typeof(obj.content), typeof(obj.identities), obj.parameters
+    )
+
+
+def typeof_RecordArray(obj):
+    return RecordArrayType(
+        tuple(typeof(x) for x in obj.contents),
+        obj.recordlookup,
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_UnionArray(obj):
+    return UnionArrayType(
+        numba.typeof(awkward1.nplike.of(obj.tags).asarray(obj.tags)),
+        numba.typeof(awkward1.nplike.of(obj.index).asarray(obj.index)),
+        tuple(typeof(x) for x in obj.contents),
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_VirtualArray(obj):
     if obj.form.form is None:
         raise ValueError("VirtualArrays without a known 'form' can't be used in Numba")
     if obj.form.has_identities:

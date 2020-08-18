@@ -12,6 +12,31 @@ import awkward1
 numba = pytest.importorskip("numba")
 
 
+def test_refcount():
+    array = awkward1.Array([1, 2, 3])
+
+    @numba.njit
+    def f1():
+        array
+        return 3.14
+
+    @numba.njit
+    def f2():
+        array, array
+        return 3.14
+
+    assert sys.getrefcount(array) == 2
+    f1()
+    assert sys.getrefcount(array) == 3
+    f2()
+    assert sys.getrefcount(array) == 5
+
+    del f1
+    assert sys.getrefcount(array) == 4
+    del f2
+    assert sys.getrefcount(array) == 2
+
+
 def test_Array():
     array = awkward1.Array([1, 2, 3])
 
@@ -55,6 +80,16 @@ def test_Array():
 
     assert f4() == 2
     assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+
+
+def test_Record():
+    record = awkward1.Record({"x": 1, "y": [1, 2, 3]})
+
+    @numba.njit
+    def f1():
+        return record.y[1]
+
+    assert f1() == 2
 
 
 def test_ArrayBuilder():
