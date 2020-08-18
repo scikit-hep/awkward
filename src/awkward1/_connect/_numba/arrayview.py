@@ -379,7 +379,7 @@ def wrap(type, viewtype, fields):
         return ArrayViewType(type, viewtype.behavior, fields)
 
 
-class ArrayViewType(numba.types.Type):
+class ArrayViewType(numba.types.Sequence):
     def __init__(self, type, behavior, fields):
         super(ArrayViewType, self).__init__(
             name="awkward1.ArrayView({0}, {1}, {2})".format(
@@ -391,6 +391,10 @@ class ArrayViewType(numba.types.Type):
         self.type = type
         self.behavior = behavior
         self.fields = fields
+
+    @property
+    def iterator_type(self):
+        return IteratorType(self)
 
 
 @numba.extending.register_model(ArrayViewType)
