@@ -78,7 +78,6 @@ TEST_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_NumpyArray_getitem_next_array_advanced",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
-
     # FIXME @reikdas: Jim added this one
     "awkward_NumpyArray_fill_tobool",
 ]
@@ -1201,13 +1200,21 @@ if __name__ == "__main__":
                                 for test in tests[funcname]:
                                     f.write(" " * 4 + "- args:\n")
                                     for arg in test["input"].keys():
-                                        f.write(
-                                            " " * 8
-                                            + arg
-                                            + ": "
-                                            + str(test["input"][arg])
-                                            + "\n"
-                                        )
+                                        f.write(" " * 8 + arg + ": ")
+                                        if (
+                                            "output" in test.keys()
+                                            and arg in test["output"].keys()
+                                        ):
+                                            f.write(
+                                                str(
+                                                    test["input"][arg][
+                                                        : len(test["output"][arg])
+                                                    ]
+                                                )
+                                                + "\n"
+                                            )
+                                        else:
+                                            f.write(str(test["input"][arg]) + "\n")
                                     f.write(
                                         " " * 6
                                         + "successful: "

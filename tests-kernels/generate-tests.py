@@ -80,7 +80,10 @@ def readspec():
                                             )
                                             testval = test["args"][arg]
                                             while isinstance(testval, list):
-                                                testval = testval[0]
+                                                if len(testval) == 0:
+                                                    testval = None
+                                                else:
+                                                    testval = testval[0]
                                             if type(testval) != eval(spectype):
                                                 flag = False
                                             elif test["successful"] and (
