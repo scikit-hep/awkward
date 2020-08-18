@@ -2372,6 +2372,7 @@ class VirtualArrayType(ContentType):
             arraypos_obj = pyapi.long_from_ssize_t(arraypos)
             array_obj = pyapi.object_getattr_string(virtualarray_obj, "array")
 
+            # FIXME: memory leak? what about putting this exception after the decrefs?
             with builder.if_then(
                 builder.icmp_signed(
                     "!=",
@@ -2387,6 +2388,7 @@ class VirtualArrayType(ContentType):
                 fill_obj, (arraypos_obj, array_obj, lookup_obj,)
             )
 
+            # FIXME: memory leak? what about putting this exception after the decrefs?
             with builder.if_then(
                 builder.icmp_signed(
                     "!=",

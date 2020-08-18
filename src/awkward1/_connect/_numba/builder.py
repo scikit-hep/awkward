@@ -51,6 +51,16 @@ class ArrayBuilderModel(numba.core.datamodel.models.StructModel):
         super(ArrayBuilderModel, self).__init__(dmm, fe_type, members)
 
 
+@numba.core.imputils.lower_constant(ArrayBuilderType)
+def lower_const_ArrayBuilder(context, builder, arraybuildertype, arraybuilder):
+    layout = arraybuilder._layout
+    rawptr = context.get_constant(numba.intp, arraybuilder._layout._ptr)
+    proxyout = context.make_helper(builder, arraybuildertype)
+    proxyout.rawptr = builder.inttoptr(rawptr, context.get_value_type(numba.types.voidptr))
+    proxyout.pyptr = context.add_dynamic_addr(builder, id(layout), info=str(type(layout)))
+    return proxyout._getvalue()
+
+
 @numba.extending.unbox(ArrayBuilderType)
 def unbox_ArrayBuilder(arraybuildertype, arraybuilderobj, c):
     inner_obj = c.pyapi.object_getattr_string(arraybuilderobj, "_layout")
