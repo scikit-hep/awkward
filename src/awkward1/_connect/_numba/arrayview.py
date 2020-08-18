@@ -379,7 +379,7 @@ def wrap(type, viewtype, fields):
         return ArrayViewType(type, viewtype.behavior, fields)
 
 
-class ArrayViewType(numba.types.Sequence):
+class ArrayViewType(numba.types.IterableType, numba.types.Sized):
     def __init__(self, type, behavior, fields):
         super(ArrayViewType, self).__init__(
             name="awkward1.ArrayView({0}, {1}, {2})".format(
