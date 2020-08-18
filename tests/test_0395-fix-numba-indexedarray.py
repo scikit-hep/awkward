@@ -23,6 +23,54 @@ def test():
                 break
         return out
 
+    numpyarray = awkward1.layout.NumpyArray(numpy.arange(100, 200, 10))
+    indexedarray = awkward1.layout.IndexedArray64(awkward1.layout.Index64(numpy.array([5, 4, 3, 2, 1, 0])), numpyarray)
+    listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 1, 4])), indexedarray)
+    array = awkward1.Array(listoffsetarray)
+
+    assert reproduce(array).tolist() == [150, 140]
+    assert numba.njit(reproduce)(array).tolist() == [150, 140]
+
+    numpyarray = awkward1.layout.NumpyArray(numpy.arange(100, 200, 10))
+    indexedarray = awkward1.layout.IndexedArray64(awkward1.layout.Index64(numpy.array([5, 4, 3, 2, 1, 0])), numpyarray)
+    listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 2, 4])), indexedarray)
+    array = awkward1.Array(listoffsetarray)
+
+    assert reproduce(array).tolist() == [150, 130]
+    assert numba.njit(reproduce)(array).tolist() == [150, 130]
+
+    numpyarray = awkward1.layout.NumpyArray(numpy.arange(100, 200, 10))
+    indexedarray = awkward1.layout.IndexedArray64(awkward1.layout.Index64(numpy.array([5, 4, 3, 2, 1, 0])), numpyarray)[2:]
+    listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 1, 4])), indexedarray)
+    array = awkward1.Array(listoffsetarray)
+
+    assert reproduce(array).tolist() == [130, 120]
+    assert numba.njit(reproduce)(array).tolist() == [130, 120]
+
+    numpyarray = awkward1.layout.NumpyArray(numpy.arange(100, 200, 10))
+    indexedarray = awkward1.layout.IndexedArray64(awkward1.layout.Index64(numpy.array([5, 4, 3, 2, 1, 0])), numpyarray)[2:]
+    listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 2, 4])), indexedarray)
+    array = awkward1.Array(listoffsetarray)
+
+    assert reproduce(array).tolist() == [130, 110]
+    assert numba.njit(reproduce)(array).tolist() == [130, 110]
+
+    numpyarray = awkward1.layout.NumpyArray(numpy.arange(100, 200, 10))[3:]
+    indexedarray = awkward1.layout.IndexedArray64(awkward1.layout.Index64(numpy.array([5, 4, 3, 2, 1, 0])), numpyarray)
+    listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 1, 4])), indexedarray)
+    array = awkward1.Array(listoffsetarray)
+
+    assert reproduce(array).tolist() == [180, 170]
+    assert numba.njit(reproduce)(array).tolist() == [180, 170]
+
+    numpyarray = awkward1.layout.NumpyArray(numpy.arange(100, 200, 10))[3:]
+    indexedarray = awkward1.layout.IndexedArray64(awkward1.layout.Index64(numpy.array([5, 4, 3, 2, 1, 0])), numpyarray)
+    listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 2, 4])), indexedarray)
+    array = awkward1.Array(listoffsetarray)
+
+    assert reproduce(array).tolist() == [180, 160]
+    assert numba.njit(reproduce)(array).tolist() == [180, 160]
+
     numpyarray = awkward1.layout.NumpyArray(numpy.arange(100, 200, 10))[3:]
     indexedarray = awkward1.layout.IndexedArray64(awkward1.layout.Index64(numpy.array([5, 4, 3, 2, 1, 0])), numpyarray)[2:]
     listoffsetarray = awkward1.layout.ListOffsetArray64(awkward1.layout.Index64(numpy.array([0, 1, 4])), indexedarray)
