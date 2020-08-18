@@ -15,6 +15,9 @@ namespace awkward {
 
   const FormPtr
   ArrayGenerator::form() const {
+    if ( form_.get() == nullptr && inferred_form_.get() != nullptr ) {
+      return inferred_form_;
+    }
     return form_;
   }
 
@@ -24,7 +27,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  ArrayGenerator::generate_and_check() const {
+  ArrayGenerator::generate_and_check() {
     ContentPtr out = generate();
     if (length_ >= 0  &&  length_ > out.get()->length()) {
       throw std::invalid_argument(
@@ -39,6 +42,9 @@ namespace awkward {
           std::string("generated array does not conform to expected form:\n\n")
           + form_.get()->tostring() + std::string("\n\nbut generated:\n\n")
           + out.get()->form(true).get()->tostring());
+    }
+    if (form_.get() == nullptr) {
+      inferred_form_ = out.get()->form(true);
     }
     return out;
   }

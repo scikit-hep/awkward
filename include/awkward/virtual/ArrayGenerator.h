@@ -50,8 +50,10 @@ namespace awkward {
       generate() const = 0;
 
     /// @brief Creates an array and checks it against the #form.
+    /// If form was not available intially, no check is made and the form
+    /// inferred from the result is saved in case it is useful later
     const ContentPtr
-      generate_and_check() const;
+      generate_and_check();
 
     /// @brief Returns a string representation of this ArrayGenerator.
     virtual const std::string
@@ -75,6 +77,7 @@ namespace awkward {
 
   protected:
     const FormPtr form_;
+    FormPtr inferred_form_{nullptr};
     int64_t length_;
   };
 

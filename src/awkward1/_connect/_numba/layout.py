@@ -2302,6 +2302,9 @@ class VirtualArrayType(ContentType):
             elif isinstance(form, awkward1.forms.UnionForm):
                 raise TypeError("union types cannot be accessed in Numba")
 
+            elif isinstance(form, awkward1.forms.VirtualForm):
+                return getitem_at(form.form)
+
             else:
                 raise AssertionError("unrecognized Form type: {0}".format(type(form)))
 

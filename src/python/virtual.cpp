@@ -196,7 +196,7 @@ make_PyArrayGenerator(const py::handle& m, const std::string& name) {
           return py::cast(length);
         }
       })
-      .def("__call__", [](const PyArrayGenerator& self) -> py::object {
+      .def("__call__", [](PyArrayGenerator& self) -> py::object {
         return box(self.generate_and_check());
       })
       .def("__repr__", [](const PyArrayGenerator& self) -> std::string {
@@ -290,7 +290,7 @@ make_SliceGenerator(const py::handle& m, const std::string& name) {
         }
       })
       .def_property_readonly("content", &ak::SliceGenerator::content)
-      .def("__call__", [](const ak::SliceGenerator& self) -> py::object {
+      .def("__call__", [](ak::SliceGenerator& self) -> py::object {
         return box(self.generate_and_check());
       })
       .def("__repr__", [](const ak::SliceGenerator& self) -> std::string {

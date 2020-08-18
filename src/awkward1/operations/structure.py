@@ -2363,7 +2363,7 @@ def virtual(
         generating
         <Array [4.4, 5.5] type='2 * float64'>
     """
-    if form in (
+    if isinstance(form, str) and form in (
         "float64",
         "float32",
         "int64",
