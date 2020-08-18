@@ -86,3 +86,30 @@ def test():
 
     assert reproduce(array).tolist() == [160, 140]
     assert numba.njit(reproduce)(array).tolist() == [160, 140]
+
+
+def test_enumerate():
+    @numba.njit
+    def f1(array):
+        out = numpy.zeros(len(array), numpy.int32)
+        for i, x in enumerate(array):
+            out[i] = x + 0.5
+        return out
+
+    array = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    assert f1(array).tolist() == [0, 1, 2, 3, 4, 6, 7, 8, 9, 10]
+
+
+def test_zip():
+    @numba.njit
+    def f1(array1, array2):
+        out = numpy.zeros(len(array1), numpy.float64)
+        i = 0
+        for a1, a2 in zip(array1, array2):
+            out[i] = a1 - a2
+            i += 1
+        return out
+
+    array1 = awkward1.Array([1.5, 2.5, 3.25])
+    array2 = awkward1.Array([1, 2, 3])
+    assert f1(array1, array2).tolist() == [0.5, 0.5, 0.25]

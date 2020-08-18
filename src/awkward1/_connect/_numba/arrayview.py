@@ -325,14 +325,14 @@ class ArrayView(object):
             numba_type = None
             for part in layout.partitions:
                 if numba_type is None:
-                    numba_type = numba.typeof(part)
-                elif numba_type != numba.typeof(part):
+                    numba_type = awkward1._connect._numba.layout.typeof(part)
+                elif numba_type != awkward1._connect._numba.layout.typeof(part):
                     raise ValueError(
                         "partitioned arrays can only be used in Numba if all "
                         "partitions have the same numba_type"
                     )
             return PartitionedView(
-                numba.typeof(part),
+                awkward1._connect._numba.layout.typeof(part),
                 behavior,
                 [Lookup(x) for x in layout.partitions],
                 awkward1.nplike.of(layout).asarray(layout.stops, dtype=np.intp),
@@ -343,7 +343,13 @@ class ArrayView(object):
 
         else:
             return ArrayView(
-                numba.typeof(layout), behavior, Lookup(layout), 0, 0, len(layout), ()
+                awkward1._connect._numba.layout.typeof(layout),
+                behavior,
+                Lookup(layout),
+                0,
+                0,
+                len(layout),
+                (),
             )
 
     def __init__(self, type, behavior, lookup, pos, start, stop, fields):
@@ -373,7 +379,7 @@ def wrap(type, viewtype, fields):
         return ArrayViewType(type, viewtype.behavior, fields)
 
 
-class ArrayViewType(numba.types.Type):
+class ArrayViewType(numba.types.IterableType, numba.types.Sized):
     def __init__(self, type, behavior, fields):
         super(ArrayViewType, self).__init__(
             name="awkward1.ArrayView({0}, {1}, {2})".format(
@@ -385,6 +391,10 @@ class ArrayViewType(numba.types.Type):
         self.type = type
         self.behavior = behavior
         self.fields = fields
+
+    @property
+    def iterator_type(self):
+        return IteratorType(self)
 
 
 @numba.extending.register_model(ArrayViewType)
@@ -399,6 +409,43 @@ class ArrayViewModel(numba.core.datamodel.models.StructModel):
             ("pylookup", numba.types.pyobject),
         ]
         super(ArrayViewModel, self).__init__(dmm, fe_type, members)
+
+
+@numba.core.imputils.lower_constant(ArrayViewType)
+def lower_const_Array(context, builder, viewtype, array):
+    return lower_const_view(context, builder, viewtype, array._numbaview)
+
+
+def lower_const_view(context, builder, viewtype, view):
+    lookup = view.lookup
+    arrayptrs = lookup.arrayptrs
+    sharedptrs = lookup.sharedptrs
+    pos = view.pos
+    start = view.start
+    stop = view.stop
+
+    arrayptrs_val = context.make_constant_array(
+        builder, numba.typeof(arrayptrs), arrayptrs
+    )
+    sharedptrs_val = context.make_constant_array(
+        builder, numba.typeof(sharedptrs), sharedptrs
+    )
+
+    proxyout = context.make_helper(builder, viewtype)
+    proxyout.pos = context.get_constant(numba.intp, pos)
+    proxyout.start = context.get_constant(numba.intp, start)
+    proxyout.stop = context.get_constant(numba.intp, stop)
+    proxyout.arrayptrs = context.make_helper(
+        builder, numba.typeof(arrayptrs), arrayptrs_val
+    ).data
+    proxyout.sharedptrs = context.make_helper(
+        builder, numba.typeof(sharedptrs), sharedptrs_val
+    ).data
+    proxyout.pylookup = context.add_dynamic_addr(
+        builder, id(lookup), info=str(type(lookup))
+    )
+
+    return proxyout._getvalue()
 
 
 @numba.extending.unbox(ArrayViewType)
@@ -690,7 +737,7 @@ class RecordView(object):
         arraylayout = layout.array
         return RecordView(
             ArrayView(
-                numba.typeof(arraylayout),
+                awkward1._connect._numba.layout.typeof(arraylayout),
                 behavior,
                 Lookup(arraylayout),
                 0,
@@ -746,6 +793,17 @@ class RecordViewModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
         members = [("arrayview", fe_type.arrayviewtype), ("at", numba.intp)]
         super(RecordViewModel, self).__init__(dmm, fe_type, members)
+
+
+@numba.core.imputils.lower_constant(RecordViewType)
+def lower_const_Record(context, builder, recordviewtype, record):
+    arrayview_val = lower_const_view(
+        context, builder, recordviewtype.arrayviewtype, record._numbaview.arrayview
+    )
+    proxyout = context.make_helper(builder, recordviewtype)
+    proxyout.arrayview = arrayview_val
+    proxyout.at = context.get_constant(numba.intp, record._layout.at)
+    return proxyout._getvalue()
 
 
 @numba.extending.unbox(RecordViewType)

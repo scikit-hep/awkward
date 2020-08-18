@@ -7,9 +7,11 @@ import keyword
 
 try:
     from collections.abc import Iterable
+    from collections.abc import Sized
     from collections.abc import MutableMapping
 except ImportError:
     from collections import Iterable
+    from collections import Sized
     from collections import MutableMapping
 
 import awkward1._connect._numpy
@@ -29,6 +31,8 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 class Array(
     awkward1._connect._numpy.NDArrayOperatorsMixin,
     awkward1._connect._pandas.PandasMixin,
+    Iterable,
+    Sized,
 ):
     u"""
     Args:
@@ -1946,7 +1950,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         self.cache = None
 
 
-class ArrayBuilder(object):
+class ArrayBuilder(Iterable, Sized):
     """
     Args:
         behavior (None or dict): Custom #ak.behavior for arrays built by

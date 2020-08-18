@@ -13,10 +13,10 @@ numba = pytest.importorskip("numba")
 
 py27 = (sys.version_info[0] < 3)
 
+
 def test_string():
     array = awkward1.Array(["one", "two", "three", "four", "five"], check_valid=True)
 
-    @numba.njit
     def f1(x, i):
         return x[i]
 
@@ -24,9 +24,32 @@ def test_string():
     assert f1(array, 1) == "two"
     assert f1(array, 2) == "three"
 
+    f1 = numba.njit(f1)
+
+    assert f1(array, 0) == "one"
+    assert f1(array, 1) == "two"
+    assert f1(array, 2) == "three"
+
     if not py27:
-        @numba.njit
         def f2(x, i, j):
             return x[i] + x[j]
 
         assert f2(array, 1, 3) == "twofour"
+        assert numba.njit(f2)(array, 1, 3) == "twofour"
+
+
+def test_bytestring():
+    array = awkward1.Array([b"one", b"two", b"three", b"four", b"five"], check_valid=True)
+
+    def f1(x, i):
+        return x[i]
+
+    assert f1(array, 0) == b"one"
+    assert f1(array, 1) == b"two"
+    assert f1(array, 2) == b"three"
+
+    f1 = numba.njit(f1)
+
+    assert f1(array, 0) == b"one"
+    assert f1(array, 1) == b"two"
+    assert f1(array, 2) == b"three"
