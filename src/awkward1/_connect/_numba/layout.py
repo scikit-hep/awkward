@@ -935,12 +935,12 @@ class IndexedArrayType(ContentType):
         )
         proxynext = context.make_helper(builder, nextviewtype)
         proxynext.pos = nextpos
-        proxynext.start = viewproxy.start
+        proxynext.start = context.get_constant(numba.intp, 0)
         proxynext.stop = builder.add(
             awkward1._connect._numba.castint(
                 context, builder, self.indextype.dtype, numba.intp, nextat
             ),
-            builder.add(viewproxy.start, context.get_constant(numba.intp, 1)),
+            context.get_constant(numba.intp, 1),
         )
         proxynext.arrayptrs = viewproxy.arrayptrs
         proxynext.sharedptrs = viewproxy.sharedptrs
