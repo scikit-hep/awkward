@@ -12,20 +12,25 @@ try:
 except ImportError:
     from collections import Mapping
 
-import numpy
-
 import awkward1.layout
 import awkward1.partition
+import awkward1.nplike
+
+
+np = awkward1.nplike.NumpyMetadata.instance()
+
 
 py27 = sys.version_info[0] < 3
 py35 = sys.version_info[0] == 3 and sys.version_info[1] <= 5
 win = os.name == "nt"
+
 
 # to silence flake8 F821 errors
 if py27:
     unicode = eval("unicode")
 else:
     unicode = None
+
 
 virtualtypes = (awkward1.layout.VirtualArray,)
 
@@ -409,7 +414,7 @@ def completely_flatten(array):
         return completely_flatten(array.array)
 
     elif isinstance(array, unknowntypes):
-        return (numpy.array([], dtype=numpy.bool_),)
+        return (awkward1.nplike.of(array).array([], dtype=np.bool_),)
 
     elif isinstance(array, indexedtypes):
         return completely_flatten(array.project())
@@ -433,7 +438,7 @@ def completely_flatten(array):
         return tuple(out)
 
     elif isinstance(array, awkward1.layout.NumpyArray):
-        return (numpy.asarray(array),)
+        return (awkward1.nplike.of(array).asarray(array),)
 
     else:
         raise RuntimeError("cannot completely flatten: {0}".format(type(array)))
@@ -452,6 +457,8 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                 )
 
     def apply(inputs, depth):
+        nplike = awkward1.nplike.of(*inputs)
+
         # handle implicit right-broadcasting (i.e. NumPy-like)
         if any(isinstance(x, listtypes) for x in inputs) and not any(
             isinstance(x, (awkward1.layout.Content, awkward1.layout.Record))
@@ -497,7 +504,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                 [
                     x
                     if not isinstance(x, unknowntypes)
-                    else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.bool_))
+                    else awkward1.layout.NumpyArray(nplike.array([], dtype=np.bool_))
                     for x in inputs
                 ],
                 depth,
@@ -527,7 +534,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
             length = None
             for x in inputs:
                 if isinstance(x, uniontypes):
-                    tagslist.append(numpy.asarray(x.tags))
+                    tagslist.append(nplike.asarray(x.tags))
                     if length is None:
                         length = len(tagslist[-1])
                     elif length != len(tagslist[-1]):
@@ -538,18 +545,18 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                             )
                         )
 
-            combos = numpy.stack(tagslist, axis=-1)
+            combos = nplike.stack(tagslist, axis=-1)
             combos = combos.view(
                 [(str(i), combos.dtype) for i in range(len(tagslist))]
             ).reshape(length)
 
-            tags = numpy.empty(length, dtype=numpy.int8)
-            index = numpy.empty(length, dtype=numpy.int64)
+            tags = nplike.empty(length, dtype=np.int8)
+            index = nplike.empty(length, dtype=np.int64)
             outcontents = []
-            for tag, combo in enumerate(numpy.unique(combos)):
+            for tag, combo in enumerate(nplike.unique(combos)):
                 mask = combos == combo
                 tags[mask] = tag
-                index[mask] = numpy.arange(numpy.count_nonzero(mask))
+                index[mask] = nplike.arange(nplike.count_nonzero(mask))
                 nextinputs = []
                 numoutputs = None
                 for i, x in enumerate(inputs):
@@ -578,20 +585,20 @@ def broadcast_and_apply(inputs, getfunction, behavior):
             mask = None
             for x in inputs:
                 if isinstance(x, optiontypes):
-                    m = numpy.asarray(x.bytemask()).view(numpy.bool_)
+                    m = nplike.asarray(x.bytemask()).view(np.bool_)
                     if mask is None:
                         mask = m
                     else:
-                        numpy.bitwise_or(mask, m, out=mask)
+                        nplike.bitwise_or(mask, m, out=mask)
 
-            nextmask = awkward1.layout.Index8(mask.view(numpy.int8))
-            index = numpy.full(len(mask), -1, dtype=numpy.int64)
-            index[~mask] = numpy.arange(
-                len(mask) - numpy.count_nonzero(mask), dtype=numpy.int64
+            nextmask = awkward1.layout.Index8(mask.view(np.int8))
+            index = nplike.full(len(mask), -1, dtype=np.int64)
+            index[~mask] = nplike.arange(
+                len(mask) - nplike.count_nonzero(mask), dtype=np.int64
             )
             index = awkward1.layout.Index64(index)
             if any(not isinstance(x, optiontypes) for x in inputs):
-                nextindex = numpy.arange(len(mask), dtype=numpy.int64)
+                nextindex = nplike.arange(len(mask), dtype=np.int64)
                 nextindex[mask] = -1
                 nextindex = awkward1.layout.Index64(nextindex)
 
@@ -632,8 +639,8 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     if isinstance(x, awkward1.layout.RegularArray):
                         if maxsize > 1 and x.size == 1:
                             tmpindex = awkward1.layout.Index64(
-                                numpy.repeat(
-                                    numpy.arange(len(x), dtype=numpy.int64), maxsize
+                                nplike.repeat(
+                                    nplike.arange(len(x), dtype=np.int64), maxsize
                                 )
                             )
                 nextinputs = []
@@ -833,7 +840,7 @@ def broadcast_pack(inputs, isscalar):
     nextinputs = []
     for x in inputs:
         if isinstance(x, awkward1.layout.Record):
-            index = numpy.full(maxlen, x.at, dtype=numpy.int64)
+            index = awkward1.nplike.of(*inputs).full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(awkward1.layout.RegularArray(x.array[index], maxlen))
             isscalar.append(True)
         elif isinstance(x, awkward1.layout.Content):
@@ -877,7 +884,7 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
             return layout
         else:
             return awkward1.layout.NumpyArray(
-                numpy.asarray(layout), layout.identities, None
+                awkward1.nplike.of(layout).asarray(layout), layout.identities, None
             )
 
     elif isinstance(layout, awkward1.layout.EmptyArray):
@@ -1181,7 +1188,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                         key = ""
                     sp = ", "
                 yield "}"
-            elif isinstance(x, (float, numpy.floating)):
+            elif isinstance(x, (float, np.floating)):
                 yield space + "{0:.3g}".format(x)
             else:
                 yield space + repr(x)
@@ -1250,7 +1257,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                     if i != 0:
                         yield ", "
                 yield "{"
-            elif isinstance(x, (float, numpy.floating)):
+            elif isinstance(x, (float, np.floating)):
                 yield "{0:.3g}".format(x) + space
             else:
                 yield repr(x) + space

@@ -2,17 +2,19 @@
 
 from __future__ import absolute_import
 
-import numpy
-
 import awkward1.highlevel
 import awkward1.operations.convert
+import awkward1.nplike
+
+
+np = awkward1.nplike.NumpyMetadata.instance()
 
 
 class ByteBehavior(awkward1.highlevel.Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = numpy.asarray(self.layout)
+        tmp = awkward1.nplike.of(self.layout).asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -33,7 +35,7 @@ class CharBehavior(awkward1.highlevel.Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = numpy.asarray(self.layout)
+        tmp = awkward1.nplike.of(self.layout).asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -79,16 +81,18 @@ awkward1.behavior["__typestr__", "string"] = "string"
 
 
 def _string_equal(one, two):
+    nplike = awkward1.nplike.of(one, two)
+
     one, two = one.layout, two.layout
 
     # first condition: string lengths must be the same
-    counts1 = numpy.asarray(one.count(axis=-1))
-    counts2 = numpy.asarray(two.count(axis=-1))
+    counts1 = nplike.asarray(one.count(axis=-1))
+    counts2 = nplike.asarray(two.count(axis=-1))
 
     out = counts1 == counts2
 
     # only compare characters in strings that are possibly equal (same length)
-    possible = numpy.logical_and(out, counts1)
+    possible = nplike.logical_and(out, counts1)
     possible_counts = counts1[possible]
 
     if len(possible_counts) > 0:
@@ -103,16 +107,17 @@ def _string_equal(one, two):
     return awkward1.highlevel.Array(awkward1.layout.NumpyArray(out))
 
 
-awkward1.behavior[numpy.equal, "bytestring", "bytestring"] = _string_equal
-awkward1.behavior[numpy.equal, "string", "string"] = _string_equal
+awkward1.behavior[awkward1.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
+awkward1.behavior[awkward1.nplike.numpy.equal, "string", "string"] = _string_equal
 
 
 def _string_broadcast(layout, offsets):
-    offsets = numpy.asarray(offsets)
+    nplike = awkward1.nplike.of(offsets)
+    offsets = nplike.asarray(offsets)
     counts = offsets[1:] - offsets[:-1]
     if awkward1._util.win:
-        counts = counts.astype(numpy.int32)
-    parents = numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)
+        counts = counts.astype(np.int32)
+    parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
     return awkward1.layout.IndexedArray64(
         awkward1.layout.Index64(parents), layout
     ).project()
