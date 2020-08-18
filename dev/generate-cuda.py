@@ -2,6 +2,7 @@
 
 import argparse
 import ast
+import copy
 import os
 from collections import OrderedDict
 
@@ -39,7 +40,14 @@ def traverse(node, args={}, forflag=False, declared=[]):
             code += traverse(subnode, args, True, declared)
         code += "}\n"
     elif node.__class__.__name__ == "If":
-        code = "if ({0}) {{\n".format(traverse(node.test, args, forflag, declared))
+        code = ""
+        tempdeclared = copy.copy(declared)
+        for subnode in node.body:
+            traverse(subnode, args, forflag, declared)
+        todecl = set(tempdeclared) ^ set(declared)
+        for todeclarg in todecl:
+            code += "int64_t {0};\n".format(todeclarg)
+        code += "if ({0}) {{\n".format(traverse(node.test, args, forflag, declared))
         for subnode in node.body:
             code += " " * 2 + traverse(subnode, args, forflag, declared) + "\n"
         code += "} else {\n"
@@ -155,20 +163,16 @@ def traverse(node, args={}, forflag=False, declared=[]):
                 if flag and (
                     traverse(node.targets[0], args, forflag, declared) not in declared
                 ):
-                    code = "if ({0}) {{\n auto {1} = {2};\n }} else {{\n auto {1} = {3};\n }}\n".format(
-                        traverse(node.value.test, args, forflag, declared),
+                    code = "auto {0} = {1};\n".format(
                         traverse(node.targets[0], args, forflag, declared),
-                        traverse(node.value.body, args, forflag, declared),
                         traverse(node.value.orelse, args, forflag, declared),
                     )
                     declared.append(traverse(node.targets[0], args, forflag, declared))
-                else:
-                    code = "if ({0}) {{\n {1} = {2};\n }} else {{\n {1} = {3};\n }}\n".format(
-                        traverse(node.value.test, args, forflag, declared),
-                        traverse(node.targets[0], args, forflag, declared),
-                        traverse(node.value.body, args, forflag, declared),
-                        traverse(node.value.orelse, args, forflag, declared),
-                    )
+                code += "if ({0}) {{\n {1} = {2};\n }}\n".format(
+                    traverse(node.value.test, args, forflag, declared),
+                    traverse(node.targets[0], args, forflag, declared),
+                    traverse(node.value.body, args, forflag, declared),
+                )
             elif node.value.__class__.__name__ == "Compare":
                 code = ""
                 if flag and (
@@ -240,12 +244,6 @@ def getbody(pycode, args):
     for node in tree.body:
         code += traverse(node, args)
     return code
-
-
-def getcudaname(name):
-    assert name.startswith("awkward_")
-    assert name.startswith("awkwardcuda_") is False
-    return name[: len("awkward")] + "cuda" + name[len("awkward") :]
 
 
 def getctype(typename):
@@ -322,7 +320,7 @@ def gettemplatestring(templateargs):
 def getdecl(name, args, templatestring, parent=False, solo=False):
     code = ""
     if templatestring != "":
-        code += "<" + templatestring + ">\n"
+        code += "template <" + templatestring + ">\n"
     if parent:
         code += "__global__\n"
     count = 0
@@ -335,7 +333,7 @@ def getdecl(name, args, templatestring, parent=False, solo=False):
     if parent:
         code += "void cuda" + name[len("awkward") :] + "(" + params + ") {\n"
     else:
-        code += "ERROR " + getcudaname(name) + "(" + params + ") {\n"
+        code += "ERROR " + name + "(" + params + ") {\n"
     return code
 
 
@@ -398,7 +396,7 @@ int64_t thread_id = block_id * blockDim.x + threadIdx.x;
 dim3 threads_per_block;
 
 if ({0} > 1024) {{
-blocks_per_grid = dim3(ceil(({0}) / 1024.0), 1, 1);
+blocks_per_grid = dim3(ceil({0} / 1024.0), 1, 1);
 threads_per_block = dim3(1024, 1, 1);
 }} else {{
 blocks_per_grid = dim3(1, 1, 1);
@@ -428,7 +426,7 @@ threads_per_block = dim3({0}, 1, 1);
 dim3 threads_per_block;
 
 if ({0} > 1024) {{
-blocks_per_grid = dim3(ceil(({0}) / 1024.0), 1, 1);
+blocks_per_grid = dim3(ceil({0} / 1024.0), 1, 1);
 threads_per_block = dim3(1024, 1, 1);
 }} else {{
 blocks_per_grid = dim3(1, 1, 1);
@@ -461,7 +459,13 @@ if __name__ == "__main__":
         os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
     ) as infile:
         mainspec = yaml.safe_load(infile)["kernels"]
-        code = ""
+        code = """#include "awkward/kernels/operations.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/reducers.h"
+#include <cstdio>
+
+"""
         for filedir in mainspec.values():
             for relpath in filedir.values():
                 with open(
