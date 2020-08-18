@@ -4,9 +4,12 @@ from __future__ import absolute_import
 
 import numbers
 
-import numpy
-
 import awkward1.layout
+import awkward1.nplike
+
+
+np = awkward1.nplike.NumpyMetadata.instance()
+numpy = awkward1.nplike.Numpy.instance()
 
 
 def is_valid(array, exception=False):
@@ -120,7 +123,7 @@ def type(array):
     if array is None:
         return awkward1.types.UnknownType()
 
-    elif isinstance(array, (bool, numpy.bool, numpy.bool_)):
+    elif isinstance(array, (bool, np.bool, np.bool_)):
         return awkward1.types.PrimitiveType("bool")
 
     elif isinstance(array, numbers.Integral):
@@ -132,16 +135,16 @@ def type(array):
     elif isinstance(
         array,
         (
-            numpy.int8,
-            numpy.int16,
-            numpy.int32,
-            numpy.int64,
-            numpy.uint8,
-            numpy.uint16,
-            numpy.uint32,
-            numpy.uint64,
-            numpy.float32,
-            numpy.float64,
+            np.int8,
+            np.int16,
+            np.int32,
+            np.int64,
+            np.uint8,
+            np.uint16,
+            np.uint32,
+            np.uint64,
+            np.float32,
+            np.float64,
         ),
     ):
         return awkward1.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
@@ -160,7 +163,7 @@ def type(array):
     elif isinstance(array, awkward1.layout.Record):
         return array.type(awkward1._util.typestrs(None))
 
-    elif isinstance(array, numpy.ndarray):
+    elif isinstance(array, np.ndarray):
         if len(array.shape) == 0:
             return type(array.reshape((1,))[0])
         else:
@@ -182,16 +185,16 @@ def type(array):
 
 
 type.dtype2primitive = {
-    numpy.int8: "int8",
-    numpy.int16: "int16",
-    numpy.int32: "int32",
-    numpy.int64: "int64",
-    numpy.uint8: "uint8",
-    numpy.uint16: "uint16",
-    numpy.uint32: "uint32",
-    numpy.uint64: "uint64",
-    numpy.float32: "float32",
-    numpy.float64: "float64",
+    np.int8: "int8",
+    np.int16: "int16",
+    np.int32: "int32",
+    np.int64: "int64",
+    np.uint8: "uint8",
+    np.uint16: "uint16",
+    np.uint32: "uint32",
+    np.uint64: "uint64",
+    np.float32: "float32",
+    np.float64: "float64",
 }
 
 
@@ -253,5 +256,5 @@ def keys(array):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_") and x not in ("numbers", "numpy", "awkward1")
+    if not x.startswith("_") and x not in ("numbers", "numpy", "np", "awkward1")
 ]

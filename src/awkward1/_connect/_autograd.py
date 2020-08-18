@@ -2,12 +2,14 @@
 
 from __future__ import absolute_import
 
-import numpy
-
 import awkward1.layout
 import awkward1.operations.convert
 import awkward1._connect._numpy
 import awkward1._util
+import awkward1.nplike
+
+
+numpy = awkward1.nplike.Numpy.instance()
 
 NEP13Box = None
 

@@ -12,13 +12,16 @@ except ImportError:
     from collections import Iterable
     from collections import MutableMapping
 
-import numpy
-
 import awkward1._connect._numpy
 import awkward1._connect._pandas
+import awkward1.nplike
 import awkward1.layout
 import awkward1.operations.convert
 import awkward1.operations.structure
+
+
+np = awkward1.nplike.NumpyMetadata.instance()
+numpy = awkward1.nplike.Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
@@ -198,7 +201,7 @@ class Array(
         elif isinstance(data, Array):
             layout = data.layout
 
-        elif isinstance(data, numpy.ndarray) and data.dtype != numpy.dtype("O"):
+        elif isinstance(data, np.ndarray) and data.dtype != np.dtype("O"):
             layout = awkward1.operations.convert.from_numpy(data, highlevel=False)
 
         elif type(data).__module__ == "pyarrow" or type(data).__module__.startswith("pyarrow."):

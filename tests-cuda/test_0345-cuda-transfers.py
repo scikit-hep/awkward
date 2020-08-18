@@ -110,27 +110,24 @@ def test_tocuda():
         [content1, listoffsetarray, content2, content1], keys=["one", "two", "2", "wonky"])
 
     cuda_recordarray = awkward1.copy_to(recordarray, "cuda")
-    print(cuda_recordarray)
-    print(awkward1.to_list(cuda_recordarray))
     copyback_recordarray = awkward1.copy_to(cuda_recordarray, "cpu")
-    print(copyback_recordarray)
-    # assert awkward1.to_list(cuda_recordarray) == awkward1.to_list(recordarray)
-    # assert awkward1.to_list(copyback_recordarray) == awkward1.to_list(recordarray)
+    assert awkward1.to_list(cuda_recordarray) == awkward1.to_list(recordarray)
+    assert awkward1.to_list(copyback_recordarray) == awkward1.to_list(recordarray)
 
-    # content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
-    # content = awkward1.Array(
-    #     ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]).layout
-    # tags = awkward1.layout.Index8(
-    #     numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
-    # index = awkward1.layout.Index32(
-    #     numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
-    # unionarray = awkward1.layout.UnionArray8_32(
-    #     tags, index, [content0, content1])
+    content0 = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    content = awkward1.Array(
+        ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]).layout
+    tags = awkward1.layout.Index8(
+        numpy.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=numpy.int8))
+    index = awkward1.layout.Index32(
+        numpy.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=numpy.int32))
+    unionarray = awkward1.layout.UnionArray8_32(
+        tags, index, [content0, content1])
 
-    # cuda_unionarray = awkward1.copy_to(unionarray, "cuda")
-    # copyback_unionarray = awkward1.copy_to(cuda_unionarray, "cpu")
-    # assert awkward1.to_list(cuda_unionarray) == awkward1.to_list(unionarray)
-    # assert awkward1.to_list(copyback_unionarray) == awkward1.to_list(unionarray)
+    cuda_unionarray = awkward1.copy_to(unionarray, "cuda")
+    copyback_unionarray = awkward1.copy_to(cuda_unionarray, "cpu")
+    assert awkward1.to_list(cuda_unionarray) == awkward1.to_list(unionarray)
+    assert awkward1.to_list(copyback_unionarray) == awkward1.to_list(unionarray)
 
     content = awkward1.layout.NumpyArray(
         numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
@@ -138,10 +135,10 @@ def test_tocuda():
         numpy.array([0, 2, 4, 6, 8, 9, 7, 5], dtype=numpy.int64))
     indexedarray = awkward1.layout.IndexedArray32(index, content)
 
-    # cuda_indexedarray = awkward1.copy_to(indexedarray, "cuda")
-    # copyback_indexedarray = awkward1.copy_to(cuda_indexedarray, "cpu")
-    # assert awkward1.to_list(cuda_indexedarray) == awkward1.to_list(indexedarray)
-    # assert awkward1.to_list(copyback_indexedarray) == awkward1.to_list(indexedarray)
+    cuda_indexedarray = awkward1.copy_to(indexedarray, "cuda")
+    copyback_indexedarray = awkward1.copy_to(cuda_indexedarray, "cpu")
+    assert awkward1.to_list(cuda_indexedarray) == awkward1.to_list(indexedarray)
+    assert awkward1.to_list(copyback_indexedarray) == awkward1.to_list(indexedarray)
 
     bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array(
         [True, True, False, False, False], dtype=numpy.int8)), listoffsetarray, True)
@@ -159,12 +156,12 @@ def test_tocuda():
     assert awkward1.to_list(copyback_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
 
 
-    # bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(
-    #     numpy.array([True, False], dtype=numpy.int8)), recordarray, True)
-    # cuda_bytemaskedarray = awkward1.copy_to(bytemaskedarray, "cuda")
-    # copyback_bytemaskedarray = awkward1.copy_to(cuda_bytemaskedarray, "cpu")
-    # assert awkward1.to_list(cuda_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
-    # assert awkward1.to_list(copyback_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
+    bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(
+        numpy.array([True, False], dtype=numpy.int8)), recordarray, True)
+    cuda_bytemaskedarray = awkward1.copy_to(bytemaskedarray, "cuda")
+    copyback_bytemaskedarray = awkward1.copy_to(cuda_bytemaskedarray, "cpu")
+    assert awkward1.to_list(cuda_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
+    assert awkward1.to_list(copyback_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
 
 
     bytemaskedarray = awkward1.layout.ByteMaskedArray(
@@ -174,19 +171,19 @@ def test_tocuda():
     assert awkward1.to_list(cuda_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
     assert awkward1.to_list(copyback_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
 
-    # bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(
-    #     numpy.array([True, False, False], dtype=numpy.int8)), unionarray, True)
-    # cuda_bytemaskedarray = awkward1.copy_to(bytemaskedarray, "cuda")
-    # copyback_bytemaskedarray = awkward1.copy_to(cuda_bytemaskedarray, "cpu")
-    # assert awkward1.to_list(cuda_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
-    # assert awkward1.to_list(copyback_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
+    bytemaskedarray = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(
+        numpy.array([True, False, False], dtype=numpy.int8)), unionarray, True)
+    cuda_bytemaskedarray = awkward1.copy_to(bytemaskedarray, "cuda")
+    copyback_bytemaskedarray = awkward1.copy_to(cuda_bytemaskedarray, "cpu")
+    assert awkward1.to_list(cuda_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
+    assert awkward1.to_list(copyback_bytemaskedarray) == awkward1.to_list(bytemaskedarray)
 
     ioa = awkward1.layout.IndexedOptionArray32(
         awkward1.layout.Index32([-30, 19, 6, 7, -3, 21, 13, 22, 17, 9, -12, 16]),
         awkward1.layout.NumpyArray(numpy.array([5.2, 1.7, 6.7, -0.4, 4.0, 7.8, 3.8, 6.8, 4.2, 0.3, 4.6, 6.2,
                                                 6.9, -0.7, 3.9, 1.6, 8.7, -0.7, 3.2, 4.3, 4.0, 5.8, 4.2, 7.0,
                                                 5.6, 3.8])))
-    # cuda_ioa = awkward1.copy_to(ioa, "cuda")
-    # copyback_ioa = awkward1.copy_to(cuda_ioa, "cpu")
-    # assert awkward1.to_list(cuda_ioa) == awkward1.to_list(ioa)
-    # assert awkward1.to_list(copyback_ioa) == awkward1.to_list(ioa)
+    cuda_ioa = awkward1.copy_to(ioa, "cuda")
+    copyback_ioa = awkward1.copy_to(cuda_ioa, "cpu")
+    assert awkward1.to_list(cuda_ioa) == awkward1.to_list(ioa)
+    assert awkward1.to_list(copyback_ioa) == awkward1.to_list(ioa)

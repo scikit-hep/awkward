@@ -5,17 +5,21 @@ from __future__ import absolute_import
 import json
 import ctypes
 
-import numpy
 import numba
 
 import awkward1.layout
 import awkward1._util
 import awkward1._connect._numba.arrayview
+import awkward1.nplike
+
+
+np = awkward1.nplike.NumpyMetadata.instance()
+numpy = awkward1.nplike.Numpy.instance()
 
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
 def typeof_NumpyArray(obj, c):
-    t = numba.typeof(numpy.asarray(obj))
+    t = numba.typeof(awkward1.nplike.of(obj).asarray(obj))
     return NumpyArrayType(
         numba.types.Array(t.dtype, t.ndim, "A"),
         numba.typeof(obj.identities),
@@ -41,7 +45,7 @@ def typeof_RegularArray(obj, c):
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray64)
 def typeof_ListArray(obj, c):
     return ListArrayType(
-        numba.typeof(numpy.asarray(obj.starts)),
+        numba.typeof(awkward1.nplike.of(obj.starts).asarray(obj.starts)),
         numba.typeof(obj.content),
         numba.typeof(obj.identities),
         obj.parameters,
@@ -53,7 +57,7 @@ def typeof_ListArray(obj, c):
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArray64)
 def typeof_IndexedArray(obj, c):
     return IndexedArrayType(
-        numba.typeof(numpy.asarray(obj.index)),
+        numba.typeof(awkward1.nplike.of(obj.index).asarray(obj.index)),
         numba.typeof(obj.content),
         numba.typeof(obj.identities),
         obj.parameters,
@@ -64,7 +68,7 @@ def typeof_IndexedArray(obj, c):
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedOptionArray64)
 def typeof_IndexedOptionArray(obj, c):
     return IndexedOptionArrayType(
-        numba.typeof(numpy.asarray(obj.index)),
+        numba.typeof(awkward1.nplike.of(obj.index).asarray(obj.index)),
         numba.typeof(obj.content),
         numba.typeof(obj.identities),
         obj.parameters,
@@ -74,7 +78,7 @@ def typeof_IndexedOptionArray(obj, c):
 @numba.extending.typeof_impl.register(awkward1.layout.ByteMaskedArray)
 def typeof_ByteMaskedArray(obj, c):
     return ByteMaskedArrayType(
-        numba.typeof(numpy.asarray(obj.mask)),
+        numba.typeof(awkward1.nplike.of(obj.mask).asarray(obj.mask)),
         numba.typeof(obj.content),
         obj.valid_when,
         numba.typeof(obj.identities),
@@ -85,7 +89,7 @@ def typeof_ByteMaskedArray(obj, c):
 @numba.extending.typeof_impl.register(awkward1.layout.BitMaskedArray)
 def typeof_BitMaskedArray(obj, c):
     return BitMaskedArrayType(
-        numba.typeof(numpy.asarray(obj.mask)),
+        numba.typeof(awkward1.nplike.of(obj.mask).asarray(obj.mask)),
         numba.typeof(obj.content),
         obj.valid_when,
         obj.lsb_order,
@@ -116,8 +120,8 @@ def typeof_RecordArray(obj, c):
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_64)
 def typeof_UnionArray(obj, c):
     return UnionArrayType(
-        numba.typeof(numpy.asarray(obj.tags)),
-        numba.typeof(numpy.asarray(obj.index)),
+        numba.typeof(awkward1.nplike.of(obj.tags).asarray(obj.tags)),
+        numba.typeof(awkward1.nplike.of(obj.index).asarray(obj.index)),
         tuple(numba.typeof(x) for x in obj.contents),
         numba.typeof(obj.identities),
         obj.parameters,
@@ -140,7 +144,7 @@ class ContentType(numba.types.Type):
             positions.append(-1)
             sharedptrs.append(None)
         else:
-            arrays.append(numpy.asarray(layout.identities))
+            arrays.append(awkward1.nplike.of(obj.identities).asarray(layout.identities))
             positions.append(arrays[-1])
             sharedptrs.append(None)
 
@@ -179,10 +183,11 @@ class ContentType(numba.types.Type):
             )
 
     def form_fill_identities(self, pos, layout, lookup):
-        if layout.identities is not None:
-            lookup.arrayptr[pos + self.IDENTITIES] = numpy.asarray(
-                layout.identities
-            ).ctypes.data
+        identities = layout.identities
+        if identities is not None:
+            lookup.arrayptr[pos + self.IDENTITIES] = (
+                awkward1.nplike.of(identities).asarray(identities).ctypes.data
+            )
 
     def IndexOf(self, arraytype):
         if arraytype.dtype.bitwidth == 8 and arraytype.dtype.signed:
@@ -375,7 +380,7 @@ class NumpyArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, positions, sharedptrs, arrays):
-        array = numpy.asarray(layout)
+        array = awkward1.nplike.of(layout).asarray(layout)
         assert len(array.shape) == 1
         pos = len(positions)
         cls.tolookup_identities(layout, positions, sharedptrs, arrays)
@@ -452,7 +457,9 @@ class NumpyArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        lookup.original_positions[pos + self.ARRAY] = numpy.asarray(layout)
+        lookup.original_positions[pos + self.ARRAY] = (
+            awkward1.nplike.of(layout).asarray(layout)
+        )
         lookup.arrayptrs[pos + self.ARRAY] = lookup.original_positions[
             pos + self.ARRAY
         ].ctypes.data
@@ -612,8 +619,8 @@ class ListArrayType(ContentType):
                 awkward1.layout.ListArray64,
             ),
         ):
-            starts = numpy.asarray(layout.starts)
-            stops = numpy.asarray(layout.stops)
+            starts = awkward1.nplike.of(layout.starts).asarray(layout.starts)
+            stops = awkward1.nplike.of(layout.stops).asarray(layout.stops)
         elif isinstance(
             layout,
             (
@@ -622,7 +629,7 @@ class ListArrayType(ContentType):
                 awkward1.layout.ListOffsetArray64,
             ),
         ):
-            offsets = numpy.asarray(layout.offsets)
+            offsets = awkward1.nplike.of(layout.offsets).asarray(layout.offsets)
             starts = offsets[:-1]
             stops = offsets[1:]
 
@@ -700,8 +707,8 @@ class ListArrayType(ContentType):
                 awkward1.layout.ListArray64,
             ),
         ):
-            starts = numpy.asarray(layout.starts)
-            stops = numpy.asarray(layout.stops)
+            starts = awkward1.nplike.of(layout.starts).asarray(layout.starts)
+            stops = awkward1.nplike.of(layout.stops).asarray(layout.stops)
         elif isinstance(
             layout,
             (
@@ -710,7 +717,7 @@ class ListArrayType(ContentType):
                 awkward1.layout.ListOffsetArray64,
             ),
         ):
-            offsets = numpy.asarray(layout.offsets)
+            offsets = awkward1.nplike.of(layout.offsets).asarray(layout.offsets)
             starts = offsets[:-1]
             stops = offsets[1:]
 
@@ -807,7 +814,7 @@ class IndexedArrayType(ContentType):
         pos = len(positions)
         cls.tolookup_identities(layout, positions, sharedptrs, arrays)
         sharedptrs[-1] = layout._persistent_shared_ptr
-        arrays.append(numpy.asarray(layout.index))
+        arrays.append(awkward1.nplike.of(layout.index).asarray(layout.index))
         positions.append(arrays[-1])
         sharedptrs.append(None)
         positions.append(None)
@@ -860,7 +867,7 @@ class IndexedArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        index = numpy.asarray(layout.index)
+        index = awkward1.nplike.of(layout.index).asarray(layout.index)
         lookup.original_positions[pos + self.INDEX] = index
         lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
 
@@ -963,7 +970,7 @@ class IndexedOptionArrayType(ContentType):
         pos = len(positions)
         cls.tolookup_identities(layout, positions, sharedptrs, arrays)
         sharedptrs[-1] = layout._persistent_shared_ptr
-        arrays.append(numpy.asarray(layout.index))
+        arrays.append(awkward1.nplike.of(layout.index).asarray(layout.index))
         positions.append(arrays[-1])
         sharedptrs.append(None)
         positions.append(None)
@@ -1016,7 +1023,7 @@ class IndexedOptionArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        index = numpy.asarray(layout.index)
+        index = awkward1.nplike.of(layout.index).asarray(layout.index)
         lookup.original_positions[pos + self.INDEX] = index
         lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
 
@@ -1134,7 +1141,7 @@ class ByteMaskedArrayType(ContentType):
         pos = len(positions)
         cls.tolookup_identities(layout, positions, sharedptrs, arrays)
         sharedptrs[-1] = layout._persistent_shared_ptr
-        arrays.append(numpy.asarray(layout.mask))
+        arrays.append(awkward1.nplike.of(layout.mask).asarray(layout.mask))
         positions.append(arrays[-1])
         sharedptrs.append(None)
         positions.append(None)
@@ -1191,7 +1198,7 @@ class ByteMaskedArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        mask = numpy.asarray(layout.mask)
+        mask = awkward1.nplike.of(layout.mask).asarray(layout.mask)
         lookup.original_positions[pos + self.MASK] = mask
         lookup.arrayptrs[pos + self.MASK] = mask.ctypes.data
 
@@ -1296,7 +1303,7 @@ class BitMaskedArrayType(ContentType):
         pos = len(positions)
         cls.tolookup_identities(layout, positions, sharedptrs, arrays)
         sharedptrs[-1] = layout._persistent_shared_ptr
-        arrays.append(numpy.asarray(layout.mask))
+        arrays.append(awkward1.nplike.of(layout.mask).asarray(layout.mask))
         positions.append(arrays[-1])
         sharedptrs.append(None)
         positions.append(None)
@@ -1358,7 +1365,7 @@ class BitMaskedArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        mask = numpy.asarray(layout.mask)
+        mask = awkward1.nplike.of(layout.mask).asarray(layout.mask)
         lookup.original_positions[pos + self.MASK] = mask
         lookup.arrayptrs[pos + self.MASK] = mask.ctypes.data
 
@@ -1717,7 +1724,7 @@ class RecordArrayType(ContentType):
                 return awkward1.layout.RecordArray(
                     contents,
                     self.recordlookup,
-                    numpy.iinfo(numpy.int64).max,
+                    np.iinfo(np.int64).max,
                     parameters=self.parameters,
                 )
             else:
@@ -1975,10 +1982,10 @@ class UnionArrayType(ContentType):
         pos = len(positions)
         cls.tolookup_identities(layout, positions, sharedptrs, arrays)
         sharedptrs[-1] = layout._persistent_shared_ptr
-        arrays.append(numpy.asarray(layout.tags))
+        arrays.append(awkward1.nplike.of(layout.tags).asarray(layout.tags))
         positions.append(arrays[-1])
         sharedptrs.append(None)
-        arrays.append(numpy.asarray(layout.index))
+        arrays.append(awkward1.nplike.of(layout.index).asarray(layout.index))
         positions.append(arrays[-1])
         sharedptrs.append(None)
         positions.extend([None] * layout.numcontents)
@@ -2049,11 +2056,11 @@ class UnionArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        tags = numpy.asarray(layout.tags)
+        tags = awkward1.nplike.of(layout.tags).asarray(layout.tags)
         lookup.original_positions[pos + self.TAGS] = tags
         lookup.arrayptrs[pos + self.TAGS] = tags.ctypes.data
 
-        index = numpy.asarray(layout.index)
+        index = awkward1.nplike.of(layout.index).asarray(layout.index)
         lookup.original_positions[pos + self.INDEX] = index
         lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
 
@@ -2162,7 +2169,7 @@ class VirtualArrayType(ContentType):
             )
         pyptr = ctypes.py_object(layout)
         ctypes.pythonapi.Py_IncRef(pyptr)
-        voidptr = numpy.frombuffer(pyptr, dtype=numpy.intp).item()
+        voidptr = numpy.frombuffer(pyptr, dtype=np.intp).item()
 
         positions.append(voidptr)
         sharedptrs.append(None)
@@ -2223,7 +2230,7 @@ class VirtualArrayType(ContentType):
 
         pyptr = ctypes.py_object(layout)
         ctypes.pythonapi.Py_IncRef(pyptr)
-        voidptr = numpy.frombuffer(pyptr, dtype=numpy.intp).item()
+        voidptr = numpy.frombuffer(pyptr, dtype=np.intp).item()
 
         lookup.original_positions[pos + self.PYOBJECT] = voidptr
         lookup.arrayptrs[pos + self.PYOBJECT] = voidptr

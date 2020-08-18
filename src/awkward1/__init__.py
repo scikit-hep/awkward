@@ -14,6 +14,9 @@ if distutils.version.LooseVersion(numpy.__version__) < distutils.version.LooseVe
 ):
     raise ImportError("Numpy 1.13.1 or later required")
 
+# NumPy-like alternatives
+import awkward1.nplike
+
 # shims for C++ (now everything is compiled into one 'awkward1._ext' module)
 import awkward1.layout
 import awkward1.types

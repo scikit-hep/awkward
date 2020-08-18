@@ -90,17 +90,33 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
         return out;
       })
 
+      .def("copy_to",
+           [name](const ak::IdentitiesOf<T>& self, const std::string& ptr_lib) -> py::object {
+             if (ptr_lib == "cpu") {
+               std::shared_ptr<ak::Identities> cpu_identities =
+                   self.copy_to(ak::kernel::lib::cpu) ;
+               return py::cast(*cpu_identities);
+             }
+             else if (ptr_lib == "cuda") {
+               std::shared_ptr<ak::Identities> cuda_identities =
+                   self.copy_to(ak::kernel::lib::cuda);
+               return py::cast(*cuda_identities);
+             }
+             else {
+               throw std::invalid_argument("specify 'cpu' or 'cuda'");
+             }
+           })
       .def_static("from_cupy", [name](ak::Identities::Ref ref,
-                                const ak::Identities::FieldLoc& fieldloc,
-                                py::object array) {
+                                      const ak::Identities::FieldLoc& fieldloc,
+                                      py::object array) {
         if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
 
           void* ptr = reinterpret_cast<void *>(py::cast<ssize_t>
-            (array.attr("data").attr("ptr")));
+              (array.attr("data").attr("ptr")));
 
           if (py::cast<int64_t>(array.attr("ndim")) != 2) {
             throw std::invalid_argument(
-              name + std::string(" must be built from a two-dimensional array"));
+                name + std::string(" must be built from a two-dimensional array"));
           }
           std::vector<int64_t> shape, strides;
 
@@ -110,9 +126,9 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
           if (strides[0] != sizeof(T)*shape[1]  ||
               strides[1] != sizeof(T)) {
             throw std::invalid_argument(
-              name + std::string(" must be built from a contiguous array (array"
-                                 ".stries == (array.shape[1]*array.itemsize, "
-                                 "array.itemsize)); try array.copy()"));
+                name + std::string(" must be built from a contiguous array (array"
+                                   ".stries == (array.shape[1]*array.itemsize, "
+                                   "array.itemsize)); try array.copy()"));
           }
           return ak::IdentitiesOf<T>(ref,
                                      fieldloc,
@@ -120,53 +136,44 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
                                      shape[1],
                                      shape[0],
                                      std::shared_ptr<T>(reinterpret_cast<T*>(ptr),
-                                           pyobject_deleter<T>(array.ptr())));
+                                                        pyobject_deleter<T>(array.ptr())),
+                                     ak::kernel::lib::cuda);
         }
         else {
           throw std::invalid_argument(name + std::string(
-            ".from_cupy() can only accept CuPy Arrays!"));
+              ".from_cupy() can only accept CuPy Arrays!"));
         }
-    })
-      .def("copy_to",
-         [name](const ak::IdentitiesOf<T>& self, const std::string& ptr_lib) -> py::object {
-             if (ptr_lib == "cpu") {
-               std::shared_ptr<ak::Identities> cpu_identities = self.copy_to(ak::kernel::lib::cpu) ;
-               return py::cast(*cpu_identities);
-             }
-             else if (ptr_lib == "cuda") {
-               std::shared_ptr<ak::Identities> cuda_identities = self.copy_to(ak::kernel::lib::cuda);
-               return py::cast(*cuda_identities);
-             }
-             else {
-               throw std::invalid_argument("specify 'cpu' or 'cuda'");
-             }
-         })
-//      .def("to_cupy", [name](const ak::IdentitiesOf<T>& self) -> py::object {
-//        if(self.ptr_lib() != ak::kernel::lib::cuda) {
-//          throw std::invalid_argument(name + " is not a Awkward CUDA array, "
-//                                             "use copy_to(\"cuda\") to convert it into one!");
-//        }
-//
-//        std::shared_ptr<ak::Identities> cuda_identities = self.copy_to(ak::kernel::lib::cuda);
-//        std::shared_ptr<ak::IdentitiesOf<T>> cuda_identities_of =
-//            reinterpret_cast<std::shared_ptr<ak::IdentitiesOf<T>>>(cuda_identities);
-//
-//        auto cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
-//            reinterpret_cast<ssize_t>(cuda_identities-> ),
-//            cuda_identities->length() * sizeof(T),
-//            cuda_identities);
-//
-//        auto cupy_memoryptr = py::module::import("cupy").attr("cuda").attr("MemoryPointer")(
-//            cupy_unowned_mem,
-//            0);
-//
-//        return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
-//            (py::module::import("cupy").attr("ndarray")(
-//                pybind11::make_tuple(py::cast<ssize_t>(cuda_identities->length())),
-//                py::format_descriptor<T>::format(),
-//                cupy_memoryptr,
-//                pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
-//      })
+      })
+      .def("to_cupy", [name](const ak::IdentitiesOf<T>& self) -> py::object {
+        if(self.ptr_lib() != ak::kernel::lib::cuda) {
+          throw std::invalid_argument(name + " is not a Awkward CUDA array, "
+                                             "use copy_to(\"cuda\") to convert it into one!");
+        }
+
+        std::shared_ptr<ak::Identities> cuda_identities =
+            self.copy_to(ak::kernel::lib::cuda);
+
+        ak::IdentitiesOf<T>* cuda_identities_of =
+            dynamic_cast<ak::IdentitiesOf<T>*>(cuda_identities.get());
+
+        py::object cupy_unowned_mem =
+            py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
+                reinterpret_cast<ssize_t>(cuda_identities_of->ptr().get()),
+                cuda_identities_of->length() * sizeof(T),
+                cuda_identities_of);
+
+        py::object cupy_memoryptr =
+            py::module::import("cupy").attr("cuda").attr("MemoryPointer")(
+                cupy_unowned_mem,
+                0);
+
+        return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
+            (py::module::import("cupy").attr("ndarray")(
+                pybind11::make_tuple(py::cast<ssize_t>(cuda_identities->length())),
+                py::format_descriptor<T>::format(),
+                cupy_memoryptr,
+                pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
+      })
 
   );
 }
