@@ -401,6 +401,38 @@ class ArrayViewModel(numba.core.datamodel.models.StructModel):
         super(ArrayViewModel, self).__init__(dmm, fe_type, members)
 
 
+@numba.core.imputils.lower_constant(ArrayViewType)
+def lower_const_Array(context, builder, viewtype, array):
+    view = array._numbaview
+    lookup = view.lookup
+    arrayptrs = lookup.arrayptrs
+    sharedptrs = lookup.sharedptrs
+    pos = view.pos
+    start = view.start
+    stop = view.stop
+
+    arrayptrs_val = context.make_constant_array(
+        builder, numba.typeof(arrayptrs), arrayptrs
+    )
+    sharedptrs_val = context.make_constant_array(
+        builder, numba.typeof(sharedptrs), sharedptrs
+    )
+
+    proxyout = context.make_helper(builder, viewtype)
+    proxyout.pos = context.get_constant(numba.intp, pos)
+    proxyout.start = context.get_constant(numba.intp, start)
+    proxyout.stop = context.get_constant(numba.intp, stop)
+    proxyout.arrayptrs = context.make_helper(
+        builder, numba.typeof(arrayptrs), arrayptrs_val
+    ).data
+    proxyout.sharedptrs = context.make_helper(
+        builder, numba.typeof(sharedptrs), sharedptrs_val
+    ).data
+    proxyout.pylookup = context.add_dynamic_addr(builder, id(lookup), info=str(type(lookup)))
+
+    return proxyout._getvalue()
+
+
 @numba.extending.unbox(ArrayViewType)
 def unbox_Array(viewtype, arrayobj, c):
     view_obj = c.pyapi.object_getattr_string(arrayobj, "_numbaview")

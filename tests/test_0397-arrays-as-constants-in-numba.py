@@ -12,6 +12,51 @@ import awkward1
 numba = pytest.importorskip("numba")
 
 
+def test_Array():
+    array = awkward1.Array([1, 2, 3])
+
+    @numba.njit
+    def f1():
+        array
+        return 3.14
+
+    f1()
+    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+
+    @numba.njit
+    def f2():
+        return array
+
+    a = f2()
+    assert a.tolist() == [1, 2, 3]
+    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+
+    @numba.njit
+    def f3():
+        return array, array
+
+    b, c = f3()
+    assert b.tolist() == [1, 2, 3]
+    assert c.tolist() == [1, 2, 3]
+    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+
+    del a
+    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+
+    del b
+    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+
+    del c
+    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+
+    @numba.njit
+    def f4():
+        return array[1]
+
+    assert f4() == 2
+    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+
+
 def test_ArrayBuilder():
     builder = awkward1.ArrayBuilder()
     assert sys.getrefcount(builder._layout) == 3
