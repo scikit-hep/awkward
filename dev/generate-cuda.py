@@ -25,6 +25,22 @@ KERNEL_WHITELIST = [
     "awkward_index_rpad_and_clip_axis1",
     "awkward_ListArray_min_range",
     "awkward_ListArray_rpad_and_clip_length_axis1",
+    "awkward_localindex",
+    "awkward_content_reduce_zeroparents_64",
+    "awkward_ListOffsetArray_reduce_global_startstop_64",
+    "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+    "awkward_ListOffsetArray_reduce_nonlocal_findgaps_64",
+    "awkward_IndexedArray_reduce_next_64",
+    "awkward_Index8_to_Index64",
+    "awkward_IndexU8_to_Index64",
+    "awkward_Index32_to_Index64",
+    "awkward_IndexU32_to_Index64",
+    "awkward_carry_arange",
+    "awkward_NumpyArray_getitem_next_at",
+    "awkward_ListArray_getitem_next_range_counts",
+    "awkward_IndexedArray_numnull",
+    "awkward_UnionArray_regular_index_getsize",
+    "awkward_ListArray_getitem_jagged_carrylen",
 ]
 
 
