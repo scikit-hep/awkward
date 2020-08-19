@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/OptionBuilder.cpp", line)
+
 #include <stdexcept>
 
 #include "awkward/Identities.h"
@@ -35,7 +37,7 @@ namespace awkward {
     out.get()->setthat(out);
     return out;
   }
- 
+
   OptionBuilder::OptionBuilder(const ArrayBuilderOptions& options,
                                const GrowableBuffer<int64_t>& index,
                                const BuilderPtr& content)
@@ -151,7 +153,8 @@ namespace awkward {
   OptionBuilder::endlist() {
     if (!content_.get()->active()) {
       throw std::invalid_argument(
-        "called 'endlist' without 'beginlist' at the same level before it");
+        std::string("called 'end_list' without 'begin_list' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else {
       int64_t length = content_.get()->length();
@@ -178,7 +181,8 @@ namespace awkward {
   OptionBuilder::index(int64_t index) {
     if (!content_.get()->active()) {
       throw std::invalid_argument(
-        "called 'index' without 'begintuple' at the same level before it");
+        std::string("called 'index' without 'begin_tuple' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else {
       content_.get()->index(index);
@@ -190,7 +194,8 @@ namespace awkward {
   OptionBuilder::endtuple() {
     if (!content_.get()->active()) {
       throw std::invalid_argument(
-        "called 'endtuple' without 'begintuple' at the same level before it");
+        std::string("called 'end_tuple' without 'begin_tuple' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else {
       int64_t length = content_.get()->length();
@@ -217,7 +222,8 @@ namespace awkward {
   OptionBuilder::field(const char* key, bool check) {
     if (!content_.get()->active()) {
       throw std::invalid_argument(
-        "called 'field' without 'beginrecord' at the same level before it");
+        std::string("called 'field' without 'begin_record' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else {
       content_.get()->field(key, check);
@@ -229,8 +235,8 @@ namespace awkward {
   OptionBuilder::endrecord() {
     if (!content_.get()->active()) {
       throw std::invalid_argument(
-        "called 'endrecord' without 'beginrecord' at the same level "
-        "before it");
+        std::string("called 'endrecord' without 'beginrecord' at the same level "
+                    "before it") + FILENAME(__LINE__));
     }
     else {
       int64_t length = content_.get()->length();

@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/virtual/ArrayGenerator.cpp", line)
+
 #include "sstream"
 
 #include "awkward/array/VirtualArray.h"
@@ -31,14 +33,14 @@ namespace awkward {
           std::string(
               "generated array does not have sufficient length: expected") +
           std::to_string(length_) + std::string(" but generated ") +
-          std::to_string(out.get()->length()));
+          std::to_string(out.get()->length()) + FILENAME(__LINE__));
     }
     if (form_.get() != nullptr  &&
         !form_.get()->equal(out.get()->form(true), true, true, false, true)) {
       throw std::invalid_argument(
           std::string("generated array does not conform to expected form:\n\n")
           + form_.get()->tostring() + std::string("\n\nbut generated:\n\n")
-          + out.get()->form(true).get()->tostring());
+          + out.get()->form(true).get()->tostring() + FILENAME(__LINE__));
     }
     return out;
   }

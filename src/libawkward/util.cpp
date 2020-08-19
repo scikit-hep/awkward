@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/util.cpp", line)
+
 #include <sstream>
 #include <set>
 
@@ -488,13 +490,13 @@ namespace awkward {
         catch (std::invalid_argument err) {
           throw std::invalid_argument(
             std::string("key ") + quote(key, true)
-            + std::string(" does not exist (not in record)"));
+            + std::string(" does not exist (not in record)") + FILENAME(__LINE__));
         }
         if (!(0 <= out && out < numfields)) {
           throw std::invalid_argument(
             std::string("key interpreted as fieldindex ") + key
-            + std::string(" for records with only " + std::to_string(numfields)
-                          + std::string(" fields")));
+            + std::string(" for records with only ") + std::to_string(numfields)
+            + std::string(" fields") + FILENAME(__LINE__));
         }
       }
       return out;
@@ -507,8 +509,8 @@ namespace awkward {
       if (fieldindex >= numfields) {
         throw std::invalid_argument(
           std::string("fieldindex ") + std::to_string(fieldindex)
-          + std::string(" for records with only " + std::to_string(numfields)
-                        + std::string(" fields")));
+          + std::string(" for records with only ") + std::to_string(numfields)
+          + std::string(" fields") + FILENAME(__LINE__));
       }
       if (recordlookup.get() != nullptr) {
         return recordlookup.get()->at((size_t) fieldindex);
@@ -629,12 +631,14 @@ namespace awkward {
     parameter_asstring(const Parameters &parameters, const std::string &key) {
       auto item = parameters.find(key);
       if (item == parameters.end()) {
-        throw std::runtime_error("parameter is null");
+        throw std::runtime_error(
+          std::string("parameter is null") + FILENAME(__LINE__));
       }
       rj::Document mine;
       mine.Parse<rj::kParseNanAndInfFlag>(item->second.c_str());
       if (!mine.IsString()) {
-        throw std::runtime_error("parameter is not a string");
+        throw std::runtime_error(
+          std::string("parameter is not a string") + FILENAME(__LINE__));
       }
       return mine.GetString();
     }

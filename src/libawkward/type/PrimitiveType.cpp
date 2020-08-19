@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/type/PrimitiveType.cpp", line)
+
 #include <sstream>
 
 #include "awkward/array/NumpyArray.h"
@@ -60,22 +62,26 @@ namespace awkward {
 
   int64_t
   PrimitiveType::fieldindex(const std::string& key) const {
-    throw std::invalid_argument("type contains no Records");
+    throw std::invalid_argument(
+      std::string("type contains no Records") + FILENAME(__LINE__));
   }
 
   const std::string
   PrimitiveType::key(int64_t fieldindex) const {
-    throw std::invalid_argument("type contains no Records");
+    throw std::invalid_argument(
+      std::string("type contains no Records") + FILENAME(__LINE__));
   }
 
   bool
   PrimitiveType::haskey(const std::string& key) const {
-    throw std::invalid_argument("type contains no Records");
+    throw std::invalid_argument(
+      std::string("type contains no Records") + FILENAME(__LINE__));
   }
 
   const std::vector<std::string>
   PrimitiveType::keys() const {
-    throw std::invalid_argument("type contains no Records");
+    throw std::invalid_argument(
+      std::string("type contains no Records") + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -86,7 +92,8 @@ namespace awkward {
     std::string format = util::dtype_to_format(dtype_);
     if (format.length() == 0) {
       throw std::invalid_argument(
-          "cannot create an empty array of unknown PrimitiveType");
+        std::string("cannot create an empty array of unknown PrimitiveType")
+        + FILENAME(__LINE__));
     }
     return std::make_shared<NumpyArray>(Identities::none(),
                                         parameters_,

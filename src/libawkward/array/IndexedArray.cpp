@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/IndexedArray.cpp", line)
+
 #include <sstream>
 #include <type_traits>
 
@@ -402,7 +404,7 @@ namespace awkward {
         std::string("mask length (") + std::to_string(mask.length())
         + std::string(") is not equal to ") + classname()
         + std::string(" length (") + std::to_string(index_.length())
-        + std::string(")"));
+        + std::string(")") + FILENAME(__LINE__));
     }
 
     Index64 nextindex(index_.length());
@@ -853,7 +855,8 @@ namespace awkward {
         }
       }
       else {
-        throw std::runtime_error("unrecognized Identities specialization");
+        throw std::runtime_error(
+          std::string("unrecognized Identities specialization") + FILENAME(__LINE__));
       }
     }
     identities_ = identities;
@@ -1191,7 +1194,8 @@ namespace awkward {
       return Content::getitem_next(*missing, tail, advanced);
     }
     else {
-      throw std::runtime_error("unrecognized slice type");
+      throw std::runtime_error(
+        std::string("unrecognized slice type") + FILENAME(__LINE__));
     }
   }
 
@@ -1306,7 +1310,8 @@ namespace awkward {
                                                      int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
-      throw std::invalid_argument("axis=0 not allowed for flatten");
+      throw std::invalid_argument(
+        std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
     }
     else if (ISOPTION) {
       int64_t numnull;
@@ -1455,7 +1460,8 @@ namespace awkward {
       util::handle_error(err2, classname(), identities_.get());
     }
     else {
-      throw std::runtime_error("unrecognized IndexedArray specialization");
+      throw std::runtime_error(
+        std::string("unrecognized IndexedArray specialization") + FILENAME(__LINE__));
     }
 
     return std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
@@ -1527,7 +1533,8 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else {
-      throw std::runtime_error("unrecognized IndexedArray specialization");
+      throw std::runtime_error(
+        std::string("unrecognized IndexedArray specialization") + FILENAME(__LINE__));
     }
 
     ContentPtr replaced_other = other;
@@ -1719,7 +1726,7 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("fillna value length (")
         + std::to_string(value.get()->length())
-        + std::string(") is not equal to 1"));
+        + std::string(") is not equal to 1") + FILENAME(__LINE__));
     }
     if (ISOPTION) {
       ContentPtrVec contents;
@@ -1887,7 +1894,8 @@ namespace awkward {
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(
             std::string("reduce_next with unbranching depth > negaxis expects a "
-            "ListOffsetArray64 whose offsets start at zero "));
+                        "ListOffsetArray64 whose offsets start at zero ")
+            + FILENAME(__LINE__));
         }
         struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
@@ -1910,7 +1918,8 @@ namespace awkward {
         throw std::runtime_error(
           std::string("reduce_next with unbranching depth > negaxis is only "
                       "expected to return RegularArray or ListOffsetArray64; "
-                      "instead, it returned ") + out.get()->classname());
+                      "instead, it returned ") + out.get()->classname()
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1954,7 +1963,8 @@ namespace awkward {
     int64_t axis,
     int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1") + FILENAME(__LINE__));
     }
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
@@ -2060,8 +2070,9 @@ namespace awkward {
         Index64 outoffsets(starts.length() + 1);
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(
-            "sort_next with unbranching depth > negaxis expects a "
-            "ListOffsetArray64 whose offsets start at zero");
+            std::string("sort_next with unbranching depth > negaxis expects a "
+                        "ListOffsetArray64 whose offsets start at zero")
+            + FILENAME(__LINE__));
         }
         struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
@@ -2085,7 +2096,8 @@ namespace awkward {
         throw std::runtime_error(
           std::string("sort_next with unbranching depth > negaxis is only "
                       "expected to return RegularArray or ListOffsetArray64; "
-                      "instead, it returned ") + out.get()->classname());
+                      "instead, it returned ") + out.get()->classname()
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2161,8 +2173,9 @@ namespace awkward {
         Index64 outoffsets(starts.length() + 1);
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(
-              "argsort_next with unbranching depth > negaxis expects a "
-              "ListOffsetArray64 whose offsets start at zero");
+            std::string("argsort_next with unbranching depth > negaxis expects a "
+                        "ListOffsetArray64 whose offsets start at zero")
+            + FILENAME(__LINE__));
         }
         struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
@@ -2185,8 +2198,9 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("argsort_next with unbranching depth > negaxis is only "
-                "expected to return RegularArray or ListOffsetArray64; "
-                "instead, it returned ") + out.get()->classname());
+                      "expected to return RegularArray or ListOffsetArray64; "
+                      "instead, it returned ") + out.get()->classname()
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2200,7 +2214,8 @@ namespace awkward {
                                          const Slice& tail,
                                          const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: IndexedArray::getitem_next(at)");
+      std::string("undefined operation: IndexedArray::getitem_next(at)")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, bool ISOPTION>
@@ -2209,7 +2224,8 @@ namespace awkward {
                                             const Slice& tail,
                                             const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: IndexedArray::getitem_next(range)");
+      std::string("undefined operation: IndexedArray::getitem_next(range)")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, bool ISOPTION>
@@ -2218,7 +2234,8 @@ namespace awkward {
                                             const Slice& tail,
                                             const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: IndexedArray::getitem_next(array)");
+      std::string("undefined operation: IndexedArray::getitem_next(array)")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, bool ISOPTION>
@@ -2227,7 +2244,8 @@ namespace awkward {
                                             const Slice& tail,
                                             const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: IndexedArray::getitem_next(jagged)");
+      std::string("undefined operation: IndexedArray::getitem_next(jagged)")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, bool ISOPTION>

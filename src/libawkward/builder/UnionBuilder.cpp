@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/UnionBuilder.cpp", line)
+
 #include <stdexcept>
 
 #include "awkward/Identities.h"
@@ -252,7 +254,8 @@ namespace awkward {
   UnionBuilder::endlist() {
     if (current_ == -1) {
       throw std::invalid_argument(
-        "called 'endlist' without 'beginlist' at the same level before it");
+        std::string("called 'end_list' without 'begin_list' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else {
       int64_t length = contents_[(size_t)current_].get()->length();
@@ -297,7 +300,8 @@ namespace awkward {
   UnionBuilder::index(int64_t index) {
     if (current_ == -1) {
       throw std::invalid_argument(
-        "called 'index' without 'begintuple' at the same level before it");
+        std::string("called 'index' without 'begin_tuple' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else {
       contents_[(size_t)current_].get()->index(index);
@@ -309,7 +313,8 @@ namespace awkward {
   UnionBuilder::endtuple() {
     if (current_ == -1) {
       throw std::invalid_argument(
-        "called 'endtuple' without 'begintuple' at the same level before it");
+        std::string("called 'end_tuple' without 'begin_tuple' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else {
       int64_t length = contents_[(size_t)current_].get()->length();
@@ -356,7 +361,8 @@ namespace awkward {
   UnionBuilder::field(const char* key, bool check) {
     if (current_ == -1) {
       throw std::invalid_argument(
-        "called 'field' without 'beginrecord' at the same level before it");
+        std::string("called 'field' without 'begin_record' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else {
       contents_[(size_t)current_].get()->field(key, check);
@@ -368,8 +374,8 @@ namespace awkward {
   UnionBuilder::endrecord() {
     if (current_ == -1) {
       throw std::invalid_argument(
-        "called 'endrecord' without 'beginrecord' at the same level "
-        "before it");
+        std::string("called 'end_record' without 'begin_record' at the same level "
+                    "before it") + FILENAME(__LINE__));
     }
     else {
       int64_t length = contents_[(size_t)current_].get()->length();

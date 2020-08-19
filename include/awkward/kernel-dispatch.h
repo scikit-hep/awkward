@@ -181,7 +181,9 @@ namespace awkward {
           kernel::cuda_array_deleter<T>());
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in ptr_alloc<bool>");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in ptr_alloc<bool>")
+          + FILENAME_FOR_EXCEPTIONS("include/awkward/kernel-dispatch.h", __LINE__));
       }
     }
 

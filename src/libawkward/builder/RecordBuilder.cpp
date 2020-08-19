@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/RecordBuilder.cpp", line)
+
 #include <stdexcept>
 
 #include "awkward/Identities.h"
@@ -128,8 +130,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'null' immediately after 'beginrecord'; "
-        "needs 'index' or 'endrecord'");
+        std::string("called 'null' immediately after 'begin_record'; "
+                    "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->null());
@@ -149,8 +151,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'boolean' immediately after 'beginrecord'; "
-        "needs 'index' or 'endrecord'");
+        std::string("called 'boolean' immediately after 'begin_record'; "
+                    "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->boolean(x));
@@ -170,8 +172,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'integer' immediately after 'beginrecord'; "
-        "needs 'index' or 'endrecord'");
+        std::string("called 'integer' immediately after 'begin_record'; "
+                    "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->integer(x));
@@ -191,8 +193,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'real' immediately after 'beginrecord'; "
-        "needs 'index' or 'endrecord'");
+        std::string("called 'real' immediately after 'begin_record'; "
+                    "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->real(x));
@@ -212,8 +214,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'string' immediately after 'beginrecord'; "
-        "needs 'index' or 'endrecord'");
+        std::string("called 'string' immediately after 'begin_record'; "
+                    "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
@@ -236,8 +238,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'beginlist' immediately after 'beginrecord'; "
-        "needs 'index' or 'endrecord'");
+        std::string("called 'begin_list' immediately after 'begin_record'; "
+                    "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
@@ -253,12 +255,14 @@ namespace awkward {
   RecordBuilder::endlist() {
     if (!begun_) {
       throw std::invalid_argument(
-        "called 'endlist' without 'beginlist' at the same level before it");
+        std::string("called 'end_list' without 'begin_list' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'endlist' immediately after 'beginrecord'; "
-        "needs 'index' or 'endrecord' and then 'beginlist'");
+        std::string("called 'end_list' immediately after 'begin_record'; "
+                    "needs 'index' or 'end_record' and then 'begin_list'")
+        + FILENAME(__LINE__));
     }
     else {
       contents_[(size_t)nextindex_].get()->endlist();
@@ -275,8 +279,9 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'begintuple' immediately after 'beginrecord'; "
-        "needs 'field_fast', 'field_check', or 'endrecord'");
+        std::string("called 'begin_tuple' immediately after 'begin_record'; "
+                    "needs 'field_fast', 'field_check', or 'end_record'")
+        + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
@@ -292,13 +297,14 @@ namespace awkward {
   RecordBuilder::index(int64_t index) {
     if (!begun_) {
       throw std::invalid_argument(
-        "called 'index' without 'begintuple' at the same level before it");
+        std::string("called 'index' without 'begin_tuple' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'index' immediately after 'beginrecord'; "
-        "needs 'field_fast', 'field_check' or 'endrecord' "
-        "and then 'begintuple'");
+        std::string("called 'index' immediately after 'begin_record'; "
+                    "needs 'field_fast', 'field_check' or 'end_record' "
+                    "and then 'begin_tuple'") + FILENAME(__LINE__));
     }
     else {
       contents_[(size_t)nextindex_].get()->index(index);
@@ -310,13 +316,14 @@ namespace awkward {
   RecordBuilder::endtuple() {
     if (!begun_) {
       throw std::invalid_argument(
-        "called 'endtuple' without 'begintuple' at the same level before it");
+        std::string("called 'end_tuple' without 'begin_tuple' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'endtuple' immediately after 'beginrecord'; "
-        "needs 'field_fast', 'field_check', or 'endrecord' "
-        "and then 'begintuple'");
+        std::string("called 'end_tuple' immediately after 'begin_record'; "
+                    "needs 'field_fast', 'field_check', or 'end_record' "
+                    "and then 'begin_tuple'") + FILENAME(__LINE__));
     }
     else {
       contents_[(size_t)nextindex_].get()->endtuple();
@@ -350,8 +357,9 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'beginrecord' immediately after 'beginrecord'; "
-        "needs 'field_fast', 'field_check', or 'endrecord'");
+        std::string("called 'begin_record' immediately after 'begin_record'; "
+                    "needs 'field_fast', 'field_check', or 'end_record'")
+        + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
@@ -378,7 +386,8 @@ namespace awkward {
   RecordBuilder::field_fast(const char* key) {
     if (!begun_) {
       throw std::invalid_argument(
-        "called 'field' without 'beginrecord' at the same level before it");
+        std::string("called 'field' without 'begin_record' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1  ||
              !contents_[(size_t)nextindex_].get()->active()) {
@@ -423,7 +432,8 @@ namespace awkward {
   RecordBuilder::field_check(const char* key) {
     if (!begun_) {
       throw std::invalid_argument(
-        "called 'field' without 'beginrecord' at the same level before it");
+        std::string("called 'field' without 'begin_record' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1  ||
              !contents_[(size_t)nextindex_].get()->active()) {
@@ -468,8 +478,8 @@ namespace awkward {
   RecordBuilder::endrecord() {
     if (!begun_) {
       throw std::invalid_argument(
-        "called 'endrecord' without 'beginrecord' at the same level "
-        "before it");
+        std::string("called 'end_record' without 'begin_record' at the same level "
+                    "before it") + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1  ||
              !contents_[(size_t)nextindex_].get()->active()) {
@@ -480,7 +490,7 @@ namespace awkward {
         if (contents_[i].get()->length() != length_ + 1) {
           throw std::invalid_argument(
             std::string("record field ") + util::quote(keys_[i], true)
-            + std::string(" filled more than once"));
+            + std::string(" filled more than once") + FILENAME(__LINE__));
         }
       }
       length_++;
@@ -501,8 +511,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'append' immediately after 'beginrecord'; "
-        "needs 'index' or 'endrecord'");
+        std::string("called 'append' immediately after 'begin_record'; "
+                    "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,

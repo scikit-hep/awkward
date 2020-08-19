@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/virtual.cpp", line)
+
 #include <sstream>
 
 #include <pybind11/pybind11.h>
@@ -154,7 +156,8 @@ make_PyArrayGenerator(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "ArrayGenerator 'form' must be an ak.forms.Form or None");
+              std::string("ArrayGenerator 'form' must be an ak.forms.Form or None")
+              + FILENAME(__LINE__));
           }
         }
         int64_t cpplength = -1;
@@ -164,7 +167,8 @@ make_PyArrayGenerator(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "ArrayGenerator 'length' must be an int or None");
+              std::string("ArrayGenerator 'length' must be an int or None")
+              + FILENAME(__LINE__));
           }
         }
         return PyArrayGenerator(cppform, cpplength, callable, args, kwargs);
@@ -247,7 +251,8 @@ make_SliceGenerator(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "SliceGenerator 'form' must be an ak.forms.Form or None");
+              std::string("SliceGenerator 'form' must be an ak.forms.Form or None")
+              + FILENAME(__LINE__));
           }
         }
         int64_t cpplength = -1;
@@ -257,7 +262,8 @@ make_SliceGenerator(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "SliceGenerator 'length' must be an int or None");
+              std::string("SliceGenerator 'length' must be an int or None")
+              + FILENAME(__LINE__));
           }
         }
         ak::Slice cppslice = toslice(slice);

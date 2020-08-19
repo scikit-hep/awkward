@@ -47,7 +47,7 @@ def test_NumpyArray():
 
     with pytest.raises(ValueError) as err:
         array2.sort(2, True, False)
-    assert str(err.value) == "axis=2 exceeds the depth of the nested list structure (which is 2)"
+    assert str(err.value).startswith("axis=2 exceeds the depth of the nested list structure (which is 2)")
 
 def test_IndexedOffsetArray():
     array = awkward1.Array([[  2.2, 1.1,   3.3 ],
@@ -445,7 +445,7 @@ def test_UnionArray():
 
     with pytest.raises(ValueError) as err:
         array.sort(1, True, False)
-    assert str(err.value) == "cannot sort UnionArray8_32"
+    assert str(err.value).startswith("cannot sort UnionArray8_32")
 
 def test_sort_strings():
     content1 = awkward1.from_iter(["one", "two", "three", "four", "five"], highlevel=False)

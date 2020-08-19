@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/Index.cpp", line)
+
 #include <cstring>
 #include <iomanip>
 #include <sstream>
@@ -30,7 +32,7 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-                std::string("unrecognized Index::Form: ") + str);
+        std::string("unrecognized Index::Form: ") + str + FILENAME(__LINE__));
     }
   }
 
@@ -48,7 +50,8 @@ namespace awkward {
     case Index::Form::i64:
       return "i64";
     default:
-      throw std::runtime_error("unrecognized Index::Form");
+      throw std::runtime_error(
+        std::string("unrecognized Index::Form") + FILENAME(__LINE__));
     }
   }
 
@@ -191,7 +194,8 @@ namespace awkward {
       return Index::Form::i64;
     }
     else {
-      throw std::runtime_error("unrecognized Index specialization");
+      throw std::runtime_error(
+        std::string("unrecognized Index specialization") + FILENAME(__LINE__));
     }
   }
 
@@ -245,7 +249,8 @@ namespace awkward {
     if (!(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop <= length_)
         &&  start != stop) {
       throw std::runtime_error(
-        "Index::getitem_range_nowrap with illegal start:stop for this length");
+        std::string("Index::getitem_range_nowrap with illegal start:stop for this length")
+        + FILENAME(__LINE__));
     }
     return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
   }

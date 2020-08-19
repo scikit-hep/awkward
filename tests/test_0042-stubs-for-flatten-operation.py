@@ -19,7 +19,7 @@ def test_flatten():
     assert awkward1.to_list(array.flatten(axis=-1)) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
     with pytest.raises(ValueError) as err:
         assert awkward1.to_list(array.flatten(axis=-2))
-    assert str(err.value) == "axis=0 not allowed for flatten"
+    assert str(err.value).startswith("axis=0 not allowed for flatten")
 
     array2 = array[2:-1]
     assert awkward1.to_list(array2.flatten(axis=1)) == [3.3, 4.4, 5.5]

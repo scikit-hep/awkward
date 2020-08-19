@@ -28,6 +28,8 @@
   #define ERROR struct Error
 #endif
 
+#define FILENAME_FOR_EXCEPTIONS(filename, line) std::string("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/" VERSION_INFO "/" filename "#L" #line ")")
+
 #include <iostream>
 #include <algorithm>
 #include <map>

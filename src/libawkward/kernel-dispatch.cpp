@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/kernel-dispatch.cpp", line)
+
 #include "awkward/common.h"
 #include "awkward/util.h"
 #include "awkward/kernels/operations.h"
@@ -56,19 +58,22 @@ namespace awkward {
       if (!handle) {
         if (ptr_lib == kernel::lib::cuda) {
           throw std::invalid_argument(
-            "array resides on a GPU, but 'awkward1-cuda-kernels' is not "
-            "installed; install it with:\n\n    "
-            "pip install awkward1[cuda] --upgrade");
+            std::string("array resides on a GPU, but 'awkward1-cuda-kernels' is not "
+                        "installed; install it with:\n\n    "
+                        "pip install awkward1[cuda] --upgrade")
+            + FILENAME(__LINE__));
         }
         else {
-          throw std::runtime_error("unrecognized ptr_lib in acquire_handle");
+          throw std::runtime_error(
+            std::string("unrecognized ptr_lib in acquire_handle")
+            + FILENAME(__LINE__));
         }
       }
       return handle;
 #else
       throw std::invalid_argument(
-          "array resides on a GPU, but 'awkward1-cuda-kernels' is not"
-          "supported on Windows");
+          std::string("array resides on a GPU, but 'awkward1-cuda-kernels' is not"
+                      "supported on Windows") + FILENAME(__LINE__));
 #endif
     }
 
@@ -77,8 +82,9 @@ namespace awkward {
 #ifndef _MSC_VER
       symbol_ptr = dlsym(handle, symbol_name.c_str());
       if (!symbol_ptr) {
-        throw std::runtime_error(symbol_name +
-                                 std::string(" not found in kernels library"));
+        throw std::runtime_error(
+          symbol_name + std::string(" not found in kernels library")
+          + FILENAME(__LINE__));
       }
 #endif
       return symbol_ptr;
@@ -115,7 +121,9 @@ namespace awkward {
       }
 
       else {
-        throw std::runtime_error("unrecognized ptr_lib in kernel::lib_tostring");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in kernel::lib_tostring")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -134,7 +142,9 @@ namespace awkward {
         return (*awkward_cuda_device_to_host_fcn)(to_ptr, from_ptr, bytelength);
       }
       else {
-        throw std::runtime_error("unrecognized combination of from_lib and to_lib");
+        throw std::runtime_error(
+          std::string("unrecognized combination of from_lib and to_lib")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -162,7 +172,9 @@ namespace awkward {
         return (*awkward_NumpyArraybool_getitem_at0_fcn)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in bool NumpyArray_getitem_at0");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in bool NumpyArray_getitem_at0")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -178,7 +190,9 @@ namespace awkward {
         return (*awkward_NumpyArray8_getitem_at0_fcn)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in int8_t NumpyArray_getitem_at0");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in int8_t NumpyArray_getitem_at0")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -194,7 +208,9 @@ namespace awkward {
         return (*awkward_NumpyArrayU8_getitem_at0_fcn)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in uint8_t NumpyArray_getitem_at0");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in uint8_t NumpyArray_getitem_at0")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -210,7 +226,9 @@ namespace awkward {
         return (*awkward_NumpyArray16_getitem_at0_fcn)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in int16_t NumpyArray_getitem_at0");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in int16_t NumpyArray_getitem_at0")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -226,7 +244,9 @@ namespace awkward {
         return (*awkward_NumpyArrayU16_getitem_at0_fcn)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in uint16_t NumpyArray_getitem_at0");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in uint16_t NumpyArray_getitem_at0")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -242,7 +262,9 @@ namespace awkward {
         return (*awkward_NumpyArray32_getitem_at0_fcn)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in int32_t NumpyArray_getitem_at0");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in int32_t NumpyArray_getitem_at0")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -258,7 +280,9 @@ namespace awkward {
         return (*awkward_NumpyArrayU32_getitem_at0_fcn)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in uint32_t NumpyArray_getitem_at0");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in uint32_t NumpyArray_getitem_at0")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -274,7 +298,9 @@ namespace awkward {
         return (*awkward_NumpyArray64_getitem_at0_fcn)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in int64_t NumpyArray_getitem_at0");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in int64_t NumpyArray_getitem_at0")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -290,7 +316,9 @@ namespace awkward {
         return (*awkward_NumpyArrayU64_getitem_at0_fcn)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in uint64_t NumpyArray_getitem_at0");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in uint64_t NumpyArray_getitem_at0")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -306,7 +334,9 @@ namespace awkward {
         return (*awkward_NumpyArrayfloat32_getitem_at0_fcn)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in float NumpyArray_getitem_at0");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in float NumpyArray_getitem_at0")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -322,7 +352,9 @@ namespace awkward {
         return (*awkward_NumpyArrayfloat64_getitem_at0_fcn)(ptr);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in double NumpyArray_getitem_at0");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in double NumpyArray_getitem_at0")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -356,11 +388,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for regularize_arrayslice_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for regularize_arrayslice_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for regularize_arrayslice_64");
+          std::string("unrecognized ptr_lib for regularize_arrayslice_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -378,11 +412,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_to_Index64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_to_Index64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_to_Index64");
+          std::string("unrecognized ptr_lib for Index_to_Index64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -400,11 +436,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_to_Index64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_to_Index64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_to_Index64");
+          std::string("unrecognized ptr_lib for Index_to_Index64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -422,11 +460,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_to_Index64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_to_Index64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_to_Index64");
+          std::string("unrecognized ptr_lib for Index_to_Index64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -444,11 +484,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_to_Index64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_to_Index64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_to_Index64");
+          std::string("unrecognized ptr_lib for Index_to_Index64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -470,11 +512,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_carry_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_carry_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_carry_64");
+          std::string("unrecognized ptr_lib for Index_carry_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -496,11 +540,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_carry_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_carry_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_carry_64");
+          std::string("unrecognized ptr_lib for Index_carry_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -522,11 +568,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_carry_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_carry_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_carry_64");
+          std::string("unrecognized ptr_lib for Index_carry_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -548,11 +596,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_carry_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_carry_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_carry_64");
+          std::string("unrecognized ptr_lib for Index_carry_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -574,11 +624,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_carry_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_carry_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_carry_64");
+          std::string("unrecognized ptr_lib for Index_carry_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -598,11 +650,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_carry_nocheck_64");
+          std::string("unrecognized ptr_lib for Index_carry_nocheck_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -622,11 +676,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_carry_nocheck_64");
+          std::string("unrecognized ptr_lib for Index_carry_nocheck_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -646,11 +702,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_carry_nocheck_64");
+          std::string("unrecognized ptr_lib for Index_carry_nocheck_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -670,11 +728,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_carry_nocheck_64");
+          std::string("unrecognized ptr_lib for Index_carry_nocheck_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -694,11 +754,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Index_carry_nocheck_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Index_carry_nocheck_64");
+          std::string("unrecognized ptr_lib for Index_carry_nocheck_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -719,11 +781,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for slicearray_ravel_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for slicearray_ravel_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for slicearray_ravel_64");
+          std::string("unrecognized ptr_lib for slicearray_ravel_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -742,11 +806,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for slicemissing_check_same");
+          std::string("not implemented: ptr_lib == cuda_kernels for slicemissing_check_same")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for slicemissing_check_same");
+          std::string("unrecognized ptr_lib for slicemissing_check_same")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -762,11 +828,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for carry_arange");
+          std::string("not implemented: ptr_lib == cuda_kernels for carry_arange")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for carry_arange");
+          std::string("unrecognized ptr_lib for carry_arange")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -782,11 +850,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for carry_arange");
+          std::string("not implemented: ptr_lib == cuda_kernels for carry_arange")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for carry_arange");
+          std::string("unrecognized ptr_lib for carry_arange")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -802,11 +872,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for carry_arange");
+          std::string("not implemented: ptr_lib == cuda_kernels for carry_arange")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for carry_arange");
+          std::string("unrecognized ptr_lib for carry_arange")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -830,11 +902,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_getitem_carry_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_getitem_carry_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_getitem_carry_64");
+          std::string("unrecognized ptr_lib for Identities_getitem_carry_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -858,11 +932,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_getitem_carry_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_getitem_carry_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_getitem_carry_64");
+          std::string("unrecognized ptr_lib for Identities_getitem_carry_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -879,11 +955,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_contiguous_init_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_contiguous_init_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_contiguous_init_64");
+          std::string("unrecognized ptr_lib for NumpyArray_contiguous_init_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -905,11 +983,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_contiguous_copy_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_contiguous_copy_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_contiguous_copy_64");
+          std::string("unrecognized ptr_lib for NumpyArray_contiguous_copy_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -930,11 +1010,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_contiguous_next_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_contiguous_next_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_contiguous_next_64");
+          std::string("unrecognized ptr_lib for NumpyArray_contiguous_next_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -955,11 +1037,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_null_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_null_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_getitem_next_null_64");
+          std::string("unrecognized ptr_lib for NumpyArray_getitem_next_null_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -980,11 +1064,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_at_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_at_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_getitem_next_at_64");
+          std::string("unrecognized ptr_lib for NumpyArray_getitem_next_at_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1009,11 +1095,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_range_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_range_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_getitem_next_range_64");
+          std::string("unrecognized ptr_lib for NumpyArray_getitem_next_range_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1042,11 +1130,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_range_advanced_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_range_advanced_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_getitem_next_range_advanced_64");
+          std::string("unrecognized ptr_lib for NumpyArray_getitem_next_range_advanced_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1071,11 +1161,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_array_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_array_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_getitem_next_array_64");
+          std::string("unrecognized ptr_lib for NumpyArray_getitem_next_array_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1098,11 +1190,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_array_advanced_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_next_array_advanced_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_getitem_next_array_advanced_64");
+          std::string("unrecognized ptr_lib for NumpyArray_getitem_next_array_advanced_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1121,11 +1215,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_boolean_numtrue");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_boolean_numtrue")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_getitem_boolean_numtrue");
+          std::string("unrecognized ptr_lib for NumpyArray_getitem_boolean_numtrue")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1144,11 +1240,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_boolean_nonzero_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_getitem_boolean_nonzero_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_getitem_boolean_nonzero_64");
+          std::string("unrecognized ptr_lib for NumpyArray_getitem_boolean_nonzero_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1170,11 +1268,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_at_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_at_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_at_64");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_at_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1196,11 +1296,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_at_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_at_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_at_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_at_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1222,11 +1324,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_at_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_at_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_at_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_at_64<int64_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -1252,11 +1356,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_carrylength<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_carrylength<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_range_carrylength<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_range_carrylength<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1282,11 +1388,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_carrylength<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_carrylength<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_range_carrylength<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_range_carrylength<uint32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -1312,11 +1420,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_carrylength<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_carrylength<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_range_carrylength<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_range_carrylength<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1344,11 +1454,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_range_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_range_64<int32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -1376,11 +1488,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_range_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_range_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1408,11 +1522,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_range_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_range_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1430,11 +1546,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_counts_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_counts_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_range_counts_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_range_counts_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1452,11 +1570,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_counts_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_counts_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_range_counts_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_range_counts_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1474,11 +1594,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_counts_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_counts_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_range_counts_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_range_counts_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1498,11 +1620,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_spreadadvanced_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_spreadadvanced_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_range_spreadadvanced_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_range_spreadadvanced_64<int32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -1522,11 +1646,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_spreadadvanced_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_spreadadvanced_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_range_spreadadvanced_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_range_spreadadvanced_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1546,11 +1672,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_spreadadvanced_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_range_spreadadvanced_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_range_spreadadvanced_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_range_spreadadvanced_64<int64_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -1578,11 +1706,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_array_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_array_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1610,11 +1740,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_array_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_array_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1642,11 +1774,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_array_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_array_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1676,11 +1810,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_advanced_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_advanced_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_array_advanced_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_array_advanced_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1710,11 +1846,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_advanced_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_advanced_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_array_advanced_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_array_advanced_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1744,11 +1882,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_advanced_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_next_array_advanced_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_next_array_advanced_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_next_array_advanced_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1774,11 +1914,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_carry_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_carry_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_carry_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_carry_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1804,11 +1946,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_carry_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_carry_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_carry_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_carry_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -1834,11 +1978,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_carry_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_carry_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_carry_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_carry_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1857,11 +2003,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_at_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_at_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_getitem_next_at_64");
+          std::string("unrecognized ptr_lib for RegularArray_getitem_next_at_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1884,11 +2032,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_range_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_range_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_getitem_next_range_64");
+          std::string("unrecognized ptr_lib for RegularArray_getitem_next_range_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1907,11 +2057,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_range_spreadadvanced_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_range_spreadadvanced_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_getitem_next_range_spreadadvanced_64");
+          std::string("unrecognized ptr_lib for RegularArray_getitem_next_range_spreadadvanced_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1930,11 +2082,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_array_regularize_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_array_regularize_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_getitem_next_array_regularize_64");
+          std::string("unrecognized ptr_lib for RegularArray_getitem_next_array_regularize_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1957,11 +2111,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_array_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_array_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_getitem_next_array_64");
+          std::string("unrecognized ptr_lib for RegularArray_getitem_next_array_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1986,11 +2142,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_array_advanced_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_next_array_advanced_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_getitem_next_array_advanced_64");
+          std::string("unrecognized ptr_lib for RegularArray_getitem_next_array_advanced_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2009,11 +2167,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_carry_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_carry_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_getitem_carry_64");
+          std::string("unrecognized ptr_lib for RegularArray_getitem_carry_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2031,11 +2191,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_numnull<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_numnull<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_numnull<int32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_numnull<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2053,11 +2215,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_numnull<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_numnull<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_numnull<uint32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_numnull<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2075,11 +2239,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_numnull<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_numnull<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_numnull<int64_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_numnull<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2101,11 +2267,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_64<int32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_64<int32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -2127,11 +2295,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_64<uint32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2153,11 +2323,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_64<int64_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_64<int64_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -2179,11 +2351,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_mask_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_mask_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_mask_64<int32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_mask_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2205,11 +2379,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_mask_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_mask_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_mask_64<uint32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_mask_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -2231,11 +2407,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_mask_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_outindex_mask_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_mask_64<int64_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_getitem_nextcarry_outindex_mask_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2258,11 +2436,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_getitem_adjust_offsets_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_getitem_adjust_offsets_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_getitem_adjust_offsets_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_getitem_adjust_offsets_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2293,11 +2473,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_getitem_adjust_offsets_index_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_getitem_adjust_offsets_index_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_getitem_adjust_offsets_index_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_getitem_adjust_offsets_index_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2322,11 +2504,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_adjust_outindex_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_adjust_outindex_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_getitem_adjust_outindex_64");
+          std::string("unrecognized ptr_lib for IndexedArray_getitem_adjust_outindex_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2346,11 +2530,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_64");
+          std::string("unrecognized ptr_lib for IndexedArray_getitem_nextcarry_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2370,11 +2556,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_64");
+          std::string("unrecognized ptr_lib for IndexedArray_getitem_nextcarry_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2394,11 +2582,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_nextcarry_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_getitem_nextcarry_64");
+          std::string("unrecognized ptr_lib for IndexedArray_getitem_nextcarry_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2420,11 +2610,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_carry_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_carry_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_getitem_carry_64<int32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_getitem_carry_64<int32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -2446,11 +2638,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_carry_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_carry_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_getitem_carry_64<uint32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_getitem_carry_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2472,11 +2666,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_carry_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_getitem_carry_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_getitem_carry_64<int64_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_getitem_carry_64<int64_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -2494,11 +2690,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_regular_index_getsize<int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_regular_index_getsize<int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_regular_index_getsize<int8_t>");
+          std::string("unrecognized ptr_lib for UnionArray_regular_index_getsize<int8_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2520,11 +2718,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_regular_index<int8_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_regular_index<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_regular_index<int8_t, int32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_regular_index<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -2546,11 +2746,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_regular_index<int8_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_regular_index<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_regular_index<int8_t, uint32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_regular_index<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2572,11 +2774,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_regular_index<int8_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_regular_index<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_regular_index<int8_t, int64_t>");
+          std::string("unrecognized ptr_lib for UnionArray_regular_index<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -2600,11 +2804,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_project_64<int8_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_project_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_project_64<int8_t, int32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_project_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2628,11 +2834,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_project_64<int8_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_project_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_project_64<int8_t, uint32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_project_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -2656,11 +2864,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_project_64<int8_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_project_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_project_64<int8_t, int64_t>");
+          std::string("unrecognized ptr_lib for UnionArray_project_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2681,11 +2891,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for missing_repeat_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for missing_repeat_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for missing_repeat_64");
+          std::string("unrecognized ptr_lib for missing_repeat_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2706,11 +2918,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_jagged_expand_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_getitem_jagged_expand_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_getitem_jagged_expand_64");
+          std::string("unrecognized ptr_lib for RegularArray_getitem_jagged_expand_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2738,11 +2952,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_expand_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_expand_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_jagged_expand_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_jagged_expand_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2770,11 +2986,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_expand_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_expand_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_jagged_expand_64");
+          std::string("unrecognized ptr_lib for ListArray_getitem_jagged_expand_64")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -2802,11 +3020,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_expand_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_expand_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_jagged_expand_64");
+          std::string("unrecognized ptr_lib for ListArray_getitem_jagged_expand_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2825,11 +3045,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_carrylen_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_carrylen_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_jagged_carrylen_64");
+          std::string("unrecognized ptr_lib for ListArray_getitem_jagged_carrylen_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2861,11 +3083,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_apply_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_apply_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_jagged_apply_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_jagged_apply_64<int32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -2897,11 +3121,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_apply_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_apply_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_jagged_apply_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_jagged_apply_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -2933,11 +3159,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_apply_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_apply_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_jagged_apply_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_jagged_apply_64<int64_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -2960,11 +3188,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_numvalid_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_numvalid_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_jagged_numvalid_64");
+          std::string("unrecognized ptr_lib for ListArray_getitem_jagged_numvalid_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2989,11 +3219,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_shrink_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_shrink_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_jagged_shrink_64");
+          std::string("unrecognized ptr_lib for ListArray_getitem_jagged_shrink_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3017,11 +3249,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_descend_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_descend_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_jagged_descend_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_jagged_descend_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3045,11 +3279,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_descend_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_descend_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_jagged_descend_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_jagged_descend_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -3073,11 +3309,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_descend_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_getitem_jagged_descend_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_getitem_jagged_descend_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_getitem_jagged_descend_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3097,7 +3335,9 @@ namespace awkward {
           at);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in int8_t index_getitem_at_nowrap");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in int8_t index_getitem_at_nowrap")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3117,7 +3357,9 @@ namespace awkward {
           at);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in uint8_t index_getitem_at_nowrap");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in uint8_t index_getitem_at_nowrap")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3137,7 +3379,9 @@ namespace awkward {
           at);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in int32_t index_getitem_at_nowrap");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in int32_t index_getitem_at_nowrap")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3157,7 +3401,9 @@ namespace awkward {
           at);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in uint32_t index_getitem_at_nowrap");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in uint32_t index_getitem_at_nowrap")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3177,7 +3423,9 @@ namespace awkward {
           at);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in int64_t index_getitem_at_nowrap");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in int64_t index_getitem_at_nowrap")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3200,7 +3448,9 @@ namespace awkward {
           value);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in void index_setitem_at_nowrap")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3223,7 +3473,9 @@ namespace awkward {
           value);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in void index_setitem_at_nowrap")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3246,7 +3498,9 @@ namespace awkward {
           value);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in void index_setitem_at_nowrap")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3269,7 +3523,9 @@ namespace awkward {
           value);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in void index_setitem_at_nowrap")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3292,7 +3548,9 @@ namespace awkward {
           value);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in void index_setitem_at_nowrap");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in void index_setitem_at_nowrap")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3313,11 +3571,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_getitem_carry_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_getitem_carry_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ByteMaskedArray_getitem_carry_64");
+          std::string("unrecognized ptr_lib for ByteMaskedArray_getitem_carry_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3336,11 +3596,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_numnull");
+          std::string("not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_numnull")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ByteMaskedArray_numnull");
+          std::string("unrecognized ptr_lib for ByteMaskedArray_numnull")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3359,11 +3621,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_getitem_nextcarry_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_getitem_nextcarry_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ByteMaskedArray_getitem_nextcarry_64");
+          std::string("unrecognized ptr_lib for ByteMaskedArray_getitem_nextcarry_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3384,11 +3648,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_getitem_nextcarry_outindex_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_getitem_nextcarry_outindex_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ByteMaskedArray_getitem_nextcarry_outindex_64");
+          std::string("unrecognized ptr_lib for ByteMaskedArray_getitem_nextcarry_outindex_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3407,11 +3673,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_toIndexedOptionArray64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_toIndexedOptionArray64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ByteMaskedArray_toIndexedOptionArray64");
+          std::string("unrecognized ptr_lib for ByteMaskedArray_toIndexedOptionArray64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3434,11 +3702,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Content_getitem_next_missing_jagged_getmaskstartstop");
+          std::string("not implemented: ptr_lib == cuda_kernels for Content_getitem_next_missing_jagged_getmaskstartstop")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Content_getitem_next_missing_jagged_getmaskstartstop");
+          std::string("unrecognized ptr_lib for Content_getitem_next_missing_jagged_getmaskstartstop")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3462,11 +3732,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for MaskedArray_getitem_next_jagged_project");
+          std::string("not implemented: ptr_lib == cuda_kernels for MaskedArray_getitem_next_jagged_project")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for MaskedArray_getitem_next_jagged_project");
+          std::string("unrecognized ptr_lib for MaskedArray_getitem_next_jagged_project")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -3489,11 +3761,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for MaskedArray_getitem_next_jagged_project");
+          std::string("not implemented: ptr_lib == cuda_kernels for MaskedArray_getitem_next_jagged_project")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for MaskedArray_getitem_next_jagged_project");
+          std::string("unrecognized ptr_lib for MaskedArray_getitem_next_jagged_project")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -3516,11 +3790,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for MaskedArray_getitem_next_jagged_project");
+          std::string("not implemented: ptr_lib == cuda_kernels for MaskedArray_getitem_next_jagged_project")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for MaskedArray_getitem_next_jagged_project");
+          std::string("unrecognized ptr_lib for MaskedArray_getitem_next_jagged_project")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3538,11 +3814,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for new_Identities");
+          std::string("not implemented: ptr_lib == cuda_kernels for new_Identities")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for new_Identities");
+          std::string("unrecognized ptr_lib for new_Identities")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3558,11 +3836,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for new_Identities");
+          std::string("not implemented: ptr_lib == cuda_kernels for new_Identities")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for new_Identities");
+          std::string("unrecognized ptr_lib for new_Identities")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3582,11 +3862,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_to_Identities64");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_to_Identities64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_to_Identities64");
+          std::string("unrecognized ptr_lib for Identities_to_Identities64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3610,11 +3892,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int32_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int32_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_ListOffsetArray<int32_t, int32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_ListOffsetArray<int32_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3638,11 +3922,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int32_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int32_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_ListOffsetArray<int32_t, uint32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_ListOffsetArray<int32_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3666,11 +3952,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int32_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int32_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_ListOffsetArray<int32_t, int64_t>");
+          std::string("unrecognized ptr_lib for Identities_from_ListOffsetArray<int32_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3694,11 +3982,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int64_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int64_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_ListOffsetArray<int64_t, int32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_ListOffsetArray<int64_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3722,11 +4012,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int64_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int64_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_ListOffsetArray<int64_t, uint32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_ListOffsetArray<int64_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3750,11 +4042,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int64_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_ListOffsetArray<int64_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_ListOffsetArray<int64_t, int64_t>");
+          std::string("unrecognized ptr_lib for Identities_from_ListOffsetArray<int64_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3782,11 +4076,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int32_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int32_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_ListArray<int32_t, int32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_ListArray<int32_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3814,11 +4110,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int32_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int32_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_ListArray<int32_t, uint32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_ListArray<int32_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3846,11 +4144,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int32_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int32_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_ListArray<int32_t, int64_t>");
+          std::string("unrecognized ptr_lib for Identities_from_ListArray<int32_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3878,11 +4178,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int64_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int64_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_ListArray<int64_t, int32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_ListArray<int64_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3910,11 +4212,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int64_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int64_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_ListArray<int64_t, uint32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_ListArray<int64_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3942,11 +4246,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int64_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_ListArray<int64_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_ListArray<int64_t, int64_t>");
+          std::string("unrecognized ptr_lib for Identities_from_ListArray<int64_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3970,11 +4276,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_RegularArray");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_RegularArray")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_RegularArray");
+          std::string("unrecognized ptr_lib for Identities_from_RegularArray")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -3998,11 +4306,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_RegularArray");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_RegularArray")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_RegularArray");
+          std::string("unrecognized ptr_lib for Identities_from_RegularArray")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4028,11 +4338,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int32_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int32_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_IndexedArray<int32_t, int32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_IndexedArray<int32_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4058,11 +4370,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int32_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int32_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_IndexedArray<int32_t, uint32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_IndexedArray<int32_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -4088,11 +4402,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int32_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int32_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_IndexedArray<int32_t, int64_t>");
+          std::string("unrecognized ptr_lib for Identities_from_IndexedArray<int32_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4118,11 +4434,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int64_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int64_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_IndexedArray<int64_t, int32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_IndexedArray<int64_t, int32_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -4148,11 +4466,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int64_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int64_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_IndexedArray<int64_t, uint32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_IndexedArray<int64_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4178,11 +4498,13 @@ namespace awkward {
      }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int64_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_IndexedArray<int64_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_IndexedArray<int64_t, int64_t>");
+          std::string("unrecognized ptr_lib for Identities_from_IndexedArray<int64_t, int64_t>")
+          + FILENAME(__LINE__));
       }
      }
 
@@ -4212,11 +4534,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int32_t, int8_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int32_t, int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_UnionArray<int32_t, int8_t, int32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_UnionArray<int32_t, int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4246,11 +4570,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int32_t, int8_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int32_t, int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_UnionArray<int32_t, int8_t, uint32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_UnionArray<int32_t, int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4280,11 +4606,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int32_t, int8_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int32_t, int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_UnionArray<int32_t, int8_t, int64_t>");
+          std::string("unrecognized ptr_lib for Identities_from_UnionArray<int32_t, int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4314,11 +4642,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int64_t, int8_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int64_t, int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_UnionArray<int64_t, int8_t, int32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_UnionArray<int64_t, int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4348,11 +4678,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int64_t, int8_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int64_t, int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_UnionArray<int64_t, int8_t, uint32_t>");
+          std::string("unrecognized ptr_lib for Identities_from_UnionArray<int64_t, int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4382,11 +4714,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int64_t, int8_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_from_UnionArray<int64_t, int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_from_UnionArray<int64_t, int8_t, int64_t>");
+          std::string("unrecognized ptr_lib for Identities_from_UnionArray<int64_t, int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4406,11 +4740,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_extend");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_extend")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_extend");
+          std::string("unrecognized ptr_lib for Identities_extend")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4430,11 +4766,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for Identities_extend");
+          std::string("not implemented: ptr_lib == cuda_kernels for Identities_extend")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for Identities_extend");
+          std::string("unrecognized ptr_lib for Identities_extend")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4463,7 +4801,9 @@ namespace awkward {
           length);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in ListArray_num_64<int32_t>");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in ListArray_num_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4490,7 +4830,9 @@ namespace awkward {
           length);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in ListArray_num_64<uint32_t>");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in ListArray_num_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4517,7 +4859,9 @@ namespace awkward {
           length);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in ListArray_num_64<int64_t>");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in ListArray_num_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4540,7 +4884,9 @@ namespace awkward {
           length);
       }
       else {
-        throw std::runtime_error("unrecognized ptr_lib in RegularArray_num_64");
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in RegularArray_num_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4562,11 +4908,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_flatten_offsets_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_flatten_offsets_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_flatten_offsets_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_flatten_offsets_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4588,11 +4936,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_flatten_offsets_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_flatten_offsets_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_flatten_offsets_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_flatten_offsets_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4614,11 +4964,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_flatten_offsets_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_flatten_offsets_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_flatten_offsets_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_flatten_offsets_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4640,11 +4992,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_none2empty_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_none2empty_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_flatten_none2empty_64<int32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_flatten_none2empty_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4666,11 +5020,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_none2empty_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_none2empty_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_flatten_none2empty_64<uint32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_flatten_none2empty_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4692,11 +5048,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_none2empty_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_none2empty_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_flatten_none2empty_64<int64_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_flatten_none2empty_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4718,11 +5076,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_length_64<int8_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_length_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_flatten_length_64<int8_t, int32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_flatten_length_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4744,11 +5104,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_length_64<int8_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_length_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_flatten_length_64<int8_t, uint32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_flatten_length_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4770,11 +5132,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_length_64<int8_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_length_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_flatten_length_64<int8_t, int64_t>");
+          std::string("unrecognized ptr_lib for UnionArray_flatten_length_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4800,11 +5164,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_combine_64<int8_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_combine_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_flatten_combine_64<int8_t, int32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_flatten_combine_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4830,11 +5196,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_combine_64<int8_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_combine_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_flatten_combine_64<int8_t, uint32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_flatten_combine_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4860,11 +5228,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_combine_64<int8_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_flatten_combine_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_flatten_combine_64<int8_t, int64_t>");
+          std::string("unrecognized ptr_lib for UnionArray_flatten_combine_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4884,11 +5254,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_nextcarry_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_nextcarry_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_flatten_nextcarry_64<int32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_flatten_nextcarry_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4908,11 +5280,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_nextcarry_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_nextcarry_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_flatten_nextcarry_64<uint32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_flatten_nextcarry_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4932,11 +5306,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_nextcarry_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_flatten_nextcarry_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_flatten_nextcarry_64<int64_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_flatten_nextcarry_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4956,11 +5332,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_overlay_mask8_to64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_overlay_mask8_to64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_overlay_mask8_to64<int32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_overlay_mask8_to64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -4980,11 +5358,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_overlay_mask8_to64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_overlay_mask8_to64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_overlay_mask8_to64<uint32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_overlay_mask8_to64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5004,11 +5384,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_overlay_mask8_to64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_overlay_mask8_to64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_overlay_mask8_to64<int64_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_overlay_mask8_to64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5026,11 +5408,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_mask8<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_mask8<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_mask8<int32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_mask8<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5048,11 +5432,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_mask8<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_mask8<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_mask8<uint32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_mask8<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5070,11 +5456,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_mask8<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_mask8<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_mask8<int64_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_mask8<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5093,11 +5481,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_mask8");
+          std::string("not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_mask8")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ByteMaskedArray_mask8");
+          std::string("unrecognized ptr_lib for ByteMaskedArray_mask8")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5110,11 +5500,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for zero_mask8");
+          std::string("not implemented: ptr_lib == cuda_kernels for zero_mask8")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for zero_mask8");
+          std::string("unrecognized ptr_lib for zero_mask8")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5136,11 +5528,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify32_to64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify32_to64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_simplify32_to64<int32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_simplify32_to64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5162,11 +5556,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify32_to64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify32_to64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_simplify32_to64<uint32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_simplify32_to64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5188,11 +5584,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify32_to64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify32_to64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_simplify32_to64<int64_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_simplify32_to64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5214,11 +5612,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplifyU32_to64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_simplifyU32_to64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_simplifyU32_to64<int32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_simplifyU32_to64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5240,11 +5640,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplifyU32_to64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_simplifyU32_to64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_simplifyU32_to64<uint32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_simplifyU32_to64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5266,11 +5668,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplifyU32_to64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_simplifyU32_to64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_simplifyU32_to64<int64_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_simplifyU32_to64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5292,11 +5696,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify64_to64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify64_to64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_simplify64_to64<int32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_simplify64_to64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5318,11 +5724,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify64_to64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify64_to64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_simplify64_to64<uint32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_simplify64_to64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5344,11 +5752,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify64_to64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_simplify64_to64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_simplify64_to64<int64_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_simplify64_to64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5368,11 +5778,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_compact_offsets_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_compact_offsets_64");
+          std::string("unrecognized ptr_lib for ListArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5392,11 +5804,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_compact_offsets_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_compact_offsets_64");
+          std::string("unrecognized ptr_lib for ListArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5416,11 +5830,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_compact_offsets_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_compact_offsets_64");
+          std::string("unrecognized ptr_lib for ListArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5437,11 +5853,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_compact_offsets_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_compact_offsets_64");
+          std::string("unrecognized ptr_lib for RegularArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5459,11 +5877,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_compact_offsets_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_compact_offsets_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5481,11 +5901,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_compact_offsets_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_compact_offsets_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5503,11 +5925,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_compact_offsets_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_compact_offsets_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_compact_offsets_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5531,11 +5955,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_broadcast_tooffsets_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_broadcast_tooffsets_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_broadcast_tooffsets_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_broadcast_tooffsets_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5559,11 +5985,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_broadcast_tooffsets_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_broadcast_tooffsets_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_broadcast_tooffsets_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_broadcast_tooffsets_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5587,11 +6015,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_broadcast_tooffsets_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_broadcast_tooffsets_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_broadcast_tooffsets_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_broadcast_tooffsets_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5608,11 +6038,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_broadcast_tooffsets_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_broadcast_tooffsets_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_broadcast_tooffsets_64");
+          std::string("unrecognized ptr_lib for RegularArray_broadcast_tooffsets_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5629,11 +6061,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_broadcast_tooffsets_size1_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_broadcast_tooffsets_size1_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_broadcast_tooffsets_size1_64");
+          std::string("unrecognized ptr_lib for RegularArray_broadcast_tooffsets_size1_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5651,11 +6085,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_toRegularArray<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_toRegularArray<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_toRegularArray<int32_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_toRegularArray<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5673,11 +6109,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_toRegularArray<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_toRegularArray<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_toRegularArray<uint32_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_toRegularArray<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5695,11 +6133,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_toRegularArray");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_toRegularArray")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_toRegularArray");
+          std::string("unrecognized ptr_lib for ListOffsetArray_toRegularArray")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5719,11 +6159,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill_frombool<bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill_frombool<bool>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5743,11 +6185,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill_frombool<int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill_frombool<int8_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5767,11 +6211,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill_frombool<int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill_frombool<int16_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5791,11 +6237,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill_frombool<int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill_frombool<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5815,11 +6263,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill_frombool<int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill_frombool<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5839,11 +6289,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill_frombool<uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill_frombool<uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5863,11 +6315,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill_frombool<uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill_frombool<uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5887,11 +6341,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill_frombool<uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill_frombool<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5911,11 +6367,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill_frombool<uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill_frombool<uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5935,11 +6393,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill_frombool<float>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill_frombool<float>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5959,11 +6419,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill_frombool<double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill_frombool<double>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill_frombool<double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -5983,11 +6445,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<bool, bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<bool, bool>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6006,11 +6470,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<bool, int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<bool, int8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6029,11 +6495,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<bool, int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<bool, int16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6052,11 +6520,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<bool, int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<bool, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6075,11 +6545,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<bool, int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<bool, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6098,11 +6570,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<bool, uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<bool, uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6121,11 +6595,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<bool, uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<bool, uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6144,11 +6620,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<bool, uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<bool, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6167,11 +6645,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<bool, uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<bool, uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6190,11 +6670,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<bool, float>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<bool, float>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6213,11 +6695,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<bool, double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<bool, double>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<bool, double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -6237,11 +6721,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int8_t, bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int8_t, bool>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6260,11 +6746,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int8_t, int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int8_t, int8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6283,11 +6771,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int8_t, int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int8_t, int16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6306,11 +6796,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int8_t, int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6329,11 +6821,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int8_t, int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6352,11 +6846,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int8_t, uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int8_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6375,11 +6871,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int8_t, uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int8_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6398,11 +6896,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int8_t, uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6421,11 +6921,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int8_t, uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int8_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6444,11 +6946,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int8_t, float>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int8_t, float>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6467,11 +6971,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int8_t, double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int8_t, double>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int8_t, double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -6491,11 +6997,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int16_t, bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int16_t, bool>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6514,11 +7022,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int16_t, int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int16_t, int8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6537,11 +7047,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int16_t, int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int16_t, int16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6560,11 +7072,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int16_t, int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int16_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6583,11 +7097,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int16_t, int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int16_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6606,11 +7122,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int16_t, uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int16_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6629,11 +7147,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int16_t, uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int16_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6652,11 +7172,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int16_t, uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int16_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6675,11 +7197,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int16_t, uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int16_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6698,11 +7222,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int16_t, float>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int16_t, float>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6721,11 +7247,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int16_t, double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int16_t, double>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int16_t, double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -6745,11 +7273,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int32_t, bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int32_t, bool>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6768,11 +7298,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int32_t, int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int32_t, int8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6791,11 +7323,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int32_t, int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int32_t, int16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6814,11 +7348,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int32_t, int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int32_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6837,11 +7373,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int32_t, int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int32_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6860,11 +7398,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int32_t, uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int32_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6883,11 +7423,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int32_t, uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int32_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6906,11 +7448,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int32_t, uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int32_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6929,11 +7473,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int32_t, uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int32_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6952,11 +7498,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int32_t, float>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int32_t, float>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -6975,11 +7523,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int32_t, double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int32_t, double>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int32_t, double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -6999,11 +7549,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int64_t, bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int64_t, bool>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7022,11 +7574,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int64_t, int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int64_t, int8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7045,11 +7599,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int64_t, int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int64_t, int16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7068,11 +7624,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int64_t, int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int64_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7091,11 +7649,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int64_t, int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int64_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7114,11 +7674,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int64_t, uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int64_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7137,11 +7699,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int64_t, uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int64_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7160,11 +7724,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int64_t, uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int64_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7183,11 +7749,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int64_t, uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int64_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7206,11 +7774,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int64_t, float>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int64_t, float>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7229,11 +7799,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<int64_t, double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<int64_t, double>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<int64_t, double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -7253,11 +7825,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint8_t, bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint8_t, bool>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7276,11 +7850,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint8_t, int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint8_t, int8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7299,11 +7875,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint8_t, int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint8_t, int16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7322,11 +7900,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint8_t, int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7345,11 +7925,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint8_t, int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7368,11 +7950,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint8_t, uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint8_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7391,11 +7975,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint8_t, uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint8_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7414,11 +8000,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint8_t, uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7437,11 +8025,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint8_t, uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint8_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7460,11 +8050,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint8_t, float>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint8_t, float>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7483,11 +8075,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint8_t, double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint8_t, double>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint8_t, double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -7507,11 +8101,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint16_t, bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint16_t, bool>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7530,11 +8126,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint16_t, int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint16_t, int8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7553,11 +8151,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint16_t, int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint16_t, int16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7576,11 +8176,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint16_t, int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint16_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7599,11 +8201,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint16_t, int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint16_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7622,11 +8226,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint16_t, uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint16_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7645,11 +8251,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint16_t, uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint16_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7668,11 +8276,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint16_t, uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint16_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7691,11 +8301,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint16_t, uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint16_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7714,11 +8326,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint16_t, float>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint16_t, float>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7737,11 +8351,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint16_t, double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint16_t, double>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint16_t, double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -7761,11 +8377,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint32_t, bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint32_t, bool>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7784,11 +8402,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint32_t, int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint32_t, int8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7807,11 +8427,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint32_t, int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint32_t, int16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7830,11 +8452,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint32_t, int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint32_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7853,11 +8477,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint32_t, int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint32_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7876,11 +8502,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint32_t, uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint32_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7899,11 +8527,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint32_t, uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint32_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7922,11 +8552,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint32_t, uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint32_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7945,11 +8577,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint32_t, uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint32_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7968,11 +8602,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint32_t, float>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint32_t, float>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -7991,11 +8627,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint32_t, double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint32_t, double>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint32_t, double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -8015,11 +8653,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint64_t, bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint64_t, bool>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8038,11 +8678,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint64_t, int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint64_t, int8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8061,11 +8703,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint64_t, int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint64_t, int16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8084,11 +8728,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint64_t, int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint64_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8107,11 +8753,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint64_t, int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint64_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8130,11 +8778,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint64_t, uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint64_t, uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8153,11 +8803,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint64_t, uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint64_t, uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8176,11 +8828,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint64_t, uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint64_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8199,11 +8853,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint64_t, uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint64_t, uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8222,11 +8878,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint64_t, float>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint64_t, float>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8245,11 +8903,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<uint64_t, double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<uint64_t, double>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<uint64_t, double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -8269,11 +8929,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<float, bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<float, bool>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8292,11 +8954,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<float, int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<float, int8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8315,11 +8979,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<float, int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<float, int16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8338,11 +9004,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<float, int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<float, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8361,11 +9029,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<float, int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<float, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8384,11 +9054,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<float, uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<float, uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8407,11 +9079,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<float, uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<float, uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8430,11 +9104,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<float, uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<float, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8453,11 +9129,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<float, uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<float, uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8476,11 +9154,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<float, float>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<float, float>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8499,11 +9179,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<float, double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<float, double>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<float, double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -8523,11 +9205,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<double, bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<double, bool>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8546,11 +9230,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<double, int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<double, int8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8569,11 +9255,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<double, int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<double, int16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8592,11 +9280,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<double, int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<double, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8615,11 +9305,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<double, int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<double, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8638,11 +9330,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<double, uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<double, uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8661,11 +9355,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<double, uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<double, uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8684,11 +9380,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<double, uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<double, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8707,11 +9405,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<double, uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<double, uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8730,11 +9430,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<double, float>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<double, float>")
+          + FILENAME(__LINE__));
       }
     }
     template <>
@@ -8753,11 +9455,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_fill<double, double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_fill<double, double>");
+          std::string("unrecognized ptr_lib for NumpyArray_fill<double, double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -8785,11 +9489,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_fill");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_fill")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_fill");
+          std::string("unrecognized ptr_lib for ListArray_fill")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -8817,11 +9523,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_fill");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_fill")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_fill");
+          std::string("unrecognized ptr_lib for ListArray_fill")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -8849,11 +9557,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_fill");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_fill")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_fill");
+          std::string("unrecognized ptr_lib for ListArray_fill")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -8875,11 +9585,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_fill");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_fill")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_fill");
+          std::string("unrecognized ptr_lib for IndexedArray_fill")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -8901,11 +9613,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_fill");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_fill")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_fill");
+          std::string("unrecognized ptr_lib for IndexedArray_fill")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -8927,11 +9641,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_fill");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_fill")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_fill");
+          std::string("unrecognized ptr_lib for IndexedArray_fill")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -8950,11 +9666,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_fill_to64_count");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_fill_to64_count")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_fill_to64_count");
+          std::string("unrecognized ptr_lib for IndexedArray_fill_to64_count")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -8975,11 +9693,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_filltags_to8_from8");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_filltags_to8_from8")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_filltags_to8_from8");
+          std::string("unrecognized ptr_lib for UnionArray_filltags_to8_from8")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -8999,11 +9719,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_fillindex");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_fillindex")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_fillindex");
+          std::string("unrecognized ptr_lib for UnionArray_fillindex")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9023,11 +9745,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_fillindex");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_fillindex")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_fillindex");
+          std::string("unrecognized ptr_lib for UnionArray_fillindex")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9047,11 +9771,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_fillindex");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_fillindex")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_fillindex");
+          std::string("unrecognized ptr_lib for UnionArray_fillindex")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9070,11 +9796,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_filltags_to8_const");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_filltags_to8_const")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_filltags_to8_const");
+          std::string("unrecognized ptr_lib for UnionArray_filltags_to8_const")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9091,11 +9819,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_fillindex_count_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_fillindex_count_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_fillindex_count_64");
+          std::string("unrecognized ptr_lib for UnionArray_fillindex_count_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9129,11 +9859,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_32_to8_64<int8_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_32_to8_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_simplify8_32_to8_64<int8_t, int32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_simplify8_32_to8_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9167,11 +9899,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_32_to8_64<int8_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_32_to8_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_simplify8_32_to8_64<int8_t, uint32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_simplify8_32_to8_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9205,11 +9939,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_32_to8_64<int8_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_32_to8_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_simplify8_32_to8_64<int8_t, int64_t>");
+          std::string("unrecognized ptr_lib for UnionArray_simplify8_32_to8_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9243,11 +9979,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_U32_to8_64<int8_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_U32_to8_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_simplify8_U32_to8_64<int8_t, int32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_simplify8_U32_to8_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9281,11 +10019,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_U32_to8_64<int8_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_U32_to8_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_simplify8_U32_to8_64<int8_t, uint32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_simplify8_U32_to8_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9319,11 +10059,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_U32_to8_64<int8_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_U32_to8_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_simplify8_U32_to8_64<int8_t, int64_t>");
+          std::string("unrecognized ptr_lib for UnionArray_simplify8_U32_to8_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9357,11 +10099,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_64_to8_64<int8_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_64_to8_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_simplify8_64_to8_64<int8_t, int32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_simplify8_64_to8_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9395,11 +10139,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_64_to8_64<int8_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_64_to8_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_simplify8_64_to8_64<int8_t, uint32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_simplify8_64_to8_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9433,11 +10179,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_64_to8_64<int8_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_simplify8_64_to8_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_simplify8_64_to8_64<int8_t, int64_t>");
+          std::string("unrecognized ptr_lib for UnionArray_simplify8_64_to8_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9465,11 +10213,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify_one_to8_64<int8_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_simplify_one_to8_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_simplify_one_to8_64<int8_t, int32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_simplify_one_to8_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9497,11 +10247,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify_one_to8_64<int8_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_simplify_one_to8_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_simplify_one_to8_64<int8_t, uint32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_simplify_one_to8_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9529,11 +10281,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_simplify_one_to8_64<int8_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_simplify_one_to8_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_simplify_one_to8_64<int8_t, int64_t>");
+          std::string("unrecognized ptr_lib for UnionArray_simplify_one_to8_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9553,11 +10307,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_validity<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_validity<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_validity<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_validity<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9577,11 +10333,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_validity<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_validity<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_validity<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_validity<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9601,11 +10359,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_validity<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_validity<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_validity<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_validity<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9625,11 +10385,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_validity<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_validity<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_validity<int32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_validity<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9649,11 +10411,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_validity<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_validity<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_validity<uint32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_validity<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9673,11 +10437,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_validity<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_validity<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_validity<int64_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_validity<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9699,11 +10465,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_validity<int8_t, int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_validity<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_validity<int8_t, int32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_validity<int8_t, int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9725,11 +10493,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_validity<int8_t, uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_validity<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_validity<int8_t, uint32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_validity<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9751,11 +10521,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_validity<int8_t, int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_validity<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_validity<int8_t, int64_t>");
+          std::string("unrecognized ptr_lib for UnionArray_validity<int8_t, int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9773,11 +10545,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_fillna_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_fillna_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_fillna_64<int32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_fillna_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9795,11 +10569,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_fillna_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_fillna_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_fillna_64<uint32_t>");
+          std::string("unrecognized ptr_lib for UnionArray_fillna_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9817,11 +10593,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for UnionArray_fillna_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_fillna_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for UnionArray_fillna_64<int64_t>");
+          std::string("unrecognized ptr_lib for UnionArray_fillna_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9838,11 +10616,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedOptionArray_rpad_and_clip_mask_axis1_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedOptionArray_rpad_and_clip_mask_axis1_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedOptionArray_rpad_and_clip_mask_axis1_64");
+          std::string("unrecognized ptr_lib for IndexedOptionArray_rpad_and_clip_mask_axis1_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9859,11 +10639,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for index_rpad_and_clip_axis0_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for index_rpad_and_clip_axis0_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for index_rpad_and_clip_axis0_64");
+          std::string("unrecognized ptr_lib for index_rpad_and_clip_axis0_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9882,11 +10664,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for index_rpad_and_clip_axis1_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for index_rpad_and_clip_axis1_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for index_rpad_and_clip_axis1_64");
+          std::string("unrecognized ptr_lib for index_rpad_and_clip_axis1_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9905,11 +10689,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_rpad_and_clip_axis1_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_rpad_and_clip_axis1_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_rpad_and_clip_axis1_64");
+          std::string("unrecognized ptr_lib for RegularArray_rpad_and_clip_axis1_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9929,11 +10715,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_min_range<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_min_range<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_min_range<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_min_range<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9953,11 +10741,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_min_range<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_min_range<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_min_range<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_min_range<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -9977,11 +10767,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_min_range<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_min_range<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_min_range<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_min_range<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10003,11 +10795,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_rpad_and_clip_length_axis1<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_rpad_and_clip_length_axis1<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_rpad_and_clip_length_axis1<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_rpad_and_clip_length_axis1<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10029,11 +10823,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_rpad_and_clip_length_axis1<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_rpad_and_clip_length_axis1<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_rpad_and_clip_length_axis1<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_rpad_and_clip_length_axis1<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10055,11 +10851,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_rpad_and_clip_length_axis1<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_rpad_and_clip_length_axis1<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_rpad_and_clip_length_axis1<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_rpad_and_clip_length_axis1<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10085,11 +10883,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_rpad_axis1_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_rpad_axis1_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_rpad_axis1_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_rpad_axis1_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10115,11 +10915,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_rpad_axis1_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_rpad_axis1_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_rpad_axis1_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_rpad_axis1_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10145,11 +10947,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_rpad_axis1_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_rpad_axis1_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_rpad_axis1_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_rpad_axis1_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10169,11 +10973,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_and_clip_axis1_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_and_clip_axis1_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_rpad_and_clip_axis1_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_rpad_and_clip_axis1_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10193,11 +10999,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_and_clip_axis1_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_and_clip_axis1_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_rpad_and_clip_axis1_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_rpad_and_clip_axis1_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10217,11 +11025,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_and_clip_axis1_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_and_clip_axis1_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_rpad_and_clip_axis1_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_rpad_and_clip_axis1_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10243,11 +11053,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_length_axis1<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_length_axis1<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_rpad_length_axis1<int32_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_rpad_length_axis1<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10269,11 +11081,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_length_axis1<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_length_axis1<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_rpad_length_axis1<uint32_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_rpad_length_axis1<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10295,11 +11109,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_length_axis1<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_length_axis1<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_rpad_length_axis1<int64_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_rpad_length_axis1<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10319,11 +11135,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_axis1_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_axis1_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_rpad_axis1_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_rpad_axis1_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10343,11 +11161,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_axis1_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_axis1_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_rpad_axis1_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_rpad_axis1_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10367,11 +11187,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_axis1_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_rpad_axis1_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_rpad_axis1_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListOffsetArray_rpad_axis1_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10386,11 +11208,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for localindex_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for localindex_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for localindex_64");
+          std::string("unrecognized ptr_lib for localindex_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10408,11 +11232,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_localindex_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_localindex_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_localindex_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_localindex_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10430,11 +11256,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_localindex_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_localindex_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_localindex_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_localindex_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10452,11 +11280,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_localindex_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_localindex_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_localindex_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_localindex_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10473,11 +11303,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_localindex_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_localindex_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_localindex_64");
+          std::string("unrecognized ptr_lib for RegularArray_localindex_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10497,11 +11329,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for combinations");
+          std::string("not implemented: ptr_lib == cuda_kernels for combinations")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for combinations");
+          std::string("unrecognized ptr_lib for combinations")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10527,11 +11361,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_combinations_length_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_combinations_length_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_combinations_length_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_combinations_length_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10557,11 +11393,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_combinations_length_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_combinations_length_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_combinations_length_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_combinations_length_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10587,11 +11425,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_combinations_length_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_combinations_length_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_combinations_length_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_combinations_length_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10619,11 +11459,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_combinations_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_combinations_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_combinations_64<int32_t>");
+          std::string("unrecognized ptr_lib for ListArray_combinations_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10651,11 +11493,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_combinations_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_combinations_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_combinations_64<uint32_t>");
+          std::string("unrecognized ptr_lib for ListArray_combinations_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10683,11 +11527,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListArray_combinations_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListArray_combinations_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListArray_combinations_64<int64_t>");
+          std::string("unrecognized ptr_lib for ListArray_combinations_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10712,11 +11558,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for RegularArray_combinations_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for RegularArray_combinations_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for RegularArray_combinations_64");
+          std::string("unrecognized ptr_lib for RegularArray_combinations_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10737,11 +11585,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_overlay_mask8");
+          std::string("not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_overlay_mask8")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ByteMaskedArray_overlay_mask8");
+          std::string("unrecognized ptr_lib for ByteMaskedArray_overlay_mask8")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10762,11 +11612,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for BitMaskedArray_to_ByteMaskedArray");
+          std::string("not implemented: ptr_lib == cuda_kernels for BitMaskedArray_to_ByteMaskedArray")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for BitMaskedArray_to_ByteMaskedArray");
+          std::string("unrecognized ptr_lib for BitMaskedArray_to_ByteMaskedArray")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10787,11 +11639,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for BitMaskedArray_to_IndexedOptionArray64");
+          std::string("not implemented: ptr_lib == cuda_kernels for BitMaskedArray_to_IndexedOptionArray64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for BitMaskedArray_to_IndexedOptionArray64");
+          std::string("unrecognized ptr_lib for BitMaskedArray_to_IndexedOptionArray64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10812,11 +11666,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_count_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_count_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_count_64");
+          std::string("unrecognized ptr_lib for reduce_count_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10838,11 +11694,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_countnonzero_64");
+          std::string("unrecognized ptr_lib for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10864,11 +11722,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_countnonzero_64");
+          std::string("unrecognized ptr_lib for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10890,11 +11750,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_countnonzero_64");
+          std::string("unrecognized ptr_lib for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10916,11 +11778,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_countnonzero_64");
+          std::string("unrecognized ptr_lib for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10942,11 +11806,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_countnonzero_64");
+          std::string("unrecognized ptr_lib for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10968,11 +11834,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_countnonzero_64");
+          std::string("unrecognized ptr_lib for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -10994,11 +11862,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_countnonzero_64");
+          std::string("unrecognized ptr_lib for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11020,11 +11890,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_countnonzero_64");
+          std::string("unrecognized ptr_lib for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11046,11 +11918,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_countnonzero_64");
+          std::string("unrecognized ptr_lib for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11072,11 +11946,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_countnonzero_64");
+          std::string("unrecognized ptr_lib for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11098,11 +11974,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_countnonzero_64");
+          std::string("unrecognized ptr_lib for reduce_countnonzero_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11124,11 +12002,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11150,11 +12030,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11176,11 +12058,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11202,11 +12086,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11228,11 +12114,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11254,11 +12142,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11280,11 +12170,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11306,11 +12198,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11332,11 +12226,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11358,11 +12254,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11384,11 +12282,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11410,11 +12310,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11436,11 +12338,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11462,11 +12366,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11488,11 +12394,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11514,11 +12422,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11540,11 +12450,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11566,11 +12478,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_64");
+          std::string("unrecognized ptr_lib for reduce_sum_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11592,11 +12506,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_bool_64");
+          std::string("unrecognized ptr_lib for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11618,11 +12534,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_bool_64");
+          std::string("unrecognized ptr_lib for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11644,11 +12562,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_bool_64");
+          std::string("unrecognized ptr_lib for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11670,11 +12590,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_bool_64");
+          std::string("unrecognized ptr_lib for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11696,11 +12618,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_bool_64");
+          std::string("unrecognized ptr_lib for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11722,11 +12646,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_bool_64");
+          std::string("unrecognized ptr_lib for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11748,11 +12674,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_bool_64");
+          std::string("unrecognized ptr_lib for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11774,11 +12702,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_bool_64");
+          std::string("unrecognized ptr_lib for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11800,11 +12730,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_bool_64");
+          std::string("unrecognized ptr_lib for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11826,11 +12758,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_bool_64");
+          std::string("unrecognized ptr_lib for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11852,11 +12786,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_sum_bool_64");
+          std::string("unrecognized ptr_lib for reduce_sum_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11878,11 +12814,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11904,11 +12842,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11930,11 +12870,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11956,11 +12898,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -11982,11 +12926,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12008,11 +12954,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12034,11 +12982,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12060,11 +13010,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12086,11 +13038,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12112,11 +13066,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12138,11 +13094,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12164,11 +13122,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12190,11 +13150,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12216,11 +13178,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12242,11 +13206,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12268,11 +13234,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12294,11 +13262,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12320,11 +13290,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_64");
+          std::string("unrecognized ptr_lib for reduce_prod_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12346,11 +13318,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_bool_64");
+          std::string("unrecognized ptr_lib for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12372,11 +13346,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_bool_64");
+          std::string("unrecognized ptr_lib for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12398,11 +13374,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_bool_64");
+          std::string("unrecognized ptr_lib for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12424,11 +13402,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_bool_64");
+          std::string("unrecognized ptr_lib for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12450,11 +13430,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_bool_64");
+          std::string("unrecognized ptr_lib for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12476,11 +13458,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_bool_64");
+          std::string("unrecognized ptr_lib for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12502,11 +13486,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_bool_64");
+          std::string("unrecognized ptr_lib for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12528,11 +13514,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_bool_64");
+          std::string("unrecognized ptr_lib for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12554,11 +13542,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_bool_64");
+          std::string("unrecognized ptr_lib for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12580,11 +13570,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_bool_64");
+          std::string("unrecognized ptr_lib for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12606,11 +13598,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_prod_bool_64");
+          std::string("unrecognized ptr_lib for reduce_prod_bool_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12634,11 +13628,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_min_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_min_64");
+          std::string("unrecognized ptr_lib for reduce_min_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12662,11 +13658,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_min_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_min_64");
+          std::string("unrecognized ptr_lib for reduce_min_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12690,11 +13688,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_min_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_min_64");
+          std::string("unrecognized ptr_lib for reduce_min_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12718,11 +13718,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_min_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_min_64");
+          std::string("unrecognized ptr_lib for reduce_min_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12746,11 +13748,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_min_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_min_64");
+          std::string("unrecognized ptr_lib for reduce_min_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12774,11 +13778,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_min_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_min_64");
+          std::string("unrecognized ptr_lib for reduce_min_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12802,11 +13808,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_min_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_min_64");
+          std::string("unrecognized ptr_lib for reduce_min_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12830,11 +13838,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_min_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_min_64");
+          std::string("unrecognized ptr_lib for reduce_min_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12858,11 +13868,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_min_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_min_64");
+          std::string("unrecognized ptr_lib for reduce_min_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12886,11 +13898,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_min_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_min_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_min_64");
+          std::string("unrecognized ptr_lib for reduce_min_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12914,11 +13928,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_max_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_max_64");
+          std::string("unrecognized ptr_lib for reduce_max_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12942,11 +13958,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_max_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_max_64");
+          std::string("unrecognized ptr_lib for reduce_max_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12970,11 +13988,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_max_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_max_64");
+          std::string("unrecognized ptr_lib for reduce_max_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -12998,11 +14018,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_max_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_max_64");
+          std::string("unrecognized ptr_lib for reduce_max_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13026,11 +14048,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_max_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_max_64");
+          std::string("unrecognized ptr_lib for reduce_max_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13054,11 +14078,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_max_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_max_64");
+          std::string("unrecognized ptr_lib for reduce_max_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13082,11 +14108,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_max_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_max_64");
+          std::string("unrecognized ptr_lib for reduce_max_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13110,11 +14138,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_max_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_max_64");
+          std::string("unrecognized ptr_lib for reduce_max_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13138,11 +14168,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_max_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_max_64");
+          std::string("unrecognized ptr_lib for reduce_max_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13166,11 +14198,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_max_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_max_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_max_64");
+          std::string("unrecognized ptr_lib for reduce_max_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13194,11 +14228,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmin_64");
+          std::string("unrecognized ptr_lib for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13222,11 +14258,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmin_64");
+          std::string("unrecognized ptr_lib for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13250,11 +14288,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmin_64");
+          std::string("unrecognized ptr_lib for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13278,11 +14318,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmin_64");
+          std::string("unrecognized ptr_lib for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13306,11 +14348,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmin_64");
+          std::string("unrecognized ptr_lib for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13334,11 +14378,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmin_64");
+          std::string("unrecognized ptr_lib for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13362,11 +14408,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmin_64");
+          std::string("unrecognized ptr_lib for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13390,11 +14438,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmin_64");
+          std::string("unrecognized ptr_lib for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13418,11 +14468,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmin_64");
+          std::string("unrecognized ptr_lib for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13446,11 +14498,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmin_64");
+          std::string("unrecognized ptr_lib for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13474,11 +14528,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmin_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmin_64");
+          std::string("unrecognized ptr_lib for reduce_argmin_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13503,11 +14559,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmax_64");
+          std::string("unrecognized ptr_lib for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13531,11 +14589,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmax_64");
+          std::string("unrecognized ptr_lib for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13559,11 +14619,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmax_64");
+          std::string("unrecognized ptr_lib for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13587,11 +14649,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmax_64");
+          std::string("unrecognized ptr_lib for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13615,11 +14679,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmax_64");
+          std::string("unrecognized ptr_lib for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13643,11 +14709,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmax_64");
+          std::string("unrecognized ptr_lib for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13671,11 +14739,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmax_64");
+          std::string("unrecognized ptr_lib for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13699,11 +14769,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmax_64");
+          std::string("unrecognized ptr_lib for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13727,11 +14799,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmax_64");
+          std::string("unrecognized ptr_lib for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13755,11 +14829,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmax_64");
+          std::string("unrecognized ptr_lib for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13783,11 +14859,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for reduce_argmax_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for reduce_argmax_64");
+          std::string("unrecognized ptr_lib for reduce_argmax_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13802,11 +14880,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for content_reduce_zeroparents_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for content_reduce_zeroparents_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for content_reduce_zeroparents_64");
+          std::string("unrecognized ptr_lib for content_reduce_zeroparents_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13825,11 +14905,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_global_startstop_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_global_startstop_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_reduce_global_startstop_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_reduce_global_startstop_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13848,11 +14930,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13885,11 +14969,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_preparenext_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_preparenext_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_reduce_nonlocal_preparenext_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_reduce_nonlocal_preparenext_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13906,11 +14992,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_nextstarts_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_nextstarts_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_reduce_nonlocal_nextstarts_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_reduce_nonlocal_nextstarts_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13927,11 +15015,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_findgaps_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_findgaps_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_reduce_nonlocal_findgaps_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_reduce_nonlocal_findgaps_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13954,11 +15044,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_outstartsstops_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_outstartsstops_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_reduce_nonlocal_outstartsstops_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_reduce_nonlocal_outstartsstops_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13975,11 +15067,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_local_nextparents_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_local_nextparents_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_reduce_local_nextparents_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_reduce_local_nextparents_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -13998,11 +15092,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_local_outoffsets_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_local_outoffsets_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_reduce_local_outoffsets_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_reduce_local_outoffsets_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14026,11 +15122,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_64<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_64<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_reduce_next_64<int32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_64<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14054,11 +15152,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_64<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_reduce_next_64<uint32_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_64<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14082,11 +15182,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_64<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_64<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_reduce_next_64<int64_t>");
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_64<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14105,11 +15207,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_fix_offsets_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_fix_offsets_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_reduce_next_fix_offsets_64");
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_fix_offsets_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14128,11 +15232,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_reduce_mask_ByteMaskedArray_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_reduce_mask_ByteMaskedArray_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_reduce_mask_ByteMaskedArray_64");
+          std::string("unrecognized ptr_lib for NumpyArray_reduce_mask_ByteMaskedArray_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14157,11 +15263,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_reduce_next_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_reduce_next_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ByteMaskedArray_reduce_next_64");
+          std::string("unrecognized ptr_lib for ByteMaskedArray_reduce_next_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14182,11 +15290,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for sorting_ranges");
+          std::string("not implemented: ptr_lib == cuda_kernels for sorting_ranges")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for sorting_ranges");
+          std::string("unrecognized ptr_lib for sorting_ranges")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14203,11 +15313,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for sorting_ranges_length");
+          std::string("not implemented: ptr_lib == cuda_kernels for sorting_ranges_length")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for sorting_ranges_length");
+          std::string("unrecognized ptr_lib for sorting_ranges_length")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14233,11 +15345,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_argsort<bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_argsort<bool>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14263,11 +15377,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_argsort<int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_argsort<int8_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14293,11 +15409,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_argsort<uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_argsort<uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14323,11 +15441,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_argsort<int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_argsort<int16_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14353,11 +15473,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_argsort<uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_argsort<uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14383,11 +15505,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_argsort<int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_argsort<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14413,11 +15537,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_argsort<uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_argsort<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14443,11 +15569,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_argsort<int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_argsort<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14473,11 +15601,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_argsort<uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_argsort<uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14503,11 +15633,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_argsort<float>");
+          std::string("unrecognized ptr_lib for NumpyArray_argsort<float>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14533,11 +15665,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_argsort<double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_argsort<double>");
+          std::string("unrecognized ptr_lib for NumpyArray_argsort<double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14565,11 +15699,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<bool>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<bool>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_sort<bool>");
+          std::string("unrecognized ptr_lib for NumpyArray_sort<bool>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14597,11 +15733,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_sort<uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_sort<uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14629,11 +15767,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<int8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<int8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_sort<int8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_sort<int8_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14661,11 +15801,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<uint16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<uint16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_sort<uint16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_sort<uint16_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14693,11 +15835,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<int16_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<int16_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_sort<int16_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_sort<int16_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14725,11 +15869,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<uint32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<uint32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_sort<uint32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_sort<uint32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14757,11 +15903,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<int32_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<int32_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_sort<int32_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_sort<int32_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14789,11 +15937,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<uint64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<uint64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_sort<uint64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_sort<uint64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14821,11 +15971,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<int64_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<int64_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_sort<int64_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_sort<int64_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14853,11 +16005,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<float>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<float>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_sort<float>");
+          std::string("unrecognized ptr_lib for NumpyArray_sort<float>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14885,11 +16039,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<double>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_sort<double>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_sort<double>");
+          std::string("unrecognized ptr_lib for NumpyArray_sort<double>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14915,11 +16071,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for NumpyArray_sort_asstrings<uint8_t>");
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_sort_asstrings<uint8_t>")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for NumpyArray_sort_asstrings<uint8_t>");
+          std::string("unrecognized ptr_lib for NumpyArray_sort_asstrings<uint8_t>")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14936,11 +16094,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for ListOffsetArray_local_preparenext_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_local_preparenext_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for ListOffsetArray_local_preparenext_64");
+          std::string("unrecognized ptr_lib for ListOffsetArray_local_preparenext_64")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -14961,11 +16121,13 @@ namespace awkward {
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
-          "not implemented: ptr_lib == cuda_kernels for IndexedArray_local_preparenext_64");
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_local_preparenext_64")
+          + FILENAME(__LINE__));
       }
       else {
         throw std::runtime_error(
-          "unrecognized ptr_lib for IndexedArray_local_preparenext_64");
+          std::string("unrecognized ptr_lib for IndexedArray_local_preparenext_64")
+          + FILENAME(__LINE__));
       }
     }
 
