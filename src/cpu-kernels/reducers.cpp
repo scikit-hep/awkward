@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/reducers.cpp", line)
+
 #include "awkward/kernels/reducers.h"
 
 ERROR awkward_reduce_count_64(

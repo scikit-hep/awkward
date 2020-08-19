@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/ListOffsetArray.cpp", line)
+
 #include <algorithm>
 #include <numeric>
 #include <sstream>
@@ -197,7 +199,8 @@ namespace awkward {
       , content_(content) {
     if (offsets.length() == 0) {
       throw std::invalid_argument(
-        "ListOffsetArray offsets length must be at least 1");
+        std::string("ListOffsetArray offsets length must be at least 1")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -265,13 +268,14 @@ namespace awkward {
   ListOffsetArrayOf<T>::broadcast_tooffsets64(const Index64& offsets) const {
     if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
       throw std::invalid_argument(
-        "broadcast_tooffsets64 can only be used with offsets that start at 0");
+        std::string("broadcast_tooffsets64 can only be used with offsets that start at 0")
+        + FILENAME(__LINE__));
     }
     if (offsets.length() - 1 > offsets_.length() - 1) {
       throw std::invalid_argument(
         std::string("cannot broadcast ListOffsetArray of length ")
         + std::to_string(offsets_.length() - 1) + (" to length ")
-        + std::to_string(offsets.length() - 1));
+        + std::to_string(offsets.length() - 1) + FILENAME(__LINE__));
     }
 
     IndexOf<T> starts = util::make_starts(offsets_);
@@ -415,7 +419,8 @@ namespace awkward {
         content_.get()->setidentities(subidentities);
       }
       else {
-        throw std::runtime_error("unrecognized Identities specialization");
+        throw std::runtime_error(
+          std::string("unrecognized Identities specialization") + FILENAME(__LINE__));
       }
     }
     identities_ = identities;
@@ -826,7 +831,8 @@ namespace awkward {
                                               int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
-      throw std::invalid_argument("axis=0 not allowed for flatten");
+      throw std::invalid_argument(
+        std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
     }
     else if (posaxis == depth + 1) {
       ContentPtr listoffsetarray = toListOffsetArray64(true);
@@ -1057,7 +1063,9 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else {
-      throw std::runtime_error("unrecognized ListOffsetArray specialization");
+      throw std::runtime_error(
+        std::string("unrecognized ListOffsetArray specialization")
+        + FILENAME(__LINE__));
     }
 
     int64_t mycontentlength = content_.get()->length();
@@ -1199,9 +1207,9 @@ namespace awkward {
                          rawother->identities().get());
     }
     else {
-      throw std::invalid_argument(std::string("cannot merge ") + classname()
-                                  + std::string(" with ")
-                                  + other.get()->classname());
+      throw std::invalid_argument(
+        std::string("cannot merge ") + classname() + std::string(" with ") +
+        other.get()->classname() + FILENAME(__LINE__));
     }
 
     return std::make_shared<ListArray64>(Identities::none(),
@@ -1408,7 +1416,8 @@ namespace awkward {
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       if (offsets_.length() - 1 != parents.length()) {
-        throw std::runtime_error("offsets_.length() - 1 != parents.length()");
+        throw std::runtime_error(
+          std::string("offsets_.length() - 1 != parents.length()") + FILENAME(__LINE__));
       }
 
       int64_t globalstart;
@@ -1598,7 +1607,8 @@ namespace awkward {
                                      int64_t axis,
                                      int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1") + FILENAME(__LINE__));
     }
 
     int64_t posaxis = axis_wrap_if_negative(axis);
@@ -1721,7 +1731,8 @@ namespace awkward {
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       if (offsets_.length() - 1 != parents.length()) {
-        throw std::runtime_error("offsets_.length() - 1 != parents.length()");
+        throw std::runtime_error(
+          std::string("offsets_.length() - 1 != parents.length()" + FILENAME(__LINE__)));
       }
       int64_t globalstart;
       int64_t globalstop;
@@ -1869,13 +1880,15 @@ namespace awkward {
     // if this is array of strings, axis parameter is ignored
     // and this array is sorted
     if (util::parameter_isstring(parameters_, "__array__")) {
-      throw std::runtime_error("not implemented yet: argsort for strings");
+      throw std::runtime_error(
+        std::string("not implemented yet: argsort for strings") + FILENAME(__LINE__));
     }
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       if (offsets_.length() - 1 != parents.length()) {
-        throw std::runtime_error("offsets_.length() - 1 != parents.length()");
+        throw std::runtime_error(
+          std::string("offsets_.length() - 1 != parents.length()") + FILENAME(__LINE__));
       }
 
       int64_t globalstart;
@@ -2001,7 +2014,8 @@ namespace awkward {
                                      const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::runtime_error(
-        "ListOffsetArray::getitem_next(SliceAt): advanced.length() != 0");
+        std::string("ListOffsetArray::getitem_next(SliceAt): advanced.length() != 0")
+        + FILENAME(__LINE__));
     }
     int64_t lenstarts = offsets_.length() - 1;
     IndexOf<T> starts = util::make_starts(offsets_);

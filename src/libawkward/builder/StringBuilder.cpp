@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/StringBuilder.cpp", line)
+
 #include "awkward/Identities.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListOffsetArray.h"
@@ -71,7 +73,8 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        std::string("unsupported encoding: ") + util::quote(encoding_, false));
+        std::string("unsupported encoding: ") + util::quote(encoding_, false)
+        + FILENAME(__LINE__));
     }
 
     Index64 offsets(offsets_.ptr(), 0, offsets_.length());
@@ -152,7 +155,8 @@ namespace awkward {
   const BuilderPtr
   StringBuilder::endlist() {
     throw std::invalid_argument(
-      "called 'endlist' without 'beginlist' at the same level before it");
+      std::string("called 'end_list' without 'begin_list' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -165,13 +169,15 @@ namespace awkward {
   const BuilderPtr
   StringBuilder::index(int64_t index) {
     throw std::invalid_argument(
-      "called 'index' without 'begintuple' at the same level before it");
+      std::string("called 'index' without 'begin_tuple' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr
   StringBuilder::endtuple() {
     throw std::invalid_argument(
-      "called 'endtuple' without 'begintuple' at the same level before it");
+      std::string("called 'end_tuple' without 'begin_tuple' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -184,13 +190,15 @@ namespace awkward {
   const BuilderPtr
   StringBuilder::field(const char* key, bool check) {
     throw std::invalid_argument(
-      "called 'field' without 'beginrecord' at the same level before it");
+      std::string("called 'field' without 'begin_record' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr
   StringBuilder::endrecord() {
     throw std::invalid_argument(
-      "called 'endrecord' without 'beginrecord' at the same level before it");
+      std::string("called 'end_record' without 'begin_record' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr

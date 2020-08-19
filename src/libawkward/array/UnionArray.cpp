@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/UnionArray.cpp", line)
+
 #include <sstream>
 #include <type_traits>
 
@@ -204,15 +206,15 @@ namespace awkward {
   int64_t
   UnionForm::fieldindex(const std::string& key) const {
     throw std::invalid_argument(
-      "UnionForm breaks the one-to-one relationship "
-      "between fieldindexes and keys");
+      std::string("UnionForm breaks the one-to-one relationship "
+                  "between fieldindexes and keys") + FILENAME(__LINE__));
   }
 
   const std::string
   UnionForm::key(int64_t fieldindex) const {
     throw std::invalid_argument(
-      "UnionForm breaks the one-to-one relationship "
-      "between fieldindexes and keys");
+      std::string("UnionForm breaks the one-to-one relationship "
+                  "between fieldindexes and keys") + FILENAME(__LINE__));
   }
 
   bool
@@ -369,7 +371,8 @@ namespace awkward {
     }
     if (index.length() < tags.length()) {
       throw std::invalid_argument(
-        "UnionArray index must not be shorter than its tags");
+        std::string("UnionArray index must not be shorter than its tags")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -405,7 +408,7 @@ namespace awkward {
         std::string("index ") + std::to_string(index)
         + std::string(" out of range for ") + classname()
         + std::string(" with ") + std::to_string(numcontents())
-        + std::string(" contents"));
+        + std::string(" contents") + FILENAME(__LINE__));
     }
     return contents_[(size_t)index];
   }
@@ -418,7 +421,7 @@ namespace awkward {
         std::string("index ") + std::to_string(index)
         + std::string(" out of range for ") + classname()
         + std::string(" with ") + std::to_string(numcontents())
-        + std::string(" contents"));
+        + std::string(" contents") + FILENAME(__LINE__));
     }
     int64_t lentags = tags_.length();
     if (index_.length() < lentags) {
@@ -637,7 +640,8 @@ namespace awkward {
 
     if (contents.size() > kMaxInt8) {
       throw std::runtime_error(
-        "FIXME: handle UnionArray with more than 127 contents");
+        std::string("FIXME: handle UnionArray with more than 127 contents")
+        + FILENAME(__LINE__));
     }
 
     if (contents.size() == 1) {
@@ -793,7 +797,9 @@ namespace awkward {
           }
         }
         else {
-          throw std::runtime_error("unrecognized Identities specialization");
+          throw std::runtime_error(
+            std::string("unrecognized Identities specialization")
+            + FILENAME(__LINE__));
         }
       }
     }
@@ -1109,7 +1115,8 @@ namespace awkward {
       return Content::getitem_next(*missing, tail, advanced);
     }
     else {
-      throw std::runtime_error("unrecognized slice type");
+      throw std::runtime_error(
+        std::string("unrecognized slice type") + FILENAME(__LINE__));
     }
   }
 
@@ -1162,16 +1169,16 @@ namespace awkward {
   int64_t
   UnionArrayOf<T, I>::fieldindex(const std::string& key) const {
     throw std::invalid_argument(
-      "UnionForm breaks the one-to-one relationship "
-      "between fieldindexes and keys");
+      std::string("UnionForm breaks the one-to-one relationship "
+                  "between fieldindexes and keys") + FILENAME(__LINE__));
   }
 
   template <typename T, typename I>
   const std::string
   UnionArrayOf<T, I>::key(int64_t fieldindex) const {
     throw std::invalid_argument(
-      "UnionForm breaks the one-to-one relationship "
-      "between fieldindexes and keys");
+      std::string("UnionForm breaks the one-to-one relationship "
+                  "between fieldindexes and keys") + FILENAME(__LINE__));
   }
 
   template <typename T, typename I>
@@ -1275,7 +1282,8 @@ namespace awkward {
                                             int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
-      throw std::invalid_argument("axis=0 not allowed for flatten");
+      throw std::invalid_argument(
+        std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
     }
     else {
       bool has_offsets = false;
@@ -1390,7 +1398,9 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else {
-      throw std::runtime_error("unrecognized UnionArray specialization");
+      throw std::runtime_error(
+        std::string("unrecognized UnionArray specialization")
+        + FILENAME(__LINE__));
     }
 
     if (std::is_same<I, int32_t>::value) {
@@ -1421,12 +1431,15 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else {
-      throw std::runtime_error("unrecognized UnionArray specialization");
+      throw std::runtime_error(
+        std::string("unrecognized UnionArray specialization")
+        + FILENAME(__LINE__));
     }
 
     if (contents.size() > kMaxInt8) {
       throw std::runtime_error(
-        "FIXME: handle UnionArray with more than 127 contents");
+        std::string("FIXME: handle UnionArray with more than 127 contents")
+        + FILENAME(__LINE__));
     }
 
     return std::make_shared<UnionArray8_64>(Identities::none(),
@@ -1467,7 +1480,9 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else {
-      throw std::runtime_error("unrecognized UnionArray specialization");
+      throw std::runtime_error(
+        std::string("unrecognized UnionArray specialization")
+        + FILENAME(__LINE__));
     }
 
     if (std::is_same<I, int32_t>::value) {
@@ -1498,7 +1513,9 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else {
-      throw std::runtime_error("unrecognized UnionArray specialization");
+      throw std::runtime_error(
+        std::string("unrecognized UnionArray specialization")
+        + FILENAME(__LINE__));
     }
 
     ContentPtrVec contents(contents_.begin(), contents_.end());
@@ -1605,7 +1622,8 @@ namespace awkward {
 
     if (contents.size() > kMaxInt8) {
       throw std::runtime_error(
-        "FIXME: handle UnionArray with more than 127 contents");
+        std::string("FIXME: handle UnionArray with more than 127 contents")
+        + FILENAME(__LINE__));
     }
 
     return std::make_shared<UnionArray8_64>(Identities::none(),
@@ -1626,7 +1644,8 @@ namespace awkward {
       }
       else {
         throw std::invalid_argument(
-          "cannot use a union of different types as a slice");
+          std::string("cannot use a union of different types as a slice")
+          + FILENAME(__LINE__));
       }
     }
     else if (UnionArray8_U32* raw =
@@ -1636,7 +1655,8 @@ namespace awkward {
       }
       else {
         throw std::invalid_argument(
-          "cannot use a union of different types as a slice");
+          std::string("cannot use a union of different types as a slice")
+          + FILENAME(__LINE__));
       }
     }
     else if (UnionArray8_64* raw =
@@ -1646,7 +1666,8 @@ namespace awkward {
       }
       else {
         throw std::invalid_argument(
-          "cannot use a union of different types as a slice");
+          std::string("cannot use a union of different types as a slice")
+          + FILENAME(__LINE__));
       }
     }
     else {
@@ -1725,7 +1746,8 @@ namespace awkward {
         dynamic_cast<UnionArray8_64*>(simplified.get())) {
       throw std::invalid_argument(
         std::string("cannot reduce (call '") + reducer.name()
-        + std::string("' on) an irreducible ") + classname());
+        + std::string("' on) an irreducible ") + classname()
+        + FILENAME(__LINE__));
     }
     return simplified.get()->reduce_next(reducer,
                                          negaxis,
@@ -1765,7 +1787,9 @@ namespace awkward {
                                    int64_t axis,
                                    int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1")
+        + FILENAME(__LINE__));
     }
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
@@ -1802,7 +1826,8 @@ namespace awkward {
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {
-      throw std::invalid_argument(std::string("cannot sort ") + classname());
+      throw std::invalid_argument(
+        std::string("cannot sort ") + classname() + FILENAME(__LINE__));
     }
     return simplified.get()->sort_next(negaxis,
                                        starts,
@@ -1826,7 +1851,8 @@ namespace awkward {
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {
-      throw std::invalid_argument(std::string("cannot sort ") + classname());
+      throw std::invalid_argument(
+        std::string("cannot sort ") + classname() + FILENAME(__LINE__));
     }
     return simplified.get()->argsort_next(negaxis,
                                           starts,
@@ -1843,7 +1869,8 @@ namespace awkward {
                                    const Slice& tail,
                                    const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: UnionArray::getitem_next(at)");
+      std::string("undefined operation: UnionArray::getitem_next(at)")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, typename I>
@@ -1852,7 +1879,8 @@ namespace awkward {
                                    const Slice& tail,
                                    const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: UnionArray::getitem_next(range)");
+      std::string("undefined operation: UnionArray::getitem_next(range)")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, typename I>
@@ -1861,7 +1889,8 @@ namespace awkward {
                                    const Slice& tail,
                                    const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: UnionArray::getitem_next(array)");
+      std::string("undefined operation: UnionArray::getitem_next(array)")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, typename I>
@@ -1870,7 +1899,8 @@ namespace awkward {
                                    const Slice& tail,
                                    const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: UnionArray::getitem_next(jagged)");
+      std::string("undefined operation: UnionArray::getitem_next(jagged)")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, typename I>
@@ -1962,7 +1992,8 @@ namespace awkward {
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {
       throw std::invalid_argument(
-        "cannot apply jagged slices to irreducible union arrays");
+        std::string("cannot apply jagged slices to irreducible union arrays")
+        + FILENAME(__LINE__));
     }
     return simplified.get()->getitem_next_jagged(slicestarts,
                                                  slicestops,

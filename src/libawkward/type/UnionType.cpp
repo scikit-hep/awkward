@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/type/UnionType.cpp", line)
+
 #include <string>
 #include <sstream>
 
@@ -73,27 +75,32 @@ namespace awkward {
 
   int64_t
   UnionType::numfields() const {
-    throw std::runtime_error("FIXME: UnionType::numfields");
+    throw std::runtime_error(
+      std::string("FIXME: UnionType::numfields") + FILENAME(__LINE__));
   }
 
   int64_t
   UnionType::fieldindex(const std::string& key) const {
-    throw std::runtime_error("FIXME: UnionType::fieldindex(key)");
+    throw std::runtime_error(
+      std::string("FIXME: UnionType::fieldindex(key)") + FILENAME(__LINE__));
   }
 
   const std::string
   UnionType::key(int64_t fieldindex) const {
-    throw std::runtime_error("FIXME: UnionType::key(fieldindex)");
+    throw std::runtime_error(
+      std::string("FIXME: UnionType::key(fieldindex)") + FILENAME(__LINE__));
   }
 
   bool
   UnionType::haskey(const std::string& key) const {
-    throw std::runtime_error("FIXME: UnionType::haskey(key)");
+    throw std::runtime_error(
+      std::string("FIXME: UnionType::haskey(key)") + FILENAME(__LINE__));
   }
 
   const std::vector<std::string>
   UnionType::keys() const {
-    throw std::runtime_error("FIXME: UnionType::keys");
+    throw std::runtime_error(
+      std::string("FIXME: UnionType::keys") + FILENAME(__LINE__));
   }
 
   const std::vector<TypePtr>

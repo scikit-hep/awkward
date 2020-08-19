@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("include/awkward/array/RawArray.h", line)
+
 #ifndef AWKWARD_RAWARRAY_H_
 #define AWKWARD_RAWARRAY_H_
 
@@ -52,12 +54,14 @@ namespace awkward {
 
     const TypePtr
       type(const util::TypeStrs& typestrs) const override {
-      throw std::runtime_error("RawForm::type");
+      throw std::runtime_error(
+        std::string("RawForm::type") + FILENAME(__LINE__));
     }
 
     void
       tojson_part(ToJson& builder, bool verbose) const override {
-      throw std::runtime_error("RawForm::tojson_part");
+      throw std::runtime_error(
+        std::string("RawForm::tojson_part") + FILENAME(__LINE__));
     }
 
     const FormPtr
@@ -101,14 +105,14 @@ namespace awkward {
     int64_t
       fieldindex(const std::string& key) const override {
       throw std::invalid_argument(std::string("key ") + util::quote(key, true)
-        + std::string(" does not exist (data are not records)"));
+        + std::string(" does not exist (data are not records)") + FILENAME(__LINE__));
     }
 
     const std::string
       key(int64_t fieldindex) const override {
       throw std::invalid_argument(std::string("fieldindex \"")
         + std::to_string(fieldindex)
-        + std::string("\" does not exist (data are not records)"));
+        + std::string("\" does not exist (data are not records)") + FILENAME(__LINE__));
     }
 
     bool
@@ -127,7 +131,8 @@ namespace awkward {
             bool check_parameters,
             bool check_form_key,
             bool compatibility_check) const override {
-      throw std::runtime_error("FIXME: RawForm::equal");
+      throw std::runtime_error(
+        std::string("FIXME: RawForm::equal") + FILENAME(__LINE__));
     }
 
   private:
@@ -206,7 +211,8 @@ namespace awkward {
         , length_(length)
         , itemsize_(itemsize) {
       if (sizeof(T) != itemsize) {
-        throw std::invalid_argument("sizeof(T) != itemsize");
+        throw std::invalid_argument(
+          std::string("sizeof(T) != itemsize") + FILENAME(__LINE__));
       }
     }
 
@@ -358,7 +364,8 @@ namespace awkward {
       if (identities.get() != nullptr  &&
           length() != identities.get()->length()) {
         throw std::invalid_argument(
-          "content and its identities must have the same length");
+          std::string("content and its identities must have the same length")
+          + FILENAME(__LINE__));
       }
       identities_ = identities;
     }
@@ -410,8 +417,10 @@ namespace awkward {
           util::gettypestr(parameters_, typestrs), util::dtype::boolean);
       }
       else {
-        throw std::invalid_argument(std::string("RawArrayOf<") +
-          typeid(T).name() + std::string("> does not have a known type"));
+        throw std::invalid_argument(
+          std::string("RawArrayOf<") + typeid(T).name()
+          + std::string("> does not have a known type")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -544,8 +553,9 @@ namespace awkward {
                        length());
       }
       else {
-        throw std::invalid_argument(std::string("cannot convert RawArrayOf<")
-          + typeid(T).name() + std::string("> into JSON"));
+        throw std::invalid_argument(
+          std::string("cannot convert RawArrayOf<") + typeid(T).name()
+          + std::string("> into JSON") + FILENAME(__LINE__));
       }
     }
 
@@ -660,14 +670,16 @@ namespace awkward {
 
     const ContentPtr
       getitem_field(const std::string& key) const override {
-      throw std::invalid_argument(std::string("cannot slice ") + classname()
-        + std::string(" by field name"));
+      throw std::invalid_argument(
+        std::string("cannot slice ") + classname() + std::string(" by field name")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const override {
-      throw std::invalid_argument(std::string("cannot slice ") + classname()
-        + std::string(" by field names"));
+      throw std::invalid_argument(
+        std::string("cannot slice ") + classname() + std::string(" by field names")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
@@ -683,7 +695,8 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const override {
       if (tail.length() != 0) {
-        throw std::invalid_argument("too many indexes for array");
+        throw std::invalid_argument(
+          std::string("too many indexes for array") + FILENAME(__LINE__));
       }
       return Content::getitem_next(head, tail, advanced);
     }
@@ -724,15 +737,19 @@ namespace awkward {
 
     int64_t
       fieldindex(const std::string& key) const override {
-      throw std::invalid_argument(std::string("key ") + util::quote(key, true)
-        + std::string(" does not exist (data are not records)"));
+      throw std::invalid_argument(
+        std::string("key ") + util::quote(key, true)
+        + std::string(" does not exist (data are not records)")
+        + FILENAME(__LINE__));
     }
 
     const std::string
       key(int64_t fieldindex) const override {
-      throw std::invalid_argument(std::string("fieldindex \"")
+      throw std::invalid_argument(
+        std::string("fieldindex \"")
         + std::to_string(fieldindex)
-        + std::string("\" does not exist (data are not records)"));
+        + std::string("\" does not exist (data are not records)")
+        + FILENAME(__LINE__));
     }
 
     bool
@@ -773,7 +790,8 @@ namespace awkward {
                                                      sizeof(int64_t));
       }
       else {
-        throw std::invalid_argument("'axis' out of range for 'num'");
+        throw std::invalid_argument(
+          std::string("'axis' out of range for 'num'") + FILENAME(__LINE__));
       }
     }
 
@@ -781,10 +799,12 @@ namespace awkward {
       offsets_and_flattened(int64_t axis, int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis == depth) {
-        throw std::invalid_argument("axis=0 not allowed for flatten");
+        throw std::invalid_argument(
+          std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
       }
       else {
-        throw std::invalid_argument("axis out of range for flatten");
+        throw std::invalid_argument(
+          std::string("axis out of range for flatten") + FILENAME(__LINE__));
       }
     }
 
@@ -896,14 +916,17 @@ namespace awkward {
                                                itemsize_);
       }
       else {
-        throw std::invalid_argument(std::string("cannot merge ") + classname()
-          + std::string(" with ") + other.get()->classname());
+        throw std::invalid_argument(
+          std::string("cannot merge ") + classname() + std::string(" with ")
+          + other.get()->classname() + FILENAME(__LINE__));
       }
     }
 
     const SliceItemPtr
       asslice() const override {
-      throw std::invalid_argument("cannot use RawArray as a slice");
+      throw std::invalid_argument(
+        std::string("cannot use RawArray as a slice")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
@@ -915,7 +938,9 @@ namespace awkward {
       rpad(int64_t target, int64_t axis, int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis != depth) {
-        throw std::invalid_argument("axis exceeds the depth of this array");
+        throw std::invalid_argument(
+          std::string("axis exceeds the depth of this array")
+          + FILENAME(__LINE__));
       }
       if (target < length()) {
         return shallow_copy();
@@ -931,7 +956,9 @@ namespace awkward {
                     int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis != depth) {
-        throw std::invalid_argument("axis exceeds the depth of this array");
+        throw std::invalid_argument(
+          std::string("axis exceeds the depth of this array")
+          + FILENAME(__LINE__));
       }
       Index64 index(target);
       struct Error err = kernel::index_rpad_and_clip_axis0_64(
@@ -955,7 +982,9 @@ namespace awkward {
                   int64_t outlength,
                   bool mask,
                   bool keepdims) const override {
-      throw std::runtime_error("FIXME: RawArray:reduce_next");
+      throw std::runtime_error(
+        std::string("FIXME: RawArray:reduce_next")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
@@ -1050,7 +1079,9 @@ namespace awkward {
         return localindex_axis0();
       }
       else {
-        throw std::invalid_argument("'axis' out of range for localindex");
+        throw std::invalid_argument(
+          std::string("'axis' out of range for localindex")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1062,14 +1093,18 @@ namespace awkward {
                    int64_t axis,
                    int64_t depth) const override {
       if (n < 1) {
-        throw std::invalid_argument("in combinations, 'n' must be at least 1");
+        throw std::invalid_argument(
+          std::string("in combinations, 'n' must be at least 1")
+          + FILENAME(__LINE__));
       }
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis == depth) {
         return combinations_axis0(n, replacement, recordlookup, parameters);
       }
       else {
-        throw std::invalid_argument("'axis' out of range for combinations");
+        throw std::invalid_argument(
+          std::string("'axis' out of range for combinations")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1095,7 +1130,8 @@ namespace awkward {
           step = 1;
         }
         else if (step == 0) {
-          throw std::invalid_argument("slice step must not be 0");
+          throw std::invalid_argument(
+            std::string("slice step must not be 0") + FILENAME(__LINE__));
         }
         kernel::regularize_rangeslice(&start, &stop, step > 0,
           range.hasstart(), range.hasstop(), length_);
@@ -1122,10 +1158,12 @@ namespace awkward {
                    const Index64& advanced) const override {
       if (advanced.length() != 0) {
         throw std::runtime_error(
-          "RawArray::getitem_next(SliceAt): advanced.length() != 0");
+          std::string("RawArray::getitem_next(SliceAt): advanced.length() != 0")
+          + FILENAME(__LINE__));
       }
       if (array.shape().size() != 1) {
-        throw std::runtime_error("array.ndim != 1");
+        throw std::runtime_error(
+          std::string("array.ndim != 1") + FILENAME(__LINE__));
       }
       Index64 flathead = array.ravel();
       struct Error err = kernel::regularize_arrayslice_64(
@@ -1141,24 +1179,30 @@ namespace awkward {
       getitem_next(const SliceField& field,
                    const Slice& tail,
                    const Index64& advanced) const override {
-      throw std::invalid_argument(std::string("cannot slice ") + classname()
-        + std::string(" by a field name because it has no fields"));
+      throw std::invalid_argument(
+        std::string("cannot slice ") + classname()
+        + std::string(" by a field name because it has no fields")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
       getitem_next(const SliceFields& fields,
                    const Slice& tail,
                    const Index64& advanced) const override {
-      throw std::invalid_argument(std::string("cannot slice ") + classname()
-        + std::string(" by field names because it has no fields"));
+      throw std::invalid_argument(
+        std::string("cannot slice ") + classname()
+        + std::string(" by field names because it has no fields")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
       getitem_next(const SliceJagged64& jagged,
                    const Slice& tail,
                    const Index64& advanced) const override {
-      throw std::invalid_argument(std::string("cannot slice ") + classname()
-        + std::string(" by a jagged array because it is one-dimensional"));
+      throw std::invalid_argument(
+        std::string("cannot slice ") + classname()
+        + std::string(" by a jagged array because it is one-dimensional")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
@@ -1167,7 +1211,8 @@ namespace awkward {
                           const SliceArray64& slicecontent,
                           const Slice& tail) const override {
       throw std::runtime_error(
-        "undefined operation: RawArray::getitem_next_jagged(array)");
+        std::string("undefined operation: RawArray::getitem_next_jagged(array)")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
@@ -1176,7 +1221,8 @@ namespace awkward {
                           const SliceMissing64& slicecontent,
                           const Slice& tail) const override {
       throw std::runtime_error(
-        "undefined operation: RawArray::getitem_next_jagged(missing)");
+        std::string("undefined operation: RawArray::getitem_next_jagged(missing)")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
@@ -1185,7 +1231,8 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override {
       throw std::runtime_error(
-        "undefined operation: RawArray::getitem_next_jagged(jagged)");
+        std::string("undefined operation: RawArray::getitem_next_jagged(jagged)")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
@@ -1219,7 +1266,8 @@ namespace awkward {
     const ContentPtr
       numbers_to_type(const std::string& name) const override {
       throw std::runtime_error(
-        "FIXME: unimplemented operation: RawArray::numbers_to_type");
+        std::string("FIXME: unimplemented operation: RawArray::numbers_to_type")
+        + FILENAME(__LINE__));
     }
 
   private:

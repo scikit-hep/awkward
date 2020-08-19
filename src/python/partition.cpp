@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/partition.cpp", line)
+
 #include "awkward/python/content.h"
 
 #include "awkward/python/partition.h"
@@ -35,7 +37,7 @@ tojson_file(const T& self,
 #endif
     throw std::invalid_argument(
       std::string("file \"") + destination
-      + std::string("\" could not be opened for writing"));
+      + std::string("\" could not be opened for writing") + FILENAME(__LINE__));
   }
   try {
     self.tojson(file,

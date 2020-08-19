@@ -219,9 +219,15 @@ def typeof_UnionArray(obj):
 
 def typeof_VirtualArray(obj):
     if obj.form.form is None:
-        raise ValueError("VirtualArrays without a known 'form' can't be used in Numba")
+        raise ValueError(
+            "VirtualArrays without a known 'form' can't be used in Numba"
+            + awkward1._util.exception_suffix(__file__)
+        )
     if obj.form.has_identities:
-        raise NotImplementedError("TODO: identities in VirtualArray")
+        raise NotImplementedError(
+            "TODO: identities in VirtualArray"
+            + awkward1._util.exception_suffix(__file__)
+        )
     return VirtualArrayType(obj.form.form, numba.none, obj.parameters)
 
 
@@ -251,7 +257,10 @@ class ContentType(numba.types.Type):
         if not form.has_identities:
             return numba.none
         else:
-            raise NotImplementedError("TODO: identities in VirtualArray")
+            raise NotImplementedError(
+                "TODO: identities in VirtualArray"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     @classmethod
     def from_form_index(cls, index_string):
@@ -268,6 +277,7 @@ class ContentType(numba.types.Type):
         else:
             raise AssertionError(
                 "unrecognized Form index type: {0}".format(index_string)
+                + awkward1._util.exception_suffix(__file__)
             )
 
     def form_fill_identities(self, pos, layout, lookup):
@@ -289,7 +299,10 @@ class ContentType(numba.types.Type):
         elif arraytype.dtype.bitwidth == 64 and arraytype.dtype.signed:
             return awkward1.layout.Index64
         else:
-            raise AssertionError("no Index* type for array: {0}".format(arraytype))
+            raise AssertionError(
+                "no Index* type for array: {0}".format(arraytype)
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     def getitem_at_check(self, viewtype):
         typer = awkward1._util.numba_array_typer(viewtype.type, viewtype.behavior)
@@ -309,6 +322,7 @@ class ContentType(numba.types.Type):
         else:
             raise TypeError(
                 "array does not have a field with key {0}".format(repr(key))
+                + awkward1._util.exception_suffix(__file__)
             )
 
     def lower_getitem_at_check(
@@ -484,6 +498,7 @@ class NumpyArrayType(ContentType):
             raise NotImplementedError(
                 "NumpyForm is multidimensional; TODO: convert to RegularForm,"
                 " just as NumpyArrays are converted to RegularArrays"
+                + awkward1._util.exception_suffix(__file__)
             )
         pos = len(positions)
         cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
@@ -499,6 +514,7 @@ class NumpyArrayType(ContentType):
             raise NotImplementedError(
                 "NumpyForm is multidimensional; TODO: convert to RegularForm,"
                 " just as NumpyArrays are converted to RegularArrays"
+                + awkward1._util.exception_suffix(__file__)
             )
         if form.primitive == "float64":
             arraytype = numba.types.Array(numba.float64, 1, "A")
@@ -525,6 +541,7 @@ class NumpyArrayType(ContentType):
         else:
             raise ValueError(
                 "unrecognized NumpyForm.primitive type: {0}".format(form.primitive)
+                + awkward1._util.exception_suffix(__file__)
             )
         return NumpyArrayType(
             arraytype, cls.from_form_identities(form), form.parameters
@@ -828,6 +845,7 @@ class ListArrayType(ContentType):
         else:
             raise AssertionError(
                 "no ListArray* type for array: {0}".format(self.indextype)
+                + awkward1._util.exception_suffix(__file__)
             )
 
     def tolayout(self, lookup, pos, fields):
@@ -973,6 +991,7 @@ class IndexedArrayType(ContentType):
         else:
             raise AssertionError(
                 "no IndexedArray* type for array: {0}".format(self.indextype)
+                + awkward1._util.exception_suffix(__file__)
             )
 
     def tolayout(self, lookup, pos, fields):
@@ -1127,6 +1146,7 @@ class IndexedOptionArrayType(ContentType):
         else:
             raise AssertionError(
                 "no IndexedOptionArray* type for array: {0}".format(self.indextype)
+                + awkward1._util.exception_suffix(__file__)
             )
 
     def tolayout(self, lookup, pos, fields):
@@ -1845,6 +1865,7 @@ class RecordArrayType(ContentType):
                         "no field {0} in tuples with {1} fields".format(
                             repr(key), len(self.contenttypes)
                         )
+                        + awkward1._util.exception_suffix(__file__)
                     )
                 else:
                     raise ValueError(
@@ -1852,6 +1873,7 @@ class RecordArrayType(ContentType):
                         "fields: [{1}]".format(
                             repr(key), ", ".join(repr(x) for x in self.recordlookup)
                         )
+                        + awkward1._util.exception_suffix(__file__)
                     )
             contenttype = self.contenttypes[index]
             subviewtype = awkward1._connect._numba.arrayview.wrap(
@@ -1867,12 +1889,14 @@ class RecordArrayType(ContentType):
                     "no field {0} in tuples with {1} fields".format(
                         repr(key), len(self.contenttypes)
                     )
+                    + awkward1._util.exception_suffix(__file__)
                 )
             else:
                 raise ValueError(
                     "no field {0} in records with fields: [{1}]".format(
                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
                     )
+                    + awkward1._util.exception_suffix(__file__)
                 )
         contenttype = self.contenttypes[index]
         subviewtype = awkward1._connect._numba.arrayview.wrap(
@@ -1888,12 +1912,14 @@ class RecordArrayType(ContentType):
                     "no field {0} in tuple with {1} fields".format(
                         repr(key), len(self.contenttypes)
                     )
+                    + awkward1._util.exception_suffix(__file__)
                 )
             else:
                 raise ValueError(
                     "no field {0} in record with fields: [{1}]".format(
                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
                     )
+                    + awkward1._util.exception_suffix(__file__)
                 )
         contenttype = self.contenttypes[index]
         subviewtype = awkward1._connect._numba.arrayview.wrap(
@@ -2168,10 +2194,12 @@ class UnionArrayType(ContentType):
             else:
                 raise AssertionError(
                     "no UnionArray* type for index array: {0}".format(self.indextype)
+                    + awkward1._util.exception_suffix(__file__)
                 )
         else:
             raise AssertionError(
                 "no UnionArray* type for tags array: {0}".format(self.tagstype)
+                + awkward1._util.exception_suffix(__file__)
             )
 
     def tolayout(self, lookup, pos, fields):
@@ -2192,15 +2220,24 @@ class UnionArrayType(ContentType):
 
     def getitem_at(self, viewtype):
         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-            raise TypeError("union types cannot be accessed in Numba")
+            raise TypeError(
+                "union types cannot be accessed in Numba"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     def getitem_range(self, viewtype):
         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-            raise TypeError("union types cannot be accessed in Numba")
+            raise TypeError(
+                "union types cannot be accessed in Numba"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     def getitem_field(self, viewtype, key):
         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-            raise TypeError("union types cannot be accessed in Numba")
+            raise TypeError(
+                "union types cannot be accessed in Numba"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     def lower_getitem_at(
         self,
@@ -2217,6 +2254,7 @@ class UnionArrayType(ContentType):
     ):
         raise NotImplementedError(
             type(self).__name__ + ".lower_getitem_at not implemented"
+            + awkward1._util.exception_suffix(__file__)
         )
 
     def lower_getitem_range(
@@ -2233,11 +2271,13 @@ class UnionArrayType(ContentType):
     ):
         raise NotImplementedError(
             type(self).__name__ + ".lower_getitem_range not implemented"
+            + awkward1._util.exception_suffix(__file__)
         )
 
     def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
         raise NotImplementedError(
             type(self).__name__ + ".lower_getitem_field not implemented"
+            + awkward1._util.exception_suffix(__file__)
         )
 
 
@@ -2254,6 +2294,7 @@ class VirtualArrayType(ContentType):
         if layout.form is None:
             raise ValueError(
                 "VirtualArrays without a known 'form' can't be used in Numba"
+                + awkward1._util.exception_suffix(__file__)
             )
         pyptr = ctypes.py_object(layout)
         ctypes.pythonapi.Py_IncRef(pyptr)
@@ -2276,6 +2317,7 @@ class VirtualArrayType(ContentType):
         if form.form is None:
             raise ValueError(
                 "VirtualArrays without a known 'form' can't be used in Numba"
+                + awkward1._util.exception_suffix(__file__)
             )
         positions.append(0)
         sharedptrs.append(None)
@@ -2292,6 +2334,7 @@ class VirtualArrayType(ContentType):
             raise ValueError(
                 "VirtualArrays without a known 'form' can't be used in Numba "
                 "(including nested)"
+                + awkward1._util.exception_suffix(__file__)
             )
         return VirtualArrayType(
             form.form, cls.from_form_identities(form), form.parameters
@@ -2301,6 +2344,7 @@ class VirtualArrayType(ContentType):
         if generator_form is None:
             raise ValueError(
                 "VirtualArrays without a known 'form' can't be used in Numba"
+                + awkward1._util.exception_suffix(__file__)
             )
         super(VirtualArrayType, self).__init__(
             name="awkward1.VirtualArrayType({0}, {1}, {2})".format(
@@ -2364,6 +2408,7 @@ class VirtualArrayType(ContentType):
                         "unrecognized NumpyForm.primitive type: {0}".format(
                             form.primitive
                         )
+                        + awkward1._util.exception_suffix(__file__)
                     )
 
             elif isinstance(
@@ -2395,10 +2440,16 @@ class VirtualArrayType(ContentType):
                 return arrayview.type.getitem_at(arrayview)
 
             elif isinstance(form, awkward1.forms.UnionForm):
-                raise TypeError("union types cannot be accessed in Numba")
+                raise TypeError(
+                    "union types cannot be accessed in Numba"
+                    + awkward1._util.exception_suffix(__file__)
+                )
 
             else:
-                raise AssertionError("unrecognized Form type: {0}".format(type(form)))
+                raise AssertionError(
+                    "unrecognized Form type: {0}".format(type(form))
+                    + awkward1._util.exception_suffix(__file__)
+                )
 
         def wrap(out):
             if isinstance(out, awkward1.forms.Form):

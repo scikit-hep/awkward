@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/type/RecordType.cpp", line)
+
 #include <string>
 #include <sstream>
 #include <algorithm>
@@ -22,7 +24,8 @@ namespace awkward {
     if (recordlookup_.get() != nullptr  &&
         recordlookup_.get()->size() != types_.size()) {
       throw std::runtime_error(
-        "recordlookup and types must have the same length");
+        std::string("recordlookup and types must have the same length")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -234,7 +237,7 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("fieldindex ") + std::to_string(fieldindex)
         + std::string(" for record with only ") + std::to_string(numfields())
-        + std::string(" fields"));
+        + std::string(" fields") + FILENAME(__LINE__));
     }
     return types_[(size_t)fieldindex];
   }

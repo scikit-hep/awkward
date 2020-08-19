@@ -319,6 +319,8 @@ def preprocess(filename, skip_implementation=False):
                                 line = line.replace(x, "float")
                             elif "awkward_" in line and "(" in line:
                                 line = "int".join(line.rsplit(x, 1))
+                            elif "FILENAME(__LINE__)" in line:
+                                pass
                             else:
                                 line = line.replace(x, "int")
             if func is True and (

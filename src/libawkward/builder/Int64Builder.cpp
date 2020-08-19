@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/Int64Builder.cpp", line)
+
 #include "awkward/Identities.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/type/PrimitiveType.h"
@@ -109,7 +111,8 @@ namespace awkward {
   const BuilderPtr
   Int64Builder::endlist() {
     throw std::invalid_argument(
-      "called 'endlist' without 'beginlist' at the same level before it");
+      std::string("called 'end_list' without 'begin_list' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -122,13 +125,15 @@ namespace awkward {
   const BuilderPtr
   Int64Builder::index(int64_t index) {
     throw std::invalid_argument(
-      "called 'index' without 'begintuple' at the same level before it");
+      std::string("called 'index' without 'begin_tuple' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr
   Int64Builder::endtuple() {
     throw std::invalid_argument(
-      "called 'endtuple' without 'begintuple' at the same level before it");
+      std::string("called 'end_tuple' without 'begin_tuple' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -141,13 +146,15 @@ namespace awkward {
   const BuilderPtr
   Int64Builder::field(const char* key, bool check) {
     throw std::invalid_argument(
-      "called 'field' without 'beginrecord' at the same level before it");
+      std::string("called 'field' without 'begin_record' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr
   Int64Builder::endrecord() {
     throw std::invalid_argument(
-      "called 'endrecord' without 'beginrecord' at the same level before it");
+      std::string("called 'end_record' without 'begin_record' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr

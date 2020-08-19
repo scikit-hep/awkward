@@ -19,7 +19,7 @@ def test_array_3d():
                                                              [2, 2, 2, 2, 2]]
     with pytest.raises(ValueError) as err:
         assert awkward1.num(array, axis=3)
-    assert str(err.value) == "'axis' out of range for 'num'"
+    assert str(err.value).startswith("'axis' out of range for 'num'")
 
     assert awkward1.to_list(awkward1.num(array, axis=-1)) == [[2, 2, 2, 2, 2],
                                                               [2, 2, 2, 2, 2],
@@ -29,7 +29,7 @@ def test_array_3d():
 
     with pytest.raises(ValueError) as err:
         assert awkward1.num(array, axis=-4)
-    assert str(err.value) == "axis == -4 exceeds the depth == 3 of this array"
+    assert str(err.value).startswith("axis == -4 exceeds the depth == 3 of this array")
 
 def test_list_array():
     array = awkward1.Array(numpy.arange(3*5*2).reshape(3, 5, 2).tolist())
@@ -41,7 +41,7 @@ def test_list_array():
 
     with pytest.raises(ValueError) as err:
         assert awkward1.num(array, axis=3)
-    assert str(err.value) == "'axis' out of range for 'num'"
+    assert str(err.value).startswith("'axis' out of range for 'num'")
 
     assert awkward1.num(array, axis=-1) == [5, 5, 5]
     assert awkward1.num(array, axis=-2) == [[2, 2, 2, 2, 2],
@@ -50,7 +50,7 @@ def test_list_array():
     assert awkward1.num(array, axis=-3) == 3
     with pytest.raises(ValueError) as err:
         assert awkward1.num(array, axis=-4)
-    assert str(err.value) == "axis == -4 exceeds the depth == 3 of this array"
+    assert str(err.value).startswith("axis == -4 exceeds the depth == 3 of this array")
 
 def test_record_array():
     array = awkward1.Array([
@@ -64,7 +64,7 @@ def test_record_array():
                                                     {'x': 3, 'y': 4}]
     with pytest.raises(ValueError) as err:
         assert awkward1.num(array, axis=2)
-    assert str(err.value) == "'axis' out of range for 'num'"
+    assert str(err.value).startswith("'axis' out of range for 'num'")
 
     assert awkward1.num(array, axis=-1).tolist() == [{'x': 1, 'y': [0, 1]},
                                                      {'x': 2, 'y': [0, 1, 2]},
@@ -78,8 +78,8 @@ def test_record_array_axis_out_of_range():
 
     with pytest.raises(ValueError) as err:
         assert awkward1.num(array, axis=-2)
-    assert str(err.value) == "axis == -2 exceeds the min depth == 2 of this array"
+    assert str(err.value).startswith("axis == -2 exceeds the min depth == 2 of this array")
 
     with pytest.raises(ValueError) as err:
         assert awkward1.num(array, axis=-3)
-    assert str(err.value) == "axis == -3 exceeds the depth == 2 of this array"
+    assert str(err.value).startswith("axis == -3 exceeds the depth == 2 of this array")

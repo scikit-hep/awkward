@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/TupleBuilder.cpp", line)
+
 #include <stdexcept>
 
 #include "awkward/Identities.h"
@@ -92,8 +94,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'null' immediately after 'begintuple'; "
-        "needs 'index' or 'endtuple'");
+        std::string("called 'null' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->null());
@@ -113,8 +115,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'boolean' immediately after 'begintuple'; "
-        "needs 'index' or 'endtuple'");
+        std::string("called 'boolean' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->boolean(x));
@@ -134,8 +136,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'integer' immediately after 'begintuple'; "
-        "needs 'index' or 'endtuple'");
+        std::string("called 'integer' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->integer(x));
@@ -155,8 +157,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'real' immediately after 'begintuple'; "
-        "needs 'index' or 'endtuple'");
+        std::string("called 'real' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->real(x));
@@ -176,8 +178,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'string' immediately after 'begintuple'; "
-        "needs 'index' or 'endtuple'");
+        std::string("called 'string' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
@@ -200,8 +202,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'beginlist' immediately after 'begintuple'; "
-        "needs 'index' or 'endtuple'");
+        std::string("called 'begin_list' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
@@ -217,12 +219,14 @@ namespace awkward {
   TupleBuilder::endlist() {
     if (!begun_) {
       throw std::invalid_argument(
-        "called 'endlist' without 'beginlist' at the same level before it");
+        std::string("called 'end_list' without 'begin_list' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'endlist' immediately after 'begintuple'; "
-        "needs 'index' or 'endtuple' and then 'beginlist'");
+        std::string("called 'end_list' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple' and then 'begin_list'")
+        + FILENAME(__LINE__));
     }
     else {
       contents_[(size_t)nextindex_].get()->endlist();
@@ -250,8 +254,9 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'begintuple' immediately after 'begintuple'; "
-        "needs 'index' or 'endtuple'");
+        std::string("called 'begin_tuple' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple'")
+        + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
@@ -267,7 +272,8 @@ namespace awkward {
   TupleBuilder::index(int64_t index) {
     if (!begun_) {
       throw std::invalid_argument(
-      "called 'index' without 'begintuple' at the same level before it");
+        std::string("called 'index' without 'begin_tuple' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1  ||
              !contents_[(size_t)nextindex_].get()->active()) {
@@ -283,7 +289,8 @@ namespace awkward {
   TupleBuilder::endtuple() {
     if (!begun_) {
       throw std::invalid_argument(
-      "called 'endtuple' without 'begintuple' at the same level before it");
+        std::string("called 'end_tuple' without 'begin_tuple' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1  ||
              !contents_[(size_t)nextindex_].get()->active()) {
@@ -294,7 +301,7 @@ namespace awkward {
         if (contents_[i].get()->length() != length_ + 1) {
           throw std::invalid_argument(
             std::string("tuple index ") + std::to_string(i)
-            + std::string(" filled more than once"));
+            + std::string(" filled more than once") + FILENAME(__LINE__));
         }
       }
       length_++;
@@ -315,8 +322,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-      "called 'beginrecord' immediately after 'begintuple'; "
-      "needs 'index' or 'endtuple'");
+        std::string("called 'begin_record' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
@@ -333,12 +340,14 @@ namespace awkward {
   TupleBuilder::field(const char* key, bool check) {
     if (!begun_) {
       throw std::invalid_argument(
-      "called 'field_fast' without 'beginrecord' at the same level before it");
+        std::string("called 'field_fast' without 'begin_record' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-      "called 'field_fast' immediately after 'begintuple'; "
-      "needs 'index' or 'endtuple' and then 'beginrecord'");
+        std::string("called 'field_fast' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple' and then 'begin_record'")
+        + FILENAME(__LINE__));
     }
     else {
       contents_[(size_t)nextindex_].get()->field(key, check);
@@ -350,12 +359,14 @@ namespace awkward {
   TupleBuilder::endrecord() {
     if (!begun_) {
       throw std::invalid_argument(
-      "called 'endrecord' without 'beginrecord' at the same level before it");
+        std::string("called 'end_record' without 'begin_record' at the same level before it")
+        + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'endrecord' immediately after 'begintuple'; "
-        "needs 'index' or 'endtuple' and then 'beginrecord'");
+        std::string("called 'end_record' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple' and then 'begin_record'")
+        + FILENAME(__LINE__));
     }
     else {
       contents_[(size_t)nextindex_].get()->endrecord();
@@ -372,8 +383,8 @@ namespace awkward {
     }
     else if (nextindex_ == -1) {
       throw std::invalid_argument(
-        "called 'append' immediately after 'begintuple'; "
-        "needs 'index' or 'endtuple'");
+        std::string("called 'append' immediately after 'begin_tuple'; "
+                    "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,

@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/VirtualArray.cpp", line)
+
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
@@ -39,7 +41,8 @@ namespace awkward {
   VirtualForm::type(const util::TypeStrs& typestrs) const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->type(typestrs);
@@ -84,7 +87,8 @@ namespace awkward {
   VirtualForm::purelist_isregular() const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->purelist_isregular();
@@ -95,7 +99,8 @@ namespace awkward {
   VirtualForm::purelist_depth() const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->purelist_depth();
@@ -106,7 +111,8 @@ namespace awkward {
   VirtualForm::minmax_depth() const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->minmax_depth();
@@ -117,7 +123,8 @@ namespace awkward {
   VirtualForm::branch_depth() const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->branch_depth();
@@ -128,7 +135,8 @@ namespace awkward {
   VirtualForm::numfields() const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->numfields();
@@ -139,7 +147,8 @@ namespace awkward {
   VirtualForm::fieldindex(const std::string& key) const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->fieldindex(key);
@@ -150,7 +159,8 @@ namespace awkward {
   VirtualForm::key(int64_t fieldindex) const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->key(fieldindex);
@@ -161,7 +171,8 @@ namespace awkward {
   VirtualForm::haskey(const std::string& key) const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->haskey(key);
@@ -172,7 +183,8 @@ namespace awkward {
   VirtualForm::keys() const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->keys();
@@ -338,12 +350,16 @@ namespace awkward {
 
   void
   VirtualArray::setidentities(const IdentitiesPtr& identities) {
-    throw std::runtime_error("FIXME: VirtualArray::setidentities(identities)");
+    throw std::runtime_error(
+      std::string("FIXME: VirtualArray::setidentities(identities)")
+      + FILENAME(__LINE__));
   }
 
   void
   VirtualArray::setidentities() {
-    throw std::runtime_error("FIXME: VirtualArray::setidentities");
+    throw std::runtime_error(
+      std::string("FIXME: VirtualArray::setidentities")
+      + FILENAME(__LINE__));
   }
 
   const TypePtr
@@ -738,7 +754,8 @@ namespace awkward {
       if (SliceRange* range =
           dynamic_cast<SliceRange*>(head.get())) {
         if (range->step() == 0) {
-            throw std::invalid_argument("slice step cannot be zero");
+            throw std::invalid_argument(
+              std::string("slice step cannot be zero") + FILENAME(__LINE__));
         }
         else if (generator_.get()->length() >= 0) {
           int64_t regular_start = range->start();
@@ -836,7 +853,8 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next(at)");
+      std::string("undefined operation: VirtualArray::getitem_next(at)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -844,7 +862,8 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next(range)");
+      std::string("undefined operation: VirtualArray::getitem_next(range)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -852,7 +871,8 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next(array)");
+      std::string("undefined operation: VirtualArray::getitem_next(array)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -860,7 +880,8 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next(field)");
+      std::string("undefined operation: VirtualArray::getitem_next(field)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -868,7 +889,8 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next(fields)");
+      std::string("undefined operation: VirtualArray::getitem_next(fields)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -876,7 +898,8 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next(jagged)");
+      std::string("undefined operation: VirtualArray::getitem_next(jagged)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -885,7 +908,8 @@ namespace awkward {
                                   const SliceArray64& slicecontent,
                                   const Slice& tail) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next_jagged(array)");
+      std::string("undefined operation: VirtualArray::getitem_next_jagged(array)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -894,7 +918,8 @@ namespace awkward {
                                   const SliceMissing64& slicecontent,
                                   const Slice& tail) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next_jagged(missing)");
+      std::string("undefined operation: VirtualArray::getitem_next_jagged(missing)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -903,7 +928,8 @@ namespace awkward {
                                   const SliceJagged64& slicecontent,
                                   const Slice& tail) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next_jagged(jagged)");
+      std::string("undefined operation: VirtualArray::getitem_next_jagged(jagged)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr

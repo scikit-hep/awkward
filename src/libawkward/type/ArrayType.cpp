@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/type/ArrayType.cpp", line)
+
 #include <string>
 
 #include "awkward/type/ArrayType.h"
@@ -74,7 +76,7 @@ namespace awkward {
     if (length_ != 0) {
       throw std::invalid_argument(
         std::string("ArrayType with length ") + std::to_string(length_)
-        + std::string(" does not describe an empty array"));
+        + std::string(" does not describe an empty array") + FILENAME(__LINE__));
     }
     return type_.get()->empty();
   }

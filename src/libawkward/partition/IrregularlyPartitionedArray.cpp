@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/partition/IrregularlyPartitionedArray.cpp", line)
+
 #include <sstream>
 
 #include "awkward/array/UnionArray.h"
@@ -13,8 +15,8 @@ namespace awkward {
       , stops_(stops) {
     if (partitions.size() != stops.size()) {
       throw std::invalid_argument(
-        "IrregularlyPartitionedArray stops must have the same length "
-        "as its partitions");
+        std::string("IrregularlyPartitionedArray stops must have the same length "
+                    "as its partitions") + FILENAME(__LINE__));
     }
   }
 
@@ -70,7 +72,7 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("cannot repartition array of length ")
         + std::to_string(stops_.back()) + std::string(" to length ")
-        + std::to_string(stops.back()));
+        + std::to_string(stops.back()) + FILENAME(__LINE__));
     }
 
     int64_t partitionid = 0;

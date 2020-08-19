@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/ListArray.cpp", line)
+
 #include <sstream>
 #include <type_traits>
 
@@ -207,7 +209,8 @@ namespace awkward {
       , content_(content) {
     if (stops.length() < starts.length()) {
       throw std::invalid_argument(
-        "ListArray stops must not be shorter than its starts");
+        std::string("ListArray stops must not be shorter than its starts")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -249,13 +252,14 @@ namespace awkward {
   ListArrayOf<T>::broadcast_tooffsets64(const Index64& offsets) const {
     if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
       throw std::invalid_argument(
-        "broadcast_tooffsets64 can only be used with offsets that start at 0");
+        std::string("broadcast_tooffsets64 can only be used with offsets that start at 0")
+        + FILENAME(__LINE__));
     }
     if (offsets.length() - 1 > starts_.length()) {
       throw std::invalid_argument(
         std::string("cannot broadcast ListArray of length ")
         + std::to_string(starts_.length()) + (" to length ")
-        + std::to_string(offsets.length() - 1));
+        + std::to_string(offsets.length() - 1) + FILENAME(__LINE__));
     }
 
     int64_t carrylen = offsets.getitem_at_nowrap(offsets.length() - 1);
@@ -394,7 +398,8 @@ namespace awkward {
         }
       }
       else {
-        throw std::runtime_error("unrecognized Identities specialization");
+        throw std::runtime_error(
+          std::string("unrecognized Identities specialization") + FILENAME(__LINE__));
       }
     }
     identities_ = identities;
@@ -995,7 +1000,8 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else {
-      throw std::runtime_error("unrecognized ListArray specialization");
+      throw std::runtime_error(
+        std::string("unrecognized ListArray specialization") + FILENAME(__LINE__));
     }
 
     int64_t mycontentlength = content_.get()->length();
@@ -1138,7 +1144,7 @@ namespace awkward {
     else {
       throw std::invalid_argument(
         std::string("cannot merge ") + classname() + std::string(" with ")
-        + other.get()->classname());
+        + other.get()->classname() + FILENAME(__LINE__));
     }
 
     return std::make_shared<ListArray64>(Identities::none(),
@@ -1300,7 +1306,8 @@ namespace awkward {
                                int64_t axis,
                                int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1") + FILENAME(__LINE__));
     }
 
     int64_t posaxis = axis_wrap_if_negative(axis);
@@ -1428,7 +1435,8 @@ namespace awkward {
 
     if (advanced.length() != 0) {
       throw std::runtime_error(
-        "ListArray::getitem_next(SliceAt): advanced.length() != 0");
+        std::string("ListArray::getitem_next(SliceAt): advanced.length() != 0")
+        + FILENAME(__LINE__));
     }
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -1591,7 +1599,8 @@ namespace awkward {
                                const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::invalid_argument(
-        "cannot mix jagged slice with NumPy-style advanced indexing");
+        std::string("cannot mix jagged slice with NumPy-style advanced indexing")
+        + FILENAME(__LINE__));
     }
     if (stops_.length() < starts_.length()) {
       util::handle_error(
@@ -1762,7 +1771,7 @@ namespace awkward {
       throw std::runtime_error(
         std::string("expected ListOffsetArray64 from "
                     "ListArray::getitem_next_jagged, got ")
-        + out.get()->classname());
+        + out.get()->classname() + FILENAME(__LINE__));
     }
   }
 

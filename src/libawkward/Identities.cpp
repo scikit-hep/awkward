@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/Identities.cpp", line)
+
 #include <cstring>
 #include <atomic>
 #include <iomanip>
@@ -192,8 +194,8 @@ namespace awkward {
     if (!(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop <= length_)
         &&  start != stop) {
       throw std::runtime_error(
-        "Identities::getitem_range_nowrap with illegal start:stop "
-        "for this length");
+        std::string("Identities::getitem_range_nowrap with illegal start:stop "
+                    "for this length") + FILENAME(__LINE__));
     }
     return std::make_shared<IdentitiesOf<T>>(
       ref_,
@@ -276,7 +278,8 @@ namespace awkward {
       util::handle_error(err, classname(), nullptr);
     }
     else {
-      throw std::runtime_error("unrecognized Identities specialization");
+      throw std::runtime_error(
+        std::string("unrecognized Identities specialization") + FILENAME(__LINE__));
     }
 
     return out;
@@ -323,7 +326,8 @@ namespace awkward {
   IdentitiesOf<T>::getitem_at_nowrap(int64_t at) const {
     if (!(0 <= at  &&  at < length_)) {
       throw std::runtime_error(
-        "Identities::getitem_at_nowrap with illegal index for this length");
+        std::string("Identities::getitem_at_nowrap with illegal index for this length")
+        + FILENAME(__LINE__));
     }
     std::vector<T> out;
     for (size_t i = (size_t)(offset_ + at);

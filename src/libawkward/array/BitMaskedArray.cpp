@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/BitMaskedArray.cpp", line)
+
 #include <sstream>
 #include <type_traits>
 
@@ -202,11 +204,13 @@ namespace awkward {
     int64_t bitlength = ((length / 8) + ((length % 8) != 0));
     if (mask.length() < bitlength) {
       throw std::invalid_argument(
-        "BitMaskedArray mask must not be shorter than its ceil(length / 8.0)");
+        std::string("BitMaskedArray mask must not be shorter than its ceil(length / 8.0)")
+        + FILENAME(__LINE__));
     }
     if (content.get()->length() < length) {
       throw std::invalid_argument(
-        "BitMaskedArray content must not be shorter than its length");
+        std::string("BitMaskedArray content must not be shorter than its length")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -367,7 +371,9 @@ namespace awkward {
         content_.get()->setidentities(subidentities);
       }
       else {
-        throw std::runtime_error("unrecognized Identities specialization");
+        throw std::runtime_error(
+          std::string("unrecognized Identities specialization")
+          + FILENAME(__LINE__));
       }
     }
     identities_ = identities;
@@ -854,7 +860,8 @@ namespace awkward {
                                const Slice& tail,
                                const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: BitMaskedArraygetitem_next(at)");
+      std::string("undefined operation: BitMaskedArraygetitem_next(at)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -862,7 +869,8 @@ namespace awkward {
                                const Slice& tail,
                                const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: BitMaskedArraygetitem_next(range)");
+      std::string("undefined operation: BitMaskedArraygetitem_next(range)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -870,7 +878,8 @@ namespace awkward {
                                const Slice& tail,
                                const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: BitMaskedArraygetitem_next(array)");
+      std::string("undefined operation: BitMaskedArraygetitem_next(array)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -878,7 +887,8 @@ namespace awkward {
                                const Slice& tail,
                                const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: BitMaskedArraygetitem_next(jagged)");
+      std::string("undefined operation: BitMaskedArraygetitem_next(jagged)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
