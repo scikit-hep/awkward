@@ -38,10 +38,14 @@ KERNEL_WHITELIST = [
     "awkward_IndexU32_to_Index64",
     "awkward_carry_arange",
     "awkward_NumpyArray_getitem_next_at",
+    "awkward_NumpyArray_getitem_boolean_numtrue",
+    "awkward_NumpyArray_getitem_boolean_nonzero",
     "awkward_ListArray_getitem_next_range_counts",
     "awkward_IndexedArray_numnull",
     "awkward_UnionArray_regular_index_getsize",
     "awkward_ListArray_getitem_jagged_carrylen",
+    "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
+    "awkward_MaskedArray_getitem_next_jagged_project",
 ]
 
 
@@ -55,6 +59,13 @@ def traverse(node, args={}, forflag=False, declared=[]):
             )
         else:
             raise Exception("Unable to handle Python for loops with >2 args")
+        for subnode in node.body:
+            code += traverse(subnode, args, True, declared)
+        code += "}\n"
+    elif node.__class__.__name__ == "While":
+        assert node.test.__class__.__name__ == "Compare"
+        assert len(node.test.ops) == 1
+        code = "while ({0}) {{\n".format(traverse(node.test))
         for subnode in node.body:
             code += traverse(subnode, args, True, declared)
         code += "}\n"
@@ -386,6 +397,21 @@ def getlenarg(pycode):
             else:
                 raise Exception(
                     "Unhandled node {0}".format(node.iter.args[0].__class__.__name__)
+                )
+        elif node.__class__.__name__ == "While":
+            assert node.test.__class__.__name__ == "Compare"
+            assert len(node.test.ops) == 1
+            assert node.test.ops[0].__class__.__name__ == "Lt"
+            assert len(node.test.comparators) == 1
+            if node.test.comparators[0].__class__.__name__ == "Constant":
+                forargs.add(node.test.comparators[0].value)
+            elif node.test.comparators[0].__class__.__name__ == "Name":
+                forargs.add(node.test.comparators[0].id)
+            else:
+                raise Exception(
+                    "Unhandled node {0}".format(
+                        node.test.comparators[0].__class__.__name__
+                    )
                 )
     if len(forargs) == 0:
         return 1
