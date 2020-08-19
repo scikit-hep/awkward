@@ -12,6 +12,7 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 KERNEL_WHITELIST = [
     "awkward_new_Identities",
     "awkward_RegularArray_num",
+    "awkward_ListOffsetArray_flatten_offsets",
     "awkward_IndexedArray_overlay_mask",
     "awkward_IndexedArray_mask",
     "awkward_ByteMaskedArray_mask",
@@ -373,6 +374,26 @@ def getbody(pycode, args):
     return code
 
 
+def getlenarg(pycode):
+    tree = ast.parse(pycode).body[0]
+    forargs = set()
+    for node in tree.body:
+        if node.__class__.__name__ == "For":
+            if node.iter.args[0].__class__.__name__ == "Constant":
+                forargs.add(node.iter.args[0].value)
+            elif node.iter.args[0].__class__.__name__ == "Name":
+                forargs.add(node.iter.args[0].id)
+            else:
+                raise Exception(
+                    "Unhandled node {0}".format(node.iter.args[0].__class__.__name__)
+                )
+    if len(forargs) == 0:
+        return 1
+    else:
+        assert len(forargs) == 1
+        return next(iter(forargs))
+
+
 def getctype(typename):
     pointercount = 0
     while "List[" in typename:
@@ -513,12 +534,7 @@ int64_t thread_id = block_id * blockDim.x + threadIdx.x;
         for childfunc in indspec["specializations"]:
             args = getchildargs(childfunc, indspec)
             code += getdecl(childfunc["name"], args, "")
-            lenarg = None
-            for arg in args.keys():
-                if "len" in arg:
-                    assert lenarg is None
-                    lenarg = arg
-            assert lenarg is not None
+            lenarg = getlenarg(indspec["definition"])
             code += """  dim3 blocks_per_grid;
 dim3 threads_per_block;
 
@@ -543,12 +559,7 @@ threads_per_block = dim3({0}, 1, 1);
             code += "}\n\n"
     else:
         code += getdecl(indspec["name"], args, "")
-        lenarg = None
-        for arg in args.keys():
-            if "len" in arg:
-                assert lenarg is None
-                lenarg = arg
-        assert lenarg is not None
+        lenarg = getlenarg(indspec["definition"])
         code += """  dim3 blocks_per_grid;
 dim3 threads_per_block;
 
