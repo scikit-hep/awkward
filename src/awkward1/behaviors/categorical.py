@@ -110,11 +110,109 @@ def _categorical_equal(one, two):
 awkward1.behavior[awkward1.nplike.numpy.equal, "categorical", "categorical"] = _categorical_equal
 
 
+def is_categorical(array):
+    """
+    Args:
+        array: A possibly-categorical Awkward Array.
+
+    If the `array` is categorical (contains #ak.layout.IndexedArray or
+    #ak.layout.IndexedOptionArray labeled with parameter
+    `"__array__" = "categorical"`), then this function returns True;
+    otherwise, it returns False.
+
+    See also #ak.categories, #ak.to_categorical, #ak.from_categorical.
+    """
+
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
+    return layout.purelist_parameter("__array__") == "categorical"
+
+
+def categories(array, highlevel=True):
+    """
+    Args:
+        array: A possibly-categorical Awkward Array.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    If the `array` is categorical (contains #ak.layout.IndexedArray or
+    #ak.layout.IndexedOptionArray labeled with parameter
+    `"__array__" = "categorical"`), then this function returns its categories.
+
+    See also #ak.is_categorical, #ak.to_categorical, #ak.from_categorical.
+    """
+
+    output = [None]
+
+    def getfunction(layout, depth):
+        if layout.parameter("__array__") == "categorical":
+            output[0] = layout.content
+            return lambda: layout
+
+        else:
+            return None
+
+    awkward1._util.recursively_apply(
+        awkward1.operations.convert.to_layout(
+            array, allow_record=False, allow_other=False
+        ),
+        getfunction,
+    )
+
+    if output[0] is None:
+        return None
+    elif highlevel:
+        return awkward1._util.wrap(output[0], awkward1._util.behaviorof(array))
+    else:
+        return out
+
+
 def to_categorical(array, highlevel=True):
+    """
+    Args:
+        array: Data convertible to an Awkward Array
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Creates a categorical dataset, which has the following properties:
+
+       * only distinct values (categories) are stored in their entirety,
+       * pointers to those distinct values are represented by integers
+         (an #ak.layout.IndexedArray or #ak.layout.IndexedOptionArray
+         labeled with parameter `"__array__" = "categorical"`.
+
+    This is equivalent to R's "factor", Pandas's "categorical", and
+    Arrow/Parquet's "dictionary encoding." It differs from generic uses of
+    #ak.layout.IndexedArray and #ak.layout.IndexedOptionArray in Awkward
+    Arrays by the guarantee of no duplicate categories and the `"categorical"`
+    parameter.
+
+    This function descends through nested lists, but not into the fields of
+    records, so records can be categories. To make categorical record
+    fields, split up the record, apply this function to each desired field,
+    and #ak.zip the results together.
+
+        >>> records = ak.Array([
+        ...     {"x": 1.1, "y": "one"},
+        ...     {"x": 2.2, "y": "two"},
+        ...     {"x": 3.3, "y": "three"},
+        ...     {"x": 2.2, "y": "two"},
+        ...     {"x": 1.1, "y": "one"}
+        ... ])
+        >>> categorical_records = ak.zip({
+        ...     "x": ak.to_categorical(records["x"]),
+        ...     "y": ak.to_categorical(records["y"]),
+        ... })
+
+    The check for uniqueness is currently implemented in a Python loop, so
+    conversion to categorical should be regarded as expensive. (This can
+    change, but it would always be an _n log(n)_ operation.)
+
+    See also #ak.is_categorical, #ak.categories, #ak.from_categorical.
+    """
     def getfunction(layout, depth):
         p = layout.purelist_parameter("__array__")
-        print("depth", depth, "layout", type(layout), "p", p)
-
         if (layout.purelist_depth == 1 or (
             layout.purelist_depth == 2 and (p == "string" or p == "bytestring")
         )):
@@ -167,6 +265,45 @@ def to_categorical(array, highlevel=True):
                 index = awkward1.layout.Index64(mapping)
 
             out = cls(index, content[is_first], parameters={"__array__": "categorical"})
+            return lambda: out
+
+        else:
+            return None
+
+    out = awkward1._util.recursively_apply(
+        awkward1.operations.convert.to_layout(
+            array, allow_record=False, allow_other=False
+        ),
+        getfunction,
+    )
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
+
+
+def from_categorical(array, highlevel=True):
+    """
+    Args:
+        array: Awkward Array from which to remove the 'categorical' parameter.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    This function replaces categorical data with non-categorical data (by
+    removing the label that declares it as such).
+
+    This is a metadata-only operation; the running time does not scale with the
+    size of the dataset. (Conversion to categorical is expensive; conversion
+    from categorical is cheap.)
+
+    See also #ak.is_categorical, #ak.categories, #ak.to_categorical,
+    #ak.from_categorical.
+    """
+    def getfunction(layout, depth):
+        if layout.parameter("__array__") == "categorical":
+            out = awkward1.operations.structure.with_parameter(
+                layout, "__array__", None, highlevel=False
+            )
             return lambda: out
 
         else:

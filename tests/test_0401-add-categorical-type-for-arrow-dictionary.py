@@ -104,26 +104,66 @@ def test_option_two_extra():
     assert (array1 == array2).tolist() == [False, True, False, False, False, True, True, False]
 
 
+def test_to_categorical_numbers():
+    array = awkward1.Array([1.1, 2.2, 3.3, 1.1, 2.2, 3.3, 1.1, 2.2, 3.3])
+    assert not awkward1.is_categorical(array)
+    categorical = awkward1.to_categorical(array)
+    assert awkward1.is_categorical(categorical)
+    assert awkward1.to_list(array) == categorical.tolist()
+    assert awkward1.to_list(categorical.layout.content) == [1.1, 2.2, 3.3]
+    not_categorical = awkward1.from_categorical(categorical)
+    assert not awkward1.is_categorical(not_categorical)
+    assert awkward1.categories(categorical).tolist() == [1.1, 2.2, 3.3]
+
+
+def test_to_categorical_nested():
+    array = awkward1.Array([["one", "two", "three"], [], ["one", "two"], ["three"]])
+    assert not awkward1.is_categorical(array)
+    categorical = awkward1.to_categorical(array)
+    assert awkward1.is_categorical(categorical)
+    assert awkward1.to_list(array) == categorical.tolist()
+    not_categorical = awkward1.from_categorical(categorical)
+    assert not awkward1.is_categorical(not_categorical)
+    assert awkward1.categories(categorical).tolist() == ["one", "two", "three"]
+
+
 def test_to_categorical():
     array = awkward1.Array(["one", "two", "three", "one", "two", "three", "one", "two", "three"])
+    assert not awkward1.is_categorical(array)
     categorical = awkward1.to_categorical(array)
+    assert awkward1.is_categorical(categorical)
     assert awkward1.to_list(array) == categorical.tolist()
     assert awkward1.to_list(categorical.layout.content) == ["one", "two", "three"]
+    not_categorical = awkward1.from_categorical(categorical)
+    assert not awkward1.is_categorical(not_categorical)
+    assert awkward1.categories(categorical).tolist() == ["one", "two", "three"]
 
 
 def test_to_categorical_none():
     array = awkward1.Array(["one", "two", "three", None, "one", "two", "three", None, "one", "two", "three", None])
+    assert not awkward1.is_categorical(array)
     categorical = awkward1.to_categorical(array)
+    assert awkward1.is_categorical(categorical)
     assert awkward1.to_list(array) == categorical.tolist()
     assert awkward1.to_list(categorical.layout.content) == ["one", "two", "three"]
+    not_categorical = awkward1.from_categorical(categorical)
+    assert not awkward1.is_categorical(not_categorical)
+    assert awkward1.categories(categorical).tolist() == ["one", "two", "three"]
+
 
 def test_to_categorical_masked():
     content = awkward1.Array(["one", "two", "three", "one", "one", "two", "three", "two", "one", "two", "three", "three"]).layout
     mask = awkward1.layout.Index8(numpy.array([False, False, False, True, False, False, False, True, False, False, False, True]))
     array = awkward1.Array(awkward1.layout.ByteMaskedArray(mask, content, valid_when=False))
+    assert not awkward1.is_categorical(array)
     categorical = awkward1.to_categorical(array)
+    assert awkward1.is_categorical(categorical)
     assert awkward1.to_list(array) == categorical.tolist()
     assert awkward1.to_list(categorical.layout.content) == ["one", "two", "three"]
+    not_categorical = awkward1.from_categorical(categorical)
+    assert not awkward1.is_categorical(not_categorical)
+    assert awkward1.categories(categorical).tolist() == ["one", "two", "three"]
+
 
 def test_to_categorical_masked():
     content = awkward1.Array(["one", "two", "three", "one", "one", "two", "three", "two"]).layout
@@ -131,6 +171,11 @@ def test_to_categorical_masked():
     indexedarray = awkward1.layout.IndexedArray64(index, content)
     mask = awkward1.layout.Index8(numpy.array([False, False, False, True, False, False, False, True, False, False, False, True]))
     array = awkward1.Array(awkward1.layout.ByteMaskedArray(mask, indexedarray, valid_when=False))
+    assert not awkward1.is_categorical(array)
     categorical = awkward1.to_categorical(array)
+    assert awkward1.is_categorical(categorical)
     assert awkward1.to_list(array) == categorical.tolist()
     assert awkward1.to_list(categorical.layout.content) == ["one", "two", "three"]
+    not_categorical = awkward1.from_categorical(categorical)
+    assert not awkward1.is_categorical(not_categorical)
+    assert awkward1.categories(categorical).tolist() == ["one", "two", "three"]
