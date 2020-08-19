@@ -399,8 +399,10 @@ namespace awkward {
     handle_error(const struct Error& err,
                  const std::string& classname,
                  const Identities* identities) {
+      std::string filename = (err.filename == nullptr ? "" : err.filename);
+
       if (err.pass_through == true) {
-        throw std::invalid_argument(err.str);
+        throw std::invalid_argument(std::string(err.str) + filename);
       }
       else {
         if (err.str != nullptr) {
@@ -417,7 +419,7 @@ namespace awkward {
           if (err.attempt != kSliceNone) {
             out << " attempting to get " << err.attempt;
           }
-          out << ", " << err.str;
+          out << ", " << err.str << filename;
           throw std::invalid_argument(out.str());
         }
       }

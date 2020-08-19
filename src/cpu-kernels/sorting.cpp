@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/sorting.cpp", line)
+
 #include <algorithm>
 #include <cstring>
 #include <numeric>

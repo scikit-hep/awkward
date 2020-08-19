@@ -6,7 +6,7 @@ set -e
 PLATFORM="manylinux2014_x86_64"
 CUDA_VERSION=9.0
 
-AWKWARD_VERSION=`cat VERSION_INFO`
+AWKWARD_VERSION=`cat VERSION_INFO | tr -d '[:space:]'`
 
 if [[ "$CUDA_VERSION" == "11.0" ]]; then
     export DOCKER_IMAGE_TAG="11.0-devel-ubuntu18.04"
@@ -38,7 +38,7 @@ echo "cuda_version ='"$CUDA_VERSION"'" >> build/awkward1_cuda_kernels/__init__.p
 echo "docker_image ='docker.io/nvidia/cuda:"$DOCKER_IMAGE_TAG"'" >> build/awkward1_cuda_kernels/__init__.py
 
 export DOCKER_ARGS="-v`pwd`:/home -w/home docker.io/nvidia/cuda:"$DOCKER_IMAGE_TAG
-export BUILD_SHARED_LIBRARY="nvcc -std=c++11 -Xcompiler -fPIC -Iinclude src/cuda-kernels/*.cu --shared -o build/awkward1_cuda_kernels/libawkward-cuda-kernels.so"
+export BUILD_SHARED_LIBRARY="nvcc -std=c++11 -Xcompiler -fPIC -Xcompiler -DVERSION_INFO="$AWKWARD_VERSION" -Iinclude src/cuda-kernels/*.cu --shared -o build/awkward1_cuda_kernels/libawkward-cuda-kernels.so"
 
 docker run $DOCKER_ARGS $BUILD_SHARED_LIBRARY
 

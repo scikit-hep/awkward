@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/getitem.cpp", line)
+
 #include "awkward/kernels/getitem.h"
 
 void awkward_regularize_rangeslice(
@@ -47,7 +49,7 @@ ERROR awkward_regularize_arrayslice(
       flatheadptr[i] += length;
     }
     if (flatheadptr[i] < 0  ||  flatheadptr[i] >= length) {
-      return failure("index out of range", kSliceNone, original);
+      return failure("index out of range", kSliceNone, original, FILENAME(__LINE__));
     }
   }
   return success();
@@ -109,7 +111,7 @@ ERROR awkward_index_carry(
   for (int64_t i = 0;  i < length;  i++) {
     T j = carry[i];
     if (j > lenfromindex) {
-      return failure("index out of range", kSliceNone, j);
+      return failure("index out of range", kSliceNone, j, FILENAME(__LINE__));
     }
     toindex[i] = fromindex[(size_t)(j)];
   }
@@ -348,7 +350,7 @@ ERROR awkward_Identities_getitem_carry(
   int64_t length) {
   for (int64_t i = 0;  i < lencarry;  i++) {
     if (carryptr[i] >= length) {
-      return failure("index out of range", kSliceNone, carryptr[i]);
+      return failure("index out of range", kSliceNone, carryptr[i], FILENAME(__LINE__));
     }
     for (int64_t j = 0;  j < width;  j++) {
       newidentitiesptr[width*i + j] =
@@ -707,7 +709,7 @@ ERROR awkward_ListArray_getitem_next_at(
       regular_at += length;
     }
     if (!(0 <= regular_at  &&  regular_at < length)) {
-      return failure("index out of range", i, at);
+      return failure("index out of range", i, at, FILENAME(__LINE__));
     }
     tocarry[i] = fromstarts[i] + regular_at;
   }
@@ -1036,11 +1038,11 @@ ERROR awkward_ListArray_getitem_next_array(
   int64_t lencontent) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
     if (fromstops[i] < fromstarts[i]) {
-      return failure("stops[i] < starts[i]", i, kSliceNone);
+      return failure("stops[i] < starts[i]", i, kSliceNone, FILENAME(__LINE__));
     }
     if ((fromstarts[i] != fromstops[i])  &&
         (fromstops[i] > lencontent)) {
-      return failure("stops[i] > len(content)", i, kSliceNone);
+      return failure("stops[i] > len(content)", i, kSliceNone, FILENAME(__LINE__));
     }
     int64_t length = fromstops[i] - fromstarts[i];
     for (int64_t j = 0;  j < lenarray;  j++) {
@@ -1049,7 +1051,7 @@ ERROR awkward_ListArray_getitem_next_array(
         regular_at += length;
       }
       if (!(0 <= regular_at  &&  regular_at < length)) {
-        return failure("index out of range", i, fromarray[j]);
+        return failure("index out of range", i, fromarray[j], FILENAME(__LINE__));
       }
       tocarry[i*lenarray + j] = fromstarts[i] + regular_at;
       toadvanced[i*lenarray + j] = j;
@@ -1128,11 +1130,11 @@ ERROR awkward_ListArray_getitem_next_array_advanced(
   int64_t lencontent) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
     if (fromstops[i] < fromstarts[i]) {
-      return failure("stops[i] < starts[i]", i, kSliceNone);
+      return failure("stops[i] < starts[i]", i, kSliceNone, FILENAME(__LINE__));
     }
     if ((fromstarts[i] != fromstops[i])  &&
         (fromstops[i] > lencontent)) {
-      return failure("stops[i] > len(content)", i, kSliceNone);
+      return failure("stops[i] > len(content)", i, kSliceNone, FILENAME(__LINE__));
     }
     int64_t length = fromstops[i] - fromstarts[i];
     int64_t regular_at = fromarray[fromadvanced[i]];
@@ -1140,7 +1142,7 @@ ERROR awkward_ListArray_getitem_next_array_advanced(
       regular_at += length;
     }
     if (!(0 <= regular_at  &&  regular_at < length)) {
-      return failure("index out of range", i, fromarray[fromadvanced[i]]);
+      return failure("index out of range", i, fromarray[fromadvanced[i]], FILENAME(__LINE__));
     }
     tocarry[i] = fromstarts[i] + regular_at;
     toadvanced[i] = i;
@@ -1222,7 +1224,7 @@ ERROR awkward_ListArray_getitem_carry(
   int64_t lencarry) {
   for (int64_t i = 0;  i < lencarry;  i++) {
     if (fromcarry[i] >= lenstarts) {
-      return failure("index out of range", i, fromcarry[i]);
+      return failure("index out of range", i, fromcarry[i], FILENAME(__LINE__));
     }
     tostarts[i] = (C)(fromstarts[fromcarry[i]]);
     tostops[i] = (C)(fromstops[fromcarry[i]]);
@@ -1292,7 +1294,7 @@ ERROR awkward_RegularArray_getitem_next_at(
     regular_at += size;
   }
   if (!(0 <= regular_at  &&  regular_at < size)) {
-    return failure("index out of range", kSliceNone, at);
+    return failure("index out of range", kSliceNone, at, FILENAME(__LINE__));
   }
   for (int64_t i = 0;  i < length;  i++) {
     tocarry[i] = i*size + regular_at;
@@ -1379,7 +1381,7 @@ ERROR awkward_RegularArray_getitem_next_array_regularize(
       toarray[j] += size;
     }
     if (!(0 <= toarray[j]  &&  toarray[j] < size)) {
-      return failure("index out of range", kSliceNone, fromarray[j]);
+      return failure("index out of range", kSliceNone, fromarray[j], FILENAME(__LINE__));
     }
   }
   return success();
@@ -1538,7 +1540,7 @@ ERROR awkward_IndexedArray_getitem_nextcarry_outindex(
   for (int64_t i = 0;  i < lenindex;  i++) {
     C j = fromindex[i];
     if (j >= lencontent) {
-      return failure("index out of range", i, j);
+      return failure("index out of range", i, j, FILENAME(__LINE__));
     }
     else if (j < 0) {
       toindex[i] = -1;
@@ -1602,7 +1604,7 @@ ERROR awkward_IndexedArray_getitem_nextcarry_outindex_mask(
   for (int64_t i = 0;  i < lenindex;  i++) {
     C j = fromindex[i];
     if (j >= lencontent) {
-      return failure("index out of range", i, j);
+      return failure("index out of range", i, j, FILENAME(__LINE__));
     }
     else if (j < 0) {
       toindex[i] = -1;
@@ -1815,7 +1817,7 @@ ERROR awkward_IndexedArray_getitem_nextcarry(
   for (int64_t i = 0;  i < lenindex;  i++) {
     C j = fromindex[i];
     if (j < 0  ||  j >= lencontent) {
-      return failure("index out of range", i, j);
+      return failure("index out of range", i, j, FILENAME(__LINE__));
     }
     else {
       tocarry[k] = j;
@@ -1867,7 +1869,7 @@ ERROR awkward_IndexedArray_getitem_carry(
   int64_t lencarry) {
   for (int64_t i = 0;  i < lencarry;  i++) {
     if (fromcarry[i] >= lenindex) {
-      return failure("index out of range", i, fromcarry[i]);
+      return failure("index out of range", i, fromcarry[i], FILENAME(__LINE__));
     }
     toindex[i] = (C)(fromindex[fromcarry[i]]);
   }
@@ -2133,11 +2135,10 @@ ERROR awkward_ListArray_getitem_jagged_expand(
     C start = fromstarts[i];
     C stop = fromstops[i];
     if (stop < start) {
-      return failure("stops[i] < starts[i]", i, kSliceNone);
+      return failure("stops[i] < starts[i]", i, kSliceNone, FILENAME(__LINE__));
     }
     if (stop - start != jaggedsize) {
-      return failure(
-        "cannot fit jagged slice into nested list", i, kSliceNone);
+      return failure("cannot fit jagged slice into nested list", i, kSliceNone, FILENAME(__LINE__));
     }
     for (int64_t j = 0;  j < jaggedsize;  j++) {
       multistarts[i*jaggedsize + j] = singleoffsets[j];
@@ -2248,19 +2249,18 @@ ERROR awkward_ListArray_getitem_jagged_apply(
     tooffsets[i] = (T)k;
     if (slicestart != slicestop) {
       if (slicestop < slicestart) {
-        return failure("jagged slice's stops[i] < starts[i]", i, kSliceNone);
+        return failure("jagged slice's stops[i] < starts[i]", i, kSliceNone, FILENAME(__LINE__));
       }
       if (slicestop > sliceinnerlen) {
-        return failure(
-          "jagged slice's offsets extend beyond its content", i, slicestop);
+        return failure("jagged slice's offsets extend beyond its content", i, slicestop, FILENAME(__LINE__));
       }
       int64_t start = (int64_t)fromstarts[i];
       int64_t stop = (int64_t)fromstops[i];
       if (stop < start) {
-        return failure("stops[i] < starts[i]", i, kSliceNone);
+        return failure("stops[i] < starts[i]", i, kSliceNone, FILENAME(__LINE__));
       }
       if (start != stop  &&  stop > contentlen) {
-        return failure("stops[i] > len(content)", i, kSliceNone);
+        return failure("stops[i] > len(content)", i, kSliceNone, FILENAME(__LINE__));
       }
       int64_t count = stop - start;
       for (int64_t j = slicestart;  j < slicestop;  j++) {
@@ -2269,10 +2269,7 @@ ERROR awkward_ListArray_getitem_jagged_apply(
           index += count;
         }
         if (!(0 <= index  &&  index < count)) {
-          return failure(
-            "index out of range",
-            i,
-            (int64_t)sliceindex[j]);
+          return failure("index out of range", i, (int64_t)sliceindex[j], FILENAME(__LINE__));
         }
         tocarry[k] = start + index;
         k++;
@@ -2366,11 +2363,10 @@ ERROR awkward_ListArray_getitem_jagged_numvalid(
     T slicestop = slicestops[i];
     if (slicestart != slicestop) {
       if (slicestop < slicestart) {
-        return failure("jagged slice's stops[i] < starts[i]", i, kSliceNone);
+        return failure("jagged slice's stops[i] < starts[i]", i, kSliceNone, FILENAME(__LINE__));
       }
       if (slicestop > missinglength) {
-        return failure(
-          "jagged slice's offsets extend beyond its content", i, slicestop);
+        return failure("jagged slice's offsets extend beyond its content", i, slicestop, FILENAME(__LINE__));
       }
       for (int64_t j = slicestart;  j < slicestop;  j++) {
         *numvalid = *numvalid + (missing[j] >= 0 ? 1 : 0);
@@ -2472,10 +2468,7 @@ ERROR awkward_ListArray_getitem_jagged_descend(
     int64_t count = (int64_t)(fromstops[i] -
                               fromstarts[i]);
     if (slicecount != count) {
-      return failure(
-        "jagged slice inner length differs from array inner length",
-        i,
-        kSliceNone);
+      return failure("jagged slice inner length differs from array inner length", i, kSliceNone, FILENAME(__LINE__));
     }
     tooffsets[i + 1] = tooffsets[i] + (T)count;
   }
@@ -2638,7 +2631,7 @@ ERROR awkward_ByteMaskedArray_getitem_carry(
   int64_t lencarry) {
   for (int64_t i = 0;  i < lencarry;  i++) {
     if (fromcarry[i] >= lenmask) {
-      return failure("index out of range", i, fromcarry[i]);
+      return failure("index out of range", i, fromcarry[i], FILENAME(__LINE__));
     }
     tomask[i] = frommask[fromcarry[i]];
   }

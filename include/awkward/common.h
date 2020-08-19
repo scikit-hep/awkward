@@ -28,7 +28,11 @@
   #define ERROR struct Error
 #endif
 
+#define QUOTE(x) #x
+
 #define FILENAME_FOR_EXCEPTIONS(filename, line) std::string("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/" VERSION_INFO "/" filename "#L" #line ")")
+#define FILENAME_FOR_EXCEPTIONS_C(filename, line) ("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/" VERSION_INFO "/" filename "#L" #line ")")
+#define FILENAME_FOR_EXCEPTIONS_CUDA(filename, line) ("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/" QUOTE(VERSION_INFO) "/" filename "#L" #line ")")
 
 #include <iostream>
 #include <algorithm>
@@ -41,6 +45,7 @@
 extern "C" {
   struct EXPORT_SYMBOL Error {
     const char* str;
+    const char* filename;
     int64_t identity;
     int64_t attempt;
     bool pass_through;
@@ -58,6 +63,7 @@ extern "C" {
     success() {
         struct Error out;
         out.str = nullptr;
+        out.filename = nullptr;
         out.identity = kSliceNone;
         out.attempt = kSliceNone;
         out.pass_through = false;
@@ -65,12 +71,32 @@ extern "C" {
     };
 
   inline struct Error
-    failure(const char* str, int64_t identity, int64_t attempt, bool pass_through = false) {
+    failure(
+      const char* str,
+      int64_t identity,
+      int64_t attempt,
+      const char* filename = nullptr) {
         struct Error out;
         out.str = str;
+        out.filename = filename;
         out.identity = identity;
         out.attempt = attempt;
-        out.pass_through = pass_through;
+        out.pass_through = false;
+        return out;
+    };
+
+  inline struct Error
+    failure_pass_through(
+      const char* str,
+      int64_t identity,
+      int64_t attempt,
+      const char* filename = nullptr) {
+        struct Error out;
+        out.str = str;
+        out.filename = filename;
+        out.identity = identity;
+        out.attempt = attempt;
+        out.pass_through = true;
         return out;
     };
 }

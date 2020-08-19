@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/identities.cpp", line)
+
 #include "awkward/kernels/identities.h"
 
 template <typename T>
@@ -59,7 +61,7 @@ ERROR awkward_Identities_from_ListOffsetArray(
     int64_t start = fromoffsets[i];
     int64_t stop = fromoffsets[i + 1];
     if (start != stop  &&  stop > tolength) {
-      return failure("max(stop) > len(content)", i, kSliceNone);
+      return failure("max(stop) > len(content)", i, kSliceNone, FILENAME(__LINE__));
     }
     for (int64_t j = start;  j < stop;  j++) {
       for (int64_t k = 0;  k < fromwidth;  k++) {
@@ -179,7 +181,7 @@ ERROR awkward_Identities_from_ListArray(
     int64_t start = fromstarts[i];
     int64_t stop = fromstops[i];
     if (start != stop  &&  stop > tolength) {
-      return failure("max(stop) > len(content)", i, kSliceNone);
+      return failure("max(stop) > len(content)", i, kSliceNone, FILENAME(__LINE__));
     }
     for (int64_t j = start;  j < stop;  j++) {
       if (toptr[j*(fromwidth + 1) + fromwidth] != -1) {
@@ -381,7 +383,7 @@ ERROR awkward_Identities_from_IndexedArray(
   for (int64_t i = 0;  i < fromlength;  i++) {
     T j = fromindex[i];
     if (j >= tolength) {
-      return failure("max(index) > len(content)", i, j);
+      return failure("max(index) > len(content)", i, j, FILENAME(__LINE__));
     }
     else if (j >= 0) {
       if (toptr[j*fromwidth] != -1) {
@@ -517,10 +519,10 @@ ERROR awkward_Identities_from_UnionArray(
     if (fromtags[i] == which) {
       I j = fromindex[i];
       if (j >= tolength) {
-        return failure("max(index) > len(content)", i, j);
+        return failure("max(index) > len(content)", i, j, FILENAME(__LINE__));
       }
       else if (j < 0) {
-        return failure("min(index) < 0", i, j);
+        return failure("min(index) < 0", i, j, FILENAME(__LINE__));
       }
       else {
         if (toptr[j*fromwidth] != -1) {
