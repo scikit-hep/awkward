@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/Identities.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/Identities.cpp", line)
 
 #include <cstring>
 #include <atomic>
@@ -315,8 +316,9 @@ namespace awkward {
       regular_at += length_;
     }
     if (!(0 <= regular_at  &&  regular_at < length_)) {
-      util::handle_error(
-        failure("index out of range", kSliceNone, at), classname(), nullptr);
+      util::handle_error(failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
+                         classname(),
+                         nullptr);
     }
     return getitem_at_nowrap(regular_at);
   }

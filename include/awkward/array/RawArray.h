@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("include/awkward/array/RawArray.h", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("include/awkward/array/RawArray.h", line)
 
 #ifndef AWKWARD_RAWARRAY_H_
 #define AWKWARD_RAWARRAY_H_
@@ -611,8 +612,12 @@ namespace awkward {
       check_for_iteration() const override {
       if (identities_.get() != nullptr  &&
           identities_.get()->length() < length_) {
-        util::handle_error(failure("len(identities) < len(array)", kSliceNone,
-          kSliceNone), identities_.get()->classname(), nullptr);
+        util::handle_error(failure("len(identities) < len(array)",
+                                   kSliceNone,
+                                   kSliceNone,
+                                   FILENAME_C(__LINE__)),
+                           identities_.get()->classname(),
+                           nullptr);
       }
     }
 
@@ -628,7 +633,10 @@ namespace awkward {
         regular_at += length_;
       }
       if (!(0 <= regular_at  &&  regular_at < length_)) {
-        util::handle_error(failure("index out of range", kSliceNone, at),
+        util::handle_error(failure("index out of range",
+                                   kSliceNone,
+                                   at,
+                                   FILENAME_C(__LINE__)),
                            classname(),
                            identities_.get());
       }
@@ -648,7 +656,10 @@ namespace awkward {
         start != Slice::none(), stop != Slice::none(), length_);
       if (identities_.get() != nullptr  &&
           regular_stop > identities_.get()->length()) {
-        util::handle_error(failure("index out of range", kSliceNone, stop),
+        util::handle_error(failure("index out of range",
+                                   kSliceNone,
+                                   stop,
+                                   FILENAME_C(__LINE__)),
           identities_.get()->classname(), nullptr);
       }
       return getitem_range_nowrap(regular_start, regular_stop);

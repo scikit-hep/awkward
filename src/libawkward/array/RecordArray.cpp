@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/RecordArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/RecordArray.cpp", line)
 
 #include <sstream>
 #include <algorithm>
@@ -482,7 +483,8 @@ namespace awkward {
         util::handle_error(
           failure("content and its identities must have the same length",
                   kSliceNone,
-                  kSliceNone),
+                  kSliceNone,
+                  FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -662,7 +664,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < length()) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -682,7 +687,10 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < len)) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range",
+                kSliceNone,
+                at,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -703,7 +711,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
       util::handle_error(
-        failure("index out of range", kSliceNone, stop),
+        failure("index out of range",
+                kSliceNone,
+                stop,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -816,7 +827,8 @@ namespace awkward {
       if (field(i).get()->length() < length_) {
         return (std::string("at ") + path + std::string(" (") + classname()
                 + std::string("): len(field(")
-                + std::to_string(i) + (")) < len(recordarray)"));
+                + std::to_string(i) + (")) < len(recordarray)")
+                + FILENAME(__LINE__));
       }
     }
     for (int64_t i = 0;  i < numfields();  i++) {
