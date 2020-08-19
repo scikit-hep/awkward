@@ -11,6 +11,7 @@ import yaml
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 KERNEL_WHITELIST = [
     "awkward_new_Identities",
+    "awkward_Identities32_to_Identities64",
     "awkward_RegularArray_num",
     "awkward_ListOffsetArray_flatten_offsets",
     "awkward_IndexedArray_overlay_mask",
@@ -52,7 +53,7 @@ KERNEL_WHITELIST = [
 def traverse(node, args={}, forflag=False, declared=[]):
     if node.__class__.__name__ == "For":
         if len(node.iter.args) == 1:
-            code = "if (thread_id < {0}) {{\n".format(node.iter.args[0].id)
+            code = "if (thread_id < {0}) {{\n".format(traverse(node.iter.args[0]))
         elif len(node.iter.args) == 2:
             code = "if ((thread_id < {0}) && (thread_id >= {1})) {{\n".format(
                 traverse(node.iter.args[1]), traverse(node.iter.args[0])
@@ -390,29 +391,13 @@ def getlenarg(pycode):
     forargs = set()
     for node in tree.body:
         if node.__class__.__name__ == "For":
-            if node.iter.args[0].__class__.__name__ == "Constant":
-                forargs.add(node.iter.args[0].value)
-            elif node.iter.args[0].__class__.__name__ == "Name":
-                forargs.add(node.iter.args[0].id)
-            else:
-                raise Exception(
-                    "Unhandled node {0}".format(node.iter.args[0].__class__.__name__)
-                )
+            forargs.add(traverse(node.iter.args[0]))
         elif node.__class__.__name__ == "While":
             assert node.test.__class__.__name__ == "Compare"
             assert len(node.test.ops) == 1
             assert node.test.ops[0].__class__.__name__ == "Lt"
             assert len(node.test.comparators) == 1
-            if node.test.comparators[0].__class__.__name__ == "Constant":
-                forargs.add(node.test.comparators[0].value)
-            elif node.test.comparators[0].__class__.__name__ == "Name":
-                forargs.add(node.test.comparators[0].id)
-            else:
-                raise Exception(
-                    "Unhandled node {0}".format(
-                        node.test.comparators[0].__class__.__name__
-                    )
-                )
+            forargs.add(traverse(node.test.comparators[0]))
     if len(forargs) == 0:
         return 1
     else:
