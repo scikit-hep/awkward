@@ -231,7 +231,10 @@ class Array(
         if not isinstance(
             layout, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
         ):
-            raise TypeError("could not convert data into an awkward1.Array")
+            raise TypeError(
+                "could not convert data into an awkward1.Array"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
         if with_name is not None:
             layout = awkward1.operations.structure.with_name(
@@ -302,7 +305,10 @@ class Array(
             self._layout = layout
             self._numbaview = None
         else:
-            raise TypeError("layout must be a subclass of awkward1.layout.Content")
+            raise TypeError(
+                "layout must be a subclass of awkward1.layout.Content"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     @property
     def behavior(self):
@@ -328,7 +334,10 @@ class Array(
         if behavior is None or isinstance(behavior, dict):
             self._behavior = behavior
         else:
-            raise TypeError("behavior must be None or a dict")
+            raise TypeError(
+                "behavior must be None or a dict"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     @property
     def cache(self):
@@ -339,7 +348,10 @@ class Array(
         if value is None or isinstance(value, MutableMapping):
             self._cache = value
         else:
-            raise TypeError("cache must be None or a MutableMapping")
+            raise TypeError(
+                "cache must be None or a MutableMapping"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     class Mask(object):
         def __init__(self, array, valid_when):
@@ -943,7 +955,10 @@ class Array(
             isinstance(where, str)
             or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
         ):
-            raise TypeError("only fields may be assigned in-place (by field name)")
+            raise TypeError(
+                "only fields may be assigned in-place (by field name)"
+                + awkward1._util.exception_suffix(__file__)
+            )
         self._layout = awkward1.operations.structure.with_field(
             self._layout, what, where
         ).layout
@@ -998,9 +1013,13 @@ class Array(
                     raise AttributeError(
                         "while trying to get field {0}, an exception "
                         "occurred:\n{1}: {2}".format(repr(where), type(err), str(err))
+                        + awkward1._util.exception_suffix(__file__)
                     )
             else:
-                raise AttributeError("no field named {0}".format(repr(where)))
+                raise AttributeError(
+                    "no field named {0}".format(repr(where))
+                    + awkward1._util.exception_suffix(__file__)
+                )
 
     def __dir__(self):
         """
@@ -1419,13 +1438,17 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         elif isinstance(data, Iterable):
             raise TypeError(
                 "could not convert non-dict into an awkward1.Record; try awkward1.Array"
+                + awkward1._util.exception_suffix(__file__)
             )
 
         else:
             layout = None
 
         if not isinstance(layout, awkward1.layout.Record):
-            raise TypeError("could not convert data into an awkward1.Record")
+            raise TypeError(
+                "could not convert data into an awkward1.Record"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
         if self.__class__ is Record:
             self.__class__ = awkward1._util.recordclass(layout, behavior)
@@ -1491,7 +1514,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             self._layout = layout
             self._numbaview = None
         else:
-            raise TypeError("layout must be a subclass of awkward1.layout.Record")
+            raise TypeError(
+                "layout must be a subclass of awkward1.layout.Record"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     @property
     def behavior(self):
@@ -1517,7 +1543,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if behavior is None or isinstance(behavior, dict):
             self._behavior = behavior
         else:
-            raise TypeError("behavior must be None or a dict")
+            raise TypeError(
+                "behavior must be None or a dict"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     @property
     def cache(self):
@@ -1528,7 +1557,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if value is None or isinstance(value, MutableMapping):
             self._cache = value
         else:
-            raise TypeError("cache must be None or a MutableMapping")
+            raise TypeError(
+                "cache must be None or a MutableMapping"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     def tolist(self):
         """
@@ -1665,7 +1697,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             isinstance(where, str)
             or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
         ):
-            raise TypeError("only fields may be assigned in-place (by field name)")
+            raise TypeError(
+                "only fields may be assigned in-place (by field name)"
+                + awkward1._util.exception_suffix(__file__)
+            )
         self._layout = awkward1.operations.structure.with_field(
             self._layout, what, where
         ).layout
@@ -1709,9 +1744,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                     raise AttributeError(
                         "while trying to get field {0}, an exception "
                         "occurred:\n{1}: {2}".format(repr(where), type(err), str(err))
+                        + awkward1._util.exception_suffix(__file__)
                     )
             else:
-                raise AttributeError("no field named {0}".format(repr(where)))
+                raise AttributeError(
+                    "no field named {0}".format(repr(where))
+                    + awkward1._util.exception_suffix(__file__)
+                )
 
     def __dir__(self):
         """
@@ -2116,7 +2155,10 @@ class ArrayBuilder(object):
         if behavior is None or isinstance(behavior, dict):
             self._behavior = behavior
         else:
-            raise TypeError("behavior must be None or a dict")
+            raise TypeError(
+                "behavior must be None or a dict"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     def __len__(self):
         """
@@ -2467,6 +2509,7 @@ class ArrayBuilder(object):
                 raise TypeError(
                     "'append' method can only be used with 'at' when "
                     "'obj' is an ak.Array"
+                    + awkward1._util.exception_suffix(__file__)
                 )
 
     def extend(self, obj):
@@ -2480,7 +2523,10 @@ class ArrayBuilder(object):
         if isinstance(obj, Array):
             self._layout.extend(obj.layout)
         else:
-            raise TypeError("'extend' method requires an ak.Array")
+            raise TypeError(
+                "'extend' method requires an ak.Array"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     class _Nested(object):
         def __init__(self, arraybuilder):

@@ -94,6 +94,7 @@ def get_dtype():
                 else:
                     raise TypeError(
                         "cannot construct a {0} from {1}".format(cls, string)
+                        + awkward1._util.exception_suffix(__file__)
                     )
 
             @classmethod
@@ -153,7 +154,10 @@ class PandasMixin(PandasNotImportedYet):
     def _from_factorized(cls, values, original):
         # https://pandas.pydata.org/pandas-docs/version/1.0.0/reference/api/pandas.api.extensions.ExtensionArray._from_factorized.html
         vote()
-        raise NotImplementedError("_from_factorized")
+        raise NotImplementedError(
+            "_from_factorized"
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     # __getitem__(self)
     # __len__(self)
@@ -169,6 +173,7 @@ class PandasMixin(PandasNotImportedYet):
                 raise ValueError(
                     "partitioned arrays cannot be Pandas columns; "
                     "try ak.repartition(array, None)"
+                    + awkward1._util.exception_suffix(__file__)
                 )
             else:
                 return AwkwardDtype()

@@ -213,12 +213,16 @@ def to_numpy(array, allow_missing=True):
             except Exception:
                 raise ValueError(
                     "cannot convert {0} into numpy.ma.MaskedArray".format(array)
+                    + awkward1._util.exception_suffix(__file__)
                 )
         else:
             try:
                 out = numpy.concatenate(contents)
             except Exception:
-                raise ValueError("cannot convert {0} into np.ndarray".format(array))
+                raise ValueError(
+                    "cannot convert {0} into np.ndarray".format(array)
+                    + awkward1._util.exception_suffix(__file__)
+                )
 
         tags = numpy.asarray(array.tags)
         for tag, content in enumerate(contents):
@@ -257,6 +261,7 @@ def to_numpy(array, allow_missing=True):
                     "to_numpy cannot convert 'None' values to "
                     "np.ma.MaskedArray unless the "
                     "'allow_missing' parameter is set to True"
+                    + awkward1._util.exception_suffix(__file__)
                 )
         else:
             if allow_missing:
@@ -281,7 +286,10 @@ def to_numpy(array, allow_missing=True):
             for i in range(array.numfields)
         ]
         if any(len(x.shape) != 1 for x in contents):
-            raise ValueError("cannot convert {0} into np.ndarray".format(array))
+            raise ValueError(
+                "cannot convert {0} into np.ndarray".format(array)
+                + awkward1._util.exception_suffix(__file__)
+            )
         out = numpy.empty(
             len(contents[0]),
             dtype=[(str(n), x.dtype) for n, x in zip(array.keys(), contents)],
@@ -294,13 +302,19 @@ def to_numpy(array, allow_missing=True):
         return numpy.asarray(array)
 
     elif isinstance(array, awkward1.layout.Content):
-        raise AssertionError("unrecognized Content type: {0}".format(type(array)))
+        raise AssertionError(
+            "unrecognized Content type: {0}".format(type(array))
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     elif isinstance(array, Iterable):
         return numpy.asarray(array)
 
     else:
-        raise ValueError("cannot convert {0} into np.ndarray".format(array))
+        raise ValueError(
+            "cannot convert {0} into np.ndarray".format(array)
+            + awkward1._util.exception_suffix(__file__)
+        )
 
 
 def from_iter(
@@ -358,7 +372,10 @@ def from_iter(
                 resize=resize,
             )[0]
         else:
-            raise ValueError("cannot produce an array from a dict")
+            raise ValueError(
+                "cannot produce an array from a dict"
+                + awkward1._util.exception_suffix(__file__)
+            )
     out = awkward1.layout.ArrayBuilder(initial=initial, resize=resize)
     for x in iterable:
         out.fromiter(x)
@@ -447,7 +464,10 @@ def to_list(array):
         return [to_list(x) for x in array]
 
     else:
-        raise TypeError("unrecognized array type: {0}".format(type(array)))
+        raise TypeError(
+            "unrecognized array type: {0}".format(type(array))
+            + awkward1._util.exception_suffix(__file__)
+        )
 
 
 def from_json(
@@ -555,7 +575,10 @@ def to_json(array, destination=None, pretty=False, maxdecimals=None, buffersize=
         out = array
 
     else:
-        raise TypeError("unrecognized array type: {0}".format(repr(array)))
+        raise TypeError(
+            "unrecognized array type: {0}".format(repr(array))
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     if destination is None:
         return out.tojson(pretty=pretty, maxdecimals=maxdecimals)
@@ -855,6 +878,7 @@ def from_awkward0(
                 raise ValueError(
                     "awkward1.SparseArray hasn't been written (if at all); "
                     "try keep_layout=False"
+                    + awkward1._util.exception_suffix(__file__)
                 )
             return recurse(array.dense, level + 1)
 
@@ -870,6 +894,7 @@ def from_awkward0(
             else:
                 raise ValueError(
                     "unsupported encoding: {0}".format(repr(array.encoding))
+                    + awkward1._util.exception_suffix(__file__)
                 )
             return out
 
@@ -879,6 +904,7 @@ def from_awkward0(
                 raise ValueError(
                     "there isn't (and won't ever be) an awkward1 equivalent "
                     "of awkward0.ObjectArray; try keep_layout=False"
+                    + awkward1._util.exception_suffix(__file__)
                 )
             out = recurse(array.content, level + 1)
             out.setparameter(
@@ -898,6 +924,7 @@ def from_awkward0(
                     "awkward1 PartitionedArrays are only allowed "
                     "at the root of a data structure, unlike "
                     "awkward0.ChunkedArray; try keep_layout=False"
+                    + awkward1._util.exception_suffix(__file__)
                 )
             elif level == 0:
                 return awkward1.partition.IrregularlyPartitionedArray(
@@ -914,17 +941,24 @@ def from_awkward0(
                 "the awkward1 equivalent of awkward0.AppendableArray is "
                 "awkward1.ArrayBuilder, but it is not a Content type, not "
                 "mixable with immutable array elements"
+                + awkward1._util.exception_suffix(__file__)
             )
 
         elif isinstance(array, awkward0.VirtualArray):
             # generator, args, kwargs, cache, persistentkey, type, nbytes, persistvirtual
             if keep_layout:
-                raise NotImplementedError("FIXME")
+                raise NotImplementedError(
+                    "FIXME"
+                    + awkward1._util.exception_suffix(__file__)
+                )
             else:
                 return recurse(array.array, level + 1)
 
         else:
-            raise TypeError("not an awkward0 array: {0}".format(repr(array)))
+            raise TypeError(
+                "not an awkward0 array: {0}".format(repr(array))
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     out = recurse(array, 0)
     if highlevel:
@@ -972,6 +1006,7 @@ def to_awkward0(array, keep_layout=False):
                 raise ValueError(
                     "awkward0 has no equivalent of RegularArray; "
                     "try keep_layout=False"
+                    + awkward1._util.exception_suffix(__file__)
                 )
             offsets = numpy.arange(0, (len(layout) + 1) * layout.size, layout.size)
             return awkward0.JaggedArray.fromoffsets(offsets, recurse(layout.content))
@@ -1040,6 +1075,7 @@ def to_awkward0(array, keep_layout=False):
                 raise ValueError(
                     "cannot convert zero-field, nonzero-length RecordArray "
                     "to awkward0.Table (limitation in awkward0)"
+                    + awkward1._util.exception_suffix(__file__)
                 )
             keys = layout.keys()
             values = [recurse(x) for x in layout.contents]
@@ -1131,11 +1167,15 @@ def to_awkward0(array, keep_layout=False):
             return recurse(layout.content)  # no equivalent in awkward0
 
         elif isinstance(layout, awkward1.layout.VirtualArray):
-            raise NotImplementedError("FIXME")
+            raise NotImplementedError(
+                "FIXME"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
         else:
             raise AssertionError(
                 "missing converter for {0}".format(type(layout).__name__)
+                + awkward1._util.exception_suffix(__file__)
             )
 
     layout = to_layout(
@@ -1208,7 +1248,10 @@ def to_layout(
 
     elif isinstance(array, np.ndarray):
         if not issubclass(array.dtype.type, numpytype):
-            raise ValueError("NumPy {0} not allowed".format(repr(array.dtype)))
+            raise ValueError(
+                "NumPy {0} not allowed".format(repr(array.dtype))
+                + awkward1._util.exception_suffix(__file__)
+            )
         out = awkward1.layout.NumpyArray(array.reshape(-1))
         for size in array.shape[:0:-1]:
             out = awkward1.layout.RegularArray(out, size)
@@ -1223,7 +1266,10 @@ def to_layout(
         return from_iter(array, highlevel=False)
 
     elif not allow_other:
-        raise TypeError("{0} cannot be converted into an Awkward Array".format(array))
+        raise TypeError(
+            "{0} cannot be converted into an Awkward Array".format(array)
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     else:
         return array
@@ -1627,7 +1673,10 @@ def to_arrow(array):
             return recurse(layout.content)
 
         else:
-            raise TypeError("unrecognized array type: {0}".format(repr(layout)))
+            raise TypeError(
+                "unrecognized array type: {0}".format(repr(layout))
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     return recurse(layout)
 
@@ -1661,7 +1710,10 @@ def from_arrow(array, highlevel=True, behavior=None):
             if array is not None:
                 content = recurse(array.dictionary)
             else:
-                raise NotImplementedError("Arrow dictionary inside of UnionArray")
+                raise NotImplementedError(
+                    "Arrow dictionary inside of UnionArray"
+                    + awkward1._util.exception_suffix(__file__)
+                )
 
             if isinstance(index, awkward1.layout.BitMaskedArray):
                 return awkward1.layout.BitMaskedArray(
@@ -1941,7 +1993,10 @@ def from_arrow(array, highlevel=True, behavior=None):
                 return out
 
         else:
-            raise TypeError("unrecognized Arrow array type: {0}".format(repr(tpe)))
+            raise TypeError(
+                "unrecognized Arrow array type: {0}".format(repr(tpe))
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     def recurse(obj):
         if isinstance(obj, pyarrow.lib.Array):
@@ -1979,7 +2034,10 @@ def from_arrow(array, highlevel=True, behavior=None):
                 )
 
         else:
-            raise TypeError("unrecognized Arrow type: {0}".format(type(obj)))
+            raise TypeError(
+                "unrecognized Arrow type: {0}".format(type(obj))
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     if highlevel:
         return awkward1._util.wrap(recurse(array), behavior)
@@ -2149,6 +2207,7 @@ def from_parquet(
         if x not in all_columns:
             raise ValueError(
                 "column {0} does not exist in file {1}".format(repr(x), repr(source))
+                + awkward1._util.exception_suffix(__file__)
             )
 
     if file.num_row_groups == 0:
@@ -2237,6 +2296,7 @@ def _arrayset_key(
     if form_key is None:
         raise ValueError(
             "cannot read from arrayset using Forms without form_keys"
+            + awkward1._util.exception_suffix(__file__)
         )
     if attribute is None:
         attribute = ""
@@ -2436,7 +2496,10 @@ def to_arrayset(
         elif isinstance(index, awkward1.layout.IndexU8):
             return "u8"
         else:
-            raise AssertionError("unrecognized index: " + repr(index))
+            raise AssertionError(
+                "unrecognized index: " + repr(index)
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     if prefix is None:
         prefix = ""
@@ -2482,6 +2545,7 @@ def to_arrayset(
         if has_identities:
             raise NotImplementedError(
                 "ak.to_arrayset for an array with Identities"
+                + awkward1._util.exception_suffix(__file__)
             )
 
         if isinstance(layout, awkward1.layout.EmptyArray):
@@ -2660,8 +2724,10 @@ def to_arrayset(
             return fill(layout.array, part)
 
         else:
-            raise AssertionError("unrecognized layout node type: "
-                                 + str(type(layout)))
+            raise AssertionError(
+                "unrecognized layout node type: " + str(type(layout))
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     layout = to_layout(array, allow_record=False, allow_other=False)
 
@@ -2670,6 +2736,7 @@ def to_arrayset(
             raise ValueError(
                 "array is partitioned; an explicit 'partition' should not be "
                 "assigned"
+                + awkward1._util.exception_suffix(__file__)
             )
         form = None
         for part, content in enumerate(layout.partitions):
@@ -2688,6 +2755,7 @@ def to_arrayset(
 differs from the first Form:
 
     {2}""".format(part, f.tojson(True, False), form.tojson(True, False))
+                    + awkward1._util.exception_suffix(__file__)
                 )
 
         num_partitions = len(layout.partitions)
@@ -2771,6 +2839,7 @@ def _form_to_layout(
     if form.has_identities:
         raise NotImplementedError(
             "ak.from_arrayset for an array with Identities"
+            + awkward1._util.exception_suffix(__file__)
         )
     else:
         identities = None
@@ -3125,7 +3194,10 @@ def _form_to_layout(
         return awkward1.layout.VirtualArray(generator, cache, cache_key + sep + node_cache_key)
 
     else:
-        raise AssertionError("unexpected form node type: " + str(type(form)))
+        raise AssertionError(
+            "unexpected form node type: " + str(type(form))
+            + awkward1._util.exception_suffix(__file__)
+        )
 
 
 _from_arrayset_key_number = 0
@@ -3305,6 +3377,7 @@ def from_arrayset(
                 raise TypeError(
                     "for lazy=True and num_partitions=None, lazy_lengths "
                     "must be an integer, not " + repr(lazy_lengths)
+                    + awkward1._util.exception_suffix(__file__)
                 )
 
             generator = awkward1.layout.ArrayGenerator(
@@ -3334,6 +3407,7 @@ def from_arrayset(
                     "for lazy=True, lazy_lengths must be an integer or "
                     "iterable of 'num_partitions' integers, not "
                     + repr(lazy_lengths)
+                    + awkward1._util.exception_suffix(__file__)
                 )
 
         partitions = []

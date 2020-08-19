@@ -108,6 +108,7 @@ def mask(array, mask, valid_when=True, highlevel=True):
             if not issubclass(m.dtype.type, (np.bool, np.bool_)):
                 raise ValueError(
                     "mask must have boolean type, not " "{0}".format(repr(m.dtype))
+                    + awkward1._util.exception_suffix(__file__)
                 )
             bytemask = awkward1.layout.Index8(m.view(np.int8))
             return lambda: (
@@ -293,7 +294,10 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
     structure or not.
     """
     if depth_limit is not None and depth_limit <= 0:
-        raise ValueError("depth_limit must be None or at least 1")
+        raise ValueError(
+            "depth_limit must be None or at least 1"
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     if isinstance(arrays, dict):
         recordlookup = []
@@ -444,6 +448,7 @@ def with_field(base, what, where=None, highlevel=True):
         raise TypeError(
             "New fields may only be assigned by field name(s) "
             "or as a new integer slot by passing None for 'where'"
+            + awkward1._util.exception_suffix(__file__)
         )
     if (
         not isinstance(where, str)
@@ -466,7 +471,10 @@ def with_field(base, what, where=None, highlevel=True):
             base, allow_record=True, allow_other=False
         )
         if base.numfields < 0:
-            raise ValueError("no tuples or records in array; cannot add a new " "field")
+            raise ValueError(
+                "no tuples or records in array; cannot add a new field"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
         what = awkward1.operations.convert.to_layout(
             what, allow_record=True, allow_other=True
@@ -713,7 +721,10 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     element for element, and similarly for deeper levels.
     """
     if axis != 0:
-        raise NotImplementedError("axis={0}".format(axis))
+        raise NotImplementedError(
+            "axis={0}".format(axis)
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     contents = [
         awkward1.operations.convert.to_layout(x, allow_record=False) for x in arrays
@@ -725,7 +736,10 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     ]
 
     if len(contents) == 0:
-        raise ValueError("need at least one array to concatenate")
+        raise ValueError(
+            "need at least one array to concatenate"
+            + awkward1._util.exception_suffix(__file__)
+        )
     out = contents[0]
     for x in contents[1:]:
         if not out.mergeable(x, mergebool=mergebool):
@@ -804,7 +818,10 @@ def where(condition, *args, **kwargs):
             return tuple(awkward1.layout.NumpyArray(x) for x in out)
 
     elif len(args) == 1:
-        raise ValueError("either both or neither of x and y should be given")
+        raise ValueError(
+            "either both or neither of x and y should be given"
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     elif len(args) == 2:
         nplike = awkward1.nplike.of(akcondition, args[0], args[1])
@@ -853,6 +870,7 @@ def where(condition, *args, **kwargs):
         raise TypeError(
             "where() takes from 1 to 3 positional arguments but {0} were "
             "given".format(len(args) + 1)
+            + awkward1._util.exception_suffix(__file__)
         )
 
 
@@ -1420,7 +1438,10 @@ def firsts(array, axis=1, highlevel=True):
     See #ak.singletons to invert this function.
     """
     if axis <= 0:
-        raise NotImplementedError("ak.firsts with axis={0}".format(axis))
+        raise NotImplementedError(
+            "ak.firsts with axis={0}".format(axis)
+            + awkward1._util.exception_suffix(__file__)
+        )
     toslice = (slice(None, None, None),) * axis + (0,)
     out = awkward1.mask(array, awkward1.num(array, axis=axis) > 0, highlevel=False)[
         toslice
@@ -1663,7 +1684,10 @@ def cartesian(
         parameters["__record__"] = with_name
 
     if axis < 0:
-        raise ValueError("the 'axis' of cartesian must be non-negative")
+        raise ValueError(
+            "the 'axis' of cartesian must be non-negative"
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     elif axis == 0:
         if nested is None or nested is False:
@@ -1676,6 +1700,7 @@ def cartesian(
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be dict keys "
                     "for a dict of arrays"
+                    + awkward1._util.exception_suffix(__file__)
                 )
             recordlookup = []
             layouts = []
@@ -1697,6 +1722,7 @@ def cartesian(
                 raise ValueError(
                     "the 'nested' prarmeter of cartesian must be integers in "
                     "[0, len(arrays) - 1) for an iterable of arrays"
+                    + awkward1._util.exception_suffix(__file__)
                 )
             recordlookup = None
             layouts = []
@@ -1804,6 +1830,7 @@ def cartesian(
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be dict keys "
                     "for a dict of arrays"
+                    + awkward1._util.exception_suffix(__file__)
                 )
             recordlookup = []
             layouts = []
@@ -1823,6 +1850,7 @@ def cartesian(
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be integers in "
                     "[0, len(arrays) - 1) for an iterable of arrays"
+                    + awkward1._util.exception_suffix(__file__)
                 )
             recordlookup = None
             layouts = []
@@ -1913,7 +1941,10 @@ def argcartesian(
     so see the #ak.cartesian documentation for a more complete description.
     """
     if axis < 0:
-        raise ValueError("the 'axis' of argcartesian must be non-negative")
+        raise ValueError(
+            "the 'axis' of argcartesian must be non-negative"
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     else:
         if isinstance(arrays, dict):
@@ -2166,7 +2197,10 @@ def argcombinations(
         parameters["__record__"] = with_name
 
     if axis < 0:
-        raise ValueError("the 'axis' for argcombinations must be non-negative")
+        raise ValueError(
+            "the 'axis' for argcombinations must be non-negative"
+            + awkward1._util.exception_suffix(__file__)
+        )
     else:
         layout = awkward1.operations.convert.to_layout(
             array, allow_record=False, allow_other=False
@@ -2283,7 +2317,8 @@ def repartition(array, lengths, highlevel=True):
         if isinstance(lengths, (int, numbers.Integral, np.integer)):
             if lengths < 1:
                 raise ValueError(
-                    "lengths must be at least 1 (and probably " "considerably more)"
+                    "lengths must be at least 1 (and probably considerably more)"
+                    + awkward1._util.exception_suffix(__file__)
                 )
 
             howmany = len(layout) // lengths
@@ -2303,6 +2338,7 @@ def repartition(array, lengths, highlevel=True):
             raise ValueError(
                 "cannot repartition array of length {0} into "
                 "these lengths".format(len(layout))
+                + awkward1._util.exception_suffix(__file__)
             )
 
         if isinstance(layout, awkward1.partition.PartitionedArray):
@@ -2480,7 +2516,10 @@ def with_cache(array, cache, chain=None, highlevel=True):
     elif chain is False:
         chain = None
     elif chain is not None and chain not in ("first", "last"):
-        raise ValueError("chain must be None, 'first', 'last', or bool")
+        raise ValueError(
+            "chain must be None, 'first', 'last', or bool"
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     if not isinstance(cache, awkward1.layout.ArrayCache):
         cache = awkward1.layout.ArrayCache(cache)
@@ -2574,7 +2613,10 @@ def size(array, axis=None):
     error), then this function raise an error.
     """
     if axis is not None and axis < 0:
-        raise NotImplementedError("ak.size with axis < 0")
+        raise NotImplementedError(
+            "ak.size with axis < 0"
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     def recurse(layout, axis, sizes):
         nplike = awkward1.nplike.of(layout)
@@ -2595,6 +2637,7 @@ def size(array, axis=None):
                 elif compare != inner:
                     raise ValueError(
                         "ak.size is ambiguous due to union of different " "sizes"
+                        + awkward1._util.exception_suffix(__file__)
                     )
             sizes.extend(compare)
         elif isinstance(layout, awkward1._util.optiontypes):
@@ -2618,6 +2661,7 @@ def size(array, axis=None):
                 elif compare != inner:
                     raise ValueError(
                         "ak.size is ambiguous due to record of different " "sizes"
+                        + awkward1._util.exception_suffix(__file__)
                     )
             sizes.extend(compare)
         elif isinstance(layout, awkward1.layout.NumpyArray):
@@ -2626,7 +2670,10 @@ def size(array, axis=None):
             else:
                 sizes.extend(nplike.asarray(layout).shape[1 : axis + 2])
         else:
-            raise AssertionError("unrecognized Content type")
+            raise AssertionError(
+                "unrecognized Content type"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     layout = awkward1.operations.convert.to_layout(array, allow_record=False)
     if isinstance(layout, awkward1.partition.PartitionedArray):
@@ -2644,6 +2691,7 @@ def size(array, axis=None):
                     "ak.size is ambiguous due to variable-length arrays "
                     "(try ak.flatten to remove structure or ak.to_numpy "
                     "to force regularity, if possible)"
+                    + awkward1._util.exception_suffix(__file__)
                 )
             else:
                 out *= size
@@ -2654,6 +2702,7 @@ def size(array, axis=None):
                 "ak.size is ambiguous due to variable-length arrays at "
                 "axis {0} (try ak.flatten to remove structure or "
                 "ak.to_numpy to force regularity, if possible)".format(axis)
+                + awkward1._util.exception_suffix(__file__)
             )
         else:
             return sizes[-1]
@@ -2722,7 +2771,10 @@ def values_astype(array, to, highlevel=True):
     to_dtype = np.dtype(to)
     to_str = _dtype_to_string.get(to_dtype)
     if to_str is None:
-        raise ValueError("cannot use {0} to cast the numeric type of an array".format(to_dtype))
+        raise ValueError(
+            "cannot use {0} to cast the numeric type of an array".format(to_dtype)
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     layout = awkward1.operations.convert.to_layout(
         array, allow_record=False, allow_other=False

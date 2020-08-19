@@ -222,6 +222,7 @@ def tolookup(layout, positions, sharedptrs, arrays):
     else:
         raise AssertionError(
             "unrecognized Content or Form type: {0}".format(type(layout))
+            + awkward1._util.exception_suffix(__file__)
         )
 
 
@@ -262,7 +263,10 @@ def tonumbatype(form):
         return awkward1._connect._numba.layout.VirtualArrayType.from_form(form)
 
     else:
-        raise AssertionError("unrecognized Form type: {0}".format(type(form)))
+        raise AssertionError(
+            "unrecognized Form type: {0}".format(type(form))
+            + awkward1._util.exception_suffix(__file__)
+        )
 
 
 @numba.extending.typeof_impl.register(Lookup)
@@ -330,6 +334,7 @@ class ArrayView(object):
                     raise ValueError(
                         "partitioned arrays can only be used in Numba if all "
                         "partitions have the same numba_type"
+                        + awkward1._util.exception_suffix(__file__)
                     )
             return PartitionedView(
                 numba.typeof(part),
@@ -535,6 +540,7 @@ class type_getitem(numba.core.typing.templates.AbstractTemplate):
                     "only an integer, start:stop range, or a *constant* "
                     "field name string may be used as awkward1.Array "
                     "slices in compiled code"
+                    + awkward1._util.exception_suffix(__file__)
                 )
 
 
@@ -807,6 +813,7 @@ class type_getitem_record(numba.core.typing.templates.AbstractTemplate):
                 raise TypeError(
                     "only a *constant* field name string may be used as "
                     "awkward1.Record slices in compiled code"
+                    + awkward1._util.exception_suffix(__file__)
                 )
 
 
@@ -1219,6 +1226,7 @@ class type_getitem_partitioned(numba.core.typing.templates.AbstractTemplate):
                     "only an integer, start:stop range, or a *constant* "
                     "field name string may be used as awkward1.Array "
                     "slices in compiled code"
+                    + awkward1._util.exception_suffix(__file__)
                 )
 
 

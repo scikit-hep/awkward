@@ -150,7 +150,10 @@ class PartitionedArray(object):
             if out is None:
                 out = x.type(typestrs)
             elif out != x.type(typestrs):
-                raise ValueError("inconsistent types in PartitionedArray")
+                raise ValueError(
+                    "inconsistent types in PartitionedArray"
+                    + awkward1._util.exception_suffix(__file__)
+                )
         return out
 
     @property
@@ -398,6 +401,7 @@ class PartitionedArray(object):
                 if not 0 <= head < len(self):
                     raise ValueError(
                         "{0} index out of range".format(type(self).__name__)
+                        + awkward1._util.exception_suffix(__file__)
                     )
                 partitionid, index = self._ext.partitionid_index_at(head)
                 return self.partition(partitionid)[(index,) + tail]

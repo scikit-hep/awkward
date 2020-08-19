@@ -63,7 +63,10 @@ def validity_error(array, exception=False):
     ):
         out = array.validityerror()
         if out is not None and exception:
-            raise ValueError(out)
+            raise ValueError(
+                out
+                + awkward1._util.exception_suffix(__file__)
+            )
         else:
             return out
 
@@ -71,7 +74,10 @@ def validity_error(array, exception=False):
         return validity_error(array.snapshot(), exception=exception)
 
     else:
-        raise TypeError("not an awkward array: {0}".format(repr(array)))
+        raise TypeError(
+            "not an awkward array: {0}".format(repr(array))
+            + awkward1._util.exception_suffix(__file__)
+        )
 
 
 def type(array):
@@ -181,7 +187,10 @@ def type(array):
         return array.type(awkward1._util.typestrs(None))
 
     else:
-        raise TypeError("unrecognized array type: {0}".format(repr(array)))
+        raise TypeError(
+            "unrecognized array type: {0}".format(repr(array))
+            + awkward1._util.exception_suffix(__file__)
+        )
 
 
 type.dtype2primitive = {
