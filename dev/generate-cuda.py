@@ -23,6 +23,7 @@ KERNEL_WHITELIST = [
     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
     "awkward_index_rpad_and_clip_axis0",
     "awkward_index_rpad_and_clip_axis1",
+    "awkward_ListArray_min_range",
 ]
 
 
@@ -32,7 +33,7 @@ def traverse(node, args={}, forflag=False, declared=[]):
             code = "if (thread_id < {0}) {{\n".format(node.iter.args[0].id)
         elif len(node.iter.args) == 2:
             code = "if ((thread_id < {0}) && (thread_id >= {1})) {{\n".format(
-                node.iter.args[1].id, node.iter.args[0].id
+                traverse(node.iter.args[1]), traverse(node.iter.args[0])
             )
         else:
             raise Exception("Unable to handle Python for loops with >2 args")
@@ -168,10 +169,11 @@ def traverse(node, args={}, forflag=False, declared=[]):
                         traverse(node.value.orelse, args, forflag, declared),
                     )
                     declared.append(traverse(node.targets[0], args, forflag, declared))
-                code += "if ({0}) {{\n {1} = {2};\n }}\n".format(
+                code += "if ({0}) {{\n {1} = {2};\n }} else {{\n {1} = {3};\n }}\n".format(
                     traverse(node.value.test, args, forflag, declared),
                     traverse(node.targets[0], args, forflag, declared),
                     traverse(node.value.body, args, forflag, declared),
+                    traverse(node.value.orelse, args, forflag, declared),
                 )
             elif node.value.__class__.__name__ == "Compare":
                 code = ""
