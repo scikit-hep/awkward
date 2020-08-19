@@ -112,16 +112,12 @@ def traverse(node, args={}, forflag=False, declared=[]):
     elif node.__class__.__name__ == "Subscript":
         if node.slice.value.__class__.__name__ == "Name" and node.slice.value.id == "i":
             code = node.value.id + "[thread_id]"
-        elif node.slice.value.__class__.__name__ == "Name":
-            code = node.value.id + "[" + node.slice.value.id + "]"
-        elif node.slice.value.__class__.__name__ == "Constant":
-            code = (
-                node.value.id
-                + "["
-                + traverse(node.slice.value, args, forflag, declared)
-                + "]"
-            )
-        elif node.slice.value.__class__.__name__ == "BinOp":
+        elif (
+            node.slice.value.__class__.__name__ == "Constant"
+            or node.slice.value.__class__.__name__ == "BinOp"
+            or node.slice.value.__class__.__name__ == "Subscript"
+            or node.slice.value.__class__.__name__ == "Name"
+        ):
             code = (
                 node.value.id
                 + "["
