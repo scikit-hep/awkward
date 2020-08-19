@@ -24,6 +24,7 @@ KERNEL_WHITELIST = [
     "awkward_index_rpad_and_clip_axis0",
     "awkward_index_rpad_and_clip_axis1",
     "awkward_ListArray_min_range",
+    "awkward_ListArray_rpad_and_clip_length_axis1",
 ]
 
 
@@ -233,6 +234,114 @@ def traverse(node, args={}, forflag=False, declared=[]):
                     declared.append(traverse(node.targets[0], args, forflag, declared))
                 code += "{0} = {1};\n".format(
                     traverse(node.targets[0], args, forflag, declared),
+                    traverse(node.value, args, forflag, declared),
+                )
+    elif node.__class__.__name__ == "AugAssign":
+        if node.op.__class__.__name__ == "Add":
+            operator = "+="
+        else:
+            raise Exception(
+                "Unhandled AugAssign node {0}".format(node.op.__class__.__name__)
+            )
+        left = traverse(node.target, args, forflag, declared)
+        if "[" in left:
+            left = left[: left.find("[")]
+        code = ""
+        if left not in args.keys() and ("*" + left) not in args.keys():
+            flag = True
+        else:
+            flag = False
+        if node.value.__class__.__name__ == "Name" and node.value.id == "i":
+            code = ""
+            if flag and (
+                traverse(node.target, args, forflag, declared) not in declared
+            ):
+                code += "auto "
+                declared.append(traverse(node.target, args, forflag, declared))
+            code += "{0} = thread_id;\n".format(
+                traverse(node.target, args, forflag, declared)
+            )
+        else:
+            if node.value.__class__.__name__ == "IfExp":
+                if flag and (
+                    traverse(node.target, args, forflag, declared) not in declared
+                ):
+                    code = "auto {0} {1} {2};\n".format(
+                        traverse(node.target, args, forflag, declared),
+                        operator,
+                        traverse(node.value.orelse, args, forflag, declared),
+                    )
+                    declared.append(traverse(node.target, args, forflag, declared))
+                code += "if ({0}) {{\n {1} {2} {3};\n }} else {{\n {1} {2} {4};\n }}\n".format(
+                    traverse(node.value.test, args, forflag, declared),
+                    traverse(node.target, args, forflag, declared),
+                    operator,
+                    traverse(node.value.body, args, forflag, declared),
+                    traverse(node.value.orelse, args, forflag, declared),
+                )
+            elif node.value.__class__.__name__ == "Compare":
+                code = ""
+                if flag and (
+                    traverse(node.target, args, forflag, declared) not in declared
+                ):
+                    code += "auto "
+                    declared.append(traverse(node.target, args, forflag, declared))
+                if (
+                    len(node.value.ops) == 1
+                    and node.value.ops[0].__class__.__name__ == "Lt"
+                ):
+                    code += "{0} {1} {2} < {3};\n".format(
+                        traverse(node.target, args, forflag, declared),
+                        operator,
+                        traverse(node.value.left, args, forflag, declared),
+                        traverse(node.value.comparators[0], args, forflag, declared),
+                    )
+                elif (
+                    len(node.value.ops) == 1
+                    and node.value.ops[0].__class__.__name__ == "Gt"
+                ):
+                    code += "{0} {1} {2} > {3};\n".format(
+                        traverse(node.target, args, forflag, declared),
+                        operator,
+                        traverse(node.value.left, args, forflag, declared),
+                        traverse(node.value.comparators[0], args, forflag, declared),
+                    )
+                elif (
+                    len(node.value.ops) == 1
+                    and node.value.ops[0].__class__.__name__ == "GtE"
+                ):
+                    code += "{0} {1} {2} >= {3};\n".format(
+                        traverse(node.target, args, forflag, declared),
+                        operator,
+                        traverse(node.value.left, args, forflag, declared),
+                        traverse(node.value.comparators[0], args, forflag, declared),
+                    )
+                elif (
+                    len(node.value.ops) == 1
+                    and node.value.ops[0].__class__.__name__ == "NotEq"
+                ):
+                    code += "{0} {1} {2} != {3};\n".format(
+                        traverse(node.target, args, forflag, declared),
+                        operator,
+                        traverse(node.value.left, args, forflag, declared),
+                        traverse(node.value.comparators[0], args, forflag, declared),
+                    )
+                else:
+                    raise Exception(
+                        "Unhandled Compare node {0}. Please inform the developers.".format(
+                            node.value.ops[0]
+                        )
+                    )
+            else:
+                code = ""
+                if flag and (
+                    traverse(node.target, args, forflag, declared) not in declared
+                ):
+                    code += "auto "
+                    declared.append(traverse(node.target, args, forflag, declared))
+                code += "{0} {1} {2};\n".format(
+                    traverse(node.target, args, forflag, declared),
+                    operator,
                     traverse(node.value, args, forflag, declared),
                 )
     else:
