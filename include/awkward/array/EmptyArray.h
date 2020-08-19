@@ -17,7 +17,7 @@ namespace awkward {
   /// @class EmptyForm
   ///
   /// @brief Form describing EmptyArray.
-  class EXPORT_SYMBOL EmptyForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL EmptyForm: public Form {
   public:
     /// @brief Creates a EmptyForm. See EmptyArray for documentation.
     EmptyForm(bool has_identities,
@@ -81,7 +81,7 @@ namespace awkward {
   /// consequence) UnknownType.
   ///
   /// See #EmptyArray for the meaning of each parameter.
-  class EXPORT_SYMBOL EmptyArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL EmptyArray: public Content {
   public:
     /// @brief Creates an EmptyArray from a full set of parameters.
     ///

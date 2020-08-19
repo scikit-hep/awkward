@@ -17,7 +17,7 @@ namespace awkward {
   /// @class IndexedForm
   ///
   /// @brief Form describing IndexedArray (with `OPTION = false`).
-  class EXPORT_SYMBOL IndexedForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL IndexedForm: public Form {
   public:
     /// @brief Creates a IndexedForm. See {@link IndexedArrayOf IndexedArray}
     /// for documentation.
@@ -90,7 +90,7 @@ namespace awkward {
   /// @class IndexedOptionForm
   ///
   /// @brief Form describing IndexedOptionArray.
-  class EXPORT_SYMBOL IndexedOptionForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL IndexedOptionForm: public Form {
   public:
     /// @brief Creates a IndexedOptionForm. See IndexedArray for documentation.
     IndexedOptionForm(bool has_identities,
@@ -168,7 +168,11 @@ namespace awkward {
   ///
   /// See #IndexedArrayOf for the meaning of each parameter.
   template <typename T, bool ISOPTION>
-  class EXPORT_SYMBOL IndexedArrayOf: public Content {
+  class
+#ifdef AWKWARD_INDEXEDARRAY_NO_EXTERN_TEMPLATE
+  LIBAWKWARD_EXPORT_SYMBOL
+#endif
+  IndexedArrayOf: public Content {
   public:
     /// @brief Creates an IndexedArray or IndexedOptionArray from a full set
     /// of parameters.
@@ -479,7 +483,7 @@ namespace awkward {
     const ContentPtr content_;
   };
 
-#if !defined AWKWARD_INDEXEDARRAY_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+#ifndef AWKWARD_INDEXEDARRAY_NO_EXTERN_TEMPLATE
   extern template class IndexedArrayOf<int32_t,  false>;
   extern template class IndexedArrayOf<uint32_t, false>;
   extern template class IndexedArrayOf<int64_t,  false>;

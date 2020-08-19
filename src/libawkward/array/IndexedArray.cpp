@@ -2418,10 +2418,10 @@ namespace awkward {
 
   // IndexedArrayOf<int64_t, true> has to be first, or ld on darwin
   // will hide the typeinfo symbol
-  template class EXPORT_SYMBOL IndexedArrayOf<int64_t, true>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<int64_t, true>;
 
-  template class EXPORT_SYMBOL IndexedArrayOf<int32_t, false>;
-  template class EXPORT_SYMBOL IndexedArrayOf<uint32_t, false>;
-  template class EXPORT_SYMBOL IndexedArrayOf<int64_t, false>;
-  template class EXPORT_SYMBOL IndexedArrayOf<int32_t, true>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<int32_t, false>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<uint32_t, false>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<int64_t, false>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<int32_t, true>;
 }

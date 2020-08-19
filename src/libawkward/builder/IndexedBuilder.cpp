@@ -155,7 +155,7 @@ namespace awkward {
 
   ////////// IndexedGenericBuilder
 
-  template class EXPORT_SYMBOL IndexedBuilder<Content>;
+  template class EXPORT_TEMPLATE_INST IndexedBuilder<Content>;
 
   const BuilderPtr
   IndexedGenericBuilder::fromnulls(const ArrayBuilderOptions& options,
@@ -261,7 +261,7 @@ namespace awkward {
 
   ////////// IndexedI32Builder (makes IndexedArray32)
 
-  template class EXPORT_SYMBOL IndexedBuilder<IndexedArray32>;
+  template class EXPORT_TEMPLATE_INST IndexedBuilder<IndexedArray32>;
 
   IndexedI32Builder::IndexedI32Builder(
     const ArrayBuilderOptions& options,
@@ -309,7 +309,7 @@ namespace awkward {
 
   ////////// IndexedIU32Builder (makes IndexedArrayU32)
 
-  template class EXPORT_SYMBOL IndexedBuilder<IndexedArrayU32>;
+  template class EXPORT_TEMPLATE_INST IndexedBuilder<IndexedArrayU32>;
 
   IndexedIU32Builder::IndexedIU32Builder(
     const ArrayBuilderOptions& options,
@@ -357,7 +357,7 @@ namespace awkward {
 
   ////////// IndexedI64Builder (makes IndexedArray64)
 
-  template class EXPORT_SYMBOL IndexedBuilder<IndexedArray64>;
+  template class EXPORT_TEMPLATE_INST IndexedBuilder<IndexedArray64>;
 
   IndexedI64Builder::IndexedI64Builder(
     const ArrayBuilderOptions& options,
@@ -405,7 +405,7 @@ namespace awkward {
 
   ////////// IndexedIO32Builder (makes IndexedOptionArray32)
 
-  template class EXPORT_SYMBOL IndexedBuilder<IndexedOptionArray32>;
+  template class EXPORT_TEMPLATE_INST IndexedBuilder<IndexedOptionArray32>;
 
   IndexedIO32Builder::IndexedIO32Builder(
     const ArrayBuilderOptions& options,
@@ -447,7 +447,7 @@ namespace awkward {
 
   ////////// IndexedIO64Builder (makes IndexedOptionArray64)
 
-  template class EXPORT_SYMBOL IndexedBuilder<IndexedOptionArray64>;
+  template class EXPORT_TEMPLATE_INST IndexedBuilder<IndexedOptionArray64>;
 
   IndexedIO64Builder::IndexedIO64Builder(
     const ArrayBuilderOptions& options,

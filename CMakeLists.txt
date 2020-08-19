@@ -75,6 +75,7 @@ endif()
 # Second tier: libawkward (object files, static library, and dynamic library).
 add_library(awkward-objects OBJECT ${LIBAWKWARD_SOURCES})
 set_target_properties(awkward-objects PROPERTIES POSITION_INDEPENDENT_CODE 1)
+target_compile_definitions(awkward-objects PRIVATE LIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL)
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "^(|Apple)Clang$")
   # Avoid emitting vtables in the dependent libraries
   target_compile_options(awkward-objects PRIVATE -Werror=weak-vtables -Wweak-vtables -Wshorten-64-to-32 -Wsign-compare -Wsign-conversion -Wshift-sign-overflow -Wreorder -Wrange-loop-analysis -Wconversion -Wunused)

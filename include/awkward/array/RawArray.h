@@ -40,7 +40,7 @@ namespace awkward {
   /// @class RawForm
   ///
   /// @brief Form describing RawArray.
-  class EXPORT_SYMBOL RawForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL RawForm: public Form {
   public:
     /// @brief Creates a RawForm. See RawArray for documentation.
     RawForm(bool has_identities,
@@ -188,7 +188,7 @@ namespace awkward {
   ///  - 8-bit, 16-bit, 32-bit, and 64-bit signed and unsigned integers
   ///  - 8-bit booleans
   template <typename T>
-  class EXPORT_SYMBOL RawArrayOf: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL RawArrayOf: public Content {
   public:
     /// @brief Creates a RawArray from a full set of parameters.
     ///

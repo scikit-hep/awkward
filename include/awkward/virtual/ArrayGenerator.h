@@ -17,7 +17,7 @@ namespace awkward {
   /// The main implementation, PyArrayGenerator, is passed through pybind11 to
   /// Python to work with Python functions and lambdas, but in principle, pure
   /// C++ generators could be written.
-  class EXPORT_SYMBOL ArrayGenerator {
+  class LIBAWKWARD_EXPORT_SYMBOL ArrayGenerator {
   public:
     /// @brief Called by subclasses to set the #form of an ArrayGenerator.
     ///
@@ -90,7 +90,7 @@ namespace awkward {
   /// @brief Generator for lazy slicing. Used to avoid materializing a
   /// VirtualArray before its content is needed (in case its content is
   /// never needed).
-  class EXPORT_SYMBOL SliceGenerator: public ArrayGenerator {
+  class LIBAWKWARD_EXPORT_SYMBOL SliceGenerator: public ArrayGenerator {
   public:
     SliceGenerator(const FormPtr& form,
                    int64_t length,

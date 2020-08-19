@@ -30,7 +30,7 @@ namespace awkward {
   ///
   /// Forms may be thought of as low-level types, whereas Type is a high-level
   /// type. There is a one-to-many relationship from Type to Form.
-  class EXPORT_SYMBOL Form {
+  class LIBAWKWARD_EXPORT_SYMBOL Form {
   public:
     static FormPtr
       fromnumpy(char kind,
@@ -246,7 +246,7 @@ namespace awkward {
   ///
   /// @brief Abstract superclass of all array node types (flat hierarchy).
   /// Any Content can be nested within any other Content.
-  class EXPORT_SYMBOL Content {
+  class LIBAWKWARD_EXPORT_SYMBOL Content {
   public:
     /// @brief Called by all subclass constructors; assigns #identities and
     /// #parameters upon construction.

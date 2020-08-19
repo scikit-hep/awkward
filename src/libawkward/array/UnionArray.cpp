@@ -2040,7 +2040,7 @@ namespace awkward {
                                                  tail);
   }
 
-  template class EXPORT_SYMBOL UnionArrayOf<int8_t, int32_t>;
-  template class EXPORT_SYMBOL UnionArrayOf<int8_t, uint32_t>;
-  template class EXPORT_SYMBOL UnionArrayOf<int8_t, int64_t>;
+  template class EXPORT_TEMPLATE_INST UnionArrayOf<int8_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST UnionArrayOf<int8_t, uint32_t>;
+  template class EXPORT_TEMPLATE_INST UnionArrayOf<int8_t, int64_t>;
 }

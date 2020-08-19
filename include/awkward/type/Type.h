@@ -19,7 +19,7 @@ namespace awkward {
   /// @class Type
   ///
   /// @brief Abstract superclass of all high level types (flat hierarchy).
-  class EXPORT_SYMBOL Type {
+  class LIBAWKWARD_EXPORT_SYMBOL Type {
   public:
     /// @brief Called by all subclass constructors; assigns #parameters and
     /// #typestr upon construction.

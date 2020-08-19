@@ -375,6 +375,6 @@ namespace awkward {
     }
   }
 
-  template class EXPORT_SYMBOL IdentitiesOf<int32_t>;
-  template class EXPORT_SYMBOL IdentitiesOf<int64_t>;
+  template class EXPORT_TEMPLATE_INST IdentitiesOf<int32_t>;
+  template class EXPORT_TEMPLATE_INST IdentitiesOf<int64_t>;
 }

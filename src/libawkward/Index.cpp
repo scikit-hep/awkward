@@ -379,9 +379,9 @@ namespace awkward {
     }
   }
 
-  template class EXPORT_SYMBOL IndexOf<int8_t>;
-  template class EXPORT_SYMBOL IndexOf<uint8_t>;
-  template class EXPORT_SYMBOL IndexOf<int32_t>;
-  template class EXPORT_SYMBOL IndexOf<uint32_t>;
-  template class EXPORT_SYMBOL IndexOf<int64_t>;
+  template class EXPORT_TEMPLATE_INST IndexOf<int8_t>;
+  template class EXPORT_TEMPLATE_INST IndexOf<uint8_t>;
+  template class EXPORT_TEMPLATE_INST IndexOf<int32_t>;
+  template class EXPORT_TEMPLATE_INST IndexOf<uint32_t>;
+  template class EXPORT_TEMPLATE_INST IndexOf<int64_t>;
 }

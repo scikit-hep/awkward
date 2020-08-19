@@ -1886,7 +1886,7 @@ namespace awkward {
                                             content);
   }
 
-  template class EXPORT_SYMBOL ListArrayOf<int32_t>;
-  template class EXPORT_SYMBOL ListArrayOf<uint32_t>;
-  template class EXPORT_SYMBOL ListArrayOf<int64_t>;
+  template class EXPORT_TEMPLATE_INST ListArrayOf<int32_t>;
+  template class EXPORT_TEMPLATE_INST ListArrayOf<uint32_t>;
+  template class EXPORT_TEMPLATE_INST ListArrayOf<int64_t>;
 }

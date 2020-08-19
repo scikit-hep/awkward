@@ -20,7 +20,7 @@ namespace awkward {
   /// @class ByteMaskedForm
   ///
   /// @brief Form describing ByteMaskedArray.
-  class EXPORT_SYMBOL ByteMaskedForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL ByteMaskedForm: public Form {
   public:
     /// @brief Creates a ByteMaskedForm. See ByteMaskedArray for documentation.
     ByteMaskedForm(bool has_identities,
@@ -100,7 +100,7 @@ namespace awkward {
   /// over its #content.
   ///
   /// See #ByteMaskedArray for the meaning of each parameter.
-  class EXPORT_SYMBOL ByteMaskedArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL ByteMaskedArray: public Content {
   public:
     /// @brief Creates an ByteMaskedArray from a full set of parameters.
     ///

@@ -16,7 +16,7 @@ namespace awkward {
   /// @class UnmaskedForm
   ///
   /// @brief Form describing UnmaskedArray.
-  class EXPORT_SYMBOL UnmaskedForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL UnmaskedForm: public Form {
   public:
     /// @brief Creates a UnmaskedForm. See UnmaskedArray for documentation.
     UnmaskedForm(bool has_identities,
@@ -86,7 +86,7 @@ namespace awkward {
   /// values happen to be valid.
   ///
   /// See #UnmaskedArray for the meaning of each parameter.
-  class EXPORT_SYMBOL UnmaskedArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL UnmaskedArray: public Content {
   public:
     /// @brief Creates an UnmaskedArray from a full set of parameters.
     ///

@@ -12,7 +12,7 @@ namespace awkward {
   /// items, such as numbers or booleans.
   ///
   /// NumpyArray and {@link RawArrayOf RawArray} nodes have this type.
-  class EXPORT_SYMBOL PrimitiveType: public Type {
+  class LIBAWKWARD_EXPORT_SYMBOL PrimitiveType: public Type {
   public:
     /// Constructs a PrimitiveType with a full set of parameters.
     ///
