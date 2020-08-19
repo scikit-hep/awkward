@@ -54,9 +54,9 @@ from awkward1.highlevel import Record
 from awkward1.highlevel import ArrayBuilder
 
 # behaviors
-from awkward1.behaviors.mixins import mixin_class, mixin_class_method
-import awkward1.behaviors.string
-import awkward1.behaviors.categorical
+from awkward1.behaviors.mixins import *
+from awkward1.behaviors.string import *
+from awkward1.behaviors.categorical import *
 
 # operations
 from awkward1.operations.convert import *

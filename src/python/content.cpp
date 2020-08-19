@@ -1467,6 +1467,8 @@ make_ByteMaskedArray(const py::handle& m, const std::string& name) {
       .def("simplify", [](const ak::ByteMaskedArray& self) {
         return box(self.simplify_optiontype());
       })
+      .def("toIndexedOptionArray64",
+           &ak::ByteMaskedArray::toIndexedOptionArray64)
   );
 }
 

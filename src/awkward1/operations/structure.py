@@ -2790,5 +2790,13 @@ def values_astype(array, to, highlevel=True):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_") and x not in ("numpy", "np", "awkward1")
+    if not x.startswith("_") and x not in (
+        "absolute_import",
+        "numbers",
+        "json",
+        "Iterable",
+        "MutableMapping",
+        "np",
+        "awkward1",
+    )
 ]

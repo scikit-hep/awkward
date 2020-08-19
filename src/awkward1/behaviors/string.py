@@ -99,6 +99,7 @@ awkward1.behavior["__typestr__", "string"] = "string"
 
 def _string_equal(one, two):
     nplike = awkward1.nplike.of(one, two)
+    behavior = awkward1._util.behaviorof(one, two)
 
     one, two = one.layout, two.layout
 
@@ -121,7 +122,7 @@ def _string_equal(one, two):
         # update same-length strings with a verdict about their characters
         out[possible] = reduced
 
-    return awkward1.highlevel.Array(awkward1.layout.NumpyArray(out))
+    return awkward1._util.wrap(awkward1.layout.NumpyArray(out), behavior)
 
 
 awkward1.behavior[awkward1.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
@@ -235,3 +236,15 @@ awkward1.behavior["__numba_typer__", "bytestring"] = _string_numba_typer
 awkward1.behavior["__numba_lower__", "bytestring"] = _string_numba_lower
 awkward1.behavior["__numba_typer__", "string"] = _string_numba_typer
 awkward1.behavior["__numba_lower__", "string"] = _string_numba_lower
+
+
+__all__ = [
+    x
+    for x in list(globals())
+    if not x.startswith("_")
+    and x not in (
+        "absolute_import",
+        "np",
+        "awkward1",
+    )
+]

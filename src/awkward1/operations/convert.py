@@ -3671,5 +3671,16 @@ __all__ = [
     x
     for x in list(globals())
     if not x.startswith("_")
-    and x not in ("numbers", "json", "Iterable", "numpy", "np", "awkward1")
+    and x not in (
+        "absolute_import",
+        "numbers",
+        "json",
+        "collections",
+        "math",
+        "threading",
+        "Iterable",
+        "numpy",
+        "np",
+        "awkward1",
+    )
 ]
