@@ -14,6 +14,7 @@ KERNEL_WHITELIST = [
     "awkward_Identities32_to_Identities64",
     "awkward_RegularArray_num",
     "awkward_ListOffsetArray_flatten_offsets",
+    "awkward_UnionArray_flatten_length",
     "awkward_IndexedArray_overlay_mask",
     "awkward_IndexedArray_mask",
     "awkward_ByteMaskedArray_mask",
@@ -117,11 +118,20 @@ def traverse(node, args={}, forflag=False, declared=[]):
             or node.slice.value.__class__.__name__ == "BinOp"
             or node.slice.value.__class__.__name__ == "Subscript"
             or node.slice.value.__class__.__name__ == "Name"
-        ):
+        ) and hasattr(node.value, "id"):
             code = (
                 node.value.id
                 + "["
                 + traverse(node.slice.value, args, forflag, declared)
+                + "]"
+            )
+        elif node.value.__class__.__name__ == "Subscript":
+            code = (
+                traverse(node.value.value)
+                + "["
+                + traverse(node.value.slice.value)
+                + "]["
+                + traverse(node.slice.value)
                 + "]"
             )
         else:
