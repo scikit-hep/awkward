@@ -56,6 +56,7 @@ from awkward1.highlevel import ArrayBuilder
 # behaviors
 from awkward1.behaviors.mixins import mixin_class, mixin_class_method
 import awkward1.behaviors.string
+import awkward1.behaviors.categorical
 
 # operations
 from awkward1.operations.convert import *
