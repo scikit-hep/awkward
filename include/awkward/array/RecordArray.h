@@ -89,6 +89,9 @@ namespace awkward {
             bool check_form_key,
             bool compatibility_check) const override;
 
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   private:
     const util::RecordLookupPtr recordlookup_;
     const std::vector<FormPtr> contents_;

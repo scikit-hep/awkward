@@ -187,6 +187,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  BitMaskedForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// BitMaskedArray
 
   BitMaskedArray::BitMaskedArray(const IdentitiesPtr& identities,

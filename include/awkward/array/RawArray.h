@@ -136,6 +136,13 @@ namespace awkward {
         std::string("FIXME: RawForm::equal") + FILENAME(__LINE__));
     }
 
+    const FormPtr
+      getitem_field(const std::string& key) const override {
+      throw std::invalid_argument(std::string("key ") + util::quote(key, true)
+        + std::string(" does not exist (data are not records)"));
+    }
+
+
   private:
     const std::string T_;
   };

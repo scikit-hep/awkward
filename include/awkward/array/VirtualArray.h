@@ -81,6 +81,9 @@ namespace awkward {
             bool check_form_key,
             bool compatibility_check) const override;
 
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   private:
     const FormPtr form_;
     bool has_length_;
@@ -224,9 +227,6 @@ namespace awkward {
 
     const ContentPtr
       carry(const Index64& carry, bool allow_lazy) const override;
-
-    const std::string
-      purelist_parameter(const std::string& key) const override;
 
     int64_t
       numfields() const override;

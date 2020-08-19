@@ -182,6 +182,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  IndexedForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// IndexedOptionForm
 
   IndexedOptionForm::IndexedOptionForm(bool has_identities,
@@ -328,6 +333,11 @@ namespace awkward {
     else {
       return false;
     }
+  }
+
+  const FormPtr
+  IndexedOptionForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
   }
 
   ////////// IndexedArray

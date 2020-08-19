@@ -131,6 +131,13 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  EmptyForm::getitem_field(const std::string& key) const {
+    throw std::invalid_argument(
+      std::string("key ") + util::quote(key, true)
+      + std::string(" does not exist (data might not be records)"));
+  }
+
   ////////// EmptyArray
 
   EmptyArray::EmptyArray(const IdentitiesPtr& identities,

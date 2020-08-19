@@ -180,6 +180,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  ByteMaskedForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// ByteMaskedArray
 
   ByteMaskedArray::ByteMaskedArray(const IdentitiesPtr& identities,

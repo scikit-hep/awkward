@@ -302,6 +302,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  RecordForm::getitem_field(const std::string& key) const {
+    return content(key);
+  }
+
   ////////// RecordArray
 
   RecordArray::RecordArray(const IdentitiesPtr& identities,
