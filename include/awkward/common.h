@@ -75,7 +75,7 @@ extern "C" {
       const char* str,
       int64_t identity,
       int64_t attempt,
-      const char* filename = nullptr) {
+      const char* filename) {
         struct Error out;
         out.str = str;
         out.filename = filename;
@@ -90,7 +90,7 @@ extern "C" {
       const char* str,
       int64_t identity,
       int64_t attempt,
-      const char* filename = nullptr) {
+      const char* filename) {
         struct Error out;
         out.str = str;
         out.filename = filename;

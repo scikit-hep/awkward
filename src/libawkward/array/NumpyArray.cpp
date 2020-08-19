@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/NumpyArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/NumpyArray.cpp", line)
 
 #include <algorithm>
 #include <iomanip>
@@ -477,7 +478,8 @@ namespace awkward {
       util::handle_error(
         failure("content and its identities must have the same length",
                 kSliceNone,
-                kSliceNone),
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -946,7 +948,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < shape_[0]) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -979,7 +984,7 @@ namespace awkward {
     }
     if (regular_at < 0  ||  regular_at >= shape_[0]) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -995,7 +1000,7 @@ namespace awkward {
     if (identities_.get() != nullptr) {
       if (at >= identities_.get()->length()) {
         util::handle_error(
-          failure("index out of range", kSliceNone, at),
+          failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
           identities_.get()->classname(),
           nullptr);
       }
@@ -1031,7 +1036,7 @@ namespace awkward {
     if (identities_.get() != nullptr) {
       if (stop > identities_.get()->length()) {
         util::handle_error(
-          failure("index out of range", kSliceNone, stop),
+          failure("index out of range", kSliceNone, stop, FILENAME_C(__LINE__)),
           identities_.get()->classname(),
           nullptr);
       }
@@ -1258,19 +1263,22 @@ namespace awkward {
   NumpyArray::validityerror(const std::string& path) const {
     if (shape_.empty()) {
       return (std::string("at ") + path + std::string(" (") + classname()
-              + std::string("): shape is zero-dimensional"));
+              + std::string("): shape is zero-dimensional")
+              + FILENAME(__LINE__));
     }
     for (size_t i = 0;  i < shape_.size();  i++) {
       if (shape_[i] < 0) {
         return (std::string("at ") + path + std::string(" (") + classname()
-                + std::string("): shape[") + std::to_string(i) + ("] < 0"));
+                + std::string("): shape[") + std::to_string(i) + ("] < 0")
+                + FILENAME(__LINE__));
       }
     }
     for (size_t i = 0;  i < strides_.size();  i++) {
       if (strides_[i] % itemsize_ != 0) {
         return (std::string("at ") + path + std::string(" (") + classname()
                 + std::string("): shape[") + std::to_string(i)
-                + ("] % itemsize != 0"));
+                + ("] % itemsize != 0")
+                + FILENAME(__LINE__));
       }
     }
     return std::string();
@@ -3960,7 +3968,10 @@ namespace awkward {
                                 int64_t length) const {
     if (ndim() < 2) {
       util::handle_error(
-        failure("too many dimensions in slice", kSliceNone, kSliceNone),
+        failure("too many dimensions in slice",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -3969,7 +3980,7 @@ namespace awkward {
     if (i < 0) i += shape_[1];
     if (i < 0  ||  i >= shape_[1]) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at.at()),
+        failure("index out of range", kSliceNone, at.at(), FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -4008,7 +4019,10 @@ namespace awkward {
                                 int64_t length) const {
     if (ndim() < 2) {
       util::handle_error(
-        failure("too many dimensions in slice", kSliceNone, kSliceNone),
+        failure("too many dimensions in slice",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -4245,7 +4259,10 @@ namespace awkward {
                            bool first) const {
     if (ndim() < 2) {
       util::handle_error(
-        failure("too many dimensions in slice", kSliceNone, kSliceNone),
+        failure("too many dimensions in slice",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -4268,7 +4285,7 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < shape_[1])) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at.at()),
+        failure("index out of range", kSliceNone, at.at(), FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -4314,7 +4331,10 @@ namespace awkward {
                            bool first) const {
     if (ndim() < 2) {
       util::handle_error(
-        failure("too many dimensions in slice", kSliceNone, kSliceNone),
+        failure("too many dimensions in slice",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -4519,7 +4539,10 @@ namespace awkward {
                            bool first) const {
     if (ndim() < 2) {
       util::handle_error(
-        failure("too many dimensions in slice", kSliceNone, kSliceNone),
+        failure("too many dimensions in slice",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }

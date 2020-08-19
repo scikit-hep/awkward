@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/EmptyArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/EmptyArray.cpp", line)
 
 #include <iomanip>
 #include <sstream>
@@ -173,7 +174,8 @@ namespace awkward {
       util::handle_error(
         failure("content and its identities must have the same length",
                 kSliceNone,
-                kSliceNone),
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -278,7 +280,10 @@ namespace awkward {
   const ContentPtr
   EmptyArray::getitem_at(int64_t at) const {
     util::handle_error(
-      failure("index out of range", kSliceNone, at),
+      failure("index out of range",
+              kSliceNone,
+              at,
+              FILENAME_C(__LINE__)),
       classname(),
       identities_.get());
     return ContentPtr(nullptr);  // make Windows compiler happy
@@ -287,7 +292,7 @@ namespace awkward {
   const ContentPtr
   EmptyArray::getitem_at_nowrap(int64_t at) const {
     util::handle_error(
-      failure("index out of range", kSliceNone, at),
+      failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
       classname(),
       identities_.get());
     return ContentPtr(nullptr);  // make Windows compiler happy
@@ -524,7 +529,10 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     util::handle_error(
-      failure("too many dimensions in slice", kSliceNone, kSliceNone),
+      failure("too many dimensions in slice",
+              kSliceNone,
+              kSliceNone,
+              FILENAME_C(__LINE__)),
       classname(),
       identities_.get());
     return ContentPtr(nullptr);  // make Windows compiler happy
@@ -535,7 +543,10 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     util::handle_error(
-      failure("too many dimensions in slice", kSliceNone, kSliceNone),
+      failure("too many dimensions in slice",
+              kSliceNone,
+              kSliceNone,
+              FILENAME_C(__LINE__)),
       classname(),
       identities_.get());
     return ContentPtr(nullptr);  // make Windows compiler happy
@@ -546,7 +557,10 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     util::handle_error(
-      failure("too many dimensions in slice", kSliceNone, kSliceNone),
+      failure("too many dimensions in slice",
+              kSliceNone,
+              kSliceNone,
+              FILENAME_C(__LINE__)),
       classname(),
       identities_.get());
     return ContentPtr(nullptr);  // make Windows compiler happy
