@@ -293,6 +293,13 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  UnionForm::getitem_field(const std::string& key) const {
+    throw std::invalid_argument(
+      "UnionForm breaks the one-to-one relationship "
+      "between fieldindexes and keys");
+  }
+
   ////////// UnionArray
 
   template <>

@@ -2445,6 +2445,9 @@ class VirtualArrayType(ContentType):
                     + awkward1._util.exception_suffix(__file__)
                 )
 
+            elif isinstance(form, awkward1.forms.VirtualForm):
+                return getitem_at(form.form)
+
             else:
                 raise AssertionError(
                     "unrecognized Form type: {0}".format(type(form))

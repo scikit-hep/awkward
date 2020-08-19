@@ -154,6 +154,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  UnmaskedForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// UnmaskedArray
 
   UnmaskedArray::UnmaskedArray(const IdentitiesPtr& identities,

@@ -172,6 +172,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  RegularForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// RegularArray
 
   RegularArray::RegularArray(const IdentitiesPtr& identities,

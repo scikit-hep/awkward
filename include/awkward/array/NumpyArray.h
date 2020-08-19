@@ -99,6 +99,9 @@ namespace awkward {
             bool check_form_key,
             bool compatibility_check) const override;
 
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   private:
     const std::vector<int64_t> inner_shape_;
     int64_t itemsize_;
