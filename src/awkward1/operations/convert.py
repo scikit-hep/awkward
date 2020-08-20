@@ -1521,7 +1521,7 @@ def to_arrow(array):
                 return recurse(layout.broadcast_tooffsets64(layout.compact_offsets64()))
 
         elif isinstance(layout, awkward1.layout.RecordArray):
-            values = [recurse(x[: len(layout)]) for x in layout.contents]
+            values = [recurse(x[:len(layout)]) for x in layout.contents]
 
             min_list_len = min(map(len, values))
 
@@ -1592,17 +1592,29 @@ def to_arrow(array):
             ),
         ):
             index = numpy.asarray(layout.index)
-            dictionary = recurse(layout.content)
-            if mask is None:
-                return pyarrow.DictionaryArray.from_arrays(index, dictionary)
+
+            if layout.parameter("__array__") == "categorical":
+                dictionary = recurse(layout.content)
+                if mask is None:
+                    return pyarrow.DictionaryArray.from_arrays(index, dictionary)
+                else:
+                    bytemask = (
+                        numpy.unpackbits(~mask)
+                        .reshape(-1, 8)[:, ::-1]
+                        .reshape(-1)
+                        .view(np.bool_)
+                    )[: len(index)]
+                    return pyarrow.DictionaryArray.from_arrays(index, dictionary, bytemask)
+
             else:
-                bytemask = (
-                    numpy.unpackbits(~mask)
-                    .reshape(-1, 8)[:, ::-1]
-                    .reshape(-1)
-                    .view(np.bool_)
-                )[: len(index)]
-                return pyarrow.DictionaryArray.from_arrays(index, dictionary, bytemask)
+                if len(layout.content) == 0:
+                    empty = recurse(layout.content)
+                    if mask is None:
+                        return empty
+                    else:
+                        return pyarrow.array([None] * len(index)).cast(empty.type)
+                else:
+                    return recurse(layout.content[index], mask)
 
         elif isinstance(
             layout,
@@ -1721,7 +1733,9 @@ def from_arrow(array, highlevel=True, behavior=None):
                 return awkward1.layout.BitMaskedArray(
                     index.mask,
                     awkward1.layout.IndexedArray32(
-                        awkward1.layout.Index32(index.content), content
+                        awkward1.layout.Index32(index.content),
+                        content,
+                        parameters={"__array__": "categorical"},
                     ),
                     True,
                     length,
@@ -1729,7 +1743,9 @@ def from_arrow(array, highlevel=True, behavior=None):
                 )
             else:
                 return awkward1.layout.IndexedArray32(
-                    awkward1.layout.Index32(index), content
+                    awkward1.layout.Index32(index),
+                    content,
+                    parameters={"__array__": "categorical"},
                 )
 
         elif isinstance(tpe, pyarrow.lib.StructType):

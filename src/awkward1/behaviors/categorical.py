@@ -241,12 +241,13 @@ def to_categorical(array, highlevel=True):
         )):
             if isinstance(layout, awkward1._util.optiontypes):
                 layout = layout.simplify()
-            if isinstance(
-                layout,
-                awkward1._util.indexedoptiontypes + awkward1._util.indexedtypes
-            ):
+
+            if isinstance(layout, awkward1._util.indexedoptiontypes):
                 content = layout.content
                 cls = awkward1.layout.IndexedOptionArray64
+            elif isinstance(layout, awkward1._util.indexedtypes):
+                content = layout.content
+                cls = awkward1.layout.IndexedArray64
             elif isinstance(layout, awkward1._util.optiontypes):
                 content = layout.content
                 cls = awkward1.layout.IndexedOptionArray64

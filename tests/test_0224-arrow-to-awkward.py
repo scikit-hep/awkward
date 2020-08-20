@@ -128,11 +128,28 @@ def test_toarrow_IndexedArray():
     index = awkward1.layout.Index32(
         numpy.array([0, 2, 4, 6, 8, 9, 7, 5], dtype=numpy.int64))
     indexedarray = awkward1.layout.IndexedArray32(index, content)
+    do_this_instead = awkward1.to_categorical(indexedarray, highlevel=False)
 
-    assert isinstance(awkward1.to_arrow(indexedarray),
-                      (pyarrow.DictionaryArray))
+    assert isinstance(awkward1.to_arrow(indexedarray), pyarrow.lib.DoubleArray)
     assert awkward1.to_arrow(indexedarray).to_pylist() == [
         0.0, 2.2, 4.4, 6.6, 8.8, 9.9, 7.7, 5.5]
+
+    assert isinstance(awkward1.to_arrow(do_this_instead), pyarrow.DictionaryArray)
+    assert awkward1.to_arrow(do_this_instead).to_pylist() == [
+        0.0, 2.2, 4.4, 6.6, 8.8, 9.9, 7.7, 5.5]
+
+def test_toarrow_IndexedOptionArray_2():
+    array = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5, None])
+
+    assert awkward1.to_arrow(array).to_pylist() == [1.1, 2.2, 3.3, 4.4, 5.5, None]
+    assert awkward1.to_arrow(array[:-1]).to_pylist() == [1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.to_arrow(array[:1]).to_pylist() == [1.1]
+    assert awkward1.to_arrow(array[:0]).to_pylist() == []
+
+    content = awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.float64))
+    index = awkward1.layout.Index32(numpy.array([-1, -1, -1, -1], dtype=numpy.int32))
+    indexedoptionarray = awkward1.layout.IndexedOptionArray32(index, content)
+    assert awkward1.to_arrow(indexedoptionarray).to_pylist() == [None, None, None, None]
 
 def test_toarrow_ByteMaskedArray_2():
     content = awkward1.layout.NumpyArray(
