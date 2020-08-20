@@ -243,8 +243,8 @@ def to_categorical(array, highlevel=True):
                     mapping[i] = lookup[x]
                 else:
                     is_first[i] = True
-                    lookup[x] = i
-                    mapping[i] = i
+                    lookup[x] = j = len(lookup)
+                    mapping[i] = j
 
             if isinstance(layout, awkward1._util.indexedoptiontypes):
                 original_index = awkward1.nplike.numpy.asarray(layout.index)

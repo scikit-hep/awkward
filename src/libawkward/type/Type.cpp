@@ -44,7 +44,12 @@ namespace awkward {
 
   void
   Type::setparameter(const std::string& key, const std::string& value) {
-    parameters_[key] = value;
+    if (value == std::string("null")) {
+      parameters_.erase(key);
+    }
+    else {
+      parameters_[key] = value;
+    }
   }
 
   bool
@@ -95,17 +100,42 @@ namespace awkward {
     }
   }
 
+  bool
+  Type::parameters_empty() const {
+    if (parameters_.empty()) {
+      return true;
+    }
+    else if (parameters_.size() == 1  &&  parameter_equals("__categorical__", "true")) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  std::string
+  Type::wrap_categorical(const std::string& output) const {
+    if (parameter_equals("__categorical__", "true")) {
+      return std::string("categorical[type=") + output + std::string("]");
+    }
+    else {
+      return output;
+    }
+  }
+
   const std::string
   Type::string_parameters() const {
     std::stringstream out;
     out << "parameters={";
     bool first = true;
     for (auto pair : parameters_) {
-      if (!first) {
-        out << ", ";
+      if (pair.first != std::string("__categorical__")) {
+        if (!first) {
+          out << ", ";
+        }
+        out << util::quote(pair.first, true) << ": " << pair.second;
+        first = false;
       }
-      out << util::quote(pair.first, true) << ": " << pair.second;
-      first = false;
     }
     out << "}";
     return out.str();

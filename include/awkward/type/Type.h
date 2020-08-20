@@ -200,6 +200,16 @@ namespace awkward {
     bool
       get_typestr(std::string& output) const;
 
+    /// @brief Internal function to determine if there are no parameters
+    /// *except* `__categorical__`.
+    bool
+      parameters_empty() const;
+
+    /// @brief Internal function that wraps `output` with `categorical[type=`
+    /// and `]` if `__categorical__` is `true`; passes through otherwise.
+    std::string
+      wrap_categorical(const std::string& output) const;
+
     /// @brief Internal function to format parameters as part of the #tostring
     /// string.
     const std::string

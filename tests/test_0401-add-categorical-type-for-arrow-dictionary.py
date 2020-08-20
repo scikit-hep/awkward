@@ -179,3 +179,10 @@ def test_to_categorical_masked():
     not_categorical = awkward1.from_categorical(categorical)
     assert not awkward1.is_categorical(not_categorical)
     assert awkward1.categories(categorical).tolist() == ["one", "two", "three"]
+
+
+def test_typestr():
+    assert str(awkward1.type(awkward1.to_categorical(awkward1.Array([1.1, 2.2, 2.2, 3.3])))) == "4 * categorical[type=float64]"
+    assert str(awkward1.type(awkward1.to_categorical(awkward1.Array([1.1, 2.2, None, 2.2, 3.3])))) == "5 * categorical[type=?float64]"
+    assert str(awkward1.type(awkward1.to_categorical(awkward1.Array(["one", "two", "two", "three"])))) == "4 * categorical[type=string]"
+    assert str(awkward1.type(awkward1.to_categorical(awkward1.Array(["one", "two", None, "two", "three"])))) == "5 * categorical[type=option[string]]"
