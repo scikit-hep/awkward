@@ -165,7 +165,7 @@ def categories(array, highlevel=True):
     elif highlevel:
         return awkward1._util.wrap(output[0], awkward1._util.behaviorof(array))
     else:
-        return out
+        return output[0]
 
 
 def to_categorical(array, highlevel=True):
