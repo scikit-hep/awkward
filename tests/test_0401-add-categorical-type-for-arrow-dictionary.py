@@ -182,7 +182,16 @@ def test_to_categorical_masked():
 
 
 def test_typestr():
-    assert str(awkward1.type(awkward1.to_categorical(awkward1.Array([1.1, 2.2, 2.2, 3.3])))) == "4 * categorical[type=float64]"
-    assert str(awkward1.type(awkward1.to_categorical(awkward1.Array([1.1, 2.2, None, 2.2, 3.3])))) == "5 * categorical[type=?float64]"
-    assert str(awkward1.type(awkward1.to_categorical(awkward1.Array(["one", "two", "two", "three"])))) == "4 * categorical[type=string]"
-    assert str(awkward1.type(awkward1.to_categorical(awkward1.Array(["one", "two", None, "two", "three"])))) == "5 * categorical[type=option[string]]"
+    if not awkward1._util.py27:
+        assert str(awkward1.type(awkward1.to_categorical(awkward1.Array([1.1, 2.2, 2.2, 3.3])))) == "4 * categorical[type=float64]"
+        assert str(awkward1.type(awkward1.to_categorical(awkward1.Array([1.1, 2.2, None, 2.2, 3.3])))) == "5 * categorical[type=?float64]"
+        assert str(awkward1.type(awkward1.to_categorical(awkward1.Array(["one", "two", "two", "three"])))) == "4 * categorical[type=string]"
+        assert str(awkward1.type(awkward1.to_categorical(awkward1.Array(["one", "two", None, "two", "three"])))) == "5 * categorical[type=option[string]]"
+
+
+def test_zip():
+    x = awkward1.Array([1.1, 2.2, 3.3])
+    y = awkward1.Array(["one", "two", "three"])
+    assert awkward1.zip({"x": x, "y": y}).tolist() == [{"x": 1.1, "y": "one"}, {"x": 2.2, "y": "two"}, {"x": 3.3, "y": "three"}]
+    y = awkward1.to_categorical(y)
+    assert awkward1.zip({"x": x, "y": y}).tolist() == [{"x": 1.1, "y": "one"}, {"x": 2.2, "y": "two"}, {"x": 3.3, "y": "three"}]

@@ -328,8 +328,12 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
         parameters["__record__"] = with_name
 
     def getfunction(inputs, depth):
-        if (depth_limit is None and all(x.purelist_depth == 1 for x in inputs)) or (
-            depth_limit == depth
+        if depth_limit == depth or (
+            depth_limit is None and
+            all(x.purelist_depth == 1 or (
+                x.purelist_depth == 2 and
+                x.purelist_parameter("__array__") in ("string", "bytestring", "categorical")
+            ) for x in inputs)
         ):
             return lambda: (
                 awkward1.layout.RecordArray(

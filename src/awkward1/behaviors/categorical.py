@@ -188,6 +188,21 @@ def to_categorical(array, highlevel=True):
     Arrays by the guarantee of no duplicate categories and the `"categorical"`
     parameter.
 
+        >>> array = ak.Array([["one", "two", "three"], [], ["three", "two"]])
+        >>> categorical = ak.to_categorical(array)
+        >>> categorical
+        <Array [['one', 'two', ... 'three', 'two']] type='3 * var * categorical[type=str...'>
+        >>> ak.type(categorical)
+        3 * var * categorical[type=string]
+        >>> ak.to_list(categorical) == ak.to_list(array)
+        True
+        >>> ak.categories(categorical)
+        <Array ['one', 'two', 'three'] type='3 * string'>
+        >>> ak.is_categorical(categorical)
+        True
+        >>> ak.from_categorical(categorical)
+        <Array [['one', 'two', ... 'three', 'two']] type='3 * var * string'>
+
     This function descends through nested lists, but not into the fields of
     records, so records can be categories. To make categorical record
     fields, split up the record, apply this function to each desired field,
@@ -200,10 +215,18 @@ def to_categorical(array, highlevel=True):
         ...     {"x": 2.2, "y": "two"},
         ...     {"x": 1.1, "y": "one"}
         ... ])
+        >>> records
+        <Array [{x: 1.1, y: 'one'}, ... y: 'one'}] type='5 * {"x": float64, "y": string}'>
         >>> categorical_records = ak.zip({
         ...     "x": ak.to_categorical(records["x"]),
         ...     "y": ak.to_categorical(records["y"]),
         ... })
+        >>> categorical_records
+        <Array [{x: 1.1, y: 'one'}, ... y: 'one'}] type='5 * {"x": categorical[type=floa...'>
+        >>> ak.type(categorical_records)
+        5 * {"x": categorical[type=float64], "y": categorical[type=string]}
+        >>> ak.to_list(categorical_records) == ak.to_list(records)
+        True
 
     The check for uniqueness is currently implemented in a Python loop, so
     conversion to categorical should be regarded as expensive. (This can
