@@ -1521,7 +1521,7 @@ def to_arrow(array):
                 return recurse(layout.broadcast_tooffsets64(layout.compact_offsets64()))
 
         elif isinstance(layout, awkward1.layout.RecordArray):
-            values = [recurse(x[: len(layout)]) for x in layout.contents]
+            values = [recurse(x[:len(layout)]) for x in layout.contents]
 
             min_list_len = min(map(len, values))
 
@@ -1592,17 +1592,29 @@ def to_arrow(array):
             ),
         ):
             index = numpy.asarray(layout.index)
-            dictionary = recurse(layout.content)
-            if mask is None:
-                return pyarrow.DictionaryArray.from_arrays(index, dictionary)
+
+            if layout.parameter("__array__") == "categorical":
+                dictionary = recurse(layout.content)
+                if mask is None:
+                    return pyarrow.DictionaryArray.from_arrays(index, dictionary)
+                else:
+                    bytemask = (
+                        numpy.unpackbits(~mask)
+                        .reshape(-1, 8)[:, ::-1]
+                        .reshape(-1)
+                        .view(np.bool_)
+                    )[: len(index)]
+                    return pyarrow.DictionaryArray.from_arrays(index, dictionary, bytemask)
+
             else:
-                bytemask = (
-                    numpy.unpackbits(~mask)
-                    .reshape(-1, 8)[:, ::-1]
-                    .reshape(-1)
-                    .view(np.bool_)
-                )[: len(index)]
-                return pyarrow.DictionaryArray.from_arrays(index, dictionary, bytemask)
+                if len(layout.content) == 0:
+                    empty = recurse(layout.content)
+                    if mask is None:
+                        return empty
+                    else:
+                        return pyarrow.array([None] * len(index)).cast(empty.type)
+                else:
+                    return recurse(layout.content[index], mask)
 
         elif isinstance(
             layout,
@@ -1716,10 +1728,14 @@ def from_arrow(array, highlevel=True, behavior=None):
                 )
 
             if isinstance(index, awkward1.layout.BitMaskedArray):
+                if isinstance(content, awkward1.layout.UnmaskedArray):
+                    content = content.content
                 return awkward1.layout.BitMaskedArray(
                     index.mask,
                     awkward1.layout.IndexedArray32(
-                        awkward1.layout.Index32(index.content), content
+                        awkward1.layout.Index32(index.content),
+                        content,
+                        parameters={"__array__": "categorical"},
                     ),
                     True,
                     length,
@@ -1727,7 +1743,9 @@ def from_arrow(array, highlevel=True, behavior=None):
                 )
             else:
                 return awkward1.layout.IndexedArray32(
-                    awkward1.layout.Index32(index), content
+                    awkward1.layout.Index32(index),
+                    content,
+                    parameters={"__array__": "categorical"},
                 )
 
         elif isinstance(tpe, pyarrow.lib.StructType):
@@ -1753,7 +1771,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 )
                 return awkward1.layout.BitMaskedArray(mask, out, True, length, True)
             else:
-                return out
+                return awkward1.layout.UnmaskedArray(out)
 
         elif isinstance(tpe, pyarrow.lib.ListType):
             assert tpe.num_buffers == 2
@@ -1775,7 +1793,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 )
                 return awkward1.layout.BitMaskedArray(mask, out, True, length, True)
             else:
-                return out
+                return awkward1.layout.UnmaskedArray(out)
 
         elif isinstance(tpe, pyarrow.lib.LargeListType):
             assert tpe.num_buffers == 2
@@ -1797,7 +1815,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 )
                 return awkward1.layout.BitMaskedArray(mask, out, True, length, True)
             else:
-                return out
+                return awkward1.layout.UnmaskedArray(out)
 
         elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "sparse":
             assert tpe.num_buffers == 2
@@ -1829,7 +1847,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 )
                 return awkward1.layout.BitMaskedArray(mask, out, True, length, True)
             else:
-                return out
+                return awkward1.layout.UnmaskedArray(out)
 
         elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "dense":
             assert tpe.num_buffers == 3
@@ -1860,7 +1878,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 )
                 return awkward1.layout.BitMaskedArray(mask, out, True, length, True)
             else:
-                return out
+                return awkward1.layout.UnmaskedArray(out)
 
         elif tpe == pyarrow.string():
             assert tpe.num_buffers == 3
@@ -1878,7 +1896,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             awk_arr.setparameter("__array__", "string")
 
             if mask is None:
-                return awk_arr
+                return awkward1.layout.UnmaskedArray(awk_arr)
             else:
                 awk_mask = awkward1.layout.IndexU8(
                     numpy.frombuffer(mask, dtype=np.uint8)
@@ -1903,7 +1921,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             awk_arr.setparameter("__array__", "string")
 
             if mask is None:
-                return awk_arr
+                return awkward1.layout.UnmaskedArray(awk_arr)
             else:
                 awk_mask = awkward1.layout.IndexU8(
                     numpy.frombuffer(mask, dtype=np.uint8)
@@ -1928,7 +1946,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             awk_arr.setparameter("__array__", "bytestring")
 
             if mask is None:
-                return awk_arr
+                return awkward1.layout.UnmaskedArray(awk_arr)
             else:
                 awk_mask = awkward1.layout.IndexU8(
                     numpy.frombuffer(mask, dtype=np.uint8)
@@ -1953,7 +1971,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             awk_arr.setparameter("__array__", "bytestring")
 
             if mask is None:
-                return awk_arr
+                return awkward1.layout.UnmaskedArray(awk_arr)
             else:
                 awk_mask = awkward1.layout.IndexU8(
                     numpy.frombuffer(mask, dtype=np.uint8)
@@ -1976,7 +1994,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 mask = numpy.frombuffer(mask, dtype=np.uint8)
                 return awkward1.layout.BitMaskedArray(awk_mask, out, True, length, True)
             else:
-                return out
+                return awkward1.layout.UnmaskedArray(out)
 
         elif isinstance(tpe, pyarrow.lib.DataType):
             assert tpe.num_buffers == 2
@@ -1990,7 +2008,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 )
                 return awkward1.layout.BitMaskedArray(mask, out, True, length, True)
             else:
-                return out
+                return awkward1.layout.UnmaskedArray(out)
 
         else:
             raise TypeError(
@@ -3671,5 +3689,16 @@ __all__ = [
     x
     for x in list(globals())
     if not x.startswith("_")
-    and x not in ("numbers", "json", "Iterable", "numpy", "np", "awkward1")
+    and x not in (
+        "absolute_import",
+        "numbers",
+        "json",
+        "collections",
+        "math",
+        "threading",
+        "Iterable",
+        "numpy",
+        "np",
+        "awkward1",
+    )
 ]

@@ -56,7 +56,23 @@ namespace awkward {
   const TypePtr
   IndexedForm::type(const util::TypeStrs& typestrs) const {
     TypePtr out = content_.get()->type(typestrs);
-    out.get()->setparameters(parameters_);
+    if (out.get()->parameters().empty()  &&  !parameters_.empty()) {
+      out.get()->setparameters(parameters_);
+      if (parameter_equals("__array__", "\"categorical\"")) {
+        out.get()->setparameter("__array__", "null");
+        out.get()->setparameter("__categorical__", "true");
+      }
+    }
+    else if (!out.get()->parameters().empty()  &&  !parameters_.empty()) {
+      for (auto p : parameters_) {
+        if (p.first != std::string("__array__")) {
+          out.get()->setparameter(p.first, p.second);
+        }
+      }
+      if (parameter_equals("__array__", "\"categorical\"")) {
+        out.get()->setparameter("__categorical__", "true");
+      }
+    }
     return out;
   }
 
@@ -210,10 +226,15 @@ namespace awkward {
 
   const TypePtr
   IndexedOptionForm::type(const util::TypeStrs& typestrs) const {
-    return std::make_shared<OptionType>(
-               parameters_,
-               util::gettypestr(parameters_, typestrs),
-               content_.get()->type(typestrs));
+    TypePtr out = std::make_shared<OptionType>(
+                    parameters_,
+                    util::gettypestr(parameters_, typestrs),
+                    content_.get()->type(typestrs));
+    if (out.get()->parameter_equals("__array__", "\"categorical\"")) {
+      out.get()->setparameter("__array__", "null");
+      out.get()->setparameter("__categorical__", "true");
+    }
+    return out;
   }
 
   void

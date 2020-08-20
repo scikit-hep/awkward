@@ -242,14 +242,15 @@ def dofunction(link, shortname, name, astfcn):
 
 done_extra = False
 for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
-                       key=lambda x: x.replace("/__init__.py",  "!")
-                                      .replace("/highlevel",    "#")
-                                      .replace("/operations",   "$")
+                       key=lambda x: x.replace("/__init__.py",    "!")
+                                      .replace("/highlevel",      "#")
+                                      .replace("/operations",     "$")
 
-                                      .replace("/describe.py",  "#")
-                                      .replace("/convert.py",   "$")
-                                      .replace("/structure.py", "%")
-                                      .replace("/reducers.py",  "&")
+                                      .replace("/describe.py",    "#")
+                                      .replace("/convert.py",     "$")
+                                      .replace("/structure.py",   "%")
+                                      .replace("/reducers.py",    "&")
+                                      .replace("/categorical.py", "'")
 
                                       .replace("/_", "/~")):
 
@@ -263,7 +264,11 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                            .replace(".operations.convert", "")
                            .replace(".operations.describe", "")
                            .replace(".operations.structure", "")
-                           .replace(".operations.reducers", ""))
+                           .replace(".operations.reducers", "")
+                           .replace(".operations.transfers", "")
+                           .replace(".behaviors.mixins", "")
+                           .replace(".behaviors.categorical", "")
+                           .replace(".behaviors.string", ""))
 
     if modulename == "awkward1.operations.describe":
         toctree.append("ak.behavior.rst")

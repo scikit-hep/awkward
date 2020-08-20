@@ -262,5 +262,11 @@ def keys(array):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_") and x not in ("numbers", "numpy", "np", "awkward1")
+    if not x.startswith("_") and x not in (
+        "absolute_import",
+        "numbers",
+        "numpy",
+        "np",
+        "awkward1",
+    )
 ]
