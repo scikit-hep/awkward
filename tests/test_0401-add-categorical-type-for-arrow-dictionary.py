@@ -195,3 +195,12 @@ def test_zip():
     assert awkward1.zip({"x": x, "y": y}).tolist() == [{"x": 1.1, "y": "one"}, {"x": 2.2, "y": "two"}, {"x": 3.3, "y": "three"}]
     y = awkward1.to_categorical(y)
     assert awkward1.zip({"x": x, "y": y}).tolist() == [{"x": 1.1, "y": "one"}, {"x": 2.2, "y": "two"}, {"x": 3.3, "y": "three"}]
+
+
+pyarrow = pytest.importorskip("pyarrow")
+
+
+def test_arrow_nomask():
+    array = awkward1.Array([1.1, 2.2, 3.3, 4.4, None])
+    assert str(awkward1.type(awkward1.from_arrow(awkward1.to_arrow(array)))) == "5 * ?float64"
+    assert str(awkward1.type(awkward1.from_arrow(awkward1.to_arrow(array[:-1])))) == "4 * ?float64"
