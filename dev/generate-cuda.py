@@ -24,7 +24,6 @@ KERNEL_WHITELIST = [
     "awkward_IndexedArray_fill_count",
     "awkward_UnionArray_fillna",
     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
-    "awkward_index_rpad_and_clip_axis0",
     "awkward_index_rpad_and_clip_axis1",
     "awkward_ListArray_min_range",
     "awkward_ListArray_rpad_and_clip_length_axis1",
@@ -40,14 +39,10 @@ KERNEL_WHITELIST = [
     "awkward_IndexU32_to_Index64",
     "awkward_carry_arange",
     "awkward_NumpyArray_getitem_next_at",
-    "awkward_NumpyArray_getitem_boolean_numtrue",
-    "awkward_NumpyArray_getitem_boolean_nonzero",
     "awkward_ListArray_getitem_next_range_counts",
     "awkward_IndexedArray_numnull",
     "awkward_UnionArray_regular_index_getsize",
     "awkward_ListArray_getitem_jagged_carrylen",
-    "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
-    "awkward_MaskedArray_getitem_next_jagged_project",
 ]
 
 
@@ -387,8 +382,9 @@ def traverse(node, args={}, forflag=False, declared=[]):
 def getbody(pycode, args):
     code = ""
     tree = ast.parse(pycode).body[0]
+    declared = []
     for node in tree.body:
-        code += traverse(node, args)
+        code += traverse(node, args, False, declared)
     return code
 
 
