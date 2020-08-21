@@ -302,6 +302,292 @@ def to_numpy(array, allow_missing=True):
     else:
         raise ValueError("cannot convert {0} into np.ndarray".format(array))
 
+def from_cupy(
+    array,
+    regulararray=False,
+    recordarray=True,
+    highlevel=True,
+    behavior=None
+):
+    """
+    Args:
+        array (np.ndarray): The NumPy array to convert into an Awkward Array.
+            This array can be a np.ma.MaskedArray.
+        regulararray (bool): If True and the array is multidimensional,
+            the dimensions are represented by nested #ak.layout.RegularArray
+            nodes; if False and the array is multidimensional, the dimensions
+            are represented by a multivalued #ak.layout.NumpyArray.shape.
+            If the array is one-dimensional, this has no effect.
+        recordarray (bool): If True and the array is a NumPy structured array
+            (dtype.names is not None), the fields are represented by an
+            #ak.layout.RecordArray; if False and the array is a structured
+            array, the structure is left in the #ak.layout.NumpyArray `format`,
+            which some functions do not recognize.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Converts a NumPy array into an Awkward Array.
+
+    The resulting layout may involve the following #ak.layout.Content types
+    (only):
+
+       * #ak.layout.NumpyArray
+       * #ak.layout.ByteMaskedArray or #ak.layout.UnmaskedArray if the
+         `array` is an np.ma.MaskedArray.
+       * #ak.layout.RegularArray if `regulararray=True`.
+
+    See also #ak.to_cupy.
+    """
+    cupy = awkward1.nplike.Cupy.instance()
+    def recurse(array, mask):
+        if regulararray and len(array.shape) > 1:
+            return awkward1.layout.RegularArray(
+                recurse(array.reshape((-1,) + array.shape[2:]), mask), array.shape[1]
+            )
+
+        if len(array.shape) == 0:
+            data = awkward1.layout.NumpyArray.from_cupy(array.reshape(1))
+        else:
+            data = awkward1.layout.NumpyArray.from_cupy(array)
+
+        if mask is None:
+            return data
+        elif mask is False or (isinstance(mask, np.bool_) and not mask):
+            # NumPy's MaskedArray with mask == False is an UnmaskedArray
+            if len(array.shape) == 1:
+                return awkward1.layout.UnmaskedArray(data)
+            else:
+                def attach(x):
+                    if isinstance(x, awkward1.layout.NumpyArray):
+                        return awkward1.layout.UnmaskedArray(x)
+                    else:
+                        return awkward1.layout.RegularArray(
+                            attach(x.content), x.size
+                        )
+                return attach(data.toRegularArray())
+        else:
+            # NumPy's MaskedArray is a ByteMaskedArray with valid_when=False
+            return awkward1.layout.ByteMaskedArray(
+                awkward1.layout.Index8.from_cupy(mask), data, valid_when=False
+            )
+
+    # if isinstance(array, cupy.ma.MaskedArray):
+    #     mask = cupy.ma.getmask(array)
+    #     array = cupy.ma.getdata(array)
+    #     if isinstance(mask, np.ndarray) and len(mask.shape) > 1:
+    #         regulararray = True
+    #         mask = mask.reshape(-1)
+    # else:
+    mask = None
+
+    if not recordarray or array.dtype.names is None:
+        layout = recurse(array, mask)
+    else:
+        contents = []
+        for name in array.dtype.names:
+            contents.append(recurse(array[name], mask))
+        layout = awkward1.layout.RecordArray(contents, array.dtype.names)
+
+    if highlevel:
+        return awkward1._util.wrap(layout, behavior)
+    else:
+        return layout
+
+
+def to_cupy(array, allow_missing=True):
+    """
+    Converts `array` (many types supported, including all Awkward Arrays and
+    Records) into a CuPy array, if possible.
+
+    If the data are numerical and regular (nested lists have equal lengths
+    in each dimension, as described by the #type), they can be losslessly
+    converted to a NumPy array and this function returns without an error.
+
+    Otherwise, the function raises an error. It does not create a NumPy
+    array with dtype `"O"` for `np.object_` (see the
+    [note on object_ type](https://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#arrays-scalars-built-in))
+    since silent conversions to dtype `"O"` arrays would not only be a
+    significant performance hit, but would also break functionality, since
+    nested lists in a NumPy `"O"` array are severed from the array and
+    cannot be sliced as dimensions.
+
+    If `array` is a scalar, it is converted into a NumPy scalar.
+
+    If `allow_missing` is True; NumPy
+    [masked arrays](https://docs.scipy.org/doc/numpy/reference/maskedarray.html)
+    are a possible result; otherwise, missing values (None) cause this
+    function to raise an error.
+
+    See also #ak.from_numpy.
+    """
+    import awkward1.highlevel
+
+    consistency_check = awkward1.nplike.of(array)
+    cupy = awkward1.nplike.Cupy.instance()
+    cp = awkward1.nplike.NumpyMetadata.instance()
+
+    # if not isinstance(consistency_check, awkward1.nplike.Cupy):
+    #     raise ValueError("Make sure the arrays have their kernels set to cuda, try awkward1.copy_to(\"cuda\")")
+
+    if isinstance(array, (bool, str, bytes, numbers.Number)):
+        return cupy.array([array])[0]
+
+    elif awkward1._util.py27 and isinstance(array, awkward1._util.unicode):
+        return cupy.array([array])[0]
+
+    elif isinstance(array, cp.ndarray):
+        return array
+
+    elif isinstance(array, awkward1.highlevel.Array):
+        return to_cupy(array.layout, allow_missing=allow_missing)
+
+    elif isinstance(array, awkward1.highlevel.Record):
+        out = array.layout
+        return to_cupy(out.array[out.at : out.at + 1], allow_missing=allow_missing)[0]
+
+    elif isinstance(array, awkward1.highlevel.ArrayBuilder):
+        return to_cupy(array.snapshot().layout, allow_missing=allow_missing)
+
+    elif isinstance(array, awkward1.layout.ArrayBuilder):
+        return to_cupy(array.snapshot(), allow_missing=allow_missing)
+
+    elif (
+        awkward1.operations.describe.parameters(array).get("__array__") == "bytestring"
+    ):
+        return cupy.array(
+            [
+                awkward1.behaviors.string.ByteBehavior(array[i]).__bytes__()
+                for i in range(len(array))
+            ]
+        )
+
+    elif awkward1.operations.describe.parameters(array).get("__array__") == "string":
+        return cupy.array(
+            [
+                awkward1.behaviors.string.CharBehavior(array[i]).__str__()
+                for i in range(len(array))
+            ]
+        )
+
+    elif isinstance(array, awkward1.partition.PartitionedArray):
+        tocat = [to_cupy(x, allow_missing=allow_missing) for x in array.partitions]
+        if any(isinstance(x, cupy.ma.MaskedArray) for x in tocat):
+            return cupy.ma.concatenate(tocat)
+        else:
+            return cupy.concatenate(tocat)
+
+    elif isinstance(array, awkward1._util.virtualtypes):
+        return to_cupy(array.array, allow_missing=True)
+
+    elif isinstance(array, awkward1._util.unknowntypes):
+        return cupy.array([])
+
+    elif isinstance(array, awkward1._util.indexedtypes):
+        return to_cupy(array.project(), allow_missing=allow_missing)
+
+    elif isinstance(array, awkward1._util.uniontypes):
+        contents = [
+            to_cupy(array.project(i), allow_missing=allow_missing)
+            for i in range(array.numcontents)
+        ]
+
+        if any(isinstance(x, cupy.ma.MaskedArray) for x in contents):
+            try:
+                out = cupy.ma.concatenate(contents)
+            except Exception:
+                raise ValueError(
+                    "cannot convert {0} into cupy.ma.MaskedArray".format(array)
+                )
+        else:
+            try:
+                out = cupy.concatenate(contents)
+            except Exception:
+                raise ValueError("cannot convert {0} into cp.ndarray".format(array))
+
+        tags = cupy.asarray(array.tags)
+        for tag, content in enumerate(contents):
+            mask = tags == tag
+            out[mask] = content
+        return out
+
+    elif isinstance(array, awkward1.layout.UnmaskedArray):
+        content = to_cupy(array.content, allow_missing=allow_missing)
+        if allow_missing:
+            return cupy.ma.MaskedArray(content)
+        else:
+            return content
+
+    elif isinstance(array, awkward1._util.optiontypes):
+        content = ti_cupy(array.project(), allow_missing=allow_missing)
+
+        shape = list(content.shape)
+        shape[0] = len(array)
+        data = cupy.empty(shape, dtype=content.dtype)
+        mask0 = cupy.asarray(array.bytemask()).view(np.bool_)
+        if mask0.any():
+            if allow_missing:
+                mask = cupy.broadcast_to(
+                    mask0.reshape((shape[0],) + (1,) * (len(shape) - 1)), shape
+                )
+                if isinstance(content, cupy.ma.MaskedArray):
+                    mask1 = cupy.ma.getmaskarray(content)
+                    mask = mask.copy()
+                    mask[~mask0] |= mask1
+
+                data[~mask0] = content
+                return cupy.ma.MaskedArray(data, mask)
+            else:
+                raise ValueError(
+                    "to_cupy cannot convert 'None' values to "
+                    "np.ma.MaskedArray unless the "
+                    "'allow_missing' parameter is set to True"
+                )
+        else:
+            if allow_missing:
+                return cupy.ma.MaskedArray(content)
+            else:
+                return content
+
+    elif isinstance(array, awkward1.layout.RegularArray):
+        out = to_cupy(array.content, allow_missing=allow_missing)
+        head, tail = out.shape[0], out.shape[1:]
+        shape = (head // array.size, array.size) + tail
+        return out[: shape[0] * array.size].reshape(shape)
+
+    elif isinstance(array, awkward1._util.listtypes):
+        return to_cupy(array.toRegularArray(), allow_missing=allow_missing)
+
+    elif isinstance(array, awkward1._util.recordtypes):
+        if array.numfields == 0:
+            return cupy.empty(len(array), dtype=[])
+        contents = [
+            to_cupy(array.field(i), allow_missing=allow_missing)
+            for i in range(array.numfields)
+        ]
+        if any(len(x.shape) != 1 for x in contents):
+            raise ValueError("cannot convert {0} into np.ndarray".format(array))
+        out = cupy.empty(
+            len(contents[0]),
+            dtype=[(str(n), x.dtype) for n, x in zip(array.keys(), contents)],
+        )
+        for n, x in zip(array.keys(), contents):
+            out[n] = x
+        return out
+
+    elif isinstance(array, awkward1.layout.NumpyArray):
+        return cupy.asarray(array)
+
+    elif isinstance(array, awkward1.layout.Content):
+        raise AssertionError("unrecognized Content type: {0}".format(type(array)))
+
+    elif isinstance(array, Iterable):
+        return cupy.asarray(array)
+
+    else:
+        raise ValueError("cannot convert {0} into cp.ndarray".format(array))
+
 
 def from_iter(
     iterable, highlevel=True, behavior=None, allow_record=True, initial=1024, resize=1.5
@@ -433,7 +719,7 @@ def to_list(array):
         return [to_list(x) for x in array.snapshot()]
 
     elif isinstance(array, awkward1.layout.NumpyArray):
-        return numpy.asarray(array).tolist()
+        return awkward1.nplike.of(array).asarray(array).tolist()
 
     elif isinstance(
         array, (awkward1.layout.Content, awkward1.partition.PartitionedArray)

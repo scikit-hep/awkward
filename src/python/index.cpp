@@ -41,7 +41,18 @@ make_IndexOf(const py::handle& m, const std::string& name) {
           0,
           (int64_t)info.shape[0]);
       }))
-
+      
+      .def_property_readonly("ptr_lib", [](const ak::IndexOf<T>& self) {
+        if(self.ptr_lib() == ak::kernel::lib::cpu) {
+          return py::cast("cpu");
+        }
+        else if(self.ptr_lib() == ak::kernel::lib::cuda) {
+          return py::cast("cuda");
+        }
+        else {
+          return py::cast("None");
+        }
+      })
       .def("__repr__", &ak::IndexOf<T>::tostring)
       .def("__len__", &ak::IndexOf<T>::length)
       .def("__getitem__", [](const ak::IndexOf<T>& self, py::object& obj) {

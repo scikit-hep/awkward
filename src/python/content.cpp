@@ -1741,6 +1741,18 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
       .def_property_readonly("isscalar", &ak::NumpyArray::isscalar)
       .def_property_readonly("isempty", &ak::NumpyArray::isempty)
       .def("toRegularArray", &ak::NumpyArray::toRegularArray)
+      
+      .def_property_readonly("ptr_lib", [](const ak::NumpyArray& self) {
+        if(self.ptr_lib() == ak::kernel::lib::cpu) {
+          return py::cast("cpu");
+        }
+        else if(self.ptr_lib() == ak::kernel::lib::cuda) {
+          return py::cast("cuda");
+        }
+        else {
+          return py::cast("None");
+        }
+      })
 
       .def_property_readonly("iscontiguous", &ak::NumpyArray::iscontiguous)
       .def("contiguous", &ak::NumpyArray::contiguous)

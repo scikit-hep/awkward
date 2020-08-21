@@ -3,11 +3,129 @@
 from __future__ import absolute_import
 
 import numpy
+import itertools
 
+import awkward1.layout
+
+def flatten(ptr_lib_list):
+    return itertools.chain.from_iterable(itertools.repeat(x,1) if isinstance(x,str) else x for x in ptr_lib_list)
+
+
+def fetch_ptr_libs(array):
+    def recurse(array):
+        import awkward1.highlevel
+
+        if isinstance(array, awkward1.highlevel.Array):
+            return recurse(array.layout)
+
+        elif isinstance(array, awkward1.layout.NumpyArray):
+            return [array.ptr_lib]
+
+        elif isinstance(array, (awkward1.layout.Index8,
+                                awkward1.layout.IndexU8,
+                                awkward1.layout.Index32,
+                                awkward1.layout.IndexU32,
+                                awkward1.layout.Index64)):
+            return [array.ptr_lib]
+
+        elif isinstance(array, awkward1.layout.Record):
+            out = array
+            return recurse(out.array[out.at : out.at + 1])[0]
+
+        elif isinstance(array, awkward1.layout.VirtualArray):
+            return recurse(array.array)
+
+        elif isinstance(array, awkward1.layout.EmptyArray):
+            return ["None"]
+
+        elif isinstance(array, (awkward1.layout.IndexedArray32,
+                                awkward1.layout.IndexedArrayU32,
+                                awkward1.layout.IndexedArray64)):
+            index = [recurse(array.index)]
+            dictionary = recurse(array.content)
+
+            return list(flatten(index + dictionary))
+        
+        elif isinstance(array, (awkward1.layout.IndexedOptionArray32,
+                                awkward1.layout.IndexedOptionArray64)):
+            index = recurse(array.index)
+            dictionary = recurse(array.content)
+
+            return list(flatten(index + dictionary))
+
+        elif isinstance(array, (awkward1.layout.UnionArray8_32,
+                                awkward1.layout.UnionArray8_U32,
+                                awkward1.layout.UnionArray8_64)):
+            contents = [
+                recurse(array.project(i))
+                for i in range(array.numcontents)
+            ]
+
+            tags = recurse(array.tags)
+            return contents + tags
+
+        elif isinstance(array, (awkward1.layout.ListOffsetArray32,
+                                awkward1.layout.ListOffsetArrayU32,
+                                awkward1.layout.ListOffsetArray64)):
+            offsets = recurse(array.offsets)
+            content = recurse(array.content)
+
+            return list(flatten(offsets + content))
+        
+        elif isinstance(array, (awkward1.layout.ListArray32,
+                                awkward1.layout.ListArrayU32,
+                                awkward1.layout.ListArray64)):
+            return recurse(array.broadcast_tooffsets64(array.compact_offsets64()))
+
+        elif isinstance(array, awkward1.layout.RegularArray):
+            return recurse(array.broadcast_tooffsets64(array.compact_offsets64()))
+
+        elif isinstance(array, awkward1.layout.RecordArray):
+            if array.numfields == 0:
+                return []
+            return [
+                recurse(array.field(i))
+                for i in range(array.numfields)
+            ]
+        
+        elif isinstance(array, awkward1.layout.BitMaskedArray):
+            bitmask = recurse(array.mask)
+            content = recurse(array.content)
+            return bitmask.append(content)
+        
+        elif isinstance(array, awkward1.layout.ByteMaskedArray):
+            bytemask = recurse(array.mask)
+            content = recurse(array.content)
+            return bytemask.append(content)
+        
+        elif isinstance(array, awkward1.layout.UnmaskedArray):
+            return recurse(array.content)
+
+        else:
+            raise TypeError("unrecognized array type: {0}".format(repr(array)))
+    
+    ptr_lib_list = recurse(array)
+    return list(flatten(ptr_lib_list))
 
 def of(*arrays):
-    return Numpy.instance()
+    ptr_lib_list = []
+    for i in arrays:
+        ptr_lib_list = ptr_lib_list + fetch_ptr_libs(i)
 
+    result = False
+    if len(ptr_lib_list) > 0 :
+        result = all(elem == ptr_lib_list[0] for elem in ptr_lib_list)
+
+    ptr_lib = "None"
+    if result == True:
+        ptr_lib =  ptr_lib_list[0]
+
+    if ptr_lib == "cpu":
+        return Numpy.instance()
+    elif ptr_lib == "cuda":
+        return Cupy.instance()
+    else:
+        raise ValueError("Make sure Awkward Arrays use the same kernel use awkward1.copy_to(args) to make it consistent")
 
 class Singleton(object):
     _instance = None
