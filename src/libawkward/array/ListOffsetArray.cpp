@@ -1519,8 +1519,9 @@ namespace awkward {
 
 
 
-      std::cout << "starts    " << starts.tostring() << std::endl;
+      std::cout << "offsets   " << offsets_.tostring() << std::endl;
       std::cout << "parents   " << parents.tostring() << std::endl;
+      std::cout << "starts    " << starts.tostring() << std::endl;
       std::cout << "outstarts " << outstarts.tostring() << std::endl;
 
       Index64 nextmissing(maxnextparents + 1);
@@ -1540,7 +1541,7 @@ namespace awkward {
         }
 
         if (count > maxsofar) {
-          if (maxsofar < maxnextparents + 1) {
+          if (base + maxsofar < maxnextparents + 1) {
             nextmissing.data()[base + maxsofar] += howmany;
           }
           maxsofar = count;
