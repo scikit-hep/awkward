@@ -54,7 +54,7 @@ namespace awkward {
   ///
   ///    - {@link IdentitiesOf Identities32}, which is `IdentitiesOf<int32_t>`
   ///    - {@link IdentitiesOf Identities64}, which is `IdentitiesOf<int64_t>`
-  class EXPORT_SYMBOL Identities {
+  class LIBAWKWARD_EXPORT_SYMBOL Identities {
   public:
     /// @brief Identities reference type (64-bit integer).
     using Ref = int64_t;
@@ -277,7 +277,11 @@ namespace awkward {
   ///    - {@link IdentitiesOf Identities32}, which is `IdentitiesOf<int32_t>`
   ///    - {@link IdentitiesOf Identities64}, which is `IdentitiesOf<int64_t>`
   template <typename T>
-  class EXPORT_SYMBOL IdentitiesOf: public Identities {
+  class
+#ifdef AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE
+  LIBAWKWARD_EXPORT_SYMBOL
+#endif
+  IdentitiesOf: public Identities {
   public:
     /// @brief Creates an IdentitiesOf from a full set of parameters.
     ///
@@ -393,7 +397,7 @@ namespace awkward {
     const kernel::lib ptr_lib_;
   };
 
-#if !defined AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+#ifndef AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE
   extern template class IdentitiesOf<int32_t>;
   extern template class IdentitiesOf<int64_t>;
 #endif

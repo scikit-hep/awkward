@@ -61,6 +61,11 @@ uniontypes = (
     awkward1.layout.UnionArray8_64,
 )
 
+indexedoptiontypes = (
+    awkward1.layout.IndexedOptionArray32,
+    awkward1.layout.IndexedOptionArray64,
+)
+
 optiontypes = (
     awkward1.layout.IndexedOptionArray32,
     awkward1.layout.IndexedOptionArray64,

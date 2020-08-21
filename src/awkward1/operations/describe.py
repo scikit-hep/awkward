@@ -15,8 +15,8 @@ numpy = awkward1.nplike.Numpy.instance()
 def is_valid(array, exception=False):
     """
     Args:
-        array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record,
-            #ak.ArrayBuilder, #ak.layout.ArrayBuilder): Array or record to check.
+        array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record, #ak.ArrayBuilder, #ak.layout.ArrayBuilder):
+            Array or record to check.
         exception (bool): If True, validity errors raise exceptions.
 
     Returns True if there are no errors and False if there is an error.
@@ -34,8 +34,8 @@ def is_valid(array, exception=False):
 def validity_error(array, exception=False):
     """
     Args:
-        array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record,
-            #ak.ArrayBuilder, #ak.layout.ArrayBuilder): Array or record to check.
+        array (#ak.Array, #ak.Record, #ak.layout.Content, #ak.layout.Record, #ak.ArrayBuilder, #ak.layout.ArrayBuilder):
+            Array or record to check.
         exception (bool): If True, validity errors raise exceptions.
 
     Returns None if there are no errors and a str containing the error message
@@ -63,10 +63,7 @@ def validity_error(array, exception=False):
     ):
         out = array.validityerror()
         if out is not None and exception:
-            raise ValueError(
-                out
-                + awkward1._util.exception_suffix(__file__)
-            )
+            raise ValueError(out)
         else:
             return out
 
@@ -265,5 +262,11 @@ def keys(array):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_") and x not in ("numbers", "numpy", "np", "awkward1")
+    if not x.startswith("_") and x not in (
+        "absolute_import",
+        "numbers",
+        "numpy",
+        "np",
+        "awkward1",
+    )
 ]

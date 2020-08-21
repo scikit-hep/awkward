@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/UnionArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/UnionArray.cpp", line)
 
 #include <sstream>
 #include <type_traits>
@@ -293,6 +294,13 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  UnionForm::getitem_field(const std::string& key) const {
+    throw std::invalid_argument(
+      "UnionForm breaks the one-to-one relationship "
+      "between fieldindexes and keys");
+  }
+
   ////////// UnionArray
 
   template <>
@@ -426,7 +434,10 @@ namespace awkward {
     int64_t lentags = tags_.length();
     if (index_.length() < lentags) {
       util::handle_error(
-        failure("len(index) < len(tags)", kSliceNone, kSliceNone),
+        failure("len(index) < len(tags)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -451,7 +462,10 @@ namespace awkward {
     int64_t len = length();
     if (index_.length() < len) {
       util::handle_error(
-        failure("len(index) < len(tags)", kSliceNone, kSliceNone),
+        failure("len(index) < len(tags)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -719,7 +733,10 @@ namespace awkward {
     else {
       if (index_.length() < tags_.length()) {
         util::handle_error(
-          failure("len(index) < len(tags)", kSliceNone, kSliceNone),
+          failure("len(index) < len(tags)",
+                  kSliceNone,
+                  kSliceNone,
+                  FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -727,7 +744,8 @@ namespace awkward {
         util::handle_error(
           failure("content and its identities must have the same length",
                   kSliceNone,
-                  kSliceNone),
+                  kSliceNone,
+                  FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -950,14 +968,20 @@ namespace awkward {
   UnionArrayOf<T, I>::check_for_iteration() const {
     if (index_.length() < tags_.length()) {
       util::handle_error(
-        failure("len(index) < len(tags)", kSliceNone, kSliceNone),
+        failure("len(index) < len(tags)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < index_.length()) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -979,7 +1003,7 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < len)) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -993,14 +1017,20 @@ namespace awkward {
     int64_t index = (int64_t)index_.getitem_at_nowrap(at);
     if (!(0 <= tag  &&  tag < contents_.size())) {
       util::handle_error(
-        failure("not 0 <= tag[i] < numcontents", kSliceNone, at),
+        failure("not 0 <= tag[i] < numcontents",
+                kSliceNone,
+                at,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
     ContentPtr content = contents_[tag];
     if (!(0 <= index  &&  index < content.get()->length())) {
       util::handle_error(
-        failure("index[i] > len(content(tag))", kSliceNone, at),
+        failure("index[i] > len(content(tag))",
+                kSliceNone,
+                at,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -1017,7 +1047,7 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
       util::handle_error(
-        failure("index out of range", kSliceNone, stop),
+        failure("index out of range", kSliceNone, stop, FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -1126,7 +1156,10 @@ namespace awkward {
     int64_t lentags = tags_.length();
     if (index_.length() < lentags) {
       util::handle_error(
-        failure("len(index) < len(tags)", kSliceNone, kSliceNone),
+        failure("len(index) < len(tags)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -1221,6 +1254,11 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   UnionArrayOf<T, I>::validityerror(const std::string& path) const {
+    if (index_.length() < tags_.length()) {
+      return (std::string("at ") + path + std::string(" (") + classname()
+              + std::string("): ") + std::string("len(index) < len(tags)")
+              + FILENAME(__LINE__));
+    }
     std::vector<int64_t> lencontents;
     for (int64_t i = 0;  i < numcontents();  i++) {
       lencontents.push_back(content(i).get()->length());
@@ -1235,7 +1273,8 @@ namespace awkward {
     if (err.str != nullptr) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string(err.str)
-              + std::string(" at i=") + std::to_string(err.identity));
+              + std::string(" at i=") + std::to_string(err.identity)
+              + std::string(err.filename == nullptr ? "" : err.filename));
     }
     for (int64_t i = 0;  i < numcontents();  i++) {
       std::string sub = content(i).get()->validityerror(
@@ -2001,7 +2040,7 @@ namespace awkward {
                                                  tail);
   }
 
-  template class EXPORT_SYMBOL UnionArrayOf<int8_t, int32_t>;
-  template class EXPORT_SYMBOL UnionArrayOf<int8_t, uint32_t>;
-  template class EXPORT_SYMBOL UnionArrayOf<int8_t, int64_t>;
+  template class EXPORT_TEMPLATE_INST UnionArrayOf<int8_t, int32_t>;
+  template class EXPORT_TEMPLATE_INST UnionArrayOf<int8_t, uint32_t>;
+  template class EXPORT_TEMPLATE_INST UnionArrayOf<int8_t, int64_t>;
 }

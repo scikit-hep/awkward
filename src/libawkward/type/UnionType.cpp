@@ -24,7 +24,7 @@ namespace awkward {
                            const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
-      return typestr;
+      return wrap_categorical(typestr);
     }
 
     std::stringstream out;
@@ -35,11 +35,11 @@ namespace awkward {
       }
       out << type(i).get()->tostring_part(indent, "", "");
     }
-    if (!parameters_.empty()) {
+    if (!parameters_empty()) {
       out << ", " << string_parameters();
     }
     out << "]" << post;
-    return out.str();
+    return wrap_categorical(out.str());
   }
 
   const TypePtr

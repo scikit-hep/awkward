@@ -19,17 +19,17 @@ namespace awkward {
                              const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
-      return typestr;
+      return wrap_categorical(typestr);
     }
 
     std::stringstream out;
-    if (parameters_.empty()) {
+    if (parameters_empty()) {
       out << indent << pre << "unknown" << post;
     }
     else {
       out << indent << pre << "unknown[" << string_parameters() << "]" << post;
     }
-    return out.str();
+    return wrap_categorical(out.str());
   }
 
   const TypePtr

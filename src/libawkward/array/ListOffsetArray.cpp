@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/ListOffsetArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/ListOffsetArray.cpp", line)
 
 #include <algorithm>
 #include <numeric>
@@ -187,6 +188,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  ListOffsetForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// ListOffsetArray
 
   template <typename T>
@@ -369,7 +375,8 @@ namespace awkward {
         util::handle_error(failure(
           "content and its identities must have the same length",
           kSliceNone,
-          kSliceNone),
+          kSliceNone,
+          FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
       }
@@ -579,7 +586,7 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < offsets_.length() - 1) {
       util::handle_error(failure(
-        "len(identities) < len(array)", kSliceNone, kSliceNone),
+        "len(identities) < len(array)", kSliceNone, kSliceNone, FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -599,7 +606,10 @@ namespace awkward {
       regular_at += offsets_.length() - 1;
     }
     if (!(0 <= regular_at  &&  regular_at < offsets_.length() - 1)) {
-      util::handle_error(failure("index out of range", kSliceNone, at),
+      util::handle_error(failure("index out of range",
+                                 kSliceNone,
+                                 at,
+                                 FILENAME_C(__LINE__)),
                          classname(),
                          identities_.get());
     }
@@ -617,22 +627,22 @@ namespace awkward {
     }
     if (start < 0) {
       util::handle_error(failure(
-                           "offsets[i] < 0", kSliceNone, at),
-                         classname(),
-                         identities_.get());
+          "offsets[i] < 0", kSliceNone, at, FILENAME_C(__LINE__)),
+        classname(),
+        identities_.get());
     }
     if (start > stop) {
       util::handle_error(failure(
-                           "offsets[i] > offsets[i + 1]", kSliceNone, at),
-                         classname(),
-                         identities_.get());
+          "offsets[i] > offsets[i + 1]", kSliceNone, at, FILENAME_C(__LINE__)),
+        classname(),
+        identities_.get());
     }
     if (stop > lencontent) {
       util::handle_error(failure(
-                           "offsets[i] != offsets[i + 1] and "
-                           "offsets[i + 1] > len(content)", kSliceNone, at),
-                         classname(),
-                         identities_.get());
+          "offsets[i] != offsets[i + 1] and "
+          "offsets[i + 1] > len(content)", kSliceNone, at, FILENAME_C(__LINE__)),
+        classname(),
+        identities_.get());
     }
     return content_.get()->getitem_range_nowrap(start, stop);
   }
@@ -647,7 +657,10 @@ namespace awkward {
       offsets_.length() - 1);
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
-      util::handle_error(failure("index out of range", kSliceNone, stop),
+      util::handle_error(failure("index out of range",
+                                 kSliceNone,
+                                 stop,
+                                 FILENAME_C(__LINE__)),
                          identities_.get()->classname(),
                          nullptr);
     }
@@ -769,6 +782,11 @@ namespace awkward {
   template <typename T>
   const std::string
   ListOffsetArrayOf<T>::validityerror(const std::string& path) const {
+    if (offsets_.length() < 1) {
+      return (std::string("at ") + path + std::string(" (") + classname()
+              + std::string("): ") + std::string("len(offsets) < 1")
+              + FILENAME(__LINE__));
+    }
     IndexOf<T> starts = util::make_starts(offsets_);
     IndexOf<T> stops = util::make_stops(offsets_);
     struct Error err = kernel::ListArray_validity<T>(
@@ -783,7 +801,8 @@ namespace awkward {
     else {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string(err.str)
-              + std::string(" at i=") + std::to_string(err.identity));
+              + std::string(" at i=") + std::to_string(err.identity)
+              + std::string(err.filename == nullptr ? "" : err.filename));
     }
   }
 
@@ -2256,7 +2275,7 @@ namespace awkward {
                                                   content);
   }
 
-  template class EXPORT_SYMBOL ListOffsetArrayOf<int32_t>;
-  template class EXPORT_SYMBOL ListOffsetArrayOf<uint32_t>;
-  template class EXPORT_SYMBOL ListOffsetArrayOf<int64_t>;
+  template class EXPORT_TEMPLATE_INST ListOffsetArrayOf<int32_t>;
+  template class EXPORT_TEMPLATE_INST ListOffsetArrayOf<uint32_t>;
+  template class EXPORT_TEMPLATE_INST ListOffsetArrayOf<int64_t>;
 }

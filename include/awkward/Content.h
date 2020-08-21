@@ -30,7 +30,7 @@ namespace awkward {
   ///
   /// Forms may be thought of as low-level types, whereas Type is a high-level
   /// type. There is a one-to-many relationship from Type to Form.
-  class EXPORT_SYMBOL Form {
+  class LIBAWKWARD_EXPORT_SYMBOL Form {
   public:
     static FormPtr
       fromnumpy(char kind,
@@ -223,6 +223,16 @@ namespace awkward {
     void
       form_key_tojson(ToJson& builder, bool verbose) const;
 
+    /// @brief Internal function for extracting record field
+    ///
+    /// WARNING: this function returns the field from the innermost record
+    /// form it finds, and does not wrap it with the context.
+    /// Used by VirtualArray::getitem_field to determine certain parameters
+    /// without materialization. A possible extension would be to wrap output
+    /// at each layer to fully specify the form.
+    virtual const FormPtr
+      getitem_field(const std::string& key) const = 0;
+
     protected:
     /// @brief See #has_identities
     bool has_identities_;
@@ -236,7 +246,7 @@ namespace awkward {
   ///
   /// @brief Abstract superclass of all array node types (flat hierarchy).
   /// Any Content can be nested within any other Content.
-  class EXPORT_SYMBOL Content {
+  class LIBAWKWARD_EXPORT_SYMBOL Content {
   public:
     /// @brief Called by all subclass constructors; assigns #identities and
     /// #parameters upon construction.

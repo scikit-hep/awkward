@@ -14,7 +14,7 @@ namespace awkward {
   /// @brief Abstract superclass of all PartitionedArray node types.
   /// PartitionedArrays contain a list of Content, but Content cannot contain
   /// PartitionedArrays.
-  class EXPORT_SYMBOL PartitionedArray {
+  class LIBAWKWARD_EXPORT_SYMBOL PartitionedArray {
   public:
     PartitionedArray(const ContentPtrVec& partitions);
 

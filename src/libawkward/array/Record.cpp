@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/Record.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/Record.cpp", line)
 
 #include <sstream>
 #include <memory>
@@ -176,7 +177,8 @@ namespace awkward {
       util::handle_error(
         failure("len(identities) != 1 for scalar Record",
                 kSliceNone,
-                kSliceNone),
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         array_.get()->identities().get()->classname(),
         nullptr);
     }

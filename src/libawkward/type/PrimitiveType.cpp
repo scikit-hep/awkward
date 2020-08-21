@@ -23,18 +23,18 @@ namespace awkward {
                                const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
-      return typestr;
+      return wrap_categorical(typestr);
     }
 
     std::stringstream out;
     std::string s = util::dtype_to_name(dtype_);
-    if (parameters_.empty()) {
+    if (parameters_empty()) {
       out << indent << pre << s << post;
     }
     else {
       out << indent << pre << s << "[" << string_parameters() << "]" << post;
     }
-    return out.str();
+    return wrap_categorical(out.str());
   }
 
   const TypePtr

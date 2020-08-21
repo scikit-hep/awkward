@@ -328,8 +328,12 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
         parameters["__record__"] = with_name
 
     def getfunction(inputs, depth):
-        if (depth_limit is None and all(x.purelist_depth == 1 for x in inputs)) or (
-            depth_limit == depth
+        if depth_limit == depth or (
+            depth_limit is None and
+            all(x.purelist_depth == 1 or (
+                x.purelist_depth == 2 and
+                x.purelist_parameter("__array__") in ("string", "bytestring", "categorical")
+            ) for x in inputs)
         ):
             return lambda: (
                 awkward1.layout.RecordArray(
@@ -2411,7 +2415,7 @@ def virtual(
         generating
         <Array [4.4, 5.5] type='2 * float64'>
     """
-    if form in (
+    if isinstance(form, str) and form in (
         "float64",
         "float32",
         "int64",
@@ -2790,5 +2794,13 @@ def values_astype(array, to, highlevel=True):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_") and x not in ("numpy", "np", "awkward1")
+    if not x.startswith("_") and x not in (
+        "absolute_import",
+        "numbers",
+        "json",
+        "Iterable",
+        "MutableMapping",
+        "np",
+        "awkward1",
+    )
 ]

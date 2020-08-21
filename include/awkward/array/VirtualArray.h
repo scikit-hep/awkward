@@ -17,7 +17,7 @@ namespace awkward {
   /// @class VirtualForm
   ///
   /// @brief Form describing VirtualArray.
-  class EXPORT_SYMBOL VirtualForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL VirtualForm: public Form {
   public:
     /// @brief Creates a VirtualForm. See VirtualArray for documentation.
     VirtualForm(bool has_identities,
@@ -81,6 +81,9 @@ namespace awkward {
             bool check_form_key,
             bool compatibility_check) const override;
 
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   private:
     const FormPtr form_;
     bool has_length_;
@@ -91,7 +94,7 @@ namespace awkward {
   /// @brief Represents an array that can be generated on demand.
   ///
   /// See #VirtualArray for the meaning of each parameter.
-  class EXPORT_SYMBOL VirtualArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL VirtualArray: public Content {
   public:
     /// @brief Creates a VirtualArray from a full set of parameters.
     ///
@@ -224,9 +227,6 @@ namespace awkward {
 
     const ContentPtr
       carry(const Index64& carry, bool allow_lazy) const override;
-
-    const std::string
-      purelist_parameter(const std::string& key) const override;
 
     int64_t
       numfields() const override;

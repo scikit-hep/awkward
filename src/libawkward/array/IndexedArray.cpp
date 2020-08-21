@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/IndexedArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/IndexedArray.cpp", line)
 
 #include <sstream>
 #include <type_traits>
@@ -55,7 +56,23 @@ namespace awkward {
   const TypePtr
   IndexedForm::type(const util::TypeStrs& typestrs) const {
     TypePtr out = content_.get()->type(typestrs);
-    out.get()->setparameters(parameters_);
+    if (out.get()->parameters().empty()  &&  !parameters_.empty()) {
+      out.get()->setparameters(parameters_);
+      if (parameter_equals("__array__", "\"categorical\"")) {
+        out.get()->setparameter("__array__", "null");
+        out.get()->setparameter("__categorical__", "true");
+      }
+    }
+    else if (!out.get()->parameters().empty()  &&  !parameters_.empty()) {
+      for (auto p : parameters_) {
+        if (p.first != std::string("__array__")) {
+          out.get()->setparameter(p.first, p.second);
+        }
+      }
+      if (parameter_equals("__array__", "\"categorical\"")) {
+        out.get()->setparameter("__categorical__", "true");
+      }
+    }
     return out;
   }
 
@@ -181,6 +198,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  IndexedForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// IndexedOptionForm
 
   IndexedOptionForm::IndexedOptionForm(bool has_identities,
@@ -204,10 +226,15 @@ namespace awkward {
 
   const TypePtr
   IndexedOptionForm::type(const util::TypeStrs& typestrs) const {
-    return std::make_shared<OptionType>(
-               parameters_,
-               util::gettypestr(parameters_, typestrs),
-               content_.get()->type(typestrs));
+    TypePtr out = std::make_shared<OptionType>(
+                    parameters_,
+                    util::gettypestr(parameters_, typestrs),
+                    content_.get()->type(typestrs));
+    if (out.get()->parameter_equals("__array__", "\"categorical\"")) {
+      out.get()->setparameter("__array__", "null");
+      out.get()->setparameter("__categorical__", "true");
+    }
+    return out;
   }
 
   void
@@ -327,6 +354,11 @@ namespace awkward {
     else {
       return false;
     }
+  }
+
+  const FormPtr
+  IndexedOptionForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
   }
 
   ////////// IndexedArray
@@ -791,7 +823,8 @@ namespace awkward {
         util::handle_error(
           failure("content and its identities must have the same length",
                   kSliceNone,
-                  kSliceNone),
+                  kSliceNone,
+                  FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -1025,7 +1058,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < index_.length()) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -1046,7 +1082,7 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < index_.length())) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -1063,7 +1099,7 @@ namespace awkward {
       }
       else {
         util::handle_error(
-          failure("index[i] < 0", kSliceNone, at),
+          failure("index[i] < 0", kSliceNone, at, FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -1071,7 +1107,10 @@ namespace awkward {
     int64_t lencontent = content_.get()->length();
     if (index >= lencontent) {
       util::handle_error(
-        failure("index[i] >= len(content)", kSliceNone, at),
+        failure("index[i] >= len(content)",
+                kSliceNone,
+                at,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -1089,7 +1128,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
       util::handle_error(
-        failure("index out of range", kSliceNone, stop),
+        failure("index out of range",
+                kSliceNone,
+                stop,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -1266,7 +1308,8 @@ namespace awkward {
     else {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string(err.str)
-              + std::string(" at i=") + std::to_string(err.identity));
+              + std::string(" at i=") + std::to_string(err.identity)
+              + std::string(err.filename == nullptr ? "" : err.filename));
     }
   }
 
@@ -2396,10 +2439,10 @@ namespace awkward {
 
   // IndexedArrayOf<int64_t, true> has to be first, or ld on darwin
   // will hide the typeinfo symbol
-  template class EXPORT_SYMBOL IndexedArrayOf<int64_t, true>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<int64_t, true>;
 
-  template class EXPORT_SYMBOL IndexedArrayOf<int32_t, false>;
-  template class EXPORT_SYMBOL IndexedArrayOf<uint32_t, false>;
-  template class EXPORT_SYMBOL IndexedArrayOf<int64_t, false>;
-  template class EXPORT_SYMBOL IndexedArrayOf<int32_t, true>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<int32_t, false>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<uint32_t, false>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<int64_t, false>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<int32_t, true>;
 }

@@ -28,7 +28,7 @@ namespace awkward {
   ///    - {@link IndexOf Index32}, which is `IndexOf<int32_t>`
   ///    - {@link IndexOf IndexU32}, which is `IndexOf<uint32_t>`
   ///    - {@link IndexOf Index64}, which is `IndexOf<int64_t>`
-  class EXPORT_SYMBOL Index {
+  class LIBAWKWARD_EXPORT_SYMBOL Index {
   public:
     /// @brief Integer type of an Index, used by ListForm, IndexedForm, etc.
     enum class Form {i8, u8, i32, u32, i64, kNumIndexForm};
@@ -71,7 +71,11 @@ namespace awkward {
   ///    - {@link IndexOf IndexU32}, which is `IndexOf<uint32_t>`
   ///    - {@link IndexOf Index64}, which is `IndexOf<int64_t>`
   template <typename T>
-  class EXPORT_SYMBOL IndexOf: public Index {
+  class
+#ifdef AWKWARD_INDEX_NO_EXTERN_TEMPLATE
+  LIBAWKWARD_EXPORT_SYMBOL
+#endif
+  IndexOf: public Index {
   public:
     /// @brief Creates an IndexOf from a full set of parameters.
     ///
@@ -221,7 +225,7 @@ namespace awkward {
     const int64_t length_;
   };
 
-#if !defined AWKWARD_INDEX_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+#ifndef AWKWARD_INDEX_NO_EXTERN_TEMPLATE
   extern template class IndexOf<int8_t>;
   extern template class IndexOf<uint8_t>;
   extern template class IndexOf<int32_t>;

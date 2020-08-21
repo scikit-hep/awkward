@@ -1,6 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/ListArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/ListArray.cpp", line)
 
 #include <sstream>
 #include <type_traits>
@@ -195,6 +196,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  ListForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// ListArray
 
   template <typename T>
@@ -332,7 +338,8 @@ namespace awkward {
         util::handle_error(
           failure("content and its identities must have the same length",
                   kSliceNone,
-                  kSliceNone),
+                  kSliceNone,
+                  FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -561,14 +568,20 @@ namespace awkward {
   ListArrayOf<T>::check_for_iteration() const {
     if (stops_.length() < starts_.length()) {
       util::handle_error(
-        failure("len(stops) < len(starts)", kSliceNone, kSliceNone),
+        failure("len(stops) < len(starts)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < starts_.length()) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -589,13 +602,13 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < starts_.length())) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
     if (regular_at >= stops_.length()) {
       util::handle_error(
-        failure("len(stops) < len(starts)", kSliceNone, kSliceNone),
+        failure("len(stops) < len(starts)", kSliceNone, kSliceNone, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -613,13 +626,13 @@ namespace awkward {
     }
     if (start < 0) {
       util::handle_error(
-        failure("starts[i] < 0", kSliceNone, at),
+        failure("starts[i] < 0", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
     if (start > stop) {
       util::handle_error(
-        failure("starts[i] > stops[i]", kSliceNone, at),
+        failure("starts[i] > stops[i]", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -627,7 +640,8 @@ namespace awkward {
       util::handle_error(
         failure("starts[i] != stops[i] and stops[i] > len(content)",
                 kSliceNone,
-                at),
+                at,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -643,14 +657,14 @@ namespace awkward {
       true, start != Slice::none(), stop != Slice::none(), starts_.length());
     if (regular_stop > stops_.length()) {
       util::handle_error(
-        failure("len(stops) < len(starts)", kSliceNone, kSliceNone),
+        failure("len(stops) < len(starts)", kSliceNone, kSliceNone, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
       util::handle_error(
-        failure("index out of range", kSliceNone, stop),
+        failure("index out of range", kSliceNone, stop, FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -700,7 +714,7 @@ namespace awkward {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       util::handle_error(
-        failure("len(stops) < len(starts)", kSliceNone, kSliceNone),
+        failure("len(stops) < len(starts)", kSliceNone, kSliceNone, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -760,6 +774,11 @@ namespace awkward {
   template <typename T>
   const std::string
   ListArrayOf<T>::validityerror(const std::string& path) const {
+    if (stops_.length() < starts_.length()) {
+      return (std::string("at ") + path + std::string(" (") + classname()
+              + std::string("): ") + std::string("len(stops) < len(starts)")
+              + FILENAME(__LINE__));
+    }
     struct Error err = kernel::ListArray_validity<T>(
       kernel::lib::cpu,   // DERIVE
       starts_.data(),
@@ -772,7 +791,8 @@ namespace awkward {
     else {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string(err.str)
-              + std::string(" at i=") + std::to_string(err.identity));
+              + std::string(" at i=") + std::to_string(err.identity)
+              + std::string(err.filename == nullptr ? "" : err.filename));
     }
   }
 
@@ -1428,7 +1448,10 @@ namespace awkward {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       util::handle_error(
-        failure("len(stops) < len(starts)", kSliceNone, kSliceNone),
+        failure("len(stops) < len(starts)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -1462,7 +1485,10 @@ namespace awkward {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       util::handle_error(
-        failure("len(stops) < len(starts)", kSliceNone, kSliceNone),
+        failure("len(stops) < len(starts)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -1543,7 +1569,10 @@ namespace awkward {
     int64_t lenstarts = starts_.length();
     if (stops_.length() < lenstarts) {
       util::handle_error(
-        failure("len(stops) < len(starts)", kSliceNone, kSliceNone),
+        failure("len(stops) < len(starts)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -1604,7 +1633,10 @@ namespace awkward {
     }
     if (stops_.length() < starts_.length()) {
       util::handle_error(
-        failure("len(stops) < len(starts)", kSliceNone, kSliceNone),
+        failure("len(stops) < len(starts)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -1647,13 +1679,17 @@ namespace awkward {
       util::handle_error(
         failure("jagged slice length differs from array length",
                 kSliceNone,
-                kSliceNone),
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
     if (stops_.length() < starts_.length()) {
       util::handle_error(
-        failure("len(stops) < len(starts)", kSliceNone, kSliceNone),
+        failure("len(stops) < len(starts)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -1705,7 +1741,8 @@ namespace awkward {
       util::handle_error(
         failure("jagged slice length differs from array length",
                 kSliceNone,
-                kSliceNone),
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -1785,7 +1822,8 @@ namespace awkward {
       util::handle_error(
         failure("jagged slice length differs from array length",
                 kSliceNone,
-                kSliceNone),
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -1848,7 +1886,7 @@ namespace awkward {
                                             content);
   }
 
-  template class EXPORT_SYMBOL ListArrayOf<int32_t>;
-  template class EXPORT_SYMBOL ListArrayOf<uint32_t>;
-  template class EXPORT_SYMBOL ListArrayOf<int64_t>;
+  template class EXPORT_TEMPLATE_INST ListArrayOf<int32_t>;
+  template class EXPORT_TEMPLATE_INST ListArrayOf<uint32_t>;
+  template class EXPORT_TEMPLATE_INST ListArrayOf<int64_t>;
 }

@@ -1433,5 +1433,9 @@ def softmax(x, axis=None, keepdims=False, mask_identity=False):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_") and x not in ("collections", "numpy", "np", "awkward1")
+    if not x.startswith("_") and x not in (
+        "absolute_import",
+        "np",
+        "awkward1",
+    )
 ]

@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import re
 import keyword
+import warnings
 
 try:
     from collections.abc import Iterable
@@ -481,6 +482,11 @@ class Array(
 
         See also #ak.to_json and #ak.from_json.
         """
+        warnings.warn(
+            ".tojson is deprecated, will be removed in 0.3.0. Use\n\n"
+            "    ak.to_json(array)\n\ninstead.",
+            DeprecationWarning,
+        )
         return awkward1.operations.convert.to_json(
             self, destination, pretty, maxdecimals, buffersize
         )
@@ -1625,6 +1631,11 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See also #ak.to_json and #ak.from_json.
         """
+        warnings.warn(
+            ".tojson is deprecated, will be removed in 0.3.0. Use\n\n"
+            "    ak.to_json(array)\n\ninstead.",
+            DeprecationWarning,
+        )
         return awkward1.operations.convert.to_json(
             self, destination, pretty, maxdecimals, buffersize
         )

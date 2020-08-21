@@ -67,7 +67,7 @@ namespace awkward {
                             const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
-      return typestr;
+      return wrap_categorical(typestr);
     }
 
     std::stringstream out;
@@ -88,11 +88,11 @@ namespace awkward {
           out << types_[j].get()->tostring_part("", "", "");
         }
         out << "]";
-        return out.str();
+        return wrap_categorical(out.str());
       }
     }
 
-    if (parameters_.empty()) {
+    if (parameters_empty()) {
       if (recordlookup_.get() != nullptr) {
         out << "{";
         for (size_t j = 0;  j < types_.size();  j++) {
@@ -143,7 +143,7 @@ namespace awkward {
       }
       out << "], " << string_parameters() << "]";
     }
-    return out.str();
+    return wrap_categorical(out.str());
   }
 
   const TypePtr

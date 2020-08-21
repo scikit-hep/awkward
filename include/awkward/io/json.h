@@ -19,7 +19,7 @@ namespace awkward {
   /// @param source Null-terminated string containing any valid JSON data.
   /// @param options Configuration options for building an array with an
   /// ArrayBuilder.
-  EXPORT_SYMBOL const ContentPtr
+  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
     FromJsonString(const char* source, const ArrayBuilderOptions& options);
 
   /// @brief Convert a JSON-encoded file into a Content array using an
@@ -29,7 +29,7 @@ namespace awkward {
   /// @param options Configuration options for building an array with an
   /// ArrayBuilder.
   /// @param buffersize Number of bytes for an intermediate buffer.
-  EXPORT_SYMBOL const ContentPtr
+  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
     FromJsonFile(FILE* source,
                  const ArrayBuilderOptions& options,
                  int64_t buffersize);
@@ -37,7 +37,7 @@ namespace awkward {
   /// @class ToJson
   ///
   /// Abstract base class for producing JSON data.
-  class EXPORT_SYMBOL ToJson {
+  class LIBAWKWARD_EXPORT_SYMBOL ToJson {
   public:
     /// @brief Virtual destructor acts as a first non-inline virtual function
     /// that determines a specific translation unit in which vtable shall be
@@ -88,7 +88,7 @@ namespace awkward {
   /// @class ToJsonString
   ///
   /// @brief Produces a JSON-formatted string.
-  class EXPORT_SYMBOL ToJsonString: public ToJson {
+  class LIBAWKWARD_EXPORT_SYMBOL ToJsonString: public ToJson {
   public:
     /// @brief Creates a ToJsonString with a full set of parameters.
     ///
@@ -130,7 +130,7 @@ namespace awkward {
   /// @class ToJsonPrettyString
   ///
   /// @brief Produces a pretty JSON-formatted string.
-  class EXPORT_SYMBOL ToJsonPrettyString: public ToJson {
+  class LIBAWKWARD_EXPORT_SYMBOL ToJsonPrettyString: public ToJson {
   public:
     /// @brief Creates a ToJsonPrettyString with a full set of parameters.
     ///
@@ -172,7 +172,7 @@ namespace awkward {
   /// @class ToJsonFile
   ///
   /// @brief Produces a JSON-formatted file.
-  class EXPORT_SYMBOL ToJsonFile: public ToJson {
+  class LIBAWKWARD_EXPORT_SYMBOL ToJsonFile: public ToJson {
   public:
     /// @brief Creates a ToJsonFile with a full set of parameters.
     ///
@@ -213,7 +213,7 @@ namespace awkward {
   /// @class ToJsonPrettyFile
   ///
   /// @brief Produces a pretty JSON-formatted file.
-  class EXPORT_SYMBOL ToJsonPrettyFile: public ToJson {
+  class LIBAWKWARD_EXPORT_SYMBOL ToJsonPrettyFile: public ToJson {
   public:
     /// @brief Creates a ToJsonPrettyFile with a full set of parameters.
     ///

@@ -77,3 +77,14 @@ def mixin_class_method(ufunc, rhs=None, transpose=True):
         return method
 
     return register
+
+
+__all__ = [
+    x
+    for x in list(globals())
+    if not x.startswith("_")
+    and x not in (
+        "absolute_import",
+        "awkward1",
+    )
+]

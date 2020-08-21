@@ -72,7 +72,7 @@ namespace awkward {
     ///     Python object when there are no more C++ shared pointers
     ///     referencing it.
     template <typename T>
-    class EXPORT_SYMBOL array_deleter {
+    class LIBAWKWARD_EXPORT_SYMBOL array_deleter {
     public:
         /// @brief Called by `std::shared_ptr` when its reference count reaches
         /// zero.
@@ -96,7 +96,7 @@ namespace awkward {
     ///     Python object when there are no more C++ shared pointers
     ///     referencing it.
     template <typename T>
-    class EXPORT_SYMBOL cuda_array_deleter {
+    class LIBAWKWARD_EXPORT_SYMBOL cuda_array_deleter {
     public:
         /// @brief Called by `std::shared_ptr` when its reference count reaches
         /// zero.
@@ -124,7 +124,7 @@ namespace awkward {
     ///     Python object when there are no more C++ shared pointers
     ///     referencing it.
     template <typename T>
-    class EXPORT_SYMBOL no_deleter {
+    class LIBAWKWARD_EXPORT_SYMBOL no_deleter {
     public:
         /// @brief Called by `std::shared_ptr` when its reference count reaches
         /// zero.
