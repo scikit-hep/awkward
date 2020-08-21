@@ -929,6 +929,8 @@ namespace awkward {
     Index64 starts(1);
     starts.setitem_at_nowrap(0, 0);
 
+    Index64 missing(0);
+
     Index64 parents(length());
     struct Error err = kernel::content_reduce_zeroparents_64(
       kernel::lib::cpu,   // DERIVE
@@ -939,6 +941,7 @@ namespace awkward {
     ContentPtr next = reduce_next(reducer,
                                   negaxis,
                                   starts,
+                                  missing,
                                   parents,
                                   1,
                                   mask,

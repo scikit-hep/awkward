@@ -703,6 +703,8 @@ namespace awkward {
     /// {@link IndexOf Index}. These are downward pointers from an outer
     /// structure into this structure with the same meaning as in
     /// {@link ListArrayOf ListArray}.
+    /// @param missing Adjustment for argmin/max outputs to account for
+    /// missing values (jagged lists with axis != -1 and/or None values).
     /// @param parents Groups to combine as an {@link IndexOf Index} of
     /// upward pointers from this structure to the outer structure to reduce.
     /// @param outlength The length of the reduced array, after the operation
@@ -718,6 +720,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& missing,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,

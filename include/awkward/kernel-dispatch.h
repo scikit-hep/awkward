@@ -1416,6 +1416,7 @@ namespace awkward {
       OUT* toptr,
       const IN* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1426,6 +1427,7 @@ namespace awkward {
       OUT* toptr,
       const IN* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);

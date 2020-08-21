@@ -1428,8 +1428,11 @@ namespace awkward {
     const Reducer& reducer,
     int64_t negaxis,
     const Index64& starts,
+    const Index64& missing,
     const Index64& parents,
-    int64_t outlength, bool mask, bool keepdims) const {
+    int64_t outlength,
+    bool mask,
+    bool keepdims) const {
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
@@ -1488,9 +1491,14 @@ namespace awkward {
       util::handle_error(err4, classname(), identities_.get());
 
       ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
-      ContentPtr outcontent = nextcontent.get()->reduce_next(
-        reducer, negaxis - 1, nextstarts, nextparents, maxnextparents + 1,
-        mask, false);
+      ContentPtr outcontent = nextcontent.get()->reduce_next(reducer,
+                                                             negaxis - 1,
+                                                             nextstarts,
+                                                             missing,
+                                                             nextparents,
+                                                             maxnextparents + 1,
+                                                             mask,
+                                                             false);
 
       std::cout << outcontent.get()->tostring() << std::endl;
 
@@ -1604,9 +1612,14 @@ namespace awkward {
 
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
                                                                 globalstop);
-      ContentPtr outcontent = trimmed.get()->reduce_next(
-        reducer, negaxis, util::make_starts(offsets_), nextparents,
-        offsets_.length() - 1, mask, keepdims);
+      ContentPtr outcontent = trimmed.get()->reduce_next(reducer,
+                                                         negaxis,
+                                                         util::make_starts(offsets_),
+                                                         missing,
+                                                         nextparents,
+                                                         offsets_.length() - 1,
+                                                         mask,
+                                                         keepdims);
 
       Index64 outoffsets(outlength + 1);
       struct Error err3 = kernel::ListOffsetArray_reduce_local_outoffsets_64(
@@ -1629,6 +1642,7 @@ namespace awkward {
   ListOffsetArrayOf<T>::reduce_next(const Reducer& reducer,
                                     int64_t negaxis,
                                     const Index64& starts,
+                                    const Index64& missing,
                                     const Index64& parents,
                                     int64_t length,
                                     bool mask,
@@ -1636,6 +1650,7 @@ namespace awkward {
     return toListOffsetArray64(true).get()->reduce_next(reducer,
                                                         negaxis,
                                                         starts,
+                                                        missing,
                                                         parents,
                                                         length,
                                                         mask,

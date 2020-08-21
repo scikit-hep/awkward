@@ -1143,6 +1143,7 @@ extern "C" {
       int64_t* toptr,
       const bool* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1157,6 +1158,7 @@ extern "C" {
       int64_t* toptr,
       const int8_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1171,6 +1173,7 @@ extern "C" {
       int64_t* toptr,
       const uint8_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1185,6 +1188,7 @@ extern "C" {
       int64_t* toptr,
       const int16_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1199,6 +1203,7 @@ extern "C" {
       int64_t* toptr,
       const uint16_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1213,6 +1218,7 @@ extern "C" {
       int64_t* toptr,
       const int32_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1227,6 +1233,7 @@ extern "C" {
       int64_t* toptr,
       const uint32_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1241,6 +1248,7 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1255,6 +1263,7 @@ extern "C" {
       int64_t* toptr,
       const uint64_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1269,6 +1278,7 @@ extern "C" {
       int64_t* toptr,
       const float* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1283,6 +1293,7 @@ extern "C" {
       int64_t* toptr,
       const double* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1298,6 +1309,7 @@ extern "C" {
       int64_t* toptr,
       const bool* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1312,6 +1324,7 @@ extern "C" {
       int64_t* toptr,
       const int8_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1326,6 +1339,7 @@ extern "C" {
       int64_t* toptr,
       const uint8_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1340,6 +1354,7 @@ extern "C" {
       int64_t* toptr,
       const int16_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1354,6 +1369,7 @@ extern "C" {
       int64_t* toptr,
       const uint16_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1368,6 +1384,7 @@ extern "C" {
       int64_t* toptr,
       const int32_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1382,6 +1399,7 @@ extern "C" {
       int64_t* toptr,
       const uint32_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1396,6 +1414,7 @@ extern "C" {
       int64_t* toptr,
       const int64_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1410,6 +1429,7 @@ extern "C" {
       int64_t* toptr,
       const uint64_t* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1424,6 +1444,7 @@ extern "C" {
       int64_t* toptr,
       const float* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1438,6 +1459,7 @@ extern "C" {
       int64_t* toptr,
       const double* fromptr,
       const int64_t* starts,
+      const int64_t* missing,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
