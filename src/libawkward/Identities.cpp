@@ -74,7 +74,7 @@ namespace awkward {
                                 int64_t length,
                                 kernel::lib ptr_lib)
       : Identities(ref, fieldloc, 0, width, length)
-      , ptr_(kernel::malloc<T>(ptr_lib, width * length * sizeof(T)))
+      , ptr_(kernel::malloc<T>(ptr_lib, width * length * (int64_t)sizeof(T)))
       , ptr_lib_(ptr_lib) { }
 
   template <typename T>
@@ -357,7 +357,7 @@ namespace awkward {
       return shallow_copy();
     }
     else {
-      int64_t bytelength = (offset_ + (width_ * length_)) * sizeof(T);
+      int64_t bytelength = (offset_ + (width_ * length_)) * (int64_t)sizeof(T);
       std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, bytelength);
       Error err = kernel::copy_to(ptr_lib,
                                   ptr_lib_,

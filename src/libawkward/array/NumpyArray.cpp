@@ -535,7 +535,7 @@ namespace awkward {
           out << " ";
         }
         if (dtype == util::dtype::boolean) {
-          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) != 0 ? "true" : "false");
         }
         else if (dtype == util::dtype::int8) {
           out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
@@ -556,7 +556,7 @@ namespace awkward {
           out << " ";
         }
         if (dtype == util::dtype::boolean) {
-          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) != 0 ? "true" : "false");
         }
         else if (dtype == util::dtype::int8) {
           out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
@@ -576,7 +576,7 @@ namespace awkward {
           out << " ";
         }
         if (dtype == util::dtype::boolean) {
-          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) != 0 ? "true" : "false");
         }
         else if (dtype == util::dtype::int8) {
           out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
