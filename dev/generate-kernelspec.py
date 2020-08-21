@@ -519,7 +519,7 @@ class FuncBody(object):
                     item.init.decls[0].init.__class__.__name__ == "Constant"
                     or item.init.decls[0].init.__class__.__name__ == "ID"
                 )
-                and (item.next.op == "p++")
+                and ((item.next.op == "p++") or (item.next.op == "++"))
                 and (item.cond.op == "<")
                 and (item.cond.left.name == item.init.decls[0].name)
             ):
@@ -1290,5 +1290,3 @@ if __name__ == "__main__":
                                 for arg in test["output"].keys():
                                     print(" " * 10 + arg + ": ", test["output"][arg])
                         print()
-                else:
-                    raise ValueError("Function {0} not present".format(kernelname))
