@@ -1490,18 +1490,6 @@ namespace awkward {
         nextlen);
       util::handle_error(err4, classname(), identities_.get());
 
-      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
-      ContentPtr outcontent = nextcontent.get()->reduce_next(reducer,
-                                                             negaxis - 1,
-                                                             nextstarts,
-                                                             missing,
-                                                             nextparents,
-                                                             maxnextparents + 1,
-                                                             mask,
-                                                             false);
-
-      std::cout << outcontent.get()->tostring() << std::endl;
-
       Index64 gaps(outlength);
       struct Error err5 = kernel::ListOffsetArray_reduce_nonlocal_findgaps_64(
         kernel::lib::cpu,   // DERIVE
@@ -1569,6 +1557,18 @@ namespace awkward {
         }
       }
       std::cout << "nextmissing " << nextmissing.tostring() << std::endl;
+
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+      ContentPtr outcontent = nextcontent.get()->reduce_next(reducer,
+                                                             negaxis - 1,
+                                                             nextstarts,
+                                                             missing,
+                                                             nextparents,
+                                                             maxnextparents + 1,
+                                                             mask,
+                                                             false);
+
+      std::cout << outcontent.get()->tostring() << std::endl;
 
 
 

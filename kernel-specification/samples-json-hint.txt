@@ -1,0 +1,28 @@
+These are the names of the reducer roles with a minimial indicator of type.
+
+If samples.json were samples.yml, we'd be able to include this information in a comment.
+
+        {
+            "reducer-distincts": [],
+            "reducer-distinctslen": 0,
+            "reducer-fromptr": [],
+            "reducer-gaps": [],
+            "reducer-identity": 0,
+            "reducer-index": [],
+            "reducer-lendistincts": 0,
+            "reducer-length": 0,
+            "reducer-lenparents": 0,
+            "reducer-mask": [],
+            "reducer-maxcount": 0,
+            "reducer-missing": [],
+            "reducer-nextlen": 0,
+            "reducer-nextparents": [],
+            "reducer-offsets": [],
+            "reducer-offsetscopy": [],
+            "reducer-outindexlength": 0,
+            "reducer-outlength": 0,
+            "reducer-parents": [],
+            "reducer-starts": [],
+            "reducer-startslength": 0,
+            "reducer-validwhen": false
+        }
