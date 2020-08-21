@@ -30,6 +30,10 @@ namespace awkward {
     virtual util::dtype
       return_dtype(util::dtype given_dtype) const;
 
+    /// @brief True if this reducer returns index positions; false otherwise.
+    virtual bool
+      returns_positions() const;
+
     /// @brief Apply the reducer algorithm to an array of boolean values.
     ///
     /// @param data The array to reduce.
@@ -962,6 +966,12 @@ namespace awkward {
     util::dtype
       return_dtype(util::dtype given_dtype) const override;
 
+    /// @copydoc Reducer::returns_positions()
+    ///
+    /// This is always true.
+    virtual bool
+      returns_positions() const override;
+
     const std::shared_ptr<void>
       apply_bool(const bool* data,
                  const Index64& starts,
@@ -1054,6 +1064,12 @@ namespace awkward {
     /// The return type for ReducerArgmax is `int64`.
     util::dtype
       return_dtype(util::dtype given_dtype) const override;
+
+    /// @copydoc Reducer::returns_positions()
+    ///
+    /// This is always true.
+    virtual bool
+      returns_positions() const override;
 
     const std::shared_ptr<void>
       apply_bool(const bool* data,

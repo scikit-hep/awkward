@@ -12,6 +12,11 @@ namespace awkward {
     return given_dtype;
   }
 
+  bool
+  Reducer::returns_positions() const {
+    return false;
+  }
+
   ////////// count
 
   const std::string
@@ -1899,6 +1904,11 @@ namespace awkward {
     return util::dtype::int64;
   }
 
+  bool
+  ReducerArgmin::returns_positions() const {
+    return true;
+  }
+
   const std::shared_ptr<void>
   ReducerArgmin::apply_bool(const bool* data,
                             const Index64& starts,
@@ -2123,6 +2133,11 @@ namespace awkward {
   util::dtype
   ReducerArgmax::return_dtype(util::dtype given_dtype) const {
     return util::dtype::int64;
+  }
+
+  bool
+  ReducerArgmax::returns_positions() const {
+    return true;
   }
 
   const std::shared_ptr<void>
