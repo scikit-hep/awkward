@@ -1492,6 +1492,8 @@ namespace awkward {
         reducer, negaxis - 1, nextstarts, nextparents, maxnextparents + 1,
         mask, false);
 
+      std::cout << outcontent.get()->tostring() << std::endl;
+
       Index64 gaps(outlength);
       struct Error err5 = kernel::ListOffsetArray_reduce_nonlocal_findgaps_64(
         kernel::lib::cpu,   // DERIVE
@@ -1512,11 +1514,65 @@ namespace awkward {
         outlength);
       util::handle_error(err6, classname(), identities_.get());
 
+
+
+
+
+
+      std::cout << "starts    " << starts.tostring() << std::endl;
+      std::cout << "parents   " << parents.tostring() << std::endl;
+      std::cout << "outstarts " << outstarts.tostring() << std::endl;
+
+      Index64 nextmissing(maxnextparents + 1);
+      for (int64_t k = 0;  k < maxnextparents + 1;  k++) {
+        nextmissing.data()[k] = 0;
+      }
+      int64_t base = 0;
+      int64_t maxsofar = 0;
+      int64_t howmany = 0;
+      for (int64_t i = 0;  i < offsets_.length() - 1;  i++) {
+        int64_t count = offsets_.data()[i + 1] - offsets_.data()[i];
+
+        if (i != 0  &&  starts.data()[parents.data()[i]] == i) {
+          base = maxsofar + 1;
+          maxsofar = 0;
+          howmany = 0;
+        }
+
+        if (count > maxsofar) {
+          if (maxsofar < maxnextparents + 1) {
+            nextmissing.data()[base + maxsofar] += howmany;
+          }
+          maxsofar = count;
+          howmany = 0;
+        }
+
+        howmany++;
+      }
+      std::cout << "nextmissing " << nextmissing.tostring() << std::endl;
+      int64_t starti = 1;
+      for (int64_t k = 1;  k < maxnextparents + 1;  k++) {
+        if (starti < outstarts.length()  &&  outstarts.data()[starti] == k) {
+          starti++;
+        }
+        else {
+          nextmissing.data()[k] = nextmissing.data()[k - 1] + nextmissing.data()[k];
+        }
+      }
+      std::cout << "nextmissing " << nextmissing.tostring() << std::endl;
+
+
+
+
+
+
+
       ContentPtr out = std::make_shared<ListArray64>(Identities::none(),
                                                      util::Parameters(),
                                                      outstarts,
                                                      outstops,
                                                      outcontent);
+
       if (keepdims) {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
