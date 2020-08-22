@@ -1761,8 +1761,8 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
       })
 
       .def_static("from_cupy", [name](py::object array,
-                                                 const py::object& identities,
-                                                 const py::object& parameters) -> py::object {
+                                      const py::object& identities,
+                                      const py::object& parameters) -> py::object {
         if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
           std::vector<int64_t> shape, strides;
 

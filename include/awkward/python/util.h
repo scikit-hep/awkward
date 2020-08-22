@@ -60,7 +60,7 @@ std::vector<T> pytuples_to_vector(py::object tuple) {
   std::vector<T> c_tuple;
   for(auto i : tuple) {
     try {
-      int64_t element = py::cast<T>(i);
+      T element = py::cast<T>(i);
       c_tuple.push_back(element);
     }
     catch (...) {
