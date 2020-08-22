@@ -3195,41 +3195,27 @@ namespace awkward {
           + format_ + std::string("\"") + FILENAME(__LINE__));
       }
 
-
-
-
-
-
-      // if (reducer.returns_positions()) {
-
-
-
-      //   if (shifts.length() == 0) {
-      //     int64_t* p = reinterpret_cast<int64_t*>(ptr.get());
-      //     for (int64_t k = 0;  k < outlength;  k++) {
-      //       int64_t i = p[k];
-      //       int64_t parent = parents.data()[i];
-      //       int64_t start = starts.data()[parent];
-      //       p[k] += -start;
-      //     }
-      //   }
-      //   else {
-      //     int64_t* p = reinterpret_cast<int64_t*>(ptr.get());
-      //     for (int64_t k = 0;  k < outlength;  k++) {
-      //       int64_t i = p[k];
-      //       int64_t parent = parents.data()[i];
-      //       int64_t start = starts.data()[parent];
-      //       p[k] += shifts.data()[i] - start;
-      //     }
-      //   }
-
-
-      // }
-
-
-
-
-
+      if (reducer.returns_positions()) {
+        struct Error err3;
+        if (shifts.length() == 0) {
+          err3 = kernel::NumpyArray_reduce_adjust_starts_64(
+            kernel::lib::cpu,   // DERIVE
+            reinterpret_cast<int64_t*>(ptr.get()),
+            outlength,
+            parents.data(),
+            starts.data());
+        }
+        else {
+          err3 = kernel::NumpyArray_reduce_adjust_starts_shifts_64(
+            kernel::lib::cpu,   // DERIVE
+            reinterpret_cast<int64_t*>(ptr.get()),
+            outlength,
+            parents.data(),
+            starts.data(),
+            shifts.data());
+        }
+        util::handle_error(err3, classname(), identities_.get());
+      }
 
       util::dtype dtype = reducer.return_dtype(dtype_);
       std::string format = util::dtype_to_format(dtype);

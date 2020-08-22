@@ -1485,27 +1485,28 @@ extern "C" {
       const int64_t* gaps,
       int64_t outlength);
 
-  // @param nummissing outparam
-  // @param missing outparam
-  // @param nextshifts outparam
-  // @param offsets inparam role: reducer-offsets
-  // @param length inparam role: reducer-length
-  // @param starts inparam role: reducer-starts
-  // @param parents inparam role: reducer-parents
-  // @param maxcount inparam role: reducer-maxcount
-  // @param nextlen inparam role: reducer-nextlen
-  // @param nextcarry inparam role: reducer-nextcarry
-  EXPORT_SYMBOL struct Error awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
-    int64_t* nummissing,
-    int64_t* missing,
-    int64_t* nextshifts,
-    const int64_t* offsets,
-    int64_t length,
-    const int64_t* starts,
-    const int64_t* parents,
-    int64_t maxcount,
-    int64_t nextlen,
-    const int64_t* nextcarry);
+  /// @param nummissing outparam
+  /// @param missing outparam
+  /// @param nextshifts outparam
+  /// @param offsets inparam role: reducer-offsets
+  /// @param length inparam role: reducer-length
+  /// @param starts inparam role: reducer-starts
+  /// @param parents inparam role: reducer-parents
+  /// @param maxcount inparam role: reducer-maxcount
+  /// @param nextlen inparam role: reducer-nextlen
+  /// @param nextcarry inparam role: reducer-nextcarry
+  EXPORT_SYMBOL struct Error
+    awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
+      int64_t* nummissing,
+      int64_t* missing,
+      int64_t* nextshifts,
+      const int64_t* offsets,
+      int64_t length,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t maxcount,
+      int64_t nextlen,
+      const int64_t* nextcarry);
 
   /// @param nextparents outparam
   /// @param offsets inparam role: reducer-offsets
@@ -1580,6 +1581,30 @@ extern "C" {
       const int64_t* starts,
       int64_t startslength,
       int64_t outindexlength);
+
+  /// @param toptr outparam
+  /// @param outlength inparam role: reducer-outlength
+  /// @param parents inparam role: reducer-parents
+  /// @param starts inparam role: reducer-starts
+  EXPORT_SYMBOL struct Error
+    awkward_NumpyArray_reduce_adjust_starts_64(
+      int64_t* toptr,
+      int64_t outlength,
+      const int64_t* parents,
+      const int64_t* starts);
+
+  /// @param toptr outparam
+  /// @param outlength inparam role: reducer-outlength
+  /// @param parents inparam role: reducer-parents
+  /// @param starts inparam role: reducer-starts
+  /// @param shifts inparam role: reducer-shifts
+  EXPORT_SYMBOL struct Error
+    awkward_NumpyArray_reduce_adjust_starts_shifts_64(
+      int64_t* toptr,
+      int64_t outlength,
+      const int64_t* parents,
+      const int64_t* starts,
+      const int64_t* shifts);
 
   /// @param toptr outparam
   /// @param parents inparam role: reducer-parents

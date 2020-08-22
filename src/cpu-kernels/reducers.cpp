@@ -1963,6 +1963,35 @@ ERROR awkward_IndexedArray_reduce_next_fix_offsets_64(
   return success();
 }
 
+ERROR awkward_NumpyArray_reduce_adjust_starts_64(
+  int64_t* toptr,
+  int64_t outlength,
+  const int64_t* parents,
+  const int64_t* starts) {
+  for (int64_t k = 0;  k < outlength;  k++) {
+    int64_t i = toptr[k];
+    int64_t parent = parents[i];
+    int64_t start = starts[parent];
+    toptr[k] += -start;
+  }
+  return success();
+}
+
+ERROR awkward_NumpyArray_reduce_adjust_starts_shifts_64(
+  int64_t* toptr,
+  int64_t outlength,
+  const int64_t* parents,
+  const int64_t* starts,
+  const int64_t* shifts) {
+  for (int64_t k = 0;  k < outlength;  k++) {
+    int64_t i = toptr[k];
+    int64_t parent = parents[i];
+    int64_t start = starts[parent];
+    toptr[k] += shifts[i] - start;
+  }
+  return success();
+}
+
 ERROR awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(
   int8_t* toptr,
   const int64_t* parents,

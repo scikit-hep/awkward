@@ -15010,6 +15010,43 @@ namespace awkward {
       }
     }
 
+    ERROR ListOffsetArray_reduce_nonlocal_nextshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nummissing,
+      int64_t* missing,
+      int64_t* nextshifts,
+      const int64_t* offsets,
+      int64_t length,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t maxcount,
+      int64_t nextlen,
+      const int64_t* nextcarry) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
+          nummissing,
+          missing,
+          nextshifts,
+          offsets,
+          length,
+          starts,
+          parents,
+          maxcount,
+          nextlen,
+          nextcarry);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_nextshifts_64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for ListOffsetArray_reduce_nonlocal_nextshifts_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
     ERROR ListOffsetArray_reduce_local_nextparents_64(
       kernel::lib ptr_lib,
       int64_t *nextparents,
@@ -15169,6 +15206,58 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("unrecognized ptr_lib for IndexedArray_reduce_next_fix_offsets_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    ERROR NumpyArray_reduce_adjust_starts_64(
+      kernel::lib ptr_lib,
+      int64_t* toptr,
+      int64_t outlength,
+      const int64_t* parents,
+      const int64_t* starts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_reduce_adjust_starts_64(
+          toptr,
+          outlength,
+          parents,
+          starts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_reduce_adjust_starts_64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_reduce_adjust_starts_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    ERROR NumpyArray_reduce_adjust_starts_shifts_64(
+      kernel::lib ptr_lib,
+      int64_t* toptr,
+      int64_t outlength,
+      const int64_t* parents,
+      const int64_t* starts,
+      const int64_t* shifts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_reduce_adjust_starts_shifts_64(
+          toptr,
+          outlength,
+          parents,
+          starts,
+          shifts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_reduce_adjust_starts_shifts_64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_reduce_adjust_starts_shifts_64")
           + FILENAME(__LINE__));
       }
     }
