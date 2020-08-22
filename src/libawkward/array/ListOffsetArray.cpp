@@ -1518,28 +1518,41 @@ namespace awkward {
       Index64 nummissing(maxcount);
       Index64 missing(nextlen);
       Index64 nextshifts(nextlen);
-      for (int64_t i = 0;  i < offsets_.length() - 1;  i++) {
-        int64_t start = offsets_.data()[i];
-        int64_t stop = offsets_.data()[i + 1];
-        int64_t count = stop - start;
+      // for (int64_t i = 0;  i < offsets_.length() - 1;  i++) {
+      //   int64_t start = offsets_.data()[i];
+      //   int64_t stop = offsets_.data()[i + 1];
+      //   int64_t count = stop - start;
 
-        if (starts.data()[parents.data()[i]] == i) {
-          for (int64_t k = 0;  k < maxcount;  k++) {
-            nummissing.data()[k] = 0;
-          }
-        }
+      //   if (starts.data()[parents.data()[i]] == i) {
+      //     for (int64_t k = 0;  k < maxcount;  k++) {
+      //       nummissing.data()[k] = 0;
+      //     }
+      //   }
 
-        for (int64_t k = count;  k < maxcount;  k++) {
-          nummissing.data()[k]++;
-        }
+      //   for (int64_t k = count;  k < maxcount;  k++) {
+      //     nummissing.data()[k]++;
+      //   }
 
-        for (int64_t j = 0;  j < count;  j++) {
-          missing.data()[start + j] = nummissing.data()[j];
-        }
-      }
-      for (int64_t j = 0;  j < nextlen;  j++) {
-        nextshifts.data()[j] = missing.data()[nextcarry.data()[j]];
-      }
+      //   for (int64_t j = 0;  j < count;  j++) {
+      //     missing.data()[start + j] = nummissing.data()[j];
+      //   }
+      // }
+      // for (int64_t j = 0;  j < nextlen;  j++) {
+      //   nextshifts.data()[j] = missing.data()[nextcarry.data()[j]];
+      // }
+      struct Error err7 = awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
+        nummissing.data(),
+        missing.data(),
+        nextshifts.data(),
+        offsets_.data(),
+        offsets_.length() - 1,
+        starts.data(),
+        parents.data(),
+        maxcount,
+        nextlen,
+        nextcarry.data());
+      util::handle_error(err7, classname(), identities_.get());
+
 
 
       // Index64 nextshifts = shifts;

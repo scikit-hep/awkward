@@ -1485,6 +1485,28 @@ extern "C" {
       const int64_t* gaps,
       int64_t outlength);
 
+  // @param nummissing outparam
+  // @param missing outparam
+  // @param nextshifts outparam
+  // @param offsets inparam role: reducer-offsets
+  // @param length inparam role: reducer-length
+  // @param starts inparam role: reducer-starts
+  // @param parents inparam role: reducer-parents
+  // @param maxcount inparam role: reducer-maxcount
+  // @param nextlen inparam role: reducer-nextlen
+  // @param nextcarry inparam role: reducer-nextcarry
+  EXPORT_SYMBOL struct Error awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
+    int64_t* nummissing,
+    int64_t* missing,
+    int64_t* nextshifts,
+    const int64_t* offsets,
+    int64_t length,
+    const int64_t* starts,
+    const int64_t* parents,
+    int64_t maxcount,
+    int64_t nextlen,
+    const int64_t* nextcarry);
+
   /// @param nextparents outparam
   /// @param offsets inparam role: reducer-offsets
   /// @param length inparam role: reducer-length
