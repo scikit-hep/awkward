@@ -1344,16 +1344,33 @@ ERROR awkward_reduce_argmin(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = -1;
+  for (int64_t k = 0;  k < outlength;  k++) {
+    toptr[k] = -1;
   }
+  // for (int64_t i = 0;  i < lenparents;  i++) {
+  //   int64_t parent = parents[i];
+  //   int64_t start = starts[parent];
+  //   if (toptr[parent] == -1  ||  fromptr[i] < fromptr[toptr[parent] + start]) {
+  //     toptr[parent] = i - start;
+  //   }
+  // }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[i];
-    int64_t start = starts[parent];
-    if (toptr[parent] == -1  ||  fromptr[i] < fromptr[toptr[parent] + start]) {
-      toptr[parent] = i - start;
+    if (toptr[parent] == -1  ||  fromptr[i] < fromptr[toptr[parent]]) {
+      toptr[parent] = i;
     }
   }
+  for (int64_t k = 0;  k < outlength;  k++) {
+    int64_t i = toptr[k];
+    int64_t parent = parents[i];
+    int64_t start = starts[parent];
+    toptr[k] += missing[i] - start;
+  }
+  // for (int64_t i = 0;  i < outlength;  i++) {
+  //   if (toptr[i] != -1) {
+  //     toptr[i] += missing[i];
+  //   }
+  // }
   return success();
 }
 ERROR awkward_reduce_argmin_bool_64(
@@ -1374,6 +1391,11 @@ ERROR awkward_reduce_argmin_bool_64(
       toptr[parent] = i - start;
     }
   }
+  // for (int64_t i = 0;  i < outlength;  i++) {
+  //   if (toptr[i] != -1) {
+  //     toptr[i] += missing[i];
+  //   }
+  // }
   return success();
 }
 ERROR awkward_reduce_argmin_int8_64(
@@ -1566,6 +1588,11 @@ ERROR awkward_reduce_argmax(
       toptr[parent] = i - start;
     }
   }
+  // for (int64_t i = 0;  i < outlength;  i++) {
+  //   if (toptr[i] != -1) {
+  //     toptr[i] += missing[i];
+  //   }
+  // }
   return success();
 }
 ERROR awkward_reduce_argmax_bool_64(
@@ -1586,6 +1613,11 @@ ERROR awkward_reduce_argmax_bool_64(
       toptr[parent] = i - start;
     }
   }
+  // for (int64_t i = 0;  i < outlength;  i++) {
+  //   if (toptr[i] != -1) {
+  //     toptr[i] += missing[i];
+  //   }
+  // }
   return success();
 }
 ERROR awkward_reduce_argmax_int8_64(
