@@ -1428,9 +1428,11 @@ namespace awkward {
     const Reducer& reducer,
     int64_t negaxis,
     const Index64& starts,
+    const Index64& shifts,
     const Index64& parents,
-    int64_t outlength, bool mask, bool keepdims) const {
-
+    int64_t outlength,
+    bool mask,
+    bool keepdims) const {
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -1487,11 +1489,6 @@ namespace awkward {
         nextlen);
       util::handle_error(err4, classname(), identities_.get());
 
-      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
-      ContentPtr outcontent = nextcontent.get()->reduce_next(
-        reducer, negaxis - 1, nextstarts, nextparents, maxnextparents + 1,
-        mask, false);
-
       Index64 gaps(outlength);
       struct Error err5 = kernel::ListOffsetArray_reduce_nonlocal_findgaps_64(
         kernel::lib::cpu,   // DERIVE
@@ -1512,11 +1509,43 @@ namespace awkward {
         outlength);
       util::handle_error(err6, classname(), identities_.get());
 
+      bool make_shifts = reducer.returns_positions();
+
+      Index64 nextshifts(make_shifts ? nextlen : 0);
+      if (make_shifts) {
+        Index64 nummissing(maxcount);
+        Index64 missing(offsets_.getitem_at(offsets_.length() - 1));
+        struct Error err7 = kernel::ListOffsetArray_reduce_nonlocal_nextshifts_64(
+          kernel::lib::cpu,   // DERIVE
+          nummissing.data(),
+          missing.data(),
+          nextshifts.data(),
+          offsets_.data(),
+          offsets_.length() - 1,
+          starts.data(),
+          parents.data(),
+          maxcount,
+          nextlen,
+          nextcarry.data());
+        util::handle_error(err7, classname(), identities_.get());
+      }
+
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+      ContentPtr outcontent = nextcontent.get()->reduce_next(reducer,
+                                                             negaxis - 1,
+                                                             nextstarts,
+                                                             nextshifts,
+                                                             nextparents,
+                                                             maxnextparents + 1,
+                                                             mask,
+                                                             false);
+
       ContentPtr out = std::make_shared<ListArray64>(Identities::none(),
                                                      util::Parameters(),
                                                      outstarts,
                                                      outstops,
                                                      outcontent);
+
       if (keepdims) {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
@@ -1547,9 +1576,14 @@ namespace awkward {
 
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
                                                                 globalstop);
-      ContentPtr outcontent = trimmed.get()->reduce_next(
-        reducer, negaxis, util::make_starts(offsets_), nextparents,
-        offsets_.length() - 1, mask, keepdims);
+      ContentPtr outcontent = trimmed.get()->reduce_next(reducer,
+                                                         negaxis,
+                                                         util::make_starts(offsets_),
+                                                         shifts,
+                                                         nextparents,
+                                                         offsets_.length() - 1,
+                                                         mask,
+                                                         keepdims);
 
       Index64 outoffsets(outlength + 1);
       struct Error err3 = kernel::ListOffsetArray_reduce_local_outoffsets_64(
@@ -1572,6 +1606,7 @@ namespace awkward {
   ListOffsetArrayOf<T>::reduce_next(const Reducer& reducer,
                                     int64_t negaxis,
                                     const Index64& starts,
+                                    const Index64& shifts,
                                     const Index64& parents,
                                     int64_t length,
                                     bool mask,
@@ -1579,6 +1614,7 @@ namespace awkward {
     return toListOffsetArray64(true).get()->reduce_next(reducer,
                                                         negaxis,
                                                         starts,
+                                                        shifts,
                                                         parents,
                                                         length,
                                                         mask,

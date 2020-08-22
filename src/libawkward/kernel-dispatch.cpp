@@ -14213,7 +14213,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14221,7 +14220,6 @@ namespace awkward {
         return awkward_reduce_argmin_bool_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14243,7 +14241,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14251,7 +14248,6 @@ namespace awkward {
         return awkward_reduce_argmin_int8_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14273,7 +14269,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14281,7 +14276,6 @@ namespace awkward {
         return awkward_reduce_argmin_uint8_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14303,7 +14297,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14311,7 +14304,6 @@ namespace awkward {
         return awkward_reduce_argmin_int16_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14333,7 +14325,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14341,7 +14332,6 @@ namespace awkward {
         return awkward_reduce_argmin_uint16_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14363,7 +14353,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14371,7 +14360,6 @@ namespace awkward {
         return awkward_reduce_argmin_int32_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14393,7 +14381,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14401,7 +14388,6 @@ namespace awkward {
         return awkward_reduce_argmin_uint32_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14423,7 +14409,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14431,7 +14416,6 @@ namespace awkward {
         return awkward_reduce_argmin_int64_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14453,7 +14437,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14461,7 +14444,6 @@ namespace awkward {
         return awkward_reduce_argmin_uint64_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14483,7 +14465,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14491,7 +14472,6 @@ namespace awkward {
         return awkward_reduce_argmin_float32_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14513,7 +14493,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14521,7 +14500,6 @@ namespace awkward {
         return awkward_reduce_argmin_float64_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14544,7 +14522,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14552,7 +14529,6 @@ namespace awkward {
         return awkward_reduce_argmax_bool_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14574,7 +14550,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14582,7 +14557,6 @@ namespace awkward {
         return awkward_reduce_argmax_int8_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14604,7 +14578,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14612,7 +14585,6 @@ namespace awkward {
         return awkward_reduce_argmax_uint8_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14634,7 +14606,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14642,7 +14613,6 @@ namespace awkward {
         return awkward_reduce_argmax_int16_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14664,7 +14634,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14672,7 +14641,6 @@ namespace awkward {
         return awkward_reduce_argmax_uint16_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14694,7 +14662,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14702,7 +14669,6 @@ namespace awkward {
         return awkward_reduce_argmax_int32_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14724,7 +14690,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14732,7 +14697,6 @@ namespace awkward {
         return awkward_reduce_argmax_uint32_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14754,7 +14718,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14762,7 +14725,6 @@ namespace awkward {
         return awkward_reduce_argmax_int64_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14784,7 +14746,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14792,7 +14753,6 @@ namespace awkward {
         return awkward_reduce_argmax_uint64_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14814,7 +14774,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14822,7 +14781,6 @@ namespace awkward {
         return awkward_reduce_argmax_float32_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -14844,7 +14802,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
-      const int64_t *starts,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14852,7 +14809,6 @@ namespace awkward {
         return awkward_reduce_argmax_float64_64(
           toptr,
           fromptr,
-          starts,
           parents,
           lenparents,
           outlength);
@@ -15054,6 +15010,43 @@ namespace awkward {
       }
     }
 
+    ERROR ListOffsetArray_reduce_nonlocal_nextshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nummissing,
+      int64_t* missing,
+      int64_t* nextshifts,
+      const int64_t* offsets,
+      int64_t length,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t maxcount,
+      int64_t nextlen,
+      const int64_t* nextcarry) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
+          nummissing,
+          missing,
+          nextshifts,
+          offsets,
+          length,
+          starts,
+          parents,
+          maxcount,
+          nextlen,
+          nextcarry);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_reduce_nonlocal_nextshifts_64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for ListOffsetArray_reduce_nonlocal_nextshifts_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
     ERROR ListOffsetArray_reduce_local_nextparents_64(
       kernel::lib ptr_lib,
       int64_t *nextparents,
@@ -15192,6 +15185,156 @@ namespace awkward {
       }
     }
 
+    template <>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_64<int32_t>(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int32_t* index,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray32_reduce_next_nonlocal_nextshifts_64(
+          nextshifts,
+          index,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_nonlocal_nextshifts_64<int32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_nonlocal_nextshifts_64<int32_t")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template <>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_64<uint32_t>(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const uint32_t* index,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArrayU32_reduce_next_nonlocal_nextshifts_64(
+          nextshifts,
+          index,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_nonlocal_nextshifts_64<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_nonlocal_nextshifts_64<uint32_t")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template <>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_64<int64_t>(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int64_t* index,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray64_reduce_next_nonlocal_nextshifts_64(
+          nextshifts,
+          index,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_nonlocal_nextshifts_64<int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_nonlocal_nextshifts_64<int64_t")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template <>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int32_t>(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int32_t* index,
+      int64_t length,
+      const int64_t* shifts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray32_reduce_next_nonlocal_nextshifts_fromshifts_64(
+          nextshifts,
+          index,
+          length,
+          shifts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template <>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<uint32_t>(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const uint32_t* index,
+      int64_t length,
+      const int64_t* shifts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArrayU32_reduce_next_nonlocal_nextshifts_fromshifts_64(
+          nextshifts,
+          index,
+          length,
+          shifts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template <>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int64_t>(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int64_t* index,
+      int64_t length,
+      const int64_t* shifts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray64_reduce_next_nonlocal_nextshifts_fromshifts_64(
+          nextshifts,
+          index,
+          length,
+          shifts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
     ERROR IndexedArray_reduce_next_fix_offsets_64(
       kernel::lib ptr_lib,
       int64_t *outoffsets,
@@ -15213,6 +15356,58 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("unrecognized ptr_lib for IndexedArray_reduce_next_fix_offsets_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    ERROR NumpyArray_reduce_adjust_starts_64(
+      kernel::lib ptr_lib,
+      int64_t* toptr,
+      int64_t outlength,
+      const int64_t* parents,
+      const int64_t* starts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_reduce_adjust_starts_64(
+          toptr,
+          outlength,
+          parents,
+          starts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_reduce_adjust_starts_64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_reduce_adjust_starts_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    ERROR NumpyArray_reduce_adjust_starts_shifts_64(
+      kernel::lib ptr_lib,
+      int64_t* toptr,
+      int64_t outlength,
+      const int64_t* parents,
+      const int64_t* starts,
+      const int64_t* shifts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_reduce_adjust_starts_shifts_64(
+          toptr,
+          outlength,
+          parents,
+          starts,
+          shifts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_reduce_adjust_starts_shifts_64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_reduce_adjust_starts_shifts_64")
           + FILENAME(__LINE__));
       }
     }
@@ -15250,7 +15445,7 @@ namespace awkward {
       const int8_t *mask,
       const int64_t *parents,
       int64_t length,
-      bool validwhen) {
+      bool valid_when) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_reduce_next_64(
           nextcarry,
@@ -15259,7 +15454,7 @@ namespace awkward {
           mask,
           parents,
           length,
-          validwhen);
+          valid_when);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -15269,6 +15464,58 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("unrecognized ptr_lib for ByteMaskedArray_reduce_next_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    ERROR ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int8_t* mask,
+      int64_t length,
+      bool valid_when) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
+          nextshifts,
+          mask,
+          length,
+          valid_when);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_reduce_next_nonlocal_nextshifts_64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for ByteMaskedArray_reduce_next_nonlocal_nextshifts_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    ERROR ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int8_t* mask,
+      int64_t length,
+      bool valid_when,
+      const int64_t* shifts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+          nextshifts,
+          mask,
+          length,
+          valid_when,
+          shifts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64")
           + FILENAME(__LINE__));
       }
     }

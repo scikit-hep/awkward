@@ -1888,6 +1888,7 @@ namespace awkward {
   IndexedArrayOf<T, ISOPTION>::reduce_next(const Reducer& reducer,
                                            int64_t negaxis,
                                            const Index64& starts,
+                                           const Index64& shifts,
                                            const Index64& parents,
                                            int64_t outlength,
                                            bool mask,
@@ -1913,16 +1914,44 @@ namespace awkward {
       index_.length());
     util::handle_error(err2, classname(), identities_.get());
 
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    bool make_shifts = (isoption()  &&
+                        reducer.returns_positions()  &&
+                        !branchdepth.first  && negaxis == branchdepth.second);
+
+    Index64 nextshifts(make_shifts ? index_.length() - numnull : 0);
+    if (make_shifts) {
+      if (shifts.length() == 0) {
+        struct Error err3 =
+            kernel::IndexedArray_reduce_next_nonlocal_nextshifts_64<T>(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          index_.data(),
+          index_.length());
+        util::handle_error(err3, classname(), identities_.get());
+      }
+      else {
+        struct Error err3 =
+            kernel::IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<T>(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          index_.data(),
+          index_.length(),
+          shifts.data());
+        util::handle_error(err3, classname(), identities_.get());
+      }
+    }
+
     ContentPtr next = content_.get()->carry(nextcarry, false);
     ContentPtr out = next.get()->reduce_next(reducer,
                                              negaxis,
                                              starts,
+                                             nextshifts,
                                              nextparents,
                                              outlength,
                                              mask,
                                              keepdims);
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       return out;
     }
@@ -1940,13 +1969,13 @@ namespace awkward {
                         "ListOffsetArray64 whose offsets start at zero ")
             + FILENAME(__LINE__));
         }
-        struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
+        struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
           starts.length(),
           outindex.length());
-        util::handle_error(err3, classname(), identities_.get());
+        util::handle_error(err4, classname(), identities_.get());
 
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),

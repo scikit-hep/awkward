@@ -702,7 +702,13 @@ namespace awkward {
     /// @param starts Staring positions of each group to combine as an
     /// {@link IndexOf Index}. These are downward pointers from an outer
     /// structure into this structure with the same meaning as in
-    /// {@link ListArrayOf ListArray}.
+    /// {@link ListArrayOf ListArray}. Only used by a reducer that
+    /// {@link Reducer#returns_positions returns_positions} (currently
+    /// only argmin and argmax).
+    /// @param shifts Per-element adjustments for any reducer that
+    /// {@link Reducer#returns_positions returns_positions}. Allows
+    /// for variable-length lists with axis != -1 and for missing values
+    /// (None) in argmin and argmax.
     /// @param parents Groups to combine as an {@link IndexOf Index} of
     /// upward pointers from this structure to the outer structure to reduce.
     /// @param outlength The length of the reduced array, after the operation
@@ -718,6 +724,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,

@@ -64,6 +64,8 @@ def readspec():
                     os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
                 ) as specfile:
                     indspec = yaml.safe_load(specfile)[0]
+                    if indspec.get("tests") is None:
+                        indspec["tests"] = []
                     if "tests" in indspec.keys():
                         if "specializations" in indspec.keys():
                             for childfunc in indspec["specializations"]:
