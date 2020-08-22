@@ -144,3 +144,19 @@ def test_IndexedOptionArray():
     assert awkward1.argmin(awkward1.Array([[2.2, 1.1, 0.0], [], [None, 0.5], [2, 1]]), axis=0).tolist() == [3, 2, 0]
     assert awkward1.argmin(awkward1.Array([[2.2, 1.1, 0.0], [], [0.5, None], [2, 1]]), axis=0).tolist() == [2, 3, 0]
     assert awkward1.argmin(awkward1.Array([[2.2, 1.1, 0.0], [0.5, None], [], [2, 1]]), axis=0).tolist() == [1, 3, 0]
+
+def test_ByteMaskedArray():
+    content = awkward1.Array([1.1, 2.2, 3.3, 999, 999, 4.4, 5.5]).layout
+    mask = awkward1.layout.Index8(numpy.array([False, False, False, True, True, False, False]))
+    bytemaskedarray = awkward1.layout.ByteMaskedArray(mask, content, valid_when=False)
+    array = awkward1.Array(bytemaskedarray)
+    assert array.tolist() == [1.1, 2.2, 3.3, None, None, 4.4, 5.5]
+    assert awkward1.max(array, axis=0) == 5.5
+    assert awkward1.argmax(array, axis=0) == 6
+
+    offsets = awkward1.layout.Index64(numpy.array([0, 2, 4, 7], dtype=numpy.int64))
+    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, bytemaskedarray)
+    array = awkward1.Array(listoffsetarray)
+    assert array.tolist() == [[1.1, 2.2], [3.3, None], [None, 4.4, 5.5]]
+    assert awkward1.max(array, axis=1) == [2.2, 3.3, 5.5]
+    assert awkward1.argmax(array, axis=1) == [1, 0, 2]

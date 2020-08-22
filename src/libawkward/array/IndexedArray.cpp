@@ -1917,7 +1917,9 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
-    bool make_shifts = (!branchdepth.first  &&  negaxis == branchdepth.second  &&  isoption());
+    bool make_shifts = (isoption()  &&
+                        reducer.returns_positions()  &&
+                        !branchdepth.first  && negaxis == branchdepth.second);
 
     Index64 nextshifts(make_shifts ? index_.length() - numnull : 0);
     if (make_shifts) {

@@ -960,13 +960,13 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       &numnull,
       mask_.data(),
-      length(),
+      mask_.length(),
       valid_when_);
     util::handle_error(err1, classname(), identities_.get());
 
-    Index64 nextparents(length() - numnull);
-    Index64 nextcarry(length() - numnull);
-    Index64 outindex(length());
+    Index64 nextparents(mask_.length() - numnull);
+    Index64 nextcarry(mask_.length() - numnull);
+    Index64 outindex(mask_.length());
     struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
       kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
@@ -974,21 +974,61 @@ namespace awkward {
       outindex.data(),
       mask_.data(),
       parents.data(),
-      length(),
+      mask_.length(),
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
 
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+
+    bool make_shifts = (reducer.returns_positions()  &&
+                        !branchdepth.first  && negaxis == branchdepth.second);
+
+    Index64 nextshifts(make_shifts ? mask_.length() - numnull : 0);
+    if (make_shifts) {
+      if (shifts.length() == 0) {
+        int64_t nullsum = 0;
+        int64_t k = 0;
+        for (int64_t i = 0;  i < mask_.length();  i++) {
+          if ((mask_.data()[i] != 0) == (valid_when_ != 0)) {
+            nextshifts.data()[k] = nullsum;
+            k++;
+          }
+          else {
+            nullsum++;
+          }
+        }
+      }
+      else {
+        int64_t nullsum = 0;
+        int64_t k = 0;
+        for (int64_t i = 0;  i < mask_.length();  i++) {
+          if ((mask_.data()[i] != 0) == (valid_when_ != 0)) {
+            nextshifts.data()[k] = shifts.data()[i] + nullsum;
+            k++;
+          }
+          else {
+            nullsum++;
+          }
+        }
+      }
+    }
+
     ContentPtr next = content_.get()->carry(nextcarry, false);
+
+    std::cout << "next" << std::endl;
+    std::cout << next.get()->tostring() << std::endl;
+    std::cout << "nextshifts " << nextshifts.tostring() << std::endl;
+
+
     ContentPtr out = next.get()->reduce_next(reducer,
                                              negaxis,
                                              starts,
-                                             shifts,
+                                             nextshifts,
                                              nextparents,
                                              outlength,
                                              mask,
                                              keepdims);
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       return out;
     }
