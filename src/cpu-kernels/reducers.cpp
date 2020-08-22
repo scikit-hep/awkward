@@ -1821,29 +1821,29 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
   int64_t maxcount,
   int64_t nextlen,
   const int64_t* nextcarry) {
-  // for (int64_t i = 0;  i < length;  i++) {
-  //   int64_t start = offsets[i];
-  //   int64_t stop = offsets[i + 1];
-  //   int64_t count = stop - start;
+  for (int64_t i = 0;  i < length;  i++) {
+    int64_t start = offsets[i];
+    int64_t stop = offsets[i + 1];
+    int64_t count = stop - start;
 
-  //   if (starts[parents[i]] == i) {
-  //     for (int64_t k = 0;  k < maxcount;  k++) {
-  //       nummissing[k] = 0;
-  //     }
-  //   }
+    if (starts[parents[i]] == i) {
+      for (int64_t k = 0;  k < maxcount;  k++) {
+        nummissing[k] = 0;
+      }
+    }
 
-  //   for (int64_t k = count;  k < maxcount;  k++) {
-  //     nummissing[k]++;
-  //   }
+    for (int64_t k = count;  k < maxcount;  k++) {
+      nummissing[k]++;
+    }
 
-  //   for (int64_t j = 0;  j < count;  j++) {
-  //     missing[start + j] = nummissing[j];
-  //   }
-  // }
+    for (int64_t j = 0;  j < count;  j++) {
+      missing[start + j] = nummissing[j];
+    }
+  }
 
-  // for (int64_t j = 0;  j < nextlen;  j++) {
-  //   nextshifts[j] = missing[nextcarry[j]];
-  // }
+  for (int64_t j = 0;  j < nextlen;  j++) {
+    nextshifts[j] = missing[nextcarry[j]];
+  }
   return success();
 }
 
@@ -1970,9 +1970,11 @@ ERROR awkward_NumpyArray_reduce_adjust_starts_64(
   const int64_t* starts) {
   for (int64_t k = 0;  k < outlength;  k++) {
     int64_t i = toptr[k];
-    int64_t parent = parents[i];
-    int64_t start = starts[parent];
-    toptr[k] += -start;
+    if (i >= 0) {
+      int64_t parent = parents[i];
+      int64_t start = starts[parent];
+      toptr[k] += -start;
+    }
   }
   return success();
 }
@@ -1983,12 +1985,14 @@ ERROR awkward_NumpyArray_reduce_adjust_starts_shifts_64(
   const int64_t* parents,
   const int64_t* starts,
   const int64_t* shifts) {
-  // for (int64_t k = 0;  k < outlength;  k++) {
-  //   int64_t i = toptr[k];
-  //   int64_t parent = parents[i];
-  //   int64_t start = starts[parent];
-  //   toptr[k] += shifts[i] - start;
-  // }
+  for (int64_t k = 0;  k < outlength;  k++) {
+    int64_t i = toptr[k];
+    if (i >= 0) {
+      int64_t parent = parents[i];
+      int64_t start = starts[parent];
+      toptr[k] += shifts[i] - start;
+    }
+  }
   return success();
 }
 
