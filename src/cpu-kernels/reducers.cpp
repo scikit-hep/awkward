@@ -1832,13 +1832,13 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
       }
     }
 
-  //   for (int64_t k = count;  k < maxcount;  k++) {
-  //     nummissing[k]++;
-  //   }
+    for (int64_t k = count;  k < maxcount;  k++) {
+      nummissing[k]++;
+    }
 
-  //   for (int64_t j = 0;  j < count;  j++) {
-  //     missing[start + j] = nummissing[j];
-  //   }
+    for (int64_t j = 0;  j < count;  j++) {
+      missing[start + j] = nummissing[j];
+    }
   }
 
   for (int64_t j = 0;  j < nextlen;  j++) {
