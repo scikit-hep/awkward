@@ -311,14 +311,13 @@ def from_cupy(
 ):
     """
     Args:
-        array (np.ndarray): The NumPy array to convert into an Awkward Array.
-            This array can be a np.ma.MaskedArray.
+        array (cp.ndarray): The CuPy array to convert into an Awkward Array.
         regulararray (bool): If True and the array is multidimensional,
             the dimensions are represented by nested #ak.layout.RegularArray
             nodes; if False and the array is multidimensional, the dimensions
             are represented by a multivalued #ak.layout.NumpyArray.shape.
             If the array is one-dimensional, this has no effect.
-        recordarray (bool): If True and the array is a NumPy structured array
+        recordarray (bool): If True and the array is a CuPy structured array
             (dtype.names is not None), the fields are represented by an
             #ak.layout.RecordArray; if False and the array is a structured
             array, the structure is left in the #ak.layout.NumpyArray `format`,
@@ -328,23 +327,21 @@ def from_cupy(
         behavior (bool): Custom #ak.behavior for the output array, if
             high-level.
 
-    Converts a NumPy array into an Awkward Array.
+    Converts a CuPy array into an Awkward Array.
 
     The resulting layout may involve the following #ak.layout.Content types
     (only):
 
        * #ak.layout.NumpyArray
-       * #ak.layout.ByteMaskedArray or #ak.layout.UnmaskedArray if the
-         `array` is an np.ma.MaskedArray.
        * #ak.layout.RegularArray if `regulararray=True`.
 
     See also #ak.to_cupy.
     """
     cupy = awkward1.nplike.Cupy.instance()
-    def recurse(array, mask):
+    def recurse(array):
         if regulararray and len(array.shape) > 1:
             return awkward1.layout.RegularArray(
-                recurse(array.reshape((-1,) + array.shape[2:]), mask), array.shape[1]
+                recurse(array.reshape((-1,) + array.shape[2:])), array.shape[1]
             )
 
         if len(array.shape) == 0:
@@ -352,42 +349,14 @@ def from_cupy(
         else:
             data = awkward1.layout.NumpyArray.from_cupy(array)
 
-        if mask is None:
-            return data
-        elif mask is False or (isinstance(mask, np.bool_) and not mask):
-            # NumPy's MaskedArray with mask == False is an UnmaskedArray
-            if len(array.shape) == 1:
-                return awkward1.layout.UnmaskedArray(data)
-            else:
-                def attach(x):
-                    if isinstance(x, awkward1.layout.NumpyArray):
-                        return awkward1.layout.UnmaskedArray(x)
-                    else:
-                        return awkward1.layout.RegularArray(
-                            attach(x.content), x.size
-                        )
-                return attach(data.toRegularArray())
-        else:
-            # NumPy's MaskedArray is a ByteMaskedArray with valid_when=False
-            return awkward1.layout.ByteMaskedArray(
-                awkward1.layout.Index8.from_cupy(mask), data, valid_when=False
-            )
-
-    # if isinstance(array, cupy.ma.MaskedArray):
-    #     mask = cupy.ma.getmask(array)
-    #     array = cupy.ma.getdata(array)
-    #     if isinstance(mask, np.ndarray) and len(mask.shape) > 1:
-    #         regulararray = True
-    #         mask = mask.reshape(-1)
-    # else:
-    mask = None
+        return data
 
     if not recordarray or array.dtype.names is None:
-        layout = recurse(array, mask)
+        layout = recurse(array)
     else:
         contents = []
         for name in array.dtype.names:
-            contents.append(recurse(array[name], mask))
+            contents.append(recurse(array[name]))
         layout = awkward1.layout.RecordArray(contents, array.dtype.names)
 
     if highlevel:
@@ -397,39 +366,12 @@ def from_cupy(
 
 
 def to_cupy(array, allow_missing=True):
-    """
-    Converts `array` (many types supported, including all Awkward Arrays and
-    Records) into a CuPy array, if possible.
-
-    If the data are numerical and regular (nested lists have equal lengths
-    in each dimension, as described by the #type), they can be losslessly
-    converted to a NumPy array and this function returns without an error.
-
-    Otherwise, the function raises an error. It does not create a NumPy
-    array with dtype `"O"` for `np.object_` (see the
-    [note on object_ type](https://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#arrays-scalars-built-in))
-    since silent conversions to dtype `"O"` arrays would not only be a
-    significant performance hit, but would also break functionality, since
-    nested lists in a NumPy `"O"` array are severed from the array and
-    cannot be sliced as dimensions.
-
-    If `array` is a scalar, it is converted into a NumPy scalar.
-
-    If `allow_missing` is True; NumPy
-    [masked arrays](https://docs.scipy.org/doc/numpy/reference/maskedarray.html)
-    are a possible result; otherwise, missing values (None) cause this
-    function to raise an error.
-
-    See also #ak.from_numpy.
-    """
+    raise ValueError("Not completely functional yet!")
     import awkward1.highlevel
 
     consistency_check = awkward1.nplike.of(array)
     cupy = awkward1.nplike.Cupy.instance()
     cp = awkward1.nplike.NumpyMetadata.instance()
-
-    # if not isinstance(consistency_check, awkward1.nplike.Cupy):
-    #     raise ValueError("Make sure the arrays have their kernels set to cuda, try awkward1.copy_to(\"cuda\")")
 
     if isinstance(array, (bool, str, bytes, numbers.Number)):
         return cupy.array([array])[0]

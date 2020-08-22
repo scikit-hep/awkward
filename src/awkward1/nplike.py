@@ -6,8 +6,11 @@ import numpy
 import itertools
 
 import awkward1.layout
+import numpy as np
 
 def flatten(ptr_lib_list):
+    if ptr_lib_list == None:
+        return ["None"]
     return itertools.chain.from_iterable(itertools.repeat(x,1) if isinstance(x,str) else x for x in ptr_lib_list)
 
 
@@ -36,7 +39,7 @@ def fetch_ptr_libs(array):
             return recurse(array.array)
 
         elif isinstance(array, awkward1.layout.EmptyArray):
-            return ["None"]
+            return ["cpu"]
 
         elif isinstance(array, (awkward1.layout.IndexedArray32,
                                 awkward1.layout.IndexedArrayU32,
@@ -57,8 +60,8 @@ def fetch_ptr_libs(array):
                                 awkward1.layout.UnionArray8_U32,
                                 awkward1.layout.UnionArray8_64)):
             contents = [
-                recurse(array.project(i))
-                for i in range(array.numcontents)
+                recurse(i)
+                for i in array.contents
             ]
 
             tags = recurse(array.tags)
@@ -108,24 +111,28 @@ def fetch_ptr_libs(array):
     return list(flatten(ptr_lib_list))
 
 def of(*arrays):
-    ptr_lib_list = []
-    for i in arrays:
-        ptr_lib_list = ptr_lib_list + fetch_ptr_libs(i)
+    # ptr_lib_list = []
+    # for i in arrays:
+    #     if(np.isscalar(i)):
+    #         raise ValueError("Recieved a scalar")
+    #     ptr_lib_list = ptr_lib_list + fetch_ptr_libs(i)
 
-    result = False
-    if len(ptr_lib_list) > 0 :
-        result = all(elem == ptr_lib_list[0] for elem in ptr_lib_list)
+    # result = False
+    # if len(ptr_lib_list) > 0 :
+    #     result = all(elem == ptr_lib_list[0] for elem in ptr_lib_list)
 
-    ptr_lib = "None"
-    if result == True:
-        ptr_lib =  ptr_lib_list[0]
+    # ptr_lib = "None"
+    # if result == True:
+    #     ptr_lib =  ptr_lib_list[0]
 
-    if ptr_lib == "cpu":
-        return Numpy.instance()
-    elif ptr_lib == "cuda":
-        return Cupy.instance()
-    else:
-        raise ValueError("Make sure Awkward Arrays use the same kernel use awkward1.copy_to(args) to make it consistent")
+    # if ptr_lib == "cpu":
+    #     return Numpy.instance()
+    # elif ptr_lib == "cuda":
+    #     return Cupy.instance()
+    # else:
+    #     raise ValueError("Make sure Awkward Arrays use the same kernel use awkward1.copy_to(args) to make it consistent")
+
+    return Numpy.instance()
 
 class Singleton(object):
     _instance = None
