@@ -3200,31 +3200,31 @@ namespace awkward {
 
 
 
-      // if (reducer.returns_positions()) {
+      if (reducer.returns_positions()) {
 
 
 
-      //   if (shifts.length() == 0) {
-      //     int64_t* p = reinterpret_cast<int64_t*>(ptr.get());
-      //     for (int64_t k = 0;  k < outlength;  k++) {
-      //       int64_t i = p[k];
-      //       int64_t parent = parents.data()[i];
-      //       int64_t start = starts.data()[parent];
-      //       p[k] += -start;
-      //     }
-      //   }
-      //   else {
-      //     int64_t* p = reinterpret_cast<int64_t*>(ptr.get());
-      //     for (int64_t k = 0;  k < outlength;  k++) {
-      //       int64_t i = p[k];
-      //       int64_t parent = parents.data()[i];
-      //       int64_t start = starts.data()[parent];
-      //       p[k] += shifts.data()[i] - start;
-      //     }
-      //   }
+        if (shifts.length() == 0) {
+          int64_t* p = reinterpret_cast<int64_t*>(ptr.get());
+          for (int64_t k = 0;  k < outlength;  k++) {
+            int64_t i = p[k];
+            int64_t parent = parents.data()[i];
+            int64_t start = starts.data()[parent];
+            p[k] += -start;
+          }
+        }
+        else {
+          int64_t* p = reinterpret_cast<int64_t*>(ptr.get());
+          for (int64_t k = 0;  k < outlength;  k++) {
+            int64_t i = p[k];
+            int64_t parent = parents.data()[i];
+            int64_t start = starts.data()[parent];
+            p[k] += shifts.data()[i] - start;
+          }
+        }
 
 
-      // }
+      }
 
 
 
