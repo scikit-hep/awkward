@@ -75,6 +75,8 @@ def readspec():
                                     flag = True
                                     for x in childfunc["args"]:
                                         for arg, val in x.items():
+                                            if "const " in val:
+                                                val = val.replace("const ", "", 1)
                                             spectype = pytype(
                                                 val.replace("List", "")
                                                 .replace("[", "")
@@ -116,6 +118,8 @@ def readspec():
                                     flag = True
                                     for x in indspec["args"]:
                                         for arg, val in x.items():
+                                            if "const " in val:
+                                                val = val.replace("const ", "", 1)
                                             spectype = pytype(
                                                 val.replace("List", "")
                                                 .replace("[", "")
@@ -268,17 +272,25 @@ def testcpukernels(tests):
                                     funcs[childfunc["name"]] = OrderedDict()
                                     if tests[childfunc["name"]] != []:
                                         for arg in childfunc["args"]:
+                                            typename = list(arg.values())[0]
+                                            if "const " in typename:
+                                                typename = typename.replace(
+                                                    "const ", "", 1
+                                                )
                                             funcs[childfunc["name"]][
                                                 list(arg.keys())[0]
-                                            ] = list(arg.values())[0]
+                                            ] = typename
 
                             else:
                                 funcs[indspec["name"]] = OrderedDict()
                                 if tests[indspec["name"]] != []:
                                     for arg in indspec["args"]:
+                                        typename = list(arg.values())[0]
+                                        if "const " in typename:
+                                            typename = typename.replace("const ", "", 1)
                                         funcs[indspec["name"]][
                                             list(arg.keys())[0]
-                                        ] = list(arg.values())[0]
+                                        ] = typename
 
         return funcs
 
