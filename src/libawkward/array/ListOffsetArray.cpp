@@ -1428,7 +1428,7 @@ namespace awkward {
     const Reducer& reducer,
     int64_t negaxis,
     const Index64& starts,
-    const Index64& missing,
+    const Index64& shifts,
     const Index64& parents,
     int64_t outlength,
     bool mask,
@@ -1563,60 +1563,62 @@ namespace awkward {
       //   nextmissing.data()[k] = 0;
       // }
 
-      Index64 nummissing(maxcount);
-      Index64 nextmissing(nextlen);
-      Index64 nextmissing_carried(nextlen);
-      for (int64_t i = 0;  i < offsets_.length() - 1;  i++) {
-        int64_t start = offsets_.data()[i];
-        int64_t stop = offsets_.data()[i + 1];
-        int64_t count = stop - start;
+      /////////////////////////////////////////
 
-        // std::cout << "i " << i << " count " << count << " nextmissing ";
+      // Index64 nummissing(maxcount);
+      // Index64 nextmissing(nextlen);
+      // Index64 nextmissing_carried(nextlen);
+      // for (int64_t i = 0;  i < offsets_.length() - 1;  i++) {
+      //   int64_t start = offsets_.data()[i];
+      //   int64_t stop = offsets_.data()[i + 1];
+      //   int64_t count = stop - start;
 
-        if (starts.data()[parents.data()[i]] == i) {
-          for (int64_t k = 0;  k < maxcount;  k++) {
-            nummissing.data()[k] = 0;
-          }
-        }
+      //   // std::cout << "i " << i << " count " << count << " nextmissing ";
 
-        for (int64_t k = count;  k < maxcount;  k++) {
-          nummissing.data()[k]++;
-        }
-        // for (int64_t k = 0;  k < maxcount;  k++) {
-        //   std::cout << nummissing.data()[k] << " ";
-        // }
-        // std::cout << std::endl;
+      //   if (starts.data()[parents.data()[i]] == i) {
+      //     for (int64_t k = 0;  k < maxcount;  k++) {
+      //       nummissing.data()[k] = 0;
+      //     }
+      //   }
 
-        for (int64_t j = 0;  j < count;  j++) {
-          // ContentPtr tmp = content_.get()->getitem_at_nowrap(start + j);
-          // std::cout << "    j " << j << " content " << *reinterpret_cast<double*>(dynamic_cast<NumpyArray*>(tmp.get())->data()) << " nextmissing " << nummissing.data()[j] << std::endl;
+      //   for (int64_t k = count;  k < maxcount;  k++) {
+      //     nummissing.data()[k]++;
+      //   }
+      //   // for (int64_t k = 0;  k < maxcount;  k++) {
+      //   //   std::cout << nummissing.data()[k] << " ";
+      //   // }
+      //   // std::cout << std::endl;
 
-          nextmissing.data()[start + j] = nummissing.data()[j];
-        }
-      }
-      for (int64_t j = 0;  j < nextlen;  j++) {
-        nextmissing_carried.data()[j] = nextmissing.data()[nextcarry.data()[j]];
-      }
+      //   for (int64_t j = 0;  j < count;  j++) {
+      //     // ContentPtr tmp = content_.get()->getitem_at_nowrap(start + j);
+      //     // std::cout << "    j " << j << " content " << *reinterpret_cast<double*>(dynamic_cast<NumpyArray*>(tmp.get())->data()) << " nextmissing " << nummissing.data()[j] << std::endl;
+
+      //     nextmissing.data()[start + j] = nummissing.data()[j];
+      //   }
+      // }
+      // for (int64_t j = 0;  j < nextlen;  j++) {
+      //   nextmissing_carried.data()[j] = nextmissing.data()[nextcarry.data()[j]];
+      // }
 
       ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
 
-      std::cout << "nextmissing " << nextmissing_carried.tostring() << std::endl;
+      // std::cout << "nextmissing " << nextmissing_carried.tostring() << std::endl;
 
-      std::cout << "nextcarry   " << nextcarry.tostring() << std::endl;
-      // std::cout << "nextstarts  " << nextstarts.tostring() << std::endl;
-      // std::cout << "nextparents " << nextparents.tostring() << std::endl;
-      std::cout << nextcontent.get()->tostring() << std::endl;
+      // std::cout << "nextcarry   " << nextcarry.tostring() << std::endl;
+      // // std::cout << "nextstarts  " << nextstarts.tostring() << std::endl;
+      // // std::cout << "nextparents " << nextparents.tostring() << std::endl;
+      // std::cout << nextcontent.get()->tostring() << std::endl;
 
       ContentPtr outcontent = nextcontent.get()->reduce_next(reducer,
                                                              negaxis - 1,
                                                              nextstarts,
-                                                             nextmissing_carried,
+                                                             shifts,
                                                              nextparents,
                                                              maxnextparents + 1,
                                                              mask,
                                                              false);
 
-      // std::cout << outcontent.get()->tostring() << std::endl;
+      // // std::cout << outcontent.get()->tostring() << std::endl;
 
 
 
@@ -1662,7 +1664,7 @@ namespace awkward {
       ContentPtr outcontent = trimmed.get()->reduce_next(reducer,
                                                          negaxis,
                                                          util::make_starts(offsets_),
-                                                         missing,
+                                                         shifts,
                                                          nextparents,
                                                          offsets_.length() - 1,
                                                          mask,
@@ -1689,7 +1691,7 @@ namespace awkward {
   ListOffsetArrayOf<T>::reduce_next(const Reducer& reducer,
                                     int64_t negaxis,
                                     const Index64& starts,
-                                    const Index64& missing,
+                                    const Index64& shifts,
                                     const Index64& parents,
                                     int64_t length,
                                     bool mask,
@@ -1697,7 +1699,7 @@ namespace awkward {
     return toListOffsetArray64(true).get()->reduce_next(reducer,
                                                         negaxis,
                                                         starts,
-                                                        missing,
+                                                        shifts,
                                                         parents,
                                                         length,
                                                         mask,

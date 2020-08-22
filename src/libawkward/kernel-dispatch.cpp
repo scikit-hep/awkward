@@ -14213,8 +14213,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14222,8 +14220,6 @@ namespace awkward {
         return awkward_reduce_argmin_bool_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14245,8 +14241,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14254,8 +14248,6 @@ namespace awkward {
         return awkward_reduce_argmin_int8_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14277,8 +14269,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14286,8 +14276,6 @@ namespace awkward {
         return awkward_reduce_argmin_uint8_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14309,8 +14297,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14318,8 +14304,6 @@ namespace awkward {
         return awkward_reduce_argmin_int16_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14341,8 +14325,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14350,8 +14332,6 @@ namespace awkward {
         return awkward_reduce_argmin_uint16_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14373,8 +14353,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14382,8 +14360,6 @@ namespace awkward {
         return awkward_reduce_argmin_int32_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14405,8 +14381,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14414,8 +14388,6 @@ namespace awkward {
         return awkward_reduce_argmin_uint32_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14437,8 +14409,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14446,8 +14416,6 @@ namespace awkward {
         return awkward_reduce_argmin_int64_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14469,8 +14437,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14478,8 +14444,6 @@ namespace awkward {
         return awkward_reduce_argmin_uint64_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14501,8 +14465,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14510,8 +14472,6 @@ namespace awkward {
         return awkward_reduce_argmin_float32_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14533,8 +14493,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14542,8 +14500,6 @@ namespace awkward {
         return awkward_reduce_argmin_float64_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14566,8 +14522,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const bool *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14575,8 +14529,6 @@ namespace awkward {
         return awkward_reduce_argmax_bool_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14598,8 +14550,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int8_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14607,8 +14557,6 @@ namespace awkward {
         return awkward_reduce_argmax_int8_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14630,8 +14578,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint8_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14639,8 +14585,6 @@ namespace awkward {
         return awkward_reduce_argmax_uint8_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14662,8 +14606,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int16_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14671,8 +14613,6 @@ namespace awkward {
         return awkward_reduce_argmax_int16_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14694,8 +14634,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint16_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14703,8 +14641,6 @@ namespace awkward {
         return awkward_reduce_argmax_uint16_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14726,8 +14662,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int32_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14735,8 +14669,6 @@ namespace awkward {
         return awkward_reduce_argmax_int32_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14758,8 +14690,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint32_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14767,8 +14697,6 @@ namespace awkward {
         return awkward_reduce_argmax_uint32_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14790,8 +14718,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const int64_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14799,8 +14725,6 @@ namespace awkward {
         return awkward_reduce_argmax_int64_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14822,8 +14746,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const uint64_t *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14831,8 +14753,6 @@ namespace awkward {
         return awkward_reduce_argmax_uint64_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14854,8 +14774,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const float *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14863,8 +14781,6 @@ namespace awkward {
         return awkward_reduce_argmax_float32_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);
@@ -14886,8 +14802,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t *toptr,
       const double *fromptr,
-      const int64_t *starts,
-      const int64_t *missing,
       const int64_t *parents,
       int64_t lenparents,
       int64_t outlength) {
@@ -14895,8 +14809,6 @@ namespace awkward {
         return awkward_reduce_argmax_float64_64(
           toptr,
           fromptr,
-          starts,
-          missing,
           parents,
           lenparents,
           outlength);

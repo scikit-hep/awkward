@@ -929,24 +929,19 @@ namespace awkward {
     Index64 starts(1);
     starts.setitem_at_nowrap(0, 0);
 
-    Index64 missing(length());
-    struct Error err1 = kernel::content_reduce_zeroparents_64(
-      kernel::lib::cpu,   // DERIVE
-      missing.data(),
-      length());
-    util::handle_error(err1, classname(), identities_.get());
+    Index64 shifts(0);
 
     Index64 parents(length());
-    struct Error err2 = kernel::content_reduce_zeroparents_64(
+    struct Error err = kernel::content_reduce_zeroparents_64(
       kernel::lib::cpu,   // DERIVE
       parents.data(),
       length());
-    util::handle_error(err2, classname(), identities_.get());
+    util::handle_error(err, classname(), identities_.get());
 
     ContentPtr next = reduce_next(reducer,
                                   negaxis,
                                   starts,
-                                  missing,
+                                  shifts,
                                   parents,
                                   1,
                                   mask,

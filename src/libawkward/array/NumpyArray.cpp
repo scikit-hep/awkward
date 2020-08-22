@@ -3091,7 +3091,7 @@ namespace awkward {
   NumpyArray::reduce_next(const Reducer& reducer,
                           int64_t negaxis,
                           const Index64& starts,
-                          const Index64& missing,
+                          const Index64& shifts,
                           const Index64& parents,
                           int64_t outlength,
                           bool mask,
@@ -3104,7 +3104,7 @@ namespace awkward {
       return toRegularArray().get()->reduce_next(reducer,
                                                  negaxis,
                                                  starts,
-                                                 missing,
+                                                 shifts,
                                                  parents,
                                                  outlength,
                                                  mask,
@@ -3115,64 +3115,46 @@ namespace awkward {
       switch (dtype_) {
       case util::dtype::boolean:
         ptr = reducer.apply_bool(reinterpret_cast<bool*>(data()),
-                                 starts,
-                                 missing,
                                  parents,
                                  outlength);
         break;
       case util::dtype::int8:
         ptr = reducer.apply_int8(reinterpret_cast<int8_t*>(data()),
-                                 starts,
-                                 missing,
                                  parents,
                                  outlength);
         break;
       case util::dtype::int16:
         ptr = reducer.apply_int16(reinterpret_cast<int16_t*>(data()),
-                                  starts,
-                                  missing,
                                   parents,
                                   outlength);
         break;
       case util::dtype::int32:
         ptr = reducer.apply_int32(reinterpret_cast<int32_t*>(data()),
-                                  starts,
-                                  missing,
                                   parents,
                                   outlength);
         break;
       case util::dtype::int64:
         ptr = reducer.apply_int64(reinterpret_cast<int64_t*>(data()),
-                                  starts,
-                                  missing,
                                   parents,
                                   outlength);
         break;
       case util::dtype::uint8:
         ptr = reducer.apply_uint8(reinterpret_cast<uint8_t*>(data()),
-                                  starts,
-                                  missing,
                                   parents,
                                   outlength);
         break;
       case util::dtype::uint16:
         ptr = reducer.apply_uint16(reinterpret_cast<uint16_t*>(data()),
-                                   starts,
-                                   missing,
                                    parents,
                                    outlength);
         break;
       case util::dtype::uint32:
         ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(data()),
-                                   starts,
-                                   missing,
                                    parents,
                                    outlength);
         break;
       case util::dtype::uint64:
         ptr = reducer.apply_uint64(reinterpret_cast<uint64_t*>(data()),
-                                   starts,
-                                   missing,
                                    parents,
                                    outlength);
         break;
@@ -3181,15 +3163,11 @@ namespace awkward {
           std::string("FIXME: reducers on float16") + FILENAME(__LINE__));
       case util::dtype::float32:
         ptr = reducer.apply_float32(reinterpret_cast<float*>(data()),
-                                    starts,
-                                    missing,
                                     parents,
                                     outlength);
         break;
       case util::dtype::float64:
         ptr = reducer.apply_float64(reinterpret_cast<double*>(data()),
-                                    starts,
-                                    missing,
                                     parents,
                                     outlength);
         break;
