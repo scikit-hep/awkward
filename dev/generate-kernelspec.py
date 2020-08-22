@@ -167,7 +167,11 @@ def arrayconv(cpptype):
     if count == 0:
         return cpptype
     else:
-        return "List[" * count + cpptype[:-count] + "]" * count
+        if "const" in cpptype:
+            cpptype = cpptype.replace("const ", "", 1)
+            return "const List[" * count + cpptype[:-count] + "]" * count
+        else:
+            return "List[" * count + cpptype[:-count] + "]" * count
 
 
 def preprocess(filename, skip_implementation=False):
@@ -790,7 +794,12 @@ def getargs(filename):
                 assert tree.children[2].data == "args"
                 for arg in tree.children[2].children:
                     assert arg.data == "pair"
-                    funcdict[tree.children[1]][arg.children[1]] = arg.children[0]
+                    if arg.children[0] == "const":
+                        funcdict[tree.children[1]][arg.children[2]] = (
+                            arg.children[0] + " " + arg.children[1]
+                        )
+                    else:
+                        funcdict[tree.children[1]][arg.children[1]] = arg.children[0]
 
     pydef_parser = Lark(
         r"""
@@ -798,7 +807,7 @@ def getargs(filename):
     def: "EXPORT_SYMBOL" RET FUNCNAME "(" args ");"
 
     FUNCNAME: CNAME
-    pair: TYPE PARAMNAME
+    pair: [CONST] TYPE PARAMNAME
     args: pair ("," pair)*
     TYPE: /u?int\d{1,2}_t\*?\*?/
         | /bool\*?/
@@ -811,12 +820,12 @@ def getargs(filename):
        | "bool"
        | "float"
        | "double"
+    CONST: "const"
     DONTREAD: /\/\/[^\n]*/
             | /#ifndef[^\n]*/
             | /#define[^\n]*/
             | /#include[^\n]*/
             | /#endif[^\n]*/
-            | "const"
 
     %import common.CNAME
     %import common.WS
