@@ -1510,23 +1510,22 @@ namespace awkward {
         outlength);
       util::handle_error(err6, classname(), identities_.get());
 
-      Index64 nextshifts = shifts;
-      // Index64 nummissing(maxcount);
-      // Index64 missing(nextlen);
-      // Index64 nextshifts(nextlen);
-      // struct Error err7 = kernel::ListOffsetArray_reduce_nonlocal_nextshifts_64(
-      //   kernel::lib::cpu,   // DERIVE
-      //   nummissing.data(),
-      //   missing.data(),
-      //   nextshifts.data(),
-      //   offsets_.data(),
-      //   offsets_.length() - 1,
-      //   starts.data(),
-      //   parents.data(),
-      //   maxcount,
-      //   nextlen,
-      //   nextcarry.data());
-      // util::handle_error(err7, classname(), identities_.get());
+      Index64 nummissing(maxcount);
+      Index64 missing(nextlen);
+      Index64 nextshifts(nextlen);
+      struct Error err7 = kernel::ListOffsetArray_reduce_nonlocal_nextshifts_64(
+        kernel::lib::cpu,   // DERIVE
+        nummissing.data(),
+        missing.data(),
+        nextshifts.data(),
+        offsets_.data(),
+        offsets_.length() - 1,
+        starts.data(),
+        parents.data(),
+        maxcount,
+        nextlen,
+        nextcarry.data());
+      util::handle_error(err7, classname(), identities_.get());
 
       ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
       ContentPtr outcontent = nextcontent.get()->reduce_next(reducer,
