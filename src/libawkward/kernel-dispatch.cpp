@@ -15185,6 +15185,156 @@ namespace awkward {
       }
     }
 
+    template <>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_64<int32_t>(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int32_t* index,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray32_reduce_next_nonlocal_nextshifts_64(
+          nextshifts,
+          index,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_nonlocal_nextshifts_64<int32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_nonlocal_nextshifts_64<int32_t")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template <>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_64<uint32_t>(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const uint32_t* index,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArrayU32_reduce_next_nonlocal_nextshifts_64(
+          nextshifts,
+          index,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_nonlocal_nextshifts_64<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_nonlocal_nextshifts_64<uint32_t")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template <>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_64<int64_t>(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int64_t* index,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray64_reduce_next_nonlocal_nextshifts_64(
+          nextshifts,
+          index,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_nonlocal_nextshifts_64<int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_nonlocal_nextshifts_64<int64_t")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template <>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int32_t>(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int32_t* index,
+      int64_t length,
+      const int64_t* shifts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray32_reduce_next_nonlocal_nextshifts_fromshifts_64(
+          nextshifts,
+          index,
+          length,
+          shifts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template <>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<uint32_t>(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const uint32_t* index,
+      int64_t length,
+      const int64_t* shifts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArrayU32_reduce_next_nonlocal_nextshifts_fromshifts_64(
+          nextshifts,
+          index,
+          length,
+          shifts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template <>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int64_t>(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int64_t* index,
+      int64_t length,
+      const int64_t* shifts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray64_reduce_next_nonlocal_nextshifts_fromshifts_64(
+          nextshifts,
+          index,
+          length,
+          shifts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<int64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
     ERROR IndexedArray_reduce_next_fix_offsets_64(
       kernel::lib ptr_lib,
       int64_t *outoffsets,

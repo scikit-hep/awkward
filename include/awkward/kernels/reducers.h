@@ -1571,6 +1571,65 @@ extern "C" {
       int64_t* parents,
       int64_t length);
 
+  /// @param nextshifts outparam
+  /// @param index inparam role: reducer-nextshifts
+  /// @param length inparam role: reducer-length
+  /// @param shifts inparam role: reducer-shifts
+  EXPORT_SYMBOL struct Error
+    awkward_IndexedArray32_reduce_next_nonlocal_nextshifts_64(
+      int64_t* nextshifts,
+      const int32_t* index,
+      int64_t length);
+  /// @param nextshifts outparam
+  /// @param index inparam role: reducer-nextshifts
+  /// @param length inparam role: reducer-length
+  /// @param shifts inparam role: reducer-shifts
+  EXPORT_SYMBOL struct Error
+    awkward_IndexedArrayU32_reduce_next_nonlocal_nextshifts_64(
+      int64_t* nextshifts,
+      const uint32_t* index,
+      int64_t length);
+  /// @param nextshifts outparam
+  /// @param index inparam role: reducer-nextshifts
+  /// @param length inparam role: reducer-length
+  /// @param shifts inparam role: reducer-shifts
+  EXPORT_SYMBOL struct Error
+    awkward_IndexedArray64_reduce_next_nonlocal_nextshifts_64(
+      int64_t* nextshifts,
+      const int64_t* index,
+      int64_t length);
+
+  /// @param nextshifts outparam
+  /// @param index inparam role: reducer-nextshifts
+  /// @param length inparam role: reducer-length
+  /// @param shifts inparam role: reducer-shifts
+  EXPORT_SYMBOL struct Error
+    awkward_IndexedArray32_reduce_next_nonlocal_nextshifts_fromshifts_64(
+      int64_t* nextshifts,
+      const int32_t* index,
+      int64_t length,
+      const int64_t* shifts);
+  /// @param nextshifts outparam
+  /// @param index inparam role: reducer-nextshifts
+  /// @param length inparam role: reducer-length
+  /// @param shifts inparam role: reducer-shifts
+  EXPORT_SYMBOL struct Error
+    awkward_IndexedArrayU32_reduce_next_nonlocal_nextshifts_fromshifts_64(
+      int64_t* nextshifts,
+      const uint32_t* index,
+      int64_t length,
+      const int64_t* shifts);
+  /// @param nextshifts outparam
+  /// @param index inparam role: reducer-nextshifts
+  /// @param length inparam role: reducer-length
+  /// @param shifts inparam role: reducer-shifts
+  EXPORT_SYMBOL struct Error
+    awkward_IndexedArray64_reduce_next_nonlocal_nextshifts_fromshifts_64(
+      int64_t* nextshifts,
+      const int64_t* index,
+      int64_t length,
+      const int64_t* shifts);
+
   /// @param outoffsets outparam
   /// @param starts inparam role: reducer-starts
   /// @param startslength inparam role: reducer-startslength

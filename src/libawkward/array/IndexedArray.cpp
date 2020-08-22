@@ -1924,30 +1924,23 @@ namespace awkward {
     Index64 nextshifts(make_shifts ? index_.length() - numnull : 0);
     if (make_shifts) {
       if (shifts.length() == 0) {
-        int64_t nullsum = 0;
-        int64_t k = 0;
-        for (int64_t i = 0;  i < index_.length();  i++) {
-          if (index_.data()[i] >= 0) {
-            nextshifts.data()[k] = nullsum;
-            k++;
-          }
-          else {
-            nullsum++;
-          }
-        }
+        struct Error err3 =
+            kernel::IndexedArray_reduce_next_nonlocal_nextshifts_64<T>(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          index_.data(),
+          index_.length());
+        util::handle_error(err3, classname(), identities_.get());
       }
       else {
-        int64_t nullsum = 0;
-        int64_t k = 0;
-        for (int64_t i = 0;  i < index_.length();  i++) {
-          if (index_.data()[i] >= 0) {
-            nextshifts.data()[k] = shifts.data()[i] + nullsum;
-            k++;
-          }
-          else {
-            nullsum++;
-          }
-        }
+        struct Error err3 =
+            kernel::IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<T>(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          index_.data(),
+          index_.length(),
+          shifts.data());
+        util::handle_error(err3, classname(), identities_.get());
       }
     }
 
@@ -1978,13 +1971,13 @@ namespace awkward {
                         "ListOffsetArray64 whose offsets start at zero ")
             + FILENAME(__LINE__));
         }
-        struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
+        struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
           starts.length(),
           outindex.length());
-        util::handle_error(err3, classname(), identities_.get());
+        util::handle_error(err4, classname(), identities_.get());
 
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),

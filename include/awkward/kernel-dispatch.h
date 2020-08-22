@@ -1518,6 +1518,21 @@ namespace awkward {
       int64_t* parents,
       int64_t length);
 
+    template <typename T>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const T* index,
+      int64_t length);
+
+    template <typename T>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const T* index,
+      int64_t length,
+      const int64_t* shifts);
+
     ERROR IndexedArray_reduce_next_fix_offsets_64(
       kernel::lib ptr_lib,
       int64_t* outoffsets,
