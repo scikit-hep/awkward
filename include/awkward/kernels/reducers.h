@@ -1693,6 +1693,30 @@ extern "C" {
       int64_t length,
       bool validwhen);
 
+  /// @param nextshifts outparam
+  /// @param mask inparam role: reducer-mask
+  /// @param length inparam role: reducer-length
+  /// @param valid_when inparam role: reducer-valid_when
+  EXPORT_SYMBOL struct Error
+    awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
+      int64_t* nextshifts,
+      const int8_t* mask,
+      int64_t length,
+      bool valid_when);
+
+  /// @param nextshifts outparam
+  /// @param mask inparam role: reducer-mask
+  /// @param length inparam role: reducer-length
+  /// @param valid_when inparam role: reducer-valid_when
+  /// @param shifts inparam role: reducer-shifts
+  EXPORT_SYMBOL struct Error
+    awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+      int64_t* nextshifts,
+      const int8_t* mask,
+      int64_t length,
+      bool valid_when,
+      const int64_t* shifts);
+
 }
 
 #endif // AWKWARD_KERNELS_REDUCERS_H_

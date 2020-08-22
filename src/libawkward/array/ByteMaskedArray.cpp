@@ -953,8 +953,6 @@ namespace awkward {
                                int64_t outlength,
                                bool mask,
                                bool keepdims) const {
-    std::cout << "ByteMaskedArray::reduce_next" << std::endl;
-
     int64_t numnull;
     struct Error err1 = kernel::ByteMaskedArray_numnull(
       kernel::lib::cpu,   // DERIVE
@@ -986,40 +984,29 @@ namespace awkward {
     Index64 nextshifts(make_shifts ? mask_.length() - numnull : 0);
     if (make_shifts) {
       if (shifts.length() == 0) {
-        int64_t nullsum = 0;
-        int64_t k = 0;
-        for (int64_t i = 0;  i < mask_.length();  i++) {
-          if ((mask_.data()[i] != 0) == (valid_when_ != 0)) {
-            nextshifts.data()[k] = nullsum;
-            k++;
-          }
-          else {
-            nullsum++;
-          }
-        }
+        struct Error err3 =
+            kernel::ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          mask_.data(),
+          mask_.length(),
+          valid_when_);
+        util::handle_error(err3, classname(), identities_.get());
       }
       else {
-        int64_t nullsum = 0;
-        int64_t k = 0;
-        for (int64_t i = 0;  i < mask_.length();  i++) {
-          if ((mask_.data()[i] != 0) == (valid_when_ != 0)) {
-            nextshifts.data()[k] = shifts.data()[i] + nullsum;
-            k++;
-          }
-          else {
-            nullsum++;
-          }
-        }
+        struct Error err3 =
+            kernel::ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          mask_.data(),
+          mask_.length(),
+          valid_when_,
+          shifts.data());
+        util::handle_error(err3, classname(), identities_.get());
       }
     }
 
     ContentPtr next = content_.get()->carry(nextcarry, false);
-
-    std::cout << "next" << std::endl;
-    std::cout << next.get()->tostring() << std::endl;
-    std::cout << "nextshifts " << nextshifts.tostring() << std::endl;
-
-
     ContentPtr out = next.get()->reduce_next(reducer,
                                              negaxis,
                                              starts,
@@ -1046,13 +1033,13 @@ namespace awkward {
                         "a ListOffsetArray64 whose offsets start at zero")
             + FILENAME(__LINE__));
         }
-        struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
+        struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
           starts.length(),
           outindex.length());
-        util::handle_error(err3, classname(), identities_.get());
+        util::handle_error(err4, classname(), identities_.get());
 
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),

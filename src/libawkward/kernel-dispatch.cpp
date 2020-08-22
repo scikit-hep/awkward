@@ -15445,7 +15445,7 @@ namespace awkward {
       const int8_t *mask,
       const int64_t *parents,
       int64_t length,
-      bool validwhen) {
+      bool valid_when) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ByteMaskedArray_reduce_next_64(
           nextcarry,
@@ -15454,7 +15454,7 @@ namespace awkward {
           mask,
           parents,
           length,
-          validwhen);
+          valid_when);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -15464,6 +15464,58 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("unrecognized ptr_lib for ByteMaskedArray_reduce_next_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    ERROR ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int8_t* mask,
+      int64_t length,
+      bool valid_when) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
+          nextshifts,
+          mask,
+          length,
+          valid_when);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_reduce_next_nonlocal_nextshifts_64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for ByteMaskedArray_reduce_next_nonlocal_nextshifts_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    ERROR ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int8_t* mask,
+      int64_t length,
+      bool valid_when,
+      const int64_t* shifts) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+          nextshifts,
+          mask,
+          length,
+          valid_when,
+          shifts);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64")
           + FILENAME(__LINE__));
       }
     }

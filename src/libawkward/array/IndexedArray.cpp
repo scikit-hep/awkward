@@ -1893,8 +1893,6 @@ namespace awkward {
                                            int64_t outlength,
                                            bool mask,
                                            bool keepdims) const {
-    std::cout << "IndexedArrayOf<T, " << isoption() << ">::reduce_next" << std::endl;
-
     int64_t numnull;
     struct Error err1 = kernel::IndexedArray_numnull<T>(
       kernel::lib::cpu,   // DERIVE

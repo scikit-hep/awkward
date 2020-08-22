@@ -1579,6 +1579,21 @@ namespace awkward {
       int64_t length,
       bool validwhen);
 
+    ERROR ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int8_t* mask,
+      int64_t length,
+      bool valid_when);
+
+    ERROR ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int8_t* mask,
+      int64_t length,
+      bool valid_when,
+      const int64_t* shifts);
+
     /////////////////////////////////// awkward/kernels/sorting.h
 
     ERROR sorting_ranges(
