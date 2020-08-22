@@ -411,11 +411,16 @@ def getlenarg(pycode):
 
 def getctype(typename):
     pointercount = 0
+    if "const " in typename:
+        typename = typename.replace("const ", "", 1)
+        cpptype = "const "
+    else:
+        cpptype = ""
     while "List[" in typename:
         typename = typename[5:]
         typename = typename[:-1]
         pointercount += 1
-    cpptype = typename + "*" * pointercount
+    cpptype += typename + "*" * pointercount
     return cpptype
 
 
@@ -447,7 +452,10 @@ def getparentargs(templateargs, spec):
             if list(arg.keys())[0] in templateargs.keys():
                 if "*" in getctype(list(arg.values())[0]):
                     argname = "*" + argname
-                args[argname] = templateargs[list(arg.keys())[0]]
+                if "const " in list(arg.values())[0]:
+                    args[argname] = "const " + templateargs[list(arg.keys())[0]]
+                else:
+                    args[argname] = templateargs[list(arg.keys())[0]]
             else:
                 args[argname] = getctype(list(arg.values())[0])
     else:
@@ -511,6 +519,7 @@ def gettemplatetypes(spec, templateargs):
                     count += 1
                 else:
                     code += ", " + getctype(typename).replace("*", "")
+    code = code.replace("const ", "")
     return code
 
 
