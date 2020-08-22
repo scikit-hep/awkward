@@ -1359,8 +1359,8 @@ ERROR awkward_reduce_argmin_bool_64(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = -1;
+  for (int64_t k = 0;  k < outlength;  k++) {
+    toptr[k] = -1;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[i];
@@ -1508,8 +1508,8 @@ ERROR awkward_reduce_argmax(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = -1;
+  for (int64_t k = 0;  k < outlength;  k++) {
+    toptr[k] = -1;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[i];
@@ -1525,8 +1525,8 @@ ERROR awkward_reduce_argmax_bool_64(
   const int64_t* parents,
   int64_t lenparents,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = -1;
+  for (int64_t k = 0;  k < outlength;  k++) {
+    toptr[k] = -1;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[i];

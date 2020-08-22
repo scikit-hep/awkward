@@ -3195,6 +3195,26 @@ namespace awkward {
           + format_ + std::string("\"") + FILENAME(__LINE__));
       }
 
+
+
+
+
+
+      if (reducer.returns_positions()) {
+        int64_t* p = reinterpret_cast<int64_t*>(ptr.get());
+        for (int64_t k = 0;  k < outlength;  k++) {
+          int64_t i = p[k];
+          int64_t parent = parents.data()[i];
+          int64_t start = starts.data()[parent];
+          p[k] += -start;
+        }
+      }
+
+
+
+
+
+
       util::dtype dtype = reducer.return_dtype(dtype_);
       std::string format = util::dtype_to_format(dtype);
       ssize_t itemsize = util::dtype_to_itemsize(dtype);
