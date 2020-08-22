@@ -938,6 +938,8 @@ namespace awkward {
       length());
     util::handle_error(err, classname(), identities_.get());
 
+    std::cout << "Content::reduce " << classname() << std::endl;
+
     ContentPtr next = reduce_next(reducer,
                                   negaxis,
                                   starts,

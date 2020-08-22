@@ -128,3 +128,19 @@ def test_jagged_axis1():
     array = awkward1.Array([[[1.1], [1.1, 2.2], [1.1, 2.2, 3.3], [], [999, 2.0], [1.0]], [[1.1, 999, 999, 999], [1.1, 2.2, 999], [1.1, 2.2, 3.3], [999, 2.0], [1.0]]])
     assert awkward1.min(array, axis=1).tolist() == [[1, 2, 3.3], [1, 2, 3.3, 999]]
     assert awkward1.argmin(array, axis=1).tolist() == [[5, 4, 2], [4, 3, 2, 0]]
+
+def test_IndexedOptionArray():
+    content = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5]).layout
+    index = awkward1.layout.Index64(numpy.array([4, 2, -1, -1, 1, 0, 1]))
+    array = awkward1.Array(awkward1.layout.IndexedOptionArray64(index, content))
+    assert array.tolist() == [5.5, 3.3, None, None, 2.2, 1.1, 2.2]
+    assert awkward1.min(array, axis=0) == 1.1
+    assert awkward1.argmin(array, axis=0) == 5
+
+    assert awkward1.argmin(awkward1.Array([[2.2, 1.1], [None, 3.3], [2.2, 1.1]]), axis=-1).tolist() == [1, 1, 1]
+    assert awkward1.argmin(awkward1.Array([[2.2, 1.1], [None, 3.3], [2.2, None, 1.1]]), axis=-1).tolist() == [1, 1, 2]
+    assert awkward1.argmin(awkward1.Array([[2.2, 1.1], [3.3, None], [2.2, None, 1.1]]), axis=-1).tolist() == [1, 0, 2]
+
+    assert awkward1.argmin(awkward1.Array([[2.2, 1.1, 0.0], [], [None, 0.5], [2, 1]]), axis=0).tolist() == [3, 2, 0]
+    assert awkward1.argmin(awkward1.Array([[2.2, 1.1, 0.0], [], [0.5, None], [2, 1]]), axis=0).tolist() == [2, 3, 0]
+    assert awkward1.argmin(awkward1.Array([[2.2, 1.1, 0.0], [0.5, None], [], [2, 1]]), axis=0).tolist() == [1, 3, 0]

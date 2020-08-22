@@ -1433,6 +1433,7 @@ namespace awkward {
     int64_t outlength,
     bool mask,
     bool keepdims) const {
+    std::cout << "ListOffsetArrayOf<int64_t>::reduce_next" << std::endl;
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
 

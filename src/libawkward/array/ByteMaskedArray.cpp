@@ -953,6 +953,8 @@ namespace awkward {
                                int64_t outlength,
                                bool mask,
                                bool keepdims) const {
+    std::cout << "ByteMaskedArray::reduce_next" << std::endl;
+
     int64_t numnull;
     struct Error err1 = kernel::ByteMaskedArray_numnull(
       kernel::lib::cpu,   // DERIVE

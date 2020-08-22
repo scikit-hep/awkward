@@ -1893,6 +1893,8 @@ namespace awkward {
                                            int64_t outlength,
                                            bool mask,
                                            bool keepdims) const {
+    std::cout << "IndexedArrayOf<T, " << isoption() << ">::reduce_next" << std::endl;
+
     int64_t numnull;
     struct Error err1 = kernel::IndexedArray_numnull<T>(
       kernel::lib::cpu,   // DERIVE
@@ -1914,17 +1916,49 @@ namespace awkward {
       index_.length());
     util::handle_error(err2, classname(), identities_.get());
 
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    bool make_shifts = (!branchdepth.first  &&  negaxis == branchdepth.second  &&  isoption());
+
+    Index64 nextshifts(make_shifts ? index_.length() - numnull : 0);
+    if (make_shifts) {
+      if (shifts.length() == 0) {
+        int64_t nullsum = 0;
+        int64_t k = 0;
+        for (int64_t i = 0;  i < index_.length();  i++) {
+          if (index_.data()[i] >= 0) {
+            nextshifts.data()[k] = nullsum;
+            k++;
+          }
+          else {
+            nullsum++;
+          }
+        }
+      }
+      else {
+        int64_t nullsum = 0;
+        int64_t k = 0;
+        for (int64_t i = 0;  i < index_.length();  i++) {
+          if (index_.data()[i] >= 0) {
+            nextshifts.data()[k] = shifts.data()[i] + nullsum;
+            k++;
+          }
+          else {
+            nullsum++;
+          }
+        }
+      }
+    }
+
     ContentPtr next = content_.get()->carry(nextcarry, false);
     ContentPtr out = next.get()->reduce_next(reducer,
                                              negaxis,
                                              starts,
-                                             shifts,
+                                             nextshifts,
                                              nextparents,
                                              outlength,
                                              mask,
                                              keepdims);
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       return out;
     }
