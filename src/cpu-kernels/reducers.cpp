@@ -1810,6 +1810,16 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
   return success();
 }
 
+// ERROR awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
+//   int64_t* nummissing,
+//   int64_t* missing,
+//   int64_t* nextshifts,
+//   const int64_t offsets,
+//   int64_t length,
+
+
+
+
 ERROR awkward_ListOffsetArray_reduce_local_nextparents_64(
   int64_t* nextparents,
   const int64_t* offsets,
