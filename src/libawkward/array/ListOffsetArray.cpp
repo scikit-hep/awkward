@@ -1511,7 +1511,7 @@ namespace awkward {
       util::handle_error(err6, classname(), identities_.get());
 
       Index64 nummissing(maxcount);
-      Index64 missing(nextlen);
+      Index64 missing(offsets_.getitem_at(offsets_.length() - 1));
       Index64 nextshifts(nextlen);
       struct Error err7 = kernel::ListOffsetArray_reduce_nonlocal_nextshifts_64(
         kernel::lib::cpu,   // DERIVE
