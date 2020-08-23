@@ -1783,22 +1783,24 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
 
           ak::util::dtype cupy_dtype= ak::util::name_to_dtype(
               py::cast<std::string>(py::str(py::dtype(array.attr("dtype")))));
-//
-//          std::shared_ptr<ak::NumpyArray> ak_array =  std::make_shared<ak::NumpyArray>(
-//            unbox_identities_none(identities),
-//            dict2parameters(parameters),
-//            std::shared_ptr<void>(
-//                  ptr,
-//                  pyobject_deleter<void>(array.ptr())),
-//            shape,
-//            strides,
-//            0,
-//            py::dtype(array.attr("dtype")).itemsize(),
-//            ak::util::dtype_to_format(cupy_dtype),
-//            cupy_dtype,
-//            ak::kernel::lib::cuda);
-//
-//          return box(ak_array);
+
+          ak::NumpyArray* ak_array =  new ak::NumpyArray(
+            unbox_identities_none(identities),
+            dict2parameters(parameters),
+            std::shared_ptr<void>(
+                  ptr,
+                  pyobject_deleter<void>(array.ptr())),
+            shape,
+            strides,
+            0,
+            py::dtype(array.attr("dtype")).itemsize(),
+            ak::util::dtype_to_format(cupy_dtype),
+            cupy_dtype,
+            ak::kernel::lib::cuda);
+
+          std::shared_ptr<ak::NumpyArray> arr = std::shared_ptr<ak::NumpyArray>(ak_array);
+
+          return box(arr);
         }
         else {
           throw std::invalid_argument(name + std::string(
