@@ -1767,22 +1767,22 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
           const std::vector<int64_t> shape = pytuples_to_vector<int64_t>(array.attr("shape"));
           const std::vector<int64_t> strides = pytuples_to_vector<int64_t>(array.attr("strides"));
 //
-//          if (py::cast<int64_t>(array.attr("ndim")) == 0) {
-//            throw std::invalid_argument(
-//              "NumpyArray must not be scalar; try array.reshape(1)");
-//          }
-//          if (shape.size() != py::cast<int64_t>(array.attr("ndim"))  ||
-//              strides.size() != py::cast<int64_t>(array.attr("ndim"))) {
-//            throw std::invalid_argument(
-//              "CuPy Array len(shape) != ndim or len(strides) != ndim");
-//          }
-//
-//          void* ptr = reinterpret_cast<void *>(py::cast<ssize_t>
-//              (array.attr("data").attr("ptr")));
-//
-//
-//          ak::util::dtype cupy_dtype= ak::util::name_to_dtype(
-//              py::cast<std::string>(py::str(py::dtype(array.attr("dtype")))));
+          if (py::cast<int64_t>(array.attr("ndim")) == 0) {
+            throw std::invalid_argument(
+              "NumpyArray must not be scalar; try array.reshape(1)");
+          }
+          if (shape.size() != py::cast<int64_t>(array.attr("ndim"))  ||
+              strides.size() != py::cast<int64_t>(array.attr("ndim"))) {
+            throw std::invalid_argument(
+              "CuPy Array len(shape) != ndim or len(strides) != ndim");
+          }
+
+          void* ptr = reinterpret_cast<void *>(py::cast<ssize_t>
+              (array.attr("data").attr("ptr")));
+
+
+          ak::util::dtype cupy_dtype= ak::util::name_to_dtype(
+              py::cast<std::string>(py::str(py::dtype(array.attr("dtype")))));
 //
 //          std::shared_ptr<ak::NumpyArray> ak_array =  std::make_shared<ak::NumpyArray>(
 //            unbox_identities_none(identities),
