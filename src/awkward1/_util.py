@@ -824,7 +824,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
 
     else:
         isscalar = []
-        out = apply(broadcast_pack(inputs, isscalar), 0)
+        out = apply(broadcast_pack(inputs, isscalar), 0) #SCALAR? #inputs gets passed into varargs that can be scalar
         assert isinstance(out, tuple)
         return tuple(broadcast_unpack(x, isscalar) for x in out)
 

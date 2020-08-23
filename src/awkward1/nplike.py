@@ -3,15 +3,21 @@
 from __future__ import absolute_import
 
 import numpy
-import itertools
+import collections
 
 import awkward1.layout
 import numpy as np
+import cupy as cp
 
 def flatten(ptr_lib_list):
     if ptr_lib_list == None:
-        return ["None"]
-    return itertools.chain.from_iterable(itertools.repeat(x,1) if isinstance(x,str) else x for x in ptr_lib_list)
+        return []
+    
+    for el in ptr_lib_list:
+        if isinstance(el, collections.Iterable) and not isinstance(el, (str, bytes)):
+            yield from flatten(el)
+        else:
+            yield el
 
 
 def fetch_ptr_libs(array):
@@ -34,9 +40,12 @@ def fetch_ptr_libs(array):
         elif isinstance(array, awkward1.layout.Record):
             out = array
             return recurse(out.array[out.at : out.at + 1])[0]
+        
+        elif isinstance(array, awkward1.partition.IrregularlyPartitionedArray):
+            return [recurse(x) for x in array.partitions]
 
         elif isinstance(array, awkward1.layout.VirtualArray):
-            return recurse(array.array)
+            return [array.ptr_lib]
 
         elif isinstance(array, awkward1.layout.EmptyArray):
             return ["cpu"]
@@ -65,7 +74,7 @@ def fetch_ptr_libs(array):
             ]
 
             tags = recurse(array.tags)
-            return contents + tags
+            return list(flatten(contents + tags))
 
         elif isinstance(array, (awkward1.layout.ListOffsetArray32,
                                 awkward1.layout.ListOffsetArrayU32,
@@ -94,16 +103,25 @@ def fetch_ptr_libs(array):
         elif isinstance(array, awkward1.layout.BitMaskedArray):
             bitmask = recurse(array.mask)
             content = recurse(array.content)
-            return bitmask.append(content)
+            return list(flatten(bitmask + content))
         
         elif isinstance(array, awkward1.layout.ByteMaskedArray):
             bytemask = recurse(array.mask)
             content = recurse(array.content)
-            return bytemask.append(content)
+            return list(flatten(bytemask + content))
         
         elif isinstance(array, awkward1.layout.UnmaskedArray):
             return recurse(array.content)
-
+        
+        elif isinstance(array, np.ndarray):
+            return ["cpu"]
+        
+        elif isinstance(array, cp.ndarray):
+            return ["cuda"]
+        
+        elif array == None:
+            return []
+        
         else:
             raise TypeError("unrecognized array type: {0}".format(repr(array)))
     
@@ -111,26 +129,48 @@ def fetch_ptr_libs(array):
     return list(flatten(ptr_lib_list))
 
 def of(*arrays):
-    # ptr_lib_list = []
-    # for i in arrays:
-    #     if(np.isscalar(i)):
-    #         raise ValueError("Recieved a scalar")
-    #     ptr_lib_list = ptr_lib_list + fetch_ptr_libs(i)
+    ptr_lib_list = []
+    for i in arrays:
+        if(np.isscalar(i)):
+            continue
 
-    # result = False
-    # if len(ptr_lib_list) > 0 :
-    #     result = all(elem == ptr_lib_list[0] for elem in ptr_lib_list)
+        elif(isinstance(i, (awkward1.forms.BitMaskedForm, 
+                          awkward1.forms.Form,               
+                          awkward1.forms.ListForm,
+                          awkward1.forms.RecordForm,         
+                          awkward1.forms.UnmaskedForm,       
+                          awkward1.forms.ByteMaskedForm,    
+                          awkward1.forms.IndexedForm,        
+                          awkward1.forms.ListOffsetForm,     
+                          awkward1.forms.RegularForm,        
+                          awkward1.forms.VirtualForm,        
+                          awkward1.forms.EmptyForm,         
+                          awkward1.forms.IndexedOptionForm,  
+                          awkward1.forms.NumpyForm,          
+                          awkward1.forms.UnionForm))):
+            continue
+        else:
+            ptr_lib_list = ptr_lib_list + fetch_ptr_libs(i)
 
-    # ptr_lib = "None"
-    # if result == True:
-    #     ptr_lib =  ptr_lib_list[0]
-
-    # if ptr_lib == "cpu":
-    #     return Numpy.instance()
-    # elif ptr_lib == "cuda":
-    #     return Cupy.instance()
-    # else:
-    #     raise ValueError("Make sure Awkward Arrays use the same kernel use awkward1.copy_to(args) to make it consistent")
+    result = False
+    ptr_lib_list = list(flatten(ptr_lib_list))
+    if len(ptr_lib_list) > 0 :
+        result = all(elem == ptr_lib_list[0] for elem in ptr_lib_list)
+    
+    ptr_lib = "None"
+    if result == True :
+        ptr_lib =  ptr_lib_list[0]       
+    else:
+        ptr_lib = "Inconsistent"
+    if(len(ptr_lib_list) == 0):
+        ptr_lib = "None"
+    
+    if ptr_lib == "cpu" or ptr_lib == "None":
+        return Numpy.instance()
+    elif ptr_lib == "cuda":
+        return Cupy.instance()
+    else:
+        raise ValueError("Make sure Awkward Arrays use the same kernel use awkward1.copy_to(args) to make it consistent")
 
     return Numpy.instance()
 

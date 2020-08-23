@@ -2291,5 +2291,16 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
         return box(self.array());
       })
       .def_property_readonly("cache_key", &ak::VirtualArray::cache_key)
+      .def_property_readonly("ptr_lib", [](const ak::VirtualArray& self) -> py::object {
+        if(self.ptr_lib() == ak::kernel::lib::cpu) {
+          return py::cast("cpu");
+        }
+        else if(self.ptr_lib() == ak::kernel::lib::cuda) {
+          return py::cast("cuda");
+        }
+        else {
+          return py::cast("None");
+        }
+      })
   );
 }
