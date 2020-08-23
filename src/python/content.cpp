@@ -1760,53 +1760,53 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
         return box(self.shallow_simplify());
       })
 
-      .def_static("from_cupy", [name](py::object array,
-                                      const py::object& identities,
-                                      const py::object& parameters) -> py::object {
-        if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
-          const std::vector<int64_t> shape = pytuples_to_vector<int64_t>(array.attr("shape"));
-          const std::vector<int64_t> strides = pytuples_to_vector<int64_t>(array.attr("strides"));
-
-          if (py::cast<int64_t>(array.attr("ndim")) == 0) {
-            throw std::invalid_argument(
-              "NumpyArray must not be scalar; try array.reshape(1)");
-          }
-          if (shape.size() != py::cast<int64_t>(array.attr("ndim"))  ||
-              strides.size() != py::cast<int64_t>(array.attr("ndim"))) {
-            throw std::invalid_argument(
-              "CuPy Array len(shape) != ndim or len(strides) != ndim");
-          }
-
-          void* ptr = reinterpret_cast<void *>(py::cast<ssize_t>
-              (array.attr("data").attr("ptr")));
-
-
-          ak::util::dtype cupy_dtype= ak::util::name_to_dtype(
-              py::cast<std::string>(py::str(py::dtype(array.attr("dtype")))));
-
-          std::shared_ptr<ak::NumpyArray> ak_array =  std::make_shared<ak::NumpyArray>(
-            unbox_identities_none(identities),
-            dict2parameters(parameters),
-            std::shared_ptr<void>(
-                  ptr,
-                  pyobject_deleter<void>(array.ptr())),
-            shape,
-            strides,
-            0,
-            py::dtype(array.attr("dtype")).itemsize(),
-            ak::util::dtype_to_format(cupy_dtype),
-            cupy_dtype,
-            ak::kernel::lib::cuda);
-
-          return box(ak_array);
-        }
-        else {
-          throw std::invalid_argument(name + std::string(
-            ".from_cupy() can only accept CuPy Arrays!"));
-        }
-    }, py::arg("array"),
-       py::arg("identities") = py::none(),
-       py::arg("parameters") = py::none())
+//      .def_static("from_cupy", [name](py::object array,
+//                                      const py::object& identities,
+//                                      const py::object& parameters) -> py::object {
+//        if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
+//          const std::vector<int64_t> shape = pytuples_to_vector<int64_t>(array.attr("shape"));
+//          const std::vector<int64_t> strides = pytuples_to_vector<int64_t>(array.attr("strides"));
+//
+//          if (py::cast<int64_t>(array.attr("ndim")) == 0) {
+//            throw std::invalid_argument(
+//              "NumpyArray must not be scalar; try array.reshape(1)");
+//          }
+//          if (shape.size() != py::cast<int64_t>(array.attr("ndim"))  ||
+//              strides.size() != py::cast<int64_t>(array.attr("ndim"))) {
+//            throw std::invalid_argument(
+//              "CuPy Array len(shape) != ndim or len(strides) != ndim");
+//          }
+//
+//          void* ptr = reinterpret_cast<void *>(py::cast<ssize_t>
+//              (array.attr("data").attr("ptr")));
+//
+//
+//          ak::util::dtype cupy_dtype= ak::util::name_to_dtype(
+//              py::cast<std::string>(py::str(py::dtype(array.attr("dtype")))));
+//
+//          std::shared_ptr<ak::NumpyArray> ak_array =  std::make_shared<ak::NumpyArray>(
+//            unbox_identities_none(identities),
+//            dict2parameters(parameters),
+//            std::shared_ptr<void>(
+//                  ptr,
+//                  pyobject_deleter<void>(array.ptr())),
+//            shape,
+//            strides,
+//            0,
+//            py::dtype(array.attr("dtype")).itemsize(),
+//            ak::util::dtype_to_format(cupy_dtype),
+//            cupy_dtype,
+//            ak::kernel::lib::cuda);
+//
+//          return box(ak_array);
+//        }
+//        else {
+//          throw std::invalid_argument(name + std::string(
+//            ".from_cupy() can only accept CuPy Arrays!"));
+//        }
+//    }, py::arg("array"),
+//       py::arg("identities") = py::none(),
+//       py::arg("parameters") = py::none())
       .def("to_cupy", [name](const ak::NumpyArray& self) -> py::object {
         if(self.ptr_lib() != ak::kernel::lib::cuda) {
           throw std::invalid_argument(name + " is not a Awkward CUDA array, "
