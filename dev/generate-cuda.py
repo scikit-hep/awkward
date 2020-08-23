@@ -43,6 +43,8 @@ KERNEL_WHITELIST = [
     "awkward_IndexedArray_numnull",
     "awkward_UnionArray_regular_index_getsize",
     "awkward_ListArray_getitem_jagged_carrylen",
+    "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
+    "awkward_MaskedArray_getitem_next_jagged_project",
 ]
 
 
