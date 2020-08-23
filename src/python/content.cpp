@@ -1760,12 +1760,12 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
         return box(self.shallow_simplify());
       })
 
-//      .def_static("from_cupy", [name](py::object array,
-//                                      const py::object& identities,
-//                                      const py::object& parameters) -> py::object {
-//        if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
-//          const std::vector<int64_t> shape = pytuples_to_vector<int64_t>(array.attr("shape"));
-//          const std::vector<int64_t> strides = pytuples_to_vector<int64_t>(array.attr("strides"));
+      .def_static("from_cupy", [name](py::object array,
+                                      const py::object& identities,
+                                      const py::object& parameters) -> py::object {
+        if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
+          const std::vector<int64_t> shape = pytuples_to_vector<int64_t>(array.attr("shape"));
+          const std::vector<int64_t> strides = pytuples_to_vector<int64_t>(array.attr("strides"));
 //
 //          if (py::cast<int64_t>(array.attr("ndim")) == 0) {
 //            throw std::invalid_argument(
@@ -1799,14 +1799,14 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
 //            ak::kernel::lib::cuda);
 //
 //          return box(ak_array);
-//        }
-//        else {
-//          throw std::invalid_argument(name + std::string(
-//            ".from_cupy() can only accept CuPy Arrays!"));
-//        }
-//    }, py::arg("array"),
-//       py::arg("identities") = py::none(),
-//       py::arg("parameters") = py::none())
+        }
+        else {
+          throw std::invalid_argument(name + std::string(
+            ".from_cupy() can only accept CuPy Arrays!"));
+        }
+    }, py::arg("array"),
+       py::arg("identities") = py::none(),
+       py::arg("parameters") = py::none())
       .def("to_cupy", [name](const ak::NumpyArray& self) -> py::object {
         if(self.ptr_lib() != ak::kernel::lib::cuda) {
           throw std::invalid_argument(name + " is not a Awkward CUDA array, "
