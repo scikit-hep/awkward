@@ -37,6 +37,7 @@ KERNEL_WHITELIST = [
     "awkward_ListArray_getitem_next_range_counts",
     "awkward_IndexedArray_numnull",
     "awkward_UnionArray_regular_index_getsize",
+    "awkward_ByteMaskedArray_toIndexedOptionArray",
 ]
 
 KERNEL_CURIOUS = [
@@ -162,6 +163,11 @@ def traverse(node, args={}, forflag=False, declared=[]):
                 traverse(node.left, args, forflag, declared),
                 traverse(node.comparators[0], args, forflag, declared),
             )
+        elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "Eq":
+            code = "({0} == {1})".format(
+                traverse(node.left, args, forflag, declared),
+                traverse(node.comparators[0], args, forflag, declared),
+            )
         elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "Gt":
             code = "({0} > {1})".format(
                 traverse(node.left, args, forflag, declared),
@@ -253,6 +259,15 @@ def traverse(node, args={}, forflag=False, declared=[]):
                     and node.value.ops[0].__class__.__name__ == "NotEq"
                 ):
                     code += "{0} = {1} != {2};\n".format(
+                        traverse(node.targets[0], args, forflag, declared),
+                        traverse(node.value.left, args, forflag, declared),
+                        traverse(node.value.comparators[0], args, forflag, declared),
+                    )
+                elif (
+                    len(node.value.ops) == 1
+                    and node.value.ops[0].__class__.__name__ == "Eq"
+                ):
+                    code += "{0} = {1} == {2};\n".format(
                         traverse(node.targets[0], args, forflag, declared),
                         traverse(node.value.left, args, forflag, declared),
                         traverse(node.value.comparators[0], args, forflag, declared),
@@ -359,6 +374,16 @@ def traverse(node, args={}, forflag=False, declared=[]):
                     and node.value.ops[0].__class__.__name__ == "NotEq"
                 ):
                     code += "{0} {1} {2} != {3};\n".format(
+                        traverse(node.target, args, forflag, declared),
+                        operator,
+                        traverse(node.value.left, args, forflag, declared),
+                        traverse(node.value.comparators[0], args, forflag, declared),
+                    )
+                elif (
+                    len(node.value.ops) == 1
+                    and node.value.ops[0].__class__.__name__ == "Eq"
+                ):
+                    code += "{0} {1} {2} == {3};\n".format(
                         traverse(node.target, args, forflag, declared),
                         operator,
                         traverse(node.value.left, args, forflag, declared),
