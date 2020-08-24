@@ -500,9 +500,9 @@ def kernels(*arrays):
     """
     Returns the names of the kernels library used by `arrays`. May be
 
-       * "cpu" for `libawkward-cpu-kernels.so`;
-       * "cuda" for `libawkward-cuda-kernels.so`;
-       * "mixed" if any of the arrays have different labels within their
+       * `"cpu"` for `libawkward-cpu-kernels.so`;
+       * `"cuda"` for `libawkward-cuda-kernels.so`;
+       * `"mixed"` if any of the arrays have different labels within their
          structure or any arrays have different labels from each other;
        * None if the objects are not Awkward, NumPy, or CuPy arrays (e.g.
          Python numbers, booleans, strings).
@@ -510,7 +510,7 @@ def kernels(*arrays):
     Mixed arrays can't be used in any operations, and two arrays on different
     devices can't be used in the same operation.
 
-    To use "cuda", the package
+    To use `"cuda"`, the package
     [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
     be installed, either by
 
@@ -602,9 +602,9 @@ def to_kernels(array, kernels, highlevel=True, behavior=None):
     """
     Args:
         array: Data to convert to a specified `kernels` set.
-        kernels ("cpu" or "cuda"): If "cpu", the array structure is
+        kernels (`"cpu"` or `"cuda"`): If `"cpu"`, the array structure is
             recursively copied (if need be) to main memory for use with
-            the default `libawkward-cpu-kernels.so`; if "cuda", the
+            the default `libawkward-cpu-kernels.so`; if `"cuda"`, the
             structure is copied to the GPU(s) for use with
             `libawkward-cuda-kernels.so`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -612,10 +612,11 @@ def to_kernels(array, kernels, highlevel=True, behavior=None):
         behavior (bool): Custom #ak.behavior for the output array, if
             high-level.
 
-    Converts an array from "cpu", "cuda", or "mixed" kernels to "cpu" or "cuda".
+    Converts an array from `"cpu"`, `"cuda"`, or `"mixed"` kernels to `"cpu"`
+    or `"cuda"`.
 
-    An array is "mixed" if some components are set to use "cpu" kernels and
-    others are set to use "cuda" kernels. Mixed arrays can't be used in any
+    An array is `"mixed"` if some components are set to use `"cpu"` kernels and
+    others are set to use `"cuda"` kernels. Mixed arrays can't be used in any
     operations, and two arrays set to different kernels can't be used in the
     same operation.
 
@@ -623,7 +624,7 @@ def to_kernels(array, kernels, highlevel=True, behavior=None):
     rather than copied, so this operation can be an inexpensive way to ensure
     that an array is ready for a particular library.
 
-    To use "cuda", the package
+    To use `"cuda"`, the package
     [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
     be installed, either by
 
@@ -636,7 +637,7 @@ def to_kernels(array, kernels, highlevel=True, behavior=None):
     It is only available for Linux as a binary wheel, and only supports Nvidia
     GPUs (it is written in CUDA).
 
-    See #ak.lib.
+    See #ak.kernels.
     """
     arr = awkward1.to_layout(array)
     out = arr.copy_to(kernels)

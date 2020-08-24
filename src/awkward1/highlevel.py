@@ -45,20 +45,19 @@ class Array(
 ):
     u"""
     Args:
-        data (#ak.layout.Content, #ak.partition.PartitionedArray, #ak.Array,
-              np.ndarray, cp.ndarray, pyarrow.*, str, dict, or iterable):
+        data (#ak.layout.Content, #ak.partition.PartitionedArray, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
             Data to wrap or convert into an array.
-            If a NumPy array, the regularity of its dimensions is preserved
-            and the data are viewed, not copied.
-            CuPy arrays are treated the same way as NumPy arrays except that
-            they default to `kernels="cuda"`, rather than `kernels="cpu"`.
-            If a pyarrow object, calls #ak.from_arrow, preserving as much
-            metadata as possible, usually zero-copy.
-            If a dict of str \u2192 columns, combines the columns into an
-            array of records (like Pandas's DataFrame constructor).
-            If a string, the data are assumed to be JSON.
-            If an iterable, calls #ak.from_iter, which assumes all dimensions
-            have irregular lengths.
+               - If a NumPy array, the regularity of its dimensions is preserved
+                 and the data are viewed, not copied.
+               - CuPy arrays are treated the same way as NumPy arrays except that
+                 they default to `kernels="cuda"`, rather than `kernels="cpu"`.
+               - If a pyarrow object, calls #ak.from_arrow, preserving as much
+                 metadata as possible, usually zero-copy.
+               - If a dict of str \u2192 columns, combines the columns into an
+                 array of records (like Pandas's DataFrame constructor).
+               - If a string, the data are assumed to be JSON.
+               - If an iterable, calls #ak.from_iter, which assumes all dimensions
+                 have irregular lengths.
         behavior (None or dict): Custom #ak.behavior for this Array only.
         with_name (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
@@ -66,10 +65,10 @@ class Array(
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
-        kernels (None, "cpu", or "cuda"): If "cpu", the Array will be placed in
-            main memory for use with other "cpu" Arrays and Records; if "cuda",
+        kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Array will be placed in
+            main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
             the Array will be placed in GPU global memory using CUDA; if None,
-            the `data` are left untouched. For "cuda",
+            the `data` are left untouched. For `"cuda"`,
             [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
             must be installed, which can be invoked with
             `pip install awkward1[cuda] --upgrade`.
@@ -1455,10 +1454,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
-        kernels (None, "cpu", or "cuda"): If "cpu", the Record will be placed in
-            main memory for use with other "cpu" Arrays and Records; if "cuda",
+        kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Record will be placed in
+            main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
             the Record will be placed in GPU global memory using CUDA; if None,
-            the `data` are left untouched. For "cuda",
+            the `data` are left untouched. For `"cuda"`,
             [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
             must be installed, which can be invoked with
             `pip install awkward1[cuda] --upgrade`.
