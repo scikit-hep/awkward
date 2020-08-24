@@ -12,11 +12,11 @@ import cupy
 
 def test_from_cupy():
     cupy_array_1d = cupy.arange(10)
-    cupy_array_2d = cupy.array([[1.1,2.2],[3.3,4.4],[5.5,6.6],[7.7,8.8]])
+    cupy_array_2d = cupy.array([[1.1,2.2], [3.3,4.4], [5.5,6.6], [7.7,8.8]])
 
     ak_cupy_array_1d = awkward1.from_cupy(cupy_array_1d)
     ak_cupy_array_2d = awkward1.from_cupy(cupy_array_2d)
-    
+
     for i in range(10):
         assert ak_cupy_array_1d[i] == cupy_array_1d[i]
 
