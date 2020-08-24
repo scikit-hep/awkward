@@ -44,7 +44,15 @@ def test_add():
     two = awkward1.Array([100, 200, 300], lib="cuda")
     assert awkward1.kernels(one) == "cuda"
     assert awkward1.kernels(two) == "cuda"
-
     three = one + two
-    assert awkward1.kernels(three) == "cuda"
     assert awkward1.to_list(three) == [[101.1, 102.2, 103.3], [], [304.4, 305.5]]
+    assert awkward1.kernels(three) == "cuda"
+
+
+def test_add_2():
+    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], lib="cuda")
+    two = 100
+    assert awkward1.kernels(one) == "cuda"
+    three = one + two
+    assert awkward1.to_list(three) == [[101.1, 102.2, 103.3], [], [104.4, 105.5]]
+    assert awkward1.kernels(three) == "cuda"

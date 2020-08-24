@@ -15,9 +15,10 @@ import setuptools.command.install
 
 from setuptools import setup, Extension
 
+
 install_requires = open("requirements.txt").read().strip().split()
 
-extras = {"cuda": "awkward1-cuda-kernels",
+extras = {"cuda": ["awkward1-cuda-kernels"],
           "test": open("requirements-test.txt").read().strip().split(),
           "dev":  ['numba>=0.50.0;python_version>="3.6"',
                    'pandas>=0.24.0;python_version>="3.6"',

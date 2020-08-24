@@ -500,20 +500,23 @@ def kernels(*arrays):
     """
     Returns the names of the kernels library used by `arrays`. May be
 
-       * "cpu" for `libawkward-cpu-kernels.so`,
-       * "cuda" for `libawkward-cuda-kernels.so`, or
+       * "cpu" for `libawkward-cpu-kernels.so`;
+       * "cuda" for `libawkward-cuda-kernels.so`;
        * "mixed" if any of the arrays have different labels within their
-         structure or any arrays have different labels from each other.
+         structure or any arrays have different labels from each other;
+       * None if the objects are not Awkward, NumPy, or CuPy arrays (e.g.
+         Python numbers, booleans, strings).
 
     Mixed arrays can't be used in any operations, and two arrays on different
     devices can't be used in the same operation.
 
-    To use "cuda", the optional package awkward1-cuda-kernels must be installed;
-    it is available on PyPI and may either be installed directly with
+    To use "cuda", the package
+    [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
+    be installed, either by
 
         pip install awkward1-cuda-kernels
 
-    or as an extras dependency with
+    or as an optional dependency with
 
         pip install awkward1[cuda] --upgrade
 
@@ -585,7 +588,9 @@ def kernels(*arrays):
         elif type(layout).__module__.startswith("cupy."):
             libs.add("cuda")
 
-    if libs == set() or libs == set(["cpu"]):
+    if libs == set():
+        return None
+    elif libs == set(["cpu"]):
         return "cpu"
     elif libs == set(["cuda"]):
         return "cuda"
@@ -618,12 +623,13 @@ def to_kernels(array, kernels, highlevel=True, behavior=None):
     rather than copied, so this operation can be an inexpensive way to ensure
     that an array is ready for a particular library.
 
-    To use "cuda", the optional package awkward1-cuda-kernels must be installed;
-    it is available on PyPI and may either be installed directly with
+    To use "cuda", the package
+    [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
+    be installed, either by
 
         pip install awkward1-cuda-kernels
 
-    or as an extras dependency with
+    or as an optional dependency with
 
         pip install awkward1[cuda] --upgrade
 

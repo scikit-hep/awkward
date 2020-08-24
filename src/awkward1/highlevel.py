@@ -67,8 +67,9 @@ class Array(
         lib ("cpu", "cuda", or None): If "cpu", the Array will be placed in main
             memory for use with other "cpu" Arrays and Records; if "cuda", the
             Array will be placed in GPU global memory using CUDA; if None, the
-            `data` are left untouched. For "cuda", awkward1-cuda-kernels must
-            be installed, which can be invoked with
+            `data` are left untouched. For "cuda",
+            [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
+            must be installed, which can be invoked with
             `pip install awkward1[cuda] --upgrade`.
 
     High-level array that can contain data of any type.
@@ -1444,11 +1445,12 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
-        lib ("cpu", "cuda", or None): If "cpu", the Array will be placed in main
+        lib ("cpu", "cuda", or None): If "cpu", the Record will be placed in main
             memory for use with other "cpu" Arrays and Records; if "cuda", the
-            Array will be placed in GPU global memory using CUDA; if None, the
-            `data` are left untouched. For "cuda", awkward1-cuda-kernels must
-            be installed, which can be invoked with
+            Record will be placed in GPU global memory using CUDA; if None, the
+            `data` are left untouched. For "cuda",
+            [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
+            must be installed, which can be invoked with
             `pip install awkward1[cuda] --upgrade`.
 
     High-level record that can contain fields of any type.

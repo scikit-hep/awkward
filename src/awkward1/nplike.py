@@ -11,7 +11,9 @@ def of(*arrays):
     libs = set()
     for array in arrays:
         ptr_lib = awkward1.operations.convert.kernels(array)
-        if ptr_lib == "cpu":
+        if ptr_lib is None:
+            pass
+        elif ptr_lib == "cpu":
             libs.add("cpu")
         elif ptr_lib == "cuda":
             libs.add("cuda")
