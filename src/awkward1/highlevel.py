@@ -29,6 +29,14 @@ numpy = awkward1.nplike.Numpy.instance()
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
+def _suffix(array):
+    out = awkward1.nplike.libs(array)
+    if out == "cpu":
+        return ""
+    else:
+        return " " + out
+
+
 class Array(
     awkward1._connect._numpy.NDArrayOperatorsMixin,
     awkward1._connect._pandas.PandasMixin,
@@ -375,6 +383,9 @@ class Array(
         def _repr(self, limit_value=40, limit_total=85):
             import awkward1.operations.structure
 
+            suffix = _suffix(self)
+            limit_value -= len(suffix)
+
             layout = awkward1.operations.structure.with_cache(
                 self._layout, {}, chain="last", highlevel=False
             )
@@ -393,7 +404,7 @@ class Array(
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-            return "<{0}.mask {1} type={2}>".format(name, value, typestr)
+            return "<{0}.mask {1} type={2}{3}>".format(name, value, typestr, suffix)
 
         def __getitem__(self, where):
             return awkward1.operations.structure.mask(
@@ -1218,6 +1229,9 @@ class Array(
     def _repr(self, limit_value=40, limit_total=85):
         import awkward1.operations.structure
 
+        suffix = _suffix(self)
+        limit_value -= len(suffix)
+
         layout = awkward1.operations.structure.with_cache(
             self._layout, {}, chain="last", highlevel=False
         )
@@ -1234,7 +1248,7 @@ class Array(
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{0} {1} type={2}>".format(name, value, typestr)
+        return "<{0} {1} type={2}{3}>".format(name, value, typestr, suffix)
 
     def __array__(self, *args, **kwargs):
         """
@@ -1922,6 +1936,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     def _repr(self, limit_value=40, limit_total=85):
         import awkward1.operations.structure
 
+        suffix = _suffix(self)
+        limit_value -= len(suffix)
+
         layout = awkward1.operations.structure.with_cache(
             self._layout, {}, chain="last", highlevel=False
         )
@@ -1940,7 +1957,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{0} {1} type={2}>".format(name, value, typestr)
+        return "<{0} {1} type={2}{3}>".format(name, value, typestr, suffix)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
