@@ -481,19 +481,56 @@ def to_cupy(array):
         return array.to_cupy()
 
     elif isinstance(array, awkward1.layout.Content):
-        raise AssertionError("unrecognized Content type: {0}".format(type(array)))
+        raise AssertionError(
+            "unrecognized Content type: {0}".format(type(array))
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     elif isinstance(array, Iterable):
         return cupy.asarray(array)
 
     else:
-        raise ValueError("cannot convert {0} into cp.ndarray".format(array))
+        raise ValueError(
+            "cannot convert {0} into cp.ndarray".format(array)
+            + awkward1._util.exception_suffix(__file__)
+        )
 
 
 def copy_to(array, destination, highlevel=True, behavior=None):
     """
     Args:
-        array: Data to copy to 
+        array: Data to copy to a given `destination`.
+        destination ("cpu" or "cuda"): If "cpu", the array structure is
+            recursively copied (if need be) to main memory for use with
+            the default `libawkward-cpu-kernels.so`; if "cuda", the
+            structure is copied to the GPU(s) for use with
+            `libawkward-cuda-kernels.so`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Converts an array from "cpu", "cuda", or "mixed" library to "cpu" or "cuda".
+
+    An array is "mixed" if some components are in main memory ("cpu") and others
+    are on the GPU(s) ("cuda"). Mixed arrays can't be used in any operations,
+    and two arrays on different devices can't be used in the same operation.
+
+    Any components that are already in the desired destination are viewed,
+    rather than copied, so this operation can be an inexpensive way to ensure
+    that an array is ready for use on a given device.
+
+    To use "cuda", the optional package awkward1-cuda-kernels must be installed;
+    it is available on PyPI and may either be installed directly with
+
+        pip install awkward1-cuda-kernels
+
+    or as an extras dependency with
+
+        pip install awkward1[cuda] --upgrade
+
+    It is only available for Linux as a binary wheel, and only supports Nvidia
+    GPUs (it is written in CUDA).
     """
     arr = awkward1.to_layout(array)
     out = arr.copy_to(destination)

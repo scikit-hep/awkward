@@ -119,7 +119,9 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
                return py::cast(*cuda_identities);
              }
              else {
-               throw std::invalid_argument("specify 'cpu' or 'cuda'");
+               throw std::invalid_argument(
+                 std::string("specify 'cpu' or 'cuda'")
+                 + FILENAME(__LINE__));
              }
            })
       .def_static("from_cupy", [name](ak::Identities::Ref ref,
@@ -131,7 +133,8 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
 
           if (py::cast<int64_t>(array.attr("ndim")) != 2) {
             throw std::invalid_argument(
-                name + std::string(" must be built from a two-dimensional array"));
+                name + std::string(" must be built from a two-dimensional array")
+                + FILENAME(__LINE__));
           }
           std::vector<int64_t> shape, strides;
 
@@ -143,7 +146,8 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
             throw std::invalid_argument(
                 name + std::string(" must be built from a contiguous array (array"
                                    ".stries == (array.shape[1]*array.itemsize, "
-                                   "array.itemsize)); try array.copy()"));
+                                   "array.itemsize)); try array.copy()")
+                + FILENAME(__LINE__));
           }
           return ak::IdentitiesOf<T>(ref,
                                      fieldloc,
@@ -155,8 +159,9 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
                                      ak::kernel::lib::cuda);
         }
         else {
-          throw std::invalid_argument(name + std::string(
-              ".from_cupy() can only accept CuPy Arrays!"));
+          throw std::invalid_argument(
+            name + std::string(".from_cupy() can only accept CuPy Arrays!")
+            + FILENAME(__LINE__));
         }
       })
       .def("to_cupy", [name](const ak::IdentitiesOf<T>& self) -> py::object {

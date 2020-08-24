@@ -97,23 +97,24 @@ make_IndexOf(const py::handle& m, const std::string& name) {
       .def_static("from_cupy", [name](py::object array) -> py::object {
           if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
             if(!py::dtype(array.attr("dtype")).equal(py::dtype::of<T>())) {
-                throw std::invalid_argument(name + std::string(
-                  " arg0: must be a ") +
-                  py::cast<std::string>(py::str(py::dtype::of<T>())) +
-                  std::string(" array"));
+                throw std::invalid_argument(name + std::string(" arg0: must be a ")
+                  + py::cast<std::string>(py::str(py::dtype::of<T>()))
+                  + std::string(" array") + FILENAME(__LINE__));
             }
 
             if (py::cast<int64_t>(array.attr("ndim")) != 1) {
-              throw std::invalid_argument(name + std::string(
-                " must be built from a one-dimensional array; try array.ravel()"));
+              throw std::invalid_argument(
+                name + std::string(" must be built from a one-dimensional array; "
+                                   "try array.ravel()") + FILENAME(__LINE__));
             }
 
             std::vector<int64_t> strides = array.attr("strides").cast<std::vector<int64_t>>();
 
             if (strides[0] != sizeof(T)) {
-              throw std::invalid_argument(name + std::string(
-                " must be built from a contiguous array (array.strides == "
-                "(array.itemsize,)); try array.copy()"));
+              throw std::invalid_argument(
+                name + std::string(" must be built from a contiguous array "
+                                   "(array.strides == (array.itemsize,)); "
+                                   "try array.copy()") + FILENAME(__LINE__));
             }
 
             T* ptr = reinterpret_cast<T*>(py::cast<ssize_t>(array.attr("data").attr("ptr")));
@@ -130,8 +131,9 @@ make_IndexOf(const py::handle& m, const std::string& name) {
             return py::cast(*ak_array);
           }
           else {
-            throw std::invalid_argument(name + std::string(
-              ".from_cupy() can only accept CuPy Arrays!"));
+            throw std::invalid_argument(
+              name + std::string(".from_cupy() can only accept CuPy Arrays!")
+              + FILENAME(__LINE__));
           }
       })
       .def("copy_to", [name](const ak::IndexOf<T>& self, std::string& ptr_lib) -> py::object {

@@ -1816,17 +1816,18 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
 
           if (py::cast<int64_t>(array.attr("ndim")) == 0) {
             throw std::invalid_argument(
-              "NumpyArray must not be scalar; try array.reshape(1)");
+              std::string("CuPy array must not be scalar; try array.reshape(1)")
+              + FILENAME(__LINE__));
           }
           if (shape.size() != py::cast<int64_t>(array.attr("ndim"))  ||
               strides.size() != py::cast<int64_t>(array.attr("ndim"))) {
             throw std::invalid_argument(
-              "CuPy Array len(shape) != ndim or len(strides) != ndim");
+              std::string("CuPy array len(shape) != ndim or len(strides) != ndim")
+              + FILENAME(__LINE__));
           }
 
-          void* ptr = reinterpret_cast<void *>(py::cast<ssize_t>
-              (array.attr("data").attr("ptr")));
-
+          void* ptr = reinterpret_cast<void*>(
+                        py::cast<ssize_t>(array.attr("data").attr("ptr")));
 
           ak::util::dtype cupy_dtype= ak::util::name_to_dtype(
               py::cast<std::string>(py::str(py::dtype(array.attr("dtype")))));
@@ -1848,8 +1849,9 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
           return box(ak_array);
         }
         else {
-          throw std::invalid_argument(name + std::string(
-            ".from_cupy() can only accept CuPy Arrays!"));
+          throw std::invalid_argument(
+            name + std::string(".from_cupy() can only accept CuPy Arrays!")
+            + FILENAME(__LINE__));
         }
     }, py::arg("array"),
        py::arg("identities") = py::none(),
