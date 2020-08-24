@@ -4,9 +4,43 @@ from __future__ import absolute_import
 
 import numpy
 
+import awkward1.layout
+
 
 def of(*arrays):
-    return Numpy.instance()
+    libs = set()
+    for array in arrays:
+        ptr_lib = awkward1.operations.convert.kernels(array)
+        if ptr_lib is None:
+            pass
+        elif ptr_lib == "cpu":
+            libs.add("cpu")
+        elif ptr_lib == "cuda":
+            libs.add("cuda")
+        else:
+            raise ValueError(
+            """structure mixes 'cpu' and 'cuda' buffers; use one of
+
+    ak.to_kernels(array, 'cpu')
+    ak.to_kernels(array, 'cuda')
+
+to obtain an unmixed array in main memory or the GPU(s)."""
+            + awkward1._util.exception_suffix(__file__))
+
+    if libs == set() or libs == set(["cpu"]):
+        return Numpy.instance()
+    elif libs == set(["cuda"]):
+        return Cupy.instance()
+    else:
+        raise ValueError(
+            """attempting to use both a 'cpu' array and a 'cuda' array in the """
+            """same operation; use one of
+
+    ak.to_kernels(array, 'cpu')
+    ak.to_kernels(array, 'cuda')
+
+to move one or the other to main memory or the GPU(s)."""
+            + awkward1._util.exception_suffix(__file__))
 
 
 class Singleton(object):
@@ -269,6 +303,25 @@ or
             + awkward1._util.exception_suffix(__file__)
         )
 
+    @property
+    def ndarray(self):
+        return self._module.ndarray
+
+    def asarray(self, array, dtype=None):
+        if isinstance(array, (
+            awkward1.highlevel.Array,
+            awkward1.highlevel.Record,
+            awkward1.layout.Content,
+            awkward1.layout.Record,
+        )):
+            out = awkward1.operations.convert.to_cupy(array)
+            if dtype is not None and out.dtype != dtype:
+                return self._module.asarray(out, dtype=dtype)
+            else:
+                return out
+        else:
+            return self._module.asarray(array, dtype=dtype)
+
     def frombuffer(self, *args, **kwargs):
         np_array = numpy.frombuffer(*args, **kwargs)
         return self._module.array(np_array)
@@ -352,4 +405,3 @@ or
             return out.item()
         else:
             return out
-

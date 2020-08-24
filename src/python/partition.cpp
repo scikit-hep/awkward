@@ -116,6 +116,19 @@ partitionedarray_methods(py::class_<T, std::shared_ptr<T>,
             }
             return self.getitem_range(intstart, intstop, intstep);
           })
+          .def("copy_to",
+               [](const T& self, const std::string& ptr_lib) -> ak::PartitionedArrayPtr {
+               if (ptr_lib == "cpu") {
+                 return self.copy_to(ak::kernel::lib::cpu);
+               }
+               else if (ptr_lib == "cuda") {
+                 return self.copy_to(ak::kernel::lib::cuda);
+               }
+               else {
+                 throw std::invalid_argument(
+                   std::string("specify 'cpu' or 'cuda'") + FILENAME(__LINE__));
+               }
+          })
 
   ;
 }

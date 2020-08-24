@@ -172,7 +172,7 @@ namespace awkward {
                ssize_t itemsize,
                const std::string format,
                util::dtype dtype,
-               const kernel::lib ptr_lib = kernel::lib::cpu);
+               const kernel::lib ptr_lib);
 
     /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
     NumpyArray(const Index8 index);

@@ -1245,7 +1245,7 @@ namespace awkward {
     ContentPtr next = content_.get()->getitem_range_nowrap(start, stop);
 
     std::shared_ptr<Index64> offsets = std::make_shared<Index64>(
-      offsets_.ptr(), offsets_.offset(), offsets_.length());
+      offsets_.ptr(), offsets_.offset(), offsets_.length(), offsets_.ptr_lib());
     if (start != 0) {
       offsets = std::make_shared<Index64>(offsets_.length());
       struct Error err = kernel::ListOffsetArray_compact_offsets_64<int64_t>(
@@ -1314,7 +1314,8 @@ namespace awkward {
     }
     return std::make_shared<SliceJagged64>(Index64(offsets.get()->ptr(),
                                                    offsets.get()->offset(),
-                                                   offsets.get()->length()),
+                                                   offsets.get()->length(),
+                                                   offsets.get()->ptr_lib()),
                                            slicecontent);
   }
 
@@ -1712,7 +1713,9 @@ namespace awkward {
 
       ContentPtrVec contents;
       for (auto ptr : tocarry) {
-        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen), true));
+        contents.push_back(content_.get()->carry(
+          Index64(ptr, 0, totallen, kernel::lib::cpu),   // DERIVE
+        true));
       }
       ContentPtr recordarray = std::make_shared<RecordArray>(
         Identities::none(), parameters, contents, recordlookup);

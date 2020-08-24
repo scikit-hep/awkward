@@ -1250,7 +1250,7 @@ namespace awkward {
       contents.push_back(std::make_shared<IndexedArray64>(
         Identities::none(),
         util::Parameters(),
-        Index64(ptr, 0, combinationslen),
+        Index64(ptr, 0, combinationslen, kernel::lib::cpu),   // DERIVE
         shallow_copy()));
     }
     return std::make_shared<RecordArray>(Identities::none(),

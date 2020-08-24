@@ -49,6 +49,9 @@ namespace awkward {
     const PartitionedArrayPtr
       shallow_copy() const override;
 
+    const PartitionedArrayPtr
+      copy_to(kernel::lib ptr_lib) const;
+
   private:
     const std::vector<int64_t> stops_;
   };

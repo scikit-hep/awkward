@@ -206,6 +206,9 @@ class PartitionedArray(object):
     def getitem_nothing(self, *args, **kwargs):
         return first(self).getitem_nothing(*args, **kwargs)
 
+    def copy_to(self, ptr_lib):
+        return self.from_ext(self._ext.copy_to(ptr_lib))
+
     def validityerror(self, *args, **kwargs):
         t = None
         for x in self.partitions:

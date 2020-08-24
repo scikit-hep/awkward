@@ -363,10 +363,14 @@ def wrap(content, behavior, cache=None):
     if isinstance(
         content, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
     ):
-        return awkward1.highlevel.Array(content, behavior=behavior, cache=cache)
+        return awkward1.highlevel.Array(
+            content, behavior=behavior, cache=cache, kernels=None
+        )
 
     elif isinstance(content, awkward1.layout.Record):
-        return awkward1.highlevel.Record(content, behavior=behavior, cache=cache)
+        return awkward1.highlevel.Record(
+            content, behavior=behavior, cache=cache, kernels=None
+        )
 
     else:
         return content
@@ -690,6 +694,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                             )
                     else:
                         nextinputs.append(x)
+
                 outcontent = apply(nextinputs, depth + 1)
                 assert isinstance(outcontent, tuple)
                 return tuple(
@@ -1137,6 +1142,65 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         return recursively_apply(
             layout.array, getfunction, args, depth, keep_parameters
         )
+
+    else:
+        raise AssertionError(
+            "unrecognized Content type: {0}".format(type(layout))
+            + exception_suffix(__file__)
+        )
+
+
+def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
+    apply(layout, depth, *args)
+
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        for x in layout.partitions:
+            recursive_walk(x, apply, args, depth, materialize)
+
+    elif isinstance(layout, awkward1.layout.NumpyArray):
+        pass
+
+    elif isinstance(layout, awkward1.layout.EmptyArray):
+        pass
+
+    elif isinstance(layout, (
+        awkward1.layout.RegularArray,
+        awkward1.layout.ListArray32,
+        awkward1.layout.ListArrayU32,
+        awkward1.layout.ListArray64,
+        awkward1.layout.ListOffsetArray32,
+        awkward1.layout.ListOffsetArrayU32,
+        awkward1.layout.ListOffsetArray64,
+    )):
+        recursive_walk(layout.content, apply, args, depth + 1, materialize)
+
+    elif isinstance(layout, (
+        awkward1.layout.IndexedArray32,
+        awkward1.layout.IndexedArrayU32,
+        awkward1.layout.IndexedArray64,
+        awkward1.layout.IndexedOptionArray32,
+        awkward1.layout.IndexedOptionArray64,
+        awkward1.layout.ByteMaskedArray,
+        awkward1.layout.BitMaskedArray,
+        awkward1.layout.UnmaskedArray,
+    )):
+        recursive_walk(layout.content, apply, args, depth, materialize)
+
+    elif isinstance(layout, (
+        awkward1.layout.RecordArray,
+        awkward1.layout.UnionArray8_32,
+        awkward1.layout.UnionArray8_U32,
+        awkward1.layout.UnionArray8_64,
+    )):
+        for x in layout.contents:
+            recursive_walk(x, apply, args, depth, materialize)
+
+    elif isinstance(layout, awkward1.layout.Record):
+        recursive_walk(layout.array, apply, args, depth, materialize)
+
+    elif isinstance(layout, awkward1.layout.VirtualArray):
+        if materialize:
+            recursive_walk(layout.array, apply, args, depth, materialize)
 
     else:
         raise AssertionError(

@@ -256,7 +256,8 @@ namespace awkward {
           }
           IndexOf<T> index(index_.ptr(),
                            index_.offset() + i*strides_[0],
-                           shape_[1]);
+                           shape_[1],
+                           index_.ptr_lib());
           SliceArrayOf<T> subarray(index, shape, strides, frombool_);
           out << subarray.tostring_part();
         }
@@ -268,7 +269,8 @@ namespace awkward {
           }
           IndexOf<T> index(index_.ptr(),
                            index_.offset() + i*strides_[0],
-                           shape_[1]);
+                           shape_[1],
+                           index_.ptr_lib());
           SliceArrayOf<T> subarray(index, shape, strides, frombool_);
           out << subarray.tostring_part();
         }
@@ -279,7 +281,8 @@ namespace awkward {
           }
           IndexOf<T> index(index_.ptr(),
                            index_.offset() + i*strides_[0],
-                           shape_[1]);
+                           shape_[1],
+                           index_.ptr_lib());
           SliceArrayOf<T> subarray(index, shape, strides, frombool_);
           out << subarray.tostring_part();
         }

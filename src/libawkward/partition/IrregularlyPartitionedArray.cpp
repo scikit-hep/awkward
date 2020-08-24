@@ -159,4 +159,14 @@ namespace awkward {
   IrregularlyPartitionedArray::shallow_copy() const {
     return std::make_shared<IrregularlyPartitionedArray>(partitions_, stops_);
   }
+
+  const PartitionedArrayPtr
+  IrregularlyPartitionedArray::copy_to(kernel::lib ptr_lib) const {
+    ContentPtrVec partitions;
+    for (auto content : partitions_) {
+      partitions.push_back(content.get()->copy_to(ptr_lib));
+    }
+    return std::make_shared<IrregularlyPartitionedArray>(partitions, stops_);
+  }
+
 }

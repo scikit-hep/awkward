@@ -159,7 +159,8 @@ namespace awkward {
                                         0,
                                         itemsize,
                                         format,
-                                        dtype);
+                                        dtype,
+                                        kernel::lib::cpu);
   }
 
   const std::string

@@ -68,8 +68,8 @@ namespace awkward {
 
   const ContentPtr
   UnionBuilder::snapshot() const {
-    Index8 tags(tags_.ptr(), 0, tags_.length());
-    Index64 index(index_.ptr(), 0, index_.length());
+    Index8 tags(tags_.ptr(), 0, tags_.length(), kernel::lib::cpu);
+    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
     ContentPtrVec contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->snapshot());

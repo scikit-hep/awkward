@@ -1223,16 +1223,12 @@ namespace awkward {
     /// This allows a RecordArray or {@link UnionArrayOf UnionArray} with
     /// different depths to accept `axis = -1` as the last axis, regardless
     /// of how deep that is in different record fields or union possibilities.
-    ///
     const int64_t
       axis_wrap_if_negative(int64_t axis) const;
 
-    /// @brief Transfer the entire contents of the array between GPU and main memory.
-    ///
-    /// Returns a std::shared_ptr<Content> which is, by default, allocated on the
-    /// first device(device [0])
-    ///
-    /// @note This function has not been implemented to handle Multi-GPU setups
+    /// @brief Recursively copies components of the array from main memory to a
+    /// GPU (if `ptr_lib == kernel::lib::cuda`) or to main memory (if
+    /// `ptr_lib == kernel::lib::cpu`) if those components are not already there.
     virtual const ContentPtr
       copy_to(kernel::lib ptr_lib) const = 0;
 

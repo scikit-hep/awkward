@@ -265,7 +265,6 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                            .replace(".operations.describe", "")
                            .replace(".operations.structure", "")
                            .replace(".operations.reducers", "")
-                           .replace(".operations.transfers", "")
                            .replace(".behaviors.mixins", "")
                            .replace(".behaviors.categorical", "")
                            .replace(".behaviors.string", ""))

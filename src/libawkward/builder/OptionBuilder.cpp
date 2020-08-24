@@ -63,7 +63,7 @@ namespace awkward {
 
   const ContentPtr
   OptionBuilder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length());
+    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
     return std::make_shared<IndexedOptionArray64>(Identities::none(),
                                                   util::Parameters(),
                                                   index,

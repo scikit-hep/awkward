@@ -113,10 +113,11 @@ namespace awkward {
                                                   0,
                                                   (ssize_t)itemsize,
                                                   format,
-                                                  dtype);
+                                                  dtype,
+                                                  kernel::lib::cpu);
 
     for (int64_t i = depth - 1;  i >= 0;  i--) {
-      Index64 index(levels[(size_t)i].ptr(), 0, levels[(size_t)i].length());
+      Index64 index(levels[(size_t)i].ptr(), 0, levels[(size_t)i].length(), kernel::lib::cpu);
       out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                 util::Parameters(),
                                                 index,

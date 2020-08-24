@@ -29,6 +29,14 @@ numpy = awkward1.nplike.Numpy.instance()
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
+def _suffix(array):
+    out = awkward1.operations.convert.kernels(array)
+    if out == "cpu":
+        return ""
+    else:
+        return ":" + out
+
+
 class Array(
     awkward1._connect._numpy.NDArrayOperatorsMixin,
     awkward1._connect._pandas.PandasMixin,
@@ -37,18 +45,19 @@ class Array(
 ):
     u"""
     Args:
-        data (#ak.layout.Content, #ak.partition.PartitionedArray, #ak.Array,
-              np.ndarray, pyarrow.*, str, dict, or iterable):
+        data (#ak.layout.Content, #ak.partition.PartitionedArray, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
             Data to wrap or convert into an array.
-            If a NumPy array, the regularity of its dimensions is preserved
-            and the data are viewed, not copied.
-            If a pyarrow object, calls #ak.from_arrow, preserving as much
-            metadata as possible, usually zero-copy.
-            If a dict of str \u2192 columns, combines the columns into an
-            array of records (like Pandas's DataFrame constructor).
-            If a string, the data are assumed to be JSON.
-            If an iterable, calls #ak.from_iter, which assumes all dimensions
-            have irregular lengths.
+               - If a NumPy array, the regularity of its dimensions is preserved
+                 and the data are viewed, not copied.
+               - CuPy arrays are treated the same way as NumPy arrays except that
+                 they default to `kernels="cuda"`, rather than `kernels="cpu"`.
+               - If a pyarrow object, calls #ak.from_arrow, preserving as much
+                 metadata as possible, usually zero-copy.
+               - If a dict of str \u2192 columns, combines the columns into an
+                 array of records (like Pandas's DataFrame constructor).
+               - If a string, the data are assumed to be JSON.
+               - If an iterable, calls #ak.from_iter, which assumes all dimensions
+                 have irregular lengths.
         behavior (None or dict): Custom #ak.behavior for this Array only.
         with_name (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
@@ -56,6 +65,13 @@ class Array(
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
+        kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Array will be placed in
+            main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
+            the Array will be placed in GPU global memory using CUDA; if None,
+            the `data` are left untouched. For `"cuda"`,
+            [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
+            must be installed, which can be invoked with
+            `pip install awkward1[cuda] --upgrade`.
 
     High-level array that can contain data of any type.
 
@@ -196,7 +212,13 @@ class Array(
     """
 
     def __init__(
-        self, data, behavior=None, with_name=None, check_valid=False, cache=None
+        self,
+        data,
+        behavior=None,
+        with_name=None,
+        check_valid=False,
+        cache=None,
+        kernels=None,
     ):
         if isinstance(
             data, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
@@ -208,6 +230,9 @@ class Array(
 
         elif isinstance(data, np.ndarray) and data.dtype != np.dtype("O"):
             layout = awkward1.operations.convert.from_numpy(data, highlevel=False)
+
+        elif type(data).__module__.startswith("cupy."):
+            layout = awkward1.operations.convert.from_cupy(data, highlevel=False)
 
         elif type(data).__module__ == "pyarrow" or type(data).__module__.startswith("pyarrow."):
             layout = awkward1.operations.convert.from_arrow(data, highlevel=False)
@@ -247,6 +272,14 @@ class Array(
             )
         if self.__class__ is Array:
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
+
+        if (
+            kernels is not None
+            and kernels != awkward1.operations.convert.kernels(layout)
+        ):
+            layout = awkward1.operations.convert.to_kernels(
+                layout, kernels, highlevel=False
+            )
 
         self.layout = layout
         self.behavior = behavior
@@ -375,6 +408,9 @@ class Array(
         def _repr(self, limit_value=40, limit_total=85):
             import awkward1.operations.structure
 
+            suffix = _suffix(self)
+            limit_value -= len(suffix)
+
             layout = awkward1.operations.structure.with_cache(
                 self._layout, {}, chain="last", highlevel=False
             )
@@ -393,7 +429,7 @@ class Array(
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-            return "<{0}.mask {1} type={2}>".format(name, value, typestr)
+            return "<{0}.mask{1} {2} type={3}>".format(name, suffix, value, typestr)
 
         def __getitem__(self, where):
             return awkward1.operations.structure.mask(
@@ -1218,6 +1254,9 @@ class Array(
     def _repr(self, limit_value=40, limit_total=85):
         import awkward1.operations.structure
 
+        suffix = _suffix(self)
+        limit_value -= len(suffix)
+
         layout = awkward1.operations.structure.with_cache(
             self._layout, {}, chain="last", highlevel=False
         )
@@ -1234,7 +1273,7 @@ class Array(
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{0} {1} type={2}>".format(name, value, typestr)
+        return "<{0}{1} {2} type={3}>".format(name, suffix, value, typestr)
 
     def __array__(self, *args, **kwargs):
         """
@@ -1415,6 +1454,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
+        kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Record will be placed in
+            main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
+            the Record will be placed in GPU global memory using CUDA; if None,
+            the `data` are left untouched. For `"cuda"`,
+            [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
+            must be installed, which can be invoked with
+            `pip install awkward1[cuda] --upgrade`.
 
     High-level record that can contain fields of any type.
 
@@ -1431,7 +1477,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     """
 
     def __init__(
-        self, data, behavior=None, with_name=None, check_valid=False, cache=None
+        self,
+        data,
+        behavior=None,
+        with_name=None,
+        check_valid=False,
+        cache=None,
+        kernels=None,
     ):
         if isinstance(data, awkward1.layout.Record):
             layout = data
@@ -1466,6 +1518,14 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if with_name is not None:
             layout = awkward1.operations.structure.with_name(
                 layout, with_name, highlevel=False
+            )
+
+        if (
+            kernels is not None
+            and kernels != awkward1.operations.convert.kernels(layout)
+        ):
+            layout = awkward1.operations.convert.to_kernels(
+                layout, kernels, highlevel=False
             )
 
         self.layout = layout
@@ -1922,6 +1982,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     def _repr(self, limit_value=40, limit_total=85):
         import awkward1.operations.structure
 
+        suffix = _suffix(self)
+        limit_value -= len(suffix)
+
         layout = awkward1.operations.structure.with_cache(
             self._layout, {}, chain="last", highlevel=False
         )
@@ -1940,7 +2003,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{0} {1} type={2}>".format(name, value, typestr)
+        return "<{0}{1} {2} type={3}>".format(name, suffix, value, typestr)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
