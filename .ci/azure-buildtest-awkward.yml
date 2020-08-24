@@ -93,11 +93,14 @@ jobs:
           python dev/generate-kernelspec.py
         displayName: "Generate Kernel specification"
       - script: |
-          python tests-kernels/generate-tests.py
+          python dev/generate-tests.py
         displayName: "Generate Kernel tests"
       - script: |
-          python -m pytest -vv -rs tests-kernels
-        displayName: "Test kernels"
+          python -m pytest -vv -rs tests-spec
+        displayName: "Test specification"
+      - script: |
+          python -m pytest -vv -rs tests-cpu-kernels
+        displayName: "Test CPU kernels"
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
@@ -157,11 +160,14 @@ jobs:
           python dev/generate-kernelspec.py
         displayName: "Generate Kernel specification"
       - script: |
-          python tests-kernels/generate-tests.py
+          python dev/generate-tests.py
         displayName: "Generate Kernel tests"
       - script: |
-          python -m pytest -vv -rs tests-kernels
-        displayName: "Test kernels"
+          python -m pytest -vv -rs tests-spec
+        displayName: "Test specification"
+      - script: |
+          python -m pytest -vv -rs tests-cpu-kernels
+        displayName: "Test CPU kernels"
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
@@ -237,11 +243,14 @@ jobs:
           python dev/generate-kernelspec.py
         displayName: "Generate Kernel specification"
       - script: |
-          python tests-kernels/generate-tests.py
+          python dev/generate-tests.py
         displayName: "Generate Kernel tests"
       - script: |
-          python -m pytest -vv -rs tests-kernels
-        displayName: "Test kernels"
+          python -m pytest -vv -rs tests-spec
+        displayName: "Test specification"
+      - script: |
+          python -m pytest -vv -rs tests-cpu-kernels
+        displayName: "Test CPU kernels"
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"

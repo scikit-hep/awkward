@@ -13,8 +13,9 @@ kernel-specification/sorting/
 kernel-specification/getitem/
 
 # Kernel tests
-tests-kernels/test*
-tests-kernels/kernels.py
+tests-cpu-kernels/test*
+tests-spec/kernels.py
+tests-spec/test*
 
 dependent-project/CMakeFiles
 dependent-project/CMakeCache.txt

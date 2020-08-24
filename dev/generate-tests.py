@@ -31,7 +31,7 @@ kSliceNone = kMaxInt64 + 1
         os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
     ) as infile:
         mainspec = yaml.safe_load(infile)["kernels"]
-        with open(os.path.join(CURRENT_DIR, "kernels.py"), "w") as outfile:
+        with open(os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py"), "w") as outfile:
             outfile.write(prefix)
             for filedir in mainspec.values():
                 for relpath in filedir.values():
@@ -154,9 +154,10 @@ def readspec():
 
 
 def testpykernels(tests):
+    genpykernels()
     print("Generating file for testing python kernels")
     for funcname in tests.keys():
-        with open(os.path.join(CURRENT_DIR, "test_py" + funcname + ".py"), "w",) as f:
+        with open(os.path.join(CURRENT_DIR, "..", "tests-spec", "test_py" + funcname + ".py"), "w",) as f:
             f.write("import pytest\nimport kernels\n\n")
             num = 1
             if tests[funcname] == []:
@@ -296,7 +297,7 @@ def testcpukernels(tests):
 
     funcargs = getfuncargs()
     for funcname in tests.keys():
-        with open(os.path.join(CURRENT_DIR, "test_cpu" + funcname + ".py"), "w",) as f:
+        with open(os.path.join(CURRENT_DIR, "..", "tests-cpu-kernels", "test_cpu" + funcname + ".py"), "w",) as f:
             f.write("import ctypes\nimport pytest\nfrom __init__ import lib, Error\n\n")
             num = 1
             if tests[funcname] == []:
@@ -391,7 +392,6 @@ def testcpukernels(tests):
 
 
 if __name__ == "__main__":
-    genpykernels()
     tests = readspec()
     testpykernels(tests)
     testcpukernels(tests)
