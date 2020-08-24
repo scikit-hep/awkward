@@ -364,12 +364,12 @@ def wrap(content, behavior, cache=None):
         content, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
     ):
         return awkward1.highlevel.Array(
-            content, behavior=behavior, cache=cache, lib=None
+            content, behavior=behavior, cache=cache, kernels=None
         )
 
     elif isinstance(content, awkward1.layout.Record):
         return awkward1.highlevel.Record(
-            content, behavior=behavior, cache=cache, lib=None
+            content, behavior=behavior, cache=cache, kernels=None
         )
 
     else:

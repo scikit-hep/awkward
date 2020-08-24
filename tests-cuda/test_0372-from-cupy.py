@@ -40,8 +40,8 @@ def test_NumpyArray_constructor():
 
 
 def test_add():
-    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], lib="cuda")
-    two = awkward1.Array([100, 200, 300], lib="cuda")
+    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], kernels="cuda")
+    two = awkward1.Array([100, 200, 300], kernels="cuda")
     assert awkward1.kernels(one) == "cuda"
     assert awkward1.kernels(two) == "cuda"
     three = one + two
@@ -50,7 +50,7 @@ def test_add():
 
 
 def test_add_2():
-    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], lib="cuda")
+    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], kernels="cuda")
     two = 100
     assert awkward1.kernels(one) == "cuda"
     three = one + two

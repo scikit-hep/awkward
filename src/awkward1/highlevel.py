@@ -46,10 +46,12 @@ class Array(
     u"""
     Args:
         data (#ak.layout.Content, #ak.partition.PartitionedArray, #ak.Array,
-              np.ndarray, pyarrow.*, str, dict, or iterable):
+              np.ndarray, cp.ndarray, pyarrow.*, str, dict, or iterable):
             Data to wrap or convert into an array.
             If a NumPy array, the regularity of its dimensions is preserved
             and the data are viewed, not copied.
+            CuPy arrays are treated the same way as NumPy arrays except that
+            they default to `kernels="cuda"`, rather than `kernels="cpu"`.
             If a pyarrow object, calls #ak.from_arrow, preserving as much
             metadata as possible, usually zero-copy.
             If a dict of str \u2192 columns, combines the columns into an
@@ -64,10 +66,10 @@ class Array(
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
-        lib ("cpu", "cuda", or None): If "cpu", the Array will be placed in main
-            memory for use with other "cpu" Arrays and Records; if "cuda", the
-            Array will be placed in GPU global memory using CUDA; if None, the
-            `data` are left untouched. For "cuda",
+        kernels (None, "cpu", or "cuda"): If "cpu", the Array will be placed in
+            main memory for use with other "cpu" Arrays and Records; if "cuda",
+            the Array will be placed in GPU global memory using CUDA; if None,
+            the `data` are left untouched. For "cuda",
             [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
             must be installed, which can be invoked with
             `pip install awkward1[cuda] --upgrade`.
@@ -217,7 +219,7 @@ class Array(
         with_name=None,
         check_valid=False,
         cache=None,
-        lib="cpu",
+        kernels=None,
     ):
         if isinstance(
             data, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
@@ -229,6 +231,9 @@ class Array(
 
         elif isinstance(data, np.ndarray) and data.dtype != np.dtype("O"):
             layout = awkward1.operations.convert.from_numpy(data, highlevel=False)
+
+        elif type(data).__module__.startswith("cupy."):
+            layout = awkward1.operations.convert.from_cupy(data, highlevel=False)
 
         elif type(data).__module__ == "pyarrow" or type(data).__module__.startswith("pyarrow."):
             layout = awkward1.operations.convert.from_arrow(data, highlevel=False)
@@ -269,8 +274,13 @@ class Array(
         if self.__class__ is Array:
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
 
-        if lib is not None and lib != awkward1.operations.convert.kernels(layout):
-            layout = awkward1.operations.convert.to_kernels(layout, lib, highlevel=False)
+        if (
+            kernels is not None
+            and kernels != awkward1.operations.convert.kernels(layout)
+        ):
+            layout = awkward1.operations.convert.to_kernels(
+                layout, kernels, highlevel=False
+            )
 
         self.layout = layout
         self.behavior = behavior
@@ -1445,10 +1455,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
-        lib ("cpu", "cuda", or None): If "cpu", the Record will be placed in main
-            memory for use with other "cpu" Arrays and Records; if "cuda", the
-            Record will be placed in GPU global memory using CUDA; if None, the
-            `data` are left untouched. For "cuda",
+        kernels (None, "cpu", or "cuda"): If "cpu", the Record will be placed in
+            main memory for use with other "cpu" Arrays and Records; if "cuda",
+            the Record will be placed in GPU global memory using CUDA; if None,
+            the `data` are left untouched. For "cuda",
             [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
             must be installed, which can be invoked with
             `pip install awkward1[cuda] --upgrade`.
@@ -1474,7 +1484,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         with_name=None,
         check_valid=False,
         cache=None,
-        lib="cpu",
+        kernels=None,
     ):
         if isinstance(data, awkward1.layout.Record):
             layout = data
@@ -1511,8 +1521,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                 layout, with_name, highlevel=False
             )
 
-        if lib is not None and lib != awkward1.operations.convert.kernels(layout):
-            layout = awkward1.operations.convert.to_kernels(layout, lib, highlevel=False)
+        if (
+            kernels is not None
+            and kernels != awkward1.operations.convert.kernels(layout)
+        ):
+            layout = awkward1.operations.convert.to_kernels(
+                layout, kernels, highlevel=False
+            )
 
         self.layout = layout
         self.behavior = behavior
