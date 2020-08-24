@@ -103,7 +103,8 @@ namespace awkward {
                                         0,
                                         (ssize_t)util::dtype_to_itemsize(dtype_),
                                         format,
-                                        dtype_);
+                                        dtype_,
+                                        kernel::lib::cpu);
   }
 
   util::dtype

@@ -357,6 +357,25 @@ or
             + awkward1._util.exception_suffix(__file__)
         )
 
+    @property
+    def ndarray(self):
+        return self._module.ndarray
+
+    def asarray(self, array, dtype=None):
+        if isinstance(array, (
+            awkward1.highlevel.Array,
+            awkward1.highlevel.Record,
+            awkward1.layout.Content,
+            awkward1.layout.Record,
+        )):
+            out = awkward1.operations.convert.to_cupy(array)
+            if dtype is not None and out.dtype != dtype:
+                return self._module.asarray(out, dtype=dtype)
+            else:
+                return out
+        else:
+            return self._module.asarray(array, dtype=dtype)
+
     def frombuffer(self, *args, **kwargs):
         np_array = numpy.frombuffer(*args, **kwargs)
         return self._module.array(np_array)

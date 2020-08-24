@@ -89,7 +89,8 @@ namespace awkward {
                                            0,
                                            sizeof(uint8_t),
                                            "B",
-                                           util::dtype::uint8);
+                                           util::dtype::uint8,
+                                           kernel::lib::cpu);
     return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                string_parameters,
                                                offsets,

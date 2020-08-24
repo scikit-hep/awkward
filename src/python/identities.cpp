@@ -184,12 +184,11 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
                 cupy_unowned_mem,
                 0);
 
-        return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
-            (py::module::import("cupy").attr("ndarray")(
+        return py::module::import("cupy").attr("ndarray")(
                 pybind11::make_tuple(py::cast<ssize_t>(cuda_identities->length())),
                 py::format_descriptor<T>::format(),
                 cupy_memoryptr,
-                pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
+                pybind11::make_tuple(py::cast<ssize_t>(sizeof(T))));
       })
 
   );

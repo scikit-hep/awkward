@@ -170,12 +170,11 @@ make_IndexOf(const py::handle& m, const std::string& name) {
             cupy_memoryptr,
             pybind11::make_tuple(py::cast<ssize_t>(sizeof(T))));
 
-        return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
-            (py::module::import("cupy").attr("ndarray")(
+        return py::module::import("cupy").attr("ndarray")(
                 pybind11::make_tuple(py::cast<ssize_t>(self.length())),
                 py::format_descriptor<T>::format(),
                 cupy_memoryptr,
-                pybind11::make_tuple(py::cast<ssize_t>(sizeof(T)))));
+                pybind11::make_tuple(py::cast<ssize_t>(sizeof(T))));
         })
   );
 }

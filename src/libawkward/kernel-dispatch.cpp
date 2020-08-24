@@ -115,8 +115,8 @@ namespace awkward {
         util::handle_error(err2);
 
         std::stringstream out;
-        out << indent << pre << "<Lib name=\"cuda\" num=\"" << num
-            << "\" name=\"" << name << "\"/>" << post;
+        out << indent << pre << "<Lib kernels=\"cuda\" device=\"" << num
+            << "\" device_name=\"" << name << "\"/>" << post;
         return out.str();
       }
 

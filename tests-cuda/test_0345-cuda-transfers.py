@@ -27,7 +27,6 @@ def test_tocuda():
     assert awkward1.to_list(cuda_array) == awkward1.to_list(array)
     assert awkward1.to_list(copyback_array) == awkward1.to_list(array)
 
-
     array = awkward1.layout.NumpyArray(
         numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5]))
     cuda_array = awkward1.copy_to(array, "cuda")
@@ -35,11 +34,11 @@ def test_tocuda():
     assert awkward1.to_list(cuda_array) == awkward1.to_list(array)
     assert awkward1.to_list(copyback_array) == awkward1.to_list(array)
 
-
     array = awkward1.layout.NumpyArray(
         numpy.array([[0.0, 1.1], [2.2, 3.3], [4.4, 5.5]]))
     cuda_array = awkward1.copy_to(array, "cuda")
     copyback_array = awkward1.copy_to(cuda_array, "cpu")
+
     assert awkward1.to_list(cuda_array) == awkward1.to_list(array)
     assert awkward1.to_list(copyback_array) == awkward1.to_list(array)
 

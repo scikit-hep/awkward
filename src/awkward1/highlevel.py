@@ -34,7 +34,7 @@ def _suffix(array):
     if out == "cpu":
         return ""
     else:
-        return " " + out
+        return ":" + out
 
 
 class Array(
@@ -404,7 +404,7 @@ class Array(
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-            return "<{0}.mask {1} type={2}{3}>".format(name, value, typestr, suffix)
+            return "<{0}.mask{1} {2} type={3}>".format(name, suffix, value, typestr)
 
         def __getitem__(self, where):
             return awkward1.operations.structure.mask(
@@ -1248,7 +1248,7 @@ class Array(
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{0} {1} type={2}{3}>".format(name, value, typestr, suffix)
+        return "<{0}{1} {2} type={3}>".format(name, suffix, value, typestr)
 
     def __array__(self, *args, **kwargs):
         """
@@ -1957,7 +1957,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{0} {1} type={2}{3}>".format(name, value, typestr, suffix)
+        return "<{0}{1} {2} type={3}>".format(name, suffix, value, typestr)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """

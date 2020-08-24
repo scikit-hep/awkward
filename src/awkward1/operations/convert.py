@@ -490,6 +490,20 @@ def to_cupy(array):
         raise ValueError("cannot convert {0} into cp.ndarray".format(array))
 
 
+def copy_to(array, destination, highlevel=True, behavior=None):
+    """
+    Args:
+        array: Data to copy to 
+    """
+    arr = awkward1.to_layout(array)
+    out = arr.copy_to(destination)
+
+    if highlevel:
+        return awkward1._util.wrap(out, behavior)
+    else:
+        return out
+
+
 def from_iter(
     iterable, highlevel=True, behavior=None, allow_record=True, initial=1024, resize=1.5
 ):

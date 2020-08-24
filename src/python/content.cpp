@@ -28,50 +28,70 @@ box(const std::shared_ptr<ak::Content>& content) {
   else if (ak::NumpyArray* raw =
            dynamic_cast<ak::NumpyArray*>(content.get())) {
     if (raw->isscalar()) {
-      if (raw->ptr_lib() == ak::kernel::lib::cuda) {
-        if (raw->dtype() == ak::util::dtype::boolean) {
-          return py::cast(ak::kernel::NumpyArray_getitem_at0(ak::kernel::lib::cuda,
-                                                             reinterpret_cast<bool *>(raw->ptr().get()) + raw->byteoffset() / raw->itemsize()) ? true : false);
-        } else if (raw->dtype() == ak::util::dtype::int8) {
-          return py::cast(ak::kernel::NumpyArray_getitem_at0(ak::kernel::lib::cuda,
-                                                             reinterpret_cast<int8_t *>(raw->ptr().get()) + raw->byteoffset() / raw->itemsize()));
-        } else if (raw->dtype() == ak::util::dtype::int16) {
-          return py::cast(ak::kernel::NumpyArray_getitem_at0(ak::kernel::lib::cuda,
-                                                             reinterpret_cast<int16_t *>(raw->ptr().get()) + raw->byteoffset() / raw->itemsize()));
-        } else if (raw->dtype() == ak::util::dtype::int32) {
-          return py::cast(ak::kernel::NumpyArray_getitem_at0(ak::kernel::lib::cuda,
-                                                             reinterpret_cast<int32_t *>(raw->ptr().get()) + raw->byteoffset() / raw->itemsize()));
-        } else if (raw->dtype() == ak::util::dtype::int64) {
-          return py::cast(ak::kernel::NumpyArray_getitem_at0(ak::kernel::lib::cuda,
-                                                             reinterpret_cast<int64_t *>(raw->ptr().get()) + raw->byteoffset() / raw->itemsize()));
-        } else if (raw->dtype() == ak::util::dtype::uint8) {
-          return py::cast((int)ak::kernel::NumpyArray_getitem_at0(ak::kernel::lib::cuda,
-                                                                  reinterpret_cast<uint8_t *>(raw->ptr().get()) + raw->byteoffset() / raw->itemsize()));
-        } else if (raw->dtype() == ak::util::dtype::uint16) {
-          return py::cast(ak::kernel::NumpyArray_getitem_at0(ak::kernel::lib::cuda,
-                                                             reinterpret_cast<uint16_t *>(raw->ptr().get()) + raw->byteoffset() / raw->itemsize()));
-        } else if (raw->dtype() == ak::util::dtype::uint32) {
-          return py::cast(ak::kernel::NumpyArray_getitem_at0(ak::kernel::lib::cuda,
-                                                             reinterpret_cast<uint32_t *>(raw->ptr().get()) + raw->byteoffset() / raw->itemsize()));
-        } else if (raw->dtype() == ak::util::dtype::uint64) {
-          return py::cast(ak::kernel::NumpyArray_getitem_at0(ak::kernel::lib::cuda,
-                                                             reinterpret_cast<uint64_t *>(raw->ptr().get()) + raw->byteoffset() / raw->itemsize()));
-        } else if (raw->dtype() == ak::util::dtype::float32) {
-          return py::cast(ak::kernel::NumpyArray_getitem_at0(ak::kernel::lib::cuda,
-                                                             reinterpret_cast<float *>(raw->ptr().get()) + raw->byteoffset() / raw->itemsize()));
-        } else if (raw->dtype() == ak::util::dtype::float64) {
-          return py::cast(ak::kernel::NumpyArray_getitem_at0(ak::kernel::lib::cuda,
-                                                             reinterpret_cast<double *>(raw->ptr().get()) + raw->byteoffset() / raw->itemsize()));
-        }
+      switch (raw->dtype()) {
+        case ak::util::dtype::boolean:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<bool*>(raw->data())));
+        case ak::util::dtype::int8:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<int8_t*>(raw->data())));
+        case ak::util::dtype::int16:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<int16_t*>(raw->data())));
+        case ak::util::dtype::int32:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<int32_t*>(raw->data())));
+        case ak::util::dtype::int64:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<int64_t*>(raw->data())));
+        case ak::util::dtype::uint8:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<uint8_t*>(raw->data())));
+        case ak::util::dtype::uint16:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<uint16_t*>(raw->data())));
+        case ak::util::dtype::uint32:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<uint32_t*>(raw->data())));
+        case ak::util::dtype::uint64:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<uint64_t*>(raw->data())));
+        case ak::util::dtype::float32:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<float*>(raw->data())));
+        case ak::util::dtype::float64:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<double*>(raw->data())));
+        default:
+          if (raw->ptr_lib() == ak::kernel::lib::cuda) {
+            throw std::runtime_error(
+              std::string("not implemented: format ")
+              + ak::util::quote(raw->format(), true)
+              + std::string(" in CUDA")
+              + FILENAME(__LINE__));
+          }
+          else {
+            return py::array(py::buffer_info(
+              raw->data(),
+              raw->itemsize(),
+              raw->format(),
+              raw->ndim(),
+              raw->shape(),
+              raw->strides()
+            )).attr("item")();
+          }
       }
-      return py::array(py::buffer_info(
-        raw->data(),
-        raw->itemsize(),
-        raw->format(),
-        raw->ndim(),
-        raw->shape(),
-        raw->strides()
-      )).attr("item")();
     }
     else {
       return py::cast(*raw);
@@ -1753,7 +1773,8 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
           0,
           info.itemsize,
           info.format,
-          ak::util::format_to_dtype(info.format, (int64_t)info.itemsize));
+          ak::util::format_to_dtype(info.format, (int64_t)info.itemsize),
+          ak::kernel::lib::cpu);
       }), py::arg("array"),
           py::arg("identities") = py::none(),
           py::arg("parameters") = py::none())
@@ -1852,12 +1873,11 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
             cupy_unowned_mem,
             self.byteoffset());
 
-        return py::module::import("awkward1").attr("layout").attr(name.c_str()).attr("from_cupy")
-            (py::module::import("cupy").attr("ndarray")(
+        return py::module::import("cupy").attr("ndarray")(
                 pybind11::make_tuple(py::cast<ssize_t>(self.length())),
                 ak::util::dtype_to_format(self.dtype()),
                 cupy_memoryptr,
-                pybind11::make_tuple(py::cast<ssize_t>(self.itemsize()))));
+                pybind11::make_tuple(py::cast<ssize_t>(self.itemsize())));
     })
 
   );
