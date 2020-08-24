@@ -7,7 +7,6 @@ import collections
 
 import awkward1.layout
 import numpy as np
-import cupy as cp
 
 def flatten(ptr_lib_list):
     if ptr_lib_list == None:
@@ -20,7 +19,13 @@ def flatten(ptr_lib_list):
             yield el
 
 
+
 def fetch_ptr_libs(array):
+
+    def checkifcupyndarray(array):
+        import cupy
+        return isinstance(array, cupy.ndarray)
+
     def recurse(array):
         import awkward1.highlevel
 
@@ -116,12 +121,12 @@ def fetch_ptr_libs(array):
         elif isinstance(array, np.ndarray):
             return ["cpu"]
         
-        elif isinstance(array, cp.ndarray):
-            return ["cuda"]
-        
         elif array == None:
             return []
-        
+       
+        elif (checkifcupyndarray(array)):
+            return ["cuda"]
+
         else:
             raise TypeError("unrecognized array type: {0}".format(repr(array)))
     
