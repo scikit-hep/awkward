@@ -37,6 +37,7 @@ KERNEL_WHITELIST = [
     "awkward_ListArray_getitem_next_range_counts",
     "awkward_IndexedArray_numnull",
     "awkward_UnionArray_regular_index_getsize",
+    "awkward_ByteMaskedArray_getitem_carry",
     "awkward_ByteMaskedArray_toIndexedOptionArray",
 ]
 
@@ -50,6 +51,9 @@ KERNEL_BLACKLIST = [
     "awkward_ListOffsetArray_reduce_nonlocal_findgaps_64",
     "awkward_IndexedArray_reduce_next_64",
     "awkward_ListArray_getitem_jagged_carrylen",
+    "awkward_ByteMaskedArray_numnul",
+    "awkward_ByteMaskedArray_getitem_nextcarry",
+    "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
     "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
     "awkward_MaskedArray_getitem_next_jagged_project",
 ]
@@ -90,6 +94,8 @@ def traverse(node, args={}, forflag=False, declared=[]):
         for subnode in node.orelse:
             code += " " * 2 + traverse(subnode, args, forflag, declared) + "\n"
         code += "}\n"
+    elif node.__class__.__name__ == "Raise":
+        code = "flag[0] = 1;\n"
     elif node.__class__.__name__ == "Name":
         if forflag and node.id == "i":
             code = "thread_id"
@@ -533,7 +539,7 @@ def getdecl(name, args, templatestring, parent=False, solo=False):
         else:
             params += ", " + value + " " + key
     if parent:
-        code += "void cuda" + name[len("awkward") :] + "(" + params + ") {\n"
+        code += "void cuda" + name[len("awkward") :] + "(" + params + ", int* flag) {\n"
     else:
         code += "ERROR " + name + "(" + params + ") {\n"
     return code
@@ -603,13 +609,34 @@ threads_per_block = dim3({0}, 1, 1);
 """.format(
                 lenarg
             )
+            code += "int* cuflag;\n"
+            code += "cudaMalloc((void**)&cuflag, sizeof(int));\n"
             templatetypes = gettemplatetypes(childfunc, templateargs)
             paramnames = getparamnames(args)
             code += " " * 2 + "cuda" + indspec["name"][len("awkward") :]
             if templatetypes is not None and len(templatetypes) > 0:
                 code += "<" + templatetypes + ">"
-            code += " <<<blocks_per_grid, threads_per_block>>>(" + paramnames + ");\n"
+            code += (
+                " <<<blocks_per_grid, threads_per_block>>>("
+                + paramnames
+                + ", cuflag);\n"
+            )
             code += " " * 2 + "cudaDeviceSynchronize();\n"
+            code += " " * 2 + "int* flag = (int*)malloc(sizeof(int));\n"
+            code += " " * 2 + "flag[0] = 0;\n"
+            code += (
+                " " * 2
+                + "cudaMemcpy(flag, cuflag, sizeof(int), cudaMemcpyDeviceToHost);\n"
+            )
+            code += " " * 2 + "cudaFree(cuflag);\n"
+            code += " " * 2 + "if (flag[0] == 1) {\n"
+            code += " " * 4 + "free(flag);\n"
+            code += (
+                " " * 4
+                + 'return failure("Operation not possible", 0, kSliceNone, FILENAME(__LINE__));\n'
+            )
+            code += " " * 2 + "}\n"
+            code += " " * 2 + "free(flag);\n"
             code += " " * 2 + "return success();\n"
             code += "}\n\n"
     else:
@@ -628,6 +655,8 @@ threads_per_block = dim3({0}, 1, 1);
 """.format(
             lenarg
         )
+        code += "int* cuflag;\n"
+        code += "cudaMalloc((void**)&cuflag, sizeof(int));\n"
         paramnames = getparamnames(args)
         code += (
             " " * 2
@@ -635,9 +664,24 @@ threads_per_block = dim3({0}, 1, 1);
             + indspec["name"][len("awkward") :]
             + "<<<blocks_per_grid, threads_per_block>>>("
             + paramnames
+            + ", cuflag"
             + ");\n"
         )
         code += " " * 2 + "cudaDeviceSynchronize();\n"
+        code += " " * 2 + "int* flag = (int*)malloc(sizeof(int));\n"
+        code += " " * 2 + "flag[0] = 0;\n"
+        code += (
+            " " * 2 + "cudaMemcpy(flag, cuflag, sizeof(int), cudaMemcpyDeviceToHost);\n"
+        )
+        code += " " * 2 + "cudaFree(cuflag);\n"
+        code += " " * 2 + "if (flag[0] == 1) {\n"
+        code += " " * 4 + "free(flag);\n"
+        code += (
+            " " * 4
+            + 'return failure("Operation not possible", 0, kSliceNone, FILENAME(__LINE__));\n'
+        )
+        code += " " * 2 + "}\n"
+        code += " " * 2 + "free(flag);\n"
         code += " " * 2 + "return success();\n"
         code += "}\n\n"
     return code
@@ -652,7 +696,10 @@ if __name__ == "__main__":
         os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
     ) as infile:
         mainspec = yaml.safe_load(infile)["kernels"]
-        code = """#include "awkward/kernels/operations.h"
+        code = """
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/gen.cu", line)
+
+#include "awkward/kernels/operations.h"
 #include "awkward/kernels/identities.h"
 #include "awkward/kernels/getitem.h"
 #include "awkward/kernels/reducers.h"
