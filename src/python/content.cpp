@@ -28,7 +28,7 @@ box(const std::shared_ptr<ak::Content>& content) {
   else if (ak::NumpyArray* raw =
            dynamic_cast<ak::NumpyArray*>(content.get())) {
     if (raw->isscalar()) {
-      if(raw->ptr_lib() == ak::kernel::lib::cuda) {
+      if (raw->ptr_lib() == ak::kernel::lib::cuda) {
         if (raw->dtype() == ak::util::dtype::boolean) {
           return py::cast(ak::kernel::NumpyArray_getitem_at0(ak::kernel::lib::cuda,
                                                              reinterpret_cast<bool *>(raw->ptr().get()) + raw->byteoffset() / raw->itemsize()) ? true : false);
@@ -1766,16 +1766,17 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
       .def_property_readonly("isscalar", &ak::NumpyArray::isscalar)
       .def_property_readonly("isempty", &ak::NumpyArray::isempty)
       .def("toRegularArray", &ak::NumpyArray::toRegularArray)
-      
+
       .def_property_readonly("ptr_lib", [](const ak::NumpyArray& self) {
-        if(self.ptr_lib() == ak::kernel::lib::cpu) {
+        if (self.ptr_lib() == ak::kernel::lib::cpu) {
           return py::cast("cpu");
         }
-        else if(self.ptr_lib() == ak::kernel::lib::cuda) {
+        else if (self.ptr_lib() == ak::kernel::lib::cuda) {
           return py::cast("cuda");
         }
         else {
-          return py::cast("None");
+          throw std::runtime_error(
+            std::string("unrecognized ptr_lib") + FILENAME(__LINE__));
         }
       })
 
@@ -1788,7 +1789,7 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
       .def_static("from_cupy", [name](py::object array,
                                       const py::object& identities,
                                       const py::object& parameters) -> py::object {
-        if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
+        if (py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
           const std::vector<ssize_t> shape = pytuples_to_vector<ssize_t>(array.attr("shape"));
           const std::vector<ssize_t> strides = pytuples_to_vector<ssize_t>(array.attr("strides"));
 //
@@ -1833,9 +1834,13 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
        py::arg("identities") = py::none(),
        py::arg("parameters") = py::none())
       .def("to_cupy", [name](const ak::NumpyArray& self) -> py::object {
-        if(self.ptr_lib() != ak::kernel::lib::cuda) {
-          throw std::invalid_argument(name + " is not a Awkward CUDA array, "
-                                      "use copy_to(\"cuda\") to convert it into one!");
+        if (self.ptr_lib() != ak::kernel::lib::cuda) {
+          throw std::invalid_argument(
+            name
+            + std::string(" resides in main memory, must be converted to NumPy"
+                          " or copied to the GPU with ak.copy_to(array, \"cuda\")"
+                          " first")
+            + FILENAME(__LINE__));
         }
 
         py::object cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
@@ -2323,14 +2328,15 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
       })
       .def_property_readonly("cache_key", &ak::VirtualArray::cache_key)
       .def_property_readonly("ptr_lib", [](const ak::VirtualArray& self) -> py::object {
-        if(self.ptr_lib() == ak::kernel::lib::cpu) {
+        if (self.ptr_lib() == ak::kernel::lib::cpu) {
           return py::cast("cpu");
         }
-        else if(self.ptr_lib() == ak::kernel::lib::cuda) {
+        else if (self.ptr_lib() == ak::kernel::lib::cuda) {
           return py::cast("cuda");
         }
         else {
-          return py::cast("None");
+          throw std::runtime_error(
+            std::string("unrecognized ptr_lib") + FILENAME(__LINE__));
         }
       })
   );

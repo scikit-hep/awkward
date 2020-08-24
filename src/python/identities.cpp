@@ -63,6 +63,18 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
                                pyobject_deleter<T>(array.ptr())));
       }))
 
+      .def_property_readonly("ptr_lib", [](const ak::IdentitiesOf<T>& self) {
+        if (self.ptr_lib() == ak::kernel::lib::cpu) {
+          return py::cast("cpu");
+        }
+        else if (self.ptr_lib() == ak::kernel::lib::cuda) {
+          return py::cast("cuda");
+        }
+        else {
+          throw std::runtime_error(
+            std::string("unrecognized ptr_lib") + FILENAME(__LINE__));
+        }
+      })
       .def("__repr__", &ak::IdentitiesOf<T>::tostring)
       .def("__len__", &ak::IdentitiesOf<T>::length)
       .def("__getitem__", &ak::IdentitiesOf<T>::getitem_at)
@@ -113,8 +125,7 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
       .def_static("from_cupy", [name](ak::Identities::Ref ref,
                                       const ak::Identities::FieldLoc& fieldloc,
                                       py::object array) {
-        if(py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
-
+        if (py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
           void* ptr = reinterpret_cast<void *>(py::cast<ssize_t>
               (array.attr("data").attr("ptr")));
 
@@ -149,9 +160,11 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
         }
       })
       .def("to_cupy", [name](const ak::IdentitiesOf<T>& self) -> py::object {
-        if(self.ptr_lib() != ak::kernel::lib::cuda) {
-          throw std::invalid_argument(name + " is not a Awkward CUDA array, "
-                                             "use copy_to(\"cuda\") to convert it into one!");
+        if (self.ptr_lib() != ak::kernel::lib::cuda) {
+          throw std::invalid_argument(
+            name
+            + std::string(" resides in main memory, must be converted to NumPy, not CuPy")
+            + FILENAME(__LINE__));
         }
 
         std::shared_ptr<ak::Identities> cuda_identities =

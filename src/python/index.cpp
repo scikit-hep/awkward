@@ -45,7 +45,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
           0,
           (int64_t)info.shape[0]);
       }))
-      
+
       .def_property_readonly("ptr_lib", [](const ak::IndexOf<T>& self) {
         if(self.ptr_lib() == ak::kernel::lib::cpu) {
           return py::cast("cpu");
@@ -54,7 +54,8 @@ make_IndexOf(const py::handle& m, const std::string& name) {
           return py::cast("cuda");
         }
         else {
-          return py::cast("None");
+          throw std::runtime_error(
+            std::string("unrecognized ptr_lib") + FILENAME(__LINE__));
         }
       })
       .def("__repr__", &ak::IndexOf<T>::tostring)
@@ -148,9 +149,11 @@ make_IndexOf(const py::handle& m, const std::string& name) {
         }
       })
       .def("to_cupy", [name](const ak::IndexOf<T>& self) -> py::object {
-        if(self.ptr_lib() != ak::kernel::lib::cuda) {
-          throw std::invalid_argument(name + " is not a Awkward CUDA array, "
-                                             "use copy_to(\"cuda\") to convert it into one!");
+        if (self.ptr_lib() != ak::kernel::lib::cuda) {
+          throw std::invalid_argument(
+            name
+            + std::string(" resides in main memory, must be converted to NumPy, not CuPy")
+            + FILENAME(__LINE__));
         }
 
         py::object cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
