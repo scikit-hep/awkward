@@ -452,7 +452,7 @@ namespace awkward {
       lentags,
       index);
     util::handle_error(err, classname(), identities_.get());
-    Index64 nextcarry(tmpcarry.ptr(), 0, lenout);
+    Index64 nextcarry(tmpcarry.ptr(), 0, lenout, tmpcarry.ptr_lib());
     return contents_[(size_t)index].get()->carry(nextcarry, false);
   }
 

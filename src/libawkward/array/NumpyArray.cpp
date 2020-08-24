@@ -2949,7 +2949,7 @@ namespace awkward {
         std::vector<int64_t> strides({ (int64_t)strides_[0] /
                                        (int64_t)itemsize_ });
         return std::make_shared<SliceArray64>(
-          Index64(ptr, (int64_t)byteoffset_ / (int64_t)itemsize_, length()),
+          Index64(ptr, (int64_t)byteoffset_ / (int64_t)itemsize_, length(), ptr_lib_),
           shape,
           strides,
           false);

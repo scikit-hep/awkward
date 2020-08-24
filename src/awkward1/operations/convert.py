@@ -496,29 +496,17 @@ def to_cupy(array):
         )
 
 
-def copy_to(array, destination, highlevel=True, behavior=None):
+def kernels(*arrays):
     """
-    Args:
-        array: Data to copy to a given `destination`.
-        destination ("cpu" or "cuda"): If "cpu", the array structure is
-            recursively copied (if need be) to main memory for use with
-            the default `libawkward-cpu-kernels.so`; if "cuda", the
-            structure is copied to the GPU(s) for use with
-            `libawkward-cuda-kernels.so`.
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
-            high-level.
+    Returns the names of the kernels library used by `arrays`. May be
 
-    Converts an array from "cpu", "cuda", or "mixed" library to "cpu" or "cuda".
+       * "cpu" for `libawkward-cpu-kernels.so`,
+       * "cuda" for `libawkward-cuda-kernels.so`, or
+       * "mixed" if any of the arrays have different labels within their
+         structure or any arrays have different labels from each other.
 
-    An array is "mixed" if some components are in main memory ("cpu") and others
-    are on the GPU(s) ("cuda"). Mixed arrays can't be used in any operations,
-    and two arrays on different devices can't be used in the same operation.
-
-    Any components that are already in the desired destination are viewed,
-    rather than copied, so this operation can be an inexpensive way to ensure
-    that an array is ready for use on a given device.
+    Mixed arrays can't be used in any operations, and two arrays on different
+    devices can't be used in the same operation.
 
     To use "cuda", the optional package awkward1-cuda-kernels must be installed;
     it is available on PyPI and may either be installed directly with
@@ -531,9 +519,121 @@ def copy_to(array, destination, highlevel=True, behavior=None):
 
     It is only available for Linux as a binary wheel, and only supports Nvidia
     GPUs (it is written in CUDA).
+
+    See #ak.to_kernels.
+    """
+    libs = set()
+
+    def apply(layout, depth):
+        if layout.identities is not None:
+            libs.add(layout.identities.ptr_lib)
+
+        if isinstance(layout, awkward1.layout.NumpyArray):
+            libs.add(layout.ptr_lib)
+
+        elif isinstance(layout, (
+            awkward1.layout.ListArray32,
+            awkward1.layout.ListArrayU32,
+            awkward1.layout.ListArray64,
+        )):
+            libs.add(layout.starts.ptr_lib)
+            libs.add(layout.stops.ptr_lib)
+
+        elif isinstance(layout, (
+            awkward1.layout.ListOffsetArray32,
+            awkward1.layout.ListOffsetArrayU32,
+            awkward1.layout.ListOffsetArray64,
+        )):
+            libs.add(layout.offsets.ptr_lib)
+
+        elif isinstance(layout, (
+            awkward1.layout.IndexedArray32,
+            awkward1.layout.IndexedArrayU32,
+            awkward1.layout.IndexedArray64,
+            awkward1.layout.IndexedOptionArray32,
+            awkward1.layout.IndexedOptionArray64,
+        )):
+            libs.add(layout.index.ptr_lib)
+
+        elif isinstance(layout, (
+            awkward1.layout.ByteMaskedArray,
+            awkward1.layout.BitMaskedArray,
+        )):
+            libs.add(layout.mask.ptr_lib)
+
+        elif isinstance(layout, (
+            awkward1.layout.UnionArray8_32,
+            awkward1.layout.UnionArray8_U32,
+            awkward1.layout.UnionArray8_64,
+        )):
+            libs.add(layout.tags.ptr_lib)
+            libs.add(layout.index.ptr_lib)
+
+        elif isinstance(layout, awkward1.layout.VirtualArray):
+            libs.add(layout.ptr_lib)
+
+    for array in arrays:
+        layout = awkward1.operations.convert.to_layout(
+            array,
+            allow_record=True,
+            allow_other=True,
+        )
+        if isinstance(layout, (awkward1.layout.Content, awkward1.layout.Record)):
+            awkward1._util.recursive_walk(layout, apply, materialize=False)
+        elif isinstance(layout, awkward1.nplike.numpy.ndarray):
+            libs.add("cpu")
+        elif type(layout).__module__.startswith("cupy."):
+            libs.add("cuda")
+
+    if libs == set() or libs == set(["cpu"]):
+        return "cpu"
+    elif libs == set(["cuda"]):
+        return "cuda"
+    else:
+        return "mixed"
+
+
+def to_kernels(array, kernels, highlevel=True, behavior=None):
+    """
+    Args:
+        array: Data to convert to a specified `kernels` set.
+        kernels ("cpu" or "cuda"): If "cpu", the array structure is
+            recursively copied (if need be) to main memory for use with
+            the default `libawkward-cpu-kernels.so`; if "cuda", the
+            structure is copied to the GPU(s) for use with
+            `libawkward-cuda-kernels.so`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Converts an array from "cpu", "cuda", or "mixed" kernels to "cpu" or "cuda".
+
+    An array is "mixed" if some components are set to use "cpu" kernels and
+    others are set to use "cuda" kernels. Mixed arrays can't be used in any
+    operations, and two arrays set to different kernels can't be used in the
+    same operation.
+
+    Any components that are already in the desired kernels library are viewed,
+    rather than copied, so this operation can be an inexpensive way to ensure
+    that an array is ready for a particular library.
+
+    To use "cuda", the optional package awkward1-cuda-kernels must be installed;
+    it is available on PyPI and may either be installed directly with
+
+        pip install awkward1-cuda-kernels
+
+    or as an extras dependency with
+
+        pip install awkward1[cuda] --upgrade
+
+    It is only available for Linux as a binary wheel, and only supports Nvidia
+    GPUs (it is written in CUDA).
+
+    See #ak.lib.
     """
     arr = awkward1.to_layout(array)
-    out = arr.copy_to(destination)
+    out = arr.copy_to(kernels)
 
     if highlevel:
         return awkward1._util.wrap(out, behavior)

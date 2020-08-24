@@ -363,10 +363,14 @@ def wrap(content, behavior, cache=None):
     if isinstance(
         content, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
     ):
-        return awkward1.highlevel.Array(content, behavior=behavior, cache=cache)
+        return awkward1.highlevel.Array(
+            content, behavior=behavior, cache=cache, lib=None
+        )
 
     elif isinstance(content, awkward1.layout.Record):
-        return awkward1.highlevel.Record(content, behavior=behavior, cache=cache)
+        return awkward1.highlevel.Record(
+            content, behavior=behavior, cache=cache, lib=None
+        )
 
     else:
         return content
@@ -690,6 +694,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                             )
                     else:
                         nextinputs.append(x)
+
                 outcontent = apply(nextinputs, depth + 1)
                 assert isinstance(outcontent, tuple)
                 return tuple(

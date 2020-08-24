@@ -30,7 +30,7 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
 def _suffix(array):
-    out = awkward1.nplike.lib(array)
+    out = awkward1.operations.convert.kernels(array)
     if out == "cpu":
         return ""
     else:
@@ -64,11 +64,12 @@ class Array(
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
-        lib ("cpu" or "cuda"): If "cpu", the Array will be placed in main
+        lib ("cpu", "cuda", or None): If "cpu", the Array will be placed in main
             memory for use with other "cpu" Arrays and Records; if "cuda", the
-            Array will be placed in GPU global memory using CUDA. For the latter,
-            awkward1-cuda-kernels must be installed, which can be invoked
-            with `pip install awkward1[cuda] --upgrade`.
+            Array will be placed in GPU global memory using CUDA; if None, the
+            `data` are left untouched. For "cuda", awkward1-cuda-kernels must
+            be installed, which can be invoked with
+            `pip install awkward1[cuda] --upgrade`.
 
     High-level array that can contain data of any type.
 
@@ -267,8 +268,8 @@ class Array(
         if self.__class__ is Array:
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
 
-        if lib != awkward1.nplike.lib(layout):
-            layout = awkward1.operations.convert.copy_to(layout, lib, highlevel=False)
+        if lib is not None and lib != awkward1.operations.convert.kernels(layout):
+            layout = awkward1.operations.convert.to_kernels(layout, lib, highlevel=False)
 
         self.layout = layout
         self.behavior = behavior
@@ -1443,11 +1444,12 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
-        lib ("cpu" or "cuda"): If "cpu", the Record will be placed in main
+        lib ("cpu", "cuda", or None): If "cpu", the Array will be placed in main
             memory for use with other "cpu" Arrays and Records; if "cuda", the
-            Record will be placed in GPU global memory using CUDA. For the latter,
-            awkward1-cuda-kernels must be installed, which can be invoked
-            with `pip install awkward1[cuda] --upgrade`.
+            Array will be placed in GPU global memory using CUDA; if None, the
+            `data` are left untouched. For "cuda", awkward1-cuda-kernels must
+            be installed, which can be invoked with
+            `pip install awkward1[cuda] --upgrade`.
 
     High-level record that can contain fields of any type.
 
@@ -1507,8 +1509,8 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                 layout, with_name, highlevel=False
             )
 
-        if lib != awkward1.nplike.lib(layout):
-            layout = awkward1.operations.convert.copy_to(layout, lib, highlevel=False)
+        if lib is not None and lib != awkward1.operations.convert.kernels(layout):
+            layout = awkward1.operations.convert.to_kernels(layout, lib, highlevel=False)
 
         self.layout = layout
         self.behavior = behavior

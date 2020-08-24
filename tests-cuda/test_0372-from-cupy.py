@@ -32,3 +32,19 @@ def test_from_cupy_tolist():
     ak_cupy_array_1d = awkward1.from_cupy(cupy_array_1d)
 
     assert awkward1.to_list(ak_cupy_array_1d.layout) == [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+
+
+def test_NumpyArray_constructor():
+    assert awkward1.kernels(awkward1.layout.NumpyArray(numpy.array([1, 2, 3]))) == "cpu"
+    assert awkward1.kernels(awkward1.layout.NumpyArray(cupy.array([1, 2, 3]))) == "cuda"
+
+
+def test_add():
+    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], lib="cuda")
+    two = awkward1.Array([100, 200, 300], lib="cuda")
+    assert awkward1.kernels(one) == "cuda"
+    assert awkward1.kernels(two) == "cuda"
+
+    three = one + two
+    assert awkward1.kernels(three) == "cuda"
+    assert awkward1.to_list(three) == [[101.1, 102.2, 103.3], [], [304.4, 305.5]]

@@ -22,4 +22,3 @@ def test_cupy_interop():
     assert awkward1.to_list(numpy.asarray(numpy_index_arr.copy_to("cpu"))) == awkward1.to_list(numpy.asarray(numpy_index_arr))
     #CPU->GPU->CPU
     assert awkward1.to_list(numpy.asarray(numpy_index_arr)) == awkward1.to_list(numpy.asarray(numpy_index_arr.copy_to("cuda").copy_to("cpu")))
-    

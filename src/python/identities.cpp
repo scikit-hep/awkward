@@ -10,6 +10,50 @@
 #include "awkward/python/identities.h"
 
 template <typename T>
+ak::IdentitiesOf<T>
+Identities_from_cupy(const std::string& name,
+                     ak::Identities::Ref ref,
+                     const ak::Identities::FieldLoc& fieldloc,
+                     const py::object& array) {
+  if (py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
+    void* ptr = reinterpret_cast<void *>(py::cast<ssize_t>
+                                         (array.attr("data").attr("ptr")));
+
+    if (py::cast<int64_t>(array.attr("ndim")) != 2) {
+      throw std::invalid_argument(
+        name + std::string(" must be built from a two-dimensional array")
+        + FILENAME(__LINE__));
+    }
+    std::vector<int64_t> shape, strides;
+
+    shape = array.attr("shape").cast<std::vector<int64_t>>();
+    strides = array.attr("strides").cast<std::vector<int64_t>>();
+
+    if (strides[0] != sizeof(T)*shape[1]  ||
+        strides[1] != sizeof(T)) {
+      throw std::invalid_argument(
+        name + std::string(" must be built from a contiguous array (array"
+                           ".stries == (array.shape[1]*array.itemsize, "
+                           "array.itemsize)); try array.copy()")
+        + FILENAME(__LINE__));
+    }
+    return ak::IdentitiesOf<T>(ref,
+                               fieldloc,
+                               0,
+                               shape[1],
+                               shape[0],
+                               std::shared_ptr<T>(reinterpret_cast<T*>(ptr),
+                                                  pyobject_deleter<T>(array.ptr())),
+                               ak::kernel::lib::cuda);
+  }
+  else {
+    throw std::invalid_argument(
+      name + std::string(".from_cupy() can only accept CuPy Arrays!")
+      + FILENAME(__LINE__));
+  }
+}
+
+template <typename T>
 py::class_<ak::IdentitiesOf<T>>
 make_IdentitiesOf(const py::handle& m, const std::string& name) {
   return (py::class_<ak::IdentitiesOf<T>>(m,
@@ -38,8 +82,14 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
 
       .def(py::init([name](ak::Identities::Ref ref,
                            ak::Identities::FieldLoc fieldloc,
-                           py::array_t<T,
-                           py::array::c_style | py::array::forcecast> array) {
+                           const py::object& anyarray) -> ak::IdentitiesOf<T> {
+        std::string module = anyarray.get_type().attr("__module__").cast<std::string>();
+        if (module.rfind("cupy.", 0) == 0) {
+          return Identities_from_cupy<T>(name, ref, fieldloc, anyarray);
+        }
+
+        py::array_t<T> array = anyarray.cast<py::array_t<T, py::array::c_style | py::array::forcecast>>();
+
         py::buffer_info info = array.request();
         if (info.ndim != 2) {
           throw std::invalid_argument(
@@ -126,43 +176,8 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
            })
       .def_static("from_cupy", [name](ak::Identities::Ref ref,
                                       const ak::Identities::FieldLoc& fieldloc,
-                                      py::object array) {
-        if (py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
-          void* ptr = reinterpret_cast<void *>(py::cast<ssize_t>
-              (array.attr("data").attr("ptr")));
-
-          if (py::cast<int64_t>(array.attr("ndim")) != 2) {
-            throw std::invalid_argument(
-                name + std::string(" must be built from a two-dimensional array")
-                + FILENAME(__LINE__));
-          }
-          std::vector<int64_t> shape, strides;
-
-          shape = array.attr("shape").cast<std::vector<int64_t>>();
-          strides = array.attr("strides").cast<std::vector<int64_t>>();
-
-          if (strides[0] != sizeof(T)*shape[1]  ||
-              strides[1] != sizeof(T)) {
-            throw std::invalid_argument(
-                name + std::string(" must be built from a contiguous array (array"
-                                   ".stries == (array.shape[1]*array.itemsize, "
-                                   "array.itemsize)); try array.copy()")
-                + FILENAME(__LINE__));
-          }
-          return ak::IdentitiesOf<T>(ref,
-                                     fieldloc,
-                                     0,
-                                     shape[1],
-                                     shape[0],
-                                     std::shared_ptr<T>(reinterpret_cast<T*>(ptr),
-                                                        pyobject_deleter<T>(array.ptr())),
-                                     ak::kernel::lib::cuda);
-        }
-        else {
-          throw std::invalid_argument(
-            name + std::string(".from_cupy() can only accept CuPy Arrays!")
-            + FILENAME(__LINE__));
-        }
+                                      const py::object& array) -> ak::IdentitiesOf<T> {
+        return Identities_from_cupy<T>(name, ref, fieldloc, array);
       })
       .def("to_cupy", [name](const ak::IdentitiesOf<T>& self) -> py::object {
         if (self.ptr_lib() != ak::kernel::lib::cuda) {

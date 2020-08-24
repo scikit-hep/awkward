@@ -55,7 +55,7 @@ namespace awkward {
 
   const ContentPtr
   ListBuilder::snapshot() const {
-    Index64 offsets(offsets_.ptr(), 0, offsets_.length());
+    Index64 offsets(offsets_.ptr(), 0, offsets_.length(), kernel::lib::cpu);
     return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                util::Parameters(),
                                                offsets,

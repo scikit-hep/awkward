@@ -229,7 +229,7 @@ namespace awkward {
 
   const ContentPtr
   IndexedGenericBuilder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length());
+    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
     if (hasnull_) {
       return std::make_shared<IndexedOptionArray64>(
         Identities::none(),
@@ -277,7 +277,7 @@ namespace awkward {
 
   const ContentPtr
   IndexedI32Builder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length());
+    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
     if (hasnull_) {
       return std::make_shared<IndexedOptionArray64>(
         Identities::none(),
@@ -325,7 +325,7 @@ namespace awkward {
 
   const ContentPtr
   IndexedIU32Builder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length());
+    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
     if (hasnull_) {
       return std::make_shared<IndexedOptionArray64>(
         Identities::none(),
@@ -373,7 +373,7 @@ namespace awkward {
 
   const ContentPtr
   IndexedI64Builder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length());
+    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
     if (hasnull_) {
       return std::make_shared<IndexedOptionArray64>(
         Identities::none(),
@@ -424,7 +424,7 @@ namespace awkward {
 
   const ContentPtr
   IndexedIO32Builder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length());
+    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
     return std::make_shared<IndexedOptionArray64>(
       Identities::none(),
       array_.get()->content().get()->parameters(),
@@ -465,7 +465,7 @@ namespace awkward {
 
   const ContentPtr
   IndexedIO64Builder::snapshot() const {
-    Index64 index(index_.ptr(), 0, index_.length());
+    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
     return std::make_shared<IndexedOptionArray64>(
       Identities::none(),
       array_.get()->content().get()->parameters(),

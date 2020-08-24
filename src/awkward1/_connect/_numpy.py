@@ -95,9 +95,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             )
             for x in inputs
         ):
-            return lambda: (
-                awkward1.layout.NumpyArray(getattr(ufunc, method)(*inputs, **kwargs)),
+            nplike = awkward1.nplike.of(*inputs)
+            result = getattr(ufunc, method)(
+                *[nplike.asarray(x) for x in inputs], **kwargs
             )
+            return lambda: (awkward1.layout.NumpyArray(result),)
 
         return None
 

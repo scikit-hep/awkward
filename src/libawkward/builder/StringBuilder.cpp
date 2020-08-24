@@ -77,7 +77,7 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
 
-    Index64 offsets(offsets_.ptr(), 0, offsets_.length());
+    Index64 offsets(offsets_.ptr(), 0, offsets_.length(), kernel::lib::cpu);
     std::vector<ssize_t> shape = { (ssize_t)content_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(uint8_t) };
     ContentPtr content;

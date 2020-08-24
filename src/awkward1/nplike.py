@@ -7,82 +7,10 @@ import numpy
 import awkward1.layout
 
 
-def lib(*arrays):
-    libs = set()
-
-    def apply(layout, depth):
-        if layout.identities is not None:
-            libs.add(layout.identities.ptr_lib)
-
-        if isinstance(layout, awkward1.layout.NumpyArray):
-            libs.add(layout.ptr_lib)
-
-        elif isinstance(layout, (
-            awkward1.layout.ListArray32,
-            awkward1.layout.ListArrayU32,
-            awkward1.layout.ListArray64,
-        )):
-            libs.add(layout.starts.ptr_lib)
-            libs.add(layout.stops.ptr_lib)
-
-        elif isinstance(layout, (
-            awkward1.layout.ListOffsetArray32,
-            awkward1.layout.ListOffsetArrayU32,
-            awkward1.layout.ListOffsetArray64,
-        )):
-            libs.add(layout.offsets.ptr_lib)
-
-        elif isinstance(layout, (
-            awkward1.layout.IndexedArray32,
-            awkward1.layout.IndexedArrayU32,
-            awkward1.layout.IndexedArray64,
-            awkward1.layout.IndexedOptionArray32,
-            awkward1.layout.IndexedOptionArray64,
-        )):
-            libs.add(layout.index.ptr_lib)
-
-        elif isinstance(layout, (
-            awkward1.layout.ByteMaskedArray,
-            awkward1.layout.BitMaskedArray,
-        )):
-            libs.add(layout.mask.ptr_lib)
-
-        elif isinstance(layout, (
-            awkward1.layout.UnionArray8_32,
-            awkward1.layout.UnionArray8_U32,
-            awkward1.layout.UnionArray8_64,
-        )):
-            libs.add(layout.tags.ptr_lib)
-            libs.add(layout.index.ptr_lib)
-
-        elif isinstance(layout, awkward1.layout.VirtualArray):
-            libs.add(layout.ptr_lib)
-
-    for array in arrays:
-        layout = awkward1.operations.convert.to_layout(
-            array,
-            allow_record=True,
-            allow_other=True,
-        )
-        if isinstance(layout, (awkward1.layout.Content, awkward1.layout.Record)):
-            awkward1._util.recursive_walk(layout, apply, materialize=False)
-        elif isinstance(layout, numpy.ndarray):
-            libs.add("cpu")
-        elif type(layout).__module__.startswith("cupy."):
-            libs.add("cuda")
-
-    if libs == set() or libs == set(["cpu"]):
-        return "cpu"
-    elif libs == set(["cuda"]):
-        return "cuda"
-    else:
-        return "mixed"
-
-
 def of(*arrays):
     libs = set()
     for array in arrays:
-        ptr_lib = lib(array)
+        ptr_lib = awkward1.operations.convert.kernels(array)
         if ptr_lib == "cpu":
             libs.add("cpu")
         elif ptr_lib == "cuda":
@@ -91,8 +19,8 @@ def of(*arrays):
             raise ValueError(
             """structure mixes 'cpu' and 'cuda' buffers; use one of
 
-    ak.copy_to(array, 'cpu')
-    ak.copy_to(array, 'cuda')
+    ak.to_kernels(array, 'cpu')
+    ak.to_kernels(array, 'cuda')
 
 to obtain an unmixed array in main memory or the GPU(s)."""
             + awkward1._util.exception_suffix(__file__))
@@ -106,8 +34,8 @@ to obtain an unmixed array in main memory or the GPU(s)."""
             """attempting to use both a 'cpu' array and a 'cuda' array in the """
             """same operation; use one of
 
-    ak.copy_to(array, 'cpu')
-    ak.copy_to(array, 'cuda')
+    ak.to_kernels(array, 'cpu')
+    ak.to_kernels(array, 'cuda')
 
 to move one or the other to main memory or the GPU(s)."""
             + awkward1._util.exception_suffix(__file__))
