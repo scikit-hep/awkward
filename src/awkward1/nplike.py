@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 
 import numpy
-import collections
 
 import awkward1.layout
 import numpy as np
@@ -12,15 +11,20 @@ def flatten(ptr_lib_list):
     if ptr_lib_list == None:
         return []
     
-    for el in ptr_lib_list:
-        if isinstance(el, collections.Iterable) and not isinstance(el, (str, bytes)):
-            yield from flatten(el)
-        else:
-            yield el
-
-
+    flattened_list = []
+    for i in ptr_lib_list:
+        if(not isinstance(i, list)):
+            flattened_list.append(i)
+            continue
+        for j in i:
+            flatten(j)
+    return flattened_list
 
 def fetch_ptr_libs(array):
+
+    def checkifcupyndarray(array):
+        import cupy
+        return isinstance(array, cupy.ndarray)
 
     def recurse(array):
         import awkward1.highlevel
@@ -57,14 +61,14 @@ def fetch_ptr_libs(array):
             index = [recurse(array.index)]
             dictionary = recurse(array.content)
 
-            return list(flatten(index + dictionary))
+            return flatten(index + dictionary)
         
         elif isinstance(array, (awkward1.layout.IndexedOptionArray32,
                                 awkward1.layout.IndexedOptionArray64)):
             index = recurse(array.index)
             dictionary = recurse(array.content)
 
-            return list(flatten(index + dictionary))
+            return flatten(index + dictionary)
 
         elif isinstance(array, (awkward1.layout.UnionArray8_32,
                                 awkward1.layout.UnionArray8_U32,
@@ -75,7 +79,7 @@ def fetch_ptr_libs(array):
             ]
 
             tags = recurse(array.tags)
-            return list(flatten(contents + tags))
+            return flatten(contents + tags)
 
         elif isinstance(array, (awkward1.layout.ListOffsetArray32,
                                 awkward1.layout.ListOffsetArrayU32,
@@ -83,7 +87,7 @@ def fetch_ptr_libs(array):
             offsets = recurse(array.offsets)
             content = recurse(array.content)
 
-            return list(flatten(offsets + content))
+            return flatten(offsets + content)
         
         elif isinstance(array, (awkward1.layout.ListArray32,
                                 awkward1.layout.ListArrayU32,
@@ -104,12 +108,12 @@ def fetch_ptr_libs(array):
         elif isinstance(array, awkward1.layout.BitMaskedArray):
             bitmask = recurse(array.mask)
             content = recurse(array.content)
-            return list(flatten(bitmask + content))
+            return flatten(bitmask + content)
         
         elif isinstance(array, awkward1.layout.ByteMaskedArray):
             bytemask = recurse(array.mask)
             content = recurse(array.content)
-            return list(flatten(bytemask + content))
+            return flatten(bytemask + content)
         
         elif isinstance(array, awkward1.layout.UnmaskedArray):
             return recurse(array.content)
@@ -119,12 +123,15 @@ def fetch_ptr_libs(array):
         
         elif array == None:
             return []
+       
+        elif (checkifcupyndarray(array)):
+            return ["cuda"]
 
         else:
             raise TypeError("unrecognized array type: {0}".format(repr(array)))
     
     ptr_lib_list = recurse(array)
-    return list(flatten(ptr_lib_list))
+    return flatten(ptr_lib_list)
 
 def of(*arrays):
     ptr_lib_list = []
@@ -151,7 +158,8 @@ def of(*arrays):
             ptr_lib_list = ptr_lib_list + fetch_ptr_libs(i)
 
     result = False
-    ptr_lib_list = list(flatten(ptr_lib_list))
+    ptr_lib_list1 = ptr_lib_list
+    ptr_lib_list = flatten(ptr_lib_list)
     if len(ptr_lib_list) > 0 :
         result = all(elem == ptr_lib_list[0] for elem in ptr_lib_list)
     
@@ -168,7 +176,7 @@ def of(*arrays):
     elif ptr_lib == "cuda":
         return Cupy.instance()
     else:
-        raise ValueError("Make sure Awkward Arrays use the same kernel use awkward1.copy_to(args) to make it consistent")
+        raise ValueError("Make sure Awkward Arrays use the same kernel use awkward1.copy_to(args) to make it consistent" + str(ptr_lib_list) + " " + str(ptr_lib_list1))
 
     return Numpy.instance()
 
