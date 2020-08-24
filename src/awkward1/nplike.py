@@ -22,10 +22,6 @@ def flatten(ptr_lib_list):
 
 def fetch_ptr_libs(array):
 
-    def checkifcupyndarray(array):
-        import cupy
-        return isinstance(array, cupy.ndarray)
-
     def recurse(array):
         import awkward1.highlevel
 
@@ -123,9 +119,6 @@ def fetch_ptr_libs(array):
         
         elif array == None:
             return []
-       
-        elif (checkifcupyndarray(array)):
-            return ["cuda"]
 
         else:
             raise TypeError("unrecognized array type: {0}".format(repr(array)))
