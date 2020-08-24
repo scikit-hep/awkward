@@ -30,7 +30,7 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
 def _suffix(array):
-    out = awkward1.nplike.libs(array)
+    out = awkward1.nplike.lib(array)
     if out == "cpu":
         return ""
     else:

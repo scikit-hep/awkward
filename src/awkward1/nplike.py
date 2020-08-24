@@ -7,7 +7,7 @@ import numpy
 import awkward1.layout
 
 
-def libs(*arrays):
+def lib(*arrays):
     libs = set()
 
     def apply(layout, depth):
@@ -80,20 +80,36 @@ def libs(*arrays):
 
 
 def of(*arrays):
-    ptr_lib = libs(*arrays)
-
-    if ptr_lib == "cpu":
-        return Numpy.instance()
-    elif ptr_lib == "cuda":
-        return Cupy.instance()
-    else:
-        raise ValueError(
+    libs = set()
+    for array in arrays:
+        ptr_lib = lib(array)
+        if ptr_lib == "cpu":
+            libs.add("cpu")
+        elif ptr_lib == "cuda":
+            libs.add("cuda")
+        else:
+            raise ValueError(
             """structure mixes 'cpu' and 'cuda' buffers; use one of
 
     ak.copy_to(array, 'cpu')
     ak.copy_to(array, 'cuda')
 
-to obtain an unmixed array in main memory or the GPU."""
+to obtain an unmixed array in main memory or the GPU(s)."""
+            + awkward1._util.exception_suffix(__file__))
+
+    if libs == set() or libs == set(["cpu"]):
+        return Numpy.instance()
+    elif libs == set(["cuda"]):
+        return Cupy.instance()
+    else:
+        raise ValueError(
+            """attempting to use both a 'cpu' array and a 'cuda' array in the """
+            """same operation; use one of
+
+    ak.copy_to(array, 'cpu')
+    ak.copy_to(array, 'cuda')
+
+to move one or the other to main memory or the GPU(s)."""
             + awkward1._util.exception_suffix(__file__))
 
 
