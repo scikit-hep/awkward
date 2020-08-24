@@ -50,8 +50,9 @@ For more fine-grained testing, we also have tests of the low-level kernels, whic
 
 ```bash
 python dev/generate-kernelspec.py
-python tests-kernels/generate-tests.py
-python -m pytest -vv -rs tests-kernels
+python dev/generate-tests.py
+python -m pytest -vv -rs tests-spec
+python -m pytest -vv -rs tests-cpu-kernels
 ```
 
 Furthermore, if you have an Nvidia GPU, you can build and locally install the experimental CUDA plug-in with
