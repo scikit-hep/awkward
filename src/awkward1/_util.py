@@ -1145,6 +1145,65 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         )
 
 
+def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
+    apply(layout, depth, *args)
+
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        for x in layout.partitions:
+            recursive_walk(x, apply, args, depth, materialize)
+
+    elif isinstance(layout, awkward1.layout.NumpyArray):
+        pass
+
+    elif isinstance(layout, awkward1.layout.EmptyArray):
+        pass
+
+    elif isinstance(layout, (
+        awkward1.layout.RegularArray,
+        awkward1.layout.ListArray32,
+        awkward1.layout.ListArrayU32,
+        awkward1.layout.ListArray64,
+        awkward1.layout.ListOffsetArray32,
+        awkward1.layout.ListOffsetArrayU32,
+        awkward1.layout.ListOffsetArray64,
+    )):
+        recursive_walk(layout.content, apply, args, depth + 1, materialize)
+
+    elif isinstance(layout, (
+        awkward1.layout.IndexedArray32,
+        awkward1.layout.IndexedArrayU32,
+        awkward1.layout.IndexedArray64,
+        awkward1.layout.IndexedOptionArray32,
+        awkward1.layout.IndexedOptionArray64,
+        awkward1.layout.ByteMaskedArray,
+        awkward1.layout.BitMaskedArray,
+        awkward1.layout.UnmaskedArray,
+    )):
+        recursive_walk(layout.content, apply, args, depth, materialize)
+
+    elif isinstance(layout, (
+        awkward1.layout.RecordArray,
+        awkward1.layout.UnionArray8_32,
+        awkward1.layout.UnionArray8_U32,
+        awkward1.layout.UnionArray8_64,
+    )):
+        for x in layout.contents:
+            recursive_walk(x, apply, args, depth, materialize)
+
+    elif isinstance(layout, awkward1.layout.Record):
+        recursive_walk(layout.array, apply, args, depth, materialize)
+
+    elif isinstance(layout, awkward1.layout.VirtualArray):
+        if materialize:
+            recursive_walk(layout.array, apply, args, depth, materialize)
+
+    else:
+        raise AssertionError(
+            "unrecognized Content type: {0}".format(type(layout))
+            + exception_suffix(__file__)
+        )
+
+
 def highlevel_type(layout, behavior, isarray):
     if isarray:
         return awkward1.types.ArrayType(layout.type(typestrs(behavior)), len(layout))

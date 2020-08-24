@@ -5,180 +5,97 @@ from __future__ import absolute_import
 import numpy
 
 import awkward1.layout
-import numpy as np
 
-def flatten(ptr_lib_list):
-    if ptr_lib_list == None:
-        return []
-    
-    flattened_list = []
-    for i in ptr_lib_list:
-        if(not isinstance(i, list)):
-            flattened_list.append(i)
-            continue
-        for j in i:
-            flatten(j)
-    return flattened_list
 
-def fetch_ptr_libs(array):
+def libs(*arrays):
+    libs = set()
 
-    def checkifcupyndarray(array):
-        import cupy
-        return isinstance(array, cupy.ndarray)
+    def apply(layout, depth):
+        if layout.identities is not None:
+            libs.add(layout.identities.ptr_lib)
 
-    def recurse(array):
-        import awkward1.highlevel
+        if isinstance(layout, awkward1.layout.NumpyArray):
+            libs.add(layout.ptr_lib)
 
-        if isinstance(array, awkward1.highlevel.Array):
-            return recurse(array.layout)
+        elif isinstance(layout, (
+            awkward1.layout.ListArray32,
+            awkward1.layout.ListArrayU32,
+            awkward1.layout.ListArray64,
+        )):
+            libs.add(layout.starts.ptr_lib)
+            libs.add(layout.stops.ptr_lib)
 
-        elif isinstance(array, awkward1.layout.NumpyArray):
-            return [array.ptr_lib]
+        elif isinstance(layout, (
+            awkward1.layout.ListOffsetArray32,
+            awkward1.layout.ListOffsetArrayU32,
+            awkward1.layout.ListOffsetArray64,
+        )):
+            libs.add(layout.offsets.ptr_lib)
 
-        elif isinstance(array, (awkward1.layout.Index8,
-                                awkward1.layout.IndexU8,
-                                awkward1.layout.Index32,
-                                awkward1.layout.IndexU32,
-                                awkward1.layout.Index64)):
-            return [array.ptr_lib]
+        elif isinstance(layout, (
+            awkward1.layout.IndexedArray32,
+            awkward1.layout.IndexedArrayU32,
+            awkward1.layout.IndexedArray64,
+            awkward1.layout.IndexedOptionArray32,
+            awkward1.layout.IndexedOptionArray64,
+        )):
+            libs.add(layout.index.ptr_lib)
 
-        elif isinstance(array, awkward1.layout.Record):
-            out = array
-            return recurse(out.array[out.at : out.at + 1])[0]
-        
-        elif isinstance(array, awkward1.partition.IrregularlyPartitionedArray):
-            return [recurse(x) for x in array.partitions]
+        elif isinstance(layout, (
+            awkward1.layout.ByteMaskedArray,
+            awkward1.layout.BitMaskedArray,
+        )):
+            libs.add(layout.mask.ptr_lib)
 
-        elif isinstance(array, awkward1.layout.VirtualArray):
-            return [array.ptr_lib]
+        elif isinstance(layout, (
+            awkward1.layout.UnionArray8_32,
+            awkward1.layout.UnionArray8_U32,
+            awkward1.layout.UnionArray8_64,
+        )):
+            libs.add(layout.tags.ptr_lib)
+            libs.add(layout.index.ptr_lib)
 
-        elif isinstance(array, awkward1.layout.EmptyArray):
-            return ["cpu"]
+        elif isinstance(layout, awkward1.layout.VirtualArray):
+            libs.add(layout.ptr_lib)
 
-        elif isinstance(array, (awkward1.layout.IndexedArray32,
-                                awkward1.layout.IndexedArrayU32,
-                                awkward1.layout.IndexedArray64)):
-            index = [recurse(array.index)]
-            dictionary = recurse(array.content)
+    for array in arrays:
+        layout = awkward1.operations.convert.to_layout(
+            array,
+            allow_record=True,
+            allow_other=True,
+        )
+        if isinstance(layout, (awkward1.layout.Content, awkward1.layout.Record)):
+            awkward1._util.recursive_walk(layout, apply, materialize=False)
+        elif isinstance(layout, numpy.ndarray):
+            libs.add("cpu")
+        elif type(layout).__module__.startswith("cupy."):
+            libs.add("cuda")
 
-            return flatten(index + dictionary)
-        
-        elif isinstance(array, (awkward1.layout.IndexedOptionArray32,
-                                awkward1.layout.IndexedOptionArray64)):
-            index = recurse(array.index)
-            dictionary = recurse(array.content)
+    if libs == set() or libs == set(["cpu"]):
+        return "cpu"
+    elif libs == set(["cuda"]):
+        return "cuda"
+    else:
+        return "mixed"
 
-            return flatten(index + dictionary)
-
-        elif isinstance(array, (awkward1.layout.UnionArray8_32,
-                                awkward1.layout.UnionArray8_U32,
-                                awkward1.layout.UnionArray8_64)):
-            contents = [
-                recurse(i)
-                for i in array.contents
-            ]
-
-            tags = recurse(array.tags)
-            return flatten(contents + tags)
-
-        elif isinstance(array, (awkward1.layout.ListOffsetArray32,
-                                awkward1.layout.ListOffsetArrayU32,
-                                awkward1.layout.ListOffsetArray64)):
-            offsets = recurse(array.offsets)
-            content = recurse(array.content)
-
-            return flatten(offsets + content)
-        
-        elif isinstance(array, (awkward1.layout.ListArray32,
-                                awkward1.layout.ListArrayU32,
-                                awkward1.layout.ListArray64)):
-            return recurse(array.broadcast_tooffsets64(array.compact_offsets64()))
-
-        elif isinstance(array, awkward1.layout.RegularArray):
-            return recurse(array.broadcast_tooffsets64(array.compact_offsets64()))
-
-        elif isinstance(array, awkward1.layout.RecordArray):
-            if array.numfields == 0:
-                return []
-            return [
-                recurse(array.field(i))
-                for i in range(array.numfields)
-            ]
-        
-        elif isinstance(array, awkward1.layout.BitMaskedArray):
-            bitmask = recurse(array.mask)
-            content = recurse(array.content)
-            return flatten(bitmask + content)
-        
-        elif isinstance(array, awkward1.layout.ByteMaskedArray):
-            bytemask = recurse(array.mask)
-            content = recurse(array.content)
-            return flatten(bytemask + content)
-        
-        elif isinstance(array, awkward1.layout.UnmaskedArray):
-            return recurse(array.content)
-        
-        elif isinstance(array, np.ndarray):
-            return ["cpu"]
-        
-        elif array == None:
-            return []
-       
-        elif (checkifcupyndarray(array)):
-            return ["cuda"]
-
-        else:
-            raise TypeError("unrecognized array type: {0}".format(repr(array)))
-    
-    ptr_lib_list = recurse(array)
-    return flatten(ptr_lib_list)
 
 def of(*arrays):
-    ptr_lib_list = []
-    for i in arrays:
-        if(np.isscalar(i)):
-            continue
+    ptr_lib = libs(*arrays)
 
-        elif(isinstance(i, (awkward1.forms.BitMaskedForm, 
-                          awkward1.forms.Form,               
-                          awkward1.forms.ListForm,
-                          awkward1.forms.RecordForm,         
-                          awkward1.forms.UnmaskedForm,       
-                          awkward1.forms.ByteMaskedForm,    
-                          awkward1.forms.IndexedForm,        
-                          awkward1.forms.ListOffsetForm,     
-                          awkward1.forms.RegularForm,        
-                          awkward1.forms.VirtualForm,        
-                          awkward1.forms.EmptyForm,         
-                          awkward1.forms.IndexedOptionForm,  
-                          awkward1.forms.NumpyForm,          
-                          awkward1.forms.UnionForm))):
-            continue
-        else:
-            ptr_lib_list = ptr_lib_list + fetch_ptr_libs(i)
-
-    result = False
-    ptr_lib_list1 = ptr_lib_list
-    ptr_lib_list = flatten(ptr_lib_list)
-    if len(ptr_lib_list) > 0 :
-        result = all(elem == ptr_lib_list[0] for elem in ptr_lib_list)
-    
-    ptr_lib = "None"
-    if result == True :
-        ptr_lib =  ptr_lib_list[0]       
-    else:
-        ptr_lib = "Inconsistent"
-    if(len(ptr_lib_list) == 0):
-        ptr_lib = "None"
-    
-    if ptr_lib == "cpu" or ptr_lib == "None":
+    if ptr_lib == "cpu":
         return Numpy.instance()
     elif ptr_lib == "cuda":
         return Cupy.instance()
     else:
-        raise ValueError("Make sure Awkward Arrays use the same kernel use awkward1.copy_to(args) to make it consistent" + str(ptr_lib_list) + " " + str(ptr_lib_list1))
+        raise ValueError(
+            """structure mixes 'cpu' and 'cuda' buffers; use one of
 
-    return Numpy.instance()
+    ak.copy_to(array, 'cpu')
+    ak.copy_to(array, 'cuda')
+
+to obtain an unmixed array in main memory or the GPU."""
+            + awkward1._util.exception_suffix(__file__))
+
 
 class Singleton(object):
     _instance = None
@@ -523,4 +440,3 @@ or
             return out.item()
         else:
             return out
-
