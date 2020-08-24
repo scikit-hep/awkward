@@ -1790,9 +1790,9 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
                                       const py::object& identities,
                                       const py::object& parameters) -> py::object {
         if (py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
-          const std::vector<ssize_t> shape = pytuples_to_vector<ssize_t>(array.attr("shape"));
-          const std::vector<ssize_t> strides = pytuples_to_vector<ssize_t>(array.attr("strides"));
-//
+          const std::vector<ssize_t> shape = array.attr("shape").cast<std::vector<ssize_t>>();
+          const std::vector<ssize_t> strides = array.attr("strides").cast<std::vector<ssize_t>>();
+
           if (py::cast<int64_t>(array.attr("ndim")) == 0) {
             throw std::invalid_argument(
               "NumpyArray must not be scalar; try array.reshape(1)");

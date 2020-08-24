@@ -135,8 +135,8 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
           }
           std::vector<int64_t> shape, strides;
 
-          shape = pytuples_to_vector<int64_t>(array.attr("shape"));
-          strides = pytuples_to_vector<int64_t>(array.attr("strides"));
+          shape = array.attr("shape").cast<std::vector<int64_t>>();
+          strides = array.attr("strides").cast<std::vector<int64_t>>();
 
           if (strides[0] != sizeof(T)*shape[1]  ||
               strides[1] != sizeof(T)) {

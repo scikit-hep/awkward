@@ -108,7 +108,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
                 " must be built from a one-dimensional array; try array.ravel()"));
             }
 
-            std::vector<int64_t> strides = pytuples_to_vector<int64_t>(array.attr("strides"));
+            std::vector<int64_t> strides = array.attr("strides").cast<std::vector<int64_t>>();
 
             if (strides[0] != sizeof(T)) {
               throw std::invalid_argument(name + std::string(
@@ -118,7 +118,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
 
             T* ptr = reinterpret_cast<T*>(py::cast<ssize_t>(array.attr("data").attr("ptr")));
 
-            std::vector<int64_t> shape = pytuples_to_vector<int64_t>(array.attr("shape"));
+            std::vector<int64_t> shape = array.attr("shape").cast<std::vector<int64_t>>();
 
             std::shared_ptr<ak::IndexOf<T>> ak_array = std::make_shared<ak::IndexOf<T>>(
                 std::shared_ptr<T>(ptr,
