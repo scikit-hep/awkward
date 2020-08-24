@@ -64,6 +64,11 @@ class Array(
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
+        lib ("cpu" or "cuda"): If "cpu", the Array will be placed in main
+            memory for use with other "cpu" Arrays and Records; if "cuda", the
+            Array will be placed in GPU global memory using CUDA. For the latter,
+            awkward1-cuda-kernels must be installed, which can be invoked
+            with `pip install awkward1[cuda] --upgrade`.
 
     High-level array that can contain data of any type.
 
@@ -204,7 +209,13 @@ class Array(
     """
 
     def __init__(
-        self, data, behavior=None, with_name=None, check_valid=False, cache=None
+        self,
+        data,
+        behavior=None,
+        with_name=None,
+        check_valid=False,
+        cache=None,
+        lib="cpu",
     ):
         if isinstance(
             data, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
@@ -255,6 +266,9 @@ class Array(
             )
         if self.__class__ is Array:
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
+
+        if lib != awkward1.nplike.lib(layout):
+            layout = awkward1.operations.convert.copy_to(layout, lib, highlevel=False)
 
         self.layout = layout
         self.behavior = behavior
@@ -1429,6 +1443,11 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
+        lib ("cpu" or "cuda"): If "cpu", the Record will be placed in main
+            memory for use with other "cpu" Arrays and Records; if "cuda", the
+            Record will be placed in GPU global memory using CUDA. For the latter,
+            awkward1-cuda-kernels must be installed, which can be invoked
+            with `pip install awkward1[cuda] --upgrade`.
 
     High-level record that can contain fields of any type.
 
@@ -1445,7 +1464,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     """
 
     def __init__(
-        self, data, behavior=None, with_name=None, check_valid=False, cache=None
+        self,
+        data,
+        behavior=None,
+        with_name=None,
+        check_valid=False,
+        cache=None,
+        lib="cpu",
     ):
         if isinstance(data, awkward1.layout.Record):
             layout = data
@@ -1481,6 +1506,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             layout = awkward1.operations.structure.with_name(
                 layout, with_name, highlevel=False
             )
+
+        if lib != awkward1.nplike.lib(layout):
+            layout = awkward1.operations.convert.copy_to(layout, lib, highlevel=False)
 
         self.layout = layout
         self.behavior = behavior

@@ -1352,26 +1352,26 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
              py::arg("parameters") = py::none(),
              py::arg("axis") = 1)
           .def("sort",
-               [](const T&self,
+               [](const T& self,
                   int64_t axis,
                   bool ascending,
                   bool stable) -> py::object {
                return box(self.sort(axis, ascending, false));
           })
           .def("argsort",
-               [](const T&self,
+               [](const T& self,
                   int64_t axis,
                   bool ascending,
                   bool stable) -> py::object {
                return box(self.argsort(axis, ascending, false));
           })
           .def("numbers_to_type",
-               [](const T&self,
+               [](const T& self,
                   const std::string& name) -> py::object {
                return box(self.numbers_to_type(name));
           })
           .def("copy_to",
-               [](const T&self, const std::string& ptr_lib) -> py::object {
+               [](const T& self, const std::string& ptr_lib) -> py::object {
                if (ptr_lib == "cpu") {
                  return box(self.copy_to(ak::kernel::lib::cpu));
                }
@@ -1967,6 +1967,19 @@ make_Record(const py::handle& m, const std::string& name) {
      .def_property_readonly("identity", &identity<ak::Record>)
      .def("simplify", [](const ak::Record& self) {
        return box(self.shallow_simplify());
+     })
+     .def("copy_to",
+          [](const ak::Record& self, const std::string& ptr_lib) -> py::object {
+          if (ptr_lib == "cpu") {
+            return box(self.copy_to(ak::kernel::lib::cpu));
+          }
+          else if (ptr_lib == "cuda") {
+            return box(self.copy_to(ak::kernel::lib::cuda));
+          }
+          else {
+            throw std::invalid_argument(
+              std::string("specify 'cpu' or 'cuda'") + FILENAME(__LINE__));
+          }
      })
 
   ;
