@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/io/json.cpp", line)
+
 #include "rapidjson/document.h"
 #include "rapidjson/reader.h"
 #include "rapidjson/writer.h"
@@ -63,7 +65,8 @@ namespace awkward {
       writer.EndObject();
     }
     else {
-      throw std::runtime_error("unrecognized JSON element type");
+      throw std::runtime_error(
+        std::string("unrecognized JSON element type") + FILENAME(__LINE__));
     }
   }
 
@@ -549,7 +552,8 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("JSON error at char ")
         + std::to_string(reader.GetErrorOffset()) + std::string(": ")
-        + std::string(rj::GetParseError_En(reader.GetParseErrorCode())));
+        + std::string(rj::GetParseError_En(reader.GetParseErrorCode()))
+        + FILENAME(__LINE__));
     }
   }
 
@@ -571,7 +575,8 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("JSON error at char ")
         + std::to_string(reader.GetErrorOffset()) + std::string(": ")
-        + std::string(rj::GetParseError_En(reader.GetParseErrorCode())));
+        + std::string(rj::GetParseError_En(reader.GetParseErrorCode()))
+        + FILENAME(__LINE__));
     }
     return handler.snapshot();
   }

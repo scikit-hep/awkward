@@ -64,6 +64,8 @@ def readspec():
                     os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
                 ) as specfile:
                     indspec = yaml.safe_load(specfile)[0]
+                    if indspec.get("tests") is None:
+                        indspec["tests"] = []
                     if "tests" in indspec.keys():
                         if "specializations" in indspec.keys():
                             for childfunc in indspec["specializations"]:
@@ -73,6 +75,8 @@ def readspec():
                                     flag = True
                                     for x in childfunc["args"]:
                                         for arg, val in x.items():
+                                            if "const " in val:
+                                                val = val.replace("const ", "", 1)
                                             spectype = pytype(
                                                 val.replace("List", "")
                                                 .replace("[", "")
@@ -80,7 +84,10 @@ def readspec():
                                             )
                                             testval = test["args"][arg]
                                             while isinstance(testval, list):
-                                                testval = testval[0]
+                                                if len(testval) == 0:
+                                                    testval = None
+                                                else:
+                                                    testval = testval[0]
                                             if type(testval) != eval(spectype):
                                                 flag = False
                                             elif test["successful"] and (
@@ -111,6 +118,8 @@ def readspec():
                                     flag = True
                                     for x in indspec["args"]:
                                         for arg, val in x.items():
+                                            if "const " in val:
+                                                val = val.replace("const ", "", 1)
                                             spectype = pytype(
                                                 val.replace("List", "")
                                                 .replace("[", "")
@@ -263,17 +272,25 @@ def testcpukernels(tests):
                                     funcs[childfunc["name"]] = OrderedDict()
                                     if tests[childfunc["name"]] != []:
                                         for arg in childfunc["args"]:
+                                            typename = list(arg.values())[0]
+                                            if "const " in typename:
+                                                typename = typename.replace(
+                                                    "const ", "", 1
+                                                )
                                             funcs[childfunc["name"]][
                                                 list(arg.keys())[0]
-                                            ] = list(arg.values())[0]
+                                            ] = typename
 
                             else:
                                 funcs[indspec["name"]] = OrderedDict()
                                 if tests[indspec["name"]] != []:
                                     for arg in indspec["args"]:
+                                        typename = list(arg.values())[0]
+                                        if "const " in typename:
+                                            typename = typename.replace("const ", "", 1)
                                         funcs[indspec["name"]][
                                             list(arg.keys())[0]
-                                        ] = list(arg.values())[0]
+                                        ] = typename
 
         return funcs
 

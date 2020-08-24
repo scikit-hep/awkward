@@ -18,7 +18,7 @@ namespace awkward {
   ///
   /// Nearly all of the methods raise runtime errors. See
   /// {@link Content#isscalar Content::isscalar}.
-  class EXPORT_SYMBOL None: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL None: public Content {
   public:
     /// @brief Creates a None instance.
     None();
@@ -183,6 +183,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,

@@ -1,5 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/ListOffsetArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/ListOffsetArray.cpp", line)
+
 #include <algorithm>
 #include <numeric>
 #include <sstream>
@@ -185,6 +188,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  ListOffsetForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// ListOffsetArray
 
   template <typename T>
@@ -197,7 +205,8 @@ namespace awkward {
       , content_(content) {
     if (offsets.length() == 0) {
       throw std::invalid_argument(
-        "ListOffsetArray offsets length must be at least 1");
+        std::string("ListOffsetArray offsets length must be at least 1")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -265,13 +274,14 @@ namespace awkward {
   ListOffsetArrayOf<T>::broadcast_tooffsets64(const Index64& offsets) const {
     if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
       throw std::invalid_argument(
-        "broadcast_tooffsets64 can only be used with offsets that start at 0");
+        std::string("broadcast_tooffsets64 can only be used with offsets that start at 0")
+        + FILENAME(__LINE__));
     }
     if (offsets.length() - 1 > offsets_.length() - 1) {
       throw std::invalid_argument(
         std::string("cannot broadcast ListOffsetArray of length ")
         + std::to_string(offsets_.length() - 1) + (" to length ")
-        + std::to_string(offsets.length() - 1));
+        + std::to_string(offsets.length() - 1) + FILENAME(__LINE__));
     }
 
     IndexOf<T> starts = util::make_starts(offsets_);
@@ -365,7 +375,8 @@ namespace awkward {
         util::handle_error(failure(
           "content and its identities must have the same length",
           kSliceNone,
-          kSliceNone),
+          kSliceNone,
+          FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
       }
@@ -415,7 +426,8 @@ namespace awkward {
         content_.get()->setidentities(subidentities);
       }
       else {
-        throw std::runtime_error("unrecognized Identities specialization");
+        throw std::runtime_error(
+          std::string("unrecognized Identities specialization") + FILENAME(__LINE__));
       }
     }
     identities_ = identities;
@@ -574,7 +586,7 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < offsets_.length() - 1) {
       util::handle_error(failure(
-        "len(identities) < len(array)", kSliceNone, kSliceNone),
+        "len(identities) < len(array)", kSliceNone, kSliceNone, FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -594,7 +606,10 @@ namespace awkward {
       regular_at += offsets_.length() - 1;
     }
     if (!(0 <= regular_at  &&  regular_at < offsets_.length() - 1)) {
-      util::handle_error(failure("index out of range", kSliceNone, at),
+      util::handle_error(failure("index out of range",
+                                 kSliceNone,
+                                 at,
+                                 FILENAME_C(__LINE__)),
                          classname(),
                          identities_.get());
     }
@@ -612,22 +627,22 @@ namespace awkward {
     }
     if (start < 0) {
       util::handle_error(failure(
-                           "offsets[i] < 0", kSliceNone, at),
-                         classname(),
-                         identities_.get());
+          "offsets[i] < 0", kSliceNone, at, FILENAME_C(__LINE__)),
+        classname(),
+        identities_.get());
     }
     if (start > stop) {
       util::handle_error(failure(
-                           "offsets[i] > offsets[i + 1]", kSliceNone, at),
-                         classname(),
-                         identities_.get());
+          "offsets[i] > offsets[i + 1]", kSliceNone, at, FILENAME_C(__LINE__)),
+        classname(),
+        identities_.get());
     }
     if (stop > lencontent) {
       util::handle_error(failure(
-                           "offsets[i] != offsets[i + 1] and "
-                           "offsets[i + 1] > len(content)", kSliceNone, at),
-                         classname(),
-                         identities_.get());
+          "offsets[i] != offsets[i + 1] and "
+          "offsets[i + 1] > len(content)", kSliceNone, at, FILENAME_C(__LINE__)),
+        classname(),
+        identities_.get());
     }
     return content_.get()->getitem_range_nowrap(start, stop);
   }
@@ -642,7 +657,10 @@ namespace awkward {
       offsets_.length() - 1);
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
-      util::handle_error(failure("index out of range", kSliceNone, stop),
+      util::handle_error(failure("index out of range",
+                                 kSliceNone,
+                                 stop,
+                                 FILENAME_C(__LINE__)),
                          identities_.get()->classname(),
                          nullptr);
     }
@@ -764,6 +782,11 @@ namespace awkward {
   template <typename T>
   const std::string
   ListOffsetArrayOf<T>::validityerror(const std::string& path) const {
+    if (offsets_.length() < 1) {
+      return (std::string("at ") + path + std::string(" (") + classname()
+              + std::string("): ") + std::string("len(offsets) < 1")
+              + FILENAME(__LINE__));
+    }
     IndexOf<T> starts = util::make_starts(offsets_);
     IndexOf<T> stops = util::make_stops(offsets_);
     struct Error err = kernel::ListArray_validity<T>(
@@ -778,7 +801,8 @@ namespace awkward {
     else {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string(err.str)
-              + std::string(" at i=") + std::to_string(err.identity));
+              + std::string(" at i=") + std::to_string(err.identity)
+              + std::string(err.filename == nullptr ? "" : err.filename));
     }
   }
 
@@ -826,7 +850,8 @@ namespace awkward {
                                               int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
-      throw std::invalid_argument("axis=0 not allowed for flatten");
+      throw std::invalid_argument(
+        std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
     }
     else if (posaxis == depth + 1) {
       ContentPtr listoffsetarray = toListOffsetArray64(true);
@@ -1057,7 +1082,9 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else {
-      throw std::runtime_error("unrecognized ListOffsetArray specialization");
+      throw std::runtime_error(
+        std::string("unrecognized ListOffsetArray specialization")
+        + FILENAME(__LINE__));
     }
 
     int64_t mycontentlength = content_.get()->length();
@@ -1199,9 +1226,9 @@ namespace awkward {
                          rawother->identities().get());
     }
     else {
-      throw std::invalid_argument(std::string("cannot merge ") + classname()
-                                  + std::string(" with ")
-                                  + other.get()->classname());
+      throw std::invalid_argument(
+        std::string("cannot merge ") + classname() + std::string(" with ") +
+        other.get()->classname() + FILENAME(__LINE__));
     }
 
     return std::make_shared<ListArray64>(Identities::none(),
@@ -1401,14 +1428,17 @@ namespace awkward {
     const Reducer& reducer,
     int64_t negaxis,
     const Index64& starts,
+    const Index64& shifts,
     const Index64& parents,
-    int64_t outlength, bool mask, bool keepdims) const {
-
+    int64_t outlength,
+    bool mask,
+    bool keepdims) const {
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       if (offsets_.length() - 1 != parents.length()) {
-        throw std::runtime_error("offsets_.length() - 1 != parents.length()");
+        throw std::runtime_error(
+          std::string("offsets_.length() - 1 != parents.length()") + FILENAME(__LINE__));
       }
 
       int64_t globalstart;
@@ -1459,11 +1489,6 @@ namespace awkward {
         nextlen);
       util::handle_error(err4, classname(), identities_.get());
 
-      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
-      ContentPtr outcontent = nextcontent.get()->reduce_next(
-        reducer, negaxis - 1, nextstarts, nextparents, maxnextparents + 1,
-        mask, false);
-
       Index64 gaps(outlength);
       struct Error err5 = kernel::ListOffsetArray_reduce_nonlocal_findgaps_64(
         kernel::lib::cpu,   // DERIVE
@@ -1484,11 +1509,43 @@ namespace awkward {
         outlength);
       util::handle_error(err6, classname(), identities_.get());
 
+      bool make_shifts = reducer.returns_positions();
+
+      Index64 nextshifts(make_shifts ? nextlen : 0);
+      if (make_shifts) {
+        Index64 nummissing(maxcount);
+        Index64 missing(offsets_.getitem_at(offsets_.length() - 1));
+        struct Error err7 = kernel::ListOffsetArray_reduce_nonlocal_nextshifts_64(
+          kernel::lib::cpu,   // DERIVE
+          nummissing.data(),
+          missing.data(),
+          nextshifts.data(),
+          offsets_.data(),
+          offsets_.length() - 1,
+          starts.data(),
+          parents.data(),
+          maxcount,
+          nextlen,
+          nextcarry.data());
+        util::handle_error(err7, classname(), identities_.get());
+      }
+
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+      ContentPtr outcontent = nextcontent.get()->reduce_next(reducer,
+                                                             negaxis - 1,
+                                                             nextstarts,
+                                                             nextshifts,
+                                                             nextparents,
+                                                             maxnextparents + 1,
+                                                             mask,
+                                                             false);
+
       ContentPtr out = std::make_shared<ListArray64>(Identities::none(),
                                                      util::Parameters(),
                                                      outstarts,
                                                      outstops,
                                                      outcontent);
+
       if (keepdims) {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
@@ -1519,9 +1576,14 @@ namespace awkward {
 
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
                                                                 globalstop);
-      ContentPtr outcontent = trimmed.get()->reduce_next(
-        reducer, negaxis, util::make_starts(offsets_), nextparents,
-        offsets_.length() - 1, mask, keepdims);
+      ContentPtr outcontent = trimmed.get()->reduce_next(reducer,
+                                                         negaxis,
+                                                         util::make_starts(offsets_),
+                                                         shifts,
+                                                         nextparents,
+                                                         offsets_.length() - 1,
+                                                         mask,
+                                                         keepdims);
 
       Index64 outoffsets(outlength + 1);
       struct Error err3 = kernel::ListOffsetArray_reduce_local_outoffsets_64(
@@ -1544,6 +1606,7 @@ namespace awkward {
   ListOffsetArrayOf<T>::reduce_next(const Reducer& reducer,
                                     int64_t negaxis,
                                     const Index64& starts,
+                                    const Index64& shifts,
                                     const Index64& parents,
                                     int64_t length,
                                     bool mask,
@@ -1551,6 +1614,7 @@ namespace awkward {
     return toListOffsetArray64(true).get()->reduce_next(reducer,
                                                         negaxis,
                                                         starts,
+                                                        shifts,
                                                         parents,
                                                         length,
                                                         mask,
@@ -1598,7 +1662,8 @@ namespace awkward {
                                      int64_t axis,
                                      int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1") + FILENAME(__LINE__));
     }
 
     int64_t posaxis = axis_wrap_if_negative(axis);
@@ -1721,7 +1786,8 @@ namespace awkward {
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       if (offsets_.length() - 1 != parents.length()) {
-        throw std::runtime_error("offsets_.length() - 1 != parents.length()");
+        throw std::runtime_error(
+          std::string("offsets_.length() - 1 != parents.length()" + FILENAME(__LINE__)));
       }
       int64_t globalstart;
       int64_t globalstop;
@@ -1869,13 +1935,15 @@ namespace awkward {
     // if this is array of strings, axis parameter is ignored
     // and this array is sorted
     if (util::parameter_isstring(parameters_, "__array__")) {
-      throw std::runtime_error("not implemented yet: argsort for strings");
+      throw std::runtime_error(
+        std::string("not implemented yet: argsort for strings") + FILENAME(__LINE__));
     }
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       if (offsets_.length() - 1 != parents.length()) {
-        throw std::runtime_error("offsets_.length() - 1 != parents.length()");
+        throw std::runtime_error(
+          std::string("offsets_.length() - 1 != parents.length()") + FILENAME(__LINE__));
       }
 
       int64_t globalstart;
@@ -2001,7 +2069,8 @@ namespace awkward {
                                      const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::runtime_error(
-        "ListOffsetArray::getitem_next(SliceAt): advanced.length() != 0");
+        std::string("ListOffsetArray::getitem_next(SliceAt): advanced.length() != 0")
+        + FILENAME(__LINE__));
     }
     int64_t lenstarts = offsets_.length() - 1;
     IndexOf<T> starts = util::make_starts(offsets_);
@@ -2242,7 +2311,7 @@ namespace awkward {
                                                   content);
   }
 
-  template class EXPORT_SYMBOL ListOffsetArrayOf<int32_t>;
-  template class EXPORT_SYMBOL ListOffsetArrayOf<uint32_t>;
-  template class EXPORT_SYMBOL ListOffsetArrayOf<int64_t>;
+  template class EXPORT_TEMPLATE_INST ListOffsetArrayOf<int32_t>;
+  template class EXPORT_TEMPLATE_INST ListOffsetArrayOf<uint32_t>;
+  template class EXPORT_TEMPLATE_INST ListOffsetArrayOf<int64_t>;
 }

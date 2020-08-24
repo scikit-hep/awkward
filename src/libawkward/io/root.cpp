@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/io/root.cpp", line)
+
 #include <cstring>
 
 #include "awkward/Content.h"
@@ -56,10 +58,12 @@ namespace awkward {
                         std::string format,
                         const ArrayBuilderOptions& options) {
     if (depth <= 0) {
-      throw std::runtime_error("FromROOT_nestedvector: depth <= 0");
+      throw std::runtime_error(
+        std::string("FromROOT_nestedvector: depth <= 0") + FILENAME(__LINE__));
     }
     if (rawdata.ndim() != 1) {
-      throw std::runtime_error("FromROOT_nestedvector: rawdata.ndim() != 1");
+      throw std::runtime_error(
+        std::string("FromROOT_nestedvector: rawdata.ndim() != 1") + FILENAME(__LINE__));
     }
 
     Index64 level0(byteoffsets.length());

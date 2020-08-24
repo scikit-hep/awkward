@@ -429,7 +429,9 @@ or
     @property
     def ma(self):
         raise ValueError(
-            "CUDA arrays cannot have missing values until CuPy implements numpy.ma.MaskedArray"
+            "CUDA arrays cannot have missing values until CuPy implements "
+            "numpy.ma.MaskedArray"
+            + awkward1._util.exception_suffix(__file__)
         )
 
     def frombuffer(self, *args, **kwargs):

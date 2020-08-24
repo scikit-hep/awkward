@@ -1,5 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/Index.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/Index.cpp", line)
+
 #include <cstring>
 #include <iomanip>
 #include <sstream>
@@ -30,7 +33,7 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-                std::string("unrecognized Index::Form: ") + str);
+        std::string("unrecognized Index::Form: ") + str + FILENAME(__LINE__));
     }
   }
 
@@ -48,7 +51,8 @@ namespace awkward {
     case Index::Form::i64:
       return "i64";
     default:
-      throw std::runtime_error("unrecognized Index::Form");
+      throw std::runtime_error(
+        std::string("unrecognized Index::Form") + FILENAME(__LINE__));
     }
   }
 
@@ -78,7 +82,7 @@ namespace awkward {
 
   template <typename T>
   IndexOf<T>::IndexOf(int64_t length, kernel::lib ptr_lib)
-    : ptr_(kernel::malloc<T>(ptr_lib, length * sizeof(T)))
+    : ptr_(kernel::malloc<T>(ptr_lib, length * (int64_t)sizeof(T)))
     , ptr_lib_(ptr_lib)
     , offset_(0)
     , length_(length) { }
@@ -191,7 +195,8 @@ namespace awkward {
       return Index::Form::i64;
     }
     else {
-      throw std::runtime_error("unrecognized Index specialization");
+      throw std::runtime_error(
+        std::string("unrecognized Index specialization") + FILENAME(__LINE__));
     }
   }
 
@@ -203,7 +208,7 @@ namespace awkward {
       regular_at += length_;
     }
     if (!(0 <= regular_at  &&  regular_at < length_)) {
-      util::handle_error(failure("index out of range", kSliceNone, at),
+      util::handle_error(failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
                          classname(),
                          nullptr);
     }
@@ -245,7 +250,8 @@ namespace awkward {
     if (!(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop <= length_)
         &&  start != stop) {
       throw std::runtime_error(
-        "Index::getitem_range_nowrap with illegal start:stop for this length");
+        std::string("Index::getitem_range_nowrap with illegal start:stop for this length")
+        + FILENAME(__LINE__));
     }
     return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
   }
@@ -361,7 +367,7 @@ namespace awkward {
       return IndexOf<T>(ptr_, offset_, length_);
     }
     else {
-      int64_t bytelength = (offset_ + length_) * sizeof(T);
+      int64_t bytelength = (offset_ + length_) * (int64_t)sizeof(T);
       std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, bytelength);
       Error err = kernel::copy_to(ptr_lib,
                                   ptr_lib_,
@@ -373,9 +379,9 @@ namespace awkward {
     }
   }
 
-  template class EXPORT_SYMBOL IndexOf<int8_t>;
-  template class EXPORT_SYMBOL IndexOf<uint8_t>;
-  template class EXPORT_SYMBOL IndexOf<int32_t>;
-  template class EXPORT_SYMBOL IndexOf<uint32_t>;
-  template class EXPORT_SYMBOL IndexOf<int64_t>;
+  template class EXPORT_TEMPLATE_INST IndexOf<int8_t>;
+  template class EXPORT_TEMPLATE_INST IndexOf<uint8_t>;
+  template class EXPORT_TEMPLATE_INST IndexOf<int32_t>;
+  template class EXPORT_TEMPLATE_INST IndexOf<uint32_t>;
+  template class EXPORT_TEMPLATE_INST IndexOf<int64_t>;
 }

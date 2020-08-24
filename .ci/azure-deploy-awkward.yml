@@ -64,6 +64,9 @@ jobs:
     pool:
       vmImage: "ubuntu-16.04"
 
+    variables:
+      PIP_ONLY_BINARY: cmake
+
     strategy:
       matrix:
         manylinux1_i686:
@@ -129,6 +132,9 @@ jobs:
 
     pool:
       vmImage: "vs2017-win2016"
+
+    variables:
+      PIP_ONLY_BINARY: cmake
 
     strategy:
       matrix:
@@ -217,6 +223,9 @@ jobs:
 
     pool:
       vmImage: "macOS-10.14"
+
+    variables:
+      PIP_ONLY_BINARY: cmake
 
     strategy:
       matrix:

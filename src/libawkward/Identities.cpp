@@ -1,5 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/Identities.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/Identities.cpp", line)
+
 #include <cstring>
 #include <atomic>
 #include <iomanip>
@@ -71,7 +74,7 @@ namespace awkward {
                                 int64_t length,
                                 kernel::lib ptr_lib)
       : Identities(ref, fieldloc, 0, width, length)
-      , ptr_(kernel::malloc<T>(ptr_lib, width * length * sizeof(T)))
+      , ptr_(kernel::malloc<T>(ptr_lib, width * length * (int64_t)sizeof(T)))
       , ptr_lib_(ptr_lib) { }
 
   template <typename T>
@@ -192,8 +195,8 @@ namespace awkward {
     if (!(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop <= length_)
         &&  start != stop) {
       throw std::runtime_error(
-        "Identities::getitem_range_nowrap with illegal start:stop "
-        "for this length");
+        std::string("Identities::getitem_range_nowrap with illegal start:stop "
+                    "for this length") + FILENAME(__LINE__));
     }
     return std::make_shared<IdentitiesOf<T>>(
       ref_,
@@ -276,7 +279,8 @@ namespace awkward {
       util::handle_error(err, classname(), nullptr);
     }
     else {
-      throw std::runtime_error("unrecognized Identities specialization");
+      throw std::runtime_error(
+        std::string("unrecognized Identities specialization") + FILENAME(__LINE__));
     }
 
     return out;
@@ -312,8 +316,9 @@ namespace awkward {
       regular_at += length_;
     }
     if (!(0 <= regular_at  &&  regular_at < length_)) {
-      util::handle_error(
-        failure("index out of range", kSliceNone, at), classname(), nullptr);
+      util::handle_error(failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
+                         classname(),
+                         nullptr);
     }
     return getitem_at_nowrap(regular_at);
   }
@@ -323,7 +328,8 @@ namespace awkward {
   IdentitiesOf<T>::getitem_at_nowrap(int64_t at) const {
     if (!(0 <= at  &&  at < length_)) {
       throw std::runtime_error(
-        "Identities::getitem_at_nowrap with illegal index for this length");
+        std::string("Identities::getitem_at_nowrap with illegal index for this length")
+        + FILENAME(__LINE__));
     }
     std::vector<T> out;
     for (size_t i = (size_t)(offset_ + at);
@@ -351,7 +357,7 @@ namespace awkward {
       return shallow_copy();
     }
     else {
-      int64_t bytelength = (offset_ + (width_ * length_)) * sizeof(T);
+      int64_t bytelength = (offset_ + (width_ * length_)) * (int64_t)sizeof(T);
       std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, bytelength);
       Error err = kernel::copy_to(ptr_lib,
                                   ptr_lib_,
@@ -369,6 +375,6 @@ namespace awkward {
     }
   }
 
-  template class EXPORT_SYMBOL IdentitiesOf<int32_t>;
-  template class EXPORT_SYMBOL IdentitiesOf<int64_t>;
+  template class EXPORT_TEMPLATE_INST IdentitiesOf<int32_t>;
+  template class EXPORT_TEMPLATE_INST IdentitiesOf<int64_t>;
 }

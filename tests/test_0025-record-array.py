@@ -226,7 +226,7 @@ def test_setidentities():
     assert recordarray2[2, "outer", "two", 1] == 5.5
     with pytest.raises(ValueError) as excinfo:
         recordarray2["outer", "two", 0, 99]
-    assert str(excinfo.value).endswith(' with identity [0, "outer", "two"] attempting to get 99, index out of range')
+    assert ' with identity [0, "outer", "two"] attempting to get 99, index out of range' in str(excinfo.value)
     assert recordarray2.identity == ()
     assert recordarray2[2].identity == (2,)
     assert recordarray2[2, "outer"].identity == (2, "outer")
@@ -250,7 +250,7 @@ def test_setidentities():
 
     with pytest.raises(ValueError) as excinfo:
         recordarray2["outer", 2, "two", 0, 99]
-    assert str(excinfo.value).endswith(' with identity [2, "outer", 0, "two"] attempting to get 99, index out of range')
+    assert ' with identity [2, "outer", 0, "two"] attempting to get 99, index out of range' in str(excinfo.value)
     assert recordarray2.identity == ()
     assert recordarray2[2].identity == (2,)
     assert recordarray2[2, "outer"].identity == (2, "outer")
@@ -296,10 +296,10 @@ def test_identities():
     assert b[2, "outer"].identity == (2, u'outer')
     with pytest.raises(ValueError) as err:
         b[2, "outer", 0].identity
-    assert str(err.value) == "in NumpyArray, too many dimensions in slice"
+    assert str(err.value).startswith("in NumpyArray, too many dimensions in slice")
     with pytest.raises(ValueError) as err:
         b[2, "outer", 0, "y"].identity
-    assert str(err.value) == "in NumpyArray, too many dimensions in slice"
+    assert str(err.value).startswith("in NumpyArray, too many dimensions in slice")
 
 def test_builder_tuple():
     typestrs = {}

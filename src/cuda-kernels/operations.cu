@@ -1,8 +1,9 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/operations.cu", line)
+
 #include "awkward/kernels/operations.h"
 #include <stdio.h>
-
 
 template <typename T, typename C>
 __global__

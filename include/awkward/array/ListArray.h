@@ -15,7 +15,7 @@ namespace awkward {
   /// @class ListForm
   ///
   /// @brief Form describing ListArray.
-  class EXPORT_SYMBOL ListForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL ListForm: public Form {
   public:
     /// @brief Creates a ListForm. See {@link ListArrayOf LinkArray} for
     /// documentation.
@@ -81,6 +81,9 @@ namespace awkward {
             bool check_form_key,
             bool compatibility_check) const override;
 
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   private:
     Index::Form starts_;
     Index::Form stops_;
@@ -97,7 +100,11 @@ namespace awkward {
   ///
   /// See #ListArrayOf for the meaning of each parameter.
   template <typename T>
-  class EXPORT_SYMBOL ListArrayOf: public Content {
+  class
+#ifdef AWKWARD_LISTARRAY_NO_EXTERN_TEMPLATE
+  LIBAWKWARD_EXPORT_SYMBOL
+#endif
+  ListArrayOf: public Content {
   public:
     /// @brief Creates a ListArray from a full set of parameters.
     ///
@@ -332,6 +339,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,
@@ -419,7 +427,7 @@ namespace awkward {
     const ContentPtr content_;
   };
 
-#if !defined AWKWARD_LISTARRAY_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+#ifndef AWKWARD_LISTARRAY_NO_EXTERN_TEMPLATE
   extern template class ListArrayOf<int32_t>;
   extern template class ListArrayOf<uint32_t>;
   extern template class ListArrayOf<int64_t>;

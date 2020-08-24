@@ -1,5 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/EmptyArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/EmptyArray.cpp", line)
+
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
@@ -80,14 +83,16 @@ namespace awkward {
   EmptyForm::fieldindex(const std::string& key) const {
     throw std::invalid_argument(
       std::string("key ") + util::quote(key, true)
-      + std::string(" does not exist (data might not be records)"));
+      + std::string(" does not exist (data might not be records)")
+      + FILENAME(__LINE__));
   }
 
   const std::string
   EmptyForm::key(int64_t fieldindex) const {
     throw std::invalid_argument(
       std::string("fieldindex \"") + std::to_string(fieldindex)
-      + std::string("\" does not exist (data might not be records)"));
+      + std::string("\" does not exist (data might not be records)")
+      + FILENAME(__LINE__));
   }
 
   bool
@@ -126,6 +131,13 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  EmptyForm::getitem_field(const std::string& key) const {
+    throw std::invalid_argument(
+      std::string("key ") + util::quote(key, true)
+      + std::string(" does not exist (data might not be records)"));
+  }
+
   ////////// EmptyArray
 
   EmptyArray::EmptyArray(const IdentitiesPtr& identities,
@@ -162,7 +174,8 @@ namespace awkward {
       util::handle_error(
         failure("content and its identities must have the same length",
                 kSliceNone,
-                kSliceNone),
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -267,7 +280,10 @@ namespace awkward {
   const ContentPtr
   EmptyArray::getitem_at(int64_t at) const {
     util::handle_error(
-      failure("index out of range", kSliceNone, at),
+      failure("index out of range",
+              kSliceNone,
+              at,
+              FILENAME_C(__LINE__)),
       classname(),
       identities_.get());
     return ContentPtr(nullptr);  // make Windows compiler happy
@@ -276,7 +292,7 @@ namespace awkward {
   const ContentPtr
   EmptyArray::getitem_at_nowrap(int64_t at) const {
     util::handle_error(
-      failure("index out of range", kSliceNone, at),
+      failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
       classname(),
       identities_.get());
     return ContentPtr(nullptr);  // make Windows compiler happy
@@ -296,14 +312,14 @@ namespace awkward {
   EmptyArray::getitem_field(const std::string& key) const {
     throw std::invalid_argument(
       std::string("cannot slice ") + classname()
-      + std::string(" by field name"));
+      + std::string(" by field name") + FILENAME(__LINE__));
   }
 
   const ContentPtr
   EmptyArray::getitem_fields(const std::vector<std::string>& keys) const {
     throw std::invalid_argument(
       std::string("cannot slice ") + classname()
-      + std::string(" by field names"));
+      + std::string(" by field names") + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -320,14 +336,16 @@ namespace awkward {
   EmptyArray::fieldindex(const std::string& key) const {
     throw std::invalid_argument(
       std::string("key ") + util::quote(key, true)
-      + std::string(" does not exist (data might not be records)"));
+      + std::string(" does not exist (data might not be records)")
+      + FILENAME(__LINE__));
   }
 
   const std::string
   EmptyArray::key(int64_t fieldindex) const {
     throw std::invalid_argument(
       std::string("fieldindex \"") + std::to_string(fieldindex)
-      + std::string("\" does not exist (data might not be records)"));
+      + std::string("\" does not exist (data might not be records)")
+      + FILENAME(__LINE__));
   }
 
   bool
@@ -367,7 +385,8 @@ namespace awkward {
   EmptyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
-      throw std::invalid_argument("axis=0 not allowed for flatten");
+      throw std::invalid_argument(
+        std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
     }
     else {
       Index64 offsets(1);
@@ -406,7 +425,8 @@ namespace awkward {
   EmptyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis != depth) {
-      throw std::invalid_argument("axis exceeds the depth of this array");
+      throw std::invalid_argument(
+        std::string("axis exceeds the depth of this array") + FILENAME(__LINE__));
     }
     else {
       return rpad_and_clip(target, posaxis, depth);
@@ -419,7 +439,8 @@ namespace awkward {
                             int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis != depth) {
-      throw std::invalid_argument("axis exceeds the depth of this array");
+      throw std::invalid_argument(
+        std::string("axis exceeds the depth of this array") + FILENAME(__LINE__));
     }
     else {
       return rpad_axis0(target, true);
@@ -430,6 +451,7 @@ namespace awkward {
   EmptyArray::reduce_next(const Reducer& reducer,
                           int64_t negaxis,
                           const Index64& starts,
+                          const Index64& shifts,
                           const Index64& parents,
                           int64_t outlength,
                           bool mask,
@@ -441,6 +463,7 @@ namespace awkward {
     return asnumpy.get()->reduce_next(reducer,
                                       negaxis,
                                       starts,
+                                      shifts,
                                       parents,
                                       outlength,
                                       mask,
@@ -460,7 +483,8 @@ namespace awkward {
                            int64_t axis,
                            int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1") + FILENAME(__LINE__));
     }
     return std::make_shared<EmptyArray>(identities_, util::Parameters());
   }
@@ -507,7 +531,10 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     util::handle_error(
-      failure("too many dimensions in slice", kSliceNone, kSliceNone),
+      failure("too many dimensions in slice",
+              kSliceNone,
+              kSliceNone,
+              FILENAME_C(__LINE__)),
       classname(),
       identities_.get());
     return ContentPtr(nullptr);  // make Windows compiler happy
@@ -518,7 +545,10 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     util::handle_error(
-      failure("too many dimensions in slice", kSliceNone, kSliceNone),
+      failure("too many dimensions in slice",
+              kSliceNone,
+              kSliceNone,
+              FILENAME_C(__LINE__)),
       classname(),
       identities_.get());
     return ContentPtr(nullptr);  // make Windows compiler happy
@@ -529,7 +559,10 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     util::handle_error(
-      failure("too many dimensions in slice", kSliceNone, kSliceNone),
+      failure("too many dimensions in slice",
+              kSliceNone,
+              kSliceNone,
+              FILENAME_C(__LINE__)),
       classname(),
       identities_.get());
     return ContentPtr(nullptr);  // make Windows compiler happy
@@ -541,7 +574,8 @@ namespace awkward {
                            const Index64& advanced) const {
     throw std::invalid_argument(
       std::string("cannot slice ") + classname()
-      + std::string(" by a field name because it has no fields"));
+      + std::string(" by a field name because it has no fields")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -550,7 +584,8 @@ namespace awkward {
                            const Index64& advanced) const {
     throw std::invalid_argument(
       std::string("cannot slice ") + classname()
-      + std::string(" by field names because it has no fields"));
+      + std::string(" by field names because it has no fields")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -559,9 +594,11 @@ namespace awkward {
                            const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::invalid_argument(
-        "cannot mix jagged slice with NumPy-style advanced indexing");
+        std::string("cannot mix jagged slice with NumPy-style advanced indexing")
+        + FILENAME(__LINE__));
     }
-    throw std::runtime_error("FIXME: EmptyArray::getitem_next(jagged)");
+    throw std::runtime_error(
+      std::string("FIXME: EmptyArray::getitem_next(jagged)") + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -570,7 +607,8 @@ namespace awkward {
                                   const SliceArray64& slicecontent,
                                   const Slice& tail) const {
     throw std::runtime_error(
-      "undefined operation: EmptyArray::getitem_next_jagged(array)");
+      std::string("undefined operation: EmptyArray::getitem_next_jagged(array)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -579,7 +617,8 @@ namespace awkward {
                                   const SliceMissing64& slicecontent,
                                   const Slice& tail) const {
     throw std::runtime_error(
-      "undefined operation: EmptyArray::getitem_next_jagged(missing)");
+      std::string("undefined operation: EmptyArray::getitem_next_jagged(missing)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -588,7 +627,8 @@ namespace awkward {
                                   const SliceJagged64& slicecontent,
                                   const Slice& tail) const {
     throw std::runtime_error(
-      "undefined operation: EmptyArray::getitem_next_jagged(jagged)");
+      std::string("undefined operation: EmptyArray::getitem_next_jagged(jagged)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr

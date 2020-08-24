@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/type/UnknownType.cpp", line)
+
 #include <string>
 #include <sstream>
 
@@ -17,17 +19,17 @@ namespace awkward {
                              const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
-      return typestr;
+      return wrap_categorical(typestr);
     }
 
     std::stringstream out;
-    if (parameters_.empty()) {
+    if (parameters_empty()) {
       out << indent << pre << "unknown" << post;
     }
     else {
       out << indent << pre << "unknown[" << string_parameters() << "]" << post;
     }
-    return out.str();
+    return wrap_categorical(out.str());
   }
 
   const TypePtr
@@ -55,22 +57,26 @@ namespace awkward {
 
   int64_t
   UnknownType::fieldindex(const std::string& key) const {
-    throw std::invalid_argument("type contains no Records");
+    throw std::invalid_argument(
+      std::string("type contains no Records") + FILENAME(__LINE__));
   }
 
   const std::string
   UnknownType::key(int64_t fieldindex) const {
-    throw std::invalid_argument("type contains no Records");
+    throw std::invalid_argument(
+      std::string("type contains no Records") + FILENAME(__LINE__));
   }
 
   bool
   UnknownType::haskey(const std::string& key) const {
-    throw std::invalid_argument("type contains no Records");
+    throw std::invalid_argument(
+      std::string("type contains no Records") + FILENAME(__LINE__));
   }
 
   const std::vector<std::string>
   UnknownType::keys() const {
-    throw std::invalid_argument("type contains no Records");
+    throw std::invalid_argument(
+      std::string("type contains no Records") + FILENAME(__LINE__));
   }
 
   const ContentPtr

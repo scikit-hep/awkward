@@ -1,5 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/RecordArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/RecordArray.cpp", line)
+
 #include <sstream>
 #include <algorithm>
 
@@ -34,7 +37,8 @@ namespace awkward {
     if (recordlookup.get() != nullptr  &&
         recordlookup.get()->size() != contents.size()) {
       throw std::invalid_argument(
-        "recordlookup (if provided) and contents must have the same length");
+        std::string("recordlookup (if provided) and contents must have the same length")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -59,7 +63,7 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("fieldindex ") + std::to_string(fieldindex)
         + std::string(" for record with only ") + std::to_string(numfields())
-        + std::string(" fields"));
+        + std::string(" fields") + FILENAME(__LINE__));
     }
     return contents_[(size_t)fieldindex];
   }
@@ -298,6 +302,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  RecordForm::getitem_field(const std::string& key) const {
+    return content(key);
+  }
+
   ////////// RecordArray
 
   RecordArray::RecordArray(const IdentitiesPtr& identities,
@@ -312,7 +321,8 @@ namespace awkward {
     if (recordlookup_.get() != nullptr  &&
         recordlookup_.get()->size() != contents_.size()) {
       throw std::invalid_argument(
-        "recordlookup and contents must have the same number of fields");
+        std::string("recordlookup and contents must have the same number of fields")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -360,13 +370,14 @@ namespace awkward {
   const ContentPtr
   RecordArray::setitem_field(int64_t where, const ContentPtr& what) const {
     if (where < 0) {
-      throw std::invalid_argument("where must be non-negative");
+      throw std::invalid_argument(
+        std::string("where must be non-negative") + FILENAME(__LINE__));
     }
     if (what.get()->length() != length()) {
       throw std::invalid_argument(
         std::string("array of length ") + std::to_string(what.get()->length())
         + std::string(" cannot be assigned to record array of length ")
-        + std::to_string(length()));
+        + std::to_string(length()) + FILENAME(__LINE__));
     }
     ContentPtrVec contents;
     for (size_t i = 0;  i < contents_.size();  i++) {
@@ -404,7 +415,7 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("array of length ") + std::to_string(what.get()->length())
         + std::string(" cannot be assigned to record array of length ")
-        + std::to_string(length()));
+        + std::to_string(length()) + FILENAME(__LINE__));
     }
     ContentPtrVec contents(contents_.begin(), contents_.end());
     contents.push_back(what);
@@ -477,7 +488,8 @@ namespace awkward {
         util::handle_error(
           failure("content and its identities must have the same length",
                   kSliceNone,
-                  kSliceNone),
+                  kSliceNone,
+                  FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -657,7 +669,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < length()) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -677,7 +692,10 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < len)) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range",
+                kSliceNone,
+                at,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -698,7 +716,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
       util::handle_error(
-        failure("index out of range", kSliceNone, stop),
+        failure("index out of range",
+                kSliceNone,
+                stop,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -811,7 +832,8 @@ namespace awkward {
       if (field(i).get()->length() < length_) {
         return (std::string("at ") + path + std::string(" (") + classname()
                 + std::string("): len(field(")
-                + std::to_string(i) + (")) < len(recordarray)"));
+                + std::to_string(i) + (")) < len(recordarray)")
+                + FILENAME(__LINE__));
       }
     }
     for (int64_t i = 0;  i < numfields();  i++) {
@@ -864,12 +886,13 @@ namespace awkward {
   RecordArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
-      throw std::invalid_argument("axis=0 not allowed for flatten");
+      throw std::invalid_argument(
+        std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
     }
     else if (posaxis == depth + 1) {
       throw std::invalid_argument(
-        "arrays of records cannot be flattened (but their contents can be; "
-        "try a different 'axis')");
+        std::string("arrays of records cannot be flattened (but their contents can be; "
+                    "try a different 'axis')") + FILENAME(__LINE__));
     }
     else {
       ContentPtrVec contents;
@@ -879,8 +902,8 @@ namespace awkward {
           trimmed.get()->offsets_and_flattened(posaxis, depth);
         if (pair.first.length() != 0) {
           throw std::runtime_error(
-            "RecordArray content with axis > depth + 1 returned a non-empty "
-            "offsets from offsets_and_flattened");
+            std::string("RecordArray content with axis > depth + 1 returned a non-empty "
+                        "offsets from offsets_and_flattened") + FILENAME(__LINE__));
         }
         contents.push_back(pair.second);
       }
@@ -1084,18 +1107,20 @@ namespace awkward {
         }
       }
       throw std::invalid_argument(
-        "cannot merge records or tuples with different fields");
+        std::string("cannot merge records or tuples with different fields")
+        + FILENAME(__LINE__));
     }
     else {
       throw std::invalid_argument(
         std::string("cannot merge ") + classname() + std::string(" with ")
-        + other.get()->classname());
+        + other.get()->classname() + FILENAME(__LINE__));
     }
   }
 
   const SliceItemPtr
   RecordArray::asslice() const {
-    throw std::invalid_argument("cannot use records as a slice");
+    throw std::invalid_argument(
+      std::string("cannot use records as a slice") + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -1172,6 +1197,7 @@ namespace awkward {
   RecordArray::reduce_next(const Reducer& reducer,
                            int64_t negaxis,
                            const Index64& starts,
+                           const Index64& shifts,
                            const Index64& parents,
                            int64_t outlength,
                            bool mask,
@@ -1182,6 +1208,7 @@ namespace awkward {
       ContentPtr next = trimmed.get()->reduce_next(reducer,
                                                    negaxis,
                                                    starts,
+                                                   shifts,
                                                    parents,
                                                    outlength,
                                                    mask,
@@ -1222,7 +1249,8 @@ namespace awkward {
                             int64_t axis,
                             int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1") + FILENAME(__LINE__));
     }
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
@@ -1252,7 +1280,7 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("fieldindex ") + std::to_string(fieldindex)
         + std::string(" for record with only " + std::to_string(numfields()))
-        + std::string(" fields"));
+        + std::string(" fields") + FILENAME(__LINE__));
     }
     return contents_[(size_t)fieldindex];
   }
@@ -1399,7 +1427,8 @@ namespace awkward {
                             const Slice& tail,
                             const Index64& advanced) const {
     throw std::invalid_argument(
-      std::string("undefined operation: RecordArray::getitem_next(at)"));
+      std::string("undefined operation: RecordArray::getitem_next(at)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -1407,7 +1436,8 @@ namespace awkward {
                             const Slice& tail,
                             const Index64& advanced) const {
     throw std::invalid_argument(
-      std::string("undefined operation: RecordArray::getitem_next(range)"));
+      std::string("undefined operation: RecordArray::getitem_next(range)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -1415,7 +1445,8 @@ namespace awkward {
                             const Slice& tail,
                             const Index64& advanced) const {
     throw std::invalid_argument(
-      std::string("undefined operation: RecordArray::getitem_next(array)"));
+      std::string("undefined operation: RecordArray::getitem_next(array)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -1445,7 +1476,8 @@ namespace awkward {
                             const Slice& tail,
                             const Index64& advanced) const {
     throw std::invalid_argument(
-      std::string("undefined operation: RecordArray::getitem_next(jagged)"));
+      std::string("undefined operation: RecordArray::getitem_next(jagged)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr

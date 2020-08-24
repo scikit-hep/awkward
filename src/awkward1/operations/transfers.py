@@ -20,4 +20,12 @@ def copy_to(array, ptr_lib, highlevel=True, behavior=None):
     else:
         return arr.copy_to(ptr_lib)
 
-__all__ = [x for x in list(globals()) if not x.startswith("_") and x not in ("awkward1")]
+
+__all__ = [
+    x
+    for x in list(globals())
+    if not x.startswith("_") and x not in (
+        "absolute_import",
+        "awkward1",
+    )
+]

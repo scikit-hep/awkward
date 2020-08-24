@@ -1,5 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/RegularArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/RegularArray.cpp", line)
+
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
@@ -170,6 +173,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  RegularForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// RegularArray
 
   RegularArray::RegularArray(const IdentitiesPtr& identities,
@@ -180,7 +188,9 @@ namespace awkward {
       , content_(content)
       , size_(size) {
     if (size < 0) {
-      throw std::invalid_argument("RegularArray size must be non-negative");
+      throw std::invalid_argument(
+        std::string("RegularArray size must be non-negative")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -211,7 +221,8 @@ namespace awkward {
   RegularArray::broadcast_tooffsets64(const Index64& offsets) const {
     if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
       throw std::invalid_argument(
-        "broadcast_tooffsets64 can only be used with offsets that start at 0");
+        std::string("broadcast_tooffsets64 can only be used with offsets that start at 0")
+        + FILENAME(__LINE__));
     }
 
     int64_t len = length();
@@ -219,7 +230,7 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("cannot broadcast RegularArray of length ")
         + std::to_string(len) + (" to length ")
-        + std::to_string(offsets.length() - 1));
+        + std::to_string(offsets.length() - 1) + FILENAME(__LINE__));
     }
 
     IdentitiesPtr identities;
@@ -283,7 +294,8 @@ namespace awkward {
         util::handle_error(
           failure("content and its identities must have the same length",
                   kSliceNone,
-                  kSliceNone),
+                  kSliceNone,
+                  FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -332,7 +344,9 @@ namespace awkward {
         content_.get()->setidentities(subidentities);
       }
       else {
-        throw std::runtime_error("unrecognized Identities specialization");
+        throw std::runtime_error(
+          std::string("unrecognized Identities specialization")
+          + FILENAME(__LINE__));
       }
     }
     identities_ = identities;
@@ -476,7 +490,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < length()) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -496,7 +513,7 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < len)) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -517,7 +534,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
       util::handle_error(
-        failure("index out of range", kSliceNone, stop),
+        failure("index out of range",
+                kSliceNone,
+                stop,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -601,6 +621,11 @@ namespace awkward {
 
   const std::string
   RegularArray::validityerror(const std::string& path) const {
+    if (size_ < 1) {
+      return (std::string("at ") + path + std::string(" (") + classname()
+              + std::string("): ") + std::string("size < 1")
+              + FILENAME(__LINE__));
+    }
     return content_.get()->validityerror(path + std::string(".content"));
   }
 
@@ -809,16 +834,16 @@ namespace awkward {
     else {
       throw std::invalid_argument(
         std::string("cannot merge ") + classname() + std::string(" with ")
-        + other.get()->classname());
+        + other.get()->classname() + FILENAME(__LINE__));
     }
   }
 
   const SliceItemPtr
   RegularArray::asslice() const {
     throw std::invalid_argument(
-      "slice items can have all fixed-size dimensions (to follow NumPy's "
-      "slice rules) or they can have all var-sized dimensions (for jagged "
-      "indexing), but not both in the same slice item");
+      std::string("slice items can have all fixed-size dimensions (to follow NumPy's "
+                  "slice rules) or they can have all var-sized dimensions (for jagged "
+                  "indexing), but not both in the same slice item") + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -893,6 +918,7 @@ namespace awkward {
   RegularArray::reduce_next(const Reducer& reducer,
                             int64_t negaxis,
                             const Index64& starts,
+                            const Index64& shifts,
                             const Index64& parents,
                             int64_t outlength,
                             bool mask,
@@ -900,6 +926,7 @@ namespace awkward {
     return toListOffsetArray64(true).get()->reduce_next(reducer,
                                                         negaxis,
                                                         starts,
+                                                        shifts,
                                                         parents,
                                                         outlength,
                                                         mask,
@@ -943,7 +970,9 @@ namespace awkward {
                              int64_t axis,
                              int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1")
+        + FILENAME(__LINE__));
     }
 
     int64_t posaxis = axis_wrap_if_negative(axis);
@@ -1096,7 +1125,8 @@ namespace awkward {
                              const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::runtime_error(
-        "RegularArray::getitem_next(SliceAt): advanced.length() != 0");
+        std::string("RegularArray::getitem_next(SliceAt): advanced.length() != 0")
+        + FILENAME(__LINE__));
     }
     int64_t len = length();
     SliceItemPtr nexthead = tail.head();
@@ -1125,7 +1155,8 @@ namespace awkward {
 
     if (range.step() == 0) {
       throw std::runtime_error(
-        "RegularArray::getitem_next(SliceRange): range.step() == 0");
+        std::string("RegularArray::getitem_next(SliceRange): range.step() == 0")
+        + FILENAME(__LINE__));
     }
     int64_t regular_start = range.start();
     int64_t regular_stop = range.stop();
@@ -1258,14 +1289,16 @@ namespace awkward {
                              const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::invalid_argument(
-        "cannot mix jagged slice with NumPy-style advanced indexing");
+        std::string("cannot mix jagged slice with NumPy-style advanced indexing")
+        + FILENAME(__LINE__));
     }
 
     if (jagged.length() != size_) {
       throw std::invalid_argument(
         std::string("cannot fit jagged slice with length ")
         + std::to_string(jagged.length()) + std::string(" into ")
-        + classname() + std::string(" of size ") + std::to_string(size_));
+        + classname() + std::string(" of size ") + std::to_string(size_)
+        + FILENAME(__LINE__));
     }
 
     int64_t regularlength = length();

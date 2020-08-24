@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/Slice.cpp", line)
+
 #include <algorithm>
 #include <sstream>
 #include <type_traits>
@@ -47,7 +49,8 @@ namespace awkward {
       , stop_(stop)
       , step_(step == Slice::none() ? 1 : step) {
     if (step_ == 0) {
-      throw std::runtime_error("step must not be zero");
+      throw std::runtime_error(
+        std::string("step must not be zero") + FILENAME(__LINE__));
     }
   }
 
@@ -152,11 +155,13 @@ namespace awkward {
       , strides_(strides)
       , frombool_(frombool) {
     if (shape_.empty()) {
-      throw std::runtime_error("shape must not be zero-dimensional");
+      throw std::runtime_error(
+        std::string("shape must not be zero-dimensional") + FILENAME(__LINE__));
     }
     if (shape_.size() != strides_.size()) {
       throw std::runtime_error(
-        "shape must have the same number of dimensions as strides");
+        std::string("shape must have the same number of dimensions as strides")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -310,13 +315,15 @@ namespace awkward {
       util::handle_error(err);
     }
     else {
-      throw std::runtime_error("unrecognized SliceArrayOf<T> type");
+      throw std::runtime_error(
+        std::string("unrecognized SliceArrayOf<T> type")
+        + FILENAME(__LINE__));
     }
 
     return index;
   }
 
-  template class EXPORT_SYMBOL SliceArrayOf<int64_t>;
+  template class EXPORT_TEMPLATE_INST SliceArrayOf<int64_t>;
 
   ////////// SliceField
 
@@ -464,7 +471,7 @@ namespace awkward {
     return true;
   }
 
-  template class EXPORT_SYMBOL SliceMissingOf<int64_t>;
+  template class EXPORT_TEMPLATE_INST SliceMissingOf<int64_t>;
 
   ////////// SliceJaggedOf<T>
 
@@ -543,7 +550,7 @@ namespace awkward {
     return true;
   }
 
-  template class EXPORT_SYMBOL SliceJaggedOf<int64_t>;
+  template class EXPORT_TEMPLATE_INST SliceJaggedOf<int64_t>;
 
   ////////// Slice
 
@@ -638,7 +645,9 @@ namespace awkward {
   void
   Slice::append(const SliceItemPtr& item) {
     if (sealed_) {
-      throw std::runtime_error("Slice::append when sealed_ == true");
+      throw std::runtime_error(
+        std::string("Slice::append when sealed_ == true")
+        + FILENAME(__LINE__));
     }
     items_.push_back(item);
   }
@@ -691,7 +700,9 @@ namespace awkward {
   void
   Slice::become_sealed() {
     if (sealed_) {
-      throw std::runtime_error("Slice::become_sealed when sealed_ == true");
+      throw std::runtime_error(
+        std::string("Slice::become_sealed when sealed_ == true")
+        + FILENAME(__LINE__));
     }
 
     std::vector<int64_t> shape;
@@ -701,7 +712,9 @@ namespace awkward {
           shape = array->shape();
         }
         else if (shape.size() != (size_t)array->ndim()) {
-          throw std::invalid_argument("cannot broadcast arrays in slice");
+          throw std::invalid_argument(
+            std::string("cannot broadcast arrays in slice")
+            + FILENAME(__LINE__));
         }
         else {
           std::vector<int64_t> arrayshape = array->shape();
@@ -744,7 +757,9 @@ namespace awkward {
               strides.push_back(0);
             }
             else {
-              throw std::invalid_argument("cannot broadcast arrays in slice");
+              throw std::invalid_argument(
+                std::string("cannot broadcast arrays in slice")
+                + FILENAME(__LINE__));
             }
           }
           items_[i] = std::make_shared<SliceArray64>(array->index(),
@@ -787,7 +802,8 @@ namespace awkward {
 
       if (std::count(types.begin(), types.end(), '.') > 1) {
         throw std::invalid_argument(
-          "a slice can have no more than one ellipsis ('...')");
+          std::string("a slice can have no more than one ellipsis ('...')")
+          + FILENAME(__LINE__));
       }
 
       size_t numadvanced = (size_t)std::count(types.begin(), types.end(), 'A');
@@ -796,8 +812,9 @@ namespace awkward {
                      .substr(types.find_first_of('A'));
         if (numadvanced != types.size()) {
           throw std::invalid_argument(
-            "advanced indexes separated by basic indexes is not permitted "
-            "(simple integers are advanced when any arrays are present)");
+            std::string("advanced indexes separated by basic indexes is not permitted "
+                        "(simple integers are advanced when any arrays are present)")
+            + FILENAME(__LINE__));
         }
       }
     }
@@ -808,7 +825,9 @@ namespace awkward {
   bool
   Slice::isadvanced() const {
     if (!sealed_) {
-      throw std::runtime_error("Slice::isadvanced when sealed_ == false");
+      throw std::runtime_error(
+        std::string("Slice::isadvanced when sealed_ == false")
+        + FILENAME(__LINE__));
     }
     for (size_t i = 0;  i < items_.size();  i++) {
       if (dynamic_cast<SliceArray64*>(items_[i].get()) != nullptr) {

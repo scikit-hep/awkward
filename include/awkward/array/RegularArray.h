@@ -15,7 +15,7 @@ namespace awkward {
   /// @class RegularForm
   ///
   /// @brief Form describing RegularArray.
-  class EXPORT_SYMBOL RegularForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL RegularForm: public Form {
   public:
     /// @brief Creates a RegularForm. See RegularArray for documentation.
     RegularForm(bool has_identities,
@@ -76,6 +76,9 @@ namespace awkward {
             bool check_form_key,
             bool compatibility_check) const override;
 
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   private:
     const FormPtr content_;
     int64_t size_;
@@ -90,7 +93,7 @@ namespace awkward {
   /// it must also start at zero.
   ///
   /// See #RegularArray for the meaning of each parameter.
-  class EXPORT_SYMBOL RegularArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL RegularArray: public Content {
   public:
     /// @brief Creates a RegularArray from a full set of parameters.
     ///
@@ -282,6 +285,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,

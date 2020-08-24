@@ -49,29 +49,29 @@ def test_getitem():
     assert awkward1.to_list(a[2, 1]) == []
     with pytest.raises(ValueError) as excinfo:
         a[2, 1, 0]
-    assert str(excinfo.value).endswith(" attempting to get 0, index out of range")
+    assert " attempting to get 0, index out of range" in str(excinfo.value)
     assert awkward1.to_list(a[2, 1][()]) == []
     with pytest.raises(ValueError) as excinfo:
         a[2, 1][0]
-    assert str(excinfo.value).endswith(" attempting to get 0, index out of range")
+    assert " attempting to get 0, index out of range" in str(excinfo.value)
     assert awkward1.to_list(a[2, 1][100:200]) == []
     assert awkward1.to_list(a[2, 1, 100:200]) == []
     assert awkward1.to_list(a[2, 1][numpy.array([], dtype=int)]) == []
     assert awkward1.to_list(a[2, 1, numpy.array([], dtype=int)]) == []
     with pytest.raises(ValueError) as excinfo:
         a[2, 1, numpy.array([0], dtype=int)]
-    assert str(excinfo.value).endswith(" attempting to get 0, index out of range")
+    assert " attempting to get 0, index out of range" in str(excinfo.value)
     with pytest.raises(ValueError) as excinfo:
         a[2, 1][100:200, 0]
-    assert str(excinfo.value).endswith(", too many dimensions in slice")
+    assert ", too many dimensions in slice" in str(excinfo.value)
     with pytest.raises(ValueError) as excinfo:
         a[2, 1][100:200, 200:300]
-    assert str(excinfo.value).endswith(", too many dimensions in slice")
+    assert ", too many dimensions in slice" in str(excinfo.value)
     with pytest.raises(ValueError) as excinfo:
         a[2, 1][100:200, numpy.array([], dtype=int)]
-    assert str(excinfo.value).endswith(", too many dimensions in slice")
+    assert ", too many dimensions in slice" in str(excinfo.value)
 
     assert awkward1.to_list(a[1:, 1:]) == [[[]], [[], []]]
     with pytest.raises(ValueError) as excinfo:
         a[1:, 1:, 0]
-    assert str(excinfo.value).endswith(" attempting to get 0, index out of range")
+    assert " attempting to get 0, index out of range" in str(excinfo.value)

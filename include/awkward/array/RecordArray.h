@@ -15,7 +15,7 @@ namespace awkward {
   /// @class RecordForm
   ///
   /// @brief Form describing RecordArray (not a Record).
-  class EXPORT_SYMBOL RecordForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL RecordForm: public Form {
   public:
     /// @brief Creates a RecordForm. See RecordArray (not Record) for
     /// documentation.
@@ -89,6 +89,9 @@ namespace awkward {
             bool check_form_key,
             bool compatibility_check) const override;
 
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   private:
     const util::RecordLookupPtr recordlookup_;
     const std::vector<FormPtr> contents_;
@@ -107,7 +110,7 @@ namespace awkward {
   /// with each field.
   ///
   /// Fields are always ordered, whether tuples or records.
-  class EXPORT_SYMBOL RecordArray:
+  class LIBAWKWARD_EXPORT_SYMBOL RecordArray:
     public Content,
     public std::enable_shared_from_this<RecordArray> {
   public:
@@ -304,6 +307,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,

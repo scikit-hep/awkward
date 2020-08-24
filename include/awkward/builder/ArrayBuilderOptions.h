@@ -13,7 +13,7 @@ namespace awkward {
   ///
   /// @brief Container for all configuration options needed by ArrayBuilder,
   /// GrowableBuffer, and the Builder subclasses.
-  class EXPORT_SYMBOL ArrayBuilderOptions {
+  class LIBAWKWARD_EXPORT_SYMBOL ArrayBuilderOptions {
   public:
     /// @brief Creates an ArrayBuilderOptions from a full set of parameters.
     ///

@@ -17,7 +17,7 @@ namespace awkward {
   /// @class EmptyForm
   ///
   /// @brief Form describing EmptyArray.
-  class EXPORT_SYMBOL EmptyForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL EmptyForm: public Form {
   public:
     /// @brief Creates a EmptyForm. See EmptyArray for documentation.
     EmptyForm(bool has_identities,
@@ -69,6 +69,10 @@ namespace awkward {
             bool check_parameters,
             bool check_form_key,
             bool compatibility_check) const override;
+
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   };
 
   /// @class EmptyArray
@@ -77,7 +81,7 @@ namespace awkward {
   /// consequence) UnknownType.
   ///
   /// See #EmptyArray for the meaning of each parameter.
-  class EXPORT_SYMBOL EmptyArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL EmptyArray: public Content {
   public:
     /// @brief Creates an EmptyArray from a full set of parameters.
     ///
@@ -221,6 +225,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,

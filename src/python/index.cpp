@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/index.cpp", line)
+
 #include <pybind11/numpy.h>
 #include <awkward/python/content.h>
 
@@ -27,13 +29,15 @@ make_IndexOf(const py::handle& m, const std::string& name) {
                            py::array::forcecast> array) -> ak::IndexOf<T> {
         py::buffer_info info = array.request();
         if (info.ndim != 1) {
-          throw std::invalid_argument(name + std::string(
-            " must be built from a one-dimensional array; try array.ravel()"));
+          throw std::invalid_argument(
+            name + std::string(" must be built from a one-dimensional array; "
+                               "try array.ravel()") + FILENAME(__LINE__));
         }
         if (info.strides[0] != sizeof(T)) {
-          throw std::invalid_argument(name + std::string(
-            " must be built from a contiguous array (array.strides == "
-            "(array.itemsize,)); try array.copy()"));
+          throw std::invalid_argument(
+            name + std::string(" must be built from a contiguous array "
+                               "(array.strides == (array.itemsize,)); "
+                               "try array.copy()") + FILENAME(__LINE__));
         }
         return ak::IndexOf<T>(
           std::shared_ptr<T>(reinterpret_cast<T*>(info.ptr),
@@ -78,12 +82,15 @@ make_IndexOf(const py::handle& m, const std::string& name) {
             return py::cast(out);
           }
           else {
-            throw std::invalid_argument("Index slices cannot contain step != 1");
+            throw std::invalid_argument(
+              std::string("Index slices cannot contain step != 1")
+              + FILENAME(__LINE__));
           }
         }
         else {
           throw std::invalid_argument(
-            "Index can only be sliced by an integer or start:stop slice");
+            std::string("Index can only be sliced by an integer or start:stop slice")
+            + FILENAME(__LINE__));
         }
       })
       .def_static("from_cupy", [name](py::object array) -> py::object {
@@ -136,7 +143,8 @@ make_IndexOf(const py::handle& m, const std::string& name) {
           return py::cast(cuda_index);
         }
         else {
-          throw std::invalid_argument("specify 'cpu' or 'cuda'");
+          throw std::invalid_argument(
+            std::string("specify 'cpu' or 'cuda'") + FILENAME(__LINE__));
         }
       })
       .def("to_cupy", [name](const ak::IndexOf<T>& self) -> py::object {

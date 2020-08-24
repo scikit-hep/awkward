@@ -1,5 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/NumpyArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/NumpyArray.cpp", line)
+
 #include <algorithm>
 #include <iomanip>
 #include <numeric>
@@ -74,7 +77,8 @@ namespace awkward {
     if (dtype_ == util::dtype::NOT_PRIMITIVE) {
       throw std::invalid_argument(
         std::string("Numpy format \"") + format_
-        + std::string("\" cannot be expressed as a PrimitiveType"));
+        + std::string("\" cannot be expressed as a PrimitiveType")
+        + FILENAME(__LINE__));
     }
     else {
       out = std::make_shared<PrimitiveType>(
@@ -207,14 +211,16 @@ namespace awkward {
   NumpyForm::fieldindex(const std::string& key) const {
     throw std::invalid_argument(
       std::string("key ") + util::quote(key, true)
-      + std::string(" does not exist (data are not records)"));
+      + std::string(" does not exist (data are not records)")
+      + FILENAME(__LINE__));
   }
 
   const std::string
   NumpyForm::key(int64_t fieldindex) const {
     throw std::invalid_argument(
       std::string("fieldindex \"") + std::to_string(fieldindex)
-      + std::string("\" does not exist (data are not records)"));
+      + std::string("\" does not exist (data are not records)")
+      + FILENAME(__LINE__));
   }
 
   bool
@@ -253,6 +259,13 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  NumpyForm::getitem_field(const std::string& key) const {
+    throw std::invalid_argument(
+      std::string("key ") + util::quote(key, true)
+      + std::string(" does not exist (data are not records)"));
+  }
+
   ////////// NumpyArray
 
   NumpyArray::NumpyArray(const IdentitiesPtr& identities,
@@ -278,7 +291,7 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("len(shape), which is ") + std::to_string(shape.size())
         + std::string(", must be equal to len(strides), which is ")
-        + std::to_string(strides.size()));
+        + std::to_string(strides.size()) + FILENAME(__LINE__));
     }
   }
 
@@ -466,7 +479,8 @@ namespace awkward {
       util::handle_error(
         failure("content and its identities must have the same length",
                 kSliceNone,
-                kSliceNone),
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -522,7 +536,7 @@ namespace awkward {
           out << " ";
         }
         if (dtype == util::dtype::boolean) {
-          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) != 0 ? "true" : "false");
         }
         else if (dtype == util::dtype::int8) {
           out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
@@ -543,7 +557,7 @@ namespace awkward {
           out << " ";
         }
         if (dtype == util::dtype::boolean) {
-          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) != 0 ? "true" : "false");
         }
         else if (dtype == util::dtype::int8) {
           out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
@@ -563,7 +577,7 @@ namespace awkward {
           out << " ";
         }
         if (dtype == util::dtype::boolean) {
-          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) ? "true" : "false");
+          out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) != 0 ? "true" : "false");
         }
         else if (dtype == util::dtype::int8) {
           out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
@@ -833,7 +847,8 @@ namespace awkward {
           tojson_integer<uint64_t>(builder, include_beginendlist);
           break;
         case util::dtype::float16:
-          throw std::runtime_error("FIXME: float16 to JSON");
+          throw std::runtime_error(
+            std::string("FIXME: float16 to JSON") + FILENAME(__LINE__));
         case util::dtype::float32:
           tojson_real<float>(builder, include_beginendlist);
           break;
@@ -841,17 +856,21 @@ namespace awkward {
           tojson_real<double>(builder, include_beginendlist);
           break;
         case util::dtype::float128:
-          throw std::runtime_error("FIXME: float128 to JSON");
+          throw std::runtime_error(
+            std::string("FIXME: float128 to JSON") + FILENAME(__LINE__));
         case util::dtype::complex64:
-          throw std::runtime_error("FIXME: complex64 to JSON");
+          throw std::runtime_error(
+            std::string("FIXME: complex64 to JSON") + FILENAME(__LINE__));
         case util::dtype::complex128:
-          throw std::runtime_error("FIXME: complex128 to JSON");
+          throw std::runtime_error(
+            std::string("FIXME: complex128 to JSON") + FILENAME(__LINE__));
         case util::dtype::complex256:
-          throw std::runtime_error("FIXME: complex256 to JSON");
+          throw std::runtime_error(
+            std::string("FIXME: complex256 to JSON") + FILENAME(__LINE__));
         default:
           throw std::invalid_argument(
             std::string("cannot convert Numpy format \"") + format_
-            + std::string("\" into JSON"));
+            + std::string("\" into JSON") + FILENAME(__LINE__));
       }
     }
   }
@@ -930,7 +949,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < shape_[0]) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -963,7 +985,7 @@ namespace awkward {
     }
     if (regular_at < 0  ||  regular_at >= shape_[0]) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -979,7 +1001,7 @@ namespace awkward {
     if (identities_.get() != nullptr) {
       if (at >= identities_.get()->length()) {
         util::handle_error(
-          failure("index out of range", kSliceNone, at),
+          failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
           identities_.get()->classname(),
           nullptr);
       }
@@ -1016,7 +1038,7 @@ namespace awkward {
     if (identities_.get() != nullptr) {
       if (stop > identities_.get()->length()) {
         util::handle_error(
-          failure("index out of range", kSliceNone, stop),
+          failure("index out of range", kSliceNone, stop, FILENAME_C(__LINE__)),
           identities_.get()->classname(),
           nullptr);
       }
@@ -1038,14 +1060,14 @@ namespace awkward {
   NumpyArray::getitem_field(const std::string& key) const {
     throw std::invalid_argument(
       std::string("cannot slice ") + classname()
-      + std::string(" by field name"));
+      + std::string(" by field name") + FILENAME(__LINE__));
   }
 
   const ContentPtr
   NumpyArray::getitem_fields(const std::vector<std::string>& keys) const {
     throw std::invalid_argument(
       std::string("cannot slice ") + classname()
-      + std::string(" by field names"));
+      + std::string(" by field names") + FILENAME(__LINE__));
   }
 
   bool getitem_too_general(const SliceItemPtr& head, const Slice& tail) {
@@ -1064,7 +1086,8 @@ namespace awkward {
   const ContentPtr
   NumpyArray::getitem(const Slice& where) const {
     if (isscalar()) {
-      throw std::runtime_error("cannot get-item on a scalar");
+      throw std::runtime_error(
+        std::string("cannot get-item on a scalar") + FILENAME(__LINE__));
     }
 
     if (getitem_too_general(where.head(), where.tail())) {
@@ -1221,14 +1244,16 @@ namespace awkward {
   NumpyArray::fieldindex(const std::string& key) const {
     throw std::invalid_argument(
       std::string("key ") + util::quote(key, true)
-      + std::string(" does not exist (data are not records)"));
+      + std::string(" does not exist (data are not records)")
+      + FILENAME(__LINE__));
   }
 
   const std::string
   NumpyArray::key(int64_t fieldindex) const {
     throw std::invalid_argument(
       std::string("fieldindex \"") + std::to_string(fieldindex)
-      + std::string("\" does not exist (data are not records)"));
+      + std::string("\" does not exist (data are not records)")
+      + FILENAME(__LINE__));
   }
 
   bool
@@ -1245,19 +1270,22 @@ namespace awkward {
   NumpyArray::validityerror(const std::string& path) const {
     if (shape_.empty()) {
       return (std::string("at ") + path + std::string(" (") + classname()
-              + std::string("): shape is zero-dimensional"));
+              + std::string("): shape is zero-dimensional")
+              + FILENAME(__LINE__));
     }
     for (size_t i = 0;  i < shape_.size();  i++) {
       if (shape_[i] < 0) {
         return (std::string("at ") + path + std::string(" (") + classname()
-                + std::string("): shape[") + std::to_string(i) + ("] < 0"));
+                + std::string("): shape[") + std::to_string(i) + ("] < 0")
+                + FILENAME(__LINE__));
       }
     }
     for (size_t i = 0;  i < strides_.size();  i++) {
       if (strides_[i] % itemsize_ != 0) {
         return (std::string("at ") + path + std::string(" (") + classname()
                 + std::string("): shape[") + std::to_string(i)
-                + ("] % itemsize != 0"));
+                + ("] % itemsize != 0")
+                + FILENAME(__LINE__));
       }
     }
     return std::string();
@@ -1288,7 +1316,8 @@ namespace awkward {
       depth++;
     }
     if (posaxis > depth) {
-      throw std::invalid_argument("'axis' out of range for 'num'");
+      throw std::invalid_argument(
+        std::string("'axis' out of range for 'num'") + FILENAME(__LINE__));
     }
 
     ssize_t x = sizeof(int64_t);
@@ -1346,13 +1375,15 @@ namespace awkward {
   NumpyArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
-      throw std::invalid_argument("axis=0 not allowed for flatten");
+      throw std::invalid_argument(
+        std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
       return toRegularArray().get()->offsets_and_flattened(posaxis, depth);
     }
     else {
-      throw std::invalid_argument("axis out of range for flatten");
+      throw std::invalid_argument(
+        std::string("axis out of range for flatten") + FILENAME(__LINE__));
     }
   }
 
@@ -1538,7 +1569,8 @@ namespace awkward {
     }
 
     if (ndim() == 0) {
-      throw std::invalid_argument("cannot merge Numpy scalars");
+      throw std::invalid_argument(
+        std::string("cannot merge Numpy scalars") + FILENAME(__LINE__));
     }
 
     if ((parameter_equals("__array__", "\"byte\"")  ||
@@ -1560,7 +1592,8 @@ namespace awkward {
 
       if (ndim() != rawother->ndim()) {
         throw std::invalid_argument(
-          "cannot merge arrays with different shapes");
+          std::string("cannot merge arrays with different shapes")
+          + FILENAME(__LINE__));
       }
 
       if (dtype_ == util::dtype::complex256  ||
@@ -1714,7 +1747,8 @@ namespace awkward {
       else {
         throw std::invalid_argument(
           std::string("cannot merge Numpy format \"") + format_
-          + std::string("\" with \"") + rawother->format() + std::string("\""));
+          + std::string("\" with \"") + rawother->format() + std::string("\"")
+          + FILENAME(__LINE__));
       }
 
       int64_t itemsize = util::dtype_to_itemsize(dtype);
@@ -1729,7 +1763,8 @@ namespace awkward {
       for (int64_t i = ((int64_t)shape_.size()) - 1;  i > 0;  i--) {
         if (shape_[(size_t)i] != other_shape[(size_t)i]) {
           throw std::invalid_argument(
-            "cannot merge arrays with different shapes");
+            std::string("cannot merge arrays with different shapes")
+            + FILENAME(__LINE__));
         }
         shape.insert(std::next(shape.begin()), shape_[(size_t)i]);
         strides.insert(strides.begin(), strides[0]*shape_[(size_t)i]);
@@ -1765,12 +1800,16 @@ namespace awkward {
 
       // // to datetime64
       // case util::dtype::datetime64:
-      //   throw std::runtime_error("FIXME: merge to datetime64 not implemented");
+      //   throw std::runtime_error(
+      //     std::string("FIXME: merge to datetime64 not implemented")
+      //     + FILENAME(__LINE__));
       //   break;
 
       // // to timedelta64
       // case util::dtype::timedelta64:
-      //   throw std::runtime_error("FIXME: merge to timedelta64 not implemented");
+      //   throw std::runtime_error(
+      //     std::string("FIXME: merge to timedelta64 not implemented")
+      //     + FILENAME(__LINE__));
       //   break;
 
       // to int
@@ -1794,7 +1833,7 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-              "dtype_ not in {boolean, int8} (1)");
+              std::string("dtype_ not in {boolean, int8} (1)") + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -1816,7 +1855,7 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-              "dtype_ not in {boolean, int8} (2)");
+              std::string("dtype_ not in {boolean, int8} (2)") + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -1858,7 +1897,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, int8, int16, uint8} (1)");
+              std::string("dtype_ not in {boolean, int8, int16, uint8} (1)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -1896,7 +1936,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, int8, int16, uint8} (2)");
+              std::string("dtype_ not in {boolean, int8, int16, uint8} (2)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -1954,7 +1995,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, int8, int16, int32, uint8, uint16} (1)");
+              std::string("dtype_ not in {boolean, int8, int16, int32, uint8, uint16} (1)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2008,7 +2050,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, int8, int16, int32, uint8, uint16} (2)");
+              std::string("dtype_ not in {boolean, int8, int16, int32, uint8, uint16} (2)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2082,8 +2125,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, int8, int16, int32, int64, "
-                "uint8, uint16, uint32} (1)");
+              std::string("dtype_ not in {boolean, int8, int16, int32, int64, "
+                          "uint8, uint16, uint32} (1)") + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2153,8 +2196,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, int8, int16, int32, int64, "
-                "uint8, uint16, uint32} (2)");
+              std::string("dtype_ not in {boolean, int8, int16, int32, int64, "
+                          "uint8, uint16, uint32} (2)") + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2180,7 +2223,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, uint8} (1)");
+              std::string("dtype_ not in {boolean, uint8} (1)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2202,7 +2246,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, uint8} (2)");
+              std::string("dtype_ not in {boolean, uint8} (2)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2236,7 +2281,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, uint8, uint16} (1)");
+              std::string("dtype_ not in {boolean, uint8, uint16} (1)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2266,7 +2312,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, uint8, uint16} (2)");
+              std::string("dtype_ not in {boolean, uint8, uint16} (2)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2308,7 +2355,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, uint8, uint16, uint32} (1)");
+              std::string("dtype_ not in {boolean, uint8, uint16, uint32} (1)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2346,7 +2394,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, uint8, uint16, uint32} (2)");
+              std::string("dtype_ not in {boolean, uint8, uint16, uint32} (2)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2396,7 +2445,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, uint8, uint16, uint32, uint64} (1)");
+              std::string("dtype_ not in {boolean, uint8, uint16, uint32, uint64} (1)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2442,14 +2492,16 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, uint8, uint16, uint32, uint64} (2)");
+              std::string("dtype_ not in {boolean, uint8, uint16, uint32, uint64} (2)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         break;
 
       // to float16
       case util::dtype::float16:
-        throw std::runtime_error("FIXME: merge to float16 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: merge to float16 not implemented") + FILENAME(__LINE__));
         break;
 
       // to float32
@@ -2496,7 +2548,9 @@ namespace awkward {
               self_flatlength);
             break;
           case util::dtype::float16:
-            throw std::runtime_error("FIXME: merge from float16 not implemented");
+            throw std::runtime_error(
+              std::string("FIXME: merge from float16 not implemented")
+              + FILENAME(__LINE__));
           case util::dtype::float32:
             err = kernel::NumpyArray_fill<float, float>(
               kernel::lib::cpu,   // DERIVE
@@ -2507,8 +2561,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, int8, int16, uint8, uint16, "
-                "float16, float32} (1)");
+              std::string("dtype_ not in {boolean, int8, int16, uint8, uint16, "
+                          "float16, float32} (1)") + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2553,7 +2607,9 @@ namespace awkward {
               other_flatlength);
             break;
           case util::dtype::float16:
-            throw std::runtime_error("FIXME: merge from float16 not implemented");
+            throw std::runtime_error(
+              std::string("FIXME: merge from float16 not implemented")
+              + FILENAME(__LINE__));
           case util::dtype::float32:
             err = kernel::NumpyArray_fill<float, float>(
               kernel::lib::cpu,   // DERIVE
@@ -2564,8 +2620,8 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, int8, int16, uint8, uint16, "
-                "float16, float32} (2)");
+              std::string("dtype_ not in {boolean, int8, int16, uint8, uint16, "
+                          "float16, float32} (2)") + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         break;
@@ -2646,7 +2702,9 @@ namespace awkward {
               self_flatlength);
             break;
           case util::dtype::float16:
-            throw std::runtime_error("FIXME: merge from float16 not implemented");
+            throw std::runtime_error(
+              std::string("FIXME: merge from float16 not implemented")
+              + FILENAME(__LINE__));
           case util::dtype::float32:
             err = kernel::NumpyArray_fill<float, double>(
               kernel::lib::cpu,   // DERIVE
@@ -2665,8 +2723,9 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, int8, int16, int32, int64, "
-                "uint8, uint16, uint32, uint64 float16, float32, float64} (1)");
+              std::string("dtype_ not in {boolean, int8, int16, int32, int64, "
+                          "uint8, uint16, uint32, uint64 float16, float32, float64} (1)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
@@ -2743,7 +2802,9 @@ namespace awkward {
               other_flatlength);
             break;
           case util::dtype::float16:
-            throw std::runtime_error("FIXME: merge from float16 not implemented");
+            throw std::runtime_error(
+              std::string("FIXME: merge from float16 not implemented")
+              + FILENAME(__LINE__));
           case util::dtype::float32:
             err = kernel::NumpyArray_fill<float, double>(
               kernel::lib::cpu,   // DERIVE
@@ -2762,36 +2823,46 @@ namespace awkward {
             break;
           default:
             throw std::runtime_error(
-                "dtype_ not in {boolean, int8, int16, int32, int64, "
-                "uint8, uint16, uint32, uint64 float16, float32, float64} (2)");
+              std::string("dtype_ not in {boolean, int8, int16, int32, int64, "
+                          "uint8, uint16, uint32, uint64 float16, float32, float64} (2)")
+              + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
         break;
 
       // to float128
       case util::dtype::float128:
-        throw std::runtime_error("FIXME: merge to float128 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: merge to float128 not implemented")
+          + FILENAME(__LINE__));
         break;
 
       // to complex64
       case util::dtype::complex64:
-        throw std::runtime_error("FIXME: merge to complex64 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: merge to complex64 not implemented")
+          + FILENAME(__LINE__));
         break;
 
       // to complex128
       case util::dtype::complex128:
-        throw std::runtime_error("FIXME: merge to complex128 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: merge to complex128 not implemented")
+          + FILENAME(__LINE__));
         break;
 
       // to complex256
       case util::dtype::complex256:
-        throw std::runtime_error("FIXME: merge to complex256 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: merge to complex256 not implemented")
+          + FILENAME(__LINE__));
         break;
 
       // something's wrong
       default:
         throw std::runtime_error(
-          std::string("unhandled merge case: to ") + util::dtype_to_name(dtype));
+          std::string("unhandled merge case: to ") + util::dtype_to_name(dtype)
+          + FILENAME(__LINE__));
       }
 
       return std::make_shared<NumpyArray>(Identities::none(),
@@ -2808,7 +2879,7 @@ namespace awkward {
     else {
       throw std::invalid_argument(
         std::string("cannot merge ") + classname() + std::string(" with ")
-        + other.get()->classname());
+        + other.get()->classname() + FILENAME(__LINE__));
     }
   }
 
@@ -2855,9 +2926,10 @@ namespace awkward {
   NumpyArray::asslice() const {
     if (ndim() != 1) {
       throw std::invalid_argument(
-        "slice items can have all fixed-size dimensions (to follow NumPy's "
-        "slice rules) or they can have all var-sized dimensions (for jagged "
-        "indexing), but not both in the same slice item");
+        std::string("slice items can have all fixed-size dimensions (to follow "
+                    "NumPy's slice rules) or they can have all var-sized "
+                    "dimensions (for jagged indexing), but not both in the "
+                    "same slice item") + FILENAME(__LINE__));
     }
     if (dtype_ == util::dtype::int64) {
         int64_t* raw = reinterpret_cast<int64_t*>(ptr_.get());
@@ -2937,7 +3009,7 @@ namespace awkward {
       default:
         throw std::runtime_error(
           std::string("unexpected integer type in NumpyArray::asslice: ") +
-          util::dtype_to_name(dtype_));
+          util::dtype_to_name(dtype_) + FILENAME(__LINE__));
       }
       util::handle_error(err, classname(), identities_.get());
 
@@ -2971,7 +3043,8 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        "only arrays of integers or booleans may be used as a slice");
+        std::string("only arrays of integers or booleans may be used as a slice")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -2983,14 +3056,16 @@ namespace awkward {
   const ContentPtr
   NumpyArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     if (ndim() == 0) {
-      throw std::runtime_error("cannot rpad a scalar");
+      throw std::runtime_error(
+        std::string("cannot rpad a scalar") + FILENAME(__LINE__));
     }
     else if (ndim() > 1  ||  !iscontiguous()) {
       return toRegularArray().get()->rpad(target, axis, depth);
     }
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis != depth) {
-      throw std::invalid_argument("axis exceeds the depth of this array");
+      throw std::invalid_argument(
+        std::string("axis exceeds the depth of this array") + FILENAME(__LINE__));
     }
     if (target < length()) {
       return shallow_copy();
@@ -3005,14 +3080,16 @@ namespace awkward {
                             int64_t axis,
                             int64_t depth) const {
     if (ndim() == 0) {
-      throw std::runtime_error("cannot rpad a scalar");
+      throw std::runtime_error(
+        std::string("cannot rpad a scalar") + FILENAME(__LINE__));
     }
     else if (ndim() > 1  ||  !iscontiguous()) {
       return toRegularArray().get()->rpad_and_clip(target, axis, depth);
     }
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis != depth) {
-      throw std::invalid_argument("axis exceeds the depth of this array");
+      throw std::invalid_argument(
+        std::string("axis exceeds the depth of this array") + FILENAME(__LINE__));
     }
     return rpad_axis0(target, true);
   }
@@ -3021,17 +3098,20 @@ namespace awkward {
   NumpyArray::reduce_next(const Reducer& reducer,
                           int64_t negaxis,
                           const Index64& starts,
+                          const Index64& shifts,
                           const Index64& parents,
                           int64_t outlength,
                           bool mask,
                           bool keepdims) const {
     if (shape_.empty()) {
-      throw std::runtime_error("attempting to reduce a scalar");
+      throw std::runtime_error(
+        std::string("attempting to reduce a scalar") + FILENAME(__LINE__));
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
       return toRegularArray().get()->reduce_next(reducer,
                                                  negaxis,
                                                  starts,
+                                                 shifts,
                                                  parents,
                                                  outlength,
                                                  mask,
@@ -3042,88 +3122,106 @@ namespace awkward {
       switch (dtype_) {
       case util::dtype::boolean:
         ptr = reducer.apply_bool(reinterpret_cast<bool*>(data()),
-                                 starts,
                                  parents,
                                  outlength);
         break;
       case util::dtype::int8:
         ptr = reducer.apply_int8(reinterpret_cast<int8_t*>(data()),
-                                 starts,
                                  parents,
                                  outlength);
         break;
       case util::dtype::int16:
         ptr = reducer.apply_int16(reinterpret_cast<int16_t*>(data()),
-                                  starts,
                                   parents,
                                   outlength);
         break;
       case util::dtype::int32:
         ptr = reducer.apply_int32(reinterpret_cast<int32_t*>(data()),
-                                  starts,
                                   parents,
                                   outlength);
         break;
       case util::dtype::int64:
         ptr = reducer.apply_int64(reinterpret_cast<int64_t*>(data()),
-                                  starts,
                                   parents,
                                   outlength);
         break;
       case util::dtype::uint8:
         ptr = reducer.apply_uint8(reinterpret_cast<uint8_t*>(data()),
-                                  starts,
                                   parents,
                                   outlength);
         break;
       case util::dtype::uint16:
         ptr = reducer.apply_uint16(reinterpret_cast<uint16_t*>(data()),
-                                   starts,
                                    parents,
                                    outlength);
         break;
       case util::dtype::uint32:
         ptr = reducer.apply_uint32(reinterpret_cast<uint32_t*>(data()),
-                                   starts,
                                    parents,
                                    outlength);
         break;
       case util::dtype::uint64:
         ptr = reducer.apply_uint64(reinterpret_cast<uint64_t*>(data()),
-                                   starts,
                                    parents,
                                    outlength);
         break;
       case util::dtype::float16:
-        throw std::runtime_error("FIXME: reducers on float16");
+        throw std::runtime_error(
+          std::string("FIXME: reducers on float16") + FILENAME(__LINE__));
       case util::dtype::float32:
         ptr = reducer.apply_float32(reinterpret_cast<float*>(data()),
-                                    starts,
                                     parents,
                                     outlength);
         break;
       case util::dtype::float64:
         ptr = reducer.apply_float64(reinterpret_cast<double*>(data()),
-                                    starts,
                                     parents,
                                     outlength);
         break;
       case util::dtype::float128:
-        throw std::runtime_error("FIXME: reducers on float128");
+        throw std::runtime_error(
+          std::string("FIXME: reducers on float128") + FILENAME(__LINE__));
       case util::dtype::complex64:
-        throw std::runtime_error("FIXME: reducers on complex64");
+        throw std::runtime_error(
+          std::string("FIXME: reducers on complex64") + FILENAME(__LINE__));
       case util::dtype::complex128:
-        throw std::runtime_error("FIXME: reducers on complex128");
+        throw std::runtime_error(
+          std::string("FIXME: reducers on complex128") + FILENAME(__LINE__));
       case util::dtype::complex256:
-        throw std::runtime_error("FIXME: reducers on complex256");
+        throw std::runtime_error(
+          std::string("FIXME: reducers on complex256") + FILENAME(__LINE__));
       // case util::dtype::datetime64:
-      //   throw std::runtime_error("FIXME: reducers on datetime64");
+      //   throw std::runtime_error(
+      //     std::string("FIXME: reducers on datetime64") + FILENAME(__LINE__));
       // case util::dtype:::timedelta64:
-      //   throw std::runtime_error("FIXME: reducers on timedelta64");
+      //   throw std::runtime_error(
+      //     std:string("FIXME: reducers on timedelta64") + FILENAME(__LINE__));
       default:
         throw std::invalid_argument(
           std::string("cannot apply reducers to NumpyArray with format \"")
-          + format_ + std::string("\""));
+          + format_ + std::string("\"") + FILENAME(__LINE__));
+      }
+
+      if (reducer.returns_positions()) {
+        struct Error err3;
+        if (shifts.length() == 0) {
+          err3 = kernel::NumpyArray_reduce_adjust_starts_64(
+            kernel::lib::cpu,   // DERIVE
+            reinterpret_cast<int64_t*>(ptr.get()),
+            outlength,
+            parents.data(),
+            starts.data());
+        }
+        else {
+          err3 = kernel::NumpyArray_reduce_adjust_starts_shifts_64(
+            kernel::lib::cpu,   // DERIVE
+            reinterpret_cast<int64_t*>(ptr.get()),
+            outlength,
+            parents.data(),
+            starts.data(),
+            shifts.data());
+        }
+        util::handle_error(err3, classname(), identities_.get());
       }
 
       util::dtype dtype = reducer.return_dtype(dtype_);
@@ -3176,7 +3274,8 @@ namespace awkward {
       return localindex_axis0();
     }
     else if (shape_.size() <= 1) {
-      throw std::invalid_argument("'axis' out of range for localindex");
+      throw std::invalid_argument(
+        std::string("'axis' out of range for localindex") + FILENAME(__LINE__));
     }
     else {
       return toRegularArray().get()->localindex(posaxis, depth);
@@ -3191,7 +3290,8 @@ namespace awkward {
                            int64_t axis,
                            int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1") + FILENAME(__LINE__));
     }
 
     int64_t posaxis = axis_wrap_if_negative(axis);
@@ -3200,7 +3300,8 @@ namespace awkward {
     }
 
     else if (shape_.size() <= 1) {
-      throw std::invalid_argument("'axis' out of range for combinations");
+      throw std::invalid_argument(
+        std::string("'axis' out of range for combinations") + FILENAME(__LINE__));
     }
 
     else {
@@ -3222,7 +3323,8 @@ namespace awkward {
                         bool stable,
                         bool keepdims) const {
     if (shape_.empty()) {
-      throw std::runtime_error("attempting to sort a scalar");
+      throw std::runtime_error(
+        std::string("attempting to sort a scalar") + FILENAME(__LINE__));
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
       return toRegularArray().get()->sort_next(negaxis,
@@ -3320,7 +3422,8 @@ namespace awkward {
                                    stable);
         break;
       case util::dtype::float16:
-        throw std::runtime_error("FIXME: sort for float16 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: sort for float16 not implemented") + FILENAME(__LINE__));
       case util::dtype::float32:
         ptr = array_sort<float>(reinterpret_cast<float*>(data()),
                                 length(),
@@ -3340,17 +3443,21 @@ namespace awkward {
                                  stable);
         break;
       case util::dtype::float128:
-        throw std::runtime_error("FIXME: sort for float128 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: sort for float128 not implemented") + FILENAME(__LINE__));
       case util::dtype::complex64:
-        throw std::runtime_error("FIXME: sort for complex64 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: sort for complex64 not implemented") + FILENAME(__LINE__));
       case util::dtype::complex128:
-        throw std::runtime_error("FIXME: sort for complex128 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: sort for complex128 not implemented") + FILENAME(__LINE__));
       case util::dtype::complex256:
-        throw std::runtime_error("FIXME: sort for complex256 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: sort for complex256 not implemented") + FILENAME(__LINE__));
       default:
         throw std::invalid_argument(
           std::string("cannot sort NumpyArray with format \"")
-          + format_ + std::string("\""));
+          + format_ + std::string("\"") + FILENAME(__LINE__));
       }
 
       out = std::make_shared<NumpyArray>(Identities::none(),
@@ -3384,7 +3491,8 @@ namespace awkward {
                            bool stable,
                            bool keepdims) const {
     if (shape_.empty()) {
-      throw std::runtime_error("attempting to argsort a scalar");
+      throw std::runtime_error(
+        std::string("attempting to argsort a scalar") + FILENAME(__LINE__));
     }
     else if (shape_.size() != 1  ||  !iscontiguous()) {
       return toRegularArray().get()->argsort_next(negaxis,
@@ -3482,7 +3590,9 @@ namespace awkward {
                                    stable);
         break;
       case util::dtype::float16:
-        throw std::runtime_error("FIXME: argsort for float16 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: argsort for float16 not implemented")
+          + FILENAME(__LINE__));
       case util::dtype::float32:
         ptr = index_sort<float>(reinterpret_cast<float*>(data()),
                                 length(),
@@ -3502,17 +3612,25 @@ namespace awkward {
                                  stable);
         break;
       case util::dtype::float128:
-        throw std::runtime_error("FIXME: argsort for float128 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: argsort for float128 not implemented")
+          + FILENAME(__LINE__));
       case util::dtype::complex64:
-        throw std::runtime_error("FIXME: argsort for complex64 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: argsort for complex64 not implemented")
+          + FILENAME(__LINE__));
       case util::dtype::complex128:
-        throw std::runtime_error("FIXME: argsort for complex128 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: argsort for complex128 not implemented")
+          + FILENAME(__LINE__));
       case util::dtype::complex256:
-        throw std::runtime_error("FIXME: argsort for complex256 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: argsort for complex256 not implemented")
+          + FILENAME(__LINE__));
       default:
         throw std::invalid_argument(
           std::string("cannot sort NumpyArray with format \"")
-          + format_ + std::string("\""));
+          + format_ + std::string("\"") + FILENAME(__LINE__));
       }
 
       ssize_t itemsize = 8;
@@ -3559,7 +3677,7 @@ namespace awkward {
     } else {
       throw std::invalid_argument(
         std::string("cannot sort NumpyArray as strings with format \"")
-        + format_ + std::string("\""));
+        + format_ + std::string("\"") + FILENAME(__LINE__));
     }
 
     out = std::make_shared<NumpyArray>(identities_,
@@ -3585,8 +3703,9 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: NumpyArray::getitem_next(at) "
-      "(without 'length', 'stride', and 'first')");
+      std::string("undefined operation: NumpyArray::getitem_next(at) "
+                  "(without 'length', 'stride', and 'first')")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -3594,8 +3713,9 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: NumpyArray::getitem_next(range) "
-      "(without 'length', 'stride', and 'first')");
+      std::string("undefined operation: NumpyArray::getitem_next(range) "
+                  "(without 'length', 'stride', and 'first')")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -3603,8 +3723,9 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: NumpyArray::getitem_next(array) "
-      "(without 'length','stride', and 'first')");
+      std::string("undefined operation: NumpyArray::getitem_next(array) "
+                  "(without 'length','stride', and 'first')")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -3612,8 +3733,9 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: NumpyArray::getitem_next(field) "
-      "(without 'length', 'stride', and 'first')");
+      std::string("undefined operation: NumpyArray::getitem_next(field) "
+                  "(without 'length', 'stride', and 'first')")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -3621,8 +3743,9 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: NumpyArray::getitem_next(fields) "
-      "(without 'length', 'stride', and 'first')");
+      std::string("undefined operation: NumpyArray::getitem_next(fields) "
+                  "(without 'length', 'stride', and 'first')")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -3630,18 +3753,20 @@ namespace awkward {
                            const Slice& tail, const Index64& advanced) const {
     if (shape_.size() != 1) {
       throw std::runtime_error(
-        "undefined operation: NumpyArray::getitem_next(jagged) with "
-        "ndim != 1");
+        std::string("undefined operation: NumpyArray::getitem_next(jagged) with "
+                    "ndim != 1") + FILENAME(__LINE__));
     }
 
     if (advanced.length() != 0) {
       throw std::invalid_argument(
-        "cannot mix jagged slice with NumPy-style advanced indexing");
+        std::string("cannot mix jagged slice with NumPy-style advanced indexing")
+        + FILENAME(__LINE__));
     }
 
     throw std::invalid_argument(
       std::string("cannot slice ") + classname()
-      + std::string(" by a jagged array because it is one-dimensional"));
+      + std::string(" by a jagged array because it is one-dimensional")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -3651,12 +3776,14 @@ namespace awkward {
                                   const Slice& tail) const {
     if (ndim() == 1) {
       throw std::invalid_argument(
-        "too many jagged slice dimensions for array");
+        std::string("too many jagged slice dimensions for array")
+        + FILENAME(__LINE__));
     }
     else {
       throw std::runtime_error(
         std::string("undefined operation: NumpyArray::getitem_next_jagged("
-                    "array) for ndim == ") + std::to_string(ndim()));
+                    "array) for ndim == ") + std::to_string(ndim())
+        + FILENAME(__LINE__));
     }
   }
 
@@ -3667,12 +3794,14 @@ namespace awkward {
                                   const Slice& tail) const {
     if (ndim() == 1) {
       throw std::invalid_argument(
-        "too many jagged slice dimensions for array");
+        std::string("too many jagged slice dimensions for array")
+        + FILENAME(__LINE__));
     }
     else {
       throw std::runtime_error(
         std::string("undefined operation: NumpyArray::getitem_next_jagged("
-                    "missing) for ndim == ") + std::to_string(ndim()));
+                    "missing) for ndim == ") + std::to_string(ndim())
+        + FILENAME(__LINE__));
     }
   }
 
@@ -3683,12 +3812,14 @@ namespace awkward {
                                   const Slice& tail) const {
     if (ndim() == 1) {
       throw std::invalid_argument(
-        "too many jagged slice dimensions for array");
+        std::string("too many jagged slice dimensions for array")
+        + FILENAME(__LINE__));
     }
     else {
       throw std::runtime_error(
         std::string("undefined operation: NumpyArray::getitem_next_jagged("
-                    "jagged) for ndim == ") + std::to_string(ndim()));
+                    "jagged) for ndim == ") + std::to_string(ndim())
+        + FILENAME(__LINE__));
     }
   }
 
@@ -3846,7 +3977,8 @@ namespace awkward {
     }
     else {
       throw std::runtime_error(
-        "unrecognized slice item type for NumpyArray::getitem_bystrides");
+        std::string("unrecognized slice item type for NumpyArray::getitem_bystrides")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -3856,7 +3988,10 @@ namespace awkward {
                                 int64_t length) const {
     if (ndim() < 2) {
       util::handle_error(
-        failure("too many dimensions in slice", kSliceNone, kSliceNone),
+        failure("too many dimensions in slice",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -3865,7 +4000,7 @@ namespace awkward {
     if (i < 0) i += shape_[1];
     if (i < 0  ||  i >= shape_[1]) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at.at()),
+        failure("index out of range", kSliceNone, at.at(), FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -3904,7 +4039,10 @@ namespace awkward {
                                 int64_t length) const {
     if (ndim() < 2) {
       util::handle_error(
-        failure("too many dimensions in slice", kSliceNone, kSliceNone),
+        failure("too many dimensions in slice",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -4103,26 +4241,31 @@ namespace awkward {
              dynamic_cast<SliceField*>(head.get())) {
       throw std::invalid_argument(
         std::string("cannot slice ") + classname()
-        + std::string(" by a field name because it has no fields"));
+        + std::string(" by a field name because it has no fields")
+        + FILENAME(__LINE__));
     }
     else if (SliceFields* fields =
              dynamic_cast<SliceFields*>(head.get())) {
       throw std::invalid_argument(
         std::string("cannot slice ") + classname()
-        + std::string(" by field names because it has no fields"));
+        + std::string(" by field names because it has no fields")
+        + FILENAME(__LINE__));
     }
     else if (SliceMissing64* missing =
              dynamic_cast<SliceMissing64*>(head.get())) {
       throw std::runtime_error(
-        "undefined operation: NumpyArray::getitem_next(missing) "
-        "(defer to Content::getitem_next(missing))");
+        std::string("undefined operation: NumpyArray::getitem_next(missing) "
+                    "(defer to Content::getitem_next(missing))")
+        + FILENAME(__LINE__));
     }
     else if (SliceJagged64* jagged =
              dynamic_cast<SliceJagged64*>(head.get())) {
-      throw std::runtime_error("FIXME: NumpyArray::getitem_next(jagged)");
+      throw std::runtime_error(
+        std::string("FIXME: NumpyArray::getitem_next(jagged)") + FILENAME(__LINE__));
     }
     else {
-      throw std::runtime_error("unrecognized slice item type");
+      throw std::runtime_error(
+        std::string("unrecognized slice item type") + FILENAME(__LINE__));
     }
   }
 
@@ -4136,7 +4279,10 @@ namespace awkward {
                            bool first) const {
     if (ndim() < 2) {
       util::handle_error(
-        failure("too many dimensions in slice", kSliceNone, kSliceNone),
+        failure("too many dimensions in slice",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -4159,7 +4305,7 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < shape_[1])) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at.at()),
+        failure("index out of range", kSliceNone, at.at(), FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -4205,7 +4351,10 @@ namespace awkward {
                            bool first) const {
     if (ndim() < 2) {
       util::handle_error(
-        failure("too many dimensions in slice", kSliceNone, kSliceNone),
+        failure("too many dimensions in slice",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -4410,7 +4559,10 @@ namespace awkward {
                            bool first) const {
     if (ndim() < 2) {
       util::handle_error(
-        failure("too many dimensions in slice", kSliceNone, kSliceNone),
+        failure("too many dimensions in slice",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -4779,7 +4931,9 @@ namespace awkward {
                                 dtype);
         break;
       case util::dtype::float16:
-        throw std::runtime_error("FIXME: numbers_to_type for float16 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: numbers_to_type for float16 not implemented")
+          + FILENAME(__LINE__));
       case util::dtype::float32:
         ptr = as_type<float>(reinterpret_cast<float*>(contiguous_self.ptr().get()),
                              contiguous_self.length(),
@@ -4791,17 +4945,25 @@ namespace awkward {
                               dtype);
         break;
       case util::dtype::float128:
-        throw std::runtime_error("FIXME: numbers_to_type for float128 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: numbers_to_type for float128 not implemented")
+          + FILENAME(__LINE__));
       case util::dtype::complex64:
-        throw std::runtime_error("FIXME: values_astype for complex64 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: values_astype for complex64 not implemented")
+          + FILENAME(__LINE__));
       case util::dtype::complex128:
-        throw std::runtime_error("FIXME: numbers_to_type for complex128 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: numbers_to_type for complex128 not implemented")
+          + FILENAME(__LINE__));
       case util::dtype::complex256:
-        throw std::runtime_error("FIXME: numbers_to_type for complex256 not implemented");
+        throw std::runtime_error(
+          std::string("FIXME: numbers_to_type for complex256 not implemented")
+          + FILENAME(__LINE__));
       default:
         throw std::invalid_argument(
           std::string("cannot recast NumpyArray with format \"")
-          + format_ + std::string("\""));
+          + format_ + std::string("\"") + FILENAME(__LINE__));
       }
 
       return std::make_shared<NumpyArray>(identities,
@@ -4975,7 +5137,9 @@ namespace awkward {
       ptr = cast_to_type<uint64_t>(data, length);
       break;
     case util::dtype::float16:
-      throw std::runtime_error("FIXME: as_type for float16 not implemented");
+      throw std::runtime_error(
+        std::string("FIXME: as_type for float16 not implemented")
+        + FILENAME(__LINE__));
     case util::dtype::float32:
       ptr = cast_to_type<float>(data, length);
       break;
@@ -4983,17 +5147,25 @@ namespace awkward {
       ptr = cast_to_type<double>(data, length);
       break;
     case util::dtype::float128:
-      throw std::runtime_error("FIXME: as_type for float128 not implemented");
+      throw std::runtime_error(
+        std::string("FIXME: as_type for float128 not implemented")
+        + FILENAME(__LINE__));
     case util::dtype::complex64:
-      throw std::runtime_error("FIXME: as_type for complex64 not implemented");
+      throw std::runtime_error(
+        std::string("FIXME: as_type for complex64 not implemented")
+        + FILENAME(__LINE__));
     case util::dtype::complex128:
-      throw std::runtime_error("FIXME: as_type for complex128 not implemented");
+      throw std::runtime_error(
+        std::string("FIXME: as_type for complex128 not implemented")
+        + FILENAME(__LINE__));
     case util::dtype::complex256:
-      throw std::runtime_error("FIXME: as_type for complex256 not implemented");
+      throw std::runtime_error(
+        std::string("FIXME: as_type for complex256 not implemented")
+        + FILENAME(__LINE__));
     default:
       throw std::invalid_argument(
         std::string("cannot recast NumpyArray with format \"")
-        + format_ + std::string("\""));
+        + format_ + std::string("\"") + FILENAME(__LINE__));
     }
 
     return ptr;

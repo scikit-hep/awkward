@@ -1,5 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/IndexedArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/IndexedArray.cpp", line)
+
 #include <sstream>
 #include <type_traits>
 
@@ -53,7 +56,23 @@ namespace awkward {
   const TypePtr
   IndexedForm::type(const util::TypeStrs& typestrs) const {
     TypePtr out = content_.get()->type(typestrs);
-    out.get()->setparameters(parameters_);
+    if (out.get()->parameters().empty()  &&  !parameters_.empty()) {
+      out.get()->setparameters(parameters_);
+      if (parameter_equals("__array__", "\"categorical\"")) {
+        out.get()->setparameter("__array__", "null");
+        out.get()->setparameter("__categorical__", "true");
+      }
+    }
+    else if (!out.get()->parameters().empty()  &&  !parameters_.empty()) {
+      for (auto p : parameters_) {
+        if (p.first != std::string("__array__")) {
+          out.get()->setparameter(p.first, p.second);
+        }
+      }
+      if (parameter_equals("__array__", "\"categorical\"")) {
+        out.get()->setparameter("__categorical__", "true");
+      }
+    }
     return out;
   }
 
@@ -179,6 +198,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  IndexedForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// IndexedOptionForm
 
   IndexedOptionForm::IndexedOptionForm(bool has_identities,
@@ -202,10 +226,15 @@ namespace awkward {
 
   const TypePtr
   IndexedOptionForm::type(const util::TypeStrs& typestrs) const {
-    return std::make_shared<OptionType>(
-               parameters_,
-               util::gettypestr(parameters_, typestrs),
-               content_.get()->type(typestrs));
+    TypePtr out = std::make_shared<OptionType>(
+                    parameters_,
+                    util::gettypestr(parameters_, typestrs),
+                    content_.get()->type(typestrs));
+    if (out.get()->parameter_equals("__array__", "\"categorical\"")) {
+      out.get()->setparameter("__array__", "null");
+      out.get()->setparameter("__categorical__", "true");
+    }
+    return out;
   }
 
   void
@@ -327,6 +356,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  IndexedOptionForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// IndexedArray
 
   template <typename T, bool ISOPTION>
@@ -402,7 +436,7 @@ namespace awkward {
         std::string("mask length (") + std::to_string(mask.length())
         + std::string(") is not equal to ") + classname()
         + std::string(" length (") + std::to_string(index_.length())
-        + std::string(")"));
+        + std::string(")") + FILENAME(__LINE__));
     }
 
     Index64 nextindex(index_.length());
@@ -789,7 +823,8 @@ namespace awkward {
         util::handle_error(
           failure("content and its identities must have the same length",
                   kSliceNone,
-                  kSliceNone),
+                  kSliceNone,
+                  FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -853,7 +888,8 @@ namespace awkward {
         }
       }
       else {
-        throw std::runtime_error("unrecognized Identities specialization");
+        throw std::runtime_error(
+          std::string("unrecognized Identities specialization") + FILENAME(__LINE__));
       }
     }
     identities_ = identities;
@@ -1022,7 +1058,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < index_.length()) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -1043,7 +1082,7 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < index_.length())) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -1060,7 +1099,7 @@ namespace awkward {
       }
       else {
         util::handle_error(
-          failure("index[i] < 0", kSliceNone, at),
+          failure("index[i] < 0", kSliceNone, at, FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -1068,7 +1107,10 @@ namespace awkward {
     int64_t lencontent = content_.get()->length();
     if (index >= lencontent) {
       util::handle_error(
-        failure("index[i] >= len(content)", kSliceNone, at),
+        failure("index[i] >= len(content)",
+                kSliceNone,
+                at,
+                FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -1086,7 +1128,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
       util::handle_error(
-        failure("index out of range", kSliceNone, stop),
+        failure("index out of range",
+                kSliceNone,
+                stop,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -1191,7 +1236,8 @@ namespace awkward {
       return Content::getitem_next(*missing, tail, advanced);
     }
     else {
-      throw std::runtime_error("unrecognized slice type");
+      throw std::runtime_error(
+        std::string("unrecognized slice type") + FILENAME(__LINE__));
     }
   }
 
@@ -1262,7 +1308,8 @@ namespace awkward {
     else {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string(err.str)
-              + std::string(" at i=") + std::to_string(err.identity));
+              + std::string(" at i=") + std::to_string(err.identity)
+              + std::string(err.filename == nullptr ? "" : err.filename));
     }
   }
 
@@ -1306,7 +1353,8 @@ namespace awkward {
                                                      int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
-      throw std::invalid_argument("axis=0 not allowed for flatten");
+      throw std::invalid_argument(
+        std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
     }
     else if (ISOPTION) {
       int64_t numnull;
@@ -1455,7 +1503,8 @@ namespace awkward {
       util::handle_error(err2, classname(), identities_.get());
     }
     else {
-      throw std::runtime_error("unrecognized IndexedArray specialization");
+      throw std::runtime_error(
+        std::string("unrecognized IndexedArray specialization") + FILENAME(__LINE__));
     }
 
     return std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
@@ -1527,7 +1576,8 @@ namespace awkward {
       util::handle_error(err, classname(), identities_.get());
     }
     else {
-      throw std::runtime_error("unrecognized IndexedArray specialization");
+      throw std::runtime_error(
+        std::string("unrecognized IndexedArray specialization") + FILENAME(__LINE__));
     }
 
     ContentPtr replaced_other = other;
@@ -1719,7 +1769,7 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("fillna value length (")
         + std::to_string(value.get()->length())
-        + std::string(") is not equal to 1"));
+        + std::string(") is not equal to 1") + FILENAME(__LINE__));
     }
     if (ISOPTION) {
       ContentPtrVec contents;
@@ -1838,6 +1888,7 @@ namespace awkward {
   IndexedArrayOf<T, ISOPTION>::reduce_next(const Reducer& reducer,
                                            int64_t negaxis,
                                            const Index64& starts,
+                                           const Index64& shifts,
                                            const Index64& parents,
                                            int64_t outlength,
                                            bool mask,
@@ -1863,16 +1914,44 @@ namespace awkward {
       index_.length());
     util::handle_error(err2, classname(), identities_.get());
 
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    bool make_shifts = (isoption()  &&
+                        reducer.returns_positions()  &&
+                        !branchdepth.first  && negaxis == branchdepth.second);
+
+    Index64 nextshifts(make_shifts ? index_.length() - numnull : 0);
+    if (make_shifts) {
+      if (shifts.length() == 0) {
+        struct Error err3 =
+            kernel::IndexedArray_reduce_next_nonlocal_nextshifts_64<T>(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          index_.data(),
+          index_.length());
+        util::handle_error(err3, classname(), identities_.get());
+      }
+      else {
+        struct Error err3 =
+            kernel::IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64<T>(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          index_.data(),
+          index_.length(),
+          shifts.data());
+        util::handle_error(err3, classname(), identities_.get());
+      }
+    }
+
     ContentPtr next = content_.get()->carry(nextcarry, false);
     ContentPtr out = next.get()->reduce_next(reducer,
                                              negaxis,
                                              starts,
+                                             nextshifts,
                                              nextparents,
                                              outlength,
                                              mask,
                                              keepdims);
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       return out;
     }
@@ -1887,15 +1966,16 @@ namespace awkward {
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(
             std::string("reduce_next with unbranching depth > negaxis expects a "
-            "ListOffsetArray64 whose offsets start at zero "));
+                        "ListOffsetArray64 whose offsets start at zero ")
+            + FILENAME(__LINE__));
         }
-        struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
+        struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
           starts.length(),
           outindex.length());
-        util::handle_error(err3, classname(), identities_.get());
+        util::handle_error(err4, classname(), identities_.get());
 
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
@@ -1910,7 +1990,8 @@ namespace awkward {
         throw std::runtime_error(
           std::string("reduce_next with unbranching depth > negaxis is only "
                       "expected to return RegularArray or ListOffsetArray64; "
-                      "instead, it returned ") + out.get()->classname());
+                      "instead, it returned ") + out.get()->classname()
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1954,7 +2035,8 @@ namespace awkward {
     int64_t axis,
     int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1") + FILENAME(__LINE__));
     }
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
@@ -2060,8 +2142,9 @@ namespace awkward {
         Index64 outoffsets(starts.length() + 1);
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(
-            "sort_next with unbranching depth > negaxis expects a "
-            "ListOffsetArray64 whose offsets start at zero");
+            std::string("sort_next with unbranching depth > negaxis expects a "
+                        "ListOffsetArray64 whose offsets start at zero")
+            + FILENAME(__LINE__));
         }
         struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
@@ -2085,7 +2168,8 @@ namespace awkward {
         throw std::runtime_error(
           std::string("sort_next with unbranching depth > negaxis is only "
                       "expected to return RegularArray or ListOffsetArray64; "
-                      "instead, it returned ") + out.get()->classname());
+                      "instead, it returned ") + out.get()->classname()
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2161,8 +2245,9 @@ namespace awkward {
         Index64 outoffsets(starts.length() + 1);
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(
-              "argsort_next with unbranching depth > negaxis expects a "
-              "ListOffsetArray64 whose offsets start at zero");
+            std::string("argsort_next with unbranching depth > negaxis expects a "
+                        "ListOffsetArray64 whose offsets start at zero")
+            + FILENAME(__LINE__));
         }
         struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
@@ -2185,8 +2270,9 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("argsort_next with unbranching depth > negaxis is only "
-                "expected to return RegularArray or ListOffsetArray64; "
-                "instead, it returned ") + out.get()->classname());
+                      "expected to return RegularArray or ListOffsetArray64; "
+                      "instead, it returned ") + out.get()->classname()
+          + FILENAME(__LINE__));
       }
     }
 
@@ -2200,7 +2286,8 @@ namespace awkward {
                                          const Slice& tail,
                                          const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: IndexedArray::getitem_next(at)");
+      std::string("undefined operation: IndexedArray::getitem_next(at)")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, bool ISOPTION>
@@ -2209,7 +2296,8 @@ namespace awkward {
                                             const Slice& tail,
                                             const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: IndexedArray::getitem_next(range)");
+      std::string("undefined operation: IndexedArray::getitem_next(range)")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, bool ISOPTION>
@@ -2218,7 +2306,8 @@ namespace awkward {
                                             const Slice& tail,
                                             const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: IndexedArray::getitem_next(array)");
+      std::string("undefined operation: IndexedArray::getitem_next(array)")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, bool ISOPTION>
@@ -2227,7 +2316,8 @@ namespace awkward {
                                             const Slice& tail,
                                             const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: IndexedArray::getitem_next(jagged)");
+      std::string("undefined operation: IndexedArray::getitem_next(jagged)")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, bool ISOPTION>
@@ -2378,10 +2468,10 @@ namespace awkward {
 
   // IndexedArrayOf<int64_t, true> has to be first, or ld on darwin
   // will hide the typeinfo symbol
-  template class EXPORT_SYMBOL IndexedArrayOf<int64_t, true>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<int64_t, true>;
 
-  template class EXPORT_SYMBOL IndexedArrayOf<int32_t, false>;
-  template class EXPORT_SYMBOL IndexedArrayOf<uint32_t, false>;
-  template class EXPORT_SYMBOL IndexedArrayOf<int64_t, false>;
-  template class EXPORT_SYMBOL IndexedArrayOf<int32_t, true>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<int32_t, false>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<uint32_t, false>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<int64_t, false>;
+  template class EXPORT_TEMPLATE_INST IndexedArrayOf<int32_t, true>;
 }

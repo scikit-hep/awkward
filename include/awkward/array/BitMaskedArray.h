@@ -21,7 +21,7 @@ namespace awkward {
   /// @class BitMaskedForm
   ///
   /// @brief Form describing BitMaskedArray.
-  class EXPORT_SYMBOL BitMaskedForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL BitMaskedForm: public Form {
   public:
     /// @brief Creates a BitMaskedForm. See BitMaskedArray for documentation.
     BitMaskedForm(bool has_identities,
@@ -90,6 +90,9 @@ namespace awkward {
             bool check_form_key,
             bool compatibility_check) const override;
 
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   private:
     Index::Form mask_;
     const FormPtr content_;
@@ -103,7 +106,7 @@ namespace awkward {
   /// over its #content.
   ///
   /// See #BitMaskedArray for the meaning of each parameter.
-  class EXPORT_SYMBOL BitMaskedArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL BitMaskedArray: public Content {
   public:
     /// @brief Creates an BitMaskedArray from a full set of parameters.
     ///
@@ -341,6 +344,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,

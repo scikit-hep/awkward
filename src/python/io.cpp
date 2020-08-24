@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/io.cpp", line)
+
 #include <string>
 
 #include "awkward/Content.h"
@@ -54,7 +56,8 @@ make_fromjson(py::module& m, const std::string& name) {
 #endif
         throw std::invalid_argument(
           std::string("file \"") + source
-          + std::string("\" could not be opened for reading"));
+          + std::string("\" could not be opened for reading")
+          + FILENAME(__LINE__));
       }
       std::shared_ptr<ak::Content> out(nullptr);
       try {

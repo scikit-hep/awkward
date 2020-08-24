@@ -164,4 +164,4 @@ def test_size():
     assert numpy.size(numpy.arange(2*3*5).reshape(2, 3, 5), 2) == 5
     with pytest.raises(ValueError) as err:
         awkward1.size(awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5).tolist(), check_valid=True))
-    assert str(err.value) == "ak.size is ambiguous due to variable-length arrays (try ak.flatten to remove structure or ak.to_numpy to force regularity, if possible)"
+    assert str(err.value).startswith("ak.size is ambiguous due to variable-length arrays (try ak.flatten to remove structure or ak.to_numpy to force regularity, if possible)")

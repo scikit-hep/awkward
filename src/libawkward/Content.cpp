@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/Content.cpp", line)
+
 #include <sstream>
 
 #include "rapidjson/document.h"
@@ -48,8 +50,9 @@ namespace awkward {
       }
       else {
         throw std::invalid_argument(
-          std::string("cannot convert NumPy bool dtype with itemsize ") +
-          std::to_string(itemsize) + std::string(" into a NumpyForm"));
+          std::string("cannot convert NumPy bool dtype with itemsize ")
+          + std::to_string(itemsize) + std::string(" into a NumpyForm")
+          + FILENAME(__LINE__));
       }
     case 'i':
       switch (itemsize) {
@@ -91,8 +94,9 @@ namespace awkward {
                  util::dtype::int64);
       default:
         throw std::invalid_argument(
-          std::string("cannot convert NumPy int dtype with itemsize ") +
-          std::to_string(itemsize) + std::string(" into a NumpyForm"));
+          std::string("cannot convert NumPy int dtype with itemsize ")
+          + std::to_string(itemsize) + std::string(" into a NumpyForm")
+          + FILENAME(__LINE__));
       }
     case 'u':
       switch (itemsize) {
@@ -134,8 +138,9 @@ namespace awkward {
                  util::dtype::uint64);
       default:
         throw std::invalid_argument(
-          std::string("cannot convert NumPy int dtype with itemsize ") +
-          std::to_string(itemsize) + std::string(" into a NumpyForm"));
+          std::string("cannot convert NumPy int dtype with itemsize ")
+          + std::to_string(itemsize) + std::string(" into a NumpyForm")
+          + FILENAME(__LINE__));
       }
     case 'f':
       switch (itemsize) {
@@ -177,8 +182,9 @@ namespace awkward {
                  util::dtype::float128);
       default:
         throw std::invalid_argument(
-          std::string("cannot convert NumPy floating-point dtype with itemsize ") +
-          std::to_string(itemsize) + std::string(" into a NumpyForm"));
+          std::string("cannot convert NumPy floating-point dtype with itemsize ")
+          + std::to_string(itemsize) + std::string(" into a NumpyForm")
+          + FILENAME(__LINE__));
       }
 
     case 'c':
@@ -212,8 +218,9 @@ namespace awkward {
                  util::dtype::complex256);
       default:
         throw std::invalid_argument(
-          std::string("cannot convert NumPy complex dtype with itemsize ") +
-          std::to_string(itemsize) + std::string(" into a NumpyForm"));
+          std::string("cannot convert NumPy complex dtype with itemsize ")
+          + std::to_string(itemsize) + std::string(" into a NumpyForm")
+          + FILENAME(__LINE__));
       }
 
     // case 'M': handle datetime64
@@ -221,8 +228,9 @@ namespace awkward {
 
     default:
       throw std::invalid_argument(
-        std::string("cannot convert NumPy dtype with kind ") +
-        std::string(1, kind) + std::string(" into a NumpyForm"));
+        std::string("cannot convert NumPy dtype with kind ")
+        + std::string(1, kind) + std::string(" into a NumpyForm")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -254,7 +262,8 @@ namespace awkward {
           h = json["has_identities"].GetBool();
         }
         else {
-          throw std::invalid_argument("'has_identities' must be boolean");
+          throw std::invalid_argument(
+            std::string("'has_identities' must be boolean") + FILENAME(__LINE__));
         }
       }
 
@@ -269,7 +278,8 @@ namespace awkward {
           }
         }
         else {
-          throw std::invalid_argument("'parameters' must be a JSON object");
+          throw std::invalid_argument(
+            std::string("'parameters' must be a JSON object") + FILENAME(__LINE__));
         }
       }
 
@@ -280,7 +290,8 @@ namespace awkward {
           f = std::make_shared<std::string>(json["form_key"].GetString());
         }
         else {
-          throw std::invalid_argument("'form_key' must be null or a string");
+          throw std::invalid_argument(
+            std::string("'form_key' must be null or a string") + FILENAME(__LINE__));
         }
       }
 
@@ -308,8 +319,9 @@ namespace awkward {
           dtype = util::format_to_dtype(format, itemsize);
         }
         else {
-          throw std::invalid_argument("NumpyForm must have a 'primitive' "
-                                      "field or 'format' and 'itemsize'");
+          throw std::invalid_argument(
+            std::string("NumpyForm must have a 'primitive' field or 'format' "
+                        "and 'itemsize'") + FILENAME(__LINE__));
         }
         std::vector<int64_t> s;
         if (json.HasMember("inner_shape")  &&  json["inner_shape"].IsArray()) {
@@ -318,8 +330,9 @@ namespace awkward {
               s.push_back(x.GetInt64());
             }
             else {
-              throw std::invalid_argument("NumpyForm 'inner_shape' must only "
-                                          "contain integers");
+              throw std::invalid_argument(
+                std::string("NumpyForm 'inner_shape' must only contain integers")
+                + FILENAME(__LINE__));
             }
           }
         }
@@ -342,8 +355,9 @@ namespace awkward {
           }
         }
         else {
-          throw std::invalid_argument("RecordArray 'contents' must be a JSON "
-                                      "list or a JSON object");
+          throw std::invalid_argument(
+            std::string("RecordArray 'contents' must be a JSON list or a "
+                        "JSON object") + FILENAME(__LINE__));
         }
         return std::make_shared<RecordForm>(h, p, f, recordlookup, contents);
       }
@@ -360,18 +374,19 @@ namespace awkward {
           Index::Form tmp = Index::str2form(json["offsets"].GetString());
           if (offsets != Index::Form::kNumIndexForm  &&  offsets != tmp) {
             throw std::invalid_argument(
-                  cls + std::string(" has conflicting 'offsets' type: ")
-                      + json["offsets"].GetString());
+              cls + std::string(" has conflicting 'offsets' type: ")
+              + json["offsets"].GetString() + FILENAME(__LINE__));
           }
           offsets = tmp;
         }
         if (offsets == Index::Form::kNumIndexForm) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing an 'offsets' specification"));
+            cls + std::string(" is missing an 'offsets' specification")
+            + FILENAME(__LINE__));
         }
         if (!json.HasMember("content")) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'content'"));
+            cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
         FormPtr content = fromjson_part(json["content"]);
         return std::make_shared<ListOffsetForm>(h, p, f, offsets, content);
@@ -393,8 +408,8 @@ namespace awkward {
           Index::Form tmp = Index::str2form(json["starts"].GetString());
           if (starts != Index::Form::kNumIndexForm  &&  starts != tmp) {
             throw std::invalid_argument(
-                  cls + std::string(" has conflicting 'starts' type: ")
-                      + json["starts"].GetString());
+              cls + std::string(" has conflicting 'starts' type: ")
+              + json["starts"].GetString() + FILENAME(__LINE__));
           }
           starts = tmp;
         }
@@ -402,22 +417,25 @@ namespace awkward {
           Index::Form tmp = Index::str2form(json["stops"].GetString());
           if (stops != Index::Form::kNumIndexForm  &&  stops != tmp) {
             throw std::invalid_argument(
-                  cls + std::string(" has conflicting 'stops' type: ")
-                      + json["stops"].GetString());
+              cls + std::string(" has conflicting 'stops' type: ")
+              + json["stops"].GetString() + FILENAME(__LINE__));
           }
           stops = tmp;
         }
         if (starts == Index::Form::kNumIndexForm) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing a 'starts' specification"));
+            cls + std::string(" is missing a 'starts' specification")
+            + FILENAME(__LINE__));
         }
         if (stops == Index::Form::kNumIndexForm) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing a 'stops' specification"));
+            cls + std::string(" is missing a 'stops' specification")
+            + FILENAME(__LINE__));
         }
         if (!json.HasMember("content")) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'content'"));
+            cls + std::string(" is missing its 'content'")
+            + FILENAME(__LINE__));
         }
         FormPtr content = fromjson_part(json["content"]);
         return std::make_shared<ListForm>(h, p, f, starts, stops, content);
@@ -426,12 +444,12 @@ namespace awkward {
       if (cls == std::string("RegularArray")) {
         if (!json.HasMember("content")) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'content'"));
+            cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
         FormPtr content = fromjson_part(json["content"]);
         if (!json.HasMember("size")  ||  !json["size"].IsInt()) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'size'"));
+            cls + std::string(" is missing its 'size'") + FILENAME(__LINE__));
         }
         int64_t size = json["size"].GetInt64();
         return std::make_shared<RegularForm>(h, p, f, content, size);
@@ -447,18 +465,19 @@ namespace awkward {
           Index::Form tmp = Index::str2form(json["index"].GetString());
           if (index != Index::Form::kNumIndexForm  &&  index != tmp) {
             throw std::invalid_argument(
-                  cls + std::string(" has conflicting 'index' type: ")
-                      + json["index"].GetString());
+              cls + std::string(" has conflicting 'index' type: ")
+              + json["index"].GetString() + FILENAME(__LINE__));
           }
           index = tmp;
         }
         if (index == Index::Form::kNumIndexForm) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing an 'index' specification"));
+            cls + std::string(" is missing an 'index' specification")
+            + FILENAME(__LINE__));
         }
         if (!json.HasMember("content")) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'content'"));
+            cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
         FormPtr content = fromjson_part(json["content"]);
         return std::make_shared<IndexedOptionForm>(h, p, f, index, content);
@@ -476,18 +495,19 @@ namespace awkward {
           Index::Form tmp = Index::str2form(json["index"].GetString());
           if (index != Index::Form::kNumIndexForm  &&  index != tmp) {
             throw std::invalid_argument(
-                  cls + std::string(" has conflicting 'index' type: ")
-                      + json["index"].GetString());
+              cls + std::string(" has conflicting 'index' type: ")
+              + json["index"].GetString() + FILENAME(__LINE__));
           }
           index = tmp;
         }
         if (index == Index::Form::kNumIndexForm) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing an 'index' specification"));
+            cls + std::string(" is missing an 'index' specification")
+             + FILENAME(__LINE__));
         }
         if (!json.HasMember("content")) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'content'"));
+            cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
         FormPtr content = fromjson_part(json["content"]);
         return std::make_shared<IndexedForm>(h, p, f, index, content);
@@ -502,23 +522,24 @@ namespace awkward {
           Index::Form tmp = Index::str2form(json["mask"].GetString());
           if (mask != Index::Form::kNumIndexForm  &&  mask != tmp) {
             throw std::invalid_argument(
-                  cls + std::string(" has conflicting 'mask' type: ")
-                      + json["mask"].GetString());
+              cls + std::string(" has conflicting 'mask' type: ")
+              + json["mask"].GetString() + FILENAME(__LINE__));
           }
           mask = tmp;
         }
         if (mask == Index::Form::kNumIndexForm) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing a 'mask' specification"));
+            cls + std::string(" is missing a 'mask' specification")
+             + FILENAME(__LINE__));
         }
         if (!json.HasMember("content")) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'content'"));
+            cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
         FormPtr content = fromjson_part(json["content"]);
         if (!json.HasMember("valid_when")  ||  !json["valid_when"].IsBool()) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'valid_when'"));
+            cls + std::string(" is missing its 'valid_when'") + FILENAME(__LINE__));
         }
         bool valid_when = json["valid_when"].GetBool();
         return std::make_shared<ByteMaskedForm>(h, p, f, mask, content,
@@ -534,28 +555,32 @@ namespace awkward {
           Index::Form tmp = Index::str2form(json["mask"].GetString());
           if (mask != Index::Form::kNumIndexForm  &&  mask != tmp) {
             throw std::invalid_argument(
-                  cls + std::string(" has conflicting 'mask' type: ")
-                      + json["mask"].GetString());
+              cls + std::string(" has conflicting 'mask' type: ")
+              + json["mask"].GetString() + FILENAME(__LINE__));
           }
           mask = tmp;
         }
         if (mask == Index::Form::kNumIndexForm) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing a 'mask' specification"));
+            cls + std::string(" is missing a 'mask' specification")
+            + FILENAME(__LINE__));
         }
         if (!json.HasMember("content")) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'content'"));
+            cls + std::string(" is missing its 'content'")
+            + FILENAME(__LINE__));
         }
         FormPtr content = fromjson_part(json["content"]);
         if (!json.HasMember("valid_when")  ||  !json["valid_when"].IsBool()) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'valid_when'"));
+            cls + std::string(" is missing its 'valid_when'")
+            + FILENAME(__LINE__));
         }
         bool valid_when = json["valid_when"].GetBool();
         if (!json.HasMember("lsb_order")  ||  !json["lsb_order"].IsBool()) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'lsb_order'"));
+            cls + std::string(" is missing its 'lsb_order'")
+            + FILENAME(__LINE__));
         }
         bool lsb_order = json["lsb_order"].GetBool();
         return std::make_shared<BitMaskedForm>(h, p, f, mask, content,
@@ -565,7 +590,7 @@ namespace awkward {
       if (cls == std::string("UnmaskedArray")) {
         if (!json.HasMember("content")) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'content'"));
+            cls + std::string(" is missing its 'content'") + FILENAME(__LINE__));
         }
         FormPtr content = fromjson_part(json["content"]);
         return std::make_shared<UnmaskedForm>(h, p, f, content);
@@ -583,8 +608,8 @@ namespace awkward {
           Index::Form tmp = Index::str2form(json["tags"].GetString());
           if (tags != Index::Form::kNumIndexForm  &&  tags != tmp) {
             throw std::invalid_argument(
-                  cls + std::string(" has conflicting 'tags' type: ")
-                      + json["tags"].GetString());
+              cls + std::string(" has conflicting 'tags' type: ")
+              + json["tags"].GetString() + FILENAME(__LINE__));
           }
           tags = tmp;
         }
@@ -596,18 +621,20 @@ namespace awkward {
           Index::Form tmp = Index::str2form(json["index"].GetString());
           if (index != Index::Form::kNumIndexForm  &&  index != tmp) {
             throw std::invalid_argument(
-                  cls + std::string(" has conflicting 'index' type: ")
-                      + json["index"].GetString());
+              cls + std::string(" has conflicting 'index' type: ")
+              + json["index"].GetString() + FILENAME(__LINE__));
           }
           index = tmp;
         }
         if (tags == Index::Form::kNumIndexForm) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing a 'tags' specification"));
+            cls + std::string(" is missing a 'tags' specification")
+            + FILENAME(__LINE__));
         }
         if (index == Index::Form::kNumIndexForm) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing an 'index' specification"));
+            cls + std::string(" is missing an 'index' specification")
+            + FILENAME(__LINE__));
         }
         std::vector<FormPtr> contents;
         if (json.HasMember("contents")  &&  json["contents"].IsArray()) {
@@ -617,7 +644,8 @@ namespace awkward {
         }
         else {
           throw std::invalid_argument(
-                  cls + std::string(" 'contents' must be a JSON list"));
+            cls + std::string(" 'contents' must be a JSON list")
+            + FILENAME(__LINE__));
         }
         return std::make_shared<UnionForm>(h, p, f, tags, index, contents);
       }
@@ -629,7 +657,7 @@ namespace awkward {
       if (cls == std::string("VirtualArray")) {
         if (!json.HasMember("form")) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'form'"));
+            cls + std::string(" is missing its 'form'") + FILENAME(__LINE__));
         }
         FormPtr form(nullptr);
         if (!json["form"].IsNull()) {
@@ -637,7 +665,7 @@ namespace awkward {
         }
         if (!json.HasMember("has_length")  ||  !json["has_length"].IsBool()) {
           throw std::invalid_argument(
-                  cls + std::string(" is missing its 'has_length'"));
+            cls + std::string(" is missing its 'has_length'") + FILENAME(__LINE__));
         }
         bool has_length = json["has_length"].GetBool();
         return std::make_shared<VirtualForm>(h, p, f, form, has_length);
@@ -649,8 +677,8 @@ namespace awkward {
     rj::PrettyWriter<rj::StringBuffer> writer(stringbuffer);
     json.Accept(writer);
     throw std::invalid_argument(
-              std::string("JSON cannot be recognized as a Form:\n\n")
-              + stringbuffer.GetString());
+            std::string("JSON cannot be recognized as a Form:\n\n")
+            + stringbuffer.GetString() + FILENAME(__LINE__));
   }
 
   FormPtr
@@ -871,16 +899,18 @@ namespace awkward {
     if (branch) {
       if (negaxis <= 0) {
         throw std::invalid_argument(
-        "cannot use non-negative axis on a nested list structure "
-        "of variable depth (negative axis counts from the leaves of the tree; "
-        "non-negative from the root)");
+          std::string("cannot use non-negative axis on a nested list structure "
+                      "of variable depth (negative axis counts from the leaves "
+                      "of the tree; non-negative from the root)")
+          + FILENAME(__LINE__));
       }
       if (negaxis > depth) {
         throw std::invalid_argument(
           std::string("cannot use axis=") + std::to_string(axis)
           + std::string(" on a nested list structure that splits into "
                         "different depths, the minimum of which is depth=")
-          + std::to_string(depth) + std::string(" from the leaves"));
+          + std::to_string(depth) + std::string(" from the leaves")
+          + FILENAME(__LINE__));
       }
     }
     else {
@@ -892,12 +922,14 @@ namespace awkward {
           std::string("axis=") + std::to_string(axis)
           + std::string(" exceeds the depth of the nested list structure "
                         "(which is ")
-          + std::to_string(depth) + std::string(")"));
+          + std::to_string(depth) + std::string(")") + FILENAME(__LINE__));
       }
     }
 
     Index64 starts(1);
     starts.setitem_at_nowrap(0, 0);
+
+    Index64 shifts(0);
 
     Index64 parents(length());
     struct Error err = kernel::content_reduce_zeroparents_64(
@@ -909,6 +941,7 @@ namespace awkward {
     ContentPtr next = reduce_next(reducer,
                                   negaxis,
                                   starts,
+                                  shifts,
                                   parents,
                                   1,
                                   mask,
@@ -925,15 +958,19 @@ namespace awkward {
 
     if (branch) {
       if (negaxis <= 0) {
-        throw std::invalid_argument("cannot use non-negative axis on a nested "
-        "list structure of variable depth (negative axis counts from "
-        "the leaves of the tree; non-negative from the root)");
+        throw std::invalid_argument(
+          std::string("cannot use non-negative axis on a nested list structure "
+                      "of variable depth (negative axis counts from the leaves "
+                      "of the tree; non-negative from the root)")
+          + FILENAME(__LINE__));
       }
       if (negaxis > depth) {
-        throw std::invalid_argument(std::string("cannot use axis=") +
-        std::to_string(axis) + std::string(" on a nested list structure "
-        "that splits into different depths, the minimum of which is depth=") +
-        std::to_string(depth) + std::string(" from the leaves"));
+        throw std::invalid_argument(
+          std::string("cannot use axis=") + std::to_string(axis)
+          + std::string(" on a nested list structure that splits into different "
+                        "depths, the minimum of which is depth=")
+          + std::to_string(depth) + std::string(" from the leaves")
+          + FILENAME(__LINE__));
       }
     }
     else {
@@ -941,10 +978,11 @@ namespace awkward {
         negaxis += depth;
       }
       if (!(0 < negaxis  &&  negaxis <= depth)) {
-        throw std::invalid_argument(std::string("axis=") +
+        throw std::invalid_argument(
+          std::string("axis=") +
         std::to_string(axis) + std::string(" exceeds the depth of the nested "
-        "list structure (which is ") + std::to_string(depth) +
-        std::string(")"));
+                                           "list structure (which is ")
+          + std::to_string(depth) + std::string(")") + FILENAME(__LINE__));
       }
     }
 
@@ -979,16 +1017,18 @@ namespace awkward {
     if (branch) {
       if (negaxis <= 0) {
         throw std::invalid_argument(
-          "cannot use non-negative axis on a nested list structure "
-          "of variable depth (negative axis counts from the leaves of the "
-          "tree; non-negative from the root)");
+          std::string("cannot use non-negative axis on a nested list structure "
+                      "of variable depth (negative axis counts from the leaves "
+                      "of the tree; non-negative from the root)")
+          + FILENAME(__LINE__));
       }
       if (negaxis > depth) {
         throw std::invalid_argument(
           std::string("cannot use axis=") + std::to_string(axis)
           + std::string(" on a nested list structure that splits into "
                         "different depths, the minimum of which is depth=")
-          + std::to_string(depth) + std::string(" from the leaves"));
+          + std::to_string(depth) + std::string(" from the leaves")
+          + FILENAME(__LINE__));
       }
     }
     else {
@@ -1000,7 +1040,8 @@ namespace awkward {
           std::string("axis=") + std::to_string(axis)
           + std::string(" exceeds the depth of the nested list structure "
                         "(which is ")
-          + std::to_string(depth) + std::string(")"));
+          + std::to_string(depth) + std::string(")")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1283,7 +1324,8 @@ namespace awkward {
       return getitem_next(*jagged, tail, advanced);
     }
     else {
-      throw std::runtime_error("unrecognized slice type");
+      throw std::runtime_error(
+        std::string("unrecognized slice type") + FILENAME(__LINE__));
     }
   }
 
@@ -1306,7 +1348,8 @@ namespace awkward {
     }
     else {
       throw std::runtime_error(
-        "unexpected slice type for getitem_next_jagged");
+        std::string("unexpected slice type for getitem_next_jagged")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -1328,8 +1371,8 @@ namespace awkward {
     else if (mindepth - 1 == tail.dimlength()  ||
              maxdepth - 1 == tail.dimlength()) {
       throw std::invalid_argument(
-        "ellipsis (...) can't be used on a data structure of "
-        "different depths");
+        std::string("ellipsis (...) can't be used on a data structure of "
+                    "different depths") + FILENAME(__LINE__));
     }
     else {
       std::vector<SliceItemPtr> tailitems = tail.items();
@@ -1414,16 +1457,17 @@ namespace awkward {
         dynamic_cast<SliceJagged64*>(missing.content().get());
     if (jagged == nullptr) {
       throw std::runtime_error(
-          "Logic error: calling getitem_next_missing_jagged with bad slice type");
+        std::string("Logic error: calling getitem_next_missing_jagged with bad "
+                    "slice type") + FILENAME(__LINE__));
     }
     const Index64 index = missing.index();
     ContentPtr content = that.get()->getitem_at_nowrap(0);
     if (content.get()->length() < index.length()) {
       throw std::invalid_argument(
-          std::string("cannot fit masked jagged slice with length ") +
-          std::to_string(index.length()) + std::string(" into ") +
-          that.get()->classname() + std::string(" of size ") +
-          std::to_string(content.get()->length()));
+        std::string("cannot fit masked jagged slice with length ") +
+        std::to_string(index.length()) + std::string(" into ") +
+        that.get()->classname() + std::string(" of size ") +
+        std::to_string(content.get()->length()) + FILENAME(__LINE__));
     }
     Index64 outputmask(index.length());
     Index64 starts(index.length());
@@ -1450,13 +1494,16 @@ namespace awkward {
                         const Slice& tail,
                         const Index64& advanced) const {
     if (advanced.length() != 0) {
-      throw std::invalid_argument("cannot mix missing values in slice "
-                                  "with NumPy-style advanced indexing");
+      throw std::invalid_argument(
+        std::string("cannot mix missing values in slice with NumPy-style "
+                    "advanced indexing") + FILENAME(__LINE__));
     }
 
     if (dynamic_cast<SliceJagged64*>(missing.content().get())) {
       if (length() != 1) {
-        throw std::runtime_error("Reached a not-well-considered code path");
+        throw std::runtime_error(
+          std::string("Reached a not-well-considered code path")
+          + FILENAME(__LINE__));
       }
       return getitem_next_missing_jagged(missing, tail, advanced,
                                          shallow_copy());
@@ -1491,7 +1538,7 @@ namespace awkward {
           throw std::runtime_error(
             std::string("FIXME: unhandled case of SliceMissing with ")
             + std::string("RecordArray containing\n")
-            + content.get()->tostring());
+            + content.get()->tostring() + FILENAME(__LINE__));
         }
       }
       return std::make_shared<RecordArray>(Identities::none(),
@@ -1503,7 +1550,7 @@ namespace awkward {
     else {
       throw std::runtime_error(
         std::string("FIXME: unhandled case of SliceMissing with\n")
-        + next.get()->tostring());
+        + next.get()->tostring() + FILENAME(__LINE__));
     }
   }
 
@@ -1519,14 +1566,14 @@ namespace awkward {
         throw std::invalid_argument(
           std::string("axis == ") + std::to_string(axis)
                       + std::string(" exceeds the depth == ") + std::to_string(depth)
-                      + std::string(" of this array"));
+                      + std::string(" of this array") + FILENAME(__LINE__));
       }
       return posaxis;
     } else if (axis < 0  &&  mindepth + axis == 0) {
       throw std::invalid_argument(
         std::string("axis == ") + std::to_string(axis)
                     + std::string(" exceeds the min depth == ") + std::to_string(mindepth)
-                    + std::string(" of this array"));
+                    + std::string(" of this array") + FILENAME(__LINE__));
     }
     return axis;
   }

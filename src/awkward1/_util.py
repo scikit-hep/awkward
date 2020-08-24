@@ -32,6 +32,19 @@ else:
     unicode = None
 
 
+def exception_suffix(filename):
+    line = ""
+    if hasattr(sys, "_getframe"):
+        line = "#L" + str(sys._getframe(1).f_lineno)
+    filename = filename.replace("\\", "/")
+    filename = "/src/awkward1/" + filename.split("awkward1/")[1]
+    return ("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/"
+            + awkward1.__version__
+            + filename
+            + line
+            + ")")
+
+
 virtualtypes = (awkward1.layout.VirtualArray,)
 
 unknowntypes = (awkward1.layout.EmptyArray,)
@@ -46,6 +59,11 @@ uniontypes = (
     awkward1.layout.UnionArray8_32,
     awkward1.layout.UnionArray8_U32,
     awkward1.layout.UnionArray8_64,
+)
+
+indexedoptiontypes = (
+    awkward1.layout.IndexedOptionArray32,
+    awkward1.layout.IndexedOptionArray64,
 )
 
 optiontypes = (
@@ -394,7 +412,10 @@ def key2index(keys, key):
             attempt = m.group(0)
 
     if attempt is None:
-        raise ValueError("key {0} not found in record".format(repr(key)))
+        raise ValueError(
+            "key {0} not found in record".format(repr(key))
+            + exception_suffix(__file__)
+        )
     else:
         return attempt
 
@@ -441,7 +462,10 @@ def completely_flatten(array):
         return (awkward1.nplike.of(array).asarray(array),)
 
     else:
-        raise RuntimeError("cannot completely flatten: {0}".format(type(array)))
+        raise RuntimeError(
+            "cannot completely flatten: {0}".format(type(array))
+            + exception_suffix(__file__)
+        )
 
 
 def broadcast_and_apply(inputs, getfunction, behavior):
@@ -454,6 +478,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     "length {3}".format(
                         type(inputs[0]).__name__, length, type(x).__name__, len(x)
                     )
+                    + exception_suffix(__file__)
                 )
 
     def apply(inputs, depth):
@@ -543,6 +568,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                             "with UnionArray of length {1}".format(
                                 length, len(tagslist[-1])
                             )
+                            + exception_suffix(__file__)
                         )
 
             combos = nplike.stack(tagslist, axis=-1)
@@ -660,6 +686,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                                 "{0} with RegularArray of size {1}".format(
                                     x.size, maxsize
                                 )
+                                + exception_suffix(__file__)
                             )
                     else:
                         nextinputs.append(x)
@@ -732,6 +759,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                             "match:\n    {0}\n    {1}".format(
                                 ", ".join(sorted(keys)), ", ".join(sorted(x.keys()))
                             )
+                            + exception_suffix(__file__)
                         )
                     if length is None:
                         length = len(x)
@@ -739,6 +767,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                         raise ValueError(
                             "cannot broadcast RecordArray of length {0} "
                             "with RecordArray of length {1}".format(length, len(x))
+                            + exception_suffix(__file__)
                         )
                     if not x.istuple:
                         istuple = False
@@ -769,6 +798,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
         else:
             raise ValueError(
                 "cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs))
+                + exception_suffix(__file__)
             )
 
     if any(isinstance(x, awkward1.partition.PartitionedArray) for x in inputs):
@@ -1109,7 +1139,10 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         )
 
     else:
-        raise AssertionError("unrecognized Content type: {0}".format(type(layout)))
+        raise AssertionError(
+            "unrecognized Content type: {0}".format(type(layout))
+            + exception_suffix(__file__)
+        )
 
 
 def highlevel_type(layout, behavior, isarray):

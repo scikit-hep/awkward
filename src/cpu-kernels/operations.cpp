@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/operations.cpp", line)
+
 #include "awkward/kernels/operations.h"
 
 template <typename T, typename C>
@@ -138,7 +140,7 @@ ERROR awkward_IndexedArray_flatten_none2empty(
       k++;
     }
     else if (idx + 1 >= offsetslength) {
-      return failure("flattening offset out of range", i, kSliceNone);
+      return failure("flattening offset out of range", i, kSliceNone, FILENAME(__LINE__));
     }
     else {
       T count =
@@ -337,7 +339,7 @@ ERROR awkward_IndexedArray_flatten_nextcarry(
   for (int64_t i = 0;  i < lenindex;  i++) {
     C j = fromindex[i];
     if (j >= lencontent) {
-      return failure("index out of range", i, j);
+      return failure("index out of range", i, j, FILENAME(__LINE__));
     }
     else if (j >= 0) {
       tocarry[k] = j;
@@ -515,7 +517,7 @@ ERROR awkward_IndexedArray_simplify(
       toindex[i] = -1;
     }
     else if (j >= innerlength) {
-      return failure("index out of range", i, j);
+      return failure("index out of range", i, j, FILENAME(__LINE__));
     }
     else {
       toindex[i] = innerindex[j];
@@ -673,7 +675,7 @@ ERROR awkward_ListArray_compact_offsets(
     C start = fromstarts[i];
     C stop = fromstops[i];
     if (stop < start) {
-      return failure("stops[i] < starts[i]", i, kSliceNone);
+      return failure("stops[i] < starts[i]", i, kSliceNone, FILENAME(__LINE__));
     }
     tooffsets[i + 1] = tooffsets[i] + (stop - start);
   }
@@ -766,15 +768,14 @@ ERROR awkward_ListArray_broadcast_tooffsets(
     int64_t start = (int64_t)fromstarts[i];
     int64_t stop = (int64_t)fromstops[i];
     if (start != stop  &&  stop > lencontent) {
-      return failure("stops[i] > len(content)", i, stop);
+      return failure("stops[i] > len(content)", i, stop, FILENAME(__LINE__));
     }
     int64_t count = (int64_t)(fromoffsets[i + 1] - fromoffsets[i]);
     if (count < 0) {
-      return failure(
-        "broadcast's offsets must be monotonically increasing", i, kSliceNone);
+      return failure("broadcast's offsets must be monotonically increasing", i, kSliceNone, FILENAME(__LINE__));
     }
     if (stop - start != count) {
-      return failure("cannot broadcast nested list", i, kSliceNone);
+      return failure("cannot broadcast nested list", i, kSliceNone, FILENAME(__LINE__));
     }
     for (int64_t j = start;  j < stop;  j++) {
       tocarry[k] = (T)j;
@@ -837,11 +838,10 @@ ERROR awkward_RegularArray_broadcast_tooffsets(
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     int64_t count = (int64_t)(fromoffsets[i + 1] - fromoffsets[i]);
     if (count < 0) {
-      return failure(
-        "broadcast's offsets must be monotonically increasing", i, kSliceNone);
+      return failure("broadcast's offsets must be monotonically increasing", i, kSliceNone, FILENAME(__LINE__));
     }
     if (size != count) {
-      return failure("cannot broadcast nested list", i, kSliceNone);
+      return failure("cannot broadcast nested list", i, kSliceNone, FILENAME(__LINE__));
     }
   }
   return success();
@@ -865,8 +865,7 @@ ERROR awkward_RegularArray_broadcast_tooffsets_size1(
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     int64_t count = (int64_t)(fromoffsets[i + 1] - fromoffsets[i]);
     if (count < 0) {
-      return failure(
-        "broadcast's offsets must be monotonically increasing", i, kSliceNone);
+      return failure("broadcast's offsets must be monotonically increasing", i, kSliceNone, FILENAME(__LINE__));
     }
     for (int64_t j = 0;  j < count;  j++) {
       tocarry[k] = (T)i;
@@ -894,18 +893,13 @@ ERROR awkward_ListOffsetArray_toRegularArray(
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     int64_t count = (int64_t)fromoffsets[i + 1] - (int64_t)fromoffsets[i];
     if (count < 0) {
-      return failure(
-        "offsets must be monotonically increasing", i, kSliceNone);
+      return failure("offsets must be monotonically increasing", i, kSliceNone, FILENAME(__LINE__));
     }
     if (*size == -1) {
       *size = count;
     }
     else if (*size != count) {
-      return failure(
-        "cannot convert to RegularArray because subarray lengths are not "
-        "regular",
-        i,
-        kSliceNone);
+      return failure("cannot convert to RegularArray because subarray lengths are not " "regular", i, kSliceNone, FILENAME(__LINE__));
     }
   }
   if (*size == -1) {
@@ -2563,13 +2557,13 @@ ERROR awkward_ListArray_validity(
     C stop = stops[i];
     if (start != stop) {
       if (start > stop) {
-        return failure("start[i] > stop[i]", i, kSliceNone);
+        return failure("start[i] > stop[i]", i, kSliceNone, FILENAME(__LINE__));
       }
       if (start < 0) {
-        return failure("start[i] < 0", i, kSliceNone);
+        return failure("start[i] < 0", i, kSliceNone, FILENAME(__LINE__));
       }
       if (stop > lencontent) {
-        return failure("stop[i] > len(content)", i, kSliceNone);
+        return failure("stop[i] > len(content)", i, kSliceNone, FILENAME(__LINE__));
       }
     }
   }
@@ -2620,11 +2614,11 @@ ERROR awkward_IndexedArray_validity(
     C idx = index[i];
     if (!isoption) {
       if (idx < 0) {
-        return failure("index[i] < 0", i, kSliceNone);
+        return failure("index[i] < 0", i, kSliceNone, FILENAME(__LINE__));
       }
     }
     if (idx >= lencontent) {
-      return failure("index[i] >= len(content)", i, kSliceNone);
+      return failure("index[i] >= len(content)", i, kSliceNone, FILENAME(__LINE__));
     }
   }
   return success();
@@ -2674,17 +2668,17 @@ ERROR awkward_UnionArray_validity(
     T tag = tags[i];
     I idx = index[i];
     if (tag < 0) {
-      return failure("tags[i] < 0", i, kSliceNone);
+      return failure("tags[i] < 0", i, kSliceNone, FILENAME(__LINE__));
     }
     if (idx < 0) {
-      return failure("index[i] < 0", i, kSliceNone);
+      return failure("index[i] < 0", i, kSliceNone, FILENAME(__LINE__));
     }
     if (tag >= numcontents) {
-      return failure("tags[i] >= len(contents)", i, kSliceNone);
+      return failure("tags[i] >= len(contents)", i, kSliceNone, FILENAME(__LINE__));
     }
     int64_t lencontent = lencontents[tag];
     if (idx >= lencontent) {
-      return failure("index[i] >= len(content[tags[i]])", i, kSliceNone);
+      return failure("index[i] >= len(content[tags[i]])", i, kSliceNone, FILENAME(__LINE__));
     }
   }
   return success();
@@ -3307,7 +3301,7 @@ ERROR awkward_combinations(
   int64_t n,
   bool replacement,
   int64_t singlelen) {
-  return failure("FIXME: awkward_combinations", 0, kSliceNone);
+  return failure("FIXME: awkward_combinations", 0, kSliceNone, FILENAME(__LINE__));
 }
 ERROR awkward_combinations_64(
   int64_t* toindex,

@@ -18,7 +18,7 @@ namespace awkward {
   /// @class NumpyForm
   ///
   /// @brief Form describing NumpyArray.
-  class EXPORT_SYMBOL NumpyForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL NumpyForm: public Form {
   public:
     /// @brief Creates a NumpyForm. See NumpyArray for documentation.
     NumpyForm(bool has_identities,
@@ -99,6 +99,9 @@ namespace awkward {
             bool check_form_key,
             bool compatibility_check) const override;
 
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   private:
     const std::vector<int64_t> inner_shape_;
     int64_t itemsize_;
@@ -123,7 +126,7 @@ namespace awkward {
   ///  - 8-bit booleans
   ///
   ///(native endian only).
-  class EXPORT_SYMBOL NumpyArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL NumpyArray: public Content {
   public:
 
     /// @brief Creates a NumpyArray from a full set of parameters.
@@ -430,6 +433,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,

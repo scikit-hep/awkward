@@ -61,7 +61,10 @@ def mixin_class_method(ufunc, rhs=None, transpose=True):
 
     def register(method):
         if not isinstance(rhs, (set, type(None))):
-            raise ValueError("Expected a set of right-hand-side argument types")
+            raise ValueError(
+                "expected a set of right-hand-side argument types"
+                + awkward1._util.exception_suffix(__file__)
+            )
         if transpose and rhs is not None:
 
             def transposed(left, right):
@@ -74,3 +77,14 @@ def mixin_class_method(ufunc, rhs=None, transpose=True):
         return method
 
     return register
+
+
+__all__ = [
+    x
+    for x in list(globals())
+    if not x.startswith("_")
+    and x not in (
+        "absolute_import",
+        "awkward1",
+    )
+]

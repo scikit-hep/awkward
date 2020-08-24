@@ -20,7 +20,7 @@ namespace awkward {
   /// @class ByteMaskedForm
   ///
   /// @brief Form describing ByteMaskedArray.
-  class EXPORT_SYMBOL ByteMaskedForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL ByteMaskedForm: public Form {
   public:
     /// @brief Creates a ByteMaskedForm. See ByteMaskedArray for documentation.
     ByteMaskedForm(bool has_identities,
@@ -85,6 +85,9 @@ namespace awkward {
             bool check_form_key,
             bool compatibility_check) const override;
 
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   private:
     Index::Form mask_;
     const FormPtr content_;
@@ -97,7 +100,7 @@ namespace awkward {
   /// over its #content.
   ///
   /// See #ByteMaskedArray for the meaning of each parameter.
-  class EXPORT_SYMBOL ByteMaskedArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL ByteMaskedArray: public Content {
   public:
     /// @brief Creates an ByteMaskedArray from a full set of parameters.
     ///
@@ -311,6 +314,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,

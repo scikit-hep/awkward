@@ -13,6 +13,7 @@ elif platform.system() == "Darwin":
 else:
     name = "libawkward-cpu-kernels.so"
 
+CPU_KERNEL_SO = None
 try:
     CPU_KERNEL_SO = pkg_resources.resource_filename("awkward1", name)
 except ModuleNotFoundError:
@@ -24,6 +25,8 @@ except ModuleNotFoundError:
                 CPU_KERNEL_SO = os.path.join(root, filename)
                 break
 
+if CPU_KERNEL_SO is None:
+    raise Exception("Unable to find {0}.".format(name))
 lib = ctypes.CDLL(CPU_KERNEL_SO)
 
 

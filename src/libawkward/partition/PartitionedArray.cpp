@@ -1,5 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/partition/PartitionedArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/partition/PartitionedArray.cpp", line)
+
 #include "awkward/partition/IrregularlyPartitionedArray.h"
 
 #include "awkward/partition/PartitionedArray.h"
@@ -9,7 +12,8 @@ namespace awkward {
       : partitions_(partitions) {
     if (partitions_.empty()) {
       throw std::invalid_argument(
-        "PartitionedArray must have at least one partition");
+        std::string("PartitionedArray must have at least one partition")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -28,7 +32,8 @@ namespace awkward {
   const ContentPtr
   PartitionedArray::partition(int64_t partitionindex) const {
     if (!(0 <= partitionindex  &&  partitionindex < numpartitions())) {
-      throw std::invalid_argument("partitionindex out of bounds");
+      throw std::invalid_argument(
+        std::string("partitionindex out of bounds") + FILENAME(__LINE__));
     }
     return partitions_[(size_t)partitionindex];
   }
@@ -86,7 +91,7 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < length())) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         nullptr);
     }
@@ -241,7 +246,8 @@ namespace awkward {
     }
 
     else {
-      throw std::invalid_argument("slice step must not be zero");
+      throw std::invalid_argument(
+        std::string("slice step must not be zero") + FILENAME(__LINE__));
     }
 
     if (partitions.empty()) {

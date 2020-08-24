@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/forms.cpp", line)
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -21,7 +23,9 @@ make_Form(const py::handle& m, const std::string& name) {
       .def_static("fromjson", &ak::Form::fromjson)
       .def_static("from_numpy", [](const py::object& dtype) {
         if (!py::isinstance(dtype, py::module::import("numpy").attr("dtype"))) {
-          throw std::invalid_argument("Form.from_numpy requires a numpy.dtype");
+          throw std::invalid_argument(
+            std::string("Form.from_numpy requires a numpy.dtype")
+            + FILENAME(__LINE__));
         }
         std::vector<int64_t> inner_shape;
         for (auto x : dtype.attr("shape")) {

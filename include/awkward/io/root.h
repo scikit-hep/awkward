@@ -27,7 +27,7 @@ namespace awkward {
   /// deepest `std::vector`.
   /// @param format The pybind11 format string for the data type.
   /// @param options Configuration options for building an ArrayBuilder array.
-  EXPORT_SYMBOL const ContentPtr
+  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
     FromROOT_nestedvector(const Index64& byteoffsets,
                           const NumpyArray& rawdata,
                           int64_t depth,

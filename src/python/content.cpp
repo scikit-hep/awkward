@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/content.cpp", line)
+
 #include <pybind11/numpy.h>
 
 #include "awkward/python/identities.h"
@@ -161,7 +163,8 @@ box(const std::shared_ptr<ak::Content>& content) {
     return py::cast(*raw);
   }
   else {
-    throw std::runtime_error("missing boxer for Content subtype");
+    throw std::runtime_error(
+      std::string("missing boxer for Content subtype") + FILENAME(__LINE__));
   }
 }
 
@@ -179,7 +182,8 @@ box(const std::shared_ptr<ak::Identities>& identities) {
     return py::cast(*raw);
   }
   else {
-    throw std::runtime_error("missing boxer for Identities subtype");
+    throw std::runtime_error(
+      std::string("missing boxer for Identities subtype") + FILENAME(__LINE__));
   }
 }
 
@@ -188,7 +192,8 @@ unbox_content(const py::handle& obj) {
   try {
     obj.cast<ak::Record*>();
     throw std::invalid_argument(
-      "content argument must be a Content subtype (excluding Record)");
+      std::string("content argument must be a Content subtype (excluding Record)")
+      + FILENAME(__LINE__));
   }
   catch (py::cast_error err) { }
   try {
@@ -279,7 +284,9 @@ unbox_content(const py::handle& obj) {
     return obj.cast<ak::VirtualArray*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
-  throw std::invalid_argument("content argument must be a Content subtype");
+  throw std::invalid_argument(
+    std::string("content argument must be a Content subtype")
+    + FILENAME(__LINE__));
 }
 
 std::shared_ptr<ak::Identities>
@@ -292,7 +299,9 @@ unbox_identities(const py::handle& obj) {
     return obj.cast<ak::Identities64*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
-  throw std::invalid_argument("id argument must be an Identities subtype");
+  throw std::invalid_argument(
+    std::string("id argument must be an Identities subtype")
+    + FILENAME(__LINE__));
 }
 
 std::shared_ptr<ak::Identities>
@@ -398,7 +407,8 @@ toslice_part(ak::Slice& slice, py::object obj) {
       step = pystep.cast<int64_t>();
     }
     if (step == 0) {
-      throw std::invalid_argument("slice step must not be 0");
+      throw std::invalid_argument(
+        std::string("slice step must not be 0") + FILENAME(__LINE__));
     }
     slice.append(std::make_shared<ak::SliceRange>(start, stop, step));
   }
@@ -532,7 +542,8 @@ toslice_part(ak::Slice& slice, py::object obj) {
         py::array array = obj.cast<py::array>();
         if (array.ndim() == 0) {
           throw std::invalid_argument(
-            "arrays used as an index must have at least one dimension");
+            std::string("arrays used as an index must have at least one dimension")
+            + FILENAME(__LINE__));
         }
 
         py::buffer_info info = array.request();
@@ -577,7 +588,8 @@ toslice_part(ak::Slice& slice, py::object obj) {
                 ak::util::format_to_dtype(format, (int64_t)info.itemsize))  &&
               flatlen != 0) {
             throw std::invalid_argument(
-              "arrays used as an index must be a (native-endian) integer or boolean");
+              std::string("arrays used as an index must be a (native-endian) integer or boolean")
+              + FILENAME(__LINE__));
           }
 
           py::object intarray_object =
@@ -609,8 +621,9 @@ toslice_part(ak::Slice& slice, py::object obj) {
 
   else {
     throw std::invalid_argument(
-      "only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), "
-      "and integer or boolean arrays (possibly jagged) are valid indices");
+      std::string("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), "
+                  "and integer or boolean arrays (possibly jagged) are valid indices")
+      + FILENAME(__LINE__));
   }
 }
 
@@ -638,7 +651,9 @@ check_maxdecimals(const py::object& maxdecimals) {
     return maxdecimals.cast<int64_t>();
   }
   catch (py::cast_error err) {
-    throw std::invalid_argument("maxdecimals must be None or an integer");
+    throw std::invalid_argument(
+      std::string("maxdecimals must be None or an integer")
+      + FILENAME(__LINE__));
   }
 }
 
@@ -667,7 +682,8 @@ tojson_file(const T& self,
 #endif
     throw std::invalid_argument(
       std::string("file \"") + destination
-      + std::string("\" could not be opened for writing"));
+      + std::string("\" could not be opened for writing")
+      + FILENAME(__LINE__));
   }
   try {
     self.tojson(file,
@@ -766,7 +782,8 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     for (auto pair : dict) {
       if (!py::isinstance<py::str>(pair.first)) {
         throw std::invalid_argument(
-          "keys of dicts in 'fromiter' must all be strings");
+          std::string("keys of dicts in 'fromiter' must all be strings")
+          + FILENAME(__LINE__));
       }
       std::string key = pair.first.cast<std::string>();
       self.field_check(key.c_str());
@@ -804,7 +821,7 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
       std::string("cannot convert ")
       + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ")
       + obj.attr("__class__").attr("__name__").cast<std::string>()
-      + std::string(") to an array element"));
+      + std::string(") to an array element") + FILENAME(__LINE__));
   }
 }
 
@@ -938,7 +955,8 @@ identity(const T& self) {
     throw std::invalid_argument(
       self.classname()
       + std::string(" instance has no associated identities (use "
-                    "'setidentities' to assign one to the array it is in)"));
+                    "'setidentities' to assign one to the array it is in)")
+      + FILENAME(__LINE__));
   }
   ak::Identities::FieldLoc fieldloc = self.identities().get()->fieldloc();
   if (self.isscalar()) {
@@ -997,7 +1015,8 @@ dict2parameters(const py::object& in) {
     }
   }
   else {
-    throw std::invalid_argument("type parameters must be a dict (or None)");
+    throw std::invalid_argument(
+      std::string("type parameters must be a dict (or None)") + FILENAME(__LINE__));
   }
   return out;
 }
@@ -1297,7 +1316,8 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
               }
               if (n != recordlookup.get()->size()) {
                 throw std::invalid_argument(
-                  "if provided, the length of 'keys' must be 'n'");
+                  std::string("if provided, the length of 'keys' must be 'n'")
+                  + FILENAME(__LINE__));
               }
             }
             return box(self.combinations(n,
@@ -1339,7 +1359,8 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                  return box(self.copy_to(ak::kernel::lib::cuda));
                }
                else {
-                 throw std::invalid_argument("specify 'cpu' or 'cuda'");
+                 throw std::invalid_argument(
+                   std::string("specify 'cpu' or 'cuda'") + FILENAME(__LINE__));
                }
           })
     ;
@@ -1482,6 +1503,8 @@ make_ByteMaskedArray(const py::handle& m, const std::string& name) {
       .def("simplify", [](const ak::ByteMaskedArray& self) {
         return box(self.simplify_optiontype());
       })
+      .def("toIndexedOptionArray64",
+           &ak::ByteMaskedArray::toIndexedOptionArray64)
   );
 }
 
@@ -1710,12 +1733,14 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
         py::buffer_info info = array.request();
         if (info.ndim == 0) {
           throw std::invalid_argument(
-            "NumpyArray must not be scalar; try array.reshape(1)");
+            std::string("NumpyArray must not be scalar; try array.reshape(1)")
+            + FILENAME(__LINE__));
         }
         if (info.shape.size() != info.ndim  ||
             info.strides.size() != info.ndim) {
           throw std::invalid_argument(
-            "NumpyArray len(shape) != ndim or len(strides) != ndim");
+            std::string("NumpyArray len(shape) != ndim or len(strides) != ndim")
+            + FILENAME(__LINE__));
         }
 
         return ak::NumpyArray(
@@ -1938,7 +1963,8 @@ iterable_to_RecordArray(const py::iterable& contents,
     }
     if (out.size() != recordlookup.get()->size()) {
       throw std::invalid_argument(
-        "if provided, 'keys' must have the same length as 'types'");
+        std::string("if provided, 'keys' must have the same length as 'types'")
+        + FILENAME(__LINE__));
     }
   }
   if (length.is(py::none())) {
@@ -2038,7 +2064,8 @@ make_RecordArray(const py::handle& m, const std::string& name) {
               return box(self.setitem_field(mywhere, mywhat));
             }
             catch (py::cast_error err) {
-              throw std::invalid_argument("where must be None, int, or str");
+              throw std::invalid_argument(
+                std::string("where must be None, int, or str") + FILENAME(__LINE__));
             }
           }
         }
@@ -2203,8 +2230,8 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "VirtualArray 'generator' must be an ArrayGenerator or a "
-                "SliceGenerator");
+              std::string("VirtualArray 'generator' must be an ArrayGenerator or a "
+                          "SliceGenerator") + FILENAME(__LINE__));
           }
         }
         std::shared_ptr<PyArrayCache> cppcache(nullptr);
@@ -2214,7 +2241,8 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "VirtualArray 'cache' must be an ArrayCache or None");
+              std::string("VirtualArray 'cache' must be an ArrayCache or None")
+              + FILENAME(__LINE__));
           }
         }
         if (!cache_key.is(py::none())) {
@@ -2224,7 +2252,8 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "VirtualArray 'cache_key' must be a string or None");
+              std::string("VirtualArray 'cache_key' must be a string or None")
+              + FILENAME(__LINE__));
           }
           return ak::VirtualArray(
             unbox_identities_none(identities),
@@ -2258,7 +2287,8 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
         }
         else {
           throw std::invalid_argument(
-                  "VirtualArray's generator is not a Python function");
+            std::string("VirtualArray's generator is not a Python function")
+            + FILENAME(__LINE__));
         }
       })
       .def_property_readonly("cache", [](const ak::VirtualArray& self)
@@ -2273,7 +2303,8 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
         }
         else {
           throw std::invalid_argument(
-                  "VirtualArray's cache is not a Python MutableMapping");
+            std::string("VirtualArray's cache is not a Python MutableMapping")
+            + FILENAME(__LINE__));
         }
       })
       .def_property_readonly("peek_array", [](const ak::VirtualArray& self)

@@ -1,5 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/ByteMaskedArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/ByteMaskedArray.cpp", line)
+
 #include <sstream>
 #include <type_traits>
 
@@ -177,6 +180,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  ByteMaskedForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// ByteMaskedArray
 
   ByteMaskedArray::ByteMaskedArray(const IdentitiesPtr& identities,
@@ -190,7 +198,8 @@ namespace awkward {
       , valid_when_(valid_when != 0) {
     if (content.get()->length() < mask.length()) {
       throw std::invalid_argument(
-        "ByteMaskedArray content must not be shorter than its mask");
+        std::string("ByteMaskedArray content must not be shorter than its mask")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -239,7 +248,7 @@ namespace awkward {
         std::string("mask length (") + std::to_string(mask.length())
         + std::string(") is not equal to ") + classname()
         + std::string(" length (") + std::to_string(length())
-        + std::string(")"));
+        + std::string(")") + FILENAME(__LINE__));
     }
 
     Index8 nextmask(length());
@@ -326,7 +335,8 @@ namespace awkward {
         util::handle_error(
           failure("content and its identities must have the same length",
                   kSliceNone,
-                  kSliceNone),
+                  kSliceNone,
+                  FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -367,7 +377,9 @@ namespace awkward {
         content_.get()->setidentities(subidentities);
       }
       else {
-        throw std::runtime_error("unrecognized Identities specialization");
+        throw std::runtime_error(
+          std::string("unrecognized Identities specialization")
+          + FILENAME(__LINE__));
       }
     }
     identities_ = identities;
@@ -517,7 +529,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < length()) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -536,7 +551,7 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < length())) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -563,7 +578,7 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
       util::handle_error(
-        failure("index out of range", kSliceNone, stop),
+        failure("index out of range", kSliceNone, stop, FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -647,7 +662,8 @@ namespace awkward {
       return Content::getitem_next(*missing, tail, advanced);
     }
     else {
-      throw std::runtime_error("unrecognized slice type");
+      throw std::runtime_error(
+        std::string("unrecognized slice type") + FILENAME(__LINE__));
     }
   }
 
@@ -700,7 +716,14 @@ namespace awkward {
 
   const std::string
   ByteMaskedArray::validityerror(const std::string& path) const {
-    return content_.get()->validityerror(path + std::string(".content"));
+    if (content_.get()->length() < mask_.length()) {
+      return (std::string("at ") + path + std::string(" (") + classname()
+              + std::string("): ") + std::string("len(content) < len(mask)")
+              + FILENAME(__LINE__));
+    }
+    else {
+      return content_.get()->validityerror(path + std::string(".content"));
+    }
   }
 
   const ContentPtr
@@ -737,7 +760,8 @@ namespace awkward {
   ByteMaskedArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
-      throw std::invalid_argument("axis=0 not allowed for flatten");
+      throw std::invalid_argument(
+        std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
     }
     else {
       int64_t numnull;
@@ -924,6 +948,7 @@ namespace awkward {
   ByteMaskedArray::reduce_next(const Reducer& reducer,
                                int64_t negaxis,
                                const Index64& starts,
+                               const Index64& shifts,
                                const Index64& parents,
                                int64_t outlength,
                                bool mask,
@@ -933,13 +958,13 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       &numnull,
       mask_.data(),
-      length(),
+      mask_.length(),
       valid_when_);
     util::handle_error(err1, classname(), identities_.get());
 
-    Index64 nextparents(length() - numnull);
-    Index64 nextcarry(length() - numnull);
-    Index64 outindex(length());
+    Index64 nextparents(mask_.length() - numnull);
+    Index64 nextcarry(mask_.length() - numnull);
+    Index64 outindex(mask_.length());
     struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
       kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
@@ -947,20 +972,50 @@ namespace awkward {
       outindex.data(),
       mask_.data(),
       parents.data(),
-      length(),
+      mask_.length(),
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
+
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+
+    bool make_shifts = (reducer.returns_positions()  &&
+                        !branchdepth.first  && negaxis == branchdepth.second);
+
+    Index64 nextshifts(make_shifts ? mask_.length() - numnull : 0);
+    if (make_shifts) {
+      if (shifts.length() == 0) {
+        struct Error err3 =
+            kernel::ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          mask_.data(),
+          mask_.length(),
+          valid_when_);
+        util::handle_error(err3, classname(), identities_.get());
+      }
+      else {
+        struct Error err3 =
+            kernel::ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          mask_.data(),
+          mask_.length(),
+          valid_when_,
+          shifts.data());
+        util::handle_error(err3, classname(), identities_.get());
+      }
+    }
 
     ContentPtr next = content_.get()->carry(nextcarry, false);
     ContentPtr out = next.get()->reduce_next(reducer,
                                              negaxis,
                                              starts,
+                                             nextshifts,
                                              nextparents,
                                              outlength,
                                              mask,
                                              keepdims);
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       return out;
     }
@@ -974,16 +1029,17 @@ namespace awkward {
         Index64 outoffsets(starts.length() + 1);
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(
-            "reduce_next with unbranching depth > negaxis expects "
-            "a ListOffsetArray64 whose offsets start at zero");
+            std::string("reduce_next with unbranching depth > negaxis expects "
+                        "a ListOffsetArray64 whose offsets start at zero")
+            + FILENAME(__LINE__));
         }
-        struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
+        struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
           starts.length(),
           outindex.length());
-        util::handle_error(err3, classname(), identities_.get());
+        util::handle_error(err4, classname(), identities_.get());
 
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
@@ -999,7 +1055,7 @@ namespace awkward {
           std::string("reduce_next with unbranching depth > negaxis is only "
                       "expected to return RegularArray or ListOffsetArray64; "
                       "instead, it returned ")
-          + out.get()->classname());
+          + out.get()->classname() + FILENAME(__LINE__));
       }
     }
   }
@@ -1034,7 +1090,8 @@ namespace awkward {
                                 int64_t axis,
                                 int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1") + FILENAME(__LINE__));
     }
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
@@ -1115,8 +1172,9 @@ namespace awkward {
         Index64 outoffsets(starts.length() + 1);
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(
-            "sort_next with unbranching depth > negaxis expects "
-            "a ListOffsetArray64 whose offsets start at zero");
+            std::string("sort_next with unbranching depth > negaxis expects "
+                        "a ListOffsetArray64 whose offsets start at zero")
+            + FILENAME(__LINE__));
         }
         struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
@@ -1140,7 +1198,7 @@ namespace awkward {
           std::string("sort_next with unbranching depth > negaxis is only "
                       "expected to return RegularArray or ListOffsetArray64; "
                       "instead, it returned ")
-          + out.get()->classname());
+          + out.get()->classname() + FILENAME(__LINE__));
       }
     }
   }
@@ -1199,8 +1257,9 @@ namespace awkward {
         Index64 outoffsets(starts.length() + 1);
         if (starts.length() > 0  &&  starts.getitem_at_nowrap(0) != 0) {
           throw std::runtime_error(
-            "argsort_next with unbranching depth > negaxis expects "
-            "a ListOffsetArray64 whose offsets start at zero");
+            std::string("argsort_next with unbranching depth > negaxis expects "
+                        "a ListOffsetArray64 whose offsets start at zero")
+            + FILENAME(__LINE__));
         }
         struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
@@ -1224,7 +1283,7 @@ namespace awkward {
           std::string("argsort_next with unbranching depth > negaxis is only "
                       "expected to return RegularArray or ListOffsetArray64; "
                       "instead, it returned ")
-          + out.get()->classname());
+          + out.get()->classname() + FILENAME(__LINE__));
       }
     }
   }
@@ -1234,7 +1293,8 @@ namespace awkward {
                                 const Slice& tail,
                                 const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: ByteMaskedArray::getitem_next(at)");
+      std::string("undefined operation: ByteMaskedArray::getitem_next(at)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -1242,7 +1302,8 @@ namespace awkward {
                                 const Slice& tail,
                                 const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: ByteMaskedArray::getitem_next(range)");
+      std::string("undefined operation: ByteMaskedArray::getitem_next(range)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -1250,7 +1311,8 @@ namespace awkward {
                                 const Slice& tail,
                                 const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: ByteMaskedArray::getitem_next(array)");
+      std::string("undefined operation: ByteMaskedArray::getitem_next(array)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -1258,7 +1320,8 @@ namespace awkward {
                                 const Slice& tail,
                                 const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: ByteMaskedArray::getitem_next(jagged)");
+      std::string("undefined operation: ByteMaskedArray::getitem_next(jagged)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr

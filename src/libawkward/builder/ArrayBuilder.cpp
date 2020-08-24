@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/ArrayBuilder.cpp", line)
+
 #include <sstream>
 
 #include "awkward/builder/ArrayBuilder.h"
@@ -124,7 +126,8 @@ namespace awkward {
     BuilderPtr tmp = builder_.get()->endlist();
     if (tmp.get() == nullptr) {
       throw std::invalid_argument(
-        "endlist doesn't match a corresponding beginlist");
+        std::string("endlist doesn't match a corresponding beginlist")
+        + FILENAME(__LINE__));
     }
     maybeupdate(tmp);
   }
@@ -192,9 +195,11 @@ namespace awkward {
       regular_at += length;
     }
     if (!(0 <= regular_at  &&  regular_at < length)) {
-      throw std::invalid_argument(std::string("'append' index (")
+      throw std::invalid_argument(
+        std::string("'append' index (")
         + std::to_string(at) + std::string(") out of bounds (")
-        + std::to_string(length) + std::string(")"));
+        + std::to_string(length) + std::string(")")
+        + FILENAME(__LINE__));
     }
     return append_nowrap(array, regular_at);
   }

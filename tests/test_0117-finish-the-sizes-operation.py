@@ -23,7 +23,7 @@ def test_numpyarray():
     assert awkward1.to_list(array.num(3)) == [[[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]], [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]]]
     with pytest.raises(ValueError) as err:
         array.num(4)
-    assert str(err.value) == "'axis' out of range for 'num'"
+    assert str(err.value).startswith("'axis' out of range for 'num'")
 
 def test_regulararray():
     array = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(2, 3, 5, 7)).toRegularArray()
@@ -33,7 +33,7 @@ def test_regulararray():
     assert awkward1.to_list(array.num(3)) == [[[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]], [[7, 7, 7, 7, 7], [7, 7, 7, 7, 7], [7, 7, 7, 7, 7]]]
     with pytest.raises(ValueError) as err:
         array.num(4)
-    assert str(err.value) == "'axis' out of range for 'num'"
+    assert str(err.value).startswith("'axis' out of range for 'num'")
 
 def test_listarray():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5).reshape(5, 3, 2))
@@ -54,7 +54,7 @@ def test_listarray():
     assert awkward1.to_list(array.num(3)) == [[[2, 2, 2], [2, 2, 2], [2, 2, 2]], [], [[2, 2, 2], [2, 2, 2]]]
     with pytest.raises(ValueError) as err:
         array.num(4)
-    assert str(err.value) == "'axis' out of range for 'num'"
+    assert str(err.value).startswith("'axis' out of range for 'num'")
 
 def test_listoffsetarray():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5).reshape(5, 3, 2))
@@ -74,7 +74,7 @@ def test_listoffsetarray():
     assert awkward1.to_list(array.num(3)) == [[[2, 2, 2], [2, 2, 2], [2, 2, 2]], [], [[2, 2, 2], [2, 2, 2]]]
     with pytest.raises(ValueError) as err:
         array.num(4)
-    assert str(err.value) == "'axis' out of range for 'num'"
+    assert str(err.value).startswith("'axis' out of range for 'num'")
 
 def test_indexedarray():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5).reshape(5, 3, 2))
@@ -99,7 +99,7 @@ def test_indexedarray():
 
     with pytest.raises(ValueError) as err:
         array.num(4)
-    assert str(err.value) == "'axis' out of range for 'num'"
+    assert str(err.value).startswith("'axis' out of range for 'num'")
 
 def test_indexedoptionarray():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5).reshape(5, 3, 2))
@@ -126,7 +126,7 @@ def test_indexedoptionarray():
 
     with pytest.raises(ValueError) as err:
         array.num(4)
-    assert str(err.value) == "'axis' out of range for 'num'"
+    assert str(err.value).startswith("'axis' out of range for 'num'")
 
 def test_recordarray():
     array = awkward1.from_iter([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}], highlevel=False)

@@ -1,5 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/UnmaskedArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/UnmaskedArray.cpp", line)
+
 #include <sstream>
 #include <type_traits>
 
@@ -152,6 +155,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  UnmaskedForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// UnmaskedArray
 
   UnmaskedArray::UnmaskedArray(const IdentitiesPtr& identities,
@@ -236,7 +244,8 @@ namespace awkward {
         util::handle_error(
           failure("content and its identities must have the same length",
                   kSliceNone,
-                  kSliceNone),
+                  kSliceNone,
+                  FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -277,7 +286,8 @@ namespace awkward {
         content_.get()->setidentities(subidentities);
       }
       else {
-        throw std::runtime_error("unrecognized Identities specialization");
+        throw std::runtime_error(
+          std::string("unrecognized Identities specialization") + FILENAME(__LINE__));
       }
     }
     identities_ = identities;
@@ -400,7 +410,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < length()) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -419,7 +432,7 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < length())) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -440,7 +453,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
       util::handle_error(
-        failure("index out of range", kSliceNone, stop),
+        failure("index out of range",
+                kSliceNone,
+                stop,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -512,7 +528,8 @@ namespace awkward {
       return Content::getitem_next(*missing, tail, advanced);
     }
     else {
-      throw std::runtime_error("unrecognized slice type");
+      throw std::runtime_error(
+        std::string("unrecognized slice type") + FILENAME(__LINE__));
     }
   }
 
@@ -581,7 +598,8 @@ namespace awkward {
   UnmaskedArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
-      throw std::invalid_argument("axis=0 not allowed for flatten");
+      throw std::invalid_argument(
+        std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
     }
     else {
       std::pair<Index64, ContentPtr> offsets_flattened =
@@ -718,6 +736,7 @@ namespace awkward {
   UnmaskedArray::reduce_next(const Reducer& reducer,
                              int64_t negaxis,
                              const Index64& starts,
+                             const Index64& shifts,
                              const Index64& parents,
                              int64_t outlength,
                              bool mask,
@@ -725,6 +744,7 @@ namespace awkward {
     return content_.get()->reduce_next(reducer,
                                        negaxis,
                                        starts,
+                                       shifts,
                                        parents,
                                        outlength,
                                        mask,
@@ -753,7 +773,9 @@ namespace awkward {
                               int64_t axis,
                               int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1")
+        + FILENAME(__LINE__));
     }
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
@@ -839,7 +861,8 @@ namespace awkward {
                               const Slice& tail,
                               const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: UnmaskedArray::getitem_next(at)");
+      std::string("undefined operation: UnmaskedArray::getitem_next(at)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -847,7 +870,8 @@ namespace awkward {
                               const Slice& tail,
                               const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: UnmaskedArray::getitem_next(range)");
+      std::string("undefined operation: UnmaskedArray::getitem_next(range)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -855,7 +879,8 @@ namespace awkward {
                               const Slice& tail,
                               const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: UnmaskedArray::getitem_next(array)");
+      std::string("undefined operation: UnmaskedArray::getitem_next(array)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -863,7 +888,8 @@ namespace awkward {
                               const Slice& tail,
                               const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: UnmaskedArray::getitem_next(jagged)");
+      std::string("undefined operation: UnmaskedArray::getitem_next(jagged)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr

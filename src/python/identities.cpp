@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/identities.cpp", line)
+
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 
@@ -41,14 +43,16 @@ make_IdentitiesOf(const py::handle& m, const std::string& name) {
         py::buffer_info info = array.request();
         if (info.ndim != 2) {
           throw std::invalid_argument(
-            name + std::string(" must be built from a two-dimensional array"));
+            name + std::string(" must be built from a two-dimensional array")
+            + FILENAME(__LINE__));
         }
         if (info.strides[0] != sizeof(T)*info.shape[1]  ||
             info.strides[1] != sizeof(T)) {
           throw std::invalid_argument(
             name + std::string(" must be built from a contiguous array (array"
                                ".stries == (array.shape[1]*array.itemsize, "
-                               "array.itemsize)); try array.copy()"));
+                               "array.itemsize)); try array.copy()")
+            + FILENAME(__LINE__));
         }
         return ak::IdentitiesOf<T>(ref,
                                    fieldloc,
