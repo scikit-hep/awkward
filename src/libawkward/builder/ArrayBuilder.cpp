@@ -214,8 +214,8 @@ namespace awkward {
     BuilderPtr tmp = builder_;
     for (int64_t i = 0;  i < array.get()->length();  i++) {
       tmp = builder_.get()->append(array, i);
+      maybeupdate(tmp);
     }
-    maybeupdate(tmp);
   }
 
   void

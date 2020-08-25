@@ -2576,7 +2576,9 @@ class ArrayBuilder(Iterable, Sized):
             if isinstance(obj, Record):
                 self._layout.append(obj.layout.array, obj.layout.at)
             elif isinstance(obj, Array):
+                self._layout.beginlist()
                 self._layout.extend(obj.layout)
+                self._layout.endlist()
             else:
                 self._layout.fromiter(obj)
 

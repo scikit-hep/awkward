@@ -124,7 +124,7 @@ def test_ArrayBuilder_append():
     assert isinstance(tmp.layout, awkward1.layout.IndexedArray64)
     assert isinstance(tmp.layout.content, awkward1.layout.RecordArray)
 
-    builder.append(array)
+    builder.extend(array)
     tmp = builder.snapshot()
     assert awkward1.to_list(tmp) == [{"x": 2.2, "y": [2, 2]}, {"x": 2.2, "y": [2, 2]}, {"x": 1.1, "y": [1]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}]
     assert isinstance(tmp.layout, awkward1.layout.IndexedArray64)
@@ -162,6 +162,58 @@ def test_ArrayBuilder_append():
     builder.append(array3, 0)
     array4 = builder.snapshot()
     assert isinstance(array4.layout.content, awkward1.layout.ListOffsetArray64)
+
+def test_ArrayBuilder_append_2():
+    # issue #415
+    A = awkward1.from_numpy(numpy.array([0, 1, 2], dtype=numpy.float32))
+    B = awkward1.from_numpy(numpy.array([0, 1], dtype=numpy.float32))
+
+    builder = awkward1.ArrayBuilder()
+    with builder.list():
+        builder.append(A.tolist())
+    with builder.list():
+        builder.append(A.tolist())
+    with builder.list():
+        pass
+    with builder.list():
+        builder.append(B.tolist())
+
+    assert builder.snapshot().tolist() == [[[0, 1, 2]], [[0, 1, 2]], [], [[0, 1]]]
+    assert str(awkward1.type(builder.snapshot())) == "4 * var * var * float64"
+
+    builder = awkward1.ArrayBuilder()
+    with builder.list():
+        builder.append(A)
+    with builder.list():
+        builder.append(A)
+    with builder.list():
+        pass
+    with builder.list():
+        builder.append(B)
+
+    assert builder.snapshot().tolist() == [[[0, 1, 2]], [[0, 1, 2]], [], [[0, 1]]]
+    assert str(awkward1.type(builder.snapshot())) == "4 * var * var * float32"
+
+    @numba.njit
+    def f1(builder, A, B):
+        builder.begin_list()
+        builder.append(A)
+        builder.end_list()
+
+        builder.begin_list()
+        builder.append(A)
+        builder.end_list()
+
+        builder.begin_list()
+        builder.end_list()
+
+        builder.begin_list()
+        builder.append(B)
+        builder.end_list()
+
+        return builder
+
+    assert f1(awkward1.ArrayBuilder(), A, B).snapshot().tolist() == [[[0, 1, 2]], [[0, 1, 2]], [], [[0, 1]]]
 
 def test_views():
     assert awkward1.to_list(awkward1_numba_arrayview.ArrayView.fromarray(awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)).toarray()) == [1.1, 2.2, 3.3, 4.4, 5.5]
