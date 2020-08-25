@@ -74,11 +74,11 @@ namespace awkward {
     for (auto content : contents_) {
       contents.push_back(content.get()->snapshot());
     }
-    return std::make_shared<UnionArray8_64>(Identities::none(),
-                                            util::Parameters(),
-                                            tags,
-                                            index,
-                                            contents);
+    return UnionArray8_64(Identities::none(),
+                          util::Parameters(),
+                          tags,
+                          index,
+                          contents).simplify_uniontype(false);
   }
 
   bool

@@ -164,7 +164,7 @@ def test_ArrayBuilder_append():
     assert isinstance(array4.layout.content, awkward1.layout.ListOffsetArray64)
 
 def test_ArrayBuilder_append_2():
-    # issue 415
+    # issue #415
     A = awkward1.from_numpy(numpy.array([0, 1, 2], dtype=numpy.float32))
     B = awkward1.from_numpy(numpy.array([0, 1], dtype=numpy.float32))
 
@@ -179,6 +179,7 @@ def test_ArrayBuilder_append_2():
         builder.append(B.tolist())
 
     assert builder.snapshot().tolist() == [[[0, 1, 2]], [[0, 1, 2]], [], [[0, 1]]]
+    assert str(awkward1.type(builder.snapshot())) == "4 * var * var * float64"
 
     builder = awkward1.ArrayBuilder()
     with builder.list():
@@ -191,6 +192,7 @@ def test_ArrayBuilder_append_2():
         builder.append(B)
 
     assert builder.snapshot().tolist() == [[[0, 1, 2]], [[0, 1, 2]], [], [[0, 1]]]
+    assert str(awkward1.type(builder.snapshot())) == "4 * var * var * float32"
 
     @numba.njit
     def f1(builder, A, B):
