@@ -73,6 +73,8 @@ class NumpyMetadata(Singleton):
     integer = numpy.integer
     floating = numpy.floating
     number = numpy.number
+    object = numpy.object
+    object_ = numpy.object_
     generic = numpy.generic
 
     dtype = numpy.dtype

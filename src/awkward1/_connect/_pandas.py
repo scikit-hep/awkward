@@ -179,7 +179,7 @@ class PandasMixin(PandasNotImportedYet):
                 return AwkwardDtype()
 
         else:
-            return np.dtype(np.object)
+            return np.dtype("O")
 
     @property
     def nbytes(self):
