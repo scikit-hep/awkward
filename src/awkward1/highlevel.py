@@ -31,7 +31,7 @@ _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 def _suffix(array):
     out = awkward1.operations.convert.kernels(array)
-    if out == "cpu":
+    if out is None or out == "cpu":
         return ""
     else:
         return ":" + out

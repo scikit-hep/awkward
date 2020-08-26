@@ -528,7 +528,10 @@ def kernels(*arrays):
     libs = set()
 
     def apply(layout, depth):
-        if layout.identities is not None:
+        if (
+            isinstance(layout, awkward1.layout.Content) and
+            layout.identities is not None
+        ):
             libs.add(layout.identities.ptr_lib)
 
         if isinstance(layout, awkward1.layout.NumpyArray):
@@ -575,16 +578,26 @@ def kernels(*arrays):
         elif isinstance(layout, awkward1.layout.VirtualArray):
             libs.add(layout.ptr_lib)
 
+        elif isinstance(layout, awkward1.partition.PartitionedArray):
+            pass
+
     for array in arrays:
         layout = awkward1.operations.convert.to_layout(
             array,
             allow_record=True,
             allow_other=True,
         )
-        if isinstance(layout, (awkward1.layout.Content, awkward1.layout.Record)):
+
+        if isinstance(layout, (
+            awkward1.layout.Content,
+            awkward1.layout.Record,
+            awkward1.partition.PartitionedArray
+        )):
             awkward1._util.recursive_walk(layout, apply, materialize=False)
+
         elif isinstance(layout, awkward1.nplike.numpy.ndarray):
             libs.add("cpu")
+
         elif type(layout).__module__.startswith("cupy."):
             libs.add("cuda")
 
