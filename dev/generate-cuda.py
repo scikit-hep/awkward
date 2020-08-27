@@ -708,7 +708,17 @@ if __name__ == "__main__":
                     indspec = yaml.safe_load(specfile)[0]
                     if indspec["name"] == kernelname and kernelname in KERNEL_WHITELIST:
                         code = getcode(indspec)
+                        print(code)
                         break
                     if kernelname is None and indspec["name"] in KERNEL_WHITELIST:
-                        code += getcode(indspec)
-        print(code)
+                        with open(
+                            os.path.join(
+                                CURRENT_DIR,
+                                "..",
+                                "src",
+                                "cuda-kernels",
+                                indspec["name"] + ".cu",
+                            ),
+                            "w",
+                        ) as outfile:
+                            outfile.write(code + getcode(indspec))

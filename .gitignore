@@ -12,6 +12,9 @@ kernel-specification/identities/
 kernel-specification/sorting/
 kernel-specification/getitem/
 
+# Generated CUDA kernels
+src/cuda-kernels/awkward_*.cu
+
 # Kernel tests
 tests-cpu-kernels/test*
 tests-spec/kernels.py
