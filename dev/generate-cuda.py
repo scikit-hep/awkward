@@ -26,7 +26,6 @@ KERNEL_WHITELIST = [
     "awkward_content_reduce_zeroparents_64",
     "awkward_ListOffsetArray_reduce_global_startstop_64",
     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
-    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
     "awkward_IndexedArray_reduce_next_fix_offsets_64",
     "awkward_Index8_to_Index64",
     "awkward_IndexU8_to_Index64",
@@ -93,6 +92,7 @@ KERNEL_CURIOUS = [
     "awkward_missing_repeat",
     "awkward_ByteMaskedArray_getitem_carry",
     "awkward_combinations",
+    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
 ]
 
 
