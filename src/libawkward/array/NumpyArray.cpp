@@ -422,7 +422,11 @@ namespace awkward {
       return itemsize_;
     }
     else {
-      return shape_[0]*strides_[0];
+      ssize_t out = itemsize_;
+      for (size_t i = 0;  i < shape_.size();  i++) {
+        out += (shape_[i] - 1)*strides_[i];
+      }
+      return out;
     }
   }
 
@@ -638,7 +642,7 @@ namespace awkward {
       out << "strides=\"";
       for (std::size_t i = 0;  i < shape_.size();  i++) {
         if (i != 0) {
-          out << ", ";
+          out << " ";
         }
         out << strides_[i];
       }
@@ -1210,6 +1214,10 @@ namespace awkward {
 
   const ContentPtr
   NumpyArray::carry(const Index64& carry, bool allow_lazy) const {
+    if (!iscontiguous()) {
+      return contiguous().carry(carry, allow_lazy);
+    }
+
     std::shared_ptr<void> ptr(
       kernel::malloc<void>(ptr_lib_, carry.length()*((int64_t)strides_[0])));
     struct Error err = kernel::NumpyArray_getitem_next_null_64(
