@@ -2073,13 +2073,15 @@ awkward_NumpyArray_fill_tofloat64_fromfloat64(double* toptr,
       toptr, tooffset, fromptr, length);
 }
 
+
 ERROR
 awkward_NumpyArray_fill_tofloat64_fromcomplex128(double* toptr,
                                                  int64_t tooffset,
                                                  const std::complex<double>* fromptr,
                                                  int64_t length) {
-  return awkward_NumpyArray_fill<std::complex<double>, double>(
-       toptr, tooffset, fromptr, length);
+  // This fails with explicit <std::complex<double>, double>
+  // template parameters
+  return awkward_NumpyArray_fill(toptr, tooffset, fromptr, length);
 }
 
 
