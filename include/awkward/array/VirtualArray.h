@@ -382,6 +382,10 @@ namespace awkward {
     const std::string cache_key_;
     /// @brief See#ptr_lib
     const kernel::lib ptr_lib_;
+
+    /// @brief Forward selected purelist_parameters when making lazy slices
+    const util::Parameters
+      forward_parameters() const;
   };
 
 }
