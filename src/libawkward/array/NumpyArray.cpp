@@ -2955,10 +2955,20 @@ namespace awkward {
               reinterpret_cast<double*>(contiguous_self.data()),
               self_flatlength);
             break;
+          case util::dtype::complex128:
+            err = kernel::NumpyArray_fill<std::complex<double>, std::complex<double>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<double> *>(ptr.get()),
+              0,
+              reinterpret_cast<std::complex<double> *>(contiguous_self.data()),
+              self_flatlength);
+            break;
+
           default:
             throw std::runtime_error(
               std::string("dtype_ not in {boolean, int8, int16, int32, int64, "
-                          "uint8, uint16, uint32, uint64 float16, float32, float64} (1)")
+                          "uint8, uint16, uint32, uint64 float16, float32, float64, "
+                          "complex64, complex128} (1)")
               + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);
@@ -3055,10 +3065,29 @@ namespace awkward {
               reinterpret_cast<double*>(contiguous_other.data()),
               other_flatlength);
             break;
+          // case util::dtype::complex64:
+          //   err = kernel::NumpyArray_fill<std::complex<float>, double>(
+          //     kernel::lib::cpu,   // DERIVE
+          //     reinterpret_cast<double*>(ptr.get()),
+          //     self_flatlength,
+          //     reinterpret_cast<std::complex<float> *>(contiguous_other.data()),
+          //     other_flatlength);
+          //   break;
+          case util::dtype::complex128:
+            err = kernel::NumpyArray_fill<std::complex<double>, double>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<double*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<std::complex<double> *>(contiguous_other.data()),
+              other_flatlength);
+            break;
+
+
           default:
             throw std::runtime_error(
               std::string("dtype_ not in {boolean, int8, int16, int32, int64, "
-                          "uint8, uint16, uint32, uint64 float16, float32, float64} (2)")
+                          "uint8, uint16, uint32, uint64 float16, float32, float64, "
+                          "complex64, complex128} (2)")
               + FILENAME(__LINE__));
         }
         util::handle_error(err, classname(), nullptr);

@@ -826,6 +826,26 @@ extern "C" {
   /// @param fromptr inparam role: NumpyArray-ptr
   /// @param length inparam
   EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_fill_tofloat64_fromcomplex128(
+    double * toptr,
+    int64_t tooffset,
+    const std::complex<double> * fromptr,
+    int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: IndexedArray-index-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param length inparam
+  EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_fill_tocomplex64_fromcomplex128(
+    std::complex<float> * toptr,
+    int64_t tooffset,
+    const std::complex<double> * fromptr,
+    int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: IndexedArray-index-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param length inparam
+  EXPORT_SYMBOL struct Error
   awkward_NumpyArray_fill_tocomplex128_fromint8(
     std::complex<double> * toptr,
     int64_t tooffset,
@@ -860,6 +880,26 @@ extern "C" {
     std::complex<double> * toptr,
     int64_t tooffset,
     const double* fromptr,
+    int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: IndexedArray-index-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param length inparam
+  EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_fill_tocomplex128_fromcomplex64(
+    std::complex<double> * toptr,
+    int64_t tooffset,
+    const std::complex<float>* fromptr,
+    int64_t length);
+/// @param toptr outparam
+  /// @param tooffset inparam role: IndexedArray-index-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param length inparam
+  EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_fill_tocomplex128_fromcomplex128(
+    std::complex<double> * toptr,
+    int64_t tooffset,
+    const std::complex<double>* fromptr,
     int64_t length);
   /// @param toptr outparam
   /// @param tooffset inparam role: IndexedArray-index-offset
