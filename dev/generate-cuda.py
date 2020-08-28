@@ -41,17 +41,20 @@ KERNEL_WHITELIST = [
     "awkward_UnionArray_regular_index_getsize",
     "awkward_ByteMaskedArray_toIndexedOptionArray",
     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
+    "awkward_combinations",
+    "awkward_index_carry",
+    "awkward_ByteMaskedArray_getitem_carry",
+    "awkward_IndexedArray_simplify",
+    "awkward_RegularArray_broadcast_tooffsets",
+    "awkward_ListArray_validity",
+    "awkward_IndexedArray_validity",
+    "awkward_UnionArray_validity",
 ]
 
 KERNEL_CURIOUS = [
     "awkward_Identities_from_ListArray",
     "awkward_Identities_from_IndexedArray",
     "awkward_Identities_from_UnionArray",
-    "awkward_IndexedArray_simplify",
-    "awkward_RegularArray_broadcast_tooffsets",
-    "awkward_ListArray_validity",
-    "awkward_IndexedArray_validity",
-    "awkward_UnionArray_validity",
     "awkward_index_rpad_and_clip_axis0",
     "awkward_RegularArray_rpad_and_clip_axis1",
     "awkward_ListArray_rpad_and_clip_length_axis1",
@@ -77,7 +80,6 @@ KERNEL_CURIOUS = [
     "awkward_NumpyArray_reduce_adjust_starts_64",
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
-    "awkward_index_carry",
     "awkward_NumpyArray_contiguous_next",
     "awkward_NumpyArray_getitem_next_range",
     "awkward_NumpyArray_getitem_next_range_advanced",
@@ -91,8 +93,6 @@ KERNEL_CURIOUS = [
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_expand",
     "awkward_missing_repeat",
-    "awkward_ByteMaskedArray_getitem_carry",
-    "awkward_combinations",
 ]
 
 
@@ -116,6 +116,11 @@ def traverse(node, args={}, forflag=False, declared=[]):
         for subnode in node.body:
             code += traverse(subnode, args, True, declared)
         code += "}\n"
+    elif node.__class__.__name__ == "Raise":
+        code = (
+            'err->str = "{0}";\n'.format(node.exc.args[0].value)
+            + 'err->filename = "FILENAME(__LINE__)";\nerr->pass_through=true;\n'
+        )
     elif node.__class__.__name__ == "If":
         code = ""
         tempdeclared = copy.copy(declared)
@@ -574,7 +579,9 @@ def getdecl(name, args, templatestring, parent=False, solo=False):
         else:
             params += ", " + value + " " + key
     if parent:
-        code += "void cuda" + name[len("awkward") :] + "(" + params + ") {\n"
+        code += (
+            "void cuda" + name[len("awkward") :] + "(" + params + ", ERROR* err) {\n"
+        )
     else:
         code += "ERROR " + name + "(" + params + ") {\n"
     return code
@@ -644,14 +651,31 @@ threads_per_block = dim3({0}, 1, 1);
 """.format(
                 lenarg
             )
+            code += " " * 2 + "ERROR h_err = success();\n"
+            code += " " * 2 + "ERROR* err = &h_err;\n"
+            code += " " * 2 + "ERROR* d_err;\n"
+            code += " " * 2 + "cudaMalloc((void**)&d_err, sizeof(ERROR));\n"
+            code += (
+                " " * 2
+                + "cudaMemcpy(d_err, err, sizeof(ERROR), cudaMemcpyHostToDevice);\n"
+            )
             templatetypes = gettemplatetypes(childfunc, templateargs)
             paramnames = getparamnames(args)
             code += " " * 2 + "cuda" + indspec["name"][len("awkward") :]
             if templatetypes is not None and len(templatetypes) > 0:
                 code += "<" + templatetypes + ">"
-            code += " <<<blocks_per_grid, threads_per_block>>>(" + paramnames + ");\n"
+            code += (
+                " <<<blocks_per_grid, threads_per_block>>>("
+                + paramnames
+                + ", d_err);\n"
+            )
             code += " " * 2 + "cudaDeviceSynchronize();\n"
-            code += " " * 2 + "return success();\n"
+            code += (
+                " " * 2
+                + "cudaMemcpy(d_err, err, sizeof(ERROR), cudaMemcpyDeviceToHost);\n"
+            )
+            code += " " * 2 + "cudaFree(d_err);\n"
+            code += " " * 2 + "return *err;\n"
             code += "}\n\n"
     else:
         code += getdecl(indspec["name"], args, "")
@@ -669,6 +693,13 @@ threads_per_block = dim3({0}, 1, 1);
 """.format(
             lenarg
         )
+        code += " " * 2 + "ERROR h_err = success();\n"
+        code += " " * 2 + "ERROR* err = &h_err;\n"
+        code += " " * 2 + "ERROR* d_err;\n"
+        code += " " * 2 + "cudaMalloc((void**)&d_err, sizeof(ERROR));\n"
+        code += (
+            " " * 2 + "cudaMemcpy(d_err, err, sizeof(ERROR), cudaMemcpyHostToDevice);\n"
+        )
         paramnames = getparamnames(args)
         code += (
             " " * 2
@@ -676,10 +707,14 @@ threads_per_block = dim3({0}, 1, 1);
             + indspec["name"][len("awkward") :]
             + "<<<blocks_per_grid, threads_per_block>>>("
             + paramnames
-            + ");\n"
+            + ", d_err);\n"
         )
         code += " " * 2 + "cudaDeviceSynchronize();\n"
-        code += " " * 2 + "return success();\n"
+        code += (
+            " " * 2 + "cudaMemcpy(d_err, err, sizeof(ERROR), cudaMemcpyDeviceToHost);\n"
+        )
+        code += " " * 2 + "cudaFree(d_err);\n"
+        code += " " * 2 + "return *err;\n"
         code += "}\n\n"
     return code
 
@@ -723,4 +758,7 @@ if __name__ == "__main__":
                             ),
                             "w",
                         ) as outfile:
-                            outfile.write(code + getcode(indspec))
+                            err_macro = '#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/{0}.cu", line)\n\n'.format(
+                                indspec["name"]
+                            )
+                            outfile.write(err_macro + code + getcode(indspec))
