@@ -569,6 +569,12 @@ namespace awkward {
       if (record != std::string("null")) {
         params["__record__"] = record;
       }
+      std::string doc =
+          form(false).get()->getitem_field(key)->purelist_parameter(
+              "__doc__");
+      if (doc != std::string("null")) {
+        params["__doc__"] = doc;
+      }
     }
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  sliceform, generator_.get()->length(), shallow_copy(), slice);
@@ -615,13 +621,8 @@ namespace awkward {
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  form, carry.length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
-    util::Parameters params(parameters_);
-    std::string record = purelist_parameter("__record__");
-    if (record != std::string("null")) {
-      params["__record__"] = record;
-    }
     return std::make_shared<VirtualArray>(Identities::none(),
-                                          params,
+                                          forward_parameters(),
                                           generator,
                                           cache);
   }
@@ -816,14 +817,9 @@ namespace awkward {
           FormPtr form(nullptr);
           ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, length, shallow_copy(), where);
-          util::Parameters params;
-          std::string record = purelist_parameter("__record__");
-          if (record != std::string("null")) {
-            params["__record__"] = record;
-          }
           ArrayCachePtr cache(nullptr);
           return std::make_shared<VirtualArray>(Identities::none(),
-                                                params,
+                                                forward_parameters(),
                                                 generator,
                                                 cache);
         }
@@ -837,14 +833,9 @@ namespace awkward {
         FormPtr form(nullptr);
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, generator_.get()->length(), shallow_copy(), where);
-        util::Parameters params;
-        std::string record = purelist_parameter("__record__");
-        if (record != std::string("null")) {
-          params["__record__"] = record;
-        }
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
-                                              params,
+                                              forward_parameters(),
                                               generator,
                                               cache);
       }
@@ -854,14 +845,9 @@ namespace awkward {
         FormPtr form(nullptr);
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, 1, shallow_copy(), where);
-        util::Parameters params;
-        std::string record = purelist_parameter("__record__");
-        if (record != std::string("null")) {
-          params["__record__"] = record;
-        }
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
-                                              params,
+                                              forward_parameters(),
                                               generator,
                                               cache);
       }
@@ -871,14 +857,9 @@ namespace awkward {
         FormPtr form(nullptr);
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, slicearray->length(), shallow_copy(), where);
-        util::Parameters params;
-        std::string record = purelist_parameter("__record__");
-        if (record != std::string("null")) {
-          params["__record__"] = record;
-        }
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
-                                              params,
+                                              forward_parameters(),
                                               generator,
                                               cache);
       }
@@ -1006,4 +987,17 @@ namespace awkward {
     return array().get()->numbers_to_type(name);
   }
 
+  const util::Parameters
+  VirtualArray::forward_parameters() const {
+    util::Parameters params;
+    std::string record = purelist_parameter("__record__");
+    if (record != std::string("null")) {
+      params["__record__"] = record;
+    }
+    std::string doc = purelist_parameter("__doc__");
+    if (doc != std::string("null")) {
+      params["__doc__"] = doc;
+    }
+    return params;
+  }
 }
