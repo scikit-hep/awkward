@@ -40,6 +40,7 @@ KERNEL_WHITELIST = [
     "awkward_RegularArray_getitem_next_array_advanced",
     "awkward_UnionArray_regular_index_getsize",
     "awkward_ByteMaskedArray_toIndexedOptionArray",
+    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
 ]
 
 KERNEL_CURIOUS = [
@@ -92,7 +93,6 @@ KERNEL_CURIOUS = [
     "awkward_missing_repeat",
     "awkward_ByteMaskedArray_getitem_carry",
     "awkward_combinations",
-    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
 ]
 
 
@@ -706,7 +706,9 @@ if __name__ == "__main__":
                     os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
                 ) as specfile:
                     indspec = yaml.safe_load(specfile)[0]
-                    if indspec["name"] == kernelname and kernelname in KERNEL_WHITELIST:
+                    if indspec["name"] == kernelname and (
+                        kernelname in KERNEL_WHITELIST or kernelname in KERNEL_CURIOUS
+                    ):
                         code = getcode(indspec)
                         print(code)
                         break
