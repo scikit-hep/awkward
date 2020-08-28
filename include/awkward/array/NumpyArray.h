@@ -744,6 +744,12 @@ namespace awkward {
   void
     tojson_real(ToJson& builder, bool include_beginendlist) const;
 
+  /// @brief Internal function to fill JSON with complex floating-point values.
+  template <typename T>
+  void
+    tojson_complex(ToJson& builder, bool include_beginendlist) const;
+
+
   /// @brief Internal function to fill JSON with string values.
   void
     tojson_string(ToJson& builder, bool include_beginendlist) const;

@@ -4,6 +4,7 @@
 #define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/NumpyArray.cpp", line)
 
 #include <algorithm>
+#include <complex>
 #include <iomanip>
 #include <numeric>
 #include <sstream>
@@ -4842,6 +4843,51 @@ namespace awkward {
       builder.endlist();
     }
   }
+
+  template <typename T>
+  void
+  NumpyArray::tojson_complex(ToJson& builder,
+                             bool include_beginendlist) const {
+    if (ndim() == 0) {
+      T* array = reinterpret_cast<T*>(data());
+      builder.real(array[0]);
+    }
+    else if (ndim() == 1) {
+      T* array = reinterpret_cast<T*>(data());
+      int64_t stride = strides_[0] / (int64_t)(sizeof(T));
+      if (include_beginendlist) {
+        builder.beginlist();
+      }
+      for (int64_t i = 0;  i < length();  i++) {
+        throw std::runtime_error("FIXME: actually output complex numbers");
+        // builder.real(array[i*stride]);
+      }
+      if (include_beginendlist) {
+        builder.endlist();
+      }
+    }
+    else {
+      const std::vector<ssize_t> shape(std::next(shape_.begin()), shape_.end());
+      const std::vector<ssize_t> strides(std::next(strides_.begin()), strides_.end());
+      builder.beginlist();
+      for (int64_t i = 0;  i < length();  i++) {
+        ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
+        NumpyArray numpy(Identities::none(),
+                         util::Parameters(),
+                         ptr_,
+                         shape,
+                         strides,
+                         byteoffset,
+                         itemsize_,
+                         format_,
+                         dtype_,
+                         ptr_lib_);
+        numpy.tojson_real<T>(builder, true);
+      }
+      builder.endlist();
+    }
+  }
+
 
   void
   NumpyArray::tojson_string(ToJson& builder,
