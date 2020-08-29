@@ -31,7 +31,9 @@ kSliceNone = kMaxInt64 + 1
         os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
     ) as infile:
         mainspec = yaml.safe_load(infile)["kernels"]
-        with open(os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py"), "w") as outfile:
+        with open(
+            os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py"), "w"
+        ) as outfile:
             outfile.write(prefix)
             for filedir in mainspec.values():
                 for relpath in filedir.values():
@@ -75,8 +77,10 @@ def readspec():
                                     flag = True
                                     for x in childfunc["args"]:
                                         for arg, val in x.items():
-                                            if "const " in val:
-                                                val = val.replace("const ", "", 1)
+                                            if "Const[" in val:
+                                                val = val.replace(
+                                                    "Const[", "", 1
+                                                ).rstrip("]")
                                             spectype = pytype(
                                                 val.replace("List", "")
                                                 .replace("[", "")
@@ -118,8 +122,10 @@ def readspec():
                                     flag = True
                                     for x in indspec["args"]:
                                         for arg, val in x.items():
-                                            if "const " in val:
-                                                val = val.replace("const ", "", 1)
+                                            if "Const[" in val:
+                                                val = val.replace(
+                                                    "Const[", "", 1
+                                                ).rstrip("]")
                                             spectype = pytype(
                                                 val.replace("List", "")
                                                 .replace("[", "")
@@ -157,7 +163,10 @@ def testpykernels(tests):
     genpykernels()
     print("Generating file for testing python kernels")
     for funcname in tests.keys():
-        with open(os.path.join(CURRENT_DIR, "..", "tests-spec", "test_py" + funcname + ".py"), "w",) as f:
+        with open(
+            os.path.join(CURRENT_DIR, "..", "tests-spec", "test_py" + funcname + ".py"),
+            "w",
+        ) as f:
             f.write("import pytest\nimport kernels\n\n")
             num = 1
             if tests[funcname] == []:
@@ -274,10 +283,10 @@ def testcpukernels(tests):
                                     if tests[childfunc["name"]] != []:
                                         for arg in childfunc["args"]:
                                             typename = list(arg.values())[0]
-                                            if "const " in typename:
+                                            if "Const[" in typename:
                                                 typename = typename.replace(
-                                                    "const ", "", 1
-                                                )
+                                                    "Const[", "", 1
+                                                ).rstrip("]")
                                             funcs[childfunc["name"]][
                                                 list(arg.keys())[0]
                                             ] = typename
@@ -287,8 +296,10 @@ def testcpukernels(tests):
                                 if tests[indspec["name"]] != []:
                                     for arg in indspec["args"]:
                                         typename = list(arg.values())[0]
-                                        if "const " in typename:
-                                            typename = typename.replace("const ", "", 1)
+                                        if "Const[" in typename:
+                                            typename = typename.replace(
+                                                "Const[", "", 1
+                                            ).rstrip("]")
                                         funcs[indspec["name"]][
                                             list(arg.keys())[0]
                                         ] = typename
@@ -297,7 +308,12 @@ def testcpukernels(tests):
 
     funcargs = getfuncargs()
     for funcname in tests.keys():
-        with open(os.path.join(CURRENT_DIR, "..", "tests-cpu-kernels", "test_cpu" + funcname + ".py"), "w",) as f:
+        with open(
+            os.path.join(
+                CURRENT_DIR, "..", "tests-cpu-kernels", "test_cpu" + funcname + ".py"
+            ),
+            "w",
+        ) as f:
             f.write("import ctypes\nimport pytest\nfrom __init__ import lib, Error\n\n")
             num = 1
             if tests[funcname] == []:

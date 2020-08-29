@@ -169,7 +169,7 @@ def arrayconv(cpptype):
     else:
         if "const" in cpptype:
             cpptype = cpptype.replace("const ", "", 1)
-            return "const List[" * count + cpptype[:-count] + "]" * count
+            return ("Const[List[" * count) + cpptype[:-count] + ("]" * count) + "]"
         else:
             return "List[" * count + cpptype[:-count] + "]" * count
 
