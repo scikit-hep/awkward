@@ -40,7 +40,7 @@ The functions are implemented in C with templates for integer specializations (c
                         outfile.write(indspec["name"] + "\n")
                         print("Generating doc for " + indspec["name"])
                         outfile.write(
-                            "=================================================================\n"
+                            "========================================================================\n"
                         )
                         if "specializations" in indspec.keys():
                             for childfunc in indspec["specializations"]:
