@@ -2855,17 +2855,243 @@ namespace awkward {
 
       // to complex64
       case util::dtype::complex64:
-        throw std::runtime_error(
-          std::string("FIXME: merge to complex64 not implemented")
-          + FILENAME(__LINE__));
+        switch (dtype_) {
+          case util::dtype::boolean:
+            err = kernel::NumpyArray_fill_frombool<std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float> *>(ptr.get()),
+              0,
+              reinterpret_cast<bool*>(contiguous_self.data()),
+              self_flatlength);
+            break;
+          case util::dtype::int8:
+            err = kernel::NumpyArray_fill<int8_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float> *>(ptr.get()),
+              0,
+              reinterpret_cast<int8_t*>(contiguous_self.data()),
+              self_flatlength);
+            break;
+          case util::dtype::int16:
+            err = kernel::NumpyArray_fill<int16_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float> *>(ptr.get()),
+              0,
+              reinterpret_cast<int16_t*>(contiguous_self.data()),
+              self_flatlength);
+            break;
+          case util::dtype::int32:
+            err = kernel::NumpyArray_fill<int32_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              0,
+              reinterpret_cast<int32_t*>(contiguous_self.data()),
+              self_flatlength);
+            break;
+          case util::dtype::int64:
+            err = kernel::NumpyArray_fill<int64_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              0,
+              reinterpret_cast<int64_t*>(contiguous_self.data()),
+              self_flatlength);
+            break;
+          case util::dtype::uint8:
+            err = kernel::NumpyArray_fill<uint8_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              0,
+              reinterpret_cast<uint8_t*>(contiguous_self.data()),
+              self_flatlength);
+            break;
+          case util::dtype::uint16:
+            err = kernel::NumpyArray_fill<uint16_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              0,
+              reinterpret_cast<uint16_t*>(contiguous_self.data()),
+              self_flatlength);
+            break;
+          case util::dtype::uint32:
+            err = kernel::NumpyArray_fill<uint32_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              0,
+              reinterpret_cast<uint32_t*>(contiguous_self.data()),
+              self_flatlength);
+            break;
+          case util::dtype::uint64:
+            err = kernel::NumpyArray_fill<uint64_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              0,
+              reinterpret_cast<uint64_t*>(contiguous_self.data()),
+              self_flatlength);
+            break;
+          case util::dtype::float16:
+            throw std::runtime_error(
+              std::string("FIXME: merge from float16 not implemented")
+              + FILENAME(__LINE__));
+          case util::dtype::float32:
+            err = kernel::NumpyArray_fill<float, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float> *>(ptr.get()),
+              0,
+              reinterpret_cast<float*>(contiguous_self.data()),
+              self_flatlength);
+            break;
+          case util::dtype::float64:
+            err = kernel::NumpyArray_fill<double, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float> *>(ptr.get()),
+              0,
+              reinterpret_cast<double*>(contiguous_self.data()),
+              self_flatlength);
+            break;
+          case util::dtype::complex64:
+            err = kernel::NumpyArray_fill<std::complex<float>, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float> *>(ptr.get()),
+              0,
+              reinterpret_cast<std::complex<float> *>(contiguous_self.data()),
+              self_flatlength);
+            break;
+          case util::dtype::complex128:
+            err = kernel::NumpyArray_fill<std::complex<double>, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float> *>(ptr.get()),
+              0,
+              reinterpret_cast<std::complex<double> *>(contiguous_self.data()),
+              self_flatlength);
+            break;
+
+          default:
+            throw std::runtime_error(
+              std::string("dtype_ not in {boolean, int8, int16, int32, int64, "
+                          "uint8, uint16, uint32, uint64 float16, float32, float64, "
+                          "complex64, complex128} (1)")
+              + FILENAME(__LINE__));
+        }
+        util::handle_error(err, classname(), nullptr);
+        switch (rawother->dtype()) {
+          case util::dtype::boolean:
+            err = kernel::NumpyArray_fill_frombool<std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<bool*>(contiguous_other.data()),
+              other_flatlength);
+            break;
+          case util::dtype::int8:
+            err = kernel::NumpyArray_fill<int8_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<int8_t*>(contiguous_other.data()),
+              other_flatlength);
+            break;
+          case util::dtype::int16:
+            err = kernel::NumpyArray_fill<int16_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<int16_t*>(contiguous_other.data()),
+              other_flatlength);
+            break;
+          case util::dtype::int32:
+            err = kernel::NumpyArray_fill<int32_t , std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<int32_t*>(contiguous_other.data()),
+              other_flatlength);
+            break;
+          case util::dtype::int64:
+            err = kernel::NumpyArray_fill<int64_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<int64_t*>(contiguous_other.data()),
+              other_flatlength);
+            break;
+          case util::dtype::uint8:
+            err = kernel::NumpyArray_fill<uint8_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<uint8_t*>(contiguous_other.data()),
+              other_flatlength);
+            break;
+          case util::dtype::uint16:
+            err = kernel::NumpyArray_fill<uint16_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<uint16_t*>(contiguous_other.data()),
+              other_flatlength);
+            break;
+          case util::dtype::uint32:
+            err = kernel::NumpyArray_fill<uint32_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<uint32_t*>(contiguous_other.data()),
+              other_flatlength);
+            break;
+          case util::dtype::uint64:
+            err = kernel::NumpyArray_fill<uint64_t, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<uint64_t*>(contiguous_other.data()),
+              other_flatlength);
+            break;
+          case util::dtype::float16:
+            throw std::runtime_error(
+              std::string("FIXME: merge from float16 not implemented"
+              + FILENAME(__LINE__)));
+          case util::dtype::float32:
+            err = kernel::NumpyArray_fill<float, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<float*>(contiguous_other.data()),
+              other_flatlength);
+            break;
+          case util::dtype::float64:
+            err = kernel::NumpyArray_fill<double, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<double*>(contiguous_other.data()),
+              other_flatlength);
+            break;
+          case util::dtype::complex64:
+            err = kernel::NumpyArray_fill<std::complex<float>, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<std::complex<float> *>(contiguous_other.data()),
+              other_flatlength);
+            break;
+          case util::dtype::complex128:
+            err = kernel::NumpyArray_fill<std::complex<double>, std::complex<float>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<float>*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<std::complex<double> *>(contiguous_other.data()),
+              other_flatlength);
+            break;
+
+          default:
+            throw std::runtime_error(
+              std::string("dtype_ not in {boolean, int8, int16, int32, int64, "
+                          "uint8, uint16, uint32, uint64 float16, float32, float64, "
+                          "complex64, complex128} (2)")
+              + FILENAME(__LINE__));
+        }
+        util::handle_error(err, classname(), nullptr);
         break;
-
-
-
-      ///////////////////////////
-      // BREAK
-      ///////////////////////////
-
 
 
       // to complex128
@@ -2963,6 +3189,14 @@ namespace awkward {
               reinterpret_cast<double*>(contiguous_self.data()),
               self_flatlength);
             break;
+          case util::dtype::complex64:
+            err = kernel::NumpyArray_fill<std::complex<float>, std::complex<double>>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<std::complex<double> *>(ptr.get()),
+              0,
+              reinterpret_cast<std::complex<float> *>(contiguous_self.data()),
+              self_flatlength);
+            break;
           case util::dtype::complex128:
             err = kernel::NumpyArray_fill<std::complex<double>, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
@@ -2982,109 +3216,109 @@ namespace awkward {
         util::handle_error(err, classname(), nullptr);
         switch (rawother->dtype()) {
           case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<double>(
+            err = kernel::NumpyArray_fill_frombool<std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<bool*>(contiguous_other.data()),
               other_flatlength);
             break;
           case util::dtype::int8:
-            err = kernel::NumpyArray_fill<int8_t, double>(
+            err = kernel::NumpyArray_fill<int8_t, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int8_t*>(contiguous_other.data()),
               other_flatlength);
             break;
           case util::dtype::int16:
-            err = kernel::NumpyArray_fill<int16_t, double>(
+            err = kernel::NumpyArray_fill<int16_t, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int16_t*>(contiguous_other.data()),
               other_flatlength);
             break;
           case util::dtype::int32:
-            err = kernel::NumpyArray_fill<int32_t , double>(
+            err = kernel::NumpyArray_fill<int32_t , std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int32_t*>(contiguous_other.data()),
               other_flatlength);
             break;
           case util::dtype::int64:
-            err = kernel::NumpyArray_fill<int64_t, double>(
+            err = kernel::NumpyArray_fill<int64_t, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<int64_t*>(contiguous_other.data()),
               other_flatlength);
             break;
           case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, double>(
+            err = kernel::NumpyArray_fill<uint8_t, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint8_t*>(contiguous_other.data()),
               other_flatlength);
             break;
           case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, double>(
+            err = kernel::NumpyArray_fill<uint16_t, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint16_t*>(contiguous_other.data()),
               other_flatlength);
             break;
           case util::dtype::uint32:
-            err = kernel::NumpyArray_fill<uint32_t, double>(
+            err = kernel::NumpyArray_fill<uint32_t, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint32_t*>(contiguous_other.data()),
               other_flatlength);
             break;
           case util::dtype::uint64:
-            err = kernel::NumpyArray_fill<uint64_t, double>(
+            err = kernel::NumpyArray_fill<uint64_t, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<uint64_t*>(contiguous_other.data()),
               other_flatlength);
             break;
           case util::dtype::float16:
             throw std::runtime_error(
-              std::string("FIXME: merge from float16 not implemented")
-              + FILENAME(__LINE__));
+              std::string("FIXME: merge from float16 not implemented"
+              + FILENAME(__LINE__)));
           case util::dtype::float32:
-            err = kernel::NumpyArray_fill<float, double>(
+            err = kernel::NumpyArray_fill<float, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<float*>(contiguous_other.data()),
               other_flatlength);
             break;
           case util::dtype::float64:
-            err = kernel::NumpyArray_fill<double, double>(
+            err = kernel::NumpyArray_fill<double, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<double*>(contiguous_other.data()),
               other_flatlength);
             break;
           case util::dtype::complex64:
-            err = kernel::NumpyArray_fill<std::complex<float>, double>(
+            err = kernel::NumpyArray_fill<std::complex<float>, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<std::complex<float> *>(contiguous_other.data()),
               other_flatlength);
             break;
           case util::dtype::complex128:
-            err = kernel::NumpyArray_fill<std::complex<double>, double>(
+            err = kernel::NumpyArray_fill<std::complex<double>, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               self_flatlength,
               reinterpret_cast<std::complex<double> *>(contiguous_other.data()),
               other_flatlength);
@@ -3100,12 +3334,6 @@ namespace awkward {
         }
         util::handle_error(err, classname(), nullptr);
         break;
-
-
-        // throw std::runtime_error(
-        //   std::string("FIXME: merge to complex128 not implemented")
-        //   + FILENAME(__LINE__));
-        // break;
 
       // to complex256
       case util::dtype::complex256:
