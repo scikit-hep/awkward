@@ -2860,6 +2860,14 @@ namespace awkward {
           + FILENAME(__LINE__));
         break;
 
+
+
+      ///////////////////////////
+      // BREAK
+      ///////////////////////////
+
+
+
       // to complex128
       case util::dtype::complex128:
         switch (dtype_) {
@@ -2888,49 +2896,49 @@ namespace awkward {
               self_flatlength);
             break;
           case util::dtype::int32:
-            err = kernel::NumpyArray_fill<int32_t, double>(
+            err = kernel::NumpyArray_fill<int32_t, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               0,
               reinterpret_cast<int32_t*>(contiguous_self.data()),
               self_flatlength);
             break;
           case util::dtype::int64:
-            err = kernel::NumpyArray_fill<int64_t, double>(
+            err = kernel::NumpyArray_fill<int64_t, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               0,
               reinterpret_cast<int64_t*>(contiguous_self.data()),
               self_flatlength);
             break;
           case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, double>(
+            err = kernel::NumpyArray_fill<uint8_t, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               0,
               reinterpret_cast<uint8_t*>(contiguous_self.data()),
               self_flatlength);
             break;
           case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, double>(
+            err = kernel::NumpyArray_fill<uint16_t, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               0,
               reinterpret_cast<uint16_t*>(contiguous_self.data()),
               self_flatlength);
             break;
           case util::dtype::uint32:
-            err = kernel::NumpyArray_fill<uint32_t, double>(
+            err = kernel::NumpyArray_fill<uint32_t, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               0,
               reinterpret_cast<uint32_t*>(contiguous_self.data()),
               self_flatlength);
             break;
           case util::dtype::uint64:
-            err = kernel::NumpyArray_fill<uint64_t, double>(
+            err = kernel::NumpyArray_fill<uint64_t, std::complex<double>>(
               kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
+              reinterpret_cast<std::complex<double>*>(ptr.get()),
               0,
               reinterpret_cast<uint64_t*>(contiguous_self.data()),
               self_flatlength);
@@ -3065,14 +3073,14 @@ namespace awkward {
               reinterpret_cast<double*>(contiguous_other.data()),
               other_flatlength);
             break;
-          // case util::dtype::complex64:
-          //   err = kernel::NumpyArray_fill<std::complex<float>, double>(
-          //     kernel::lib::cpu,   // DERIVE
-          //     reinterpret_cast<double*>(ptr.get()),
-          //     self_flatlength,
-          //     reinterpret_cast<std::complex<float> *>(contiguous_other.data()),
-          //     other_flatlength);
-          //   break;
+          case util::dtype::complex64:
+            err = kernel::NumpyArray_fill<std::complex<float>, double>(
+              kernel::lib::cpu,   // DERIVE
+              reinterpret_cast<double*>(ptr.get()),
+              self_flatlength,
+              reinterpret_cast<std::complex<float> *>(contiguous_other.data()),
+              other_flatlength);
+            break;
           case util::dtype::complex128:
             err = kernel::NumpyArray_fill<std::complex<double>, double>(
               kernel::lib::cpu,   // DERIVE

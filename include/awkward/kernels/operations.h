@@ -826,6 +826,16 @@ extern "C" {
   /// @param fromptr inparam role: NumpyArray-ptr
   /// @param length inparam
   EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_fill_tofloat64_fromcomplex64(
+    double * toptr,
+    int64_t tooffset,
+    const std::complex<float> * fromptr,
+    int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: IndexedArray-index-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param length inparam
+  EXPORT_SYMBOL struct Error
   awkward_NumpyArray_fill_tofloat64_fromcomplex128(
     double * toptr,
     int64_t tooffset,
@@ -860,6 +870,67 @@ extern "C" {
     std::complex<double> * toptr,
     int64_t tooffset,
     const int16_t* fromptr,
+    int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: IndexedArray-index-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param length inparam
+  EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_fill_tocomplex128_fromint32(
+    std::complex<double> * toptr,
+    int64_t tooffset,
+    const int32_t* fromptr,
+    int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: IndexedArray-index-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param length inparam
+  EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_fill_tocomplex128_fromint64(
+    std::complex<double> * toptr,
+    int64_t tooffset,
+    const int64_t* fromptr,
+    int64_t length);
+
+  /// @param toptr outparam
+  /// @param tooffset inparam role: IndexedArray-index-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param length inparam
+  EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_fill_tocomplex128_fromuint8(
+    std::complex<double> * toptr,
+    int64_t tooffset,
+    const uint8_t* fromptr,
+    int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: IndexedArray-index-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param length inparam
+  EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_fill_tocomplex128_fromuint16(
+    std::complex<double> * toptr,
+    int64_t tooffset,
+    const uint16_t* fromptr,
+    int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: IndexedArray-index-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param length inparam
+  EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_fill_tocomplex128_fromuint32(
+    std::complex<double> * toptr,
+    int64_t tooffset,
+    const uint32_t* fromptr,
+    int64_t length);
+  /// @param toptr outparam
+  /// @param tooffset inparam role: IndexedArray-index-offset
+  /// @param fromptr inparam role: NumpyArray-ptr
+  /// @param length inparam
+  EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_fill_tocomplex128_fromuint64(
+    std::complex<double> * toptr,
+    int64_t tooffset,
+    const uint64_t* fromptr,
     int64_t length);
   /// @param toptr outparam
   /// @param tooffset inparam role: IndexedArray-index-offset
