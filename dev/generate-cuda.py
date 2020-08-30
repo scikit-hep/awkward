@@ -4,6 +4,7 @@ import argparse
 import ast
 import copy
 import os
+import sys
 from collections import OrderedDict
 
 import yaml
@@ -36,7 +37,6 @@ KERNEL_WHITELIST = [
     "awkward_NumpyArray_contiguous_init",
     "awkward_NumpyArray_getitem_next_array_advanced",
     "awkward_NumpyArray_getitem_next_at",
-    "awkward_ListArray_getitem_next_range_counts",
     "awkward_RegularArray_getitem_next_array_advanced",
     "awkward_UnionArray_regular_index_getsize",
     "awkward_ByteMaskedArray_toIndexedOptionArray",
@@ -44,10 +44,9 @@ KERNEL_WHITELIST = [
     "awkward_combinations",
     "awkward_index_carry",
     "awkward_ByteMaskedArray_getitem_carry",
-    "awkward_IndexedArray_simplify",
+    # "awkward_IndexedArray_simplify", Fails on Python 3.5, 3.6 and 3.7
     "awkward_RegularArray_broadcast_tooffsets",
     "awkward_ListArray_validity",
-    "awkward_IndexedArray_validity",
     "awkward_UnionArray_validity",
 ]
 
@@ -93,6 +92,7 @@ KERNEL_CURIOUS = [
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_expand",
     "awkward_missing_repeat",
+    "awkward_IndexedArray_validity",
 ]
 
 
@@ -117,10 +117,15 @@ def traverse(node, args={}, forflag=False, declared=[]):
             code += traverse(subnode, args, True, declared)
         code += "}\n"
     elif node.__class__.__name__ == "Raise":
-        code = (
-            'err->str = "{0}";\n'.format(node.exc.args[0].value)
-            + 'err->filename = "FILENAME(__LINE__)";\nerr->pass_through=true;\n'
-        )
+        if sys.version_info[0] == 2:
+            code = 'err->str = "{0}";\n'.format(node.type.args[0].s)
+        elif sys.version_info[0] == 3 and sys.version_info[1] in [5, 6, 7]:
+            code = 'err->str = "{0}";\n'.format(node.exc.args[0].s)
+        else:
+            code = (
+                'err->str = "{0}";\n'.format(node.exc.args[0].value)
+                + 'err->filename = "FILENAME(__LINE__)";\nerr->pass_through=true;\n'
+            )
     elif node.__class__.__name__ == "If":
         code = ""
         tempdeclared = copy.copy(declared)
@@ -141,6 +146,8 @@ def traverse(node, args={}, forflag=False, declared=[]):
             code = "thread_id"
         else:
             code = node.id
+    elif node.__class__.__name__ == "Num":
+        code = str(node.n)
     elif node.__class__.__name__ == "BinOp":
         left = traverse(node.left, args, forflag, declared)
         right = traverse(node.right, args, forflag, declared)
@@ -153,7 +160,10 @@ def traverse(node, args={}, forflag=False, declared=[]):
         )
     elif node.__class__.__name__ == "UnaryOp":
         if node.op.__class__.__name__ == "USub":
-            code = "-{0}".format(node.operand.value)
+            if sys.version_info[0] == 3 and sys.version_info[1] in [5, 6, 7]:
+                code = "-{0}".format(node.operand.n)
+            else:
+                code = "-{0}".format(node.operand.value)
     elif node.__class__.__name__ == "Sub":
         code = "-"
     elif node.__class__.__name__ == "Add":
@@ -168,6 +178,7 @@ def traverse(node, args={}, forflag=False, declared=[]):
             or node.slice.value.__class__.__name__ == "BinOp"
             or node.slice.value.__class__.__name__ == "Subscript"
             or node.slice.value.__class__.__name__ == "Name"
+            or node.slice.value.__class__.__name__ == "Num"
         ) and hasattr(node.value, "id"):
             code = (
                 node.value.id
@@ -488,8 +499,9 @@ def getlenarg(pycode):
 
 def getctype(typename):
     pointercount = 0
-    if "const " in typename:
-        typename = typename.replace("const ", "", 1)
+    if "Const[" in typename:
+        typename = typename[:-1]
+        typename = typename.replace("Const[", "", 1)
         cpptype = "const "
     else:
         cpptype = ""
@@ -529,7 +541,7 @@ def getparentargs(templateargs, spec):
             if list(arg.keys())[0] in templateargs.keys():
                 if "*" in getctype(list(arg.values())[0]):
                     argname = "*" + argname
-                if "const " in list(arg.values())[0]:
+                if "Const[" in list(arg.values())[0]:
                     args[argname] = "const " + templateargs[list(arg.keys())[0]]
                 else:
                     args[argname] = templateargs[list(arg.keys())[0]]
@@ -598,7 +610,8 @@ def gettemplatetypes(spec, templateargs):
                     count += 1
                 else:
                     code += ", " + getctype(typename).replace("*", "")
-    code = code.replace("const ", "")
+    if "const " in code:
+        code = code.replace("const ", "")
     return code
 
 
@@ -672,7 +685,7 @@ threads_per_block = dim3({0}, 1, 1);
             code += " " * 2 + "cudaDeviceSynchronize();\n"
             code += (
                 " " * 2
-                + "cudaMemcpy(d_err, err, sizeof(ERROR), cudaMemcpyDeviceToHost);\n"
+                + "cudaMemcpy(err, d_err, sizeof(ERROR), cudaMemcpyDeviceToHost);\n"
             )
             code += " " * 2 + "cudaFree(d_err);\n"
             code += " " * 2 + "return *err;\n"
