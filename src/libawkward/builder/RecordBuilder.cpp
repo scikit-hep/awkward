@@ -100,7 +100,7 @@ namespace awkward {
     }
     util::Parameters parameters;
     if (nameptr_ != nullptr) {
-      parameters["__record__"] = util::quote(name_, true);
+      parameters["__record__"] = util::quote(name_);
     }
     ContentPtrVec contents;
     util::RecordLookupPtr recordlookup =
@@ -489,7 +489,7 @@ namespace awkward {
         }
         if (contents_[i].get()->length() != length_ + 1) {
           throw std::invalid_argument(
-            std::string("record field ") + util::quote(keys_[i], true)
+            std::string("record field ") + util::quote(keys_[i])
             + std::string(" filled more than once") + FILENAME(__LINE__));
         }
       }
