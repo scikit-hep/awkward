@@ -83,7 +83,7 @@ namespace awkward {
             out << ", ";
           }
           if (recordlookup_.get() != nullptr) {
-            out << util::quote(recordlookup_.get()->at(j), true) << ": ";
+            out << util::quote(recordlookup_.get()->at(j)) << ": ";
           }
           out << types_[j].get()->tostring_part("", "", "");
         }
@@ -99,7 +99,7 @@ namespace awkward {
           if (j != 0) {
             out << ", ";
           }
-          out << util::quote(recordlookup_.get()->at(j), true) << ": ";
+          out << util::quote(recordlookup_.get()->at(j)) << ": ";
           out << types_[j].get()->tostring_part("", "", "");
         }
         out << "}";
@@ -122,7 +122,7 @@ namespace awkward {
           if (j != 0) {
             out << ", ";
           }
-          out << util::quote(recordlookup_.get()->at(j), true);
+          out << util::quote(recordlookup_.get()->at(j));
         }
         out << "], [";
         for (size_t j = 0;  j < types_.size();  j++) {

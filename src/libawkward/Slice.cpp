@@ -345,7 +345,7 @@ namespace awkward {
 
   const std::string
   SliceField::tostring() const {
-    return util::quote(key_, true);
+    return util::quote(key_);
   }
 
   bool
@@ -376,7 +376,7 @@ namespace awkward {
       if (i != 0) {
         out << ", ";
       }
-      out << util::quote(keys_[i], true);
+      out << util::quote(keys_[i]);
     }
     out << "]";
     return out.str();

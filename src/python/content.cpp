@@ -77,7 +77,7 @@ box(const std::shared_ptr<ak::Content>& content) {
           if (raw->ptr_lib() == ak::kernel::lib::cuda) {
             throw std::runtime_error(
               std::string("not implemented: format ")
-              + ak::util::quote(raw->format(), true)
+              + ak::util::quote(raw->format())
               + std::string(" in CUDA")
               + FILENAME(__LINE__));
           }

@@ -195,7 +195,7 @@ namespace awkward {
   Record::getitem_at(int64_t at) const {
     throw std::invalid_argument(
       std::string("scalar Record can only be sliced by field name (string); "
-                  "try ") + util::quote(std::to_string(at), true)
+                  "try ") + util::quote(std::to_string(at))
       + FILENAME(__LINE__));
   }
 
@@ -203,7 +203,7 @@ namespace awkward {
   Record::getitem_at_nowrap(int64_t at) const {
     throw std::invalid_argument(
       std::string("scalar Record can only be sliced by field name (string); "
-                  "try ") + util::quote(std::to_string(at), true)
+                  "try ") + util::quote(std::to_string(at))
       + FILENAME(__LINE__));
   }
 

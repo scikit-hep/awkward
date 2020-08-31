@@ -73,7 +73,7 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        std::string("unsupported encoding: ") + util::quote(encoding_, false)
+        std::string("unsupported encoding: ") + util::quote(encoding_)
         + FILENAME(__LINE__));
     }
 

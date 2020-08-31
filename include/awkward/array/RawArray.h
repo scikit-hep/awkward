@@ -105,7 +105,7 @@ namespace awkward {
 
     int64_t
       fieldindex(const std::string& key) const override {
-      throw std::invalid_argument(std::string("key ") + util::quote(key, true)
+      throw std::invalid_argument(std::string("key ") + util::quote(key)
         + std::string(" does not exist (data are not records)") + FILENAME(__LINE__));
     }
 
@@ -138,7 +138,7 @@ namespace awkward {
 
     const FormPtr
       getitem_field(const std::string& key) const override {
-      throw std::invalid_argument(std::string("key ") + util::quote(key, true)
+      throw std::invalid_argument(std::string("key ") + util::quote(key)
         + std::string(" does not exist (data are not records)"));
     }
 
@@ -756,7 +756,7 @@ namespace awkward {
     int64_t
       fieldindex(const std::string& key) const override {
       throw std::invalid_argument(
-        std::string("key ") + util::quote(key, true)
+        std::string("key ") + util::quote(key)
         + std::string(" does not exist (data are not records)")
         + FILENAME(__LINE__));
     }

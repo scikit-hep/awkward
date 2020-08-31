@@ -82,7 +82,7 @@ namespace awkward {
   int64_t
   EmptyForm::fieldindex(const std::string& key) const {
     throw std::invalid_argument(
-      std::string("key ") + util::quote(key, true)
+      std::string("key ") + util::quote(key)
       + std::string(" does not exist (data might not be records)")
       + FILENAME(__LINE__));
   }
@@ -134,7 +134,7 @@ namespace awkward {
   const FormPtr
   EmptyForm::getitem_field(const std::string& key) const {
     throw std::invalid_argument(
-      std::string("key ") + util::quote(key, true)
+      std::string("key ") + util::quote(key)
       + std::string(" does not exist (data might not be records)"));
   }
 
@@ -336,7 +336,7 @@ namespace awkward {
   int64_t
   EmptyArray::fieldindex(const std::string& key) const {
     throw std::invalid_argument(
-      std::string("key ") + util::quote(key, true)
+      std::string("key ") + util::quote(key)
       + std::string(" does not exist (data might not be records)")
       + FILENAME(__LINE__));
   }

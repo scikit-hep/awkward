@@ -1606,7 +1606,7 @@ namespace awkward {
       std::stringstream out;
       out << indent << pre << "<parameters>\n";
       for (auto pair : parameters_) {
-        out << indent << "    <param key=" << util::quote(pair.first, true)
+        out << indent << "    <param key=" << util::quote(pair.first)
             << ">" << pair.second << "</param>\n";
       }
       out << indent << "</parameters>" << post;
