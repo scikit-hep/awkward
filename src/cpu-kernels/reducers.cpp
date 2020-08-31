@@ -1753,11 +1753,11 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64(
   const int64_t* nextparents,
   int64_t nextlen) {
   int64_t lastnextparent = -1;
-  for (int64_t k = 0;  k < nextlen;  k++) {
-    if (nextparents[k] != lastnextparent) {
-      nextstarts[nextparents[k]] = k;
+  for (int64_t i = 0;  i < nextlen;  i++) {
+    if (nextparents[i] != lastnextparent) {
+      nextstarts[nextparents[i]] = i;
     }
-    lastnextparent = nextparents[k];
+    lastnextparent = nextparents[i];
   }
   return success();
 }
