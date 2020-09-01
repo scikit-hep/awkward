@@ -26,6 +26,25 @@ def gettypename(spectype):
     return typename
 
 
+def getfuncnames():
+    funcs = {}
+    with open(
+        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
+    ) as infile:
+        mainspec = yaml.safe_load(infile)["kernels"]
+        for filedir in mainspec.values():
+            for relpath in filedir.values():
+                with open(
+                    os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
+                ) as specfile:
+                    indspec = yaml.safe_load(specfile)[0]
+                    funcs[indspec["name"]] = []
+                    if "specializations" in indspec.keys():
+                        for childfunc in indspec["specializations"]:
+                            funcs[indspec["name"]].append(childfunc["name"])
+    return funcs
+
+
 def genpykernels():
     print("Generating Python kernels")
     prefix = """
@@ -390,8 +409,12 @@ def gencudakerneltests(tests):
 
     funcargs = getfuncargs()
     cudakernels = getcudakernelslist()
+    funcnames = getfuncnames()
+    cudafuncnames = {funcname: funcnames[funcname] for funcname in cudakernels}
     for funcname in tests.keys():
-        if funcname in cudakernels:
+        if (funcname in cudakernels) or any(
+            funcname in x for x in cudafuncnames.values()
+        ):
             with open(
                 os.path.join(
                     CURRENT_DIR,
