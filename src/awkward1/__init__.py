@@ -14,6 +14,9 @@ if distutils.version.LooseVersion(numpy.__version__) < distutils.version.LooseVe
 ):
     raise ImportError("Numpy 1.13.1 or later required")
 
+# NumPy-like alternatives
+import awkward1.nplike
+
 # shims for C++ (now everything is compiled into one 'awkward1._ext' module)
 import awkward1.layout
 import awkward1.types
@@ -51,15 +54,15 @@ from awkward1.highlevel import Record
 from awkward1.highlevel import ArrayBuilder
 
 # behaviors
-from awkward1.behaviors.mixins import mixin_class, mixin_class_method
-import awkward1.behaviors.string
+from awkward1.behaviors.mixins import *
+from awkward1.behaviors.string import *
+from awkward1.behaviors.categorical import *
 
 # operations
 from awkward1.operations.convert import *
 from awkward1.operations.describe import *
 from awkward1.operations.structure import *
 from awkward1.operations.reducers import *
-from awkward1.operations.transfers import *
 
 # version
 __version__ = awkward1._ext.__version__

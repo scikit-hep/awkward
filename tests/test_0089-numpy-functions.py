@@ -164,20 +164,4 @@ def test_size():
     assert numpy.size(numpy.arange(2*3*5).reshape(2, 3, 5), 2) == 5
     with pytest.raises(ValueError) as err:
         awkward1.size(awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5).tolist(), check_valid=True))
-    assert str(err.value) == "ak.size is ambiguous due to variable-length arrays (try ak.flatten to remove structure or ak.to_numpy to force regularity, if possible)"
-
-plt = pytest.importorskip("matplotlib.pyplot")
-
-def test_inhibit_matplotlib():
-    array = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)
-    plt.hist(array)
-    plt.plot(array)
-    plt.plot(array, array)
-
-    array = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True)
-    with pytest.raises(ValueError):
-        plt.hist(array)
-    with pytest.raises(ValueError):
-        plt.plot(array)
-    with pytest.raises(ValueError):
-        plt.plot(array, array)
+    assert str(err.value).startswith("ak.size is ambiguous due to variable-length arrays (try ak.flatten to remove structure or ak.to_numpy to force regularity, if possible)")

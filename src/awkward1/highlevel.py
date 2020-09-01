@@ -4,38 +4,60 @@ from __future__ import absolute_import
 
 import re
 import keyword
+import warnings
 
 try:
     from collections.abc import Iterable
+    from collections.abc import Sized
     from collections.abc import MutableMapping
 except ImportError:
     from collections import Iterable
+    from collections import Sized
     from collections import MutableMapping
-
-import numpy
 
 import awkward1._connect._numpy
 import awkward1._connect._pandas
+import awkward1.nplike
 import awkward1.layout
 import awkward1.operations.convert
 import awkward1.operations.structure
 
+
+np = awkward1.nplike.NumpyMetadata.instance()
+numpy = awkward1.nplike.Numpy.instance()
+
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
+
+
+def _suffix(array):
+    out = awkward1.operations.convert.kernels(array)
+    if out is None or out == "cpu":
+        return ""
+    else:
+        return ":" + out
 
 
 class Array(
     awkward1._connect._numpy.NDArrayOperatorsMixin,
     awkward1._connect._pandas.PandasMixin,
+    Iterable,
+    Sized,
 ):
-    """
+    u"""
     Args:
-        data (#ak.layout.Content, #ak.Array, np.ndarray, str, or iterable):
+        data (#ak.layout.Content, #ak.partition.PartitionedArray, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
             Data to wrap or convert into an array.
-            If a NumPy array, the regularity of its dimensions is preserved
-            and the data are viewed, not copied.
-            If a string, the data are assumed to be JSON.
-            If an iterable, calls #ak.from_iter, which assumes all dimensions
-            have irregular lengths.
+               - If a NumPy array, the regularity of its dimensions is preserved
+                 and the data are viewed, not copied.
+               - CuPy arrays are treated the same way as NumPy arrays except that
+                 they default to `kernels="cuda"`, rather than `kernels="cpu"`.
+               - If a pyarrow object, calls #ak.from_arrow, preserving as much
+                 metadata as possible, usually zero-copy.
+               - If a dict of str \u2192 columns, combines the columns into an
+                 array of records (like Pandas's DataFrame constructor).
+               - If a string, the data are assumed to be JSON.
+               - If an iterable, calls #ak.from_iter, which assumes all dimensions
+                 have irregular lengths.
         behavior (None or dict): Custom #ak.behavior for this Array only.
         with_name (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
@@ -43,6 +65,13 @@ class Array(
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
+        kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Array will be placed in
+            main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
+            the Array will be placed in GPU global memory using CUDA; if None,
+            the `data` are left untouched. For `"cuda"`,
+            [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
+            must be installed, which can be invoked with
+            `pip install awkward1[cuda] --upgrade`.
 
     High-level array that can contain data of any type.
 
@@ -123,42 +152,18 @@ class Array(
     Pandas
     ******
 
-    ak.Arrays can be used as [Pandas](https://pandas.pydata.org/) DataFrame
-    columns and Series, in place of NumPy arrays. Their data structures are not
-    copied or converted into Python objects (not even NumPy's `"O"` dtype), so
-    this is the most efficient way to fill DataFrames with arbitrary data
-    structures.
-
-    As a consequence, however, ak.Array must include the following methods in
-    its namespace (other than names with underscores):
-
-       * `columns`: Property like #ak.keys, except that the list cannot be
-         empty (a special placeholder is used instead).
-       * `dtype`: Property with the same value as
-         #ak._connect._pandas.get_dtype. It provides no information about
-         the type of data in the array.
-       * `ndim`: Property whose value is `1`, which does not reflect the
-         structure of the data in the array.
-       * `shape`: Property whose value is a single-item tuple containing
-         the length of the array (#ak.Array.__len__). It does not reflect
-         the structure of the data in the array.
-       * `isna()`: Method whose value is equal to #ak.is_none, implementing
-         [pd.Series.isna](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.isna.html)
-       * `take(indices, allow_fill=None, fill_value=None)`: method implementing
-         [pd.Series.take](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.take.html)
-         for the ak.Array.
-       * `copy()`: Method implementing
-         [pd.Series.copy](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.copy.html),
-         which completely copies the array (all nodes, all buffers).
-
-    It's also possible to convert Awkward data structures into Pandas
+    Ragged arrays (list type) can be converted into Pandas
     [MultiIndex](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html)
-    rows and columns. In this case, the data in Pandas are not Awkward Arrays.
+    rows and nested records can be converted into MultiIndex columns. If the
+    Awkward Array has only one "branch" of nested lists (i.e. different record
+    fields do not have different-length lists, but a single chain of lists-of-lists
+    is okay), then it can be losslessly converted into a single DataFrame.
+    Otherwise, multiple DataFrames are needed, though they can be merged (with a
+    loss of information).
 
-    See #ak.pandas.df to convert an ak.Array into one Pandas DataFrame (lossy).
-
-    See #ak.pandas.dfs to convert an ak.Array into as many DataFrames as are
-    needed to preserve its list structure.
+    The #ak.to_pandas function performs this conversion; if `how=None`, it
+    returns a list of DataFrames; otherwise, `how` is passed to `pd.merge` when
+    merging the resultant DataFrames.
 
     Numba
     *****
@@ -207,30 +212,59 @@ class Array(
     """
 
     def __init__(
-        self, data, behavior=None, with_name=None, check_valid=False, cache=None
+        self,
+        data,
+        behavior=None,
+        with_name=None,
+        check_valid=False,
+        cache=None,
+        kernels=None,
     ):
         if isinstance(
             data, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
         ):
             layout = data
+
         elif isinstance(data, Array):
             layout = data.layout
-        elif isinstance(data, numpy.ndarray):
+
+        elif isinstance(data, np.ndarray) and data.dtype != np.dtype("O"):
             layout = awkward1.operations.convert.from_numpy(data, highlevel=False)
+
+        elif type(data).__module__.startswith("cupy."):
+            layout = awkward1.operations.convert.from_cupy(data, highlevel=False)
+
+        elif type(data).__module__ == "pyarrow" or type(data).__module__.startswith("pyarrow."):
+            layout = awkward1.operations.convert.from_arrow(data, highlevel=False)
+
+        elif isinstance(data, dict):
+            keys = []
+            contents = []
+            for k, v in data.items():
+                keys.append(k)
+                contents.append(Array(v).layout)
+            parameters = None
+            if with_name is not None:
+                parameters = {"__record__": with_name}
+            layout = awkward1.layout.RecordArray(
+                contents, keys, parameters=parameters
+            )
+
         elif isinstance(data, str):
             layout = awkward1.operations.convert.from_json(data, highlevel=False)
-        elif isinstance(data, dict):
-            raise TypeError(
-                "could not convert dict into an awkward1.Array; " "try awkward1.Record"
-            )
+
         else:
             layout = awkward1.operations.convert.from_iter(
                 data, highlevel=False, allow_record=False
             )
+
         if not isinstance(
             layout, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
         ):
-            raise TypeError("could not convert data into an awkward1.Array")
+            raise TypeError(
+                "could not convert data into an awkward1.Array"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
         if with_name is not None:
             layout = awkward1.operations.structure.with_name(
@@ -238,6 +272,14 @@ class Array(
             )
         if self.__class__ is Array:
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
+
+        if (
+            kernels is not None
+            and kernels != awkward1.operations.convert.kernels(layout)
+        ):
+            layout = awkward1.operations.convert.to_kernels(
+                layout, kernels, highlevel=False
+            )
 
         self.layout = layout
         self.behavior = behavior
@@ -301,7 +343,10 @@ class Array(
             self._layout = layout
             self._numbaview = None
         else:
-            raise TypeError("layout must be a subclass of awkward1.layout.Content")
+            raise TypeError(
+                "layout must be a subclass of awkward1.layout.Content"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     @property
     def behavior(self):
@@ -327,7 +372,10 @@ class Array(
         if behavior is None or isinstance(behavior, dict):
             self._behavior = behavior
         else:
-            raise TypeError("behavior must be None or a dict")
+            raise TypeError(
+                "behavior must be None or a dict"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     @property
     def cache(self):
@@ -338,18 +386,30 @@ class Array(
         if value is None or isinstance(value, MutableMapping):
             self._cache = value
         else:
-            raise TypeError("cache must be None or a MutableMapping")
+            raise TypeError(
+                "cache must be None or a MutableMapping"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     class Mask(object):
         def __init__(self, array, valid_when):
             self._array = array
             self._valid_when = valid_when
 
-        def __str__(self, limit_value=85):
-            return self._array.__str__(limit_value=limit_value)
+        def __str__(self):
+            return self._str()
 
-        def __repr__(self, limit_value=40, limit_total=85):
+        def __repr__(self):
+            return self._repr()
+
+        def _str(self, limit_value=85):
+            return self._array._str(limit_value=limit_value)
+
+        def _repr(self, limit_value=40, limit_total=85):
             import awkward1.operations.structure
+
+            suffix = _suffix(self)
+            limit_value -= len(suffix)
 
             layout = awkward1.operations.structure.with_cache(
                 self._layout, {}, chain="last", highlevel=False
@@ -369,7 +429,7 @@ class Array(
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-            return "<{0}.mask {1} type={2}>".format(name, value, typestr)
+            return "<{0}.mask{1} {2} type={3}>".format(name, suffix, value, typestr)
 
         def __getitem__(self, where):
             return awkward1.operations.structure.mask(
@@ -458,6 +518,11 @@ class Array(
 
         See also #ak.to_json and #ak.from_json.
         """
+        warnings.warn(
+            ".tojson is deprecated, will be removed in 0.3.0. Use\n\n"
+            "    ak.to_json(array)\n\ninstead.",
+            DeprecationWarning,
+        )
         return awkward1.operations.convert.to_json(
             self, destination, pretty, maxdecimals, buffersize
         )
@@ -936,7 +1001,10 @@ class Array(
             isinstance(where, str)
             or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
         ):
-            raise TypeError("only fields may be assigned in-place (by field name)")
+            raise TypeError(
+                "only fields may be assigned in-place (by field name)"
+                + awkward1._util.exception_suffix(__file__)
+            )
         self._layout = awkward1.operations.structure.with_field(
             self._layout, what, where
         ).layout
@@ -991,9 +1059,13 @@ class Array(
                     raise AttributeError(
                         "while trying to get field {0}, an exception "
                         "occurred:\n{1}: {2}".format(repr(where), type(err), str(err))
+                        + awkward1._util.exception_suffix(__file__)
                     )
             else:
-                raise AttributeError("no field named {0}".format(repr(where)))
+                raise AttributeError(
+                    "no field named {0}".format(repr(where))
+                    + awkward1._util.exception_suffix(__file__)
+                )
 
     def __dir__(self):
         """
@@ -1097,7 +1169,7 @@ class Array(
         """
         return self["9"]
 
-    def __str__(self, limit_value=85):
+    def __str__(self):
         """
         Args:
             limit_value (int): Maximum number of characters to use when
@@ -1150,16 +1222,9 @@ class Array(
         See #ak.to_list and #ak.to_json to convert whole Arrays into Python
         data or JSON strings without loss (except for #type).
         """
-        import awkward1.operations.structure
+        return self._str()
 
-        layout = awkward1.operations.structure.with_cache(
-            self._layout, {}, chain="last", highlevel=False
-        )
-        return awkward1._util.minimally_touching_string(
-            limit_value, layout, self._behavior
-        )
-
-    def __repr__(self, limit_value=40, limit_total=85):
+    def __repr__(self):
         """
         Args:
             limit_value (int): Maximum number of characters to use when
@@ -1174,7 +1239,23 @@ class Array(
         The #type is truncated as well, but showing only the left side
         of its string (the outermost data structures).
         """
+        return self._repr()
+
+    def _str(self, limit_value=85):
         import awkward1.operations.structure
+
+        layout = awkward1.operations.structure.with_cache(
+            self._layout, {}, chain="last", highlevel=False
+        )
+        return awkward1._util.minimally_touching_string(
+            limit_value, layout, self._behavior
+        )
+
+    def _repr(self, limit_value=40, limit_total=85):
+        import awkward1.operations.structure
+
+        suffix = _suffix(self)
+        limit_value -= len(suffix)
 
         layout = awkward1.operations.structure.with_cache(
             self._layout, {}, chain="last", highlevel=False
@@ -1192,7 +1273,7 @@ class Array(
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{0} {1} type={2}>".format(name, value, typestr)
+        return "<{0}{1} {2} type={3}>".format(name, suffix, value, typestr)
 
     def __array__(self, *args, **kwargs):
         """
@@ -1218,9 +1299,6 @@ class Array(
         significant performance hit, but would also break functionality, since
         nested lists in a NumPy `"O"` array are severed from the array and
         cannot be sliced as dimensions.
-
-        Only exception: Pandas can generate NumPy `"O"` arrays to print
-        Array fragments to the screen.
         """
         if awkward1._util.called_by_module(
             "pandas.io.formats.format"
@@ -1376,6 +1454,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
+        kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Record will be placed in
+            main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
+            the Record will be placed in GPU global memory using CUDA; if None,
+            the `data` are left untouched. For `"cuda"`,
+            [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
+            must be installed, which can be invoked with
+            `pip install awkward1[cuda] --upgrade`.
 
     High-level record that can contain fields of any type.
 
@@ -1392,25 +1477,40 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     """
 
     def __init__(
-        self, data, behavior=None, with_name=None, check_valid=False, cache=None
+        self,
+        data,
+        behavior=None,
+        with_name=None,
+        check_valid=False,
+        cache=None,
+        kernels=None,
     ):
         if isinstance(data, awkward1.layout.Record):
             layout = data
+
         elif isinstance(data, Record):
             layout = data.layout
+
         elif isinstance(data, str):
             layout = awkward1.operations.convert.from_json(data, highlevel=False)
+
         elif isinstance(data, dict):
             layout = awkward1.operations.convert.from_iter([data], highlevel=False)[0]
+
         elif isinstance(data, Iterable):
             raise TypeError(
-                "could not convert non-dict into an "
-                "awkward1.Record; try awkward1.Array"
+                "could not convert non-dict into an awkward1.Record; try awkward1.Array"
+                + awkward1._util.exception_suffix(__file__)
             )
+
         else:
             layout = None
+
         if not isinstance(layout, awkward1.layout.Record):
-            raise TypeError("could not convert data into an awkward1.Record")
+            raise TypeError(
+                "could not convert data into an awkward1.Record"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
         if self.__class__ is Record:
             self.__class__ = awkward1._util.recordclass(layout, behavior)
@@ -1418,6 +1518,14 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if with_name is not None:
             layout = awkward1.operations.structure.with_name(
                 layout, with_name, highlevel=False
+            )
+
+        if (
+            kernels is not None
+            and kernels != awkward1.operations.convert.kernels(layout)
+        ):
+            layout = awkward1.operations.convert.to_kernels(
+                layout, kernels, highlevel=False
             )
 
         self.layout = layout
@@ -1476,7 +1584,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             self._layout = layout
             self._numbaview = None
         else:
-            raise TypeError("layout must be a subclass of awkward1.layout.Record")
+            raise TypeError(
+                "layout must be a subclass of awkward1.layout.Record"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     @property
     def behavior(self):
@@ -1502,7 +1613,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if behavior is None or isinstance(behavior, dict):
             self._behavior = behavior
         else:
-            raise TypeError("behavior must be None or a dict")
+            raise TypeError(
+                "behavior must be None or a dict"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     @property
     def cache(self):
@@ -1513,7 +1627,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if value is None or isinstance(value, MutableMapping):
             self._cache = value
         else:
-            raise TypeError("cache must be None or a MutableMapping")
+            raise TypeError(
+                "cache must be None or a MutableMapping"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     def tolist(self):
         """
@@ -1574,6 +1691,11 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See also #ak.to_json and #ak.from_json.
         """
+        warnings.warn(
+            ".tojson is deprecated, will be removed in 0.3.0. Use\n\n"
+            "    ak.to_json(array)\n\ninstead.",
+            DeprecationWarning,
+        )
         return awkward1.operations.convert.to_json(
             self, destination, pretty, maxdecimals, buffersize
         )
@@ -1650,7 +1772,10 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             isinstance(where, str)
             or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
         ):
-            raise TypeError("only fields may be assigned in-place (by field name)")
+            raise TypeError(
+                "only fields may be assigned in-place (by field name)"
+                + awkward1._util.exception_suffix(__file__)
+            )
         self._layout = awkward1.operations.structure.with_field(
             self._layout, what, where
         ).layout
@@ -1694,9 +1819,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                     raise AttributeError(
                         "while trying to get field {0}, an exception "
                         "occurred:\n{1}: {2}".format(repr(where), type(err), str(err))
+                        + awkward1._util.exception_suffix(__file__)
                     )
             else:
-                raise AttributeError("no field named {0}".format(repr(where)))
+                raise AttributeError(
+                    "no field named {0}".format(repr(where))
+                    + awkward1._util.exception_suffix(__file__)
+                )
 
     def __dir__(self):
         """
@@ -1814,7 +1943,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         """
         return self["9"]
 
-    def __str__(self, limit_value=85):
+    def __str__(self):
         """
         Args:
             limit_value (int): Maximum number of characters to use when
@@ -1824,16 +1953,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See #ak.Array.__str__ for a more complete description.
         """
-        import awkward1.operations.structure
+        return self._str()
 
-        layout = awkward1.operations.structure.with_cache(
-            self._layout, {}, chain="last", highlevel=False
-        )
-        return awkward1._util.minimally_touching_string(
-            limit_value + 2, layout, self._behavior
-        )[1:-1]
-
-    def __repr__(self, limit_value=40, limit_total=85):
+    def __repr__(self):
         """
         Args:
             limit_value (int): Maximum number of characters to use when
@@ -1845,7 +1967,23 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See #ak.Array.__repr__ for a more complete description.
         """
+        return self._repr()
+
+    def _str(self, limit_value=85):
         import awkward1.operations.structure
+
+        layout = awkward1.operations.structure.with_cache(
+            self._layout, {}, chain="last", highlevel=False
+        )
+        return awkward1._util.minimally_touching_string(
+            limit_value + 2, layout, self._behavior
+        )[1:-1]
+
+    def _repr(self, limit_value=40, limit_total=85):
+        import awkward1.operations.structure
+
+        suffix = _suffix(self)
+        limit_value -= len(suffix)
 
         layout = awkward1.operations.structure.with_cache(
             self._layout, {}, chain="last", highlevel=False
@@ -1865,7 +2003,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{0} {1} type={2}>".format(name, value, typestr)
+        return "<{0}{1} {2} type={3}>".format(name, suffix, value, typestr)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -1925,7 +2063,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         self.cache = None
 
 
-class ArrayBuilder(object):
+class ArrayBuilder(Iterable, Sized):
     """
     Args:
         behavior (None or dict): Custom #ak.behavior for arrays built by
@@ -2095,7 +2233,10 @@ class ArrayBuilder(object):
         if behavior is None or isinstance(behavior, dict):
             self._behavior = behavior
         else:
-            raise TypeError("behavior must be None or a dict")
+            raise TypeError(
+                "behavior must be None or a dict"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     def __len__(self):
         """
@@ -2124,7 +2265,7 @@ class ArrayBuilder(object):
         for x in self.snapshot():
             yield x
 
-    def __str__(self, limit_value=85, snapshot=None):
+    def __str__(self):
         """
         Args:
             limit_value (int): Maximum number of characters to use when
@@ -2135,11 +2276,9 @@ class ArrayBuilder(object):
 
         See #ak.Array.__str__ for a more complete description.
         """
-        if snapshot is None:
-            snapshot = self.snapshot()
-        return snapshot.__str__(limit_value=limit_value)
+        return self._str()
 
-    def __repr__(self, limit_value=40, limit_total=85):
+    def __repr__(self):
         """
         Args:
             limit_value (int): Maximum number of characters to use when
@@ -2152,8 +2291,16 @@ class ArrayBuilder(object):
 
         See #ak.Array.__repr__ for a more complete description.
         """
+        return self._repr()
+
+    def _str(self, limit_value=85, snapshot=None):
+        if snapshot is None:
+            snapshot = self.snapshot()
+        return snapshot._str(limit_value=limit_value)
+
+    def _repr(self, limit_value=40, limit_total=85):
         snapshot = self.snapshot()
-        value = self.__str__(limit_value=limit_value, snapshot=snapshot)
+        value = self._str(limit_value=limit_value, snapshot=snapshot)
 
         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
         typestrs = awkward1._util.typestrs(self._behavior)
@@ -2429,7 +2576,9 @@ class ArrayBuilder(object):
             if isinstance(obj, Record):
                 self._layout.append(obj.layout.array, obj.layout.at)
             elif isinstance(obj, Array):
+                self._layout.beginlist()
                 self._layout.extend(obj.layout)
+                self._layout.endlist()
             else:
                 self._layout.fromiter(obj)
 
@@ -2440,6 +2589,7 @@ class ArrayBuilder(object):
                 raise TypeError(
                     "'append' method can only be used with 'at' when "
                     "'obj' is an ak.Array"
+                    + awkward1._util.exception_suffix(__file__)
                 )
 
     def extend(self, obj):
@@ -2453,7 +2603,10 @@ class ArrayBuilder(object):
         if isinstance(obj, Array):
             self._layout.extend(obj.layout)
         else:
-            raise TypeError("'extend' method requires an ak.Array")
+            raise TypeError(
+                "'extend' method requires an ak.Array"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     class _Nested(object):
         def __init__(self, arraybuilder):
@@ -2461,7 +2614,7 @@ class ArrayBuilder(object):
 
         def __repr__(self, limit_value=40, limit_total=85):
             snapshot = self._arraybuilder.snapshot()
-            value = self._arraybuilder.__str__(
+            value = self._arraybuilder._str(
                 limit_value=limit_value, snapshot=snapshot
             )
 

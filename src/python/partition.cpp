@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/partition.cpp", line)
+
 #include "awkward/python/content.h"
 
 #include "awkward/python/partition.h"
@@ -35,7 +37,7 @@ tojson_file(const T& self,
 #endif
     throw std::invalid_argument(
       std::string("file \"") + destination
-      + std::string("\" could not be opened for writing"));
+      + std::string("\" could not be opened for writing") + FILENAME(__LINE__));
   }
   try {
     self.tojson(file,
@@ -113,6 +115,19 @@ partitionedarray_methods(py::class_<T, std::shared_ptr<T>,
               intstep = step.cast<int64_t>();
             }
             return self.getitem_range(intstart, intstop, intstep);
+          })
+          .def("copy_to",
+               [](const T& self, const std::string& ptr_lib) -> ak::PartitionedArrayPtr {
+               if (ptr_lib == "cpu") {
+                 return self.copy_to(ak::kernel::lib::cpu);
+               }
+               else if (ptr_lib == "cuda") {
+                 return self.copy_to(ak::kernel::lib::cuda);
+               }
+               else {
+                 throw std::invalid_argument(
+                   std::string("specify 'cpu' or 'cuda'") + FILENAME(__LINE__));
+               }
           })
 
   ;

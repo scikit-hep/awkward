@@ -1,12 +1,15 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/RegularArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/RegularArray.cpp", line)
+
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
 
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/operations.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/operations.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -170,6 +173,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  RegularForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// RegularArray
 
   RegularArray::RegularArray(const IdentitiesPtr& identities,
@@ -180,7 +188,9 @@ namespace awkward {
       , content_(content)
       , size_(size) {
     if (size < 0) {
-      throw std::invalid_argument("RegularArray size must be non-negative");
+      throw std::invalid_argument(
+        std::string("RegularArray size must be non-negative")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -199,7 +209,8 @@ namespace awkward {
     int64_t len = length();
     Index64 out(len + 1);
     struct Error err = kernel::RegularArray_compact_offsets_64(
-      out.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      out.data(),
       len,
       size_);
     util::handle_error(err, classname(), identities_.get());
@@ -210,7 +221,8 @@ namespace awkward {
   RegularArray::broadcast_tooffsets64(const Index64& offsets) const {
     if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
       throw std::invalid_argument(
-        "broadcast_tooffsets64 can only be used with offsets that start at 0");
+        std::string("broadcast_tooffsets64 can only be used with offsets that start at 0")
+        + FILENAME(__LINE__));
     }
 
     int64_t len = length();
@@ -218,7 +230,7 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("cannot broadcast RegularArray of length ")
         + std::to_string(len) + (" to length ")
-        + std::to_string(offsets.length() - 1));
+        + std::to_string(offsets.length() - 1) + FILENAME(__LINE__));
     }
 
     IdentitiesPtr identities;
@@ -231,9 +243,9 @@ namespace awkward {
       int64_t carrylen = offsets.getitem_at_nowrap(offsets.length() - 1);
       Index64 nextcarry(carrylen);
       struct Error err = kernel::RegularArray_broadcast_tooffsets_size1_64(
-        nextcarry.ptr().get(),
-        offsets.ptr().get(),
-        offsets.offset(),
+        kernel::lib::cpu,   // DERIVE
+        nextcarry.data(),
+        offsets.data(),
         offsets.length());
       util::handle_error(err, classname(), identities_.get());
       ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
@@ -244,8 +256,8 @@ namespace awkward {
     }
     else {
       struct Error err = kernel::RegularArray_broadcast_tooffsets_64(
-        offsets.ptr().get(),
-        offsets.offset(),
+        kernel::lib::cpu,   // DERIVE
+        offsets.data(),
         offsets.length(),
         size_);
       util::handle_error(err, classname(), identities_.get());
@@ -282,7 +294,8 @@ namespace awkward {
         util::handle_error(
           failure("content and its identities must have the same length",
                   kSliceNone,
-                  kSliceNone),
+                  kSliceNone,
+                  FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -300,9 +313,9 @@ namespace awkward {
         Identities32* rawsubidentities =
           reinterpret_cast<Identities32*>(subidentities.get());
         struct Error err = kernel::Identities_from_RegularArray<int32_t>(
-          rawsubidentities->ptr().get(),
-          rawidentities->ptr().get(),
-          rawidentities->offset(),
+          kernel::lib::cpu,   // DERIVE
+          rawsubidentities->data(),
+          rawidentities->data(),
           size_,
           content_.get()->length(),
           length(),
@@ -320,9 +333,9 @@ namespace awkward {
         Identities64* rawsubidentities =
           reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = kernel::Identities_from_RegularArray<int64_t>(
-          rawsubidentities->ptr().get(),
-          rawidentities->ptr().get(),
-          rawidentities->offset(),
+          kernel::lib::cpu,   // DERIVE
+          rawsubidentities->data(),
+          rawidentities->data(),
           size_,
           content_.get()->length(),
           length(),
@@ -331,7 +344,9 @@ namespace awkward {
         content_.get()->setidentities(subidentities);
       }
       else {
-        throw std::runtime_error("unrecognized Identities specialization");
+        throw std::runtime_error(
+          std::string("unrecognized Identities specialization")
+          + FILENAME(__LINE__));
       }
     }
     identities_ = identities;
@@ -347,8 +362,10 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = kernel::new_Identities<int32_t>(rawidentities->ptr().get(),
-                                                         length());
+      struct Error err = kernel::new_Identities<int32_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -360,8 +377,10 @@ namespace awkward {
                                        length());
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err =
-        kernel::new_Identities<int64_t>(rawidentities->ptr().get(), length());
+      struct Error err = kernel::new_Identities<int64_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -471,7 +490,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < length()) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -491,7 +513,7 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < len)) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -512,7 +534,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
       util::handle_error(
-        failure("index out of range", kSliceNone, stop),
+        failure("index out of range",
+                kSliceNone,
+                stop,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -552,8 +577,9 @@ namespace awkward {
     Index64 nextcarry(carry.length()*size_);
 
     struct Error err = kernel::RegularArray_getitem_carry_64(
-      nextcarry.ptr().get(),
-      carry.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      nextcarry.data(),
+      carry.data(),
       carry.length(),
       size_);
     util::handle_error(err, classname(), identities_.get());
@@ -595,6 +621,11 @@ namespace awkward {
 
   const std::string
   RegularArray::validityerror(const std::string& path) const {
+    if (size_ < 1) {
+      return (std::string("at ") + path + std::string(" (") + classname()
+              + std::string("): ") + std::string("size < 1")
+              + FILENAME(__LINE__));
+    }
     return content_.get()->validityerror(path + std::string(".content"));
   }
 
@@ -615,7 +646,7 @@ namespace awkward {
       Index64 tonum(length());
       struct Error err = kernel::RegularArray_num_64(
         tonum.ptr_lib(),
-        tonum.ptr().get(),
+        tonum.data(),
         size_,
         length());
       util::handle_error(err, classname(), identities_.get());
@@ -813,7 +844,7 @@ namespace awkward {
       else {
         throw std::invalid_argument(
           std::string("cannot merge ") + classname() + std::string(" with ")
-          + other.get()->classname());
+          + other.get()->classname() + FILENAME(__LINE__));
       }
     }
     else if (posaxis == depth + 1) {
@@ -829,6 +860,7 @@ namespace awkward {
         ContentPtrVec contents({ content_, theircontent });
 
         struct Error err1 = kernel::RegularArray_merge_tags_8_index_64(
+          kernel::lib::cpu,   // DERIVE
           tags.ptr().get(),
           index.ptr().get(),
           mylength + theirlength,
@@ -851,6 +883,7 @@ namespace awkward {
 
         Index64 offsets(offsets_length + 1);
         struct Error err2 = kernel::RegularArray_merge_offsets_64(
+          kernel::lib::cpu,   // DERIVE
           offsets.ptr().get(),
           offsets_length + 1,
           mylength,
@@ -867,7 +900,7 @@ namespace awkward {
       else {
         throw std::invalid_argument(
           std::string("cannot merge ") + classname() + std::string(" with ")
-          + other.get()->classname());
+          + other.get()->classname() + FILENAME(__LINE__));
       }
     }
     else {
@@ -878,9 +911,9 @@ namespace awkward {
   const SliceItemPtr
   RegularArray::asslice() const {
     throw std::invalid_argument(
-      "slice items can have all fixed-size dimensions (to follow NumPy's "
-      "slice rules) or they can have all var-sized dimensions (for jagged "
-      "indexing), but not both in the same slice item");
+      std::string("slice items can have all fixed-size dimensions (to follow NumPy's "
+                  "slice rules) or they can have all var-sized dimensions (for jagged "
+                  "indexing), but not both in the same slice item") + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -925,7 +958,8 @@ namespace awkward {
     else if (posaxis == depth + 1) {
       Index64 index(length() * target);
       struct Error err = kernel::RegularArray_rpad_and_clip_axis1_64(
-        index.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
         target,
         size_,
         length());
@@ -954,6 +988,7 @@ namespace awkward {
   RegularArray::reduce_next(const Reducer& reducer,
                             int64_t negaxis,
                             const Index64& starts,
+                            const Index64& shifts,
                             const Index64& parents,
                             int64_t outlength,
                             bool mask,
@@ -961,6 +996,7 @@ namespace awkward {
     return toListOffsetArray64(true).get()->reduce_next(reducer,
                                                         negaxis,
                                                         starts,
+                                                        shifts,
                                                         parents,
                                                         outlength,
                                                         mask,
@@ -976,7 +1012,8 @@ namespace awkward {
     else if (posaxis == depth + 1) {
       Index64 localindex(length()*size_);
       struct Error err = kernel::RegularArray_localindex_64(
-        localindex.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        localindex.data(),
         size_,
         length());
       util::handle_error(err, classname(), identities_.get());
@@ -1003,7 +1040,9 @@ namespace awkward {
                              int64_t axis,
                              int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1")
+        + FILENAME(__LINE__));
     }
 
     int64_t posaxis = axis_wrap_if_negative(axis);
@@ -1048,9 +1087,10 @@ namespace awkward {
       IndexOf<int64_t> toindex(size);
       IndexOf<int64_t> fromindex(size);
       struct Error err = kernel::RegularArray_combinations_64(
+        kernel::lib::cpu,   // DERIVE
         tocarryraw.data(),
-        toindex.ptr().get(),
-        fromindex.ptr().get(),
+        toindex.data(),
+        fromindex.data(),
         n,
         replacement,
         size_,
@@ -1059,7 +1099,9 @@ namespace awkward {
 
       ContentPtrVec contents;
       for (auto ptr : tocarry) {
-        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen), true));
+        contents.push_back(content_.get()->carry(
+            Index64(ptr, 0, totallen, kernel::lib::cpu),   // DERIVE
+        true));
       }
       ContentPtr recordarray =
         std::make_shared<RecordArray>(Identities::none(),
@@ -1155,7 +1197,8 @@ namespace awkward {
                              const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::runtime_error(
-        "RegularArray::getitem_next(SliceAt): advanced.length() != 0");
+        std::string("RegularArray::getitem_next(SliceAt): advanced.length() != 0")
+        + FILENAME(__LINE__));
     }
     int64_t len = length();
     SliceItemPtr nexthead = tail.head();
@@ -1163,7 +1206,8 @@ namespace awkward {
     Index64 nextcarry(len);
 
     struct Error err = kernel::RegularArray_getitem_next_at_64(
-      nextcarry.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      nextcarry.data(),
       at.at(),
       len,
       size_);
@@ -1183,7 +1227,8 @@ namespace awkward {
 
     if (range.step() == 0) {
       throw std::runtime_error(
-        "RegularArray::getitem_next(SliceRange): range.step() == 0");
+        std::string("RegularArray::getitem_next(SliceRange): range.step() == 0")
+        + FILENAME(__LINE__));
     }
     int64_t regular_start = range.start();
     int64_t regular_stop = range.stop();
@@ -1213,7 +1258,8 @@ namespace awkward {
     Index64 nextcarry(len*nextsize);
 
     struct Error err = kernel::RegularArray_getitem_next_range_64(
-      nextcarry.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      nextcarry.data(),
       regular_start,
       range.step(),
       len,
@@ -1233,10 +1279,10 @@ namespace awkward {
     else {
       Index64 nextadvanced(len*nextsize);
 
-      struct Error err =
-        kernel::RegularArray_getitem_next_range_spreadadvanced_64(
-        nextadvanced.ptr().get(),
-        advanced.ptr().get(),
+      struct Error err = kernel::RegularArray_getitem_next_range_spreadadvanced_64(
+        kernel::lib::cpu,   // DERIVE
+        nextadvanced.data(),
+        advanced.data(),
         len,
         nextsize);
       util::handle_error(err, classname(), identities_.get());
@@ -1260,8 +1306,9 @@ namespace awkward {
     Index64 regular_flathead(flathead.length());
 
     struct Error err = kernel::RegularArray_getitem_next_array_regularize_64(
-      regular_flathead.ptr().get(),
-      flathead.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      regular_flathead.data(),
+      flathead.data(),
       flathead.length(),
       size_);
     util::handle_error(err, classname(), identities_.get());
@@ -1271,9 +1318,10 @@ namespace awkward {
       Index64 nextadvanced(len*flathead.length());
 
       struct Error err = kernel::RegularArray_getitem_next_array_64(
-        nextcarry.ptr().get(),
-        nextadvanced.ptr().get(),
-        regular_flathead.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        nextcarry.data(),
+        nextadvanced.data(),
+        regular_flathead.data(),
         len,
         regular_flathead.length(),
         size_);
@@ -1292,10 +1340,11 @@ namespace awkward {
       Index64 nextadvanced(len);
 
       struct Error err = kernel::RegularArray_getitem_next_array_advanced_64(
-        nextcarry.ptr().get(),
-        nextadvanced.ptr().get(),
-        advanced.ptr().get(),
-        regular_flathead.ptr().get(),
+        kernel::lib::cpu,   // DERIVE
+        nextcarry.data(),
+        nextadvanced.data(),
+        advanced.data(),
+        regular_flathead.data(),
         len,
         regular_flathead.length(),
         size_);
@@ -1312,14 +1361,16 @@ namespace awkward {
                              const Index64& advanced) const {
     if (advanced.length() != 0) {
       throw std::invalid_argument(
-        "cannot mix jagged slice with NumPy-style advanced indexing");
+        std::string("cannot mix jagged slice with NumPy-style advanced indexing")
+        + FILENAME(__LINE__));
     }
 
     if (jagged.length() != size_) {
       throw std::invalid_argument(
         std::string("cannot fit jagged slice with length ")
         + std::to_string(jagged.length()) + std::string(" into ")
-        + classname() + std::string(" of size ") + std::to_string(size_));
+        + classname() + std::string(" of size ") + std::to_string(size_)
+        + FILENAME(__LINE__));
     }
 
     int64_t regularlength = length();
@@ -1327,9 +1378,10 @@ namespace awkward {
     Index64 multistarts(jagged.length()*regularlength);
     Index64 multistops(jagged.length()*regularlength);
     struct Error err = kernel::RegularArray_getitem_jagged_expand_64(
-      multistarts.ptr().get(),
-      multistops.ptr().get(),
-      singleoffsets.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      multistarts.data(),
+      multistops.data(),
+      singleoffsets.data(),
       jagged.length(),
       regularlength);
     util::handle_error(err, classname(), identities_.get());
@@ -1382,11 +1434,29 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::copy_to(kernel::Lib ptr_lib) const {
-    ContentPtr content = content_->copy_to(ptr_lib);
-    return std::make_shared<RegularArray>(identities(),
-                                          parameters(),
+  RegularArray::copy_to(kernel::lib ptr_lib) const {
+    ContentPtr content = content_.get()->copy_to(ptr_lib);
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->copy_to(ptr_lib);
+    }
+    return std::make_shared<RegularArray>(identities,
+                                          parameters_,
                                           content,
-                                          size());
+                                          size_);
   }
+
+  const ContentPtr
+  RegularArray::numbers_to_type(const std::string& name) const {
+    ContentPtr content = content_.get()->numbers_to_type(name);
+    IdentitiesPtr identities = identities_;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<RegularArray>(identities,
+                                          parameters_,
+                                          content,
+                                          size_);
+  }
+
 }

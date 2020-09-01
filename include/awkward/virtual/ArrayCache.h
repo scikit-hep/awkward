@@ -14,7 +14,7 @@ namespace awkward {
   /// The main implementation, PyArrayCache, is passed through pybind11 to
   /// Python to work with cachetools and MutableMapping, but in principle, pure
   /// C++ caches could be written.
-  class EXPORT_SYMBOL ArrayCache {
+  class LIBAWKWARD_EXPORT_SYMBOL ArrayCache {
   public:
     /// @brief Returns a new key that is globally unique in the current
     /// process.

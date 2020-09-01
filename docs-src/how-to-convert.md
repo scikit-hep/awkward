@@ -3,8 +3,8 @@ jupytext:
   text_representation:
     extension: .md
     format_name: myst
-    format_version: '0.8'
-    jupytext_version: 1.4.2
+    format_version: '0.10'
+    jupytext_version: 1.5.2
 kernelspec:
   display_name: Python 3
   language: python
@@ -18,7 +18,6 @@ Converting arrays
    * **[Python objects](how-to-convert-python)**
    * **[JSON](how-to-convert-json)**
    * **[ROOT via Uproot](how-to-convert-uproot)**
-   * **[Parquet via Arrow](how-to-convert-arrow)**
-   * **[Pandas: Awkward columns](how-to-convert-pandas)**
-   * **[Pandas: as MultiIndex](how-to-convert-pandas-multiindex)**
-   * **[Zarr](how-to-convert-zarr)**
+   * **[Arrow and Parquet](how-to-convert-arrow)**
+   * **[Pandas](how-to-convert-pandas)**
+   * **[Generic array-sets](how-to-convert-arrayset)**

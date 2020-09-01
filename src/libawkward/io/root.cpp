@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/io/root.cpp", line)
+
 #include <cstring>
 
 #include "awkward/Content.h"
@@ -23,8 +25,8 @@ namespace awkward {
     }
 
     else {
-      uint32_t bigendian =
-        *reinterpret_cast<uint32_t*>(rawdata.byteptr((ssize_t)bytepos));
+      uint32_t bigendian = *reinterpret_cast<uint32_t*>(
+        reinterpret_cast<char*>(rawdata.data()) + bytepos);
 
       // FIXME: check native endianness
       uint32_t length =
@@ -56,10 +58,12 @@ namespace awkward {
                         std::string format,
                         const ArrayBuilderOptions& options) {
     if (depth <= 0) {
-      throw std::runtime_error("FromROOT_nestedvector: depth <= 0");
+      throw std::runtime_error(
+        std::string("FromROOT_nestedvector: depth <= 0") + FILENAME(__LINE__));
     }
     if (rawdata.ndim() != 1) {
-      throw std::runtime_error("FromROOT_nestedvector: rawdata.ndim() != 1");
+      throw std::runtime_error(
+        std::string("FromROOT_nestedvector: rawdata.ndim() != 1") + FILENAME(__LINE__));
     }
 
     Index64 level0(byteoffsets.length());
@@ -109,10 +113,11 @@ namespace awkward {
                                                   0,
                                                   (ssize_t)itemsize,
                                                   format,
-                                                  dtype);
+                                                  dtype,
+                                                  kernel::lib::cpu);
 
     for (int64_t i = depth - 1;  i >= 0;  i--) {
-      Index64 index(levels[(size_t)i].ptr(), 0, levels[(size_t)i].length());
+      Index64 index(levels[(size_t)i].ptr(), 0, levels[(size_t)i].length(), kernel::lib::cpu);
       out = std::make_shared<ListOffsetArray64>(Identities::none(),
                                                 util::Parameters(),
                                                 index,

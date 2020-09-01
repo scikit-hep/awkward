@@ -13,13 +13,13 @@
 #include "awkward/common.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
-#include "awkward/kernel.h"
+#include "awkward/kernel-dispatch.h"
 
 namespace awkward {
   /// @class NumpyForm
   ///
   /// @brief Form describing NumpyArray.
-  class EXPORT_SYMBOL NumpyForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL NumpyForm: public Form {
   public:
     /// @brief Creates a NumpyForm. See NumpyArray for documentation.
     NumpyForm(bool has_identities,
@@ -100,6 +100,9 @@ namespace awkward {
             bool check_form_key,
             bool compatibility_check) const override;
 
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   private:
     const std::vector<int64_t> inner_shape_;
     int64_t itemsize_;
@@ -124,7 +127,7 @@ namespace awkward {
   ///  - 8-bit booleans
   ///
   ///(native endian only).
-  class EXPORT_SYMBOL NumpyArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL NumpyArray: public Content {
   public:
 
     /// @brief Creates a NumpyArray from a full set of parameters.
@@ -170,7 +173,7 @@ namespace awkward {
                ssize_t itemsize,
                const std::string format,
                util::dtype dtype,
-               const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
+               const kernel::lib ptr_lib);
 
     /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
     NumpyArray(const Index8 index);
@@ -188,8 +191,12 @@ namespace awkward {
       ptr() const;
 
     /// @param ptr_lib Indicates the kernel libraries to use for this `ptr`.
-    kernel::Lib
+    kernel::lib
       ptr_lib() const;
+
+    /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
+    void*
+      data() const;
 
     /// @brief Number of elements in each dimension. A one-dimensional
     /// array has a shape of length one.
@@ -266,17 +273,6 @@ namespace awkward {
     bool
       isempty() const;
 
-    /// @brief An untyped pointer to item zero in the buffer.
-    void*
-      byteptr() const;
-
-    /// @brief An untyped pointer to item `at` in the buffer.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    void*
-      byteptr(ssize_t at) const;
-
     /// @brief The length of the array (or scalar, if `shape.empty()`) in
     /// bytes.
     ///
@@ -291,76 +287,6 @@ namespace awkward {
     /// Most integers in Awkward are `int64_t`.
     uint8_t
       getbyte(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `int8_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    int8_t
-      getint8(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `uint8_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    uint8_t
-      getuint8(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `int16_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    int16_t
-      getint16(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `uint16_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    uint16_t
-      getuint16(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `int32_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    int32_t
-      getint32(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `uint32_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    uint32_t
-      getuint32(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `int64_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    int64_t
-      getint64(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `uint64_t`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    uint64_t
-      getuint64(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `float`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    float_t
-      getfloat(ssize_t at) const;
-
-    /// @brief Dereferences a selected item as a `double`.
-    ///
-    /// Note that the integer type is `ssize_t` for consistency with pybind11.
-    /// Most integers in Awkward are `int64_t`.
-    double_t
-      getdouble(ssize_t at) const;
 
     /// @brief A contiguous version of this array with multidimensional
     /// #shape replaced by nested RegularArray nodes.
@@ -400,11 +326,6 @@ namespace awkward {
       tostring_part(const std::string& indent,
                     const std::string& pre,
                     const std::string& post) const override;
-
-    const std::string
-    kernellib_asstring(const std::string& indent,
-                       const std::string& pre,
-                       const std::string& post) const;
 
     void
       tojson_part(ToJson& builder, bool include_beginendlist) const override;
@@ -513,6 +434,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,
@@ -628,7 +550,10 @@ namespace awkward {
     /// @brief An utility function to create a new instance of NumpyArray on the
     /// GPU identical to this one.
     const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const override;
+      copy_to(kernel::lib ptr_lib) const override;
+
+    const ContentPtr
+      numbers_to_type(const std::string& name) const override;
 
   protected:
     /// @brief Internal function to merge two byte arrays without promoting
@@ -831,7 +756,6 @@ namespace awkward {
     template<typename T>
     const std::shared_ptr<void> index_sort(const T* data,
                                            int64_t length,
-                                           int64_t offset,
                                            const Index64& starts,
                                            const Index64& parents,
                                            int64_t outlength,
@@ -841,7 +765,6 @@ namespace awkward {
     template<typename T>
     const std::shared_ptr<void> array_sort(const T* data,
                                            int64_t length,
-                                           int64_t offset,
                                            const Index64& starts,
                                            const Index64& parents,
                                            int64_t outlength,
@@ -850,20 +773,29 @@ namespace awkward {
 
    template<typename T>
    const std::shared_ptr<void> string_sort(const T* data,
-                                          int64_t length,
-                                          const Index64& offsets,
-                                          Index64& outoffsets,
-                                          bool ascending,
-                                          bool stable) const;
+                                           int64_t length,
+                                           const Index64& offsets,
+                                           Index64& outoffsets,
+                                           bool ascending,
+                                           bool stable) const;
+
+  template<typename T>
+  const std::shared_ptr<void> as_type(const T* data,
+                                      int64_t length,
+                                      const util::dtype dtype) const;
+
+  template<typename TO, typename FROM>
+  const std::shared_ptr<void> cast_to_type(const FROM* data,
+                                           int64_t length) const;
 
   util::dtype merged_dtype(const util::dtype other_dtype, const std::string& other_format) const;
 
   std::tuple<std::vector<ssize_t>, std::vector<ssize_t>> merged_shape_and_strides(const std::vector<ssize_t>& other_shape, int64_t itemsize, int64_t axis) const;
 
-  /// @brief See #ptr_lib
-  const kernel::Lib ptr_lib_;
   /// @brief See #ptr.
   std::shared_ptr<void> ptr_;
+  /// @brief See #ptr_lib
+  const kernel::lib ptr_lib_;
   /// @brief See #shape.
   std::vector<ssize_t> shape_;
   /// @brief See #strides.

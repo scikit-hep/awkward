@@ -5,131 +5,229 @@ from __future__ import absolute_import
 import json
 import ctypes
 
-import numpy
 import numba
 
 import awkward1.layout
 import awkward1._util
 import awkward1._connect._numba.arrayview
+import awkward1.nplike
+
+
+np = awkward1.nplike.NumpyMetadata.instance()
+numpy = awkward1.nplike.Numpy.instance()
 
 
 @numba.extending.typeof_impl.register(awkward1.layout.NumpyArray)
-def typeof_NumpyArray(obj, c):
-    t = numba.typeof(numpy.asarray(obj))
-    return NumpyArrayType(
-        numba.types.Array(t.dtype, t.ndim, "A"),
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.RegularArray)
-def typeof_RegularArray(obj, c):
-    return RegularArrayType(
-        numba.typeof(obj.content),
-        obj.size,
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.ListArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListArray64)
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.ListOffsetArray64)
-def typeof_ListArray(obj, c):
-    return ListArrayType(
-        numba.typeof(numpy.asarray(obj.starts)),
-        numba.typeof(obj.content),
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArrayU32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedArray64)
-def typeof_IndexedArray(obj, c):
-    return IndexedArrayType(
-        numba.typeof(numpy.asarray(obj.index)),
-        numba.typeof(obj.content),
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedOptionArray32)
 @numba.extending.typeof_impl.register(awkward1.layout.IndexedOptionArray64)
-def typeof_IndexedOptionArray(obj, c):
-    return IndexedOptionArrayType(
-        numba.typeof(numpy.asarray(obj.index)),
-        numba.typeof(obj.content),
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.ByteMaskedArray)
-def typeof_ByteMaskedArray(obj, c):
-    return ByteMaskedArrayType(
-        numba.typeof(numpy.asarray(obj.mask)),
-        numba.typeof(obj.content),
-        obj.valid_when,
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.BitMaskedArray)
-def typeof_BitMaskedArray(obj, c):
-    return BitMaskedArrayType(
-        numba.typeof(numpy.asarray(obj.mask)),
-        numba.typeof(obj.content),
-        obj.valid_when,
-        obj.lsb_order,
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.UnmaskedArray)
-def typeof_UnmaskedArray(obj, c):
-    return UnmaskedArrayType(
-        numba.typeof(obj.content), numba.typeof(obj.identities), obj.parameters
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.RecordArray)
-def typeof_RecordArray(obj, c):
-    return RecordArrayType(
-        tuple(numba.typeof(x) for x in obj.contents),
-        obj.recordlookup,
-        numba.typeof(obj.identities),
-        obj.parameters,
-    )
-
-
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_32)
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_U32)
 @numba.extending.typeof_impl.register(awkward1.layout.UnionArray8_64)
-def typeof_UnionArray(obj, c):
-    return UnionArrayType(
-        numba.typeof(numpy.asarray(obj.tags)),
-        numba.typeof(numpy.asarray(obj.index)),
-        tuple(numba.typeof(x) for x in obj.contents),
-        numba.typeof(obj.identities),
+@numba.extending.typeof_impl.register(awkward1.layout.VirtualArray)
+@numba.extending.typeof_impl.register(awkward1.layout.Index8)
+@numba.extending.typeof_impl.register(awkward1.layout.IndexU8)
+@numba.extending.typeof_impl.register(awkward1.layout.Index32)
+@numba.extending.typeof_impl.register(awkward1.layout.IndexU32)
+@numba.extending.typeof_impl.register(awkward1.layout.Index64)
+@numba.extending.typeof_impl.register(awkward1.layout.Record)
+def fake_typeof(obj, c):
+    raise TypeError(
+        "{0} objects cannot be passed directly into Numba-compiled functions; "
+        "construct a high-level ak.Array or ak.Record instead".format(type(obj).__name__)
+    )
+
+
+def typeof(obj):
+    if isinstance(obj, awkward1.layout.NumpyArray):
+        return typeof_NumpyArray(obj)
+
+    elif isinstance(obj, awkward1.layout.RegularArray):
+        return typeof_RegularArray(obj)
+
+    elif isinstance(obj, (
+        awkward1.layout.ListArray32,
+        awkward1.layout.ListArrayU32,
+        awkward1.layout.ListArray64,
+        awkward1.layout.ListOffsetArray32,
+        awkward1.layout.ListOffsetArrayU32,
+        awkward1.layout.ListOffsetArray64,
+    )):
+        return typeof_ListArray(obj)
+
+    elif isinstance(obj, (
+        awkward1.layout.IndexedArray32,
+        awkward1.layout.IndexedArrayU32,
+        awkward1.layout.IndexedArray64,
+    )):
+        return typeof_IndexedArray(obj)
+
+    elif isinstance(obj, (
+        awkward1.layout.IndexedOptionArray32,
+        awkward1.layout.IndexedOptionArray64,
+    )):
+        return typeof_IndexedOptionArray(obj)
+
+    elif isinstance(obj, awkward1.layout.ByteMaskedArray):
+        return typeof_ByteMaskedArray(obj)
+
+    elif isinstance(obj, awkward1.layout.BitMaskedArray):
+        return typeof_BitMaskedArray(obj)
+
+    elif isinstance(obj, awkward1.layout.UnmaskedArray):
+        return typeof_UnmaskedArray(obj)
+
+    elif isinstance(obj, awkward1.layout.RecordArray):
+        return typeof_RecordArray(obj)
+
+    elif isinstance(obj, (
+        awkward1.layout.UnionArray8_32,
+        awkward1.layout.UnionArray8_U32,
+        awkward1.layout.UnionArray8_64,
+    )):
+        return typeof_UnionArray(obj)
+
+    elif isinstance(obj, awkward1.layout.VirtualArray):
+        return typeof_VirtualArray(obj)
+
+    elif isinstance(obj, (
+        awkward1.layout.Identities32,
+        awkward1.layout.Identities64,
+    )):
+        raise NotImplementedError(
+            "Awkward Identities are not yet supported for functions compiled by Numba"
+        )
+
+    elif isinstance(obj, (
+        awkward1.layout.Index8,
+        awkward1.layout.IndexU8,
+        awkward1.layout.Index32,
+        awkward1.layout.IndexU32,
+        awkward1.layout.Index64,
+    )):
+        raise RuntimeError(
+            "Awkward Indexes should not be used directly in functions compiled by Numba"
+        )
+
+    else:
+        return numba.typeof(obj)
+
+
+def typeof_NumpyArray(obj):
+    t = numba.typeof(awkward1.nplike.of(obj).asarray(obj))
+    return NumpyArrayType(
+        numba.types.Array(t.dtype, t.ndim, "A"),
+        typeof(obj.identities),
         obj.parameters,
     )
 
 
-@numba.extending.typeof_impl.register(awkward1.layout.VirtualArray)
-def typeof_VirtualArray(obj, c):
+def typeof_RegularArray(obj):
+    return RegularArrayType(
+        typeof(obj.content),
+        obj.size,
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_ListArray(obj):
+    return ListArrayType(
+        numba.typeof(awkward1.nplike.of(obj.starts).asarray(obj.starts)),
+        typeof(obj.content),
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_IndexedArray(obj):
+    return IndexedArrayType(
+        numba.typeof(awkward1.nplike.of(obj.index).asarray(obj.index)),
+        typeof(obj.content),
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_IndexedOptionArray(obj):
+    return IndexedOptionArrayType(
+        numba.typeof(awkward1.nplike.of(obj.index).asarray(obj.index)),
+        typeof(obj.content),
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_ByteMaskedArray(obj):
+    return ByteMaskedArrayType(
+        numba.typeof(awkward1.nplike.of(obj.mask).asarray(obj.mask)),
+        typeof(obj.content),
+        obj.valid_when,
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_BitMaskedArray(obj):
+    return BitMaskedArrayType(
+        numba.typeof(awkward1.nplike.of(obj.mask).asarray(obj.mask)),
+        typeof(obj.content),
+        obj.valid_when,
+        obj.lsb_order,
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_UnmaskedArray(obj):
+    return UnmaskedArrayType(
+        typeof(obj.content), typeof(obj.identities), obj.parameters
+    )
+
+
+def typeof_RecordArray(obj):
+    return RecordArrayType(
+        tuple(typeof(x) for x in obj.contents),
+        obj.recordlookup,
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_UnionArray(obj):
+    return UnionArrayType(
+        numba.typeof(awkward1.nplike.of(obj.tags).asarray(obj.tags)),
+        numba.typeof(awkward1.nplike.of(obj.index).asarray(obj.index)),
+        tuple(typeof(x) for x in obj.contents),
+        typeof(obj.identities),
+        obj.parameters,
+    )
+
+
+def typeof_VirtualArray(obj):
     if obj.form.form is None:
-        raise ValueError("VirtualArrays without a known 'form' can't be used in Numba")
+        raise ValueError(
+            "VirtualArrays without a known 'form' can't be used in Numba"
+            + awkward1._util.exception_suffix(__file__)
+        )
     if obj.form.has_identities:
-        raise NotImplementedError("TODO: identities in VirtualArray")
+        raise NotImplementedError(
+            "TODO: identities in VirtualArray"
+            + awkward1._util.exception_suffix(__file__)
+        )
     return VirtualArrayType(obj.form.form, numba.none, obj.parameters)
 
 
@@ -140,7 +238,7 @@ class ContentType(numba.types.Type):
             positions.append(-1)
             sharedptrs.append(None)
         else:
-            arrays.append(numpy.asarray(layout.identities))
+            arrays.append(awkward1.nplike.of(obj.identities).asarray(layout.identities))
             positions.append(arrays[-1])
             sharedptrs.append(None)
 
@@ -159,7 +257,10 @@ class ContentType(numba.types.Type):
         if not form.has_identities:
             return numba.none
         else:
-            raise NotImplementedError("TODO: identities in VirtualArray")
+            raise NotImplementedError(
+                "TODO: identities in VirtualArray"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     @classmethod
     def from_form_index(cls, index_string):
@@ -176,13 +277,15 @@ class ContentType(numba.types.Type):
         else:
             raise AssertionError(
                 "unrecognized Form index type: {0}".format(index_string)
+                + awkward1._util.exception_suffix(__file__)
             )
 
     def form_fill_identities(self, pos, layout, lookup):
-        if layout.identities is not None:
-            lookup.arrayptr[pos + self.IDENTITIES] = numpy.asarray(
-                layout.identities
-            ).ctypes.data
+        identities = layout.identities
+        if identities is not None:
+            lookup.arrayptr[pos + self.IDENTITIES] = (
+                awkward1.nplike.of(identities).asarray(identities).ctypes.data
+            )
 
     def IndexOf(self, arraytype):
         if arraytype.dtype.bitwidth == 8 and arraytype.dtype.signed:
@@ -196,7 +299,10 @@ class ContentType(numba.types.Type):
         elif arraytype.dtype.bitwidth == 64 and arraytype.dtype.signed:
             return awkward1.layout.Index64
         else:
-            raise AssertionError("no Index* type for array: {0}".format(arraytype))
+            raise AssertionError(
+                "no Index* type for array: {0}".format(arraytype)
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     def getitem_at_check(self, viewtype):
         typer = awkward1._util.numba_array_typer(viewtype.type, viewtype.behavior)
@@ -216,6 +322,7 @@ class ContentType(numba.types.Type):
         else:
             raise TypeError(
                 "array does not have a field with key {0}".format(repr(key))
+                + awkward1._util.exception_suffix(__file__)
             )
 
     def lower_getitem_at_check(
@@ -375,7 +482,7 @@ class NumpyArrayType(ContentType):
 
     @classmethod
     def tolookup(cls, layout, positions, sharedptrs, arrays):
-        array = numpy.asarray(layout)
+        array = awkward1.nplike.of(layout).asarray(layout)
         assert len(array.shape) == 1
         pos = len(positions)
         cls.tolookup_identities(layout, positions, sharedptrs, arrays)
@@ -391,6 +498,7 @@ class NumpyArrayType(ContentType):
             raise NotImplementedError(
                 "NumpyForm is multidimensional; TODO: convert to RegularForm,"
                 " just as NumpyArrays are converted to RegularArrays"
+                + awkward1._util.exception_suffix(__file__)
             )
         pos = len(positions)
         cls.form_tolookup_identities(form, positions, sharedptrs, arrays)
@@ -406,6 +514,7 @@ class NumpyArrayType(ContentType):
             raise NotImplementedError(
                 "NumpyForm is multidimensional; TODO: convert to RegularForm,"
                 " just as NumpyArrays are converted to RegularArrays"
+                + awkward1._util.exception_suffix(__file__)
             )
         if form.primitive == "float64":
             arraytype = numba.types.Array(numba.float64, 1, "A")
@@ -432,6 +541,7 @@ class NumpyArrayType(ContentType):
         else:
             raise ValueError(
                 "unrecognized NumpyForm.primitive type: {0}".format(form.primitive)
+                + awkward1._util.exception_suffix(__file__)
             )
         return NumpyArrayType(
             arraytype, cls.from_form_identities(form), form.parameters
@@ -452,7 +562,9 @@ class NumpyArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        lookup.original_positions[pos + self.ARRAY] = numpy.asarray(layout)
+        lookup.original_positions[pos + self.ARRAY] = (
+            awkward1.nplike.of(layout).asarray(layout)
+        )
         lookup.arrayptrs[pos + self.ARRAY] = lookup.original_positions[
             pos + self.ARRAY
         ].ctypes.data
@@ -612,8 +724,8 @@ class ListArrayType(ContentType):
                 awkward1.layout.ListArray64,
             ),
         ):
-            starts = numpy.asarray(layout.starts)
-            stops = numpy.asarray(layout.stops)
+            starts = awkward1.nplike.of(layout.starts).asarray(layout.starts)
+            stops = awkward1.nplike.of(layout.stops).asarray(layout.stops)
         elif isinstance(
             layout,
             (
@@ -622,7 +734,7 @@ class ListArrayType(ContentType):
                 awkward1.layout.ListOffsetArray64,
             ),
         ):
-            offsets = numpy.asarray(layout.offsets)
+            offsets = awkward1.nplike.of(layout.offsets).asarray(layout.offsets)
             starts = offsets[:-1]
             stops = offsets[1:]
 
@@ -700,8 +812,8 @@ class ListArrayType(ContentType):
                 awkward1.layout.ListArray64,
             ),
         ):
-            starts = numpy.asarray(layout.starts)
-            stops = numpy.asarray(layout.stops)
+            starts = awkward1.nplike.of(layout.starts).asarray(layout.starts)
+            stops = awkward1.nplike.of(layout.stops).asarray(layout.stops)
         elif isinstance(
             layout,
             (
@@ -710,7 +822,7 @@ class ListArrayType(ContentType):
                 awkward1.layout.ListOffsetArray64,
             ),
         ):
-            offsets = numpy.asarray(layout.offsets)
+            offsets = awkward1.nplike.of(layout.offsets).asarray(layout.offsets)
             starts = offsets[:-1]
             stops = offsets[1:]
 
@@ -733,6 +845,7 @@ class ListArrayType(ContentType):
         else:
             raise AssertionError(
                 "no ListArray* type for array: {0}".format(self.indextype)
+                + awkward1._util.exception_suffix(__file__)
             )
 
     def tolayout(self, lookup, pos, fields):
@@ -807,7 +920,7 @@ class IndexedArrayType(ContentType):
         pos = len(positions)
         cls.tolookup_identities(layout, positions, sharedptrs, arrays)
         sharedptrs[-1] = layout._persistent_shared_ptr
-        arrays.append(numpy.asarray(layout.index))
+        arrays.append(awkward1.nplike.of(layout.index).asarray(layout.index))
         positions.append(arrays[-1])
         sharedptrs.append(None)
         positions.append(None)
@@ -860,7 +973,7 @@ class IndexedArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        index = numpy.asarray(layout.index)
+        index = awkward1.nplike.of(layout.index).asarray(layout.index)
         lookup.original_positions[pos + self.INDEX] = index
         lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
 
@@ -878,6 +991,7 @@ class IndexedArrayType(ContentType):
         else:
             raise AssertionError(
                 "no IndexedArray* type for array: {0}".format(self.indextype)
+                + awkward1._util.exception_suffix(__file__)
             )
 
     def tolayout(self, lookup, pos, fields):
@@ -928,12 +1042,12 @@ class IndexedArrayType(ContentType):
         )
         proxynext = context.make_helper(builder, nextviewtype)
         proxynext.pos = nextpos
-        proxynext.start = viewproxy.start
+        proxynext.start = context.get_constant(numba.intp, 0)
         proxynext.stop = builder.add(
             awkward1._connect._numba.castint(
                 context, builder, self.indextype.dtype, numba.intp, nextat
             ),
-            builder.add(viewproxy.start, context.get_constant(numba.intp, 1)),
+            context.get_constant(numba.intp, 1),
         )
         proxynext.arrayptrs = viewproxy.arrayptrs
         proxynext.sharedptrs = viewproxy.sharedptrs
@@ -963,7 +1077,7 @@ class IndexedOptionArrayType(ContentType):
         pos = len(positions)
         cls.tolookup_identities(layout, positions, sharedptrs, arrays)
         sharedptrs[-1] = layout._persistent_shared_ptr
-        arrays.append(numpy.asarray(layout.index))
+        arrays.append(awkward1.nplike.of(layout.index).asarray(layout.index))
         positions.append(arrays[-1])
         sharedptrs.append(None)
         positions.append(None)
@@ -1016,7 +1130,7 @@ class IndexedOptionArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        index = numpy.asarray(layout.index)
+        index = awkward1.nplike.of(layout.index).asarray(layout.index)
         lookup.original_positions[pos + self.INDEX] = index
         lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
 
@@ -1032,6 +1146,7 @@ class IndexedOptionArrayType(ContentType):
         else:
             raise AssertionError(
                 "no IndexedOptionArray* type for array: {0}".format(self.indextype)
+                + awkward1._util.exception_suffix(__file__)
             )
 
     def tolayout(self, lookup, pos, fields):
@@ -1134,7 +1249,7 @@ class ByteMaskedArrayType(ContentType):
         pos = len(positions)
         cls.tolookup_identities(layout, positions, sharedptrs, arrays)
         sharedptrs[-1] = layout._persistent_shared_ptr
-        arrays.append(numpy.asarray(layout.mask))
+        arrays.append(awkward1.nplike.of(layout.mask).asarray(layout.mask))
         positions.append(arrays[-1])
         sharedptrs.append(None)
         positions.append(None)
@@ -1191,7 +1306,7 @@ class ByteMaskedArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        mask = numpy.asarray(layout.mask)
+        mask = awkward1.nplike.of(layout.mask).asarray(layout.mask)
         lookup.original_positions[pos + self.MASK] = mask
         lookup.arrayptrs[pos + self.MASK] = mask.ctypes.data
 
@@ -1296,7 +1411,7 @@ class BitMaskedArrayType(ContentType):
         pos = len(positions)
         cls.tolookup_identities(layout, positions, sharedptrs, arrays)
         sharedptrs[-1] = layout._persistent_shared_ptr
-        arrays.append(numpy.asarray(layout.mask))
+        arrays.append(awkward1.nplike.of(layout.mask).asarray(layout.mask))
         positions.append(arrays[-1])
         sharedptrs.append(None)
         positions.append(None)
@@ -1358,7 +1473,7 @@ class BitMaskedArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        mask = numpy.asarray(layout.mask)
+        mask = awkward1.nplike.of(layout.mask).asarray(layout.mask)
         lookup.original_positions[pos + self.MASK] = mask
         lookup.arrayptrs[pos + self.MASK] = mask.ctypes.data
 
@@ -1717,7 +1832,7 @@ class RecordArrayType(ContentType):
                 return awkward1.layout.RecordArray(
                     contents,
                     self.recordlookup,
-                    numpy.iinfo(numpy.int64).max,
+                    np.iinfo(np.int64).max,
                     parameters=self.parameters,
                 )
             else:
@@ -1750,6 +1865,7 @@ class RecordArrayType(ContentType):
                         "no field {0} in tuples with {1} fields".format(
                             repr(key), len(self.contenttypes)
                         )
+                        + awkward1._util.exception_suffix(__file__)
                     )
                 else:
                     raise ValueError(
@@ -1757,6 +1873,7 @@ class RecordArrayType(ContentType):
                         "fields: [{1}]".format(
                             repr(key), ", ".join(repr(x) for x in self.recordlookup)
                         )
+                        + awkward1._util.exception_suffix(__file__)
                     )
             contenttype = self.contenttypes[index]
             subviewtype = awkward1._connect._numba.arrayview.wrap(
@@ -1772,12 +1889,14 @@ class RecordArrayType(ContentType):
                     "no field {0} in tuples with {1} fields".format(
                         repr(key), len(self.contenttypes)
                     )
+                    + awkward1._util.exception_suffix(__file__)
                 )
             else:
                 raise ValueError(
                     "no field {0} in records with fields: [{1}]".format(
                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
                     )
+                    + awkward1._util.exception_suffix(__file__)
                 )
         contenttype = self.contenttypes[index]
         subviewtype = awkward1._connect._numba.arrayview.wrap(
@@ -1793,12 +1912,14 @@ class RecordArrayType(ContentType):
                     "no field {0} in tuple with {1} fields".format(
                         repr(key), len(self.contenttypes)
                     )
+                    + awkward1._util.exception_suffix(__file__)
                 )
             else:
                 raise ValueError(
                     "no field {0} in record with fields: [{1}]".format(
                         repr(key), ", ".join(repr(x) for x in self.recordlookup)
                     )
+                    + awkward1._util.exception_suffix(__file__)
                 )
         contenttype = self.contenttypes[index]
         subviewtype = awkward1._connect._numba.arrayview.wrap(
@@ -1975,10 +2096,10 @@ class UnionArrayType(ContentType):
         pos = len(positions)
         cls.tolookup_identities(layout, positions, sharedptrs, arrays)
         sharedptrs[-1] = layout._persistent_shared_ptr
-        arrays.append(numpy.asarray(layout.tags))
+        arrays.append(awkward1.nplike.of(layout.tags).asarray(layout.tags))
         positions.append(arrays[-1])
         sharedptrs.append(None)
-        arrays.append(numpy.asarray(layout.index))
+        arrays.append(awkward1.nplike.of(layout.index).asarray(layout.index))
         positions.append(arrays[-1])
         sharedptrs.append(None)
         positions.extend([None] * layout.numcontents)
@@ -2049,11 +2170,11 @@ class UnionArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        tags = numpy.asarray(layout.tags)
+        tags = awkward1.nplike.of(layout.tags).asarray(layout.tags)
         lookup.original_positions[pos + self.TAGS] = tags
         lookup.arrayptrs[pos + self.TAGS] = tags.ctypes.data
 
-        index = numpy.asarray(layout.index)
+        index = awkward1.nplike.of(layout.index).asarray(layout.index)
         lookup.original_positions[pos + self.INDEX] = index
         lookup.arrayptrs[pos + self.INDEX] = index.ctypes.data
 
@@ -2073,10 +2194,12 @@ class UnionArrayType(ContentType):
             else:
                 raise AssertionError(
                     "no UnionArray* type for index array: {0}".format(self.indextype)
+                    + awkward1._util.exception_suffix(__file__)
                 )
         else:
             raise AssertionError(
                 "no UnionArray* type for tags array: {0}".format(self.tagstype)
+                + awkward1._util.exception_suffix(__file__)
             )
 
     def tolayout(self, lookup, pos, fields):
@@ -2097,15 +2220,24 @@ class UnionArrayType(ContentType):
 
     def getitem_at(self, viewtype):
         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-            raise TypeError("union types cannot be accessed in Numba")
+            raise TypeError(
+                "union types cannot be accessed in Numba"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     def getitem_range(self, viewtype):
         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-            raise TypeError("union types cannot be accessed in Numba")
+            raise TypeError(
+                "union types cannot be accessed in Numba"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     def getitem_field(self, viewtype, key):
         if not all(isinstance(x, RecordArrayType) for x in self.contenttypes):
-            raise TypeError("union types cannot be accessed in Numba")
+            raise TypeError(
+                "union types cannot be accessed in Numba"
+                + awkward1._util.exception_suffix(__file__)
+            )
 
     def lower_getitem_at(
         self,
@@ -2122,6 +2254,7 @@ class UnionArrayType(ContentType):
     ):
         raise NotImplementedError(
             type(self).__name__ + ".lower_getitem_at not implemented"
+            + awkward1._util.exception_suffix(__file__)
         )
 
     def lower_getitem_range(
@@ -2138,11 +2271,13 @@ class UnionArrayType(ContentType):
     ):
         raise NotImplementedError(
             type(self).__name__ + ".lower_getitem_range not implemented"
+            + awkward1._util.exception_suffix(__file__)
         )
 
     def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
         raise NotImplementedError(
             type(self).__name__ + ".lower_getitem_field not implemented"
+            + awkward1._util.exception_suffix(__file__)
         )
 
 
@@ -2159,10 +2294,11 @@ class VirtualArrayType(ContentType):
         if layout.form is None:
             raise ValueError(
                 "VirtualArrays without a known 'form' can't be used in Numba"
+                + awkward1._util.exception_suffix(__file__)
             )
         pyptr = ctypes.py_object(layout)
         ctypes.pythonapi.Py_IncRef(pyptr)
-        voidptr = numpy.frombuffer(pyptr, dtype=numpy.intp).item()
+        voidptr = numpy.frombuffer(pyptr, dtype=np.intp).item()
 
         positions.append(voidptr)
         sharedptrs.append(None)
@@ -2181,6 +2317,7 @@ class VirtualArrayType(ContentType):
         if form.form is None:
             raise ValueError(
                 "VirtualArrays without a known 'form' can't be used in Numba"
+                + awkward1._util.exception_suffix(__file__)
             )
         positions.append(0)
         sharedptrs.append(None)
@@ -2197,6 +2334,7 @@ class VirtualArrayType(ContentType):
             raise ValueError(
                 "VirtualArrays without a known 'form' can't be used in Numba "
                 "(including nested)"
+                + awkward1._util.exception_suffix(__file__)
             )
         return VirtualArrayType(
             form.form, cls.from_form_identities(form), form.parameters
@@ -2206,6 +2344,7 @@ class VirtualArrayType(ContentType):
         if generator_form is None:
             raise ValueError(
                 "VirtualArrays without a known 'form' can't be used in Numba"
+                + awkward1._util.exception_suffix(__file__)
             )
         super(VirtualArrayType, self).__init__(
             name="awkward1.VirtualArrayType({0}, {1}, {2})".format(
@@ -2223,7 +2362,7 @@ class VirtualArrayType(ContentType):
 
         pyptr = ctypes.py_object(layout)
         ctypes.pythonapi.Py_IncRef(pyptr)
-        voidptr = numpy.frombuffer(pyptr, dtype=numpy.intp).item()
+        voidptr = numpy.frombuffer(pyptr, dtype=np.intp).item()
 
         lookup.original_positions[pos + self.PYOBJECT] = voidptr
         lookup.arrayptrs[pos + self.PYOBJECT] = voidptr
@@ -2269,6 +2408,7 @@ class VirtualArrayType(ContentType):
                         "unrecognized NumpyForm.primitive type: {0}".format(
                             form.primitive
                         )
+                        + awkward1._util.exception_suffix(__file__)
                     )
 
             elif isinstance(
@@ -2300,10 +2440,19 @@ class VirtualArrayType(ContentType):
                 return arrayview.type.getitem_at(arrayview)
 
             elif isinstance(form, awkward1.forms.UnionForm):
-                raise TypeError("union types cannot be accessed in Numba")
+                raise TypeError(
+                    "union types cannot be accessed in Numba"
+                    + awkward1._util.exception_suffix(__file__)
+                )
+
+            elif isinstance(form, awkward1.forms.VirtualForm):
+                return getitem_at(form.form)
 
             else:
-                raise AssertionError("unrecognized Form type: {0}".format(type(form)))
+                raise AssertionError(
+                    "unrecognized Form type: {0}".format(type(form))
+                    + awkward1._util.exception_suffix(__file__)
+                )
 
         def wrap(out):
             if isinstance(out, awkward1.forms.Form):
@@ -2365,6 +2514,7 @@ class VirtualArrayType(ContentType):
             arraypos_obj = pyapi.long_from_ssize_t(arraypos)
             array_obj = pyapi.object_getattr_string(virtualarray_obj, "array")
 
+            # FIXME: memory leak? what about putting this exception after the decrefs?
             with builder.if_then(
                 builder.icmp_signed(
                     "!=",
@@ -2380,6 +2530,7 @@ class VirtualArrayType(ContentType):
                 fill_obj, (arraypos_obj, array_obj, lookup_obj,)
             )
 
+            # FIXME: memory leak? what about putting this exception after the decrefs?
             with builder.if_then(
                 builder.icmp_signed(
                     "!=",

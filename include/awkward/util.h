@@ -43,7 +43,7 @@ namespace awkward {
         complex256,
         // datetime64,
         // timedelta64,
-        num_dtype
+        size
     };
 
     /// @brief Returns the name associated with a given dtype.
@@ -110,7 +110,7 @@ namespace awkward {
     /// strings. See issue
     /// [scikit-hep/awkward-1.0#186](https://github.com/scikit-hep/awkward-1.0/issues/186).
     std::string
-      quote(const std::string& x, bool doublequote);
+      quote(const std::string& x);
 
     /// @brief Converts an `offsets` index (from
     /// {@link ListOffsetArrayOf ListOffsetArray}, for instance) into a

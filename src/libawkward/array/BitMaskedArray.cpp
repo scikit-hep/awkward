@@ -1,11 +1,14 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/BitMaskedArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/BitMaskedArray.cpp", line)
+
 #include <sstream>
 #include <type_traits>
 
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/operations.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/operations.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -184,6 +187,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  BitMaskedForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// BitMaskedArray
 
   BitMaskedArray::BitMaskedArray(const IdentitiesPtr& identities,
@@ -202,11 +210,13 @@ namespace awkward {
     int64_t bitlength = ((length / 8) + ((length % 8) != 0));
     if (mask.length() < bitlength) {
       throw std::invalid_argument(
-        "BitMaskedArray mask must not be shorter than its ceil(length / 8.0)");
+        std::string("BitMaskedArray mask must not be shorter than its ceil(length / 8.0)")
+        + FILENAME(__LINE__));
     }
     if (content.get()->length() < length) {
       throw std::invalid_argument(
-        "BitMaskedArray content must not be shorter than its length");
+        std::string("BitMaskedArray content must not be shorter than its length")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -244,11 +254,11 @@ namespace awkward {
   BitMaskedArray::bytemask() const {
     Index8 bytemask(mask_.length() * 8);
     struct Error err = kernel::BitMaskedArray_to_ByteMaskedArray(
-      bytemask.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
+      kernel::lib::cpu,   // DERIVE
+      bytemask.data(),
+      mask_.data(),
       mask_.length(),
-      false,
+      valid_when_,
       lsb_order_);
     util::handle_error(err, classname(), identities_.get());
     return bytemask.getitem_range_nowrap(0, length_);
@@ -278,9 +288,9 @@ namespace awkward {
   BitMaskedArray::toByteMaskedArray() const {
     Index8 bytemask(mask_.length() * 8);
     struct Error err = kernel::BitMaskedArray_to_ByteMaskedArray(
-      bytemask.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
+      kernel::lib::cpu,   // DERIVE
+      bytemask.data(),
+      mask_.data(),
       mask_.length(),
       false,
       lsb_order_);
@@ -297,9 +307,9 @@ namespace awkward {
   BitMaskedArray::toIndexedOptionArray64() const {
     Index64 index(mask_.length() * 8);
     struct Error err = kernel::BitMaskedArray_to_IndexedOptionArray64(
-      index.ptr().get(),
-      mask_.ptr().get(),
-      mask_.offset(),
+      kernel::lib::cpu,   // DERIVE
+      index.data(),
+      mask_.data(),
       mask_.length(),
       valid_when_,
       lsb_order_);
@@ -326,7 +336,8 @@ namespace awkward {
         util::handle_error(
           failure("content and its identities must have the same length",
                   kSliceNone,
-                  kSliceNone),
+                  kSliceNone,
+                  FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -340,9 +351,9 @@ namespace awkward {
         Identities32* rawsubidentities =
           reinterpret_cast<Identities32*>(subidentities.get());
         struct Error err = kernel::Identities_extend<int32_t>(
-          rawsubidentities->ptr().get(),
-          rawidentities->ptr().get(),
-          rawidentities->offset(),
+          kernel::lib::cpu,   // DERIVE
+          rawsubidentities->data(),
+          rawidentities->data(),
           rawidentities->length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
@@ -358,16 +369,18 @@ namespace awkward {
         Identities64* rawsubidentities =
           reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = kernel::Identities_extend<int64_t>(
-          rawsubidentities->ptr().get(),
-          rawidentities->ptr().get(),
-          rawidentities->offset(),
+          kernel::lib::cpu,   // DERIVE
+          rawsubidentities->data(),
+          rawidentities->data(),
           rawidentities->length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
         content_.get()->setidentities(subidentities);
       }
       else {
-        throw std::runtime_error("unrecognized Identities specialization");
+        throw std::runtime_error(
+          std::string("unrecognized Identities specialization")
+          + FILENAME(__LINE__));
       }
     }
     identities_ = identities;
@@ -383,8 +396,10 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err =
-        kernel::new_Identities<int32_t>(rawidentities->ptr().get(), length());
+      struct Error err = kernel::new_Identities<int32_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -396,8 +411,10 @@ namespace awkward {
                                        length());
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err = kernel::new_Identities<int64_t>(rawidentities->ptr().get(),
-                                                         length());
+      struct Error err = kernel::new_Identities<int64_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -519,7 +536,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < length()) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -538,7 +558,7 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < length())) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -570,7 +590,7 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
       util::handle_error(
-        failure("index out of range", kSliceNone, stop),
+        failure("index out of range", kSliceNone, stop, FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -667,7 +687,19 @@ namespace awkward {
 
   const std::string
   BitMaskedArray::validityerror(const std::string& path) const {
-    return content_.get()->validityerror(path + std::string(".content"));
+    if (mask_.length() * 8 < length_) {
+      return (std::string("at ") + path + std::string(" (") + classname()
+              + std::string("): ") + std::string("len(mask) * 8 < length")
+              + FILENAME(__LINE__));
+    }
+    else if (content_.get()->length() < length_) {
+      return (std::string("at ") + path + std::string(" (") + classname()
+              + std::string("): ") + std::string("len(content) < length")
+              + FILENAME(__LINE__));
+    }
+    else {
+      return content_.get()->validityerror(path + std::string(".content"));
+    }
   }
 
   const ContentPtr
@@ -778,6 +810,7 @@ namespace awkward {
   BitMaskedArray::reduce_next(const Reducer& reducer,
                               int64_t negaxis,
                               const Index64& starts,
+                              const Index64& shifts,
                               const Index64& parents,
                               int64_t outlength,
                               bool mask,
@@ -785,6 +818,7 @@ namespace awkward {
     return toByteMaskedArray().get()->reduce_next(reducer,
                                                   negaxis,
                                                   starts,
+                                                  shifts,
                                                   parents,
                                                   outlength,
                                                   mask,
@@ -850,7 +884,8 @@ namespace awkward {
                                const Slice& tail,
                                const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: BitMaskedArraygetitem_next(at)");
+      std::string("undefined operation: BitMaskedArraygetitem_next(at)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -858,7 +893,8 @@ namespace awkward {
                                const Slice& tail,
                                const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: BitMaskedArraygetitem_next(range)");
+      std::string("undefined operation: BitMaskedArraygetitem_next(range)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -866,7 +902,8 @@ namespace awkward {
                                const Slice& tail,
                                const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: BitMaskedArraygetitem_next(array)");
+      std::string("undefined operation: BitMaskedArraygetitem_next(array)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -874,7 +911,8 @@ namespace awkward {
                                const Slice& tail,
                                const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: BitMaskedArraygetitem_next(jagged)");
+      std::string("undefined operation: BitMaskedArraygetitem_next(jagged)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -911,15 +949,25 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::copy_to(kernel::Lib ptr_lib) const {
+  BitMaskedArray::copy_to(kernel::lib ptr_lib) const {
     IndexU8 mask = mask_.copy_to(ptr_lib);
-    ContentPtr  content = content_->copy_to(ptr_lib);
-    return std::make_shared<BitMaskedArray>(identities(),
-                                            parameters(),
+    ContentPtr content = content_.get()->copy_to(ptr_lib);
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->copy_to(ptr_lib);
+    }
+    return std::make_shared<BitMaskedArray>(identities,
+                                            parameters_,
                                             mask,
                                             content,
-                                            valid_when(),
-                                            length(),
-                                            lsb_order());
+                                            valid_when_,
+                                            length_,
+                                            lsb_order_);
   }
+
+  const ContentPtr
+  BitMaskedArray::numbers_to_type(const std::string& name) const {
+    return toByteMaskedArray().get()->numbers_to_type(name);
+  }
+
 }

@@ -1,6 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#include "awkward/cpu-kernels/identities.h"
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/identities.cpp", line)
+
+#include "awkward/kernels/identities.h"
 
 template <typename T>
 ERROR awkward_new_Identities(
@@ -42,13 +44,11 @@ ERROR awkward_Identities_from_ListOffsetArray(
   ID* toptr,
   const ID* fromptr,
   const T* fromoffsets,
-  int64_t fromptroffset,
-  int64_t offsetsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
-  int64_t globalstart = fromoffsets[offsetsoffset];
-  int64_t globalstop = fromoffsets[offsetsoffset + fromlength];
+  int64_t globalstart = fromoffsets[0];
+  int64_t globalstop = fromoffsets[fromlength];
   for (int64_t k = 0;  k < globalstart*(fromwidth + 1);  k++) {
     toptr[k] = -1;
   }
@@ -58,15 +58,15 @@ ERROR awkward_Identities_from_ListOffsetArray(
     toptr[k] = -1;
   }
   for (int64_t i = 0;  i < fromlength;  i++) {
-    int64_t start = fromoffsets[offsetsoffset + i];
-    int64_t stop = fromoffsets[offsetsoffset + i + 1];
+    int64_t start = fromoffsets[i];
+    int64_t stop = fromoffsets[i + 1];
     if (start != stop  &&  stop > tolength) {
-      return failure("max(stop) > len(content)", i, kSliceNone);
+      return failure("max(stop) > len(content)", i, kSliceNone, FILENAME(__LINE__));
     }
     for (int64_t j = start;  j < stop;  j++) {
       for (int64_t k = 0;  k < fromwidth;  k++) {
         toptr[j*(fromwidth + 1) + k] =
-          fromptr[fromptroffset + i*(fromwidth) + k];
+          fromptr[i*(fromwidth) + k];
       }
       toptr[j*(fromwidth + 1) + fromwidth] = (ID)(j - start);
     }
@@ -77,8 +77,6 @@ ERROR awkward_Identities32_from_ListOffsetArray32(
   int32_t* toptr,
   const int32_t* fromptr,
   const int32_t* fromoffsets,
-  int64_t fromptroffset,
-  int64_t offsetsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -86,8 +84,6 @@ ERROR awkward_Identities32_from_ListOffsetArray32(
     toptr,
     fromptr,
     fromoffsets,
-    fromptroffset,
-    offsetsoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -96,8 +92,6 @@ ERROR awkward_Identities32_from_ListOffsetArrayU32(
   int32_t* toptr,
   const int32_t* fromptr,
   const uint32_t* fromoffsets,
-  int64_t fromptroffset,
-  int64_t offsetsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -105,8 +99,6 @@ ERROR awkward_Identities32_from_ListOffsetArrayU32(
     toptr,
     fromptr,
     fromoffsets,
-    fromptroffset,
-    offsetsoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -115,8 +107,6 @@ ERROR awkward_Identities32_from_ListOffsetArray64(
   int32_t* toptr,
   const int32_t* fromptr,
   const int64_t* fromoffsets,
-  int64_t fromptroffset,
-  int64_t offsetsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -124,8 +114,6 @@ ERROR awkward_Identities32_from_ListOffsetArray64(
     toptr,
     fromptr,
     fromoffsets,
-    fromptroffset,
-    offsetsoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -134,8 +122,6 @@ ERROR awkward_Identities64_from_ListOffsetArray32(
   int64_t* toptr,
   const int64_t* fromptr,
   const int32_t* fromoffsets,
-  int64_t fromptroffset,
-  int64_t offsetsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -143,8 +129,6 @@ ERROR awkward_Identities64_from_ListOffsetArray32(
     toptr,
     fromptr,
     fromoffsets,
-    fromptroffset,
-    offsetsoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -153,8 +137,6 @@ ERROR awkward_Identities64_from_ListOffsetArrayU32(
   int64_t* toptr,
   const int64_t* fromptr,
   const uint32_t* fromoffsets,
-  int64_t fromptroffset,
-  int64_t offsetsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -162,8 +144,6 @@ ERROR awkward_Identities64_from_ListOffsetArrayU32(
     toptr,
     fromptr,
     fromoffsets,
-    fromptroffset,
-    offsetsoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -172,8 +152,6 @@ ERROR awkward_Identities64_from_ListOffsetArray64(
   int64_t* toptr,
   const int64_t* fromptr,
   const int64_t* fromoffsets,
-  int64_t fromptroffset,
-  int64_t offsetsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -181,8 +159,6 @@ ERROR awkward_Identities64_from_ListOffsetArray64(
     toptr,
     fromptr,
     fromoffsets,
-    fromptroffset,
-    offsetsoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -195,9 +171,6 @@ ERROR awkward_Identities_from_ListArray(
   const ID* fromptr,
   const T* fromstarts,
   const T* fromstops,
-  int64_t fromptroffset,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -205,10 +178,10 @@ ERROR awkward_Identities_from_ListArray(
     toptr[k] = -1;
   }
   for (int64_t i = 0;  i < fromlength;  i++) {
-    int64_t start = fromstarts[startsoffset + i];
-    int64_t stop = fromstops[stopsoffset + i];
+    int64_t start = fromstarts[i];
+    int64_t stop = fromstops[i];
     if (start != stop  &&  stop > tolength) {
-      return failure("max(stop) > len(content)", i, kSliceNone);
+      return failure("max(stop) > len(content)", i, kSliceNone, FILENAME(__LINE__));
     }
     for (int64_t j = start;  j < stop;  j++) {
       if (toptr[j*(fromwidth + 1) + fromwidth] != -1) {
@@ -217,7 +190,7 @@ ERROR awkward_Identities_from_ListArray(
       }                     // if there are any non-unique contents
       for (int64_t k = 0;  k < fromwidth;  k++) {
         toptr[j*(fromwidth + 1) + k] =
-          fromptr[fromptroffset + i*(fromwidth) + k];
+          fromptr[i*(fromwidth) + k];
       }
       toptr[j*(fromwidth + 1) + fromwidth] = (ID)(j - start);
     }
@@ -231,9 +204,6 @@ ERROR awkward_Identities32_from_ListArray32(
   const int32_t* fromptr,
   const int32_t* fromstarts,
   const int32_t* fromstops,
-  int64_t fromptroffset,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -243,9 +213,6 @@ ERROR awkward_Identities32_from_ListArray32(
     fromptr,
     fromstarts,
     fromstops,
-    fromptroffset,
-    startsoffset,
-    stopsoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -256,9 +223,6 @@ ERROR awkward_Identities32_from_ListArrayU32(
   const int32_t* fromptr,
   const uint32_t* fromstarts,
   const uint32_t* fromstops,
-  int64_t fromptroffset,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -268,9 +232,6 @@ ERROR awkward_Identities32_from_ListArrayU32(
     fromptr,
     fromstarts,
     fromstops,
-    fromptroffset,
-    startsoffset,
-    stopsoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -281,9 +242,6 @@ ERROR awkward_Identities32_from_ListArray64(
   const int32_t* fromptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
-  int64_t fromptroffset,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -293,9 +251,6 @@ ERROR awkward_Identities32_from_ListArray64(
     fromptr,
     fromstarts,
     fromstops,
-    fromptroffset,
-    startsoffset,
-    stopsoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -306,9 +261,6 @@ ERROR awkward_Identities64_from_ListArray32(
   const int64_t* fromptr,
   const int32_t* fromstarts,
   const int32_t* fromstops,
-  int64_t fromptroffset,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -318,9 +270,6 @@ ERROR awkward_Identities64_from_ListArray32(
     fromptr,
     fromstarts,
     fromstops,
-    fromptroffset,
-    startsoffset,
-    stopsoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -331,9 +280,6 @@ ERROR awkward_Identities64_from_ListArrayU32(
   const int64_t* fromptr,
   const uint32_t* fromstarts,
   const uint32_t* fromstops,
-  int64_t fromptroffset,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -343,9 +289,6 @@ ERROR awkward_Identities64_from_ListArrayU32(
     fromptr,
     fromstarts,
     fromstops,
-    fromptroffset,
-    startsoffset,
-    stopsoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -356,9 +299,6 @@ ERROR awkward_Identities64_from_ListArray64(
   const int64_t* fromptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
-  int64_t fromptroffset,
-  int64_t startsoffset,
-  int64_t stopsoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -368,9 +308,6 @@ ERROR awkward_Identities64_from_ListArray64(
     fromptr,
     fromstarts,
     fromstops,
-    fromptroffset,
-    startsoffset,
-    stopsoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -380,7 +317,6 @@ template <typename ID>
 ERROR awkward_Identities_from_RegularArray(
   ID* toptr,
   const ID* fromptr,
-  int64_t fromptroffset,
   int64_t size,
   int64_t tolength,
   int64_t fromlength,
@@ -389,7 +325,7 @@ ERROR awkward_Identities_from_RegularArray(
     for (int64_t j = 0;  j < size;  j++) {
       for (int64_t k = 0;  k < fromwidth;  k++) {
         toptr[(i*size + j)*(fromwidth + 1) + k] =
-          fromptr[fromptroffset + i*fromwidth + k];
+          fromptr[i*fromwidth + k];
       }
       toptr[(i*size + j)*(fromwidth + 1) + fromwidth] = (ID)(j);
     }
@@ -404,7 +340,6 @@ ERROR awkward_Identities_from_RegularArray(
 ERROR awkward_Identities32_from_RegularArray(
   int32_t* toptr,
   const int32_t* fromptr,
-  int64_t fromptroffset,
   int64_t size,
   int64_t tolength,
   int64_t fromlength,
@@ -412,7 +347,6 @@ ERROR awkward_Identities32_from_RegularArray(
   return awkward_Identities_from_RegularArray<int32_t>(
     toptr,
     fromptr,
-    fromptroffset,
     size,
     tolength,
     fromlength,
@@ -421,7 +355,6 @@ ERROR awkward_Identities32_from_RegularArray(
 ERROR awkward_Identities64_from_RegularArray(
   int64_t* toptr,
   const int64_t* fromptr,
-  int64_t fromptroffset,
   int64_t size,
   int64_t tolength,
   int64_t fromlength,
@@ -429,7 +362,6 @@ ERROR awkward_Identities64_from_RegularArray(
   return awkward_Identities_from_RegularArray<int64_t>(
     toptr,
     fromptr,
-    fromptroffset,
     size,
     tolength,
     fromlength,
@@ -442,8 +374,6 @@ ERROR awkward_Identities_from_IndexedArray(
   ID* toptr,
   const ID* fromptr,
   const T* fromindex,
-  int64_t fromptroffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -451,9 +381,9 @@ ERROR awkward_Identities_from_IndexedArray(
     toptr[k] = -1;
   }
   for (int64_t i = 0;  i < fromlength;  i++) {
-    T j = fromindex[indexoffset + i];
+    T j = fromindex[i];
     if (j >= tolength) {
-      return failure("max(index) > len(content)", i, j);
+      return failure("max(index) > len(content)", i, j, FILENAME(__LINE__));
     }
     else if (j >= 0) {
       if (toptr[j*fromwidth] != -1) {
@@ -461,7 +391,7 @@ ERROR awkward_Identities_from_IndexedArray(
         return success();   // calling code won't use the (incomplete) toptr
       }                     // if there are any non-unique contents
       for (int64_t k = 0;  k < fromwidth;  k++) {
-        toptr[j*fromwidth + k] = fromptr[fromptroffset + i*fromwidth + k];
+        toptr[j*fromwidth + k] = fromptr[i*fromwidth + k];
       }
     }
   }
@@ -473,8 +403,6 @@ ERROR awkward_Identities32_from_IndexedArray32(
   int32_t* toptr,
   const int32_t* fromptr,
   const int32_t* fromindex,
-  int64_t fromptroffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -483,8 +411,6 @@ ERROR awkward_Identities32_from_IndexedArray32(
     toptr,
     fromptr,
     fromindex,
-    fromptroffset,
-    indexoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -494,8 +420,6 @@ ERROR awkward_Identities32_from_IndexedArrayU32(
   int32_t* toptr,
   const int32_t* fromptr,
   const uint32_t* fromindex,
-  int64_t fromptroffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -504,8 +428,6 @@ ERROR awkward_Identities32_from_IndexedArrayU32(
     toptr,
     fromptr,
     fromindex,
-    fromptroffset,
-    indexoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -515,8 +437,6 @@ ERROR awkward_Identities32_from_IndexedArray64(
   int32_t* toptr,
   const int32_t* fromptr,
   const int64_t* fromindex,
-  int64_t fromptroffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -525,8 +445,6 @@ ERROR awkward_Identities32_from_IndexedArray64(
     toptr,
     fromptr,
     fromindex,
-    fromptroffset,
-    indexoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -536,8 +454,6 @@ ERROR awkward_Identities64_from_IndexedArray32(
   int64_t* toptr,
   const int64_t* fromptr,
   const int32_t* fromindex,
-  int64_t fromptroffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -546,8 +462,6 @@ ERROR awkward_Identities64_from_IndexedArray32(
     toptr,
     fromptr,
     fromindex,
-    fromptroffset,
-    indexoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -557,8 +471,6 @@ ERROR awkward_Identities64_from_IndexedArrayU32(
   int64_t* toptr,
   const int64_t* fromptr,
   const uint32_t* fromindex,
-  int64_t fromptroffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -567,8 +479,6 @@ ERROR awkward_Identities64_from_IndexedArrayU32(
     toptr,
     fromptr,
     fromindex,
-    fromptroffset,
-    indexoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -578,8 +488,6 @@ ERROR awkward_Identities64_from_IndexedArray64(
   int64_t* toptr,
   const int64_t* fromptr,
   const int64_t* fromindex,
-  int64_t fromptroffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth) {
@@ -588,8 +496,6 @@ ERROR awkward_Identities64_from_IndexedArray64(
     toptr,
     fromptr,
     fromindex,
-    fromptroffset,
-    indexoffset,
     tolength,
     fromlength,
     fromwidth);
@@ -602,9 +508,6 @@ ERROR awkward_Identities_from_UnionArray(
   const ID* fromptr,
   const T* fromtags,
   const I* fromindex,
-  int64_t fromptroffset,
-  int64_t tagsoffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth,
@@ -613,13 +516,13 @@ ERROR awkward_Identities_from_UnionArray(
     toptr[k] = -1;
   }
   for (int64_t i = 0;  i < fromlength;  i++) {
-    if (fromtags[tagsoffset + i] == which) {
-      I j = fromindex[indexoffset + i];
+    if (fromtags[i] == which) {
+      I j = fromindex[i];
       if (j >= tolength) {
-        return failure("max(index) > len(content)", i, j);
+        return failure("max(index) > len(content)", i, j, FILENAME(__LINE__));
       }
       else if (j < 0) {
-        return failure("min(index) < 0", i, j);
+        return failure("min(index) < 0", i, j, FILENAME(__LINE__));
       }
       else {
         if (toptr[j*fromwidth] != -1) {
@@ -627,7 +530,7 @@ ERROR awkward_Identities_from_UnionArray(
           return success();   // calling code won't use the (incomplete) toptr
         }                     // if there are any non-unique contents
         for (int64_t k = 0;  k < fromwidth;  k++) {
-          toptr[j*fromwidth + k] = fromptr[fromptroffset + i*fromwidth + k];
+          toptr[j*fromwidth + k] = fromptr[i*fromwidth + k];
         }
       }
     }
@@ -641,9 +544,6 @@ ERROR awkward_Identities32_from_UnionArray8_32(
   const int32_t* fromptr,
   const int8_t* fromtags,
   const int32_t* fromindex,
-  int64_t fromptroffset,
-  int64_t tagsoffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth,
@@ -654,9 +554,6 @@ ERROR awkward_Identities32_from_UnionArray8_32(
     fromptr,
     fromtags,
     fromindex,
-    fromptroffset,
-    tagsoffset,
-    indexoffset,
     tolength,
     fromlength,
     fromwidth,
@@ -668,9 +565,6 @@ ERROR awkward_Identities32_from_UnionArray8_U32(
   const int32_t* fromptr,
   const int8_t* fromtags,
   const uint32_t* fromindex,
-  int64_t fromptroffset,
-  int64_t tagsoffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth,
@@ -681,9 +575,6 @@ ERROR awkward_Identities32_from_UnionArray8_U32(
     fromptr,
     fromtags,
     fromindex,
-    fromptroffset,
-    tagsoffset,
-    indexoffset,
     tolength,
     fromlength,
     fromwidth,
@@ -695,9 +586,6 @@ ERROR awkward_Identities32_from_UnionArray8_64(
   const int32_t* fromptr,
   const int8_t* fromtags,
   const int64_t* fromindex,
-  int64_t fromptroffset,
-  int64_t tagsoffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth,
@@ -708,9 +596,6 @@ ERROR awkward_Identities32_from_UnionArray8_64(
     fromptr,
     fromtags,
     fromindex,
-    fromptroffset,
-    tagsoffset,
-    indexoffset,
     tolength,
     fromlength,
     fromwidth,
@@ -722,9 +607,6 @@ ERROR awkward_Identities64_from_UnionArray8_32(
   const int64_t* fromptr,
   const int8_t* fromtags,
   const int32_t* fromindex,
-  int64_t fromptroffset,
-  int64_t tagsoffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth,
@@ -735,9 +617,6 @@ ERROR awkward_Identities64_from_UnionArray8_32(
     fromptr,
     fromtags,
     fromindex,
-    fromptroffset,
-    tagsoffset,
-    indexoffset,
     tolength,
     fromlength,
     fromwidth,
@@ -749,9 +628,6 @@ ERROR awkward_Identities64_from_UnionArray8_U32(
   const int64_t* fromptr,
   const int8_t* fromtags,
   const uint32_t* fromindex,
-  int64_t fromptroffset,
-  int64_t tagsoffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth,
@@ -762,9 +638,6 @@ ERROR awkward_Identities64_from_UnionArray8_U32(
     fromptr,
     fromtags,
     fromindex,
-    fromptroffset,
-    tagsoffset,
-    indexoffset,
     tolength,
     fromlength,
     fromwidth,
@@ -776,9 +649,6 @@ ERROR awkward_Identities64_from_UnionArray8_64(
   const int64_t* fromptr,
   const int8_t* fromtags,
   const int64_t* fromindex,
-  int64_t fromptroffset,
-  int64_t tagsoffset,
-  int64_t indexoffset,
   int64_t tolength,
   int64_t fromlength,
   int64_t fromwidth,
@@ -789,9 +659,6 @@ ERROR awkward_Identities64_from_UnionArray8_64(
     fromptr,
     fromtags,
     fromindex,
-    fromptroffset,
-    tagsoffset,
-    indexoffset,
     tolength,
     fromlength,
     fromwidth,
@@ -802,12 +669,11 @@ template <typename ID>
 ERROR awkward_Identities_extend(
   ID* toptr,
   const ID* fromptr,
-  int64_t fromoffset,
   int64_t fromlength,
   int64_t tolength) {
   int64_t i = 0;
   for (;  i < fromlength;  i++) {
-    toptr[i] = fromptr[fromoffset + i];
+    toptr[i] = fromptr[i];
   }
   for (;  i < tolength;  i++) {
     toptr[i] = -1;
@@ -817,26 +683,22 @@ ERROR awkward_Identities_extend(
 ERROR awkward_Identities32_extend(
   int32_t* toptr,
   const int32_t* fromptr,
-  int64_t fromoffset,
   int64_t fromlength,
   int64_t tolength) {
   return awkward_Identities_extend<int32_t>(
     toptr,
     fromptr,
-    fromoffset,
     fromlength,
     tolength);
 }
 ERROR awkward_Identities64_extend(
   int64_t* toptr,
   const int64_t* fromptr,
-  int64_t fromoffset,
   int64_t fromlength,
   int64_t tolength) {
   return awkward_Identities_extend<int64_t>(
     toptr,
     fromptr,
-    fromoffset,
     fromlength,
     tolength);
 }

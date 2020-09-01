@@ -11,13 +11,13 @@
 #include "awkward/Slice.h"
 #include "awkward/Index.h"
 #include "awkward/Content.h"
-#include "awkward/kernel.h"
+#include "awkward/kernel-dispatch.h"
 
 namespace awkward {
   /// @class UnionForm
   ///
   /// @brief Form describing UnionArray.
-  class EXPORT_SYMBOL UnionForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL UnionForm: public Form {
   public:
     /// @brief Creates a UnionForm. See {@link UnionArrayOf UnionArray} for
     /// documentation.
@@ -89,6 +89,9 @@ namespace awkward {
             bool check_form_key,
             bool compatibility_check) const override;
 
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   private:
     Index::Form tags_;
     Index::Form index_;
@@ -107,7 +110,11 @@ namespace awkward {
   /// same type, though #simplify_uniontype would combine such arrays to
   /// simplify the representation.
   template <typename T, typename I>
-  class EXPORT_SYMBOL UnionArrayOf: public Content {
+  class
+#ifdef AWKWARD_UNIONARRAY_NO_EXTERN_TEMPLATE
+  LIBAWKWARD_EXPORT_SYMBOL
+#endif
+  UnionArrayOf: public Content {
   public:
     /// @brief Generates an index in which `index[i] = i`.
     static const IndexOf<I>
@@ -319,6 +326,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,
@@ -392,7 +400,10 @@ namespace awkward {
                           const Slice& tail) const override;
 
     const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const override;
+      copy_to(kernel::lib ptr_lib) const override;
+
+    const ContentPtr
+      numbers_to_type(const std::string& name) const override;
 
   protected:
     template <typename S>
@@ -408,7 +419,7 @@ namespace awkward {
     const ContentPtrVec contents_;
   };
 
-#if !defined AWKWARD_UNIONARRAY_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+#ifndef AWKWARD_UNIONARRAY_NO_EXTERN_TEMPLATE
   extern template class UnionArrayOf<int8_t, int32_t>;
   extern template class UnionArrayOf<int8_t, uint32_t>;
   extern template class UnionArrayOf<int8_t, int64_t>;

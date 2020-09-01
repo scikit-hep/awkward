@@ -1,49 +1,45 @@
 // BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/sorting.cpp", line)
+
 #include <algorithm>
 #include <cstring>
 #include <numeric>
 #include <vector>
 
-#include "awkward/cpu-kernels/sorting.h"
+#include "awkward/kernels/sorting.h"
 
 ERROR awkward_sorting_ranges(
   int64_t* toindex,
   int64_t tolength,
   const int64_t* parents,
-  int64_t parentsoffset,
-  int64_t parentslength,
-  int64_t outlength) {
+  int64_t parentslength) {
   int64_t j = 0;
   int64_t k = 0;
   toindex[0] = k;
   k++; j++;
   for (int64_t i = 1;  i < parentslength;  i++) {
-    if(parents[i - 1] != parents[i]) {
+    if (parents[i - 1] != parents[i]) {
       toindex[j] = k;
       j++;
     }
     k++;
   }
   toindex[tolength - 1] = parentslength;
-
   return success();
 }
 
 ERROR awkward_sorting_ranges_length(
   int64_t* tolength,
   const int64_t* parents,
-  int64_t parentsoffset,
-  int64_t parentslength,
-  int64_t outlength) {
+  int64_t parentslength) {
   int64_t length = 2;
   for (int64_t i = 1;  i < parentslength;  i++) {
-    if(parents[i - 1] != parents[i]) {
+    if (parents[i - 1] != parents[i]) {
       length++;
     }
   }
   *tolength = length;
-
   return success();
 }
 
@@ -579,15 +575,13 @@ ERROR awkward_IndexedArray_local_preparenext_64(
     int64_t* tocarry,
     const int64_t* starts,
     const int64_t* parents,
-    int64_t parentsoffset,
     int64_t parentslength,
-    const int64_t* nextparents,
-    int64_t nextparentsoffset) {
+    const int64_t* nextparents) {
   int64_t j = 0;
   for (int64_t i = 0;  i < parentslength;  i++) {
-    int64_t parent = parents[i] + parentsoffset;
+    int64_t parent = parents[i];
     int64_t start = starts[parent];
-    int64_t nextparent = nextparents[j] + nextparentsoffset;
+    int64_t nextparent = nextparents[j];
     if (parent == nextparent) {
       tocarry[i] = j;
       ++j;
@@ -604,7 +598,6 @@ ERROR awkward_IndexedArray_local_preparenext_64(
 ERROR awkward_NumpyArray_sort_asstrings_uint8(
     uint8_t* toptr,
     const uint8_t* fromptr,
-    int64_t length,
     const int64_t* offsets,
     int64_t offsetslength,
     int64_t* outoffsets,

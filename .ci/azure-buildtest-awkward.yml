@@ -32,6 +32,9 @@ jobs:
     pool:
       vmImage: "vs2017-win2016"
 
+    variables:
+      PIP_ONLY_BINARY: cmake
+
     strategy:
       matrix:
         "py27-32bit":
@@ -87,6 +90,18 @@ jobs:
           python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
+          python dev/generate-kernelspec.py
+        displayName: "Generate Kernel specification"
+      - script: |
+          python dev/generate-tests.py
+        displayName: "Generate Kernel tests"
+      - script: |
+          python -m pytest -vv -rs tests-spec
+        displayName: "Test specification"
+      - script: |
+          python -m pytest -vv -rs tests-cpu-kernels
+        displayName: "Test CPU kernels"
+      - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
 
@@ -94,6 +109,9 @@ jobs:
 
     pool:
       vmImage: "macOS-10.14"
+
+    variables:
+      PIP_ONLY_BINARY: cmake
 
     strategy:
       matrix:
@@ -139,6 +157,18 @@ jobs:
           python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
+          python dev/generate-kernelspec.py
+        displayName: "Generate Kernel specification"
+      - script: |
+          python dev/generate-tests.py
+        displayName: "Generate Kernel tests"
+      - script: |
+          python -m pytest -vv -rs tests-spec
+        displayName: "Test specification"
+      - script: |
+          python -m pytest -vv -rs tests-cpu-kernels
+        displayName: "Test CPU kernels"
+      - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
 
@@ -151,6 +181,9 @@ jobs:
 
     pool:
       vmImage: "ubuntu-16.04"
+
+    variables:
+      PIP_ONLY_BINARY: cmake
 
     strategy:
       matrix:
@@ -207,8 +240,29 @@ jobs:
           python -m pip install -v .[test,dev]
         displayName: "Build"
       - script: |
+          python dev/generate-kernelspec.py
+        displayName: "Generate Kernel specification"
+      - script: |
+          python dev/generate-tests.py
+        displayName: "Generate Kernel tests"
+      - script: |
+          python -m pytest -vv -rs tests-spec
+        displayName: "Test specification"
+      - script: |
+          python -m pytest -vv -rs tests-cpu-kernels
+        displayName: "Test CPU kernels"
+      - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
+      - script: |
+          python dev/generate-cuda.py
+        displayName: "Generate CUDA kernels"
+        condition: "ne(variables['python.version'], '3.8')"
+      - script: |
+          python -m pip install wheel
+          bash cuda-build.sh
+        displayName: "Test-build the cuda-kernels"
+        condition: "ne(variables['python.version'], '2.7')"
 
       # - script: |
       #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py

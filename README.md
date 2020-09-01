@@ -1,11 +1,10 @@
 <img src="docs-img/logo/logo-300px.png">
 
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
-[![Build Status](https://dev.azure.com/jpivarski/Scikit-HEP/_apis/build/status/buildtest-awkward?branchName=master)](https://dev.azure.com/jpivarski/Scikit-HEP/_build/latest?definitionId=3&branchName=master)
-[![Python 2.7 3.5 3.6 3.7 3.8](docs-img/logo/python-badge.svg)](https://www.python.org)
+[![NSF-1836650](https://img.shields.io/badge/NSF-1836650-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1836650)
 [![DOI](https://zenodo.org/badge/137079949.svg)](https://zenodo.org/badge/latestdoi/137079949)
+[![Python 2.7 3.5 3.6 3.7 3.8](docs-img/logo/python-badge.svg)](https://www.python.org)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 
@@ -13,23 +12,13 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 
 <table>
   <tr>
-    <td width="33%" valign="top">
-      <a href="https://awkward-array.org/how-to.html">
-        <img src="docs-img/panel-data-analysts.png" width="268">
+    <td width="66%" valign="top">
+      <a href="https://awkward-array.org">
+        <img src="docs-img/panel-tutorials.png" width="570">
       </a>
       <p align="center"><b>
-        <a href="https://awkward-array.org/how-to.html">
-        How-to documentation<br>for data analysts
-        </a>
-      </b></p>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://awkward-array.org/how-it-works.html">
-        <img src="docs-img/panel-developers.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.org/how-it-works.html">
-        How-it-works tutorials<br>for developers
+        <a href="https://awkward-array.org">
+        How-to tutorials
         </a>
       </b></p>
     </td>
@@ -39,7 +28,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        Python<br>API reference
+        Python API reference
         </a>
       </b></p>
       <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
@@ -47,7 +36,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++<br>API reference
+        C++ API reference
         </a>
       </b></p>
     </td>
@@ -141,6 +130,30 @@ Or you can build it locally for incremental development. The following reuses a 
 python localbuild.py --pytest tests
 ```
 
+The `--pytest tests` runs the integration tests from the `tests` directory (drop it to build only).
+
+For more fine-grained testing, we also have tests of the low-level kernels, which can be invoked with
+
+```bash
+python dev/generate-kernelspec.py
+python dev/generate-tests.py
+python -m pytest -vv -rs tests-cpu-kernels
+python -m pytest -vv -rs tests-spec
+```
+
+Furthermore, if you have an Nvidia GPU, you can build and locally install the experimental CUDA plug-in with
+
+```bash
+pip uninstall -y awkward1-cuda-kernels
+./cuda-build.sh --install
+```
+
+The `--install` does a local `pip install` on your system, which is the only way to use it. You can run its tests with
+
+```bash
+python -m pytest tests-cuda
+```
+
    * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/).
    * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by [ReadTheDocs](https://readthedocs.org).
    * [awkward-array.org](https://awkward-array.org) is hosted by [Netlify](https://www.netlify.com).
@@ -209,6 +222,7 @@ Thanks especially to the gracious help of awkward-array contributors (including 
   </tr>
   <tr>
     <td align="center"><a href="https://gitlab.com/nikoladze"><img src="https://avatars0.githubusercontent.com/u/3707225?v=4" width="100px;" alt=""/><br /><sub><b>Nikolai Hartmann</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=nikoladze" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/sjperkins"><img src="https://avatars3.githubusercontent.com/u/3530212?v=4" width="100px;" alt=""/><br /><sub><b>Simon Perkins</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=sjperkins" title="Code">💻</a></td>
   </tr>
 </table>
 

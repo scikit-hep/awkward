@@ -3,12 +3,14 @@
 #ifndef AWKWARDPY_STARTUP_H_
 #define AWKWARDPY_STARTUP_H_
 
-#include "awkward/kernel.h"
 #include <pybind11/pybind11.h>
 
-namespace py = pybind11;
+#include "awkward/kernel-dispatch.h"
 
-class StartupLibraryPathCallback : public kernel::LibraryPathCallback {
+namespace py = pybind11;
+namespace ak = awkward;
+
+class StartupLibraryPathCallback : public ak::kernel::LibraryPathCallback {
 public:
   StartupLibraryPathCallback() = default;
 

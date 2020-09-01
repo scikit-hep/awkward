@@ -1,5 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/VirtualArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/VirtualArray.cpp", line)
+
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
@@ -39,7 +42,8 @@ namespace awkward {
   VirtualForm::type(const util::TypeStrs& typestrs) const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->type(typestrs);
@@ -77,14 +81,24 @@ namespace awkward {
 
   const std::string
   VirtualForm::purelist_parameter(const std::string& key) const {
-    return parameter(key);
+    std::string out = parameter(key);
+    if (out == std::string("null")) {
+      if (form_.get() == nullptr) {
+        return out;
+      }
+      return form_.get()->purelist_parameter(key);
+    }
+    else {
+      return out;
+    }
   }
 
   bool
   VirtualForm::purelist_isregular() const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->purelist_isregular();
@@ -95,7 +109,8 @@ namespace awkward {
   VirtualForm::purelist_depth() const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->purelist_depth();
@@ -106,7 +121,8 @@ namespace awkward {
   VirtualForm::minmax_depth() const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->minmax_depth();
@@ -117,7 +133,8 @@ namespace awkward {
   VirtualForm::branch_depth() const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->branch_depth();
@@ -128,7 +145,8 @@ namespace awkward {
   VirtualForm::numfields() const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->numfields();
@@ -139,7 +157,8 @@ namespace awkward {
   VirtualForm::fieldindex(const std::string& key) const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->fieldindex(key);
@@ -150,7 +169,8 @@ namespace awkward {
   VirtualForm::key(int64_t fieldindex) const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->key(fieldindex);
@@ -161,7 +181,8 @@ namespace awkward {
   VirtualForm::haskey(const std::string& key) const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->haskey(key);
@@ -172,7 +193,8 @@ namespace awkward {
   VirtualForm::keys() const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "VirtualForm cannot determine its type without an expected Form");
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
     }
     else {
       return form_.get()->keys();
@@ -239,6 +261,17 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  VirtualForm::getitem_field(const std::string& key) const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+          "Cannot determine field without an expected Form");
+    }
+    else {
+      return form_.get()->getitem_field(key);
+    }
+  }
+
   ////////// VirtualArray
 
   VirtualArray::VirtualArray(const IdentitiesPtr& identities,
@@ -246,7 +279,7 @@ namespace awkward {
                              const ArrayGeneratorPtr& generator,
                              const ArrayCachePtr& cache,
                              const std::string& cache_key,
-                             const kernel::Lib ptr_lib)
+                             const kernel::lib ptr_lib)
       : Content(identities, parameters)
       , generator_(generator)
       , cache_(cache)
@@ -257,7 +290,7 @@ namespace awkward {
                              const util::Parameters& parameters,
                              const ArrayGeneratorPtr& generator,
                              const ArrayCachePtr& cache,
-                             const kernel::Lib ptr_lib)
+                             const kernel::lib ptr_lib)
       : Content(identities, parameters)
       , generator_(generator)
       , cache_(cache)
@@ -274,7 +307,7 @@ namespace awkward {
     return cache_;
   }
 
-  const kernel::Lib
+  const kernel::lib
   VirtualArray::ptr_lib() const {
     return ptr_lib_;
   }
@@ -287,24 +320,24 @@ namespace awkward {
     return ContentPtr(nullptr);
   }
 
-  kernel::Lib check_key(const std::string& cache_key) {
+  kernel::lib check_key(const std::string& cache_key) {
     auto fully_qualified_index = cache_key.find_last_of(':');
 
-    if(fully_qualified_index != std::string::npos) {
+    if (fully_qualified_index != std::string::npos) {
       if (cache_key.substr(fully_qualified_index + 1, cache_key.length()) == "cuda") {
-        return kernel::Lib::cuda_kernels;
+        return kernel::lib::cuda;
       }
     }
 
-    return kernel::Lib::cpu_kernels;
+    return kernel::lib::cpu;
   }
 
   const ContentPtr
   VirtualArray::array() const {
     ContentPtr out(nullptr);
-    kernel::Lib src_ptrlib = check_key(cache_key_);
+    kernel::lib src_ptrlib = check_key(cache_key_);
     if (cache_.get() != nullptr) {
-      if(src_ptrlib != ptr_lib_) {
+      if (src_ptrlib != ptr_lib_) {
         out = cache_.get()->get(cache_key())->copy_to(ptr_lib_);
       }
       else {
@@ -312,7 +345,7 @@ namespace awkward {
       }
     }
     if (out.get() == nullptr) {
-      if(src_ptrlib != ptr_lib_) {
+      if (src_ptrlib != ptr_lib_) {
         out = generator_.get()->generate_and_check()->copy_to(src_ptrlib);
       }
       else {
@@ -320,7 +353,7 @@ namespace awkward {
       }
     }
     if (cache_.get() != nullptr) {
-      cache_.get()->set(kernel::fully_qualified_cache_key(cache_key(), ptr_lib_),
+      cache_.get()->set(kernel::fully_qualified_cache_key(ptr_lib_, cache_key()),
                         out);
     }
     return out;
@@ -338,12 +371,16 @@ namespace awkward {
 
   void
   VirtualArray::setidentities(const IdentitiesPtr& identities) {
-    throw std::runtime_error("FIXME: VirtualArray::setidentities(identities)");
+    throw std::runtime_error(
+      std::string("FIXME: VirtualArray::setidentities(identities)")
+      + FILENAME(__LINE__));
   }
 
   void
   VirtualArray::setidentities() {
-    throw std::runtime_error("FIXME: VirtualArray::setidentities");
+    throw std::runtime_error(
+      std::string("FIXME: VirtualArray::setidentities")
+      + FILENAME(__LINE__));
   }
 
   const TypePtr
@@ -453,7 +490,10 @@ namespace awkward {
       regular_at += length();
     }
     if (!(0 <= regular_at  &&  regular_at < length())) {
-      util::handle_error(failure("index out of range", kSliceNone, at),
+      util::handle_error(failure("index out of range",
+                                 kSliceNone,
+                                 at,
+                                 FILENAME_C(__LINE__)),
                          classname(),
                          identities_.get());
     }
@@ -520,12 +560,27 @@ namespace awkward {
     Slice slice;
     slice.append(SliceField(key));
     slice.become_sealed();
-    FormPtr form(nullptr);
+    FormPtr sliceform(nullptr);
+    util::Parameters params;
+    if (!has_virtual_form()) {
+      std::string record =
+          form(false).get()->getitem_field(key)->purelist_parameter(
+              "__record__");
+      if (record != std::string("null")) {
+        params["__record__"] = record;
+      }
+      std::string doc =
+          form(false).get()->getitem_field(key)->purelist_parameter(
+              "__doc__");
+      if (doc != std::string("null")) {
+        params["__doc__"] = doc;
+      }
+    }
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                 form, generator_.get()->length(), shallow_copy(), slice);
+                 sliceform, generator_.get()->length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
-                                          util::Parameters(),
+                                          params,
                                           generator,
                                           cache);
   }
@@ -567,14 +622,9 @@ namespace awkward {
                  form, carry.length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
-                                          parameters_,
+                                          forward_parameters(),
                                           generator,
                                           cache);
-  }
-
-  const std::string
-  VirtualArray::purelist_parameter(const std::string& key) const {
-    return parameter(key);
   }
 
   int64_t
@@ -658,6 +708,7 @@ namespace awkward {
   VirtualArray::reduce_next(const Reducer& reducer,
                           int64_t negaxis,
                           const Index64& starts,
+                          const Index64& shifts,
                           const Index64& parents,
                           int64_t outlength,
                           bool mask,
@@ -665,6 +716,7 @@ namespace awkward {
     return array().get()->reduce_next(reducer,
                                       negaxis,
                                       starts,
+                                      shifts,
                                       parents,
                                       outlength,
                                       mask,
@@ -738,7 +790,8 @@ namespace awkward {
       if (SliceRange* range =
           dynamic_cast<SliceRange*>(head.get())) {
         if (range->step() == 0) {
-            throw std::invalid_argument("slice step cannot be zero");
+            throw std::invalid_argument(
+              std::string("slice step cannot be zero") + FILENAME(__LINE__));
         }
         else if (generator_.get()->length() >= 0) {
           int64_t regular_start = range->start();
@@ -766,7 +819,7 @@ namespace awkward {
                      form, length, shallow_copy(), where);
           ArrayCachePtr cache(nullptr);
           return std::make_shared<VirtualArray>(Identities::none(),
-                                                util::Parameters(),
+                                                forward_parameters(),
                                                 generator,
                                                 cache);
         }
@@ -782,7 +835,7 @@ namespace awkward {
                      form, generator_.get()->length(), shallow_copy(), where);
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
-                                              util::Parameters(),
+                                              forward_parameters(),
                                               generator,
                                               cache);
       }
@@ -794,7 +847,7 @@ namespace awkward {
                      form, 1, shallow_copy(), where);
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
-                                              util::Parameters(),
+                                              forward_parameters(),
                                               generator,
                                               cache);
       }
@@ -806,7 +859,7 @@ namespace awkward {
                      form, slicearray->length(), shallow_copy(), where);
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
-                                              util::Parameters(),
+                                              forward_parameters(),
                                               generator,
                                               cache);
       }
@@ -836,7 +889,8 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next(at)");
+      std::string("undefined operation: VirtualArray::getitem_next(at)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -844,7 +898,8 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next(range)");
+      std::string("undefined operation: VirtualArray::getitem_next(range)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -852,7 +907,8 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next(array)");
+      std::string("undefined operation: VirtualArray::getitem_next(array)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -860,7 +916,8 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next(field)");
+      std::string("undefined operation: VirtualArray::getitem_next(field)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -868,7 +925,8 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next(fields)");
+      std::string("undefined operation: VirtualArray::getitem_next(fields)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -876,7 +934,8 @@ namespace awkward {
                            const Slice& tail,
                            const Index64& advanced) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next(jagged)");
+      std::string("undefined operation: VirtualArray::getitem_next(jagged)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -885,7 +944,8 @@ namespace awkward {
                                   const SliceArray64& slicecontent,
                                   const Slice& tail) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next_jagged(array)");
+      std::string("undefined operation: VirtualArray::getitem_next_jagged(array)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -894,7 +954,8 @@ namespace awkward {
                                   const SliceMissing64& slicecontent,
                                   const Slice& tail) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next_jagged(missing)");
+      std::string("undefined operation: VirtualArray::getitem_next_jagged(missing)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -903,16 +964,40 @@ namespace awkward {
                                   const SliceJagged64& slicecontent,
                                   const Slice& tail) const {
     throw std::runtime_error(
-            "undefined operation: VirtualArray::getitem_next_jagged(jagged)");
+      std::string("undefined operation: VirtualArray::getitem_next_jagged(jagged)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
-  VirtualArray::copy_to(kernel::Lib ptr_lib) const {
-      return std::make_shared<VirtualArray>(identities(),
-                                            parameters(),
-                                            generator(),
-                                            cache(),
-                                            cache_key(),
+  VirtualArray::copy_to(kernel::lib ptr_lib) const {
+      IdentitiesPtr identities(nullptr);
+      if (identities_.get() != nullptr) {
+        identities = identities_.get()->copy_to(ptr_lib);
+      }
+      return std::make_shared<VirtualArray>(identities,
+                                            parameters_,
+                                            generator_,
+                                            cache_,
+                                            cache_key_,
                                             ptr_lib);
+  }
+
+  const ContentPtr
+  VirtualArray::numbers_to_type(const std::string& name) const {
+    return array().get()->numbers_to_type(name);
+  }
+
+  const util::Parameters
+  VirtualArray::forward_parameters() const {
+    util::Parameters params;
+    std::string record = purelist_parameter("__record__");
+    if (record != std::string("null")) {
+      params["__record__"] = record;
+    }
+    std::string doc = purelist_parameter("__doc__");
+    if (doc != std::string("null")) {
+      params["__doc__"] = doc;
+    }
+    return params;
   }
 }

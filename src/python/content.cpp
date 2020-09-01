@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/content.cpp", line)
+
 #include <pybind11/numpy.h>
 
 #include "awkward/python/identities.h"
@@ -26,14 +28,70 @@ box(const std::shared_ptr<ak::Content>& content) {
   else if (ak::NumpyArray* raw =
            dynamic_cast<ak::NumpyArray*>(content.get())) {
     if (raw->isscalar()) {
-      return py::array(py::buffer_info(
-        raw->byteptr(),
-        raw->itemsize(),
-        raw->format(),
-        raw->ndim(),
-        raw->shape(),
-        raw->strides()
-      )).attr("item")();
+      switch (raw->dtype()) {
+        case ak::util::dtype::boolean:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<bool*>(raw->data())));
+        case ak::util::dtype::int8:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<int8_t*>(raw->data())));
+        case ak::util::dtype::int16:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<int16_t*>(raw->data())));
+        case ak::util::dtype::int32:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<int32_t*>(raw->data())));
+        case ak::util::dtype::int64:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<int64_t*>(raw->data())));
+        case ak::util::dtype::uint8:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<uint8_t*>(raw->data())));
+        case ak::util::dtype::uint16:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<uint16_t*>(raw->data())));
+        case ak::util::dtype::uint32:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<uint32_t*>(raw->data())));
+        case ak::util::dtype::uint64:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<uint64_t*>(raw->data())));
+        case ak::util::dtype::float32:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<float*>(raw->data())));
+        case ak::util::dtype::float64:
+          return py::cast(ak::kernel::NumpyArray_getitem_at0(
+                   raw->ptr_lib(),
+                   reinterpret_cast<double*>(raw->data())));
+        default:
+          if (raw->ptr_lib() == ak::kernel::lib::cuda) {
+            throw std::runtime_error(
+              std::string("not implemented: format ")
+              + ak::util::quote(raw->format())
+              + std::string(" in CUDA")
+              + FILENAME(__LINE__));
+          }
+          else {
+            return py::array(py::buffer_info(
+              raw->data(),
+              raw->itemsize(),
+              raw->format(),
+              raw->ndim(),
+              raw->shape(),
+              raw->strides()
+            )).attr("item")();
+          }
+      }
     }
     else {
       return py::cast(*raw);
@@ -125,7 +183,8 @@ box(const std::shared_ptr<ak::Content>& content) {
     return py::cast(*raw);
   }
   else {
-    throw std::runtime_error("missing boxer for Content subtype");
+    throw std::runtime_error(
+      std::string("missing boxer for Content subtype") + FILENAME(__LINE__));
   }
 }
 
@@ -143,7 +202,8 @@ box(const std::shared_ptr<ak::Identities>& identities) {
     return py::cast(*raw);
   }
   else {
-    throw std::runtime_error("missing boxer for Identities subtype");
+    throw std::runtime_error(
+      std::string("missing boxer for Identities subtype") + FILENAME(__LINE__));
   }
 }
 
@@ -152,7 +212,8 @@ unbox_content(const py::handle& obj) {
   try {
     obj.cast<ak::Record*>();
     throw std::invalid_argument(
-      "content argument must be a Content subtype (excluding Record)");
+      std::string("content argument must be a Content subtype (excluding Record)")
+      + FILENAME(__LINE__));
   }
   catch (py::cast_error err) { }
   try {
@@ -243,7 +304,9 @@ unbox_content(const py::handle& obj) {
     return obj.cast<ak::VirtualArray*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
-  throw std::invalid_argument("content argument must be a Content subtype");
+  throw std::invalid_argument(
+    std::string("content argument must be a Content subtype")
+    + FILENAME(__LINE__));
 }
 
 std::shared_ptr<ak::Identities>
@@ -256,7 +319,9 @@ unbox_identities(const py::handle& obj) {
     return obj.cast<ak::Identities64*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
-  throw std::invalid_argument("id argument must be an Identities subtype");
+  throw std::invalid_argument(
+    std::string("id argument must be an Identities subtype")
+    + FILENAME(__LINE__));
 }
 
 std::shared_ptr<ak::Identities>
@@ -362,7 +427,8 @@ toslice_part(ak::Slice& slice, py::object obj) {
       step = pystep.cast<int64_t>();
     }
     if (step == 0) {
-      throw std::invalid_argument("slice step must not be 0");
+      throw std::invalid_argument(
+        std::string("slice step must not be 0") + FILENAME(__LINE__));
     }
     slice.append(std::make_shared<ak::SliceRange>(start, stop, step));
   }
@@ -406,6 +472,7 @@ toslice_part(ak::Slice& slice, py::object obj) {
         content = unbox_content(
             py::module::import("awkward1").attr("from_numpy")(obj,
                                                               false,
+                                                              false,
                                                               false));
       }
       else if (py::isinstance(
@@ -446,25 +513,33 @@ toslice_part(ak::Slice& slice, py::object obj) {
         obj = box(content);
       }
       else {
+        obj = py::module::import("awkward1").attr("from_iter")(obj, false);
+
         bool bad = false;
+        py::object asarray;
         try {
-          obj = py::module::import("numpy").attr("asarray")(obj);
+          asarray = py::module::import("awkward1").attr("to_numpy")(obj, false);
         }
         catch (py::error_already_set& exc) {
           exc.restore();
           PyErr_Clear();
           bad = true;
         }
+
         if (!bad) {
-          py::array array = obj.cast<py::array>();
+          py::array array = asarray.cast<py::array>();
           py::buffer_info info = array.request();
-          if (info.format.compare("O") == 0) {
+          if (ak::util::format_to_dtype(info.format, info.itemsize) ==
+              ak::util::dtype::NOT_PRIMITIVE) {
             bad = true;
           }
         }
+
         if (bad) {
-          content = unbox_content(py::module::import("awkward1")
-                    .attr("from_iter")(obj, false));
+          content = unbox_content(obj);
+        }
+        else {
+          obj = asarray;
         }
       }
 
@@ -487,7 +562,8 @@ toslice_part(ak::Slice& slice, py::object obj) {
         py::array array = obj.cast<py::array>();
         if (array.ndim() == 0) {
           throw std::invalid_argument(
-            "arrays used as an index must have at least one dimension");
+            std::string("arrays used as an index must have at least one dimension")
+            + FILENAME(__LINE__));
         }
 
         py::buffer_info info = array.request();
@@ -512,7 +588,8 @@ toslice_part(ak::Slice& slice, py::object obj) {
                 reinterpret_cast<int64_t*>(intinfo.ptr),
                 pyobject_deleter<int64_t>(intarray.ptr())),
               0,
-              shape[0]);
+              shape[0],
+              ak::kernel::lib::cpu);
             slice.append(std::make_shared<ak::SliceArray64>(index,
                                                             shape,
                                                             strides,
@@ -532,7 +609,8 @@ toslice_part(ak::Slice& slice, py::object obj) {
                 ak::util::format_to_dtype(format, (int64_t)info.itemsize))  &&
               flatlen != 0) {
             throw std::invalid_argument(
-              "arrays used as an index must be a (native-endian) integer or boolean");
+              std::string("arrays used as an index must be a (native-endian) integer or boolean")
+              + FILENAME(__LINE__));
           }
 
           py::object intarray_object =
@@ -552,7 +630,8 @@ toslice_part(ak::Slice& slice, py::object obj) {
               reinterpret_cast<int64_t*>(intinfo.ptr),
               pyobject_deleter<int64_t>(intarray.ptr())),
             0,
-            shape[0]);
+            shape[0],
+            ak::kernel::lib::cpu);
           slice.append(std::make_shared<ak::SliceArray64>(index,
                                                           shape,
                                                           strides,
@@ -564,8 +643,9 @@ toslice_part(ak::Slice& slice, py::object obj) {
 
   else {
     throw std::invalid_argument(
-      "only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), "
-      "and integer or boolean arrays (possibly jagged) are valid indices");
+      std::string("only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`), "
+                  "and integer or boolean arrays (possibly jagged) are valid indices")
+      + FILENAME(__LINE__));
   }
 }
 
@@ -593,7 +673,9 @@ check_maxdecimals(const py::object& maxdecimals) {
     return maxdecimals.cast<int64_t>();
   }
   catch (py::cast_error err) {
-    throw std::invalid_argument("maxdecimals must be None or an integer");
+    throw std::invalid_argument(
+      std::string("maxdecimals must be None or an integer")
+      + FILENAME(__LINE__));
   }
 }
 
@@ -622,7 +704,8 @@ tojson_file(const T& self,
 #endif
     throw std::invalid_argument(
       std::string("file \"") + destination
-      + std::string("\" could not be opened for writing"));
+      + std::string("\" could not be opened for writing")
+      + FILENAME(__LINE__));
   }
   try {
     self.tojson(file,
@@ -721,7 +804,8 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     for (auto pair : dict) {
       if (!py::isinstance<py::str>(pair.first)) {
         throw std::invalid_argument(
-          "keys of dicts in 'fromiter' must all be strings");
+          std::string("keys of dicts in 'fromiter' must all be strings")
+          + FILENAME(__LINE__));
       }
       std::string key = pair.first.cast<std::string>();
       self.field_check(key.c_str());
@@ -759,7 +843,7 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
       std::string("cannot convert ")
       + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ")
       + obj.attr("__class__").attr("__name__").cast<std::string>()
-      + std::string(") to an array element"));
+      + std::string(") to an array element") + FILENAME(__LINE__));
   }
 }
 
@@ -893,7 +977,8 @@ identity(const T& self) {
     throw std::invalid_argument(
       self.classname()
       + std::string(" instance has no associated identities (use "
-                    "'setidentities' to assign one to the array it is in)"));
+                    "'setidentities' to assign one to the array it is in)")
+      + FILENAME(__LINE__));
   }
   ak::Identities::FieldLoc fieldloc = self.identities().get()->fieldloc();
   if (self.isscalar()) {
@@ -952,7 +1037,8 @@ dict2parameters(const py::object& in) {
     }
   }
   else {
-    throw std::invalid_argument("type parameters must be a dict (or None)");
+    throw std::invalid_argument(
+      std::string("type parameters must be a dict (or None)") + FILENAME(__LINE__));
   }
   return out;
 }
@@ -1253,7 +1339,8 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
               }
               if (n != recordlookup.get()->size()) {
                 throw std::invalid_argument(
-                  "if provided, the length of 'keys' must be 'n'");
+                  std::string("if provided, the length of 'keys' must be 'n'")
+                  + FILENAME(__LINE__));
               }
             }
             return box(self.combinations(n,
@@ -1268,33 +1355,40 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
              py::arg("parameters") = py::none(),
              py::arg("axis") = 1)
           .def("sort",
-               [](const T&self,
+               [](const T& self,
                   int64_t axis,
                   bool ascending,
                   bool stable) -> py::object {
                return box(self.sort(axis, ascending, false));
           })
           .def("argsort",
-               [](const T&self,
+               [](const T& self,
                   int64_t axis,
                   bool ascending,
                   bool stable) -> py::object {
                return box(self.argsort(axis, ascending, false));
           })
+          .def("numbers_to_type",
+               [](const T& self,
+                  const std::string& name) -> py::object {
+               return box(self.numbers_to_type(name));
+          })
           .def("copy_to",
-               [](const T&self,
-                      std::string ptr_lib) -> py::object {
-               if(ptr_lib == "cuda") {
-                 return box(self.copy_to(kernel::Lib::cuda_kernels));
+               [](const T& self, const std::string& ptr_lib) -> py::object {
+               if (ptr_lib == "cpu") {
+                 return box(self.copy_to(ak::kernel::lib::cpu));
                }
-               else if(ptr_lib == "cpu") {
-                 return box(self.copy_to(kernel::Lib::cpu_kernels));
+               else if (ptr_lib == "cuda") {
+                 return box(self.copy_to(ak::kernel::lib::cuda));
                }
                else {
-                 throw std::invalid_argument("Invalid kernel specified, valid kernels are cpu and cuda");
+                 throw std::invalid_argument(
+                   std::string("specify 'cpu' or 'cuda'") + FILENAME(__LINE__));
                }
-          });
+          })
+    ;
   }
+
 
 ////////// EmptyArray
 
@@ -1432,6 +1526,8 @@ make_ByteMaskedArray(const py::handle& m, const std::string& name) {
       .def("simplify", [](const ak::ByteMaskedArray& self) {
         return box(self.simplify_optiontype());
       })
+      .def("toIndexedOptionArray64",
+           &ak::ByteMaskedArray::toIndexedOptionArray64)
   );
 }
 
@@ -1639,6 +1735,52 @@ make_ListOffsetArrayOf(const py::handle& m, const std::string& name);
 
 ////////// NumpyArray
 
+const ak::NumpyArray
+NumpyArray_from_cupy(const std::string& name,
+                     const py::object& array,
+                     const py::object& identities,
+                     const py::object& parameters) {
+  if (py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
+    const std::vector<ssize_t> shape = array.attr("shape").cast<std::vector<ssize_t>>();
+    const std::vector<ssize_t> strides = array.attr("strides").cast<std::vector<ssize_t>>();
+
+    if (py::cast<int64_t>(array.attr("ndim")) == 0) {
+      throw std::invalid_argument(
+        std::string("CuPy array must not be scalar; try array.reshape(1)")
+        + FILENAME(__LINE__));
+    }
+    if (shape.size() != py::cast<int64_t>(array.attr("ndim"))  ||
+        strides.size() != py::cast<int64_t>(array.attr("ndim"))) {
+      throw std::invalid_argument(
+        std::string("CuPy array len(shape) != ndim or len(strides) != ndim")
+        + FILENAME(__LINE__));
+    }
+
+    void* ptr = reinterpret_cast<void*>(
+                  py::cast<ssize_t>(array.attr("data").attr("ptr")));
+
+    ak::util::dtype cupy_dtype= ak::util::name_to_dtype(
+                  py::cast<std::string>(py::str(py::dtype(array.attr("dtype")))));
+
+    return ak::NumpyArray(
+        unbox_identities_none(identities),
+        dict2parameters(parameters),
+        std::shared_ptr<void>(ptr, pyobject_deleter<void>(array.ptr())),
+        shape,
+        strides,
+        0,
+        py::dtype(array.attr("dtype")).itemsize(),
+        ak::util::dtype_to_format(cupy_dtype),
+        cupy_dtype,
+        ak::kernel::lib::cuda);
+  }
+  else {
+    throw std::invalid_argument(
+      name + std::string(".from_cupy() can only accept CuPy Arrays!")
+      + FILENAME(__LINE__));
+  }
+}
+
 py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content>
 make_NumpyArray(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::NumpyArray,
@@ -1646,7 +1788,7 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
                          ak::Content>(m, name.c_str(), py::buffer_protocol())
       .def_buffer([](const ak::NumpyArray& self) -> py::buffer_info {
         return py::buffer_info(
-          self.byteptr(),
+          self.data(),
           self.itemsize(),
           self.format(),
           self.ndim(),
@@ -1654,18 +1796,27 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
           self.strides());
       })
 
-      .def(py::init([](py::array& array,
-                       const py::object& identities,
-                       const py::object& parameters) -> ak::NumpyArray {
+      .def(py::init([name](const py::object& anyarray,
+                           const py::object& identities,
+                           const py::object& parameters) -> ak::NumpyArray {
+        std::string module = anyarray.get_type().attr("__module__").cast<std::string>();
+        if (module.rfind("cupy.", 0) == 0) {
+          return NumpyArray_from_cupy(name, anyarray, identities, parameters);
+        }
+
+        py::array array = anyarray.cast<py::array>();
+
         py::buffer_info info = array.request();
         if (info.ndim == 0) {
           throw std::invalid_argument(
-            "NumpyArray must not be scalar; try array.reshape(1)");
+            std::string("NumpyArray must not be scalar; try array.reshape(1)")
+            + FILENAME(__LINE__));
         }
         if (info.shape.size() != info.ndim  ||
             info.strides.size() != info.ndim) {
           throw std::invalid_argument(
-            "NumpyArray len(shape) != ndim or len(strides) != ndim");
+            std::string("NumpyArray len(shape) != ndim or len(strides) != ndim")
+            + FILENAME(__LINE__));
         }
 
         return ak::NumpyArray(
@@ -1678,7 +1829,8 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
           0,
           info.itemsize,
           info.format,
-          ak::util::format_to_dtype(info.format, (int64_t)info.itemsize));
+          ak::util::format_to_dtype(info.format, (int64_t)info.itemsize),
+          ak::kernel::lib::cpu);
       }), py::arg("array"),
           py::arg("identities") = py::none(),
           py::arg("parameters") = py::none())
@@ -1692,11 +1844,59 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
       .def_property_readonly("isempty", &ak::NumpyArray::isempty)
       .def("toRegularArray", &ak::NumpyArray::toRegularArray)
 
+      .def_property_readonly("ptr_lib", [](const ak::NumpyArray& self) {
+        if (self.ptr_lib() == ak::kernel::lib::cpu) {
+          return py::cast("cpu");
+        }
+        else if (self.ptr_lib() == ak::kernel::lib::cuda) {
+          return py::cast("cuda");
+        }
+        else {
+          throw std::runtime_error(
+            std::string("unrecognized ptr_lib") + FILENAME(__LINE__));
+        }
+      })
+
       .def_property_readonly("iscontiguous", &ak::NumpyArray::iscontiguous)
       .def("contiguous", &ak::NumpyArray::contiguous)
       .def("simplify", [](const ak::NumpyArray& self) {
         return box(self.shallow_simplify());
       })
+
+      .def_static("from_cupy", [name](const py::object& array,
+                                      const py::object& identities,
+                                      const py::object& parameters) -> py::object {
+        return box(NumpyArray_from_cupy(name, array, identities, parameters).shallow_copy());
+      },
+        py::arg("array"),
+        py::arg("identities") = py::none(),
+        py::arg("parameters") = py::none())
+      .def("to_cupy", [name](const ak::NumpyArray& self) -> py::object {
+        if (self.ptr_lib() != ak::kernel::lib::cuda) {
+          throw std::invalid_argument(
+            name
+            + std::string(" resides in main memory, must be converted to NumPy"
+                          " or copied to the GPU with ak.copy_to(array, \"cuda\")"
+                          " first")
+            + FILENAME(__LINE__));
+        }
+
+        py::object cupy_unowned_mem = py::module::import("cupy").attr("cuda").attr("UnownedMemory")(
+            reinterpret_cast<ssize_t>(self.ptr().get()),
+            self.shape()[0]*self.strides()[0],
+            self);
+
+        py::object cupy_memoryptr = py::module::import("cupy").attr("cuda").attr("MemoryPointer")(
+            cupy_unowned_mem,
+            self.byteoffset());
+
+        return py::module::import("cupy").attr("ndarray")(
+                pybind11::make_tuple(py::cast<ssize_t>(self.length())),
+                ak::util::dtype_to_format(self.dtype()),
+                cupy_memoryptr,
+                pybind11::make_tuple(py::cast<ssize_t>(self.itemsize())));
+    })
+
   );
 }
 
@@ -1783,6 +1983,19 @@ make_Record(const py::handle& m, const std::string& name) {
      .def("simplify", [](const ak::Record& self) {
        return box(self.shallow_simplify());
      })
+     .def("copy_to",
+          [](const ak::Record& self, const std::string& ptr_lib) -> py::object {
+          if (ptr_lib == "cpu") {
+            return box(self.copy_to(ak::kernel::lib::cpu));
+          }
+          else if (ptr_lib == "cuda") {
+            return box(self.copy_to(ak::kernel::lib::cuda));
+          }
+          else {
+            throw std::invalid_argument(
+              std::string("specify 'cpu' or 'cuda'") + FILENAME(__LINE__));
+          }
+     })
 
   ;
 }
@@ -1805,7 +2018,8 @@ iterable_to_RecordArray(const py::iterable& contents,
     }
     if (out.size() != recordlookup.get()->size()) {
       throw std::invalid_argument(
-        "if provided, 'keys' must have the same length as 'types'");
+        std::string("if provided, 'keys' must have the same length as 'types'")
+        + FILENAME(__LINE__));
     }
   }
   if (length.is(py::none())) {
@@ -1905,7 +2119,8 @@ make_RecordArray(const py::handle& m, const std::string& name) {
               return box(self.setitem_field(mywhere, mywhat));
             }
             catch (py::cast_error err) {
-              throw std::invalid_argument("where must be None, int, or str");
+              throw std::invalid_argument(
+                std::string("where must be None, int, or str") + FILENAME(__LINE__));
             }
           }
         }
@@ -2070,8 +2285,8 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "VirtualArray 'generator' must be an ArrayGenerator or a "
-                "SliceGenerator");
+              std::string("VirtualArray 'generator' must be an ArrayGenerator or a "
+                          "SliceGenerator") + FILENAME(__LINE__));
           }
         }
         std::shared_ptr<PyArrayCache> cppcache(nullptr);
@@ -2081,7 +2296,8 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "VirtualArray 'cache' must be an ArrayCache or None");
+              std::string("VirtualArray 'cache' must be an ArrayCache or None")
+              + FILENAME(__LINE__));
           }
         }
         if (!cache_key.is(py::none())) {
@@ -2091,7 +2307,8 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           }
           catch (py::cast_error err) {
             throw std::invalid_argument(
-                "VirtualArray 'cache_key' must be a string or None");
+              std::string("VirtualArray 'cache_key' must be a string or None")
+              + FILENAME(__LINE__));
           }
           return ak::VirtualArray(
             unbox_identities_none(identities),
@@ -2125,7 +2342,8 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
         }
         else {
           throw std::invalid_argument(
-                  "VirtualArray's generator is not a Python function");
+            std::string("VirtualArray's generator is not a Python function")
+            + FILENAME(__LINE__));
         }
       })
       .def_property_readonly("cache", [](const ak::VirtualArray& self)
@@ -2140,7 +2358,8 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
         }
         else {
           throw std::invalid_argument(
-                  "VirtualArray's cache is not a Python MutableMapping");
+            std::string("VirtualArray's cache is not a Python MutableMapping")
+            + FILENAME(__LINE__));
         }
       })
       .def_property_readonly("peek_array", [](const ak::VirtualArray& self)
@@ -2158,5 +2377,17 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
         return box(self.array());
       })
       .def_property_readonly("cache_key", &ak::VirtualArray::cache_key)
+      .def_property_readonly("ptr_lib", [](const ak::VirtualArray& self) -> py::object {
+        if (self.ptr_lib() == ak::kernel::lib::cpu) {
+          return py::cast("cpu");
+        }
+        else if (self.ptr_lib() == ak::kernel::lib::cuda) {
+          return py::cast("cuda");
+        }
+        else {
+          throw std::runtime_error(
+            std::string("unrecognized ptr_lib") + FILENAME(__LINE__));
+        }
+      })
   );
 }

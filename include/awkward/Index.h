@@ -9,7 +9,7 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
-#include "awkward/kernel.h"
+#include "awkward/kernel-dispatch.h"
 
 namespace awkward {
   template <typename T>
@@ -28,7 +28,7 @@ namespace awkward {
   ///    - {@link IndexOf Index32}, which is `IndexOf<int32_t>`
   ///    - {@link IndexOf IndexU32}, which is `IndexOf<uint32_t>`
   ///    - {@link IndexOf Index64}, which is `IndexOf<int64_t>`
-  class EXPORT_SYMBOL Index {
+  class LIBAWKWARD_EXPORT_SYMBOL Index {
   public:
     /// @brief Integer type of an Index, used by ListForm, IndexedForm, etc.
     enum class Form {i8, u8, i32, u32, i64, kNumIndexForm};
@@ -71,7 +71,11 @@ namespace awkward {
   ///    - {@link IndexOf IndexU32}, which is `IndexOf<uint32_t>`
   ///    - {@link IndexOf Index64}, which is `IndexOf<int64_t>`
   template <typename T>
-  class EXPORT_SYMBOL IndexOf: public Index {
+  class
+#ifdef AWKWARD_INDEX_NO_EXTERN_TEMPLATE
+  LIBAWKWARD_EXPORT_SYMBOL
+#endif
+  IndexOf: public Index {
   public:
     /// @brief Creates an IndexOf from a full set of parameters.
     ///
@@ -82,18 +86,26 @@ namespace awkward {
     /// `ptr` can be reference counted among all arrays that use the same
     /// buffer.
     /// @param length Number of elements in the array.
-    /// @param Choose the Kernel Library for this array, default:= cpu_kernels
+    /// @param Choose the Kernel Library for this array, default:= kernel::lib::cpu
     IndexOf<T>(const std::shared_ptr<T>& ptr,
                int64_t offset,
                int64_t length,
-               kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
+               kernel::lib ptr_lib);
 
     /// @brief Allocates a new integer array buffer with a given #length.
-    IndexOf<T>(int64_t length, kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
+    IndexOf<T>(int64_t length, kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Reference-counted pointer to the integer array buffer.
     const std::shared_ptr<T>
       ptr() const;
+
+    /// @brief The Kernel Library that ptr uses.
+    kernel::lib
+      ptr_lib() const;
+
+    /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
+    T*
+      data() const;
 
     /// @brief Location of item zero in the buffer, relative to
     /// #ptr, measured in the number of elements.
@@ -107,10 +119,6 @@ namespace awkward {
     /// @brief Number of elements in the array.
     int64_t
       length() const;
-
-    /// @brief The Kernel Library that ptr uses.
-    kernel::Lib
-      ptr_lib() const;
 
     /// @brief User-friendly name of this class: `"Index8"`, `"IndexU8"`,
     /// `"Index32"`, `"IndexU32"`, or `"Index64"`.
@@ -131,11 +139,6 @@ namespace awkward {
       tostring_part(const std::string& indent,
                     const std::string& pre,
                     const std::string& post) const;
-
-    const std::string
-      kernellib_asstring(const std::string& indent,
-                         const std::string& pre,
-                         const std::string& post) const;
 
     /// @brief Returns the enum describing this Index's integer specialization.
     Form
@@ -209,20 +212,20 @@ namespace awkward {
       deep_copy() const;
 
     const IndexOf<T>
-      copy_to(kernel::Lib ptr_lib) const;
+      copy_to(kernel::lib ptr_lib) const;
 
   private:
-    /// @brief See #ptr_lib
-    const kernel::Lib ptr_lib_;
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;
+    /// @brief See #ptr_lib
+    const kernel::lib ptr_lib_;
     /// @brief See #offset.
     const int64_t offset_;
     /// @brief See #length.
     const int64_t length_;
   };
 
-#if !defined AWKWARD_INDEX_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+#ifndef AWKWARD_INDEX_NO_EXTERN_TEMPLATE
   extern template class IndexOf<int8_t>;
   extern template class IndexOf<uint8_t>;
   extern template class IndexOf<int32_t>;

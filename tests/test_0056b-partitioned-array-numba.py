@@ -53,6 +53,7 @@ def test_boxing1():
     aslayout = awkward1.layout.NumpyArray(asnumpy)
     aspart = awkward1.repartition(aslayout, 3, highlevel=False)
     asarray = awkward1.Array(aspart)
+    aspart = asarray._layout
 
     assert (sys.getrefcount(asnumpy), sys.getrefcount(aslayout), sys.getrefcount(aspart)) == (3, 2, 3)
 
@@ -78,6 +79,7 @@ def test_boxing2():
     aslayout = awkward1.layout.NumpyArray(asnumpy)
     aspart = awkward1.repartition(aslayout, 3, highlevel=False)
     asarray = awkward1.Array(aspart)
+    aspart = asarray._layout
 
     assert (sys.getrefcount(asnumpy), sys.getrefcount(aslayout), sys.getrefcount(aspart)) == (3, 2, 3)
 
@@ -107,6 +109,7 @@ def test_boxing3():
     aslayout = awkward1.layout.NumpyArray(asnumpy)
     aspart = awkward1.repartition(aslayout, 3, highlevel=False)
     asarray = awkward1.Array(aspart)
+    aspart = asarray._layout
 
     assert (sys.getrefcount(asnumpy), sys.getrefcount(aslayout), sys.getrefcount(aspart)) == (3, 2, 3)
 

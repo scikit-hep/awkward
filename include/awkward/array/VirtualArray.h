@@ -17,7 +17,7 @@ namespace awkward {
   /// @class VirtualForm
   ///
   /// @brief Form describing VirtualArray.
-  class EXPORT_SYMBOL VirtualForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL VirtualForm: public Form {
   public:
     /// @brief Creates a VirtualForm. See VirtualArray for documentation.
     VirtualForm(bool has_identities,
@@ -81,6 +81,9 @@ namespace awkward {
             bool check_form_key,
             bool compatibility_check) const override;
 
+    const FormPtr
+      getitem_field(const std::string& key) const override;
+
   private:
     const FormPtr form_;
     bool has_length_;
@@ -91,7 +94,7 @@ namespace awkward {
   /// @brief Represents an array that can be generated on demand.
   ///
   /// See #VirtualArray for the meaning of each parameter.
-  class EXPORT_SYMBOL VirtualArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL VirtualArray: public Content {
   public:
     /// @brief Creates a VirtualArray from a full set of parameters.
     ///
@@ -110,7 +113,7 @@ namespace awkward {
                  const ArrayGeneratorPtr& generator,
                  const ArrayCachePtr& cache,
                  const std::string& cache_key,
-                 const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
+                 const kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Creates a VirtualArray with an automatically assigned #cache_key
     /// (unique per process).
@@ -118,7 +121,7 @@ namespace awkward {
                  const util::Parameters& parameters,
                  const ArrayGeneratorPtr& generator,
                  const ArrayCachePtr& cache,
-                 const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels);
+                 const kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Function that materializes the array and possibly
     /// checks it against an expected Form.
@@ -130,7 +133,7 @@ namespace awkward {
     const ArrayCachePtr
       cache() const;
 
-    const kernel::Lib
+    const kernel::lib
       ptr_lib() const;
 
     /// @brief Returns the array if it exists in the #cache; `nullptr`
@@ -225,9 +228,6 @@ namespace awkward {
     const ContentPtr
       carry(const Index64& carry, bool allow_lazy) const override;
 
-    const std::string
-      purelist_parameter(const std::string& key) const override;
-
     int64_t
       numfields() const override;
 
@@ -280,6 +280,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,
@@ -367,7 +368,10 @@ namespace awkward {
                           const Slice& tail) const override;
 
     const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const override;
+      copy_to(kernel::lib ptr_lib) const override;
+
+    const ContentPtr
+      numbers_to_type(const std::string& name) const override;
 
   private:
     /// @brief See #generator.
@@ -377,7 +381,11 @@ namespace awkward {
     /// @brief See #cache_key.
     const std::string cache_key_;
     /// @brief See#ptr_lib
-    const kernel::Lib ptr_lib_;
+    const kernel::lib ptr_lib_;
+
+    /// @brief Forward selected purelist_parameters when making lazy slices
+    const util::Parameters
+      forward_parameters() const;
   };
 
 }

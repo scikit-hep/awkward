@@ -133,8 +133,8 @@ namespace awkward {
     return ptr_.get()[at];
   }
 
-  template class EXPORT_SYMBOL GrowableBuffer<int8_t>;
-  template class EXPORT_SYMBOL GrowableBuffer<uint8_t>;
-  template class EXPORT_SYMBOL GrowableBuffer<int64_t>;
-  template class EXPORT_SYMBOL GrowableBuffer<double>;
+  template class EXPORT_TEMPLATE_INST GrowableBuffer<int8_t>;
+  template class EXPORT_TEMPLATE_INST GrowableBuffer<uint8_t>;
+  template class EXPORT_TEMPLATE_INST GrowableBuffer<int64_t>;
+  template class EXPORT_TEMPLATE_INST GrowableBuffer<double>;
 }

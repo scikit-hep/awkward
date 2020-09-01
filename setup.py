@@ -15,9 +15,11 @@ import setuptools.command.install
 
 from setuptools import setup, Extension
 
+
 install_requires = open("requirements.txt").read().strip().split()
 
-extras = {"test": open("requirements-test.txt").read().strip().split(),
+extras = {"cuda": ["awkward1-cuda-kernels"],
+          "test": open("requirements-test.txt").read().strip().split(),
           "dev":  ['numba>=0.50.0;python_version>="3.6"',
                    'pandas>=0.24.0;python_version>="3.6"',
                    'numexpr;python_version>="3.6"',
@@ -27,8 +29,6 @@ extras["all"] = sum(extras.values(), [])
 
 tests_require = extras["test"]
 
-AWKWARD_BUILD_CUDA = (os.environ.get("AWKWARD_BUILD_CUDA")
-                      in ("1", "true", "True", "TRUE", "on", "On", "ON", "yes", "Yes", "YES"))
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
@@ -59,9 +59,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
            cmake_args.append("-DCMAKE_CXX_COMPILER={0}".format(compiler_path))
         except AttributeError:
             print("Not able to access compiler path (on Windows), using CMake default")
-
-        if AWKWARD_BUILD_CUDA:
-            cmake_args.append("-DBUILD_CUDA_KERNELS=ON")
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
@@ -138,9 +135,6 @@ else:
                           os.path.join(libdir, "libawkward-cpu-kernels" + shared),
                           os.path.join(libdir, "libawkward-static" + static),
                           os.path.join(libdir, "libawkward" + shared)])]
-    if AWKWARD_BUILD_CUDA:
-        libraries[0][1].append(os.path.join(libdir, "libawkward-cuda-kernels-static" + static))
-        libraries[0][1].append(os.path.join(libdir, "libawkward-cuda-kernels" + shared))
 
     Install = setuptools.command.install.install
 
@@ -152,7 +146,6 @@ setup(name = "awkward1",
       data_files = libraries + [
           ("include/awkward",              glob.glob("include/awkward/*.h")),
           ("include/awkward/cpu-kernels",  glob.glob("include/awkward/cpu-kernels/*.h")),
-          ("include/awkward/cuda-kernels", glob.glob("include/awkward/cuda-kernels/*.h")),
           ("include/awkward/python",       glob.glob("include/awkward/python/*.h")),
           ("include/awkward/array",        glob.glob("include/awkward/array/*.h")),
           ("include/awkward/builder",      glob.glob("include/awkward/builder/*.h")),
@@ -164,7 +157,7 @@ setup(name = "awkward1",
       author_email = "pivarski@princeton.edu",
       maintainer = "Jim Pivarski",
       maintainer_email = "pivarski@princeton.edu",
-      description = "Development of awkward 1.0, to replace scikit-hep/awkward-array in 2020.",
+      description = "Manipulate JSON-like data with NumPy-like idioms.",
       long_description = """<a href="https://github.com/scikit-hep/awkward-1.0#readme"><img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/logo/logo-300px.png"></a>
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
@@ -173,23 +166,13 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 
 <table>
   <tr>
-    <td width="33%" valign="top">
-      <a href="https://awkward-array.org/how-to.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-data-analysts.png" width="268">
+    <td width="66%" valign="top">
+      <a href="https://awkward-array.org">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-tutorials.png" width="570">
       </a>
       <p align="center"><b>
-        <a href="https://awkward-array.org/how-to.html">
-        How-to documentation<br>for data analysts
-        </a>
-      </b></p>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://awkward-array.org/how-it-works.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-developers.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.org/how-it-works.html">
-        How-it-works tutorials<br>for developers
+        <a href="https://awkward-array.org">
+        How-to tutorials
         </a>
       </b></p>
     </td>
@@ -199,7 +182,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        Python<br>API reference
+        Python API reference
         </a>
       </b></p>
       <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
@@ -207,7 +190,7 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++<br>API reference
+        C++ API reference
         </a>
       </b></p>
     </td>
@@ -266,6 +249,20 @@ For a similar problem 10 million times larger than the one above (on a single-th
 Speed and memory factors in the double digits are common because we're replacing Python's dynamically typed, pointer-chasing virtual machine with type-specialized, precompiled routines on contiguous data. (In other words, for the same reasons as NumPy.) Even higher speedups are possible when Awkward Array is paired with [Numba](https://numba.pydata.org/).
 
 Our [presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) provides a good introduction, showing how to use these arrays in a real analysis.
+
+# Installation
+
+Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward1/) using pip:
+
+```bash
+pip install awkward1
+```
+
+Most users will get a precompiled binary (wheel) for your operating system and Python version. If not, the above attempts to compile from source.
+
+   * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues). If you have a general "How do I…?" question, we'll answer it as a new [example in the tutorial](https://awkward-array.org/how-to.html).
+   * If you have a problem that's too specific to be new documentation or it isn't exclusively related to Awkward Array, it might be more appropriate to ask on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
+   * The [Gitter Scikit-HEP/community](https://gitter.im/Scikit-HEP/community) is a way to get in touch with all Scikit-HEP developers and users.
 """,
       long_description_content_type = "text/markdown",
       url = "https://github.com/scikit-hep/awkward-1.0",
@@ -289,16 +286,17 @@ Our [presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) provides a good i
 #         "Development Status :: 1 - Planning",
 #         "Development Status :: 2 - Pre-Alpha",
 #         "Development Status :: 3 - Alpha",
-          "Development Status :: 4 - Beta",
-#         "Development Status :: 5 - Production/Stable",
+#         "Development Status :: 4 - Beta",
+          "Development Status :: 5 - Production/Stable",
 #         "Development Status :: 6 - Mature",
 #         "Development Status :: 7 - Inactive",
           "Intended Audience :: Developers",
           "Intended Audience :: Information Technology",
           "Intended Audience :: Science/Research",
           "License :: OSI Approved :: BSD License",
-          "Operating System :: MacOS",
-          "Operating System :: POSIX",
+          "Operating System :: MacOS :: MacOS X",
+          "Operating System :: Microsoft :: Windows",
+          "Operating System :: POSIX :: Linux",
           "Operating System :: Unix",
           "Programming Language :: Python",
           "Programming Language :: Python :: 2.7",

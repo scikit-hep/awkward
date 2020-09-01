@@ -30,7 +30,7 @@ namespace awkward {
   ///
   /// Forms may be thought of as low-level types, whereas Type is a high-level
   /// type. There is a one-to-many relationship from Type to Form.
-  class EXPORT_SYMBOL Form {
+  class LIBAWKWARD_EXPORT_SYMBOL Form {
   public:
     static FormPtr
       fromnumpy(char kind,
@@ -223,6 +223,16 @@ namespace awkward {
     void
       form_key_tojson(ToJson& builder, bool verbose) const;
 
+    /// @brief Internal function for extracting record field
+    ///
+    /// WARNING: this function returns the field from the innermost record
+    /// form it finds, and does not wrap it with the context.
+    /// Used by VirtualArray::getitem_field to determine certain parameters
+    /// without materialization. A possible extension would be to wrap output
+    /// at each layer to fully specify the form.
+    virtual const FormPtr
+      getitem_field(const std::string& key) const = 0;
+
     protected:
     /// @brief See #has_identities
     bool has_identities_;
@@ -236,7 +246,7 @@ namespace awkward {
   ///
   /// @brief Abstract superclass of all array node types (flat hierarchy).
   /// Any Content can be nested within any other Content.
-  class EXPORT_SYMBOL Content {
+  class LIBAWKWARD_EXPORT_SYMBOL Content {
   public:
     /// @brief Called by all subclass constructors; assigns #identities and
     /// #parameters upon construction.
@@ -692,7 +702,13 @@ namespace awkward {
     /// @param starts Staring positions of each group to combine as an
     /// {@link IndexOf Index}. These are downward pointers from an outer
     /// structure into this structure with the same meaning as in
-    /// {@link ListArrayOf ListArray}.
+    /// {@link ListArrayOf ListArray}. Only used by a reducer that
+    /// {@link Reducer#returns_positions returns_positions} (currently
+    /// only argmin and argmax).
+    /// @param shifts Per-element adjustments for any reducer that
+    /// {@link Reducer#returns_positions returns_positions}. Allows
+    /// for variable-length lists with axis != -1 and for missing values
+    /// (None) in argmin and argmax.
     /// @param parents Groups to combine as an {@link IndexOf Index} of
     /// upward pointers from this structure to the outer structure to reduce.
     /// @param outlength The length of the reduced array, after the operation
@@ -708,6 +724,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,
@@ -1206,18 +1223,18 @@ namespace awkward {
     /// This allows a RecordArray or {@link UnionArrayOf UnionArray} with
     /// different depths to accept `axis = -1` as the last axis, regardless
     /// of how deep that is in different record fields or union possibilities.
-    ///
     const int64_t
       axis_wrap_if_negative(int64_t axis) const;
 
-    /// @brief Transfer the entire contents of the array between GPU and main memory.
-    ///
-    /// Returns a std::shared_ptr<Content> which is, by default, allocated on the
-    /// first device(device [0])
-    ///
-    /// @note This function has not been implemented to handle Multi-GPU setups
+    /// @brief Recursively copies components of the array from main memory to a
+    /// GPU (if `ptr_lib == kernel::lib::cuda`) or to main memory (if
+    /// `ptr_lib == kernel::lib::cpu`) if those components are not already there.
     virtual const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const = 0;
+      copy_to(kernel::lib ptr_lib) const = 0;
+
+    /// @brief Change the leaf types to 'totype'.
+    virtual const ContentPtr
+      numbers_to_type(const std::string& name) const = 0;
 
   protected:
     /// @brief Internal function to wrap putative #getitem output with enough

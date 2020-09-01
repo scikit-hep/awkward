@@ -12,12 +12,13 @@ import awkward1
 
 numba = pytest.importorskip("numba")
 awkward1_connect_numba_arrayview = pytest.importorskip("awkward1._connect._numba.arrayview")
+awkward1_connect_numba_layout = pytest.importorskip("awkward1._connect._numba.layout")
 
 def test_numpyarray():
     layout = awkward1.from_iter([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], highlevel=False)
 
     numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert numba.typeof(layout).name == numbatype.name
+    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
 
     lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
     lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
@@ -58,7 +59,7 @@ def test_listarray():
             layout = layout[[0, 1, 2, 3, 4]]
 
         numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-        assert numba.typeof(layout).name == numbatype.name
+        assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
 
         lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
         lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
@@ -115,7 +116,7 @@ def test_regulararray():
     layout = awkward1.from_numpy(numpy.array([[1, 2, 3], [4, 5, 6]]), regulararray=True, highlevel=False)
 
     numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert numba.typeof(layout).name == numbatype.name
+    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
 
     lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
     lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
@@ -173,7 +174,7 @@ def test_indexedarray():
     layout = awkward1.layout.IndexedArray64(awkward1.layout.Index64(numpy.array([4, 3, 2, 1, 0], dtype=numpy.int64)), layout)
 
     numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert numba.typeof(layout).name == numbatype.name
+    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
 
     lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
     lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
@@ -230,7 +231,7 @@ def test_indexedoptionarray():
     layout = awkward1.from_iter([[1.1, 2.2, 3.3], None, [], [4.4, 5.5], None, None, [6.6], [7.7, 8.8, 9.9]], highlevel=False)
 
     numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert numba.typeof(layout).name == numbatype.name
+    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
 
     lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
     lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
@@ -294,7 +295,7 @@ def test_bytemaskedarray():
     layout = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, True, False, False, True, True, False, False], dtype=numpy.int8)), layout, valid_when=False)
 
     numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert numba.typeof(layout).name == numbatype.name
+    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
 
     lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
     lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
@@ -358,7 +359,7 @@ def test_bitmaskedarray():
     layout = awkward1.layout.BitMaskedArray(awkward1.layout.IndexU8(numpy.packbits(numpy.array([False, True, False, False, True, True, False, False, False, True, True, True, True, True, True, True], dtype=numpy.bool))), layout, valid_when=False, length=9, lsb_order=False)
 
     numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert numba.typeof(layout).name == numbatype.name
+    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
 
     lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
     lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
@@ -422,7 +423,7 @@ def test_unmaskedarray():
     layout = awkward1.layout.UnmaskedArray(layout)
 
     numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert numba.typeof(layout).name == numbatype.name
+    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
 
     lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
     lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
@@ -479,7 +480,7 @@ def test_recordarray():
     layout = awkward1.from_iter([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}], highlevel=False)
 
     numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert numba.typeof(layout).name == numbatype.name
+    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
 
     lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
     lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
@@ -596,7 +597,7 @@ def test_tuplearray():
     layout = awkward1.from_iter([(0.0, []), (1.1, [1]), (2.2, [2, 2]), (3.3, [3, 3, 3]), (4.4, [4, 4, 4, 4])], highlevel=False)
 
     numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert numba.typeof(layout).name == numbatype.name
+    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
 
     lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
     lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
@@ -673,7 +674,7 @@ def test_unionarray():
     layout = awkward1.from_iter([0.0, [], 1.1, [1], 2.2, [2, 2], 3.3, [3, 3, 3], 4.4, [4, 4, 4, 4]], highlevel=False)
 
     numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert numba.typeof(layout).name == numbatype.name
+    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
 
     lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
     lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)

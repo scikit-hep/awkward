@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/types.cpp", line)
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -44,7 +46,8 @@ box(const std::shared_ptr<ak::Type>& t) {
     return py::cast(*raw);
   }
   else {
-    throw std::runtime_error("missing boxer for Type subtype");
+    throw std::runtime_error(
+      std::string("missing boxer for Type subtype") + FILENAME(__LINE__));
   }
 }
 
@@ -82,7 +85,8 @@ unbox_type(const py::handle& obj) {
     return obj.cast<ak::UnknownType*>()->shallow_copy();
   }
   catch (py::cast_error err) { }
-  throw std::invalid_argument("argument must be a Type subtype");
+  throw std::invalid_argument(
+    std::string("argument must be a Type subtype") + FILENAME(__LINE__));
 }
 
 ////////// Type
@@ -286,10 +290,11 @@ make_PrimitiveType(const py::handle& m, const std::string& name) {
       .def(py::init([](const std::string& dtype,
                        const py::object& parameters,
                        const py::object& typestr) -> ak::PrimitiveType {
-        ak::util::dtype dt = util::name_to_dtype(dtype);
+        ak::util::dtype dt = ak::util::name_to_dtype(dtype);
         if (dt == ak::util::dtype::NOT_PRIMITIVE) {
           throw std::invalid_argument(
-            std::string("unrecognized primitive type: ") + dtype);
+            std::string("unrecognized primitive type: ") + dtype
+            + FILENAME(__LINE__));
         }
         return ak::PrimitiveType(dict2parameters(parameters),
                                  typestr2str(typestr),
@@ -299,7 +304,7 @@ make_PrimitiveType(const py::handle& m, const std::string& name) {
           py::arg("typestr") = py::none())
       .def_property_readonly("dtype",
                              [](const ak::PrimitiveType& self) -> std::string {
-        return util::dtype_to_name(self.dtype());
+        return ak::util::dtype_to_name(self.dtype());
       })
       .def(py::pickle([](const ak::PrimitiveType& self) {
         return py::make_tuple(parameters2dict(self.parameters()),
@@ -339,7 +344,8 @@ iterable_to_RecordType(const py::iterable& types,
     }
     if (out.size() != recordlookup.get()->size()) {
       throw std::invalid_argument(
-        "if provided, 'keys' must have the same length as 'types'");
+        std::string("if provided, 'keys' must have the same length as 'types'")
+        + FILENAME(__LINE__));
     }
     return ak::RecordType(dict2parameters(parameters),
                           typestr2str(typestr),

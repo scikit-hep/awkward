@@ -9,10 +9,12 @@ try:
 except ImportError:
     from collections import Iterable
 
-import numpy
-
 import awkward1._ext
 import awkward1._util
+
+
+np = awkward1.nplike.NumpyMetadata.instance()
+numpy = awkward1.nplike.Numpy.instance()
 
 
 def single(obj):
@@ -148,7 +150,10 @@ class PartitionedArray(object):
             if out is None:
                 out = x.type(typestrs)
             elif out != x.type(typestrs):
-                raise ValueError("inconsistent types in PartitionedArray")
+                raise ValueError(
+                    "inconsistent types in PartitionedArray"
+                    + awkward1._util.exception_suffix(__file__)
+                )
         return out
 
     @property
@@ -200,6 +205,9 @@ class PartitionedArray(object):
 
     def getitem_nothing(self, *args, **kwargs):
         return first(self).getitem_nothing(*args, **kwargs)
+
+    def copy_to(self, ptr_lib):
+        return self.from_ext(self._ext.copy_to(ptr_lib))
 
     def validityerror(self, *args, **kwargs):
         t = None
@@ -287,7 +295,7 @@ class PartitionedArray(object):
             for x in self.partitions:
                 output.append(
                     awkward1.layout.NumpyArray(
-                        numpy.arange(start, start + len(x), dtype=numpy.int64)
+                        awkward1.nplike.of(x).arange(start, start + len(x), dtype=np.int64)
                     )
                 )
                 start += len(x)
@@ -328,7 +336,7 @@ class PartitionedArray(object):
             if any(isinstance(x, numpy.ma.MaskedArray) for x in tocat):
                 return numpy.ma.concatenate(tocat)
             else:
-                return numpy.concatenate(tocat)
+                return awkward1.nplike.of(tocat).concatenate(tocat)
         else:
             return y
 
@@ -353,7 +361,7 @@ class PartitionedArray(object):
         from awkward1.types import PrimitiveType, OptionType, UnionType
 
         if not isinstance(where, bool) and isinstance(
-            where, (numbers.Integral, numpy.integer)
+            where, (numbers.Integral, np.integer)
         ):
             return PartitionedArray.from_ext(self._ext.getitem_at(where))
 
@@ -389,13 +397,14 @@ class PartitionedArray(object):
             head, tail = where[0], where[1:]
 
             if not isinstance(head, bool) and isinstance(
-                head, (numbers.Integral, numpy.integer)
+                head, (numbers.Integral, np.integer)
             ):
                 if head < 0:
                     head += len(self)
                 if not 0 <= head < len(self):
                     raise ValueError(
                         "{0} index out of range".format(type(self).__name__)
+                        + awkward1._util.exception_suffix(__file__)
                     )
                 partitionid, index = self._ext.partitionid_index_at(head)
                 return self.partition(partitionid)[(index,) + tail]
@@ -437,7 +446,7 @@ class PartitionedArray(object):
                 else:
                     return y[tail]
 
-            elif head is numpy.newaxis:
+            elif head is np.newaxis:
                 return self.toContent()[(head,) + tail]
 
             else:
@@ -445,7 +454,7 @@ class PartitionedArray(object):
                     head,
                     allow_record=False,
                     allow_other=False,
-                    numpytype=(numpy.integer, numpy.bool_, numpy.bool),
+                    numpytype=(np.integer, np.bool_, np.bool),
                 )
 
                 t = awkward1.operations.describe.type(layout)

@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/type/RecordType.cpp", line)
+
 #include <string>
 #include <sstream>
 #include <algorithm>
@@ -22,7 +24,8 @@ namespace awkward {
     if (recordlookup_.get() != nullptr  &&
         recordlookup_.get()->size() != types_.size()) {
       throw std::runtime_error(
-        "recordlookup and types must have the same length");
+        std::string("recordlookup and types must have the same length")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -64,7 +67,7 @@ namespace awkward {
                             const std::string& post) const {
     std::string typestr;
     if (get_typestr(typestr)) {
-      return typestr;
+      return wrap_categorical(typestr);
     }
 
     std::stringstream out;
@@ -80,23 +83,23 @@ namespace awkward {
             out << ", ";
           }
           if (recordlookup_.get() != nullptr) {
-            out << util::quote(recordlookup_.get()->at(j), true) << ": ";
+            out << util::quote(recordlookup_.get()->at(j)) << ": ";
           }
           out << types_[j].get()->tostring_part("", "", "");
         }
         out << "]";
-        return out.str();
+        return wrap_categorical(out.str());
       }
     }
 
-    if (parameters_.empty()) {
+    if (parameters_empty()) {
       if (recordlookup_.get() != nullptr) {
         out << "{";
         for (size_t j = 0;  j < types_.size();  j++) {
           if (j != 0) {
             out << ", ";
           }
-          out << util::quote(recordlookup_.get()->at(j), true) << ": ";
+          out << util::quote(recordlookup_.get()->at(j)) << ": ";
           out << types_[j].get()->tostring_part("", "", "");
         }
         out << "}";
@@ -119,7 +122,7 @@ namespace awkward {
           if (j != 0) {
             out << ", ";
           }
-          out << util::quote(recordlookup_.get()->at(j), true);
+          out << util::quote(recordlookup_.get()->at(j));
         }
         out << "], [";
         for (size_t j = 0;  j < types_.size();  j++) {
@@ -140,7 +143,7 @@ namespace awkward {
       }
       out << "], " << string_parameters() << "]";
     }
-    return out.str();
+    return wrap_categorical(out.str());
   }
 
   const TypePtr
@@ -234,7 +237,7 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("fieldindex ") + std::to_string(fieldindex)
         + std::string(" for record with only ") + std::to_string(numfields())
-        + std::string(" fields"));
+        + std::string(" fields") + FILENAME(__LINE__));
     }
     return types_[(size_t)fieldindex];
   }

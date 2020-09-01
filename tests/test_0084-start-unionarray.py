@@ -62,10 +62,10 @@ def test_getitem():
     assert awkward1.to_list(array2["y", :, 1:]) == ["ero", "ne", [], [], "wo", [2.2], "our", "hree"]
     with pytest.raises(ValueError) as err:
         array2[:, 1:, "y"]
-    assert str(err.value) == "in NumpyArray, too many dimensions in slice"
+    assert str(err.value).startswith("in NumpyArray, too many dimensions in slice")
     with pytest.raises(ValueError) as err:
         array2["z"]
-    assert str(err.value) == "key \"z\" does not exist (not in record)"
+    assert str(err.value).startswith("key \"z\" does not exist (not in record)")
 
     array3 = awkward1.layout.UnionArray8_32(tags, index, [content3, content2])
     array4 = awkward1.layout.UnionArray8_32(tags, index, [content0, content1, content2, content3])

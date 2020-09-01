@@ -12,20 +12,38 @@ try:
 except ImportError:
     from collections import Mapping
 
-import numpy
-
 import awkward1.layout
 import awkward1.partition
+import awkward1.nplike
+
+
+np = awkward1.nplike.NumpyMetadata.instance()
+
 
 py27 = sys.version_info[0] < 3
 py35 = sys.version_info[0] == 3 and sys.version_info[1] <= 5
 win = os.name == "nt"
+
 
 # to silence flake8 F821 errors
 if py27:
     unicode = eval("unicode")
 else:
     unicode = None
+
+
+def exception_suffix(filename):
+    line = ""
+    if hasattr(sys, "_getframe"):
+        line = "#L" + str(sys._getframe(1).f_lineno)
+    filename = filename.replace("\\", "/")
+    filename = "/src/awkward1/" + filename.split("awkward1/")[1]
+    return ("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/"
+            + awkward1.__version__
+            + filename
+            + line
+            + ")")
+
 
 virtualtypes = (awkward1.layout.VirtualArray,)
 
@@ -41,6 +59,11 @@ uniontypes = (
     awkward1.layout.UnionArray8_32,
     awkward1.layout.UnionArray8_U32,
     awkward1.layout.UnionArray8_64,
+)
+
+indexedoptiontypes = (
+    awkward1.layout.IndexedOptionArray32,
+    awkward1.layout.IndexedOptionArray64,
 )
 
 optiontypes = (
@@ -340,10 +363,14 @@ def wrap(content, behavior, cache=None):
     if isinstance(
         content, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
     ):
-        return awkward1.highlevel.Array(content, behavior=behavior, cache=cache)
+        return awkward1.highlevel.Array(
+            content, behavior=behavior, cache=cache, kernels=None
+        )
 
     elif isinstance(content, awkward1.layout.Record):
-        return awkward1.highlevel.Record(content, behavior=behavior, cache=cache)
+        return awkward1.highlevel.Record(
+            content, behavior=behavior, cache=cache, kernels=None
+        )
 
     else:
         return content
@@ -389,7 +416,10 @@ def key2index(keys, key):
             attempt = m.group(0)
 
     if attempt is None:
-        raise ValueError("key {0} not found in record".format(repr(key)))
+        raise ValueError(
+            "key {0} not found in record".format(repr(key))
+            + exception_suffix(__file__)
+        )
     else:
         return attempt
 
@@ -409,7 +439,7 @@ def completely_flatten(array):
         return completely_flatten(array.array)
 
     elif isinstance(array, unknowntypes):
-        return (numpy.array([], dtype=numpy.bool_),)
+        return (awkward1.nplike.of(array).array([], dtype=np.bool_),)
 
     elif isinstance(array, indexedtypes):
         return completely_flatten(array.project())
@@ -433,10 +463,13 @@ def completely_flatten(array):
         return tuple(out)
 
     elif isinstance(array, awkward1.layout.NumpyArray):
-        return (numpy.asarray(array),)
+        return (awkward1.nplike.of(array).asarray(array),)
 
     else:
-        raise RuntimeError("cannot completely flatten: {0}".format(type(array)))
+        raise RuntimeError(
+            "cannot completely flatten: {0}".format(type(array))
+            + exception_suffix(__file__)
+        )
 
 
 def broadcast_and_apply(inputs, getfunction, behavior):
@@ -449,9 +482,12 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     "length {3}".format(
                         type(inputs[0]).__name__, length, type(x).__name__, len(x)
                     )
+                    + exception_suffix(__file__)
                 )
 
     def apply(inputs, depth):
+        nplike = awkward1.nplike.of(*inputs)
+
         # handle implicit right-broadcasting (i.e. NumPy-like)
         if any(isinstance(x, listtypes) for x in inputs) and not any(
             isinstance(x, (awkward1.layout.Content, awkward1.layout.Record))
@@ -497,7 +533,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                 [
                     x
                     if not isinstance(x, unknowntypes)
-                    else awkward1.layout.NumpyArray(numpy.array([], dtype=numpy.bool_))
+                    else awkward1.layout.NumpyArray(nplike.array([], dtype=np.bool_))
                     for x in inputs
                 ],
                 depth,
@@ -527,7 +563,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
             length = None
             for x in inputs:
                 if isinstance(x, uniontypes):
-                    tagslist.append(numpy.asarray(x.tags))
+                    tagslist.append(nplike.asarray(x.tags))
                     if length is None:
                         length = len(tagslist[-1])
                     elif length != len(tagslist[-1]):
@@ -536,20 +572,21 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                             "with UnionArray of length {1}".format(
                                 length, len(tagslist[-1])
                             )
+                            + exception_suffix(__file__)
                         )
 
-            combos = numpy.stack(tagslist, axis=-1)
+            combos = nplike.stack(tagslist, axis=-1)
             combos = combos.view(
                 [(str(i), combos.dtype) for i in range(len(tagslist))]
             ).reshape(length)
 
-            tags = numpy.empty(length, dtype=numpy.int8)
-            index = numpy.empty(length, dtype=numpy.int64)
+            tags = nplike.empty(length, dtype=np.int8)
+            index = nplike.empty(length, dtype=np.int64)
             outcontents = []
-            for tag, combo in enumerate(numpy.unique(combos)):
+            for tag, combo in enumerate(nplike.unique(combos)):
                 mask = combos == combo
                 tags[mask] = tag
-                index[mask] = numpy.arange(numpy.count_nonzero(mask))
+                index[mask] = nplike.arange(nplike.count_nonzero(mask))
                 nextinputs = []
                 numoutputs = None
                 for i, x in enumerate(inputs):
@@ -578,20 +615,20 @@ def broadcast_and_apply(inputs, getfunction, behavior):
             mask = None
             for x in inputs:
                 if isinstance(x, optiontypes):
-                    m = numpy.asarray(x.bytemask()).view(numpy.bool_)
+                    m = nplike.asarray(x.bytemask()).view(np.bool_)
                     if mask is None:
                         mask = m
                     else:
-                        numpy.bitwise_or(mask, m, out=mask)
+                        nplike.bitwise_or(mask, m, out=mask)
 
-            nextmask = awkward1.layout.Index8(mask.view(numpy.int8))
-            index = numpy.full(len(mask), -1, dtype=numpy.int64)
-            index[~mask] = numpy.arange(
-                len(mask) - numpy.count_nonzero(mask), dtype=numpy.int64
+            nextmask = awkward1.layout.Index8(mask.view(np.int8))
+            index = nplike.full(len(mask), -1, dtype=np.int64)
+            index[~mask] = nplike.arange(
+                len(mask) - nplike.count_nonzero(mask), dtype=np.int64
             )
             index = awkward1.layout.Index64(index)
             if any(not isinstance(x, optiontypes) for x in inputs):
-                nextindex = numpy.arange(len(mask), dtype=numpy.int64)
+                nextindex = nplike.arange(len(mask), dtype=np.int64)
                 nextindex[mask] = -1
                 nextindex = awkward1.layout.Index64(nextindex)
 
@@ -632,8 +669,8 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     if isinstance(x, awkward1.layout.RegularArray):
                         if maxsize > 1 and x.size == 1:
                             tmpindex = awkward1.layout.Index64(
-                                numpy.repeat(
-                                    numpy.arange(len(x), dtype=numpy.int64), maxsize
+                                nplike.repeat(
+                                    nplike.arange(len(x), dtype=np.int64), maxsize
                                 )
                             )
                 nextinputs = []
@@ -653,9 +690,11 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                                 "{0} with RegularArray of size {1}".format(
                                     x.size, maxsize
                                 )
+                                + exception_suffix(__file__)
                             )
                     else:
                         nextinputs.append(x)
+
                 outcontent = apply(nextinputs, depth + 1)
                 assert isinstance(outcontent, tuple)
                 return tuple(
@@ -725,6 +764,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                             "match:\n    {0}\n    {1}".format(
                                 ", ".join(sorted(keys)), ", ".join(sorted(x.keys()))
                             )
+                            + exception_suffix(__file__)
                         )
                     if length is None:
                         length = len(x)
@@ -732,6 +772,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                         raise ValueError(
                             "cannot broadcast RecordArray of length {0} "
                             "with RecordArray of length {1}".format(length, len(x))
+                            + exception_suffix(__file__)
                         )
                     if not x.istuple:
                         istuple = False
@@ -762,6 +803,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
         else:
             raise ValueError(
                 "cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs))
+                + exception_suffix(__file__)
             )
 
     if any(isinstance(x, awkward1.partition.PartitionedArray) for x in inputs):
@@ -833,7 +875,7 @@ def broadcast_pack(inputs, isscalar):
     nextinputs = []
     for x in inputs:
         if isinstance(x, awkward1.layout.Record):
-            index = numpy.full(maxlen, x.at, dtype=numpy.int64)
+            index = awkward1.nplike.of(*inputs).full(maxlen, x.at, dtype=np.int64)
             nextinputs.append(awkward1.layout.RegularArray(x.array[index], maxlen))
             isscalar.append(True)
         elif isinstance(x, awkward1.layout.Content):
@@ -877,7 +919,7 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
             return layout
         else:
             return awkward1.layout.NumpyArray(
-                numpy.asarray(layout), layout.identities, None
+                awkward1.nplike.of(layout).asarray(layout), layout.identities, None
             )
 
     elif isinstance(layout, awkward1.layout.EmptyArray):
@@ -1102,7 +1144,69 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         )
 
     else:
-        raise AssertionError("unrecognized Content type: {0}".format(type(layout)))
+        raise AssertionError(
+            "unrecognized Content type: {0}".format(type(layout))
+            + exception_suffix(__file__)
+        )
+
+
+def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
+    apply(layout, depth, *args)
+
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        for x in layout.partitions:
+            recursive_walk(x, apply, args, depth, materialize)
+
+    elif isinstance(layout, awkward1.layout.NumpyArray):
+        pass
+
+    elif isinstance(layout, awkward1.layout.EmptyArray):
+        pass
+
+    elif isinstance(layout, (
+        awkward1.layout.RegularArray,
+        awkward1.layout.ListArray32,
+        awkward1.layout.ListArrayU32,
+        awkward1.layout.ListArray64,
+        awkward1.layout.ListOffsetArray32,
+        awkward1.layout.ListOffsetArrayU32,
+        awkward1.layout.ListOffsetArray64,
+    )):
+        recursive_walk(layout.content, apply, args, depth + 1, materialize)
+
+    elif isinstance(layout, (
+        awkward1.layout.IndexedArray32,
+        awkward1.layout.IndexedArrayU32,
+        awkward1.layout.IndexedArray64,
+        awkward1.layout.IndexedOptionArray32,
+        awkward1.layout.IndexedOptionArray64,
+        awkward1.layout.ByteMaskedArray,
+        awkward1.layout.BitMaskedArray,
+        awkward1.layout.UnmaskedArray,
+    )):
+        recursive_walk(layout.content, apply, args, depth, materialize)
+
+    elif isinstance(layout, (
+        awkward1.layout.RecordArray,
+        awkward1.layout.UnionArray8_32,
+        awkward1.layout.UnionArray8_U32,
+        awkward1.layout.UnionArray8_64,
+    )):
+        for x in layout.contents:
+            recursive_walk(x, apply, args, depth, materialize)
+
+    elif isinstance(layout, awkward1.layout.Record):
+        recursive_walk(layout.array, apply, args, depth, materialize)
+
+    elif isinstance(layout, awkward1.layout.VirtualArray):
+        if materialize:
+            recursive_walk(layout.array, apply, args, depth, materialize)
+
+    else:
+        raise AssertionError(
+            "unrecognized Content type: {0}".format(type(layout))
+            + exception_suffix(__file__)
+        )
 
 
 def highlevel_type(layout, behavior, isarray):
@@ -1181,7 +1285,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                         key = ""
                     sp = ", "
                 yield "}"
-            elif isinstance(x, (float, numpy.floating)):
+            elif isinstance(x, (float, np.floating)):
                 yield space + "{0:.3g}".format(x)
             else:
                 yield space + repr(x)
@@ -1250,7 +1354,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                     if i != 0:
                         yield ", "
                 yield "{"
-            elif isinstance(x, (float, numpy.floating)):
+            elif isinstance(x, (float, np.floating)):
                 yield "{0:.3g}".format(x) + space
             else:
                 yield repr(x) + space

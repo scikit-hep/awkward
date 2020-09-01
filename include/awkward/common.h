@@ -28,6 +28,23 @@
   #define ERROR struct Error
 #endif
 
+#define QUOTE(x) #x
+
+#define FILENAME_FOR_EXCEPTIONS(filename, line) std::string("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/" VERSION_INFO "/" filename "#L" #line ")")
+#define FILENAME_FOR_EXCEPTIONS_C(filename, line) ("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/" VERSION_INFO "/" filename "#L" #line ")")
+#define FILENAME_FOR_EXCEPTIONS_CUDA(filename, line) ("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/" QUOTE(VERSION_INFO) "/" filename "#L" #line ")")
+
+#ifdef __GNUC__
+// Silence a gcc warning: type attributes ignored after type is already defined
+  #define EXPORT_TEMPLATE_INST
+#else
+  #define EXPORT_TEMPLATE_INST EXPORT_SYMBOL
+#endif
+
+#ifndef LIBAWKWARD_EXPORT_SYMBOL
+  #define LIBAWKWARD_EXPORT_SYMBOL
+#endif
+
 #include <iostream>
 #include <algorithm>
 #include <map>
@@ -37,8 +54,9 @@
 #include <cstring>
 
 extern "C" {
-  struct EXPORT_SYMBOL Error {
+  struct LIBAWKWARD_EXPORT_SYMBOL Error {
     const char* str;
+    const char* filename;
     int64_t identity;
     int64_t attempt;
     bool pass_through;
@@ -50,11 +68,13 @@ extern "C" {
   const uint32_t kMaxUInt32 =          4294967295;   // 2**32 - 1
   const int64_t  kMaxInt64  = 9223372036854775806;   // 2**63 - 2: see below
   const int64_t  kSliceNone = kMaxInt64 + 1;         // for Slice::none()
+  // Change kSliceNone in dev/genpython.py if the value is changed here
 
   inline struct Error
     success() {
         struct Error out;
         out.str = nullptr;
+        out.filename = nullptr;
         out.identity = kSliceNone;
         out.attempt = kSliceNone;
         out.pass_through = false;
@@ -62,12 +82,32 @@ extern "C" {
     };
 
   inline struct Error
-    failure(const char* str, int64_t identity, int64_t attempt, bool pass_through = false) {
+    failure(
+      const char* str,
+      int64_t identity,
+      int64_t attempt,
+      const char* filename) {
         struct Error out;
         out.str = str;
+        out.filename = filename;
         out.identity = identity;
         out.attempt = attempt;
-        out.pass_through = pass_through;
+        out.pass_through = false;
+        return out;
+    };
+
+  inline struct Error
+    failure_pass_through(
+      const char* str,
+      int64_t identity,
+      int64_t attempt,
+      const char* filename) {
+        struct Error out;
+        out.str = str;
+        out.filename = filename;
+        out.identity = identity;
+        out.attempt = attempt;
+        out.pass_through = true;
         return out;
     };
 }

@@ -1,11 +1,14 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/UnmaskedArray.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/UnmaskedArray.cpp", line)
+
 #include <sstream>
 #include <type_traits>
 
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/operations.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/operations.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -152,6 +155,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  UnmaskedForm::getitem_field(const std::string& key) const {
+    return content_.get()->getitem_field(key);
+  }
+
   ////////// UnmaskedArray
 
   UnmaskedArray::UnmaskedArray(const IdentitiesPtr& identities,
@@ -183,7 +191,8 @@ namespace awkward {
   UnmaskedArray::bytemask() const {
     Index8 out(length());
     struct Error err = kernel::zero_mask8(
-      out.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      out.data(),
       length());
     util::handle_error(err, classname(), identities_.get());
     return out;
@@ -210,7 +219,8 @@ namespace awkward {
   UnmaskedArray::toIndexedOptionArray64() const {
     Index64 index(length());
     struct Error err = kernel::carry_arange<int64_t>(
-      index.ptr().get(),
+      kernel::lib::cpu,   // DERIVE
+      index.data(),
       length());
     util::handle_error(err, classname(), identities_.get());
     return std::make_shared<IndexedOptionArray64>(identities_,
@@ -234,7 +244,8 @@ namespace awkward {
         util::handle_error(
           failure("content and its identities must have the same length",
                   kSliceNone,
-                  kSliceNone),
+                  kSliceNone,
+                  FILENAME_C(__LINE__)),
           classname(),
           identities_.get());
       }
@@ -248,9 +259,9 @@ namespace awkward {
         Identities32* rawsubidentities =
           reinterpret_cast<Identities32*>(subidentities.get());
         struct Error err = kernel::Identities_extend<int32_t>(
-          rawsubidentities->ptr().get(),
-          rawidentities->ptr().get(),
-          rawidentities->offset(),
+          kernel::lib::cpu,   // DERIVE
+          rawsubidentities->data(),
+          rawidentities->data(),
           rawidentities->length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
@@ -266,16 +277,17 @@ namespace awkward {
         Identities64* rawsubidentities =
           reinterpret_cast<Identities64*>(subidentities.get());
         struct Error err = kernel::Identities_extend<int64_t>(
-          rawsubidentities->ptr().get(),
-          rawidentities->ptr().get(),
-          rawidentities->offset(),
+          kernel::lib::cpu,   // DERIVE
+          rawsubidentities->data(),
+          rawidentities->data(),
           rawidentities->length(),
           content_.get()->length());
         util::handle_error(err, classname(), identities_.get());
         content_.get()->setidentities(subidentities);
       }
       else {
-        throw std::runtime_error("unrecognized Identities specialization");
+        throw std::runtime_error(
+          std::string("unrecognized Identities specialization") + FILENAME(__LINE__));
       }
     }
     identities_ = identities;
@@ -291,8 +303,10 @@ namespace awkward {
                                        length());
       Identities32* rawidentities =
         reinterpret_cast<Identities32*>(newidentities.get());
-      struct Error err = kernel::new_Identities<int32_t>(rawidentities->ptr().get(),
-                                                         length());
+      struct Error err = kernel::new_Identities<int32_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -304,8 +318,10 @@ namespace awkward {
                                        length());
       Identities64* rawidentities =
         reinterpret_cast<Identities64*>(newidentities.get());
-      struct Error err = kernel::new_Identities<int64_t>(rawidentities->ptr().get(),
-                                                         length());
+      struct Error err = kernel::new_Identities<int64_t>(
+        kernel::lib::cpu,   // DERIVE
+        rawidentities->data(),
+        length());
       util::handle_error(err, classname(), identities_.get());
       setidentities(newidentities);
     }
@@ -394,7 +410,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         identities_.get()->length() < length()) {
       util::handle_error(
-        failure("len(identities) < len(array)", kSliceNone, kSliceNone),
+        failure("len(identities) < len(array)",
+                kSliceNone,
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -413,7 +432,7 @@ namespace awkward {
     }
     if (!(0 <= regular_at  &&  regular_at < length())) {
       util::handle_error(
-        failure("index out of range", kSliceNone, at),
+        failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
         classname(),
         identities_.get());
     }
@@ -434,7 +453,10 @@ namespace awkward {
     if (identities_.get() != nullptr  &&
         regular_stop > identities_.get()->length()) {
       util::handle_error(
-        failure("index out of range", kSliceNone, stop),
+        failure("index out of range",
+                kSliceNone,
+                stop,
+                FILENAME_C(__LINE__)),
         identities_.get()->classname(),
         nullptr);
     }
@@ -506,7 +528,8 @@ namespace awkward {
       return Content::getitem_next(*missing, tail, advanced);
     }
     else {
-      throw std::runtime_error("unrecognized slice type");
+      throw std::runtime_error(
+        std::string("unrecognized slice type") + FILENAME(__LINE__));
     }
   }
 
@@ -575,7 +598,8 @@ namespace awkward {
   UnmaskedArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
-      throw std::invalid_argument("axis=0 not allowed for flatten");
+      throw std::invalid_argument(
+        std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
     }
     else {
       std::pair<Index64, ContentPtr> offsets_flattened =
@@ -712,6 +736,7 @@ namespace awkward {
   UnmaskedArray::reduce_next(const Reducer& reducer,
                              int64_t negaxis,
                              const Index64& starts,
+                             const Index64& shifts,
                              const Index64& parents,
                              int64_t outlength,
                              bool mask,
@@ -719,6 +744,7 @@ namespace awkward {
     return content_.get()->reduce_next(reducer,
                                        negaxis,
                                        starts,
+                                       shifts,
                                        parents,
                                        outlength,
                                        mask,
@@ -747,7 +773,9 @@ namespace awkward {
                               int64_t axis,
                               int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1")
+        + FILENAME(__LINE__));
     }
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
@@ -833,7 +861,8 @@ namespace awkward {
                               const Slice& tail,
                               const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: UnmaskedArray::getitem_next(at)");
+      std::string("undefined operation: UnmaskedArray::getitem_next(at)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -841,7 +870,8 @@ namespace awkward {
                               const Slice& tail,
                               const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: UnmaskedArray::getitem_next(range)");
+      std::string("undefined operation: UnmaskedArray::getitem_next(range)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -849,7 +879,8 @@ namespace awkward {
                               const Slice& tail,
                               const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: UnmaskedArray::getitem_next(array)");
+      std::string("undefined operation: UnmaskedArray::getitem_next(array)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -857,7 +888,8 @@ namespace awkward {
                               const Slice& tail,
                               const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: UnmaskedArray::getitem_next(jagged)");
+      std::string("undefined operation: UnmaskedArray::getitem_next(jagged)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -894,11 +926,25 @@ namespace awkward {
   }
 
   const ContentPtr
-  UnmaskedArray::copy_to(kernel::Lib ptr_lib) const {
-    ContentPtr content = content_->copy_to(ptr_lib);
-    return std::make_shared<UnmaskedArray>(identities(),
-                                           parameters(),
+  UnmaskedArray::copy_to(kernel::lib ptr_lib) const {
+    ContentPtr content = content_.get()->copy_to(ptr_lib);
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->copy_to(ptr_lib);
+    }
+    return std::make_shared<UnmaskedArray>(identities,
+                                           parameters_,
                                            content);
+  }
+
+  const ContentPtr
+  UnmaskedArray::numbers_to_type(const std::string& name) const {
+    ContentPtr content = content_.get()->numbers_to_type(name);
+    IdentitiesPtr identities = identities_;
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->deep_copy();
+    }
+    return std::make_shared<UnmaskedArray>(identities, parameters_, content);
   }
 
   template <typename S>

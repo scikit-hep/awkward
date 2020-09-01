@@ -36,6 +36,38 @@ Most pull requests are merged with the "squash and merge" feature, so details ab
 
 It is unnecessary to manually edit (rebase) your commit history. If, however, you do want to save a pull request as multiple commits on `master`, ask me and we'll discuss.
 
+### Building and teseting locally
+
+As described in [the README](https://github.com/scikit-hep/awkward-1.0#installation-for-developers), you can build locally using
+
+```bash
+python localbuild.py --pytest tests
+```
+
+The `--pytest tests` runs the integration tests from the `tests` directory (drop it to build only).
+
+For more fine-grained testing, we also have tests of the low-level kernels, which can be invoked with
+
+```bash
+python dev/generate-kernelspec.py
+python dev/generate-tests.py
+python -m pytest -vv -rs tests-spec
+python -m pytest -vv -rs tests-cpu-kernels
+```
+
+Furthermore, if you have an Nvidia GPU, you can build and locally install the experimental CUDA plug-in with
+
+```bash
+pip uninstall -y awkward1-cuda-kernels
+./cuda-build.sh --install
+```
+
+The `--install` does a local `pip install` on your system, which is the only way to use it. You can run its tests with
+
+```bash
+python -m pytest tests-cuda
+```
+
 ### Building documentation locally
 
 We use [Sphinx](https://pypi.org/project/Sphinx/) to generate documentation.  
@@ -44,23 +76,69 @@ You need some additional packages installed on your system to build the document
 * [Doxygen](https://www.doxygen.nl/download.html)
 * [pycparser](https://pypi.org/project/pycparser/)
 * [black](https://pypi.org/project/black/)
-* Sphinx and its dependencies ([Jinja2](https://pypi.org/project/Jinja2/), [sphinxcontrib-serializinghtml](https://pypi.org/project/sphinxcontrib-serializinghtml/), [sphinxcontrib-applehelp](https://pypi.org/project/sphinxcontrib-applehelp/), [sphinxcontrib-devhelp](https://pypi.org/project/sphinxcontrib-devhelp/), [sphinxcontrib-jsmath](https://pypi.org/project/sphinxcontrib-jsmath/), [sphinxcontrib-htmlhelp](https://pypi.org/project/sphinxcontrib-htmlhelp/), [sphinxcontrib-qthelp](https://pypi.org/project/sphinxcontrib-qthelp/), [Pygments](https://pypi.org/project/Pygments/), [docutils](https://pypi.org/project/docutils/), [snowballstemmer](https://pypi.org/project/snowballstemmer/), [Babel](https://pypi.org/project/Babel/), [alabaster](https://pypi.org/project/alabaster/), [imagesize](https://pypi.org/project/imagesize/), [requests](https://pypi.org/project/requests/), [setuptools](https://pypi.org/project/setuptools/), [packaging](https://pypi.org/project/packaging/))  
+* [sphinx](https://pypi.org/project/sphinx/)
+* [sphinx-rtd-theme](https://pypi.org/project/sphinx-rtd-theme/)
 
+To build documentation locally, execute the following command from the root directory of the project.
 
-To build documentation locally, execute the following command from the root directory of the project -  
-```sphinx-build docs-sphinx/ docs-sphinx/_build/```   
+```bash
+sphinx-build docs-sphinx docs-sphinx/_build
+```
+
 this command executes multiple custom Python scripts(some require a working internet connection), in addition to using Sphinx and Doxygen to generate the required browser viewable documentation.
 
-To view the built documentation, open `docs-sphinx/_build/index.html` from the root directory of the project in your preferred web browser.
+To view the built documentation, open
 
-Before re-building documentation, you might want to delete the files that were generated to create viewable documentation. A simple command to remove all of them is -   
-```rm -rf docs-shinx/_auto/ docs_sphinx/_build/ docs-sphinx/_static/```
+```bash
+docs-sphinx/_build/index.html
+```
+
+from the root directory of the project in your preferred web browser.
+
+Before re-building documentation, you might want to delete the files that were generated to create viewable documentation. A simple command to remove all of them is
+
+```bash
+rm -rf docs-shinx/_auto docs_sphinx/_build docs-sphinx/_static
+```
 
 ### Continuous integration
 
 Pull requests must pass all [continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) tests before they are merged. I will sometimes cancel non-essential builds to give priority to pull requests that are almost ready to be merged. If you needed the result of the build as a diagnostic, you can ask me to restart your job or make a trivial change to trigger a new build.
 
 Currently, we only run merge builds (the state of your branch if merged with master), not regular branch builds (the state of your branch as-is), because only merge builds can be made to run for pull requests from external forks and it makes better use of our limited execution time on Azure. If you want to enable regular branch builds, you can turn it on for your branch by editing `trigger/branches/exclude` in [.ci/azure-buildtest-awkwrad.yml](https://github.com/scikit-hep/awkward-1.0/blob/9b6fca3f6e6456860ae40979171f762e0045ce7c/.ci/azure-buildtest-awkward.yml#L1-L5). The merge build trigger is not controlled by the YAML file. It is better, however, to keep up-to-date with `git merge master`.
+
+### Semi-automated testing of CUDA kernels
+
+For development on the cuda-kernels, an AWS VM with a GPU has been set up to run tests in the `tests-cuda` directory. You can email jpivarski at GMail for more information on how to get permissions to launch the AWS instance.
+
+To see if the AWS instance is running, use the launcher:
+
+```bash
+% ssh -i ~/.ssh/awkward1-cuda-test.pem ubuntu@WW.XX.YY.ZZ ./list-instances.py
+i-0295dd31185ce78f7     WW.XX.YY.ZZ    running ['launcher']
+i-0a1ec83c261607797     AA.BB.CC.DD    running ['awkward1-cuda-test']
+i-0a9dd553fe19610fb          (none)    stopped ['awkward1-cuda-test-2gpus']
+```
+
+If it is `stopped`, launch it with:
+
+```bash
+ssh -i ~/.ssh/awkward1-cuda-test.pem ubuntu@WW.XX.YY.ZZ aws ec2 start-instances --instance-ids i-0a1ec83c261607797
+```
+
+Once it's `running`, use its IP address (`AA.BB.CC.DD`) to run the tests for your branch (`my-branch-name`):
+
+```bash
+ssh -i ~/.ssh/awkward1-cuda-test.pem ubuntu@AA.BB.CC.DD ./cuda-run-tests.sh my-branch-name
+```
+
+When you are done, be sure to put it back into the `stopped` state:
+
+```bash
+ssh -i ~/.ssh/awkward1-cuda-test.pem ubuntu@WW.XX.YY.ZZ aws ec2 stop-instances --instance-ids i-0a1ec83c261607797
+```
+
+and verify with `list-instances`. While the GPU instance is running, you can ssh into it interactively for debugging.
 
 ### The master branch
 
@@ -147,6 +225,20 @@ Unit tests do not need to adhere to the 80-character limit.
 We don't, however, use automated formatters like clang-format or black. Automated formatting can rearrange code into something that is, paradoxically, harder to read, undermining the human element in programming.
 
 We don't currently use linters like clang-tidy or flake8, but I'm open to it.
+
+#### Contributing to files in src/cpu-kernels/
+
+Avoid using [Python keywords](https://docs.python.org/3/reference/lexical_analysis.html#keywords) in files residing inside `src/cpu-kernels/`
+
+#### Contributing to files in include/awkward/cpu-kernels/
+
+Make sure to prepend each function definition with -
+```
+/// @param param1 inparam/outparam (optional role: rolename)
+/// @param param2 inparam/outparam (optional role: rolename)
+/// @param param3 inparam/outparam (optional role: rolename)
+....
+```
 
 ### Fully qualified names
 

@@ -1,15 +1,19 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/util.cpp", line)
+
 #include <sstream>
 #include <set>
 
 #include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/operations.h"
-#include "awkward/cpu-kernels/reducers.h"
-#include "awkward/cpu-kernels/sorting.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/operations.h"
+#include "awkward/kernels/reducers.h"
+#include "awkward/kernels/sorting.h"
 
 #include "awkward/util.h"
 #include "awkward/Identities.h"
@@ -18,6 +22,7 @@ namespace rj = rapidjson;
 
 namespace awkward {
   namespace util {
+
     dtype
     name_to_dtype(const std::string& name) {
       if (name == "bool") {
@@ -396,8 +401,10 @@ namespace awkward {
     handle_error(const struct Error& err,
                  const std::string& classname,
                  const Identities* identities) {
-      if(err.pass_through == true) {
-        throw std::invalid_argument(err.str);
+      std::string filename = (err.filename == nullptr ? "" : err.filename);
+
+      if (err.pass_through == true) {
+        throw std::invalid_argument(std::string(err.str) + filename);
       }
       else {
         if (err.str != nullptr) {
@@ -414,7 +421,7 @@ namespace awkward {
           if (err.attempt != kSliceNone) {
             out << " attempting to get " << err.attempt;
           }
-          out << ", " << err.str;
+          out << ", " << err.str << filename;
           throw std::invalid_argument(out.str());
         }
       }
@@ -449,13 +456,11 @@ namespace awkward {
     template IndexOf<int64_t> make_stops(const IndexOf<int64_t> &offsets);
 
     std::string
-    quote(const std::string &x, bool doublequote) {
-      // TODO: escape characters, possibly using RapidJSON.
-      if (doublequote) {
-        return std::string("\"") + x + std::string("\"");
-      } else {
-        return std::string("'") + x + std::string("'");
-      }
+    quote(const std::string &x) {
+      rj::StringBuffer buffer;
+      rj::Writer<rj::StringBuffer> writer(buffer);
+      writer.String(x.c_str(), x.length());
+      return std::string(buffer.GetString());
     }
 
     RecordLookupPtr
@@ -486,14 +491,14 @@ namespace awkward {
         }
         catch (std::invalid_argument err) {
           throw std::invalid_argument(
-            std::string("key ") + quote(key, true)
-            + std::string(" does not exist (not in record)"));
+            std::string("key ") + quote(key)
+            + std::string(" does not exist (not in record)") + FILENAME(__LINE__));
         }
         if (!(0 <= out && out < numfields)) {
           throw std::invalid_argument(
             std::string("key interpreted as fieldindex ") + key
-            + std::string(" for records with only " + std::to_string(numfields)
-                          + std::string(" fields")));
+            + std::string(" for records with only ") + std::to_string(numfields)
+            + std::string(" fields") + FILENAME(__LINE__));
         }
       }
       return out;
@@ -506,8 +511,8 @@ namespace awkward {
       if (fieldindex >= numfields) {
         throw std::invalid_argument(
           std::string("fieldindex ") + std::to_string(fieldindex)
-          + std::string(" for records with only " + std::to_string(numfields)
-                        + std::string(" fields")));
+          + std::string(" for records with only ") + std::to_string(numfields)
+          + std::string(" fields") + FILENAME(__LINE__));
       }
       if (recordlookup.get() != nullptr) {
         return recordlookup.get()->at((size_t) fieldindex);
@@ -628,12 +633,14 @@ namespace awkward {
     parameter_asstring(const Parameters &parameters, const std::string &key) {
       auto item = parameters.find(key);
       if (item == parameters.end()) {
-        throw std::runtime_error("parameter is null");
+        throw std::runtime_error(
+          std::string("parameter is null") + FILENAME(__LINE__));
       }
       rj::Document mine;
       mine.Parse<rj::kParseNanAndInfFlag>(item->second.c_str());
       if (!mine.IsString()) {
-        throw std::runtime_error("parameter is not a string");
+        throw std::runtime_error(
+          std::string("parameter is not a string") + FILENAME(__LINE__));
       }
       return mine.GetString();
     }
@@ -670,5 +677,6 @@ namespace awkward {
       }
       return std::string();
     }
+
   }
 }

@@ -12,7 +12,7 @@ namespace awkward {
   ///
   /// Many of the methods raise runtime errors. See
   /// {@link Content#isscalar Content::isscalar}.
-  class EXPORT_SYMBOL Record: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL Record: public Content {
   public:
     /// @brief Creates a Record from a full set of parameters.
     ///
@@ -205,6 +205,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,
@@ -327,7 +328,10 @@ namespace awkward {
                           const Slice& tail) const override;
 
     const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const override;
+      copy_to(kernel::lib ptr_lib) const override;
+
+    const ContentPtr
+      numbers_to_type(const std::string& name) const override;
 
   private:
     /// @brief See #array.

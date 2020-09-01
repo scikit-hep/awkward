@@ -7,7 +7,7 @@
 #include <vector>
 #include <memory>
 
-#include "awkward/cpu-kernels/getitem.h"
+#include "awkward/kernels/getitem.h"
 #include "awkward/type/Type.h"
 #include "awkward/Index.h"
 
@@ -19,7 +19,7 @@ namespace awkward {
   ///
   /// @brief Abstract class for slice items, which are elements of a tuple
   /// passed to an array's `__getitem__` in Python.
-  class EXPORT_SYMBOL SliceItem {
+  class LIBAWKWARD_EXPORT_SYMBOL SliceItem {
   public:
     /// @brief Virtual destructor acts as a first non-inline virtual function
     /// that determines a specific translation unit in which vtable shall be
@@ -49,7 +49,7 @@ namespace awkward {
   ///
   /// @brief Represents an integer in a tuple of slices passed to
   /// `__getitem__` in Python.
-  class EXPORT_SYMBOL SliceAt: public SliceItem {
+  class LIBAWKWARD_EXPORT_SYMBOL SliceAt: public SliceItem {
   public:
     /// @brief Creates a SliceAt from a full set of parameters.
     ///
@@ -81,7 +81,7 @@ namespace awkward {
   ///
   /// @brief Represents a Python `slice` object (usual syntax:
   /// `array[start:stop:step]`).
-  class EXPORT_SYMBOL SliceRange: public SliceItem {
+  class LIBAWKWARD_EXPORT_SYMBOL SliceRange: public SliceItem {
   public:
     /// @brief Creates a SliceRange from a full set of parameters.
     ///
@@ -154,7 +154,7 @@ namespace awkward {
   ///
   /// @brief Represents a Python `Ellipsis` object (usual syntax:
   /// `array[...]`).
-  class EXPORT_SYMBOL SliceEllipsis: public SliceItem {
+  class LIBAWKWARD_EXPORT_SYMBOL SliceEllipsis: public SliceItem {
   public:
     /// @brief Creates a SliceEllipsis.
     SliceEllipsis();
@@ -179,7 +179,7 @@ namespace awkward {
   /// marker (a.k.a. `None`), which prompts `__getitem__` to insert a
   /// length-1 regular dimension (RegularArray) at some point in the slice
   /// tuple.
-  class EXPORT_SYMBOL SliceNewAxis: public SliceItem {
+  class LIBAWKWARD_EXPORT_SYMBOL SliceNewAxis: public SliceItem {
   public:
     /// @brief Creates a SliceNewAxis.
     SliceNewAxis();
@@ -204,7 +204,11 @@ namespace awkward {
   ///
   /// Currently, the only type specialization is `T = int64_t`.
   template <typename T>
-  class EXPORT_SYMBOL SliceArrayOf: public SliceItem {
+  class
+#ifdef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
+  LIBAWKWARD_EXPORT_SYMBOL
+#endif
+  SliceArrayOf: public SliceItem {
   public:
     /// @brief Creates a SliceArrayOf from a full set of parameters.
     ///
@@ -302,7 +306,7 @@ namespace awkward {
     bool frombool_;
   };
 
-#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+#ifndef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
   extern template class SliceArrayOf<int64_t>;
 #endif
 
@@ -312,7 +316,7 @@ namespace awkward {
   ///
   /// @brief Represents a single string in a slice tuple, indicating that a
   /// RecordArray should be replaced by one of its fields.
-  class EXPORT_SYMBOL SliceField: public SliceItem {
+  class LIBAWKWARD_EXPORT_SYMBOL SliceField: public SliceItem {
   public:
     /// @brief Creates a SliceField from a full set of parameters.
     ///
@@ -353,7 +357,7 @@ namespace awkward {
   ///
   /// @brief Represents a list of strings in a slice tuple, indicating that a
   /// RecordArray should be replaced by a subset of its fields.
-  class EXPORT_SYMBOL SliceFields: public SliceItem {
+  class LIBAWKWARD_EXPORT_SYMBOL SliceFields: public SliceItem {
   public:
     /// @brief Creates a SliceFields from a full set of parameters.
     ///
@@ -397,7 +401,11 @@ namespace awkward {
   ///
   /// Currently, the only type specialization is `T = int64_t`.
   template <typename T>
-  class EXPORT_SYMBOL SliceMissingOf: public SliceItem {
+  class
+#ifdef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
+  LIBAWKWARD_EXPORT_SYMBOL
+#endif
+  SliceMissingOf: public SliceItem {
   public:
     /// @brief Creates a SliceMissingOf with a full set of parameters.
     ///
@@ -456,7 +464,7 @@ namespace awkward {
     const SliceItemPtr content_;
   };
 
-#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+#ifndef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
   extern template class SliceMissingOf<int64_t>;
 #endif
 
@@ -470,7 +478,11 @@ namespace awkward {
   ///
   /// Currently, the only type specialization is `T = int64_t`.
   template <typename T>
-  class EXPORT_SYMBOL SliceJaggedOf: public SliceItem {
+  class
+#ifdef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
+  LIBAWKWARD_EXPORT_SYMBOL
+#endif
+  SliceJaggedOf: public SliceItem {
   public:
     /// @brief Creates a SliceJaggedOf with a full set of parameters.
     ///
@@ -527,7 +539,7 @@ namespace awkward {
     const SliceItemPtr content_;
   };
 
-#if !defined AWKWARD_SLICE_NO_EXTERN_TEMPLATE && !defined _MSC_VER
+#ifndef AWKWARD_SLICE_NO_EXTERN_TEMPLATE
   extern template class SliceJaggedOf<int64_t>;
 #endif
 
@@ -537,7 +549,7 @@ namespace awkward {
   ///
   /// @brief A sequence of SliceItem objects representing a tuple passed
   /// to Python's `__getitem__`.
-  class EXPORT_SYMBOL Slice {
+  class LIBAWKWARD_EXPORT_SYMBOL Slice {
   public:
     /// @brief Represents a missing {@link SliceRange#start start},
     /// {@link SliceRange#stop stop}, or {@link SliceRange#step step}

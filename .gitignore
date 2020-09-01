@@ -2,7 +2,23 @@ studies/**/sample-*
 docs/demos/countries.geojson
 docs/demos/test-program
 docs/demos/test-program.cpp
-dev/kernels.py
+.ci/logs/
+
+# Specification
+kernel-specification/kernelnames.yml
+kernel-specification/operations/
+kernel-specification/reducers/
+kernel-specification/identities/
+kernel-specification/sorting/
+kernel-specification/getitem/
+
+# Generated CUDA kernels
+src/cuda-kernels/awkward_*.cu
+
+# Kernel tests
+tests-cpu-kernels/test*
+tests-spec/kernels.py
+tests-spec/test*
 
 dependent-project/CMakeFiles
 dependent-project/CMakeCache.txt
@@ -25,6 +41,7 @@ docs-mkdocs/docs
 docs-sphinx/_build
 docs-sphinx/_static
 docs-sphinx/_auto
+docs-src/_build
 
 ############################################################# IDEs
 .idea

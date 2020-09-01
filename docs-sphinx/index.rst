@@ -61,7 +61,7 @@ Navigation
 
 **Virtual arrays:** :doc:`_auto/ak.virtual` creates an array that will be generated on demand and :doc:`_auto/ak.with_cache` assigns a new cache to all virtual arrays in a structure.
 
-**NumPy/Pandas compatibility:** :doc:`_auto/ak.size`, :doc:`_auto/ak.atleast_1d`.
+**NumPy compatibility:** :doc:`_auto/ak.size`, :doc:`_auto/ak.atleast_1d`.
 
 **Reducers:** eliminate a dimension by replacing it with a count, sum, logical and/or, etc. over its members. These functions summarize the innermost lists with ``axis=-1`` and cross lists with other values of ``axis``. They never apply to data structures, only numbers at the innermost fields of a structure.
 
@@ -93,9 +93,7 @@ Navigation
 
 **Numba compatibility:** :doc:`ak.numba.register` informs Numba about Awkward Array types; rarely needed because this should happen automatically.
 
-**Pandas compatibility:** :doc:`ak.pandas.register` informs Pandas about Awkward Array types; rarely needed because this should happen automatically.
-
-**Exploding to Pandas:** :doc:`ak.pandas.df` turns an Awkward Array into a DataFrame and :doc:`ak.pandas.dfs` turns it into as many DataFrames as would be needed to not lose data. These functions differ from simply putting Awkward Arrays into DataFrame columns because they decompose the array into its numerical components, one number per DataFrame cell.
+**Pandas compatibility:** :doc:`ak.to_pandas` turns an Awkward Array into a list of DataFrames or joins them with `pd.merge <https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html>`__ if necessary.
 
 **NumExpr compatibility:** :doc:`ak.numexpr.evaluate` and :doc:`ak.numexpr.re_evaluate` are like the NumExpr functions, but with Awkward Array support.
 

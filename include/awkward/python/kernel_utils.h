@@ -7,13 +7,13 @@
 
 #include <pybind11/pybind11.h>
 
-#include "awkward/kernel.h"
+#include "awkward/kernel-dispatch.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
 
-py::enum_<kernel::Lib>
-make_Libenum(const py::handle& m, const std::string& name);
+py::enum_<ak::kernel::lib>
+  make_lib_enum(const py::handle& m, const std::string& name);
 
 
 #endif //AWKWARD_KERNEL_UTILS_H

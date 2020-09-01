@@ -32,9 +32,8 @@ def array_function(func, types, args, kwargs):
 
 def implements(numpy_function):
     def decorator(function):
-        implemented[numpy_function] = function
+        implemented[getattr(numpy, numpy_function)] = function
         return function
-
     return decorator
 
 
@@ -96,9 +95,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             )
             for x in inputs
         ):
-            return lambda: (
-                awkward1.layout.NumpyArray(getattr(ufunc, method)(*inputs, **kwargs)),
+            nplike = awkward1.nplike.of(*inputs)
+            result = getattr(ufunc, method)(
+                *[nplike.asarray(x) for x in inputs], **kwargs
             )
+            return lambda: (awkward1.layout.NumpyArray(result),)
 
         return None
 
@@ -182,7 +183,9 @@ except AttributeError:
             __divmod__ = _binary_method(um.divmod, "divmod")
             __rdivmod__ = _reflected_binary_method(um.divmod, "divmod")
         __pow__, __rpow__, __ipow__ = _numeric_methods(um.power, "pow")
-        __lshift__, __rlshift__, __ilshift__ = _numeric_methods(um.left_shift, "lshift")
+        __lshift__, __rlshift__, __ilshift__ = _numeric_methods(
+            um.left_shift, "lshift"
+        )
         __rshift__, __rrshift__, __irshift__ = _numeric_methods(
             um.right_shift, "rshift"
         )

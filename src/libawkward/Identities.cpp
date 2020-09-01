@@ -1,13 +1,16 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/Identities.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/Identities.cpp", line)
+
 #include <cstring>
 #include <atomic>
 #include <iomanip>
 #include <sstream>
 #include <type_traits>
 
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
 #include "awkward/Slice.h"
 
 #define AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE
@@ -69,10 +72,10 @@ namespace awkward {
                                 const FieldLoc& fieldloc,
                                 int64_t width,
                                 int64_t length,
-                                kernel::Lib ptr_lib)
+                                kernel::lib ptr_lib)
       : Identities(ref, fieldloc, 0, width, length)
-      , ptr_lib_(ptr_lib)
-      , ptr_(kernel::ptr_alloc<T>(ptr_lib, width*length)) { }
+      , ptr_(kernel::malloc<T>(ptr_lib, width * length * (int64_t)sizeof(T)))
+      , ptr_lib_(ptr_lib) { }
 
   template <typename T>
   IdentitiesOf<T>::IdentitiesOf(const Ref ref,
@@ -81,15 +84,26 @@ namespace awkward {
                                 int64_t width,
                                 int64_t length,
                                 const std::shared_ptr<T> ptr,
-                                kernel::Lib ptr_lib)
+                                kernel::lib ptr_lib)
       : Identities(ref, fieldloc, offset, width, length)
-      , ptr_lib_(ptr_lib)
-      , ptr_(ptr) { }
+      , ptr_(ptr)
+      , ptr_lib_(ptr_lib) { }
 
   template <typename T>
   const std::shared_ptr<T>
   IdentitiesOf<T>::ptr() const {
     return ptr_;
+  }
+
+  template<typename T>
+  kernel::lib IdentitiesOf<T>::ptr_lib() const {
+    return ptr_lib_;
+  }
+
+  template <typename T>
+  T*
+  IdentitiesOf<T>::data() const {
+    return ptr_.get() + offset_;
   }
 
   template <typename T>
@@ -117,7 +131,7 @@ namespace awkward {
       out << ptr_.get()[offset_ + at*width_ + i];
       for (auto pair : fieldloc_) {
         if (pair.first == i) {
-          out << ", " << util::quote(pair.second, true);
+          out << ", " << util::quote(pair.second);
         }
       }
     }
@@ -137,8 +151,9 @@ namespace awkward {
                                                          length_);
       Identities64* raw = reinterpret_cast<Identities64*>(out.get());
       kernel::Identities_to_Identities64<int32_t>(
-        raw->ptr().get(),
-        reinterpret_cast<int32_t*>(ptr_.get()),
+        kernel::lib::cpu,   // DERIVE
+        raw->data(),
+        reinterpret_cast<int32_t*>(data()),
         length_,
         width_);
       return out;
@@ -159,15 +174,14 @@ namespace awkward {
       name = "Identities64";
     }
     out << indent << pre << "<" << name << " ref=\"" << ref_
-        << "\" fieldloc=\"[";
+        << "\" fieldloc=\"";
     for (size_t i = 0;  i < fieldloc_.size();  i++) {
       if (i != 0) {
         out << " ";
       }
-      out << "(" << fieldloc_[i].first << ", "
-          << util::quote(fieldloc_[i].second, false) << ")";
+      out << fieldloc_[i].first << ": " << fieldloc_[i].second;
     }
-    out << "]\" width=\"" << width_ << "\" offset=\"" << offset_
+    out << "\" width=\"" << width_ << "\" offset=\"" << offset_
         << "\" length=\"" << length_ << "\" at=\"0x";
     out << std::hex << std::setw(12) << std::setfill('0')
         << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
@@ -180,8 +194,8 @@ namespace awkward {
     if (!(0 <= start  &&  start < length_  &&  0 <= stop  &&  stop <= length_)
         &&  start != stop) {
       throw std::runtime_error(
-        "Identities::getitem_range_nowrap with illegal start:stop "
-        "for this length");
+        std::string("Identities::getitem_range_nowrap with illegal start:stop "
+                    "for this length") + FILENAME(__LINE__));
     }
     return std::make_shared<IdentitiesOf<T>>(
       ref_,
@@ -243,28 +257,29 @@ namespace awkward {
 
     if (std::is_same<T, int32_t>::value) {
       struct Error err = kernel::Identities_getitem_carry_64<int32_t>(
+        kernel::lib::cpu,   // DERIVE
         reinterpret_cast<int32_t*>(rawout->ptr().get()),
-        reinterpret_cast<int32_t*>(ptr_.get()),
-        carry.ptr().get(),
+        reinterpret_cast<int32_t*>(data()),
+        carry.data(),
         carry.length(),
-        offset_,
         width_,
         length_);
       util::handle_error(err, classname(), nullptr);
     }
     else if (std::is_same<T, int64_t>::value) {
       struct Error err = kernel::Identities_getitem_carry_64<int64_t>(
+        kernel::lib::cpu,   // DERIVE
         reinterpret_cast<int64_t*>(rawout->ptr().get()),
-        reinterpret_cast<int64_t*>(ptr_.get()),
-        carry.ptr().get(),
+        reinterpret_cast<int64_t*>(data()),
+        carry.data(),
         carry.length(),
-        offset_,
         width_,
         length_);
       util::handle_error(err, classname(), nullptr);
     }
     else {
-      throw std::runtime_error("unrecognized Identities specialization");
+      throw std::runtime_error(
+        std::string("unrecognized Identities specialization") + FILENAME(__LINE__));
     }
 
     return out;
@@ -300,8 +315,9 @@ namespace awkward {
       regular_at += length_;
     }
     if (!(0 <= regular_at  &&  regular_at < length_)) {
-      util::handle_error(
-        failure("index out of range", kSliceNone, at), classname(), nullptr);
+      util::handle_error(failure("index out of range", kSliceNone, at, FILENAME_C(__LINE__)),
+                         classname(),
+                         nullptr);
     }
     return getitem_at_nowrap(regular_at);
   }
@@ -311,7 +327,8 @@ namespace awkward {
   IdentitiesOf<T>::getitem_at_nowrap(int64_t at) const {
     if (!(0 <= at  &&  at < length_)) {
       throw std::runtime_error(
-        "Identities::getitem_at_nowrap with illegal index for this length");
+        std::string("Identities::getitem_at_nowrap with illegal index for this length")
+        + FILENAME(__LINE__));
     }
     std::vector<T> out;
     for (size_t i = (size_t)(offset_ + at);
@@ -332,41 +349,31 @@ namespace awkward {
     return getitem_range_nowrap(regular_start, regular_stop);
   }
 
-  template<typename T>
-  kernel::Lib IdentitiesOf<T>::ptr_lib() const {
-    return ptr_lib_;
-  }
-
   template <typename T>
   const IdentitiesPtr
-  IdentitiesOf<T>::copy_to(kernel::Lib ptr_lib) const {
-    if(ptr_lib == ptr_lib_) {
-      return std::make_shared<IdentitiesOf<T>>(ref(),
-                                               fieldloc(),
-                                               offset(),
-                                               width(),
-                                               length(),
-                                               ptr_,
-                                               ptr_lib_);
+  IdentitiesOf<T>::copy_to(kernel::lib ptr_lib) const {
+    if (ptr_lib == ptr_lib_) {
+      return shallow_copy();
     }
-    std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, width_*length_);
-
-    Error err =  kernel::copy_to<T>(ptr_lib,
-                                    ptr_lib_,
-                                    ptr.get(),
-                                    ptr_.get(),
-                                    width_ * length_);
-    util::handle_error(err);
-
-    return std::make_shared<IdentitiesOf<T>>(ref(),
-                                             fieldloc(),
-                                             offset(),
-                                             width(),
-                                             length(),
-                                             ptr,
-                                             kernel::Lib::cuda_kernels);
+    else {
+      int64_t bytelength = (offset_ + (width_ * length_)) * (int64_t)sizeof(T);
+      std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, bytelength);
+      Error err = kernel::copy_to(ptr_lib,
+                                  ptr_lib_,
+                                  ptr.get(),
+                                  ptr_.get(),
+                                  bytelength);
+      util::handle_error(err);
+      return std::make_shared<IdentitiesOf<T>>(ref_,
+                                               fieldloc_,
+                                               offset_,
+                                               width_,
+                                               length_,
+                                               ptr,
+                                               ptr_lib);
+    }
   }
 
-  template class EXPORT_SYMBOL IdentitiesOf<int32_t>;
-  template class EXPORT_SYMBOL IdentitiesOf<int64_t>;
+  template class EXPORT_TEMPLATE_INST IdentitiesOf<int32_t>;
+  template class EXPORT_TEMPLATE_INST IdentitiesOf<int64_t>;
 }

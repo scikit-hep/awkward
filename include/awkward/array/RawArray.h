@@ -1,5 +1,8 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("include/awkward/array/RawArray.h", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("include/awkward/array/RawArray.h", line)
+
 #ifndef AWKWARD_RAWARRAY_H_
 #define AWKWARD_RAWARRAY_H_
 
@@ -15,11 +18,11 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/kernel.h"
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
-#include "awkward/cpu-kernels/operations.h"
-#include "awkward/cpu-kernels/sorting.h"
+#include "awkward/kernel-dispatch.h"
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
+#include "awkward/kernels/operations.h"
+#include "awkward/kernels/sorting.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/util.h"
 #include "awkward/Slice.h"
@@ -37,7 +40,7 @@ namespace awkward {
   /// @class RawForm
   ///
   /// @brief Form describing RawArray.
-  class EXPORT_SYMBOL RawForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL RawForm: public Form {
   public:
     /// @brief Creates a RawForm. See RawArray for documentation.
     RawForm(bool has_identities,
@@ -52,12 +55,14 @@ namespace awkward {
 
     const TypePtr
       type(const util::TypeStrs& typestrs) const override {
-      throw std::runtime_error("RawForm::type");
+      throw std::runtime_error(
+        std::string("RawForm::type") + FILENAME(__LINE__));
     }
 
     void
       tojson_part(ToJson& builder, bool verbose) const override {
-      throw std::runtime_error("RawForm::tojson_part");
+      throw std::runtime_error(
+        std::string("RawForm::tojson_part") + FILENAME(__LINE__));
     }
 
     const FormPtr
@@ -100,15 +105,15 @@ namespace awkward {
 
     int64_t
       fieldindex(const std::string& key) const override {
-      throw std::invalid_argument(std::string("key ") + util::quote(key, true)
-        + std::string(" does not exist (data are not records)"));
+      throw std::invalid_argument(std::string("key ") + util::quote(key)
+        + std::string(" does not exist (data are not records)") + FILENAME(__LINE__));
     }
 
     const std::string
       key(int64_t fieldindex) const override {
       throw std::invalid_argument(std::string("fieldindex \"")
         + std::to_string(fieldindex)
-        + std::string("\" does not exist (data are not records)"));
+        + std::string("\" does not exist (data are not records)") + FILENAME(__LINE__));
     }
 
     bool
@@ -127,8 +132,16 @@ namespace awkward {
             bool check_parameters,
             bool check_form_key,
             bool compatibility_check) const override {
-      throw std::runtime_error("FIXME: RawForm::equal");
+      throw std::runtime_error(
+        std::string("FIXME: RawForm::equal") + FILENAME(__LINE__));
     }
+
+    const FormPtr
+      getitem_field(const std::string& key) const override {
+      throw std::invalid_argument(std::string("key ") + util::quote(key)
+        + std::string(" does not exist (data are not records)"));
+    }
+
 
   private:
     const std::string T_;
@@ -175,7 +188,7 @@ namespace awkward {
   ///  - 8-bit, 16-bit, 32-bit, and 64-bit signed and unsigned integers
   ///  - 8-bit booleans
   template <typename T>
-  class EXPORT_SYMBOL RawArrayOf: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL RawArrayOf: public Content {
   public:
     /// @brief Creates a RawArray from a full set of parameters.
     ///
@@ -191,14 +204,14 @@ namespace awkward {
     /// buffer.
     /// @param length Number of elements in the array.
     /// @param itemsize Number of bytes per item; should agree with the format.
-    /// @param Choose the Kernel Library for this array, default:= cpu_kernels
+    /// @param Choose the Kernel Library for this array, default:= kernel::lib::cpu
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const std::shared_ptr<T>& ptr,
                   const int64_t offset,
                   const int64_t length,
                   const int64_t itemsize,
-                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
+                  const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
         , ptr_(ptr)
@@ -206,7 +219,8 @@ namespace awkward {
         , length_(length)
         , itemsize_(itemsize) {
       if (sizeof(T) != itemsize) {
-        throw std::invalid_argument("sizeof(T) != itemsize");
+        throw std::invalid_argument(
+          std::string("sizeof(T) != itemsize") + FILENAME(__LINE__));
       }
     }
 
@@ -217,7 +231,7 @@ namespace awkward {
                   const util::Parameters& parameters,
                   const std::shared_ptr<T>& ptr,
                   const int64_t length,
-                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
+                  const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
         , ptr_(ptr)
@@ -234,10 +248,10 @@ namespace awkward {
     RawArrayOf<T>(const IdentitiesPtr& identities,
                   const util::Parameters& parameters,
                   const int64_t length,
-                  const kernel::Lib ptr_lib = kernel::Lib::cpu_kernels)
+                  const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
-        , ptr_(kernel::ptr_alloc<T>(ptr_lib_, length))
+        , ptr_(kernel::malloc<T>(ptr_lib_, length * sizeof(T)))
         , offset_(0)
         , length_(length)
         , itemsize_(sizeof(T)) { }
@@ -246,6 +260,17 @@ namespace awkward {
     const std::shared_ptr<T>
       ptr() const {
       return ptr_;
+    }
+
+    const kernel::lib
+    ptr_lib() const {
+      return ptr_lib_;
+    }
+
+    /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
+    T*
+      data() const {
+      return ptr_.get() + offset_;
     }
 
     /// @brief Location of item zero in the buffer, relative to
@@ -264,12 +289,6 @@ namespace awkward {
       itemsize() const {
       return itemsize_;
     }
-
-    const kernel::Lib
-    ptr_lib() const {
-      return ptr_lib_;
-    }
-
 
     /// @brief Location of item zero in the buffer, relative to
     /// `ptr`, measured in bytes, rather than number of elements; see #offset.
@@ -326,7 +345,11 @@ namespace awkward {
                                          Identities::FieldLoc(), 1, length());
         Identities32* rawidentities =
           reinterpret_cast<Identities32*>(newidentities.get());
-        kernel::new_Identities<int32_t>(rawidentities->ptr().get(), length());
+        struct Error err = kernel::new_Identities<int32_t>(
+          kernel::lib::cpu,   // DERIVE
+          rawidentities->ptr().get(),
+          length());
+        util::handle_error(err, classname(), identities_.get());
         setidentities(newidentities);
       }
       else {
@@ -335,7 +358,11 @@ namespace awkward {
                                          Identities::FieldLoc(), 1, length());
         Identities64* rawidentities =
           reinterpret_cast<Identities64*>(newidentities.get());
-        kernel::new_Identities<int64_t>(rawidentities->ptr().get(), length());
+        struct Error err = kernel::new_Identities<int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          rawidentities->ptr().get(),
+          length());
+        util::handle_error(err, classname(), identities_.get());
         setidentities(newidentities);
       }
     }
@@ -345,7 +372,8 @@ namespace awkward {
       if (identities.get() != nullptr  &&
           length() != identities.get()->length()) {
         throw std::invalid_argument(
-          "content and its identities must have the same length");
+          std::string("content and its identities must have the same length")
+          + FILENAME(__LINE__));
       }
       identities_ = identities;
     }
@@ -397,8 +425,10 @@ namespace awkward {
           util::gettypestr(parameters_, typestrs), util::dtype::boolean);
       }
       else {
-        throw std::invalid_argument(std::string("RawArrayOf<") +
-          typeid(T).name() + std::string("> does not have a known type"));
+        throw std::invalid_argument(
+          std::string("RawArrayOf<") + typeid(T).name()
+          + std::string("> does not have a known type")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -531,8 +561,9 @@ namespace awkward {
                        length());
       }
       else {
-        throw std::invalid_argument(std::string("cannot convert RawArrayOf<")
-          + typeid(T).name() + std::string("> into JSON"));
+        throw std::invalid_argument(
+          std::string("cannot convert RawArrayOf<") + typeid(T).name()
+          + std::string("> into JSON") + FILENAME(__LINE__));
       }
     }
 
@@ -588,8 +619,12 @@ namespace awkward {
       check_for_iteration() const override {
       if (identities_.get() != nullptr  &&
           identities_.get()->length() < length_) {
-        util::handle_error(failure("len(identities) < len(array)", kSliceNone,
-          kSliceNone), identities_.get()->classname(), nullptr);
+        util::handle_error(failure("len(identities) < len(array)",
+                                   kSliceNone,
+                                   kSliceNone,
+                                   FILENAME_C(__LINE__)),
+                           identities_.get()->classname(),
+                           nullptr);
       }
     }
 
@@ -605,7 +640,10 @@ namespace awkward {
         regular_at += length_;
       }
       if (!(0 <= regular_at  &&  regular_at < length_)) {
-        util::handle_error(failure("index out of range", kSliceNone, at),
+        util::handle_error(failure("index out of range",
+                                   kSliceNone,
+                                   at,
+                                   FILENAME_C(__LINE__)),
                            classname(),
                            identities_.get());
       }
@@ -625,7 +663,10 @@ namespace awkward {
         start != Slice::none(), stop != Slice::none(), length_);
       if (identities_.get() != nullptr  &&
           regular_stop > identities_.get()->length()) {
-        util::handle_error(failure("index out of range", kSliceNone, stop),
+        util::handle_error(failure("index out of range",
+                                   kSliceNone,
+                                   stop,
+                                   FILENAME_C(__LINE__)),
           identities_.get()->classname(), nullptr);
       }
       return getitem_range_nowrap(regular_start, regular_stop);
@@ -647,14 +688,16 @@ namespace awkward {
 
     const ContentPtr
       getitem_field(const std::string& key) const override {
-      throw std::invalid_argument(std::string("cannot slice ") + classname()
-        + std::string(" by field name"));
+      throw std::invalid_argument(
+        std::string("cannot slice ") + classname() + std::string(" by field name")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const override {
-      throw std::invalid_argument(std::string("cannot slice ") + classname()
-        + std::string(" by field names"));
+      throw std::invalid_argument(
+        std::string("cannot slice ") + classname() + std::string(" by field names")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
@@ -670,7 +713,8 @@ namespace awkward {
                    const Slice& tail,
                    const Index64& advanced) const override {
       if (tail.length() != 0) {
-        throw std::invalid_argument("too many indexes for array");
+        throw std::invalid_argument(
+          std::string("too many indexes for array") + FILENAME(__LINE__));
       }
       return Content::getitem_next(head, tail, advanced);
     }
@@ -681,11 +725,11 @@ namespace awkward {
                              kernel::array_deleter<T>());
 
       struct Error err = kernel::NumpyArray_getitem_next_null_64(
+        kernel::lib::cpu,   // DERIVE
         reinterpret_cast<uint8_t*>(ptr.get()),
         reinterpret_cast<uint8_t*>(ptr_.get()),
         carry.length(),
         itemsize_,
-        byteoffset(),
         carry.ptr().get());
       util::handle_error(err, classname(), identities_.get());
 
@@ -711,15 +755,19 @@ namespace awkward {
 
     int64_t
       fieldindex(const std::string& key) const override {
-      throw std::invalid_argument(std::string("key ") + util::quote(key, true)
-        + std::string(" does not exist (data are not records)"));
+      throw std::invalid_argument(
+        std::string("key ") + util::quote(key)
+        + std::string(" does not exist (data are not records)")
+        + FILENAME(__LINE__));
     }
 
     const std::string
       key(int64_t fieldindex) const override {
-      throw std::invalid_argument(std::string("fieldindex \"")
+      throw std::invalid_argument(
+        std::string("fieldindex \"")
         + std::to_string(fieldindex)
-        + std::string("\" does not exist (data are not records)"));
+        + std::string("\" does not exist (data are not records)")
+        + FILENAME(__LINE__));
     }
 
     bool
@@ -760,7 +808,8 @@ namespace awkward {
                                                      sizeof(int64_t));
       }
       else {
-        throw std::invalid_argument("'axis' out of range for 'num'");
+        throw std::invalid_argument(
+          std::string("'axis' out of range for 'num'") + FILENAME(__LINE__));
       }
     }
 
@@ -768,10 +817,12 @@ namespace awkward {
       offsets_and_flattened(int64_t axis, int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis == depth) {
-        throw std::invalid_argument("axis=0 not allowed for flatten");
+        throw std::invalid_argument(
+          std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
       }
       else {
-        throw std::invalid_argument("axis out of range for flatten");
+        throw std::invalid_argument(
+          std::string("axis out of range for flatten") + FILENAME(__LINE__));
       }
     }
 
@@ -883,14 +934,17 @@ namespace awkward {
                                                itemsize_);
       }
       else {
-        throw std::invalid_argument(std::string("cannot merge ") + classname()
-          + std::string(" with ") + other.get()->classname());
+        throw std::invalid_argument(
+          std::string("cannot merge ") + classname() + std::string(" with ")
+          + other.get()->classname() + FILENAME(__LINE__));
       }
     }
 
     const SliceItemPtr
       asslice() const override {
-      throw std::invalid_argument("cannot use RawArray as a slice");
+      throw std::invalid_argument(
+        std::string("cannot use RawArray as a slice")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
@@ -902,7 +956,9 @@ namespace awkward {
       rpad(int64_t target, int64_t axis, int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis != depth) {
-        throw std::invalid_argument("axis exceeds the depth of this array");
+        throw std::invalid_argument(
+          std::string("axis exceeds the depth of this array")
+          + FILENAME(__LINE__));
       }
       if (target < length()) {
         return shallow_copy();
@@ -918,10 +974,13 @@ namespace awkward {
                     int64_t depth) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis != depth) {
-        throw std::invalid_argument("axis exceeds the depth of this array");
+        throw std::invalid_argument(
+          std::string("axis exceeds the depth of this array")
+          + FILENAME(__LINE__));
       }
       Index64 index(target);
       struct Error err = kernel::index_rpad_and_clip_axis0_64(
+        kernel::lib::cpu,   // DERIVE
         index.ptr().get(),
         target,
         length());
@@ -937,11 +996,14 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,
                   bool keepdims) const override {
-      throw std::runtime_error("FIXME: RawArray:reduce_next");
+      throw std::runtime_error(
+        std::string("FIXME: RawArray:reduce_next")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
@@ -960,6 +1022,7 @@ namespace awkward {
       offsets.setitem_at_nowrap(1, length_);
 
       struct Error err = kernel::NumpyArray_sort<T>(
+        kernel::lib::cpu,   // DERIVE
         ptr.get(),
         ptr_.get(),
         length_,
@@ -1002,6 +1065,7 @@ namespace awkward {
       outranges.setitem_at_nowrap(1, length_);
 
       struct Error err = kernel::NumpyArray_argsort<T>(
+        kernel::lib::cpu,   // DERIVE
         ptr.get(),
         ptr_.get(),
         length_,
@@ -1034,7 +1098,9 @@ namespace awkward {
         return localindex_axis0();
       }
       else {
-        throw std::invalid_argument("'axis' out of range for localindex");
+        throw std::invalid_argument(
+          std::string("'axis' out of range for localindex")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1046,14 +1112,18 @@ namespace awkward {
                    int64_t axis,
                    int64_t depth) const override {
       if (n < 1) {
-        throw std::invalid_argument("in combinations, 'n' must be at least 1");
+        throw std::invalid_argument(
+          std::string("in combinations, 'n' must be at least 1")
+          + FILENAME(__LINE__));
       }
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis == depth) {
         return combinations_axis0(n, replacement, recordlookup, parameters);
       }
       else {
-        throw std::invalid_argument("'axis' out of range for combinations");
+        throw std::invalid_argument(
+          std::string("'axis' out of range for combinations")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1079,7 +1149,8 @@ namespace awkward {
           step = 1;
         }
         else if (step == 0) {
-          throw std::invalid_argument("slice step must not be 0");
+          throw std::invalid_argument(
+            std::string("slice step must not be 0") + FILENAME(__LINE__));
         }
         kernel::regularize_rangeslice(&start, &stop, step > 0,
           range.hasstart(), range.hasstop(), length_);
@@ -1106,13 +1177,16 @@ namespace awkward {
                    const Index64& advanced) const override {
       if (advanced.length() != 0) {
         throw std::runtime_error(
-          "RawArray::getitem_next(SliceAt): advanced.length() != 0");
+          std::string("RawArray::getitem_next(SliceAt): advanced.length() != 0")
+          + FILENAME(__LINE__));
       }
       if (array.shape().size() != 1) {
-        throw std::runtime_error("array.ndim != 1");
+        throw std::runtime_error(
+          std::string("array.ndim != 1") + FILENAME(__LINE__));
       }
       Index64 flathead = array.ravel();
       struct Error err = kernel::regularize_arrayslice_64(
+        kernel::lib::cpu,   // DERIVE
         flathead.ptr().get(),
         flathead.length(),
         length_);
@@ -1124,24 +1198,30 @@ namespace awkward {
       getitem_next(const SliceField& field,
                    const Slice& tail,
                    const Index64& advanced) const override {
-      throw std::invalid_argument(std::string("cannot slice ") + classname()
-        + std::string(" by a field name because it has no fields"));
+      throw std::invalid_argument(
+        std::string("cannot slice ") + classname()
+        + std::string(" by a field name because it has no fields")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
       getitem_next(const SliceFields& fields,
                    const Slice& tail,
                    const Index64& advanced) const override {
-      throw std::invalid_argument(std::string("cannot slice ") + classname()
-        + std::string(" by field names because it has no fields"));
+      throw std::invalid_argument(
+        std::string("cannot slice ") + classname()
+        + std::string(" by field names because it has no fields")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
       getitem_next(const SliceJagged64& jagged,
                    const Slice& tail,
                    const Index64& advanced) const override {
-      throw std::invalid_argument(std::string("cannot slice ") + classname()
-        + std::string(" by a jagged array because it is one-dimensional"));
+      throw std::invalid_argument(
+        std::string("cannot slice ") + classname()
+        + std::string(" by a jagged array because it is one-dimensional")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
@@ -1150,7 +1230,8 @@ namespace awkward {
                           const SliceArray64& slicecontent,
                           const Slice& tail) const override {
       throw std::runtime_error(
-        "undefined operation: RawArray::getitem_next_jagged(array)");
+        std::string("undefined operation: RawArray::getitem_next_jagged(array)")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
@@ -1159,7 +1240,8 @@ namespace awkward {
                           const SliceMissing64& slicecontent,
                           const Slice& tail) const override {
       throw std::runtime_error(
-        "undefined operation: RawArray::getitem_next_jagged(missing)");
+        std::string("undefined operation: RawArray::getitem_next_jagged(missing)")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
@@ -1168,42 +1250,47 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override {
       throw std::runtime_error(
-        "undefined operation: RawArray::getitem_next_jagged(jagged)");
+        std::string("undefined operation: RawArray::getitem_next_jagged(jagged)")
+        + FILENAME(__LINE__));
     }
 
     const ContentPtr
-      copy_to(kernel::Lib ptr_lib) const override {
-        if(ptr_lib == ptr_lib_) {
-          return std::make_shared<RawArrayOf<T>>(identities(),
-                                                 parameters(),
-                                                 ptr_,
-                                                 offset(),
-                                                 length(),
-                                                 itemsize(),
-                                                 ptr_lib_);
+      copy_to(kernel::lib ptr_lib) const override {
+        if (ptr_lib == ptr_lib_) {
+          return shallow_copy();
         }
+        else {
+          int64_t num_bytes = byteoffset() + bytelength();
+          std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, num_bytes);
+          Error err = kernel::copy_to(ptr_lib,
+                                      ptr_lib_,
+                                      ptr.get(),
+                                      ptr_.get(),
+                                      num_bytes);
+          util::handle_error(err);
+          IdentitiesPtr identities(nullptr);
+          if (identities_.get() != nullptr) {
+            identities = identities_.get()->copy_to(ptr_lib);
+          }
+          return std::make_shared<RawArrayOf<T>>(identities,
+                                                 parameters_,
+                                                 ptr,
+                                                 offset_,
+                                                 length_,
+                                                 itemsize_,
+                                                 ptr_lib);
+        }
+    }
 
-        std::shared_ptr<T> ptr = kernel::ptr_alloc<T>(ptr_lib, length_);
-
-        Error err = kernel::copy_to(
-           ptr_lib,
-           ptr_lib_,
-           ptr.get(),
-           ptr_.get(),
-           length_);
-        util::handle_error(err);
-
-        return std::make_shared<RawArrayOf<T>>(identities(),
-                                               parameters(),
-                                               ptr,
-                                               offset(),
-                                               length(),
-                                               itemsize(),
-                                               ptr_lib);
+    const ContentPtr
+      numbers_to_type(const std::string& name) const override {
+      throw std::runtime_error(
+        std::string("FIXME: unimplemented operation: RawArray::numbers_to_type")
+        + FILENAME(__LINE__));
     }
 
   private:
-    const kernel::Lib ptr_lib_;
+    const kernel::lib ptr_lib_;
     const std::shared_ptr<T> ptr_;
     const int64_t offset_;
     const int64_t length_;

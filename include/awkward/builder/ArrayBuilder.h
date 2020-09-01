@@ -16,7 +16,7 @@ namespace awkward {
   /// @brief User interface to the Builder system: the ArrayBuilder is a
   /// fixed reference while the Builder subclass instances change in
   /// response to accumulating data.
-  class EXPORT_SYMBOL ArrayBuilder {
+  class LIBAWKWARD_EXPORT_SYMBOL ArrayBuilder {
   public:
     /// @brief Creates an ArrayBuilder from a full set of parameters.
     ///
@@ -304,118 +304,118 @@ namespace awkward {
 
 extern "C" {
   /// @brief C interface to {@link awkward::ArrayBuilder#length ArrayBuilder::length}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_length(void* arraybuilder,
                                 int64_t* result);
   /// @brief C interface to {@link awkward::ArrayBuilder#clear ArrayBuilder::clear}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_clear(void* arraybuilder);
 
   /// @brief C interface to {@link awkward::ArrayBuilder#null ArrayBuilder::null}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_null(void* arraybuilder);
 
   /// @brief C interface to {@link awkward::ArrayBuilder#boolean ArrayBuilder::boolean}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_boolean(void* arraybuilder,
                                  bool x);
 
   /// @brief C interface to {@link awkward::ArrayBuilder#integer ArrayBuilder::integer}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_integer(void* arraybuilder,
                                  int64_t x);
 
   /// @brief C interface to {@link awkward::ArrayBuilder#real ArrayBuilder::real}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_real(void* arraybuilder,
                               double x);
 
   /// @brief C interface to
   /// {@link awkward::ArrayBuilder#bytestring ArrayBuilder::bytestring}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_bytestring(void* arraybuilder,
                                     const char* x);
 
   /// @brief C interface to
   /// {@link awkward::ArrayBuilder#bytestring ArrayBuilder::bytestring}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_bytestring_length(void* arraybuilder,
                                            const char* x,
                                            int64_t length);
 
   /// @brief C interface to {@link awkward::ArrayBuilder#string ArrayBuilder::string}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_string(void* arraybuilder,
                                 const char* x);
 
   /// @brief C interface to {@link awkward::ArrayBuilder#string ArrayBuilder::string}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_string_length(void* arraybuilder,
                                        const char* x,
                                        int64_t length);
 
   /// @brief C interface to
   /// {@link awkward::ArrayBuilder#beginlist ArrayBuilder::beginlist}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_beginlist(void* arraybuilder);
 
   /// @brief C interface to {@link awkward::ArrayBuilder#endlist ArrayBuilder::endlist}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_endlist(void* arraybuilder);
 
   /// @brief C interface to
   /// {@link awkward::ArrayBuilder#begintuple ArrayBuilder::begintuple}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_begintuple(void* arraybuilder,
                                     int64_t numfields);
 
   /// @brief C interface to {@link awkward::ArrayBuilder#index ArrayBuilder::index}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_index(void* arraybuilder,
                                int64_t index);
 
   /// @brief C interface to
   /// {@link awkward::ArrayBuilder#endtuple ArrayBuilder::endtuple}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_endtuple(void* arraybuilder);
 
   /// @brief C interface to
   /// {@link awkward::ArrayBuilder#beginrecord ArrayBuilder::beginrecord}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_beginrecord(void* arraybuilder);
 
   /// @brief C interface to
   /// {@link awkward::ArrayBuilder#beginrecord_fast ArrayBuilder::beginrecord_fast}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_beginrecord_fast(void* arraybuilder,
                                           const char* name);
 
   /// @brief C interface to
   /// {@link awkward::ArrayBuilder#beginrecord_check ArrayBuilder::beginrecord_check}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_beginrecord_check(void* arraybuilder,
                                            const char* name);
 
   /// @brief C interface to
   /// {@link awkward::ArrayBuilder#field_fast ArrayBuilder::field_fast}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_field_fast(void* arraybuilder,
                                     const char* key);
 
   /// @brief C interface to
   /// {@link awkward::ArrayBuilder#field_check ArrayBuilder::field_check}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_field_check(void* arraybuilder,
                                      const char* key);
 
   /// @brief C interface to
   /// {@link awkward::ArrayBuilder#endrecord ArrayBuilder::endrecord}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_endrecord(void* arraybuilder);
 
   /// @brief C interface to
   /// {@link awkward::ArrayBuilder#append_nowrap ArrayBuilder::append_nowrap}.
-  EXPORT_SYMBOL uint8_t
+  LIBAWKWARD_EXPORT_SYMBOL uint8_t
     awkward_ArrayBuilder_append_nowrap(void* arraybuilder,
                                        const void* shared_ptr_ptr,
                                        int64_t at);

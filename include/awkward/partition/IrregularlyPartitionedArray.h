@@ -9,7 +9,7 @@ namespace awkward {
   /// @class IrregularlyPartitionedArray
   ///
   /// @brief PartitionedArray of arbitrary length partitions.
-  class EXPORT_SYMBOL IrregularlyPartitionedArray: public PartitionedArray {
+  class LIBAWKWARD_EXPORT_SYMBOL IrregularlyPartitionedArray: public PartitionedArray {
   public:
     IrregularlyPartitionedArray(const ContentPtrVec& partitions,
                                 const std::vector<int64_t> stops);
@@ -48,6 +48,9 @@ namespace awkward {
 
     const PartitionedArrayPtr
       shallow_copy() const override;
+
+    const PartitionedArrayPtr
+      copy_to(kernel::lib ptr_lib) const override;
 
   private:
     const std::vector<int64_t> stops_;

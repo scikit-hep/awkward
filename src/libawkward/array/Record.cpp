@@ -1,9 +1,13 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#include <sstream>
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/array/Record.cpp", line)
+#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/Record.cpp", line)
 
-#include "awkward/cpu-kernels/identities.h"
-#include "awkward/cpu-kernels/getitem.h"
+#include <sstream>
+#include <memory>
+
+#include "awkward/kernels/identities.h"
+#include "awkward/kernels/getitem.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/ArrayType.h"
 
@@ -17,7 +21,8 @@ namespace awkward {
     if (!(0 <= at  &&  at < array.get()->length())) {
       throw std::invalid_argument(
         std::string("at=") + std::to_string(at)
-        + std::string(" is out of range for recordarray"));
+        + std::string(" is out of range for recordarray")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -73,12 +78,16 @@ namespace awkward {
 
   void
   Record::setidentities() {
-    throw std::runtime_error("undefined operation: Record::setidentities");
+    throw std::runtime_error(
+      std::string("undefined operation: Record::setidentities")
+      + FILENAME(__LINE__));
   }
 
   void
   Record::setidentities(const IdentitiesPtr& identities) {
-    throw std::runtime_error("undefined operation: Record::setidentities");
+    throw std::runtime_error(
+      std::string("undefined operation: Record::setidentities")
+      + FILENAME(__LINE__));
   }
 
   const TypePtr
@@ -168,7 +177,8 @@ namespace awkward {
       util::handle_error(
         failure("len(identities) != 1 for scalar Record",
                 kSliceNone,
-                kSliceNone),
+                kSliceNone,
+                FILENAME_C(__LINE__)),
         array_.get()->identities().get()->classname(),
         nullptr);
     }
@@ -176,33 +186,39 @@ namespace awkward {
 
   const ContentPtr
   Record::getitem_nothing() const {
-    throw std::runtime_error("undefined operation: Record::getitem_nothing");
+    throw std::runtime_error(
+      std::string("undefined operation: Record::getitem_nothing")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
   Record::getitem_at(int64_t at) const {
     throw std::invalid_argument(
       std::string("scalar Record can only be sliced by field name (string); "
-                  "try ") + util::quote(std::to_string(at), true));
+                  "try ") + util::quote(std::to_string(at))
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
   Record::getitem_at_nowrap(int64_t at) const {
     throw std::invalid_argument(
       std::string("scalar Record can only be sliced by field name (string); "
-                  "try ") + util::quote(std::to_string(at), true));
+                  "try ") + util::quote(std::to_string(at))
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
   Record::getitem_range(int64_t start, int64_t stop) const {
     throw std::invalid_argument(
-      "scalar Record can only be sliced by field name (string)");
+      std::string("scalar Record can only be sliced by field name (string)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
   Record::getitem_range_nowrap(int64_t start, int64_t stop) const {
     throw std::invalid_argument(
-      "scalar Record can only be sliced by field name (string)");
+      std::string("scalar Record can only be sliced by field name (string)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -218,7 +234,8 @@ namespace awkward {
 
   const ContentPtr
   Record::carry(const Index64& carry, bool allow_lazy) const {
-    throw std::runtime_error("undefined operation: Record::carry");
+    throw std::runtime_error(
+      std::string("undefined operation: Record::carry") + FILENAME(__LINE__));
   }
 
   int64_t
@@ -278,7 +295,8 @@ namespace awkward {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
       throw std::invalid_argument(
-        "cannot call 'num' with an 'axis' of 0 on a Record");
+        std::string("cannot call 'num' with an 'axis' of 0 on a Record")
+        + FILENAME(__LINE__));
     }
     else {
       ContentPtr singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
@@ -289,24 +307,28 @@ namespace awkward {
   const std::pair<Index64, ContentPtr>
   Record::offsets_and_flattened(int64_t axis, int64_t depth) const {
     throw std::invalid_argument(
-      "Record cannot be flattened because it is not an array");
+      std::string("Record cannot be flattened because it is not an array")
+      + FILENAME(__LINE__));
   }
 
   bool
   Record::mergeable(const ContentPtr& other, bool mergebool) const {
     throw std::invalid_argument(
-      "Record cannot be merged because it is not an array");
+      std::string("Record cannot be merged because it is not an array")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
   Record::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
     throw std::invalid_argument(
-      "Record cannot be merged because it is not an array");
+      std::string("Record cannot be merged because it is not an array")
+      + FILENAME(__LINE__));
   }
 
   const SliceItemPtr
   Record::asslice() const {
-    throw std::invalid_argument("cannot use a record as a slice");
+    throw std::invalid_argument(
+      std::string("cannot use a record as a slice") + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -320,19 +342,22 @@ namespace awkward {
   const ContentPtr
   Record::rpad(int64_t length, int64_t axis, int64_t depth) const {
     throw std::invalid_argument(
-      "Record cannot be padded because it is not an array");
+      std::string("Record cannot be padded because it is not an array")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
   Record::rpad_and_clip(int64_t length, int64_t axis, int64_t depth) const {
     throw std::invalid_argument(
-      "Record cannot be padded because it is not an array");
+      std::string("Record cannot be padded because it is not an array")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
   Record::reduce_next(const Reducer& reducer,
                       int64_t negaxis,
                       const Index64& starts,
+                      const Index64& shifts,
                       const Index64& parents,
                       int64_t outlength,
                       bool mask,
@@ -341,6 +366,7 @@ namespace awkward {
     return trimmed.get()->reduce_next(reducer,
                                       negaxis,
                                       starts,
+                                      shifts,
                                       parents,
                                       outlength,
                                       mask,
@@ -352,7 +378,8 @@ namespace awkward {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
       throw std::invalid_argument(
-        "cannot call 'localindex' with an 'axis' of 0 on a Record");
+        std::string("cannot call 'localindex' with an 'axis' of 0 on a Record")
+        + FILENAME(__LINE__));
     }
     else {
       ContentPtr singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
@@ -370,12 +397,14 @@ namespace awkward {
                        int64_t axis,
                        int64_t depth) const {
     if (n < 1) {
-      throw std::invalid_argument("in combinations, 'n' must be at least 1");
+      throw std::invalid_argument(
+        std::string("in combinations, 'n' must be at least 1") + FILENAME(__LINE__));
     }
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
       throw std::invalid_argument(
-        "cannot call 'combinations' with an 'axis' of 0 on a Record");
+        std::string("cannot call 'combinations' with an 'axis' of 0 on a Record")
+        + FILENAME(__LINE__));
     }
     else {
       ContentPtr singleton = array_.get()->getitem_range_nowrap(at_, at_ + 1);
@@ -495,7 +524,9 @@ namespace awkward {
   Record::getitem_next(const SliceAt& at,
                        const Slice& tail,
                        const Index64& advanced) const {
-    throw std::runtime_error("undefined operation: Record::getitem_next(at)");
+    throw std::runtime_error(
+      std::string("undefined operation: Record::getitem_next(at)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -503,7 +534,8 @@ namespace awkward {
                        const Slice& tail,
                        const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: Record::getitem_next(range)");
+      std::string("undefined operation: Record::getitem_next(range)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -511,7 +543,8 @@ namespace awkward {
                        const Slice& tail,
                        const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: Record::getitem_next(array)");
+      std::string("undefined operation: Record::getitem_next(array)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -519,7 +552,8 @@ namespace awkward {
                        const Slice& tail,
                        const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: Record::getitem_next(field)");
+      std::string("undefined operation: Record::getitem_next(field)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -527,7 +561,8 @@ namespace awkward {
                        const Slice& tail,
                        const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: Record::getitem_next(fields)");
+      std::string("undefined operation: Record::getitem_next(fields)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -535,7 +570,8 @@ namespace awkward {
                        const Slice& tail,
                        const Index64& advanced) const {
     throw std::runtime_error(
-      "undefined operation: Record::getitem_next(jagged)");
+      std::string("undefined operation: Record::getitem_next(jagged)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -544,7 +580,8 @@ namespace awkward {
                               const SliceArray64& slicecontent,
                               const Slice& tail) const {
     throw std::runtime_error(
-      "undefined operation: Record::getitem_next_jagged(array)");
+      std::string("undefined operation: Record::getitem_next_jagged(array)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -553,7 +590,8 @@ namespace awkward {
                               const SliceMissing64& slicecontent,
                               const Slice& tail) const {
     throw std::runtime_error(
-      "undefined operation: Record::getitem_next_jagged(missing)");
+      std::string("undefined operation: Record::getitem_next_jagged(missing)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
@@ -562,25 +600,22 @@ namespace awkward {
                               const SliceJagged64& slicecontent,
                               const Slice& tail) const {
     throw std::runtime_error(
-      "undefined operation: Record::getitem_next_jagged(jagged)");
+      std::string("undefined operation: Record::getitem_next_jagged(jagged)")
+      + FILENAME(__LINE__));
   }
 
   const ContentPtr
-  Record::copy_to(kernel::Lib ptr_lib) const{
-    ContentPtrVec content_vec;
-    for(auto i : array_->contents()) {
-      ContentPtr ptr = i->copy_to(ptr_lib);
-      content_vec.emplace_back(ptr);
-    }
-
-    std::shared_ptr<const RecordArray> record_arr  =
-      std::make_shared<const RecordArray>(array_->identities(),
-                                          array_->parameters(),
-                                          content_vec,
-                                          array_->recordlookup(),
-                                          array_->length());
-
-    return std::make_shared<Record>(record_arr,
-                                    at());
+  Record::copy_to(kernel::lib ptr_lib) const {
+    ContentPtr array = array_.get()->copy_to(ptr_lib);
+    return std::make_shared<Record>(
+             std::dynamic_pointer_cast<RecordArray>(array), at_);
   }
+
+  const ContentPtr
+  Record::numbers_to_type(const std::string& name) const {
+    ContentPtr out = array_.get()->numbers_to_type(name);
+    return std::make_shared<Record>(
+      std::dynamic_pointer_cast<RecordArray>(out), at_);
+  }
+
 }

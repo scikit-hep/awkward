@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/StringBuilder.cpp", line)
+
 #include "awkward/Identities.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/ListOffsetArray.h"
@@ -71,10 +73,11 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        std::string("unsupported encoding: ") + util::quote(encoding_, false));
+        std::string("unsupported encoding: ") + util::quote(encoding_)
+        + FILENAME(__LINE__));
     }
 
-    Index64 offsets(offsets_.ptr(), 0, offsets_.length());
+    Index64 offsets(offsets_.ptr(), 0, offsets_.length(), kernel::lib::cpu);
     std::vector<ssize_t> shape = { (ssize_t)content_.length() };
     std::vector<ssize_t> strides = { (ssize_t)sizeof(uint8_t) };
     ContentPtr content;
@@ -86,7 +89,8 @@ namespace awkward {
                                            0,
                                            sizeof(uint8_t),
                                            "B",
-                                           util::dtype::uint8);
+                                           util::dtype::uint8,
+                                           kernel::lib::cpu);
     return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                string_parameters,
                                                offsets,
@@ -152,7 +156,8 @@ namespace awkward {
   const BuilderPtr
   StringBuilder::endlist() {
     throw std::invalid_argument(
-      "called 'endlist' without 'beginlist' at the same level before it");
+      std::string("called 'end_list' without 'begin_list' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -165,13 +170,15 @@ namespace awkward {
   const BuilderPtr
   StringBuilder::index(int64_t index) {
     throw std::invalid_argument(
-      "called 'index' without 'begintuple' at the same level before it");
+      std::string("called 'index' without 'begin_tuple' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr
   StringBuilder::endtuple() {
     throw std::invalid_argument(
-      "called 'endtuple' without 'begintuple' at the same level before it");
+      std::string("called 'end_tuple' without 'begin_tuple' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr
@@ -184,13 +191,15 @@ namespace awkward {
   const BuilderPtr
   StringBuilder::field(const char* key, bool check) {
     throw std::invalid_argument(
-      "called 'field' without 'beginrecord' at the same level before it");
+      std::string("called 'field' without 'begin_record' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr
   StringBuilder::endrecord() {
     throw std::invalid_argument(
-      "called 'endrecord' without 'beginrecord' at the same level before it");
+      std::string("called 'end_record' without 'begin_record' at the same level before it")
+      + FILENAME(__LINE__));
   }
 
   const BuilderPtr

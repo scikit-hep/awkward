@@ -6,6 +6,7 @@ import distutils.version
 
 import awkward1.highlevel
 import awkward1.layout
+import awkward1._util
 
 
 checked_version = False
@@ -93,7 +94,10 @@ def castint(context, builder, fromtype, totype, val):
         elif fromtype.width == 64:
             fromtype = numba.int64
     if not isinstance(fromtype, numba.types.Integer):
-        raise AssertionError("unrecognized integer type: {0}".format(repr(fromtype)))
+        raise AssertionError(
+            "unrecognized integer type: {0}".format(repr(fromtype))
+            + awkward1._util.exception_suffix(__file__)
+        )
 
     if fromtype.bitwidth < totype.bitwidth:
         if fromtype.signed:
