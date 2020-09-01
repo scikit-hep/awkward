@@ -1264,29 +1264,6 @@ namespace awkward {
     /// @brief See #parameters.
     util::Parameters parameters_;
   };
-
-  struct merger {
-    template<typename T>
-    ContentPtr operator()(const T content1, const T content2, int64_t axis) const {
-      if (content1.get()->mergeable(content2, true)) {
-        return content1.get()->merge(content2, axis);
-      } else {
-        throw std::runtime_error("Arrays are not mergeable");
-      }
-    }
-  };
-
-  template <typename F, typename T, typename T2>
-  auto func(F f, T&& t, T2&& t2) -> ContentPtr
-  {
-      return f(std::forward<T>(t), std::forward<T2>(t2));
-  }
-
-  template <typename F, typename T, typename T2, typename ... Ts>
-  auto func(F f, T&& t, T2&& t2, Ts&&...args) -> ContentPtr {
-    return func(f, f(std::forward<T>(t), std::forward<T2>(t2)), std::forward<Ts>(args)...);
-  }
-
 }
 
 #endif // AWKWARD_CONTENT_H_
