@@ -750,14 +750,6 @@ namespace awkward {
 
   const ContentPtr
   RegularArray::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
-    std::cout << "RegularArray::merge at axis " << axis << "\n";
-    std::cout << " and purelist_depth " << purelist_depth() << "\n";
-    auto depths = minmax_depth();
-    std::cout << "min depth " << depths.first << " and max depth " << depths.second << "\n";
-
-    auto other_depths = minmax_depth();
-    std::cout << "other min depth " << other_depths.first << " and other max depth " << other_depths.second << "\n";
-
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
       if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {

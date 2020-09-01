@@ -978,11 +978,6 @@ namespace awkward {
   template <typename T>
   const ContentPtr
   ListOffsetArrayOf<T>::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
-    std::cout << "ListOffsetArrayOf<T>::merge in axis " << axis << "\n";
-    if (axis != 0) {
-      std::cout << "Here it is!\n";
-      std::cout << num(axis, 0 /*depth*/).get()->tostring() << "\n";
-    }
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
       return merge(raw->array(), axis, depth);
     }
