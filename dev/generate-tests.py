@@ -19,6 +19,13 @@ def pytype(cpptype):
         return cpptype
 
 
+def gettypename(spectype):
+    typename = spectype.replace("List", "").replace("[", "").replace("]", "")
+    if typename.endswith("_t"):
+        typename = typename[:-2]
+    return typename
+
+
 def genpykernels():
     print("Generating Python kernels")
     prefix = """
@@ -159,9 +166,20 @@ def readspec():
     return funcs
 
 
-def testpykernels(tests):
+def getcudakernelslist():
+    cudakernels = []
+    for f in os.listdir(os.path.join(CURRENT_DIR, "..", "src", "cuda-kernels")):
+        if os.path.isfile(os.path.join(CURRENT_DIR, "..", "src", "cuda-kernels", f)):
+            if f.startswith("awkward_") and f.endswith(".cu"):
+                cudakernels.append(f[:-3])
+            elif f.startswith("manual_awkward_") and f.endswith(".cu"):
+                cudakernels.append(f[len("manual_") : -3])
+    return cudakernels
+
+
+def genspectests(tests):
     genpykernels()
-    print("Generating file for testing python kernels")
+    print("Generating files for testing specification")
     for funcname in tests.keys():
         with open(
             os.path.join(CURRENT_DIR, "..", "tests-spec", "test_py" + funcname + ".py"),
@@ -223,88 +241,88 @@ def testpykernels(tests):
                     f.write("\n")
 
 
-def testcpukernels(tests):
-    print("Generating file for testing CPU kernels")
-
-    def getctypelist(typedict):
-        newctypes = []
-        for typename in typedict.values():
-            if "List" in typename:
-                count = typename.count("List")
-                typename = (
-                    typename.replace("List", "").replace("[", "").replace("]", "")
-                )
-                if typename.endswith("_t"):
-                    typename = typename[:-2]
-                start = ""
-                end = ")"
-                for i in range(count):
-                    if i > 0:
-                        start += "("
-                        end += ")"
-                    start += "ctypes.POINTER"
-                start += "(ctypes.c_"
-                newctypes.append(start + typename + end)
-            else:
-                if typename.endswith("_t"):
-                    typename = typename[:-2]
-                newctypes.append("ctypes.c_" + typename)
-        count = 0
-        funcCtypes = "("
-        for x in newctypes:
-            if count == 0:
-                funcCtypes += x
-                count += 1
-            else:
-                funcCtypes += ", " + x
-        funcCtypes += ")"
-        return funcCtypes
-
-    def getfuncargs():
-        funcs = {}
-        with open(
-            os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
-        ) as infile:
-            mainspec = yaml.safe_load(infile)["kernels"]
-            for filedir in mainspec.values():
-                for relpath in filedir.values():
-                    with open(
-                        os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
-                    ) as specfile:
-                        indspec = yaml.safe_load(specfile)[0]
-                        if (
-                            "def " in indspec["definition"]
-                            and "tests" in indspec.keys()
-                            and indspec["tests"] is not None
-                        ):
-                            if "specializations" in indspec.keys():
-                                for childfunc in indspec["specializations"]:
-                                    funcs[childfunc["name"]] = OrderedDict()
-                                    if tests[childfunc["name"]] != []:
-                                        for arg in childfunc["args"]:
-                                            typename = list(arg.values())[0]
-                                            if "Const[" in typename:
-                                                typename = typename.replace(
-                                                    "Const[", "", 1
-                                                ).rstrip("]")
-                                            funcs[childfunc["name"]][
-                                                list(arg.keys())[0]
-                                            ] = typename
-
-                            else:
-                                funcs[indspec["name"]] = OrderedDict()
-                                if tests[indspec["name"]] != []:
-                                    for arg in indspec["args"]:
+def getfuncargs():
+    funcs = {}
+    with open(
+        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
+    ) as infile:
+        mainspec = yaml.safe_load(infile)["kernels"]
+        for filedir in mainspec.values():
+            for relpath in filedir.values():
+                with open(
+                    os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
+                ) as specfile:
+                    indspec = yaml.safe_load(specfile)[0]
+                    if (
+                        "def " in indspec["definition"]
+                        and "tests" in indspec.keys()
+                        and indspec["tests"] is not None
+                    ):
+                        if "specializations" in indspec.keys():
+                            for childfunc in indspec["specializations"]:
+                                funcs[childfunc["name"]] = OrderedDict()
+                                if tests[childfunc["name"]] != []:
+                                    for arg in childfunc["args"]:
                                         typename = list(arg.values())[0]
                                         if "Const[" in typename:
                                             typename = typename.replace(
                                                 "Const[", "", 1
                                             ).rstrip("]")
-                                        funcs[indspec["name"]][
+                                        funcs[childfunc["name"]][
                                             list(arg.keys())[0]
                                         ] = typename
 
-        return funcs
+                        else:
+                            funcs[indspec["name"]] = OrderedDict()
+                            if tests[indspec["name"]] != []:
+                                for arg in indspec["args"]:
+                                    typename = list(arg.values())[0]
+                                    if "Const[" in typename:
+                                        typename = typename.replace(
+                                            "Const[", "", 1
+                                        ).rstrip("]")
+                                    funcs[indspec["name"]][
+                                        list(arg.keys())[0]
+                                    ] = typename
+
+    return funcs
+
+
+def getctypelist(typedict):
+    newctypes = []
+    for typename in typedict.values():
+        if "List" in typename:
+            count = typename.count("List")
+            typename = typename.replace("List", "").replace("[", "").replace("]", "")
+            if typename.endswith("_t"):
+                typename = typename[:-2]
+            start = ""
+            end = ")"
+            for i in range(count):
+                if i > 0:
+                    start += "("
+                    end += ")"
+                start += "ctypes.POINTER"
+            start += "(ctypes.c_"
+            newctypes.append(start + typename + end)
+        else:
+            if typename.endswith("_t"):
+                typename = typename[:-2]
+            newctypes.append("ctypes.c_" + typename)
+    count = 0
+    funcCtypes = "("
+    for x in newctypes:
+        if count == 0:
+            funcCtypes += x
+            count += 1
+        else:
+            funcCtypes += ", " + x
+    funcCtypes += ")"
+    return funcCtypes
+
+
+def gencpukerneltests(tests):
+    print("Generating files for testing CPU kernels")
 
     funcargs = getfuncargs()
     for funcname in tests.keys():
@@ -407,7 +425,114 @@ def testcpukernels(tests):
                 f.write("\n")
 
 
+def gencudakerneltests(tests):
+    print("Generating files for testing CUDA kernels")
+
+    funcargs = getfuncargs()
+    cudakernels = getcudakernelslist()
+    for funcname in tests.keys():
+        if funcname in cudakernels:
+            with open(
+                os.path.join(
+                    CURRENT_DIR,
+                    "..",
+                    "tests-cuda-kernels",
+                    "test_cuda" + funcname + ".py",
+                ),
+                "w",
+            ) as f:
+                f.write(
+                    "import ctypes\nimport cupy\nimport pytest\nfrom __init__ import lib, Error\n\n"
+                )
+                num = 1
+                if tests[funcname] == []:
+                    f.write(
+                        "@pytest.mark.skip(reason='Unable to generate any tests for kernel')\n"
+                    )
+                    f.write("def test_cuda" + funcname + "_" + str(num) + "():\n")
+                    f.write(
+                        " " * 4
+                        + "raise NotImplementedError('Unable to generate any tests for kernel')\n"
+                    )
+                for test in tests[funcname]:
+                    f.write("def test_cuda" + funcname + "_" + str(num) + "():\n")
+                    num += 1
+                    for arg, val in test["inargs"].items():
+                        if "List" in funcargs[funcname][arg]:
+                            count = funcargs[funcname][arg].count(
+                                "List"
+                            )  # Might need later for ndim array
+                            typename = gettypename(funcargs[funcname][arg])
+                            f.write(
+                                " " * 4
+                                + "{0} = cupy.array({1}, dtype=cupy.{2})\n".format(
+                                    arg, str(val), typename
+                                )
+                            )
+                            f.write(
+                                " " * 4
+                                + "d_{0} = ctypes.cast({0}.data.ptr, ctypes.POINTER(ctypes.c_{1}))\n".format(
+                                    arg, typename
+                                )
+                            )
+                        else:
+                            f.write(" " * 4 + "d_" + arg + " = " + str(val) + "\n")
+                    f.write(" " * 4 + "funcC = getattr(lib, '" + funcname + "')\n")
+                    f.write(" " * 4 + "funcC.restype = Error\n")
+                    f.write(
+                        " " * 4
+                        + "funcC.argtypes = "
+                        + getctypelist(funcargs[funcname])
+                        + "\n"
+                    )
+                    args = ""
+                    count = 0
+                    for arg in funcargs[funcname].keys():
+                        if count == 0:
+                            args += "d_" + arg
+                            count += 1
+                        else:
+                            args += ", d_" + arg
+                    if test["success"]:
+                        f.write(" " * 4 + "ret_pass = funcC(" + args + ")\n")
+                        for arg, val in test["outargs"].items():
+                            f.write(
+                                " " * 4
+                                + "pytest_"
+                                + arg
+                                + " = cupy.array("
+                                + str(val)
+                                + ", dtype=cupy."
+                                + gettypename(funcargs[funcname][arg])
+                                + ")"
+                                + "\n"
+                            )
+                            if isinstance(val, list):
+                                f.write(
+                                    " " * 4
+                                    + "for x in range(len(pytest_{0})):\n".format(arg)
+                                )
+                                f.write(
+                                    " " * 8
+                                    + "assert {0}[x] == pytest_{0}[x]\n".format(arg)
+                                )
+                            else:
+                                f.write(
+                                    " " * 4
+                                    + "assert "
+                                    + arg
+                                    + " == pytest_"
+                                    + arg
+                                    + "\n"
+                                )
+                        f.write(" " * 4 + "assert not ret_pass.str\n")
+                    else:
+                        f.write(" " * 4 + "assert funcC(" + args + ").str.contents\n")
+                    f.write("\n")
+
+
 if __name__ == "__main__":
     tests = readspec()
-    testpykernels(tests)
-    testcpukernels(tests)
+    genspectests(tests)
+    gencpukerneltests(tests)
+    gencudakerneltests(tests)
