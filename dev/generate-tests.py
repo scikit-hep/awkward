@@ -53,10 +53,9 @@ kSliceNone = kMaxInt64 + 1
                             if "specializations" in indspec.keys():
                                 for childfunc in indspec["specializations"]:
                                     outfile.write(
-                                        childfunc["name"]
-                                        + " = "
-                                        + indspec["name"]
-                                        + "\n"
+                                        "{0} = {1}\n".format(
+                                            childfunc["name"], indspec["name"]
+                                        )
                                     )
                                 outfile.write("\n\n")
 
@@ -124,34 +123,31 @@ def readspec():
                             for test in indspec["tests"]:
                                 # Check if test has correct types
                                 flag = True
-                                for test in indspec["tests"]:
-                                    # Check if test has correct types
-                                    flag = True
-                                    for x in indspec["args"]:
-                                        for arg, val in x.items():
-                                            if "Const[" in val:
-                                                val = val.replace(
-                                                    "Const[", "", 1
-                                                ).rstrip("]")
-                                            spectype = pytype(
-                                                val.replace("List", "")
-                                                .replace("[", "")
-                                                .replace("]", "")
+                                for x in indspec["args"]:
+                                    for arg, val in x.items():
+                                        if "Const[" in val:
+                                            val = val.replace("Const[", "", 1).rstrip(
+                                                "]"
                                             )
-                                            testval = test["args"][arg]
-                                            while isinstance(testval, list):
-                                                testval = testval[0]
-                                            if type(testval) != eval(spectype):
-                                                flag = False
-                                            elif test["successful"] and (
-                                                "U32" in indspec["name"]
-                                                or "U64" in indspec["name"]
-                                                or (
-                                                    arg in test["results"].keys()
-                                                    and -1 in test["results"][arg]
-                                                )
-                                            ):
-                                                flag = False
+                                        spectype = pytype(
+                                            val.replace("List", "")
+                                            .replace("[", "")
+                                            .replace("]", "")
+                                        )
+                                        testval = test["args"][arg]
+                                        while isinstance(testval, list):
+                                            testval = testval[0]
+                                        if type(testval) != eval(spectype):
+                                            flag = False
+                                        elif test["successful"] and (
+                                            "U32" in indspec["name"]
+                                            or "U64" in indspec["name"]
+                                            or (
+                                                arg in test["results"].keys()
+                                                and -1 in test["results"][arg]
+                                            )
+                                        ):
+                                            flag = False
                                 if flag:
                                     testinfo = {}
                                     testinfo["inargs"] = OrderedDict()
@@ -218,22 +214,13 @@ def genspectests(tests):
                             if isinstance(val, list):
                                 f.write(
                                     " " * 4
-                                    + "assert "
-                                    + arg
-                                    + "[:len(pytest_"
-                                    + arg
-                                    + ")] == pytest.approx(pytest_"
-                                    + arg
-                                    + ")\n"
+                                    + "assert {0}[:len(pytest_{0})] == pytest.approx(pytest_{0})\n".format(
+                                        arg
+                                    )
                                 )
                             else:
                                 f.write(
-                                    " " * 4
-                                    + "assert "
-                                    + arg
-                                    + " == pytest_"
-                                    + arg
-                                    + "\n"
+                                    " " * 4 + "assert {0} == pytest_{0}\n".format(arg)
                                 )
                     else:
                         f.write(" " * 4 + "with pytest.raises(Exception):\n")
@@ -348,49 +335,28 @@ def gencpukerneltests(tests):
                 num += 1
                 for arg, val in test["inargs"].items():
                     f.write(" " * 4 + arg + " = " + str(val) + "\n")
-                    typename = funcargs[funcname][arg]
-                    if "List" in typename:
-                        count = typename.count("List")
-                        typename = (
-                            typename.replace("List", "")
-                            .replace("[", "")
-                            .replace("]", "")
-                        )
-                        if typename.endswith("_t"):
-                            typename = typename[:-2]
+                    if "List" in funcargs[funcname][arg]:
+                        count = funcargs[funcname][arg].count("List")
+                        typename = gettypename(funcargs[funcname][arg])
                         if count == 1:
                             f.write(
                                 " " * 4
-                                + arg
-                                + " = (ctypes.c_"
-                                + typename
-                                + "*len("
-                                + arg
-                                + "))(*"
-                                + arg
-                                + ")\n"
+                                + "{0} = (ctypes.c_{1}*len({0}))(*{0})\n".format(
+                                    arg, typename
+                                )
                             )
                         elif count == 2:
                             f.write(
                                 " " * 4
-                                + arg
-                                + " = ctypes.pointer(ctypes.cast((ctypes.c_"
-                                + typename
-                                + "*len("
-                                + arg
-                                + "[0]))(*"
-                                + arg
-                                + "[0]),ctypes.POINTER(ctypes.c_"
-                                + typename
-                                + ")))\n"
+                                + "{0} = ctypes.pointer(ctypes.cast((ctypes.c_{1}*len({0}[0]))(*{0}[0]),ctypes.POINTER(ctypes.c_{1})))\n".format(
+                                    arg, typename
+                                )
                             )
                 f.write(" " * 4 + "funcC = getattr(lib, '" + funcname + "')\n")
                 f.write(" " * 4 + "funcC.restype = Error\n")
                 f.write(
                     " " * 4
-                    + "funcC.argtypes = "
-                    + getctypelist(funcargs[funcname])
-                    + "\n"
+                    + "funcC.argtypes = {0}\n".format(getctypelist(funcargs[funcname]))
                 )
                 args = ""
                 count = 0
@@ -407,21 +373,15 @@ def gencpukerneltests(tests):
                         if isinstance(val, list):
                             f.write(
                                 " " * 4
-                                + "assert "
-                                + arg
-                                + "[:len(pytest_"
-                                + arg
-                                + ")] == pytest.approx(pytest_"
-                                + arg
-                                + ")\n"
+                                + "assert {0}[:len(pytest_{0})] == pytest.approx(pytest_{0})\n".format(
+                                    arg
+                                )
                             )
                         else:
-                            f.write(
-                                " " * 4 + "assert " + arg + " == pytest_" + arg + "\n"
-                            )
+                            f.write(" " * 4 + "assert {0} == pytest_{0}\n".format(arg))
                     f.write(" " * 4 + "assert not ret_pass.str\n")
                 else:
-                    f.write(" " * 4 + "assert funcC(" + args + ").str.contents\n")
+                    f.write(" " * 4 + "assert funcC({0}).str.contents\n".format(args))
                 f.write("\n")
 
 
@@ -481,9 +441,9 @@ def gencudakerneltests(tests):
                     f.write(" " * 4 + "funcC.restype = Error\n")
                     f.write(
                         " " * 4
-                        + "funcC.argtypes = "
-                        + getctypelist(funcargs[funcname])
-                        + "\n"
+                        + "funcC.argtypes = {0}\n".format(
+                            getctypelist(funcargs[funcname])
+                        )
                     )
                     args = ""
                     count = 0
@@ -498,14 +458,9 @@ def gencudakerneltests(tests):
                         for arg, val in test["outargs"].items():
                             f.write(
                                 " " * 4
-                                + "pytest_"
-                                + arg
-                                + " = cupy.array("
-                                + str(val)
-                                + ", dtype=cupy."
-                                + gettypename(funcargs[funcname][arg])
-                                + ")"
-                                + "\n"
+                                + "pytest_{0} = cupy.array({1}, dtype=cupy.{2})\n".format(
+                                    arg, str(val), gettypename(funcargs[funcname][arg])
+                                )
                             )
                             if isinstance(val, list):
                                 f.write(
@@ -518,16 +473,13 @@ def gencudakerneltests(tests):
                                 )
                             else:
                                 f.write(
-                                    " " * 4
-                                    + "assert "
-                                    + arg
-                                    + " == pytest_"
-                                    + arg
-                                    + "\n"
+                                    " " * 4 + "assert {0} == pytest_{0}\n".format(arg)
                                 )
                         f.write(" " * 4 + "assert not ret_pass.str\n")
                     else:
-                        f.write(" " * 4 + "assert funcC(" + args + ").str.contents\n")
+                        f.write(
+                            " " * 4 + "assert funcC({0}).str.contents\n".format(args)
+                        )
                     f.write("\n")
 
 
