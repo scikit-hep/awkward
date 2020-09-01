@@ -260,7 +260,7 @@ def fcn():
 def test_basic():
     generator = awkward1.layout.ArrayGenerator(fcn, form=awkward1.forms.NumpyForm([], 8, "d"), length=5)
 
-    d = {}
+    d = awkward1._util.MappingProxy({})
     cache = awkward1.layout.ArrayCache(d)
 
     virtualarray = awkward1.layout.VirtualArray(generator, cache)
@@ -298,7 +298,7 @@ def test_field():
 def test_single_level():
     template = awkward1.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}], [], [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]])
     generator = awkward1.layout.ArrayGenerator(lambda: template, form=template.layout.form, length=3)
-    d = {}
+    d = awkward1._util.MappingProxy({})
     cache = awkward1.layout.ArrayCache(d)
     virtualarray = awkward1.layout.VirtualArray(generator, cache)
 
@@ -361,7 +361,7 @@ def test_single_level():
 
 def test_iter():
     generator = awkward1.layout.ArrayGenerator(fcn, form=awkward1.forms.NumpyForm([], 8, "d"), length=5)
-    d = {}
+    d = awkward1._util.MappingProxy({})
     cache = awkward1.layout.ArrayCache(d)
     virtualarray = awkward1.layout.VirtualArray(generator, cache)
 
@@ -431,6 +431,7 @@ def test_highlevel():
     assert awkward1.to_list(array[2]) == [4.4, 5.5]
     assert counter[0] == 1
 
+@pytest.mark.skip("YAGNI")
 def test_cache_chain():
     cache1 = {}
 
