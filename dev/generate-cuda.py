@@ -22,7 +22,6 @@ KERNEL_WHITELIST = [
     "awkward_RegularArray_compact_offsets",
     "awkward_IndexedArray_fill_count",
     "awkward_UnionArray_fillna",
-    "awkward_ListArray_min_range",
     "awkward_localindex",
     "awkward_content_reduce_zeroparents_64",
     "awkward_ListOffsetArray_reduce_global_startstop_64",
@@ -42,12 +41,7 @@ KERNEL_WHITELIST = [
     "awkward_ByteMaskedArray_toIndexedOptionArray",
     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
     "awkward_combinations",
-    "awkward_index_carry",
-    "awkward_ByteMaskedArray_getitem_carry",
     # "awkward_IndexedArray_simplify", Fails on Python 3.5, 3.6 and 3.7
-    "awkward_RegularArray_broadcast_tooffsets",
-    "awkward_ListArray_validity",
-    "awkward_UnionArray_validity",
 ]
 
 KERNEL_CURIOUS = [
@@ -93,6 +87,11 @@ KERNEL_CURIOUS = [
     "awkward_ListArray_getitem_jagged_expand",
     "awkward_missing_repeat",
     "awkward_IndexedArray_validity",
+    "awkward_ListArray_validity",
+    "awkward_UnionArray_validity",
+    "awkward_ByteMaskedArray_getitem_carry",
+    "awkward_index_carry",
+    "awkward_ListArray_min_range",
 ]
 
 
