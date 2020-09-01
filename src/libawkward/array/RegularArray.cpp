@@ -718,92 +718,160 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::merge(const ContentPtr& other, int64_t axis) const {
-    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array(), axis);
-    }
+  RegularArray::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
+    std::cout << "RegularArray::merge at axis " << axis << "\n";
+    std::cout << " and purelist_depth " << purelist_depth() << "\n";
+    auto depths = minmax_depth();
+    std::cout << "min depth " << depths.first << " and max depth " << depths.second << "\n";
 
-    if (!parameters_equal(other.get()->parameters())) {
-      return merge_as_union(other);
-    }
+    auto other_depths = minmax_depth();
+    std::cout << "other min depth " << other_depths.first << " and other max depth " << other_depths.second << "\n";
 
-    if (dynamic_cast<EmptyArray*>(other.get())) {
-      return shallow_copy();
-    }
-    else if (IndexedArray32* rawother =
-             dynamic_cast<IndexedArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedArrayU32* rawother =
-             dynamic_cast<IndexedArrayU32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedArray64* rawother =
-             dynamic_cast<IndexedArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedOptionArray32* rawother =
-             dynamic_cast<IndexedOptionArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedOptionArray64* rawother =
-             dynamic_cast<IndexedOptionArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (ByteMaskedArray* rawother =
-             dynamic_cast<ByteMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (BitMaskedArray* rawother =
-             dynamic_cast<BitMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnmaskedArray* rawother =
-             dynamic_cast<UnmaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_32* rawother =
-             dynamic_cast<UnionArray8_32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_U32* rawother =
-             dynamic_cast<UnionArray8_U32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_64* rawother =
-             dynamic_cast<UnionArray8_64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
+      if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+        return merge(raw->array(), axis, depth);
+      }
 
-    if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
-      if (size_ == rawother->size()) {
-        ContentPtr mine =
-          content_.get()->getitem_range_nowrap(0, size_*length());
-        ContentPtr theirs =
-          rawother->content().get()->getitem_range_nowrap(
-            0, rawother->size()*rawother->length());
-        ContentPtr content = mine.get()->merge(theirs, axis);
-        return std::make_shared<RegularArray>(Identities::none(),
-                                              parameters_,
-                                              content,
-                                              size_);
+      if (!parameters_equal(other.get()->parameters())) {
+        return merge_as_union(other);
+      }
+
+      if (dynamic_cast<EmptyArray*>(other.get())) {
+        return shallow_copy();
+      }
+      else if (IndexedArray32* rawother =
+               dynamic_cast<IndexedArray32*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (IndexedArrayU32* rawother =
+               dynamic_cast<IndexedArrayU32*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (IndexedArray64* rawother =
+               dynamic_cast<IndexedArray64*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (IndexedOptionArray32* rawother =
+               dynamic_cast<IndexedOptionArray32*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (IndexedOptionArray64* rawother =
+               dynamic_cast<IndexedOptionArray64*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (ByteMaskedArray* rawother =
+               dynamic_cast<ByteMaskedArray*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (BitMaskedArray* rawother =
+               dynamic_cast<BitMaskedArray*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (UnmaskedArray* rawother =
+               dynamic_cast<UnmaskedArray*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (UnionArray8_32* rawother =
+               dynamic_cast<UnionArray8_32*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (UnionArray8_U32* rawother =
+               dynamic_cast<UnionArray8_U32*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (UnionArray8_64* rawother =
+               dynamic_cast<UnionArray8_64*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+
+      if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
+        if (size_ == rawother->size()) {
+          ContentPtr mine =
+            content_.get()->getitem_range_nowrap(0, size_*length());
+          ContentPtr theirs =
+            rawother->content().get()->getitem_range_nowrap(
+              0, rawother->size()*rawother->length());
+          ContentPtr content = mine.get()->merge(theirs, axis, depth);
+          return std::make_shared<RegularArray>(Identities::none(),
+                                                parameters_,
+                                                content,
+                                                size_);
+        }
+        else {
+          return toListOffsetArray64(true).get()->merge(other, axis, depth);
+        }
+      }
+      else if (dynamic_cast<ListArray32*>(other.get())  ||
+               dynamic_cast<ListArrayU32*>(other.get())  ||
+               dynamic_cast<ListArray64*>(other.get())  ||
+               dynamic_cast<ListOffsetArray32*>(other.get())  ||
+               dynamic_cast<ListOffsetArrayU32*>(other.get())  ||
+               dynamic_cast<ListOffsetArray64*>(other.get())) {
+        return toListOffsetArray64(true).get()->merge(other, axis, depth);
       }
       else {
-        return toListOffsetArray64(true).get()->merge(other, axis);
+        throw std::invalid_argument(
+          std::string("cannot merge ") + classname() + std::string(" with ")
+          + other.get()->classname());
       }
     }
-    else if (dynamic_cast<ListArray32*>(other.get())  ||
-             dynamic_cast<ListArrayU32*>(other.get())  ||
-             dynamic_cast<ListArray64*>(other.get())  ||
-             dynamic_cast<ListOffsetArray32*>(other.get())  ||
-             dynamic_cast<ListOffsetArrayU32*>(other.get())  ||
-             dynamic_cast<ListOffsetArray64*>(other.get())) {
-      return toListOffsetArray64(true).get()->merge(other, axis);
+    else if (posaxis == depth + 1) {
+      if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
+        ContentPtr theircontent = rawother->content();
+        int64_t mylength = content_.get()->length();
+        int64_t mysize = size_;
+        int64_t theirlength = rawother->content().get()->length();
+        int64_t theirsize = rawother->size();
+
+        Index8 tags(mylength + theirlength);
+        Index64 index(mylength + theirlength);
+        ContentPtrVec contents({ content_, theircontent });
+
+        struct Error err1 = kernel::RegularArray_merge_tags_8_index_64(
+          tags.ptr().get(),
+          index.ptr().get(),
+          mylength + theirlength,
+          mylength,
+          mysize,
+          theirlength,
+          theirsize
+        );
+        util::handle_error(err1, classname(), identities_.get());
+
+        ContentPtr union_content = std::make_shared<UnionArray8_64>(Identities::none(),
+                                                util::Parameters(),
+                                                tags,
+                                                index,
+                                                contents);
+
+        int64_t myoffsets = mylength / mysize;
+        int64_t theiroffsets = theirlength / theirsize;
+        int64_t offsets_length = myoffsets > theiroffsets ? myoffsets : theiroffsets;
+
+        Index64 offsets(offsets_length + 1);
+        struct Error err2 = kernel::RegularArray_merge_offsets_64(
+          offsets.ptr().get(),
+          offsets_length + 1,
+          mylength,
+          mysize,
+          theirlength,
+          theirsize);
+        util::handle_error(err2, classname(), identities_.get());
+
+        return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                   util::Parameters(),
+                                                   offsets,
+                                                   union_content);
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("cannot merge ") + classname() + std::string(" with ")
+          + other.get()->classname());
+      }
     }
     else {
-      throw std::invalid_argument(
-        std::string("cannot merge ") + classname() + std::string(" with ")
-        + other.get()->classname());
+      return merge_as_union(other);
     }
   }
 

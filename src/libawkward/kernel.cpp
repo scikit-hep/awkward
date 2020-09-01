@@ -4645,6 +4645,40 @@ namespace kernel {
       size);
   }
 
+  ERROR RegularArray_merge_offsets_64(
+    int64_t *tooffsets,
+    int64_t tolength,
+    int64_t length,
+    int64_t size,
+    int64_t otherlength,
+    int64_t othersize) {
+    return awkward_RegularArray_merge_offsets64(
+      tooffsets,
+      tolength,
+      length,
+      size,
+      otherlength,
+      othersize);
+  }
+
+  ERROR RegularArray_merge_tags_8_index_64(
+    int8_t* totags,
+    int64_t* toindex,
+    int64_t tolength,
+    int64_t length,
+    int64_t size,
+    int64_t otherlength,
+    int64_t othersize) {
+    return awkward_RegularArray_merge_tags8_index64(
+      totags,
+      toindex,
+      tolength,
+      length,
+      size,
+      otherlength,
+      othersize);
+  }
+
   template<>
   Error ListOffsetArray_compact_offsets_64(
     int64_t *tooffsets,
@@ -5670,7 +5704,1434 @@ namespace kernel {
       fromoffset,
       length);
   }
+////////////////
 
+template<>
+ERROR NumpyArray_merge_frombool<bool>(
+  bool *toptr,
+  int64_t tooffset,
+  const bool *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const bool* from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tobool_frombool(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge_frombool<int8_t>(
+  int8_t *toptr,
+  int64_t tooffset,
+  const bool *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const bool* from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint8_frombool(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge_frombool<int16_t>(
+  int16_t *toptr,
+  int64_t tooffset,
+  const bool *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const bool* from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint16_frombool(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge_frombool<int32_t>(
+  int32_t *toptr,
+  int64_t tooffset,
+  const bool *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const bool* from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint32_frombool(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge_frombool<int64_t>(
+  int64_t *toptr,
+  int64_t tooffset,
+  const bool *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const bool* from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint64_frombool(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge_frombool<uint8_t>(
+  uint8_t *toptr,
+  int64_t tooffset,
+  const bool *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const bool* from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint8_frombool(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge_frombool<uint16_t>(
+  uint16_t *toptr,
+  int64_t tooffset,
+  const bool *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const bool* from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint16_frombool(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge_frombool<uint32_t>(
+  uint32_t *toptr,
+  int64_t tooffset,
+  const bool *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const bool* from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint32_frombool(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge_frombool<uint64_t>(
+  uint64_t *toptr,
+  int64_t tooffset,
+  const bool *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const bool* from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint64_frombool(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge_frombool<float>(
+  float *toptr,
+  int64_t tooffset,
+  const bool *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const bool* from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat32_frombool(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge_frombool<double>(
+  double *toptr,
+  int64_t tooffset,
+  const bool *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const bool* from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat64_frombool(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int8_t, int8_t>(
+  int8_t *toptr,
+  int64_t tooffset,
+  const int8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint8_fromint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int8_t, int16_t>(
+  int16_t *toptr,
+  int64_t tooffset,
+  const int8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint16_fromint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int8_t, int32_t>(
+  int32_t *toptr,
+  int64_t tooffset,
+  const int8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint32_fromint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int8_t, int64_t>(
+  int64_t *toptr,
+  int64_t tooffset,
+  const int8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint64_fromint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int8_t, float>(
+  float *toptr,
+  int64_t tooffset,
+  const int8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat32_fromint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int8_t, double>(
+  double *toptr,
+  int64_t tooffset,
+  const int8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat64_fromint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int16_t, int16_t>(
+  int16_t *toptr,
+  int64_t tooffset,
+  const int16_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int16_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint16_fromint16(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int16_t, int32_t>(
+  int32_t *toptr,
+  int64_t tooffset,
+  const int16_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int16_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint32_fromint16(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int16_t, int64_t>(
+  int64_t *toptr,
+  int64_t tooffset,
+  const int16_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int16_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint64_fromint16(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int16_t, float>(
+  float *toptr,
+  int64_t tooffset,
+  const int16_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int16_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat32_fromint16(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int16_t, double>(
+  double *toptr,
+  int64_t tooffset,
+  const int16_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int16_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat64_fromint16(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int32_t, int32_t>(
+  int32_t *toptr,
+  int64_t tooffset,
+  const int32_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int32_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint32_fromint32(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int32_t, int64_t>(
+  int64_t *toptr,
+  int64_t tooffset,
+  const int32_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int32_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint64_fromint32(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int32_t, float>(
+  float *toptr,
+  int64_t tooffset,
+  const int32_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int32_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat32_fromint32(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int32_t, double>(
+  double *toptr,
+  int64_t tooffset,
+  const int32_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int32_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat64_fromint32(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int64_t, int64_t>(
+  int64_t *toptr,
+  int64_t tooffset,
+  const int64_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int64_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint64_fromint64(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int64_t, float>(
+  float *toptr,
+  int64_t tooffset,
+  const int64_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int64_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat32_fromint64(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<int64_t, double>(
+  double *toptr,
+  int64_t tooffset,
+  const int64_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const int64_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat64_fromint64(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint8_t, int16_t>(
+  int16_t *toptr,
+  int64_t tooffset,
+  const uint8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint16_fromuint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint8_t, int32_t>(
+  int32_t *toptr,
+  int64_t tooffset,
+  const uint8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint32_fromuint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint8_t, int64_t>(
+  int64_t *toptr,
+  int64_t tooffset,
+  const uint8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint64_fromuint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint8_t, uint8_t>(
+  uint8_t *toptr,
+  int64_t tooffset,
+  const uint8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint8_fromuint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint8_t, uint16_t>(
+  uint16_t *toptr,
+  int64_t tooffset,
+  const uint8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint16_fromuint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint8_t, uint32_t>(
+  uint32_t *toptr,
+  int64_t tooffset,
+  const uint8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint32_fromuint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint8_t, uint64_t>(
+  uint64_t *toptr,
+  int64_t tooffset,
+  const uint8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint64_fromuint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint8_t, float>(
+  float *toptr,
+  int64_t tooffset,
+  const uint8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat32_fromuint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint8_t, double>(
+  double *toptr,
+  int64_t tooffset,
+  const uint8_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint8_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat64_fromuint8(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint16_t, int32_t>(
+  int32_t *toptr,
+  int64_t tooffset,
+  const uint16_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint16_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint32_fromuint16(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint16_t, int64_t>(
+  int64_t *toptr,
+  int64_t tooffset,
+  const uint16_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint16_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint64_fromuint16(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint16_t, uint16_t>(
+  uint16_t *toptr,
+  int64_t tooffset,
+  const uint16_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint16_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint16_fromuint16(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint16_t, uint32_t>(
+  uint32_t *toptr,
+  int64_t tooffset,
+  const uint16_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint16_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint32_fromuint16(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint16_t, uint64_t>(
+  uint64_t *toptr,
+  int64_t tooffset,
+  const uint16_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint16_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint64_fromuint16(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint16_t, float>(
+  float *toptr,
+  int64_t tooffset,
+  const uint16_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint16_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat32_fromuint16(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint16_t, double>(
+  double *toptr,
+  int64_t tooffset,
+  const uint16_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint16_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat64_fromuint16(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint32_t, int64_t>(
+  int64_t *toptr,
+  int64_t tooffset,
+  const uint32_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint32_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint64_fromuint32(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint32_t, uint32_t>(
+  uint32_t *toptr,
+  int64_t tooffset,
+  const uint32_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint32_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint32_fromuint32(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint32_t, uint64_t>(
+  uint64_t *toptr,
+  int64_t tooffset,
+  const uint32_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint32_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint64_fromuint32(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint32_t, float>(
+  float *toptr,
+  int64_t tooffset,
+  const uint32_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint32_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat32_fromuint32(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint32_t, double>(
+  double *toptr,
+  int64_t tooffset,
+  const uint32_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint32_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat64_fromuint32(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint64_t, uint64_t>(
+  uint64_t *toptr,
+  int64_t tooffset,
+  const uint64_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint64_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_touint64_fromuint64(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint64_t, int64_t>(
+  int64_t *toptr,
+  int64_t tooffset,
+  const uint64_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint64_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_toint64_fromuint64(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint64_t, float>(
+  float *toptr,
+  int64_t tooffset,
+  const uint64_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint64_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat32_fromuint64(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<uint64_t, double>(
+  double *toptr,
+  int64_t tooffset,
+  const uint64_t *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const uint64_t *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat64_fromuint64(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<float, float>(
+  float *toptr,
+  int64_t tooffset,
+  const float *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const float *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat32_fromfloat32(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<float, double>(
+  double *toptr,
+  int64_t tooffset,
+  const float *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const float *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat64_fromfloat32(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+template<>
+ERROR NumpyArray_merge<double, double>(
+  double *toptr,
+  int64_t tooffset,
+  const double *fromptr,
+  int64_t fromoffset,
+  int64_t length,
+  int64_t stride,
+  const double *from_other_ptr,
+  int64_t from_other_offset,
+  int64_t other_length,
+  int64_t other_stride) {
+  return awkward_NumpyArray_merge_tofloat64_fromfloat64(
+    toptr,
+    tooffset,
+    fromptr,
+    fromoffset,
+    length,
+    stride,
+    from_other_ptr,
+    from_other_offset,
+    other_length,
+    other_stride);
+}
+
+////////////////
   template<>
   ERROR ListArray_fill(
     int64_t *tostarts,

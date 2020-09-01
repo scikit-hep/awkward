@@ -384,7 +384,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  EmptyArray::merge(const ContentPtr& other, int64_t axis) const {
+  EmptyArray::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
     return other;
   }
 

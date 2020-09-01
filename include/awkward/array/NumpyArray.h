@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <memory>
 #include <typeindex>
+#include <tuple>
 #include <vector>
 
 #include "awkward/common.h"
@@ -492,7 +493,7 @@ namespace awkward {
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
     const ContentPtr
-      merge(const ContentPtr& other, int64_t axis) const override;
+      merge(const ContentPtr& other, int64_t axis, int64_t depth) const override;
 
     const SliceItemPtr
       asslice() const override;
@@ -854,6 +855,10 @@ namespace awkward {
                                           Index64& outoffsets,
                                           bool ascending,
                                           bool stable) const;
+
+  util::dtype merged_dtype(const util::dtype other_dtype, const std::string& other_format) const;
+
+  std::tuple<std::vector<ssize_t>, std::vector<ssize_t>> merged_shape_and_strides(const std::vector<ssize_t>& other_shape, int64_t itemsize, int64_t axis) const;
 
   /// @brief See #ptr_lib
   const kernel::Lib ptr_lib_;

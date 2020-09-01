@@ -201,7 +201,7 @@ namespace awkward {
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
     const ContentPtr
-      merge(const ContentPtr& other, int64_t axis) const override;
+      merge(const ContentPtr& other, int64_t axis, int64_t depth) const override;
 
     const SliceItemPtr
       asslice() const override;

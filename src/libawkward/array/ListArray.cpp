@@ -900,9 +900,9 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::merge(const ContentPtr& other, int64_t axis) const {
+  ListArrayOf<T>::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array(), axis);
+      return merge(raw->array(), axis, depth);
     }
 
     if (!parameters_equal(other.get()->parameters())) {
@@ -914,47 +914,47 @@ namespace awkward {
     }
     else if (IndexedArray32* rawother =
              dynamic_cast<IndexedArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (IndexedArrayU32* rawother =
              dynamic_cast<IndexedArrayU32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (IndexedArray64* rawother =
              dynamic_cast<IndexedArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (IndexedOptionArray32* rawother =
              dynamic_cast<IndexedOptionArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (IndexedOptionArray64* rawother =
              dynamic_cast<IndexedOptionArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (ByteMaskedArray* rawother =
              dynamic_cast<ByteMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (BitMaskedArray* rawother =
              dynamic_cast<BitMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (UnmaskedArray* rawother =
              dynamic_cast<UnmaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (UnionArray8_32* rawother =
              dynamic_cast<UnionArray8_32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (UnionArray8_U32* rawother =
              dynamic_cast<UnionArray8_U32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (UnionArray8_64* rawother =
              dynamic_cast<UnionArray8_64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
 
     int64_t mylength = length();
@@ -1012,7 +1012,7 @@ namespace awkward {
     ContentPtr content;
     if (ListArray32* rawother =
         dynamic_cast<ListArray32*>(other.get())) {
-      content = content_.get()->merge(rawother->content(), axis);
+      content = content_.get()->merge(rawother->content(), axis, depth);
       Index32 other_starts = rawother->starts();
       Index32 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
@@ -1032,7 +1032,7 @@ namespace awkward {
     }
     else if (ListArrayU32* rawother =
              dynamic_cast<ListArrayU32*>(other.get())) {
-      content = content_.get()->merge(rawother->content(), axis);
+      content = content_.get()->merge(rawother->content(), axis, depth);
       IndexU32 other_starts = rawother->starts();
       IndexU32 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
@@ -1052,7 +1052,7 @@ namespace awkward {
     }
     else if (ListArray64* rawother =
              dynamic_cast<ListArray64*>(other.get())) {
-      content = content_.get()->merge(rawother->content(), axis);
+      content = content_.get()->merge(rawother->content(), axis, depth);
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
@@ -1072,7 +1072,7 @@ namespace awkward {
     }
     else if (ListOffsetArray32* rawother =
              dynamic_cast<ListOffsetArray32*>(other.get())) {
-      content = content_.get()->merge(rawother->content(), axis);
+      content = content_.get()->merge(rawother->content(), axis, depth);
       Index32 other_starts = rawother->starts();
       Index32 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
@@ -1091,7 +1091,7 @@ namespace awkward {
     }
     else if (ListOffsetArrayU32* rawother =
              dynamic_cast<ListOffsetArrayU32*>(other.get())) {
-      content = content_.get()->merge(rawother->content(), axis);
+      content = content_.get()->merge(rawother->content(), axis, depth);
       IndexU32 other_starts = rawother->starts();
       IndexU32 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
@@ -1111,7 +1111,7 @@ namespace awkward {
     }
     else if (ListOffsetArray64* rawother =
              dynamic_cast<ListOffsetArray64*>(other.get())) {
-      content = content_.get()->merge(rawother->content(), axis);
+      content = content_.get()->merge(rawother->content(), axis, depth);
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
@@ -1134,7 +1134,7 @@ namespace awkward {
       ContentPtr listoffsetarray = rawregulararray->toListOffsetArray64(true);
       ListOffsetArray64* rawother =
         dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
-      content = content_.get()->merge(rawother->content(), axis);
+      content = content_.get()->merge(rawother->content(), axis, depth);
       Index64 other_starts = rawother->starts();
       Index64 other_stops = rawother->stops();
       struct Error err = kernel::ListArray_fill<int64_t, int64_t>(

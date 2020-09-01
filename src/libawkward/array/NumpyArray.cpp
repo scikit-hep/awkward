@@ -1530,10 +1530,187 @@ namespace awkward {
     }
   }
 
+  util::dtype
+  NumpyArray::merged_dtype(const util::dtype other_dtype, const std::string& other_format) const {
+    util::dtype dtype = util::dtype::NOT_PRIMITIVE;
+    if (dtype_ == util::dtype::complex256  ||
+        other_dtype == util::dtype::complex256) {
+      dtype = util::dtype::complex256;
+    }
+    else if ((dtype_ == util::dtype::float128  &&
+              util::is_complex(other_dtype))  ||
+             (other_dtype == util::dtype::float128  &&
+              util::is_complex(dtype_))) {
+      dtype = util::dtype::complex256;
+    }
+    else if (dtype_ == util::dtype::complex128  ||
+             other_dtype == util::dtype::complex128) {
+      dtype = util::dtype::complex128;
+    }
+    else if (((dtype_ == util::dtype::float64  ||
+               dtype_ == util::dtype::uint64  ||
+               dtype_ == util::dtype::int64  ||
+               dtype_ == util::dtype::uint32  ||
+               dtype_ == util::dtype::int32)  &&
+              util::is_complex(other_dtype))  ||
+             ((other_dtype == util::dtype::float64  ||
+               other_dtype == util::dtype::uint64  ||
+               other_dtype == util::dtype::int64  ||
+               other_dtype == util::dtype::uint32  ||
+               other_dtype == util::dtype::int32)  &&
+              util::is_complex(dtype_))) {
+      dtype = util::dtype::complex128;
+    }
+    else if (dtype_ == util::dtype::complex64  ||
+             other_dtype == util::dtype::complex64) {
+      dtype = util::dtype::complex64;
+    }
+    else if (dtype_ == util::dtype::float128  ||
+             other_dtype == util::dtype::float128) {
+      dtype = util::dtype::float128;
+    }
+    else if (dtype_ == util::dtype::float64  ||
+             other_dtype == util::dtype::float64) {
+      dtype = util::dtype::float64;
+    }
+    else if ((dtype_ == util::dtype::float32  &&
+              (other_dtype == util::dtype::uint64  ||
+               other_dtype == util::dtype::int64  ||
+               other_dtype == util::dtype::uint32  ||
+               other_dtype == util::dtype::int32))  ||
+             (other_dtype == util::dtype::float32  &&
+              (dtype_ == util::dtype::uint64  ||
+               dtype_ == util::dtype::int64  ||
+               dtype_ == util::dtype::uint32  ||
+               dtype_ == util::dtype::int32))) {
+      dtype = util::dtype::float64;
+    }
+    else if (dtype_ == util::dtype::float32  ||
+             other_dtype == util::dtype::float32) {
+      dtype = util::dtype::float32;
+    }
+    else if ((dtype_ == util::dtype::float16  &&
+              (other_dtype == util::dtype::uint64  ||
+               other_dtype == util::dtype::int64  ||
+               other_dtype == util::dtype::uint32  ||
+               other_dtype == util::dtype::int32))  ||
+             (other_dtype == util::dtype::float16  &&
+              (dtype_ == util::dtype::uint64  ||
+               dtype_ == util::dtype::int64  ||
+               dtype_ == util::dtype::uint32  ||
+               dtype_ == util::dtype::int32))) {
+      dtype = util::dtype::float64;
+    }
+    else if ((dtype_ == util::dtype::float16  &&
+              (other_dtype == util::dtype::uint16  ||
+               other_dtype == util::dtype::int16))  ||
+             (other_dtype == util::dtype::float16  &&
+              (dtype_ == util::dtype::uint16  ||
+               dtype_ == util::dtype::int16))) {
+      dtype = util::dtype::float32;
+    }
+    else if (dtype_ == util::dtype::float16  ||
+             other_dtype == util::dtype::float16) {
+      dtype = util::dtype::float16;
+    }
+    else if ((dtype_ == util::dtype::uint64  &&
+              util::is_signed(other_dtype))  ||
+             (other_dtype == util::dtype::uint64  &&
+              util::is_signed(dtype_))) {
+      dtype = util::dtype::float64;
+    }
+    else if (dtype_ == util::dtype::uint64  ||
+             other_dtype == util::dtype::uint64) {
+      dtype = util::dtype::uint64;
+    }
+    else if (dtype_ == util::dtype::int64  ||
+             other_dtype == util::dtype::int64) {
+      dtype = util::dtype::int64;
+    }
+    else if ((dtype_ == util::dtype::uint32  &&
+              util::is_signed(other_dtype))  ||
+             (other_dtype == util::dtype::uint32  &&
+              util::is_signed(dtype_))) {
+      dtype = util::dtype::int64;
+    }
+    else if (dtype_ == util::dtype::uint32  ||
+             other_dtype == util::dtype::uint32) {
+      dtype = util::dtype::uint32;
+    }
+    else if (dtype_ == util::dtype::int32  ||
+             other_dtype == util::dtype::int32) {
+      dtype = util::dtype::int32;
+    }
+    else if ((dtype_ == util::dtype::uint16  &&
+              util::is_signed(other_dtype))  ||
+             (other_dtype == util::dtype::uint16  &&
+              util::is_signed(dtype_))) {
+      dtype = util::dtype::int32;
+    }
+    else if (dtype_ == util::dtype::uint16  ||
+             other_dtype == util::dtype::uint16) {
+      dtype = util::dtype::uint16;
+    }
+    else if (dtype_ == util::dtype::int16  ||
+             other_dtype == util::dtype::int16) {
+      dtype = util::dtype::int16;
+    }
+    else if ((dtype_ == util::dtype::uint8  &&
+              util::is_signed(other_dtype))  ||
+             (other_dtype == util::dtype::uint8  &&
+              util::is_signed(dtype_))) {
+      dtype = util::dtype::int16;
+    }
+    else if (dtype_ == util::dtype::uint8  ||
+             other_dtype == util::dtype::uint8) {
+      dtype = util::dtype::uint8;
+    }
+    else if (dtype_ == util::dtype::int8  ||
+             other_dtype == util::dtype::int8) {
+      dtype = util::dtype::int8;
+    }
+    else if (dtype_ == util::dtype::boolean  &&
+             other_dtype == util::dtype::boolean) {
+      dtype = util::dtype::boolean;
+    }
+    // else if (dtype_ == util::dtype::datetime64  &&
+    //          other_dtype == util::dtype::datetime64) {
+    //   dtype = util::dtype::datetime64;
+    // }
+    // else if (dtype_ == util::dtype::timedelta64  &&
+    //          other_dtype == util::dtype::timedelta64) {
+    //   dtype = util::dtype::timedelta64;
+    // }
+    else {
+      throw std::invalid_argument(
+        std::string("cannot merge Numpy format \"") + format_
+        + std::string("\" with \"") + other_format + std::string("\""));
+    }
+
+    return dtype;
+  }
+
+  std::tuple<std::vector<ssize_t>, std::vector<ssize_t>>
+  NumpyArray::merged_shape_and_strides(const std::vector<ssize_t>& other_shape,
+                                       int64_t itemsize, int64_t posaxis) const {
+    if (posaxis < 0) {
+      throw std::invalid_argument("cannot merge array shapes in negative axis");
+    }
+    std::vector<ssize_t> shape = shape_;
+    shape[(size_t)posaxis] += other_shape[(size_t)posaxis];
+    std::vector<ssize_t> strides;
+    strides.emplace_back(itemsize);
+    for (int64_t i = ((int64_t)shape.size()) - 1;  i > 0;  i--) {
+      strides.insert(strides.begin(), strides[0]*shape[(size_t)i]);
+    }
+    return std::make_tuple(shape, strides);
+  }
+
   const ContentPtr
-  NumpyArray::merge(const ContentPtr& other, int64_t axis) const {
+  NumpyArray::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
+
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array(), axis);
+      return merge(raw->array(), axis, depth);
     }
 
     if (!parameters_equal(other.get()->parameters())) {
@@ -1545,47 +1722,47 @@ namespace awkward {
     }
     else if (IndexedArray32* rawother =
              dynamic_cast<IndexedArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (IndexedArrayU32* rawother =
              dynamic_cast<IndexedArrayU32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (IndexedArray64* rawother =
              dynamic_cast<IndexedArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (IndexedOptionArray32* rawother =
              dynamic_cast<IndexedOptionArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (IndexedOptionArray64* rawother =
              dynamic_cast<IndexedOptionArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (ByteMaskedArray* rawother =
              dynamic_cast<ByteMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (BitMaskedArray* rawother =
              dynamic_cast<BitMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (UnmaskedArray* rawother =
              dynamic_cast<UnmaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (UnionArray8_32* rawother =
              dynamic_cast<UnionArray8_32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (UnionArray8_U32* rawother =
              dynamic_cast<UnionArray8_U32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (UnionArray8_64* rawother =
              dynamic_cast<UnionArray8_64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
 
     if (ndim() == 0) {
@@ -1607,165 +1784,14 @@ namespace awkward {
 
     NumpyArray contiguous_self = contiguous();
     if (NumpyArray* rawother = dynamic_cast<NumpyArray*>(other.get())) {
-      util::dtype dtype = util::dtype::NOT_PRIMITIVE;
+      if (axis != 0) {
+        return toRegularArray().get()->merge(rawother->toRegularArray(), axis, depth);
+      }
+      util::dtype dtype = merged_dtype(rawother->dtype(), rawother->format());
 
       if (ndim() != rawother->ndim()) {
         throw std::invalid_argument(
           "cannot merge arrays with different shapes");
-      }
-
-      if (dtype_ == util::dtype::complex256  ||
-          rawother->dtype() == util::dtype::complex256) {
-        dtype = util::dtype::complex256;
-      }
-      else if ((dtype_ == util::dtype::float128  &&
-                util::is_complex(rawother->dtype()))  ||
-               (rawother->dtype() == util::dtype::float128  &&
-                util::is_complex(dtype_))) {
-        dtype = util::dtype::complex256;
-      }
-      else if (dtype_ == util::dtype::complex128  ||
-               rawother->dtype() == util::dtype::complex128) {
-        dtype = util::dtype::complex128;
-      }
-      else if (((dtype_ == util::dtype::float64  ||
-                 dtype_ == util::dtype::uint64  ||
-                 dtype_ == util::dtype::int64  ||
-                 dtype_ == util::dtype::uint32  ||
-                 dtype_ == util::dtype::int32)  &&
-                util::is_complex(rawother->dtype()))  ||
-               ((rawother->dtype() == util::dtype::float64  ||
-                 rawother->dtype() == util::dtype::uint64  ||
-                 rawother->dtype() == util::dtype::int64  ||
-                 rawother->dtype() == util::dtype::uint32  ||
-                 rawother->dtype() == util::dtype::int32)  &&
-                util::is_complex(dtype_))) {
-        dtype = util::dtype::complex128;
-      }
-      else if (dtype_ == util::dtype::complex64  ||
-               rawother->dtype() == util::dtype::complex64) {
-        dtype = util::dtype::complex64;
-      }
-      else if (dtype_ == util::dtype::float128  ||
-               rawother->dtype() == util::dtype::float128) {
-        dtype = util::dtype::float128;
-      }
-      else if (dtype_ == util::dtype::float64  ||
-               rawother->dtype() == util::dtype::float64) {
-        dtype = util::dtype::float64;
-      }
-      else if ((dtype_ == util::dtype::float32  &&
-                (rawother->dtype() == util::dtype::uint64  ||
-                 rawother->dtype() == util::dtype::int64  ||
-                 rawother->dtype() == util::dtype::uint32  ||
-                 rawother->dtype() == util::dtype::int32))  ||
-               (rawother->dtype() == util::dtype::float32  &&
-                (dtype_ == util::dtype::uint64  ||
-                 dtype_ == util::dtype::int64  ||
-                 dtype_ == util::dtype::uint32  ||
-                 dtype_ == util::dtype::int32))) {
-        dtype = util::dtype::float64;
-      }
-      else if (dtype_ == util::dtype::float32  ||
-               rawother->dtype() == util::dtype::float32) {
-        dtype = util::dtype::float32;
-      }
-      else if ((dtype_ == util::dtype::float16  &&
-                (rawother->dtype() == util::dtype::uint64  ||
-                 rawother->dtype() == util::dtype::int64  ||
-                 rawother->dtype() == util::dtype::uint32  ||
-                 rawother->dtype() == util::dtype::int32))  ||
-               (rawother->dtype() == util::dtype::float16  &&
-                (dtype_ == util::dtype::uint64  ||
-                 dtype_ == util::dtype::int64  ||
-                 dtype_ == util::dtype::uint32  ||
-                 dtype_ == util::dtype::int32))) {
-        dtype = util::dtype::float64;
-      }
-      else if ((dtype_ == util::dtype::float16  &&
-                (rawother->dtype() == util::dtype::uint16  ||
-                 rawother->dtype() == util::dtype::int16))  ||
-               (rawother->dtype() == util::dtype::float16  &&
-                (dtype_ == util::dtype::uint16  ||
-                 dtype_ == util::dtype::int16))) {
-        dtype = util::dtype::float32;
-      }
-      else if (dtype_ == util::dtype::float16  ||
-               rawother->dtype() == util::dtype::float16) {
-        dtype = util::dtype::float16;
-      }
-      else if ((dtype_ == util::dtype::uint64  &&
-                util::is_signed(rawother->dtype()))  ||
-               (rawother->dtype() == util::dtype::uint64  &&
-                util::is_signed(dtype_))) {
-        dtype = util::dtype::float64;
-      }
-      else if (dtype_ == util::dtype::uint64  ||
-               rawother->dtype() == util::dtype::uint64) {
-        dtype = util::dtype::uint64;
-      }
-      else if (dtype_ == util::dtype::int64  ||
-               rawother->dtype() == util::dtype::int64) {
-        dtype = util::dtype::int64;
-      }
-      else if ((dtype_ == util::dtype::uint32  &&
-                util::is_signed(rawother->dtype()))  ||
-               (rawother->dtype() == util::dtype::uint32  &&
-                util::is_signed(dtype_))) {
-        dtype = util::dtype::int64;
-      }
-      else if (dtype_ == util::dtype::uint32  ||
-               rawother->dtype() == util::dtype::uint32) {
-        dtype = util::dtype::uint32;
-      }
-      else if (dtype_ == util::dtype::int32  ||
-               rawother->dtype() == util::dtype::int32) {
-        dtype = util::dtype::int32;
-      }
-      else if ((dtype_ == util::dtype::uint16  &&
-                util::is_signed(rawother->dtype()))  ||
-               (rawother->dtype() == util::dtype::uint16  &&
-                util::is_signed(dtype_))) {
-        dtype = util::dtype::int32;
-      }
-      else if (dtype_ == util::dtype::uint16  ||
-               rawother->dtype() == util::dtype::uint16) {
-        dtype = util::dtype::uint16;
-      }
-      else if (dtype_ == util::dtype::int16  ||
-               rawother->dtype() == util::dtype::int16) {
-        dtype = util::dtype::int16;
-      }
-      else if ((dtype_ == util::dtype::uint8  &&
-                util::is_signed(rawother->dtype()))  ||
-               (rawother->dtype() == util::dtype::uint8  &&
-                util::is_signed(dtype_))) {
-        dtype = util::dtype::int16;
-      }
-      else if (dtype_ == util::dtype::uint8  ||
-               rawother->dtype() == util::dtype::uint8) {
-        dtype = util::dtype::uint8;
-      }
-      else if (dtype_ == util::dtype::int8  ||
-               rawother->dtype() == util::dtype::int8) {
-        dtype = util::dtype::int8;
-      }
-      else if (dtype_ == util::dtype::boolean  &&
-               rawother->dtype() == util::dtype::boolean) {
-        dtype = util::dtype::boolean;
-      }
-      // else if (dtype_ == util::dtype::datetime64  &&
-      //          rawother->dtype() == util::dtype::datetime64) {
-      //   dtype = util::dtype::datetime64;
-      // }
-      // else if (dtype_ == util::dtype::timedelta64  &&
-      //          rawother->dtype() == util::dtype::timedelta64) {
-      //   dtype = util::dtype::timedelta64;
-      // }
-      else {
-        throw std::invalid_argument(
-          std::string("cannot merge Numpy format \"") + format_
-          + std::string("\" with \"") + rawother->format() + std::string("\""));
       }
 
       int64_t itemsize = util::dtype_to_itemsize(dtype);
@@ -1773,17 +1799,11 @@ namespace awkward {
       std::vector<ssize_t> other_shape = rawother->shape();
       std::vector<ssize_t> shape;
       std::vector<ssize_t> strides;
-      shape.emplace_back(shape_[0] + other_shape[0]);
-      strides.emplace_back(itemsize);
+      std::tie(shape, strides) = merged_shape_and_strides(other_shape, itemsize, axis);
+
       int64_t self_flatlength = shape_[0];
       int64_t other_flatlength = other_shape[0];
       for (int64_t i = ((int64_t)shape_.size()) - 1;  i > 0;  i--) {
-        if (shape_[(size_t)i] != other_shape[(size_t)i]) {
-          throw std::invalid_argument(
-            "cannot merge arrays with different shapes");
-        }
-        shape.insert(std::next(shape.begin()), shape_[(size_t)i]);
-        strides.insert(strides.begin(), strides[0]*shape_[(size_t)i]);
         self_flatlength *= (int64_t)shape_[(size_t)i];
         other_flatlength *= (int64_t)shape_[(size_t)i];
       }

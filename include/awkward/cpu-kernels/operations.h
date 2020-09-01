@@ -329,6 +329,25 @@ extern "C" {
       int64_t size);
 
   EXPORT_SYMBOL struct Error
+    awkward_RegularArray_merge_offsets64(
+      int64_t* tooffsets,
+      int64_t tolength,
+      int64_t length,
+      int64_t size,
+      int64_t otherlength,
+      int64_t othersize);
+
+  EXPORT_SYMBOL struct Error
+    awkward_RegularArray_merge_tags8_index64(
+      int8_t* totags,
+      int64_t* toindex,
+      int64_t tolength,
+      int64_t length,
+      int64_t size,
+      int64_t otherlength,
+      int64_t othersize);
+
+  EXPORT_SYMBOL struct Error
     awkward_ListArray32_compact_offsets_64(
       int64_t* tooffsets,
       const int32_t* fromstarts,
@@ -838,7 +857,693 @@ extern "C" {
       const double* fromptr,
       int64_t fromoffset,
       int64_t length);
+/////////////////////////////
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tobool_frombool(
+    bool* toptr,
+    int64_t tooffset,
+    const bool* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const bool* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint8_frombool(
+    int8_t* toptr,
+    int64_t tooffset,
+    const bool* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const bool* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint16_frombool(
+    int16_t* toptr,
+    int64_t tooffset,
+    const bool* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const bool* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint32_frombool(
+    int32_t* toptr,
+    int64_t tooffset,
+    const bool* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const bool* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint64_frombool(
+    int64_t* toptr,
+    int64_t tooffset,
+    const bool* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const bool* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint8_frombool(
+    uint8_t* toptr,
+    int64_t tooffset,
+    const bool* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const bool* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint16_frombool(
+    uint16_t* toptr,
+    int64_t tooffset,
+    const bool* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const bool* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint32_frombool(
+    uint32_t* toptr,
+    int64_t tooffset,
+    const bool* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const bool* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint64_frombool(
+    uint64_t* toptr,
+    int64_t tooffset,
+    const bool* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const bool* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat32_frombool(
+    float* toptr,
+    int64_t tooffset,
+    const bool* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const bool* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat64_frombool(
+    double* toptr,
+    int64_t tooffset,
+    const bool* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const bool* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint8_fromint8(
+    int8_t* toptr,
+    int64_t tooffset,
+    const int8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint16_fromint8(
+    int16_t* toptr,
+    int64_t tooffset,
+    const int8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint32_fromint8(
+    int32_t* toptr,
+    int64_t tooffset,
+    const int8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint64_fromint8(
+    int64_t* toptr,
+    int64_t tooffset,
+    const int8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat32_fromint8(
+    float* toptr,
+    int64_t tooffset,
+    const int8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat64_fromint8(
+    double* toptr,
+    int64_t tooffset,
+    const int8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint16_fromint16(
+    int16_t* toptr,
+    int64_t tooffset,
+    const int16_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int16_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint32_fromint16(
+    int32_t* toptr,
+    int64_t tooffset,
+    const int16_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int16_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint64_fromint16(
+    int64_t* toptr,
+    int64_t tooffset,
+    const int16_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int16_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat32_fromint16(
+    float* toptr,
+    int64_t tooffset,
+    const int16_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int16_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat64_fromint16(
+    double* toptr,
+    int64_t tooffset,
+    const int16_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int16_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint32_fromint32(
+    int32_t* toptr,
+    int64_t tooffset,
+    const int32_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int32_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint64_fromint32(
+    int64_t* toptr,
+    int64_t tooffset,
+    const int32_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int32_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat32_fromint32(
+    float* toptr,
+    int64_t tooffset,
+    const int32_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int32_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat64_fromint32(
+    double* toptr,
+    int64_t tooffset,
+    const int32_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int32_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint64_fromint64(
+    int64_t* toptr,
+    int64_t tooffset,
+    const int64_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int64_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat32_fromint64(
+    float* toptr,
+    int64_t tooffset,
+    const int64_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int64_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat64_fromint64(
+    double* toptr,
+    int64_t tooffset,
+    const int64_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const int64_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint16_fromuint8(
+    int16_t* toptr,
+    int64_t tooffset,
+    const uint8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint32_fromuint8(
+    int32_t* toptr,
+    int64_t tooffset,
+    const uint8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint64_fromuint8(
+    int64_t* toptr,
+    int64_t tooffset,
+    const uint8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint8_fromuint8(
+    uint8_t* toptr,
+    int64_t tooffset,
+    const uint8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint16_fromuint8(
+    uint16_t* toptr,
+    int64_t tooffset,
+    const uint8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint32_fromuint8(
+    uint32_t* toptr,
+    int64_t tooffset,
+    const uint8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint64_fromuint8(
+    uint64_t* toptr,
+    int64_t tooffset,
+    const uint8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat32_fromuint8(
+    float* toptr,
+    int64_t tooffset,
+    const uint8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat64_fromuint8(
+    double* toptr,
+    int64_t tooffset,
+    const uint8_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint8_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint32_fromuint16(
+    int32_t* toptr,
+    int64_t tooffset,
+    const uint16_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint16_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint64_fromuint16(
+    int64_t* toptr,
+    int64_t tooffset,
+    const uint16_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint16_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint16_fromuint16(
+    uint16_t* toptr,
+    int64_t tooffset,
+    const uint16_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint16_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint32_fromuint16(
+    uint32_t* toptr,
+    int64_t tooffset,
+    const uint16_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint16_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint64_fromuint16(
+    uint64_t* toptr,
+    int64_t tooffset,
+    const uint16_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint16_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat32_fromuint16(
+    float* toptr,
+    int64_t tooffset,
+    const uint16_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint16_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat64_fromuint16(
+    double* toptr,
+    int64_t tooffset,
+    const uint16_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint16_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint64_fromuint32(
+    int64_t* toptr,
+    int64_t tooffset,
+    const uint32_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint32_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint32_fromuint32(
+    uint32_t* toptr,
+    int64_t tooffset,
+    const uint32_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint32_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint64_fromuint32(
+    uint64_t* toptr,
+    int64_t tooffset,
+    const uint32_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint32_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat32_fromuint32(
+    float* toptr,
+    int64_t tooffset,
+    const uint32_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint32_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat64_fromuint32(
+    double* toptr,
+    int64_t tooffset,
+    const uint32_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint32_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_touint64_fromuint64(
+    uint64_t* toptr,
+    int64_t tooffset,
+    const uint64_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint64_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_toint64_fromuint64(
+    int64_t* toptr,
+    int64_t tooffset,
+    const uint64_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint64_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat32_fromuint64(
+    float* toptr,
+    int64_t tooffset,
+    const uint64_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint64_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat64_fromuint64(
+    double* toptr,
+    int64_t tooffset,
+    const uint64_t* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const uint64_t* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat32_fromfloat32(
+    float* toptr,
+    int64_t tooffset,
+    const float* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const float* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat64_fromfloat32(
+    double* toptr,
+    int64_t tooffset,
+    const float* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const float* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
+EXPORT_SYMBOL struct Error
+  awkward_NumpyArray_merge_tofloat64_fromfloat64(
+    double* toptr,
+    int64_t tooffset,
+    const double* fromptr,
+    int64_t fromoffset,
+    int64_t length,
+    int64_t stride,
+    const double* from_other_ptr,
+    int64_t from_other_offset,
+    int64_t other_length,
+    int64_t other_stride);
 
+/////////////////////////////
   EXPORT_SYMBOL struct Error
     awkward_ListArray_fill_to64_from32(
       int64_t* tostarts,

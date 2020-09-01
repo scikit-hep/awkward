@@ -187,7 +187,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::merge(const ContentPtr& other, int64_t axis) const {
+  None::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
     throw std::runtime_error("undefined operation: None::merge");
   }
 

@@ -1148,7 +1148,7 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           }, py::arg("other"), py::arg("mergebool") = false)
           .def("merge",
                [](const T& self, const py::object& other, int64_t axis) -> py::object {
-            return box(self.merge(unbox_content(other), axis));
+            return box(self.merge(unbox_content(other), axis, 0));
           }, py::arg("other"),
              py::arg("axis") = 0)
           .def("merge_as_union",

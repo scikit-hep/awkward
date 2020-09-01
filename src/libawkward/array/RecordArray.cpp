@@ -973,9 +973,9 @@ namespace awkward {
   }
 
   const ContentPtr
-  RecordArray::merge(const ContentPtr& other, int64_t axis) const {
+  RecordArray::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array(), axis);
+      return merge(raw->array(), axis, depth);
     }
 
     if (!parameters_equal(other.get()->parameters())) {
@@ -987,47 +987,47 @@ namespace awkward {
     }
     else if (IndexedArray32* rawother =
              dynamic_cast<IndexedArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (IndexedArrayU32* rawother =
              dynamic_cast<IndexedArrayU32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (IndexedArray64* rawother =
              dynamic_cast<IndexedArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (IndexedOptionArray32* rawother =
              dynamic_cast<IndexedOptionArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (IndexedOptionArray64* rawother =
              dynamic_cast<IndexedOptionArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (ByteMaskedArray* rawother =
              dynamic_cast<ByteMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (BitMaskedArray* rawother =
              dynamic_cast<BitMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (UnmaskedArray* rawother =
              dynamic_cast<UnmaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (UnionArray8_32* rawother =
              dynamic_cast<UnionArray8_32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (UnionArray8_U32* rawother =
              dynamic_cast<UnionArray8_U32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
     else if (UnionArray8_64* rawother =
              dynamic_cast<UnionArray8_64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+      return rawother->reverse_merge(shallow_copy(), axis, depth);
     }
 
     if (RecordArray* rawother =
@@ -1051,7 +1051,7 @@ namespace awkward {
               field(i).get()->getitem_range_nowrap(0, mylength);
             ContentPtr theirs =
               rawother->field(i).get()->getitem_range_nowrap(0, theirlength);
-            contents.push_back(mine.get()->merge(theirs, axis));
+            contents.push_back(mine.get()->merge(theirs, axis, depth));
           }
           return std::make_shared<RecordArray>(Identities::none(),
                                                parameters_,
@@ -1071,7 +1071,7 @@ namespace awkward {
               field(key).get()->getitem_range_nowrap(0, mylength);
             ContentPtr theirs =
               rawother->field(key).get()->getitem_range_nowrap(0, theirlength);
-            contents.push_back(mine.get()->merge(theirs, axis));
+            contents.push_back(mine.get()->merge(theirs, axis, depth));
           }
           return std::make_shared<RecordArray>(Identities::none(),
                                                parameters_,

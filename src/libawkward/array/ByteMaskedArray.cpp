@@ -829,16 +829,16 @@ namespace awkward {
   }
 
   const ContentPtr
-  ByteMaskedArray::reverse_merge(const ContentPtr& other) const {
+  ByteMaskedArray::reverse_merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
     ContentPtr indexedoptionarray = toIndexedOptionArray64();
     IndexedOptionArray64* raw =
       dynamic_cast<IndexedOptionArray64*>(indexedoptionarray.get());
-    return raw->reverse_merge(other);
+    return raw->reverse_merge(other, axis, depth);
   }
 
   const ContentPtr
-  ByteMaskedArray::merge(const ContentPtr& other, int64_t axis) const {
-    return toIndexedOptionArray64().get()->merge(other, axis);
+  ByteMaskedArray::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
+    return toIndexedOptionArray64().get()->merge(other, axis, depth);
   }
 
   const SliceItemPtr

@@ -628,8 +628,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  VirtualArray::merge(const ContentPtr& other, int64_t axis) const {
-    return array().get()->merge(other, axis);
+  VirtualArray::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
+    return array().get()->merge(other, axis, depth);
   }
 
   const SliceItemPtr

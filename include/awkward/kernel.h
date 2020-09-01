@@ -994,6 +994,23 @@ namespace kernel {
     int64_t length,
     int64_t size);
 
+  ERROR RegularArray_merge_offsets_64(
+    int64_t* tooffsets,
+    int64_t tolength,
+    int64_t length,
+    int64_t size,
+    int64_t otherlength,
+    int64_t othersize);
+
+  ERROR RegularArray_merge_tags_8_index_64(
+    int8_t* totags,
+    int64_t* toindex,
+    int64_t tolength,
+    int64_t length,
+    int64_t size,
+    int64_t otherlength,
+    int64_t othersize);
+
   template <typename T>
   ERROR
   ListOffsetArray_compact_offsets_64(
@@ -1051,6 +1068,32 @@ namespace kernel {
     const bool* fromptr,
     int64_t fromoffset,
     int64_t length);
+
+    template <typename FROM, typename TO>
+    ERROR NumpyArray_merge(
+      TO* toptr,
+      int64_t tooffset,
+      const FROM* fromptr,
+      int64_t fromoffset,
+      int64_t length,
+      int64_t stride,
+      const FROM* from_other_ptr,
+      int64_t from_other_offset,
+      int64_t other_length,
+      int64_t other_stride);
+
+    template <typename TO>
+    ERROR NumpyArray_merge_frombool(
+      TO* toptr,
+      int64_t tooffset,
+      const bool* fromptr,
+      int64_t fromoffset,
+      int64_t length,
+      int64_t stride,
+      const bool* from_other_ptr,
+      int64_t from_other_offset,
+      int64_t other_length,
+      int64_t other_stride);
 
   template <typename FROM, typename TO>
   ERROR ListArray_fill(
