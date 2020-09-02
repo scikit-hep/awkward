@@ -840,6 +840,7 @@ namespace awkward {
       }
     }
     else if (posaxis == depth + 1) {
+
       if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
         ContentPtr theircontent = rawother->content();
         int64_t mylength = content_.get()->length();
@@ -896,6 +897,21 @@ namespace awkward {
       }
     }
     else {
+
+      if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
+        ContentPtr theircontent = rawother->content();
+        ContentPtr next = content_.get()->merge(theircontent, posaxis, depth + 1);
+
+        return std::make_shared<RegularArray>(Identities::none(),
+                                              util::Parameters(),
+                                              next,
+                                              size_);
+      } else {
+        throw std::invalid_argument(
+          std::string("cannot merge ") + classname() + std::string(" with ")
+          + other.get()->classname() + FILENAME(__LINE__));
+      }
+
       return merge_as_union(other);
     }
   }
