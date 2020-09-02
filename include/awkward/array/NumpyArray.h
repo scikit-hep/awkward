@@ -788,9 +788,17 @@ namespace awkward {
   const std::shared_ptr<void> cast_to_type(const FROM* data,
                                            int64_t length) const;
 
-  util::dtype merged_dtype(const util::dtype other_dtype, const std::string& other_format) const;
+  util::dtype merged_dtype(const util::dtype other_dtype,
+                           const std::string& other_format) const;
 
-  std::tuple<std::vector<ssize_t>, std::vector<ssize_t>> merged_shape_and_strides(const std::vector<ssize_t>& other_shape, int64_t itemsize, int64_t axis) const;
+  std::tuple<std::vector<ssize_t>, std::vector<ssize_t>>
+  merged_shape_and_strides(const std::vector<ssize_t>& other_shape,
+                           int64_t itemsize,
+                           int64_t axis) const;
+
+  const ContentPtr merge_axis0(const ContentPtr& other,
+                               int64_t axis = 0,
+                               int64_t depth = 0) const;
 
   /// @brief See #ptr.
   std::shared_ptr<void> ptr_;

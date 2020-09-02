@@ -1701,6 +1701,26 @@ namespace awkward {
 
   const ContentPtr
   NumpyArray::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
+      return merge_axis0(other);
+    } else if (posaxis > depth) {
+      if (NumpyArray* rawother = dynamic_cast<NumpyArray*>(other.get())) {
+        return toRegularArray().get()->merge(rawother->toRegularArray(), axis, depth);
+      } else {
+        throw std::invalid_argument(
+          std::string("cannot merge ") + classname() + std::string(" with ")
+          + other.get()->classname() + FILENAME(__LINE__));
+      }
+    } else {
+      throw std::invalid_argument(
+        std::string("cannot merge ") + classname() + std::string(" with ")
+        + other.get()->classname() + FILENAME(__LINE__));
+    }
+  }
+
+  const ContentPtr
+  NumpyArray::merge_axis0(const ContentPtr& other, int64_t axis, int64_t depth) const {
 
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
       return merge(raw->array(), axis, depth);
@@ -1778,9 +1798,6 @@ namespace awkward {
 
     NumpyArray contiguous_self = contiguous();
     if (NumpyArray* rawother = dynamic_cast<NumpyArray*>(other.get())) {
-      if (axis != 0) {
-        return toRegularArray().get()->merge(rawother->toRegularArray(), axis, depth);
-      }
       util::dtype dtype = merged_dtype(rawother->dtype(), rawother->format());
 
       if (ndim() != rawother->ndim()) {
