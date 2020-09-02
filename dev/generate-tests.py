@@ -500,9 +500,7 @@ def gencudakerneltests(tests):
                                 )
                         f.write(" " * 4 + "assert not ret_pass.str\n")
                     else:
-                        f.write(
-                            " " * 4 + "assert funcC({0}).str.contents\n".format(args)
-                        )
+                        f.write(" " * 4 + "assert funcC({0}).str\n".format(args))
                     f.write("\n")
 
 

@@ -41,7 +41,35 @@ KERNEL_WHITELIST = [
     "awkward_ByteMaskedArray_toIndexedOptionArray",
     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
     "awkward_combinations",
-    # "awkward_IndexedArray_simplify", Fails on Python 3.5, 3.6 and 3.7
+    "awkward_IndexedArray_simplify",
+    "awkward_ListArray_validity",
+    "awkward_UnionArray_validity",
+    "awkward_index_carry",
+    "awkward_ByteMaskedArray_getitem_carry",
+    "awkward_IndexedArray_validity",
+    "awkward_ByteMaskedArray_overlay_mask",
+    "awkward_reduce_count_64",
+    "awkward_reduce_min",
+    "awkward_reduce_max",
+    "awkward_reduce_argmin",
+    "awkward_reduce_argmax",
+    "awkward_reduce_argmin_bool_64",
+    "awkward_reduce_argmax_bool_64",
+    "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+    "awkward_RegularArray_getitem_carry",
+    "awkward_NumpyArray_getitem_next_array",
+    "awkward_RegularArray_localindex",
+    "awkward_NumpyArray_contiguous_next",
+    "awkward_NumpyArray_getitem_next_range",
+    "awkward_NumpyArray_getitem_next_range_advanced",
+    "awkward_ListArray_getitem_next_range_spreadadvanced",
+    "awkward_RegularArray_getitem_next_range",
+    "awkward_RegularArray_getitem_next_range_spreadadvanced",
+    "awkward_RegularArray_getitem_next_array",
+    "awkward_missing_repeat",
+    "awkward_Identities_getitem_carry",
+    "awkward_RegularArray_getitem_jagged_expand",
+    "awkward_ListArray_getitem_jagged_expand",
 ]
 
 KERNEL_CURIOUS = [
@@ -50,63 +78,42 @@ KERNEL_CURIOUS = [
     "awkward_Identities_from_UnionArray",
     "awkward_index_rpad_and_clip_axis0",
     "awkward_RegularArray_rpad_and_clip_axis1",
-    "awkward_ListArray_rpad_and_clip_length_axis1",
-    "awkward_ListArray_localindex",
-    "awkward_ByteMaskedArray_overlay_mask",
+    "awkward_ListArray_localindex",  # nested for loop
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_BitMaskedArray_to_IndexedOptionArray",
-    "awkward_reduce_count_64",
-    "awkward_reduce_countnonzero",
-    "awkward_reduce_sum_int64_bool_64",
-    "awkward_reduce_sum_int32_bool_64",
-    "awkward_reduce_sum_bool",
-    "awkward_reduce_prod_int64_bool_64",
-    "awkward_reduce_prod_int32_bool_64",
-    "awkward_reduce_prod_bool",
-    "awkward_reduce_min",
-    "awkward_reduce_max",
-    "awkward_reduce_argmin",
-    "awkward_reduce_argmax",
-    "awkward_reduce_argmax_bool_64",
+    "awkward_reduce_countnonzero",  # +=
+    "awkward_reduce_sum_int64_bool_64",  # +=
+    "awkward_reduce_sum_int32_bool_64",  # +=
+    "awkward_reduce_sum_bool",  # |=
+    "awkward_reduce_prod_int64_bool_64",  # *=
+    "awkward_reduce_prod_int32_bool_64",  # *=
+    "awkward_reduce_prod_bool",  # &=
     "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
-    "awkward_RegularArray_localindex",
-    "awkward_NumpyArray_reduce_adjust_starts_64",
-    "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
-    "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
-    "awkward_NumpyArray_contiguous_next",
-    "awkward_NumpyArray_getitem_next_range",
-    "awkward_NumpyArray_getitem_next_range_advanced",
-    "awkward_NumpyArray_getitem_next_array",
-    "awkward_Identities_getitem_carry",
-    "awkward_RegularArray_getitem_next_range",
-    "awkward_RegularArray_getitem_next_range_spreadadvanced",
-    "awkward_RegularArray_getitem_next_array_regularize",
-    "awkward_RegularArray_getitem_next_array",
-    "awkward_RegularArray_getitem_carry",
-    "awkward_RegularArray_getitem_jagged_expand",
-    "awkward_ListArray_getitem_jagged_expand",
-    "awkward_missing_repeat",
-    "awkward_IndexedArray_validity",
-    "awkward_ListArray_validity",
-    "awkward_UnionArray_validity",
-    "awkward_ByteMaskedArray_getitem_carry",
-    "awkward_index_carry",
-    "awkward_ListArray_min_range",
+    "awkward_NumpyArray_reduce_adjust_starts_64",  # +=
+    "awkward_NumpyArray_reduce_adjust_starts_shifts_64",  # +=
+    "awkward_RegularArray_getitem_next_array_regularize",  # +=
 ]
 
 
-def traverse(node, args={}, forflag=False, declared=[]):
+def traverse(node, args={}, forflag=False, declared=[], nested=False):
     if node.__class__.__name__ == "For":
+        if nested:
+            thread_var = "thready_dim"
+        else:
+            thread_var = "threadx_dim"
         if len(node.iter.args) == 1:
-            code = "if (thread_id < {0}) {{\n".format(traverse(node.iter.args[0]))
+            code = "if ({0} < {1}) {{\n".format(thread_var, traverse(node.iter.args[0]))
         elif len(node.iter.args) == 2:
-            code = "if ((thread_id < {0}) && (thread_id >= {1})) {{\n".format(
-                traverse(node.iter.args[1]), traverse(node.iter.args[0])
+            code = "if (({0} < {1}) && ({0} >= {2})) {{\n".format(
+                thread_var, traverse(node.iter.args[1]), traverse(node.iter.args[0])
             )
         else:
             raise Exception("Unable to handle Python for loops with >2 args")
         for subnode in node.body:
-            code += traverse(subnode, args, True, declared)
+            if subnode.__class__.__name__ == "For":
+                code += traverse(subnode, args, True, declared, True)
+            else:
+                code += traverse(subnode, args, True, declared)
         code += "}\n"
     elif node.__class__.__name__ == "While":
         assert node.test.__class__.__name__ == "Compare"
@@ -140,9 +147,20 @@ def traverse(node, args={}, forflag=False, declared=[]):
         for subnode in node.orelse:
             code += " " * 2 + traverse(subnode, args, forflag, declared) + "\n"
         code += "}\n"
+    elif node.__class__.__name__ == "BoolOp":
+        if node.op.__class__.__name__ == "Or":
+            operator = "||"
+        assert len(node.values) == 2
+        code = "{0} {1} {2}".format(
+            traverse(node.values[0], args, forflag, declared),
+            operator,
+            traverse(node.values[1], args, forflag, declared),
+        )
     elif node.__class__.__name__ == "Name":
         if forflag and node.id == "i":
-            code = "thread_id"
+            code = "threadx_dim"
+        elif forflag and node.id == "j":
+            code = "thready_dim"
         else:
             code = node.id
     elif node.__class__.__name__ == "Num":
@@ -150,19 +168,30 @@ def traverse(node, args={}, forflag=False, declared=[]):
     elif node.__class__.__name__ == "BinOp":
         left = traverse(node.left, args, forflag, declared)
         right = traverse(node.right, args, forflag, declared)
-        if left == "i":
-            left = "thread_id"
-        if right == "i":
-            right = "thread_id"
+        if forflag and left == "i":
+            left = "threadx_dim"
+        elif forflag and left == "j":
+            left = "thready_dim"
+        if forflag and right == "i":
+            right = "threadx_dim"
+        elif forflag and right == "j":
+            right = "thready_dim"
         code = "({0} {1} {2})".format(
             left, traverse(node.op, args, forflag, declared), right,
         )
     elif node.__class__.__name__ == "UnaryOp":
         if node.op.__class__.__name__ == "USub":
-            if sys.version_info[0] == 3 and sys.version_info[1] in [5, 6, 7]:
-                code = "-{0}".format(node.operand.n)
-            else:
-                code = "-{0}".format(node.operand.value)
+            code = "-{0}".format(traverse(node.operand, args, forflag, declared))
+        elif node.op.__class__.__name__ == "Not":
+            code = "!{0}".format(traverse(node.operand, args, forflag, declared))
+        else:
+            raise Exception(
+                "Unhandled UnaryOp node {0}. Please inform the developers.".format(
+                    node.op.__class__.__name__
+                )
+            )
+    elif node.__class__.__name__ == "BitOr":
+        code = "|"
     elif node.__class__.__name__ == "Sub":
         code = "-"
     elif node.__class__.__name__ == "Add":
@@ -170,8 +199,18 @@ def traverse(node, args={}, forflag=False, declared=[]):
     elif node.__class__.__name__ == "Mult":
         code = "*"
     elif node.__class__.__name__ == "Subscript":
-        if node.slice.value.__class__.__name__ == "Name" and node.slice.value.id == "i":
-            code = node.value.id + "[thread_id]"
+        if (
+            node.slice.value.__class__.__name__ == "Name"
+            and forflag
+            and node.slice.value.id == "i"
+        ):
+            code = node.value.id + "[threadx_dim]"
+        elif (
+            node.slice.value.__class__.__name__ == "Name"
+            and forflag
+            and node.slice.value.id == "j"
+        ):
+            code = node.value.id + "[thready_dim]"
         elif (
             node.slice.value.__class__.__name__ == "Constant"
             or node.slice.value.__class__.__name__ == "BinOp"
@@ -250,15 +289,23 @@ def traverse(node, args={}, forflag=False, declared=[]):
             flag = True
         else:
             flag = False
-        if node.value.__class__.__name__ == "Name" and node.value.id == "i":
+        if (
+            node.value.__class__.__name__ == "Name"
+            and forflag
+            and (node.value.id == "i" or node.value.id == "j")
+        ):
             code = ""
             if flag and (
                 traverse(node.targets[0], args, forflag, declared) not in declared
             ):
                 code += "auto "
                 declared.append(traverse(node.targets[0], args, forflag, declared))
-            code += "{0} = thread_id;\n".format(
-                traverse(node.targets[0], args, forflag, declared)
+            if node.value.id == "i":
+                thread_var = "threadx_dim"
+            elif node.value.id == "j":
+                thread_var = "thready_dim"
+            code += "{0} = {1};\n".format(
+                traverse(node.targets[0], args, forflag, declared), thread_var
             )
         else:
             if node.value.__class__.__name__ == "IfExp":
@@ -360,15 +407,21 @@ def traverse(node, args={}, forflag=False, declared=[]):
             flag = True
         else:
             flag = False
-        if node.value.__class__.__name__ == "Name" and node.value.id == "i":
+        if node.value.__class__.__name__ == "Name" and (
+            node.value.id == "i" or node.value.id == "j"
+        ):
             code = ""
             if flag and (
                 traverse(node.target, args, forflag, declared) not in declared
             ):
                 code += "auto "
                 declared.append(traverse(node.target, args, forflag, declared))
-            code += "{0} = thread_id;\n".format(
-                traverse(node.target, args, forflag, declared)
+            if node.value.id == "i":
+                thread_var = "threadx_dim"
+            elif node.value.id == "j":
+                thread_var = "thready_dim"
+            code += "{0} = {1};\n".format(
+                traverse(node.target, args, forflag, declared), thread_var
             )
         else:
             if node.value.__class__.__name__ == "IfExp":
@@ -473,11 +526,11 @@ def getbody(pycode, args):
     tree = ast.parse(pycode).body[0]
     declared = []
     for node in tree.body:
-        code += traverse(node, args, False, declared)
+        code += traverse(node, args, [], declared)
     return code
 
 
-def getlenarg(pycode):
+def getxthreads(pycode):
     tree = ast.parse(pycode).body[0]
     forargs = set()
     for node in tree.body:
@@ -491,9 +544,36 @@ def getlenarg(pycode):
             forargs.add(traverse(node.test.comparators[0]))
     if len(forargs) == 0:
         return 1
-    else:
-        assert len(forargs) == 1
+    elif len(forargs) == 1:
         return next(iter(forargs))
+    else:
+        lenarg = "std::max("
+        count = 0
+        for arg in forargs:
+            if count == 0:
+                lenarg += arg
+                count += 1
+            else:
+                lenarg += ", " + arg
+        lenarg += ")"
+        return lenarg
+
+
+def getythreads(pycode):
+    tree = ast.parse(pycode).body[0]
+    forargs = set()
+    for node in tree.body:
+        if node.__class__.__name__ == "For":
+            for subnode in node.body:
+                if subnode.__class__.__name__ == "For":
+                    forargs.add(traverse(node.iter.args[0]))
+    assert len(forargs) == 0 or len(forargs) == 1
+    if len(forargs) == 0:
+        return "1"
+    elif len(forargs) == 1:
+        return next(iter(forargs))
+    else:
+        raise Exception("Only doubly nested for loops can be handled")
 
 
 def getctype(typename):
@@ -523,7 +603,11 @@ def gettemplateargs(spec):
                 if len(typelist) < i + 1:
                     typelist.append(list(childfunc["args"][i].values())[0])
                 else:
-                    if typelist[i] != list(childfunc["args"][i].values())[0]:
+                    if (
+                        typelist[i] != list(childfunc["args"][i].values())[0]
+                        and list(childfunc["args"][i].keys())[0]
+                        not in templateargs.keys()
+                    ):
                         templateargs[list(childfunc["args"][i].keys())[0]] = chr(
                             templascii
                         )
@@ -640,8 +724,8 @@ def getcode(indspec):
         parent=True,
         solo="specializations" in indspec.keys(),
     )
-    code += """  int64_t block_id = blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+    code += """  int64_t threadx_dim = blockIdx.x * blockDim.x + threadIdx.x;
+int64_t thready_dim = blockIdx.y * blockDim.y + threadIdx.y;
 """
     code += getbody(indspec["definition"], args)
     code += "}\n\n"
@@ -649,19 +733,23 @@ int64_t thread_id = block_id * blockDim.x + threadIdx.x;
         for childfunc in indspec["specializations"]:
             args = getchildargs(childfunc, indspec)
             code += getdecl(childfunc["name"], args, "")
-            lenarg = getlenarg(indspec["definition"])
             code += """  dim3 blocks_per_grid;
 dim3 threads_per_block;
 
-if ({0} > 1024) {{
-blocks_per_grid = dim3(ceil({0} / 1024.0), 1, 1);
-threads_per_block = dim3(1024, 1, 1);
+if ({0} > 1024 && {1} > 1024) {{
+  blocks_per_grid = dim3(ceil({0} / 1024.0), ceil({1}/1024.0), 1);
+  threads_per_block = dim3(1024, 1024, 1);
+}} else if ({0} > 1024) {{
+  blocks_per_grid = dim3(ceil({0} / 1024.0), 1, 1);
+  threads_per_block = dim3(1024, {1}, 1);
+}} else if ({1} > 1024) {{
+  blocks_per_grid = dim3(1, ceil({1}/1024.0), 1);
+  threads_per_block = dim3({0}, 1024, 1);
 }} else {{
-blocks_per_grid = dim3(1, 1, 1);
-threads_per_block = dim3({0}, 1, 1);
-}}
-""".format(
-                lenarg
+  blocks_per_grid = dim3(1, 1, 1);
+  threads_per_block = dim3({0}, {1}, 1);
+}}""".format(
+                getxthreads(indspec["definition"]), getythreads(indspec["definition"])
             )
             code += " " * 2 + "ERROR h_err = success();\n"
             code += " " * 2 + "ERROR* err = &h_err;\n"
@@ -691,19 +779,23 @@ threads_per_block = dim3({0}, 1, 1);
             code += "}\n\n"
     else:
         code += getdecl(indspec["name"], args, "")
-        lenarg = getlenarg(indspec["definition"])
-        code += """  dim3 blocks_per_grid;
+        code += """dim3 blocks_per_grid;
 dim3 threads_per_block;
 
-if ({0} > 1024) {{
-blocks_per_grid = dim3(ceil({0} / 1024.0), 1, 1);
-threads_per_block = dim3(1024, 1, 1);
+if ({0} > 1024 && {1} > 1024) {{
+  blocks_per_grid = dim3(ceil({0} / 1024.0), ceil({1}/1024.0), 1);
+  threads_per_block = dim3(1024, 1024, 1);
+}} else if ({0} > 1024) {{
+  blocks_per_grid = dim3(ceil({0} / 1024.0), 1, 1);
+  threads_per_block = dim3(1024, {1}, 1);
+}} else if ({1} > 1024) {{
+  blocks_per_grid = dim3(1, ceil({1}/1024.0), 1);
+  threads_per_block = dim3({0}, 1024, 1);
 }} else {{
-blocks_per_grid = dim3(1, 1, 1);
-threads_per_block = dim3({0}, 1, 1);
-}}
-""".format(
-            lenarg
+  blocks_per_grid = dim3(1, 1, 1);
+  threads_per_block = dim3({0}, {1}, 1);
+}}""".format(
+            getxthreads(indspec["definition"]), getythreads(indspec["definition"])
         )
         code += " " * 2 + "ERROR h_err = success();\n"
         code += " " * 2 + "ERROR* err = &h_err;\n"
@@ -744,6 +836,7 @@ if __name__ == "__main__":
 #include "awkward/kernels/identities.h"
 #include "awkward/kernels/getitem.h"
 #include "awkward/kernels/reducers.h"
+#include <algorithm>
 #include <cstdio>
 
 """
