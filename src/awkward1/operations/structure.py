@@ -2442,14 +2442,17 @@ def virtual(
         generate, args, kwargs, form=form, length=length
     )
     if cache is not None:
-        cache = awkward1.layout.ArrayCache(cache)
+        toattach = awkward1._util.MappingProxy.maybe_wrap(cache)
+        cache = awkward1.layout.ArrayCache(toattach)
+    else:
+        toattach = None
 
     out = awkward1.layout.VirtualArray(
         gen, cache, cache_key=cache_key, parameters=parameters
     )
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior=behavior)
+        return awkward1._util.wrap(out, behavior=behavior, cache=toattach)
     else:
         return out
 
@@ -2525,8 +2528,11 @@ def with_cache(array, cache, chain=None, highlevel=True):
             + awkward1._util.exception_suffix(__file__)
         )
 
-    if not isinstance(cache, awkward1.layout.ArrayCache):
-        cache = awkward1.layout.ArrayCache(cache)
+    if isinstance(cache, awkward1.layout.ArrayCache):
+        cache = cache.mutablemapping
+
+    toattach = awkward1._util.MappingProxy.maybe_wrap(cache)
+    cache = awkward1.layout.ArrayCache(toattach)
 
     def getfunction(layout, depth):
         if isinstance(layout, awkward1.layout.VirtualArray):
@@ -2537,9 +2543,11 @@ def with_cache(array, cache, chain=None, highlevel=True):
             elif layout.cache is None:
                 newcache = cache
             elif chain == "first":
-                newcache = awkward1.layout.ArrayCache(_CacheChain(cache, layout.cache))
+                raise NotImplementedError("To properly chain caches we need to find and chain all layout caches, returning them as highlevel")
+                # newcache = awkward1.layout.ArrayCache(_CacheChain(cache, layout.cache))
             elif chain == "last":
-                newcache = awkward1.layout.ArrayCache(_CacheChain(layout.cache, cache))
+                raise NotImplementedError("To properly chain caches we need to find and chain all layout caches, returning them as highlevel")
+                # newcache = awkward1.layout.ArrayCache(_CacheChain(layout.cache, cache))
             return lambda: awkward1.layout.VirtualArray(
                 layout.generator,
                 newcache,
@@ -2554,7 +2562,7 @@ def with_cache(array, cache, chain=None, highlevel=True):
         awkward1.operations.convert.to_layout(array), getfunction
     )
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array), toattach)
     else:
         return out
 

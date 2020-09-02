@@ -6,11 +6,12 @@ import inspect
 import re
 import sys
 import os
+import weakref
 
 try:
-    from collections.abc import Mapping
+    from collections.abc import Mapping, MutableMapping
 except ImportError:
-    from collections import Mapping
+    from collections import Mapping, MutableMapping
 
 import awkward1.layout
 import awkward1.partition
@@ -1439,3 +1440,35 @@ def minimally_touching_string(limit_length, layout, behavior):
                 + ", ... "
                 + "".join(reversed(right)).lstrip(" ")
             )
+
+
+class MappingProxy(MutableMapping):
+    """A type suitable for use with layout.ArrayCache
+    
+    This can be used to wrap plain dict instances if need be,
+    since they are not able to be weak referenced.
+    """
+
+    def __init__(self, base):
+        self.base = base
+
+    @classmethod
+    def maybe_wrap(cls, mapping):
+        if type(mapping) is dict:
+            return cls(mapping)
+        return mapping
+
+    def __getitem__(self, key):
+        return self.base[key]
+
+    def __setitem__(self, key, value):
+        self.base[key] = value
+
+    def __delitem__(self, key):
+        del self.base[key]
+
+    def __iter__(self):
+        return iter(self.base)
+
+    def __len__(self):
+        return len(self.base)
