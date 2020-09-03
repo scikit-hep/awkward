@@ -854,8 +854,8 @@ namespace awkward {
 
         struct Error err1 = kernel::RegularArray_merge_tags_8_index_64(
           kernel::lib::cpu,   // DERIVE
-          tags.ptr().get(),
-          index.ptr().get(),
+          tags.data(),
+          index.data(),
           mylength + theirlength,
           mylength,
           mysize,
@@ -877,7 +877,7 @@ namespace awkward {
         Index64 offsets(offsets_length + 1);
         struct Error err2 = kernel::RegularArray_merge_offsets_64(
           kernel::lib::cpu,   // DERIVE
-          offsets.ptr().get(),
+          offsets.data(),
           offsets_length + 1,
           mylength,
           mysize,
