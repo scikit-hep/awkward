@@ -358,7 +358,7 @@ PyArrayCache::set(const std::string& key, const ak::ContentPtr& value) {
                                      "surrogateescape"));
   const py::object mapping = mutablemapping();
   if ( ! mapping.is(py::none()) ) {
-    mutablemapping().attr("__setitem__")(pykey, box(value));
+    mapping.attr("__setitem__")(pykey, box(value));
   }
 }
 
