@@ -324,6 +324,9 @@ PyArrayCache::PyArrayCache(const py::object& mutablemapping)
 
 const py::object
 PyArrayCache::mutablemapping() const {
+  if ( mutablemapping_.is(py::none()) ) {
+    return mutablemapping_;
+  }
   const py::object out = mutablemapping_();
   if ( out.is(py::none()) ) {
     throw std::runtime_error(
@@ -353,7 +356,10 @@ PyArrayCache::set(const std::string& key, const ak::ContentPtr& value) {
   py::str pykey(PyUnicode_DecodeUTF8(key.data(),
                                      key.length(),
                                      "surrogateescape"));
-  mutablemapping().attr("__setitem__")(pykey, box(value));
+  const py::object mapping = mutablemapping();
+  if ( ! mapping.is(py::none()) ) {
+    mutablemapping().attr("__setitem__")(pykey, box(value));
+  }
 }
 
 const std::string
@@ -392,8 +398,8 @@ make_PyArrayCache(const py::handle& m, const std::string& name) {
         self.set(key, unbox_content(value));
       })
       .def("__delitem__", [](PyArrayCache& self,
-                             const std::string& key) -> py::object {
-        return self.mutablemapping().attr("__delitem__")(py::cast(key));
+                             const std::string& key) -> void {
+        self.mutablemapping().attr("__delitem__")(py::cast(key));
       })
       .def("__iter__", [](const PyArrayCache& self) -> py::object {
         return self.mutablemapping().attr("__iter__")();

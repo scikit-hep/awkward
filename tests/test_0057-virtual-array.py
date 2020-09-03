@@ -270,6 +270,14 @@ def test_basic():
     assert awkward1.to_list(virtualarray.array) == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert awkward1.to_list(d[virtualarray.cache_key]) == [1.1, 2.2, 3.3, 4.4, 5.5]
 
+    cache = awkward1.layout.ArrayCache(None)
+
+    virtualarray = awkward1.layout.VirtualArray(generator, cache)
+    assert virtualarray.peek_array is None
+    assert virtualarray.array is not None
+    assert virtualarray.peek_array is None
+    assert awkward1.to_list(virtualarray.array) == [1.1, 2.2, 3.3, 4.4, 5.5]
+
 def test_slice():
     generator = awkward1.layout.ArrayGenerator(
         lambda: awkward1.Array([[1.1, 2.2, 3.3, 4.4, 5.5], [6.6, 7.7, 8.8], [100, 200, 300, 400]]),
