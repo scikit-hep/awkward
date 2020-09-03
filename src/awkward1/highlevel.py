@@ -406,16 +406,11 @@ class Array(
             return self._array._str(limit_value=limit_value)
 
         def _repr(self, limit_value=40, limit_total=85):
-            import awkward1.operations.structure
-
             suffix = _suffix(self)
             limit_value -= len(suffix)
 
-            layout = awkward1.operations.structure.with_cache(
-                self._layout, {}, chain="last", highlevel=False
-            )
             value = awkward1._util.minimally_touching_string(
-                limit_value, layout, self._behavior
+                limit_value, self._array._layout, self._array._behavior
             )
 
             try:
@@ -424,7 +419,7 @@ class Array(
                 name = type(self._array).__name__
             limit_type = limit_total - (len(value) + len(name) + len("<.mask  type=>"))
             typestr = repr(
-                str(awkward1._util.highlevel_type(layout, self._array._behavior, True))
+                str(awkward1._util.highlevel_type(self._array._layout, self._array._behavior, True))
             )
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
@@ -1242,26 +1237,16 @@ class Array(
         return self._repr()
 
     def _str(self, limit_value=85):
-        import awkward1.operations.structure
-
-        layout = awkward1.operations.structure.with_cache(
-            self._layout, {}, chain="last", highlevel=False
-        )
         return awkward1._util.minimally_touching_string(
-            limit_value, layout, self._behavior
+            limit_value, self._layout, self._behavior
         )
 
     def _repr(self, limit_value=40, limit_total=85):
-        import awkward1.operations.structure
-
         suffix = _suffix(self)
         limit_value -= len(suffix)
 
-        layout = awkward1.operations.structure.with_cache(
-            self._layout, {}, chain="last", highlevel=False
-        )
         value = awkward1._util.minimally_touching_string(
-            limit_value, layout, self._behavior
+            limit_value, self._layout, self._behavior
         )
 
         try:
@@ -1269,7 +1254,7 @@ class Array(
         except AttributeError:
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(str(awkward1._util.highlevel_type(layout, self._behavior, True)))
+        typestr = repr(str(awkward1._util.highlevel_type(self._layout, self._behavior, True)))
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
@@ -1970,26 +1955,16 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         return self._repr()
 
     def _str(self, limit_value=85):
-        import awkward1.operations.structure
-
-        layout = awkward1.operations.structure.with_cache(
-            self._layout, {}, chain="last", highlevel=False
-        )
         return awkward1._util.minimally_touching_string(
-            limit_value + 2, layout, self._behavior
+            limit_value + 2, self._layout, self._behavior
         )[1:-1]
 
     def _repr(self, limit_value=40, limit_total=85):
-        import awkward1.operations.structure
-
         suffix = _suffix(self)
         limit_value -= len(suffix)
 
-        layout = awkward1.operations.structure.with_cache(
-            self._layout, {}, chain="last", highlevel=False
-        )
         value = awkward1._util.minimally_touching_string(
-            limit_value + 2, layout, self._behavior
+            limit_value + 2, self._layout, self._behavior
         )[1:-1]
 
         try:
@@ -1998,7 +1973,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
         typestr = repr(
-            str(awkward1._util.highlevel_type(layout, self._behavior, False))
+            str(awkward1._util.highlevel_type(self._layout, self._behavior, False))
         )
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
