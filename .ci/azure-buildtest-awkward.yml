@@ -257,7 +257,7 @@ jobs:
       - script: |
           python dev/generate-cuda.py
         displayName: "Generate CUDA kernels"
-        condition: "ne(variables['python.version'], '3.8')"
+        condition: "eq(variables['python.version'], '3.8')"
       - script: |
           python -m pip install wheel
           bash cuda-build.sh
