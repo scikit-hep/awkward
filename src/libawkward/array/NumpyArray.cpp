@@ -1707,16 +1707,57 @@ namespace awkward {
     } else if (posaxis > depth) {
       if (NumpyArray* rawother = dynamic_cast<NumpyArray*>(other.get())) {
         return toRegularArray().get()->merge(rawother->toRegularArray(), axis, depth);
-      } else {
-        throw std::invalid_argument(
-          std::string("cannot merge ") + classname() + std::string(" with ")
-          + other.get()->classname() + FILENAME(__LINE__));
+      } else if (dynamic_cast<EmptyArray*>(other.get())) {
+        return shallow_copy();
       }
-    } else {
-      throw std::invalid_argument(
-        std::string("cannot merge ") + classname() + std::string(" with ")
-        + other.get()->classname() + FILENAME(__LINE__));
+      else if (IndexedArray32* rawother =
+               dynamic_cast<IndexedArray32*>(other.get())) {
+        return rawother->reverse_merge(toRegularArray(), posaxis, depth);
+      }
+      else if (IndexedArrayU32* rawother =
+               dynamic_cast<IndexedArrayU32*>(other.get())) {
+        return rawother->reverse_merge(toRegularArray(), posaxis, depth);
+      }
+      else if (IndexedArray64* rawother =
+               dynamic_cast<IndexedArray64*>(other.get())) {
+        return rawother->reverse_merge(toRegularArray(), posaxis, depth);
+      }
+      else if (IndexedOptionArray32* rawother =
+               dynamic_cast<IndexedOptionArray32*>(other.get())) {
+        return rawother->reverse_merge(toRegularArray(), posaxis, depth);
+      }
+      else if (IndexedOptionArray64* rawother =
+               dynamic_cast<IndexedOptionArray64*>(other.get())) {
+        return rawother->reverse_merge(toRegularArray(), posaxis, depth);
+      }
+      else if (ByteMaskedArray* rawother =
+               dynamic_cast<ByteMaskedArray*>(other.get())) {
+        return rawother->reverse_merge(toRegularArray(), posaxis, depth);
+      }
+      else if (BitMaskedArray* rawother =
+               dynamic_cast<BitMaskedArray*>(other.get())) {
+        return rawother->reverse_merge(toRegularArray(), posaxis, depth);
+      }
+      else if (UnmaskedArray* rawother =
+               dynamic_cast<UnmaskedArray*>(other.get())) {
+        return rawother->reverse_merge(toRegularArray(), posaxis, depth);
+      }
+      else if (UnionArray8_32* rawother =
+               dynamic_cast<UnionArray8_32*>(other.get())) {
+        return rawother->reverse_merge(toRegularArray(), posaxis, depth);
+      }
+      else if (UnionArray8_U32* rawother =
+               dynamic_cast<UnionArray8_U32*>(other.get())) {
+        return rawother->reverse_merge(toRegularArray(), posaxis, depth);
+      }
+      else if (UnionArray8_64* rawother =
+               dynamic_cast<UnionArray8_64*>(other.get())) {
+        return rawother->reverse_merge(toRegularArray(), posaxis, depth);
+      }
     }
+    throw std::invalid_argument(
+      std::string("cannot merge ") + classname() + std::string(" with ")
+      + other.get()->classname() + FILENAME(__LINE__));
   }
 
   const ContentPtr
