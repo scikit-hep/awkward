@@ -410,7 +410,7 @@ class Array(
             limit_value -= len(suffix)
 
             value = awkward1._util.minimally_touching_string(
-                limit_value, self._layout, self._behavior
+                limit_value, self._array._layout, self._array._behavior
             )
 
             try:
@@ -419,7 +419,7 @@ class Array(
                 name = type(self._array).__name__
             limit_type = limit_total - (len(value) + len(name) + len("<.mask  type=>"))
             typestr = repr(
-                str(awkward1._util.highlevel_type(self._layout, self._array._behavior, True))
+                str(awkward1._util.highlevel_type(self._array._layout, self._array._behavior, True))
             )
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
