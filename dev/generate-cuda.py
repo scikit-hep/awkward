@@ -593,26 +593,20 @@ def getctype(typename):
 
 
 def gettemplateargs(spec):
-    templateargs = {}
+    templateargs = OrderedDict()
     if "specializations" in spec.keys():
         typelist = []
-        count = 0
         templascii = 65
-        for childfunc in spec["specializations"]:
-            for i in range(len(childfunc["args"])):
-                if len(typelist) < i + 1:
-                    typelist.append(list(childfunc["args"][i].values())[0])
-                else:
-                    if (
-                        typelist[i] != list(childfunc["args"][i].values())[0]
-                        and list(childfunc["args"][i].keys())[0]
-                        not in templateargs.keys()
-                    ):
-                        templateargs[list(childfunc["args"][i].keys())[0]] = chr(
-                            templascii
-                        )
-                        count += 1
-                        templascii += 1
+        for arg in spec["specializations"][0]["args"]:
+            typelist.append(list(arg.values())[0])
+        for i in range(len(spec["specializations"][0]["args"])):
+            for childfunc in spec["specializations"]:
+                if (
+                    typelist[i] != list(childfunc["args"][i].values())[0]
+                    and list(childfunc["args"][i].keys())[0] not in templateargs.keys()
+                ):
+                    templateargs[list(childfunc["args"][i].keys())[0]] = chr(templascii)
+                    templascii += 1
     return templateargs
 
 
