@@ -132,20 +132,12 @@ def traverse(node, args={}, forvars=[], declared=[]):
         code += "}\n"
     elif node.__class__.__name__ == "Raise":
         if sys.version_info[0] == 2:
-            code = (
-                'err->str = "{0}";\n'.format(node.type.args[0].s)
-                + 'err->filename = "FILENAME(__LINE__)";\nerr->pass_through=true;\n'
-            )
+            code = 'err->str = "{0}";\n'.format(node.type.args[0].s)
         elif sys.version_info[0] == 3 and sys.version_info[1] in [5, 6, 7]:
-            code = (
-                'err->str = "{0}";\n'.format(node.exc.args[0].s)
-                + 'err->filename = "FILENAME(__LINE__)";\nerr->pass_through=true;\n'
-            )
+            code = 'err->str = "{0}";\n'.format(node.exc.args[0].s)
         else:
-            code = (
-                'err->str = "{0}";\n'.format(node.exc.args[0].value)
-                + 'err->filename = "FILENAME(__LINE__)";\nerr->pass_through=true;\n'
-            )
+            code = 'err->str = "{0}";\n'.format(node.exc.args[0].value)
+        code += 'err->filename = "FILENAME(__LINE__)";\nerr->pass_through=true;\n'
     elif node.__class__.__name__ == "If":
         code = ""
         tempdeclared = copy.copy(declared)
@@ -295,158 +287,20 @@ def traverse(node, args={}, forvars=[], declared=[]):
                     node.ops[0]
                 )
             )
-    elif node.__class__.__name__ == "Assign":
-        assert len(node.targets) == 1
-        left = traverse(node.targets[0], args, copy.copy(forvars), declared)
-        if "[" in left:
-            left = left[: left.find("[")]
-        code = ""
-        if left not in args.keys() and ("*" + left) not in args.keys():
-            flag = True
+    elif node.__class__.__name__ == "AugAssign" or node.__class__.__name__ == "Assign":
+        if node.__class__.__name__ == "Assign":
+            assert len(node.targets) == 1
+            operator = "="
+            targetnode = node.targets[0]
         else:
-            flag = False
-        if node.value.__class__.__name__ == "Name" and node.value.id in forvars:
-            code = ""
-            if flag and (
-                traverse(node.targets[0], args, copy.copy(forvars), declared)
-                not in declared
-            ):
-                code += "auto "
-                declared.append(
-                    traverse(node.targets[0], args, copy.copy(forvars), declared)
-                )
-            thread_var = getthread_dim(forvars.index(node.value.id))
-            code += "{0} = {1};\n".format(
-                traverse(node.targets[0], args, copy.copy(forvars), declared),
-                thread_var,
-            )
-        else:
-            if node.value.__class__.__name__ == "IfExp":
-                if flag and (
-                    traverse(node.targets[0], args, copy.copy(forvars), declared)
-                    not in declared
-                ):
-                    code = "auto {0} = {1};\n".format(
-                        traverse(node.targets[0], args, copy.copy(forvars), declared),
-                        traverse(node.value.orelse, args, copy.copy(forvars), declared),
-                    )
-                    declared.append(
-                        traverse(node.targets[0], args, copy.copy(forvars), declared)
-                    )
-                code += "if ({0}) {{\n {1} = {2};\n }} else {{\n {1} = {3};\n }}\n".format(
-                    traverse(node.value.test, args, copy.copy(forvars), declared),
-                    traverse(node.targets[0], args, copy.copy(forvars), declared),
-                    traverse(node.value.body, args, copy.copy(forvars), declared),
-                    traverse(node.value.orelse, args, copy.copy(forvars), declared),
-                )
-            elif node.value.__class__.__name__ == "Compare":
-                code = ""
-                if flag and (
-                    traverse(node.targets[0], args, copy.copy(forvars), declared)
-                    not in declared
-                ):
-                    code += "auto "
-                    declared.append(
-                        traverse(node.targets[0], args, copy.copy(forvars), declared)
-                    )
-                if (
-                    len(node.value.ops) == 1
-                    and node.value.ops[0].__class__.__name__ == "Lt"
-                ):
-                    code += "{0} = {1} < {2};\n".format(
-                        traverse(node.targets[0], args, copy.copy(forvars), declared),
-                        traverse(node.value.left, args, copy.copy(forvars), declared),
-                        traverse(
-                            node.value.comparators[0],
-                            args,
-                            copy.copy(forvars),
-                            declared,
-                        ),
-                    )
-                elif (
-                    len(node.value.ops) == 1
-                    and node.value.ops[0].__class__.__name__ == "Gt"
-                ):
-                    code += "{0} = {1} > {2};\n".format(
-                        traverse(node.targets[0], args, copy.copy(forvars), declared),
-                        traverse(node.value.left, args, copy.copy(forvars), declared),
-                        traverse(
-                            node.value.comparators[0],
-                            args,
-                            copy.copy(forvars),
-                            declared,
-                        ),
-                    )
-                elif (
-                    len(node.value.ops) == 1
-                    and node.value.ops[0].__class__.__name__ == "GtE"
-                ):
-                    code += "{0} = {1} >= {2};\n".format(
-                        traverse(node.targets[0], args, copy.copy(forvars), declared),
-                        traverse(node.value.left, args, copy.copy(forvars), declared),
-                        traverse(
-                            node.value.comparators[0],
-                            args,
-                            copy.copy(forvars),
-                            declared,
-                        ),
-                    )
-                elif (
-                    len(node.value.ops) == 1
-                    and node.value.ops[0].__class__.__name__ == "NotEq"
-                ):
-                    code += "{0} = {1} != {2};\n".format(
-                        traverse(node.targets[0], args, copy.copy(forvars), declared),
-                        traverse(node.value.left, args, copy.copy(forvars), declared),
-                        traverse(
-                            node.value.comparators[0],
-                            args,
-                            copy.copy(forvars),
-                            declared,
-                        ),
-                    )
-                elif (
-                    len(node.value.ops) == 1
-                    and node.value.ops[0].__class__.__name__ == "Eq"
-                ):
-                    code += "{0} = {1} == {2};\n".format(
-                        traverse(node.targets[0], args, copy.copy(forvars), declared),
-                        traverse(node.value.left, args, copy.copy(forvars), declared),
-                        traverse(
-                            node.value.comparators[0],
-                            args,
-                            copy.copy(forvars),
-                            declared,
-                        ),
-                    )
-                else:
-                    raise Exception(
-                        "Unhandled Compare node {0}. Please inform the developers.".format(
-                            node.value.ops[0]
-                        )
-                    )
+            if node.op.__class__.__name__ == "Add":
+                operator = "+="
             else:
-                code = ""
-                if flag and (
-                    traverse(node.targets[0], args, copy.copy(forvars), declared)
-                    not in declared
-                ):
-                    code += "auto "
-                    declared.append(
-                        traverse(node.targets[0], args, copy.copy(forvars), declared)
-                    )
-                code += "{0} = {1};\n".format(
-                    traverse(node.targets[0], args, copy.copy(forvars), declared),
-                    traverse(node.value, args, copy.copy(forvars), declared),
+                raise Exception(
+                    "Unhandled AugAssign node {0}".format(node.op.__class__.__name__)
                 )
-    elif node.__class__.__name__ == "AugAssign":
-        if node.op.__class__.__name__ == "Add":
-            operator = "+="
-        else:
-            raise Exception(
-                "Unhandled AugAssign node {0}".format(node.op.__class__.__name__)
-            )
-        left = traverse(node.target, args, copy.copy(forvars), declared)
+            targetnode = node.target
+        left = traverse(targetnode, args, copy.copy(forvars), declared)
         if "[" in left:
             left = left[: left.find("[")]
         code = ""
@@ -457,141 +311,87 @@ def traverse(node, args={}, forvars=[], declared=[]):
         if node.value.__class__.__name__ == "Name" and (node.value.id in forvars):
             code = ""
             if flag and (
-                traverse(node.target, args, copy.copy(forvars), declared)
-                not in declared
+                traverse(targetnode, args, copy.copy(forvars), declared) not in declared
             ):
                 code += "auto "
                 declared.append(
-                    traverse(node.target, args, copy.copy(forvars), declared)
+                    traverse(targetnode, args, copy.copy(forvars), declared)
                 )
             thread_var = getthread_dim(forvars.index(node.value.id))
             code += "{0} = {1};\n".format(
-                traverse(node.target, args, copy.copy(forvars), declared), thread_var
+                traverse(targetnode, args, copy.copy(forvars), declared), thread_var
             )
         else:
             if node.value.__class__.__name__ == "IfExp":
                 if flag and (
-                    traverse(node.target, args, copy.copy(forvars), declared)
+                    traverse(targetnode, args, copy.copy(forvars), declared)
                     not in declared
                 ):
                     code = "auto {0} {1} {2};\n".format(
-                        traverse(node.target, args, copy.copy(forvars), declared),
+                        traverse(targetnode, args, copy.copy(forvars), declared),
                         operator,
                         traverse(node.value.orelse, args, copy.copy(forvars), declared),
                     )
                     declared.append(
-                        traverse(node.target, args, copy.copy(forvars), declared)
+                        traverse(targetnode, args, copy.copy(forvars), declared)
                     )
                 code += "if ({0}) {{\n {1} {2} {3};\n }} else {{\n {1} {2} {4};\n }}\n".format(
                     traverse(node.value.test, args, copy.copy(forvars), declared),
-                    traverse(node.target, args, copy.copy(forvars), declared),
+                    traverse(targetnode, args, copy.copy(forvars), declared),
                     operator,
                     traverse(node.value.body, args, copy.copy(forvars), declared),
                     traverse(node.value.orelse, args, copy.copy(forvars), declared),
                 )
             elif node.value.__class__.__name__ == "Compare":
+                assert len(node.value.ops) == 1
                 code = ""
                 if flag and (
-                    traverse(node.target, args, copy.copy(forvars), declared)
+                    traverse(targetnode, args, copy.copy(forvars), declared)
                     not in declared
                 ):
                     code += "auto "
                     declared.append(
-                        traverse(node.target, args, copy.copy(forvars), declared)
+                        traverse(targetnode, args, copy.copy(forvars), declared)
                     )
-                if (
-                    len(node.value.ops) == 1
-                    and node.value.ops[0].__class__.__name__ == "Lt"
-                ):
-                    code += "{0} {1} {2} < {3};\n".format(
-                        traverse(node.target, args, copy.copy(forvars), declared),
-                        operator,
-                        traverse(node.value.left, args, copy.copy(forvars), declared),
-                        traverse(
-                            node.value.comparators[0],
-                            args,
-                            copy.copy(forvars),
-                            declared,
-                        ),
-                    )
-                elif (
-                    len(node.value.ops) == 1
-                    and node.value.ops[0].__class__.__name__ == "Gt"
-                ):
-                    code += "{0} {1} {2} > {3};\n".format(
-                        traverse(node.target, args, copy.copy(forvars), declared),
-                        operator,
-                        traverse(node.value.left, args, copy.copy(forvars), declared),
-                        traverse(
-                            node.value.comparators[0],
-                            args,
-                            copy.copy(forvars),
-                            declared,
-                        ),
-                    )
-                elif (
-                    len(node.value.ops) == 1
-                    and node.value.ops[0].__class__.__name__ == "GtE"
-                ):
-                    code += "{0} {1} {2} >= {3};\n".format(
-                        traverse(node.target, args, copy.copy(forvars), declared),
-                        operator,
-                        traverse(node.value.left, args, copy.copy(forvars), declared),
-                        traverse(
-                            node.value.comparators[0],
-                            args,
-                            copy.copy(forvars),
-                            declared,
-                        ),
-                    )
-                elif (
-                    len(node.value.ops) == 1
-                    and node.value.ops[0].__class__.__name__ == "NotEq"
-                ):
-                    code += "{0} {1} {2} != {3};\n".format(
-                        traverse(node.target, args, copy.copy(forvars), declared),
-                        operator,
-                        traverse(node.value.left, args, copy.copy(forvars), declared),
-                        traverse(
-                            node.value.comparators[0],
-                            args,
-                            copy.copy(forvars),
-                            declared,
-                        ),
-                    )
-                elif (
-                    len(node.value.ops) == 1
-                    and node.value.ops[0].__class__.__name__ == "Eq"
-                ):
-                    code += "{0} {1} {2} == {3};\n".format(
-                        traverse(node.target, args, copy.copy(forvars), declared),
-                        operator,
-                        traverse(node.value.left, args, copy.copy(forvars), declared),
-                        traverse(
-                            node.value.comparators[0],
-                            args,
-                            copy.copy(forvars),
-                            declared,
-                        ),
-                    )
+                if node.value.ops[0].__class__.__name__ == "Lt":
+                    compop = "<"
+                elif node.value.ops[0].__class__.__name__ == "Gt":
+                    compop = ">"
+                elif node.value.ops[0].__class__.__name__ == "LtE":
+                    compop = "<="
+                elif node.value.ops[0].__class__.__name__ == "GtE":
+                    compop = ">="
+                elif node.value.ops[0].__class__.__name__ == "NotEq":
+                    compop = "!="
+                elif node.value.ops[0].__class__.__name__ == "Eq":
+                    compop = "=="
                 else:
                     raise Exception(
                         "Unhandled Compare node {0}. Please inform the developers.".format(
                             node.value.ops[0]
                         )
                     )
+                code += "{0} {1} {2} {3} {4};\n".format(
+                    traverse(targetnode, args, copy.copy(forvars), declared),
+                    operator,
+                    traverse(node.value.left, args, copy.copy(forvars), declared),
+                    compop,
+                    traverse(
+                        node.value.comparators[0], args, copy.copy(forvars), declared,
+                    ),
+                )
             else:
                 code = ""
                 if flag and (
-                    traverse(node.target, args, copy.copy(forvars), declared)
+                    traverse(targetnode, args, copy.copy(forvars), declared)
                     not in declared
                 ):
                     code += "auto "
                     declared.append(
-                        traverse(node.target, args, copy.copy(forvars), declared)
+                        traverse(targetnode, args, copy.copy(forvars), declared)
                     )
                 code += "{0} {1} {2};\n".format(
-                    traverse(node.target, args, copy.copy(forvars), declared),
+                    traverse(targetnode, args, copy.copy(forvars), declared),
                     operator,
                     traverse(node.value, args, copy.copy(forvars), declared),
                 )
