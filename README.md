@@ -152,6 +152,7 @@ python dev/generate-cuda.py
 The `--install` does a local `pip install` on your system, which is the only way to use it. You can run its tests with
 
 ```bash
+python dev/generate-tests.py
 python -m pytest -vv -rs tests-cuda-kernels
 python -m pytest -vv -rs tests-cuda
 ```
