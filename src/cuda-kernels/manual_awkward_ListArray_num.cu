@@ -3,7 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/manual_awkward_ListArray_num.cu", line)
 
 #include "awkward/kernels/operations.h"
-#include <stdio.h>
+#include <cstdio>
 
 template <typename T, typename C>
 __global__
