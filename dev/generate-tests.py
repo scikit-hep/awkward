@@ -127,10 +127,9 @@ def getargvals(funcname, arglist, rolelist, data, outparams):
     ) as kernelfile:
         exec(kernelfile.read())
         instancedict = {}
-        checkindex = []
         funcpassdict = OrderedDict()
         count = 0
-        for i, roledict in enumerate(rolelist):
+        for roledict in rolelist:
             assert len(roledict) == 1
             for arg, role in roledict.items():
                 funcpassdict[arg] = []
@@ -140,7 +139,6 @@ def getargvals(funcname, arglist, rolelist, data, outparams):
                     instancedict[group] = [arg]
                     if arg in outparams:
                         funcpassdict[arg].append({})
-                        checkindex.append(i)
                     else:
                         funcpassdict[arg].append(data["num"])
                     assert len(funcpassdict[arg]) == 1
@@ -184,8 +182,9 @@ def getargvals(funcname, arglist, rolelist, data, outparams):
                 if (funcname not in SUCCESS_TEST_BLACKLIST) or any(
                     funcname in x for x in SUCCESS_TEST_BLACKLIST
                 ):
-                    for i, arg in enumerate(temp):
-                        if i in checkindex:
+                    for arg in temp.keys():
+                        if arg in outparams:
+                            assert isinstance(temp[arg], dict)
                             temparglist = dicttolist(
                                 temp[arg],
                                 next(
@@ -208,8 +207,8 @@ def getargvals(funcname, arglist, rolelist, data, outparams):
                     tempdict["outargs"] = copy.deepcopy(outtests)
                     tempdict["success"] = True
             except ValueError:
-                for i, arg in enumerate(temp):
-                    if i in checkindex:
+                for arg in temp.keys():
+                    if arg in outparams:
                         intests[arg] = getdummyvalue(
                             next(
                                 argmap
