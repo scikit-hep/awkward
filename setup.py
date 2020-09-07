@@ -129,6 +129,8 @@ else:
             print("--- build directory -------------------------------------------")
             tree("build")
 
+            outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
+
             print("--- copying ---------------------------------------------------")
             shutil.copytree(os.path.join("include"), os.path.join(outerdir, "awkward1", "include"))
 
