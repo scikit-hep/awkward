@@ -17,6 +17,7 @@ src/cuda-kernels/awkward_*.cu
 
 # Kernel tests
 tests-cpu-kernels/test*
+tests-cuda-kernels/test*
 tests-spec/kernels.py
 tests-spec/test*
 

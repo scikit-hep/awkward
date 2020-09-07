@@ -2585,7 +2585,10 @@ def from_parquet(
         state = _ParquetState(file, use_threads, source, options)
 
         if lazy_cache == "attach":
-            lazy_cache = {}
+            lazy_cache = awkward1._util.MappingProxy({})
+            toattach = lazy_cache
+        elif lazy_cache is not None:
+            lazy_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
             toattach = lazy_cache
         else:
             toattach = None
@@ -3717,7 +3720,10 @@ def from_arrayset(
         form = _wrap_record_with_virtual(form)
 
         if lazy_cache == "attach":
-            lazy_cache = {}
+            lazy_cache = awkward1._util.MappingProxy({})
+            toattach = lazy_cache
+        elif lazy_cache is not None:
+            lazy_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
             toattach = lazy_cache
         else:
             toattach = None

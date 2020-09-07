@@ -318,11 +318,22 @@ make_SliceGenerator(const py::handle& m, const std::string& name) {
 ////////// PyArrayCache
 
 PyArrayCache::PyArrayCache(const py::object& mutablemapping)
-    : mutablemapping_(mutablemapping) { }
+    : mutablemapping_(mutablemapping.is(py::none())
+                          ? mutablemapping
+                          : py::weakref((const py::handle&) mutablemapping)) {}
 
 const py::object
 PyArrayCache::mutablemapping() const {
-  return mutablemapping_;
+  if ( mutablemapping_.is(py::none()) ) {
+    return mutablemapping_;
+  }
+  const py::object out = mutablemapping_();
+  if ( out.is(py::none()) ) {
+    throw std::runtime_error(
+      std::string("PyArrayCache has lost its weak reference to mapping")
+      + FILENAME(__LINE__));
+  }
+  return out;
 }
 
 ak::ContentPtr
@@ -332,7 +343,7 @@ PyArrayCache::get(const std::string& key) const {
                                      "surrogateescape"));
   py::object out;
   try {
-    out = mutablemapping_.attr("__getitem__")(pykey);
+    out = mutablemapping().attr("__getitem__")(pykey);
   }
   catch (py::error_already_set err) {
     return ak::ContentPtr(nullptr);
@@ -345,21 +356,24 @@ PyArrayCache::set(const std::string& key, const ak::ContentPtr& value) {
   py::str pykey(PyUnicode_DecodeUTF8(key.data(),
                                      key.length(),
                                      "surrogateescape"));
-  mutablemapping_.attr("__setitem__")(pykey, box(value));
+  const py::object mapping = mutablemapping();
+  if ( ! mapping.is(py::none()) ) {
+    mapping.attr("__setitem__")(pykey, box(value));
+  }
 }
 
 const std::string
 PyArrayCache::tostring_part(const std::string& indent,
                             const std::string& pre,
                             const std::string& post) const {
-  std::string mutablemapping =
-    mutablemapping_.attr("__repr__")().cast<std::string>();
-  if (mutablemapping.length() > 50) {
-    mutablemapping = mutablemapping.substr(0, 47) + std::string("...");
+  std::string repr =
+    mutablemapping().attr("__repr__")().cast<std::string>();
+  if (repr.length() > 50) {
+    repr = repr.substr(0, 47) + std::string("...");
   }
   std::stringstream out;
   out << indent << pre << "<ArrayCache mapping=\""
-      << mutablemapping << "\"/>"
+      << repr << "\"/>"
       << post;
   return out.str();
 }
@@ -384,8 +398,8 @@ make_PyArrayCache(const py::handle& m, const std::string& name) {
         self.set(key, unbox_content(value));
       })
       .def("__delitem__", [](PyArrayCache& self,
-                             const std::string& key) -> py::object {
-        return self.mutablemapping().attr("__delitem__")(py::cast(key));
+                             const std::string& key) -> void {
+        self.mutablemapping().attr("__delitem__")(py::cast(key));
       })
       .def("__iter__", [](const PyArrayCache& self) -> py::object {
         return self.mutablemapping().attr("__iter__")();

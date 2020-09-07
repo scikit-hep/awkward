@@ -2,31 +2,25 @@
 
 import ctypes
 import os
-import platform
 
 import pkg_resources
 
-if platform.system() == "Windows":
-    name = "awkward-cpu-kernels.dll"
-elif platform.system() == "Darwin":
-    name = "libawkward-cpu-kernels.dylib"
-else:
-    name = "libawkward-cpu-kernels.so"
-
 CPU_KERNEL_SO = None
 try:
-    CPU_KERNEL_SO = pkg_resources.resource_filename("awkward1", name)
+    CPU_KERNEL_SO = pkg_resources.resource_filename(
+        "awkward1", "libawkward-cuda-kernels.so"
+    )
 except ModuleNotFoundError:
     CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
     TOP_DIR = os.path.join(CURRENT_DIR, "..")
     for root, _, files in os.walk(TOP_DIR):
         for filename in files:
-            if filename == name:
+            if filename == "libawkward-cuda-kernels.so":
                 CPU_KERNEL_SO = os.path.join(root, filename)
                 break
 
 if CPU_KERNEL_SO is None:
-    raise Exception("Unable to find {0}.".format(name))
+    raise Exception("Unable to find libawkward-cuda-kernels.so")
 lib = ctypes.CDLL(CPU_KERNEL_SO)
 
 
