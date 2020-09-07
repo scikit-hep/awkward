@@ -17,7 +17,13 @@ A C++ program that depends on Awkward Array, like [minimal.cpp](./minimal.cpp), 
 $ g++ `python -m awkward1.config --cflags --libs` minimal.cpp -o minimal
 ```
 
-and used like this (it picks one item from an Awkward Array):
+The new executable, `./minimal`, depends on Awkward Array's shared libraries, we they need to be on your system's library search path. The way to do that is system-dependent, but a quick and dirty way to do it on Linux is
+
+```bash
+export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
+```
+
+Then you can run this executable. (It takes two arguments, an array as JSON and an item to select and print as JSON.)
 
 ```bash
 $ ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
