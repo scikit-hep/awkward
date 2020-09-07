@@ -9,7 +9,7 @@ $ python -m awkward1.config --cflags --libs
 -std=c++11 -I/path/to/awkward1/include -L/path/to/awkward1 -lawkward -lawkward-cpu-kernels
 ```
 
-The Python package includes both static (.a) and shared (.so or .dylib) libraries.
+The Python package includes both shared (.so or .dylib) and static (.a) libraries (see `python -m awkward1.config --help`).
 
 A C++ program that depends on Awkward Array, like [minimal.cpp](./minimal.cpp), can be compiled like this:
 
@@ -17,10 +17,12 @@ A C++ program that depends on Awkward Array, like [minimal.cpp](./minimal.cpp), 
 $ g++ `python -m awkward1.config --cflags --libs` minimal.cpp -o minimal
 ```
 
-The new executable, `./minimal`, depends on Awkward Array's shared libraries, we they need to be on your system's library search path. The way to do that is system-dependent, but a quick and dirty way to do it on Linux is
+The new executable, `./minimal`, depends on Awkward Array's shared libraries, we they need to be on your system's library search path (if you didn't use `--static-libs`).
+
+The way to set up your search path is system-dependent, but a quick and dirty way to do it on Linux is
 
 ```bash
-export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
+$ export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
 ```
 
 Then you can run this executable. (It takes two arguments, an array as JSON and an item to select and print as JSON.)
