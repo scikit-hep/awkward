@@ -84,7 +84,6 @@ namespace awkward {
   IndexOf<T>::IndexOf(int64_t length, kernel::lib ptr_lib)
     : ptr_(kernel::malloc<T>(ptr_lib, length * (int64_t)sizeof(T)))
     , ptr_lib_(ptr_lib)
-    , offset_(0)
     , length_(length) { }
 
   template <typename T>

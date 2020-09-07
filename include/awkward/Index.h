@@ -75,8 +75,10 @@ namespace awkward {
 #ifdef AWKWARD_INDEX_NO_EXTERN_TEMPLATE
   LIBAWKWARD_EXPORT_SYMBOL
 #endif
-  IndexOf: public Index {
+  IndexOf final : public Index {
   public:
+    IndexOf<T>() = delete;
+
     /// @brief Creates an IndexOf from a full set of parameters.
     ///
     /// @param ptr Reference-counted pointer to the integer array buffer.
@@ -87,13 +89,13 @@ namespace awkward {
     /// buffer.
     /// @param length Number of elements in the array.
     /// @param Choose the Kernel Library for this array, default:= kernel::lib::cpu
-    IndexOf<T>(const std::shared_ptr<T>& ptr,
-               int64_t offset,
-               int64_t length,
-               kernel::lib ptr_lib);
+    explicit IndexOf<T>(const std::shared_ptr<T>& ptr,
+                        int64_t offset,
+                        int64_t length,
+                        kernel::lib ptr_lib);
 
     /// @brief Allocates a new integer array buffer with a given #length.
-    IndexOf<T>(int64_t length, kernel::lib ptr_lib = kernel::lib::cpu);
+    explicit IndexOf<T>(int64_t length, kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Reference-counted pointer to the integer array buffer.
     const std::shared_ptr<T>
@@ -220,7 +222,7 @@ namespace awkward {
     /// @brief See #ptr_lib
     const kernel::lib ptr_lib_;
     /// @brief See #offset.
-    const int64_t offset_;
+    const int64_t offset_ = 0;
     /// @brief See #length.
     const int64_t length_;
   };
