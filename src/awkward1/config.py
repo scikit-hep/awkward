@@ -7,50 +7,57 @@ import argparse
 import pkg_resources
 
 if __name__ == "__main__":
-    awkward_path = pkg_resources.resource_filename("awkward1", "")
-    libawkward_cpu_kernels_name = "libawkward-cpu-kernels.so"
-    libawkward_name = "libawkward.so"
-
     argparser = argparse.ArgumentParser(description="Print out compilation arguments to use Awkward Array as a C++ dependency")
     argparser.add_argument("--cflags", action="store_true", help="output compiler flags and Awkward include path")
     argparser.add_argument("--libs", action="store_true", help="output Awkward libraries with path")
     argparser.add_argument("--libs-only-L", action="store_true", help="output Awkward library path")
     argparser.add_argument("--libs-only-l", action="store_true", help="output Awkward libraries without path")
+    argparser.add_argument("--static-libs", action="store_true", help="output Awkward static libraries with path")
+    argparser.add_argument("--static-libs-only-L", action="store_true", help="output Awkward static library path")
+    argparser.add_argument("--static-libs-only-l", action="store_true", help="output Awkward static libraries without path")
     argparser.add_argument("--cflags-only-I", action="store_true", help="output Awkward include path")
+    argparser.add_argument("--incdir", action="store_true", help="output Awkward include directory name")
+    argparser.add_argument("--libdir", action="store_true", help="output Awkward library directory name")
 
     # only used in validating the arguments
     args = argparser.parse_args()
 
     output = []
+    incdir = pkg_resources.resource_filename("awkward1", "include")
+    libdir = pkg_resources.resource_filename("awkward1", "")
+    cpu_kernels = "awkward-cpu-kernels"
+    libawkward = "awkward"
 
     # loop over original sys.argv to get optional arguments in order
     for arg in sys.argv:
         if arg == "--cflags":
-            output.append("-std=c++11 -I{0}".format(
-                pkg_resources.resource_filename("awkward1", "include")
-            ))
+            output.append("-std=c++11 -I{0}".format(incdir))
 
         if arg == "--libs":
-            output.append("-L{0} -l{1} -l{2}".format(
-                pkg_resources.resource_filename("awkward1", ""),
-                libawkward_name,
-                libawkward_cpu_kernels_name,
-            ))
+            output.append("-L{0} -l{1} -l{2}".format(libdir, libawkward, cpu_kernels))
 
         if arg == "--libs-only-L":
-            output.append("-L{0}".format(
-                pkg_resources.resource_filename("awkward1", ""),
-            ))
+            output.append("-L{0}".format(libdir))
 
         if arg == "--libs-only-l":
-            output.append("-l{0} -l{1}".format(
-                libawkward_name,
-                libawkward_cpu_kernels_name,
-            ))
+            output.append("-l{0} -l{1}".format(libawkward, cpu_kernels))
+
+        if arg == "--static-libs":
+            output.append("-L{0} -l{1}-static -l{2}-static".format(libdir, libawkward, cpu_kernels))
+
+        if arg == "--static-libs-only-L":
+            output.append("-L{0}".format(libdir))
+
+        if arg == "--static-libs-only-l":
+            output.append("-l{0}-static -l{1}-static".format(libawkward, cpu_kernels))
 
         if arg == "--cflags-only-I":
-            output.append("-I{0}".format(
-                pkg_resources.resource_filename("awkward1", "include")
-            ))
+            output.append("-I{0}".format(incdir))
+
+        if arg == "--incdir":
+            output.append(incdir)
+
+        if arg == "--libdir":
+            output.append(libdir)
 
     print(" ".join(output))

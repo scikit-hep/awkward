@@ -97,7 +97,6 @@ def tree(x):
             tree(os.path.join(x, y))
 
 
-data_files = []
 if platform.system() == "Windows":
     class Install(setuptools.command.install.install):
         def run(self):
@@ -125,16 +124,6 @@ if platform.system() == "Windows":
             setuptools.command.install.install.run(self)
 
 else:
-    # Libraries do not exist yet, so they cannot be determined with a glob pattern.
-    libdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "awkward1")
-
-    # Install shared libraries system-wide only on Linux.
-    if platform.system() != "Darwin":
-        data_files = [("lib", [
-            os.path.join(libdir, "libawkward-cpu-kernels.so"),
-            os.path.join(libdir, "libawkward.so"),
-        ])]
-
     class Install(setuptools.command.install.install):
         def run(self):
             print("--- build directory -------------------------------------------")
@@ -155,7 +144,6 @@ else:
 setup(name = "awkward1",
       packages = [x for x in setuptools.find_packages(where="src") if x != "awkward1_cuda_kernels"],
       package_dir = {"awkward1": "src/awkward1"},
-      data_files = data_files,
       version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
