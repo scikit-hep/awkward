@@ -1,4 +1,4 @@
-include requirements.txt requirements-test.txt VERSION_INFO CMakeLists.txt LICENSE README.md
+include requirements*.txt VERSION_INFO CMakeLists.txt LICENSE README*.md CONTRIBUTING.md
 recursive-include include *.h
 recursive-include src *.cpp
 recursive-include src/awkward1 *.py
