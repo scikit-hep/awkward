@@ -4,21 +4,12 @@ from __future__ import absolute_import
 
 import sys
 import argparse
-import platform
 import pkg_resources
 
 if __name__ == "__main__":
-    if platform.system() == "Windows":
-        libawkward_cpu_kernels_name = "awkward-cpu-kernels.dll"
-        libawkward_name = "awkward.dll"
-    elif platform.system() == "Darwin":
-        libawkward_cpu_kernels_name = "libawkward-cpu-kernels.dylib"
-        libawkward_name = "libawkward.dylib"
-    else:
-        libawkward_cpu_kernels_name = "libawkward-cpu-kernels.so"
-        libawkward_name = "libawkward.so"
-
     awkward_path = pkg_resources.resource_filename("awkward1", "")
+    libawkward_cpu_kernels_name = "libawkward-cpu-kernels.so"
+    libawkward_name = "libawkward.so"
 
     argparser = argparse.ArgumentParser(description="Print out compilation arguments to use Awkward Array as a C++ dependency")
     argparser.add_argument("--cflags", action="store_true", help="output compiler flags and Awkward include path")

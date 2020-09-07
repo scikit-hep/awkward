@@ -2,41 +2,39 @@
 
 Python code that depends on Awkward requires no configuration; just `pip install awkward1` and import it like any other Python library.
 
-C++ code, however, must have access to Awkward's `include` directory and its static or dynamically linked libraries. When you `pip install awkward1` with superuser privileges (i.e. not `--user`), these files are deployed to your system's standard `include` and `lib` directories (on MacOS and Linux, but not Windows).
-
-The provided libraries are:
-
-   * libawkward.so (or .dylib)
-   * libawkward-cpu-kernels.so (or .dylib)
-   * libawkward.a
-   * libawkward-cpu-kernels.a
-
-You need to link against both libawkward and libawkward-cpu-kernels, but either the shared libraries (.so or .dylib) or the static libraries—not both.
-
-Assuming that `$PREFIX` has your system's standard `$PREFIX/include` and `$PREFIX/lib`, the [minimal.cpp](./minimal.cpp) project can be compiled like this:
+C++ compilers, on the other hand, don't know where to find Awkward Array's header files and shared libraries without help. These files are distributed along with the Python library, and it can be used as a "pkg-config" substitute to locate these libraries:
 
 ```bash
-g++ --std=c++11 -I$PREFIX/include -L$PREFIX/lib -lawkward -lawkward-cpu-kernels minimal.cpp -o minimal
+$ python -m awkward1.config --cflags --libs
+-std=c++11 -I/path/to/awkward1/include -L/path/to/awkward1 -lawkward -lawkward-cpu-kernels
+```
+
+The Python package includes both static (.a) and shared (.so or .dylib) libraries.
+
+A C++ program that depends on Awkward Array, like [minimal.cpp](./minimal.cpp), can be compiled like this:
+
+```bash
+$ g++ `python -m awkward1.config --cflags --libs` minimal.cpp -o minimal
 ```
 
 and used like this (it picks one item from an Awkward Array):
 
 ```bash
-./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
-# [4.4,5.5]
+$ ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
+[4.4,5.5]
 ```
 
 If you want your C++ code to have a Python interface, compile it with the same version of pybind11 as Awkward (see release notes) as shown in [CMakeLists.txt](CMakeLists.txt) and [dependent.cpp](dependent.cpp), which can be compiled like this:
 
 ```bash
-cmake -S . -B build
-cmake --build build
+$ cmake -S . -B build
+$ cmake --build build
 ```
 
 Its Python test, [test-python.py](test-python.py),
 
 ```bash
-pytest -vv test-python.py
+$ pytest -vv test-python.py
 ```
 
 demonstrates that you can pass Awkward Arrays between C++ codebases through Python as an intermediary. The data are not copied or serialized in this transfer; this is a suitable way to move large, complex datasets.
