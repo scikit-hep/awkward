@@ -34,22 +34,22 @@ if __name__ == "__main__":
             output.append("-std=c++11 -I{0}".format(incdir))
 
         if arg == "--libs":
-            output.append("-L{0} -l{1} -l{2}".format(libdir, libawkward, cpu_kernels))
+            output.append("-L{0} -l{1} -l{2} -ldl".format(libdir, libawkward, cpu_kernels))
 
         if arg == "--libs-only-L":
             output.append("-L{0}".format(libdir))
 
         if arg == "--libs-only-l":
-            output.append("-l{0} -l{1}".format(libawkward, cpu_kernels))
+            output.append("-l{0} -l{1} -ldl".format(libawkward, cpu_kernels))
 
         if arg == "--static-libs":
-            output.append("-L{0} -l{1}-static -l{2}-static".format(libdir, libawkward, cpu_kernels))
+            output.append("-L{0} -l{1}-static -l{2}-static -ldl".format(libdir, libawkward, cpu_kernels))
 
         if arg == "--static-libs-only-L":
             output.append("-L{0}".format(libdir))
 
         if arg == "--static-libs-only-l":
-            output.append("-l{0}-static -l{1}-static".format(libawkward, cpu_kernels))
+            output.append("-l{0}-static -l{1}-static -ldl".format(libawkward, cpu_kernels))
 
         if arg == "--cflags-only-I":
             output.append("-I{0}".format(incdir))

@@ -11,21 +11,19 @@ $ python -m awkward1.config --cflags --libs
 
 The Python package includes both shared (.so or .dylib) and static (.a) libraries (see `python -m awkward1.config --help`).
 
-A C++ program that depends on Awkward Array, like [minimal.cpp](./minimal.cpp), can be compiled like this:
+A C++ program that depends on Awkward Array, like [minimal.cpp](./minimal.cpp), can be compiled like the following (be sure to configure Awkward libraries *after* your own project's files! argument order matters!):
 
 ```bash
-$ g++ `python -m awkward1.config --cflags --libs` minimal.cpp -o minimal
+$ g++ minimal.cpp `python -m awkward1.config --cflags --libs` -o minimal
 ```
 
-The new executable, `./minimal`, depends on Awkward Array's shared libraries, we they need to be on your system's library search path (if you didn't use `--static-libs`).
-
-The way to set up your search path is system-dependent, but a quick and dirty way to do it on Linux is
+If you want the new executable to include Awkward Array libraries within it, use `--static-libs` to link them statically. Otherwise, you will either need to copy the shared libraries into a directory on your system's library search path or point your system's library search path to the Awkward package. A quick and dirty way to do the latter is
 
 ```bash
 $ export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
 ```
 
-Then you can run this executable. (It takes two arguments, an array as JSON and an item to select and print as JSON.)
+Now you can run this executable. (It takes two arguments, an array as JSON and an item to select and print as JSON.)
 
 ```bash
 $ ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2

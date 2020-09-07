@@ -282,23 +282,32 @@ jobs:
       #   condition: "ne(variables['python.version'], '2.7')"
 
       - script: |
-          ls `python -m awkward1.config --incdir`
+          echo '===== include directory ============================='
+          ls -R `python -m awkward1.config --incdir`
+          echo '===== library directory ============================='
           ls `python -m awkward1.config --libdir`
-          g++ `python -m awkward1.config --cflags --libs` minimal.cpp -o minimal
-          export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
-          echo $LD_LIBRARY_PATH
+          echo '===== compilation ==================================='
+          g++ minimal.cpp `python -m awkward1.config --cflags --static-libs` -o minimal
           ldd minimal
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
         workingDirectory: dependent-project
         displayName: "Test dependent project 1"
 
       - script: |
-          ls `python -m awkward1.config --incdir`
-          ls `python -m awkward1.config --libdir`
+          rm -f minimal
+          g++ minimal.cpp `python -m awkward1.config --cflags --libs` -o minimal
+          export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
+          echo $LD_LIBRARY_PATH
+          ldd minimal
+          ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
+        workingDirectory: dependent-project
+        displayName: "Test dependent project 2"
+
+      - script: |
           cmake -S . -B build
           cmake --build build
           export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
           echo $LD_LIBRARY_PATH
           pytest -vv test-python.py
         workingDirectory: dependent-project
-        displayName: "Test dependent project 2"
+        displayName: "Test dependent project 3"
