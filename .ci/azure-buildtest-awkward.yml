@@ -308,6 +308,8 @@ jobs:
           cmake --build build
           export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
           echo $LD_LIBRARY_PATH
+          ls build/dependent*
+          ldd build/dependent*
           pytest -vv test-python.py
         workingDirectory: dependent-project
         displayName: "Test dependent project 3"

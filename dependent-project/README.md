@@ -2,7 +2,7 @@
 
 Python code that depends on Awkward requires no configuration; just `pip install awkward1` and import it like any other Python library.
 
-C++ compilers, on the other hand, don't know where to find Awkward Array's header files and shared libraries without help. These files are distributed along with the Python library, and it can be used as a "pkg-config" substitute to locate these libraries:
+C++ compilers, on the other hand, don't know where to find Awkward Array's header files and libraries without help. These files are distributed inside of the Python library. To find the right search paths, `python -m awkward1.config` can be used like "pkg-config":
 
 ```bash
 $ python -m awkward1.config --cflags --libs
@@ -11,13 +11,13 @@ $ python -m awkward1.config --cflags --libs
 
 The Python package includes both shared (.so or .dylib) and static (.a) libraries (see `python -m awkward1.config --help`).
 
-A C++ program that depends on Awkward Array, like [minimal.cpp](./minimal.cpp), can be compiled like the following (be sure to configure Awkward libraries *after* your own project's files! argument order matters!):
+A C++ program that depends on Awkward Array, such as [minimal.cpp](./minimal.cpp), can be compiled with the following (be sure to configure Awkward libraries *after* your own project's files! argument order matters!):
 
 ```bash
 $ g++ minimal.cpp `python -m awkward1.config --cflags --libs` -o minimal
 ```
 
-If you want the new executable to include Awkward Array libraries within it, use `--static-libs` to link them statically. Otherwise, you will either need to copy the shared libraries into a directory on your system's library search path or point your system's library search path to the Awkward package. A quick and dirty way to do the latter is
+If you want Awkward Array to be statically linked into the executable, use `--static-libs`. Otherwise, you will either need to copy the shared libraries into a directory on your system's library search path or point your system's library search path to the Awkward package. A quick and dirty way to do the latter is
 
 ```bash
 $ export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH

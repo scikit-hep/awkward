@@ -12,8 +12,9 @@ add_subdirectory(../pybind11 cmake_pybind11)
 
 find_library(CPU-KERNELS awkward-cpu-kernels REQUIRED HINTS ${AWKWARD_LIBRARIES})
 find_library(LIBAWKWARD awkward REQUIRED HINTS ${AWKWARD_LIBRARIES})
-message(STATUS "Libraries: ${LIBAWKWARD} ${CPU-KERNELS}")
+find_library(LIBDL dl REQUIRED)
+message(STATUS "Libraries: ${CPU-KERNELS} ${LIBAWKWARD} ${LIBDL}")
 
 pybind11_add_module(dependent dependent.cpp)
 set_target_properties(dependent PROPERTIES CXX_VISIBILITY_PRESET hidden)
-target_link_libraries(dependent PRIVATE ${CPU-KERNELS} ${LIBAWKWARD})
+target_link_libraries(dependent PRIVATE ${CPU-KERNELS} ${LIBAWKWARD} ${LIBDL})
