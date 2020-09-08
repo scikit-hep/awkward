@@ -7,4 +7,5 @@ include *.dll
 
 recursive-include pybind11/include/pybind11 *
 recursive-include pybind11/tools *
+recursive-include rapidjson/include *
 include pybind11/CMakeLists.txt pybind11/LICENSE pybind11/README.md pybind11/CONTRIBUTING.md
