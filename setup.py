@@ -100,21 +100,29 @@ def tree(x):
 if platform.system() == "Windows":
     class Install(setuptools.command.install.install):
         def run(self):
+            outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
+
+            print("--- this directory --------------------------------------------")
+            for x in sorted(os.listdir(".")):
+                print(x)
+
             print("--- build directory -------------------------------------------")
             tree("build")
 
-            print("--- specifically, the dlldir ----------------------------------")
-            dlldir = os.path.join(os.path.join("build", "temp.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "Release", "Release")
-            tree(dlldir)
+            print("--- copying includes ------------------------------------------")
+            shutil.copytree(os.path.join("include"), os.path.join(outerdir, "awkward1", "include"))
 
-            print("--- copying ---------------------------------------------------")
+            print("--- outerdir after copy ---------------------------------------")
+            tree(outerdir)
+
+            print("--- copying libraries -----------------------------------------")
+            dlldir = os.path.join(os.path.join("build", "temp.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "Release", "Release")
             for x in os.listdir(dlldir):
                 if x.startswith("awkward"):
                     print("copying", os.path.join(dlldir, x), "-->", os.path.join(self.build_lib, "awkward1", x))
                     shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward1", x))
 
-            print("--- deleting --------------------------------------------------")
-            outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
+            print("--- deleting libraries ----------------------------------------")
             for x in os.listdir(outerdir):
                 if x.endswith(".pyd"):
                     print("deleting", os.path.join(outerdir, x))
@@ -126,12 +134,16 @@ if platform.system() == "Windows":
 else:
     class Install(setuptools.command.install.install):
         def run(self):
+            outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
+
+            print("--- this directory --------------------------------------------")
+            for x in sorted(os.listdir(".")):
+                print(x)
+
             print("--- build directory -------------------------------------------")
             tree("build")
 
-            outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
-
-            print("--- copying ---------------------------------------------------")
+            print("--- copying includes ------------------------------------------")
             shutil.copytree(os.path.join("include"), os.path.join(outerdir, "awkward1", "include"))
 
             print("--- outerdir after copy ---------------------------------------")
