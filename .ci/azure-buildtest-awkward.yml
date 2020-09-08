@@ -112,78 +112,115 @@ jobs:
   #         python -m pytest -vv -rs tests
   #       displayName: "Test"
 
-  # - job: MacOS
+  - job: MacOS
 
-  #   pool:
-  #     vmImage: "macOS-10.14"
+    pool:
+      vmImage: "macOS-10.14"
 
-  #   variables:
-  #     PIP_ONLY_BINARY: cmake
+    variables:
+      PIP_ONLY_BINARY: cmake
 
-  #   strategy:
-  #     matrix:
-  #       "py27":
-  #         python.version: "2.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "1.16.5"
-  #       "py35":
-  #         python.version: "3.5"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py36":
-  #         python.version: "3.6"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py37":
-  #         python.version: "3.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py38":
-  #         python.version: "3.8"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
+    strategy:
+      matrix:
+        "py27":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.16.5"
+        "py35":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py38":
+          python.version: "3.8"
+          python.architecture: "x64"
+          numpy.version: "latest"
 
-  #   steps:
-  #     - checkout: self
-  #       submodules: recursive
+    steps:
+      - checkout: self
+        submodules: recursive
 
-  #     - task: UsePythonVersion@0
-  #       inputs:
-  #         versionSpec: '$(python.version)'
-  #         architecture: '$(python.architecture)'
-  #       displayName: 'Python $(python.version)'
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
+        displayName: 'Python $(python.version)'
 
-  #     - script: |
-  #         python -m pip install --upgrade pip
-  #       displayName: "Install Pip"
+      - script: |
+          python -m pip install --upgrade pip
+        displayName: "Install Pip"
 
-  #     - script: |
-  #         python -m pip list
-  #       displayName: "Print versions"
+      - script: |
+          python -m pip list
+        displayName: "Print versions"
 
-  #     - script: |
-  #         python -m pip install -v .[test,dev]
-  #       displayName: "Build"
+      - script: |
+          python -m pip install -v .[test,dev]
+        displayName: "Build"
 
-  #     - script: |
-  #         python dev/generate-kernelspec.py
-  #       displayName: "Generate Kernel specification"
+      # - script: |
+      #     python dev/generate-kernelspec.py
+      #   displayName: "Generate Kernel specification"
 
-  #     - script: |
-  #         python dev/generate-tests.py
-  #       displayName: "Generate Kernel tests"
+      # - script: |
+      #     python dev/generate-tests.py
+      #   displayName: "Generate Kernel tests"
 
-  #     - script: |
-  #         python -m pytest -vv -rs tests-spec
-  #       displayName: "Test specification"
+      # - script: |
+      #     python -m pytest -vv -rs tests-spec
+      #   displayName: "Test specification"
 
-  #     - script: |
-  #         python -m pytest -vv -rs tests-cpu-kernels
-  #       displayName: "Test CPU kernels"
+      # - script: |
+      #     python -m pytest -vv -rs tests-cpu-kernels
+      #   displayName: "Test CPU kernels"
 
-  #     - script: |
-  #         python -m pytest -vv -rs tests
-  #       displayName: "Test"
+      # - script: |
+      #     python -m pytest -vv -rs tests
+      #   displayName: "Test"
+
+      - script: |
+          echo '===== include directory ============================='
+          ls -R `python -m awkward1.config --incdir`
+          echo '===== library directory ============================='
+          ls `python -m awkward1.config --libdir`
+          echo '===== compilation ==================================='
+          which g++
+          g++ minimal.cpp `python -m awkward1.config --cflags --static-libs` -o minimal
+          ldd minimal
+          ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
+        workingDirectory: dependent-project
+        displayName: "Test dependent project 1"
+
+      - script: |
+          rm -f minimal
+          g++ minimal.cpp `python -m awkward1.config --cflags --libs` -o minimal
+          export DYLD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$DYLD_LIBRARY_PATH
+          echo $DYLD_LIBRARY_PATH
+          ldd minimal
+          ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
+        workingDirectory: dependent-project
+        displayName: "Test dependent project 2"
+
+      - script: |
+          which python
+          python -c 'import sys; print(sys.version)'
+          cmake -S . -B build -DPYTHON_EXECUTABLE:FILEPATH=`which python`
+          cmake --build build
+          export DYLD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$DYLD_LIBRARY_PATH
+          echo $DYLD_LIBRARY_PATH
+          ls build/dependent*
+          ldd build/dependent*
+          touch build/__init__.py
+          python -m pytest -vv test-python.py
+        workingDirectory: dependent-project
+        displayName: "Test dependent project 3"
 
   - job: Linux
 
@@ -312,6 +349,7 @@ jobs:
           echo $LD_LIBRARY_PATH
           ls build/dependent*
           ldd build/dependent*
+          touch build/__init__.py
           python -m pytest -vv test-python.py
         workingDirectory: dependent-project
         displayName: "Test dependent project 3"
