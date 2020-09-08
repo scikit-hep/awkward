@@ -12,6 +12,14 @@ from parser_utils import PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST, TEST_BLACKLIST
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
+def wrap_exec(string, globs, locs):
+    exec(string, globs, locs)
+
+
+def wrap_eval(string, globs, locs):
+    return eval(string, globs, locs)
+
+
 def gettypename(spectype):
     typename = spectype.replace("List", "").replace("[", "").replace("]", "")
     if typename.endswith("_t"):
@@ -125,7 +133,7 @@ def getargvals(funcname, arglist, rolelist, data, outparams):
     with open(
         os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py")
     ) as kernelfile:
-        exec(kernelfile.read())
+        wrap_exec(kernelfile.read(), globals(), locals())
         instancedict = {}
         funcpassdict = OrderedDict()
         count = 0
@@ -172,7 +180,7 @@ def getargvals(funcname, arglist, rolelist, data, outparams):
                     origtemp[key] = value
 
             temp = copy.deepcopy(origtemp)
-            funcPy = eval(funcname)
+            funcPy = wrap_eval(funcname, globals(), locals())
 
             intests = OrderedDict()
             outtests = OrderedDict()
