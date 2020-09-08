@@ -2,18 +2,15 @@
 
 import argparse
 import copy
-import json
 import os
 import platform
 import re
 import sys
 from collections import OrderedDict
-from itertools import product
 
 import pycparser
 from lark import Lark
-
-from parser_utils import indent_code
+from parser_utils import PYGEN_BLACKLIST, SPEC_BLACKLIST, indent_code
 
 if sys.version[0] == "3":
     from collections.abc import Iterable
@@ -31,100 +28,6 @@ except ImportError:
 
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-
-SPEC_BLACKLIST = [
-    "awkward_ListArray_combinations_step",
-    "awkward_Index8_getitem_at_nowrap",
-    "awkward_IndexU8_getitem_at_nowrap",
-    "awkward_Index32_getitem_at_nowrap",
-    "awkward_IndexU32_getitem_at_nowrap",
-    "awkward_Index64_getitem_at_nowrap",
-    "awkward_NumpyArraybool_getitem_at0",
-    "awkward_NumpyArray8_getitem_at0",
-    "awkward_NumpyArrayU8_getitem_at0",
-    "awkward_NumpyArray16_getitem_at0",
-    "awkward_NumpyArray32_getitem_at0",
-    "awkward_NumpyArrayU32_getitem_at0",
-    "awkward_NumpyArray64_getitem_at0",
-    "awkward_NumpyArrayU64_getitem_at0",
-    "awkward_NumpyArrayfloat32_getitem_at0",
-    "awkward_NumpyArrayfloat64_getitem_at0",
-    "awkward_Index8_setitem_at_nowrap",
-    "awkward_IndexU8_setitem_at_nowrap",
-    "awkward_Index32_setitem_at_nowrap",
-    "awkward_IndexU32_setitem_at_nowrap",
-    "awkward_Index64_setitem_at_nowrap",
-    "awkward_regularize_rangeslice",
-    "awkward_NumpyArrayU16_getitem_at0",
-    "awkward_ListArray_combinations",
-    "awkward_RegularArray_combinations",
-    "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
-]
-
-TEST_BLACKLIST = SPEC_BLACKLIST + [
-    "awkward_ListArray_combinations",
-    "awkward_RegularArray_combinations",
-    "awkward_slicearray_ravel",
-    "awkward_ListArray_getitem_next_range_carrylength",
-    "awkward_ListArray_getitem_next_range",
-    "awkward_regularize_rangeslice",
-    "awkward_ListOffsetArray_rpad_and_clip_axis1",
-    "awkward_ListOffsetArray_rpad_axis1",
-    "awkward_UnionArray_flatten_combine",
-    "awkward_UnionArray_flatten_length",
-    "awkward_ListArray_getitem_jagged_numvalid",
-    "awkward_NumpyArray_fill",
-    "awkward_ListArray_getitem_next_range_spreadadvanced",
-    "awkward_ListOffsetArray_reduce_local_nextparents_64",
-    "awkward_NumpyArray_getitem_next_array_advanced",
-    "awkward_ListOffsetArray_reduce_local_nextparents_64",
-    # FIXME @reikdas: Jim added this one
-    "awkward_NumpyArray_fill_tobool",
-]
-
-SUCCESS_TEST_BLACKLIST = TEST_BLACKLIST + [
-    "awkward_RegularArray_broadcast_tooffsets",
-    "awkward_ListArray_validity",
-    "awkward_IndexedArray_validity",
-    "awkward_UnionArray_validity",
-    "awkward_regularize_arrayslice",
-]
-
-PYGEN_BLACKLIST = SPEC_BLACKLIST + [
-    "awkward_sorting_ranges",
-    "awkward_sorting_ranges_length",
-    "awkward_argsort",
-    "awkward_argsort_bool",
-    "awkward_argsort_int8",
-    "awkward_argsort_uint8",
-    "awkward_argsort_int16",
-    "awkward_argsort_uint16",
-    "awkward_argsort_int32",
-    "awkward_argsort_uint32",
-    "awkward_argsort_int64",
-    "awkward_argsort_uint64",
-    "awkward_argsort_float32",
-    "awkward_argsort_float64",
-    "awkward_sort",
-    "awkward_sort_bool",
-    "awkward_sort_int8",
-    "awkward_sort_uint8",
-    "awkward_sort_int16",
-    "awkward_sort_uint16",
-    "awkward_sort_int32",
-    "awkward_sort_uint32",
-    "awkward_sort_int64",
-    "awkward_sort_uint64",
-    "awkward_sort_float32",
-    "awkward_sort_float64",
-    "awkward_ListOffsetArray_local_preparenext_64",
-    "awkward_IndexedArray_local_preparenext_64",
-    "awkward_NumpyArray_sort_asstrings_uint8",
-    "awkward_NumpyArray_contiguous_copy",
-    "awkward_NumpyArray_contiguous_copy_64",
-    "awkward_NumpyArray_getitem_next_null",
-    "awkward_NumpyArray_getitem_next_null_64",
-]
 
 
 def pytype(cpptype):
@@ -905,172 +808,6 @@ def parseheader(filename):
         return funcs
 
 
-def get_tests(allpykernels, allfuncargs, alltokens, allfuncroles):
-    kernelcode = """
-
-kMaxInt64  = 9223372036854775806
-kSliceNone = kMaxInt64 + 1
-
-"""
-    for func in alltokens.keys():
-        if (
-            "gen" not in alltokens[func].keys()
-            and func not in TEST_BLACKLIST
-            and func not in PYGEN_BLACKLIST
-        ):
-            kernelcode += allpykernels[func][:4] + "py" + allpykernels[func][4:] + "\n"
-            if "childfunc" in alltokens[func].keys():
-                for childfunc in alltokens[func]["childfunc"]:
-                    kernelcode += childfunc + " = " + "py" + func + "\n"
-                kernelcode += "\n"
-
-    exec(kernelcode)
-
-    with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "samples.json")
-    ) as testjson:
-        data = json.load(testjson)
-        funcs = OrderedDict()
-        for funcname in alltokens.keys():
-            if (
-                "gen" not in alltokens[funcname].keys()
-                and funcname not in TEST_BLACKLIST
-                and funcname not in PYGEN_BLACKLIST
-            ):
-                if "childfunc" in alltokens[funcname].keys():
-                    keyfunc = next(iter(alltokens[funcname]["childfunc"]))
-                else:
-                    keyfunc = funcname
-
-                funcs[funcname] = []
-                funcPy = eval("py" + funcname)
-
-                firstdict = OrderedDict()
-                instancedict = {}
-                checkindex = []
-
-                count = 0
-                for i in range(len(allfuncargs[keyfunc].keys())):
-                    arg = list(allfuncargs[keyfunc].keys())[i]
-                    firstdict[arg] = []
-                    if allfuncroles[keyfunc][arg]["check"] == "inparam":
-                        if "role" in allfuncroles[keyfunc][arg].keys():
-                            group = allfuncroles[keyfunc][arg]["role"][
-                                : allfuncroles[keyfunc][arg]["role"].find("-")
-                            ]
-                            if group not in instancedict.keys():
-                                instancedict[group] = []
-                            instancedict[group].append(arg)
-                            if group not in data.keys() and group[:-1] in data.keys():
-                                pseudogroup = group[:-1]
-                            elif group in data.keys():
-                                pseudogroup = group
-                            role = (
-                                pseudogroup
-                                + allfuncroles[keyfunc][arg]["role"][
-                                    allfuncroles[keyfunc][arg]["role"].find("-") :
-                                ]
-                            )
-                            for x in range(len(data[pseudogroup])):
-                                firstdict[arg].append(data[pseudogroup][x][role])
-                        else:
-                            group = str(count)
-                            assert group not in instancedict.keys()
-                            instancedict[group] = [arg]
-                            firstdict[arg].append(data["num"])
-                            assert len(firstdict[arg]) == 1
-                            count += 1
-                    elif allfuncroles[keyfunc][arg]["check"] == "outparam":
-                        group = str(count)
-                        assert group not in instancedict.keys()
-                        instancedict[group] = [arg]
-                        firstdict[arg].append({})
-                        assert (len(firstdict[arg])) == 1
-                        checkindex.append(i)
-                        count += 1
-                    else:
-                        raise AssertionError(
-                            "Function argument must have inparam/outparam role"
-                        )
-
-                instancedictlist = list(instancedict.keys())
-
-                combinations = []
-                for name in instancedictlist:
-                    temp = []
-                    for arg in instancedict[name]:
-                        temp.append(firstdict[arg])
-                    combinations.append(zip(*temp))
-
-                for x in product(*combinations):
-                    temp = {}
-                    for groupName, t in zip(instancedictlist, x):
-                        for key, value in zip(instancedict[groupName], t):
-                            temp[key] = value
-
-                    tests = []
-                    intests = OrderedDict()
-                    outtests = OrderedDict()
-                    for key in firstdict.keys():
-                        argpytype = pytype(allfuncargs[keyfunc][key])
-                        if allfuncroles[keyfunc][key]["check"] == "outparam":
-                            if argpytype == "int":
-                                intests[key] = [123] * 50
-                            elif argpytype == "float":
-                                intests[key] = [123.0] * 50
-                            elif argpytype == "bool":
-                                intests[key] = [True] * 50
-                        elif allfuncroles[keyfunc][key]["check"] == "inparam":
-                            intests[key] = temp[key]
-                        else:
-                            raise AssertionError(
-                                "Invalid roles should have been filtered"
-                            )
-                        tests.append(copy.deepcopy(temp[key]))
-
-                    try:
-                        funcPy(*tests)
-                        if funcname not in SUCCESS_TEST_BLACKLIST:
-                            for i in checkindex:
-                                count = 0
-                                outtests[list(allfuncargs[keyfunc].keys())[i]] = []
-                                for num in sorted(tests[i]):
-                                    if num != count and count < num:
-                                        while num != count:
-                                            argpytype = pytype(
-                                                list(allfuncargs[keyfunc].values())[i]
-                                            )
-                                            if argpytype == "int":
-                                                outtests[
-                                                    list(allfuncargs[keyfunc].keys())[i]
-                                                ].append(123)
-                                            elif argpytype == "float":
-                                                outtests[
-                                                    list(allfuncargs[keyfunc].keys())[i]
-                                                ].append(123.0)
-                                            elif argpytype == "bool":
-                                                outtests[
-                                                    list(allfuncargs[keyfunc].keys())[i]
-                                                ].append(True)
-                                            count = count + 1
-                                    outtests[
-                                        list(allfuncargs[keyfunc].keys())[i]
-                                    ].append(tests[i][num])
-                                    count = count + 1
-                            tempdict = {}
-                            tempdict["input"] = copy.deepcopy(intests)
-                            tempdict["output"] = copy.copy(outtests)
-                            tempdict["success"] = True
-                            funcs[funcname].append(tempdict)
-                    except ValueError:
-                        tempdict = {}
-                        tempdict["input"] = copy.deepcopy(intests)
-                        tempdict["success"] = False
-                        funcs[funcname].append(tempdict)
-
-    return funcs
-
-
 def get_paramcheck(funcroles, alltokens, allfuncargs):
     funcs = OrderedDict()
     for funcname in alltokens.keys():
@@ -1115,8 +852,6 @@ if __name__ == "__main__":
             funcroles = parseheader(hfile)
             funcargs = getargs(hfile)
 
-            if "sorting.cpp" not in filename:
-                tests = get_tests(pyfuncs, funcargs, tokens, funcroles)
             paramchecks = get_paramcheck(funcroles, tokens, funcargs)
 
             if kernelname is None:
@@ -1202,46 +937,23 @@ if __name__ == "__main__":
                                 f.write(
                                     indent_code(pyfuncs[funcname], 4).rstrip() + "\n"
                                 )
-                            if (
-                                "sorting.cpp" not in filename
-                                and funcname not in TEST_BLACKLIST
-                                and funcname in tests.keys()
-                            ):
-                                f.write(" " * 2 + "tests:\n")
-                                for test in tests[funcname]:
-                                    f.write(" " * 4 + "- args:\n")
-                                    for arg in test["input"].keys():
-                                        f.write(" " * 8 + arg + ": ")
-                                        if (
-                                            "output" in test.keys()
-                                            and arg in test["output"].keys()
-                                        ):
-                                            f.write(
-                                                str(
-                                                    test["input"][arg][
-                                                        : len(test["output"][arg])
-                                                    ]
-                                                )
-                                                + "\n"
-                                            )
-                                        else:
-                                            f.write(str(test["input"][arg]) + "\n")
-                                    f.write(
-                                        " " * 6
-                                        + "successful: "
-                                        + str(test["success"])
-                                        + "\n"
+                            if "sorting.cpp" not in filename:
+                                if "childfunc" in tokens[funcname].keys():
+                                    genfuncname = next(
+                                        iter(tokens[funcname]["childfunc"])
                                     )
-                                    if test["success"] is True:
-                                        f.write(" " * 6 + "results:\n")
-                                        for arg in test["output"].keys():
-                                            f.write(
-                                                " " * 8
-                                                + arg
-                                                + ": "
-                                                + str(test["output"][arg])
-                                                + "\n"
-                                            )
+                                else:
+                                    genfuncname = copy.copy(funcname)
+                                if genfuncname in funcroles.keys():
+                                    f.write(" " * 2 + "roles:\n")
+                                    for arg, roledict in funcroles[genfuncname].items():
+                                        if "role" in roledict:
+                                            role = roledict["role"]
+                                        else:
+                                            role = "default"
+                                        f.write(
+                                            " " * 4 + "- " + arg + ": " + role + "\n"
+                                        )
             else:
                 if kernelname in tokens.keys() and kernelname not in SPEC_BLACKLIST:
                     print("name: ", kernelname)
@@ -1287,15 +999,13 @@ if __name__ == "__main__":
                         print(" " * 6 + "Insert Python definition here")
                     else:
                         print(indent_code(pyfuncs[kernelname], 6).rstrip())
-                    if kernelname in tests.keys():
-                        print(" " * 4 + "tests:")
-                        for test in tests[kernelname]:
-                            print(" " * 6 + "- args:")
-                            for arg in test["input"].keys():
-                                print(" " * 10 + arg + ": ", test["input"][arg])
-                            print(" " * 8 + "successful: ", test["success"])
-                            print(" " * 8 + "results:")
-                            if test["success"] is True:
-                                for arg in test["output"].keys():
-                                    print(" " * 10 + arg + ": ", test["output"][arg])
-                        print()
+                    if "childfunc" in tokens[kernelname].keys():
+                        kernelname = next(iter(tokens[kernelname]["childfunc"]))
+                    if kernelname in funcroles.keys():
+                        print(" " * 2 + "roles:")
+                        for arg, roledict in funcroles[kernelname].items():
+                            if "role" in roledict:
+                                role = roledict["role"]
+                            else:
+                                role = "default"
+                            print(" " * 4 + "- " + arg + ": " + role)

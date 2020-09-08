@@ -1,22 +1,23 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+import copy
+import json
 import os
-import re
 from collections import OrderedDict
+from itertools import product
 
 import yaml
+from parser_utils import PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST, TEST_BLACKLIST
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-def pytype(cpptype):
-    cpptype = cpptype.replace("*", "")
-    if re.match("u?int\d{1,2}(_t)?", cpptype) is not None:
-        return "int"
-    elif cpptype == "double":
-        return "float"
-    else:
-        return cpptype
+def wrap_exec(string, globs, locs):
+    exec(string, globs, locs)
+
+
+def wrap_eval(string, globs, locs):
+    return eval(string, globs, locs)
 
 
 def gettypename(spectype):
@@ -79,106 +80,220 @@ kSliceNone = kMaxInt64 + 1
                                 outfile.write("\n\n")
 
 
-def readspec():
-    funcs = {}
+def gettypeval(typename):
+    if "int" in typename:
+        typeval = 123
+    elif "bool" in typename:
+        typeval = True
+    elif "double" in typename or "float" in typename:
+        typeval = 123.0
+    else:
+        raise ValueError("Unknown type encountered")
+    return typeval
+
+
+def typevalidates(testdict, arglist):
+    for argdict in arglist:
+        for arg, typename in argdict.items():
+            if isinstance(testdict[arg], list):
+                if testdict[arg] == []:
+                    return False
+                if not isinstance(testdict[arg][0], type(gettypeval(typename))):
+                    return False
+            else:
+                if not isinstance(testdict[arg], type(gettypeval(typename))):
+                    return False
+    return True
+
+
+def getdummyvalue(argdict, length):
+    assert len(argdict) == 1
+    return [gettypeval(list(argdict.values())[0])] * length
+
+
+def dicttolist(outputdict, argdict):
+    assert len(argdict) == 1
+    typeval = gettypeval(list(argdict.values())[0])
+    vallist = []
+    count = 0
+    for num in sorted(outputdict):
+        if num == count:
+            vallist.append(outputdict[num])
+        else:
+            while num != count:
+                count += 1
+                vallist.append(typeval)
+            vallist.append(outputdict[num])
+        count += 1
+    return vallist
+
+
+def getargvals(funcname, arglist, rolelist, data, outparams):
+    allvals = []
     with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
-    ) as infile:
-        mainspec = yaml.safe_load(infile)["kernels"]
-        for filedir in mainspec.values():
-            for relpath in filedir.values():
-                with open(
-                    os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
-                ) as specfile:
-                    indspec = yaml.safe_load(specfile)[0]
-                    if indspec.get("tests") is None:
-                        indspec["tests"] = []
-                    if "tests" in indspec.keys():
+        os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py")
+    ) as kernelfile:
+        wrap_exec(kernelfile.read(), globals(), locals())
+        instancedict = {}
+        funcpassdict = OrderedDict()
+        count = 0
+        for roledict in rolelist:
+            assert len(roledict) == 1
+            for arg, role in roledict.items():
+                funcpassdict[arg] = []
+                if role == "default":
+                    group = str(count)
+                    assert group not in instancedict.keys()
+                    instancedict[group] = [arg]
+                    if arg in outparams:
+                        funcpassdict[arg].append({})
+                    else:
+                        funcpassdict[arg].append(data["num"])
+                    assert len(funcpassdict[arg]) == 1
+                    count += 1
+                else:
+                    group = role[: role.find("-")]
+                    if group not in instancedict.keys():
+                        instancedict[group] = []
+                    instancedict[group].append(arg)
+                    if group not in data.keys() and group[:-1] in data.keys():
+                        pseudogroup = copy.copy(group[:-1])
+                    elif group in data.keys():
+                        pseudogroup = copy.copy(group)
+                    role = pseudogroup + role[role.find("-") :]
+                    for x in range(len(data[pseudogroup])):
+                        funcpassdict[arg].append(data[pseudogroup][x][role])
+
+        instancedictlist = list(instancedict.keys())
+
+        combinations = []
+        for name in instancedictlist:
+            temp = []
+            for arg in instancedict[name]:
+                temp.append(funcpassdict[arg])
+            combinations.append(zip(*temp))
+
+        for x in product(*combinations):
+            origtemp = OrderedDict()
+            for groupName, t in zip(instancedictlist, x):
+                for key, value in zip(instancedict[groupName], t):
+                    origtemp[key] = value
+
+            temp = copy.deepcopy(origtemp)
+            funcPy = wrap_eval(funcname, globals(), locals())
+
+            intests = OrderedDict()
+            outtests = OrderedDict()
+            tempdict = {}
+            try:
+                funcPy(**temp)
+                if (funcname not in SUCCESS_TEST_BLACKLIST) or any(
+                    funcname in x for x in SUCCESS_TEST_BLACKLIST
+                ):
+                    for arg in temp.keys():
+                        if arg in outparams:
+                            assert isinstance(temp[arg], dict)
+                            temparglist = dicttolist(
+                                temp[arg],
+                                next(
+                                    argmap
+                                    for argmap in arglist
+                                    if list(argmap.keys())[0] == arg
+                                ),
+                            )
+                            intests[arg] = getdummyvalue(
+                                next(
+                                    argmap
+                                    for argmap in arglist
+                                    if list(argmap.keys())[0] == arg
+                                ),
+                                len(temparglist),
+                            )
+                            outtests[arg] = temparglist
+                        else:
+                            intests[arg] = temp[arg]
+                    tempdict["outargs"] = copy.deepcopy(outtests)
+                    tempdict["success"] = True
+            except ValueError:
+                for arg in temp.keys():
+                    if arg in outparams:
+                        intests[arg] = getdummyvalue(
+                            next(
+                                argmap
+                                for argmap in arglist
+                                if list(argmap.keys())[0] == arg
+                            ),
+                            len(temp[arg]),
+                        )
+                    else:
+                        intests[arg] = temp[arg]
+                tempdict["success"] = False
+            tempdict["inargs"] = copy.deepcopy(intests)
+            if typevalidates(tempdict["inargs"], arglist):
+                allvals.append(tempdict)
+
+    return allvals
+
+
+def gettests():
+    tests = {}
+    with open(
+        os.path.join(CURRENT_DIR, "..", "kernel-specification", "samples.json")
+    ) as testjson:
+        data = json.load(testjson)
+        genpykernels()
+        print("Generating test cases")
+        with open(
+            os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
+        ) as infile:
+            mainspec = yaml.safe_load(infile)["kernels"]
+            for filedir in mainspec.values():
+                for relpath in filedir.values():
+                    with open(
+                        os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
+                    ) as specfile:
+                        indspec = yaml.safe_load(specfile)[0]
                         if "specializations" in indspec.keys():
                             for childfunc in indspec["specializations"]:
-                                funcs[childfunc["name"]] = []
-                                for test in indspec["tests"]:
-                                    # Check if test has correct types
-                                    flag = True
-                                    for x in childfunc["args"]:
-                                        for arg, val in x.items():
-                                            if "Const[" in val:
-                                                val = val.replace(
-                                                    "Const[", "", 1
-                                                ).rstrip("]")
-                                            spectype = pytype(
-                                                val.replace("List", "")
-                                                .replace("[", "")
-                                                .replace("]", "")
-                                            )
-                                            testval = test["args"][arg]
-                                            while isinstance(testval, list):
-                                                if len(testval) == 0:
-                                                    testval = None
-                                                else:
-                                                    testval = testval[0]
-                                            if type(testval) != eval(spectype):
-                                                flag = False
-                                            elif test["successful"] and (
-                                                "U32" in childfunc["name"]
-                                                or "U64" in childfunc["name"]
-                                                or (
-                                                    arg in test["results"].keys()
-                                                    and -1 in test["results"][arg]
-                                                )
-                                            ):
-                                                flag = False
-                                    if flag:
-                                        testinfo = {}
-                                        testinfo["inargs"] = OrderedDict()
-                                        testinfo["inargs"].update(test["args"])
-                                        testinfo["success"] = test["successful"]
-                                        if testinfo["success"]:
-                                            testinfo["outargs"] = OrderedDict()
-                                            testinfo["outargs"].update(test["results"])
-                                        funcs[childfunc["name"]].append(testinfo)
+                                if (
+                                    "roles" in indspec.keys()
+                                    and (
+                                        "pointer"
+                                        not in [
+                                            list(x.values())[0]
+                                            for x in indspec["roles"]
+                                        ]
+                                    )
+                                    and indspec["name"] not in TEST_BLACKLIST
+                                    and indspec["name"] not in PYGEN_BLACKLIST
+                                ):
+                                    tests[childfunc["name"]] = getargvals(
+                                        childfunc["name"],
+                                        childfunc["args"],
+                                        indspec["roles"],
+                                        data,
+                                        indspec["outparams"],
+                                    )
+                                else:
+                                    tests[childfunc["name"]] = []
                         else:
-                            funcs[indspec["name"]] = []
-                            for test in indspec["tests"]:
-                                # Check if test has correct types
-                                flag = True
-                                for x in indspec["args"]:
-                                    for arg, val in x.items():
-                                        if "Const[" in val:
-                                            val = val.replace("Const[", "", 1).rstrip(
-                                                "]"
-                                            )
-                                        spectype = pytype(
-                                            val.replace("List", "")
-                                            .replace("[", "")
-                                            .replace("]", "")
-                                        )
-                                        testval = test["args"][arg]
-                                        while isinstance(testval, list):
-                                            testval = testval[0]
-                                        if type(testval) != eval(spectype):
-                                            flag = False
-                                        elif test["successful"] and (
-                                            "U32" in indspec["name"]
-                                            or "U64" in indspec["name"]
-                                            or (
-                                                arg in test["results"].keys()
-                                                and -1 in test["results"][arg]
-                                            )
-                                        ):
-                                            flag = False
-                                if flag:
-                                    testinfo = {}
-                                    testinfo["inargs"] = OrderedDict()
-                                    testinfo["inargs"].update(test["args"])
-                                    testinfo["success"] = test["successful"]
-                                    if testinfo["success"]:
-                                        testinfo["outargs"] = OrderedDict()
-                                        testinfo["outargs"].update(test["results"])
-                                    funcs[indspec["name"]].append(testinfo)
-                    else:
-                        funcs[indspec["name"]] = []
-    return funcs
+                            if (
+                                "roles" in indspec.keys()
+                                and "pointer"
+                                not in [list(x.values())[0] for x in indspec["roles"]]
+                                and indspec["name"] not in TEST_BLACKLIST
+                                and indspec["name"] not in PYGEN_BLACKLIST
+                            ):
+                                tests[indspec["name"]] = getargvals(
+                                    indspec["name"],
+                                    indspec["args"],
+                                    indspec["roles"],
+                                    data,
+                                    indspec["outparams"],
+                                )
+                            else:
+                                tests[indspec["name"]] = []
+    return tests
 
 
 def getcudakernelslist():
@@ -193,7 +308,6 @@ def getcudakernelslist():
 
 
 def genspectests(tests):
-    genpykernels()
     print("Generating files for testing specification")
     for funcname in tests.keys():
         with open(
@@ -247,7 +361,7 @@ def genspectests(tests):
                     f.write("\n")
 
 
-def getfuncargs():
+def getfuncargs(tests):
     funcs = {}
     with open(
         os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
@@ -259,11 +373,7 @@ def getfuncargs():
                     os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
                 ) as specfile:
                     indspec = yaml.safe_load(specfile)[0]
-                    if (
-                        "def " in indspec["definition"]
-                        and "tests" in indspec.keys()
-                        and indspec["tests"] is not None
-                    ):
+                    if "def " in indspec["definition"]:
                         if "specializations" in indspec.keys():
                             for childfunc in indspec["specializations"]:
                                 funcs[childfunc["name"]] = OrderedDict()
@@ -330,7 +440,7 @@ def getctypelist(typedict):
 def gencpukerneltests(tests):
     print("Generating files for testing CPU kernels")
 
-    funcargs = getfuncargs()
+    funcargs = getfuncargs(tests)
     for funcname in tests.keys():
         with open(
             os.path.join(
@@ -407,7 +517,7 @@ def gencpukerneltests(tests):
 def gencudakerneltests(tests):
     print("Generating files for testing CUDA kernels")
 
-    funcargs = getfuncargs()
+    funcargs = getfuncargs(tests)
     cudakernels = getcudakernelslist()
     funcnames = getfuncnames()
     cudafuncnames = {funcname: funcnames[funcname] for funcname in cudakernels}
@@ -505,7 +615,7 @@ def gencudakerneltests(tests):
 
 
 if __name__ == "__main__":
-    tests = readspec()
+    tests = gettests()
     genspectests(tests)
     gencpukerneltests(tests)
     gencudakerneltests(tests)
