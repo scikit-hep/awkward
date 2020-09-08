@@ -15,14 +15,20 @@ namespace awkward {
   /// @class RegularForm
   ///
   /// @brief Form describing RegularArray.
-  class LIBAWKWARD_EXPORT_SYMBOL RegularForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL RegularForm final : public Form {
   public:
     /// @brief Creates a RegularForm. See RegularArray for documentation.
-    RegularForm(bool has_identities,
-                const util::Parameters& parameters,
-                const FormKey& form_key,
-                const FormPtr& content,
-                int64_t size);
+    explicit RegularForm(bool has_identities,
+                         const util::Parameters& parameters,
+                         const FormKey& form_key,
+                         const FormPtr& content,
+                         int64_t size);
+
+    /// @brief Copies a RegularForm.
+    RegularForm(const RegularForm& form)
+      : Form(form.has_identities_, form.parameters_, form.form_key_),
+        content_(form.content_),
+        size_(form.size_) { }
 
     const FormPtr
       content() const;
@@ -81,7 +87,7 @@ namespace awkward {
 
   private:
     const FormPtr content_;
-    int64_t size_;
+    int64_t size_ = 0;
   };
 
   /// @class RegularArray
@@ -93,7 +99,7 @@ namespace awkward {
   /// it must also start at zero.
   ///
   /// See #RegularArray for the meaning of each parameter.
-  class LIBAWKWARD_EXPORT_SYMBOL RegularArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL RegularArray final : public Content {
   public:
     /// @brief Creates a RegularArray from a full set of parameters.
     ///
@@ -106,10 +112,10 @@ namespace awkward {
     /// Values in `content[i]` where `i >= length * size` are "unreachable,"
     /// and don't exist in the high level view.
     /// @param size Length of the equally sized nested lists.
-    RegularArray(const IdentitiesPtr& identities,
-                 const util::Parameters& parameters,
-                 const ContentPtr& content,
-                 int64_t size);
+    explicit RegularArray(const IdentitiesPtr& identities,
+                          const util::Parameters& parameters,
+                          const ContentPtr& content,
+                          int64_t size);
 
     /// @brief Data contained within all nested lists as a contiguous array.
     ///
@@ -366,7 +372,7 @@ namespace awkward {
 
   private:
     const ContentPtr content_;
-    int64_t size_;
+    int64_t size_ = 0;
   };
 }
 

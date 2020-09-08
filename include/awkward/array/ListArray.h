@@ -15,16 +15,23 @@ namespace awkward {
   /// @class ListForm
   ///
   /// @brief Form describing ListArray.
-  class LIBAWKWARD_EXPORT_SYMBOL ListForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL ListForm final : public Form {
   public:
     /// @brief Creates a ListForm. See {@link ListArrayOf LinkArray} for
     /// documentation.
-    ListForm(bool has_identities,
-             const util::Parameters& parameters,
-             const FormKey& form_key,
-             Index::Form starts,
-             Index::Form stops,
-             const FormPtr& content);
+    explicit ListForm(bool has_identities,
+                      const util::Parameters& parameters,
+                      const FormKey& form_key,
+                      Index::Form starts,
+                      Index::Form stops,
+                      const FormPtr& content);
+
+   /// @brief Copies a ListForm.
+   ListForm(const ListForm& form)
+     : Form(form.has_identities_, form.parameters_, form.form_key_),
+       starts_(form.starts_),
+       stops_(form.stops_),
+       content_(form.content_) { }
 
     Index::Form
       starts() const;
@@ -104,7 +111,7 @@ namespace awkward {
 #ifdef AWKWARD_LISTARRAY_NO_EXTERN_TEMPLATE
   LIBAWKWARD_EXPORT_SYMBOL
 #endif
-  ListArrayOf: public Content {
+  ListArrayOf final : public Content {
   public:
     /// @brief Creates a ListArray from a full set of parameters.
     ///
@@ -125,11 +132,11 @@ namespace awkward {
     /// The `content` does not necessarily represent a flattened version of
     /// this array because a single element may belong to multiple lists or
     /// no list at all.
-    ListArrayOf<T>(const IdentitiesPtr& identities,
-                   const util::Parameters& parameters,
-                   const IndexOf<T>& starts,
-                   const IndexOf<T>& stops,
-                   const ContentPtr& content);
+    explicit ListArrayOf<T>(const IdentitiesPtr& identities,
+                            const util::Parameters& parameters,
+                            const IndexOf<T>& starts,
+                            const IndexOf<T>& stops,
+                            const ContentPtr& content);
 
     /// @brief Positions where each nested list starts in the #content.
     ///

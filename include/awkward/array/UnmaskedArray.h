@@ -16,13 +16,18 @@ namespace awkward {
   /// @class UnmaskedForm
   ///
   /// @brief Form describing UnmaskedArray.
-  class LIBAWKWARD_EXPORT_SYMBOL UnmaskedForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL UnmaskedForm final : public Form {
   public:
     /// @brief Creates a UnmaskedForm. See UnmaskedArray for documentation.
-    UnmaskedForm(bool has_identities,
-                 const util::Parameters& parameters,
-                 const FormKey& form_key,
-                 const FormPtr& content);
+    explicit UnmaskedForm(bool has_identities,
+                          const util::Parameters& parameters,
+                          const FormKey& form_key,
+                          const FormPtr& content);
+
+    /// @brief Copies a UnmaskedForm.
+    UnmaskedForm(const UnmaskedForm& form)
+      : Form(form.has_identities_, form.parameters_, form.form_key_),
+        content_(form.content_) { }
 
     const FormPtr
       content() const;
@@ -86,7 +91,7 @@ namespace awkward {
   /// values happen to be valid.
   ///
   /// See #UnmaskedArray for the meaning of each parameter.
-  class LIBAWKWARD_EXPORT_SYMBOL UnmaskedArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL UnmaskedArray final : public Content {
   public:
     /// @brief Creates an UnmaskedArray from a full set of parameters.
     ///
@@ -95,9 +100,9 @@ namespace awkward {
     /// @param parameters String-to-JSON map that augments the meaning of this
     /// array.
     /// @param content Data to be converted to an OptionType.
-    UnmaskedArray(const IdentitiesPtr& identities,
-                  const util::Parameters& parameters,
-                  const ContentPtr& content);
+    explicit UnmaskedArray(const IdentitiesPtr& identities,
+                           const util::Parameters& parameters,
+                           const ContentPtr& content);
 
     /// @brief Data to be converted to an OptionType.
     const ContentPtr

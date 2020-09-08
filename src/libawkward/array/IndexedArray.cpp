@@ -2084,7 +2084,6 @@ namespace awkward {
                                          bool keepdims) const {
     int64_t index_length = index_.length();
     int64_t parents_length = parents.length();
-    assert(index_length == parents_length);
 
     int64_t starts_length = starts.length();
     int64_t numnull(0);
@@ -2193,7 +2192,6 @@ namespace awkward {
                                             bool keepdims) const {
     int64_t index_length = index_.length();
     int64_t parents_length = parents.length();
-    assert(index_length == parents_length);
 
     int64_t starts_length = starts.length();
     int64_t numnull(0);

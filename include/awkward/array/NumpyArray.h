@@ -18,16 +18,24 @@ namespace awkward {
   /// @class NumpyForm
   ///
   /// @brief Form describing NumpyArray.
-  class LIBAWKWARD_EXPORT_SYMBOL NumpyForm: public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL NumpyForm final : public Form {
   public:
     /// @brief Creates a NumpyForm. See NumpyArray for documentation.
-    NumpyForm(bool has_identities,
-              const util::Parameters& parameters,
-              const FormKey& form_key,
-              const std::vector<int64_t>& inner_shape,
-              int64_t itemsize,
-              const std::string& format,
-              util::dtype dtype);
+    explicit NumpyForm(bool has_identities,
+                       const util::Parameters& parameters,
+                       const FormKey& form_key,
+                       const std::vector<int64_t>& inner_shape,
+                       int64_t itemsize,
+                       const std::string& format,
+                       util::dtype dtype);
+
+    /// @brief Copies a NumpyForm.
+    NumpyForm(const NumpyForm& form)
+      : Form(form.has_identities_, form.parameters_, form.form_key_),
+        inner_shape_(form.inner_shape_),
+        itemsize_(form.itemsize_),
+        format_(form.format_),
+        dtype_(form.dtype_) { }
 
     const std::vector<int64_t>
       inner_shape() const;
@@ -126,7 +134,7 @@ namespace awkward {
   ///  - 8-bit booleans
   ///
   ///(native endian only).
-  class LIBAWKWARD_EXPORT_SYMBOL NumpyArray: public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL NumpyArray final : public Content {
   public:
 
     /// @brief Creates a NumpyArray from a full set of parameters.
@@ -163,16 +171,16 @@ namespace awkward {
     ///
     /// Note that the integer type for all of these parameters is `ssize_t`,
     /// for consistency with pybind11. Most integers in Awkward are `int64_t`.
-    NumpyArray(const IdentitiesPtr& identities,
-               const util::Parameters& parameters,
-               const std::shared_ptr<void>& ptr,
-               const std::vector<ssize_t>& shape,
-               const std::vector<ssize_t>& strides,
-               ssize_t byteoffset,
-               ssize_t itemsize,
-               const std::string format,
-               util::dtype dtype,
-               const kernel::lib ptr_lib);
+    explicit NumpyArray(const IdentitiesPtr& identities,
+                        const util::Parameters& parameters,
+                        const std::shared_ptr<void>& ptr,
+                        const std::vector<ssize_t>& shape,
+                        const std::vector<ssize_t>& strides,
+                        ssize_t byteoffset,
+                        ssize_t itemsize,
+                        const std::string format,
+                        util::dtype dtype,
+                        const kernel::lib ptr_lib);
 
     /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
     NumpyArray(const Index8 index);

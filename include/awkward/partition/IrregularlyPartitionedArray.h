@@ -9,10 +9,10 @@ namespace awkward {
   /// @class IrregularlyPartitionedArray
   ///
   /// @brief PartitionedArray of arbitrary length partitions.
-  class LIBAWKWARD_EXPORT_SYMBOL IrregularlyPartitionedArray: public PartitionedArray {
+  class LIBAWKWARD_EXPORT_SYMBOL IrregularlyPartitionedArray final : public PartitionedArray {
   public:
-    IrregularlyPartitionedArray(const ContentPtrVec& partitions,
-                                const std::vector<int64_t> stops);
+    explicit IrregularlyPartitionedArray(const ContentPtrVec& partitions,
+                                         const std::vector<int64_t> stops);
 
     /// @brief Logical index where each partition ends.
     ///
