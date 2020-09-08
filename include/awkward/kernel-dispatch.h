@@ -182,8 +182,7 @@ namespace awkward {
       }
       else {
         throw std::runtime_error(
-          std::string("unrecognized ptr_lib in ptr_alloc<bool>")
-          + FILENAME_FOR_EXCEPTIONS("include/awkward/kernel-dispatch.h", __LINE__));
+          std::string("unrecognized ptr_lib in ptr_alloc<bool>"));
       }
     }
 

@@ -6,7 +6,7 @@
 
 #include "awkward/builder/ArrayBuilder.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
-#include "awkward/cpu-kernels/getitem.h"
+#include "awkward/kernels/getitem.h"
 
 namespace py = pybind11;
 namespace ak = awkward;
@@ -38,7 +38,7 @@ std::shared_ptr<ak::Content> producer() {
   builder.field_fast("y");
   builder.string("wow");
   builder.endrecord();
-  
+
   return builder.snapshot();
 }
 
