@@ -12,7 +12,7 @@ export PATH=`ls -d /opt/_internal/cpython-3.7.*/lib/python3.7/site-packages/cmak
 echo "PATH:" $PATH
 echo "which cmake:" `which cmake`
 
-for PYBIN in /opt/python/cp37-cp37m/bin; do # /opt/python/*/bin; do
+for PYBIN in /opt/python/*/bin; do
     echo "========================================================="
     echo $PYBIN
     echo "========================================================="

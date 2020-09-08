@@ -49,13 +49,13 @@ jobs:
           bash cuda-build.sh
         displayName: "Build"
 
-      # - script: |
-      #     ls dist
-      #     rm -rf dist/awkward1_cuda_kernels-*-py3-none-any.whl dist/awkward1_cuda_kernels dist/awkward1_cuda_kernels-*.dist-info dist/tmp_WHEEL
-      #     ls dist
-      #     python -m twine upload dist/awkward1_cuda_kernels-*-py3-none-manylinux2014_x86_64.whl --config-file $(pypirc.secureFilePath) --verbose
-      #   displayName: "Deploy"
-      #   condition: contains(variables['Build.SourceBranch'], 'tags')
+      - script: |
+          ls dist
+          rm -rf dist/awkward1_cuda_kernels-*-py3-none-any.whl dist/awkward1_cuda_kernels dist/awkward1_cuda_kernels-*.dist-info dist/tmp_WHEEL
+          ls dist
+          python -m twine upload dist/awkward1_cuda_kernels-*-py3-none-manylinux2014_x86_64.whl --config-file $(pypirc.secureFilePath) --verbose
+        displayName: "Deploy"
+        condition: contains(variables['Build.SourceBranch'], 'tags')
 
       - task: PublishPipelineArtifact@0
         inputs:
@@ -121,198 +121,198 @@ jobs:
           cp wheelhouse/awkward1*manylinux*.whl dist/.
         displayName: "Copy wheels to dist"
 
-      # - script: |
-      #     python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
-      #   displayName: "Deploy"
-      #   condition: contains(variables['Build.SourceBranch'], 'tags')
+      - script: |
+          python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+        displayName: "Deploy"
+        condition: contains(variables['Build.SourceBranch'], 'tags')
 
       - task: PublishPipelineArtifact@0
         inputs:
           artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
           targetPath: 'dist'
 
-  # - job: Windows
+  - job: Windows
 
-  #   pool:
-  #     vmImage: "vs2017-win2016"
+    pool:
+      vmImage: "vs2017-win2016"
 
-  #   variables:
-  #     PIP_ONLY_BINARY: cmake
+    variables:
+      PIP_ONLY_BINARY: cmake
 
-  #   strategy:
-  #     matrix:
-  #       "py27-32bit":
-  #         python.version: "2.7"
-  #         python.architecture: "x86"
-  #         numpy.version: "1.16.5"
-  #       "py27-64bit":
-  #         python.version: "2.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "1.16.5"
-  #       "py35-32bit":
-  #         python.version: "3.5"
-  #         python.architecture: "x86"
-  #         numpy.version: "latest"
-  #       "py35-64bit":
-  #         python.version: "3.5"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py36-32bit":
-  #         python.version: "3.6"
-  #         python.architecture: "x86"
-  #         numpy.version: "latest"
-  #       "py36-64bit":
-  #         python.version: "3.6"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py37-32bit":
-  #         python.version: "3.7"
-  #         python.architecture: "x86"
-  #         numpy.version: "latest"
-  #       "py37-64bit":
-  #         python.version: "3.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py38-32bit":
-  #         python.version: "3.8"
-  #         python.architecture: "x86"
-  #         numpy.version: "latest"
-  #       "py38-64bit":
-  #         python.version: "3.8"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
+    strategy:
+      matrix:
+        "py27-32bit":
+          python.version: "2.7"
+          python.architecture: "x86"
+          numpy.version: "1.16.5"
+        "py27-64bit":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.16.5"
+        "py35-32bit":
+          python.version: "3.5"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py35-64bit":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36-32bit":
+          python.version: "3.6"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py36-64bit":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37-32bit":
+          python.version: "3.7"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py37-64bit":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py38-32bit":
+          python.version: "3.8"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py38-64bit":
+          python.version: "3.8"
+          python.architecture: "x64"
+          numpy.version: "latest"
 
-  #   steps:
-  #     - checkout: self
-  #       submodules: recursive
+    steps:
+      - checkout: self
+        submodules: recursive
 
-  #     - task: DownloadSecureFile@1
-  #       name: pypirc
-  #       inputs:
-  #         secureFile: pivarski-pypirc
-  #       displayName: "Credentials"
+      - task: DownloadSecureFile@1
+        name: pypirc
+        inputs:
+          secureFile: pivarski-pypirc
+        displayName: "Credentials"
 
-  #     - task: UsePythonVersion@0
-  #       inputs:
-  #         versionSpec: '$(python.version)'
-  #         architecture: '$(python.architecture)'
-  #       displayName: 'Python $(python.version)'
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
+        displayName: 'Python $(python.version)'
 
-  #     - script: |
-  #         python -m pip install --upgrade pip
-  #         python -m pip install twine wheel
-  #       displayName: "Install"
+      - script: |
+          python -m pip install --upgrade pip
+          python -m pip install twine wheel
+        displayName: "Install"
 
-  #     - script: |
-  #         python -m pip wheel . -v -w wheelhouse/
-  #       displayName: "Build"
+      - script: |
+          python -m pip wheel . -v -w wheelhouse/
+        displayName: "Build"
 
-  #     - script: |
-  #         if not exist "dist" mkdir dist
-  #         cp wheelhouse/awkward1*.whl dist/.
-  #       displayName: "Copy wheels to dist"
+      - script: |
+          if not exist "dist" mkdir dist
+          cp wheelhouse/awkward1*.whl dist/.
+        displayName: "Copy wheels to dist"
 
-  #     # - script: |
-  #     #     python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
-  #     #   displayName: "Deploy"
-  #     #   condition: contains(variables['Build.SourceBranch'], 'tags')
+      - script: |
+          python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+        displayName: "Deploy"
+        condition: contains(variables['Build.SourceBranch'], 'tags')
 
-  #     - task: PublishPipelineArtifact@0
-  #       inputs:
-  #         artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
-  #         targetPath: 'dist'
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
+          targetPath: 'dist'
 
-  # - job: MacOS
+  - job: MacOS
 
-  #   pool:
-  #     vmImage: "macOS-10.14"
+    pool:
+      vmImage: "macOS-10.14"
 
-  #   variables:
-  #     PIP_ONLY_BINARY: cmake
+    variables:
+      PIP_ONLY_BINARY: cmake
 
-  #   strategy:
-  #     matrix:
-  #       "py27":
-  #         python.version: "2.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py36":
-  #         python.version: "3.6"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py37":
-  #         python.version: "3.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py38":
-  #         python.version: "3.8"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
+    strategy:
+      matrix:
+        "py27":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py38":
+          python.version: "3.8"
+          python.architecture: "x64"
+          numpy.version: "latest"
 
-  #   steps:
-  #     - checkout: self
-  #       submodules: recursive
+    steps:
+      - checkout: self
+        submodules: recursive
 
-  #     - task: DownloadSecureFile@1
-  #       name: pypirc
-  #       inputs:
-  #         secureFile: pivarski-pypirc
-  #       displayName: "Credentials"
+      - task: DownloadSecureFile@1
+        name: pypirc
+        inputs:
+          secureFile: pivarski-pypirc
+        displayName: "Credentials"
 
-  #     - script: |
-  #         case $(python.version) in
-  #         2.7)
-  #           FULL_VERSION=2.7.17
-  #           ;;
-  #         3.6)
-  #           FULL_VERSION=3.6.8
-  #           ;;
-  #         3.7)
-  #           FULL_VERSION=3.7.5
-  #           ;;
-  #         3.8)
-  #           FULL_VERSION=3.8.0
-  #           ;;
-  #         esac
+      - script: |
+          case $(python.version) in
+          2.7)
+            FULL_VERSION=2.7.17
+            ;;
+          3.6)
+            FULL_VERSION=3.6.8
+            ;;
+          3.7)
+            FULL_VERSION=3.7.5
+            ;;
+          3.8)
+            FULL_VERSION=3.8.0
+            ;;
+          esac
 
-  #         INSTALLER_NAME=python-$FULL_VERSION-macosx10.9.pkg
-  #         URL=https://www.python.org/ftp/python/$FULL_VERSION/$INSTALLER_NAME
+          INSTALLER_NAME=python-$FULL_VERSION-macosx10.9.pkg
+          URL=https://www.python.org/ftp/python/$FULL_VERSION/$INSTALLER_NAME
 
-  #         PY_PREFIX=/Library/Frameworks/Python.framework/Versions
+          PY_PREFIX=/Library/Frameworks/Python.framework/Versions
 
-  #         set -e -x
+          set -e -x
 
-  #         curl $URL > $INSTALLER_NAME
+          curl $URL > $INSTALLER_NAME
 
-  #         sudo installer -pkg $INSTALLER_NAME -target /
+          sudo installer -pkg $INSTALLER_NAME -target /
 
-  #         sudo rm /usr/local/bin/python
-  #         sudo ln -s /usr/local/bin/python$PYTHON_VERSION /usr/local/bin/python
+          sudo rm /usr/local/bin/python
+          sudo ln -s /usr/local/bin/python$PYTHON_VERSION /usr/local/bin/python
 
-  #       displayName: 'Python $(python.version)'
+        displayName: 'Python $(python.version)'
 
-  #     - script: |
-  #         python -m ensurepip
-  #         python -m pip install --upgrade pip
-  #         python -m pip install setuptools twine wheel
-  #       displayName: "Install"
+      - script: |
+          python -m ensurepip
+          python -m pip install --upgrade pip
+          python -m pip install setuptools twine wheel
+        displayName: "Install"
 
-  #     - script: |
-  #         python --version
-  #         python -m pip wheel . -v -w wheelhouse/
-  #       displayName: "Build"
+      - script: |
+          python --version
+          python -m pip wheel . -v -w wheelhouse/
+        displayName: "Build"
 
-  #     - script: |
-  #         mkdir -p dist
-  #         cp wheelhouse/awkward1*.whl dist/.
-  #       displayName: "Copy wheels to dist"
+      - script: |
+          mkdir -p dist
+          cp wheelhouse/awkward1*.whl dist/.
+        displayName: "Copy wheels to dist"
 
-  #     # - script: |
-  #     #     python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
-  #     #   displayName: "Deploy"
-  #     #   condition: contains(variables['Build.SourceBranch'], 'tags')
+      - script: |
+          python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
+        displayName: "Deploy"
+        condition: contains(variables['Build.SourceBranch'], 'tags')
 
-  #     - task: PublishPipelineArtifact@0
-  #       inputs:
-  #         artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
-  #         targetPath: 'dist'
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'wheel_$(Agent.OS)_$(Agent.JobName)_$(python.architecture)'
+          targetPath: 'dist'
