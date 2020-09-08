@@ -304,12 +304,14 @@ jobs:
         displayName: "Test dependent project 2"
 
       - script: |
-          cmake -S . -B build
+          which python
+          python -c 'import sys; print(sys.version)'
+          cmake -S . -B build -DPYTHON_EXECUTABLE:FILEPATH=`which python`
           cmake --build build
           export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
           echo $LD_LIBRARY_PATH
           ls build/dependent*
           ldd build/dependent*
-          pytest -vv test-python.py
+          python -m pytest -vv test-python.py
         workingDirectory: dependent-project
         displayName: "Test dependent project 3"
