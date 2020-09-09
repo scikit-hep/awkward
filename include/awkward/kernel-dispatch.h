@@ -1654,9 +1654,9 @@ namespace awkward {
       int64_t* tocarry,
       const int64_t* starts,
       const int64_t* parents,
-      int64_t parentslength,
+      const int64_t parentslength,
       const int64_t* nextparents,
-      int64_t nextparentslength);
+      const int64_t nextlen);
 
   }
 }

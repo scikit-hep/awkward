@@ -16531,9 +16531,9 @@ namespace awkward {
       int64_t *tocarry,
       const int64_t *starts,
       const int64_t *parents,
-      int64_t parentslength,
+      const int64_t parentslength,
       const int64_t *nextparents,
-      int64_t nextparentslength) {
+      const int64_t nextlen) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexedArray_local_preparenext_64(
           tocarry,
@@ -16541,7 +16541,7 @@ namespace awkward {
           parents,
           parentslength,
           nextparents,
-          nextparentslength);
+          nextlen);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
