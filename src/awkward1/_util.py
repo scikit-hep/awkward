@@ -486,6 +486,50 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     + exception_suffix(__file__)
                 )
 
+    def all_same_offsets(nplike, inputs):
+        offsets = None
+        for x in inputs:
+            if isinstance(x, (
+                awkward1.layout.ListOffsetArray32,
+                awkward1.layout.ListOffsetArrayU32,
+                awkward1.layout.ListOffsetArray64,
+            )):
+                if offsets is None:
+                    offsets = nplike.asarray(x.offsets)
+                elif not nplike.array_equal(offsets, nplike.asarray(x.offsets)):
+                    return False
+            elif isinstance(x, (
+                awkward1.layout.ListArray32,
+                awkward1.layout.ListArrayU32,
+                awkward1.layout.ListArray64,
+            )):
+                starts = nplike.asarray(x.starts)
+                stops = nplike.asarray(x.stops)
+                if not nplike.array_equal(starts[1:], stops[:-1]):
+                    return False
+                if offsets is None:
+                    offsets = nplike.empty(len(starts) + 1, dtype=starts.dtype)
+                    if len(offsets) == 1:
+                        offsets[0] = 0
+                    else:
+                        offsets[:-1] = starts
+                        offsets[-1] = stops[-1]
+                elif (
+                    not nplike.array_equal(offsets[:-1], starts) or
+                    offsets[-1] != stops[-1]
+                ):
+                    return False
+            elif isinstance(x, awkward1.layout.RegularArray):
+                my_offsets = nplike.arange(0, len(x.content), x.size)
+                if offsets is None:
+                    offsets = my_offsets
+                elif not nplike.array_equal(offsets, my_offsets):
+                    return False
+            elif isinstance(x, awkward1.layout.Content):
+                return False
+        else:
+            return True
+
     def apply(inputs, depth):
         nplike = awkward1.nplike.of(*inputs)
 
@@ -698,17 +742,19 @@ def broadcast_and_apply(inputs, getfunction, behavior):
 
                 outcontent = apply(nextinputs, depth + 1)
                 assert isinstance(outcontent, tuple)
+
                 return tuple(
                     awkward1.layout.RegularArray(x, maxsize) for x in outcontent
                 )
 
-            else:
+            elif not all_same_offsets(nplike, inputs):
                 fcns = [
                     custom_broadcast(x, behavior)
                     if isinstance(x, awkward1.layout.Content)
                     else None
                     for x in inputs
                 ]
+
                 first, secondround = None, False
                 for x, fcn in zip(inputs, fcns):
                     if (
@@ -718,6 +764,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     ):
                         first = x
                         break
+
                 if first is None:
                     secondround = True
                     for x in inputs:
@@ -747,9 +794,69 @@ def broadcast_and_apply(inputs, getfunction, behavior):
 
                 outcontent = apply(nextinputs, depth + 1)
                 assert isinstance(outcontent, tuple)
+
                 return tuple(
                     awkward1.layout.ListOffsetArray64(offsets, x) for x in outcontent
                 )
+
+            else:
+                lencontent, offsets, starts, stops = None, None, None, None
+                nextinputs = []
+
+                for x in inputs:
+                    if isinstance(x, (
+                        awkward1.layout.ListOffsetArray32,
+                        awkward1.layout.ListOffsetArrayU32,
+                        awkward1.layout.ListOffsetArray64,
+                    )):
+                        offsets = x.offsets
+                        lencontent = offsets[-1]
+                        nextinputs.append(x.content[:lencontent])
+
+                    elif isinstance(x, (
+                        awkward1.layout.ListArray32,
+                        awkward1.layout.ListArrayU32,
+                        awkward1.layout.ListArray64,
+                    )):
+                        starts, stops = x.starts, x.stops
+                        lencontent = nplike.max(stops)
+                        nextinputs.append(x.content[:lencontent])
+
+                    else:
+                        nextinputs.append(x)
+
+                outcontent = apply(nextinputs, depth + 1)
+
+                if isinstance(offsets, awkward1.layout.Index32):
+                    return tuple(
+                        awkward1.layout.ListOffsetArray32(offsets, x) for x in outcontent
+                    )
+                elif isinstance(offsets, awkward1.layout.IndexU32):
+                    return tuple(
+                        awkward1.layout.ListOffsetArrayU32(offsets, x) for x in outcontent
+                    )
+                elif isinstance(offsets, awkward1.layout.Index64):
+                    return tuple(
+                        awkward1.layout.ListOffsetArray64(offsets, x) for x in outcontent
+                    )
+                elif isinstance(starts, awkward1.layout.Index32):
+                    return tuple(
+                        awkward1.layout.ListArray32(starts, stops, x) for x in outcontent
+                    )
+                elif isinstance(starts, awkward1.layout.IndexU32):
+                    return tuple(
+                        awkward1.layout.ListArrayU32(starts, stops, x) for x in outcontent
+                    )
+                elif isinstance(starts, awkward1.layout.Index64):
+                    return tuple(
+                        awkward1.layout.ListArray64(starts, stops, x) for x in outcontent
+                    )
+                else:
+                    raise AssertionError(
+                        "unexpected offsets, starts: {0} {1}".format(
+                            type(offsets), type(starts)
+                        ) + exception_suffix(__file__)
+                    )
 
         elif any(isinstance(x, recordtypes) for x in inputs):
             keys = None
@@ -1443,12 +1550,12 @@ def minimally_touching_string(limit_length, layout, behavior):
 
 
 class MappingProxy(MutableMapping):
-    """A type suitable for use with layout.ArrayCache
-    
+    """
+    A type suitable for use with layout.ArrayCache.
+
     This can be used to wrap plain dict instances if need be,
     since they are not able to be weak referenced.
     """
-
     def __init__(self, base):
         self.base = base
 
