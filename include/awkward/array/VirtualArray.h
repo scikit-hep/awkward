@@ -17,20 +17,14 @@ namespace awkward {
   /// @class VirtualForm
   ///
   /// @brief Form describing VirtualArray.
-  class LIBAWKWARD_EXPORT_SYMBOL VirtualForm final : public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL VirtualForm: public Form {
   public:
     /// @brief Creates a VirtualForm. See VirtualArray for documentation.
-    explicit VirtualForm(bool has_identities,
-                         const util::Parameters& parameters,
-                         const FormKey& form_key,
-                         const FormPtr& form,
-                         bool has_length);
-
-    /// @brief Copies a VirtualForm.
-    VirtualForm(const VirtualForm& form)
-      : Form(form.has_identities_, form.parameters_, form.form_key_),
-        form_(form.form_),
-        has_length_(form.has_length_) { }
+    VirtualForm(bool has_identities,
+                const util::Parameters& parameters,
+                const FormKey& form_key,
+                const FormPtr& form,
+                bool has_length);
 
     bool
       has_form() const;
@@ -100,7 +94,7 @@ namespace awkward {
   /// @brief Represents an array that can be generated on demand.
   ///
   /// See #VirtualArray for the meaning of each parameter.
-  class LIBAWKWARD_EXPORT_SYMBOL VirtualArray final : public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL VirtualArray: public Content {
   public:
     /// @brief Creates a VirtualArray from a full set of parameters.
     ///
@@ -114,20 +108,20 @@ namespace awkward {
     /// the #generator more than necessary. May be `nullptr`.
     /// @param cache_key The key this VirtualArray will use when filling a
     /// #cache.
-    explicit VirtualArray(const IdentitiesPtr& identities,
-                          const util::Parameters& parameters,
-                          const ArrayGeneratorPtr& generator,
-                          const ArrayCachePtr& cache,
-                          const std::string& cache_key,
-                          const kernel::lib ptr_lib = kernel::lib::cpu);
+    VirtualArray(const IdentitiesPtr& identities,
+                 const util::Parameters& parameters,
+                 const ArrayGeneratorPtr& generator,
+                 const ArrayCachePtr& cache,
+                 const std::string& cache_key,
+                 const kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Creates a VirtualArray with an automatically assigned #cache_key
     /// (unique per process).
-    explicit VirtualArray(const IdentitiesPtr& identities,
-                          const util::Parameters& parameters,
-                          const ArrayGeneratorPtr& generator,
-                          const ArrayCachePtr& cache,
-                          const kernel::lib ptr_lib = kernel::lib::cpu);
+    VirtualArray(const IdentitiesPtr& identities,
+                 const util::Parameters& parameters,
+                 const ArrayGeneratorPtr& generator,
+                 const ArrayCachePtr& cache,
+                 const kernel::lib ptr_lib = kernel::lib::cpu);
 
     /// @brief Function that materializes the array and possibly
     /// checks it against an expected Form.

@@ -17,18 +17,12 @@ namespace awkward {
   /// @class EmptyForm
   ///
   /// @brief Form describing EmptyArray.
-  class LIBAWKWARD_EXPORT_SYMBOL EmptyForm final : public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL EmptyForm: public Form {
   public:
     /// @brief Creates a EmptyForm. See EmptyArray for documentation.
-    explicit EmptyForm(bool has_identities,
-                       const util::Parameters& parameters,
-                       const FormKey& form_key);
-
-    /// @brief Copies an EmptyForm.
-    EmptyForm(const EmptyForm& form)
-      : Form(form.has_identities(),
-             form.parameters(),
-             form.form_key()) { }
+    EmptyForm(bool has_identities,
+              const util::Parameters& parameters,
+              const FormKey& form_key);
 
     const TypePtr
       type(const util::TypeStrs& typestrs) const override;
@@ -87,7 +81,7 @@ namespace awkward {
   /// consequence) UnknownType.
   ///
   /// See #EmptyArray for the meaning of each parameter.
-  class LIBAWKWARD_EXPORT_SYMBOL EmptyArray final : public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL EmptyArray: public Content {
   public:
     /// @brief Creates an EmptyArray from a full set of parameters.
     ///
@@ -95,8 +89,8 @@ namespace awkward {
     /// (may be `nullptr`).
     /// @param parameters String-to-JSON map that augments the meaning of this
     /// array.
-    explicit EmptyArray(const IdentitiesPtr& identities,
-                        const util::Parameters& parameters);
+    EmptyArray(const IdentitiesPtr& identities,
+               const util::Parameters& parameters);
 
     /// @brief Converts this array into a NumpyArray with a given
     /// {NumpyArray#format format}.

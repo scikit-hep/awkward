@@ -15,21 +15,15 @@ namespace awkward {
   /// @class ListOffsetForm
   ///
   /// @brief Form describing ListOffsetArray.
-  class LIBAWKWARD_EXPORT_SYMBOL ListOffsetForm final : public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL ListOffsetForm: public Form {
   public:
     /// @brief Creates a ListOffsetForm. See
     /// {@link ListOffsetArrayOf ListOffsetArray} for documentation.
-    explicit ListOffsetForm(bool has_identities,
-                            const util::Parameters& parameters,
-                            const FormKey& form_key,
-                            Index::Form offsets,
-                            const FormPtr& content);
-
-    /// @brief Copies a ListOffsetForm.
-    ListOffsetForm(const ListOffsetForm& form)
-      : Form(form.has_identities_, form.parameters_, form.form_key_),
-        offsets_(form.offsets_),
-        content_(form.content_) { }
+    ListOffsetForm(bool has_identities,
+                   const util::Parameters& parameters,
+                   const FormKey& form_key,
+                   Index::Form offsets,
+                   const FormPtr& content);
 
     Index::Form
       offsets() const;
@@ -107,7 +101,7 @@ namespace awkward {
 #ifdef AWKWARD_LISTOFFSETARRAY_NO_EXTERN_TEMPLATE
   LIBAWKWARD_EXPORT_SYMBOL
 #endif
-  ListOffsetArrayOf final : public Content {
+  ListOffsetArrayOf: public Content {
   public:
     /// @brief Creates a ListOffsetArray from a full set of parameters.
     ///
@@ -124,10 +118,10 @@ namespace awkward {
     /// Values in `content[i]` where `i < offsets[0]` are "unreachable," and
     /// don't exist in the high level view, as are any where
     /// `i >= offsets[len(offsets) - 1]`.
-    explicit ListOffsetArrayOf<T>(const IdentitiesPtr& identities,
-                                  const util::Parameters& parameters,
-                                  const IndexOf<T>& offsets,
-                                  const ContentPtr& content);
+    ListOffsetArrayOf<T>(const IdentitiesPtr& identities,
+                         const util::Parameters& parameters,
+                         const IndexOf<T>& offsets,
+                         const ContentPtr& content);
 
     /// @brief Positions where one nested list stops and the next starts in
     /// the #content; the `offsets` must be monotonically increasing.

@@ -21,24 +21,16 @@ namespace awkward {
   /// @class BitMaskedForm
   ///
   /// @brief Form describing BitMaskedArray.
-  class LIBAWKWARD_EXPORT_SYMBOL BitMaskedForm final : public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL BitMaskedForm: public Form {
   public:
     /// @brief Creates a BitMaskedForm. See BitMaskedArray for documentation.
-    explicit BitMaskedForm(bool has_identities,
-                           const util::Parameters& parameters,
-                           const FormKey& form_key,
-                           Index::Form mask,
-                           const FormPtr& content,
-                           bool valid_when,
-                           bool lsb_order);
-
-    /// @brief Copies a BitMaskedForm.
-    BitMaskedForm(const BitMaskedForm& form)
-      : Form(form.has_identities_, form.parameters_, form.form_key_),
-        mask_(form.mask_),
-        content_(form.content_),
-        valid_when_(form.valid_when_),
-        lsb_order_(form.lsb_order_) { }
+    BitMaskedForm(bool has_identities,
+                  const util::Parameters& parameters,
+                  const FormKey& form_key,
+                  Index::Form mask,
+                  const FormPtr& content,
+                  bool valid_when,
+                  bool lsb_order);
 
     Index::Form
       mask() const;
@@ -114,7 +106,7 @@ namespace awkward {
   /// over its #content.
   ///
   /// See #BitMaskedArray for the meaning of each parameter.
-  class LIBAWKWARD_EXPORT_SYMBOL BitMaskedArray final : public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL BitMaskedArray: public Content {
   public:
     /// @brief Creates an BitMaskedArray from a full set of parameters.
     ///
@@ -142,13 +134,13 @@ namespace awkward {
     /// order.
     ///
     /// Any non-zero value of a boolean byte and #valid_when are equivalent.
-    explicit BitMaskedArray(const IdentitiesPtr& identities,
-                            const util::Parameters& parameters,
-                            const IndexU8& mask,
-                            const ContentPtr& content,
-                            bool valid_when,
-                            int64_t length,
-                            bool lsb_order);
+    BitMaskedArray(const IdentitiesPtr& identities,
+                   const util::Parameters& parameters,
+                   const IndexU8& mask,
+                   const ContentPtr& content,
+                   bool valid_when,
+                   int64_t length,
+                   bool lsb_order);
 
     /// @brief Mask in which each bit represents a missing value (`None`)
     /// or a valid value (from #content).

@@ -20,22 +20,15 @@ namespace awkward {
   /// @class ByteMaskedForm
   ///
   /// @brief Form describing ByteMaskedArray.
-  class LIBAWKWARD_EXPORT_SYMBOL ByteMaskedForm final : public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL ByteMaskedForm: public Form {
   public:
     /// @brief Creates a ByteMaskedForm. See ByteMaskedArray for documentation.
-    explicit ByteMaskedForm(bool has_identities,
-                            const util::Parameters& parameters,
-                            const FormKey& form_key,
-                            Index::Form mask,
-                            const FormPtr& content,
-                            bool valid_when);
-
-    /// @brief Copies a ByteMaskedForm.
-    ByteMaskedForm(const ByteMaskedForm& form)
-      : Form(form.has_identities_, form.parameters_, form.form_key_),
-        mask_(form.mask_),
-        content_(form.content_),
-        valid_when_(form.valid_when_) { }
+    ByteMaskedForm(bool has_identities,
+                   const util::Parameters& parameters,
+                   const FormKey& form_key,
+                   Index::Form mask,
+                   const FormPtr& content,
+                   bool valid_when);
 
     Index::Form
       mask() const;
@@ -107,7 +100,7 @@ namespace awkward {
   /// over its #content.
   ///
   /// See #ByteMaskedArray for the meaning of each parameter.
-  class LIBAWKWARD_EXPORT_SYMBOL ByteMaskedArray final : public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL ByteMaskedArray: public Content {
   public:
     /// @brief Creates an ByteMaskedArray from a full set of parameters.
     ///
@@ -126,11 +119,11 @@ namespace awkward {
     ///  equal to valid_when are not `None`.
     ///
     /// Any non-zero value of a boolean byte and #valid_when are equivalent.
-    explicit ByteMaskedArray(const IdentitiesPtr& identities,
-                             const util::Parameters& parameters,
-                             const Index8& mask,
-                             const ContentPtr& content,
-                             bool valid_when);
+    ByteMaskedArray(const IdentitiesPtr& identities,
+                    const util::Parameters& parameters,
+                    const Index8& mask,
+                    const ContentPtr& content,
+                    bool valid_when);
 
     /// @brief Mask in which each byte represents a missing value (`None`)
     /// or a valid value (from #content).

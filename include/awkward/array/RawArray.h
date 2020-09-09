@@ -40,13 +40,13 @@ namespace awkward {
   /// @class RawForm
   ///
   /// @brief Form describing RawArray.
-  class LIBAWKWARD_EXPORT_SYMBOL RawForm final : public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL RawForm: public Form {
   public:
     /// @brief Creates a RawForm. See RawArray for documentation.
-    explicit RawForm(bool has_identities,
-                     const util::Parameters& parameters,
-                     const FormKey& form_key,
-                     const std::string& T)
+    RawForm(bool has_identities,
+            const util::Parameters& parameters,
+            const FormKey& form_key,
+            const std::string& T)
         : Form(has_identities, parameters, form_key)
         , T_(T) { }
 
@@ -188,7 +188,7 @@ namespace awkward {
   ///  - 8-bit, 16-bit, 32-bit, and 64-bit signed and unsigned integers
   ///  - 8-bit booleans
   template <typename T>
-  class LIBAWKWARD_EXPORT_SYMBOL RawArrayOf final : public Content {
+  class LIBAWKWARD_EXPORT_SYMBOL RawArrayOf: public Content {
   public:
     /// @brief Creates a RawArray from a full set of parameters.
     ///
@@ -205,13 +205,13 @@ namespace awkward {
     /// @param length Number of elements in the array.
     /// @param itemsize Number of bytes per item; should agree with the format.
     /// @param Choose the Kernel Library for this array, default:= kernel::lib::cpu
-    explicit RawArrayOf<T>(const IdentitiesPtr& identities,
-                           const util::Parameters& parameters,
-                           const std::shared_ptr<T>& ptr,
-                           const int64_t offset,
-                           const int64_t length,
-                           const int64_t itemsize,
-                           const kernel::lib ptr_lib = kernel::lib::cpu)
+    RawArrayOf<T>(const IdentitiesPtr& identities,
+                  const util::Parameters& parameters,
+                  const std::shared_ptr<T>& ptr,
+                  const int64_t offset,
+                  const int64_t length,
+                  const int64_t itemsize,
+                  const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
         , ptr_(ptr)
@@ -227,11 +227,11 @@ namespace awkward {
     /// @brief Creates a RawArray without having to specify #itemsize.
     ///
     /// The #itemsize is computed as `sizeof(T)`.
-    explicit RawArrayOf<T>(const IdentitiesPtr& identities,
-                           const util::Parameters& parameters,
-                           const std::shared_ptr<T>& ptr,
-                           const int64_t length,
-                           const kernel::lib ptr_lib = kernel::lib::cpu)
+    RawArrayOf<T>(const IdentitiesPtr& identities,
+                  const util::Parameters& parameters,
+                  const std::shared_ptr<T>& ptr,
+                  const int64_t length,
+                  const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
         , ptr_(ptr)
@@ -245,10 +245,10 @@ namespace awkward {
     /// This constructor allocates a new buffer with `itemsize * length` bytes.
     ///
     /// The #itemsize is computed as `sizeof(T)`.
-    explicit RawArrayOf<T>(const IdentitiesPtr& identities,
-                           const util::Parameters& parameters,
-                           const int64_t length,
-                           const kernel::lib ptr_lib = kernel::lib::cpu)
+    RawArrayOf<T>(const IdentitiesPtr& identities,
+                  const util::Parameters& parameters,
+                  const int64_t length,
+                  const kernel::lib ptr_lib = kernel::lib::cpu)
         : Content(identities, parameters)
         , ptr_lib_(ptr_lib)
         , ptr_(kernel::malloc<T>(ptr_lib_, length * sizeof(T)))

@@ -17,23 +17,16 @@ namespace awkward {
   /// @class UnionForm
   ///
   /// @brief Form describing UnionArray.
-  class LIBAWKWARD_EXPORT_SYMBOL UnionForm final : public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL UnionForm: public Form {
   public:
     /// @brief Creates a UnionForm. See {@link UnionArrayOf UnionArray} for
     /// documentation.
-    explicit UnionForm(bool has_identities,
-                       const util::Parameters& parameters,
-                       const FormKey& form_key,
-                       Index::Form tags,
-                       Index::Form index,
-                       const std::vector<FormPtr>& contents);
-
-    /// @brief Copies a UnionForm.
-    UnionForm(const UnionForm& form)
-      : Form(form.has_identities_, form.parameters_, form.form_key_),
-        tags_(form.tags_),
-        index_(form.index_),
-        contents_(form.contents_) { }
+    UnionForm(bool has_identities,
+              const util::Parameters& parameters,
+              const FormKey& form_key,
+              Index::Form tags,
+              Index::Form index,
+              const std::vector<FormPtr>& contents);
 
     Index::Form
       tags() const;
@@ -121,7 +114,7 @@ namespace awkward {
 #ifdef AWKWARD_UNIONARRAY_NO_EXTERN_TEMPLATE
   LIBAWKWARD_EXPORT_SYMBOL
 #endif
-  UnionArrayOf final : public Content {
+  UnionArrayOf: public Content {
   public:
     /// @brief Generates an index in which `index[i] = i`.
     static const IndexOf<I>
@@ -145,11 +138,11 @@ namespace awkward {
     /// of the possible types.
     ///
     /// For each `i`, this `array[i] = contents[tags[i]][index[i]]`.
-    explicit UnionArrayOf<T, I>(const IdentitiesPtr& identities,
-                                const util::Parameters& parameters,
-                                const IndexOf<T> tags,
-                                const IndexOf<I>& index,
-                                const ContentPtrVec& contents);
+    UnionArrayOf<T, I>(const IdentitiesPtr& identities,
+                       const util::Parameters& parameters,
+                       const IndexOf<T> tags,
+                       const IndexOf<I>& index,
+                       const ContentPtrVec& contents);
 
     /// @brief Small integers indicating which of the #contents to draw
     /// from for each element of the heterogeneous array.

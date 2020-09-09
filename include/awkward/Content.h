@@ -240,12 +240,6 @@ namespace awkward {
     util::Parameters parameters_;
     /// @brief See #form_key
     FormKey form_key_;
-
-  private:
-    /// @brief undefined
-    Form( const Form& );
-    /// @brief undefined
-    Form& operator=( const Form& );
   };
 
   /// @class Content

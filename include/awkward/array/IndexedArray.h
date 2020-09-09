@@ -17,21 +17,15 @@ namespace awkward {
   /// @class IndexedForm
   ///
   /// @brief Form describing IndexedArray (with `OPTION = false`).
-  class LIBAWKWARD_EXPORT_SYMBOL IndexedForm final : public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL IndexedForm: public Form {
   public:
     /// @brief Creates a IndexedForm. See {@link IndexedArrayOf IndexedArray}
     /// for documentation.
-    explicit IndexedForm(bool has_identities,
-                         const util::Parameters& parameters,
-                         const FormKey& form_key,
-                         Index::Form index,
-                         const FormPtr& content);
-
-    /// @brief Copies an IndexedForm.
-    IndexedForm(const IndexedForm& form)
-      : Form(form.has_identities(), form.parameters(), form.form_key()),
-        index_(form.index_),
-        content_(form.content_) { }
+    IndexedForm(bool has_identities,
+                const util::Parameters& parameters,
+                const FormKey& form_key,
+                Index::Form index,
+                const FormPtr& content);
 
     Index::Form
       index() const;
@@ -96,20 +90,14 @@ namespace awkward {
   /// @class IndexedOptionForm
   ///
   /// @brief Form describing IndexedOptionArray.
-  class LIBAWKWARD_EXPORT_SYMBOL IndexedOptionForm final : public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL IndexedOptionForm: public Form {
   public:
     /// @brief Creates a IndexedOptionForm. See IndexedArray for documentation.
-    explicit IndexedOptionForm(bool has_identities,
-                               const util::Parameters& parameters,
-                               const FormKey& form_key,
-                               Index::Form index,
-                               const FormPtr& content);
-
-    /// @brief Copies an IndexedOptionForm.
-    IndexedOptionForm(const IndexedOptionForm& form)
-      : Form(form.has_identities_, form.parameters_, form.form_key_),
-        index_(form.index_),
-        content_(form.content_) { } // user-defined copy ctor
+    IndexedOptionForm(bool has_identities,
+                      const util::Parameters& parameters,
+                      const FormKey& form_key,
+                      Index::Form index,
+                      const FormPtr& content);
 
     Index::Form index() const;
 
@@ -184,7 +172,7 @@ namespace awkward {
 #ifdef AWKWARD_INDEXEDARRAY_NO_EXTERN_TEMPLATE
   LIBAWKWARD_EXPORT_SYMBOL
 #endif
-  IndexedArrayOf final : public Content {
+  IndexedArrayOf: public Content {
   public:
     /// @brief Creates an IndexedArray or IndexedOptionArray from a full set
     /// of parameters.
@@ -201,10 +189,10 @@ namespace awkward {
     /// @param content Data to be filtered, rearranged, and/or duplicated.
     /// Values in `content[i]` where `i` is not in `index` are
     /// "unreachable;" they do not exist in the high level view.
-    explicit IndexedArrayOf<T, ISOPTION>(const IdentitiesPtr& identities,
-                                         const util::Parameters& parameters,
-                                         const IndexOf<T>& index,
-                                         const ContentPtr& content);
+    IndexedArrayOf<T, ISOPTION>(const IdentitiesPtr& identities,
+                                const util::Parameters& parameters,
+                                const IndexOf<T>& index,
+                                const ContentPtr& content);
 
     /// @brief Item positions to be filtered, rearranged, duplicated, or
     /// masked as `None`.

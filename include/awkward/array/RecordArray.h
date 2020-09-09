@@ -15,21 +15,15 @@ namespace awkward {
   /// @class RecordForm
   ///
   /// @brief Form describing RecordArray (not a Record).
-  class LIBAWKWARD_EXPORT_SYMBOL RecordForm final : public Form {
+  class LIBAWKWARD_EXPORT_SYMBOL RecordForm: public Form {
   public:
     /// @brief Creates a RecordForm. See RecordArray (not Record) for
     /// documentation.
-    explicit RecordForm(bool has_identities,
-                        const util::Parameters& parameters,
-                        const FormKey& form_key,
-                        const util::RecordLookupPtr& recordlookup,
-                        const std::vector<FormPtr>& contents);
-
-    /// @brief Copies a RecordForm.
-    RecordForm(const RecordForm& form)
-      : Form(form.has_identities_, form.parameters_, form.form_key_),
-        recordlookup_(form.recordlookup_),
-        contents_(form.contents_) { }
+    RecordForm(bool has_identities,
+               const util::Parameters& parameters,
+               const FormKey& form_key,
+               const util::RecordLookupPtr& recordlookup,
+               const std::vector<FormPtr>& contents);
 
     const util::RecordLookupPtr
       recordlookup() const;
@@ -116,7 +110,7 @@ namespace awkward {
   /// with each field.
   ///
   /// Fields are always ordered, whether tuples or records.
-  class LIBAWKWARD_EXPORT_SYMBOL RecordArray final :
+  class LIBAWKWARD_EXPORT_SYMBOL RecordArray:
     public Content,
     public std::enable_shared_from_this<RecordArray> {
   public:
@@ -134,18 +128,18 @@ namespace awkward {
     /// records. The number of names must match the number of #contents.
     /// @param length The length of the array, breaking ambiguities between
     /// #contents of different lengths and essential if there are zero fields.
-    explicit RecordArray(const IdentitiesPtr& identities,
-                         const util::Parameters& parameters,
-                         const ContentPtrVec& contents,
-                         const util::RecordLookupPtr& recordlookup,
-                         int64_t length);
+    RecordArray(const IdentitiesPtr& identities,
+                const util::Parameters& parameters,
+                const ContentPtrVec& contents,
+                const util::RecordLookupPtr& recordlookup,
+                int64_t length);
 
     /// @brief Creates a RecordArray in which #length is the minimum
     /// length of the #contents or zero if there are no #contents.
-    explicit RecordArray(const IdentitiesPtr& identities,
-                         const util::Parameters& parameters,
-                         const ContentPtrVec& contents,
-                         const util::RecordLookupPtr& recordlookup);
+    RecordArray(const IdentitiesPtr& identities,
+                const util::Parameters& parameters,
+                const ContentPtrVec& contents,
+                const util::RecordLookupPtr& recordlookup);
 
     /// @brief `std::vector` of Content instances representing the
     /// (ordered) fields.
