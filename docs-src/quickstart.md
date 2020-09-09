@@ -72,7 +72,7 @@ For developers
 
 See Awkward Array's [GitHub page](https://github.com/scikit-hep/awkward-1.0) for more on the following.
 
-   * [Insatllation for developers](https://github.com/scikit-hep/awkward-1.0#installation-for-developers).
+   * [Installation for developers](https://github.com/scikit-hep/awkward-1.0#installation-for-developers).
    * [Using Awkward as a dependency](https://github.com/scikit-hep/awkward-1.0/tree/master/dependent-project) (example projects).
    * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/).
    * [Release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) (changelog) is hosted by [ReadTheDocs](https://readthedocs.org).
