@@ -459,7 +459,7 @@ namespace awkward {
     quote(const std::string &x) {
       rj::StringBuffer buffer;
       rj::Writer<rj::StringBuffer> writer(buffer);
-      writer.String(x.c_str(), (unsigned int)x.length());
+      writer.String(x.c_str(), (rj::SizeType)x.length());
       return std::string(buffer.GetString());
     }
 
