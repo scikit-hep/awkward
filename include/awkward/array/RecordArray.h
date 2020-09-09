@@ -447,7 +447,7 @@ namespace awkward {
     /// @brief See #recordlookup.
     const util::RecordLookupPtr recordlookup_;
     /// @brief See #length.
-    int64_t length_ = 0;
+    int64_t length_;
   };
 }
 

@@ -87,7 +87,7 @@ namespace awkward {
 
   private:
     const FormPtr content_;
-    int64_t size_ = 0;
+    int64_t size_;
   };
 
   /// @class RegularArray
@@ -372,7 +372,7 @@ namespace awkward {
 
   private:
     const ContentPtr content_;
-    int64_t size_ = 0;
+    int64_t size_;
   };
 }
 

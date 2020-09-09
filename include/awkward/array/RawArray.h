@@ -1292,9 +1292,9 @@ namespace awkward {
   private:
     const kernel::lib ptr_lib_;
     const std::shared_ptr<T> ptr_;
-    const int64_t offset_ = 0;
-    const int64_t length_ = 0;
-    const int64_t itemsize_ = 0;
+    const int64_t offset_;
+    const int64_t length_;
+    const int64_t itemsize_;
   };
 }
 

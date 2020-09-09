@@ -222,7 +222,7 @@ namespace awkward {
     /// @brief See #ptr_lib
     const kernel::lib ptr_lib_;
     /// @brief See #offset.
-    const int64_t offset_ = 0;
+    const int64_t offset_;
     /// @brief See #length.
     const int64_t length_;
   };
