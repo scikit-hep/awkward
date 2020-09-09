@@ -857,7 +857,9 @@ namespace awkward {
       ContentPtr listoffsetarray = toListOffsetArray64(true);
       ListOffsetArray64* raw =
         dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
-      return std::pair<Index64, ContentPtr>(raw->offsets(), raw->content());
+      int64_t stop = raw->offsets().getitem_at(-1);
+      ContentPtr content = raw->content().get()->getitem_range_nowrap(0, stop);
+      return std::pair<Index64, ContentPtr>(raw->offsets(), content);
     }
     else {
       std::pair<Index64, ContentPtr> pair =
