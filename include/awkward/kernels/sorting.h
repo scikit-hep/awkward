@@ -442,7 +442,8 @@ extern "C" {
       const int64_t* starts,
       const int64_t* parents,
       int64_t parentslength,
-      const int64_t* nextparents);
+      const int64_t* nextparents,
+      int64_t nextparentslength);
 
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index

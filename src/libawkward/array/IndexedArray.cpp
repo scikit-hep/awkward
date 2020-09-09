@@ -2124,7 +2124,8 @@ namespace awkward {
         starts.data(),
         parents.data(),
         parents_length,
-        nextparents.data());
+        nextparents.data(),
+        next_length);
     util::handle_error(err3, classname(), identities_.get());
 
     out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
@@ -2232,7 +2233,8 @@ namespace awkward {
       starts.data(),
       parents.data(),
       parents_length,
-      nextparents.data());
+      nextparents.data(),
+      next_length);
     util::handle_error(err3, classname(), identities_.get());
 
     out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(

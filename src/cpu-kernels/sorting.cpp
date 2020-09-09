@@ -576,13 +576,13 @@ ERROR awkward_IndexedArray_local_preparenext_64(
     const int64_t* starts,
     const int64_t* parents,
     int64_t parentslength,
-    const int64_t* nextparents) {
+    const int64_t* nextparents,
+    int64_t nextparentslength) {
   int64_t j = 0;
   for (int64_t i = 0;  i < parentslength;  i++) {
     int64_t parent = parents[i];
     int64_t start = starts[parent];
-    int64_t nextparent = nextparents[j];
-    if (parent == nextparent) {
+    if (j < nextparentslength  &&  parent == nextparents[j]) {
       tocarry[i] = j;
       ++j;
     }
