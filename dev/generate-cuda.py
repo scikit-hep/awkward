@@ -25,7 +25,6 @@ KERNEL_WHITELIST = [
     "awkward_localindex",
     "awkward_content_reduce_zeroparents_64",
     "awkward_ListOffsetArray_reduce_global_startstop_64",
-    "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
     "awkward_IndexedArray_reduce_next_fix_offsets_64",
     "awkward_Index8_to_Index64",
     "awkward_IndexU8_to_Index64",
@@ -37,10 +36,8 @@ KERNEL_WHITELIST = [
     "awkward_NumpyArray_getitem_next_array_advanced",
     "awkward_NumpyArray_getitem_next_at",
     "awkward_RegularArray_getitem_next_array_advanced",
-    "awkward_UnionArray_regular_index_getsize",
     "awkward_ByteMaskedArray_toIndexedOptionArray",
-    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
-    "awkward_combinations",
+    "awkward_combinations",  # ?
     "awkward_IndexedArray_simplify",
     "awkward_ListArray_validity",
     "awkward_UnionArray_validity",
@@ -48,13 +45,6 @@ KERNEL_WHITELIST = [
     "awkward_ByteMaskedArray_getitem_carry",
     "awkward_IndexedArray_validity",
     "awkward_ByteMaskedArray_overlay_mask",
-    "awkward_reduce_count_64",
-    "awkward_reduce_min",
-    "awkward_reduce_max",
-    "awkward_reduce_argmin",
-    "awkward_reduce_argmax",
-    "awkward_reduce_argmin_bool_64",
-    "awkward_reduce_argmax_bool_64",
     "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
     "awkward_RegularArray_getitem_carry",
     "awkward_NumpyArray_getitem_next_array",
@@ -62,7 +52,6 @@ KERNEL_WHITELIST = [
     "awkward_NumpyArray_contiguous_next",
     "awkward_NumpyArray_getitem_next_range",
     "awkward_NumpyArray_getitem_next_range_advanced",
-    "awkward_ListArray_getitem_next_range_spreadadvanced",
     "awkward_RegularArray_getitem_next_range",
     "awkward_RegularArray_getitem_next_range_spreadadvanced",
     "awkward_RegularArray_getitem_next_array",
@@ -70,22 +59,6 @@ KERNEL_WHITELIST = [
     "awkward_Identities_getitem_carry",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_expand",
-    "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
-]
-
-KERNEL_CURIOUS = [
-    "awkward_index_rpad_and_clip_axis0",  # Thread allocation
-    "awkward_RegularArray_rpad_and_clip_axis1",  # Thread allocation
-    "awkward_reduce_countnonzero",  # +=
-    "awkward_reduce_sum_int64_bool_64",  # +=
-    "awkward_reduce_sum_int32_bool_64",  # +=
-    "awkward_reduce_sum_bool",  # |=
-    "awkward_reduce_prod_int64_bool_64",  # *=
-    "awkward_reduce_prod_int32_bool_64",  # *=
-    "awkward_reduce_prod_bool",  # &=
-    "awkward_NumpyArray_reduce_adjust_starts_64",  # +=
-    "awkward_NumpyArray_reduce_adjust_starts_shifts_64",  # +=
-    "awkward_RegularArray_getitem_next_array_regularize",  # +=
 ]
 
 
@@ -183,7 +156,9 @@ def traverse(node, args={}, forvars=[], declared=[]):
         if right in forvars:
             right = getthread_dim(forvars.index(right))
         code = "({0} {1} {2})".format(
-            left, traverse(node.op, args, copy.copy(forvars), declared), right,
+            left,
+            traverse(node.op, args, copy.copy(forvars), declared),
+            right,
         )
     elif node.__class__.__name__ == "UnaryOp":
         if node.op.__class__.__name__ == "USub":
@@ -377,7 +352,10 @@ def traverse(node, args={}, forvars=[], declared=[]):
                     traverse(node.value.left, args, copy.copy(forvars), declared),
                     compop,
                     traverse(
-                        node.value.comparators[0], args, copy.copy(forvars), declared,
+                        node.value.comparators[0],
+                        args,
+                        copy.copy(forvars),
+                        declared,
                     ),
                 )
             else:
@@ -720,7 +698,7 @@ if __name__ == "__main__":
                 ) as specfile:
                     indspec = yaml.safe_load(specfile)[0]
                     if indspec["name"] == kernelname and (
-                        kernelname in KERNEL_WHITELIST or kernelname in KERNEL_CURIOUS
+                        kernelname in KERNEL_WHITELIST
                     ):
                         code = getcode(indspec)
                         print(code)
