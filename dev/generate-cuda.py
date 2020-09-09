@@ -59,6 +59,13 @@ KERNEL_WHITELIST = [
     "awkward_Identities_getitem_carry",
     "awkward_RegularArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_expand",
+    "awkward_ListArray_getitem_next_array",
+    "awkward_RegularArray_broadcast_tooffsets",
+    "awkward_NumpyArray_fill_tobool",
+    "awkward_NumpyArray_reduce_adjust_starts_64",
+    "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+    "awkward_regularize_arrayslice",
+    "awkward_RegularArray_getitem_next_at",
 ]
 
 
@@ -135,6 +142,8 @@ def traverse(node, args={}, forvars=[], declared=[]):
     elif node.__class__.__name__ == "BoolOp":
         if node.op.__class__.__name__ == "Or":
             operator = "||"
+        elif node.op.__class__.__name__ == "And":
+            operator = "&&"
         assert len(node.values) == 2
         code = "{0} {1} {2}".format(
             traverse(node.values[0], args, copy.copy(forvars), declared),
@@ -253,6 +262,11 @@ def traverse(node, args={}, forvars=[], declared=[]):
             )
         elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "GtE":
             code = "({0} >= {1})".format(
+                traverse(node.left, args, copy.copy(forvars), declared),
+                traverse(node.comparators[0], args, copy.copy(forvars), declared),
+            )
+        elif len(node.ops) == 1 and node.ops[0].__class__.__name__ == "LtE":
+            code = "({0} <= {1})".format(
                 traverse(node.left, args, copy.copy(forvars), declared),
                 traverse(node.comparators[0], args, copy.copy(forvars), declared),
             )
