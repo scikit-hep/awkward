@@ -233,7 +233,7 @@ namespace awkward {
     virtual const FormPtr
       getitem_field(const std::string& key) const = 0;
 
-    protected:
+  protected:
     /// @brief See #has_identities
     bool has_identities_;
     /// @brief See #parameters

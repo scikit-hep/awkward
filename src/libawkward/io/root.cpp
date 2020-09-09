@@ -44,9 +44,9 @@ namespace awkward {
                                    whichlevel + 1,
                                    itemsize);
       }
-      int64_t previous = levels[(unsigned int)whichlevel].getitem_at_nowrap(
-        levels[(unsigned int)whichlevel].length() - 1);
-      levels[(unsigned int)whichlevel].append(previous + length);
+      int64_t previous = levels[(uint64_t)whichlevel].getitem_at_nowrap(
+        levels[(uint64_t)whichlevel].length() - 1);
+      levels[(uint64_t)whichlevel].append(previous + length);
     }
   }
 

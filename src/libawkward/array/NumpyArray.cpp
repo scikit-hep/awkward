@@ -544,10 +544,10 @@ namespace awkward {
           out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) != 0 ? "true" : "false");
         }
         else if (dtype == util::dtype::int8) {
-          out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+          out << (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else if (dtype == util::dtype::uint8) {
-          out << (unsigned int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+          out << (uint64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else {
           out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
@@ -565,10 +565,10 @@ namespace awkward {
           out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) != 0 ? "true" : "false");
         }
         else if (dtype == util::dtype::int8) {
-          out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+          out << (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else if (dtype == util::dtype::uint8) {
-          out << (unsigned int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+          out << (uint64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else {
           out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
@@ -585,10 +585,10 @@ namespace awkward {
           out << (kernel::NumpyArray_getitem_at0(ptr_lib, ptr2) != 0 ? "true" : "false");
         }
         else if (dtype == util::dtype::int8) {
-          out << (int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+          out << (int64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else if (dtype == util::dtype::uint8) {
-          out << (unsigned int)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+          out << (uint64_t)kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
         }
         else {
           out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
@@ -748,7 +748,7 @@ namespace awkward {
           unsigned char* ptr2 = reinterpret_cast<unsigned char*>(
               reinterpret_cast<ssize_t>(data()) + (ssize_t)i);
           out << std::hex << std::setw(2) << std::setfill('0')
-              << int((unsigned char)kernel::NumpyArray_getitem_at0(ptr_lib_, ptr2));
+              << (int64_t)((unsigned char)kernel::NumpyArray_getitem_at0(ptr_lib_, ptr2));
         }
       }
       else {
@@ -759,7 +759,7 @@ namespace awkward {
           unsigned char* ptr2 = reinterpret_cast<unsigned char*>(
               reinterpret_cast<ssize_t>(data()) + (ssize_t)i);
           out << std::hex << std::setw(2) << std::setfill('0')
-              << int((unsigned char)kernel::NumpyArray_getitem_at0(ptr_lib_, ptr2));
+              << (int64_t)((unsigned char)kernel::NumpyArray_getitem_at0(ptr_lib_, ptr2));
         }
         out << " ... ";
         for (ssize_t i = len - 16;  i < len;  i++) {
@@ -769,7 +769,7 @@ namespace awkward {
           unsigned char* ptr2 = reinterpret_cast<unsigned char*>(
               reinterpret_cast<ssize_t>(data()) + (ssize_t)i);
           out << std::hex << std::setw(2) << std::setfill('0')
-              << int((unsigned char)kernel::NumpyArray_getitem_at0(ptr_lib_, ptr2));
+              << (int64_t)((unsigned char)kernel::NumpyArray_getitem_at0(ptr_lib_, ptr2));
         }
       }
     }
