@@ -153,6 +153,30 @@ def test_IndexedOffsetArray():
         [5.5, None, None],
         [None, None, None]]
 
+    array4 = array3.rpad(5, 1)
+    assert awkward1.to_list(array4) == [
+        [ 2.2,  1.1,  3.3, None, None],
+        [None, None, None, None, None],
+        [ 4.4,  5.5, None, None, None],
+        [ 5.5, None, None, None, None],
+        [-4.4, -5.5, -6.6, None, None]]
+
+    array5 = array4.sort(0, True, False)
+    assert awkward1.to_list(array5) == [
+        [-4.4, -5.5, -6.6, None, None],
+        [ 2.2,  1.1,  3.3, None, None],
+        [ 4.4,  5.5, None, None, None],
+        [ 5.5, None, None, None, None],
+        [None, None, None, None, None]]
+
+    array5 = array4.argsort(0, True, False)
+    assert awkward1.to_list(array5) == [
+        [   3,    2,    1, None, None],
+        [   0,    0,    0, None, None],
+        [   1,    1, None, None, None],
+        [   2, None, None, None, None],
+        [None, None, None, None, None]]
+
 # FIXME: implement dropna to strip off the None's
 #
     # array6 = array5.dropna(0)
