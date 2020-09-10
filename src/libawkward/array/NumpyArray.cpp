@@ -191,6 +191,11 @@ namespace awkward {
     return (int64_t)inner_shape_.size() + 1;
   }
 
+  bool
+  NumpyForm::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   NumpyForm::minmax_depth() const {
     return std::pair<int64_t, int64_t>((int64_t)inner_shape_.size() + 1,

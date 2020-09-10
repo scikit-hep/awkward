@@ -64,6 +64,11 @@ namespace awkward {
     return 1;
   }
 
+  bool
+  EmptyForm::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   EmptyForm::minmax_depth() const {
     return std::pair<int64_t, int64_t>(1, 1);

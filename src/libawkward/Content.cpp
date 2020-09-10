@@ -876,6 +876,11 @@ namespace awkward {
     return form(true).get()->purelist_depth();
   }
 
+  bool
+  Content::dimension_optiontype() const {
+    return form(true).get()->dimension_optiontype();
+  }
+
   const std::pair<int64_t, int64_t>
   Content::minmax_depth() const {
     return form(true).get()->minmax_depth();

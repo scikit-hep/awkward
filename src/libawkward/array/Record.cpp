@@ -243,6 +243,11 @@ namespace awkward {
     return 0;
   }
 
+  bool
+  Record::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   Record::minmax_depth() const {
     std::pair<int64_t, int64_t> out = array_.get()->minmax_depth();
