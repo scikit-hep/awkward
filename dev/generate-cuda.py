@@ -155,6 +155,13 @@ def traverse(node, args={}, forvars=[], declared=[]):
             code = getthread_dim(forvars.index(node.id))
         else:
             code = node.id
+    elif node.__class__.__name__ == "NameConstant":
+        if node.value == True:
+            code = "true"
+        elif node.value == False:
+            code = "false"
+        else:
+            raise Exception("Unhandled NameConstant value {0}".format(node.value))
     elif node.__class__.__name__ == "Num":
         code = str(node.n)
     elif node.__class__.__name__ == "BinOp":
