@@ -33,4 +33,10 @@ def can_optimize(interpretation, form):
 
 
 def basket_array(form, data, byte_offsets, extra):
-    return "YOWZA"
+    # FIXME: uproot4_issue_90 is just a placeholder, to show how it would be done
+
+    return awkward1._io.uproot_issue_90(
+        form,
+        awkward1.layout.NumpyArray(data),
+        awkward1.layout.Index32(byte_offsets),
+    )

@@ -9,6 +9,7 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/io/json.h"
+#include "awkward/io/uproot.h"
 
 #include "awkward/python/io.h"
 
@@ -75,4 +76,11 @@ make_fromjson(py::module& m, const std::string& name) {
       py::arg("initial") = 1024,
       py::arg("resize") = 1.5,
       py::arg("buffersize") = 65536);
+}
+
+////////// Uproot connector
+
+void
+make_uproot_issue_90(py::module& m) {
+  m.def("uproot_issue_90", &ak::uproot_issue_90);
 }
