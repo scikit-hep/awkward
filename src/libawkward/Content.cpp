@@ -892,6 +892,56 @@ namespace awkward {
   }
 
   const ContentPtr
+  Content::reverse_merge(const ContentPtr& other) const {
+    throw std::runtime_error(
+      std::string("undefined operation: ") + classname() + ("::reverse_merge")
+      + FILENAME(__LINE__));
+  }
+
+  const std::pair<ContentPtrVec, ContentPtrVec>
+  Content::merging_strategy(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      throw std::invalid_argument(
+        std::string("to merge this array with 'others', at least one other "
+                    "must be provided") + FILENAME(__LINE__));
+    }
+
+    ContentPtrVec head;
+    ContentPtrVec tail;
+    size_t i = 0;
+    for (;  i < others.size();  i++) {
+      ContentPtr other = others[i];
+      if (dynamic_cast<IndexedArray32*>(other.get())  ||
+          dynamic_cast<IndexedArrayU32*>(other.get())  ||
+          dynamic_cast<IndexedArray64*>(other.get())  ||
+          dynamic_cast<IndexedOptionArray32*>(other.get())  ||
+          dynamic_cast<IndexedOptionArray64*>(other.get())  ||
+          dynamic_cast<ByteMaskedArray*>(other.get())  ||
+          dynamic_cast<BitMaskedArray*>(other.get())  ||
+          dynamic_cast<UnmaskedArray*>(other.get())  ||
+          dynamic_cast<UnionArray8_32*>(other.get())  ||
+          dynamic_cast<UnionArray8_U32*>(other.get())  ||
+          dynamic_cast<UnionArray8_64*>(other.get())) {
+        break;
+      }
+      head.push_back(other);
+    }
+
+    for (;  i < others.size();  i++) {
+      ContentPtr other = others[i];
+      tail.push_back(other);
+    }
+
+    return std::pair<ContentPtrVec, ContentPtrVec>(head, tail);
+  }
+
+  const ContentPtr
+  Content::mergemany(const ContentPtrVec& others) const {
+    throw std::runtime_error(
+      std::string("not implemented: ") + classname() + std::string("::mergemany"));
+  }
+
+  const ContentPtr
   Content::reduce(const Reducer& reducer,
                   int64_t axis,
                   bool mask,

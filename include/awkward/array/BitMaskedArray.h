@@ -324,7 +324,7 @@ namespace awkward {
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
     const ContentPtr
-      reverse_merge(const ContentPtr& other) const;
+      reverse_merge(const ContentPtr& other) const override;
 
     const ContentPtr
       merge(const ContentPtr& other) const override;

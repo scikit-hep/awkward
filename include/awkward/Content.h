@@ -651,10 +651,38 @@ namespace awkward {
     virtual bool
       mergeable(const ContentPtr& other, bool mergebool) const = 0;
 
+    /// @brief Partitions a list of `others` into a head sequence and a tail
+    /// sequence (in the original order and internally maintaining order);
+    /// the head sequence can be directly merged with this array, but
+    /// the first item in the tail sequence must be reverse_merged.
+    ///
+    /// Either of these can be empty, but since the `others` is required
+    /// to be non-empty, at least one is non-empty.
+    ///
+    /// Most #merge methods call this first.
+    virtual const std::pair<ContentPtrVec, ContentPtrVec>
+      merging_strategy(const ContentPtrVec& others) const;
+
+    /// @brief Merges a single `other` with this array in reverse order:
+    /// `other` first, this last.
+    ///
+    /// Only arrays that need to be reversible have this function:
+    /// option-type and union-type arrays. Others raise a runtime error.
+    virtual const ContentPtr
+      reverse_merge(const ContentPtr& other) const;
+
     /// @brief An array with this and the `other` concatenated (this
     /// first, `other` last).
     virtual const ContentPtr
       merge(const ContentPtr& other) const = 0;
+
+    /// @brief Returns an array with this and the `others` concatenated
+    /// (in order, this first, `others` last).
+    ///
+    /// FIXME: This is temporary; before the PR is done, mergemany
+    /// will be renamed merge and the original merge will be gone.
+    virtual const ContentPtr
+      mergemany(const ContentPtrVec& others) const;
 
     /// @brief Converts this array into a SliceItem that can be used in
     /// getitem.

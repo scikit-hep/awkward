@@ -884,40 +884,25 @@ namespace awkward {
 
     const ContentPtr
       merge(const ContentPtr& other) const override {
+      if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+        return merge(raw->array());
+      }
+
+      if (!parameters_equal(other.get()->parameters())) {
+        return merge_as_union(other);
+      }
+
       if (dynamic_cast<EmptyArray*>(other.get())) {
         return shallow_copy();
       }
-      else if (IndexedArray32* rawother =
-               dynamic_cast<IndexedArray32*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (IndexedArrayU32* rawother =
-               dynamic_cast<IndexedArrayU32*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (IndexedArray64* rawother =
-               dynamic_cast<IndexedArray64*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (IndexedOptionArray32* rawother =
-               dynamic_cast<IndexedOptionArray32*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (IndexedOptionArray64* rawother =
-               dynamic_cast<IndexedOptionArray64*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (ByteMaskedArray* rawother =
-               dynamic_cast<ByteMaskedArray*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (BitMaskedArray* rawother =
-               dynamic_cast<BitMaskedArray*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (UnmaskedArray* rawother =
-               dynamic_cast<UnmaskedArray*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
+
+      ContentPtrVec others({ other });
+      std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
+      ContentPtrVec head = head_tail.first;
+      ContentPtrVec tail = head_tail.second;
+
+      if (!tail.empty()) {
+        return tail[0].get()->reverse_merge(shallow_copy());
       }
 
       if (RawArrayOf<T>* rawother =
