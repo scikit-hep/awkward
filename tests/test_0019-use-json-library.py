@@ -60,25 +60,6 @@ def test_tofile(tmp_path):
     with open(os.path.join(str(tmp_path), "tmp1.json"), "r") as f:
         f.read() == "[[1.1,2.2,3],[],[4,5.5]]"
 
-def test_root_nestedvector():
-    # fromcounts([3, 2], fromcounts([1, 0, 2, 2, 1], [123, 99, 123, 99, 123, 123]))
-    # <JaggedArray [[[123] [] [99 123]] [[99 123] [123]]]>
-
-    # outer offsets: [0, 3, 5]
-    # inner offsets: [0, 1, 1, 3, 5, 6]
-
-    byteoffsets = awkward1.layout.Index64(numpy.array([0, 28, 52], dtype=numpy.int64))
-    rawdata = awkward1.layout.NumpyArray(numpy.array([
-        0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 123, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 99, 0, 0, 0, 123,
-        0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 99, 0, 0, 0, 123, 0, 0, 0, 1, 0, 0, 0, 123
-        ], dtype=numpy.uint8))
-
-    result = awkward1._ext.fromroot_nestedvector(byteoffsets, rawdata, 2, numpy.dtype(">i").itemsize, ">i")
-    assert numpy.asarray(result.offsets).tolist() == [0, 3, 5]
-    assert numpy.asarray(result.content.offsets).tolist() == [0, 1, 1, 3, 5, 6]
-    assert numpy.asarray(result.content.content).tolist() == [123, 99, 123, 99, 123, 123]
-    assert awkward1.to_list(result) == [[[123], [], [99, 123]], [[99, 123], [123]]]
-
 def test_fromiter():
     assert awkward1.to_list(awkward1.from_iter([True, True, False, False, True])) == [True, True, False, False, True]
     assert awkward1.to_list(awkward1.from_iter([5, 4, 3, 2, 1])) == [5, 4, 3, 2, 1]
