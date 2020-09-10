@@ -1611,7 +1611,7 @@ namespace awkward {
         outlength);
       util::handle_error(err3, classname(), identities_.get());
 
-      if (keepdims  &&  !represents_regular_) {
+      if (keepdims  &&  (!represents_regular_  ||  content_.get()->dimension_optiontype())) {
         if (RegularArray* raw = dynamic_cast<RegularArray*>(outcontent.get())) {
           outcontent = raw->toListOffsetArray64(false).get()->shallow_copy();
         }

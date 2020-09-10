@@ -956,7 +956,7 @@ namespace awkward {
       bool convert_deep = (negaxis + 2 == branchdepth.second);
       if (keepdims) {
         convert_shallow = false;
-        convert_deep = (negaxis == branchdepth.second  ||  negaxis + 1 == branchdepth.second  ||  negaxis + 2 == branchdepth.second);
+        convert_deep = true;
       }
 
       if (convert_deep) {

@@ -123,40 +123,84 @@ def test_keepdims():
     assert str(awkward1.type(awkward1.Array(axis2))) == "2 * 1 * 5 * int64"
     assert str(awkward1.type(awkward1.Array(axis3))) == "1 * 3 * 5 * int64"
 
-    # print(listoffset_listoffset)
-    # print(repr(awkward1.Array(listoffset_listoffset)))
-    # print()
-    # print(repr(awkward1.sum(listoffset_listoffset, axis=-1, keepdims=True)))
-    # print()
-    # print(repr(awkward1.sum(listoffset_listoffset, axis=-2, keepdims=True)))
-    # print()
-    # print(repr(awkward1.sum(listoffset_listoffset, axis=-3, keepdims=True)))
+def test_nokeepdims_none1():
+    content = awkward1.Array([0, 1, 2, None, 4, 5, None, None, 8, 9, 10, 11, 12, None, 14, 15, 16, 17, 18, None, None, None, None, None, None, 25, 26, 27, 28, 29]).layout
+    regular = awkward1.layout.RegularArray(content, 5)
+    listoffset = regular.toListOffsetArray64(False)
+    regular_regular = awkward1.layout.RegularArray(regular, 3)
+    listoffset_regular = regular_regular.toListOffsetArray64(False)
+    regular_listoffset = awkward1.layout.RegularArray(listoffset, 3)
+    listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
 
-    # print(regular_regular)
-    # print(repr(awkward1.Array(regular_regular)))
-    # print()
-    # print(repr(awkward1.sum(regular_regular, axis=-1, keepdims=True)))
-    # print()
-    # print(repr(awkward1.sum(regular_regular, axis=-2, keepdims=True)))
-    # print()
-    # print(repr(awkward1.sum(regular_regular, axis=-3, keepdims=True)))
+    assert str(awkward1.type(awkward1.Array(listoffset_listoffset))) == "2 * var * var * ?int64"
+    axis1 = awkward1.sum(listoffset_listoffset, axis=-1)
+    axis2 = awkward1.sum(listoffset_listoffset, axis=-2)
+    axis3 = awkward1.sum(listoffset_listoffset, axis=-3)
+    assert str(awkward1.type(awkward1.Array(axis1))) == "2 * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis2))) == "2 * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis3))) == "3 * var * int64"
 
-    # print(regular_listoffset)
-    # print(repr(awkward1.Array(regular_listoffset)))
-    # print()
-    # print(repr(awkward1.sum(regular_listoffset, axis=-1, keepdims=True)))
-    # print()
-    # print(repr(awkward1.sum(regular_listoffset, axis=-2, keepdims=True)))
-    # print()
-    # print(repr(awkward1.sum(regular_listoffset, axis=-3, keepdims=True)))
+    assert str(awkward1.type(awkward1.Array(listoffset_regular))) == "2 * var * 5 * ?int64"
+    axis1 = awkward1.sum(listoffset_regular, axis=-1)
+    axis2 = awkward1.sum(listoffset_regular, axis=-2)
+    axis3 = awkward1.sum(listoffset_regular, axis=-3)
+    assert str(awkward1.type(awkward1.Array(axis1))) == "2 * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis2))) == "2 * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis3))) == "3 * var * int64"
 
-    # print(listoffset_regular)
-    # print(repr(awkward1.Array(listoffset_regular)))
-    # print()
-    # print(repr(awkward1.sum(listoffset_regular, axis=-1, keepdims=True)))
-    # print()
-    # print(repr(awkward1.sum(listoffset_regular, axis=-2, keepdims=True)))
-    # print()
-    # print(repr(awkward1.sum(listoffset_regular, axis=-3, keepdims=True)))
+    assert str(awkward1.type(awkward1.Array(regular_listoffset))) == "2 * 3 * var * ?int64"
+    axis1 = awkward1.sum(regular_listoffset, axis=-1)
+    axis2 = awkward1.sum(regular_listoffset, axis=-2)
+    axis3 = awkward1.sum(regular_listoffset, axis=-3)
+    assert str(awkward1.type(awkward1.Array(axis1))) == "2 * 3 * int64"
+    assert str(awkward1.type(awkward1.Array(axis2))) == "2 * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis3))) == "3 * var * int64"
 
-    # raise Exception("STOPPY")
+    assert str(awkward1.type(awkward1.Array(regular_regular))) == "2 * 3 * 5 * ?int64"
+    axis1 = awkward1.sum(regular_regular, axis=-1)
+    axis2 = awkward1.sum(regular_regular, axis=-2)
+    axis3 = awkward1.sum(regular_regular, axis=-3)
+    assert str(awkward1.type(awkward1.Array(axis1))) == "2 * 3 * int64"
+    assert str(awkward1.type(awkward1.Array(axis2))) == "2 * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis3))) == "3 * var * int64"
+
+def test_keepdims_none1():
+    content = awkward1.Array([0, 1, 2, None, 4, 5, None, None, 8, 9, 10, 11, 12, None, 14, 15, 16, 17, 18, None, None, None, None, None, None, 25, 26, 27, 28, 29]).layout
+    regular = awkward1.layout.RegularArray(content, 5)
+    listoffset = regular.toListOffsetArray64(False)
+    regular_regular = awkward1.layout.RegularArray(regular, 3)
+    listoffset_regular = regular_regular.toListOffsetArray64(False)
+    regular_listoffset = awkward1.layout.RegularArray(listoffset, 3)
+    listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
+
+    assert str(awkward1.type(awkward1.Array(listoffset_listoffset))) == "2 * var * var * ?int64"
+    axis1 = awkward1.sum(listoffset_listoffset, axis=-1, keepdims=True)
+    axis2 = awkward1.sum(listoffset_listoffset, axis=-2, keepdims=True)
+    axis3 = awkward1.sum(listoffset_listoffset, axis=-3, keepdims=True)
+    assert str(awkward1.type(awkward1.Array(axis1))) == "2 * var * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis2))) == "2 * var * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis3))) == "1 * var * var * int64"
+
+    assert str(awkward1.type(awkward1.Array(listoffset_regular))) == "2 * var * 5 * ?int64"
+    axis1 = awkward1.sum(listoffset_regular, axis=-1, keepdims=True)
+    axis2 = awkward1.sum(listoffset_regular, axis=-2, keepdims=True)
+    axis3 = awkward1.sum(listoffset_regular, axis=-3, keepdims=True)
+    assert str(awkward1.type(awkward1.Array(axis1))) == "2 * var * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis2))) == "2 * var * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis3))) == "1 * var * var * int64"
+
+    assert str(awkward1.type(awkward1.Array(regular_listoffset))) == "2 * 3 * var * ?int64"
+    axis1 = awkward1.sum(regular_listoffset, axis=-1, keepdims=True)
+    axis2 = awkward1.sum(regular_listoffset, axis=-2, keepdims=True)
+    axis3 = awkward1.sum(regular_listoffset, axis=-3, keepdims=True)
+    assert str(awkward1.type(awkward1.Array(axis1))) == "2 * 3 * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis2))) == "2 * 1 * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis3))) == "1 * 3 * var * int64"
+
+    assert str(awkward1.type(awkward1.Array(regular_regular))) == "2 * 3 * 5 * ?int64"
+    axis1 = awkward1.sum(regular_regular, axis=-1, keepdims=True)
+    axis2 = awkward1.sum(regular_regular, axis=-2, keepdims=True)
+    axis3 = awkward1.sum(regular_regular, axis=-3, keepdims=True)
+    assert str(awkward1.type(awkward1.Array(axis1))) == "2 * 3 * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis2))) == "2 * 1 * var * int64"
+    assert str(awkward1.type(awkward1.Array(axis3))) == "1 * 3 * var * int64"
