@@ -1,16 +1,16 @@
 #include "standard_parallel_algorithms.cuh"
+#include <iostream>
 
 __global__
-awkward_ByteMaskedArray_getitem_nextcarry_outindex_kernel(
+void awkward_ByteMaskedArray_getitem_nextcarry_outindex_kernel(
 	int* prefixed_mask,
 	int* mask,
 	int* to_carry,
-	float* outindex,
-	int validwhen) {
+	float* outindex) {
 
 	int thread_id = threadIdx.x;
 
-	if((mask[thread_id] != 0) == validwhen) {
+	if(mask[thread_id] != 0) {
 		to_carry[prefixed_mask[thread_id] - 1] = thread_id;
 		outindex[prefixed_mask[thread_id] - 1] = float(thread_id);
 	} else {
@@ -18,25 +18,44 @@ awkward_ByteMaskedArray_getitem_nextcarry_outindex_kernel(
 	}
 }
 
-awkward_ByteMaskedArray_getitem_nextcarry_outindex(
+__global__
+void filter_mask(
+	int* mask,
+	bool validwhen) {
+	int thread_id = threadIdx.x;
+
+	if((mask[thread_id] != 0) == validwhen) {
+		mask[thread_id] = 1;
+	}
+
+}
+
+
+void awkward_ByteMaskedArray_getitem_nextcarry_outindex(
 	int** tocarry, 
-	int** outindex, 
+	float** outindex, 
 	int* mask, 
 	int length, 
-	int validwhen) {
-
+	bool validwhen) {
+	
 	int* res_temp;
+	int* h_mask = new int[length];
+
 
 	HANDLE_ERROR(cudaMalloc((void**)&res_temp, sizeof(int) * length));
 
+	filter_mask<<<1, length>>>(
+		mask,
+		validwhen);		
+	
 	exclusive_scan(&res_temp, mask, length);
-
+	
 	awkward_ByteMaskedArray_getitem_nextcarry_outindex_kernel<<<1, length>>>(
 		res_temp, 
 		mask,
 		*tocarry, 
-		*outindex, 
-		validwhen);
+		*outindex);
+
 
 }
 

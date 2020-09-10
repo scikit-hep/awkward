@@ -48,14 +48,18 @@ void scatter(
 
 void exclusive_scan(
 	int** out,
-	int* d_in,
+	int* in,
 	int length) {
 
+	int* d_in;
 	int* d_out;
 	int* d_final;
 
+	HANDLE_ERROR(cudaMalloc((void**)&d_in, length * sizeof(int)));
 	HANDLE_ERROR(cudaMalloc((void**)&d_out, length * sizeof(int)));
 	HANDLE_ERROR(cudaMalloc((void**)&d_final, length * sizeof(int)));
+
+	HANDLE_ERROR(cudaMemcpy(d_in, in, length * sizeof(int), cudaMemcpyDeviceToDevice));
 
 	int stride = 1;
 	int total_steps = ceil(log2(static_cast<float>(length)));
