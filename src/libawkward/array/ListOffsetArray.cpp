@@ -1446,8 +1446,6 @@ namespace awkward {
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
-      // std::cout << "ListOffsetArray A begin" << std::endl;
-
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error(
           std::string("offsets_.length() - 1 != parents.length()") + FILENAME(__LINE__));
@@ -1565,14 +1563,10 @@ namespace awkward {
                            1).toListOffsetArray64(false).get()->shallow_copy();
       }
 
-      // std::cout << "ListOffsetArray A end " << (represents_regular_ ? "regular " : "") << (keepdims ? "keepdims" : "") << std::endl;
-
       return out;
     }
 
     else {
-      // std::cout << "ListOffsetArray B begin" << std::endl;
-
       int64_t globalstart;
       int64_t globalstop;
       struct Error err1 = kernel::ListOffsetArray_reduce_global_startstop_64(
@@ -1616,8 +1610,6 @@ namespace awkward {
           outcontent = raw->toListOffsetArray64(false).get()->shallow_copy();
         }
       }
-
-      // std::cout << "ListOffsetArray B end " << (represents_regular_ ? "regular" : "") << std::endl;
 
       return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                  util::Parameters(),

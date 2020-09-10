@@ -934,8 +934,6 @@ namespace awkward {
                             int64_t outlength,
                             bool mask,
                             bool keepdims) const {
-    // std::cout << "RegularArray begin" << std::endl;
-
     ContentPtr out = toListOffsetArray64(true).get()->reduce_next(reducer,
                                                                   negaxis,
                                                                   starts,
@@ -945,12 +943,8 @@ namespace awkward {
                                                                   mask,
                                                                   keepdims);
 
-    // std::cout << "RegularArray end";
-
     if (!content_.get()->dimension_optiontype()) {
       std::pair<bool, int64_t> branchdepth = branch_depth();
-
-      // std::cout << " " << negaxis << " " << branchdepth.second << " " << (keepdims ? "keepdims " : "");
 
       bool convert_shallow = (negaxis == branchdepth.second);
       bool convert_deep = (negaxis + 2 == branchdepth.second);
@@ -960,8 +954,6 @@ namespace awkward {
       }
 
       if (convert_deep) {
-        // std::cout << "converting deep" << std::endl;
-
         if (ListOffsetArray64* raw1 = dynamic_cast<ListOffsetArray64*>(out.get())) {
           if (ListOffsetArray64* raw2 = dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
             out = std::make_shared<ListOffsetArray64>(raw1->identities(),
@@ -995,8 +987,6 @@ namespace awkward {
       }
 
       if (convert_shallow) {
-        // std::cout << "converting shallow" << std::endl;
-
         if (ListOffsetArray64* raw1 = dynamic_cast<ListOffsetArray64*>(out.get())) {
           out = raw1->toRegularArray();
         }
@@ -1004,10 +994,6 @@ namespace awkward {
           out = raw1->toRegularArray();
         }
       }
-
-      // if (!convert_deep  &&  !convert_shallow) {
-      //   std::cout << std::endl;
-      // }
     }
 
     return out;

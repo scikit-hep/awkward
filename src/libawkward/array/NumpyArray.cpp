@@ -3127,8 +3127,6 @@ namespace awkward {
                           int64_t outlength,
                           bool mask,
                           bool keepdims) const {
-    // std::cout << "NumpyArray begin" << std::endl;
-
     if (shape_.empty()) {
       throw std::runtime_error(
         std::string("attempting to reduce a scalar") + FILENAME(__LINE__));
@@ -3289,8 +3287,6 @@ namespace awkward {
                                              out,
                                              1);
       }
-
-      // std::cout << "NumpyArray end " << (keepdims ? "keepdims" : "") << std::endl;
 
       return out;
     }

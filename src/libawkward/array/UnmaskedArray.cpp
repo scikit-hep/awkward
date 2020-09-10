@@ -746,14 +746,18 @@ namespace awkward {
                              int64_t outlength,
                              bool mask,
                              bool keepdims) const {
-    return content_.get()->reduce_next(reducer,
-                                       negaxis,
-                                       starts,
-                                       shifts,
-                                       parents,
-                                       outlength,
-                                       mask,
-                                       keepdims);
+    ContentPtr next = content_;
+    if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
+      next = raw->toListOffsetArray64(true);
+    }
+    return next.get()->reduce_next(reducer,
+                                   negaxis,
+                                   starts,
+                                   shifts,
+                                   parents,
+                                   outlength,
+                                   mask,
+                                   keepdims);
   }
 
   const ContentPtr
