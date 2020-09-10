@@ -66,6 +66,7 @@ KERNEL_WHITELIST = [
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_regularize_arrayslice",
     "awkward_RegularArray_getitem_next_at",
+    "awkward_ListOffsetArray_compact_offsets",
 ]
 
 
