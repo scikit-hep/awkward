@@ -7,6 +7,8 @@ import json
 # don't import awkward1._connect._uproot in awkward1/__init__.py!
 import uproot4
 
+import awkward1._io
+
 
 def can_optimize(interpretation, form):
     if isinstance(interpretation, uproot4.interpretation.objects.AsObjects):

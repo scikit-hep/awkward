@@ -9,9 +9,9 @@
 
 namespace awkward {
   LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
-    uproot_issue_90(const NumpyArray& data,
-                    const Index32& byte_offsets,
-                    const Form& form);
+    uproot_issue_90(const Form& form,
+                    const NumpyArray& data,
+                    const Index32& byte_offsets);
 }
 
 #endif // AWKWARD_IO_UPROOT_H_
