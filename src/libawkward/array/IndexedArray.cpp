@@ -132,6 +132,11 @@ namespace awkward {
     return content_.get()->purelist_depth();
   }
 
+  bool
+  IndexedForm::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   IndexedForm::minmax_depth() const {
     return content_.get()->minmax_depth();
@@ -288,6 +293,11 @@ namespace awkward {
   int64_t
   IndexedOptionForm::purelist_depth() const {
     return content_.get()->purelist_depth();
+  }
+
+  bool
+  IndexedOptionForm::dimension_optiontype() const {
+    return true;
   }
 
   const std::pair<int64_t, int64_t>

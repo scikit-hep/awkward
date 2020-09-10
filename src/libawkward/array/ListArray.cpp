@@ -125,6 +125,11 @@ namespace awkward {
     return content_.get()->purelist_depth() + 1;
   }
 
+  bool
+  ListForm::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   ListForm::minmax_depth() const {
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();

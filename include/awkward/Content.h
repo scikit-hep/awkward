@@ -121,6 +121,11 @@ namespace awkward {
     virtual int64_t
       purelist_depth() const = 0;
 
+    /// @brief Returns `true` if this dimension has option-type; `false`
+    /// otherwise.
+    virtual bool
+      dimension_optiontype() const = 0;
+
     /// @brief An optional string associated with this Form, usually specifying
     /// where an array may be fetched.
     const FormKey
@@ -540,6 +545,11 @@ namespace awkward {
     /// different depths, the return value is `-1`.
     virtual int64_t
       purelist_depth() const;
+
+    /// @brief Returns `true` if this dimension has option-type; `false`
+    /// otherwise.
+    virtual bool
+      dimension_optiontype() const;
 
     /// @brief Returns (a) the minimum list-depth and (b) the maximum
     /// list-depth of the array, which can differ if this array "branches"

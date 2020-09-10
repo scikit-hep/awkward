@@ -117,6 +117,18 @@ namespace awkward {
     }
   }
 
+  bool
+  VirtualForm::dimension_optiontype() const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
+    }
+    else {
+      return form_.get()->dimension_optiontype();
+    }
+  }
+
   const std::pair<int64_t, int64_t>
   VirtualForm::minmax_depth() const {
     if (form_.get() == nullptr) {

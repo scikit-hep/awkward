@@ -159,6 +159,11 @@ namespace awkward {
     return 1;
   }
 
+  bool
+  RecordForm::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   RecordForm::minmax_depth() const {
     if (contents_.empty()) {

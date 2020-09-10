@@ -103,6 +103,11 @@ namespace awkward {
     return content_.get()->purelist_depth() + 1;
   }
 
+  bool
+  RegularForm::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   RegularForm::minmax_depth() const {
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
@@ -276,7 +281,13 @@ namespace awkward {
   const ContentPtr
   RegularArray::toListOffsetArray64(bool start_at_zero) const {
     Index64 offsets = compact_offsets64(start_at_zero);
-    return broadcast_tooffsets64(offsets);
+    ContentPtr out = broadcast_tooffsets64(offsets);
+    ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(out.get());
+    return std::make_shared<ListOffsetArray64>(raw->identities(),
+                                               raw->parameters(),
+                                               raw->offsets(),
+                                               raw->content(),
+                                               true);
   }
 
   const std::string
@@ -923,14 +934,83 @@ namespace awkward {
                             int64_t outlength,
                             bool mask,
                             bool keepdims) const {
-    return toListOffsetArray64(true).get()->reduce_next(reducer,
-                                                        negaxis,
-                                                        starts,
-                                                        shifts,
-                                                        parents,
-                                                        outlength,
-                                                        mask,
-                                                        keepdims);
+    // std::cout << "RegularArray begin" << std::endl;
+
+    ContentPtr out = toListOffsetArray64(true).get()->reduce_next(reducer,
+                                                                  negaxis,
+                                                                  starts,
+                                                                  shifts,
+                                                                  parents,
+                                                                  outlength,
+                                                                  mask,
+                                                                  keepdims);
+
+    // std::cout << "RegularArray end";
+
+    if (!content_.get()->dimension_optiontype()) {
+      std::pair<bool, int64_t> branchdepth = branch_depth();
+
+      // std::cout << " " << negaxis << " " << branchdepth.second << " " << (keepdims ? "keepdims " : "");
+
+      bool convert_shallow = (negaxis == branchdepth.second);
+      bool convert_deep = (negaxis + 2 == branchdepth.second);
+      if (keepdims) {
+        convert_shallow = false;
+        convert_deep = (negaxis == branchdepth.second  ||  negaxis + 1 == branchdepth.second  ||  negaxis + 2 == branchdepth.second);
+      }
+
+      if (convert_deep) {
+        // std::cout << "converting deep" << std::endl;
+
+        if (ListOffsetArray64* raw1 = dynamic_cast<ListOffsetArray64*>(out.get())) {
+          if (ListOffsetArray64* raw2 = dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
+            out = std::make_shared<ListOffsetArray64>(raw1->identities(),
+                                                      raw1->parameters(),
+                                                      raw1->offsets(),
+                                                      raw2->toRegularArray());
+          }
+          else if (ListArray64* raw2 = dynamic_cast<ListArray64*>(raw1->content().get())) {
+            out = std::make_shared<ListOffsetArray64>(raw1->identities(),
+                                                      raw1->parameters(),
+                                                      raw1->offsets(),
+                                                      raw2->toRegularArray());
+          }
+        }
+        else if (ListArray64* raw1 = dynamic_cast<ListArray64*>(out.get())) {
+          if (ListOffsetArray64* raw2 = dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
+            out = std::make_shared<ListArray64>(raw1->identities(),
+                                                raw1->parameters(),
+                                                raw1->starts(),
+                                                raw1->stops(),
+                                                raw2->toRegularArray());
+          }
+          else if (ListArray64* raw2 = dynamic_cast<ListArray64*>(raw1->content().get())) {
+            out = std::make_shared<ListArray64>(raw1->identities(),
+                                                raw1->parameters(),
+                                                raw1->starts(),
+                                                raw1->stops(),
+                                                raw2->toRegularArray());
+          }
+        }
+      }
+
+      if (convert_shallow) {
+        // std::cout << "converting shallow" << std::endl;
+
+        if (ListOffsetArray64* raw1 = dynamic_cast<ListOffsetArray64*>(out.get())) {
+          out = raw1->toRegularArray();
+        }
+        else if (ListArray64* raw1 = dynamic_cast<ListArray64*>(out.get())) {
+          out = raw1->toRegularArray();
+        }
+      }
+
+      // if (!convert_deep  &&  !convert_shallow) {
+      //   std::cout << std::endl;
+      // }
+    }
+
+    return out;
   }
 
   const ContentPtr

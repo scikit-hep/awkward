@@ -113,6 +113,11 @@ namespace awkward {
     return content_.get()->purelist_depth();
   }
 
+  bool
+  ByteMaskedForm::dimension_optiontype() const {
+    return true;
+  }
+
   const std::pair<int64_t, int64_t>
   ByteMaskedForm::minmax_depth() const {
     return content_.get()->minmax_depth();

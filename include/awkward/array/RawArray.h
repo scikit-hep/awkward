@@ -88,6 +88,11 @@ namespace awkward {
       return 1;
     }
 
+    bool
+      dimension_optiontype() const override {
+      return false;
+    }
+
     const std::pair<int64_t, int64_t>
       minmax_depth() const override {
       return std::pair<int64_t, int64_t>(1, 1);

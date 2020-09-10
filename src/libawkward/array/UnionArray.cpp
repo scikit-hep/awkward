@@ -161,6 +161,16 @@ namespace awkward {
     return out;
   }
 
+  bool
+  UnionForm::dimension_optiontype() const {
+    for (auto content : contents_) {
+      if (content.get()->dimension_optiontype()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   UnionForm::minmax_depth() const {
     if (contents_.empty()) {

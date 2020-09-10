@@ -191,6 +191,11 @@ namespace awkward {
     return (int64_t)inner_shape_.size() + 1;
   }
 
+  bool
+  NumpyForm::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   NumpyForm::minmax_depth() const {
     return std::pair<int64_t, int64_t>((int64_t)inner_shape_.size() + 1,
@@ -3122,6 +3127,8 @@ namespace awkward {
                           int64_t outlength,
                           bool mask,
                           bool keepdims) const {
+    // std::cout << "NumpyArray begin" << std::endl;
+
     if (shape_.empty()) {
       throw std::runtime_error(
         std::string("attempting to reduce a scalar") + FILENAME(__LINE__));
@@ -3282,6 +3289,8 @@ namespace awkward {
                                              out,
                                              1);
       }
+
+      // std::cout << "NumpyArray end " << (keepdims ? "keepdims" : "") << std::endl;
 
       return out;
     }
