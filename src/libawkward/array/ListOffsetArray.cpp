@@ -118,6 +118,11 @@ namespace awkward {
     return content_.get()->purelist_depth() + 1;
   }
 
+  bool
+  ListOffsetForm::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   ListOffsetForm::minmax_depth() const {
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
@@ -199,10 +204,12 @@ namespace awkward {
   ListOffsetArrayOf<T>::ListOffsetArrayOf(const IdentitiesPtr& identities,
                                           const util::Parameters& parameters,
                                           const IndexOf<T>& offsets,
-                                          const ContentPtr& content)
+                                          const ContentPtr& content,
+                                          bool represents_regular)
       : Content(identities, parameters)
       , offsets_(offsets)
-      , content_(content) {
+      , content_(content)
+      , represents_regular_(represents_regular) {
     if (offsets.length() == 0) {
       throw std::invalid_argument(
         std::string("ListOffsetArray offsets length must be at least 1")
@@ -857,7 +864,9 @@ namespace awkward {
       ContentPtr listoffsetarray = toListOffsetArray64(true);
       ListOffsetArray64* raw =
         dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
-      return std::pair<Index64, ContentPtr>(raw->offsets(), raw->content());
+      int64_t stop = raw->offsets().getitem_at(-1);
+      ContentPtr content = raw->content().get()->getitem_range_nowrap(0, stop);
+      return std::pair<Index64, ContentPtr>(raw->offsets(), content);
     }
     else {
       std::pair<Index64, ContentPtr> pair =
@@ -1548,11 +1557,12 @@ namespace awkward {
                                                      outcontent);
 
       if (keepdims) {
-        out = std::make_shared<RegularArray>(Identities::none(),
-                                             util::Parameters(),
-                                             out,
-                                             1);
+        out = RegularArray(Identities::none(),
+                           util::Parameters(),
+                           out,
+                           1).toListOffsetArray64(false).get()->shallow_copy();
       }
+
       return out;
     }
 
@@ -1594,6 +1604,12 @@ namespace awkward {
         parents.length(),
         outlength);
       util::handle_error(err3, classname(), identities_.get());
+
+      if (keepdims  &&  (!represents_regular_  ||  content_.get()->dimension_optiontype())) {
+        if (RegularArray* raw = dynamic_cast<RegularArray*>(outcontent.get())) {
+          outcontent = raw->toListOffsetArray64(false).get()->shallow_copy();
+        }
+      }
 
       return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                  util::Parameters(),

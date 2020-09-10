@@ -132,6 +132,11 @@ namespace awkward {
     return content_.get()->purelist_depth();
   }
 
+  bool
+  IndexedForm::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   IndexedForm::minmax_depth() const {
     return content_.get()->minmax_depth();
@@ -288,6 +293,11 @@ namespace awkward {
   int64_t
   IndexedOptionForm::purelist_depth() const {
     return content_.get()->purelist_depth();
+  }
+
+  bool
+  IndexedOptionForm::dimension_optiontype() const {
+    return true;
   }
 
   const std::pair<int64_t, int64_t>
@@ -1943,6 +1953,12 @@ namespace awkward {
     }
 
     ContentPtr next = content_.get()->carry(nextcarry, false);
+    if (ISOPTION) {
+      if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
+        next = raw->toListOffsetArray64(true);
+      }
+    }
+
     ContentPtr out = next.get()->reduce_next(reducer,
                                              negaxis,
                                              starts,
@@ -2082,17 +2098,22 @@ namespace awkward {
                                          bool ascending,
                                          bool stable,
                                          bool keepdims) const {
-    int64_t numnull;
+    int64_t index_length = index_.length();
+    int64_t parents_length = parents.length();
+
+    int64_t starts_length = starts.length();
+    int64_t numnull(0);
     struct Error err1 = kernel::IndexedArray_numnull<T>(
       kernel::lib::cpu,   // DERIVE
       &numnull,
       index_.data(),
-      index_.length());
+      index_length);
     util::handle_error(err1, classname(), identities_.get());
 
-    Index64 nextparents(index_.length() - numnull);
-    Index64 nextcarry(index_.length() - numnull);
-    Index64 outindex(index_.length());
+    int64_t next_length = (numnull > 0) ? index_length - numnull : index_length;
+    Index64 nextparents(next_length);
+    Index64 nextcarry(next_length);
+    Index64 outindex(index_length);
     struct Error err2 = kernel::IndexedArray_reduce_next_64<T>(
       kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
@@ -2100,7 +2121,7 @@ namespace awkward {
       outindex.data(),
       index_.data(),
       parents.data(),
-      index_.length());
+      index_length);
     util::handle_error(err2, classname(), identities_.get());
 
     ContentPtr next = content_.get()->carry(nextcarry, false);
@@ -2112,14 +2133,15 @@ namespace awkward {
                                            stable,
                                            keepdims);
 
-    Index64 nextoutindex(index_.length());
+    Index64 nextoutindex(parents_length);
     struct Error err3 = kernel::IndexedArray_local_preparenext_64(
         kernel::lib::cpu,   // DERIVE
         nextoutindex.data(),
         starts.data(),
         parents.data(),
-        parents.length(),
-        nextparents.data());
+        parents_length,
+        nextparents.data(),
+        next_length);
     util::handle_error(err3, classname(), identities_.get());
 
     out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
@@ -2150,7 +2172,7 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
-          starts.length(),
+          starts_length,
           outindex.length());
         util::handle_error(err4, classname(), identities_.get());
 
@@ -2185,17 +2207,22 @@ namespace awkward {
                                             bool ascending,
                                             bool stable,
                                             bool keepdims) const {
-    int64_t numnull;
+    int64_t index_length = index_.length();
+    int64_t parents_length = parents.length();
+
+    int64_t starts_length = starts.length();
+    int64_t numnull(0);
     struct Error err1 = kernel::IndexedArray_numnull<T>(
       kernel::lib::cpu,   // DERIVE
       &numnull,
       index_.data(),
-      index_.length());
+      index_length);
     util::handle_error(err1, classname(), identities_.get());
 
-    Index64 nextparents(index_.length() - numnull);
-    Index64 nextcarry(index_.length() - numnull);
-    Index64 outindex(index_.length());
+    int64_t next_length = (numnull > 0) ? index_length - numnull : index_length;
+    Index64 nextparents(next_length);
+    Index64 nextcarry(next_length);
+    Index64 outindex(index_length);
     struct Error err2 = kernel::IndexedArray_reduce_next_64<T>(
       kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
@@ -2203,7 +2230,7 @@ namespace awkward {
       outindex.data(),
       index_.data(),
       parents.data(),
-      index_.length());
+      index_length);
     util::handle_error(err2, classname(), identities_.get());
 
     ContentPtr next = content_.get()->carry(nextcarry, false);
@@ -2215,14 +2242,15 @@ namespace awkward {
                                               stable,
                                               keepdims);
 
-    Index64 nextoutindex(index_.length());
+    Index64 nextoutindex(parents_length);
     struct Error err3 = kernel::IndexedArray_local_preparenext_64(
       kernel::lib::cpu,   // DERIVE
       nextoutindex.data(),
       starts.data(),
       parents.data(),
-      parents.length(),
-      nextparents.data());
+      parents_length,
+      nextparents.data(),
+      next_length);
     util::handle_error(err3, classname(), identities_.get());
 
     out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
@@ -2253,7 +2281,7 @@ namespace awkward {
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
-          starts.length(),
+          starts_length,
           outindex.length());
         util::handle_error(err4, classname(), identities_.get());
 

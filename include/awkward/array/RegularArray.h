@@ -48,6 +48,9 @@ namespace awkward {
     int64_t
       purelist_depth() const override;
 
+    bool
+      dimension_optiontype() const override;
+
     const std::pair<int64_t, int64_t>
       minmax_depth() const override;
 

@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("include/awkward/array/RawArray.h", line)
-#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("include/awkward/array/RawArray.h", line)
+#define FILENAME(line) std::string("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/master/include/awkward/array/RawArray.h#L" #line ")")
+#define FILENAME_C(line) ("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/master/include/awkward/array/RawArray.h#L" #line ")")
 
 #ifndef AWKWARD_RAWARRAY_H_
 #define AWKWARD_RAWARRAY_H_
@@ -86,6 +86,11 @@ namespace awkward {
     int64_t
       purelist_depth() const override {
       return 1;
+    }
+
+    bool
+      dimension_optiontype() const override {
+      return false;
     }
 
     const std::pair<int64_t, int64_t>

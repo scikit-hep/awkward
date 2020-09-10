@@ -20,6 +20,6 @@ int main(int argc, char** argv) {
   std::shared_ptr<ak::Content> selection = input.get()->getitem_at(at);
 
   std::cout << selection.get()->tojson(false, 1) << std::endl;
-  
+
   return 0;
 }
