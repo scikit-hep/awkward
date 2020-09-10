@@ -60,6 +60,7 @@ namespace awkward {
     GrowableBuffer<T> content = GrowableBuffer<T>::empty(options);
 
     offsets1_ptr[0] = 0;
+    offsets2.append(0);
     int64_t last_offsets2 = 0;
     for (int64_t entry = 0;  entry < byte_offsets.length() - 1;  entry++) {
       int32_t pos = byte_offsets_ptr[entry];
@@ -79,8 +80,8 @@ namespace awkward {
           pos += sizeof(double);
         }
 
-        offsets2.append(last_offsets2);
         last_offsets2 += length;
+        offsets2.append(last_offsets2);
 
         count++;
       }
