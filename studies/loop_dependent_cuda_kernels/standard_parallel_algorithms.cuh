@@ -12,25 +12,25 @@ void exclusive_scan_kernel(
 	int thread_id = threadIdx.x;
 	int sum = 0;	
 	if(!in_out_flag) {
-			if(thread_id < stride) {
-					sum = d_out[thread_id];
-					d_in[thread_id] = sum;
-			} else {
-					sum = d_out[thread_id] + d_out[thread_id - stride];
-					d_in[thread_id] = sum;
-			}
+		if(thread_id < stride) {
+			sum = d_out[thread_id];
+			d_in[thread_id] = sum;
+		} else {
+			sum = d_out[thread_id] + d_out[thread_id - stride];
+			d_in[thread_id] = sum;
+		}
 	} else {
-			if(thread_id < stride) {
-					sum = d_in[thread_id];
-					d_out[thread_id] = sum;
-			} else {
-					sum = d_in[thread_id] + d_in[thread_id - stride];
-					d_out[thread_id] = sum;
-			}
+		if(thread_id < stride) {
+			sum = d_in[thread_id];
+			d_out[thread_id] = sum;
+		} else {
+			sum = d_in[thread_id] + d_in[thread_id - stride];
+			d_out[thread_id] = sum;
+		}
 	}
 
 	if(curr_step == total_steps) {
-			d_final[thread_id] = sum;
+		d_final[thread_id] = sum;
 	}
 
 }
@@ -47,17 +47,15 @@ void scatter(
 }
 
 void exclusive_scan(
-	int** out,
+	int* out,
 	int* in,
 	int length) {
 
 	int* d_in;
 	int* d_out;
-	int* d_final;
 
 	HANDLE_ERROR(cudaMalloc((void**)&d_in, length * sizeof(int)));
 	HANDLE_ERROR(cudaMalloc((void**)&d_out, length * sizeof(int)));
-	HANDLE_ERROR(cudaMalloc((void**)&d_final, length * sizeof(int)));
 
 	HANDLE_ERROR(cudaMemcpy(d_in, in, length * sizeof(int), cudaMemcpyDeviceToDevice));
 
@@ -69,15 +67,12 @@ void exclusive_scan(
 		exclusive_scan_kernel<<<1, length>>>(
 			d_in,
 			d_out,
-			d_final,
+			out,
 			curr_step,
 			total_steps,
 			stride,
 			in_out_flag);
 		stride = stride * 2;
 	}
-
-	(*out) = d_final;
-
 }
 
