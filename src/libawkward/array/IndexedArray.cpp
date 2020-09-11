@@ -1464,6 +1464,8 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::reverse_merge(const ContentPtr& other) const {
+    std::cout << "IndexedArray::reverse_merge " << tojson(false, -1) << " and " << other.get()->tojson(false, -1) << std::endl;
+
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
       return reverse_merge(raw->array());
     }
@@ -1481,7 +1483,6 @@ namespace awkward {
       0);
     util::handle_error(err1, classname(), identities_.get());
 
-    int64_t mycontentlength = content_.get()->length();
     if (std::is_same<T, int32_t>::value) {
       struct Error err2 = kernel::IndexedArray_fill<int32_t, int64_t>(
         kernel::lib::cpu,   // DERIVE
@@ -1489,7 +1490,7 @@ namespace awkward {
         theirlength,
         reinterpret_cast<int32_t*>(index_.data()),
         mylength,
-        mycontentlength);
+        theirlength);
       util::handle_error(err2, classname(), identities_.get());
     }
     else if (std::is_same<T, uint32_t>::value) {
@@ -1499,7 +1500,7 @@ namespace awkward {
         theirlength,
         reinterpret_cast<uint32_t*>(index_.data()),
         mylength,
-        mycontentlength);
+        theirlength);
       util::handle_error(err2, classname(), identities_.get());
     }
     if (std::is_same<T, int64_t>::value) {
@@ -1509,7 +1510,7 @@ namespace awkward {
         theirlength,
         reinterpret_cast<int64_t*>(index_.data()),
         mylength,
-        mycontentlength);
+        theirlength);
       util::handle_error(err2, classname(), identities_.get());
     }
     else {
@@ -1527,6 +1528,8 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::merge(const ContentPtr& other) const {
+    std::cout << "IndexedArray::merge " << tojson(false, -1) << std::endl;
+
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
       return merge(raw->array());
     }
@@ -1869,7 +1872,6 @@ namespace awkward {
     ContentPtr nextcontent = contents[0].get()->mergemany(tail_contents);
 
     ContentPtr next(nullptr);
-
     if (is_option) {
       next = std::make_shared<IndexedOptionArray64>(Identities::none(),
                                                     parameters_,

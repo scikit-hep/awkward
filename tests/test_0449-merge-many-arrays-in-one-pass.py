@@ -83,7 +83,19 @@ def test_reverse_indexed():
     one = awkward1.Array([1, 2, 3]).layout
     two = awkward1.Array([4, 5]).layout
     three = awkward1.Array([None, 6, None]).layout
-    assert awkward1.to_list(one.mergemany([two, three])) == [1, 2, 3, 4, 5, None, 2, None]
+    assert awkward1.to_list(one.mergemany([two, three])) == [1, 2, 3, 4, 5, None, 6, None]
 
     four = awkward1.Array([7, 8, None, None, 9]).layout
-    assert awkward1.to_list(one.mergemany([two, three, four])) == [1, 2, 3, 4, 5, None, 2, None, 7, 8, None, None, 9]
+    assert awkward1.to_list(one.mergemany([two, three, four])) == [1, 2, 3, 4, 5, None, 6, None, 7, 8, None, None, 9]
+
+def test_bytemasked():
+    one = awkward1.Array([1, 2, 3, 4, 5, 6]).mask[[True, True, False, True, False, True]].layout
+    two = awkward1.Array([7, 99, 999, 8, 9]).mask[[True, False, False, True, True]].layout
+    three = awkward1.Array([100, 200, 300]).layout
+    four = awkward1.Array([None, None, 123, None]).layout
+    assert awkward1.to_list(one.mergemany([two, three, four])) == [1, 2, None, 4, None, 6, 7, None, None, 8, 9, 100, 200, 300, None, None, 123, None]
+    assert awkward1.to_list(four.mergemany([three, two, one])) == [None, None, 123, None, 100, 200, 300, 7, None, None, 8, 9, 1, 2, None, 4, None, 6]
+    assert awkward1.to_list(three.mergemany([four, one])) == [100, 200, 300, None, None, 123, None, 1, 2, None, 4, None, 6]
+    assert awkward1.to_list(three.mergemany([four, one, two])) == [100, 200, 300, None, None, 123, None, 1, 2, None, 4, None, 6, 7, None, None, 8, 9]
+    assert awkward1.to_list(three.mergemany([two, one])) == [100, 200, 300, 7, None, None, 8, 9, 1, 2, None, 4, None, 6]
+    assert awkward1.to_list(three.mergemany([two, one, four])) == [100, 200, 300, 7, None, None, 8, 9, 1, 2, None, 4, None, 6, None, None, 123, None]

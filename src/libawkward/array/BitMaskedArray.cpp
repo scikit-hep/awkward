@@ -778,15 +778,17 @@ namespace awkward {
 
   const ContentPtr
   BitMaskedArray::reverse_merge(const ContentPtr& other) const {
-    ContentPtr indexedoptionarray = toIndexedOptionArray64();
-    IndexedOptionArray64* raw =
-      dynamic_cast<IndexedOptionArray64*>(indexedoptionarray.get());
-    return raw->reverse_merge(other);
+    return toIndexedOptionArray64().get()->reverse_merge(other);
   }
 
   const ContentPtr
   BitMaskedArray::merge(const ContentPtr& other) const {
     return toIndexedOptionArray64().get()->merge(other);
+  }
+
+  const ContentPtr
+  BitMaskedArray::mergemany(const ContentPtrVec& others) const {
+    return toIndexedOptionArray64().get()->mergemany(others);
   }
 
   const SliceItemPtr
