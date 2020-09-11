@@ -7,6 +7,7 @@ from collections import OrderedDict
 from itertools import product
 
 import yaml
+from numpy import uint8
 from parser_utils import PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST, TEST_BLACKLIST
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -49,6 +50,7 @@ def getfuncnames():
 def genpykernels():
     print("Generating Python kernels")
     prefix = """
+from numpy import uint8
 
 kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
@@ -377,7 +379,10 @@ def getfuncargs(tests):
                         if "specializations" in indspec.keys():
                             for childfunc in indspec["specializations"]:
                                 funcs[childfunc["name"]] = OrderedDict()
-                                if tests[childfunc["name"]] != []:
+                                if (
+                                    childfunc["name"] in tests.keys()
+                                    and tests[childfunc["name"]] != []
+                                ):
                                     for arg in childfunc["args"]:
                                         typename = list(arg.values())[0]
                                         if "Const[" in typename:
@@ -390,7 +395,10 @@ def getfuncargs(tests):
 
                         else:
                             funcs[indspec["name"]] = OrderedDict()
-                            if tests[indspec["name"]] != []:
+                            if (
+                                indspec["name"] in tests.keys()
+                                and tests[indspec["name"]] != []
+                            ):
                                 for arg in indspec["args"]:
                                     typename = list(arg.values())[0]
                                     if "Const[" in typename:
@@ -614,8 +622,87 @@ def gencudakerneltests(tests):
                     f.write("\n")
 
 
+def validateoverflow(tests):
+    new_tests = {}
+    with open(
+        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
+    ) as infile:
+        mainspec = yaml.safe_load(infile)["kernels"]
+        for filedir in mainspec.values():
+            for relpath in filedir.values():
+                with open(
+                    os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
+                ) as specfile:
+                    indspec = yaml.safe_load(specfile)[0]
+                    if "def " in indspec["definition"]:
+                        if "specializations" in indspec.keys():
+                            for childfunc in indspec["specializations"]:
+                                if (
+                                    childfunc["name"] in tests.keys()
+                                    and tests[childfunc["name"]] != []
+                                ):
+                                    new_tests[childfunc["name"]] = []
+                                    for test in tests[childfunc["name"]]:
+                                        flag = True
+                                        for argdict in childfunc["args"]:
+                                            for arg, typename in argdict.items():
+                                                if (
+                                                    "uint" in typename
+                                                    and (
+                                                        any(
+                                                            n < 0
+                                                            for n in test["inargs"][arg]
+                                                        )
+                                                    )
+                                                ) or (
+                                                    "outargs" in test.keys()
+                                                    and (arg in test["outargs"].keys())
+                                                    and any(
+                                                        n < 0
+                                                        for n in test["outargs"][arg]
+                                                    )
+                                                ):
+                                                    flag = False
+                                        if flag:
+                                            new_tests[childfunc["name"]].append(
+                                                copy.deepcopy(test)
+                                            )
+                        else:
+                            if (
+                                indspec["name"] in tests.keys()
+                                and tests[indspec["name"]] != []
+                            ):
+                                new_tests[indspec["name"]] = []
+                                for test in tests[indspec["name"]]:
+                                    flag = True
+                                    for argdict in indspec["args"]:
+                                        for arg, typename in argdict.items():
+                                            if (
+                                                "uint" in typename
+                                                and (
+                                                    any(
+                                                        n < 0
+                                                        for n in test["inargs"][arg]
+                                                    )
+                                                )
+                                            ) or (
+                                                "outargs" in test.keys()
+                                                and (arg in test["outargs"].keys())
+                                                and any(
+                                                    n < 0 for n in test["outargs"][arg]
+                                                )
+                                            ):
+                                                flag = False
+                                    if flag:
+                                        new_tests[indspec["name"]].append(
+                                            copy.deepcopy(test)
+                                        )
+    return new_tests
+
+
 if __name__ == "__main__":
     tests = gettests()
+    tests = validateoverflow(tests)
     genspectests(tests)
     gencpukerneltests(tests)
     gencudakerneltests(tests)

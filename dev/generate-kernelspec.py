@@ -203,9 +203,14 @@ def preprocess(filename, skip_implementation=False):
                     and re.search("u?int\d{1,2}_t\*?", line) is not None
                     and re.search("u?int\d{1,2}_t\*?", line).span()[0] > line.find("(")
                 ):
-                    line = line.replace(
-                        re.search("u?int\d{1,2}_t", line).group(), "int"
-                    )
+                    if re.search("uint8_t\*?", line) is not None:
+                        line = line.replace(
+                            re.search("uint8_t", line).group(), "unsigned char"
+                        )
+                    else:
+                        line = line.replace(
+                            re.search("u?int\d{1,2}_t", line).group(), "int"
+                        )
             if "ERROR" in line:
                 line = line.replace("ERROR", "int", 1)
             if func is True and "(size_t)" in line:
@@ -549,7 +554,17 @@ class FuncBody(object):
             else:
                 self.code += stmt
         elif item.__class__.__name__ == "Typename":
-            stmt = " " * indent + "{0}".format(item.type.type.names[0])
+            if len(item.type.type.names) == 1:
+                stmt = " " * indent + "{0}".format(item.type.type.names[0])
+            elif (
+                item.type.type.names[0] == "unsigned"
+                and item.type.type.names[1] == "char"
+            ):
+                stmt = " " * indent + "uint8"
+            else:
+                raise Exception(
+                    "Unhandled Typename {0}".format(str(item.type.type.names))
+                )
             if called:
                 return stmt
             else:
@@ -669,7 +684,10 @@ def genpython(pfile):
             if blackimported:
                 funcs[decl.name] = black.format_str(
                     (
-                        "def {0}({1})".format(decl.name, decl.arrange_args(),)
+                        "def {0}({1})".format(
+                            decl.name,
+                            decl.arrange_args(),
+                        )
                         + ":\n"
                         + remove_return(FuncBody(ast.ext[i].body).code)
                     ),
@@ -677,7 +695,10 @@ def genpython(pfile):
                 )
             else:
                 funcs[decl.name] = (
-                    "def {0}({1})".format(decl.name, decl.arrange_args(),)
+                    "def {0}({1})".format(
+                        decl.name,
+                        decl.arrange_args(),
+                    )
                     + ":\n"
                     + remove_return(FuncBody(ast.ext[i].body).code)
                 )
@@ -829,10 +850,34 @@ if __name__ == "__main__":
     kernelname = args.kernelname
 
     kernelfiles = [
-        os.path.join(CURRENT_DIR, "..", "src", "cpu-kernels", "identities.cpp",),
-        os.path.join(CURRENT_DIR, "..", "src", "cpu-kernels", "operations.cpp",),
-        os.path.join(CURRENT_DIR, "..", "src", "cpu-kernels", "reducers.cpp",),
-        os.path.join(CURRENT_DIR, "..", "src", "cpu-kernels", "getitem.cpp",),
+        os.path.join(
+            CURRENT_DIR,
+            "..",
+            "src",
+            "cpu-kernels",
+            "identities.cpp",
+        ),
+        os.path.join(
+            CURRENT_DIR,
+            "..",
+            "src",
+            "cpu-kernels",
+            "operations.cpp",
+        ),
+        os.path.join(
+            CURRENT_DIR,
+            "..",
+            "src",
+            "cpu-kernels",
+            "reducers.cpp",
+        ),
+        os.path.join(
+            CURRENT_DIR,
+            "..",
+            "src",
+            "cpu-kernels",
+            "getitem.cpp",
+        ),
         os.path.join(CURRENT_DIR, "..", "src", "cpu-kernels", "sorting.cpp"),
     ]
 
@@ -886,7 +931,8 @@ if __name__ == "__main__":
                                 + funcname
                                 + ": "
                                 + os.path.join(
-                                    getdirname(filename), funcname + ".yml\n",
+                                    getdirname(filename),
+                                    funcname + ".yml\n",
                                 )
                             )
                             f.write("- name: " + funcname + "\n")
