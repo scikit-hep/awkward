@@ -1204,31 +1204,16 @@ namespace awkward {
                                          content);
   }
 
-  // template <typename T>
-  // const ContentPtr
-  // ListOffsetArray<T>::mergemany(const ContentPtrVec& others) const {
-  //   std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
-  //   ContentPtrVec head = head_tail.first;
-  //   ContentPtrVec tail = head_tail.second;
-
-  //   ContentPtr nextcontent;
-
-
-
-
-
-  //   if (tail.empty()) {
-  //     return next;
-  //   }
-
-  //   ContentPtr reversed = tail[0].get()->reverse_merge(next);
-  //   if (tail.size() == 1) {
-  //     return reversed;
-  //   }
-  //   else {
-  //     return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()));
-  //   }
-  // }
+  template <typename T>
+  const ContentPtr
+  ListOffsetArrayOf<T>::mergemany(const ContentPtrVec& others) const {
+    ContentPtr listarray = std::make_shared<ListArrayOf<T>>(identities_,
+                                                            parameters_,
+                                                            starts(),
+                                                            stops(),
+                                                            content_);
+    return listarray.get()->mergemany(others);
+  }
 
   template <>
   const SliceItemPtr ListOffsetArrayOf<int64_t>::asslice() const {

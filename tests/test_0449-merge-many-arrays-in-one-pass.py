@@ -38,3 +38,16 @@ def test_numpyarray():
 
                     assert awkward1.to_list(ak_combined) == combined.tolist()
                     assert awkward1.to_numpy(ak_combined).dtype == numpy.concatenate([one, two, four]).dtype
+
+
+def test_lists():
+    one = awkward1.Array([[1, 2, 3], [], [4, 5]]).layout
+    two = awkward1.Array([[1.1, 2.2], [3.3, 4.4]]).layout
+    three = awkward1.from_numpy(numpy.array([[10], [20]]), regulararray=True, highlevel=False)
+    assert awkward1.to_list(one.mergemany([two, three])) == [[1.0, 2.0, 3.0], [], [4.0, 5.0], [1.1, 2.2], [3.3, 4.4], [10.0], [20.0]]
+    assert awkward1.to_list(three.mergemany([two, one])) == [[10.0], [20.0], [1.1, 2.2], [3.3, 4.4], [1.0, 2.0, 3.0], [], [4.0, 5.0]]
+
+    one = awkward1.layout.ListArray64(one.starts, one.stops, one.content)
+    two = awkward1.layout.ListArray64(two.starts, two.stops, two.content)
+    assert awkward1.to_list(one.mergemany([two, three])) == [[1.0, 2.0, 3.0], [], [4.0, 5.0], [1.1, 2.2], [3.3, 4.4], [10.0], [20.0]]
+    assert awkward1.to_list(three.mergemany([two, one])) == [[10.0], [20.0], [1.1, 2.2], [3.3, 4.4], [1.0, 2.0, 3.0], [], [4.0, 5.0]]

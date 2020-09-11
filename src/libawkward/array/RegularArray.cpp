@@ -806,6 +806,11 @@ namespace awkward {
     }
   }
 
+  const ContentPtr
+  RegularArray::mergemany(const ContentPtrVec& others) const {
+    return toListOffsetArray64(true).get()->mergemany(others);
+  }
+
   const SliceItemPtr
   RegularArray::asslice() const {
     throw std::invalid_argument(
