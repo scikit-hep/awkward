@@ -7,6 +7,7 @@ from collections import OrderedDict
 from itertools import product
 
 import yaml
+from numpy import uint8
 from parser_utils import PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST, TEST_BLACKLIST
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -49,6 +50,7 @@ def getfuncnames():
 def genpykernels():
     print("Generating Python kernels")
     prefix = """
+from numpy import uint8
 
 kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1

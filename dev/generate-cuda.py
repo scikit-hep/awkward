@@ -67,6 +67,8 @@ KERNEL_WHITELIST = [
     "awkward_regularize_arrayslice",
     "awkward_RegularArray_getitem_next_at",
     "awkward_ListOffsetArray_compact_offsets",
+    "awkward_BitMaskedArray_to_ByteMaskedArray",
+    "awkward_BitMaskedArray_to_IndexedOptionArray",
 ]
 
 
@@ -121,18 +123,15 @@ def traverse(node, args={}, forvars=[], declared=[]):
         code += 'err->filename = "FILENAME(__LINE__)";\nerr->pass_through=true;\n'
     elif node.__class__.__name__ == "If":
         code = ""
-        tempdeclared = copy.copy(declared)
-        for subnode in node.body:
-            traverse(subnode, args, copy.copy(forvars), declared)
-        todecl = set(tempdeclared) ^ set(declared)
-        for todeclarg in todecl:
-            code += "int64_t {0};\n".format(todeclarg)
         code += "if ({0}) {{\n".format(
             traverse(node.test, args, copy.copy(forvars), declared)
         )
+        tempdeclared = copy.copy(declared)
         for subnode in node.body:
             code += (
-                " " * 2 + traverse(subnode, args, copy.copy(forvars), declared) + "\n"
+                " " * 2
+                + traverse(subnode, args, copy.copy(forvars), tempdeclared)
+                + "\n"
             )
         code += "} else {\n"
         for subnode in node.orelse:
@@ -237,9 +236,15 @@ def traverse(node, args={}, forvars=[], declared=[]):
             code = traverse(node.slice.value, args, copy.copy(forvars), declared)
     elif node.__class__.__name__ == "Call":
         assert len(node.args) == 1
+        if node.func.id == "uint8":
+            casttype = "uint8_t"
+        else:
+            casttype = node.func.id
         code = "({0})({1})".format(
-            node.func.id, traverse(node.args[0], args, copy.copy(forvars), declared)
+            casttype, traverse(node.args[0], args, copy.copy(forvars), declared)
         )
+    elif node.__class__.__name__ == "BitAnd":
+        code = "&"
     elif node.__class__.__name__ == "Constant":
         if node.value == True:
             code = "true"
@@ -292,6 +297,10 @@ def traverse(node, args={}, forvars=[], declared=[]):
         else:
             if node.op.__class__.__name__ == "Add":
                 operator = "+="
+            elif node.op.__class__.__name__ == "RShift":
+                operator = ">>="
+            elif node.op.__class__.__name__ == "LShift":
+                operator = "<<="
             else:
                 raise Exception(
                     "Unhandled AugAssign node {0}".format(node.op.__class__.__name__)
@@ -412,15 +421,20 @@ def getbody(pycode, args):
 def getxthreads(pycode):
     tree = ast.parse(pycode).body[0]
     forargs = set()
-    for node in tree.body:
-        if node.__class__.__name__ == "For":
-            forargs.add(traverse(node.iter.args[0]))
-        elif node.__class__.__name__ == "While":
-            assert node.test.__class__.__name__ == "Compare"
-            assert len(node.test.ops) == 1
-            assert node.test.ops[0].__class__.__name__ == "Lt"
-            assert len(node.test.comparators) == 1
-            forargs.add(traverse(node.test.comparators[0]))
+    flag = False
+    while flag is False and "body" in tree.__dir__():
+        for node in tree.body:
+            if node.__class__.__name__ == "For":
+                forargs.add(traverse(node.iter.args[0]))
+                flag = True
+            elif node.__class__.__name__ == "While":
+                assert node.test.__class__.__name__ == "Compare"
+                assert len(node.test.ops) == 1
+                assert node.test.ops[0].__class__.__name__ == "Lt"
+                assert len(node.test.comparators) == 1
+                forargs.add(traverse(node.test.comparators[0]))
+                flag = True
+        tree = tree.body[0]
     if len(forargs) == 0:
         return 1
     elif len(forargs) == 1:
