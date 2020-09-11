@@ -2919,6 +2919,9 @@ namespace awkward {
       if (NumpyArray* raw = dynamic_cast<NumpyArray*>(array.get())) {
         contiguous_arrays.push_back(raw->contiguous());
       }
+      else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
+        ;
+      }
       else {
         throw std::invalid_argument(
           std::string("cannot merge ") + classname() + std::string(" with ")
