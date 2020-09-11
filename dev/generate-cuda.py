@@ -120,7 +120,7 @@ def traverse(node, args={}, forvars=[], declared=[]):
             code = 'err->str = "{0}";\n'.format(node.exc.args[0].s)
         else:
             code = 'err->str = "{0}";\n'.format(node.exc.args[0].value)
-        code += 'err->filename = "FILENAME(__LINE__)";\nerr->pass_through=true;\n'
+        code += "err->filename = FILENAME(__LINE__);\nerr->pass_through=true;\n"
     elif node.__class__.__name__ == "If":
         code = ""
         code += "if ({0}) {{\n".format(
