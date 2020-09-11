@@ -2929,157 +2929,157 @@ namespace awkward {
       }
     }
 
-    util::dtype dtype = dtype_;
+    util::dtype nextdtype = dtype_;
     for (auto contiguous_array : contiguous_arrays) {
-      util::dtype that_dtype = contiguous_array.dtype();
+      util::dtype thatdtype = contiguous_array.dtype();
 
-      if (dtype == util::dtype::complex256  ||
-          that_dtype == util::dtype::complex256) {
-        dtype = util::dtype::complex256;
+      if (nextdtype == util::dtype::complex256  ||
+          thatdtype == util::dtype::complex256) {
+        nextdtype = util::dtype::complex256;
       }
-      else if ((dtype == util::dtype::float128  &&
-                util::is_complex(that_dtype))  ||
-               (that_dtype == util::dtype::float128  &&
-                util::is_complex(dtype))) {
-        dtype = util::dtype::complex256;
+      else if ((nextdtype == util::dtype::float128  &&
+                util::is_complex(thatdtype))  ||
+               (thatdtype == util::dtype::float128  &&
+                util::is_complex(nextdtype))) {
+        nextdtype = util::dtype::complex256;
       }
-      else if (dtype == util::dtype::complex128  ||
-               that_dtype == util::dtype::complex128) {
-        dtype = util::dtype::complex128;
+      else if (nextdtype == util::dtype::complex128  ||
+               thatdtype == util::dtype::complex128) {
+        nextdtype = util::dtype::complex128;
       }
-      else if (((dtype == util::dtype::float64  ||
-                 dtype == util::dtype::uint64  ||
-                 dtype == util::dtype::int64  ||
-                 dtype == util::dtype::uint32  ||
-                 dtype == util::dtype::int32)  &&
-                util::is_complex(that_dtype))  ||
-               ((that_dtype == util::dtype::float64  ||
-                 that_dtype == util::dtype::uint64  ||
-                 that_dtype == util::dtype::int64  ||
-                 that_dtype == util::dtype::uint32  ||
-                 that_dtype == util::dtype::int32)  &&
-                util::is_complex(dtype))) {
-        dtype = util::dtype::complex128;
+      else if (((nextdtype == util::dtype::float64  ||
+                 nextdtype == util::dtype::uint64  ||
+                 nextdtype == util::dtype::int64  ||
+                 nextdtype == util::dtype::uint32  ||
+                 nextdtype == util::dtype::int32)  &&
+                util::is_complex(thatdtype))  ||
+               ((thatdtype == util::dtype::float64  ||
+                 thatdtype == util::dtype::uint64  ||
+                 thatdtype == util::dtype::int64  ||
+                 thatdtype == util::dtype::uint32  ||
+                 thatdtype == util::dtype::int32)  &&
+                util::is_complex(nextdtype))) {
+        nextdtype = util::dtype::complex128;
       }
-      else if (dtype == util::dtype::complex64  ||
-               that_dtype == util::dtype::complex64) {
-        dtype = util::dtype::complex64;
+      else if (nextdtype == util::dtype::complex64  ||
+               thatdtype == util::dtype::complex64) {
+        nextdtype = util::dtype::complex64;
       }
-      else if (dtype == util::dtype::float128  ||
-               that_dtype == util::dtype::float128) {
-        dtype = util::dtype::float128;
+      else if (nextdtype == util::dtype::float128  ||
+               thatdtype == util::dtype::float128) {
+        nextdtype = util::dtype::float128;
       }
-      else if (dtype == util::dtype::float64  ||
-               that_dtype == util::dtype::float64) {
-        dtype = util::dtype::float64;
+      else if (nextdtype == util::dtype::float64  ||
+               thatdtype == util::dtype::float64) {
+        nextdtype = util::dtype::float64;
       }
-      else if ((dtype == util::dtype::float32  &&
-                (that_dtype == util::dtype::uint64  ||
-                 that_dtype == util::dtype::int64  ||
-                 that_dtype == util::dtype::uint32  ||
-                 that_dtype == util::dtype::int32))  ||
-               (that_dtype == util::dtype::float32  &&
-                (dtype == util::dtype::uint64  ||
-                 dtype == util::dtype::int64  ||
-                 dtype == util::dtype::uint32  ||
-                 dtype == util::dtype::int32))) {
-        dtype = util::dtype::float64;
+      else if ((nextdtype == util::dtype::float32  &&
+                (thatdtype == util::dtype::uint64  ||
+                 thatdtype == util::dtype::int64  ||
+                 thatdtype == util::dtype::uint32  ||
+                 thatdtype == util::dtype::int32))  ||
+               (thatdtype == util::dtype::float32  &&
+                (nextdtype == util::dtype::uint64  ||
+                 nextdtype == util::dtype::int64  ||
+                 nextdtype == util::dtype::uint32  ||
+                 nextdtype == util::dtype::int32))) {
+        nextdtype = util::dtype::float64;
       }
-      else if (dtype == util::dtype::float32  ||
-               that_dtype == util::dtype::float32) {
-        dtype = util::dtype::float32;
+      else if (nextdtype == util::dtype::float32  ||
+               thatdtype == util::dtype::float32) {
+        nextdtype = util::dtype::float32;
       }
-      else if ((dtype == util::dtype::float16  &&
-                (that_dtype == util::dtype::uint64  ||
-                 that_dtype == util::dtype::int64  ||
-                 that_dtype == util::dtype::uint32  ||
-                 that_dtype == util::dtype::int32))  ||
-               (that_dtype == util::dtype::float16  &&
-                (dtype == util::dtype::uint64  ||
-                 dtype == util::dtype::int64  ||
-                 dtype == util::dtype::uint32  ||
-                 dtype == util::dtype::int32))) {
-        dtype = util::dtype::float64;
+      else if ((nextdtype == util::dtype::float16  &&
+                (thatdtype == util::dtype::uint64  ||
+                 thatdtype == util::dtype::int64  ||
+                 thatdtype == util::dtype::uint32  ||
+                 thatdtype == util::dtype::int32))  ||
+               (thatdtype == util::dtype::float16  &&
+                (nextdtype == util::dtype::uint64  ||
+                 nextdtype == util::dtype::int64  ||
+                 nextdtype == util::dtype::uint32  ||
+                 nextdtype == util::dtype::int32))) {
+        nextdtype = util::dtype::float64;
       }
-      else if ((dtype == util::dtype::float16  &&
-                (that_dtype == util::dtype::uint16  ||
-                 that_dtype == util::dtype::int16))  ||
-               (that_dtype == util::dtype::float16  &&
-                (dtype == util::dtype::uint16  ||
-                 dtype == util::dtype::int16))) {
-        dtype = util::dtype::float32;
+      else if ((nextdtype == util::dtype::float16  &&
+                (thatdtype == util::dtype::uint16  ||
+                 thatdtype == util::dtype::int16))  ||
+               (thatdtype == util::dtype::float16  &&
+                (nextdtype == util::dtype::uint16  ||
+                 nextdtype == util::dtype::int16))) {
+        nextdtype = util::dtype::float32;
       }
-      else if (dtype == util::dtype::float16  ||
-               that_dtype == util::dtype::float16) {
-        dtype = util::dtype::float16;
+      else if (nextdtype == util::dtype::float16  ||
+               thatdtype == util::dtype::float16) {
+        nextdtype = util::dtype::float16;
       }
-      else if ((dtype == util::dtype::uint64  &&
-                util::is_signed(that_dtype))  ||
-               (that_dtype == util::dtype::uint64  &&
-                util::is_signed(dtype))) {
-        dtype = util::dtype::float64;
+      else if ((nextdtype == util::dtype::uint64  &&
+                util::is_signed(thatdtype))  ||
+               (thatdtype == util::dtype::uint64  &&
+                util::is_signed(nextdtype))) {
+        nextdtype = util::dtype::float64;
       }
-      else if (dtype == util::dtype::uint64  ||
-               that_dtype == util::dtype::uint64) {
-        dtype = util::dtype::uint64;
+      else if (nextdtype == util::dtype::uint64  ||
+               thatdtype == util::dtype::uint64) {
+        nextdtype = util::dtype::uint64;
       }
-      else if (dtype == util::dtype::int64  ||
-               that_dtype == util::dtype::int64) {
-        dtype = util::dtype::int64;
+      else if (nextdtype == util::dtype::int64  ||
+               thatdtype == util::dtype::int64) {
+        nextdtype = util::dtype::int64;
       }
-      else if ((dtype == util::dtype::uint32  &&
-                util::is_signed(that_dtype))  ||
-               (that_dtype == util::dtype::uint32  &&
-                util::is_signed(dtype))) {
-        dtype = util::dtype::int64;
+      else if ((nextdtype == util::dtype::uint32  &&
+                util::is_signed(thatdtype))  ||
+               (thatdtype == util::dtype::uint32  &&
+                util::is_signed(nextdtype))) {
+        nextdtype = util::dtype::int64;
       }
-      else if (dtype == util::dtype::uint32  ||
-               that_dtype == util::dtype::uint32) {
-        dtype = util::dtype::uint32;
+      else if (nextdtype == util::dtype::uint32  ||
+               thatdtype == util::dtype::uint32) {
+        nextdtype = util::dtype::uint32;
       }
-      else if (dtype == util::dtype::int32  ||
-               that_dtype == util::dtype::int32) {
-        dtype = util::dtype::int32;
+      else if (nextdtype == util::dtype::int32  ||
+               thatdtype == util::dtype::int32) {
+        nextdtype = util::dtype::int32;
       }
-      else if ((dtype == util::dtype::uint16  &&
-                util::is_signed(that_dtype))  ||
-               (that_dtype == util::dtype::uint16  &&
-                util::is_signed(dtype))) {
-        dtype = util::dtype::int32;
+      else if ((nextdtype == util::dtype::uint16  &&
+                util::is_signed(thatdtype))  ||
+               (thatdtype == util::dtype::uint16  &&
+                util::is_signed(nextdtype))) {
+        nextdtype = util::dtype::int32;
       }
-      else if (dtype == util::dtype::uint16  ||
-               that_dtype == util::dtype::uint16) {
-        dtype = util::dtype::uint16;
+      else if (nextdtype == util::dtype::uint16  ||
+               thatdtype == util::dtype::uint16) {
+        nextdtype = util::dtype::uint16;
       }
-      else if (dtype == util::dtype::int16  ||
-               that_dtype == util::dtype::int16) {
-        dtype = util::dtype::int16;
+      else if (nextdtype == util::dtype::int16  ||
+               thatdtype == util::dtype::int16) {
+        nextdtype = util::dtype::int16;
       }
-      else if ((dtype == util::dtype::uint8  &&
-                util::is_signed(that_dtype))  ||
-               (that_dtype == util::dtype::uint8  &&
-                util::is_signed(dtype))) {
-        dtype = util::dtype::int16;
+      else if ((nextdtype == util::dtype::uint8  &&
+                util::is_signed(thatdtype))  ||
+               (thatdtype == util::dtype::uint8  &&
+                util::is_signed(nextdtype))) {
+        nextdtype = util::dtype::int16;
       }
-      else if (dtype == util::dtype::uint8  ||
-               that_dtype == util::dtype::uint8) {
-        dtype = util::dtype::uint8;
+      else if (nextdtype == util::dtype::uint8  ||
+               thatdtype == util::dtype::uint8) {
+        nextdtype = util::dtype::uint8;
       }
-      else if (dtype == util::dtype::int8  ||
-               that_dtype == util::dtype::int8) {
-        dtype = util::dtype::int8;
+      else if (nextdtype == util::dtype::int8  ||
+               thatdtype == util::dtype::int8) {
+        nextdtype = util::dtype::int8;
       }
-      else if (dtype == util::dtype::boolean  &&
-               that_dtype == util::dtype::boolean) {
-        dtype = util::dtype::boolean;
+      else if (nextdtype == util::dtype::boolean  &&
+               thatdtype == util::dtype::boolean) {
+        nextdtype = util::dtype::boolean;
       }
-      // else if (dtype == util::dtype::datetime64  &&
-      //          that_dtype == util::dtype::datetime64) {
-      //   dtype = util::dtype::datetime64;
+      // else if (nextdtype == util::dtype::datetime64  &&
+      //          thatdtype == util::dtype::datetime64) {
+      //   nextdtype = util::dtype::datetime64;
       // }
-      // else if (dtype == util::dtype::timedelta64  &&
-      //          that_dtype == util::dtype::timedelta64) {
-      //   dtype = util::dtype::timedelta64;
+      // else if (nextdtype == util::dtype::timedelta64  &&
+      //          thatdtype == util::dtype::timedelta64) {
+      //   nextdtype = util::dtype::timedelta64;
       // }
     }
 
@@ -3107,7 +3107,7 @@ namespace awkward {
 
     kernel::lib ptr_lib = ptr_lib_;   // DERIVE
 
-    int64_t itemsize = util::dtype_to_itemsize(dtype);
+    int64_t itemsize = util::dtype_to_itemsize(nextdtype);
 
     std::shared_ptr<void> ptr(kernel::malloc<void>(ptr_lib,
                                                    itemsize*total_flatlength));
@@ -3120,7 +3120,7 @@ namespace awkward {
       }
 
       struct Error err;
-      switch (dtype) {
+      switch (nextdtype) {
       // to boolean
       case util::dtype::boolean:
         switch (contiguous_array.dtype()) {
@@ -3712,7 +3712,7 @@ namespace awkward {
       // something's wrong
       default:
         throw std::runtime_error(
-          std::string("unhandled merge case: to ") + util::dtype_to_name(dtype)
+          std::string("unhandled merge case: to ") + util::dtype_to_name(nextdtype)
           + FILENAME(__LINE__));
       }
       util::handle_error(err, classname(), nullptr);
@@ -3739,8 +3739,8 @@ namespace awkward {
                                                    strides,
                                                    0,
                                                    (ssize_t)itemsize,
-                                                   util::dtype_to_format(dtype),
-                                                   dtype,
+                                                   util::dtype_to_format(nextdtype),
+                                                   nextdtype,
                                                    ptr_lib);
 
     if (tail.empty()) {
