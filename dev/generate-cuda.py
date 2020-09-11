@@ -422,7 +422,7 @@ def getxthreads(pycode):
     tree = ast.parse(pycode).body[0]
     forargs = set()
     flag = False
-    while flag is False and "body" in tree.__dir__():
+    while flag is False and "body" in dir(tree):
         for node in tree.body:
             if node.__class__.__name__ == "For":
                 forargs.add(traverse(node.iter.args[0]))
