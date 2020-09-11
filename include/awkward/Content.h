@@ -651,15 +651,27 @@ namespace awkward {
     virtual bool
       mergeable(const ContentPtr& other, bool mergebool) const = 0;
 
-    /// @brief Partitions a list of `others` into a head sequence and a tail
-    /// sequence (in the original order and internally maintaining order);
-    /// the head sequence can be directly merged with this array, but
-    /// the first item in the tail sequence must be reverse_merged.
+    /// @brief Partitions `this` array plus a list of `others` into a `head`
+    /// sequence and a `tail` sequence:
     ///
-    /// Either of these can be empty, but since the `others` is required
-    /// to be non-empty, at least one is non-empty.
+    /// `[this] + others == head + tail`
     ///
-    /// Most #merge methods call this first.
+    /// The order is preserved and no arrays are lost. The `others` must
+    /// have at least one array, and `this` will be added to `head`,
+    /// though `tail` might be empty.
+    ///
+    /// (If `tail` is empty, `head` must contain at least two arrays!)
+    ///
+    /// The position of the split between `head` and `tail` is such that the
+    /// first array in `tail` must be merged with #reverse_merge (usually
+    /// because it is an option-type or union-type array, though this
+    /// rule depends on whether `this` is option-type, union-type, or neither).
+    ///
+    /// The purpose of this function is to prepare a `head` of arrays that
+    /// can all be merged "normally," followed by a `tail` whose first array
+    /// must be "reverse merged" and subsequent arrays recurse.
+    ///
+    /// This is the first step in #merge.
     virtual const std::pair<ContentPtrVec, ContentPtrVec>
       merging_strategy(const ContentPtrVec& others) const;
 

@@ -908,6 +908,9 @@ namespace awkward {
 
     ContentPtrVec head;
     ContentPtrVec tail;
+
+    head.push_back(shallow_copy());
+
     size_t i = 0;
     for (;  i < others.size();  i++) {
       ContentPtr other = others[i];

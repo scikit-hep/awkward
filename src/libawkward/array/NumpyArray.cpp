@@ -2915,167 +2915,169 @@ namespace awkward {
     ContentPtrVec tail = head_tail.second;
 
     std::vector<NumpyArray> contiguous_arrays;
-    contiguous_arrays.push_back(contiguous());
-
-    util::dtype dtype = dtype_;
-    for (auto other : head) {
-      if (NumpyArray* rawother = dynamic_cast<NumpyArray*>(other.get())) {
-        contiguous_arrays.push_back(rawother->contiguous());
-
-        if (dtype == util::dtype::complex256  ||
-            rawother->dtype() == util::dtype::complex256) {
-          dtype = util::dtype::complex256;
-        }
-        else if ((dtype == util::dtype::float128  &&
-                  util::is_complex(rawother->dtype()))  ||
-                 (rawother->dtype() == util::dtype::float128  &&
-                  util::is_complex(dtype))) {
-          dtype = util::dtype::complex256;
-        }
-        else if (dtype == util::dtype::complex128  ||
-                 rawother->dtype() == util::dtype::complex128) {
-          dtype = util::dtype::complex128;
-        }
-        else if (((dtype == util::dtype::float64  ||
-                   dtype == util::dtype::uint64  ||
-                   dtype == util::dtype::int64  ||
-                   dtype == util::dtype::uint32  ||
-                   dtype == util::dtype::int32)  &&
-                  util::is_complex(rawother->dtype()))  ||
-                 ((rawother->dtype() == util::dtype::float64  ||
-                   rawother->dtype() == util::dtype::uint64  ||
-                   rawother->dtype() == util::dtype::int64  ||
-                   rawother->dtype() == util::dtype::uint32  ||
-                   rawother->dtype() == util::dtype::int32)  &&
-                  util::is_complex(dtype))) {
-          dtype = util::dtype::complex128;
-        }
-        else if (dtype == util::dtype::complex64  ||
-                 rawother->dtype() == util::dtype::complex64) {
-          dtype = util::dtype::complex64;
-        }
-        else if (dtype == util::dtype::float128  ||
-                 rawother->dtype() == util::dtype::float128) {
-          dtype = util::dtype::float128;
-        }
-        else if (dtype == util::dtype::float64  ||
-                 rawother->dtype() == util::dtype::float64) {
-          dtype = util::dtype::float64;
-        }
-        else if ((dtype == util::dtype::float32  &&
-                  (rawother->dtype() == util::dtype::uint64  ||
-                   rawother->dtype() == util::dtype::int64  ||
-                   rawother->dtype() == util::dtype::uint32  ||
-                   rawother->dtype() == util::dtype::int32))  ||
-                 (rawother->dtype() == util::dtype::float32  &&
-                  (dtype == util::dtype::uint64  ||
-                   dtype == util::dtype::int64  ||
-                   dtype == util::dtype::uint32  ||
-                   dtype == util::dtype::int32))) {
-          dtype = util::dtype::float64;
-        }
-        else if (dtype == util::dtype::float32  ||
-                 rawother->dtype() == util::dtype::float32) {
-          dtype = util::dtype::float32;
-        }
-        else if ((dtype == util::dtype::float16  &&
-                  (rawother->dtype() == util::dtype::uint64  ||
-                   rawother->dtype() == util::dtype::int64  ||
-                   rawother->dtype() == util::dtype::uint32  ||
-                   rawother->dtype() == util::dtype::int32))  ||
-                 (rawother->dtype() == util::dtype::float16  &&
-                  (dtype == util::dtype::uint64  ||
-                   dtype == util::dtype::int64  ||
-                   dtype == util::dtype::uint32  ||
-                   dtype == util::dtype::int32))) {
-          dtype = util::dtype::float64;
-        }
-        else if ((dtype == util::dtype::float16  &&
-                  (rawother->dtype() == util::dtype::uint16  ||
-                   rawother->dtype() == util::dtype::int16))  ||
-                 (rawother->dtype() == util::dtype::float16  &&
-                  (dtype == util::dtype::uint16  ||
-                   dtype == util::dtype::int16))) {
-          dtype = util::dtype::float32;
-        }
-        else if (dtype == util::dtype::float16  ||
-                 rawother->dtype() == util::dtype::float16) {
-          dtype = util::dtype::float16;
-        }
-        else if ((dtype == util::dtype::uint64  &&
-                  util::is_signed(rawother->dtype()))  ||
-                 (rawother->dtype() == util::dtype::uint64  &&
-                  util::is_signed(dtype))) {
-          dtype = util::dtype::float64;
-        }
-        else if (dtype == util::dtype::uint64  ||
-                 rawother->dtype() == util::dtype::uint64) {
-          dtype = util::dtype::uint64;
-        }
-        else if (dtype == util::dtype::int64  ||
-                 rawother->dtype() == util::dtype::int64) {
-          dtype = util::dtype::int64;
-        }
-        else if ((dtype == util::dtype::uint32  &&
-                  util::is_signed(rawother->dtype()))  ||
-                 (rawother->dtype() == util::dtype::uint32  &&
-                  util::is_signed(dtype))) {
-          dtype = util::dtype::int64;
-        }
-        else if (dtype == util::dtype::uint32  ||
-                 rawother->dtype() == util::dtype::uint32) {
-          dtype = util::dtype::uint32;
-        }
-        else if (dtype == util::dtype::int32  ||
-                 rawother->dtype() == util::dtype::int32) {
-          dtype = util::dtype::int32;
-        }
-        else if ((dtype == util::dtype::uint16  &&
-                  util::is_signed(rawother->dtype()))  ||
-                 (rawother->dtype() == util::dtype::uint16  &&
-                  util::is_signed(dtype))) {
-          dtype = util::dtype::int32;
-        }
-        else if (dtype == util::dtype::uint16  ||
-                 rawother->dtype() == util::dtype::uint16) {
-          dtype = util::dtype::uint16;
-        }
-        else if (dtype == util::dtype::int16  ||
-                 rawother->dtype() == util::dtype::int16) {
-          dtype = util::dtype::int16;
-        }
-        else if ((dtype == util::dtype::uint8  &&
-                  util::is_signed(rawother->dtype()))  ||
-                 (rawother->dtype() == util::dtype::uint8  &&
-                  util::is_signed(dtype))) {
-          dtype = util::dtype::int16;
-        }
-        else if (dtype == util::dtype::uint8  ||
-                 rawother->dtype() == util::dtype::uint8) {
-          dtype = util::dtype::uint8;
-        }
-        else if (dtype == util::dtype::int8  ||
-                 rawother->dtype() == util::dtype::int8) {
-          dtype = util::dtype::int8;
-        }
-        else if (dtype == util::dtype::boolean  &&
-                 rawother->dtype() == util::dtype::boolean) {
-          dtype = util::dtype::boolean;
-        }
-        // else if (dtype == util::dtype::datetime64  &&
-        //          rawother->dtype() == util::dtype::datetime64) {
-        //   dtype = util::dtype::datetime64;
-        // }
-        // else if (dtype == util::dtype::timedelta64  &&
-        //          rawother->dtype() == util::dtype::timedelta64) {
-        //   dtype = util::dtype::timedelta64;
-        // }
+    for (auto array : head) {
+      if (NumpyArray* raw = dynamic_cast<NumpyArray*>(array.get())) {
+        contiguous_arrays.push_back(raw->contiguous());
       }
       else {
         throw std::invalid_argument(
           std::string("cannot merge ") + classname() + std::string(" with ")
-          + other.get()->classname() + FILENAME(__LINE__));
+          + array.get()->classname() + FILENAME(__LINE__));
       }
+    }
+
+    util::dtype dtype = dtype_;
+    for (auto contiguous_array : contiguous_arrays) {
+      util::dtype that_dtype = contiguous_array.dtype();
+
+      if (dtype == util::dtype::complex256  ||
+          that_dtype == util::dtype::complex256) {
+        dtype = util::dtype::complex256;
+      }
+      else if ((dtype == util::dtype::float128  &&
+                util::is_complex(that_dtype))  ||
+               (that_dtype == util::dtype::float128  &&
+                util::is_complex(dtype))) {
+        dtype = util::dtype::complex256;
+      }
+      else if (dtype == util::dtype::complex128  ||
+               that_dtype == util::dtype::complex128) {
+        dtype = util::dtype::complex128;
+      }
+      else if (((dtype == util::dtype::float64  ||
+                 dtype == util::dtype::uint64  ||
+                 dtype == util::dtype::int64  ||
+                 dtype == util::dtype::uint32  ||
+                 dtype == util::dtype::int32)  &&
+                util::is_complex(that_dtype))  ||
+               ((that_dtype == util::dtype::float64  ||
+                 that_dtype == util::dtype::uint64  ||
+                 that_dtype == util::dtype::int64  ||
+                 that_dtype == util::dtype::uint32  ||
+                 that_dtype == util::dtype::int32)  &&
+                util::is_complex(dtype))) {
+        dtype = util::dtype::complex128;
+      }
+      else if (dtype == util::dtype::complex64  ||
+               that_dtype == util::dtype::complex64) {
+        dtype = util::dtype::complex64;
+      }
+      else if (dtype == util::dtype::float128  ||
+               that_dtype == util::dtype::float128) {
+        dtype = util::dtype::float128;
+      }
+      else if (dtype == util::dtype::float64  ||
+               that_dtype == util::dtype::float64) {
+        dtype = util::dtype::float64;
+      }
+      else if ((dtype == util::dtype::float32  &&
+                (that_dtype == util::dtype::uint64  ||
+                 that_dtype == util::dtype::int64  ||
+                 that_dtype == util::dtype::uint32  ||
+                 that_dtype == util::dtype::int32))  ||
+               (that_dtype == util::dtype::float32  &&
+                (dtype == util::dtype::uint64  ||
+                 dtype == util::dtype::int64  ||
+                 dtype == util::dtype::uint32  ||
+                 dtype == util::dtype::int32))) {
+        dtype = util::dtype::float64;
+      }
+      else if (dtype == util::dtype::float32  ||
+               that_dtype == util::dtype::float32) {
+        dtype = util::dtype::float32;
+      }
+      else if ((dtype == util::dtype::float16  &&
+                (that_dtype == util::dtype::uint64  ||
+                 that_dtype == util::dtype::int64  ||
+                 that_dtype == util::dtype::uint32  ||
+                 that_dtype == util::dtype::int32))  ||
+               (that_dtype == util::dtype::float16  &&
+                (dtype == util::dtype::uint64  ||
+                 dtype == util::dtype::int64  ||
+                 dtype == util::dtype::uint32  ||
+                 dtype == util::dtype::int32))) {
+        dtype = util::dtype::float64;
+      }
+      else if ((dtype == util::dtype::float16  &&
+                (that_dtype == util::dtype::uint16  ||
+                 that_dtype == util::dtype::int16))  ||
+               (that_dtype == util::dtype::float16  &&
+                (dtype == util::dtype::uint16  ||
+                 dtype == util::dtype::int16))) {
+        dtype = util::dtype::float32;
+      }
+      else if (dtype == util::dtype::float16  ||
+               that_dtype == util::dtype::float16) {
+        dtype = util::dtype::float16;
+      }
+      else if ((dtype == util::dtype::uint64  &&
+                util::is_signed(that_dtype))  ||
+               (that_dtype == util::dtype::uint64  &&
+                util::is_signed(dtype))) {
+        dtype = util::dtype::float64;
+      }
+      else if (dtype == util::dtype::uint64  ||
+               that_dtype == util::dtype::uint64) {
+        dtype = util::dtype::uint64;
+      }
+      else if (dtype == util::dtype::int64  ||
+               that_dtype == util::dtype::int64) {
+        dtype = util::dtype::int64;
+      }
+      else if ((dtype == util::dtype::uint32  &&
+                util::is_signed(that_dtype))  ||
+               (that_dtype == util::dtype::uint32  &&
+                util::is_signed(dtype))) {
+        dtype = util::dtype::int64;
+      }
+      else if (dtype == util::dtype::uint32  ||
+               that_dtype == util::dtype::uint32) {
+        dtype = util::dtype::uint32;
+      }
+      else if (dtype == util::dtype::int32  ||
+               that_dtype == util::dtype::int32) {
+        dtype = util::dtype::int32;
+      }
+      else if ((dtype == util::dtype::uint16  &&
+                util::is_signed(that_dtype))  ||
+               (that_dtype == util::dtype::uint16  &&
+                util::is_signed(dtype))) {
+        dtype = util::dtype::int32;
+      }
+      else if (dtype == util::dtype::uint16  ||
+               that_dtype == util::dtype::uint16) {
+        dtype = util::dtype::uint16;
+      }
+      else if (dtype == util::dtype::int16  ||
+               that_dtype == util::dtype::int16) {
+        dtype = util::dtype::int16;
+      }
+      else if ((dtype == util::dtype::uint8  &&
+                util::is_signed(that_dtype))  ||
+               (that_dtype == util::dtype::uint8  &&
+                util::is_signed(dtype))) {
+        dtype = util::dtype::int16;
+      }
+      else if (dtype == util::dtype::uint8  ||
+               that_dtype == util::dtype::uint8) {
+        dtype = util::dtype::uint8;
+      }
+      else if (dtype == util::dtype::int8  ||
+               that_dtype == util::dtype::int8) {
+        dtype = util::dtype::int8;
+      }
+      else if (dtype == util::dtype::boolean  &&
+               that_dtype == util::dtype::boolean) {
+        dtype = util::dtype::boolean;
+      }
+      // else if (dtype == util::dtype::datetime64  &&
+      //          that_dtype == util::dtype::datetime64) {
+      //   dtype = util::dtype::datetime64;
+      // }
+      // else if (dtype == util::dtype::timedelta64  &&
+      //          that_dtype == util::dtype::timedelta64) {
+      //   dtype = util::dtype::timedelta64;
+      // }
     }
 
     int64_t total_flatlength = 0;
@@ -3727,16 +3729,28 @@ namespace awkward {
       strides.insert(strides.begin(), strides[0]*shape_[(size_t)i]);
     }
 
-    return std::make_shared<NumpyArray>(Identities::none(),
-                                        parameters_,
-                                        ptr,
-                                        shape,
-                                        strides,
-                                        0,
-                                        (ssize_t)itemsize,
-                                        util::dtype_to_format(dtype),
-                                        dtype,
-                                        ptr_lib);
+    ContentPtr next = std::make_shared<NumpyArray>(Identities::none(),
+                                                   parameters_,
+                                                   ptr,
+                                                   shape,
+                                                   strides,
+                                                   0,
+                                                   (ssize_t)itemsize,
+                                                   util::dtype_to_format(dtype),
+                                                   dtype,
+                                                   ptr_lib);
+
+    if (tail.empty()) {
+      return next;
+    }
+
+    ContentPtr reversed = tail[0].get()->reverse_merge(next);
+    if (tail.size() == 1) {
+      return reversed;
+    }
+    else {
+      return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()));
+    }
   }
 
   const SliceItemPtr

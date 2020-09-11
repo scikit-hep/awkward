@@ -884,42 +884,8 @@ namespace awkward {
 
     const ContentPtr
       merge(const ContentPtr& other) const override {
-      if (dynamic_cast<EmptyArray*>(other.get())) {
-        return shallow_copy();
-      }
-
-      ContentPtrVec others({ other });
-      std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
-      ContentPtrVec head = head_tail.first;
-      ContentPtrVec tail = head_tail.second;
-
-      if (!tail.empty()) {
-        return tail[0].get()->reverse_merge(shallow_copy());
-      }
-
-      if (RawArrayOf<T>* rawother =
-          dynamic_cast<RawArrayOf<T>*>(other.get())) {
-        std::shared_ptr<T> ptr =
-          std::shared_ptr<T>(new T[(size_t)(length_ + rawother->length())],
-                             kernel::array_deleter<T>());
-        memcpy(ptr.get(),
-               &ptr_.get()[(size_t)offset_],
-               sizeof(T)*((size_t)length_));
-        memcpy(&ptr.get()[(size_t)length_],
-               &rawother->ptr().get()[(size_t)rawother->offset()],
-               sizeof(T)*((size_t)rawother->length()));
-        return std::make_shared<RawArrayOf<T>>(Identities::none(),
-                                               util::Parameters(),
-                                               ptr,
-                                               0,
-                                               length_ + rawother->length(),
-                                               itemsize_);
-      }
-      else {
-        throw std::invalid_argument(
-          std::string("cannot merge ") + classname() + std::string(" with ")
-          + other.get()->classname() + FILENAME(__LINE__));
-      }
+      throw std::runtime_error(
+        std::string("not implemented RawArrayOf<T>::merge")+ FILENAME(__LINE__));
     }
 
     const SliceItemPtr
