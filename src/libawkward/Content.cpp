@@ -924,7 +924,12 @@ namespace awkward {
           dynamic_cast<UnionArray8_64*>(other.get())) {
         break;
       }
-      head.push_back(other);
+      else if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+        head.push_back(raw->array());
+      }
+      else {
+        head.push_back(other);
+      }
     }
 
     for (;  i < others.size();  i++) {

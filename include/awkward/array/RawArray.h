@@ -884,10 +884,6 @@ namespace awkward {
 
     const ContentPtr
       merge(const ContentPtr& other) const override {
-      if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-        return merge(raw->array());
-      }
-
       if (dynamic_cast<EmptyArray*>(other.get())) {
         return shallow_copy();
       }
