@@ -329,7 +329,7 @@ namespace awkward {
     const ContentPtr
       merge(const ContentPtr& other) const override;
 
-    const ContentPtr  // FIXME: temporary!
+    const ContentPtr
       mergemany(const ContentPtrVec& others) const override;
 
     const SliceItemPtr

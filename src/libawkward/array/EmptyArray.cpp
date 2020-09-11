@@ -416,6 +416,24 @@ namespace awkward {
     return other;
   }
 
+  const ContentPtr
+  EmptyArray::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      throw std::invalid_argument(
+        std::string("to merge this array with 'others', at least one other "
+                    "must be provided") + FILENAME(__LINE__));
+    }
+
+    else if (others.size() == 1) {
+      return others[0];
+    }
+
+    else {
+      ContentPtrVec tail_others(others.begin() + 1, others.end());
+      return others[0].get()->mergemany(tail_others);
+    }
+  }
+
   const SliceItemPtr
   EmptyArray::asslice() const {
     Index64 index(0);

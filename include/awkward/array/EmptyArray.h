@@ -210,6 +210,9 @@ namespace awkward {
     const ContentPtr
       merge(const ContentPtr& other) const override;
 
+    const ContentPtr
+      mergemany(const ContentPtrVec& others) const override;
+
     const SliceItemPtr
       asslice() const override;
 

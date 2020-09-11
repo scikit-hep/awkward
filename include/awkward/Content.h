@@ -690,9 +690,6 @@ namespace awkward {
 
     /// @brief Returns an array with this and the `others` concatenated
     /// (in order, this first, `others` last).
-    ///
-    /// FIXME: This is temporary; before the PR is done, mergemany
-    /// will be renamed merge and the original merge will be gone.
     virtual const ContentPtr
       mergemany(const ContentPtrVec& others) const;
 

@@ -99,3 +99,18 @@ def test_bytemasked():
     assert awkward1.to_list(three.mergemany([four, one, two])) == [100, 200, 300, None, None, 123, None, 1, 2, None, 4, None, 6, 7, None, None, 8, 9]
     assert awkward1.to_list(three.mergemany([two, one])) == [100, 200, 300, 7, None, None, 8, 9, 1, 2, None, 4, None, 6]
     assert awkward1.to_list(three.mergemany([two, one, four])) == [100, 200, 300, 7, None, None, 8, 9, 1, 2, None, 4, None, 6, None, None, 123, None]
+
+def test_empty():
+    one = awkward1.layout.EmptyArray()
+    two = awkward1.layout.EmptyArray()
+    three = awkward1.Array([1, 2, 3]).layout
+    four = awkward1.Array([4, 5]).layout
+    assert awkward1.to_list(one.mergemany([two])) == []
+    assert awkward1.to_list(one.mergemany([two, one, two, one, two])) == []
+    assert awkward1.to_list(one.mergemany([two, three])) == [1, 2, 3]
+    assert awkward1.to_list(one.mergemany([two, three, four])) == [1, 2, 3, 4, 5]
+    assert awkward1.to_list(one.mergemany([three])) == [1, 2, 3]
+    assert awkward1.to_list(one.mergemany([three, four])) == [1, 2, 3, 4, 5]
+    assert awkward1.to_list(one.mergemany([three, two])) == [1, 2, 3]
+    assert awkward1.to_list(one.mergemany([three, two, four])) == [1, 2, 3, 4, 5]
+    assert awkward1.to_list(one.mergemany([three, four, two])) == [1, 2, 3, 4, 5]

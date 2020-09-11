@@ -378,7 +378,7 @@ namespace awkward {
     const std::pair<ContentPtrVec, ContentPtrVec>
       merging_strategy(const ContentPtrVec& others) const override;
 
-    const ContentPtr  // FIXME: temporary!
+    const ContentPtr
       mergemany(const ContentPtrVec& others) const override;
 
     const SliceItemPtr
