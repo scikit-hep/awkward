@@ -405,6 +405,9 @@ namespace awkward {
 
   bool
   EmptyArray::mergeable(const ContentPtr& other, bool mergebool) const {
+    if (!parameters_equal(other.get()->parameters())) {
+      return false;
+    }
     return true;
   }
 

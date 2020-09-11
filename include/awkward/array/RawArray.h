@@ -888,10 +888,6 @@ namespace awkward {
         return merge(raw->array());
       }
 
-      if (!parameters_equal(other.get()->parameters())) {
-        return merge_as_union(other);
-      }
-
       if (dynamic_cast<EmptyArray*>(other.get())) {
         return shallow_copy();
       }
