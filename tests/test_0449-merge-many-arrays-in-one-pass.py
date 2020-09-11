@@ -39,15 +39,29 @@ def test_numpyarray():
                     assert awkward1.to_list(ak_combined) == combined.tolist()
                     assert awkward1.to_numpy(ak_combined).dtype == numpy.concatenate([one, two, four]).dtype
 
-
 def test_lists():
     one = awkward1.Array([[1, 2, 3], [], [4, 5]]).layout
     two = awkward1.Array([[1.1, 2.2], [3.3, 4.4]]).layout
-    three = awkward1.from_numpy(numpy.array([[10], [20]]), regulararray=True, highlevel=False)
-    assert awkward1.to_list(one.mergemany([two, three])) == [[1.0, 2.0, 3.0], [], [4.0, 5.0], [1.1, 2.2], [3.3, 4.4], [10.0], [20.0]]
-    assert awkward1.to_list(three.mergemany([two, one])) == [[10.0], [20.0], [1.1, 2.2], [3.3, 4.4], [1.0, 2.0, 3.0], [], [4.0, 5.0]]
+    three = awkward1.layout.EmptyArray()
+    four = awkward1.from_numpy(numpy.array([[10], [20]]), regulararray=True, highlevel=False)
+    assert awkward1.to_list(one.mergemany([two, three, four])) == [[1.0, 2.0, 3.0], [], [4.0, 5.0], [1.1, 2.2], [3.3, 4.4], [10.0], [20.0]]
+    assert awkward1.to_list(four.mergemany([three, two, one])) == [[10.0], [20.0], [1.1, 2.2], [3.3, 4.4], [1.0, 2.0, 3.0], [], [4.0, 5.0]]
 
     one = awkward1.layout.ListArray64(one.starts, one.stops, one.content)
     two = awkward1.layout.ListArray64(two.starts, two.stops, two.content)
-    assert awkward1.to_list(one.mergemany([two, three])) == [[1.0, 2.0, 3.0], [], [4.0, 5.0], [1.1, 2.2], [3.3, 4.4], [10.0], [20.0]]
-    assert awkward1.to_list(three.mergemany([two, one])) == [[10.0], [20.0], [1.1, 2.2], [3.3, 4.4], [1.0, 2.0, 3.0], [], [4.0, 5.0]]
+    assert awkward1.to_list(one.mergemany([two, three, four])) == [[1.0, 2.0, 3.0], [], [4.0, 5.0], [1.1, 2.2], [3.3, 4.4], [10.0], [20.0]]
+    assert awkward1.to_list(four.mergemany([three, two, one])) == [[10.0], [20.0], [1.1, 2.2], [3.3, 4.4], [1.0, 2.0, 3.0], [], [4.0, 5.0]]
+
+def test_records():
+    one = awkward1.Array([{"x": 1, "y": [1]}, {"x": 2, "y": [1, 2]}, {"x": 3, "y": [1, 2, 3]}]).layout
+    two = awkward1.Array([{"y": [], "x": 4}, {"y": [3, 2, 1], "x": 5}]).layout
+    three = awkward1.layout.EmptyArray()
+    four = awkward1.Array([{"x": 6, "y": [1]}, {"x": 7, "y": [1, 2]}]).layout
+    assert awkward1.to_list(one.mergemany([two, three, four])) == [{"x": 1, "y": [1]}, {"x": 2, "y": [1, 2]}, {"x": 3, "y": [1, 2, 3]}, {"y": [], "x": 4}, {"y": [3, 2, 1], "x": 5}, {"x": 6, "y": [1]}, {"x": 7, "y": [1, 2]}]
+
+def test_tuples():
+    one = awkward1.Array([(1, [1]), (2, [1, 2]), (3, [1, 2, 3])]).layout
+    two = awkward1.Array([(4, []), (5, [3, 2, 1])]).layout
+    three = awkward1.layout.EmptyArray()
+    four = awkward1.Array([(6, [1]), (7, [1, 2])]).layout
+    assert awkward1.to_list(one.mergemany([two, three, four])) == [(1, [1]), (2, [1, 2]), (3, [1, 2, 3]), (4, []), (5, [3, 2, 1]), (6, [1]), (7, [1, 2])]

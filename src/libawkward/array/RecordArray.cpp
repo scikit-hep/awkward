@@ -1079,6 +1079,133 @@ namespace awkward {
     }
   }
 
+  const ContentPtr
+  RecordArray::mergemany(const ContentPtrVec& others) const {
+    std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
+    ContentPtrVec head = head_tail.first;
+    ContentPtrVec tail = head_tail.second;
+
+    ContentPtrVec headless(head.begin() + 1, head.end());
+
+    std::cout << "length is " << length_ << std::endl;
+
+    std::vector<ContentPtrVec> for_each_field;
+    for (auto field : contents_) {
+      ContentPtr trimmed = field.get()->getitem_range_nowrap(0, length_);
+
+      std::cout << "    " << " field " << trimmed.get()->tojson(false, -1) << std::endl;
+
+      for_each_field.push_back(ContentPtrVec({ field }));
+    }
+
+    if (istuple()) {
+      for (auto array : headless) {
+        if (RecordArray* raw = dynamic_cast<RecordArray*>(array.get())) {
+          if (istuple()) {
+            if (numfields() == raw->numfields()) {
+              for (size_t i = 0;  i < contents_.size();  i++) {
+                ContentPtr field = raw->field(i);
+                for_each_field[i].push_back(field.get()->getitem_range_nowrap(0, raw->length()));
+              }
+            }
+            else {
+              throw std::invalid_argument(
+                std::string("cannot merge tuples with different numbers of fields")
+                + FILENAME(__LINE__));
+            }
+          }
+          else {
+            throw std::invalid_argument(
+              std::string("cannot merge tuple with non-tuple record")
+              + FILENAME(__LINE__));
+          }
+        }
+        else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
+          ;
+        }
+        else {
+          throw std::invalid_argument(
+            std::string("cannot merge ") + classname() + std::string(" with ")
+            + array.get()->classname() + FILENAME(__LINE__));
+        }
+      }
+    }
+
+    else {
+      std::vector<std::string> these_keys = keys();
+      std::sort(these_keys.begin(), these_keys.end());
+
+      for (auto array : headless) {
+        std::cout << "array " << array.get()->tojson(false, -1) << std::endl;
+
+        if (RecordArray* raw = dynamic_cast<RecordArray*>(array.get())) {
+          if (!istuple()) {
+            std::vector<std::string> those_keys = raw->keys();
+            std::sort(those_keys.begin(), those_keys.end());
+            if (these_keys == those_keys) {
+              for (size_t i = 0;  i < contents_.size();  i++) {
+                ContentPtr field = raw->field(key(i));
+                ContentPtr trimmed = field.get()->getitem_range_nowrap(0, raw->length());
+
+                std::cout << "    " << i << " " << key(i) << " field " << trimmed.get()->tojson(false, -1) << std::endl;
+
+                for_each_field[i].push_back(trimmed);
+              }
+            }
+            else {
+              throw std::invalid_argument(
+                std::string("cannot merge records with different sets of field names")
+                + FILENAME(__LINE__));
+            }
+          }
+          else {
+            throw std::invalid_argument(
+              std::string("cannot merge non-tuple record with tuple")
+              + FILENAME(__LINE__));
+          }
+        }
+        else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
+          ;
+        }
+        else {
+          throw std::invalid_argument(
+            std::string("cannot merge ") + classname() + std::string(" with ")
+            + array.get()->classname() + FILENAME(__LINE__));
+        }
+      }
+    }
+
+    ContentPtrVec nextcontents;
+    int64_t minlength = -1;
+    for (auto forfield : for_each_field) {
+      ContentPtrVec tail_forfield(forfield.begin() + 1, forfield.end());
+      ContentPtr merged = forfield[0].get()->mergemany(tail_forfield);
+      nextcontents.push_back(merged);
+
+      if (minlength == -1  ||  merged.get()->length() < minlength) {
+        minlength = merged.get()->length();
+      }
+    }
+
+    ContentPtr next = std::make_shared<RecordArray>(Identities::none(),
+                                                    util::Parameters(),
+                                                    nextcontents,
+                                                    recordlookup_,
+                                                    minlength);
+
+    if (tail.empty()) {
+      return next;
+    }
+
+    ContentPtr reversed = tail[0].get()->reverse_merge(next);
+    if (tail.size() == 1) {
+      return reversed;
+    }
+    else {
+      return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()));
+    }
+  }
+
   const SliceItemPtr
   RecordArray::asslice() const {
     throw std::invalid_argument(

@@ -1171,6 +1171,9 @@ namespace awkward {
       else if (RegularArray* raw = dynamic_cast<RegularArray*>(array.get())) {
         contents.push_back(raw->content());
       }
+      else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
+        ;
+      }
       else {
         throw std::invalid_argument(
           std::string("cannot merge ") + classname() + std::string(" with ")
@@ -1308,6 +1311,9 @@ namespace awkward {
         util::handle_error(err, raw->classname(), raw->identities().get());
         contentlength_so_far += raw->content().get()->length();
         length_so_far += raw->length();
+      }
+      else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
+        ;
       }
       // other classes already excluded
     }
