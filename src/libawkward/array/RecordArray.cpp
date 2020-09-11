@@ -1188,7 +1188,7 @@ namespace awkward {
     }
 
     ContentPtr next = std::make_shared<RecordArray>(Identities::none(),
-                                                    util::Parameters(),
+                                                    parameters_,
                                                     nextcontents,
                                                     recordlookup_,
                                                     minlength);

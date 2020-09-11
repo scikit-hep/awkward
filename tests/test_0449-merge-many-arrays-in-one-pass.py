@@ -55,13 +55,35 @@ def test_lists():
 def test_records():
     one = awkward1.Array([{"x": 1, "y": [1]}, {"x": 2, "y": [1, 2]}, {"x": 3, "y": [1, 2, 3]}]).layout
     two = awkward1.Array([{"y": [], "x": 4}, {"y": [3, 2, 1], "x": 5}]).layout
-    three = awkward1.layout.EmptyArray()
+    three = two[0:0]
     four = awkward1.Array([{"x": 6, "y": [1]}, {"x": 7, "y": [1, 2]}]).layout
+    assert awkward1.to_list(one.mergemany([two, three, four])) == [{"x": 1, "y": [1]}, {"x": 2, "y": [1, 2]}, {"x": 3, "y": [1, 2, 3]}, {"y": [], "x": 4}, {"y": [3, 2, 1], "x": 5}, {"x": 6, "y": [1]}, {"x": 7, "y": [1, 2]}]
+
+    three = awkward1.layout.EmptyArray()
     assert awkward1.to_list(one.mergemany([two, three, four])) == [{"x": 1, "y": [1]}, {"x": 2, "y": [1, 2]}, {"x": 3, "y": [1, 2, 3]}, {"y": [], "x": 4}, {"y": [3, 2, 1], "x": 5}, {"x": 6, "y": [1]}, {"x": 7, "y": [1, 2]}]
 
 def test_tuples():
     one = awkward1.Array([(1, [1]), (2, [1, 2]), (3, [1, 2, 3])]).layout
     two = awkward1.Array([(4, []), (5, [3, 2, 1])]).layout
-    three = awkward1.layout.EmptyArray()
+    three = two[0:0]
     four = awkward1.Array([(6, [1]), (7, [1, 2])]).layout
     assert awkward1.to_list(one.mergemany([two, three, four])) == [(1, [1]), (2, [1, 2]), (3, [1, 2, 3]), (4, []), (5, [3, 2, 1]), (6, [1]), (7, [1, 2])]
+
+    three = awkward1.layout.EmptyArray()
+    assert awkward1.to_list(one.mergemany([two, three, four])) == [(1, [1]), (2, [1, 2]), (3, [1, 2, 3]), (4, []), (5, [3, 2, 1]), (6, [1]), (7, [1, 2])]
+
+def test_indexed():
+    one = awkward1.Array([1, 2, 3, None, 4, None, None, 5]).layout
+    two = awkward1.Array([6, 7, 8]).layout
+    three = awkward1.layout.EmptyArray()
+    four = awkward1.Array([9, None, None]).layout
+    assert awkward1.to_list(one.mergemany([two, three, four])) == [1, 2, 3, None, 4, None, None, 5, 6, 7, 8, 9, None, None]
+
+def test_reverse_indexed():
+    one = awkward1.Array([1, 2, 3]).layout
+    two = awkward1.Array([4, 5]).layout
+    three = awkward1.Array([None, 6, None]).layout
+    assert awkward1.to_list(one.mergemany([two, three])) == [1, 2, 3, 4, 5, None, 2, None]
+
+    four = awkward1.Array([7, 8, None, None, 9]).layout
+    assert awkward1.to_list(one.mergemany([two, three, four])) == [1, 2, 3, 4, 5, None, 2, None, 7, 8, None, None, 9]
