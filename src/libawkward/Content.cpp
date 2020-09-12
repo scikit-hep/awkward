@@ -944,12 +944,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  Content::mergemany(const ContentPtrVec& others) const {
-    throw std::runtime_error(
-      std::string("not implemented: ") + classname() + std::string("::mergemany"));
-  }
-
-  const ContentPtr
   Content::reduce(const Reducer& reducer,
                   int64_t axis,
                   bool mask,

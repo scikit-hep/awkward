@@ -2910,6 +2910,10 @@ namespace awkward {
         std::string("cannot merge a scalar") + FILENAME(__LINE__));
     }
 
+    if (others.empty()) {
+      return shallow_copy();
+    }
+
     std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
     ContentPtrVec head = head_tail.first;
     ContentPtrVec tail = head_tail.second;

@@ -788,6 +788,9 @@ namespace awkward {
 
   const ContentPtr
   BitMaskedArray::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
     return toIndexedOptionArray64().get()->mergemany(others);
   }
 

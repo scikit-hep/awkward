@@ -1679,6 +1679,176 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::pair<ContentPtrVec, ContentPtrVec>
+  UnionArrayOf<T, I>::merging_strategy(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      throw std::invalid_argument(
+        std::string("to merge this array with 'others', at least one other "
+                    "must be provided") + FILENAME(__LINE__));
+    }
+
+    ContentPtrVec head;
+    ContentPtrVec tail;
+
+    head.push_back(shallow_copy());
+
+    for (size_t i = 0;  i < others.size();  i++) {
+      ContentPtr other = others[i];
+      if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+        head.push_back(raw->array());
+      }
+      else {
+        head.push_back(other);
+      }
+    }
+
+    return std::pair<ContentPtrVec, ContentPtrVec>(head, tail);
+  }
+
+  template <typename T, typename I>
+  const ContentPtr
+  UnionArrayOf<T, I>::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
+
+    std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
+    ContentPtrVec head = head_tail.first;
+    ContentPtrVec tail = head_tail.second;
+
+    int64_t total_length = 0;
+    for (auto array : head) {
+      total_length += array.get()->length();
+    }
+
+    Index8 nexttags(total_length);
+    Index64 nextindex(total_length);
+    ContentPtrVec nextcontents;
+    int64_t length_so_far = 0;
+
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+
+    for (auto array : head) {
+      if (UnionArray8_32* raw = dynamic_cast<UnionArray8_32*>(array.get())) {
+        Index8 union_tags = raw->tags();
+        Index32 union_index = raw->index();
+        ContentPtrVec union_contents = raw->contents();
+        struct Error err1 = kernel::UnionArray_filltags_to8_from8(
+          ptr_lib,
+          nexttags.data(),
+          length_so_far,
+          union_tags.data(),
+          array.get()->length(),
+          (int64_t)nextcontents.size());
+        util::handle_error(err1, array.get()->classname(), array.get()->identities().get());
+        struct Error err2 = kernel::UnionArray_fillindex<int32_t, int64_t>(
+          ptr_lib,
+          nextindex.data(),
+          length_so_far,
+          union_index.data(),
+          array.get()->length());
+        util::handle_error(err2, array.get()->classname(), array.get()->identities().get());
+        length_so_far += array.get()->length();
+        nextcontents.insert(nextcontents.end(), union_contents.begin(), union_contents.end());
+      }
+
+      else if (UnionArray8_U32* raw = dynamic_cast<UnionArray8_U32*>(array.get())) {
+        Index8 union_tags = raw->tags();
+        IndexU32 union_index = raw->index();
+        ContentPtrVec union_contents = raw->contents();
+        struct Error err1 = kernel::UnionArray_filltags_to8_from8(
+          ptr_lib,
+          nexttags.data(),
+          length_so_far,
+          union_tags.data(),
+          array.get()->length(),
+          (int64_t)nextcontents.size());
+        util::handle_error(err1, array.get()->classname(), array.get()->identities().get());
+        struct Error err2 = kernel::UnionArray_fillindex<uint32_t, int64_t>(
+          ptr_lib,
+          nextindex.data(),
+          length_so_far,
+          union_index.data(),
+          array.get()->length());
+        util::handle_error(err2, array.get()->classname(), array.get()->identities().get());
+        length_so_far += array.get()->length();
+        nextcontents.insert(nextcontents.end(), union_contents.begin(), union_contents.end());
+      }
+
+      else if (UnionArray8_64* raw = dynamic_cast<UnionArray8_64*>(array.get())) {
+        Index8 union_tags = raw->tags();
+        Index64 union_index = raw->index();
+        ContentPtrVec union_contents = raw->contents();
+        struct Error err1 = kernel::UnionArray_filltags_to8_from8(
+          ptr_lib,
+          nexttags.data(),
+          length_so_far,
+          union_tags.data(),
+          array.get()->length(),
+          (int64_t)nextcontents.size());
+        util::handle_error(err1, array.get()->classname(), array.get()->identities().get());
+        struct Error err2 = kernel::UnionArray_fillindex<int64_t, int64_t>(
+          ptr_lib,
+          nextindex.data(),
+          length_so_far,
+          union_index.data(),
+          array.get()->length());
+        util::handle_error(err2, array.get()->classname(), array.get()->identities().get());
+        length_so_far += array.get()->length();
+        nextcontents.insert(nextcontents.end(), union_contents.begin(), union_contents.end());
+      }
+
+      else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
+        ;
+      }
+
+      else {
+        struct Error err1 = kernel::UnionArray_filltags_to8_const(
+          ptr_lib,
+          nexttags.data(),
+          length_so_far,
+          array.get()->length(),
+          (int64_t)nextcontents.size());
+        util::handle_error(err1, array.get()->classname(), array.get()->identities().get());
+        struct Error err2 = kernel::UnionArray_fillindex_count_64(
+          ptr_lib,
+          nextindex.data(),
+          length_so_far,
+          array.get()->length());
+        util::handle_error(err2, array.get()->classname(), array.get()->identities().get());
+        length_so_far += array.get()->length();
+        nextcontents.push_back(array);
+      }
+    }
+
+    if (nextcontents.size() > kMaxInt8) {
+      throw std::runtime_error(
+        std::string("FIXME: handle UnionArray with more than 127 contents")
+        + FILENAME(__LINE__));
+    }
+
+    ContentPtr next = std::make_shared<UnionArray8_64>(Identities::none(),
+                                                       parameters_,
+                                                       nexttags,
+                                                       nextindex,
+                                                       nextcontents);
+
+    // Given UnionArray's merging_strategy, tail is always empty, but just to be formal...
+
+    if (tail.empty()) {
+      return next;
+    }
+
+    ContentPtr reversed = tail[0].get()->reverse_merge(next);
+    if (tail.size() == 1) {
+      return reversed;
+    }
+    else {
+      return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()));
+    }
+  }
+
+  template <typename T, typename I>
   const SliceItemPtr
   UnionArrayOf<T, I>::asslice() const {
     ContentPtr simplified = simplify_uniontype(false);

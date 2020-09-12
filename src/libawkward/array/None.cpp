@@ -242,6 +242,13 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
+  const ContentPtr
+  None::mergemany(const ContentPtrVec& others) const {
+    throw std::runtime_error(
+      std::string("undefined operation: None::mergemany")
+      + FILENAME(__LINE__));
+  }
+
   const SliceItemPtr
   None::asslice() const {
     throw std::runtime_error(

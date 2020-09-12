@@ -694,6 +694,11 @@ namespace awkward {
     return array().get()->merge(other);
   }
 
+  const ContentPtr
+  VirtualArray::mergemany(const ContentPtrVec& others) const {
+    return array().get()->mergemany(others);
+  }
+
   const SliceItemPtr
   VirtualArray::asslice() const {
     return array().get()->asslice();

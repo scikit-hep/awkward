@@ -419,9 +419,7 @@ namespace awkward {
   const ContentPtr
   EmptyArray::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {
-      throw std::invalid_argument(
-        std::string("to merge this array with 'others', at least one other "
-                    "must be provided") + FILENAME(__LINE__));
+      return shallow_copy();
     }
 
     else if (others.size() == 1) {

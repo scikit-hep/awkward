@@ -691,7 +691,7 @@ namespace awkward {
     /// @brief Returns an array with this and the `others` concatenated
     /// (in order, this first, `others` last).
     virtual const ContentPtr
-      mergemany(const ContentPtrVec& others) const;
+      mergemany(const ContentPtrVec& others) const = 0;
 
     /// @brief Converts this array into a SliceItem that can be used in
     /// getitem.

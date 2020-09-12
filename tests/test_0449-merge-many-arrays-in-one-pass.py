@@ -114,3 +114,49 @@ def test_empty():
     assert awkward1.to_list(one.mergemany([three, two])) == [1, 2, 3]
     assert awkward1.to_list(one.mergemany([three, two, four])) == [1, 2, 3, 4, 5]
     assert awkward1.to_list(one.mergemany([three, four, two])) == [1, 2, 3, 4, 5]
+
+def test_union():
+    one = awkward1.Array([1, 2, [], [3, 4]]).layout
+    two = awkward1.Array([100, 200, 300]).layout
+    three = awkward1.Array([{"x": 1}, {"x": 2}, 5, 6, 7]).layout
+
+    assert awkward1.to_list(one.mergemany([two, three])) == [1, 2, [], [3, 4], 100, 200, 300, {"x": 1}, {"x": 2}, 5, 6, 7]
+    assert awkward1.to_list(one.mergemany([three, two])) == [1, 2, [], [3, 4], {"x": 1}, {"x": 2}, 5, 6, 7, 100, 200, 300]
+    assert awkward1.to_list(two.mergemany([one, three])) == [100, 200, 300, 1, 2, [], [3, 4], {"x": 1}, {"x": 2}, 5, 6, 7]
+    assert awkward1.to_list(two.mergemany([three, one])) == [100, 200, 300, {"x": 1}, {"x": 2}, 5, 6, 7, 1, 2, [], [3, 4]]
+    assert awkward1.to_list(three.mergemany([one, two])) == [{"x": 1}, {"x": 2}, 5, 6, 7, 1, 2, [], [3, 4], 100, 200, 300]
+    assert awkward1.to_list(three.mergemany([two, one])) == [{"x": 1}, {"x": 2}, 5, 6, 7, 100, 200, 300, 1, 2, [], [3, 4]]
+
+def test_union_option():
+    one = awkward1.Array([1, 2, [], [3, 4]]).layout
+    two = awkward1.Array([100, None, 300]).layout
+    three = awkward1.Array([{"x": 1}, {"x": 2}, 5, 6, 7]).layout
+
+    assert awkward1.to_list(one.mergemany([two, three])) == [1, 2, [], [3, 4], 100, None, 300, {"x": 1}, {"x": 2}, 5, 6, 7]
+    assert awkward1.to_list(one.mergemany([three, two])) == [1, 2, [], [3, 4], {"x": 1}, {"x": 2}, 5, 6, 7, 100, None, 300]
+    assert awkward1.to_list(two.mergemany([one, three])) == [100, None, 300, 1, 2, [], [3, 4], {"x": 1}, {"x": 2}, 5, 6, 7]
+    assert awkward1.to_list(two.mergemany([three, one])) == [100, None, 300, {"x": 1}, {"x": 2}, 5, 6, 7, 1, 2, [], [3, 4]]
+    assert awkward1.to_list(three.mergemany([one, two])) == [{"x": 1}, {"x": 2}, 5, 6, 7, 1, 2, [], [3, 4], 100, None, 300]
+    assert awkward1.to_list(three.mergemany([two, one])) == [{"x": 1}, {"x": 2}, 5, 6, 7, 100, None, 300, 1, 2, [], [3, 4]]
+
+    one = awkward1.Array([1, 2, [], [3, 4]]).layout
+    two = awkward1.Array([100, None, 300]).layout
+    three = awkward1.Array([{"x": 1}, {"x": 2}, 5, None, 7]).layout
+
+    assert awkward1.to_list(one.mergemany([two, three])) == [1, 2, [], [3, 4], 100, None, 300, {"x": 1}, {"x": 2}, 5, None, 7]
+    assert awkward1.to_list(one.mergemany([three, two])) == [1, 2, [], [3, 4], {"x": 1}, {"x": 2}, 5, None, 7, 100, None, 300]
+    assert awkward1.to_list(two.mergemany([one, three])) == [100, None, 300, 1, 2, [], [3, 4], {"x": 1}, {"x": 2}, 5, None, 7]
+    assert awkward1.to_list(two.mergemany([three, one])) == [100, None, 300, {"x": 1}, {"x": 2}, 5, None, 7, 1, 2, [], [3, 4]]
+    assert awkward1.to_list(three.mergemany([one, two])) == [{"x": 1}, {"x": 2}, 5, None, 7, 1, 2, [], [3, 4], 100, None, 300]
+    assert awkward1.to_list(three.mergemany([two, one])) == [{"x": 1}, {"x": 2}, 5, None, 7, 100, None, 300, 1, 2, [], [3, 4]]
+
+    one = awkward1.Array([1, 2, [], [3, 4]]).layout
+    two = awkward1.Array([100, 200, 300]).layout
+    three = awkward1.Array([{"x": 1}, {"x": 2}, 5, None, 7]).layout
+
+    assert awkward1.to_list(one.mergemany([two, three])) == [1, 2, [], [3, 4], 100, 200, 300, {"x": 1}, {"x": 2}, 5, None, 7]
+    assert awkward1.to_list(one.mergemany([three, two])) == [1, 2, [], [3, 4], {"x": 1}, {"x": 2}, 5, None, 7, 100, 200, 300]
+    assert awkward1.to_list(two.mergemany([one, three])) == [100, 200, 300, 1, 2, [], [3, 4], {"x": 1}, {"x": 2}, 5, None, 7]
+    assert awkward1.to_list(two.mergemany([three, one])) == [100, 200, 300, {"x": 1}, {"x": 2}, 5, None, 7, 1, 2, [], [3, 4]]
+    assert awkward1.to_list(three.mergemany([one, two])) == [{"x": 1}, {"x": 2}, 5, None, 7, 1, 2, [], [3, 4], 100, 200, 300]
+    assert awkward1.to_list(three.mergemany([two, one])) == [{"x": 1}, {"x": 2}, 5, None, 7, 100, 200, 300, 1, 2, [], [3, 4]]

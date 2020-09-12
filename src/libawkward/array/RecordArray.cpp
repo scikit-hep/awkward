@@ -1081,6 +1081,10 @@ namespace awkward {
 
   const ContentPtr
   RecordArray::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
+
     std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
     ContentPtrVec head = head_tail.first;
     ContentPtrVec tail = head_tail.second;

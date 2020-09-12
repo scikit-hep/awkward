@@ -888,6 +888,12 @@ namespace awkward {
         std::string("not implemented RawArrayOf<T>::merge")+ FILENAME(__LINE__));
     }
 
+    const ContentPtr
+      mergemany(const ContentPtrVec& others) const override {
+      throw std::runtime_error(
+        std::string("not implemented RawArrayOf<T>::mergemany")+ FILENAME(__LINE__));
+    }
+
     const SliceItemPtr
       asslice() const override {
       throw std::invalid_argument(

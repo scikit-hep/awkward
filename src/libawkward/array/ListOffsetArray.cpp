@@ -1207,6 +1207,9 @@ namespace awkward {
   template <typename T>
   const ContentPtr
   ListOffsetArrayOf<T>::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
     ContentPtr listarray = std::make_shared<ListArrayOf<T>>(identities_,
                                                             parameters_,
                                                             starts(),

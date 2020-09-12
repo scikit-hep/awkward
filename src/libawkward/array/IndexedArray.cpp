@@ -1464,8 +1464,6 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::reverse_merge(const ContentPtr& other) const {
-    std::cout << "IndexedArray::reverse_merge " << tojson(false, -1) << " and " << other.get()->tojson(false, -1) << std::endl;
-
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
       return reverse_merge(raw->array());
     }
@@ -1528,8 +1526,6 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::merge(const ContentPtr& other) const {
-    std::cout << "IndexedArray::merge " << tojson(false, -1) << std::endl;
-
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
       return merge(raw->array());
     }
@@ -1749,6 +1745,10 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
+
     std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
     ContentPtrVec head = head_tail.first;
     ContentPtrVec tail = head_tail.second;

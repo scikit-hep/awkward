@@ -808,6 +808,9 @@ namespace awkward {
 
   const ContentPtr
   RegularArray::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
     return toListOffsetArray64(true).get()->mergemany(others);
   }
 
