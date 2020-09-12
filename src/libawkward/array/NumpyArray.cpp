@@ -1529,293 +1529,297 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::merge(const ContentPtr& other) const {
-    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array());
+  NumpyArray::mergemany(const ContentPtrVec& others) const {
+    if (isscalar()) {
+      throw std::runtime_error(
+        std::string("cannot merge a scalar") + FILENAME(__LINE__));
     }
 
-    if (!parameters_equal(other.get()->parameters())) {
-      return merge_as_union(other);
-    }
-
-    if (dynamic_cast<EmptyArray*>(other.get())) {
+    if (others.empty()) {
       return shallow_copy();
     }
-    else if (IndexedArray32* rawother =
-             dynamic_cast<IndexedArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedArrayU32* rawother =
-             dynamic_cast<IndexedArrayU32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedArray64* rawother =
-             dynamic_cast<IndexedArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedOptionArray32* rawother =
-             dynamic_cast<IndexedOptionArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedOptionArray64* rawother =
-             dynamic_cast<IndexedOptionArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (ByteMaskedArray* rawother =
-             dynamic_cast<ByteMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (BitMaskedArray* rawother =
-             dynamic_cast<BitMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnmaskedArray* rawother =
-             dynamic_cast<UnmaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_32* rawother =
-             dynamic_cast<UnionArray8_32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_U32* rawother =
-             dynamic_cast<UnionArray8_U32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_64* rawother =
-             dynamic_cast<UnionArray8_64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
 
-    if (ndim() == 0) {
-      throw std::invalid_argument(
-        std::string("cannot merge Numpy scalars") + FILENAME(__LINE__));
-    }
+    std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
+    ContentPtrVec head = head_tail.first;
+    ContentPtrVec tail = head_tail.second;
 
-    if ((parameter_equals("__array__", "\"byte\"")  ||
-         parameter_equals("__array__", "\"char\""))  &&
-        (other.get()->parameter_equals("__array__", "\"byte\"")  ||
-         other.get()->parameter_equals("__array__", "\"char\""))) {
-      if (std::shared_ptr<NumpyArray> othernumpy =
-            std::dynamic_pointer_cast<NumpyArray>(other)) {
-        if (ndim() == 1  &&  othernumpy.get()->ndim() == 1  &&
-            itemsize() == 1  &&  othernumpy.get()->itemsize() == 1) {
-          return merge_bytes(othernumpy);
-        }
+    std::vector<NumpyArray> contiguous_arrays;
+    for (auto array : head) {
+      if (NumpyArray* raw = dynamic_cast<NumpyArray*>(array.get())) {
+        contiguous_arrays.push_back(raw->contiguous());
+      }
+      else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
+        ;
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("cannot merge ") + classname() + std::string(" with ")
+          + array.get()->classname() + FILENAME(__LINE__));
       }
     }
 
-    NumpyArray contiguous_self = contiguous();
-    if (NumpyArray* rawother = dynamic_cast<NumpyArray*>(other.get())) {
-      util::dtype dtype = util::dtype::NOT_PRIMITIVE;
+    // handle strings
 
-      if (ndim() != rawother->ndim()) {
-        throw std::invalid_argument(
-          std::string("cannot merge arrays with different shapes")
-          + FILENAME(__LINE__));
+    if (parameter_equals("__array__", "\"byte\"")  ||
+        parameter_equals("__array__", "\"char\"")) {
+      int64_t total_length = 0;
+      for (auto contiguous_array : contiguous_arrays) {
+        total_length += contiguous_array.length();
       }
 
       kernel::lib ptr_lib = ptr_lib_;   // DERIVE
 
-      if (dtype_ == util::dtype::complex256  ||
-          rawother->dtype() == util::dtype::complex256) {
-        dtype = util::dtype::complex256;
+      std::shared_ptr<void> ptr(kernel::malloc<void>(ptr_lib, total_length));
+
+      int64_t length_so_far = 0;
+      for (auto contiguous_array : contiguous_arrays) {
+        struct Error err = kernel::NumpyArray_fill<uint8_t, uint8_t>(
+          ptr_lib,
+          reinterpret_cast<uint8_t*>(ptr.get()),
+          length_so_far,
+          reinterpret_cast<uint8_t*>(contiguous_array.data()),
+          contiguous_array.length());
+        util::handle_error(err, classname(), contiguous_array.identities().get());
+        length_so_far += contiguous_array.length();
       }
-      else if ((dtype_ == util::dtype::float128  &&
-                util::is_complex(rawother->dtype()))  ||
-               (rawother->dtype() == util::dtype::float128  &&
-                util::is_complex(dtype_))) {
-        dtype = util::dtype::complex256;
+
+      std::vector<ssize_t> shape({ (ssize_t)total_length });
+      std::vector<ssize_t> strides({ 1 });
+
+      ContentPtr next = std::make_shared<NumpyArray>(Identities::none(),
+                                                     parameters_,
+                                                     ptr,
+                                                     shape,
+                                                     strides,
+                                                     0,
+                                                     1,
+                                                     std::string("c"),
+                                                     util::dtype::uint8,
+                                                     ptr_lib);
+
+      if (tail.empty()) {
+        return next;
       }
-      else if (dtype_ == util::dtype::complex128  ||
-               rawother->dtype() == util::dtype::complex128) {
-        dtype = util::dtype::complex128;
+
+      ContentPtr reversed = tail[0].get()->reverse_merge(next);
+      if (tail.size() == 1) {
+        return reversed;
       }
-      else if (((dtype_ == util::dtype::float64  ||
-                 dtype_ == util::dtype::uint64  ||
-                 dtype_ == util::dtype::int64  ||
-                 dtype_ == util::dtype::uint32  ||
-                 dtype_ == util::dtype::int32)  &&
-                util::is_complex(rawother->dtype()))  ||
-               ((rawother->dtype() == util::dtype::float64  ||
-                 rawother->dtype() == util::dtype::uint64  ||
-                 rawother->dtype() == util::dtype::int64  ||
-                 rawother->dtype() == util::dtype::uint32  ||
-                 rawother->dtype() == util::dtype::int32)  &&
-                util::is_complex(dtype_))) {
-        dtype = util::dtype::complex128;
-      }
-      else if (dtype_ == util::dtype::complex64  ||
-               rawother->dtype() == util::dtype::complex64) {
-        dtype = util::dtype::complex64;
-      }
-      else if (dtype_ == util::dtype::float128  ||
-               rawother->dtype() == util::dtype::float128) {
-        dtype = util::dtype::float128;
-      }
-      else if (dtype_ == util::dtype::float64  ||
-               rawother->dtype() == util::dtype::float64) {
-        dtype = util::dtype::float64;
-      }
-      else if ((dtype_ == util::dtype::float32  &&
-                (rawother->dtype() == util::dtype::uint64  ||
-                 rawother->dtype() == util::dtype::int64  ||
-                 rawother->dtype() == util::dtype::uint32  ||
-                 rawother->dtype() == util::dtype::int32))  ||
-               (rawother->dtype() == util::dtype::float32  &&
-                (dtype_ == util::dtype::uint64  ||
-                 dtype_ == util::dtype::int64  ||
-                 dtype_ == util::dtype::uint32  ||
-                 dtype_ == util::dtype::int32))) {
-        dtype = util::dtype::float64;
-      }
-      else if (dtype_ == util::dtype::float32  ||
-               rawother->dtype() == util::dtype::float32) {
-        dtype = util::dtype::float32;
-      }
-      else if ((dtype_ == util::dtype::float16  &&
-                (rawother->dtype() == util::dtype::uint64  ||
-                 rawother->dtype() == util::dtype::int64  ||
-                 rawother->dtype() == util::dtype::uint32  ||
-                 rawother->dtype() == util::dtype::int32))  ||
-               (rawother->dtype() == util::dtype::float16  &&
-                (dtype_ == util::dtype::uint64  ||
-                 dtype_ == util::dtype::int64  ||
-                 dtype_ == util::dtype::uint32  ||
-                 dtype_ == util::dtype::int32))) {
-        dtype = util::dtype::float64;
-      }
-      else if ((dtype_ == util::dtype::float16  &&
-                (rawother->dtype() == util::dtype::uint16  ||
-                 rawother->dtype() == util::dtype::int16))  ||
-               (rawother->dtype() == util::dtype::float16  &&
-                (dtype_ == util::dtype::uint16  ||
-                 dtype_ == util::dtype::int16))) {
-        dtype = util::dtype::float32;
-      }
-      else if (dtype_ == util::dtype::float16  ||
-               rawother->dtype() == util::dtype::float16) {
-        dtype = util::dtype::float16;
-      }
-      else if ((dtype_ == util::dtype::uint64  &&
-                util::is_signed(rawother->dtype()))  ||
-               (rawother->dtype() == util::dtype::uint64  &&
-                util::is_signed(dtype_))) {
-        dtype = util::dtype::float64;
-      }
-      else if (dtype_ == util::dtype::uint64  ||
-               rawother->dtype() == util::dtype::uint64) {
-        dtype = util::dtype::uint64;
-      }
-      else if (dtype_ == util::dtype::int64  ||
-               rawother->dtype() == util::dtype::int64) {
-        dtype = util::dtype::int64;
-      }
-      else if ((dtype_ == util::dtype::uint32  &&
-                util::is_signed(rawother->dtype()))  ||
-               (rawother->dtype() == util::dtype::uint32  &&
-                util::is_signed(dtype_))) {
-        dtype = util::dtype::int64;
-      }
-      else if (dtype_ == util::dtype::uint32  ||
-               rawother->dtype() == util::dtype::uint32) {
-        dtype = util::dtype::uint32;
-      }
-      else if (dtype_ == util::dtype::int32  ||
-               rawother->dtype() == util::dtype::int32) {
-        dtype = util::dtype::int32;
-      }
-      else if ((dtype_ == util::dtype::uint16  &&
-                util::is_signed(rawother->dtype()))  ||
-               (rawother->dtype() == util::dtype::uint16  &&
-                util::is_signed(dtype_))) {
-        dtype = util::dtype::int32;
-      }
-      else if (dtype_ == util::dtype::uint16  ||
-               rawother->dtype() == util::dtype::uint16) {
-        dtype = util::dtype::uint16;
-      }
-      else if (dtype_ == util::dtype::int16  ||
-               rawother->dtype() == util::dtype::int16) {
-        dtype = util::dtype::int16;
-      }
-      else if ((dtype_ == util::dtype::uint8  &&
-                util::is_signed(rawother->dtype()))  ||
-               (rawother->dtype() == util::dtype::uint8  &&
-                util::is_signed(dtype_))) {
-        dtype = util::dtype::int16;
-      }
-      else if (dtype_ == util::dtype::uint8  ||
-               rawother->dtype() == util::dtype::uint8) {
-        dtype = util::dtype::uint8;
-      }
-      else if (dtype_ == util::dtype::int8  ||
-               rawother->dtype() == util::dtype::int8) {
-        dtype = util::dtype::int8;
-      }
-      else if (dtype_ == util::dtype::boolean  &&
-               rawother->dtype() == util::dtype::boolean) {
-        dtype = util::dtype::boolean;
-      }
-      // else if (dtype_ == util::dtype::datetime64  &&
-      //          rawother->dtype() == util::dtype::datetime64) {
-      //   dtype = util::dtype::datetime64;
-      // }
-      // else if (dtype_ == util::dtype::timedelta64  &&
-      //          rawother->dtype() == util::dtype::timedelta64) {
-      //   dtype = util::dtype::timedelta64;
-      // }
       else {
+        return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()));
+      }
+    }
+
+    // handle booleans and numbers
+
+    util::dtype nextdtype = dtype_;
+    for (auto contiguous_array : contiguous_arrays) {
+      util::dtype thatdtype = contiguous_array.dtype();
+
+      if (nextdtype == util::dtype::complex256  ||
+          thatdtype == util::dtype::complex256) {
+        nextdtype = util::dtype::complex256;
+      }
+      else if ((nextdtype == util::dtype::float128  &&
+                util::is_complex(thatdtype))  ||
+               (thatdtype == util::dtype::float128  &&
+                util::is_complex(nextdtype))) {
+        nextdtype = util::dtype::complex256;
+      }
+      else if (nextdtype == util::dtype::complex128  ||
+               thatdtype == util::dtype::complex128) {
+        nextdtype = util::dtype::complex128;
+      }
+      else if (((nextdtype == util::dtype::float64  ||
+                 nextdtype == util::dtype::uint64  ||
+                 nextdtype == util::dtype::int64  ||
+                 nextdtype == util::dtype::uint32  ||
+                 nextdtype == util::dtype::int32)  &&
+                util::is_complex(thatdtype))  ||
+               ((thatdtype == util::dtype::float64  ||
+                 thatdtype == util::dtype::uint64  ||
+                 thatdtype == util::dtype::int64  ||
+                 thatdtype == util::dtype::uint32  ||
+                 thatdtype == util::dtype::int32)  &&
+                util::is_complex(nextdtype))) {
+        nextdtype = util::dtype::complex128;
+      }
+      else if (nextdtype == util::dtype::complex64  ||
+               thatdtype == util::dtype::complex64) {
+        nextdtype = util::dtype::complex64;
+      }
+      else if (nextdtype == util::dtype::float128  ||
+               thatdtype == util::dtype::float128) {
+        nextdtype = util::dtype::float128;
+      }
+      else if (nextdtype == util::dtype::float64  ||
+               thatdtype == util::dtype::float64) {
+        nextdtype = util::dtype::float64;
+      }
+      else if ((nextdtype == util::dtype::float32  &&
+                (thatdtype == util::dtype::uint64  ||
+                 thatdtype == util::dtype::int64  ||
+                 thatdtype == util::dtype::uint32  ||
+                 thatdtype == util::dtype::int32))  ||
+               (thatdtype == util::dtype::float32  &&
+                (nextdtype == util::dtype::uint64  ||
+                 nextdtype == util::dtype::int64  ||
+                 nextdtype == util::dtype::uint32  ||
+                 nextdtype == util::dtype::int32))) {
+        nextdtype = util::dtype::float64;
+      }
+      else if (nextdtype == util::dtype::float32  ||
+               thatdtype == util::dtype::float32) {
+        nextdtype = util::dtype::float32;
+      }
+      else if ((nextdtype == util::dtype::float16  &&
+                (thatdtype == util::dtype::uint64  ||
+                 thatdtype == util::dtype::int64  ||
+                 thatdtype == util::dtype::uint32  ||
+                 thatdtype == util::dtype::int32))  ||
+               (thatdtype == util::dtype::float16  &&
+                (nextdtype == util::dtype::uint64  ||
+                 nextdtype == util::dtype::int64  ||
+                 nextdtype == util::dtype::uint32  ||
+                 nextdtype == util::dtype::int32))) {
+        nextdtype = util::dtype::float64;
+      }
+      else if ((nextdtype == util::dtype::float16  &&
+                (thatdtype == util::dtype::uint16  ||
+                 thatdtype == util::dtype::int16))  ||
+               (thatdtype == util::dtype::float16  &&
+                (nextdtype == util::dtype::uint16  ||
+                 nextdtype == util::dtype::int16))) {
+        nextdtype = util::dtype::float32;
+      }
+      else if (nextdtype == util::dtype::float16  ||
+               thatdtype == util::dtype::float16) {
+        nextdtype = util::dtype::float16;
+      }
+      else if ((nextdtype == util::dtype::uint64  &&
+                util::is_signed(thatdtype))  ||
+               (thatdtype == util::dtype::uint64  &&
+                util::is_signed(nextdtype))) {
+        nextdtype = util::dtype::float64;
+      }
+      else if (nextdtype == util::dtype::uint64  ||
+               thatdtype == util::dtype::uint64) {
+        nextdtype = util::dtype::uint64;
+      }
+      else if (nextdtype == util::dtype::int64  ||
+               thatdtype == util::dtype::int64) {
+        nextdtype = util::dtype::int64;
+      }
+      else if ((nextdtype == util::dtype::uint32  &&
+                util::is_signed(thatdtype))  ||
+               (thatdtype == util::dtype::uint32  &&
+                util::is_signed(nextdtype))) {
+        nextdtype = util::dtype::int64;
+      }
+      else if (nextdtype == util::dtype::uint32  ||
+               thatdtype == util::dtype::uint32) {
+        nextdtype = util::dtype::uint32;
+      }
+      else if (nextdtype == util::dtype::int32  ||
+               thatdtype == util::dtype::int32) {
+        nextdtype = util::dtype::int32;
+      }
+      else if ((nextdtype == util::dtype::uint16  &&
+                util::is_signed(thatdtype))  ||
+               (thatdtype == util::dtype::uint16  &&
+                util::is_signed(nextdtype))) {
+        nextdtype = util::dtype::int32;
+      }
+      else if (nextdtype == util::dtype::uint16  ||
+               thatdtype == util::dtype::uint16) {
+        nextdtype = util::dtype::uint16;
+      }
+      else if (nextdtype == util::dtype::int16  ||
+               thatdtype == util::dtype::int16) {
+        nextdtype = util::dtype::int16;
+      }
+      else if ((nextdtype == util::dtype::uint8  &&
+                util::is_signed(thatdtype))  ||
+               (thatdtype == util::dtype::uint8  &&
+                util::is_signed(nextdtype))) {
+        nextdtype = util::dtype::int16;
+      }
+      else if (nextdtype == util::dtype::uint8  ||
+               thatdtype == util::dtype::uint8) {
+        nextdtype = util::dtype::uint8;
+      }
+      else if (nextdtype == util::dtype::int8  ||
+               thatdtype == util::dtype::int8) {
+        nextdtype = util::dtype::int8;
+      }
+      else if (nextdtype == util::dtype::boolean  &&
+               thatdtype == util::dtype::boolean) {
+        nextdtype = util::dtype::boolean;
+      }
+      // else if (nextdtype == util::dtype::datetime64  &&
+      //          thatdtype == util::dtype::datetime64) {
+      //   nextdtype = util::dtype::datetime64;
+      // }
+      // else if (nextdtype == util::dtype::timedelta64  &&
+      //          thatdtype == util::dtype::timedelta64) {
+      //   nextdtype = util::dtype::timedelta64;
+      // }
+    }
+
+    int64_t total_flatlength = 0;
+    int64_t total_length = 0;
+    for (auto contiguous_array : contiguous_arrays) {
+      std::vector<ssize_t> shape = contiguous_array.shape();
+      if (shape_.size() != shape.size()) {
         throw std::invalid_argument(
-          std::string("cannot merge Numpy format \"") + format_
-          + std::string("\" with \"") + rawother->format() + std::string("\"")
+          std::string("cannot merge arrays with different numbers of dimensions")
           + FILENAME(__LINE__));
       }
-
-      int64_t itemsize = util::dtype_to_itemsize(dtype);
-
-      std::vector<ssize_t> other_shape = rawother->shape();
-      std::vector<ssize_t> shape;
-      std::vector<ssize_t> strides;
-      shape.emplace_back(shape_[0] + other_shape[0]);
-      strides.emplace_back((ssize_t)itemsize);
-      int64_t self_flatlength = shape_[0];
-      int64_t other_flatlength = other_shape[0];
-      for (int64_t i = ((int64_t)shape_.size()) - 1;  i > 0;  i--) {
-        if (shape_[(size_t)i] != other_shape[(size_t)i]) {
+      int64_t flatlength = (int64_t)shape[0];
+      for (size_t i = 1;  i < shape.size();  i++) {
+        if (shape_[i] != shape[i]) {
           throw std::invalid_argument(
-            std::string("cannot merge arrays with different shapes")
+            std::string("cannot merge arrays with different dimensions (shape[1:])")
             + FILENAME(__LINE__));
         }
-        shape.insert(std::next(shape.begin()), shape_[(size_t)i]);
-        strides.insert(strides.begin(), strides[0]*shape_[(size_t)i]);
-        self_flatlength *= (int64_t)shape_[(size_t)i];
-        other_flatlength *= (int64_t)shape_[(size_t)i];
+        flatlength *= shape[i];
+      }
+      total_flatlength += flatlength;
+      total_length += (int64_t)shape[0];
+    }
+
+    kernel::lib ptr_lib = ptr_lib_;   // DERIVE
+
+    int64_t itemsize = util::dtype_to_itemsize(nextdtype);
+
+    std::shared_ptr<void> ptr(
+      kernel::malloc<void>(ptr_lib, itemsize*total_flatlength));
+
+    int64_t flatlength_so_far = 0;
+    for (auto contiguous_array : contiguous_arrays) {
+      int64_t flatlength = 1;
+      for (auto x : contiguous_array.shape()) {
+        flatlength *= (int64_t)x;
       }
 
-      std::shared_ptr<void> ptr(
-        kernel::malloc<void>(ptr_lib_, itemsize*(self_flatlength + other_flatlength)));
-
-      NumpyArray contiguous_other = rawother->contiguous();
-
       struct Error err;
-
-      switch (dtype) {
+      switch (nextdtype) {
       // to boolean
       case util::dtype::boolean:
-        err = kernel::NumpyArray_fill_frombool<bool>(
-          kernel::lib::cpu,   // DERIVE
-          reinterpret_cast<bool*>(ptr.get()),
-          0,
-          reinterpret_cast<bool*>(contiguous_self.data()),
-          self_flatlength);
-        util::handle_error(err, classname(), nullptr);
-        err = kernel::NumpyArray_fill_frombool<bool>(
-          kernel::lib::cpu,   // DERIVE
-          reinterpret_cast<bool*>(ptr.get()),
-          self_flatlength,
-          reinterpret_cast<bool*>(contiguous_other.data()),
-          other_flatlength);
-        util::handle_error(err, classname(), nullptr);
+        switch (contiguous_array.dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_frombool<bool>(
+            ptr_lib,
+            reinterpret_cast<bool*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<bool*>(contiguous_array.data()),
+            flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {boolean}")
+            + FILENAME(__LINE__));
+        }
         break;
 
       // // to datetime64
@@ -1832,1022 +1836,532 @@ namespace awkward {
       //     + FILENAME(__LINE__));
       //   break;
 
-      // to int
+      // to int8
       case util::dtype::int8:
-        switch (dtype_) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<int8_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int8_t*>(ptr.get()),
-              0,
-              reinterpret_cast<bool*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int8:
-            err = kernel::NumpyArray_fill<int8_t, int8_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int8_t*>(ptr.get()),
-              0,
-              reinterpret_cast<int8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, int8} (1)") + FILENAME(__LINE__));
+        switch (contiguous_array.dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_frombool<int8_t>(
+            ptr_lib,
+            reinterpret_cast<int8_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<bool*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int8:
+          err = kernel::NumpyArray_fill<int8_t, int8_t>(
+            ptr_lib,
+            reinterpret_cast<int8_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {boolean, int8}")
+            + FILENAME(__LINE__));
         }
-        util::handle_error(err, classname(), nullptr);
-        switch (rawother->dtype()) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<int8_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int8_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<bool*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int8:
-            err = kernel::NumpyArray_fill<int8_t, int8_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int8_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, int8} (2)") + FILENAME(__LINE__));
-        }
-        util::handle_error(err, classname(), nullptr);
         break;
 
-      // to int
+      // to int16
       case util::dtype::int16:
-        switch (dtype_) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<int16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int16_t*>(ptr.get()),
-              0,
-              reinterpret_cast<bool*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int8:
-            err = kernel::NumpyArray_fill<int8_t, int16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int16_t*>(ptr.get()),
-              0,
-              reinterpret_cast<int8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int16:
-            err = kernel::NumpyArray_fill<int16_t, int16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int16_t*>(ptr.get()),
-              0,
-              reinterpret_cast<int16_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, int16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int16_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, int8, int16, uint8} (1)")
-              + FILENAME(__LINE__));
+        switch (contiguous_array.dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_frombool<int16_t>(
+            ptr_lib,
+            reinterpret_cast<int16_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<bool*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int8:
+          err = kernel::NumpyArray_fill<int8_t, int16_t>(
+            ptr_lib,
+            reinterpret_cast<int16_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int16:
+          err = kernel::NumpyArray_fill<int16_t, int16_t>(
+            ptr_lib,
+            reinterpret_cast<int16_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill<uint8_t, int16_t>(
+            ptr_lib,
+            reinterpret_cast<int16_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {boolean, int8, int16, uint8}")
+            + FILENAME(__LINE__));
         }
-        util::handle_error(err, classname(), nullptr);
-        switch (rawother->dtype()) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<int16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int16_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<bool*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int8:
-            err = kernel::NumpyArray_fill<int8_t, int16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int16_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int16:
-            err = kernel::NumpyArray_fill<int16_t, int16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int16_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int16_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, int16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int16_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, int8, int16, uint8} (2)")
-              + FILENAME(__LINE__));
-        }
-        util::handle_error(err, classname(), nullptr);
         break;
 
       // to int32
       case util::dtype::int32:
-        switch (dtype_) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<int32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int32_t*>(ptr.get()),
-              0,
-              reinterpret_cast<bool*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int8:
-            err = kernel::NumpyArray_fill<int8_t, int32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int32_t*>(ptr.get()),
-              0,
-              reinterpret_cast<int8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int16:
-            err = kernel::NumpyArray_fill<int16_t, int32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int32_t*>(ptr.get()),
-              0,
-              reinterpret_cast<int16_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int32:
-            err = kernel::NumpyArray_fill<int32_t, int32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int32_t*>(ptr.get()),
-              0,
-              reinterpret_cast<int32_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, int32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int32_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, int32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int32_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, int8, int16, int32, uint8, uint16} (1)")
-              + FILENAME(__LINE__));
+        switch (contiguous_array.dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_frombool<int32_t>(
+            ptr_lib,
+            reinterpret_cast<int32_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<bool*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int8:
+          err = kernel::NumpyArray_fill<int8_t, int32_t>(
+            ptr_lib,
+            reinterpret_cast<int32_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int16:
+          err = kernel::NumpyArray_fill<int16_t, int32_t>(
+            ptr_lib,
+            reinterpret_cast<int32_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int32:
+          err = kernel::NumpyArray_fill<int32_t, int32_t>(
+            ptr_lib,
+            reinterpret_cast<int32_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int32_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill<uint8_t, int32_t>(
+            ptr_lib,
+            reinterpret_cast<int32_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint16:
+          err = kernel::NumpyArray_fill<uint16_t, int32_t>(
+            ptr_lib,
+            reinterpret_cast<int32_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {boolean, int8, int16, int32, uint8, uint16}")
+            + FILENAME(__LINE__));
         }
-        util::handle_error(err, classname(), nullptr);
-        switch (rawother->dtype()) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<int32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int32_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<bool*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int8:
-            err = kernel::NumpyArray_fill<int8_t, int32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int32_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int16:
-            err = kernel::NumpyArray_fill<int16_t, int32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int32_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int16_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int32:
-            err = kernel::NumpyArray_fill<int32_t , int32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int32_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int32_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, int32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int32_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, int32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int32_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, int8, int16, int32, uint8, uint16} (2)")
-              + FILENAME(__LINE__));
-        }
-        util::handle_error(err, classname(), nullptr);
         break;
 
       // to int64
       case util::dtype::int64:
-        switch (dtype_) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              0,
-              reinterpret_cast<bool*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int8:
-            err = kernel::NumpyArray_fill<int8_t, int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              0,
-              reinterpret_cast<int8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int16:
-            err = kernel::NumpyArray_fill<int16_t, int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              0,
-              reinterpret_cast<int16_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int32:
-            err = kernel::NumpyArray_fill<int32_t, int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              0,
-              reinterpret_cast<int32_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int64:
-            err = kernel::NumpyArray_fill<int64_t, int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              0,
-              reinterpret_cast<int64_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint32:
-            err = kernel::NumpyArray_fill<uint32_t, int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint32_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, int8, int16, int32, int64, "
-                          "uint8, uint16, uint32} (1)") + FILENAME(__LINE__));
+        switch (contiguous_array.dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_frombool<int64_t>(
+            ptr_lib,
+            reinterpret_cast<int64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<bool*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int8:
+          err = kernel::NumpyArray_fill<int8_t, int64_t>(
+            ptr_lib,
+            reinterpret_cast<int64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int16:
+          err = kernel::NumpyArray_fill<int16_t, int64_t>(
+            ptr_lib,
+            reinterpret_cast<int64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int32:
+          err = kernel::NumpyArray_fill<int32_t, int64_t>(
+            ptr_lib,
+            reinterpret_cast<int64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int32_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int64:
+          err = kernel::NumpyArray_fill<int64_t, int64_t>(
+            ptr_lib,
+            reinterpret_cast<int64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int64_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill<uint8_t, int64_t>(
+            ptr_lib,
+            reinterpret_cast<int64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint16:
+          err = kernel::NumpyArray_fill<uint16_t, int64_t>(
+            ptr_lib,
+            reinterpret_cast<int64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint32:
+          err = kernel::NumpyArray_fill<uint32_t, int64_t>(
+            ptr_lib,
+            reinterpret_cast<int64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint32_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {boolean, int8, int16, int32, int64, "
+                        "uint8, uint16, uint32}")
+            + FILENAME(__LINE__));
         }
-        util::handle_error(err, classname(), nullptr);
-        switch (rawother->dtype()) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<bool*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int8:
-            err = kernel::NumpyArray_fill<int8_t, int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int16:
-            err = kernel::NumpyArray_fill<int16_t, int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int16_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int32:
-            err = kernel::NumpyArray_fill<int32_t , int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int32_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int64:
-            err = kernel::NumpyArray_fill<int64_t, int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int64_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint32:
-            err = kernel::NumpyArray_fill<uint32_t, int64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<int64_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint32_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, int8, int16, int32, int64, "
-                          "uint8, uint16, uint32} (2)") + FILENAME(__LINE__));
-        }
-        util::handle_error(err, classname(), nullptr);
         break;
 
       // to uint8
       case util::dtype::uint8:
-        switch (dtype_) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<uint8_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint8_t*>(ptr.get()),
-              0,
-              reinterpret_cast<bool*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, uint8_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint8_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, uint8} (1)")
-              + FILENAME(__LINE__));
+        switch (contiguous_array.dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_frombool<uint8_t>(
+            ptr_lib,
+            reinterpret_cast<uint8_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<bool*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill<uint8_t, uint8_t>(
+            ptr_lib,
+            reinterpret_cast<uint8_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {boolean, uint8}")
+            + FILENAME(__LINE__));
         }
-        util::handle_error(err, classname(), nullptr);
-        switch (rawother->dtype()) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<uint8_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint8_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<bool*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, uint8_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint8_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, uint8} (2)")
-              + FILENAME(__LINE__));
-        }
-        util::handle_error(err, classname(), nullptr);
         break;
 
       // to uint16
       case util::dtype::uint16:
-        switch (dtype_) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<uint16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint16_t*>(ptr.get()),
-              0,
-              reinterpret_cast<bool*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, uint16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint16_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, uint16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint16_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, uint8, uint16} (1)")
-              + FILENAME(__LINE__));
+        switch (contiguous_array.dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_frombool<uint16_t>(
+            ptr_lib,
+            reinterpret_cast<uint16_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<bool*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill<uint8_t, uint16_t>(
+            ptr_lib,
+            reinterpret_cast<uint16_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint16:
+          err = kernel::NumpyArray_fill<uint16_t, uint16_t>(
+            ptr_lib,
+            reinterpret_cast<uint16_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {boolean, uint8, uint16}")
+            + FILENAME(__LINE__));
         }
-        util::handle_error(err, classname(), nullptr);
-        switch (rawother->dtype()) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<uint16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint16_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<bool*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, uint16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint16_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, uint16_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint16_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, uint8, uint16} (2)")
-              + FILENAME(__LINE__));
-        }
-        util::handle_error(err, classname(), nullptr);
         break;
 
       // to uint32
       case util::dtype::uint32:
-        switch (dtype_) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<uint32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint32_t*>(ptr.get()),
-              0,
-              reinterpret_cast<bool*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, uint32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint32_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, uint32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint32_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint32:
-            err = kernel::NumpyArray_fill<uint32_t, uint32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint32_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint32_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, uint8, uint16, uint32} (1)")
-              + FILENAME(__LINE__));
+        switch (contiguous_array.dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_frombool<uint32_t>(
+            ptr_lib,
+            reinterpret_cast<uint32_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<bool*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill<uint8_t, uint32_t>(
+            ptr_lib,
+            reinterpret_cast<uint32_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint16:
+          err = kernel::NumpyArray_fill<uint16_t, uint32_t>(
+            ptr_lib,
+            reinterpret_cast<uint32_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint32:
+          err = kernel::NumpyArray_fill<uint32_t, uint32_t>(
+            ptr_lib,
+            reinterpret_cast<uint32_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint32_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {boolean, uint8, uint16, uint32}")
+            + FILENAME(__LINE__));
         }
-        util::handle_error(err, classname(), nullptr);
-        switch (rawother->dtype()) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<uint32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint32_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<bool*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, uint32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint32_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, uint32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint32_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint32:
-            err = kernel::NumpyArray_fill<uint32_t, uint32_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint32_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint32_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, uint8, uint16, uint32} (2)")
-              + FILENAME(__LINE__));
-        }
-        util::handle_error(err, classname(), nullptr);
         break;
 
       // to uint64
       case util::dtype::uint64:
-        switch (dtype_) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<uint64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint64_t*>(ptr.get()),
-              0,
-              reinterpret_cast<bool*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, uint64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint64_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, uint64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint64_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint32:
-            err = kernel::NumpyArray_fill<uint32_t, uint64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint64_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint32_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint64:
-            err = kernel::NumpyArray_fill<uint64_t, uint64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint64_t*>(ptr.get()),
-              0,
-              reinterpret_cast<uint64_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, uint8, uint16, uint32, uint64} (1)")
-              + FILENAME(__LINE__));
+        switch (contiguous_array.dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_frombool<uint64_t>(
+            ptr_lib,
+            reinterpret_cast<uint64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<bool*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill<uint8_t, uint64_t>(
+            ptr_lib,
+            reinterpret_cast<uint64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint16:
+          err = kernel::NumpyArray_fill<uint16_t, uint64_t>(
+            ptr_lib,
+            reinterpret_cast<uint64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint32:
+          err = kernel::NumpyArray_fill<uint32_t, uint64_t>(
+            ptr_lib,
+            reinterpret_cast<uint64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint32_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint64:
+          err = kernel::NumpyArray_fill<uint64_t, uint64_t>(
+            ptr_lib,
+            reinterpret_cast<uint64_t*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint64_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {boolean, uint8, uint16, uint32, uint64}")
+            + FILENAME(__LINE__));
         }
-        util::handle_error(err, classname(), nullptr);
-        switch (rawother->dtype()) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<uint64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint64_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<bool*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, uint64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint64_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, uint64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint64_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint32:
-            err = kernel::NumpyArray_fill<uint32_t, uint64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint64_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint32_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint64:
-            err = kernel::NumpyArray_fill<uint64_t, uint64_t>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<uint64_t*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint64_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, uint8, uint16, uint32, uint64} (2)")
-              + FILENAME(__LINE__));
-        }
-        util::handle_error(err, classname(), nullptr);
         break;
 
       // to float16
       case util::dtype::float16:
         throw std::runtime_error(
-          std::string("FIXME: merge to float16 not implemented") + FILENAME(__LINE__));
+          std::string("FIXME: merge to float16 not implemented")
+          + FILENAME(__LINE__));
         break;
 
       // to float32
       case util::dtype::float32:
-        switch (dtype_) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<float>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<float*>(ptr.get()),
-              0,
-              reinterpret_cast<bool*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int8:
-            err = kernel::NumpyArray_fill<int8_t, float>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<float*>(ptr.get()),
-              0,
-              reinterpret_cast<int8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int16:
-            err = kernel::NumpyArray_fill<int16_t, float>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<float*>(ptr.get()),
-              0,
-              reinterpret_cast<int16_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, float>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<float*>(ptr.get()),
-              0,
-              reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, float>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<float*>(ptr.get()),
-              0,
-              reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::float16:
-            throw std::runtime_error(
-              std::string("FIXME: merge from float16 not implemented")
-              + FILENAME(__LINE__));
-          case util::dtype::float32:
-            err = kernel::NumpyArray_fill<float, float>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<float*>(ptr.get()),
-              0,
-              reinterpret_cast<float*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, int8, int16, uint8, uint16, "
-                          "float16, float32} (1)") + FILENAME(__LINE__));
+        switch (contiguous_array.dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_frombool<float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<bool*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int8:
+          err = kernel::NumpyArray_fill<int8_t, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int16:
+          err = kernel::NumpyArray_fill<int16_t, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill<uint8_t, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint16:
+          err = kernel::NumpyArray_fill<uint16_t, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::float16:
+          throw std::runtime_error(
+            std::string("FIXME: merge from float16 not implemented")
+            + FILENAME(__LINE__));
+          break;
+        case util::dtype::float32:
+          err = kernel::NumpyArray_fill<float, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<float*>(contiguous_array.data()),
+            flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {boolean, int8, int16, uint8, uint16, "
+                        "float16, float32}")
+            + FILENAME(__LINE__));
         }
-        util::handle_error(err, classname(), nullptr);
-        switch (rawother->dtype()) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<float>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<float*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<bool*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int8:
-            err = kernel::NumpyArray_fill<int8_t, float>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<float*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int16:
-            err = kernel::NumpyArray_fill<int16_t, float>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<float*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int16_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, float>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<float*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, float>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<float*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::float16:
-            throw std::runtime_error(
-              std::string("FIXME: merge from float16 not implemented")
-              + FILENAME(__LINE__));
-          case util::dtype::float32:
-            err = kernel::NumpyArray_fill<float, float>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<float*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<float*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, int8, int16, uint8, uint16, "
-                          "float16, float32} (2)") + FILENAME(__LINE__));
-        }
-        util::handle_error(err, classname(), nullptr);
         break;
 
       // to float64
       case util::dtype::float64:
-        switch (dtype_) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              0,
-              reinterpret_cast<bool*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int8:
-            err = kernel::NumpyArray_fill<int8_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              0,
-              reinterpret_cast<int8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int16:
-            err = kernel::NumpyArray_fill<int16_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              0,
-              reinterpret_cast<int16_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int32:
-            err = kernel::NumpyArray_fill<int32_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              0,
-              reinterpret_cast<int32_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::int64:
-            err = kernel::NumpyArray_fill<int64_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              0,
-              reinterpret_cast<int64_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              0,
-              reinterpret_cast<uint8_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              0,
-              reinterpret_cast<uint16_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint32:
-            err = kernel::NumpyArray_fill<uint32_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              0,
-              reinterpret_cast<uint32_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::uint64:
-            err = kernel::NumpyArray_fill<uint64_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              0,
-              reinterpret_cast<uint64_t*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::float16:
-            throw std::runtime_error(
-              std::string("FIXME: merge from float16 not implemented")
-              + FILENAME(__LINE__));
-          case util::dtype::float32:
-            err = kernel::NumpyArray_fill<float, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              0,
-              reinterpret_cast<float*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          case util::dtype::float64:
-            err = kernel::NumpyArray_fill<double, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              0,
-              reinterpret_cast<double*>(contiguous_self.data()),
-              self_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, int8, int16, int32, int64, "
-                          "uint8, uint16, uint32, uint64 float16, float32, float64} (1)")
-              + FILENAME(__LINE__));
+        switch (contiguous_array.dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_frombool<double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<bool*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int8:
+          err = kernel::NumpyArray_fill<int8_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int16:
+          err = kernel::NumpyArray_fill<int16_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int32:
+          err = kernel::NumpyArray_fill<int32_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int32_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int64:
+          err = kernel::NumpyArray_fill<int64_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int64_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill<uint8_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint16:
+          err = kernel::NumpyArray_fill<uint16_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint32:
+          err = kernel::NumpyArray_fill<uint32_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint32_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint64:
+          err = kernel::NumpyArray_fill<uint64_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint64_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::float16:
+          throw std::runtime_error(
+            std::string("FIXME: merge from float16 not implemented")
+            + FILENAME(__LINE__));
+          break;
+        case util::dtype::float32:
+          err = kernel::NumpyArray_fill<float, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<float*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::float64:
+          err = kernel::NumpyArray_fill<double, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<double*>(contiguous_array.data()),
+            flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {boolean, int8, int16, int32, int64, "
+                        "uint8, uint16, uint32, uint64, float16, float32, float64}")
+            + FILENAME(__LINE__));
         }
-        util::handle_error(err, classname(), nullptr);
-        switch (rawother->dtype()) {
-          case util::dtype::boolean:
-            err = kernel::NumpyArray_fill_frombool<double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<bool*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int8:
-            err = kernel::NumpyArray_fill<int8_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int16:
-            err = kernel::NumpyArray_fill<int16_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int16_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int32:
-            err = kernel::NumpyArray_fill<int32_t , double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int32_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::int64:
-            err = kernel::NumpyArray_fill<int64_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<int64_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint8:
-            err = kernel::NumpyArray_fill<uint8_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint8_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint16:
-            err = kernel::NumpyArray_fill<uint16_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint16_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint32:
-            err = kernel::NumpyArray_fill<uint32_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint32_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::uint64:
-            err = kernel::NumpyArray_fill<uint64_t, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<uint64_t*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::float16:
-            throw std::runtime_error(
-              std::string("FIXME: merge from float16 not implemented")
-              + FILENAME(__LINE__));
-          case util::dtype::float32:
-            err = kernel::NumpyArray_fill<float, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<float*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          case util::dtype::float64:
-            err = kernel::NumpyArray_fill<double, double>(
-              kernel::lib::cpu,   // DERIVE
-              reinterpret_cast<double*>(ptr.get()),
-              self_flatlength,
-              reinterpret_cast<double*>(contiguous_other.data()),
-              other_flatlength);
-            break;
-          default:
-            throw std::runtime_error(
-              std::string("dtype_ not in {boolean, int8, int16, int32, int64, "
-                          "uint8, uint16, uint32, uint64 float16, float32, float64} (2)")
-              + FILENAME(__LINE__));
-        }
-        util::handle_error(err, classname(), nullptr);
         break;
 
       // to float128
@@ -2881,69 +2395,48 @@ namespace awkward {
       // something's wrong
       default:
         throw std::runtime_error(
-          std::string("unhandled merge case: to ") + util::dtype_to_name(dtype)
+          std::string("unhandled merge case: to ") + util::dtype_to_name(nextdtype)
           + FILENAME(__LINE__));
       }
+      util::handle_error(err, classname(), nullptr);
 
-      return std::make_shared<NumpyArray>(Identities::none(),
-                                          parameters_,
-                                          ptr,
-                                          shape,
-                                          strides,
-                                          0,
-                                          (ssize_t)itemsize,
-                                          util::dtype_to_format(dtype),
-                                          dtype,
-                                          ptr_lib);
+      flatlength_so_far += flatlength;
     }
 
+    std::vector<ssize_t> shape;
+    shape.push_back((ssize_t)total_length);
+    for (size_t i = 1;  i < shape_.size();  i++) {
+      shape.push_back(shape_[i]);
+    }
+
+    std::vector<ssize_t> strides;
+    strides.push_back((ssize_t)itemsize);
+    for (int64_t i = ((int64_t)shape_.size()) - 1;  i > 0;  i--) {
+      strides.insert(strides.begin(), strides[0]*shape_[(size_t)i]);
+    }
+
+    ContentPtr next = std::make_shared<NumpyArray>(Identities::none(),
+                                                   parameters_,
+                                                   ptr,
+                                                   shape,
+                                                   strides,
+                                                   0,
+                                                   (ssize_t)itemsize,
+                                                   util::dtype_to_format(nextdtype),
+                                                   nextdtype,
+                                                   ptr_lib);
+
+    if (tail.empty()) {
+      return next;
+    }
+
+    ContentPtr reversed = tail[0].get()->reverse_merge(next);
+    if (tail.size() == 1) {
+      return reversed;
+    }
     else {
-      throw std::invalid_argument(
-        std::string("cannot merge ") + classname() + std::string(" with ")
-        + other.get()->classname() + FILENAME(__LINE__));
+      return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()));
     }
-  }
-
-  const ContentPtr
-  NumpyArray::merge_bytes(const std::shared_ptr<NumpyArray>& other) const {
-    NumpyArray contiguous_self = contiguous();
-    NumpyArray contiguous_other = other.get()->contiguous();
-
-    std::shared_ptr<void> ptr(
-      kernel::malloc<void>(ptr_lib_, length() + other.get()->length()));
-
-    kernel::lib ptr_lib = ptr_lib_;   // DERIVE
-
-    struct Error err;
-
-    err = kernel::NumpyArray_fill<uint8_t, uint8_t>(
-      kernel::lib::cpu,   // DERIVE
-      reinterpret_cast<uint8_t*>(ptr.get()),
-      0,
-      reinterpret_cast<uint8_t*>(contiguous_self.data()),
-      contiguous_self.length());
-    util::handle_error(err, classname(), nullptr);
-
-    err = kernel::NumpyArray_fill<uint8_t, uint8_t>(
-      kernel::lib::cpu,   // DERIVE
-      reinterpret_cast<uint8_t*>(ptr.get()),
-      length(),
-      reinterpret_cast<uint8_t*>(contiguous_other.data()),
-      contiguous_other.length());
-    util::handle_error(err, classname(), nullptr);
-
-    std::vector<ssize_t> shape({ (ssize_t)(length() + other.get()->length()) });
-    std::vector<ssize_t> strides({ 1 });
-    return std::make_shared<NumpyArray>(Identities::none(),
-                                        parameters_,
-                                        ptr,
-                                        shape,
-                                        strides,
-                                        0,
-                                        1,
-                                        format_,
-                                        dtype_,
-                                        ptr_lib);
   }
 
   const SliceItemPtr
