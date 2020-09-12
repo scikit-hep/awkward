@@ -891,13 +891,6 @@ namespace awkward {
     return form(true).get()->branch_depth();
   }
 
-  const ContentPtr
-  Content::reverse_merge(const ContentPtr& other) const {
-    throw std::runtime_error(
-      std::string("undefined operation: ") + classname() + ("::reverse_merge")
-      + FILENAME(__LINE__));
-  }
-
   const std::pair<ContentPtrVec, ContentPtrVec>
   Content::merging_strategy(const ContentPtrVec& others) const {
     if (others.empty()) {
@@ -941,6 +934,19 @@ namespace awkward {
     }
 
     return std::pair<ContentPtrVec, ContentPtrVec>(head, tail);
+  }
+
+  const ContentPtr
+  Content::reverse_merge(const ContentPtr& other) const {
+    throw std::runtime_error(
+      std::string("undefined operation: ") + classname() + ("::reverse_merge")
+      + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
+  Content::merge(const ContentPtr& other) const {
+    ContentPtrVec others({ other });
+    return mergemany(others);
   }
 
   const ContentPtr

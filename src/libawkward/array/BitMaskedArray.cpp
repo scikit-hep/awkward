@@ -782,11 +782,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::merge(const ContentPtr& other) const {
-    return toIndexedOptionArray64().get()->merge(other);
-  }
-
-  const ContentPtr
   BitMaskedArray::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {
       return shallow_copy();

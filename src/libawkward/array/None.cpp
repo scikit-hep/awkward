@@ -236,13 +236,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::merge(const ContentPtr& other) const {
-    throw std::runtime_error(
-      std::string("undefined operation: None::merge")
-      + FILENAME(__LINE__));
-  }
-
-  const ContentPtr
   None::mergemany(const ContentPtrVec& others) const {
     throw std::runtime_error(
       std::string("undefined operation: None::mergemany")

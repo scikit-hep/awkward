@@ -690,11 +690,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  VirtualArray::merge(const ContentPtr& other) const {
-    return array().get()->merge(other);
-  }
-
-  const ContentPtr
   VirtualArray::mergemany(const ContentPtrVec& others) const {
     return array().get()->mergemany(others);
   }

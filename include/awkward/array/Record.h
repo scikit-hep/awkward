@@ -185,10 +185,6 @@ namespace awkward {
 
     /// @exception std::runtime_error is always thrown
     const ContentPtr
-      merge(const ContentPtr& other) const override;
-
-    /// @exception std::runtime_error is always thrown
-    const ContentPtr
       mergemany(const ContentPtrVec& others) const override;
 
     /// @exception std::runtime_error is always thrown

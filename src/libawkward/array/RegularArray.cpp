@@ -760,53 +760,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::merge(const ContentPtr& other) const {
-    if (dynamic_cast<EmptyArray*>(other.get())) {
-      return shallow_copy();
-    }
-
-    ContentPtrVec others({ other });
-    std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
-    ContentPtrVec head = head_tail.first;
-    ContentPtrVec tail = head_tail.second;
-
-    if (!tail.empty()) {
-      return tail[0].get()->reverse_merge(shallow_copy());
-    }
-
-    if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
-      if (size_ == rawother->size()) {
-        ContentPtr mine =
-          content_.get()->getitem_range_nowrap(0, size_*length());
-        ContentPtr theirs =
-          rawother->content().get()->getitem_range_nowrap(
-            0, rawother->size()*rawother->length());
-        ContentPtr content = mine.get()->merge(theirs);
-        return std::make_shared<RegularArray>(Identities::none(),
-                                              parameters_,
-                                              content,
-                                              size_);
-      }
-      else {
-        return toListOffsetArray64(true).get()->merge(other);
-      }
-    }
-    else if (dynamic_cast<ListArray32*>(other.get())  ||
-             dynamic_cast<ListArrayU32*>(other.get())  ||
-             dynamic_cast<ListArray64*>(other.get())  ||
-             dynamic_cast<ListOffsetArray32*>(other.get())  ||
-             dynamic_cast<ListOffsetArrayU32*>(other.get())  ||
-             dynamic_cast<ListOffsetArray64*>(other.get())) {
-      return toListOffsetArray64(true).get()->merge(other);
-    }
-    else {
-      throw std::invalid_argument(
-        std::string("cannot merge ") + classname() + std::string(" with ")
-        + other.get()->classname() + FILENAME(__LINE__));
-    }
-  }
-
-  const ContentPtr
   RegularArray::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {
       return shallow_copy();

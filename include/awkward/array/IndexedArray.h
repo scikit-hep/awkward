@@ -372,9 +372,6 @@ namespace awkward {
     const ContentPtr
       reverse_merge(const ContentPtr& other) const override;
 
-    const ContentPtr
-      merge(const ContentPtr& other) const override;
-
     const std::pair<ContentPtrVec, ContentPtrVec>
       merging_strategy(const ContentPtrVec& others) const override;
 

@@ -883,12 +883,6 @@ namespace awkward {
     }
 
     const ContentPtr
-      merge(const ContentPtr& other) const override {
-      throw std::runtime_error(
-        std::string("not implemented RawArrayOf<T>::merge")+ FILENAME(__LINE__));
-    }
-
-    const ContentPtr
       mergemany(const ContentPtrVec& others) const override {
       throw std::runtime_error(
         std::string("not implemented RawArrayOf<T>::mergemany")+ FILENAME(__LINE__));

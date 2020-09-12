@@ -412,11 +412,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  EmptyArray::merge(const ContentPtr& other) const {
-    return other;
-  }
-
-  const ContentPtr
   EmptyArray::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {
       return shallow_copy();
