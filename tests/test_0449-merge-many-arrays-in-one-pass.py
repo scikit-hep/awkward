@@ -38,7 +38,7 @@ def test_numpyarray():
 
                     assert awkward1.to_list(ak_combined) == combined.tolist()
                     assert awkward1.to_numpy(ak_combined).dtype == numpy.concatenate([one, two, four]).dtype
-
+    
 def test_lists():
     one = awkward1.Array([[1, 2, 3], [], [4, 5]]).layout
     two = awkward1.Array([[1.1, 2.2], [3.3, 4.4]]).layout
@@ -160,3 +160,9 @@ def test_union_option():
     assert awkward1.to_list(two.mergemany([three, one])) == [100, 200, 300, {"x": 1}, {"x": 2}, 5, None, 7, 1, 2, [], [3, 4]]
     assert awkward1.to_list(three.mergemany([one, two])) == [{"x": 1}, {"x": 2}, 5, None, 7, 1, 2, [], [3, 4], 100, 200, 300]
     assert awkward1.to_list(three.mergemany([two, one])) == [{"x": 1}, {"x": 2}, 5, None, 7, 100, 200, 300, 1, 2, [], [3, 4]]
+
+def test_strings():
+    one = awkward1.Array(["uno", "dos", "tres"]).layout
+    two = awkward1.Array(["un", "deux", "trois", "quatre"]).layout
+    three = awkward1.Array(["onay", "ootay", "eethray"]).layout
+    assert awkward1.to_list(one.mergemany([two, three])) == ["uno", "dos", "tres", "un", "deux", "trois", "quatre", "onay", "ootay", "eethray"]

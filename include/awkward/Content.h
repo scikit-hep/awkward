@@ -685,7 +685,7 @@ namespace awkward {
 
     /// @brief An array with this and the `other` concatenated (this
     /// first, `other` last).
-    virtual const ContentPtr
+    const ContentPtr
       merge(const ContentPtr& other) const;
 
     /// @brief Returns an array with this and the `others` concatenated

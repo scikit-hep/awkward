@@ -416,9 +416,6 @@ namespace awkward {
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
     const ContentPtr
-      merge(const ContentPtr& other) const override;
-
-    const ContentPtr
       mergemany(const ContentPtrVec& others) const override;
 
     const SliceItemPtr
@@ -561,11 +558,6 @@ namespace awkward {
       numbers_to_type(const std::string& name) const override;
 
   protected:
-    /// @brief Internal function to merge two byte arrays without promoting
-    /// the types to int64.
-    const ContentPtr
-      merge_bytes(const std::shared_ptr<NumpyArray>& other) const;
-
     /// @brief Internal function that propagates the derivation of a contiguous
     /// version of this array from one axis to the next.
     ///
