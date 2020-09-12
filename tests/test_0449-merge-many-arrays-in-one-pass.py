@@ -38,7 +38,7 @@ def test_numpyarray():
 
                     assert awkward1.to_list(ak_combined) == combined.tolist()
                     assert awkward1.to_numpy(ak_combined).dtype == numpy.concatenate([one, two, four]).dtype
-    
+
 def test_lists():
     one = awkward1.Array([[1, 2, 3], [], [4, 5]]).layout
     two = awkward1.Array([[1.1, 2.2], [3.3, 4.4]]).layout
@@ -166,3 +166,17 @@ def test_strings():
     two = awkward1.Array(["un", "deux", "trois", "quatre"]).layout
     three = awkward1.Array(["onay", "ootay", "eethray"]).layout
     assert awkward1.to_list(one.mergemany([two, three])) == ["uno", "dos", "tres", "un", "deux", "trois", "quatre", "onay", "ootay", "eethray"]
+
+def test_concatenate():
+    one = awkward1.Array([1, 2, 3])
+    two = awkward1.Array([4.4, 5.5])
+    three = awkward1.Array([6, 7, 8])
+    four = awkward1.Array([[9, 9, 9], [10, 10, 10]])
+    assert awkward1.concatenate([one, two, three, four]).tolist() == [1, 2, 3, 4.4, 5.5, 6, 7, 8, [9, 9, 9], [10, 10, 10]]
+    assert awkward1.concatenate([four, one, two, three]).tolist() == [[9, 9, 9], [10, 10, 10], 1, 2, 3, 4.4, 5.5, 6, 7, 8]
+    assert awkward1.concatenate([one, two, four, three]).tolist() == [1, 2, 3, 4.4, 5.5, [9, 9, 9], [10, 10, 10], 6, 7, 8]
+
+    five = awkward1.Array(["nine", "ten"])
+    assert awkward1.concatenate([one, two, three, five]).tolist() == [1, 2, 3, 4.4, 5.5, 6, 7, 8, "nine", "ten"]
+    assert awkward1.concatenate([five, one, two, three]).tolist() == ["nine", "ten", 1, 2, 3, 4.4, 5.5, 6, 7, 8]
+    assert awkward1.concatenate([one, two, five, three]).tolist() == [1, 2, 3, 4.4, 5.5, "nine", "ten", 6, 7, 8]
