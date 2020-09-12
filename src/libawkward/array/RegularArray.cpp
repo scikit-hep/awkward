@@ -760,93 +760,11 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::merge(const ContentPtr& other) const {
-    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array());
-    }
-
-    if (!parameters_equal(other.get()->parameters())) {
-      return merge_as_union(other);
-    }
-
-    if (dynamic_cast<EmptyArray*>(other.get())) {
+  RegularArray::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
       return shallow_copy();
     }
-    else if (IndexedArray32* rawother =
-             dynamic_cast<IndexedArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedArrayU32* rawother =
-             dynamic_cast<IndexedArrayU32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedArray64* rawother =
-             dynamic_cast<IndexedArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedOptionArray32* rawother =
-             dynamic_cast<IndexedOptionArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedOptionArray64* rawother =
-             dynamic_cast<IndexedOptionArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (ByteMaskedArray* rawother =
-             dynamic_cast<ByteMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (BitMaskedArray* rawother =
-             dynamic_cast<BitMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnmaskedArray* rawother =
-             dynamic_cast<UnmaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_32* rawother =
-             dynamic_cast<UnionArray8_32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_U32* rawother =
-             dynamic_cast<UnionArray8_U32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_64* rawother =
-             dynamic_cast<UnionArray8_64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-
-    if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
-      if (size_ == rawother->size()) {
-        ContentPtr mine =
-          content_.get()->getitem_range_nowrap(0, size_*length());
-        ContentPtr theirs =
-          rawother->content().get()->getitem_range_nowrap(
-            0, rawother->size()*rawother->length());
-        ContentPtr content = mine.get()->merge(theirs);
-        return std::make_shared<RegularArray>(Identities::none(),
-                                              parameters_,
-                                              content,
-                                              size_);
-      }
-      else {
-        return toListOffsetArray64(true).get()->merge(other);
-      }
-    }
-    else if (dynamic_cast<ListArray32*>(other.get())  ||
-             dynamic_cast<ListArrayU32*>(other.get())  ||
-             dynamic_cast<ListArray64*>(other.get())  ||
-             dynamic_cast<ListOffsetArray32*>(other.get())  ||
-             dynamic_cast<ListOffsetArrayU32*>(other.get())  ||
-             dynamic_cast<ListOffsetArray64*>(other.get())) {
-      return toListOffsetArray64(true).get()->merge(other);
-    }
-    else {
-      throw std::invalid_argument(
-        std::string("cannot merge ") + classname() + std::string(" with ")
-        + other.get()->classname() + FILENAME(__LINE__));
-    }
+    return toListOffsetArray64(true).get()->mergemany(others);
   }
 
   const SliceItemPtr

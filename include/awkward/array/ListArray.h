@@ -322,7 +322,7 @@ namespace awkward {
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
     const ContentPtr
-      merge(const ContentPtr& other) const override;
+      mergemany(const ContentPtrVec& others) const override;
 
     const SliceItemPtr
       asslice() const override;

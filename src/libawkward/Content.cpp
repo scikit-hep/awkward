@@ -891,6 +891,64 @@ namespace awkward {
     return form(true).get()->branch_depth();
   }
 
+  const std::pair<ContentPtrVec, ContentPtrVec>
+  Content::merging_strategy(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      throw std::invalid_argument(
+        std::string("to merge this array with 'others', at least one other "
+                    "must be provided") + FILENAME(__LINE__));
+    }
+
+    ContentPtrVec head;
+    ContentPtrVec tail;
+
+    head.push_back(shallow_copy());
+
+    size_t i = 0;
+    for (;  i < others.size();  i++) {
+      ContentPtr other = others[i];
+      if (dynamic_cast<IndexedArray32*>(other.get())  ||
+          dynamic_cast<IndexedArrayU32*>(other.get())  ||
+          dynamic_cast<IndexedArray64*>(other.get())  ||
+          dynamic_cast<IndexedOptionArray32*>(other.get())  ||
+          dynamic_cast<IndexedOptionArray64*>(other.get())  ||
+          dynamic_cast<ByteMaskedArray*>(other.get())  ||
+          dynamic_cast<BitMaskedArray*>(other.get())  ||
+          dynamic_cast<UnmaskedArray*>(other.get())  ||
+          dynamic_cast<UnionArray8_32*>(other.get())  ||
+          dynamic_cast<UnionArray8_U32*>(other.get())  ||
+          dynamic_cast<UnionArray8_64*>(other.get())) {
+        break;
+      }
+      else if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+        head.push_back(raw->array());
+      }
+      else {
+        head.push_back(other);
+      }
+    }
+
+    for (;  i < others.size();  i++) {
+      ContentPtr other = others[i];
+      tail.push_back(other);
+    }
+
+    return std::pair<ContentPtrVec, ContentPtrVec>(head, tail);
+  }
+
+  const ContentPtr
+  Content::reverse_merge(const ContentPtr& other) const {
+    throw std::runtime_error(
+      std::string("undefined operation: ") + classname() + ("::reverse_merge")
+      + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
+  Content::merge(const ContentPtr& other) const {
+    ContentPtrVec others({ other });
+    return mergemany(others);
+  }
+
   const ContentPtr
   Content::reduce(const Reducer& reducer,
                   int64_t axis,

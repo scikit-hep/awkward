@@ -1005,120 +1005,123 @@ namespace awkward {
   }
 
   const ContentPtr
-  RecordArray::merge(const ContentPtr& other) const {
-    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array());
-    }
-
-    if (!parameters_equal(other.get()->parameters())) {
-      return merge_as_union(other);
-    }
-
-    if (dynamic_cast<EmptyArray*>(other.get())) {
+  RecordArray::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
       return shallow_copy();
     }
-    else if (IndexedArray32* rawother =
-             dynamic_cast<IndexedArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedArrayU32* rawother =
-             dynamic_cast<IndexedArrayU32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedArray64* rawother =
-             dynamic_cast<IndexedArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedOptionArray32* rawother =
-             dynamic_cast<IndexedOptionArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedOptionArray64* rawother =
-             dynamic_cast<IndexedOptionArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (ByteMaskedArray* rawother =
-             dynamic_cast<ByteMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (BitMaskedArray* rawother =
-             dynamic_cast<BitMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnmaskedArray* rawother =
-             dynamic_cast<UnmaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_32* rawother =
-             dynamic_cast<UnionArray8_32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_U32* rawother =
-             dynamic_cast<UnionArray8_U32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_64* rawother =
-             dynamic_cast<UnionArray8_64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
+
+    std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
+    ContentPtrVec head = head_tail.first;
+    ContentPtrVec tail = head_tail.second;
+
+    ContentPtrVec headless(head.begin() + 1, head.end());
+
+    std::vector<ContentPtrVec> for_each_field;
+    for (auto field : contents_) {
+      ContentPtr trimmed = field.get()->getitem_range_nowrap(0, length_);
+      for_each_field.push_back(ContentPtrVec({ field }));
     }
 
-    if (RecordArray* rawother =
-        dynamic_cast<RecordArray*>(other.get())) {
-      int64_t mylength = length();
-      int64_t theirlength = rawother->length();
+    if (istuple()) {
+      for (auto array : headless) {
+        if (RecordArray* raw = dynamic_cast<RecordArray*>(array.get())) {
+          if (istuple()) {
+            if (numfields() == raw->numfields()) {
+              for (size_t i = 0;  i < contents_.size();  i++) {
+                ContentPtr field = raw->field(i);
+                for_each_field[i].push_back(field.get()->getitem_range_nowrap(0, raw->length()));
+              }
+            }
+            else {
+              throw std::invalid_argument(
+                std::string("cannot merge tuples with different numbers of fields")
+                + FILENAME(__LINE__));
+            }
+          }
+          else {
+            throw std::invalid_argument(
+              std::string("cannot merge tuple with non-tuple record")
+              + FILENAME(__LINE__));
+          }
+        }
+        else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
+          ;
+        }
+        else {
+          throw std::invalid_argument(
+            std::string("cannot merge ") + classname() + std::string(" with ")
+            + array.get()->classname() + FILENAME(__LINE__));
+        }
+      }
+    }
 
-      if (istuple() == rawother->istuple()  &&
-          numfields() == 0  &&  rawother->numfields() == 0) {
-        return std::make_shared<RecordArray>(Identities::none(),
-                                             parameters_,
-                                             contents_,
-                                             util::RecordLookupPtr(nullptr),
-                                             mylength + theirlength);
-      }
-      if (istuple()  &&  rawother->istuple()) {
-        if (numfields() == rawother->numfields()) {
-          ContentPtrVec contents;
-          for (int64_t i = 0;  i < numfields();  i++) {
-            ContentPtr mine =
-              field(i).get()->getitem_range_nowrap(0, mylength);
-            ContentPtr theirs =
-              rawother->field(i).get()->getitem_range_nowrap(0, theirlength);
-            contents.push_back(mine.get()->merge(theirs));
+    else {
+      std::vector<std::string> these_keys = keys();
+      std::sort(these_keys.begin(), these_keys.end());
+
+      for (auto array : headless) {
+        if (RecordArray* raw = dynamic_cast<RecordArray*>(array.get())) {
+          if (!istuple()) {
+            std::vector<std::string> those_keys = raw->keys();
+            std::sort(those_keys.begin(), those_keys.end());
+            if (these_keys == those_keys) {
+              for (size_t i = 0;  i < contents_.size();  i++) {
+                ContentPtr field = raw->field(key(i));
+                ContentPtr trimmed = field.get()->getitem_range_nowrap(0, raw->length());
+                for_each_field[i].push_back(trimmed);
+              }
+            }
+            else {
+              throw std::invalid_argument(
+                std::string("cannot merge records with different sets of field names")
+                + FILENAME(__LINE__));
+            }
           }
-          return std::make_shared<RecordArray>(Identities::none(),
-                                               parameters_,
-                                               contents,
-                                               recordlookup_);
+          else {
+            throw std::invalid_argument(
+              std::string("cannot merge non-tuple record with tuple")
+              + FILENAME(__LINE__));
+          }
+        }
+        else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
+          ;
+        }
+        else {
+          throw std::invalid_argument(
+            std::string("cannot merge ") + classname() + std::string(" with ")
+            + array.get()->classname() + FILENAME(__LINE__));
         }
       }
-      else if (!istuple()  &&  !rawother->istuple()) {
-        std::vector<std::string> self_keys = keys();
-        std::vector<std::string> other_keys = rawother->keys();
-        std::sort(self_keys.begin(), self_keys.end());
-        std::sort(other_keys.begin(), other_keys.end());
-        if (self_keys == other_keys) {
-          ContentPtrVec contents;
-          for (auto key : keys()) {
-            ContentPtr mine =
-              field(key).get()->getitem_range_nowrap(0, mylength);
-            ContentPtr theirs =
-              rawother->field(key).get()->getitem_range_nowrap(0, theirlength);
-            contents.push_back(mine.get()->merge(theirs));
-          }
-          return std::make_shared<RecordArray>(Identities::none(),
-                                               parameters_,
-                                               contents,
-                                               recordlookup_);
-        }
+    }
+
+    ContentPtrVec nextcontents;
+    int64_t minlength = -1;
+    for (auto forfield : for_each_field) {
+      ContentPtrVec tail_forfield(forfield.begin() + 1, forfield.end());
+      ContentPtr merged = forfield[0].get()->mergemany(tail_forfield);
+      nextcontents.push_back(merged);
+
+      if (minlength == -1  ||  merged.get()->length() < minlength) {
+        minlength = merged.get()->length();
       }
-      throw std::invalid_argument(
-        std::string("cannot merge records or tuples with different fields")
-        + FILENAME(__LINE__));
+    }
+
+    ContentPtr next = std::make_shared<RecordArray>(Identities::none(),
+                                                    parameters_,
+                                                    nextcontents,
+                                                    recordlookup_,
+                                                    minlength);
+
+    if (tail.empty()) {
+      return next;
+    }
+
+    ContentPtr reversed = tail[0].get()->reverse_merge(next);
+    if (tail.size() == 1) {
+      return reversed;
     }
     else {
-      throw std::invalid_argument(
-        std::string("cannot merge ") + classname() + std::string(" with ")
-        + other.get()->classname() + FILENAME(__LINE__));
+      return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()));
     }
   }
 
