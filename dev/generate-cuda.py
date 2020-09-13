@@ -66,7 +66,7 @@ KERNEL_WHITELIST = [
     "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     "awkward_regularize_arrayslice",
     "awkward_RegularArray_getitem_next_at",
-    "awkward_ListOffsetArray_compact_offsets",
+    # "awkward_ListOffsetArray_compact_offsets", Need to tune tests
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_BitMaskedArray_to_IndexedOptionArray",
 ]
@@ -491,14 +491,14 @@ def gettemplateargs(spec):
         typelist = []
         templascii = 65
         for arg in spec["specializations"][0]["args"]:
-            typelist.append(list(arg.values())[0])
+            typelist.append(arg["type"])
         for i in range(len(spec["specializations"][0]["args"])):
             for childfunc in spec["specializations"]:
                 if (
-                    typelist[i] != list(childfunc["args"][i].values())[0]
-                    and list(childfunc["args"][i].keys())[0] not in templateargs.keys()
+                    typelist[i] != childfunc["args"][i]["type"]
+                    and childfunc["args"][i]["name"] not in templateargs.keys()
                 ):
-                    templateargs[list(childfunc["args"][i].keys())[0]] = chr(templascii)
+                    templateargs[childfunc["args"][i]["name"]] = chr(templascii)
                     templascii += 1
     return templateargs
 
@@ -507,31 +507,30 @@ def getparentargs(templateargs, spec):
     args = OrderedDict()
     if "specializations" in spec.keys():
         for arg in spec["specializations"][0]["args"]:
-            argname = list(arg.keys())[0]
-            if list(arg.keys())[0] in templateargs.keys():
-                if "*" in getctype(list(arg.values())[0]):
+            argname = arg["name"]
+            if arg["name"] in templateargs.keys():
+                if "*" in getctype(arg["type"]):
                     argname = "*" + argname
-                if "Const[" in list(arg.values())[0]:
-                    args[argname] = "const " + templateargs[list(arg.keys())[0]]
+                if "Const[" in arg["type"]:
+                    args[argname] = "const " + templateargs[arg["name"]]
                 else:
-                    args[argname] = templateargs[list(arg.keys())[0]]
+                    args[argname] = templateargs[arg["name"]]
             else:
-                args[argname] = getctype(list(arg.values())[0])
+                args[argname] = getctype(arg["type"])
     else:
         for arg in spec["args"]:
-            argname = list(arg.keys())[0]
-            if argname in spec["outparams"]:
+            argname = arg["name"]
+            if arg["direction"] == "out":
                 argname = "*" + argname
             if "*" not in argname:
-                args[argname] = list(arg.values())[0]
+                args[argname] = arg["type"]
     return args
 
 
 def getchildargs(childfunc, spec):
     args = OrderedDict()
     for arg in childfunc["args"]:
-        for argname, typename in arg.items():
-            args[argname] = getctype(typename)
+        args[arg["name"]] = getctype(arg["type"])
     return args
 
 
@@ -573,13 +572,13 @@ def gettemplatetypes(spec, templateargs):
     count = 0
     code = ""
     for arg in spec["args"]:
-        for argname, typename in arg.items():
+        for argname, info in arg.items():
             if argname in templateargs.keys():
                 if count == 0:
-                    code += getctype(typename).replace("*", "")
+                    code += getctype(info["type"]).replace("*", "")
                     count += 1
                 else:
-                    code += ", " + getctype(typename).replace("*", "")
+                    code += ", " + getctype(info["type"]).replace("*", "")
     if "const " in code:
         code = code.replace("const ", "")
     return code
