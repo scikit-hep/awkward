@@ -1002,6 +1002,7 @@ if __name__ == "__main__":
                                 f.write(
                                     indent_code(pyfuncs[funcname], 4).rstrip() + "\n"
                                 )
+                            f.write(" " * 2 + "description: null")
             else:
                 if kernelname in tokens.keys() and kernelname not in SPEC_BLACKLIST:
                     print("name: ", kernelname)
