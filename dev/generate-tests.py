@@ -8,9 +8,210 @@ from itertools import product
 
 import yaml
 from numpy import uint8
-from parser_utils import PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST, TEST_BLACKLIST
+from parser_utils import (PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST,
+                          TEST_BLACKLIST)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+class Argument(object):
+    def __init__(self, name, typename, direction, role="default"):
+        self.name = name
+        self.typename = typename
+        self.direction = direction
+        self.role = role
+
+
+class Specification(object):
+    def __init__(self, spec, testdata, blacklisted):
+        self.name = spec["name"]
+        self.args = []
+        for arg in spec["args"]:
+            self.args.append(
+                Argument(
+                    arg["name"],
+                    arg["type"],
+                    arg["direction"],
+                    arg["role"] if "role" in arg.keys() else "default",
+                )
+            )
+        if blacklisted:
+            self.tests = []
+        else:
+            self.tests = self.gettests(testdata)
+
+    def validateoverflow(self, testvals):
+        flag = True
+        for arg in self.args:
+            if "uint" in arg.typename and (
+                any(n < 0 for n in testvals["inargs"][arg.name])
+                or (
+                    "outargs" in testvals.keys()
+                    and arg.name in testvals["outargs"].keys()
+                    and any(n < 0 for n in testvals["outargs"][arg.name])
+                )
+            ):
+                flag = False
+        return flag
+
+    def dicttolist(self, outputdict, typename):
+        typeval = gettypeval(typename)
+        vallist = []
+        count = 0
+        for num in sorted(outputdict):
+            if num == count:
+                vallist.append(outputdict[num])
+            else:
+                while num != count:
+                    count += 1
+                    vallist.append(typeval)
+                vallist.append(outputdict[num])
+            count += 1
+        return vallist
+
+    def getdummyvalue(self, typename, length):
+        return [gettypeval(typename)] * length
+
+    def typevalidates(self, testdict, arglist):
+        for arg in arglist:
+            if isinstance(testdict[arg.name], list):
+                if testdict[arg.name] == []:
+                    return False
+                if not isinstance(
+                    testdict[arg.name][0], type(gettypeval(arg.typename))
+                ):
+                    return False
+            else:
+                if not isinstance(testdict[arg.name], type(gettypeval(arg.typename))):
+                    return False
+        return True
+
+    def gettests(self, testdata):
+        allvals = []
+        with open(
+            os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py")
+        ) as kernelfile:
+            wrap_exec(kernelfile.read(), globals(), locals())
+            instancedict = {}
+            funcpassdict = OrderedDict()
+            count = 0
+            for arg in self.args:
+                funcpassdict[arg.name] = []
+                if arg.role == "default":
+                    group = str(count)
+                    assert group not in instancedict.keys()
+                    instancedict[group] = [arg.name]
+                    if arg.direction == "out":
+                        funcpassdict[arg.name].append({})
+                    else:
+                        funcpassdict[arg.name].append(testdata["num"])
+                    assert len(funcpassdict[arg.name]) == 1
+                    count += 1
+                else:
+                    group = arg.role[: arg.role.find("-")]
+                    if group not in instancedict.keys():
+                        instancedict[group] = []
+                    instancedict[group].append(arg.name)
+                    if group not in testdata.keys() and group[:-1] in testdata.keys():
+                        pseudogroup = copy.copy(group[:-1])
+                    elif group in testdata.keys():
+                        pseudogroup = copy.copy(group)
+                    role = pseudogroup + arg.role[arg.role.find("-") :]
+                    for x in range(len(testdata[pseudogroup])):
+                        funcpassdict[arg.name].append(testdata[pseudogroup][x][role])
+
+            instancedictlist = list(instancedict.keys())
+
+            combinations = []
+            for name in instancedictlist:
+                temp = []
+                for arg in instancedict[name]:
+                    temp.append(funcpassdict[arg])
+                combinations.append(zip(*temp))
+
+            for x in product(*combinations):
+                origtemp = OrderedDict()
+                for groupName, t in zip(instancedictlist, x):
+                    for key, value in zip(instancedict[groupName], t):
+                        origtemp[key] = value
+
+                temp = copy.deepcopy(origtemp)
+                funcPy = wrap_eval(self.name, globals(), locals())
+
+                intests = OrderedDict()
+                outtests = OrderedDict()
+                tempdict = {}
+                try:
+                    funcPy(**temp)
+                    if self.name not in SUCCESS_TEST_BLACKLIST or any(
+                        self.name in x for x in SUCCESS_TEST_BLACKLIST
+                    ):
+                        for arg in self.args:
+                            if arg.direction == "out":
+                                assert isinstance(temp[arg.name], dict)
+                                temparglist = self.dicttolist(
+                                    temp[arg.name], arg.typename
+                                )
+                                intests[arg.name] = self.getdummyvalue(
+                                    arg.typename, len(temparglist)
+                                )
+                                outtests[arg.name] = temparglist
+                            else:
+                                intests[arg.name] = temp[arg.name]
+                        tempdict["outargs"] = copy.deepcopy(outtests)
+                        tempdict["success"] = True
+                except ValueError:
+                    for arg in self.args:
+                        if arg.direction == "out":
+                            intests[arg.name] = self.getdummyvalue(
+                                arg.typename, len(temp[arg.name])
+                            )
+                        else:
+                            intests[arg.name] = temp[arg.name]
+                    tempdict["success"] = False
+                tempdict["inargs"] = copy.deepcopy(intests)
+                if self.typevalidates(
+                    tempdict["inargs"], self.args
+                ) and self.validateoverflow(tempdict):
+                    allvals.append(tempdict)
+
+        return allvals
+
+
+def readspec():
+    genpykernels()
+    specdict = {}
+    with open(
+        os.path.join(CURRENT_DIR, "..", "kernel-specification", "samples.json")
+    ) as testjson:
+        data = json.load(testjson)
+        with open(
+            os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
+        ) as infile:
+            mainspec = yaml.safe_load(infile)["kernels"]
+            for filedir in mainspec.values():
+                for relpath in filedir.values():
+                    with open(
+                        os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
+                    ) as specfile:
+                        indspec = yaml.safe_load(specfile)[0]
+                        if "def " in indspec["definition"]:
+                            if "specializations" in indspec.keys():
+                                for childfunc in indspec["specializations"]:
+                                    specdict[childfunc["name"]] = Specification(
+                                        childfunc,
+                                        data,
+                                        (indspec["name"] in TEST_BLACKLIST)
+                                        or (indspec["name"] in PYGEN_BLACKLIST),
+                                    )
+                            else:
+                                specdict[indspec["name"]] = Specification(
+                                    indspec,
+                                    data,
+                                    (indspec["name"] in TEST_BLACKLIST)
+                                    or (indspec["name"] in PYGEN_BLACKLIST),
+                                )
+    return specdict
 
 
 def wrap_exec(string, globs, locs):
@@ -51,10 +252,8 @@ def genpykernels():
     print("Generating Python kernels")
     prefix = """
 from numpy import uint8
-
 kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
-
 """
     with open(
         os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
@@ -94,210 +293,6 @@ def gettypeval(typename):
     return typeval
 
 
-def typevalidates(testdict, arglist):
-    for argdict in arglist:
-        for arg, typename in argdict.items():
-            if isinstance(testdict[arg], list):
-                if testdict[arg] == []:
-                    return False
-                if not isinstance(testdict[arg][0], type(gettypeval(typename))):
-                    return False
-            else:
-                if not isinstance(testdict[arg], type(gettypeval(typename))):
-                    return False
-    return True
-
-
-def getdummyvalue(argdict, length):
-    assert len(argdict) == 1
-    return [gettypeval(list(argdict.values())[0])] * length
-
-
-def dicttolist(outputdict, argdict):
-    assert len(argdict) == 1
-    typeval = gettypeval(list(argdict.values())[0])
-    vallist = []
-    count = 0
-    for num in sorted(outputdict):
-        if num == count:
-            vallist.append(outputdict[num])
-        else:
-            while num != count:
-                count += 1
-                vallist.append(typeval)
-            vallist.append(outputdict[num])
-        count += 1
-    return vallist
-
-
-def getargvals(funcname, arglist, rolelist, data, outparams):
-    allvals = []
-    with open(
-        os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py")
-    ) as kernelfile:
-        wrap_exec(kernelfile.read(), globals(), locals())
-        instancedict = {}
-        funcpassdict = OrderedDict()
-        count = 0
-        for roledict in rolelist:
-            assert len(roledict) == 1
-            for arg, role in roledict.items():
-                funcpassdict[arg] = []
-                if role == "default":
-                    group = str(count)
-                    assert group not in instancedict.keys()
-                    instancedict[group] = [arg]
-                    if arg in outparams:
-                        funcpassdict[arg].append({})
-                    else:
-                        funcpassdict[arg].append(data["num"])
-                    assert len(funcpassdict[arg]) == 1
-                    count += 1
-                else:
-                    group = role[: role.find("-")]
-                    if group not in instancedict.keys():
-                        instancedict[group] = []
-                    instancedict[group].append(arg)
-                    if group not in data.keys() and group[:-1] in data.keys():
-                        pseudogroup = copy.copy(group[:-1])
-                    elif group in data.keys():
-                        pseudogroup = copy.copy(group)
-                    role = pseudogroup + role[role.find("-") :]
-                    for x in range(len(data[pseudogroup])):
-                        funcpassdict[arg].append(data[pseudogroup][x][role])
-
-        instancedictlist = list(instancedict.keys())
-
-        combinations = []
-        for name in instancedictlist:
-            temp = []
-            for arg in instancedict[name]:
-                temp.append(funcpassdict[arg])
-            combinations.append(zip(*temp))
-
-        for x in product(*combinations):
-            origtemp = OrderedDict()
-            for groupName, t in zip(instancedictlist, x):
-                for key, value in zip(instancedict[groupName], t):
-                    origtemp[key] = value
-
-            temp = copy.deepcopy(origtemp)
-            funcPy = wrap_eval(funcname, globals(), locals())
-
-            intests = OrderedDict()
-            outtests = OrderedDict()
-            tempdict = {}
-            try:
-                funcPy(**temp)
-                if (funcname not in SUCCESS_TEST_BLACKLIST) or any(
-                    funcname in x for x in SUCCESS_TEST_BLACKLIST
-                ):
-                    for arg in temp.keys():
-                        if arg in outparams:
-                            assert isinstance(temp[arg], dict)
-                            temparglist = dicttolist(
-                                temp[arg],
-                                next(
-                                    argmap
-                                    for argmap in arglist
-                                    if list(argmap.keys())[0] == arg
-                                ),
-                            )
-                            intests[arg] = getdummyvalue(
-                                next(
-                                    argmap
-                                    for argmap in arglist
-                                    if list(argmap.keys())[0] == arg
-                                ),
-                                len(temparglist),
-                            )
-                            outtests[arg] = temparglist
-                        else:
-                            intests[arg] = temp[arg]
-                    tempdict["outargs"] = copy.deepcopy(outtests)
-                    tempdict["success"] = True
-            except ValueError:
-                for arg in temp.keys():
-                    if arg in outparams:
-                        intests[arg] = getdummyvalue(
-                            next(
-                                argmap
-                                for argmap in arglist
-                                if list(argmap.keys())[0] == arg
-                            ),
-                            len(temp[arg]),
-                        )
-                    else:
-                        intests[arg] = temp[arg]
-                tempdict["success"] = False
-            tempdict["inargs"] = copy.deepcopy(intests)
-            if typevalidates(tempdict["inargs"], arglist):
-                allvals.append(tempdict)
-
-    return allvals
-
-
-def gettests():
-    tests = {}
-    with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "samples.json")
-    ) as testjson:
-        data = json.load(testjson)
-        genpykernels()
-        print("Generating test cases")
-        with open(
-            os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
-        ) as infile:
-            mainspec = yaml.safe_load(infile)["kernels"]
-            for filedir in mainspec.values():
-                for relpath in filedir.values():
-                    with open(
-                        os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
-                    ) as specfile:
-                        indspec = yaml.safe_load(specfile)[0]
-                        if "specializations" in indspec.keys():
-                            for childfunc in indspec["specializations"]:
-                                if (
-                                    "roles" in indspec.keys()
-                                    and (
-                                        "pointer"
-                                        not in [
-                                            list(x.values())[0]
-                                            for x in indspec["roles"]
-                                        ]
-                                    )
-                                    and indspec["name"] not in TEST_BLACKLIST
-                                    and indspec["name"] not in PYGEN_BLACKLIST
-                                ):
-                                    tests[childfunc["name"]] = getargvals(
-                                        childfunc["name"],
-                                        childfunc["args"],
-                                        indspec["roles"],
-                                        data,
-                                        indspec["outparams"],
-                                    )
-                                else:
-                                    tests[childfunc["name"]] = []
-                        else:
-                            if (
-                                "roles" in indspec.keys()
-                                and "pointer"
-                                not in [list(x.values())[0] for x in indspec["roles"]]
-                                and indspec["name"] not in TEST_BLACKLIST
-                                and indspec["name"] not in PYGEN_BLACKLIST
-                            ):
-                                tests[indspec["name"]] = getargvals(
-                                    indspec["name"],
-                                    indspec["args"],
-                                    indspec["roles"],
-                                    data,
-                                    indspec["outparams"],
-                                )
-                            else:
-                                tests[indspec["name"]] = []
-    return tests
-
-
 def getcudakernelslist():
     cudakernels = []
     for f in os.listdir(os.path.join(CURRENT_DIR, "..", "src", "cuda-kernels")):
@@ -309,32 +304,36 @@ def getcudakernelslist():
     return cudakernels
 
 
-def genspectests(tests):
+def genspectests(specdict):
     print("Generating files for testing specification")
-    for funcname in tests.keys():
+    for spec in specdict.values():
         with open(
-            os.path.join(CURRENT_DIR, "..", "tests-spec", "test_py" + funcname + ".py"),
+            os.path.join(
+                CURRENT_DIR, "..", "tests-spec", "test_py" + spec.name + ".py"
+            ),
             "w",
         ) as f:
             f.write("import pytest\nimport kernels\n\n")
             num = 1
-            if tests[funcname] == []:
+            if spec.tests == []:
                 f.write(
                     "@pytest.mark.skip(reason='Unable to generate any tests for kernel')\n"
                 )
-                f.write("def test_py" + funcname + "_" + str(num) + "():\n")
+                f.write("def test_py" + spec.name + "_" + str(num) + "():\n")
                 f.write(
                     " " * 4
                     + "raise NotImplementedError('Unable to generate any tests for kernel')\n"
                 )
             else:
-                for test in tests[funcname]:
-                    f.write("def test_py" + funcname + "_" + str(num) + "():\n")
+                for test in spec.tests:
+                    f.write("def test_py" + spec.name + "_" + str(num) + "():\n")
                     num += 1
                     args = ""
                     for arg, val in test["inargs"].items():
                         f.write(" " * 4 + arg + " = " + str(val) + "\n")
-                    f.write(" " * 4 + "funcPy = getattr(kernels, '" + funcname + "')\n")
+                    f.write(
+                        " " * 4 + "funcPy = getattr(kernels, '" + spec.name + "')\n"
+                    )
                     count = 0
                     for arg in test["inargs"].keys():
                         if count == 0:
@@ -363,58 +362,16 @@ def genspectests(tests):
                     f.write("\n")
 
 
-def getfuncargs(tests):
-    funcs = {}
-    with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
-    ) as infile:
-        mainspec = yaml.safe_load(infile)["kernels"]
-        for filedir in mainspec.values():
-            for relpath in filedir.values():
-                with open(
-                    os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
-                ) as specfile:
-                    indspec = yaml.safe_load(specfile)[0]
-                    if "def " in indspec["definition"]:
-                        if "specializations" in indspec.keys():
-                            for childfunc in indspec["specializations"]:
-                                funcs[childfunc["name"]] = OrderedDict()
-                                if (
-                                    childfunc["name"] in tests.keys()
-                                    and tests[childfunc["name"]] != []
-                                ):
-                                    for arg in childfunc["args"]:
-                                        typename = list(arg.values())[0]
-                                        if "Const[" in typename:
-                                            typename = typename.replace(
-                                                "Const[", "", 1
-                                            ).rstrip("]")
-                                        funcs[childfunc["name"]][
-                                            list(arg.keys())[0]
-                                        ] = typename
-
-                        else:
-                            funcs[indspec["name"]] = OrderedDict()
-                            if (
-                                indspec["name"] in tests.keys()
-                                and tests[indspec["name"]] != []
-                            ):
-                                for arg in indspec["args"]:
-                                    typename = list(arg.values())[0]
-                                    if "Const[" in typename:
-                                        typename = typename.replace(
-                                            "Const[", "", 1
-                                        ).rstrip("]")
-                                    funcs[indspec["name"]][
-                                        list(arg.keys())[0]
-                                    ] = typename
-
-    return funcs
+def remove_const(typename):
+    if "Const[" in typename:
+        typename = typename.replace("Const[", "", 1).rstrip("]")
+    return typename
 
 
-def getctypelist(typedict):
+def getctypelist(arglist):
     newctypes = []
-    for typename in typedict.values():
+    for arg in arglist:
+        typename = remove_const(arg.typename)
         if "List" in typename:
             count = typename.count("List")
             typename = typename.replace("List", "").replace("[", "").replace("]", "")
@@ -445,36 +402,40 @@ def getctypelist(typedict):
     return funcCtypes
 
 
-def gencpukerneltests(tests):
+def gencpukerneltests(specdict):
     print("Generating files for testing CPU kernels")
 
-    funcargs = getfuncargs(tests)
-    for funcname in tests.keys():
+    for spec in specdict.values():
         with open(
             os.path.join(
-                CURRENT_DIR, "..", "tests-cpu-kernels", "test_cpu" + funcname + ".py"
+                CURRENT_DIR, "..", "tests-cpu-kernels", "test_cpu" + spec.name + ".py"
             ),
             "w",
         ) as f:
             f.write("import ctypes\nimport pytest\nfrom __init__ import lib, Error\n\n")
             num = 1
-            if tests[funcname] == []:
+            if spec.tests == []:
                 f.write(
                     "@pytest.mark.skip(reason='Unable to generate any tests for kernel')\n"
                 )
-                f.write("def test_cpu" + funcname + "_" + str(num) + "():\n")
+                f.write("def test_cpu" + spec.name + "_" + str(num) + "():\n")
                 f.write(
                     " " * 4
                     + "raise NotImplementedError('Unable to generate any tests for kernel')\n"
                 )
-            for test in tests[funcname]:
-                f.write("def test_cpu" + funcname + "_" + str(num) + "():\n")
+            for test in spec.tests:
+                f.write("def test_cpu" + spec.name + "_" + str(num) + "():\n")
                 num += 1
                 for arg, val in test["inargs"].items():
                     f.write(" " * 4 + arg + " = " + str(val) + "\n")
-                    if "List" in funcargs[funcname][arg]:
-                        count = funcargs[funcname][arg].count("List")
-                        typename = gettypename(funcargs[funcname][arg])
+                    typename = remove_const(
+                        next(
+                            argument for argument in spec.args if argument.name == arg
+                        ).typename
+                    )
+                    if "List" in typename:
+                        count = typename.count("List")
+                        typename = gettypename(typename)
                         if count == 1:
                             f.write(
                                 " " * 4
@@ -489,20 +450,19 @@ def gencpukerneltests(tests):
                                     arg, typename
                                 )
                             )
-                f.write(" " * 4 + "funcC = getattr(lib, '" + funcname + "')\n")
+                f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
                 f.write(" " * 4 + "funcC.restype = Error\n")
                 f.write(
-                    " " * 4
-                    + "funcC.argtypes = {0}\n".format(getctypelist(funcargs[funcname]))
+                    " " * 4 + "funcC.argtypes = {0}\n".format(getctypelist(spec.args))
                 )
                 args = ""
                 count = 0
-                for arg in funcargs[funcname].keys():
+                for arg in spec.args:
                     if count == 0:
-                        args += arg
+                        args += arg.name
                         count += 1
                     else:
-                        args += ", " + arg
+                        args += ", " + arg.name
                 if test["success"]:
                     f.write(" " * 4 + "ret_pass = funcC(" + args + ")\n")
                     for arg, val in test["outargs"].items():
@@ -522,23 +482,22 @@ def gencpukerneltests(tests):
                 f.write("\n")
 
 
-def gencudakerneltests(tests):
+def gencudakerneltests(specdict):
     print("Generating files for testing CUDA kernels")
 
-    funcargs = getfuncargs(tests)
     cudakernels = getcudakernelslist()
     funcnames = getfuncnames()
     cudafuncnames = {funcname: funcnames[funcname] for funcname in cudakernels}
-    for funcname in tests.keys():
-        if (funcname in cudakernels) or any(
-            funcname in x for x in cudafuncnames.values()
+    for spec in specdict.values():
+        if (spec.name in cudakernels) or any(
+            spec.name in x for x in cudafuncnames.values()
         ):
             with open(
                 os.path.join(
                     CURRENT_DIR,
                     "..",
                     "tests-cuda-kernels",
-                    "test_cuda" + funcname + ".py",
+                    "test_cuda" + spec.name + ".py",
                 ),
                 "w",
             ) as f:
@@ -546,24 +505,31 @@ def gencudakerneltests(tests):
                     "import ctypes\nimport cupy\nimport pytest\nfrom __init__ import lib, Error\n\n"
                 )
                 num = 1
-                if tests[funcname] == []:
+                if spec.tests == []:
                     f.write(
                         "@pytest.mark.skip(reason='Unable to generate any tests for kernel')\n"
                     )
-                    f.write("def test_cuda" + funcname + "_" + str(num) + "():\n")
+                    f.write("def test_cuda" + spec.name + "_" + str(num) + "():\n")
                     f.write(
                         " " * 4
                         + "raise NotImplementedError('Unable to generate any tests for kernel')\n"
                     )
-                for test in tests[funcname]:
-                    f.write("def test_cuda" + funcname + "_" + str(num) + "():\n")
+                for test in spec.tests:
+                    f.write("def test_cuda" + spec.name + "_" + str(num) + "():\n")
                     num += 1
                     for arg, val in test["inargs"].items():
-                        if "List" in funcargs[funcname][arg]:
-                            count = funcargs[funcname][arg].count(
+                        typename = remove_const(
+                            next(
+                                argument
+                                for argument in spec.args
+                                if argument.name == arg
+                            ).typename
+                        )
+                        if "List" in typename:
+                            count = typename.count(
                                 "List"
                             )  # Might need later for ndim array
-                            typename = gettypename(funcargs[funcname][arg])
+                            typename = gettypename(typename)
                             f.write(
                                 " " * 4
                                 + "{0} = cupy.array({1}, dtype=cupy.{2})\n".format(
@@ -578,29 +544,35 @@ def gencudakerneltests(tests):
                             )
                         else:
                             f.write(" " * 4 + "d_" + arg + " = " + str(val) + "\n")
-                    f.write(" " * 4 + "funcC = getattr(lib, '" + funcname + "')\n")
+                    f.write(" " * 4 + "funcC = getattr(lib, '" + spec.name + "')\n")
                     f.write(" " * 4 + "funcC.restype = Error\n")
                     f.write(
                         " " * 4
-                        + "funcC.argtypes = {0}\n".format(
-                            getctypelist(funcargs[funcname])
-                        )
+                        + "funcC.argtypes = {0}\n".format(getctypelist(spec.args))
                     )
                     args = ""
                     count = 0
-                    for arg in funcargs[funcname].keys():
+                    for arg in spec.args:
                         if count == 0:
-                            args += "d_" + arg
+                            args += "d_" + arg.name
                             count += 1
                         else:
-                            args += ", d_" + arg
+                            args += ", d_" + arg.name
                     if test["success"]:
                         f.write(" " * 4 + "ret_pass = funcC(" + args + ")\n")
                         for arg, val in test["outargs"].items():
                             f.write(
                                 " " * 4
                                 + "pytest_{0} = cupy.array({1}, dtype=cupy.{2})\n".format(
-                                    arg, str(val), gettypename(funcargs[funcname][arg])
+                                    arg,
+                                    str(val),
+                                    gettypename(
+                                        next(
+                                            argument.typename
+                                            for argument in spec.args
+                                            if argument.name == arg
+                                        )
+                                    ),
                                 )
                             )
                             if isinstance(val, list):
@@ -622,87 +594,8 @@ def gencudakerneltests(tests):
                     f.write("\n")
 
 
-def validateoverflow(tests):
-    new_tests = {}
-    with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
-    ) as infile:
-        mainspec = yaml.safe_load(infile)["kernels"]
-        for filedir in mainspec.values():
-            for relpath in filedir.values():
-                with open(
-                    os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
-                ) as specfile:
-                    indspec = yaml.safe_load(specfile)[0]
-                    if "def " in indspec["definition"]:
-                        if "specializations" in indspec.keys():
-                            for childfunc in indspec["specializations"]:
-                                if (
-                                    childfunc["name"] in tests.keys()
-                                    and tests[childfunc["name"]] != []
-                                ):
-                                    new_tests[childfunc["name"]] = []
-                                    for test in tests[childfunc["name"]]:
-                                        flag = True
-                                        for argdict in childfunc["args"]:
-                                            for arg, typename in argdict.items():
-                                                if (
-                                                    "uint" in typename
-                                                    and (
-                                                        any(
-                                                            n < 0
-                                                            for n in test["inargs"][arg]
-                                                        )
-                                                    )
-                                                ) or (
-                                                    "outargs" in test.keys()
-                                                    and (arg in test["outargs"].keys())
-                                                    and any(
-                                                        n < 0
-                                                        for n in test["outargs"][arg]
-                                                    )
-                                                ):
-                                                    flag = False
-                                        if flag:
-                                            new_tests[childfunc["name"]].append(
-                                                copy.deepcopy(test)
-                                            )
-                        else:
-                            if (
-                                indspec["name"] in tests.keys()
-                                and tests[indspec["name"]] != []
-                            ):
-                                new_tests[indspec["name"]] = []
-                                for test in tests[indspec["name"]]:
-                                    flag = True
-                                    for argdict in indspec["args"]:
-                                        for arg, typename in argdict.items():
-                                            if (
-                                                "uint" in typename
-                                                and (
-                                                    any(
-                                                        n < 0
-                                                        for n in test["inargs"][arg]
-                                                    )
-                                                )
-                                            ) or (
-                                                "outargs" in test.keys()
-                                                and (arg in test["outargs"].keys())
-                                                and any(
-                                                    n < 0 for n in test["outargs"][arg]
-                                                )
-                                            ):
-                                                flag = False
-                                    if flag:
-                                        new_tests[indspec["name"]].append(
-                                            copy.deepcopy(test)
-                                        )
-    return new_tests
-
-
 if __name__ == "__main__":
-    tests = gettests()
-    tests = validateoverflow(tests)
-    genspectests(tests)
-    gencpukerneltests(tests)
-    gencudakerneltests(tests)
+    specdict = readspec()
+    genspectests(specdict)
+    gencpukerneltests(specdict)
+    gencudakerneltests(specdict)

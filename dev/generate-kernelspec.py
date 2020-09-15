@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 import argparse
-import copy
 import os
 import platform
 import re
@@ -942,40 +941,60 @@ if __name__ == "__main__":
                                     f.write(" " * 4 + "- name: " + childfunc + "\n")
                                     f.write(" " * 6 + "args:\n")
                                     for arg in funcargs[childfunc].keys():
+                                        f.write(" " * 8 + "- name: " + arg + "\n")
                                         f.write(
-                                            " " * 8
-                                            + "- "
-                                            + arg
-                                            + ": "
+                                            " " * 10
+                                            + "type: "
                                             + arrayconv(funcargs[childfunc][arg])
                                             + "\n"
                                         )
+                                        f.write(
+                                            " " * 10
+                                            + "direction: "
+                                            + paramchecks[funcname][arg][
+                                                : -len("param")
+                                            ]
+                                            + "\n"
+                                        )
+                                        if not paramchecks[funcname][arg] == "outparam":
+                                            if (
+                                                "role"
+                                                in funcroles[childfunc][arg].keys()
+                                            ):
+                                                f.write(
+                                                    " " * 10
+                                                    + "role: "
+                                                    + funcroles[childfunc][arg]["role"]
+                                                    + "\n"
+                                                )
+                                            else:
+                                                f.write(" " * 10 + "role: default\n")
                             else:
                                 f.write(" " * 2 + "args:\n")
                                 for arg in funcargs[funcname].keys():
+                                    f.write(" " * 4 + "- name: " + arg + "\n")
                                     f.write(
-                                        " " * 4
-                                        + "- "
-                                        + arg
-                                        + ": "
+                                        " " * 6
+                                        + "type: "
                                         + arrayconv(funcargs[funcname][arg])
                                         + "\n"
                                     )
-                            inparams = []
-                            outparams = []
-                            for arg in paramchecks[funcname].keys():
-                                if (
-                                    paramchecks[funcname][arg] == "inparam"
-                                    or paramchecks[funcname][arg] == "inoutparam"
-                                ):
-                                    inparams.append(str(arg))
-                                if (
-                                    paramchecks[funcname][arg] == "outparam"
-                                    or paramchecks[funcname][arg] == "inoutparam"
-                                ):
-                                    outparams.append(str(arg))
-                            f.write(" " * 2 + "inparams: " + str(inparams) + "\n")
-                            f.write(" " * 2 + "outparams: " + str(outparams) + "\n")
+                                    f.write(
+                                        " " * 6
+                                        + "direction: "
+                                        + paramchecks[funcname][arg][: -len("param")]
+                                        + "\n"
+                                    )
+                                    if not paramchecks[funcname][arg] == "outparam":
+                                        if "role" in funcroles[funcname][arg].keys():
+                                            f.write(
+                                                " " * 6
+                                                + "role: "
+                                                + funcroles[funcname][arg]["role"]
+                                                + "\n"
+                                            )
+                                        else:
+                                            f.write(" " * 6 + "role: default\n")
                             f.write(" " * 2 + "definition: |\n")
                             if funcname in PYGEN_BLACKLIST or "sorting.cpp" in filename:
                                 f.write(" " * 4 + "Insert Python definition here\n")
@@ -983,23 +1002,6 @@ if __name__ == "__main__":
                                 f.write(
                                     indent_code(pyfuncs[funcname], 4).rstrip() + "\n"
                                 )
-                            if "sorting.cpp" not in filename:
-                                if "childfunc" in tokens[funcname].keys():
-                                    genfuncname = next(
-                                        iter(tokens[funcname]["childfunc"])
-                                    )
-                                else:
-                                    genfuncname = copy.copy(funcname)
-                                if genfuncname in funcroles.keys():
-                                    f.write(" " * 2 + "roles:\n")
-                                    for arg, roledict in funcroles[genfuncname].items():
-                                        if "role" in roledict:
-                                            role = roledict["role"]
-                                        else:
-                                            role = "default"
-                                        f.write(
-                                            " " * 4 + "- " + arg + ": " + role + "\n"
-                                        )
             else:
                 if kernelname in tokens.keys() and kernelname not in SPEC_BLACKLIST:
                     print("name: ", kernelname)
@@ -1009,37 +1011,26 @@ if __name__ == "__main__":
                             print(" " * 2 + "- name: " + childfunc)
                             print(" " * 4 + "args:")
                             for arg in funcargs[childfunc].keys():
+                                print(" " * 6 + "- " + arg + ":")
                                 print(
-                                    " " * 6
-                                    + "- "
-                                    + arg
-                                    + ": "
-                                    + arrayconv(funcargs[childfunc][arg])
+                                    " " * 8 + "type: ",
+                                    arrayconv(funcargs[childfunc][arg]),
+                                )
+                                print(
+                                    " " * 8 + "direction: ",
+                                    paramchecks[funcname][arg][: -len("param")],
                                 )
                     else:
+                        print(" " * 2 + "args:")
                         for arg in funcargs[kernelname].keys():
+                            print(" " * 4 + "- " + arg + ":")
                             print(
-                                " " * 2
-                                + "- "
-                                + arg
-                                + ": "
-                                + arrayconv(funcargs[kernelname][arg])
+                                " " * 6 + "type: ", arrayconv(funcargs[kernelname][arg])
                             )
-                    inparams = []
-                    outparams = []
-                    for arg in paramchecks[kernelname].keys():
-                        if (
-                            paramchecks[kernelname][arg] == "inparam"
-                            or paramchecks[kernelname][arg] == "inoutparam"
-                        ):
-                            inparams.append(str(arg))
-                        if (
-                            paramchecks[kernelname][arg] == "outparam"
-                            or paramchecks[kernelname][arg] == "inoutparam"
-                        ):
-                            outparams.append(str(arg))
-                    print(" " * 4 + "inparams: ", inparams)
-                    print(" " * 4 + "outparams: ", outparams)
+                            print(
+                                " " * 6 + "direction: ",
+                                paramchecks[kernelname][arg][: -len("param")],
+                            )
                     print(" " * 4 + "definition: |")
                     if kernelname in PYGEN_BLACKLIST or "sorting.cpp" in filename:
                         print(" " * 6 + "Insert Python definition here")
