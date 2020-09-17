@@ -8,8 +8,7 @@ from itertools import product
 
 import yaml
 from numpy import uint8
-from parser_utils import (PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST,
-                          TEST_BLACKLIST)
+from parser_utils import PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST, TEST_BLACKLIST
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -533,7 +532,9 @@ def gencudakerneltests(specdict):
                             f.write(
                                 " " * 4
                                 + "{0} = cupy.array({1}, dtype=cupy.{2})\n".format(
-                                    arg, str(val), typename
+                                    arg,
+                                    str(val),
+                                    "float32" if typename == "float" else typename,
                                 )
                             )
                             f.write(

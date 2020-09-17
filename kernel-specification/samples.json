@@ -201,7 +201,7 @@
             "NumpyArray-length": 4
         },
         {
-            "NumpyArray-ptr": [1, -8, 3, 9, 4, 7, 9],
+            "NumpyArray-ptr": [1.1, -8.1, 3.1, 9.1, 4.1, 7.1, 9.1],
             "NumpyArray-ptr-offset": 1,
             "NumpyArray-length": 2
         },
