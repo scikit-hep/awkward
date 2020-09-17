@@ -170,7 +170,11 @@ def type(array):
         if len(array.shape) == 0:
             return type(array.reshape((1,))[0])
         else:
-            out = awkward1.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
+            try:
+                out = type.dtype2primitive[array.dtype.type]
+            except KeyError:
+                raise TypeError("numpy array type is unrecognized by awkward: %r" % array.dtype.type)
+            out = awkward1.types.PrimitiveType(out)
             for x in array.shape[-1:0:-1]:
                 out = awkward1.types.RegularType(out, x)
             return awkward1.types.ArrayType(out, array.shape[0])
@@ -191,6 +195,8 @@ def type(array):
 
 
 type.dtype2primitive = {
+    np.bool: "bool",
+    np.bool_: "bool",
     np.int8: "int8",
     np.int16: "int16",
     np.int32: "int32",
