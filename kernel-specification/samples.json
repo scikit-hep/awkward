@@ -101,6 +101,12 @@
             "UnionArray-tags-offset": 0,
             "UnionArray-which": 1,
             "UnionArray-length": 2
+        },
+        {
+            "UnionArray-tags": [0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1],
+            "UnionArray-tags-offset": 0,
+            "UnionArray-which": 0,
+            "UnionArray-length": 3
         }
     ],
     "NumpyArray": [
