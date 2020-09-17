@@ -23,9 +23,8 @@ A second implementation, ``libawkward-cuda-kernels.so``, is provided as a separa
 The functions are implemented in C with templates for integer specializations (cpu-kernels) and as CUDA (cuda-kernels), but the function signatures and normative definitions are expressed below using a subset of the Python language. These normative definitions are used as a stable and easy-to-read standard that both implementations must reproduce in tests, regardless of how they are optimized.\n
 """
     with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
-    ) as infile:
-        mainspec = yaml.safe_load(infile)["kernels"]
+        os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml")
+    ) as specfile:
         with open(
             os.path.join(
                 CURRENT_DIR,
@@ -37,69 +36,65 @@ The functions are implemented in C with templates for integer specializations (c
             "w",
         ) as outfile:
             outfile.write(prefix)
-            for filedir in mainspec.values():
-                for relpath in filedir.values():
-                    with open(
-                        os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
-                    ) as specfile:
-                        indspec = yaml.safe_load(specfile)[0]
-                        outfile.write(indspec["name"] + "\n")
-                        print("Generating doc for " + indspec["name"])
-                        outfile.write(
-                            "========================================================================\n"
-                        )
-                        if "specializations" in indspec.keys():
-                            for childfunc in indspec["specializations"]:
-                                outfile.write(".. py:function:: " + childfunc["name"])
-                                outfile.write("(")
-                                for i in range(len(childfunc["args"])):
-                                    if i != 0:
-                                        outfile.write(
-                                            ", "
-                                            + childfunc["args"][i]["name"]
-                                            + ": "
-                                            + childfunc["args"][i]["type"]
-                                        )
-                                    else:
-                                        outfile.write(
-                                            childfunc["args"][i]["name"]
-                                            + ": "
-                                            + childfunc["args"][i]["type"]
-                                        )
-                                outfile.write(")\n")
-                        outfile.write(".. code-block:: python\n\n")
-                        # Remove conditional at the end of dev
-                        if "def" in indspec["definition"]:
-                            outfile.write(
-                                indent_code(
-                                    indspec["definition"],
-                                    4,
+            indspec = yaml.safe_load(specfile)
+            for spec in indspec:
+                outfile.write(spec["name"] + "\n")
+                print("Generating doc for " + spec["name"])
+                outfile.write(
+                    "========================================================================\n"
+                )
+                if "specializations" in spec.keys():
+                    for childfunc in spec["specializations"]:
+                        outfile.write(".. py:function:: " + childfunc["name"])
+                        outfile.write("(")
+                        for i in range(len(childfunc["args"])):
+                            if i != 0:
+                                outfile.write(
+                                    ", "
+                                    + childfunc["args"][i]["name"]
+                                    + ": "
+                                    + childfunc["args"][i]["type"]
                                 )
-                                + "\n\n"
-                            )
+                            else:
+                                outfile.write(
+                                    childfunc["args"][i]["name"]
+                                    + ": "
+                                    + childfunc["args"][i]["type"]
+                                )
+                        outfile.write(")\n")
+                outfile.write(".. code-block:: python\n\n")
+                # Remove conditional at the end of dev
+                if "def" in spec["definition"]:
+                    outfile.write(
+                        indent_code(
+                            spec["definition"],
+                            4,
+                        )
+                        + "\n\n"
+                    )
 
-        if os.path.isfile(
+    if os.path.isfile(
+        os.path.join(
+            CURRENT_DIR,
+            "..",
+            "docs-sphinx",
+            "_auto",
+            "toctree.txt",
+        )
+    ):
+        with open(
             os.path.join(
                 CURRENT_DIR,
                 "..",
                 "docs-sphinx",
                 "_auto",
                 "toctree.txt",
-            )
-        ):
-            with open(
-                os.path.join(
-                    CURRENT_DIR,
-                    "..",
-                    "docs-sphinx",
-                    "_auto",
-                    "toctree.txt",
-                ),
-                "r+",
-            ) as f:
-                if "_auto/kernels.rst" not in f.read():
-                    print("Updating toctree.txt")
-                    f.write(" " * 4 + "_auto/kernels.rst")
+            ),
+            "r+",
+        ) as f:
+            if "_auto/kernels.rst" not in f.read():
+                print("Updating toctree.txt")
+                f.write(" " * 4 + "_auto/kernels.rst")
 
 
 if __name__ == "__main__":
