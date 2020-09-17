@@ -714,11 +714,8 @@ if __name__ == "__main__":
     arg_parser.add_argument("kernelname", nargs="?")
     args = arg_parser.parse_args()
     kernelname = args.kernelname
-    with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
-    ) as infile:
-        mainspec = yaml.safe_load(infile)["kernels"]
-        code = """#include "awkward/kernels/operations.h"
+
+    code = """#include "awkward/kernels/operations.h"
 #include "awkward/kernels/identities.h"
 #include "awkward/kernels/getitem.h"
 #include "awkward/kernels/reducers.h"
@@ -726,30 +723,28 @@ if __name__ == "__main__":
 #include <cstdio>
 
 """
-        for filedir in mainspec.values():
-            for relpath in filedir.values():
+
+    with open(
+        os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml")
+    ) as specfile:
+        indspec = yaml.safe_load(specfile)
+        for spec in indspec:
+            if spec["name"] == kernelname and (kernelname in KERNEL_WHITELIST):
+                code = getcode(spec)
+                print(code)
+                break
+            if kernelname is None and spec["name"] in KERNEL_WHITELIST:
                 with open(
-                    os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
-                ) as specfile:
-                    indspec = yaml.safe_load(specfile)[0]
-                    if indspec["name"] == kernelname and (
-                        kernelname in KERNEL_WHITELIST
-                    ):
-                        code = getcode(indspec)
-                        print(code)
-                        break
-                    if kernelname is None and indspec["name"] in KERNEL_WHITELIST:
-                        with open(
-                            os.path.join(
-                                CURRENT_DIR,
-                                "..",
-                                "src",
-                                "cuda-kernels",
-                                indspec["name"] + ".cu",
-                            ),
-                            "w",
-                        ) as outfile:
-                            err_macro = '#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/{0}.cu", line)\n\n'.format(
-                                indspec["name"]
-                            )
-                            outfile.write(err_macro + code + getcode(indspec))
+                    os.path.join(
+                        CURRENT_DIR,
+                        "..",
+                        "src",
+                        "cuda-kernels",
+                        spec["name"] + ".cu",
+                    ),
+                    "w",
+                ) as outfile:
+                    err_macro = '#define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/{0}.cu", line)\n\n'.format(
+                        spec["name"]
+                    )
+                    outfile.write(err_macro + code + getcode(spec))
