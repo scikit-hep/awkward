@@ -185,31 +185,26 @@ def readspec():
     ) as testjson:
         data = json.load(testjson)
         with open(
-            os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
-        ) as infile:
-            mainspec = yaml.safe_load(infile)["kernels"]
-            for filedir in mainspec.values():
-                for relpath in filedir.values():
-                    with open(
-                        os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
-                    ) as specfile:
-                        indspec = yaml.safe_load(specfile)[0]
-                        if "def " in indspec["definition"]:
-                            if "specializations" in indspec.keys():
-                                for childfunc in indspec["specializations"]:
-                                    specdict[childfunc["name"]] = Specification(
-                                        childfunc,
-                                        data,
-                                        (indspec["name"] in TEST_BLACKLIST)
-                                        or (indspec["name"] in PYGEN_BLACKLIST),
-                                    )
-                            else:
-                                specdict[indspec["name"]] = Specification(
-                                    indspec,
-                                    data,
-                                    (indspec["name"] in TEST_BLACKLIST)
-                                    or (indspec["name"] in PYGEN_BLACKLIST),
-                                )
+            os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml")
+        ) as specfile:
+            indspec = yaml.safe_load(specfile)
+            for spec in indspec:
+                if "def " in spec["definition"]:
+                    if "specializations" in spec.keys():
+                        for childfunc in spec["specializations"]:
+                            specdict[childfunc["name"]] = Specification(
+                                childfunc,
+                                data,
+                                (spec["name"] in TEST_BLACKLIST)
+                                or (spec["name"] in PYGEN_BLACKLIST),
+                            )
+                    else:
+                        specdict[spec["name"]] = Specification(
+                            spec,
+                            data,
+                            (spec["name"] in TEST_BLACKLIST)
+                            or (spec["name"] in PYGEN_BLACKLIST),
+                        )
     return specdict
 
 
@@ -231,19 +226,14 @@ def gettypename(spectype):
 def getfuncnames():
     funcs = {}
     with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
-    ) as infile:
-        mainspec = yaml.safe_load(infile)["kernels"]
-        for filedir in mainspec.values():
-            for relpath in filedir.values():
-                with open(
-                    os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
-                ) as specfile:
-                    indspec = yaml.safe_load(specfile)[0]
-                    funcs[indspec["name"]] = []
-                    if "specializations" in indspec.keys():
-                        for childfunc in indspec["specializations"]:
-                            funcs[indspec["name"]].append(childfunc["name"])
+        os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml")
+    ) as specfile:
+        indspec = yaml.safe_load(specfile)
+        for spec in indspec:
+            funcs[spec["name"]] = []
+            if "specializations" in spec.keys():
+                for childfunc in spec["specializations"]:
+                    funcs[spec["name"]].append(childfunc["name"])
     return funcs
 
 
@@ -255,29 +245,22 @@ kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
 """
     with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
-    ) as infile:
-        mainspec = yaml.safe_load(infile)["kernels"]
+        os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py"), "w"
+    ) as outfile:
+        outfile.write(prefix)
         with open(
-            os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py"), "w"
-        ) as outfile:
-            outfile.write(prefix)
-            for filedir in mainspec.values():
-                for relpath in filedir.values():
-                    with open(
-                        os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
-                    ) as specfile:
-                        indspec = yaml.safe_load(specfile)[0]
-                        if "def " in indspec["definition"]:
-                            outfile.write(indspec["definition"] + "\n")
-                            if "specializations" in indspec.keys():
-                                for childfunc in indspec["specializations"]:
-                                    outfile.write(
-                                        "{0} = {1}\n".format(
-                                            childfunc["name"], indspec["name"]
-                                        )
-                                    )
-                                outfile.write("\n\n")
+            os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml")
+        ) as specfile:
+            indspec = yaml.safe_load(specfile)
+            for spec in indspec:
+                if "def " in spec["definition"]:
+                    outfile.write(spec["definition"] + "\n")
+                    if "specializations" in spec.keys():
+                        for childfunc in spec["specializations"]:
+                            outfile.write(
+                                "{0} = {1}\n".format(childfunc["name"], spec["name"])
+                            )
+                        outfile.write("\n\n")
 
 
 def gettypeval(typename):
