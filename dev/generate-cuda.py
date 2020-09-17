@@ -487,43 +487,34 @@ def getctype(typename):
 
 def gettemplateargs(spec):
     templateargs = OrderedDict()
-    if "specializations" in spec.keys():
-        typelist = []
-        templascii = 65
-        for arg in spec["specializations"][0]["args"]:
-            typelist.append(arg["type"])
-        for i in range(len(spec["specializations"][0]["args"])):
-            for childfunc in spec["specializations"]:
-                if (
-                    typelist[i] != childfunc["args"][i]["type"]
-                    and childfunc["args"][i]["name"] not in templateargs.keys()
-                ):
-                    templateargs[childfunc["args"][i]["name"]] = chr(templascii)
-                    templascii += 1
+    typelist = []
+    templascii = 65
+    for arg in spec["specializations"][0]["args"]:
+        typelist.append(arg["type"])
+    for i in range(len(spec["specializations"][0]["args"])):
+        for childfunc in spec["specializations"]:
+            if (
+                typelist[i] != childfunc["args"][i]["type"]
+                and childfunc["args"][i]["name"] not in templateargs.keys()
+            ):
+                templateargs[childfunc["args"][i]["name"]] = chr(templascii)
+                templascii += 1
     return templateargs
 
 
 def getparentargs(templateargs, spec):
     args = OrderedDict()
-    if "specializations" in spec.keys():
-        for arg in spec["specializations"][0]["args"]:
-            argname = arg["name"]
-            if arg["name"] in templateargs.keys():
-                if "*" in getctype(arg["type"]):
-                    argname = "*" + argname
-                if "Const[" in arg["type"]:
-                    args[argname] = "const " + templateargs[arg["name"]]
-                else:
-                    args[argname] = templateargs[arg["name"]]
-            else:
-                args[argname] = getctype(arg["type"])
-    else:
-        for arg in spec["args"]:
-            argname = arg["name"]
-            if arg["direction"] == "out":
+    for arg in spec["specializations"][0]["args"]:
+        argname = arg["name"]
+        if arg["name"] in templateargs.keys():
+            if "*" in getctype(arg["type"]):
                 argname = "*" + argname
-            if "*" not in argname:
-                args[argname] = arg["type"]
+            if "Const[" in arg["type"]:
+                args[argname] = "const " + templateargs[arg["name"]]
+            else:
+                args[argname] = templateargs[arg["name"]]
+        else:
+            args[argname] = getctype(arg["type"])
     return args
 
 
@@ -598,11 +589,7 @@ def getparamnames(args):
 def getcode(indspec):
     templateargs = gettemplateargs(indspec)
     args = getparentargs(templateargs, indspec)
-    if "specializations" in indspec.keys():
-        templatestring = gettemplatestring(templateargs)
-    else:
-        templatestring = ""
-        args = getchildargs(indspec, indspec)
+    templatestring = gettemplatestring(templateargs)
     code = getdecl(
         indspec["name"],
         args,
@@ -615,71 +602,24 @@ int64_t thready_dim = blockIdx.y * blockDim.y + threadIdx.y;
 """
     code += getbody(indspec["definition"], args)
     code += "}\n\n"
-    if "specializations" in indspec.keys():
-        for childfunc in indspec["specializations"]:
-            args = getchildargs(childfunc, indspec)
-            code += getdecl(childfunc["name"], args, "")
-            code += """  dim3 blocks_per_grid;
+    for childfunc in indspec["specializations"]:
+        args = getchildargs(childfunc, indspec)
+        code += getdecl(childfunc["name"], args, "")
+        code += """  dim3 blocks_per_grid;
 dim3 threads_per_block;
 
 if ({0} > 1024 && {1} > 1024) {{
-  blocks_per_grid = dim3(ceil({0} / 1024.0), ceil({1}/1024.0), 1);
-  threads_per_block = dim3(1024, 1024, 1);
+blocks_per_grid = dim3(ceil({0} / 1024.0), ceil({1}/1024.0), 1);
+threads_per_block = dim3(1024, 1024, 1);
 }} else if ({0} > 1024) {{
-  blocks_per_grid = dim3(ceil({0} / 1024.0), 1, 1);
-  threads_per_block = dim3(1024, {1}, 1);
+blocks_per_grid = dim3(ceil({0} / 1024.0), 1, 1);
+threads_per_block = dim3(1024, {1}, 1);
 }} else if ({1} > 1024) {{
-  blocks_per_grid = dim3(1, ceil({1}/1024.0), 1);
-  threads_per_block = dim3({0}, 1024, 1);
+blocks_per_grid = dim3(1, ceil({1}/1024.0), 1);
+threads_per_block = dim3({0}, 1024, 1);
 }} else {{
-  blocks_per_grid = dim3(1, 1, 1);
-  threads_per_block = dim3({0}, {1}, 1);
-}}""".format(
-                getxthreads(indspec["definition"]), getythreads(indspec["definition"])
-            )
-            code += " " * 2 + "ERROR h_err = success();\n"
-            code += " " * 2 + "ERROR* err = &h_err;\n"
-            code += " " * 2 + "ERROR* d_err;\n"
-            code += " " * 2 + "cudaMalloc((void**)&d_err, sizeof(ERROR));\n"
-            code += (
-                " " * 2
-                + "cudaMemcpy(d_err, err, sizeof(ERROR), cudaMemcpyHostToDevice);\n"
-            )
-            templatetypes = gettemplatetypes(childfunc, templateargs)
-            paramnames = getparamnames(args)
-            code += " " * 2 + "cuda" + indspec["name"][len("awkward") :]
-            if templatetypes is not None and len(templatetypes) > 0:
-                code += "<" + templatetypes + ">"
-            code += (
-                " <<<blocks_per_grid, threads_per_block>>>("
-                + paramnames
-                + ", d_err);\n"
-            )
-            code += " " * 2 + "cudaDeviceSynchronize();\n"
-            code += (
-                " " * 2
-                + "cudaMemcpy(err, d_err, sizeof(ERROR), cudaMemcpyDeviceToHost);\n"
-            )
-            code += " " * 2 + "cudaFree(d_err);\n"
-            code += " " * 2 + "return *err;\n"
-            code += "}\n\n"
-    else:
-        code += getdecl(indspec["name"], args, "")
-        code += """dim3 blocks_per_grid;
-dim3 threads_per_block;
-
-if ({0} > 1024 && {1} > 1024) {{
-  blocks_per_grid = dim3(ceil({0} / 1024.0), ceil({1}/1024.0), 1);
-  threads_per_block = dim3(1024, 1024, 1);
-}} else if ({0} > 1024) {{
-  blocks_per_grid = dim3(ceil({0} / 1024.0), 1, 1);
-  threads_per_block = dim3(1024, {1}, 1);
-}} else if ({1} > 1024) {{
-  blocks_per_grid = dim3(1, ceil({1}/1024.0), 1);
-  threads_per_block = dim3({0}, 1024, 1);
-}} else {{
-  blocks_per_grid = dim3(1, 1, 1);
-  threads_per_block = dim3({0}, {1}, 1);
+blocks_per_grid = dim3(1, 1, 1);
+threads_per_block = dim3({0}, {1}, 1);
 }}""".format(
             getxthreads(indspec["definition"]), getythreads(indspec["definition"])
         )
@@ -690,18 +630,17 @@ if ({0} > 1024 && {1} > 1024) {{
         code += (
             " " * 2 + "cudaMemcpy(d_err, err, sizeof(ERROR), cudaMemcpyHostToDevice);\n"
         )
+        templatetypes = gettemplatetypes(childfunc, templateargs)
         paramnames = getparamnames(args)
+        code += " " * 2 + "cuda" + indspec["name"][len("awkward") :]
+        if templatetypes is not None and len(templatetypes) > 0:
+            code += "<" + templatetypes + ">"
         code += (
-            " " * 2
-            + "cuda"
-            + indspec["name"][len("awkward") :]
-            + "<<<blocks_per_grid, threads_per_block>>>("
-            + paramnames
-            + ", d_err);\n"
+            " <<<blocks_per_grid, threads_per_block>>>(" + paramnames + ", d_err);\n"
         )
         code += " " * 2 + "cudaDeviceSynchronize();\n"
         code += (
-            " " * 2 + "cudaMemcpy(d_err, err, sizeof(ERROR), cudaMemcpyDeviceToHost);\n"
+            " " * 2 + "cudaMemcpy(err, d_err, sizeof(ERROR), cudaMemcpyDeviceToHost);\n"
         )
         code += " " * 2 + "cudaFree(d_err);\n"
         code += " " * 2 + "return *err;\n"
@@ -727,7 +666,7 @@ if __name__ == "__main__":
     with open(
         os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml")
     ) as specfile:
-        indspec = yaml.safe_load(specfile)
+        indspec = yaml.safe_load(specfile)["kernels"]
         for spec in indspec:
             if spec["name"] == kernelname and (kernelname in KERNEL_WHITELIST):
                 code = getcode(spec)

@@ -8,7 +8,8 @@ from itertools import product
 
 import yaml
 from numpy import uint8
-from parser_utils import PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST, TEST_BLACKLIST
+from parser_utils import (PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST,
+                          TEST_BLACKLIST)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -30,7 +31,7 @@ class Specification(object):
                 Argument(
                     arg["name"],
                     arg["type"],
-                    arg["direction"],
+                    arg["dir"],
                     arg["role"] if "role" in arg.keys() else "default",
                 )
             )
@@ -187,20 +188,12 @@ def readspec():
         with open(
             os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml")
         ) as specfile:
-            indspec = yaml.safe_load(specfile)
+            indspec = yaml.safe_load(specfile)["kernels"]
             for spec in indspec:
                 if "def " in spec["definition"]:
-                    if "specializations" in spec.keys():
-                        for childfunc in spec["specializations"]:
-                            specdict[childfunc["name"]] = Specification(
-                                childfunc,
-                                data,
-                                (spec["name"] in TEST_BLACKLIST)
-                                or (spec["name"] in PYGEN_BLACKLIST),
-                            )
-                    else:
-                        specdict[spec["name"]] = Specification(
-                            spec,
+                    for childfunc in spec["specializations"]:
+                        specdict[childfunc["name"]] = Specification(
+                            childfunc,
                             data,
                             (spec["name"] in TEST_BLACKLIST)
                             or (spec["name"] in PYGEN_BLACKLIST),
@@ -228,12 +221,11 @@ def getfuncnames():
     with open(
         os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml")
     ) as specfile:
-        indspec = yaml.safe_load(specfile)
+        indspec = yaml.safe_load(specfile)["kernels"]
         for spec in indspec:
             funcs[spec["name"]] = []
-            if "specializations" in spec.keys():
-                for childfunc in spec["specializations"]:
-                    funcs[spec["name"]].append(childfunc["name"])
+            for childfunc in spec["specializations"]:
+                funcs[spec["name"]].append(childfunc["name"])
     return funcs
 
 
@@ -251,16 +243,15 @@ kSliceNone = kMaxInt64 + 1
         with open(
             os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml")
         ) as specfile:
-            indspec = yaml.safe_load(specfile)
+            indspec = yaml.safe_load(specfile)["kernels"]
             for spec in indspec:
                 if "def " in spec["definition"]:
                     outfile.write(spec["definition"] + "\n")
-                    if "specializations" in spec.keys():
-                        for childfunc in spec["specializations"]:
-                            outfile.write(
-                                "{0} = {1}\n".format(childfunc["name"], spec["name"])
-                            )
-                        outfile.write("\n\n")
+                    for childfunc in spec["specializations"]:
+                        outfile.write(
+                            "{0} = {1}\n".format(childfunc["name"], spec["name"])
+                        )
+                    outfile.write("\n\n")
 
 
 def gettypeval(typename):

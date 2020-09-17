@@ -36,32 +36,31 @@ The functions are implemented in C with templates for integer specializations (c
             "w",
         ) as outfile:
             outfile.write(prefix)
-            indspec = yaml.safe_load(specfile)
+            indspec = yaml.safe_load(specfile)["kernels"]
             for spec in indspec:
                 outfile.write(spec["name"] + "\n")
                 print("Generating doc for " + spec["name"])
                 outfile.write(
                     "========================================================================\n"
                 )
-                if "specializations" in spec.keys():
-                    for childfunc in spec["specializations"]:
-                        outfile.write(".. py:function:: " + childfunc["name"])
-                        outfile.write("(")
-                        for i in range(len(childfunc["args"])):
-                            if i != 0:
-                                outfile.write(
-                                    ", "
-                                    + childfunc["args"][i]["name"]
-                                    + ": "
-                                    + childfunc["args"][i]["type"]
-                                )
-                            else:
-                                outfile.write(
-                                    childfunc["args"][i]["name"]
-                                    + ": "
-                                    + childfunc["args"][i]["type"]
-                                )
-                        outfile.write(")\n")
+                for childfunc in spec["specializations"]:
+                    outfile.write(".. py:function:: " + childfunc["name"])
+                    outfile.write("(")
+                    for i in range(len(childfunc["args"])):
+                        if i != 0:
+                            outfile.write(
+                                ", "
+                                + childfunc["args"][i]["name"]
+                                + ": "
+                                + childfunc["args"][i]["type"]
+                            )
+                        else:
+                            outfile.write(
+                                childfunc["args"][i]["name"]
+                                + ": "
+                                + childfunc["args"][i]["type"]
+                            )
+                    outfile.write(")\n")
                 outfile.write(".. code-block:: python\n\n")
                 # Remove conditional at the end of dev
                 if "def" in spec["definition"]:

@@ -898,55 +898,46 @@ if __name__ == "__main__":
                         kerneldict[funcname] += " " * 4 + "- name: " + childfunc + "\n"
                         kerneldict[funcname] += " " * 6 + "args:\n"
                         for arg in funcargs[childfunc].keys():
-                            kerneldict[funcname] += " " * 8 + "- name: " + arg + "\n"
                             kerneldict[funcname] += (
-                                " " * 10
-                                + "type: "
+                                " " * 8
+                                + "- {name: "
+                                + arg
+                                + ', type: "'
                                 + arrayconv(funcargs[childfunc][arg])
-                                + "\n"
-                            )
-                            kerneldict[funcname] += (
-                                " " * 10
-                                + "direction: "
+                                + '", dir: '
                                 + paramchecks[funcname][arg][: -len("param")]
-                                + "\n"
                             )
                             if not paramchecks[funcname][arg] == "outparam":
                                 if "role" in funcroles[childfunc][arg].keys():
                                     kerneldict[funcname] += (
-                                        " " * 10
-                                        + "role: "
-                                        + funcroles[childfunc][arg]["role"]
-                                        + "\n"
+                                        ", role: " + funcroles[childfunc][arg]["role"]
                                     )
                                 else:
-                                    kerneldict[funcname] += " " * 10 + "role: default\n"
+                                    kerneldict[funcname] += ", role: default"
+                            kerneldict[funcname] += "}\n"
                 else:
-                    kerneldict[funcname] += " " * 2 + "args:\n"
+                    kerneldict[funcname] += " " * 2 + "specializations:\n"
+                    kerneldict[funcname] += " " * 4 + "- name: " + funcname + "\n"
+                    kerneldict[funcname] += " " * 6 + "args:\n"
                     for arg in funcargs[funcname].keys():
-                        kerneldict[funcname] += " " * 4 + "- name: " + arg + "\n"
                         kerneldict[funcname] += (
-                            " " * 6
-                            + "type: "
+                            " " * 8
+                            + "- {name: "
+                            + arg
+                            + ', type: "'
                             + arrayconv(funcargs[funcname][arg])
-                            + "\n"
-                        )
-                        kerneldict[funcname] += (
-                            " " * 6
-                            + "direction: "
+                            + '", dir: '
                             + paramchecks[funcname][arg][: -len("param")]
-                            + "\n"
                         )
                         if not paramchecks[funcname][arg] == "outparam":
                             if "role" in funcroles[funcname][arg].keys():
                                 kerneldict[funcname] += (
-                                    " " * 6
-                                    + "role: "
-                                    + funcroles[funcname][arg]["role"]
-                                    + "\n"
+                                    ", role: " + funcroles[funcname][arg]["role"]
                                 )
                             else:
-                                kerneldict[funcname] += " " * 6 + "role: default\n"
+                                kerneldict[funcname] += ", role: default"
+                        kerneldict[funcname] += "}\n"
+                kerneldict[funcname] += " " * 2 + "description: null\n"
                 kerneldict[funcname] += " " * 2 + "definition: |\n"
                 if funcname in PYGEN_BLACKLIST or "sorting.cpp" in filename:
                     kerneldict[funcname] += " " * 4 + "Insert Python definition here\n"
@@ -954,10 +945,11 @@ if __name__ == "__main__":
                     kerneldict[funcname] += (
                         indent_code(pyfuncs[funcname], 4).rstrip() + "\n"
                     )
-                kerneldict[funcname] += " " * 2 + "description: null"
+                kerneldict[funcname] += " " * 2 + "extra-tests: []\n"
     with open(
         os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml"),
         "w",
     ) as f:
+        f.write("kernels:\n")
         for kernelkey in sorted(kerneldict.keys()):
-            f.write(kerneldict[kernelkey] + "\n\n")
+            f.write(indent_code(kerneldict[kernelkey], 2) + "\n")
