@@ -26,6 +26,22 @@
             "ListArray-stops-offset": 1,
             "ListArray-length": 5,
             "ListArray-at": 0
+        },
+        {
+            "ListArray-starts": [1, 7, 6, 1, 3, 4, 2, 5, 2, 3, 1, 2, 3, 4, 5, 6, 7, 1, 2],
+            "ListArray-starts-offset": 2,
+            "ListArray-stops": [1, 9, 6, 2, 4, 5, 3, 6, 3, 4, 2, 4, 5, 5, 7, 8, 2, 3],
+            "ListArray-stops-offset": 2,
+            "ListArray-length": 3,
+            "ListArray-at": 2
+        },
+        {
+            "ListArray-starts": [0, 0, 0, 0, 0, 0, 0, 0],
+            "ListArray-starts-offset": 0,
+            "ListArray-stops": [1, 1, 1, 1, 1, 1, 1, 1],
+            "ListArray-stops-offset": 0,
+            "ListArray-length": 6,
+            "ListArray-at": 1
         }
     ],
     "ListOffsetArray": [
@@ -46,6 +62,18 @@
             "ListOffsetArray-offsets-offset": 1,
             "ListOffsetArray-length": 6,
             "ListOffsetArray-rawoffsets": [[3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4], [2, 1, 2, 3, 1, 0, 2, 3, 0, 2, 1]]
+        },
+        {
+            "ListOffsetArray-offsets": [1, 0, 2, 3, 1, 2, 0, 0, 1, 1, 2, 3, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            "ListOffsetArray-offsets-offset": 2,
+            "ListOffsetArray-length": 3,
+            "ListOffsetArray-rawoffsets": [[1, 2, 3, 2, 3, 1, 3, 3, 3, 2, 3, 1, 2, 3, 4, 1, 2], [2, 1, 2, 1, 2, 1, 2, 3, 1, 2, 3, 1, 3, 2, 3]]
+        },
+        {
+            "ListOffsetArray-offsets": [0, 0, 0, 0, 0, 0, 0, 0],
+            "ListOffsetArray-offsets-offset": 0,
+            "ListOffsetArray-length": 6,
+            "ListOffsetArray-rawoffsets": [[0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]]
         }
     ],
     "Identities": [
@@ -56,6 +84,18 @@
         {
             "Identities-array": [0, 2, 1, 1, 1, 1, 2, 0, 1, 2, 0, 1, 0, 2, 0, 1, 1, 1, 0, 2, 2, 2, 1, 2, 0, 1],
             "Identities-array-offset": 1
+        },
+        {
+            "Identities-array": [1, 4, 3, 1, 2, 4, 5, 2, 3, 4, 1, 7, 5, 4, 2, 3, 1, 4, 2, 7, 8, 4, 3, 3, 4, 1, 5, 9, 7, 2, 3, 4, 5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            "Identities-array-offset": 2
+        },
+        {
+            "Identities-array": [1, 3, 2, 3, 1, 2, 5, 4, 3, 2, 1, 4, 3, 5, 1, 2, 3, 5, 1, 4, 2, 3, 2, 1, 2, 3, 5, 4, 3, 2, 1, 4, 2, 3, 1, 5, 2, 3, 4, 1, 5, 1, 2, 1, 1, 1],
+            "Identities-array-offset": 3
+        },
+        {
+            "Identities-array": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "Identities-array-offset": 0
         }
     ],
     "RegularArray": [
@@ -64,6 +104,15 @@
         },
         {
             "RegularArray-size": 2
+        },
+        {
+            "RegularArray-size": 1
+        },
+        {
+            "RegularArray-size": 2
+        },
+        {
+            "RegularArray-size": 0
         }
     ],
     "IndexedArray": [
@@ -87,6 +136,20 @@
             "IndexedArray-length": 1,
             "IndexedArray-parents": [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
             "IndexedArray-parents-offset": 1
+        },
+        {
+            "IndexedArray-index": [1, 4, 2, 3, 1, 2, 3, 1, 4, 3, 2, 1, 3, 2, 4, 5, 1, 2, 3, 4, 5],
+            "IndexedArray-index-offset": 1,
+            "IndexedArray-length": 2,
+            "IndexedArray-parents": [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1],
+            "IndexedArray-parents-offset": 2
+        },
+        {
+            "IndexedArray-index": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "IndexedArray-index-offset": 0,
+            "IndexedArray-length": 5,
+            "IndexedArray-parents": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "IndexedArray-parents-offset": 0
         }
     ],
     "UnionArray": [
@@ -101,6 +164,24 @@
             "UnionArray-tags-offset": 0,
             "UnionArray-which": 1,
             "UnionArray-length": 2
+        },
+        {
+            "UnionArray-tags": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            "UnionArray-tags-offset": 1,
+            "UnionArray-which": 2,
+            "UnionArray-length": 3
+        },
+        {
+            "UnionArray-tags": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "UnionArray-tags-offset": 2,
+            "UnionArray-which": 1,
+            "UnionArray-length": 3
+        },
+        {
+            "UnionArray-tags": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "UnionArray-tags-offset": 0,
+            "UnionArray-which": 0,
+            "UnionArray-length": 10
         }
     ],
     "NumpyArray": [
@@ -113,6 +194,21 @@
             "NumpyArray-ptr": [-1, 2, 4, 0, -3],
             "NumpyArray-ptr-offset": 1,
             "NumpyArray-length": 3
+        },
+        {
+            "NumpyArray-ptr": [-1, -3, 2, 1, -5, 7, 8, 9, 2, 3, 4, -1, -5, -3, -7, 5],
+            "NumpyArray-ptr-offset": 2,
+            "NumpyArray-length": 4
+        },
+        {
+            "NumpyArray-ptr": [1, -8, 3, 9, 4, 7, 9],
+            "NumpyArray-ptr-offset": 1,
+            "NumpyArray-length": 2
+        },
+        {
+            "NumpyArray-ptr": [0, 0, 0, 0, 0, 0, 0],
+            "NumpyArray-ptr-offset": 0,
+            "NumpyArray-length": 5
         }
     ],
     "ByteMaskedArray": [
@@ -127,6 +223,24 @@
             "ByteMaskedArray-mask-offset": 0,
             "ByteMaskedArray-valid_when": false,
             "ByteMaskedArray-length": 5
+        },
+        {
+            "ByteMaskedArray-mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            "ByteMaskedArray-mask-offset": 1,
+            "ByteMaskedArray-valid_when": true,
+            "ByteMaskedArray-length": 7
+        },
+        {
+            "ByteMaskedArray-mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            "ByteMaskedArray-mask-offset": 1,
+            "ByteMaskedArray-valid_when": true,
+            "ByteMaskedArray-length": 7
+        },
+        {
+            "ByteMaskedArray-mask": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "ByteMaskedArray-mask-offset": 0,
+            "ByteMaskedArray-valid_when": true,
+            "ByteMaskedArray-length": 7
         }
     ],
     "BitMaskedArray": [
@@ -138,6 +252,24 @@
         },
         {
             "BitMaskedArray-mask": [0, 0, 0, 0, 0],
+            "BitMaskedArray-mask-offset": 0,
+            "BitMaskedArray-valid_when": false,
+            "BitMaskedArray-lsb_order": false
+        },
+        {
+            "BitMaskedArray-mask": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "BitMaskedArray-mask-offset": 1,
+            "BitMaskedArray-valid_when": true,
+            "BitMaskedArray-lsb_order": false
+        },
+        {
+            "BitMaskedArray-mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            "BitMaskedArray-mask-offset": 2,
+            "BitMaskedArray-valid_when": true,
+            "BitMaskedArray-lsb_order": true
+        },
+        {
+            "BitMaskedArray-mask": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             "BitMaskedArray-mask-offset": 0,
             "BitMaskedArray-valid_when": false,
             "BitMaskedArray-lsb_order": false
