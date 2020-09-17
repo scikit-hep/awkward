@@ -1240,6 +1240,14 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                [](const T& self, const py::object& other) -> py::object {
             return box(self.merge_as_union(unbox_content(other)));
           })
+          .def("mergemany",   // FIXME: temporary!
+               [](const T& self, const py::iterable& pyothers) -> py::object {
+            ak::ContentPtrVec others;
+            for (auto pyother : pyothers) {
+              others.push_back(unbox_content(pyother));
+            }
+            return box(self.mergemany(others));
+          })
           .def("count",
                [](const T& self, int64_t axis, bool mask, bool keepdims)
                -> py::object {

@@ -405,12 +405,26 @@ namespace awkward {
 
   bool
   EmptyArray::mergeable(const ContentPtr& other, bool mergebool) const {
+    if (!parameters_equal(other.get()->parameters())) {
+      return false;
+    }
     return true;
   }
 
   const ContentPtr
-  EmptyArray::merge(const ContentPtr& other) const {
-    return other;
+  EmptyArray::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
+
+    else if (others.size() == 1) {
+      return others[0];
+    }
+
+    else {
+      ContentPtrVec tail_others(others.begin() + 1, others.end());
+      return others[0].get()->mergemany(tail_others);
+    }
   }
 
   const SliceItemPtr

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 echo "Copying files"
+
 cp standard_parallel_algorithms.h loop-dependent-variable-kernels/manual_*.cu ../../src/cuda-kernels/
 cd ../..
 

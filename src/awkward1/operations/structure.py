@@ -733,25 +733,27 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     contents = [
         awkward1.operations.convert.to_layout(x, allow_record=False) for x in arrays
     ]
-
     contents = [
         x.toContent() if isinstance(x, awkward1.partition.PartitionedArray) else x
         for x in contents
     ]
-
     if len(contents) == 0:
         raise ValueError(
             "need at least one array to concatenate"
             + awkward1._util.exception_suffix(__file__)
         )
-    out = contents[0]
+
+    batch = [contents[0]]
     for x in contents[1:]:
-        if not out.mergeable(x, mergebool=mergebool):
-            out = out.merge_as_union(x)
+        if batch[-1].mergeable(x, mergebool=mergebool):
+            batch.append(x)
         else:
-            out = out.merge(x)
-        if isinstance(out, awkward1._util.uniontypes):
-            out = out.simplify(mergebool=mergebool)
+            collapsed = batch[0].mergemany(batch[1:])
+            batch = [collapsed.merge_as_union(x)]
+
+    out = batch[0].mergemany(batch[1:])
+    if isinstance(out, awkward1._util.uniontypes):
+        out = out.simplify(mergebool=mergebool)
 
     if highlevel:
         return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(*arrays))

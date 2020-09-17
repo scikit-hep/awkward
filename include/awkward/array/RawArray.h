@@ -883,66 +883,9 @@ namespace awkward {
     }
 
     const ContentPtr
-      merge(const ContentPtr& other) const override {
-      if (dynamic_cast<EmptyArray*>(other.get())) {
-        return shallow_copy();
-      }
-      else if (IndexedArray32* rawother =
-               dynamic_cast<IndexedArray32*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (IndexedArrayU32* rawother =
-               dynamic_cast<IndexedArrayU32*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (IndexedArray64* rawother =
-               dynamic_cast<IndexedArray64*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (IndexedOptionArray32* rawother =
-               dynamic_cast<IndexedOptionArray32*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (IndexedOptionArray64* rawother =
-               dynamic_cast<IndexedOptionArray64*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (ByteMaskedArray* rawother =
-               dynamic_cast<ByteMaskedArray*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (BitMaskedArray* rawother =
-               dynamic_cast<BitMaskedArray*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-      else if (UnmaskedArray* rawother =
-               dynamic_cast<UnmaskedArray*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy());
-      }
-
-      if (RawArrayOf<T>* rawother =
-          dynamic_cast<RawArrayOf<T>*>(other.get())) {
-        std::shared_ptr<T> ptr =
-          std::shared_ptr<T>(new T[(size_t)(length_ + rawother->length())],
-                             kernel::array_deleter<T>());
-        memcpy(ptr.get(),
-               &ptr_.get()[(size_t)offset_],
-               sizeof(T)*((size_t)length_));
-        memcpy(&ptr.get()[(size_t)length_],
-               &rawother->ptr().get()[(size_t)rawother->offset()],
-               sizeof(T)*((size_t)rawother->length()));
-        return std::make_shared<RawArrayOf<T>>(Identities::none(),
-                                               util::Parameters(),
-                                               ptr,
-                                               0,
-                                               length_ + rawother->length(),
-                                               itemsize_);
-      }
-      else {
-        throw std::invalid_argument(
-          std::string("cannot merge ") + classname() + std::string(" with ")
-          + other.get()->classname() + FILENAME(__LINE__));
-      }
+      mergemany(const ContentPtrVec& others) const override {
+      throw std::runtime_error(
+        std::string("not implemented RawArrayOf<T>::mergemany")+ FILENAME(__LINE__));
     }
 
     const SliceItemPtr

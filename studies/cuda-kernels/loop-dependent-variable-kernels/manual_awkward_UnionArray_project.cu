@@ -68,7 +68,7 @@ ERROR awkward_UnionArray_project(
 
   exclusive_scan(res_temp, filtered_mask, length);
 
-  HANDLE_ERROR(cudaMemcpy(res_temp + (length - 1), lenout, sizeof(int64_t), cudaMemcpyDeviceToHost));
+  HANDLE_ERROR(cudaMemcpy(lenout, res_temp + (length - 1), sizeof(int64_t), cudaMemcpyDeviceToDevice));
 
   awkward_UnionArray_project_kernel<T, C, I><<<blocks_per_grid, threads_per_block>>>(
       res_temp,

@@ -48,7 +48,6 @@ TEST_BLACKLIST = SPEC_BLACKLIST + [
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_IndexedArray_overlay_mask",
     "awkward_ListOffsetArray_rpad_length_axis1",
-    "awkward_NumpyArray_fill_tobool",
 ]
 
 SUCCESS_TEST_BLACKLIST = TEST_BLACKLIST + [
