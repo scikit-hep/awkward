@@ -474,52 +474,6 @@ class Array(
         """
         return awkward1.operations.convert.to_list(self)
 
-    def tojson(
-        self, destination=None, pretty=False, maxdecimals=None, buffersize=65536
-    ):
-        """
-        Args:
-            destination (None or str): If None, this method returns a JSON str;
-                if a str, it uses that as a file name and writes (overwrites)
-                that file (returning None).
-            pretty (bool): If True, indent the output for human readability; if
-                False, output compact JSON without spaces.
-            maxdecimals (None or int): If an int, limit the number of
-                floating-point decimals to this number; if None, write all
-                digits.
-            buffersize (int): Size (in bytes) of the buffer used by the JSON
-                parser.
-
-        Converts this Array into a JSON string or file; same as #ak.to_json
-        (but without the underscore, like #ak.Array.tolist).
-
-        Awkward Array types have the following JSON translations.
-
-           * #ak.types.PrimitiveType: converted into JSON booleans and numbers.
-           * #ak.types.OptionType: missing values are converted into None.
-           * #ak.types.ListType: converted into JSON lists.
-           * #ak.types.RegularType: also converted into JSON lists. JSON (and
-             Python) forms lose information about the regularity of list
-             lengths.
-           * #ak.types.ListType with parameter `"__array__"` equal to
-             `"__bytestring__"` or `"__string__"`: converted into JSON strings.
-           * #ak.types.RecordArray without field names: converted into JSON
-             objects with numbers as strings for keys.
-           * #ak.types.RecordArray with field names: converted into JSON
-             objects.
-           * #ak.types.UnionArray: JSON data are naturally heterogeneous.
-
-        See also #ak.to_json and #ak.from_json.
-        """
-        warnings.warn(
-            ".tojson is deprecated, will be removed in 0.3.0. Use\n\n"
-            "    ak.to_json(array)\n\ninstead.",
-            DeprecationWarning,
-        )
-        return awkward1.operations.convert.to_json(
-            self, destination, pretty, maxdecimals, buffersize
-        )
-
     @property
     def nbytes(self):
         """
@@ -1619,51 +1573,6 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         See also #ak.to_list and #ak.from_iter.
         """
         return awkward1.operations.convert.to_list(self)
-
-    def tojson(
-        self, destination=None, pretty=False, maxdecimals=None, buffersize=65536
-    ):
-        """
-        Args:
-            destination (None or str): If None, this method returns a JSON str;
-                if a str, it uses that as a file name and writes (overwrites)
-                that file (returning None).
-            pretty (bool): If True, indent the output for human readability; if
-                False, output compact JSON without spaces.
-            maxdecimals (None or int): If an int, limit the number of
-                floating-point decimals to this number; if None, write all
-                digits.
-            buffersize (int): Size (in bytes) of the buffer used by the JSON
-                parser.
-
-        Converts this Record into a JSON string or file.
-
-        Awkward Array types have the following JSON translations.
-
-           * #ak.types.PrimitiveType: converted into JSON booleans and numbers.
-           * #ak.types.OptionType: missing values are converted into None.
-           * #ak.types.ListType: converted into JSON lists.
-           * #ak.types.RegularType: also converted into JSON lists. JSON (and
-             Python) forms lose information about the regularity of list
-             lengths.
-           * #ak.types.ListType with parameter `"__array__"` equal to
-             `"__bytestring__"` or `"__string__"`: converted into JSON strings.
-           * #ak.types.RecordArray without field names: converted into JSON
-             objects with numbers as strings for keys.
-           * #ak.types.RecordArray with field names: converted into JSON
-             objects.
-           * #ak.types.UnionArray: JSON data are naturally heterogeneous.
-
-        See also #ak.to_json and #ak.from_json.
-        """
-        warnings.warn(
-            ".tojson is deprecated, will be removed in 0.3.0. Use\n\n"
-            "    ak.to_json(array)\n\ninstead.",
-            DeprecationWarning,
-        )
-        return awkward1.operations.convert.to_json(
-            self, destination, pretty, maxdecimals, buffersize
-        )
 
     @property
     def nbytes(self):
