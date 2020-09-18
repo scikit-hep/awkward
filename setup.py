@@ -67,7 +67,8 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
                 "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir),
                 "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE",
             ]
-            if sys.maxsize > 2**32 and os.environ.get("CMAKE_GENERATOR") != "NMake Makefiles":
+            excluded_gens = ["NMake Makefiles", "Visual Studio 15 2017 Win64"]
+            if sys.maxsize > 2**32 and os.environ.get("CMAKE_GENERATOR") not in excluded_gens:
                 cmake_args += ["-A", "x64"]
         else:
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
