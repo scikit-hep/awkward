@@ -16,7 +16,6 @@ except ImportError:
     from collections import MutableMapping
 
 import awkward1._connect._numpy
-import awkward1._connect._pandas
 import awkward1.nplike
 import awkward1.layout
 import awkward1.operations.convert
@@ -39,7 +38,6 @@ def _suffix(array):
 
 class Array(
     awkward1._connect._numpy.NDArrayOperatorsMixin,
-    awkward1._connect._pandas.PandasMixin,
     Iterable,
     Sized,
 ):
@@ -1285,25 +1283,7 @@ class Array(
         nested lists in a NumPy `"O"` array are severed from the array and
         cannot be sliced as dimensions.
         """
-        if awkward1._util.called_by_module(
-            "pandas.io.formats.format"
-        ) or awkward1._util.called_by_module("pandas.core.generic"):
-            out = numpy.empty(len(self._layout), dtype="O")
-            for i, x in enumerate(self._layout):
-                out[i] = awkward1._util.wrap(x, self._behavior)
-            return out
-        elif awkward1._util.called_by_module("pandas"):
-            try:
-                return awkward1._connect._numpy.convert_to_array(
-                    self._layout, args, kwargs
-                )
-            except Exception:
-                out = numpy.empty(len(self._layout), dtype="O")
-                for i, x in enumerate(self._layout):
-                    out[i] = awkward1._util.wrap(x, self._behavior)
-                return out
-        else:
-            return awkward1._connect._numpy.convert_to_array(self._layout, args, kwargs)
+        return awkward1._connect._numpy.convert_to_array(self._layout, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """

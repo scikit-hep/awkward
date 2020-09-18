@@ -3927,7 +3927,18 @@ def to_pandas(
               2         3.0  NaN
               3         4.0  NaN
     """
-    pandas = awkward1._connect._pandas.get_pandas()
+    try:
+        import pandas
+    except ImportError:
+        raise ImportError(
+            """install the 'pandas' package with:
+
+    pip install pandas --upgrade
+
+or
+
+    conda install pandas"""
+        )
 
     if how is not None:
         out = None
