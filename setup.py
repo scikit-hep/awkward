@@ -69,7 +69,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             ]
             if sys.maxsize > 2**32 and os.environ.get("CMAKE_GENERATOR") != "NMake Makefiles":
                 cmake_args += ["-A", "x64"]
-            # build_args += ["--", "/m"]
         else:
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
             build_args += ["-j", str(multiprocessing.cpu_count())]
@@ -77,9 +76,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         if not os.path.exists(self.build_temp):
              os.makedirs(self.build_temp)
         build_dir = self.build_temp
-
-        # for scikit-build:
-        # build_dir = os.path.join(DIR, "_pybuild")
 
         subprocess.check_call(["cmake", "-S", ext.sourcedir, "-B", build_dir] + cmake_args)
         subprocess.check_call(["cmake", "--build", build_dir] + build_args)
@@ -112,7 +108,6 @@ if platform.system() == "Windows":
             tree(outerdir)
 
             print("--- copying libraries -----------------------------------------")
-            # dlldir = os.path.join(os.path.join("build", "temp.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "Release", "Release")
             dlldir = os.path.join(os.path.join("build", "temp.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "Release")
             found = False
             for x in os.listdir(dlldir):
@@ -181,16 +176,13 @@ setup(name = "awkward1",
       install_requires = install_requires,
       tests_require = extras["test"],
       extras_require = extras,
-
-      # cmake_args=['-DBUILD_TESTING=OFF'],      # for scikit-build
       ext_modules = [
-          CMakeExtension("awkward"),             # NOT scikit-build
+          CMakeExtension("awkward"),
       ],
       cmdclass = {
-          "build_ext": CMakeBuild,               # NOT scikit-build
+          "build_ext": CMakeBuild,
           "install": Install,
       },
-
       classifiers = [
 #         "Development Status :: 1 - Planning",
 #         "Development Status :: 2 - Pre-Alpha",
