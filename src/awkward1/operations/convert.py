@@ -2412,7 +2412,7 @@ def to_parquet(array, where, explode_records=False, **options):
         array: Data to write to a Parquet file.
         where (str, Path, file-like object): Where to write the Parquet file.
         explode_records (bool): If True, lists of records are written as
-            records of lists, so that nested keys become top-level fields
+            records of lists, so that nested fields become top-level fields
             (which can be zipped when read back).
         options: All other options are passed to pyarrow.parquet.ParquetWriter.
             In particular, if no `schema` is given, a schema is derived from
