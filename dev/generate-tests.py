@@ -1,14 +1,14 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 import copy
-import json
 import os
 from collections import OrderedDict
 from itertools import product
 
 import yaml
 from numpy import uint8
-from parser_utils import PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST, TEST_BLACKLIST
+from parser_utils import (PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST,
+                          TEST_BLACKLIST)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -181,22 +181,20 @@ def readspec():
     genpykernels()
     specdict = {}
     with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "samples.json")
-    ) as testjson:
-        data = json.load(testjson)
-        with open(
-            os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml")
-        ) as specfile:
-            indspec = yaml.safe_load(specfile)["kernels"]
-            for spec in indspec:
-                if "def " in spec["definition"]:
-                    for childfunc in spec["specializations"]:
-                        specdict[childfunc["name"]] = Specification(
-                            childfunc,
-                            data,
-                            (spec["name"] in TEST_BLACKLIST)
-                            or (spec["name"] in PYGEN_BLACKLIST),
-                        )
+        os.path.join(CURRENT_DIR, "..", "kernel-specification.yml"), "r"
+    ) as specfile:
+        loadfile = yaml.safe_load(specfile)
+        indspec = loadfile["kernels"]
+        data = loadfile["tests"]
+        for spec in indspec:
+            if "def " in spec["definition"]:
+                for childfunc in spec["specializations"]:
+                    specdict[childfunc["name"]] = Specification(
+                        childfunc,
+                        data,
+                        (spec["name"] in TEST_BLACKLIST)
+                        or (spec["name"] in PYGEN_BLACKLIST),
+                    )
     return specdict
 
 
@@ -217,9 +215,7 @@ def gettypename(spectype):
 
 def getfuncnames():
     funcs = {}
-    with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml")
-    ) as specfile:
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
         indspec = yaml.safe_load(specfile)["kernels"]
         for spec in indspec:
             funcs[spec["name"]] = []
@@ -240,7 +236,7 @@ kSliceNone = kMaxInt64 + 1
     ) as outfile:
         outfile.write(prefix)
         with open(
-            os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml")
+            os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")
         ) as specfile:
             indspec = yaml.safe_load(specfile)["kernels"]
             for spec in indspec:

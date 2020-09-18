@@ -663,9 +663,7 @@ if __name__ == "__main__":
 
 """
 
-    with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "spec.yml")
-    ) as specfile:
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
         indspec = yaml.safe_load(specfile)["kernels"]
         for spec in indspec:
             if spec["name"] == kernelname and (kernelname in KERNEL_WHITELIST):
