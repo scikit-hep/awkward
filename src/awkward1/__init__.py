@@ -29,13 +29,6 @@ import awkward1._connect._numba
 numba = type(awkward1._connect._numba)("numba")
 numba.register = awkward1._connect._numba.register
 
-import awkward1._connect._pandas
-
-pandas = type(awkward1._connect._pandas)("pandas")
-pandas.register = awkward1._connect._pandas.register
-pandas.df = awkward1._connect._pandas.df
-pandas.dfs = awkward1._connect._pandas.dfs
-
 import awkward1._connect._numexpr
 
 numexpr = type(awkward1._connect._numexpr)("numexpr")

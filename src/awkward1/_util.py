@@ -390,18 +390,6 @@ def extra(args, kwargs, defaults):
     return out
 
 
-def called_by_module(modulename):
-    frame = inspect.currentframe()
-    while frame is not None:
-        name = getattr(inspect.getmodule(frame), "__name__", None)
-        if name is not None and (
-            name == modulename or name.startswith(modulename + ".")
-        ):
-            return True
-        frame = frame.f_back
-    return False
-
-
 def key2index(keys, key):
     if keys is None:
         attempt = None
