@@ -82,7 +82,7 @@ namespace awkward {
 
   template <typename T>
   IndexOf<T>::IndexOf(int64_t length, kernel::lib ptr_lib)
-    : ptr_(kernel::malloc<T>(ptr_lib, length * sizeof(T)))
+    : ptr_(kernel::malloc<T>(ptr_lib, length * (int64_t)sizeof(T)))
     , ptr_lib_(ptr_lib)
     , offset_(0)
     , length_(length) { }
@@ -253,7 +253,7 @@ namespace awkward {
         std::string("Index::getitem_range_nowrap with illegal start:stop for this length")
         + FILENAME(__LINE__));
     }
-    return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start);
+    return IndexOf<T>(ptr_, offset_ + start*(start != stop), stop - start, ptr_lib_);
   }
 
   template <typename T>
@@ -269,7 +269,7 @@ namespace awkward {
   template <typename T>
   const std::shared_ptr<Index>
   IndexOf<T>::shallow_copy() const {
-    return std::make_shared<IndexOf<T>>(ptr_, offset_, length_);
+    return std::make_shared<IndexOf<T>>(ptr_, offset_, length_, ptr_lib_);
   }
 
   template <>
@@ -285,7 +285,7 @@ namespace awkward {
         length_);
       util::handle_error(err);
     }
-    return IndexOf<int64_t>(ptr, 0, length_);
+    return IndexOf<int64_t>(ptr, 0, length_, kernel::lib::cpu);   // DERIVE
   }
 
   template <>
@@ -301,7 +301,7 @@ namespace awkward {
         length_);
       util::handle_error(err);
     }
-    return IndexOf<int64_t>(ptr, 0, length_);
+    return IndexOf<int64_t>(ptr, 0, length_, kernel::lib::cpu);   // DERIVE
   }
 
   template <>
@@ -317,7 +317,7 @@ namespace awkward {
         length_);
       util::handle_error(err);
     }
-    return IndexOf<int64_t>(ptr, 0, length_);
+    return IndexOf<int64_t>(ptr, 0, length_, kernel::lib::cpu);   // DERIVE
   }
 
   template <>
@@ -333,12 +333,12 @@ namespace awkward {
         length_);
       util::handle_error(err);
     }
-    return IndexOf<int64_t>(ptr, 0, length_);
+    return IndexOf<int64_t>(ptr, 0, length_, kernel::lib::cpu);   // DERIVE
   }
 
   template <>
   IndexOf<int64_t> IndexOf<int64_t>::to64() const {
-    return IndexOf<int64_t>(ptr_, offset_, length_);
+    return IndexOf<int64_t>(ptr_, offset_, length_, ptr_lib_);
   }
 
   template <typename T>
@@ -352,7 +352,7 @@ namespace awkward {
              &ptr_.get()[(size_t)offset_],
              sizeof(T)*((size_t)length_));
     }
-    return IndexOf<T>(ptr, 0, length_);
+    return IndexOf<T>(ptr, 0, length_, ptr_lib_);
   }
 
   template<typename T>
@@ -364,10 +364,10 @@ namespace awkward {
   const IndexOf<T>
   IndexOf<T>::copy_to(kernel::lib ptr_lib) const {
     if (ptr_lib == ptr_lib_) {
-      return IndexOf<T>(ptr_, offset_, length_);
+      return IndexOf<T>(ptr_, offset_, length_, ptr_lib);
     }
     else {
-      int64_t bytelength = (offset_ + length_) * sizeof(T);
+      int64_t bytelength = (offset_ + length_) * (int64_t)sizeof(T);
       std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, bytelength);
       Error err = kernel::copy_to(ptr_lib,
                                   ptr_lib_,

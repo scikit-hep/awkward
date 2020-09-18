@@ -126,7 +126,7 @@ PYBIND11_MODULE(_ext, m) {
   ////////// io.h
 
   make_fromjson(m, "fromjson");
-  make_fromroot_nestedvector(m, "fromroot_nestedvector");
+  make_uproot_issue_90(m);
 
   ////////// partition.h
 

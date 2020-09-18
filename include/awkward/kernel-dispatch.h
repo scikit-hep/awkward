@@ -182,8 +182,7 @@ namespace awkward {
       }
       else {
         throw std::runtime_error(
-          std::string("unrecognized ptr_lib in ptr_alloc<bool>")
-          + FILENAME_FOR_EXCEPTIONS("include/awkward/kernel-dispatch.h", __LINE__));
+          std::string("unrecognized ptr_lib in ptr_alloc<bool>"));
       }
     }
 
@@ -1415,7 +1414,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       OUT* toptr,
       const IN* fromptr,
-      const int64_t* starts,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1425,7 +1423,6 @@ namespace awkward {
       kernel::lib ptr_lib,
       OUT* toptr,
       const IN* fromptr,
-      const int64_t* starts,
       const int64_t* parents,
       int64_t lenparents,
       int64_t outlength);
@@ -1484,6 +1481,19 @@ namespace awkward {
       const int64_t* gaps,
       int64_t outlength);
 
+    ERROR ListOffsetArray_reduce_nonlocal_nextshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nummissing,
+      int64_t* missing,
+      int64_t* nextshifts,
+      const int64_t* offsets,
+      int64_t length,
+      const int64_t* starts,
+      const int64_t* parents,
+      int64_t maxcount,
+      int64_t nextlen,
+      const int64_t* nextcarry);
+
     ERROR ListOffsetArray_reduce_local_nextparents_64(
       kernel::lib ptr_lib,
       int64_t* nextparents,
@@ -1507,12 +1517,49 @@ namespace awkward {
       int64_t* parents,
       int64_t length);
 
+    template <typename T>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const T* index,
+      int64_t length);
+
+    template <typename T>
+    ERROR IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const T* index,
+      int64_t length,
+      const int64_t* shifts);
+
     ERROR IndexedArray_reduce_next_fix_offsets_64(
       kernel::lib ptr_lib,
       int64_t* outoffsets,
       const int64_t* starts,
       int64_t startslength,
       int64_t outindexlength);
+
+    ERROR NumpyArray_reduce_adjust_starts_64(
+      kernel::lib ptr_lib,
+      int64_t* toptr,
+      int64_t outlength,
+      const int64_t* parents,
+      const int64_t* starts);
+
+    ERROR NumpyArray_reduce_adjust_starts_shifts_64(
+      kernel::lib ptr_lib,
+      int64_t* toptr,
+      int64_t outlength,
+      const int64_t* parents,
+      const int64_t* starts,
+      const int64_t* shifts);
+
+    ERROR NumpyArray_reduce_mask_ByteMaskedArray_64(
+      kernel::lib ptr_lib,
+      int8_t* toptr,
+      const int64_t* parents,
+      int64_t lenparents,
+      int64_t outlength);
 
     ERROR NumpyArray_reduce_mask_ByteMaskedArray_64(
       kernel::lib ptr_lib,
@@ -1530,6 +1577,21 @@ namespace awkward {
       const int64_t* parents,
       int64_t length,
       bool validwhen);
+
+    ERROR ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int8_t* mask,
+      int64_t length,
+      bool valid_when);
+
+    ERROR ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+      kernel::lib ptr_lib,
+      int64_t* nextshifts,
+      const int8_t* mask,
+      int64_t length,
+      bool valid_when,
+      const int64_t* shifts);
 
     /////////////////////////////////// awkward/kernels/sorting.h
 
@@ -1591,8 +1653,9 @@ namespace awkward {
       int64_t* tocarry,
       const int64_t* starts,
       const int64_t* parents,
-      int64_t parentslength,
-      const int64_t* nextparents);
+      const int64_t parentslength,
+      const int64_t* nextparents,
+      const int64_t nextlen);
 
   }
 }

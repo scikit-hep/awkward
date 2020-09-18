@@ -9,7 +9,7 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/io/json.h"
-#include "awkward/io/root.h"
+#include "awkward/io/uproot.h"
 
 #include "awkward/python/io.h"
 
@@ -78,29 +78,9 @@ make_fromjson(py::module& m, const std::string& name) {
       py::arg("buffersize") = 65536);
 }
 
-////////// fromroot
+////////// Uproot connector
 
 void
-make_fromroot_nestedvector(py::module& m, const std::string& name) {
-  m.def(name.c_str(),
-        [](const ak::Index64& byteoffsets,
-           const ak::NumpyArray& rawdata,
-           int64_t depth,
-           int64_t itemsize,
-           const std::string& format,
-           int64_t initial,
-           double resize) -> std::shared_ptr<ak::Content> {
-      return FromROOT_nestedvector(byteoffsets,
-                                   rawdata,
-                                   depth,
-                                   itemsize,
-                                   format,
-                                   ak::ArrayBuilderOptions(initial, resize));
-  }, py::arg("byteoffsets"),
-     py::arg("rawdata"),
-     py::arg("depth"),
-     py::arg("itemsize"),
-     py::arg("format"),
-     py::arg("initial") = 1024,
-     py::arg("resize") = 1.5);
+make_uproot_issue_90(py::module& m) {
+  m.def("uproot_issue_90", &ak::uproot_issue_90);
 }

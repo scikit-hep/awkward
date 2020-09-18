@@ -29,13 +29,6 @@ import awkward1._connect._numba
 numba = type(awkward1._connect._numba)("numba")
 numba.register = awkward1._connect._numba.register
 
-import awkward1._connect._pandas
-
-pandas = type(awkward1._connect._pandas)("pandas")
-pandas.register = awkward1._connect._pandas.register
-pandas.df = awkward1._connect._pandas.df
-pandas.dfs = awkward1._connect._pandas.dfs
-
 import awkward1._connect._numexpr
 
 numexpr = type(awkward1._connect._numexpr)("numexpr")
@@ -63,7 +56,6 @@ from awkward1.operations.convert import *
 from awkward1.operations.describe import *
 from awkward1.operations.structure import *
 from awkward1.operations.reducers import *
-from awkward1.operations.transfers import *
 
 # version
 __version__ = awkward1._ext.__version__

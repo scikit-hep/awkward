@@ -733,25 +733,27 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     contents = [
         awkward1.operations.convert.to_layout(x, allow_record=False) for x in arrays
     ]
-
     contents = [
         x.toContent() if isinstance(x, awkward1.partition.PartitionedArray) else x
         for x in contents
     ]
-
     if len(contents) == 0:
         raise ValueError(
             "need at least one array to concatenate"
             + awkward1._util.exception_suffix(__file__)
         )
-    out = contents[0]
+
+    batch = [contents[0]]
     for x in contents[1:]:
-        if not out.mergeable(x, mergebool=mergebool):
-            out = out.merge_as_union(x)
+        if batch[-1].mergeable(x, mergebool=mergebool):
+            batch.append(x)
         else:
-            out = out.merge(x)
-        if isinstance(out, awkward1._util.uniontypes):
-            out = out.simplify(mergebool=mergebool)
+            collapsed = batch[0].mergemany(batch[1:])
+            batch = [collapsed.merge_as_union(x)]
+
+    out = batch[0].mergemany(batch[1:])
+    if isinstance(out, awkward1._util.uniontypes):
+        out = out.simplify(mergebool=mergebool)
 
     if highlevel:
         return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(*arrays))
@@ -2442,14 +2444,17 @@ def virtual(
         generate, args, kwargs, form=form, length=length
     )
     if cache is not None:
-        cache = awkward1.layout.ArrayCache(cache)
+        toattach = awkward1._util.MappingProxy.maybe_wrap(cache)
+        cache = awkward1.layout.ArrayCache(toattach)
+    else:
+        toattach = None
 
     out = awkward1.layout.VirtualArray(
         gen, cache, cache_key=cache_key, parameters=parameters
     )
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior=behavior)
+        return awkward1._util.wrap(out, behavior=behavior, cache=toattach)
     else:
         return out
 
@@ -2525,8 +2530,11 @@ def with_cache(array, cache, chain=None, highlevel=True):
             + awkward1._util.exception_suffix(__file__)
         )
 
-    if not isinstance(cache, awkward1.layout.ArrayCache):
-        cache = awkward1.layout.ArrayCache(cache)
+    if isinstance(cache, awkward1.layout.ArrayCache):
+        cache = cache.mutablemapping
+
+    toattach = awkward1._util.MappingProxy.maybe_wrap(cache)
+    cache = awkward1.layout.ArrayCache(toattach)
 
     def getfunction(layout, depth):
         if isinstance(layout, awkward1.layout.VirtualArray):
@@ -2537,9 +2545,11 @@ def with_cache(array, cache, chain=None, highlevel=True):
             elif layout.cache is None:
                 newcache = cache
             elif chain == "first":
-                newcache = awkward1.layout.ArrayCache(_CacheChain(cache, layout.cache))
+                raise NotImplementedError("To properly chain caches we need to find and chain all layout caches, returning them as highlevel")
+                # newcache = awkward1.layout.ArrayCache(_CacheChain(cache, layout.cache))
             elif chain == "last":
-                newcache = awkward1.layout.ArrayCache(_CacheChain(layout.cache, cache))
+                raise NotImplementedError("To properly chain caches we need to find and chain all layout caches, returning them as highlevel")
+                # newcache = awkward1.layout.ArrayCache(_CacheChain(layout.cache, cache))
             return lambda: awkward1.layout.VirtualArray(
                 layout.generator,
                 newcache,
@@ -2554,7 +2564,7 @@ def with_cache(array, cache, chain=None, highlevel=True):
         awkward1.operations.convert.to_layout(array), getfunction
     )
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array), toattach)
     else:
         return out
 

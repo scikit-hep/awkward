@@ -117,6 +117,18 @@ namespace awkward {
     }
   }
 
+  bool
+  VirtualForm::dimension_optiontype() const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
+    }
+    else {
+      return form_.get()->dimension_optiontype();
+    }
+  }
+
   const std::pair<int64_t, int64_t>
   VirtualForm::minmax_depth() const {
     if (form_.get() == nullptr) {
@@ -569,6 +581,12 @@ namespace awkward {
       if (record != std::string("null")) {
         params["__record__"] = record;
       }
+      std::string doc =
+          form(false).get()->getitem_field(key)->purelist_parameter(
+              "__doc__");
+      if (doc != std::string("null")) {
+        params["__doc__"] = doc;
+      }
     }
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  sliceform, generator_.get()->length(), shallow_copy(), slice);
@@ -615,13 +633,8 @@ namespace awkward {
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  form, carry.length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
-    util::Parameters params(parameters_);
-    std::string record = purelist_parameter("__record__");
-    if (record != std::string("null")) {
-      params["__record__"] = record;
-    }
     return std::make_shared<VirtualArray>(Identities::none(),
-                                          params,
+                                          forward_parameters(),
                                           generator,
                                           cache);
   }
@@ -677,8 +690,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  VirtualArray::merge(const ContentPtr& other) const {
-    return array().get()->merge(other);
+  VirtualArray::mergemany(const ContentPtrVec& others) const {
+    return array().get()->mergemany(others);
   }
 
   const SliceItemPtr
@@ -707,6 +720,7 @@ namespace awkward {
   VirtualArray::reduce_next(const Reducer& reducer,
                           int64_t negaxis,
                           const Index64& starts,
+                          const Index64& shifts,
                           const Index64& parents,
                           int64_t outlength,
                           bool mask,
@@ -714,6 +728,7 @@ namespace awkward {
     return array().get()->reduce_next(reducer,
                                       negaxis,
                                       starts,
+                                      shifts,
                                       parents,
                                       outlength,
                                       mask,
@@ -814,14 +829,9 @@ namespace awkward {
           FormPtr form(nullptr);
           ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, length, shallow_copy(), where);
-          util::Parameters params;
-          std::string record = purelist_parameter("__record__");
-          if (record != std::string("null")) {
-            params["__record__"] = record;
-          }
           ArrayCachePtr cache(nullptr);
           return std::make_shared<VirtualArray>(Identities::none(),
-                                                params,
+                                                forward_parameters(),
                                                 generator,
                                                 cache);
         }
@@ -835,14 +845,9 @@ namespace awkward {
         FormPtr form(nullptr);
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, generator_.get()->length(), shallow_copy(), where);
-        util::Parameters params;
-        std::string record = purelist_parameter("__record__");
-        if (record != std::string("null")) {
-          params["__record__"] = record;
-        }
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
-                                              params,
+                                              forward_parameters(),
                                               generator,
                                               cache);
       }
@@ -852,14 +857,9 @@ namespace awkward {
         FormPtr form(nullptr);
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, 1, shallow_copy(), where);
-        util::Parameters params;
-        std::string record = purelist_parameter("__record__");
-        if (record != std::string("null")) {
-          params["__record__"] = record;
-        }
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
-                                              params,
+                                              forward_parameters(),
                                               generator,
                                               cache);
       }
@@ -869,14 +869,9 @@ namespace awkward {
         FormPtr form(nullptr);
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, slicearray->length(), shallow_copy(), where);
-        util::Parameters params;
-        std::string record = purelist_parameter("__record__");
-        if (record != std::string("null")) {
-          params["__record__"] = record;
-        }
         ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
-                                              params,
+                                              forward_parameters(),
                                               generator,
                                               cache);
       }
@@ -1004,4 +999,17 @@ namespace awkward {
     return array().get()->numbers_to_type(name);
   }
 
+  const util::Parameters
+  VirtualArray::forward_parameters() const {
+    util::Parameters params;
+    std::string record = purelist_parameter("__record__");
+    if (record != std::string("null")) {
+      params["__record__"] = record;
+    }
+    std::string doc = purelist_parameter("__doc__");
+    if (doc != std::string("null")) {
+      params["__doc__"] = doc;
+    }
+    return params;
+  }
 }

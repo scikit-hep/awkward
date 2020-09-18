@@ -90,6 +90,11 @@ namespace awkward {
     return content_.get()->purelist_depth();
   }
 
+  bool
+  UnmaskedForm::dimension_optiontype() const {
+    return true;
+  }
+
   const std::pair<int64_t, int64_t>
   UnmaskedForm::minmax_depth() const {
     return content_.get()->minmax_depth();
@@ -675,15 +680,15 @@ namespace awkward {
 
   const ContentPtr
   UnmaskedArray::reverse_merge(const ContentPtr& other) const {
-    ContentPtr indexedoptionarray = toIndexedOptionArray64();
-    IndexedOptionArray64* raw =
-      dynamic_cast<IndexedOptionArray64*>(indexedoptionarray.get());
-    return raw->reverse_merge(other);
+    return toIndexedOptionArray64().get()->reverse_merge(other);
   }
 
   const ContentPtr
-  UnmaskedArray::merge(const ContentPtr& other) const {
-    return toIndexedOptionArray64().get()->merge(other);
+  UnmaskedArray::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
+    return toIndexedOptionArray64().get()->mergemany(others);
   }
 
   const SliceItemPtr
@@ -736,17 +741,23 @@ namespace awkward {
   UnmaskedArray::reduce_next(const Reducer& reducer,
                              int64_t negaxis,
                              const Index64& starts,
+                             const Index64& shifts,
                              const Index64& parents,
                              int64_t outlength,
                              bool mask,
                              bool keepdims) const {
-    return content_.get()->reduce_next(reducer,
-                                       negaxis,
-                                       starts,
-                                       parents,
-                                       outlength,
-                                       mask,
-                                       keepdims);
+    ContentPtr next = content_;
+    if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
+      next = raw->toListOffsetArray64(true);
+    }
+    return next.get()->reduce_next(reducer,
+                                   negaxis,
+                                   starts,
+                                   shifts,
+                                   parents,
+                                   outlength,
+                                   mask,
+                                   keepdims);
   }
 
   const ContentPtr

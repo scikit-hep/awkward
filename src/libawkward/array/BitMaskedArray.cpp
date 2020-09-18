@@ -119,6 +119,11 @@ namespace awkward {
     return content_.get()->purelist_depth();
   }
 
+  bool
+  BitMaskedForm::dimension_optiontype() const {
+    return true;
+  }
+
   const std::pair<int64_t, int64_t>
   BitMaskedForm::minmax_depth() const {
     return content_.get()->minmax_depth();
@@ -773,15 +778,15 @@ namespace awkward {
 
   const ContentPtr
   BitMaskedArray::reverse_merge(const ContentPtr& other) const {
-    ContentPtr indexedoptionarray = toIndexedOptionArray64();
-    IndexedOptionArray64* raw =
-      dynamic_cast<IndexedOptionArray64*>(indexedoptionarray.get());
-    return raw->reverse_merge(other);
+    return toIndexedOptionArray64().get()->reverse_merge(other);
   }
 
   const ContentPtr
-  BitMaskedArray::merge(const ContentPtr& other) const {
-    return toIndexedOptionArray64().get()->merge(other);
+  BitMaskedArray::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
+    return toIndexedOptionArray64().get()->mergemany(others);
   }
 
   const SliceItemPtr
@@ -810,6 +815,7 @@ namespace awkward {
   BitMaskedArray::reduce_next(const Reducer& reducer,
                               int64_t negaxis,
                               const Index64& starts,
+                              const Index64& shifts,
                               const Index64& parents,
                               int64_t outlength,
                               bool mask,
@@ -817,6 +823,7 @@ namespace awkward {
     return toByteMaskedArray().get()->reduce_next(reducer,
                                                   negaxis,
                                                   starts,
+                                                  shifts,
                                                   parents,
                                                   outlength,
                                                   mask,

@@ -32,6 +32,9 @@ jobs:
     pool:
       vmImage: "vs2017-win2016"
 
+    variables:
+      PIP_ONLY_BINARY: cmake
+
     strategy:
       matrix:
         "py27-32bit":
@@ -80,21 +83,31 @@ jobs:
       - script: |
           python -m pip install --upgrade pip
         displayName: "Install Pip"
+
       - script: |
           python -m pip list
         displayName: "Show versions"
+
       - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
+
       - script: |
           python dev/generate-kernelspec.py
         displayName: "Generate Kernel specification"
+
       - script: |
-          python tests-kernels/generate-tests.py
+          python dev/generate-tests.py
         displayName: "Generate Kernel tests"
+
       - script: |
-          python -m pytest -vv -rs tests-kernels
-        displayName: "Test kernels"
+          python -m pytest -vv -rs tests-spec
+        displayName: "Test specification"
+
+      - script: |
+          python -m pytest -vv -rs tests-cpu-kernels
+        displayName: "Test CPU kernels"
+
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
@@ -103,6 +116,9 @@ jobs:
 
     pool:
       vmImage: "macOS-10.14"
+
+    variables:
+      PIP_ONLY_BINARY: cmake
 
     strategy:
       matrix:
@@ -140,6 +156,7 @@ jobs:
       - script: |
           python -m pip install --upgrade pip
         displayName: "Install Pip"
+
       - script: |
           python -m pip list
         displayName: "Print versions"
@@ -147,28 +164,71 @@ jobs:
       - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
+
       - script: |
           python dev/generate-kernelspec.py
         displayName: "Generate Kernel specification"
+
       - script: |
-          python tests-kernels/generate-tests.py
+          python dev/generate-tests.py
         displayName: "Generate Kernel tests"
+
       - script: |
-          python -m pytest -vv -rs tests-kernels
-        displayName: "Test kernels"
+          python -m pytest -vv -rs tests-spec
+        displayName: "Test specification"
+
+      - script: |
+          python -m pytest -vv -rs tests-cpu-kernels
+        displayName: "Test CPU kernels"
+
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
 
-      # - script: |
-      #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
-      #   workingDirectory: dependent-project
-      #   displayName: "Test dependent project"
+      - script: |
+          echo '===== include directory ============================='
+          ls -R `python -m awkward1.config --incdir`
+          echo '===== library directory ============================='
+          ls `python -m awkward1.config --libdir`
+          echo '===== compilation ==================================='
+          which g++
+          g++ minimal.cpp `python -m awkward1.config --cflags --static-libs` -o minimal
+          otool -L minimal
+          ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
+        workingDirectory: dependent-project
+        displayName: "Test dependent project 1"
+
+      - script: |
+          rm -f minimal
+          g++ minimal.cpp `python -m awkward1.config --cflags --libs` -o minimal
+          export DYLD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$DYLD_LIBRARY_PATH
+          echo $DYLD_LIBRARY_PATH
+          otool -L minimal
+          ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
+        workingDirectory: dependent-project
+        displayName: "Test dependent project 2"
+
+      - script: |
+          which python
+          python -c 'import sys; print(sys.version)'
+          cmake -S . -B build -DPYTHON_EXECUTABLE:FILEPATH=`which python`
+          cmake --build build
+          export DYLD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$DYLD_LIBRARY_PATH
+          echo $DYLD_LIBRARY_PATH
+          ls build/dependent*
+          otool -L build/dependent*
+          touch build/__init__.py
+          python -m pytest -vv test-python.py
+        workingDirectory: dependent-project
+        displayName: "Test dependent project 3"
 
   - job: Linux
 
     pool:
       vmImage: "ubuntu-16.04"
+
+    variables:
+      PIP_ONLY_BINARY: cmake
 
     strategy:
       matrix:
@@ -210,6 +270,7 @@ jobs:
       - script: |
           python -m pip install --upgrade pip
         displayName: "Install Pip"
+
       - script: |
           if [ $(numpy.version) = "latest" ]; then
             python -m pip install numpy;
@@ -217,6 +278,7 @@ jobs:
             python -m pip install numpy==$(numpy.version);
           fi
         displayName: "Install NumPy"
+
       - script: |
           python -m pip list
         displayName: "Print versions"
@@ -224,25 +286,70 @@ jobs:
       - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
+
       - script: |
           python dev/generate-kernelspec.py
         displayName: "Generate Kernel specification"
+
       - script: |
-          python tests-kernels/generate-tests.py
+          python dev/generate-tests.py
         displayName: "Generate Kernel tests"
+
       - script: |
-          python -m pytest -vv -rs tests-kernels
-        displayName: "Test kernels"
+          python -m pytest -vv -rs tests-spec
+        displayName: "Test specification"
+
+      - script: |
+          python -m pytest -vv -rs tests-cpu-kernels
+        displayName: "Test CPU kernels"
+
       - script: |
           python -m pytest -vv -rs tests
         displayName: "Test"
+
+      - script: |
+          python dev/generate-cuda.py
+        displayName: "Generate CUDA kernels"
+        condition: "ne(variables['python.version'], '3.8')"
+
       - script: |
           python -m pip install wheel
           bash cuda-build.sh
-        displayName: "Test-build the cuda-kernels"
+        displayName: "Build the cuda-kernels"
         condition: "ne(variables['python.version'], '2.7')"
 
-      # - script: |
-      #     cmake -S . -B build  &&  cmake --build build  &&  python -m pytest -vv tests.py
-      #   workingDirectory: dependent-project
-      #   displayName: "Test dependent project"
+      - script: |
+          echo '===== include directory ============================='
+          ls -R `python -m awkward1.config --incdir`
+          echo '===== library directory ============================='
+          ls `python -m awkward1.config --libdir`
+          echo '===== compilation ==================================='
+          g++ minimal.cpp `python -m awkward1.config --cflags --static-libs` -o minimal
+          ldd minimal
+          ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
+        workingDirectory: dependent-project
+        displayName: "Test dependent project 1"
+
+      - script: |
+          rm -f minimal
+          g++ minimal.cpp `python -m awkward1.config --cflags --libs` -o minimal
+          export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
+          echo $LD_LIBRARY_PATH
+          ldd minimal
+          ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
+        workingDirectory: dependent-project
+        displayName: "Test dependent project 2"
+
+      - script: |
+          which python
+          python -c 'import sys; print(sys.version)'
+          cmake -S . -B build -DPYTHON_EXECUTABLE:FILEPATH=`which python`
+          cmake --build build
+          export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
+          echo $LD_LIBRARY_PATH
+          ls build/dependent*
+          ldd build/dependent*
+          touch build/__init__.py
+          python -m pytest -vv test-python.py
+        workingDirectory: dependent-project
+        displayName: "Test dependent project 3"

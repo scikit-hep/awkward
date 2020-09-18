@@ -3,12 +3,9 @@
 from __future__ import absolute_import
 
 import ctypes
-import ctypes.util
 import platform
 import pkg_resources
 
-# libpath = ctypes.util.find_library("awkward")
-# if libpath is None:
 if platform.system() == "Windows":
     name = "awkward-cpu-kernels.dll"
 elif platform.system() == "Darwin":

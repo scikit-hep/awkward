@@ -3,7 +3,6 @@
 import os
 
 import yaml
-
 from parser_utils import indent_code
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -28,7 +27,14 @@ The functions are implemented in C with templates for integer specializations (c
     ) as infile:
         mainspec = yaml.safe_load(infile)["kernels"]
         with open(
-            os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto", "kernels.rst",), "w"
+            os.path.join(
+                CURRENT_DIR,
+                "..",
+                "docs-sphinx",
+                "_auto",
+                "kernels.rst",
+            ),
+            "w",
         ) as outfile:
             outfile.write(prefix)
             for filedir in mainspec.values():
@@ -40,7 +46,7 @@ The functions are implemented in C with templates for integer specializations (c
                         outfile.write(indspec["name"] + "\n")
                         print("Generating doc for " + indspec["name"])
                         outfile.write(
-                            "=================================================================\n"
+                            "========================================================================\n"
                         )
                         if "specializations" in indspec.keys():
                             for childfunc in indspec["specializations"]:
@@ -50,29 +56,45 @@ The functions are implemented in C with templates for integer specializations (c
                                     if i != 0:
                                         outfile.write(
                                             ", "
-                                            + list(childfunc["args"][i].keys())[0]
+                                            + childfunc["args"][i]["name"]
                                             + ": "
-                                            + list(childfunc["args"][i].values())[0]
+                                            + childfunc["args"][i]["type"]
                                         )
                                     else:
                                         outfile.write(
-                                            list(childfunc["args"][i].keys())[0]
+                                            childfunc["args"][i]["name"]
                                             + ": "
-                                            + list(childfunc["args"][i].values())[0]
+                                            + childfunc["args"][i]["type"]
                                         )
                                 outfile.write(")\n")
                         outfile.write(".. code-block:: python\n\n")
                         # Remove conditional at the end of dev
                         if "def" in indspec["definition"]:
                             outfile.write(
-                                indent_code(indspec["definition"], 4,) + "\n\n"
+                                indent_code(
+                                    indspec["definition"],
+                                    4,
+                                )
+                                + "\n\n"
                             )
 
         if os.path.isfile(
-            os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto", "toctree.txt",)
+            os.path.join(
+                CURRENT_DIR,
+                "..",
+                "docs-sphinx",
+                "_auto",
+                "toctree.txt",
+            )
         ):
             with open(
-                os.path.join(CURRENT_DIR, "..", "docs-sphinx", "_auto", "toctree.txt",),
+                os.path.join(
+                    CURRENT_DIR,
+                    "..",
+                    "docs-sphinx",
+                    "_auto",
+                    "toctree.txt",
+                ),
                 "r+",
             ) as f:
                 if "_auto/kernels.rst" not in f.read():

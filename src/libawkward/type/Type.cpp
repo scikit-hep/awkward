@@ -133,7 +133,7 @@ namespace awkward {
         if (!first) {
           out << ", ";
         }
-        out << util::quote(pair.first, true) << ": " << pair.second;
+        out << util::quote(pair.first) << ": " << pair.second;
         first = false;
       }
     }

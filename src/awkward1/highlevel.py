@@ -16,7 +16,6 @@ except ImportError:
     from collections import MutableMapping
 
 import awkward1._connect._numpy
-import awkward1._connect._pandas
 import awkward1.nplike
 import awkward1.layout
 import awkward1.operations.convert
@@ -29,26 +28,34 @@ numpy = awkward1.nplike.Numpy.instance()
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
 
+def _suffix(array):
+    out = awkward1.operations.convert.kernels(array)
+    if out is None or out == "cpu":
+        return ""
+    else:
+        return ":" + out
+
+
 class Array(
     awkward1._connect._numpy.NDArrayOperatorsMixin,
-    awkward1._connect._pandas.PandasMixin,
     Iterable,
     Sized,
 ):
     u"""
     Args:
-        data (#ak.layout.Content, #ak.partition.PartitionedArray, #ak.Array,
-              np.ndarray, pyarrow.*, str, dict, or iterable):
+        data (#ak.layout.Content, #ak.partition.PartitionedArray, #ak.Array, `np.ndarray`, `cp.ndarray`, `pyarrow.*`, str, dict, or iterable):
             Data to wrap or convert into an array.
-            If a NumPy array, the regularity of its dimensions is preserved
-            and the data are viewed, not copied.
-            If a pyarrow object, calls #ak.from_arrow, preserving as much
-            metadata as possible, usually zero-copy.
-            If a dict of str \u2192 columns, combines the columns into an
-            array of records (like Pandas's DataFrame constructor).
-            If a string, the data are assumed to be JSON.
-            If an iterable, calls #ak.from_iter, which assumes all dimensions
-            have irregular lengths.
+               - If a NumPy array, the regularity of its dimensions is preserved
+                 and the data are viewed, not copied.
+               - CuPy arrays are treated the same way as NumPy arrays except that
+                 they default to `kernels="cuda"`, rather than `kernels="cpu"`.
+               - If a pyarrow object, calls #ak.from_arrow, preserving as much
+                 metadata as possible, usually zero-copy.
+               - If a dict of str \u2192 columns, combines the columns into an
+                 array of records (like Pandas's DataFrame constructor).
+               - If a string, the data are assumed to be JSON.
+               - If an iterable, calls #ak.from_iter, which assumes all dimensions
+                 have irregular lengths.
         behavior (None or dict): Custom #ak.behavior for this Array only.
         with_name (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
@@ -56,6 +63,13 @@ class Array(
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
+        kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Array will be placed in
+            main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
+            the Array will be placed in GPU global memory using CUDA; if None,
+            the `data` are left untouched. For `"cuda"`,
+            [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
+            must be installed, which can be invoked with
+            `pip install awkward1[cuda] --upgrade`.
 
     High-level array that can contain data of any type.
 
@@ -196,7 +210,13 @@ class Array(
     """
 
     def __init__(
-        self, data, behavior=None, with_name=None, check_valid=False, cache=None
+        self,
+        data,
+        behavior=None,
+        with_name=None,
+        check_valid=False,
+        cache=None,
+        kernels=None,
     ):
         if isinstance(
             data, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
@@ -208,6 +228,9 @@ class Array(
 
         elif isinstance(data, np.ndarray) and data.dtype != np.dtype("O"):
             layout = awkward1.operations.convert.from_numpy(data, highlevel=False)
+
+        elif type(data).__module__.startswith("cupy."):
+            layout = awkward1.operations.convert.from_cupy(data, highlevel=False)
 
         elif type(data).__module__ == "pyarrow" or type(data).__module__.startswith("pyarrow."):
             layout = awkward1.operations.convert.from_arrow(data, highlevel=False)
@@ -247,6 +270,14 @@ class Array(
             )
         if self.__class__ is Array:
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
+
+        if (
+            kernels is not None
+            and kernels != awkward1.operations.convert.kernels(layout)
+        ):
+            layout = awkward1.operations.convert.to_kernels(
+                layout, kernels, highlevel=False
+            )
 
         self.layout = layout
         self.behavior = behavior
@@ -373,13 +404,11 @@ class Array(
             return self._array._str(limit_value=limit_value)
 
         def _repr(self, limit_value=40, limit_total=85):
-            import awkward1.operations.structure
+            suffix = _suffix(self)
+            limit_value -= len(suffix)
 
-            layout = awkward1.operations.structure.with_cache(
-                self._layout, {}, chain="last", highlevel=False
-            )
             value = awkward1._util.minimally_touching_string(
-                limit_value, layout, self._behavior
+                limit_value, self._array._layout, self._array._behavior
             )
 
             try:
@@ -388,12 +417,12 @@ class Array(
                 name = type(self._array).__name__
             limit_type = limit_total - (len(value) + len(name) + len("<.mask  type=>"))
             typestr = repr(
-                str(awkward1._util.highlevel_type(layout, self._array._behavior, True))
+                str(awkward1._util.highlevel_type(self._array._layout, self._array._behavior, True))
             )
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-            return "<{0}.mask {1} type={2}>".format(name, value, typestr)
+            return "<{0}.mask{1} {2} type={3}>".format(name, suffix, value, typestr)
 
         def __getitem__(self, where):
             return awkward1.operations.structure.mask(
@@ -1206,23 +1235,16 @@ class Array(
         return self._repr()
 
     def _str(self, limit_value=85):
-        import awkward1.operations.structure
-
-        layout = awkward1.operations.structure.with_cache(
-            self._layout, {}, chain="last", highlevel=False
-        )
         return awkward1._util.minimally_touching_string(
-            limit_value, layout, self._behavior
+            limit_value, self._layout, self._behavior
         )
 
     def _repr(self, limit_value=40, limit_total=85):
-        import awkward1.operations.structure
+        suffix = _suffix(self)
+        limit_value -= len(suffix)
 
-        layout = awkward1.operations.structure.with_cache(
-            self._layout, {}, chain="last", highlevel=False
-        )
         value = awkward1._util.minimally_touching_string(
-            limit_value, layout, self._behavior
+            limit_value, self._layout, self._behavior
         )
 
         try:
@@ -1230,11 +1252,11 @@ class Array(
         except AttributeError:
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(str(awkward1._util.highlevel_type(layout, self._behavior, True)))
+        typestr = repr(str(awkward1._util.highlevel_type(self._layout, self._behavior, True)))
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{0} {1} type={2}>".format(name, value, typestr)
+        return "<{0}{1} {2} type={3}>".format(name, suffix, value, typestr)
 
     def __array__(self, *args, **kwargs):
         """
@@ -1261,25 +1283,7 @@ class Array(
         nested lists in a NumPy `"O"` array are severed from the array and
         cannot be sliced as dimensions.
         """
-        if awkward1._util.called_by_module(
-            "pandas.io.formats.format"
-        ) or awkward1._util.called_by_module("pandas.core.generic"):
-            out = numpy.empty(len(self._layout), dtype="O")
-            for i, x in enumerate(self._layout):
-                out[i] = awkward1._util.wrap(x, self._behavior)
-            return out
-        elif awkward1._util.called_by_module("pandas"):
-            try:
-                return awkward1._connect._numpy.convert_to_array(
-                    self._layout, args, kwargs
-                )
-            except Exception:
-                out = numpy.empty(len(self._layout), dtype="O")
-                for i, x in enumerate(self._layout):
-                    out[i] = awkward1._util.wrap(x, self._behavior)
-                return out
-        else:
-            return awkward1._connect._numpy.convert_to_array(self._layout, args, kwargs)
+        return awkward1._connect._numpy.convert_to_array(self._layout, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -1415,6 +1419,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         cache (None or MutableMapping): Stores data for any
             #ak.layout.VirtualArray nodes that this Array might contain.
             Persists through `__getitem__` but not any other operations.
+        kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Record will be placed in
+            main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
+            the Record will be placed in GPU global memory using CUDA; if None,
+            the `data` are left untouched. For `"cuda"`,
+            [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
+            must be installed, which can be invoked with
+            `pip install awkward1[cuda] --upgrade`.
 
     High-level record that can contain fields of any type.
 
@@ -1431,7 +1442,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     """
 
     def __init__(
-        self, data, behavior=None, with_name=None, check_valid=False, cache=None
+        self,
+        data,
+        behavior=None,
+        with_name=None,
+        check_valid=False,
+        cache=None,
+        kernels=None,
     ):
         if isinstance(data, awkward1.layout.Record):
             layout = data
@@ -1466,6 +1483,14 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if with_name is not None:
             layout = awkward1.operations.structure.with_name(
                 layout, with_name, highlevel=False
+            )
+
+        if (
+            kernels is not None
+            and kernels != awkward1.operations.convert.kernels(layout)
+        ):
+            layout = awkward1.operations.convert.to_kernels(
+                layout, kernels, highlevel=False
             )
 
         self.layout = layout
@@ -1910,23 +1935,16 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         return self._repr()
 
     def _str(self, limit_value=85):
-        import awkward1.operations.structure
-
-        layout = awkward1.operations.structure.with_cache(
-            self._layout, {}, chain="last", highlevel=False
-        )
         return awkward1._util.minimally_touching_string(
-            limit_value + 2, layout, self._behavior
+            limit_value + 2, self._layout, self._behavior
         )[1:-1]
 
     def _repr(self, limit_value=40, limit_total=85):
-        import awkward1.operations.structure
+        suffix = _suffix(self)
+        limit_value -= len(suffix)
 
-        layout = awkward1.operations.structure.with_cache(
-            self._layout, {}, chain="last", highlevel=False
-        )
         value = awkward1._util.minimally_touching_string(
-            limit_value + 2, layout, self._behavior
+            limit_value + 2, self._layout, self._behavior
         )[1:-1]
 
         try:
@@ -1935,12 +1953,12 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
         typestr = repr(
-            str(awkward1._util.highlevel_type(layout, self._behavior, False))
+            str(awkward1._util.highlevel_type(self._layout, self._behavior, False))
         )
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
-        return "<{0} {1} type={2}>".format(name, value, typestr)
+        return "<{0}{1} {2} type={3}>".format(name, suffix, value, typestr)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -2513,7 +2531,9 @@ class ArrayBuilder(Iterable, Sized):
             if isinstance(obj, Record):
                 self._layout.append(obj.layout.array, obj.layout.at)
             elif isinstance(obj, Array):
+                self._layout.beginlist()
                 self._layout.extend(obj.layout)
+                self._layout.endlist()
             else:
                 self._layout.fromiter(obj)
 

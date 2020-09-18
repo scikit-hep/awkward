@@ -113,6 +113,11 @@ namespace awkward {
     return content_.get()->purelist_depth();
   }
 
+  bool
+  ByteMaskedForm::dimension_optiontype() const {
+    return true;
+  }
+
   const std::pair<int64_t, int64_t>
   ByteMaskedForm::minmax_depth() const {
     return content_.get()->minmax_depth();
@@ -855,15 +860,15 @@ namespace awkward {
 
   const ContentPtr
   ByteMaskedArray::reverse_merge(const ContentPtr& other) const {
-    ContentPtr indexedoptionarray = toIndexedOptionArray64();
-    IndexedOptionArray64* raw =
-      dynamic_cast<IndexedOptionArray64*>(indexedoptionarray.get());
-    return raw->reverse_merge(other);
+    return toIndexedOptionArray64().get()->reverse_merge(other);
   }
 
   const ContentPtr
-  ByteMaskedArray::merge(const ContentPtr& other) const {
-    return toIndexedOptionArray64().get()->merge(other);
+  ByteMaskedArray::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
+    return toIndexedOptionArray64().get()->mergemany(others);
   }
 
   const SliceItemPtr
@@ -948,6 +953,7 @@ namespace awkward {
   ByteMaskedArray::reduce_next(const Reducer& reducer,
                                int64_t negaxis,
                                const Index64& starts,
+                               const Index64& shifts,
                                const Index64& parents,
                                int64_t outlength,
                                bool mask,
@@ -957,13 +963,13 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       &numnull,
       mask_.data(),
-      length(),
+      mask_.length(),
       valid_when_);
     util::handle_error(err1, classname(), identities_.get());
 
-    Index64 nextparents(length() - numnull);
-    Index64 nextcarry(length() - numnull);
-    Index64 outindex(length());
+    Index64 nextparents(mask_.length() - numnull);
+    Index64 nextcarry(mask_.length() - numnull);
+    Index64 outindex(mask_.length());
     struct Error err2 = kernel::ByteMaskedArray_reduce_next_64(
       kernel::lib::cpu,   // DERIVE
       nextcarry.data(),
@@ -971,20 +977,54 @@ namespace awkward {
       outindex.data(),
       mask_.data(),
       parents.data(),
-      length(),
+      mask_.length(),
       valid_when_);
     util::handle_error(err2, classname(), identities_.get());
 
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+
+    bool make_shifts = (reducer.returns_positions()  &&
+                        !branchdepth.first  && negaxis == branchdepth.second);
+
+    Index64 nextshifts(make_shifts ? mask_.length() - numnull : 0);
+    if (make_shifts) {
+      if (shifts.length() == 0) {
+        struct Error err3 =
+            kernel::ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          mask_.data(),
+          mask_.length(),
+          valid_when_);
+        util::handle_error(err3, classname(), identities_.get());
+      }
+      else {
+        struct Error err3 =
+            kernel::ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
+          kernel::lib::cpu,   // DERIVE
+          nextshifts.data(),
+          mask_.data(),
+          mask_.length(),
+          valid_when_,
+          shifts.data());
+        util::handle_error(err3, classname(), identities_.get());
+      }
+    }
+
     ContentPtr next = content_.get()->carry(nextcarry, false);
+    if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
+      next = raw->toListOffsetArray64(true);
+    }
+
     ContentPtr out = next.get()->reduce_next(reducer,
                                              negaxis,
                                              starts,
+                                             nextshifts,
                                              nextparents,
                                              outlength,
                                              mask,
                                              keepdims);
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       return out;
     }
@@ -1002,13 +1042,13 @@ namespace awkward {
                         "a ListOffsetArray64 whose offsets start at zero")
             + FILENAME(__LINE__));
         }
-        struct Error err3 = kernel::IndexedArray_reduce_next_fix_offsets_64(
+        struct Error err4 = kernel::IndexedArray_reduce_next_fix_offsets_64(
           kernel::lib::cpu,   // DERIVE
           outoffsets.data(),
           starts.data(),
           starts.length(),
           outindex.length());
-        util::handle_error(err3, classname(), identities_.get());
+        util::handle_error(err4, classname(), identities_.get());
 
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),

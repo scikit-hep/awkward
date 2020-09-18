@@ -158,7 +158,7 @@ namespace awkward {
 
     /// @exception std::runtime_error is always thrown
     const ContentPtr
-      merge(const ContentPtr& other) const override;
+      mergemany(const ContentPtrVec& others) const override;
 
     /// @exception std::runtime_error is always thrown
     const SliceItemPtr
@@ -183,6 +183,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,

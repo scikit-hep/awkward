@@ -36,9 +36,11 @@ jobs:
       - script: |
           python -m pip install --upgrade pip
         displayName: "Install Pip"
+
       - script: |
           python -m pip install twine wheel
         displayName: "Install Twine & Wheel"
+
       - script: |
           python -m pip list
         displayName: "Print versions"
@@ -46,6 +48,7 @@ jobs:
       - script: |
           bash cuda-build.sh
         displayName: "Build"
+
       - script: |
           ls dist
           rm -rf dist/awkward1_cuda_kernels-*-py3-none-any.whl dist/awkward1_cuda_kernels dist/awkward1_cuda_kernels-*.dist-info dist/tmp_WHEEL
@@ -63,6 +66,9 @@ jobs:
 
     pool:
       vmImage: "ubuntu-16.04"
+
+    variables:
+      PIP_ONLY_BINARY: cmake
 
     strategy:
       matrix:
@@ -129,6 +135,9 @@ jobs:
 
     pool:
       vmImage: "vs2017-win2016"
+
+    variables:
+      PIP_ONLY_BINARY: cmake
 
     strategy:
       matrix:
@@ -217,6 +226,9 @@ jobs:
 
     pool:
       vmImage: "macOS-10.14"
+
+    variables:
+      PIP_ONLY_BINARY: cmake
 
     strategy:
       matrix:

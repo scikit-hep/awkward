@@ -50,21 +50,25 @@ For more fine-grained testing, we also have tests of the low-level kernels, whic
 
 ```bash
 python dev/generate-kernelspec.py
-python tests-kernels/generate-tests.py
-python -m pytest -vv -rs tests-kernels
+python dev/generate-tests.py
+python -m pytest -vv -rs tests-spec
+python -m pytest -vv -rs tests-cpu-kernels
 ```
 
 Furthermore, if you have an Nvidia GPU, you can build and locally install the experimental CUDA plug-in with
 
 ```bash
 pip uninstall -y awkward1-cuda-kernels
+python dev/generate-cuda.py
 ./cuda-build.sh --install
 ```
 
 The `--install` does a local `pip install` on your system, which is the only way to use it. You can run its tests with
 
 ```bash
-python -m pytest tests-cuda
+python dev/generate-tests.py
+python -m pytest -vv -rs tests-cuda-kernels
+python -m pytest -vv -rs tests-cuda
 ```
 
 ### Building documentation locally

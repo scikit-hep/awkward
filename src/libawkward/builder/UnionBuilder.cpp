@@ -68,17 +68,17 @@ namespace awkward {
 
   const ContentPtr
   UnionBuilder::snapshot() const {
-    Index8 tags(tags_.ptr(), 0, tags_.length());
-    Index64 index(index_.ptr(), 0, index_.length());
+    Index8 tags(tags_.ptr(), 0, tags_.length(), kernel::lib::cpu);
+    Index64 index(index_.ptr(), 0, index_.length(), kernel::lib::cpu);
     ContentPtrVec contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->snapshot());
     }
-    return std::make_shared<UnionArray8_64>(Identities::none(),
-                                            util::Parameters(),
-                                            tags,
-                                            index,
-                                            contents);
+    return UnionArray8_64(Identities::none(),
+                          util::Parameters(),
+                          tags,
+                          index,
+                          contents).simplify_uniontype(false);
   }
 
   bool

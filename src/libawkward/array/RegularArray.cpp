@@ -103,6 +103,11 @@ namespace awkward {
     return content_.get()->purelist_depth() + 1;
   }
 
+  bool
+  RegularForm::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   RegularForm::minmax_depth() const {
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
@@ -276,7 +281,13 @@ namespace awkward {
   const ContentPtr
   RegularArray::toListOffsetArray64(bool start_at_zero) const {
     Index64 offsets = compact_offsets64(start_at_zero);
-    return broadcast_tooffsets64(offsets);
+    ContentPtr out = broadcast_tooffsets64(offsets);
+    ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(out.get());
+    return std::make_shared<ListOffsetArray64>(raw->identities(),
+                                               raw->parameters(),
+                                               raw->offsets(),
+                                               raw->content(),
+                                               true);
   }
 
   const std::string
@@ -749,93 +760,11 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::merge(const ContentPtr& other) const {
-    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array());
-    }
-
-    if (!parameters_equal(other.get()->parameters())) {
-      return merge_as_union(other);
-    }
-
-    if (dynamic_cast<EmptyArray*>(other.get())) {
+  RegularArray::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
       return shallow_copy();
     }
-    else if (IndexedArray32* rawother =
-             dynamic_cast<IndexedArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedArrayU32* rawother =
-             dynamic_cast<IndexedArrayU32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedArray64* rawother =
-             dynamic_cast<IndexedArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedOptionArray32* rawother =
-             dynamic_cast<IndexedOptionArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedOptionArray64* rawother =
-             dynamic_cast<IndexedOptionArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (ByteMaskedArray* rawother =
-             dynamic_cast<ByteMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (BitMaskedArray* rawother =
-             dynamic_cast<BitMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnmaskedArray* rawother =
-             dynamic_cast<UnmaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_32* rawother =
-             dynamic_cast<UnionArray8_32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_U32* rawother =
-             dynamic_cast<UnionArray8_U32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_64* rawother =
-             dynamic_cast<UnionArray8_64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-
-    if (RegularArray* rawother = dynamic_cast<RegularArray*>(other.get())) {
-      if (size_ == rawother->size()) {
-        ContentPtr mine =
-          content_.get()->getitem_range_nowrap(0, size_*length());
-        ContentPtr theirs =
-          rawother->content().get()->getitem_range_nowrap(
-            0, rawother->size()*rawother->length());
-        ContentPtr content = mine.get()->merge(theirs);
-        return std::make_shared<RegularArray>(Identities::none(),
-                                              parameters_,
-                                              content,
-                                              size_);
-      }
-      else {
-        return toListOffsetArray64(true).get()->merge(other);
-      }
-    }
-    else if (dynamic_cast<ListArray32*>(other.get())  ||
-             dynamic_cast<ListArrayU32*>(other.get())  ||
-             dynamic_cast<ListArray64*>(other.get())  ||
-             dynamic_cast<ListOffsetArray32*>(other.get())  ||
-             dynamic_cast<ListOffsetArrayU32*>(other.get())  ||
-             dynamic_cast<ListOffsetArray64*>(other.get())) {
-      return toListOffsetArray64(true).get()->merge(other);
-    }
-    else {
-      throw std::invalid_argument(
-        std::string("cannot merge ") + classname() + std::string(" with ")
-        + other.get()->classname() + FILENAME(__LINE__));
-    }
+    return toListOffsetArray64(true).get()->mergemany(others);
   }
 
   const SliceItemPtr
@@ -918,17 +847,74 @@ namespace awkward {
   RegularArray::reduce_next(const Reducer& reducer,
                             int64_t negaxis,
                             const Index64& starts,
+                            const Index64& shifts,
                             const Index64& parents,
                             int64_t outlength,
                             bool mask,
                             bool keepdims) const {
-    return toListOffsetArray64(true).get()->reduce_next(reducer,
-                                                        negaxis,
-                                                        starts,
-                                                        parents,
-                                                        outlength,
-                                                        mask,
-                                                        keepdims);
+    ContentPtr out = toListOffsetArray64(true).get()->reduce_next(reducer,
+                                                                  negaxis,
+                                                                  starts,
+                                                                  shifts,
+                                                                  parents,
+                                                                  outlength,
+                                                                  mask,
+                                                                  keepdims);
+
+    if (!content_.get()->dimension_optiontype()) {
+      std::pair<bool, int64_t> branchdepth = branch_depth();
+
+      bool convert_shallow = (negaxis == branchdepth.second);
+      bool convert_deep = (negaxis + 2 == branchdepth.second);
+      if (keepdims) {
+        convert_shallow = false;
+        convert_deep = true;
+      }
+
+      if (convert_deep) {
+        if (ListOffsetArray64* raw1 = dynamic_cast<ListOffsetArray64*>(out.get())) {
+          if (ListOffsetArray64* raw2 = dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
+            out = std::make_shared<ListOffsetArray64>(raw1->identities(),
+                                                      raw1->parameters(),
+                                                      raw1->offsets(),
+                                                      raw2->toRegularArray());
+          }
+          else if (ListArray64* raw2 = dynamic_cast<ListArray64*>(raw1->content().get())) {
+            out = std::make_shared<ListOffsetArray64>(raw1->identities(),
+                                                      raw1->parameters(),
+                                                      raw1->offsets(),
+                                                      raw2->toRegularArray());
+          }
+        }
+        else if (ListArray64* raw1 = dynamic_cast<ListArray64*>(out.get())) {
+          if (ListOffsetArray64* raw2 = dynamic_cast<ListOffsetArray64*>(raw1->content().get())) {
+            out = std::make_shared<ListArray64>(raw1->identities(),
+                                                raw1->parameters(),
+                                                raw1->starts(),
+                                                raw1->stops(),
+                                                raw2->toRegularArray());
+          }
+          else if (ListArray64* raw2 = dynamic_cast<ListArray64*>(raw1->content().get())) {
+            out = std::make_shared<ListArray64>(raw1->identities(),
+                                                raw1->parameters(),
+                                                raw1->starts(),
+                                                raw1->stops(),
+                                                raw2->toRegularArray());
+          }
+        }
+      }
+
+      if (convert_shallow) {
+        if (ListOffsetArray64* raw1 = dynamic_cast<ListOffsetArray64*>(out.get())) {
+          out = raw1->toRegularArray();
+        }
+        else if (ListArray64* raw1 = dynamic_cast<ListArray64*>(out.get())) {
+          out = raw1->toRegularArray();
+        }
+      }
+    }
+
+    return out;
   }
 
   const ContentPtr
@@ -1027,7 +1013,9 @@ namespace awkward {
 
       ContentPtrVec contents;
       for (auto ptr : tocarry) {
-        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen), true));
+        contents.push_back(content_.get()->carry(
+            Index64(ptr, 0, totallen, kernel::lib::cpu),   // DERIVE
+        true));
       }
       ContentPtr recordarray =
         std::make_shared<RecordArray>(Identities::none(),

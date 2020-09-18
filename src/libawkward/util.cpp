@@ -6,6 +6,8 @@
 #include <set>
 
 #include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 
 #include "awkward/kernels/identities.h"
 #include "awkward/kernels/getitem.h"
@@ -454,13 +456,11 @@ namespace awkward {
     template IndexOf<int64_t> make_stops(const IndexOf<int64_t> &offsets);
 
     std::string
-    quote(const std::string &x, bool doublequote) {
-      // TODO: escape characters, possibly using RapidJSON.
-      if (doublequote) {
-        return std::string("\"") + x + std::string("\"");
-      } else {
-        return std::string("'") + x + std::string("'");
-      }
+    quote(const std::string &x) {
+      rj::StringBuffer buffer;
+      rj::Writer<rj::StringBuffer> writer(buffer);
+      writer.String(x.c_str(), (rj::SizeType)x.length());
+      return std::string(buffer.GetString());
     }
 
     RecordLookupPtr
@@ -491,7 +491,7 @@ namespace awkward {
         }
         catch (std::invalid_argument err) {
           throw std::invalid_argument(
-            std::string("key ") + quote(key, true)
+            std::string("key ") + quote(key)
             + std::string(" does not exist (not in record)") + FILENAME(__LINE__));
         }
         if (!(0 <= out && out < numfields)) {

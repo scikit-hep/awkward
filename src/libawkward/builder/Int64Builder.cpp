@@ -59,7 +59,8 @@ namespace awkward {
              0,
              sizeof(int64_t),
              util::dtype_to_format(util::dtype::int64),
-             util::dtype::int64);
+             util::dtype::int64,
+             kernel::lib::cpu);
   }
 
   bool

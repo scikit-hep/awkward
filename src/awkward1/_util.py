@@ -6,11 +6,12 @@ import inspect
 import re
 import sys
 import os
+import weakref
 
 try:
-    from collections.abc import Mapping
+    from collections.abc import Mapping, MutableMapping
 except ImportError:
-    from collections import Mapping
+    from collections import Mapping, MutableMapping
 
 import awkward1.layout
 import awkward1.partition
@@ -363,10 +364,14 @@ def wrap(content, behavior, cache=None):
     if isinstance(
         content, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
     ):
-        return awkward1.highlevel.Array(content, behavior=behavior, cache=cache)
+        return awkward1.highlevel.Array(
+            content, behavior=behavior, cache=cache, kernels=None
+        )
 
     elif isinstance(content, awkward1.layout.Record):
-        return awkward1.highlevel.Record(content, behavior=behavior, cache=cache)
+        return awkward1.highlevel.Record(
+            content, behavior=behavior, cache=cache, kernels=None
+        )
 
     else:
         return content
@@ -383,18 +388,6 @@ def extra(args, kwargs, defaults):
         else:
             out.append(default)
     return out
-
-
-def called_by_module(modulename):
-    frame = inspect.currentframe()
-    while frame is not None:
-        name = getattr(inspect.getmodule(frame), "__name__", None)
-        if name is not None and (
-            name == modulename or name.startswith(modulename + ".")
-        ):
-            return True
-        frame = frame.f_back
-    return False
 
 
 def key2index(keys, key):
@@ -480,6 +473,50 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     )
                     + exception_suffix(__file__)
                 )
+
+    def all_same_offsets(nplike, inputs):
+        offsets = None
+        for x in inputs:
+            if isinstance(x, (
+                awkward1.layout.ListOffsetArray32,
+                awkward1.layout.ListOffsetArrayU32,
+                awkward1.layout.ListOffsetArray64,
+            )):
+                if offsets is None:
+                    offsets = nplike.asarray(x.offsets)
+                elif not nplike.array_equal(offsets, nplike.asarray(x.offsets)):
+                    return False
+            elif isinstance(x, (
+                awkward1.layout.ListArray32,
+                awkward1.layout.ListArrayU32,
+                awkward1.layout.ListArray64,
+            )):
+                starts = nplike.asarray(x.starts)
+                stops = nplike.asarray(x.stops)
+                if not nplike.array_equal(starts[1:], stops[:-1]):
+                    return False
+                if offsets is None:
+                    offsets = nplike.empty(len(starts) + 1, dtype=starts.dtype)
+                    if len(offsets) == 1:
+                        offsets[0] = 0
+                    else:
+                        offsets[:-1] = starts
+                        offsets[-1] = stops[-1]
+                elif (
+                    not nplike.array_equal(offsets[:-1], starts) or
+                    offsets[-1] != stops[-1]
+                ):
+                    return False
+            elif isinstance(x, awkward1.layout.RegularArray):
+                my_offsets = nplike.arange(0, len(x.content), x.size)
+                if offsets is None:
+                    offsets = my_offsets
+                elif not nplike.array_equal(offsets, my_offsets):
+                    return False
+            elif isinstance(x, awkward1.layout.Content):
+                return False
+        else:
+            return True
 
     def apply(inputs, depth):
         nplike = awkward1.nplike.of(*inputs)
@@ -690,19 +727,22 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                             )
                     else:
                         nextinputs.append(x)
+
                 outcontent = apply(nextinputs, depth + 1)
                 assert isinstance(outcontent, tuple)
+
                 return tuple(
                     awkward1.layout.RegularArray(x, maxsize) for x in outcontent
                 )
 
-            else:
+            elif not all_same_offsets(nplike, inputs):
                 fcns = [
                     custom_broadcast(x, behavior)
                     if isinstance(x, awkward1.layout.Content)
                     else None
                     for x in inputs
                 ]
+
                 first, secondround = None, False
                 for x, fcn in zip(inputs, fcns):
                     if (
@@ -712,6 +752,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     ):
                         first = x
                         break
+
                 if first is None:
                     secondround = True
                     for x in inputs:
@@ -741,9 +782,69 @@ def broadcast_and_apply(inputs, getfunction, behavior):
 
                 outcontent = apply(nextinputs, depth + 1)
                 assert isinstance(outcontent, tuple)
+
                 return tuple(
                     awkward1.layout.ListOffsetArray64(offsets, x) for x in outcontent
                 )
+
+            else:
+                lencontent, offsets, starts, stops = None, None, None, None
+                nextinputs = []
+
+                for x in inputs:
+                    if isinstance(x, (
+                        awkward1.layout.ListOffsetArray32,
+                        awkward1.layout.ListOffsetArrayU32,
+                        awkward1.layout.ListOffsetArray64,
+                    )):
+                        offsets = x.offsets
+                        lencontent = offsets[-1]
+                        nextinputs.append(x.content[:lencontent])
+
+                    elif isinstance(x, (
+                        awkward1.layout.ListArray32,
+                        awkward1.layout.ListArrayU32,
+                        awkward1.layout.ListArray64,
+                    )):
+                        starts, stops = x.starts, x.stops
+                        lencontent = nplike.max(stops)
+                        nextinputs.append(x.content[:lencontent])
+
+                    else:
+                        nextinputs.append(x)
+
+                outcontent = apply(nextinputs, depth + 1)
+
+                if isinstance(offsets, awkward1.layout.Index32):
+                    return tuple(
+                        awkward1.layout.ListOffsetArray32(offsets, x) for x in outcontent
+                    )
+                elif isinstance(offsets, awkward1.layout.IndexU32):
+                    return tuple(
+                        awkward1.layout.ListOffsetArrayU32(offsets, x) for x in outcontent
+                    )
+                elif isinstance(offsets, awkward1.layout.Index64):
+                    return tuple(
+                        awkward1.layout.ListOffsetArray64(offsets, x) for x in outcontent
+                    )
+                elif isinstance(starts, awkward1.layout.Index32):
+                    return tuple(
+                        awkward1.layout.ListArray32(starts, stops, x) for x in outcontent
+                    )
+                elif isinstance(starts, awkward1.layout.IndexU32):
+                    return tuple(
+                        awkward1.layout.ListArrayU32(starts, stops, x) for x in outcontent
+                    )
+                elif isinstance(starts, awkward1.layout.Index64):
+                    return tuple(
+                        awkward1.layout.ListArray64(starts, stops, x) for x in outcontent
+                    )
+                else:
+                    raise AssertionError(
+                        "unexpected offsets, starts: {0} {1}".format(
+                            type(offsets), type(starts)
+                        ) + exception_suffix(__file__)
+                    )
 
         elif any(isinstance(x, recordtypes) for x in inputs):
             keys = None
@@ -1145,6 +1246,65 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         )
 
 
+def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
+    apply(layout, depth, *args)
+
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        for x in layout.partitions:
+            recursive_walk(x, apply, args, depth, materialize)
+
+    elif isinstance(layout, awkward1.layout.NumpyArray):
+        pass
+
+    elif isinstance(layout, awkward1.layout.EmptyArray):
+        pass
+
+    elif isinstance(layout, (
+        awkward1.layout.RegularArray,
+        awkward1.layout.ListArray32,
+        awkward1.layout.ListArrayU32,
+        awkward1.layout.ListArray64,
+        awkward1.layout.ListOffsetArray32,
+        awkward1.layout.ListOffsetArrayU32,
+        awkward1.layout.ListOffsetArray64,
+    )):
+        recursive_walk(layout.content, apply, args, depth + 1, materialize)
+
+    elif isinstance(layout, (
+        awkward1.layout.IndexedArray32,
+        awkward1.layout.IndexedArrayU32,
+        awkward1.layout.IndexedArray64,
+        awkward1.layout.IndexedOptionArray32,
+        awkward1.layout.IndexedOptionArray64,
+        awkward1.layout.ByteMaskedArray,
+        awkward1.layout.BitMaskedArray,
+        awkward1.layout.UnmaskedArray,
+    )):
+        recursive_walk(layout.content, apply, args, depth, materialize)
+
+    elif isinstance(layout, (
+        awkward1.layout.RecordArray,
+        awkward1.layout.UnionArray8_32,
+        awkward1.layout.UnionArray8_U32,
+        awkward1.layout.UnionArray8_64,
+    )):
+        for x in layout.contents:
+            recursive_walk(x, apply, args, depth, materialize)
+
+    elif isinstance(layout, awkward1.layout.Record):
+        recursive_walk(layout.array, apply, args, depth, materialize)
+
+    elif isinstance(layout, awkward1.layout.VirtualArray):
+        if materialize:
+            recursive_walk(layout.array, apply, args, depth, materialize)
+
+    else:
+        raise AssertionError(
+            "unrecognized Content type: {0}".format(type(layout))
+            + exception_suffix(__file__)
+        )
+
+
 def highlevel_type(layout, behavior, isarray):
     if isarray:
         return awkward1.types.ArrayType(layout.type(typestrs(behavior)), len(layout))
@@ -1375,3 +1535,35 @@ def minimally_touching_string(limit_length, layout, behavior):
                 + ", ... "
                 + "".join(reversed(right)).lstrip(" ")
             )
+
+
+class MappingProxy(MutableMapping):
+    """
+    A type suitable for use with layout.ArrayCache.
+
+    This can be used to wrap plain dict instances if need be,
+    since they are not able to be weak referenced.
+    """
+    def __init__(self, base):
+        self.base = base
+
+    @classmethod
+    def maybe_wrap(cls, mapping):
+        if type(mapping) is dict:
+            return cls(mapping)
+        return mapping
+
+    def __getitem__(self, key):
+        return self.base[key]
+
+    def __setitem__(self, key, value):
+        self.base[key] = value
+
+    def __delitem__(self, key):
+        del self.base[key]
+
+    def __iter__(self):
+        return iter(self.base)
+
+    def __len__(self):
+        return len(self.base)

@@ -136,21 +136,25 @@ For more fine-grained testing, we also have tests of the low-level kernels, whic
 
 ```bash
 python dev/generate-kernelspec.py
-python tests-kernels/generate-tests.py
-python -m pytest -vv -rs tests-kernels
+python dev/generate-tests.py
+python -m pytest -vv -rs tests-spec
+python -m pytest -vv -rs tests-cpu-kernels
 ```
 
 Furthermore, if you have an Nvidia GPU, you can build and locally install the experimental CUDA plug-in with
 
 ```bash
 pip uninstall -y awkward1-cuda-kernels
+python dev/generate-cuda.py
 ./cuda-build.sh --install
 ```
 
 The `--install` does a local `pip install` on your system, which is the only way to use it. You can run its tests with
 
 ```bash
-python -m pytest tests-cuda
+python dev/generate-tests.py
+python -m pytest -vv -rs tests-cuda-kernels
+python -m pytest -vv -rs tests-cuda
 ```
 
    * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/).
@@ -221,6 +225,7 @@ Thanks especially to the gracious help of awkward-array contributors (including 
   </tr>
   <tr>
     <td align="center"><a href="https://gitlab.com/nikoladze"><img src="https://avatars0.githubusercontent.com/u/3707225?v=4" width="100px;" alt=""/><br /><sub><b>Nikolai Hartmann</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=nikoladze" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/sjperkins"><img src="https://avatars3.githubusercontent.com/u/3530212?v=4" width="100px;" alt=""/><br /><sub><b>Simon Perkins</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=sjperkins" title="Code">💻</a></td>
   </tr>
 </table>
 

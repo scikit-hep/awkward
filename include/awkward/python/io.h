@@ -11,6 +11,6 @@ void
 make_fromjson(py::module& m, const std::string& name);
 
 void
-make_fromroot_nestedvector(py::module& m, const std::string& name);
+make_uproot_issue_90(py::module& m);
 
 #endif // AWKWARDPY_IO_H_

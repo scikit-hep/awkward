@@ -58,8 +58,9 @@ def from_numpy(
        * #ak.layout.ByteMaskedArray or #ak.layout.UnmaskedArray if the
          `array` is an np.ma.MaskedArray.
        * #ak.layout.RegularArray if `regulararray=True`.
+       * #ak.layout.RecordArray if `recordarray=True`.
 
-    See also #ak.to_numpy.
+    See also #ak.to_numpy and #ak.from_cupy.
     """
 
     def recurse(array, mask):
@@ -141,7 +142,7 @@ def to_numpy(array, allow_missing=True):
     are a possible result; otherwise, missing values (None) cause this
     function to raise an error.
 
-    See also #ak.from_numpy.
+    See also #ak.from_numpy and #ak.to_cupy.
     """
     import awkward1.highlevel
 
@@ -258,7 +259,7 @@ def to_numpy(array, allow_missing=True):
                 return numpy.ma.MaskedArray(data, mask)
             else:
                 raise ValueError(
-                    "to_numpy cannot convert 'None' values to "
+                    "ak.to_numpy cannot convert 'None' values to "
                     "np.ma.MaskedArray unless the "
                     "'allow_missing' parameter is set to True"
                     + awkward1._util.exception_suffix(__file__)
@@ -315,6 +316,349 @@ def to_numpy(array, allow_missing=True):
             "cannot convert {0} into np.ndarray".format(array)
             + awkward1._util.exception_suffix(__file__)
         )
+
+def from_cupy(
+    array,
+    regulararray=False,
+    highlevel=True,
+    behavior=None
+):
+    """
+    Args:
+        array (cp.ndarray): The CuPy array to convert into an Awkward Array.
+        regulararray (bool): If True and the array is multidimensional,
+            the dimensions are represented by nested #ak.layout.RegularArray
+            nodes; if False and the array is multidimensional, the dimensions
+            are represented by a multivalued #ak.layout.NumpyArray.shape.
+            If the array is one-dimensional, this has no effect.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Converts a CuPy array into an Awkward Array.
+
+    The resulting layout may involve the following #ak.layout.Content types
+    (only):
+
+       * #ak.layout.NumpyArray
+       * #ak.layout.RegularArray if `regulararray=True`.
+
+    See also #ak.to_cupy and #ak.from_numpy.
+    """
+    cupy = awkward1.nplike.Cupy.instance()
+
+    def recurse(array):
+        if regulararray and len(array.shape) > 1:
+            return awkward1.layout.RegularArray(
+                recurse(array.reshape((-1,) + array.shape[2:])), array.shape[1]
+            )
+
+        if len(array.shape) == 0:
+            data = awkward1.layout.NumpyArray.from_cupy(array.reshape(1))
+        else:
+            data = awkward1.layout.NumpyArray.from_cupy(array)
+
+        return data
+
+    layout = recurse(array)
+
+    if highlevel:
+        return awkward1._util.wrap(layout, behavior)
+    else:
+        return layout
+
+
+def to_cupy(array):
+    """
+    Converts `array` (many types supported) into a CuPy array, if possible.
+
+    If the data are numerical and regular (nested lists have equal lengths
+    in each dimension, as described by the #type), they can be losslessly
+    converted to a CuPy array and this function returns without an error.
+
+    Otherwise, the function raises an error.
+
+    If `array` is a scalar, it is converted into a CuPy scalar.
+
+    See also #ak.from_cupy and #ak.to_numpy.
+    """
+    import awkward1.highlevel
+
+    consistency_check = awkward1.nplike.of(array)
+    cupy = awkward1.nplike.Cupy.instance()
+    np = awkward1.nplike.NumpyMetadata.instance()
+
+    if isinstance(array, (bool, numbers.Number)):
+        return cupy.array([array])[0]
+
+    elif isinstance(array, cupy.ndarray):
+        return array
+
+    elif isinstance(array, np.ndarray):
+        return cupy.asarray(array)
+
+    elif isinstance(array, awkward1.highlevel.Array):
+        return to_cupy(array.layout)
+
+    elif isinstance(array, awkward1.highlevel.Record):
+        raise ValueError(
+            "CuPy does not support record structures"
+            + awkward1._util.exception_suffix(__file__)
+        )
+
+    elif isinstance(array, awkward1.highlevel.ArrayBuilder):
+        return to_cupy(array.snapshot().layout)
+
+    elif isinstance(array, awkward1.layout.ArrayBuilder):
+        return to_cupy(array.snapshot())
+
+    elif (
+        awkward1.operations.describe.parameters(array).get("__array__") == "bytestring"
+        or awkward1.operations.describe.parameters(array).get("__array__") == "string"
+    ):
+        raise ValueError(
+            "CuPy does not support arrays of strings"
+            + awkward1._util.exception_suffix(__file__)
+        )
+
+    elif isinstance(array, awkward1.partition.PartitionedArray):
+        return cupy.concatenate([to_cupy(x) for x in array.partitions])
+
+    elif isinstance(array, awkward1._util.virtualtypes):
+        return to_cupy(array.array)
+
+    elif isinstance(array, awkward1._util.unknowntypes):
+        return cupy.array([])
+
+    elif isinstance(array, awkward1._util.indexedtypes):
+        return to_cupy(array.project())
+
+    elif isinstance(array, awkward1._util.uniontypes):
+        contents = [to_cupy(array.project(i)) for i in range(array.numcontents)]
+        out = cupy.concatenate(contents)
+
+        tags = cupy.asarray(array.tags)
+        for tag, content in enumerate(contents):
+            mask = tags == tag
+            out[mask] = content
+        return out
+
+    elif isinstance(array, awkward1.layout.UnmaskedArray):
+        return to_cupy(array.content)
+
+    elif isinstance(array, awkward1._util.optiontypes):
+        content = ti_cupy(array.project())
+
+        shape = list(content.shape)
+        shape[0] = len(array)
+        data = cupy.empty(shape, dtype=content.dtype)
+        mask0 = cupy.asarray(array.bytemask()).view(np.bool_)
+        if mask0.any():
+            raise ValueError(
+                "CuPy does not support masked arrays"
+                + awkward1._util.exception_suffix(__file__)
+            )
+        else:
+            return content
+
+    elif isinstance(array, awkward1.layout.RegularArray):
+        out = to_cupy(array.content)
+        head, tail = out.shape[0], out.shape[1:]
+        shape = (head // array.size, array.size) + tail
+        return out[: shape[0] * array.size].reshape(shape)
+
+    elif isinstance(array, awkward1._util.listtypes):
+        return to_cupy(array.toRegularArray())
+
+    elif isinstance(array, awkward1._util.recordtypes):
+        raise ValueError(
+            "CuPy does not support record structures"
+            + awkward1._util.exception_suffix(__file__)
+        )
+
+    elif isinstance(array, awkward1.layout.NumpyArray):
+        return array.to_cupy()
+
+    elif isinstance(array, awkward1.layout.Content):
+        raise AssertionError(
+            "unrecognized Content type: {0}".format(type(array))
+            + awkward1._util.exception_suffix(__file__)
+        )
+
+    elif isinstance(array, Iterable):
+        return cupy.asarray(array)
+
+    else:
+        raise ValueError(
+            "cannot convert {0} into cp.ndarray".format(array)
+            + awkward1._util.exception_suffix(__file__)
+        )
+
+
+def kernels(*arrays):
+    """
+    Returns the names of the kernels library used by `arrays`. May be
+
+       * `"cpu"` for `libawkward-cpu-kernels.so`;
+       * `"cuda"` for `libawkward-cuda-kernels.so`;
+       * `"mixed"` if any of the arrays have different labels within their
+         structure or any arrays have different labels from each other;
+       * None if the objects are not Awkward, NumPy, or CuPy arrays (e.g.
+         Python numbers, booleans, strings).
+
+    Mixed arrays can't be used in any operations, and two arrays on different
+    devices can't be used in the same operation.
+
+    To use `"cuda"`, the package
+    [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
+    be installed, either by
+
+        pip install awkward1-cuda-kernels
+
+    or as an optional dependency with
+
+        pip install awkward1[cuda] --upgrade
+
+    It is only available for Linux as a binary wheel, and only supports Nvidia
+    GPUs (it is written in CUDA).
+
+    See #ak.to_kernels.
+    """
+    libs = set()
+
+    def apply(layout, depth):
+        if (
+            isinstance(layout, awkward1.layout.Content) and
+            layout.identities is not None
+        ):
+            libs.add(layout.identities.ptr_lib)
+
+        if isinstance(layout, awkward1.layout.NumpyArray):
+            libs.add(layout.ptr_lib)
+
+        elif isinstance(layout, (
+            awkward1.layout.ListArray32,
+            awkward1.layout.ListArrayU32,
+            awkward1.layout.ListArray64,
+        )):
+            libs.add(layout.starts.ptr_lib)
+            libs.add(layout.stops.ptr_lib)
+
+        elif isinstance(layout, (
+            awkward1.layout.ListOffsetArray32,
+            awkward1.layout.ListOffsetArrayU32,
+            awkward1.layout.ListOffsetArray64,
+        )):
+            libs.add(layout.offsets.ptr_lib)
+
+        elif isinstance(layout, (
+            awkward1.layout.IndexedArray32,
+            awkward1.layout.IndexedArrayU32,
+            awkward1.layout.IndexedArray64,
+            awkward1.layout.IndexedOptionArray32,
+            awkward1.layout.IndexedOptionArray64,
+        )):
+            libs.add(layout.index.ptr_lib)
+
+        elif isinstance(layout, (
+            awkward1.layout.ByteMaskedArray,
+            awkward1.layout.BitMaskedArray,
+        )):
+            libs.add(layout.mask.ptr_lib)
+
+        elif isinstance(layout, (
+            awkward1.layout.UnionArray8_32,
+            awkward1.layout.UnionArray8_U32,
+            awkward1.layout.UnionArray8_64,
+        )):
+            libs.add(layout.tags.ptr_lib)
+            libs.add(layout.index.ptr_lib)
+
+        elif isinstance(layout, awkward1.layout.VirtualArray):
+            libs.add(layout.ptr_lib)
+
+        elif isinstance(layout, awkward1.partition.PartitionedArray):
+            pass
+
+    for array in arrays:
+        layout = awkward1.operations.convert.to_layout(
+            array,
+            allow_record=True,
+            allow_other=True,
+        )
+
+        if isinstance(layout, (
+            awkward1.layout.Content,
+            awkward1.layout.Record,
+            awkward1.partition.PartitionedArray
+        )):
+            awkward1._util.recursive_walk(layout, apply, materialize=False)
+
+        elif isinstance(layout, awkward1.nplike.numpy.ndarray):
+            libs.add("cpu")
+
+        elif type(layout).__module__.startswith("cupy."):
+            libs.add("cuda")
+
+    if libs == set():
+        return None
+    elif libs == set(["cpu"]):
+        return "cpu"
+    elif libs == set(["cuda"]):
+        return "cuda"
+    else:
+        return "mixed"
+
+
+def to_kernels(array, kernels, highlevel=True, behavior=None):
+    """
+    Args:
+        array: Data to convert to a specified `kernels` set.
+        kernels (`"cpu"` or `"cuda"`): If `"cpu"`, the array structure is
+            recursively copied (if need be) to main memory for use with
+            the default `libawkward-cpu-kernels.so`; if `"cuda"`, the
+            structure is copied to the GPU(s) for use with
+            `libawkward-cuda-kernels.so`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (bool): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Converts an array from `"cpu"`, `"cuda"`, or `"mixed"` kernels to `"cpu"`
+    or `"cuda"`.
+
+    An array is `"mixed"` if some components are set to use `"cpu"` kernels and
+    others are set to use `"cuda"` kernels. Mixed arrays can't be used in any
+    operations, and two arrays set to different kernels can't be used in the
+    same operation.
+
+    Any components that are already in the desired kernels library are viewed,
+    rather than copied, so this operation can be an inexpensive way to ensure
+    that an array is ready for a particular library.
+
+    To use `"cuda"`, the package
+    [awkward1-cuda-kernels](https://pypi.org/project/awkward1-cuda-kernels)
+    be installed, either by
+
+        pip install awkward1-cuda-kernels
+
+    or as an optional dependency with
+
+        pip install awkward1[cuda] --upgrade
+
+    It is only available for Linux as a binary wheel, and only supports Nvidia
+    GPUs (it is written in CUDA).
+
+    See #ak.kernels.
+    """
+    arr = awkward1.to_layout(array)
+    out = arr.copy_to(kernels)
+
+    if highlevel:
+        return awkward1._util.wrap(out, behavior)
+    else:
+        return out
 
 
 def from_iter(
@@ -450,7 +794,7 @@ def to_list(array):
         return [to_list(x) for x in array.snapshot()]
 
     elif isinstance(array, awkward1.layout.NumpyArray):
-        return numpy.asarray(array).tolist()
+        return awkward1.nplike.of(array).asarray(array).tolist()
 
     elif isinstance(
         array, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
@@ -2241,7 +2585,10 @@ def from_parquet(
         state = _ParquetState(file, use_threads, source, options)
 
         if lazy_cache == "attach":
-            lazy_cache = {}
+            lazy_cache = awkward1._util.MappingProxy({})
+            toattach = lazy_cache
+        elif lazy_cache is not None:
+            lazy_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
             toattach = lazy_cache
         else:
             toattach = None
@@ -3373,7 +3720,10 @@ def from_arrayset(
         form = _wrap_record_with_virtual(form)
 
         if lazy_cache == "attach":
-            lazy_cache = {}
+            lazy_cache = awkward1._util.MappingProxy({})
+            toattach = lazy_cache
+        elif lazy_cache is not None:
+            lazy_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
             toattach = lazy_cache
         else:
             toattach = None
@@ -3577,7 +3927,18 @@ def to_pandas(
               2         3.0  NaN
               3         4.0  NaN
     """
-    pandas = awkward1._connect._pandas.get_pandas()
+    try:
+        import pandas
+    except ImportError:
+        raise ImportError(
+            """install the 'pandas' package with:
+
+    pip install pandas --upgrade
+
+or
+
+    conda install pandas"""
+        )
 
     if how is not None:
         out = None

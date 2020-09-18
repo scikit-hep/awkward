@@ -12,6 +12,11 @@ namespace awkward {
     return given_dtype;
   }
 
+  bool
+  Reducer::returns_positions() const {
+    return false;
+  }
+
   ////////// count
 
   const std::string
@@ -31,7 +36,6 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerCount::apply_bool(const bool* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     // This is the only reducer that completely ignores the data.
@@ -44,116 +48,96 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerCount::apply_int8(const int8_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     return apply_bool(reinterpret_cast<const bool*>(data),
-                      starts,
                       parents,
                       outlength);
   }
 
   const std::shared_ptr<void>
   ReducerCount::apply_uint8(const uint8_t* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     return apply_bool(reinterpret_cast<const bool*>(data),
-                      starts,
                       parents,
                       outlength);
   }
 
   const std::shared_ptr<void>
   ReducerCount::apply_int16(const int16_t* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     return apply_bool(reinterpret_cast<const bool*>(data),
-                      starts,
                       parents,
                       outlength);
   }
 
   const std::shared_ptr<void>
   ReducerCount::apply_uint16(const uint16_t* data,
-                             const Index64& starts,
                              const Index64& parents,
                              int64_t outlength) const {
     return apply_bool(reinterpret_cast<const bool*>(data),
-                      starts,
                       parents,
                       outlength);
   }
 
   const std::shared_ptr<void>
   ReducerCount::apply_int32(const int32_t* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     return apply_bool(reinterpret_cast<const bool*>(data),
-                      starts,
                       parents,
                       outlength);
   }
 
   const std::shared_ptr<void>
   ReducerCount::apply_uint32(const uint32_t* data,
-                             const Index64& starts,
                              const Index64& parents,
                              int64_t outlength) const {
     return apply_bool(reinterpret_cast<const bool*>(data),
-                      starts,
                       parents,
                       outlength);
   }
 
   const std::shared_ptr<void>
   ReducerCount::apply_int64(const int64_t* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     return apply_bool(reinterpret_cast<const bool*>(data),
-                      starts,
                       parents,
                       outlength);
   }
 
   const std::shared_ptr<void>
   ReducerCount::apply_uint64(const uint64_t* data,
-                             const Index64& starts,
                              const Index64& parents,
                              int64_t outlength) const {
     return apply_bool(reinterpret_cast<const bool*>(data),
-                      starts,
                       parents,
                       outlength);
   }
 
   const std::shared_ptr<void>
   ReducerCount::apply_float32(const float* data,
-                              const Index64& starts,
                               const Index64& parents,
                               int64_t outlength) const {
     return apply_bool(reinterpret_cast<const bool*>(data),
-                      starts,
                       parents,
                       outlength);
   }
 
   const std::shared_ptr<void>
   ReducerCount::apply_float64(const double* data,
-                              const Index64& starts,
                               const Index64& parents,
                               int64_t outlength) const {
     return apply_bool(reinterpret_cast<const bool*>(data),
-                      starts,
                       parents,
                       outlength);
   }
@@ -177,7 +161,6 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_bool(const bool* data,
-                                  const Index64& starts,
                                   const Index64& parents,
                                   int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -189,13 +172,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_int8(const int8_t* data,
-                                  const Index64& starts,
                                   const Index64& parents,
                                   int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -208,13 +190,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_uint8(const uint8_t* data,
-                                   const Index64& starts,
                                    const Index64& parents,
                                    int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -226,13 +207,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_int16(const int16_t* data,
-                                   const Index64& starts,
                                    const Index64& parents,
                                    int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -244,13 +224,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_uint16(const uint16_t* data,
-                                    const Index64& starts,
                                     const Index64& parents,
                                     int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -262,13 +241,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_int32(const int32_t* data,
-                                   const Index64& starts,
                                    const Index64& parents,
                                    int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -280,13 +258,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_uint32(const uint32_t* data,
-                                    const Index64& starts,
                                     const Index64& parents,
                                     int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -298,13 +275,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_int64(const int64_t* data,
-                                   const Index64& starts,
                                    const Index64& parents,
                                    int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -316,13 +292,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_uint64(const uint64_t* data,
-                                    const Index64& starts,
                                     const Index64& parents,
                                     int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -334,13 +309,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_float32(const float* data,
-                                     const Index64& starts,
                                      const Index64& parents,
                                      int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -352,13 +326,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerCountNonzero::apply_float64(const double* data,
-                                     const Index64& starts,
                                      const Index64& parents,
                                      int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -370,7 +343,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
@@ -413,7 +386,6 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerSum::apply_bool(const bool* data,
-                         const Index64& starts,
                          const Index64& parents,
                          int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -437,13 +409,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerSum::apply_int8(const int8_t* data,
-                         const Index64& starts,
                          const Index64& parents,
                          int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -467,13 +438,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerSum::apply_uint8(const uint8_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -497,13 +467,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerSum::apply_int16(const int16_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -527,13 +496,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerSum::apply_uint16(const uint16_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -557,13 +525,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerSum::apply_int32(const int32_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -587,13 +554,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerSum::apply_uint32(const uint32_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -617,13 +583,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerSum::apply_int64(const int64_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -635,13 +600,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerSum::apply_uint64(const uint64_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
@@ -653,13 +617,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerSum::apply_float32(const float* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<float> ptr(new float[(size_t)outlength],
@@ -671,13 +634,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerSum::apply_float64(const double* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<double> ptr(new double[(size_t)outlength],
@@ -689,7 +651,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
@@ -732,7 +694,6 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerProd::apply_bool(const bool* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -756,13 +717,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerProd::apply_int8(const int8_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -786,13 +746,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerProd::apply_uint8(const uint8_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -816,13 +775,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerProd::apply_int16(const int16_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -846,13 +804,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerProd::apply_uint16(const uint16_t* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -876,13 +833,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerProd::apply_int32(const int32_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -906,13 +862,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerProd::apply_uint32(const uint32_t* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
 #if defined _MSC_VER || defined __i386__
@@ -936,13 +891,12 @@ namespace awkward {
       parents.length(),
       outlength);
 #endif
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerProd::apply_int64(const int64_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -954,13 +908,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerProd::apply_uint64(const uint64_t* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
@@ -972,13 +925,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerProd::apply_float32(const float* data,
-                             const Index64& starts,
                              const Index64& parents,
                              int64_t outlength) const {
     std::shared_ptr<float> ptr(new float[(size_t)outlength],
@@ -990,13 +942,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerProd::apply_float64(const double* data,
-                             const Index64& starts,
                              const Index64& parents,
                              int64_t outlength) const {
     std::shared_ptr<double> ptr(new double[(size_t)outlength],
@@ -1008,7 +959,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
@@ -1031,7 +982,6 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerAny::apply_bool(const bool* data,
-                         const Index64& starts,
                          const Index64& parents,
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1043,13 +993,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAny::apply_int8(const int8_t* data,
-                         const Index64& starts,
                          const Index64& parents,
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1061,13 +1010,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAny::apply_uint8(const uint8_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1079,13 +1027,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAny::apply_int16(const int16_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1097,13 +1044,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAny::apply_uint16(const uint16_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1115,13 +1061,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAny::apply_int32(const int32_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1133,13 +1078,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAny::apply_uint32(const uint32_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1151,13 +1095,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAny::apply_int64(const int64_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1169,13 +1112,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAny::apply_uint64(const uint64_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1187,13 +1129,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAny::apply_float32(const float* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1205,13 +1146,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAny::apply_float64(const double* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1223,7 +1163,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
@@ -1246,7 +1186,6 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerAll::apply_bool(const bool* data,
-                         const Index64& starts,
                          const Index64& parents,
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1258,13 +1197,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAll::apply_int8(const int8_t* data,
-                         const Index64& starts,
                          const Index64& parents,
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1276,13 +1214,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAll::apply_uint8(const uint8_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1294,13 +1231,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAll::apply_int16(const int16_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1312,13 +1248,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAll::apply_uint16(const uint16_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1330,13 +1265,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAll::apply_int32(const int32_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1348,13 +1282,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAll::apply_uint32(const uint32_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1366,13 +1299,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAll::apply_int64(const int64_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1384,13 +1316,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAll::apply_uint64(const uint64_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1402,13 +1333,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAll::apply_float32(const float* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1420,13 +1350,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerAll::apply_float64(const double* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1438,7 +1367,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
@@ -1456,7 +1385,6 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerMin::apply_bool(const bool* data,
-                         const Index64& starts,
                          const Index64& parents,
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1468,13 +1396,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMin::apply_int8(const int8_t* data,
-                         const Index64& starts,
                          const Index64& parents,
                          int64_t outlength) const {
     std::shared_ptr<int8_t> ptr(new int8_t[(size_t)outlength],
@@ -1487,13 +1414,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<int8_t>::max());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMin::apply_uint8(const uint8_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<uint8_t> ptr(new uint8_t[(size_t)outlength],
@@ -1506,13 +1432,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<uint8_t>::max());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMin::apply_int16(const int16_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<int16_t> ptr(new int16_t[(size_t)outlength],
@@ -1525,13 +1450,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<int16_t>::max());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMin::apply_uint16(const uint16_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<uint16_t> ptr(new uint16_t[(size_t)outlength],
@@ -1544,13 +1468,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<uint16_t>::max());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMin::apply_int32(const int32_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
@@ -1563,13 +1486,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<int32_t>::max());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMin::apply_uint32(const uint32_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
@@ -1582,13 +1504,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<uint32_t>::max());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMin::apply_int64(const int64_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -1601,13 +1522,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<int64_t>::max());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMin::apply_uint64(const uint64_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
@@ -1620,13 +1540,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<uint64_t>::max());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMin::apply_float32(const float* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<float> ptr(new float[(size_t)outlength],
@@ -1639,13 +1558,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<float>::infinity());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMin::apply_float64(const double* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<double> ptr(new double[(size_t)outlength],
@@ -1658,7 +1576,7 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<double>::infinity());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
@@ -1676,7 +1594,6 @@ namespace awkward {
 
   const std::shared_ptr<void>
   ReducerMax::apply_bool(const bool* data,
-                         const Index64& starts,
                          const Index64& parents,
                          int64_t outlength) const {
     std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
@@ -1688,13 +1605,12 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMax::apply_int8(const int8_t* data,
-                         const Index64& starts,
                          const Index64& parents,
                          int64_t outlength) const {
     std::shared_ptr<int8_t> ptr(new int8_t[(size_t)outlength],
@@ -1707,13 +1623,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<int8_t>::min());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMax::apply_uint8(const uint8_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<uint8_t> ptr(new uint8_t[(size_t)outlength],
@@ -1726,13 +1641,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<uint8_t>::min());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMax::apply_int16(const int16_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<int16_t> ptr(new int16_t[(size_t)outlength],
@@ -1745,13 +1659,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<int16_t>::min());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMax::apply_uint16(const uint16_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<uint16_t> ptr(new uint16_t[(size_t)outlength],
@@ -1764,13 +1677,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<uint16_t>::min());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMax::apply_int32(const int32_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
@@ -1783,13 +1695,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<int32_t>::min());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMax::apply_uint32(const uint32_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
@@ -1802,13 +1713,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<uint32_t>::min());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMax::apply_int64(const int64_t* data,
-                          const Index64& starts,
                           const Index64& parents,
                           int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -1821,13 +1731,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<int64_t>::min());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMax::apply_uint64(const uint64_t* data,
-                           const Index64& starts,
                            const Index64& parents,
                            int64_t outlength) const {
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
@@ -1840,13 +1749,12 @@ namespace awkward {
       parents.length(),
       outlength,
       std::numeric_limits<uint64_t>::min());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMax::apply_float32(const float* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<float> ptr(new float[(size_t)outlength],
@@ -1859,13 +1767,12 @@ namespace awkward {
       parents.length(),
       outlength,
       -std::numeric_limits<float>::infinity());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerMax::apply_float64(const double* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<double> ptr(new double[(size_t)outlength],
@@ -1878,7 +1785,7 @@ namespace awkward {
       parents.length(),
       outlength,
       -std::numeric_limits<double>::infinity());
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
@@ -1899,9 +1806,13 @@ namespace awkward {
     return util::dtype::int64;
   }
 
+  bool
+  ReducerArgmin::returns_positions() const {
+    return true;
+  }
+
   const std::shared_ptr<void>
   ReducerArgmin::apply_bool(const bool* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -1910,17 +1821,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_int8(const int8_t* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -1929,17 +1838,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_uint8(const uint8_t* data,
-                             const Index64& starts,
                              const Index64& parents,
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -1948,17 +1855,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_int16(const int16_t* data,
-                             const Index64& starts,
                              const Index64& parents,
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -1967,17 +1872,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_uint16(const uint16_t* data,
-                              const Index64& starts,
                               const Index64& parents,
                               int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -1986,17 +1889,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_int32(const int32_t* data,
-                             const Index64& starts,
                              const Index64& parents,
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2005,17 +1906,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_uint32(const uint32_t* data,
-                              const Index64& starts,
                               const Index64& parents,
                               int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2024,17 +1923,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_int64(const int64_t* data,
-                             const Index64& starts,
                              const Index64& parents,
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2043,17 +1940,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_uint64(const uint64_t* data,
-                              const Index64& starts,
                               const Index64& parents,
                               int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2062,17 +1957,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_float32(const float* data,
-                               const Index64& starts,
                                const Index64& parents,
                                int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2081,17 +1974,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_float64(const double* data,
-                               const Index64& starts,
                                const Index64& parents,
                                int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2100,11 +1991,10 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
@@ -2125,9 +2015,13 @@ namespace awkward {
     return util::dtype::int64;
   }
 
+  bool
+  ReducerArgmax::returns_positions() const {
+    return true;
+  }
+
   const std::shared_ptr<void>
   ReducerArgmax::apply_bool(const bool* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2136,17 +2030,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_int8(const int8_t* data,
-                            const Index64& starts,
                             const Index64& parents,
                             int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2155,17 +2047,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_uint8(const uint8_t* data,
-                             const Index64& starts,
                              const Index64& parents,
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2174,17 +2064,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_int16(const int16_t* data,
-                             const Index64& starts,
                              const Index64& parents,
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2193,17 +2081,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_uint16(const uint16_t* data,
-                              const Index64& starts,
                               const Index64& parents,
                               int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2212,17 +2098,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_int32(const int32_t* data,
-                             const Index64& starts,
                              const Index64& parents,
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2231,17 +2115,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_uint32(const uint32_t* data,
-                              const Index64& starts,
                               const Index64& parents,
                               int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2250,17 +2132,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_int64(const int64_t* data,
-                             const Index64& starts,
                              const Index64& parents,
                              int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2269,17 +2149,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_uint64(const uint64_t* data,
-                              const Index64& starts,
                               const Index64& parents,
                               int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2288,17 +2166,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_float32(const float* data,
-                               const Index64& starts,
                                const Index64& parents,
                                int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2307,17 +2183,15 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_float64(const double* data,
-                               const Index64& starts,
                                const Index64& parents,
                                int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
@@ -2326,11 +2200,10 @@ namespace awkward {
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
-      starts.data(),
       parents.data(),
       parents.length(),
       outlength);
-    util::handle_error(err, util::quote(name(), true), nullptr);
+    util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 

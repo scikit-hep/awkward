@@ -74,7 +74,7 @@ namespace awkward {
                                 int64_t length,
                                 kernel::lib ptr_lib)
       : Identities(ref, fieldloc, 0, width, length)
-      , ptr_(kernel::malloc<T>(ptr_lib, width * length * sizeof(T)))
+      , ptr_(kernel::malloc<T>(ptr_lib, width * length * (int64_t)sizeof(T)))
       , ptr_lib_(ptr_lib) { }
 
   template <typename T>
@@ -131,7 +131,7 @@ namespace awkward {
       out << ptr_.get()[offset_ + at*width_ + i];
       for (auto pair : fieldloc_) {
         if (pair.first == i) {
-          out << ", " << util::quote(pair.second, true);
+          out << ", " << util::quote(pair.second);
         }
       }
     }
@@ -174,15 +174,14 @@ namespace awkward {
       name = "Identities64";
     }
     out << indent << pre << "<" << name << " ref=\"" << ref_
-        << "\" fieldloc=\"[";
+        << "\" fieldloc=\"";
     for (size_t i = 0;  i < fieldloc_.size();  i++) {
       if (i != 0) {
         out << " ";
       }
-      out << "(" << fieldloc_[i].first << ", "
-          << util::quote(fieldloc_[i].second, false) << ")";
+      out << fieldloc_[i].first << ": " << fieldloc_[i].second;
     }
-    out << "]\" width=\"" << width_ << "\" offset=\"" << offset_
+    out << "\" width=\"" << width_ << "\" offset=\"" << offset_
         << "\" length=\"" << length_ << "\" at=\"0x";
     out << std::hex << std::setw(12) << std::setfill('0')
         << reinterpret_cast<ssize_t>(ptr_.get()) << "\"/>" << post;
@@ -357,7 +356,7 @@ namespace awkward {
       return shallow_copy();
     }
     else {
-      int64_t bytelength = (offset_ + (width_ * length_)) * sizeof(T);
+      int64_t bytelength = (offset_ + (width_ * length_)) * (int64_t)sizeof(T);
       std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib, bytelength);
       Error err = kernel::copy_to(ptr_lib,
                                   ptr_lib_,

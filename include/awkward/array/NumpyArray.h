@@ -71,6 +71,9 @@ namespace awkward {
     int64_t
       purelist_depth() const override;
 
+    bool
+      dimension_optiontype() const override;
+
     const std::pair<int64_t, int64_t>
       minmax_depth() const override;
 
@@ -172,7 +175,7 @@ namespace awkward {
                ssize_t itemsize,
                const std::string format,
                util::dtype dtype,
-               const kernel::lib ptr_lib = kernel::lib::cpu);
+               const kernel::lib ptr_lib);
 
     /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
     NumpyArray(const Index8 index);
@@ -413,7 +416,7 @@ namespace awkward {
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
     const ContentPtr
-      merge(const ContentPtr& other) const override;
+      mergemany(const ContentPtrVec& others) const override;
 
     const SliceItemPtr
       asslice() const override;
@@ -433,6 +436,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,
@@ -554,11 +558,6 @@ namespace awkward {
       numbers_to_type(const std::string& name) const override;
 
   protected:
-    /// @brief Internal function to merge two byte arrays without promoting
-    /// the types to int64.
-    const ContentPtr
-      merge_bytes(const std::shared_ptr<NumpyArray>& other) const;
-
     /// @brief Internal function that propagates the derivation of a contiguous
     /// version of this array from one axis to the next.
     ///

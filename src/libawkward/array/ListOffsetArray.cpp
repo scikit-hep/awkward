@@ -118,6 +118,11 @@ namespace awkward {
     return content_.get()->purelist_depth() + 1;
   }
 
+  bool
+  ListOffsetForm::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   ListOffsetForm::minmax_depth() const {
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
@@ -199,10 +204,12 @@ namespace awkward {
   ListOffsetArrayOf<T>::ListOffsetArrayOf(const IdentitiesPtr& identities,
                                           const util::Parameters& parameters,
                                           const IndexOf<T>& offsets,
-                                          const ContentPtr& content)
+                                          const ContentPtr& content,
+                                          bool represents_regular)
       : Content(identities, parameters)
       , offsets_(offsets)
-      , content_(content) {
+      , content_(content)
+      , represents_regular_(represents_regular) {
     if (offsets.length() == 0) {
       throw std::invalid_argument(
         std::string("ListOffsetArray offsets length must be at least 1")
@@ -857,7 +864,9 @@ namespace awkward {
       ContentPtr listoffsetarray = toListOffsetArray64(true);
       ListOffsetArray64* raw =
         dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
-      return std::pair<Index64, ContentPtr>(raw->offsets(), raw->content());
+      int64_t stop = raw->offsets().getitem_at(-1);
+      ContentPtr content = raw->content().get()->getitem_range_nowrap(0, stop);
+      return std::pair<Index64, ContentPtr>(raw->offsets(), content);
     }
     else {
       std::pair<Index64, ContentPtr> pair =
@@ -977,265 +986,16 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListOffsetArrayOf<T>::merge(const ContentPtr& other) const {
-    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array());
-    }
-
-    if (!parameters_equal(other.get()->parameters())) {
-      return merge_as_union(other);
-    }
-
-    if (dynamic_cast<EmptyArray*>(other.get())) {
+  ListOffsetArrayOf<T>::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
       return shallow_copy();
     }
-    else if (IndexedArray32* rawother =
-             dynamic_cast<IndexedArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedArrayU32* rawother =
-             dynamic_cast<IndexedArrayU32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedArray64* rawother =
-             dynamic_cast<IndexedArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedOptionArray32* rawother =
-             dynamic_cast<IndexedOptionArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (IndexedOptionArray64* rawother =
-             dynamic_cast<IndexedOptionArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (ByteMaskedArray* rawother =
-             dynamic_cast<ByteMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (BitMaskedArray* rawother =
-             dynamic_cast<BitMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnmaskedArray* rawother =
-             dynamic_cast<UnmaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_32* rawother =
-             dynamic_cast<UnionArray8_32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_U32* rawother =
-             dynamic_cast<UnionArray8_U32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-    else if (UnionArray8_64* rawother =
-             dynamic_cast<UnionArray8_64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy());
-    }
-
-    int64_t mylength = length();
-    int64_t theirlength = other.get()->length();
-    Index64 starts(mylength + theirlength);
-    Index64 stops(mylength + theirlength);
-
-    IndexOf<T> self_starts = util::make_starts(offsets_);
-    IndexOf<T> self_stops = util::make_stops(offsets_);
-
-    if (std::is_same<T, int32_t>::value) {
-      struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        0,
-        stops.data(),
-        0,
-        reinterpret_cast<int32_t*>(self_starts.data()),
-        reinterpret_cast<int32_t*>(self_stops.data()),
-        mylength,
-        0);
-      util::handle_error(err, classname(), identities_.get());
-    }
-    else if (std::is_same<T, uint32_t>::value) {
-      struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        0,
-        stops.data(),
-        0,
-        reinterpret_cast<uint32_t*>(self_starts.data()),
-        reinterpret_cast<uint32_t*>(self_stops.data()),
-        mylength,
-        0);
-      util::handle_error(err, classname(), identities_.get());
-    }
-    else if (std::is_same<T, int64_t>::value) {
-      struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        0,
-        stops.data(),
-        0,
-        reinterpret_cast<int64_t*>(self_starts.data()),
-        reinterpret_cast<int64_t*>(self_stops.data()),
-        mylength,
-        0);
-      util::handle_error(err, classname(), identities_.get());
-    }
-    else {
-      throw std::runtime_error(
-        std::string("unrecognized ListOffsetArray specialization")
-        + FILENAME(__LINE__));
-    }
-
-    int64_t mycontentlength = content_.get()->length();
-    ContentPtr content;
-    if (ListArray32* rawother =
-        dynamic_cast<ListArray32*>(other.get())) {
-      content = content_.get()->merge(rawother->content());
-      Index32 other_starts = rawother->starts();
-      Index32 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (ListArrayU32* rawother =
-             dynamic_cast<ListArrayU32*>(other.get())) {
-      content = content_.get()->merge(rawother->content());
-      IndexU32 other_starts = rawother->starts();
-      IndexU32 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (ListArray64* rawother =
-             dynamic_cast<ListArray64*>(other.get())) {
-      content = content_.get()->merge(rawother->content());
-      Index64 other_starts = rawother->starts();
-      Index64 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (ListOffsetArray32* rawother =
-             dynamic_cast<ListOffsetArray32*>(other.get())) {
-      content = content_.get()->merge(rawother->content());
-      Index32 other_starts = rawother->starts();
-      Index32 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (ListOffsetArrayU32* rawother =
-             dynamic_cast<ListOffsetArrayU32*>(other.get())) {
-      content = content_.get()->merge(rawother->content());
-      IndexU32 other_starts = rawother->starts();
-      IndexU32 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (ListOffsetArray64* rawother =
-             dynamic_cast<ListOffsetArray64*>(other.get())) {
-      content = content_.get()->merge(rawother->content());
-      Index64 other_starts = rawother->starts();
-      Index64 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (RegularArray* rawregulararray =
-             dynamic_cast<RegularArray*>(other.get())) {
-      ContentPtr listoffsetarray = rawregulararray->toListOffsetArray64(true);
-      ListOffsetArray64* rawother =
-        dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
-      content = content_.get()->merge(rawother->content());
-      Index64 other_starts = rawother->starts();
-      Index64 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else {
-      throw std::invalid_argument(
-        std::string("cannot merge ") + classname() + std::string(" with ") +
-        other.get()->classname() + FILENAME(__LINE__));
-    }
-
-    return std::make_shared<ListArray64>(Identities::none(),
-                                         parameters_,
-                                         starts,
-                                         stops,
-                                         content);
+    ContentPtr listarray = std::make_shared<ListArrayOf<T>>(identities_,
+                                                            parameters_,
+                                                            starts(),
+                                                            stops(),
+                                                            content_);
+    return listarray.get()->mergemany(others);
   }
 
   template <>
@@ -1245,7 +1005,7 @@ namespace awkward {
     ContentPtr next = content_.get()->getitem_range_nowrap(start, stop);
 
     std::shared_ptr<Index64> offsets = std::make_shared<Index64>(
-      offsets_.ptr(), offsets_.offset(), offsets_.length());
+      offsets_.ptr(), offsets_.offset(), offsets_.length(), offsets_.ptr_lib());
     if (start != 0) {
       offsets = std::make_shared<Index64>(offsets_.length());
       struct Error err = kernel::ListOffsetArray_compact_offsets_64<int64_t>(
@@ -1314,7 +1074,8 @@ namespace awkward {
     }
     return std::make_shared<SliceJagged64>(Index64(offsets.get()->ptr(),
                                                    offsets.get()->offset(),
-                                                   offsets.get()->length()),
+                                                   offsets.get()->length(),
+                                                   offsets.get()->ptr_lib()),
                                            slicecontent);
   }
 
@@ -1428,9 +1189,11 @@ namespace awkward {
     const Reducer& reducer,
     int64_t negaxis,
     const Index64& starts,
+    const Index64& shifts,
     const Index64& parents,
-    int64_t outlength, bool mask, bool keepdims) const {
-
+    int64_t outlength,
+    bool mask,
+    bool keepdims) const {
     std::pair<bool, int64_t> branchdepth = branch_depth();
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -1487,11 +1250,6 @@ namespace awkward {
         nextlen);
       util::handle_error(err4, classname(), identities_.get());
 
-      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
-      ContentPtr outcontent = nextcontent.get()->reduce_next(
-        reducer, negaxis - 1, nextstarts, nextparents, maxnextparents + 1,
-        mask, false);
-
       Index64 gaps(outlength);
       struct Error err5 = kernel::ListOffsetArray_reduce_nonlocal_findgaps_64(
         kernel::lib::cpu,   // DERIVE
@@ -1512,17 +1270,50 @@ namespace awkward {
         outlength);
       util::handle_error(err6, classname(), identities_.get());
 
+      bool make_shifts = reducer.returns_positions();
+
+      Index64 nextshifts(make_shifts ? nextlen : 0);
+      if (make_shifts) {
+        Index64 nummissing(maxcount);
+        Index64 missing(offsets_.getitem_at(offsets_.length() - 1));
+        struct Error err7 = kernel::ListOffsetArray_reduce_nonlocal_nextshifts_64(
+          kernel::lib::cpu,   // DERIVE
+          nummissing.data(),
+          missing.data(),
+          nextshifts.data(),
+          offsets_.data(),
+          offsets_.length() - 1,
+          starts.data(),
+          parents.data(),
+          maxcount,
+          nextlen,
+          nextcarry.data());
+        util::handle_error(err7, classname(), identities_.get());
+      }
+
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, false);
+      ContentPtr outcontent = nextcontent.get()->reduce_next(reducer,
+                                                             negaxis - 1,
+                                                             nextstarts,
+                                                             nextshifts,
+                                                             nextparents,
+                                                             maxnextparents + 1,
+                                                             mask,
+                                                             false);
+
       ContentPtr out = std::make_shared<ListArray64>(Identities::none(),
                                                      util::Parameters(),
                                                      outstarts,
                                                      outstops,
                                                      outcontent);
+
       if (keepdims) {
-        out = std::make_shared<RegularArray>(Identities::none(),
-                                             util::Parameters(),
-                                             out,
-                                             1);
+        out = RegularArray(Identities::none(),
+                           util::Parameters(),
+                           out,
+                           1).toListOffsetArray64(false).get()->shallow_copy();
       }
+
       return out;
     }
 
@@ -1547,9 +1338,14 @@ namespace awkward {
 
       ContentPtr trimmed = content_.get()->getitem_range_nowrap(globalstart,
                                                                 globalstop);
-      ContentPtr outcontent = trimmed.get()->reduce_next(
-        reducer, negaxis, util::make_starts(offsets_), nextparents,
-        offsets_.length() - 1, mask, keepdims);
+      ContentPtr outcontent = trimmed.get()->reduce_next(reducer,
+                                                         negaxis,
+                                                         util::make_starts(offsets_),
+                                                         shifts,
+                                                         nextparents,
+                                                         offsets_.length() - 1,
+                                                         mask,
+                                                         keepdims);
 
       Index64 outoffsets(outlength + 1);
       struct Error err3 = kernel::ListOffsetArray_reduce_local_outoffsets_64(
@@ -1559,6 +1355,12 @@ namespace awkward {
         parents.length(),
         outlength);
       util::handle_error(err3, classname(), identities_.get());
+
+      if (keepdims  &&  (!represents_regular_  ||  content_.get()->dimension_optiontype())) {
+        if (RegularArray* raw = dynamic_cast<RegularArray*>(outcontent.get())) {
+          outcontent = raw->toListOffsetArray64(false).get()->shallow_copy();
+        }
+      }
 
       return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                  util::Parameters(),
@@ -1572,6 +1374,7 @@ namespace awkward {
   ListOffsetArrayOf<T>::reduce_next(const Reducer& reducer,
                                     int64_t negaxis,
                                     const Index64& starts,
+                                    const Index64& shifts,
                                     const Index64& parents,
                                     int64_t length,
                                     bool mask,
@@ -1579,6 +1382,7 @@ namespace awkward {
     return toListOffsetArray64(true).get()->reduce_next(reducer,
                                                         negaxis,
                                                         starts,
+                                                        shifts,
                                                         parents,
                                                         length,
                                                         mask,
@@ -1676,7 +1480,9 @@ namespace awkward {
 
       ContentPtrVec contents;
       for (auto ptr : tocarry) {
-        contents.push_back(content_.get()->carry(Index64(ptr, 0, totallen), true));
+        contents.push_back(content_.get()->carry(
+          Index64(ptr, 0, totallen, kernel::lib::cpu),   // DERIVE
+        true));
       }
       ContentPtr recordarray = std::make_shared<RecordArray>(
         Identities::none(), parameters, contents, recordlookup);

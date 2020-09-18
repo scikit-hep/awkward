@@ -121,6 +121,11 @@ namespace awkward {
     virtual int64_t
       purelist_depth() const = 0;
 
+    /// @brief Returns `true` if this dimension has option-type; `false`
+    /// otherwise.
+    virtual bool
+      dimension_optiontype() const = 0;
+
     /// @brief An optional string associated with this Form, usually specifying
     /// where an array may be fetched.
     const FormKey
@@ -233,7 +238,7 @@ namespace awkward {
     virtual const FormPtr
       getitem_field(const std::string& key) const = 0;
 
-    protected:
+  protected:
     /// @brief See #has_identities
     bool has_identities_;
     /// @brief See #parameters
@@ -541,6 +546,11 @@ namespace awkward {
     virtual int64_t
       purelist_depth() const;
 
+    /// @brief Returns `true` if this dimension has option-type; `false`
+    /// otherwise.
+    virtual bool
+      dimension_optiontype() const;
+
     /// @brief Returns (a) the minimum list-depth and (b) the maximum
     /// list-depth of the array, which can differ if this array "branches"
     /// (differs when followed through different fields of a RecordArray or
@@ -641,10 +651,47 @@ namespace awkward {
     virtual bool
       mergeable(const ContentPtr& other, bool mergebool) const = 0;
 
+    /// @brief Partitions `this` array plus a list of `others` into a `head`
+    /// sequence and a `tail` sequence:
+    ///
+    /// `[this] + others == head + tail`
+    ///
+    /// The order is preserved and no arrays are lost. The `others` must
+    /// have at least one array, and `this` will be added to `head`,
+    /// though `tail` might be empty.
+    ///
+    /// (If `tail` is empty, `head` must contain at least two arrays!)
+    ///
+    /// The position of the split between `head` and `tail` is such that the
+    /// first array in `tail` must be merged with #reverse_merge (usually
+    /// because it is an option-type or union-type array, though this
+    /// rule depends on whether `this` is option-type, union-type, or neither).
+    ///
+    /// The purpose of this function is to prepare a `head` of arrays that
+    /// can all be merged "normally," followed by a `tail` whose first array
+    /// must be "reverse merged" and subsequent arrays recurse.
+    ///
+    /// This is the first step in #merge.
+    virtual const std::pair<ContentPtrVec, ContentPtrVec>
+      merging_strategy(const ContentPtrVec& others) const;
+
+    /// @brief Merges a single `other` with this array in reverse order:
+    /// `other` first, this last.
+    ///
+    /// Only arrays that need to be reversible have this function:
+    /// option-type and union-type arrays. Others raise a runtime error.
+    virtual const ContentPtr
+      reverse_merge(const ContentPtr& other) const;
+
     /// @brief An array with this and the `other` concatenated (this
     /// first, `other` last).
+    const ContentPtr
+      merge(const ContentPtr& other) const;
+
+    /// @brief Returns an array with this and the `others` concatenated
+    /// (in order, this first, `others` last).
     virtual const ContentPtr
-      merge(const ContentPtr& other) const = 0;
+      mergemany(const ContentPtrVec& others) const = 0;
 
     /// @brief Converts this array into a SliceItem that can be used in
     /// getitem.
@@ -702,7 +749,13 @@ namespace awkward {
     /// @param starts Staring positions of each group to combine as an
     /// {@link IndexOf Index}. These are downward pointers from an outer
     /// structure into this structure with the same meaning as in
-    /// {@link ListArrayOf ListArray}.
+    /// {@link ListArrayOf ListArray}. Only used by a reducer that
+    /// {@link Reducer#returns_positions returns_positions} (currently
+    /// only argmin and argmax).
+    /// @param shifts Per-element adjustments for any reducer that
+    /// {@link Reducer#returns_positions returns_positions}. Allows
+    /// for variable-length lists with axis != -1 and for missing values
+    /// (None) in argmin and argmax.
     /// @param parents Groups to combine as an {@link IndexOf Index} of
     /// upward pointers from this structure to the outer structure to reduce.
     /// @param outlength The length of the reduced array, after the operation
@@ -718,6 +771,7 @@ namespace awkward {
       reduce_next(const Reducer& reducer,
                   int64_t negaxis,
                   const Index64& starts,
+                  const Index64& shifts,
                   const Index64& parents,
                   int64_t outlength,
                   bool mask,
@@ -1216,16 +1270,12 @@ namespace awkward {
     /// This allows a RecordArray or {@link UnionArrayOf UnionArray} with
     /// different depths to accept `axis = -1` as the last axis, regardless
     /// of how deep that is in different record fields or union possibilities.
-    ///
     const int64_t
       axis_wrap_if_negative(int64_t axis) const;
 
-    /// @brief Transfer the entire contents of the array between GPU and main memory.
-    ///
-    /// Returns a std::shared_ptr<Content> which is, by default, allocated on the
-    /// first device(device [0])
-    ///
-    /// @note This function has not been implemented to handle Multi-GPU setups
+    /// @brief Recursively copies components of the array from main memory to a
+    /// GPU (if `ptr_lib == kernel::lib::cuda`) or to main memory (if
+    /// `ptr_lib == kernel::lib::cpu`) if those components are not already there.
     virtual const ContentPtr
       copy_to(kernel::lib ptr_lib) const = 0;
 

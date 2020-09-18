@@ -153,6 +153,12 @@ namespace awkward {
     const PartitionedArrayPtr
       getitem_range_nowrap(int64_t start, int64_t stop, int64_t step) const;
 
+    /// @brief Recursively copies components of the array from main memory to a
+    /// GPU (if `ptr_lib == kernel::lib::cuda`) or to main memory (if
+    /// `ptr_lib == kernel::lib::cpu`) if those components are not already there.
+    virtual const PartitionedArrayPtr
+      copy_to(kernel::lib ptr_lib) const = 0;
+
   protected:
     const ContentPtrVec partitions_;
   };

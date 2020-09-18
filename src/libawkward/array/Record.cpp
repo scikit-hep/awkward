@@ -195,7 +195,7 @@ namespace awkward {
   Record::getitem_at(int64_t at) const {
     throw std::invalid_argument(
       std::string("scalar Record can only be sliced by field name (string); "
-                  "try ") + util::quote(std::to_string(at), true)
+                  "try ") + util::quote(std::to_string(at))
       + FILENAME(__LINE__));
   }
 
@@ -203,7 +203,7 @@ namespace awkward {
   Record::getitem_at_nowrap(int64_t at) const {
     throw std::invalid_argument(
       std::string("scalar Record can only be sliced by field name (string); "
-                  "try ") + util::quote(std::to_string(at), true)
+                  "try ") + util::quote(std::to_string(at))
       + FILENAME(__LINE__));
   }
 
@@ -241,6 +241,11 @@ namespace awkward {
   int64_t
   Record::purelist_depth() const {
     return 0;
+  }
+
+  bool
+  Record::dimension_optiontype() const {
+    return false;
   }
 
   const std::pair<int64_t, int64_t>
@@ -319,7 +324,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  Record::merge(const ContentPtr& other) const {
+  Record::mergemany(const ContentPtrVec& others) const {
     throw std::invalid_argument(
       std::string("Record cannot be merged because it is not an array")
       + FILENAME(__LINE__));
@@ -357,6 +362,7 @@ namespace awkward {
   Record::reduce_next(const Reducer& reducer,
                       int64_t negaxis,
                       const Index64& starts,
+                      const Index64& shifts,
                       const Index64& parents,
                       int64_t outlength,
                       bool mask,
@@ -365,6 +371,7 @@ namespace awkward {
     return trimmed.get()->reduce_next(reducer,
                                       negaxis,
                                       starts,
+                                      shifts,
                                       parents,
                                       outlength,
                                       mask,

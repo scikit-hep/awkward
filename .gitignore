@@ -12,15 +12,21 @@ kernel-specification/identities/
 kernel-specification/sorting/
 kernel-specification/getitem/
 
+# Generated CUDA kernels
+src/cuda-kernels/awkward_*.cu
+
 # Kernel tests
-tests-kernels/test*
-tests-kernels/kernels.py
+tests-cpu-kernels/test*
+tests-cuda-kernels/test*
+tests-spec/kernels.py
+tests-spec/test*
 
 dependent-project/CMakeFiles
 dependent-project/CMakeCache.txt
 dependent-project/Makefile
 dependent-project/cmake_install.cmake
 dependent-project/cmake_pybind11
+dependent-project/minimal
 
 # to use all-contributors-cli without adding it to the project
 node_modules

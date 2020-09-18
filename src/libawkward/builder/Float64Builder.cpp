@@ -68,7 +68,8 @@ namespace awkward {
                                         0,
                                         sizeof(double),
                                         "d",
-                                        util::dtype::float64);
+                                        util::dtype::float64,
+                                        kernel::lib::cpu);
   }
 
   bool

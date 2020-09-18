@@ -256,7 +256,8 @@ namespace awkward {
           }
           IndexOf<T> index(index_.ptr(),
                            index_.offset() + i*strides_[0],
-                           shape_[1]);
+                           shape_[1],
+                           index_.ptr_lib());
           SliceArrayOf<T> subarray(index, shape, strides, frombool_);
           out << subarray.tostring_part();
         }
@@ -268,7 +269,8 @@ namespace awkward {
           }
           IndexOf<T> index(index_.ptr(),
                            index_.offset() + i*strides_[0],
-                           shape_[1]);
+                           shape_[1],
+                           index_.ptr_lib());
           SliceArrayOf<T> subarray(index, shape, strides, frombool_);
           out << subarray.tostring_part();
         }
@@ -279,7 +281,8 @@ namespace awkward {
           }
           IndexOf<T> index(index_.ptr(),
                            index_.offset() + i*strides_[0],
-                           shape_[1]);
+                           shape_[1],
+                           index_.ptr_lib());
           SliceArrayOf<T> subarray(index, shape, strides, frombool_);
           out << subarray.tostring_part();
         }
@@ -342,7 +345,7 @@ namespace awkward {
 
   const std::string
   SliceField::tostring() const {
-    return util::quote(key_, true);
+    return util::quote(key_);
   }
 
   bool
@@ -373,7 +376,7 @@ namespace awkward {
       if (i != 0) {
         out << ", ";
       }
-      out << util::quote(keys_[i], true);
+      out << util::quote(keys_[i]);
     }
     out << "]";
     return out.str();

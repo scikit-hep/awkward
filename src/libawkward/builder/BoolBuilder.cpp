@@ -52,7 +52,8 @@ namespace awkward {
                                         0,
                                         sizeof(bool),
                                         "?",
-                                        util::dtype::boolean);
+                                        util::dtype::boolean,
+                                        kernel::lib::cpu);
   }
 
   bool

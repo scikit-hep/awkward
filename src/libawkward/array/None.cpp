@@ -236,9 +236,9 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::merge(const ContentPtr& other) const {
+  None::mergemany(const ContentPtrVec& others) const {
     throw std::runtime_error(
-      std::string("undefined operation: None::merge")
+      std::string("undefined operation: None::mergemany")
       + FILENAME(__LINE__));
   }
 
@@ -274,6 +274,7 @@ namespace awkward {
   None::reduce_next(const Reducer& reducer,
                     int64_t negaxis,
                     const Index64& starts,
+                    const Index64& shifts,
                     const Index64& parents,
                     int64_t outlength,
                     bool mask,

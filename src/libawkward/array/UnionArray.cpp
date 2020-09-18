@@ -161,6 +161,16 @@ namespace awkward {
     return out;
   }
 
+  bool
+  UnionForm::dimension_optiontype() const {
+    for (auto content : contents_) {
+      if (content.get()->dimension_optiontype()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   UnionForm::minmax_depth() const {
     if (contents_.empty()) {
@@ -452,7 +462,7 @@ namespace awkward {
       lentags,
       index);
     util::handle_error(err, classname(), identities_.get());
-    Index64 nextcarry(tmpcarry.ptr(), 0, lenout);
+    Index64 nextcarry(tmpcarry.ptr(), 0, lenout, tmpcarry.ptr_lib());
     return contents_[(size_t)index].get()->carry(nextcarry, false);
   }
 
@@ -1489,187 +1499,173 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const std::pair<ContentPtrVec, ContentPtrVec>
+  UnionArrayOf<T, I>::merging_strategy(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      throw std::invalid_argument(
+        std::string("to merge this array with 'others', at least one other "
+                    "must be provided") + FILENAME(__LINE__));
+    }
+
+    ContentPtrVec head;
+    ContentPtrVec tail;
+
+    head.push_back(shallow_copy());
+
+    for (size_t i = 0;  i < others.size();  i++) {
+      ContentPtr other = others[i];
+      if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+        head.push_back(raw->array());
+      }
+      else {
+        head.push_back(other);
+      }
+    }
+
+    return std::pair<ContentPtrVec, ContentPtrVec>(head, tail);
+  }
+
+  template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::merge(const ContentPtr& other) const {
-    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array());
-    }
-
-    if (!parameters_equal(other.get()->parameters())) {
-      return merge_as_union(other);
-    }
-
-    if (dynamic_cast<EmptyArray*>(other.get())) {
+  UnionArrayOf<T, I>::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
       return shallow_copy();
     }
 
-    int64_t mylength = length();
-    int64_t theirlength = other.get()->length();
-    Index8 tags(mylength + theirlength);
-    Index64 index(mylength + theirlength);
+    std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
+    ContentPtrVec head = head_tail.first;
+    ContentPtrVec tail = head_tail.second;
 
-    if (std::is_same<T, int8_t>::value) {
-      struct Error err = kernel::UnionArray_filltags_to8_from8(
-        kernel::lib::cpu,   // DERIVE
-        tags.data(),
-        0,
-        reinterpret_cast<int8_t*>(tags_.data()),
-        mylength,
-        0);
-      util::handle_error(err, classname(), identities_.get());
-    }
-    else {
-      throw std::runtime_error(
-        std::string("unrecognized UnionArray specialization")
-        + FILENAME(__LINE__));
+    int64_t total_length = 0;
+    for (auto array : head) {
+      total_length += array.get()->length();
     }
 
-    if (std::is_same<I, int32_t>::value) {
-      struct Error err = kernel::UnionArray_fillindex<int32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        index.data(),
-        0,
-        reinterpret_cast<int32_t*>(index_.data()),
-        mylength);
-      util::handle_error(err, classname(), identities_.get());
-    }
-    else if (std::is_same<I, uint32_t>::value) {
-      struct Error err = kernel::UnionArray_fillindex<uint32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        index.data(),
-        0,
-        reinterpret_cast<uint32_t*>(index_.data()),
-        mylength);
-      util::handle_error(err, classname(), identities_.get());
-    }
-    else if (std::is_same<I, int64_t>::value) {
-      struct Error err = kernel::UnionArray_fillindex<int64_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        index.data(),
-        0,
-        reinterpret_cast<int64_t*>(index_.data()),
-        mylength);
-      util::handle_error(err, classname(), identities_.get());
-    }
-    else {
-      throw std::runtime_error(
-        std::string("unrecognized UnionArray specialization")
-        + FILENAME(__LINE__));
+    Index8 nexttags(total_length);
+    Index64 nextindex(total_length);
+    ContentPtrVec nextcontents;
+    int64_t length_so_far = 0;
+
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+
+    for (auto array : head) {
+      if (UnionArray8_32* raw = dynamic_cast<UnionArray8_32*>(array.get())) {
+        Index8 union_tags = raw->tags();
+        Index32 union_index = raw->index();
+        ContentPtrVec union_contents = raw->contents();
+        struct Error err1 = kernel::UnionArray_filltags_to8_from8(
+          ptr_lib,
+          nexttags.data(),
+          length_so_far,
+          union_tags.data(),
+          array.get()->length(),
+          (int64_t)nextcontents.size());
+        util::handle_error(err1, array.get()->classname(), array.get()->identities().get());
+        struct Error err2 = kernel::UnionArray_fillindex<int32_t, int64_t>(
+          ptr_lib,
+          nextindex.data(),
+          length_so_far,
+          union_index.data(),
+          array.get()->length());
+        util::handle_error(err2, array.get()->classname(), array.get()->identities().get());
+        length_so_far += array.get()->length();
+        nextcontents.insert(nextcontents.end(), union_contents.begin(), union_contents.end());
+      }
+
+      else if (UnionArray8_U32* raw = dynamic_cast<UnionArray8_U32*>(array.get())) {
+        Index8 union_tags = raw->tags();
+        IndexU32 union_index = raw->index();
+        ContentPtrVec union_contents = raw->contents();
+        struct Error err1 = kernel::UnionArray_filltags_to8_from8(
+          ptr_lib,
+          nexttags.data(),
+          length_so_far,
+          union_tags.data(),
+          array.get()->length(),
+          (int64_t)nextcontents.size());
+        util::handle_error(err1, array.get()->classname(), array.get()->identities().get());
+        struct Error err2 = kernel::UnionArray_fillindex<uint32_t, int64_t>(
+          ptr_lib,
+          nextindex.data(),
+          length_so_far,
+          union_index.data(),
+          array.get()->length());
+        util::handle_error(err2, array.get()->classname(), array.get()->identities().get());
+        length_so_far += array.get()->length();
+        nextcontents.insert(nextcontents.end(), union_contents.begin(), union_contents.end());
+      }
+
+      else if (UnionArray8_64* raw = dynamic_cast<UnionArray8_64*>(array.get())) {
+        Index8 union_tags = raw->tags();
+        Index64 union_index = raw->index();
+        ContentPtrVec union_contents = raw->contents();
+        struct Error err1 = kernel::UnionArray_filltags_to8_from8(
+          ptr_lib,
+          nexttags.data(),
+          length_so_far,
+          union_tags.data(),
+          array.get()->length(),
+          (int64_t)nextcontents.size());
+        util::handle_error(err1, array.get()->classname(), array.get()->identities().get());
+        struct Error err2 = kernel::UnionArray_fillindex<int64_t, int64_t>(
+          ptr_lib,
+          nextindex.data(),
+          length_so_far,
+          union_index.data(),
+          array.get()->length());
+        util::handle_error(err2, array.get()->classname(), array.get()->identities().get());
+        length_so_far += array.get()->length();
+        nextcontents.insert(nextcontents.end(), union_contents.begin(), union_contents.end());
+      }
+
+      else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
+        ;
+      }
+
+      else {
+        struct Error err1 = kernel::UnionArray_filltags_to8_const(
+          ptr_lib,
+          nexttags.data(),
+          length_so_far,
+          array.get()->length(),
+          (int64_t)nextcontents.size());
+        util::handle_error(err1, array.get()->classname(), array.get()->identities().get());
+        struct Error err2 = kernel::UnionArray_fillindex_count_64(
+          ptr_lib,
+          nextindex.data(),
+          length_so_far,
+          array.get()->length());
+        util::handle_error(err2, array.get()->classname(), array.get()->identities().get());
+        length_so_far += array.get()->length();
+        nextcontents.push_back(array);
+      }
     }
 
-    ContentPtrVec contents(contents_.begin(), contents_.end());
-    if (UnionArray8_32* rawother =
-        dynamic_cast<UnionArray8_32*>(other.get())) {
-      ContentPtrVec other_contents = rawother->contents();
-      contents.insert(contents.end(),
-                      other_contents.begin(),
-                      other_contents.end());
-      Index8 other_tags = rawother->tags();
-      struct Error err1 = kernel::UnionArray_filltags_to8_from8(
-        kernel::lib::cpu,   // DERIVE
-        tags.data(),
-        mylength,
-        other_tags.data(),
-        theirlength,
-        numcontents());
-      util::handle_error(err1,
-                         rawother->classname(),
-                         rawother->identities().get());
-      Index32 other_index = rawother->index();
-      struct Error err2 = kernel::UnionArray_fillindex<int32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        index.data(),
-        mylength,
-        other_index.data(),
-        theirlength);
-      util::handle_error(err2,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (UnionArray8_U32* rawother =
-             dynamic_cast<UnionArray8_U32*>(other.get())) {
-      ContentPtrVec other_contents = rawother->contents();
-      contents.insert(contents.end(),
-                      other_contents.begin(),
-                      other_contents.end());
-      Index8 other_tags = rawother->tags();
-      struct Error err1 = kernel::UnionArray_filltags_to8_from8(
-        kernel::lib::cpu,   // DERIVE
-        tags.data(),
-        mylength,
-        other_tags.data(),
-        theirlength,
-        numcontents());
-      util::handle_error(err1,
-                         rawother->classname(),
-                         rawother->identities().get());
-      IndexU32 other_index = rawother->index();
-      struct Error err2 = kernel::UnionArray_fillindex<uint32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        index.data(),
-        mylength,
-        other_index.data(),
-        theirlength);
-      util::handle_error(err2,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (UnionArray8_64* rawother =
-             dynamic_cast<UnionArray8_64*>(other.get())) {
-      ContentPtrVec other_contents = rawother->contents();
-      contents.insert(contents.end(),
-                      other_contents.begin(),
-                      other_contents.end());
-      Index8 other_tags = rawother->tags();
-      struct Error err1 = kernel::UnionArray_filltags_to8_from8(
-        kernel::lib::cpu,   // DERIVE
-        tags.data(),
-        mylength,
-        other_tags.data(),
-        theirlength,
-        numcontents());
-      util::handle_error(err1,
-                         rawother->classname(),
-                         rawother->identities().get());
-      Index64 other_index = rawother->index();
-      struct Error err2 = kernel::UnionArray_fillindex<int64_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        index.data(),
-        mylength,
-        other_index.data(),
-        theirlength);
-      util::handle_error(err2,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else {
-      contents.push_back(other);
-      struct Error err1 = kernel::UnionArray_filltags_to8_const(
-        kernel::lib::cpu,   // DERIVE
-        tags.data(),
-        mylength,
-        theirlength,
-        numcontents());
-      util::handle_error(err1, classname(), identities_.get());
-      struct Error err2 = kernel::UnionArray_fillindex_count_64(
-        kernel::lib::cpu,   // DERIVE
-        index.data(),
-        mylength,
-        theirlength);
-      util::handle_error(err2, classname(), identities_.get());
-    }
-
-    if (contents.size() > kMaxInt8) {
+    if (nextcontents.size() > kMaxInt8) {
       throw std::runtime_error(
         std::string("FIXME: handle UnionArray with more than 127 contents")
         + FILENAME(__LINE__));
     }
 
-    return std::make_shared<UnionArray8_64>(Identities::none(),
-                                            parameters_,
-                                            tags,
-                                            index,
-                                            contents);
+    ContentPtr next = std::make_shared<UnionArray8_64>(Identities::none(),
+                                                       parameters_,
+                                                       nexttags,
+                                                       nextindex,
+                                                       nextcontents);
+
+    // Given UnionArray's merging_strategy, tail is always empty, but just to be formal...
+
+    if (tail.empty()) {
+      return next;
+    }
+
+    ContentPtr reversed = tail[0].get()->reverse_merge(next);
+    if (tail.size() == 1) {
+      return reversed;
+    }
+    else {
+      return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()));
+    }
   }
 
   template <typename T, typename I>
@@ -1775,6 +1771,7 @@ namespace awkward {
   UnionArrayOf<T, I>::reduce_next(const Reducer& reducer,
                                   int64_t negaxis,
                                   const Index64& starts,
+                                  const Index64& shifts,
                                   const Index64& parents,
                                   int64_t outlength,
                                   bool mask,
@@ -1791,6 +1788,7 @@ namespace awkward {
     return simplified.get()->reduce_next(reducer,
                                          negaxis,
                                          starts,
+                                         shifts,
                                          parents,
                                          outlength,
                                          mask,

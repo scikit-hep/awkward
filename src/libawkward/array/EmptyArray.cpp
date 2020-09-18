@@ -64,6 +64,11 @@ namespace awkward {
     return 1;
   }
 
+  bool
+  EmptyForm::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   EmptyForm::minmax_depth() const {
     return std::pair<int64_t, int64_t>(1, 1);
@@ -82,7 +87,7 @@ namespace awkward {
   int64_t
   EmptyForm::fieldindex(const std::string& key) const {
     throw std::invalid_argument(
-      std::string("key ") + util::quote(key, true)
+      std::string("key ") + util::quote(key)
       + std::string(" does not exist (data might not be records)")
       + FILENAME(__LINE__));
   }
@@ -134,7 +139,7 @@ namespace awkward {
   const FormPtr
   EmptyForm::getitem_field(const std::string& key) const {
     throw std::invalid_argument(
-      std::string("key ") + util::quote(key, true)
+      std::string("key ") + util::quote(key)
       + std::string(" does not exist (data might not be records)"));
   }
 
@@ -159,7 +164,8 @@ namespace awkward {
                                         0,
                                         itemsize,
                                         format,
-                                        dtype);
+                                        dtype,
+                                        kernel::lib::cpu);
   }
 
   const std::string
@@ -335,7 +341,7 @@ namespace awkward {
   int64_t
   EmptyArray::fieldindex(const std::string& key) const {
     throw std::invalid_argument(
-      std::string("key ") + util::quote(key, true)
+      std::string("key ") + util::quote(key)
       + std::string(" does not exist (data might not be records)")
       + FILENAME(__LINE__));
   }
@@ -399,12 +405,26 @@ namespace awkward {
 
   bool
   EmptyArray::mergeable(const ContentPtr& other, bool mergebool) const {
+    if (!parameters_equal(other.get()->parameters())) {
+      return false;
+    }
     return true;
   }
 
   const ContentPtr
-  EmptyArray::merge(const ContentPtr& other) const {
-    return other;
+  EmptyArray::mergemany(const ContentPtrVec& others) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
+
+    else if (others.size() == 1) {
+      return others[0];
+    }
+
+    else {
+      ContentPtrVec tail_others(others.begin() + 1, others.end());
+      return others[0].get()->mergemany(tail_others);
+    }
   }
 
   const SliceItemPtr
@@ -451,6 +471,7 @@ namespace awkward {
   EmptyArray::reduce_next(const Reducer& reducer,
                           int64_t negaxis,
                           const Index64& starts,
+                          const Index64& shifts,
                           const Index64& parents,
                           int64_t outlength,
                           bool mask,
@@ -462,6 +483,7 @@ namespace awkward {
     return asnumpy.get()->reduce_next(reducer,
                                       negaxis,
                                       starts,
+                                      shifts,
                                       parents,
                                       outlength,
                                       mask,

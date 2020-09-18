@@ -436,13 +436,15 @@ extern "C" {
   /// @param parents inparam role: IndexedArray-index
   /// @param parentslength inparam
   /// @param nextparents inparam role: IndexedArray-index
+  /// @param nextlen inparam
   EXPORT_SYMBOL struct Error
     awkward_IndexedArray_local_preparenext_64(
       int64_t* tocarry,
       const int64_t* starts,
       const int64_t* parents,
-      int64_t parentslength,
-      const int64_t* nextparents);
+      const int64_t parentslength,
+      const int64_t* nextparents,
+      const int64_t nextlen);
 
   /// @param toptr outparam
   /// @param fromptr inparam role: IndexedArray-index
