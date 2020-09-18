@@ -8,8 +8,7 @@ from itertools import product
 
 import yaml
 from numpy import uint8
-from parser_utils import (PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST,
-                          TEST_BLACKLIST)
+from parser_utils import PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST, TEST_BLACKLIST
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
