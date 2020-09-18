@@ -72,11 +72,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             # build_args += ["--", "/m"]
         else:
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
-
-        if platform.system() == "Windows":
-            # build_args += ["/m"]
-            pass
-        else:
             build_args += ["-j", str(multiprocessing.cpu_count())]
 
         if not os.path.exists(self.build_temp):
@@ -119,10 +114,19 @@ if platform.system() == "Windows":
             print("--- copying libraries -----------------------------------------")
             # dlldir = os.path.join(os.path.join("build", "temp.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "Release", "Release")
             dlldir = os.path.join(os.path.join("build", "temp.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "Release")
+            found = False
             for x in os.listdir(dlldir):
-                if x.startswith("awkward"):
+                if x.endswith(".lib") or x.endswith(".exp") or x.endswith(".dll"):
                     print("copying", os.path.join(dlldir, x), "-->", os.path.join(self.build_lib, "awkward1", x))
                     shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward1", x))
+                    found = True
+            if not found:
+                dlldir = os.path.join(dlldir, "Release")
+                for x in os.listdir(dlldir):
+                    if x.endswith(".lib") or x.endswith(".exp") or x.endswith(".dll"):
+                        print("copying", os.path.join(dlldir, x), "-->", os.path.join(self.build_lib, "awkward1", x))
+                        shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward1", x))
+                        found = True
 
             print("--- deleting libraries ----------------------------------------")
             for x in os.listdir(outerdir):
