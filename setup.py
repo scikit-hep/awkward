@@ -67,7 +67,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
                 "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir),
                 "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE",
             ]
-            if sys.maxsize > 2**32:
+            if sys.maxsize > 2**32 and os.environ.get("CMAKE_GENERATOR") != "NMake Makefiles":
                 cmake_args += ["-A", "x64"]
             # build_args += ["--", "/m"]
         else:
