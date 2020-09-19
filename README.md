@@ -135,7 +135,6 @@ The `--pytest tests` runs the integration tests from the `tests` directory (drop
 For more fine-grained testing, we also have tests of the low-level kernels, which can be invoked with
 
 ```bash
-python dev/generate-kernelspec.py
 python dev/generate-tests.py
 python -m pytest -vv -rs tests-spec
 python -m pytest -vv -rs tests-cpu-kernels
