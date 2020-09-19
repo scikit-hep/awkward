@@ -494,6 +494,87 @@ class Array(
         """
         return self._layout.nbytes
 
+    @property
+    def ndim(self):
+        """
+        Number of dimensions (nested variable-length lists and/or regular arrays)
+        before reaching a numeric type or a record.
+
+        There may be nested lists within the record, as field values, but this
+        number of dimensions does not count those.
+
+        (Some fields may have different depths than others, which is why they
+        are not counted.)
+        """
+        return self.layout.purelist_depth
+
+    @property
+    def fields(self):
+        """
+        List of field names or tuple slot numbers (as strings) of the outermost
+        record or tuple in this array.
+
+        If the array contains nested records, only the fields of the outermost
+        record are shown. If it contains tuples instead of records, its fields
+        are string representations of integers, such as `"0"`, `"1"`, `"2"`, etc.
+        The records or tuples may be within multiple layers of nested lists.
+
+        If the array contains neither tuples nor records, it is an empty list.
+
+        See also #ak.fields.
+        """
+        return awkward1.operations.describe.fields(self)
+
+    @property
+    def type(self):
+        """
+        The high-level type of this array.
+
+        The high-level type ignores #layout differences like
+        #ak.layout.ListArray64 versus #ak.layout.ListOffsetArray64, but
+        not differences like "regular-sized lists" (i.e.
+        #ak.layout.RegularArray) versus "variable-sized lists" (i.e.
+        #ak.layout.ListArray64 and similar).
+
+        Types are rendered as [Datashape](https://datashape.readthedocs.io/)
+        strings, which makes the same distinctions.
+
+        For example,
+
+            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+                      [],
+                      [{"x": 3.3, "y": [3, 3, 3]}]])
+
+        has type
+
+            3 * var * {"x": float64, "y": var * int64}
+
+        but
+
+            ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
+
+        has type
+
+            2 * 3 * 5 * int64
+
+        Some cases, like heterogeneous data, require [extensions beyond the
+        Datashape specification](https://github.com/blaze/datashape/issues/237).
+        For example,
+
+            ak.Array([1, "two", [3, 3, 3]])
+
+        has type
+
+            3 * union[int64, string, var * int64]
+
+        but "union" is not a Datashape type-constructor. (Its syntax is
+        similar to existing type-constructors, so it's a plausible addition
+        to the language.)
+
+        See also #ak.type.
+        """
+        return awkward1.operations.describe.type(self)
+
     def __len__(self):
         """
         The length of this Array, only counting the outermost structure.
@@ -1593,6 +1674,28 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         array buffers.
         """
         return self._layout.nbytes
+
+    @property
+    def fields(self):
+        """
+        List of field names or tuple slot numbers (as strings) of this record.
+
+        If this is actually a tuple its fields are string representations of
+        integers, such as `"0"`, `"1"`, `"2"`, etc.
+
+        See also #ak.fields.
+        """
+        return awkward1.operations.describe.fields(self)
+
+    @property
+    def type(self):
+        """
+        The high-level type of this record, like the `type` of an array, but
+        the outermost structure is a record-type, not a number of elements.
+
+        See also #ak.type.
+        """
+        return awkward1.operations.describe.type(self)
 
     def __getitem__(self, where):
         """

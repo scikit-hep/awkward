@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import numbers
+import warnings
 
 import awkward1.layout
 import awkward1.nplike
@@ -247,12 +248,20 @@ def parameters(array):
 
 
 def keys(array):
+    warnings.warn(
+        "ak.keys is deprecated, will be removed in 0.4.0. Use ak.fields instead.",
+        DeprecationWarning,
+    )
+    return fields(array)
+
+
+def fields(array):
     """
-    Extracts record or tuple keys from `array` (many types supported,
-    including all Awkward Arrays and Records).
+    Extracts record fields or tuple slot numbers from `array` (many types
+    supported, including all Awkward Arrays and Records).
 
     If the array contains nested records, only the outermost record is
-    queried. If it contains tuples instead of records, the keys are
+    queried. If it contains tuples instead of records, this function outputs
     string representations of integers, such as `"0"`, `"1"`, `"2"`, etc.
     The records or tuples may be within multiple layers of nested lists.
 
