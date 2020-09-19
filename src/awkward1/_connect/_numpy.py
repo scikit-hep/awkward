@@ -9,6 +9,7 @@ import numpy
 import awkward1.layout
 import awkward1.operations.convert
 import awkward1._util
+import awkward1.nplike
 
 
 def convert_to_array(layout, args, kwargs):
@@ -68,22 +69,22 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         )
 
     def getfunction(inputs, depth):
-        signature = (ufunc,) + tuple(
-            x.parameters.get("__record__")
-            if isinstance(x, awkward1.layout.Content)
-            else type(x)
-            for x in inputs
-        )
-        custom = awkward1._util.overload(behavior, signature)
-        if custom is not None:
-            return lambda: adjust(custom, inputs, kwargs)
+        signature = [ufunc]
+        for x in inputs:
+            if isinstance(x, awkward1.layout.Content):
+                record = x.parameters.get("__record__")
+                array = x.parameters.get("__array__")
+                if record is not None:
+                    signature.append(record)
+                elif array is not None:
+                    signature.append(array)
+                elif isinstance(x, awkward1.layout.NumpyArray):
+                    signature.append(awkward1.nplike.of(x).asarray(x).dtype.type)
+                else:
+                    signature.append(None)
+            else:
+                signature.append(type(x))
 
-        signature = (ufunc,) + tuple(
-            x.parameters.get("__array__")
-            if isinstance(x, awkward1.layout.Content)
-            else type(x)
-            for x in inputs
-        )
         custom = awkward1._util.overload(behavior, signature)
         if custom is not None:
             return lambda: adjust(custom, inputs, kwargs)
