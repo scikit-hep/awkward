@@ -49,7 +49,8 @@ kernels:
                   tobytemask[(i * 8) + 6] = ((byte & uint8(128)) != 0) != validwhen
                   byte <<= 1
                   tobytemask[(i * 8) + 7] = ((byte & uint8(128)) != 0) != validwhen
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_BitMaskedArray_to_IndexedOptionArray
     specializations:
@@ -149,7 +150,8 @@ kernels:
                       toindex[(i * 8) + 7] = (i * 8) + 7
                   else:
                       toindex[(i * 8) + 7] = -1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ByteMaskedArray_getitem_carry
     specializations:
@@ -169,7 +171,8 @@ kernels:
               if fromcarry[i] >= lenmask:
                   raise ValueError("index out of range")
               tomask[i] = frommask[fromcarry[i]]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ByteMaskedArray_getitem_nextcarry
     specializations:
@@ -187,7 +190,8 @@ kernels:
               if (mask[i] != 0) == validwhen:
                   tocarry[k] = i
                   k = k + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ByteMaskedArray_getitem_nextcarry_outindex
     specializations:
@@ -211,7 +215,8 @@ kernels:
                   k = k + 1
               else:
                   outindex[i] = -1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ByteMaskedArray_mask
     specializations:
@@ -226,7 +231,8 @@ kernels:
       def awkward_ByteMaskedArray_mask(tomask, frommask, length, validwhen):
           for i in range(length):
               tomask[i] = (frommask[i] != 0) != validwhen
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ByteMaskedArray_numnull
     specializations:
@@ -243,7 +249,8 @@ kernels:
           for i in range(length):
               if (mask[i] != 0) != validwhen:
                   numnull[0] = numnull[0] + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ByteMaskedArray_overlay_mask
     specializations:
@@ -261,7 +268,8 @@ kernels:
               theirs = theirmask[i]
               mine = (mymask[i] != 0) != validwhen
               tomask[i] = 1 if theirs | mine else 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ByteMaskedArray_reduce_next_64
     specializations:
@@ -288,7 +296,8 @@ kernels:
                   k = k + 1
               else:
                   outindex[i] = -1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64
     specializations:
@@ -311,7 +320,8 @@ kernels:
                   k = k + 1
               else:
                   nullsum = nullsum + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64
     specializations:
@@ -335,7 +345,8 @@ kernels:
                   k = k + 1
               else:
                   nullsum = nullsum + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ByteMaskedArray_toIndexedOptionArray
     specializations:
@@ -350,7 +361,8 @@ kernels:
       def awkward_ByteMaskedArray_toIndexedOptionArray(toindex, mask, length, validwhen):
           for i in range(length):
               toindex[i] = i if (mask[i] != 0) == validwhen else -1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_Content_getitem_next_missing_jagged_getmaskstartstop
     specializations:
@@ -377,7 +389,8 @@ kernels:
                   mask_out[i] = i
                   k = k + 1
                   stops_out[i] = offsets_in[k]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_Identities32_to_Identities64
     specializations:
@@ -392,7 +405,8 @@ kernels:
       def awkward_Identities32_to_Identities64(toptr, fromptr, length, width):
           for i in range(length * width):
               toptr[i] = int(fromptr[i])
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_Identities_extend
     specializations:
@@ -418,7 +432,8 @@ kernels:
           while i < tolength:
               toptr[i] = -1
               i = i + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_Identities_from_IndexedArray
     specializations:
@@ -495,7 +510,8 @@ kernels:
                       for k in range(fromwidth):
                           toptr[(j * fromwidth) + k] = fromptr[(i * fromwidth) + k]
           uniquecontents[0] = True
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_Identities_from_ListArray
     specializations:
@@ -586,7 +602,8 @@ kernels:
                       toptr[(j * (fromwidth + 1)) + k] = fromptr[(i * fromwidth) + k]
                   toptr[(j * (fromwidth + 1)) + fromwidth] = float(j - start)
           uniquecontents[0] = True
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_Identities_from_ListOffsetArray
     specializations:
@@ -660,7 +677,8 @@ kernels:
                   for k in range(fromwidth):
                       toptr[(j * (fromwidth + 1)) + k] = fromptr[(i * fromwidth) + k]
                   toptr[(j * (fromwidth + 1)) + fromwidth] = float(j - start)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_Identities_from_RegularArray
     specializations:
@@ -696,7 +714,8 @@ kernels:
           while k < (tolength * (fromwidth + 1)):
               toptr[k] = -1
               k = k + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_Identities_from_UnionArray
     specializations:
@@ -796,7 +815,8 @@ kernels:
                           for k in range(fromwidth):
                               toptr[(j * fromwidth) + k] = fromptr[(i * fromwidth) + k]
           uniquecontents[0] = True
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_Identities_getitem_carry
     specializations:
@@ -826,7 +846,8 @@ kernels:
                   raise ValueError("index out of range")
               for j in range(width):
                   newidentitiesptr[(width * i) + j] = identitiesptr[(width * carryptr[i]) + j]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_Index32_to_Index64
     specializations:
@@ -840,7 +861,8 @@ kernels:
       def awkward_Index32_to_Index64(toptr, fromptr, length):
           for i in range(length):
               toptr[i] = int(fromptr[i])
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_Index8_to_Index64
     specializations:
@@ -854,7 +876,8 @@ kernels:
       def awkward_Index8_to_Index64(toptr, fromptr, length):
           for i in range(length):
               toptr[i] = int(fromptr[i])
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexU32_to_Index64
     specializations:
@@ -868,7 +891,8 @@ kernels:
       def awkward_IndexU32_to_Index64(toptr, fromptr, length):
           for i in range(length):
               toptr[i] = int(fromptr[i])
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexU8_to_Index64
     specializations:
@@ -882,7 +906,8 @@ kernels:
       def awkward_IndexU8_to_Index64(toptr, fromptr, length):
           for i in range(length):
               toptr[i] = int(fromptr[i])
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_fill
     specializations:
@@ -913,7 +938,8 @@ kernels:
           for i in range(length):
               fromval = fromindex[i]
               toindex[toindexoffset + i] = -1 if fromval < 0 else float(fromval + base)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_fill_count
     specializations:
@@ -928,7 +954,8 @@ kernels:
       def awkward_IndexedArray_fill_count(toindex, toindexoffset, length, base):
           for i in range(length):
               toindex[toindexoffset + i] = i + base
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_flatten_nextcarry
     specializations:
@@ -962,7 +989,8 @@ kernels:
                   if j >= 0:
                       tocarry[k] = j
                       k = k + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_flatten_none2empty
     specializations:
@@ -1006,7 +1034,8 @@ kernels:
                       count = offsets[idx + 1] - offsets[idx]
                       outoffsets[k] = outoffsets[k - 1] + count
                       k = k + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_getitem_adjust_outindex
     specializations:
@@ -1038,7 +1067,8 @@ kernels:
                       toindex[k] = j
                       j = j + 1
                       k = k + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_getitem_carry
     specializations:
@@ -1072,7 +1102,8 @@ kernels:
               if fromcarry[i] >= lenindex:
                   raise ValueError("index out of range")
               toindex[i] = float(fromindex[fromcarry[i]])
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_getitem_nextcarry
     specializations:
@@ -1105,7 +1136,8 @@ kernels:
               else:
                   tocarry[k] = j
                   k = k + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_getitem_nextcarry_outindex
     specializations:
@@ -1147,7 +1179,8 @@ kernels:
                       tocarry[k] = j
                       toindex[i] = float(k)
                       k = k + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_getitem_nextcarry_outindex_mask
     specializations:
@@ -1189,7 +1222,8 @@ kernels:
                       tocarry[k] = j
                       toindex[i] = float(k)
                       k = k + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_local_preparenext_64
     specializations:
@@ -1204,7 +1238,8 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_mask
     specializations:
@@ -1228,7 +1263,8 @@ kernels:
       def awkward_IndexedArray_mask(tomask, fromindex, length):
           for i in range(length):
               tomask[i] = fromindex[i] < 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_numnull
     specializations:
@@ -1254,7 +1290,8 @@ kernels:
           for i in range(lenindex):
               if fromindex[i] < 0:
                   numnull[0] = numnull[0] + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_overlay_mask
     specializations:
@@ -1282,7 +1319,8 @@ kernels:
           for i in range(length):
               m = mask[i]
               toindex[i] = -1 if m else fromindex[i]
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_IndexedArray_reduce_next_64
     specializations:
@@ -1324,7 +1362,8 @@ kernels:
                   k = k + 1
               else:
                   outindex[i] = -1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_reduce_next_fix_offsets_64
     specializations:
@@ -1342,7 +1381,8 @@ kernels:
           for i in range(startslength):
               outoffsets[i] = starts[i]
           outoffsets[startslength] = outindexlength
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64
     specializations:
@@ -1372,7 +1412,8 @@ kernels:
                   k = k + 1
               else:
                   nullsum = nullsum + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64
     specializations:
@@ -1407,7 +1448,8 @@ kernels:
                   k = k + 1
               else:
                   nullsum = nullsum + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_simplify
     specializations:
@@ -1488,7 +1530,8 @@ kernels:
                       raise ValueError("index out of range")
                   else:
                       toindex[i] = innerindex[j]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedArray_validity
     specializations:
@@ -1520,7 +1563,8 @@ kernels:
                       raise ValueError("index[i] < 0")
               if idx >= lencontent:
                   raise ValueError("index[i] >= len(content)")
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_IndexedOptionArray_rpad_and_clip_mask_axis1
     specializations:
@@ -1539,7 +1583,8 @@ kernels:
               else:
                   toindex[i] = count
                   count = count + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_broadcast_tooffsets
     specializations:
@@ -1586,7 +1631,8 @@ kernels:
               for j in range(start, stop):
                   tocarry[k] = float(j)
                   k = k + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_combinations_length
     specializations:
@@ -1646,7 +1692,8 @@ kernels:
                           j = j + 1
               totallen[0] = totallen[0] + combinationslen
               tooffsets[i + 1] = tooffsets[i] + combinationslen
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_compact_offsets
     specializations:
@@ -1678,7 +1725,8 @@ kernels:
               if stop < start:
                   raise ValueError("stops[i] < starts[i]")
               tooffsets[i + 1] = tooffsets[i] + (stop - start)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_fill
     specializations:
@@ -1727,7 +1775,8 @@ kernels:
           for i in range(length):
               tostarts[tostartsoffset + i] = float(fromstarts[i] + base)
               tostops[tostopsoffset + i] = float(fromstops[i] + base)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_carry
     specializations:
@@ -1768,7 +1817,8 @@ kernels:
                   raise ValueError("index out of range")
               tostarts[i] = float(fromstarts[fromcarry[i]])
               tostops[i] = float(fromstops[fromcarry[i]])
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_jagged_apply
     specializations:
@@ -1848,7 +1898,8 @@ kernels:
                       tocarry[k] = start + index
                       k = k + 1
               tooffsets[i + 1] = float(k)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_jagged_carrylen
     specializations:
@@ -1866,7 +1917,8 @@ kernels:
           carrylen[0] = 0
           for i in range(sliceouterlen):
               carrylen[0] = carrylen[0] + int(slicestops[i] - slicestarts[i])
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_jagged_descend
     specializations:
@@ -1911,7 +1963,8 @@ kernels:
                       "jagged slice inner length differs from array inner length"
                   )
               tooffsets[i + 1] = tooffsets[i] + float(count)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_jagged_expand
     specializations:
@@ -1968,7 +2021,8 @@ kernels:
                   multistarts[(i * jaggedsize) + j] = singleoffsets[j]
                   multistops[(i * jaggedsize) + j] = singleoffsets[j + 1]
                   tocarry[(i * jaggedsize) + j] = start + j
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_jagged_numvalid
     specializations:
@@ -1996,7 +2050,8 @@ kernels:
                       raise ValueError("jagged slice's offsets extend beyond its content")
                   for j in range(slicestart, slicestop):
                       numvalid[0] = numvalid[0] + 1 if missing[j] >= 0 else 0
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_jagged_shrink
     specializations:
@@ -2035,7 +2090,8 @@ kernels:
               else:
                   tosmalloffsets[i + 1] = tosmalloffsets[i]
               tolargeoffsets[i + 1] = tolargeoffsets[i] + (slicestop - slicestart)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_next_array
     specializations:
@@ -2095,7 +2151,8 @@ kernels:
                       raise ValueError("index out of range")
                   tocarry[(i * lenarray) + j] = fromstarts[i] + regular_at
                   toadvanced[(i * lenarray) + j] = j
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_next_array_advanced
     specializations:
@@ -2158,7 +2215,8 @@ kernels:
                   raise ValueError("index out of range")
               tocarry[i] = fromstarts[i] + regular_at
               toadvanced[i] = i
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_next_at
     specializations:
@@ -2194,7 +2252,8 @@ kernels:
               if not ((0 <= regular_at) and (regular_at < length)):
                   raise ValueError("index out of range")
               tocarry[i] = fromstarts[i] + regular_at
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_next_range
     specializations:
@@ -2273,7 +2332,8 @@ kernels:
                       k = k + 1
                       j += step
                   tooffsets[i + 1] = float(k)
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_next_range_carrylength
     specializations:
@@ -2332,7 +2392,8 @@ kernels:
                   while j > regular_stop:
                       carrylength[0] = carrylength[0] + 1
                       j += step
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_next_range_counts
     specializations:
@@ -2357,7 +2418,8 @@ kernels:
           total[0] = 0
           for i in range(lenstarts):
               total[0] = (total[0] + fromoffsets[i + 1]) - fromoffsets[i]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_getitem_next_range_spreadadvanced
     specializations:
@@ -2388,7 +2450,8 @@ kernels:
               count = fromoffsets[i + 1] - fromoffsets[i]
               for j in range(count):
                   toadvanced[fromoffsets[i] + j] = fromadvanced[i]
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_ListArray_localindex
     specializations:
@@ -2415,7 +2478,8 @@ kernels:
               stop = int(offsets[i + 1])
               for j in range(start, stop):
                   toindex[j] = j - start
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_min_range
     specializations:
@@ -2445,7 +2509,8 @@ kernels:
               rangeval = fromstops[i] - fromstarts[i]
               shorter = shorter if shorter < rangeval else rangeval
           tomin[0] = shorter
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_num
     specializations:
@@ -2474,7 +2539,8 @@ kernels:
               start = fromstarts[i]
               stop = fromstops[i]
               tonum[i] = float(stop - start)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_rpad_and_clip_length_axis1
     specializations:
@@ -2509,7 +2575,8 @@ kernels:
               rangeval = fromstops[i] - fromstarts[i]
               length += target if target > rangeval else rangeval
           tomin[0] = length
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_rpad_axis1
     specializations:
@@ -2555,7 +2622,8 @@ kernels:
                   toindex[offset + j] = -1
               offset = tostarts[i] + target if target > rangeval else tostarts[i] + rangeval
               tostops[i] = offset
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListArray_validity
     specializations:
@@ -2590,7 +2658,8 @@ kernels:
                       raise ValueError("start[i] < 0")
                   if stop > lencontent:
                       raise ValueError("stop[i] > len(content)")
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_compact_offsets
     specializations:
@@ -2616,7 +2685,8 @@ kernels:
           tooffsets[0] = 0
           for i in range(length):
               tooffsets[i + 1] = fromoffsets[i + 1] - diff
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_flatten_offsets
     specializations:
@@ -2648,7 +2718,8 @@ kernels:
       ):
           for i in range(outeroffsetslen):
               tooffsets[i] = inneroffsets[outeroffsets[i]]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_getitem_adjust_offsets
     specializations:
@@ -2677,7 +2748,8 @@ kernels:
                   count = count + 1
       
               tooffsets[i + 1] = tooffsets[i] + count
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_getitem_adjust_offsets_index
     specializations:
@@ -2733,7 +2805,8 @@ kernels:
                   count = count + 1
       
               tooffsets[i + 1] = tooffsets[i] + count
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_local_preparenext_64
     specializations:
@@ -2745,7 +2818,8 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_reduce_global_startstop_64
     specializations:
@@ -2762,7 +2836,8 @@ kernels:
       ):
           globalstart[0] = offsets[0]
           globalstop[0] = offsets[length]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_reduce_local_nextparents_64
     specializations:
@@ -2780,7 +2855,8 @@ kernels:
               while j < (offsets[i + 1] - initialoffset):
                   nextparents[j] = i
                   j = j + 1
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_reduce_local_outoffsets_64
     specializations:
@@ -2806,7 +2882,8 @@ kernels:
           while k <= outlength:
               outoffsets[k] = lenparents
               k = k + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_reduce_nonlocal_findgaps_64
     specializations:
@@ -2826,7 +2903,8 @@ kernels:
                   gaps[k] = parent - last
                   k = k + 1
                   last = parent
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64
     specializations:
@@ -2848,7 +2926,8 @@ kernels:
               if maxcount[0] < count:
                   maxcount[0] = count
               offsetscopy[i + 1] = offsets[i + 1]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64
     specializations:
@@ -2891,7 +2970,8 @@ kernels:
                   missing[start + j] = nummissing[j]
           for j in range(nextlen):
               nextshifts[j] = missing[nextcarry[j]]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64
     specializations:
@@ -2910,7 +2990,8 @@ kernels:
               if nextparents[i] != lastnextparent:
                   nextstarts[nextparents[i]] = i
               lastnextparent = nextparents[i]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64
     specializations:
@@ -2944,7 +3025,8 @@ kernels:
               outstarts[k] = lendistincts + 1
               outstops[k] = lendistincts + 1
               k = k + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_rpad_and_clip_axis1
     specializations:
@@ -2976,7 +3058,8 @@ kernels:
                   toindex[(i * target) + j] = float(fromoffsets[i]) + j
               for j in range(shorter, target):
                   toindex[(i * target) + j] = -1
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_rpad_axis1
     specializations:
@@ -3010,7 +3093,8 @@ kernels:
               for j in range(rangeval, target):
                   toindex[count] = -1
                   count = count + 1
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_rpad_length_axis1
     specializations:
@@ -3048,7 +3132,8 @@ kernels:
               length = length + longer
               tooffsets[i + 1] = tooffsets[i] + longer
           tolength[0] = length
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_ListOffsetArray_toRegularArray
     specializations:
@@ -3084,7 +3169,8 @@ kernels:
                       )
           if size[0] == -1:
               size[0] = 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_MaskedArray_getitem_next_jagged_project
     specializations:
@@ -3123,7 +3209,8 @@ kernels:
                   starts_out[k] = starts_in[i]
                   stops_out[k] = stops_in[i]
                   k = k + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_contiguous_copy
     specializations:
@@ -3137,7 +3224,8 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_contiguous_init
     specializations:
@@ -3151,7 +3239,8 @@ kernels:
       def awkward_NumpyArray_contiguous_init(toptr, skip, stride):
           for i in range(skip):
               toptr[i] = i * stride
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_contiguous_next
     specializations:
@@ -3168,7 +3257,8 @@ kernels:
           for i in range(length):
               for j in range(skip):
                   topos[(i * skip) + j] = frompos[i] + (j * stride)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_fill
     specializations:
@@ -3777,7 +3867,8 @@ kernels:
       def awkward_NumpyArray_fill(toptr, tooffset, fromptr, length):
           for i in range(length):
               toptr[tooffset + i] = float(fromptr[i])
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_NumpyArray_fill_frombool
     specializations:
@@ -3852,7 +3943,8 @@ kernels:
       def awkward_NumpyArray_fill_frombool(toptr, tooffset, fromptr, length):
           for i in range(length):
               toptr[tooffset + i] = float(1 if fromptr[i] else 0)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_fill_tobool
     specializations:
@@ -3921,7 +4013,8 @@ kernels:
       def awkward_NumpyArray_fill_tobool(toptr, tooffset, fromptr, length):
           for i in range(length):
               toptr[tooffset + i] = True if fromptr[i] > 0 else False
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_getitem_boolean_nonzero
     specializations:
@@ -3941,7 +4034,8 @@ kernels:
                   toptr[k] = i
                   k = k + 1
               i += stride
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_getitem_boolean_numtrue
     specializations:
@@ -3959,7 +4053,8 @@ kernels:
           while i < length:
               numtrue[0] = numtrue[0] + (fromptr[i] != 0)
               i += stride
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_getitem_next_array
     specializations:
@@ -3981,7 +4076,8 @@ kernels:
               for j in range(lenflathead):
                   nextcarryptr[(i * lenflathead) + j] = (skip * carryptr[i]) + flatheadptr[j]
                   nextadvancedptr[(i * lenflathead) + j] = j
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_getitem_next_array_advanced
     specializations:
@@ -4000,7 +4096,8 @@ kernels:
       ):
           for i in range(lencarry):
               nextcarryptr[i] = (skip * carryptr[i]) + flatheadptr[advancedptr[i]]
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_NumpyArray_getitem_next_at
     specializations:
@@ -4016,7 +4113,8 @@ kernels:
       def awkward_NumpyArray_getitem_next_at(nextcarryptr, carryptr, lencarry, skip, at):
           for i in range(lencarry):
               nextcarryptr[i] = (skip * carryptr[i]) + at
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_getitem_next_null
     specializations:
@@ -4030,7 +4128,8 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_getitem_next_range
     specializations:
@@ -4053,7 +4152,8 @@ kernels:
                   nextcarryptr[(i * lenhead) + j] = ((skip * carryptr[i]) + start) + (
                       j * step
                   )
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_getitem_next_range_advanced
     specializations:
@@ -4087,7 +4187,8 @@ kernels:
                       j * step
                   )
                   nextadvancedptr[(i * lenhead) + j] = advancedptr[i]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_reduce_adjust_starts_64
     specializations:
@@ -4106,7 +4207,8 @@ kernels:
                   parent = parents[i]
                   start = starts[parent]
                   toptr[k] += -start
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_reduce_adjust_starts_shifts_64
     specializations:
@@ -4128,7 +4230,8 @@ kernels:
                   parent = parents[i]
                   start = starts[parent]
                   toptr[k] += shifts[i] - start
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_reduce_mask_ByteMaskedArray_64
     specializations:
@@ -4147,7 +4250,8 @@ kernels:
               toptr[i] = 1
           for i in range(lenparents):
               toptr[parents[i]] = 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_NumpyArray_sort_asstrings_uint8
     specializations:
@@ -4163,7 +4267,8 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_broadcast_tooffsets
     specializations:
@@ -4181,7 +4286,8 @@ kernels:
                   raise ValueError("broadcast's offsets must be monotonically increasing")
               if size != count:
                   raise ValueError("cannot broadcast nested list")
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_broadcast_tooffsets_size1
     specializations:
@@ -4201,7 +4307,8 @@ kernels:
               for j in range(count):
                   tocarry[k] = float(i)
                   k = k + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_compact_offsets
     specializations:
@@ -4216,7 +4323,8 @@ kernels:
           tooffsets[0] = 0
           for i in range(length):
               tooffsets[i + 1] = (i + 1) * size
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_getitem_carry
     specializations:
@@ -4232,7 +4340,8 @@ kernels:
           for i in range(lencarry):
               for j in range(size):
                   tocarry[(i * size) + j] = (fromcarry[i] * size) + j
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_getitem_jagged_expand
     specializations:
@@ -4252,7 +4361,8 @@ kernels:
               for j in range(regularsize):
                   multistarts[(i * regularsize) + j] = singleoffsets[j]
                   multistops[(i * regularsize) + j] = singleoffsets[j + 1]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_getitem_next_array
     specializations:
@@ -4273,7 +4383,8 @@ kernels:
               for j in range(lenarray):
                   tocarry[(i * lenarray) + j] = (i * size) + fromarray[j]
                   toadvanced[(i * lenarray) + j] = j
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_getitem_next_array_advanced
     specializations:
@@ -4294,7 +4405,8 @@ kernels:
           for i in range(length):
               tocarry[i] = (i * size) + fromarray[fromadvanced[i]]
               toadvanced[i] = i
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_getitem_next_array_regularize
     specializations:
@@ -4315,7 +4427,8 @@ kernels:
                   toarray[j] += size
               if not ((0 <= toarray[j]) and (toarray[j] < size)):
                   raise ValueError("index out of range")
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_getitem_next_at
     specializations:
@@ -4335,7 +4448,8 @@ kernels:
               raise ValueError("index out of range")
           for i in range(length):
               tocarry[i] = (i * size) + regular_at
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_getitem_next_range
     specializations:
@@ -4355,7 +4469,8 @@ kernels:
           for i in range(length):
               for j in range(nextsize):
                   tocarry[(i * nextsize) + j] = ((i * size) + regular_start) + (j * step)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_getitem_next_range_spreadadvanced
     specializations:
@@ -4373,7 +4488,8 @@ kernels:
           for i in range(length):
               for j in range(nextsize):
                   toadvanced[(i * nextsize) + j] = fromadvanced[i]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_localindex
     specializations:
@@ -4388,7 +4504,8 @@ kernels:
           for i in range(length):
               for j in range(size):
                   toindex[(i * size) + j] = j
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_num
     specializations:
@@ -4402,7 +4519,8 @@ kernels:
       def awkward_RegularArray_num(tonum, size, length):
           for i in range(length):
               tonum[i] = size
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_RegularArray_rpad_and_clip_axis1
     specializations:
@@ -4421,7 +4539,8 @@ kernels:
                   toindex[(i * target) + j] = (i * size) + j
               for j in range(shorter, target):
                   toindex[(i * target) + j] = -1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_UnionArray_fillindex
     specializations:
@@ -4448,7 +4567,8 @@ kernels:
       def awkward_UnionArray_fillindex(toindex, toindexoffset, fromindex, length):
           for i in range(length):
               toindex[toindexoffset + i] = float(fromindex[i])
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_UnionArray_fillindex_count
     specializations:
@@ -4462,7 +4582,8 @@ kernels:
       def awkward_UnionArray_fillindex_count(toindex, toindexoffset, length):
           for i in range(length):
               toindex[toindexoffset + i] = float(i)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_UnionArray_fillna
     specializations:
@@ -4486,7 +4607,8 @@ kernels:
       def awkward_UnionArray_fillna(toindex, fromindex, length):
           for i in range(length):
               toindex[i] = fromindex[i] if fromindex[i] >= 0 else 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_UnionArray_filltags
     specializations:
@@ -4502,7 +4624,8 @@ kernels:
       def awkward_UnionArray_filltags(totags, totagsoffset, fromtags, length, base):
           for i in range(length):
               totags[totagsoffset + i] = float(fromtags[i] + base)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_UnionArray_filltags_const
     specializations:
@@ -4517,7 +4640,8 @@ kernels:
       def awkward_UnionArray_filltags_const(totags, totagsoffset, length, base):
           for i in range(length):
               totags[totagsoffset + i] = float(base)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_UnionArray_flatten_combine
     specializations:
@@ -4565,7 +4689,8 @@ kernels:
                   totags[k] = tag
                   toindex[k] = j
                   k = k + 1
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_UnionArray_flatten_length
     specializations:
@@ -4602,7 +4727,8 @@ kernels:
               start = offsetsraws[tag][idx]
               stop = offsetsraws[tag][idx + 1]
               total_length[0] = total_length[0] + (stop - start)
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_UnionArray_project
     specializations:
@@ -4638,7 +4764,8 @@ kernels:
               if fromtags[i] == which:
                   tocarry[lenout[0]] = fromindex[i]
                   lenout[0] = lenout[0] + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_UnionArray_regular_index
     specializations:
@@ -4673,7 +4800,8 @@ kernels:
               tag = fromtags[i]
               toindex[i] = current[tag]
               current[tag] = current[tag] + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_UnionArray_regular_index_getsize
     specializations:
@@ -4691,7 +4819,8 @@ kernels:
               if size[0] < tag:
                   size[0] = tag
           size[0] = size[0] + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_UnionArray_simplify
     specializations:
@@ -4833,7 +4962,8 @@ kernels:
                   if innertags[j] == innerwhich:
                       totags[i] = float(towhich)
                       toindex[i] = float(innerindex[j] + base)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_UnionArray_simplify_one
     specializations:
@@ -4876,7 +5006,8 @@ kernels:
               if fromtags[i] == fromwhich:
                   totags[i] = float(towhich)
                   toindex[i] = float(fromindex[i] + base)
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_UnionArray_validity
     specializations:
@@ -4916,7 +5047,8 @@ kernels:
               lencontent = lencontents[tag]
               if idx >= lencontent:
                   raise ValueError("index[i] >= len(content[tags[i]])")
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_argsort
     specializations:
@@ -5022,7 +5154,8 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_carry_arange
     specializations:
@@ -5043,7 +5176,8 @@ kernels:
       def awkward_carry_arange(toptr, length):
           for i in range(length):
               toptr[i] = i
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_combinations
     specializations:
@@ -5057,7 +5191,8 @@ kernels:
     definition: |
       def awkward_combinations(toindex, n, replacement, singlelen):
           raise ValueError("FIXME: awkward_combinations")
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_content_reduce_zeroparents_64
     specializations:
@@ -5070,7 +5205,8 @@ kernels:
       def awkward_content_reduce_zeroparents_64(toparents, length):
           for i in range(length):
               toparents[i] = 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_index_carry
     specializations:
@@ -5117,7 +5253,8 @@ kernels:
               if j > lenfromindex:
                   raise ValueError("index out of range")
               toindex[i] = fromindex[j]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_index_carry_nocheck
     specializations:
@@ -5156,7 +5293,8 @@ kernels:
       def awkward_index_carry_nocheck(toindex, fromindex, carry, length):
           for i in range(length):
               toindex[i] = fromindex[carry[i]]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_index_rpad_and_clip_axis0
     specializations:
@@ -5173,7 +5311,8 @@ kernels:
               toindex[i] = i
           for i in range(shorter, target):
               toindex[i] = -1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_index_rpad_and_clip_axis1
     specializations:
@@ -5191,7 +5330,8 @@ kernels:
               tostarts[i] = offset
               offset = offset + target
               tostops[i] = offset
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_localindex
     specializations:
@@ -5204,7 +5344,8 @@ kernels:
       def awkward_localindex(toindex, length):
           for i in range(length):
               toindex[i] = i
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_missing_repeat
     specializations:
@@ -5222,7 +5363,8 @@ kernels:
               for j in range(indexlength):
                   base = index[j]
                   outindex[(i * indexlength) + j] = base + i * regularsize if base >= 0 else 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_new_Identities
     specializations:
@@ -5239,7 +5381,8 @@ kernels:
       def awkward_new_Identities(toptr, length):
           for i in range(length):
               toptr[i] = i
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_argmax
     specializations:
@@ -5322,7 +5465,8 @@ kernels:
               parent = parents[i]
               if (toptr[parent] == -1) or (fromptr[i] > fromptr[toptr[parent]]):
                   toptr[parent] = i
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_argmax_bool_64
     specializations:
@@ -5342,7 +5486,8 @@ kernels:
               parent = parents[i]
               if (toptr[parent] == -1) or ((fromptr[i] != 0) > (fromptr[toptr[parent]] != 0)):
                   toptr[parent] = i
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_argmin
     specializations:
@@ -5425,7 +5570,8 @@ kernels:
               parent = parents[i]
               if (toptr[parent] == -1) or (fromptr[i] < fromptr[toptr[parent]]):
                   toptr[parent] = i
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_argmin_bool_64
     specializations:
@@ -5445,7 +5591,8 @@ kernels:
               parent = parents[i]
               if (toptr[parent] == -1) or ((fromptr[i] != 0) < (fromptr[toptr[parent]] != 0)):
                   toptr[parent] = i
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_count_64
     specializations:
@@ -5462,7 +5609,8 @@ kernels:
               toptr[i] = 0
           for i in range(lenparents):
               toptr[parents[i]] = toptr[parents[i]] + 1
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_countnonzero
     specializations:
@@ -5550,7 +5698,8 @@ kernels:
               toptr[i] = 0
           for i in range(lenparents):
               toptr[parents[i]] += fromptr[i] != 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_max
     specializations:
@@ -5642,7 +5791,8 @@ kernels:
           for i in range(lenparents):
               x = fromptr[i]
               toptr[parents[i]] = x if x > toptr[parents[i]] else toptr[parents[i]]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_min
     specializations:
@@ -5734,7 +5884,8 @@ kernels:
           for i in range(lenparents):
               x = fromptr[i]
               toptr[parents[i]] = x if x < toptr[parents[i]] else toptr[parents[i]]
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_prod
     specializations:
@@ -5857,7 +6008,8 @@ kernels:
               toptr[i] = float(1)
           for i in range(lenparents):
               toptr[parents[i]] *= float(fromptr[i])
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_prod_bool
     specializations:
@@ -5945,7 +6097,8 @@ kernels:
               toptr[i] = True
           for i in range(lenparents):
               toptr[parents[i]] &= fromptr[i] != 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_prod_int32_bool_64
     specializations:
@@ -5963,7 +6116,8 @@ kernels:
               toptr[i] = 1
           for i in range(lenparents):
               toptr[parents[i]] *= fromptr[i] != 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_prod_int64_bool_64
     specializations:
@@ -5981,7 +6135,8 @@ kernels:
               toptr[i] = 1
           for i in range(lenparents):
               toptr[parents[i]] *= fromptr[i] != 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_sum
     specializations:
@@ -6104,7 +6259,8 @@ kernels:
               toptr[i] = float(0)
           for i in range(lenparents):
               toptr[parents[i]] += float(fromptr[i])
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_sum_bool
     specializations:
@@ -6192,7 +6348,8 @@ kernels:
               toptr[i] = False
           for i in range(lenparents):
               toptr[parents[i]] |= fromptr[i] != 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_sum_int32_bool_64
     specializations:
@@ -6210,7 +6367,8 @@ kernels:
               toptr[i] = 0
           for i in range(lenparents):
               toptr[parents[i]] += fromptr[i] != 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_reduce_sum_int64_bool_64
     specializations:
@@ -6228,7 +6386,8 @@ kernels:
               toptr[i] = 0
           for i in range(lenparents):
               toptr[parents[i]] += fromptr[i] != 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_regularize_arrayslice
     specializations:
@@ -6246,7 +6405,8 @@ kernels:
                   flatheadptr[i] += length
               if (flatheadptr[i] < 0) or (flatheadptr[i] >= length):
                   raise ValueError("index out of range")
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_slicearray_ravel
     specializations:
@@ -6274,7 +6434,8 @@ kernels:
                   )
                   if err.str != nullptr:
                       return err
-    extra-tests: []
+    automatic-tests: false
+    manual-tests: []
 
   - name: awkward_slicemissing_check_same
     specializations:
@@ -6294,7 +6455,8 @@ kernels:
               if left != right:
                   same[0] = False
                   return
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_sort
     specializations:
@@ -6411,7 +6573,8 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_sorting_ranges
     specializations:
@@ -6424,7 +6587,8 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_sorting_ranges_length
     specializations:
@@ -6436,7 +6600,8 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
   - name: awkward_zero_mask
     specializations:
@@ -6449,7 +6614,8 @@ kernels:
       def awkward_zero_mask(tomask, length):
           for i in range(length):
               tomask[i] = 0
-    extra-tests: []
+    automatic-tests: true
+    manual-tests: []
 
 tests:
   reducer: []
