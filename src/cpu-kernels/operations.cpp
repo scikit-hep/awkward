@@ -2,7 +2,7 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/operations.cpp", line)
 
-#include "awkward/kernels/operations.h"
+#include "awkward/kernels.h"
 
 template <typename T, typename C>
 ERROR awkward_ListArray_num(

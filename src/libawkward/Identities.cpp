@@ -9,8 +9,8 @@
 #include <sstream>
 #include <type_traits>
 
-#include "awkward/kernels/identities.h"
-#include "awkward/kernels/getitem.h"
+#include "awkward/kernels.h"
+#include "awkward/kernel-utils.h"
 #include "awkward/Slice.h"
 
 #define AWKWARD_IDENTITIES_NO_EXTERN_TEMPLATE

@@ -7,7 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "awkward/kernels/operations.h"
+#include "awkward/kernels.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/IndexedArray.h"

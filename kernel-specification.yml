@@ -1634,6 +1634,44 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_ListArray_combinations
+    specializations:
+      - name: awkward_ListArray32_combinations_64
+        args:
+          - {name: tocarry, type: "List[List[int64_t]]", dir: out}
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "List[int64_t]", dir: in}
+          - {name: n, type: "int64_t", dir: in}
+          - {name: replacement, type: "bool", dir: in}
+          - {name: starts, type: "Const[List[int32_t]]", dir: in}
+          - {name: stops, type: "Const[List[int32_t]]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+      - name: awkward_ListArrayU32_combinations_64
+        args:
+          - {name: tocarry, type: "List[List[int64_t]]", dir: out}
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "List[int64_t]", dir: in}
+          - {name: n, type: "int64_t", dir: in}
+          - {name: replacement, type: "bool", dir: in}
+          - {name: starts, type: "Const[List[uint32_t]]", dir: in}
+          - {name: stops, type: "Const[List[uint32_t]]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+      - name: awkward_ListArray64_combinations_64
+        args:
+          - {name: tocarry, type: "List[List[int64_t]]", dir: out}
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "List[int64_t]", dir: in}
+          - {name: n, type: "int64_t", dir: in}
+          - {name: replacement, type: "bool", dir: in}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in}
+          - {name: stops, type: "Const[List[int64_t]]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_ListArray_combinations_length
     specializations:
       - name: awkward_ListArray32_combinations_length_64
@@ -3028,6 +3066,27 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_ListOffsetArray_reduce_nonlocal_preparenext_64
+    specializations:
+      - name: awkward_ListOffsetArray_reduce_nonlocal_preparenext_64
+        args:
+          - {name: nextcarry, type: "List[int64_t]", dir: out}
+          - {name: nextparents, type: "List[int64_t]", dir: out}
+          - {name: nextlen, type: "int64_t", dir: in}
+          - {name: maxnextparents, type: "List[int64_t]", dir: out}
+          - {name: distincts, type: "List[int64_t]", dir: out}
+          - {name: distinctslen, type: "int64_t", dir: in}
+          - {name: offsetscopy, type: "List[int64_t]", dir: in}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in}
+          - {name: maxcount, type: "int64_t", dir: in}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_ListOffsetArray_rpad_and_clip_axis1
     specializations:
       - name: awkward_ListOffsetArray32_rpad_and_clip_axis1_64
@@ -4308,6 +4367,23 @@ kernels:
                   tocarry[k] = float(i)
                   k = k + 1
     automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_RegularArray_combinations
+    specializations:
+      - name: awkward_RegularArray_combinations_64
+        args:
+          - {name: tocarry, type: "List[List[int64_t]]", dir: out}
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "List[int64_t]", dir: in}
+          - {name: n, type: "int64_t", dir: in}
+          - {name: replacement, type: "bool", dir: in}
+          - {name: size, type: "int64_t", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_RegularArray_compact_offsets

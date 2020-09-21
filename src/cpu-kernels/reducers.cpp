@@ -2,7 +2,7 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/reducers.cpp", line)
 
-#include "awkward/kernels/reducers.h"
+#include "awkward/kernels.h"
 
 ERROR awkward_reduce_count_64(
   int64_t* toptr,

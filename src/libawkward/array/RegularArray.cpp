@@ -7,9 +7,8 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "awkward/kernels/identities.h"
-#include "awkward/kernels/getitem.h"
-#include "awkward/kernels/operations.h"
+#include "awkward/kernels.h"
+#include "awkward/kernel-utils.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"

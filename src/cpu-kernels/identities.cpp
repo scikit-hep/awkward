@@ -2,7 +2,7 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/identities.cpp", line)
 
-#include "awkward/kernels/identities.h"
+#include "awkward/kernels.h"
 
 template <typename T>
 ERROR awkward_new_Identities(
