@@ -17,7 +17,7 @@ from setuptools import setup, Extension
 
 
 extras = {
-    "cuda": ["awkward1-cuda-kernels"],
+    "cuda": ["awkward1-cuda-kernels==" + open("VERSION_INFO").read().strip()],
     "test": open("requirements-test.txt").read().strip().split("\n"),
     "dev":  open("requirements-dev.txt").read().strip().split("\n"),
 }
