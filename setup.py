@@ -58,7 +58,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
            compiler_path = self.compiler.compiler_cxx[0]
            cmake_args += ["-DCMAKE_CXX_COMPILER={0}".format(compiler_path)]
         except AttributeError:
-            print("Not able to access compiler path (on Windows), using CMake default")
+            print("Not able to access compiler path, using CMake default")
 
         cfg = "Debug" if self.debug else "Release"
         build_args += ["--config", cfg]
@@ -81,7 +81,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
         subprocess.check_call(["cmake", "-S", ext.sourcedir, "-B", build_dir] + cmake_args)
         subprocess.check_call(["cmake", "--build", build_dir] + build_args)
-        subprocess.check_call(["cmake", "--build", build_dir, "--target", "install"])
+        subprocess.check_call(["cmake", "--build", build_dir, "--config", cfg, "--target", "install"])
 
 
 def tree(x):
