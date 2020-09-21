@@ -45,6 +45,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+        build_args = []
         cmake_args = [
             "-DCMAKE_INSTALL_PREFIX={0}".format(extdir),
             "-DPYTHON_EXECUTABLE={0}".format(sys.executable),
@@ -55,12 +56,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         ]
         try:
            compiler_path = self.compiler.compiler_cxx[0]
-           cmake_args.append("-DCMAKE_CXX_COMPILER={0}".format(compiler_path))
+           cmake_args += ["-DCMAKE_CXX_COMPILER={0}".format(compiler_path)]
         except AttributeError:
-            print("Not able to access compiler path (on Windows), using CMake default")
+            print("Not able to access compiler path, using CMake default")
 
         cfg = "Debug" if self.debug else "Release"
-        build_args = ["--config", cfg]
+        build_args += ["--config", cfg]
+        cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
 
         if platform.system() == "Windows":
             cmake_args += [
@@ -71,7 +73,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             if sys.maxsize > 2**32 and cmake_generator != "NMake Makefiles" and "Win64" not in cmake_generator:
                 cmake_args += ["-A", "x64"]
         else:
-            cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
             build_args += ["-j", str(multiprocessing.cpu_count())]
 
         if not os.path.exists(self.build_temp):
@@ -80,7 +81,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
         subprocess.check_call(["cmake", "-S", ext.sourcedir, "-B", build_dir] + cmake_args)
         subprocess.check_call(["cmake", "--build", build_dir] + build_args)
-        subprocess.check_call(["cmake", "--build", build_dir, "--target", "install"])
+        subprocess.check_call(["cmake", "--build", build_dir, "--config", cfg, "--target", "install"])
 
 
 def tree(x):
