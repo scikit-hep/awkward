@@ -59,8 +59,8 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         except AttributeError:
             print("Not able to access compiler path (on Windows), using CMake default")
 
-        cfg = "Debug" if self.debug else "Release"
-        build_args = ["--config", cfg]
+        # cfg = "Debug" if self.debug else "Release"
+        build_args = ["--config", "Release"]
 
         if platform.system() == "Windows":
             cmake_args += [
