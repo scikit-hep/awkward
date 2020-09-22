@@ -9,9 +9,7 @@ awkward_NumpyArray_getitem_boolean_nonzero_filter_mask(
     int64_t* filtered_index,
     int64_t stride,
     int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length  && thread_id % stride == 0) {
     if (fromptr[thread_id] != 0) {
@@ -28,9 +26,7 @@ awkward_NumpyArray_getitem_boolean_nonzero_kernel(
     const int8_t* fromptr,
     int64_t length,
     int64_t stride) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length && thread_id % stride == 0) {
     if(fromptr[thread_id] != 0) {

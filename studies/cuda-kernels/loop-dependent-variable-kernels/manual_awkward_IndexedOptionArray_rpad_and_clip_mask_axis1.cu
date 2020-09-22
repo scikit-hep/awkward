@@ -8,9 +8,7 @@ awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_filter_mask(
     const int8_t* frommask,
     int8_t* filtered_mask,
     int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     if (!frommask[thread_id]) {
@@ -26,9 +24,7 @@ awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_kernel(
     const int8_t* frommask,
     int64_t* prefixedsum_mask,
     int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     if (frommask[thread_id]) {

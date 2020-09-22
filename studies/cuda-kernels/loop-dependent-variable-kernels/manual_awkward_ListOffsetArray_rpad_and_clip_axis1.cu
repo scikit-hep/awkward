@@ -2,44 +2,6 @@
 
 #include "awkward/kernels/operations.h"
 #include "standard_parallel_algorithms.h"
-//
-//template <typename T, typename C>
-//__device__ void
-//nested_loop_j_1(
-//    T* toindex,
-//    const C* fromoffsets,
-//    int64_t length,
-//    int64_t target,
-//    int64_t i) {
-//
-//  int64_t block_id =
-//      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-//  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
-//
-//  if(thread_id < length) {
-//    toindex[i * target + thread_id] = (T)fromoffsets[i] + thread_id;
-//  }
-//}
-//
-//
-//template <typename T, typename C>
-//__device__ void
-//nested_loop_j_2(
-//    T* toindex,
-//    int64_t shorter,
-//    int64_t target,
-//    int64_t i) {
-//
-//  int64_t block_id =
-//      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-//  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
-//
-//  if(thread_id <= (target - shorter)) {
-//    toindex[i*target + (thread_id + shorter)] = -1;
-//  }
-//}
-//
-//
 
 template <typename T, typename C>
 __global__ void
@@ -48,21 +10,19 @@ awkward_ListOffsetArray_rpad_and_clip_axis1_kernel(
     const C* fromoffsets,
     int64_t length,
     int64_t target) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
+  int64_t thread_idy = blockIdx.y * blockDim.y + threadIdx.y;
 
-  if(thread_id < length) {
-    int64_t rangeval = (T)(fromoffsets[thread_id + 1] - fromoffsets[thread_id]);
+  if(thread_idx < length) {
+    int64_t rangeval = (T)(fromoffsets[thread_idx + 1] - fromoffsets[thread_idx]);
     int64_t shorter = (target < rangeval) ? target : rangeval;
 
-    for (int64_t j = 0; j < shorter; j++) {
-      toindex[thread_id * target + j] = (T)fromoffsets[thread_id] + j;
+	if(thread_idy < shorter) {
+      toindex[thread_idx * target + thread_idy] = (T)fromoffsets[thread_idx] + thread_idy;
     }
-    for (int64_t j = shorter; j < target; j++) {
-      toindex[thread_id * target + j] = -1;
+	else if(thread_idy >= shorter && thread_idy < target) {
+      toindex[thread_idx * target + thread_idy] = -1;
     }
-
   }
 }
 
@@ -73,8 +33,8 @@ ERROR awkward_ListOffsetArray_rpad_and_clip_axis1(
     int64_t length,
     int64_t target) {
 
-  dim3 blocks_per_grid = blocks(length);
-  dim3 threads_per_block = threads(length);
+  dim3 blocks_per_grid = blocks_2d(length, target);
+  dim3 threads_per_block = threads_2d(length, target);
 
   awkward_ListOffsetArray_rpad_and_clip_axis1_kernel<T, C><<<blocks_per_grid, threads_per_block>>>(
       toindex,

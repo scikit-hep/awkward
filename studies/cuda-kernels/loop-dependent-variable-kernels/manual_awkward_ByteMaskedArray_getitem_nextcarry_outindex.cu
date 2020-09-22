@@ -8,9 +8,7 @@ __global__ void
 awkward_ByteMaskedArray_getitem_nextcarry_outindex_filter_mask(int8_t* mask,
                                                                bool validwhen,
                                                                int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     if ((mask[thread_id] != 0) == validwhen) {
@@ -25,9 +23,7 @@ awkward_ByteMaskedArray_getitem_nextcarry_outindex_kernel(int64_t* prefixed_mask
                                                           int64_t* outindex,
                                                           int8_t* mask,
                                                           int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     if (mask[thread_id] != 0) {

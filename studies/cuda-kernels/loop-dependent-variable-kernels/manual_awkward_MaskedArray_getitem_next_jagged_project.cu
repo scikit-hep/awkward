@@ -9,9 +9,7 @@ awkward_MaskedArray_getitem_next_jagged_project_filter_mask(
     T* index,
     int64_t* filtered_index,
     int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     if (index[thread_id] >= 0) {
@@ -30,9 +28,7 @@ awkward_MaskedArray_getitem_next_jagged_project_kernel(
     int64_t* starts_out,
     int64_t* stops_out,
     int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     if (index[thread_id] >= 0) {

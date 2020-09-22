@@ -10,9 +10,7 @@ awkward_index_rpad_and_clip_axis1_kernel(
     T* tostops,
     int64_t target,
     int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     tostarts[thread_id] = thread_id * target;

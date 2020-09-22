@@ -10,9 +10,7 @@ awkward_UnionArray_project_filter_mask(
     int64_t which,
     int8_t* filtered_mask,
     int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     if (fromtags[thread_id] == which) {
@@ -30,9 +28,7 @@ awkward_UnionArray_project_kernel(
     const I* fromindex,
     int64_t length,
     int64_t which) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     if (fromtags[thread_id] == which) {
