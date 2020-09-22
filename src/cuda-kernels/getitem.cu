@@ -2,7 +2,7 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/getitem.cu", line)
 
-#include "awkward/kernels/getitem.h"
+#include "awkward/kernels.h"
 #include <iostream>
 
 template <typename T>

@@ -8,6 +8,8 @@
 #include <sstream>
 #include <type_traits>
 
+#include "awkward/kernel-utils.h"
+
 #define AWKWARD_INDEX_NO_EXTERN_TEMPLATE
 #include "awkward/Slice.h"
 

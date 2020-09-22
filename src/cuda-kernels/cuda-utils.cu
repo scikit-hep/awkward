@@ -2,7 +2,7 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/cuda-utils.cu", line)
 
-#include "awkward/kernels/cuda-utils.h"
+#include "awkward/cuda-utils.h"
 
 ERROR awkward_cuda_ptr_device_num(int64_t* num, void* ptr) {
   cudaPointerAttributes att;

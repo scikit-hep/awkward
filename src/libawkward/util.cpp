@@ -9,11 +9,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 
-#include "awkward/kernels/identities.h"
-#include "awkward/kernels/getitem.h"
-#include "awkward/kernels/operations.h"
-#include "awkward/kernels/reducers.h"
-#include "awkward/kernels/sorting.h"
+#include "awkward/kernels.h"
 
 #include "awkward/util.h"
 #include "awkward/Identities.h"

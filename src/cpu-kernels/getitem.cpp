@@ -2,7 +2,8 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/getitem.cpp", line)
 
-#include "awkward/kernels/getitem.h"
+#include "awkward/kernels.h"
+#include "awkward/kernel-utils.h"
 
 void awkward_regularize_rangeslice(
   int64_t* start,

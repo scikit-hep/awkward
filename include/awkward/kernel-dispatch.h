@@ -5,9 +5,8 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
-#include "awkward/kernels/allocators.h"
-#include "awkward/kernels/getitem.h"
-#include "awkward/kernels/sorting.h"
+#include "awkward/allocators.h"
+#include "awkward/kernels.h"
 
 #include <sstream>
 
