@@ -654,10 +654,7 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
     kernelname = args.kernelname
 
-    code = """#include "awkward/kernels/operations.h"
-#include "awkward/kernels/identities.h"
-#include "awkward/kernels/getitem.h"
-#include "awkward/kernels/reducers.h"
+    code = """#include "awkward/kernels.h"
 #include <algorithm>
 #include <cstdio>
 
