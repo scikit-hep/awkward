@@ -1238,7 +1238,7 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    automatic-tests: true
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_IndexedArray_mask
@@ -2856,7 +2856,7 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    automatic-tests: true
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_ListOffsetArray_reduce_global_startstop_64
@@ -3283,7 +3283,7 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    automatic-tests: true
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_NumpyArray_contiguous_init
@@ -4187,7 +4187,7 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    automatic-tests: true
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_NumpyArray_getitem_next_range
@@ -5230,7 +5230,7 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    automatic-tests: true
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_carry_arange
@@ -6649,7 +6649,7 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    automatic-tests: true
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_sorting_ranges
@@ -6663,7 +6663,7 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    automatic-tests: true
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_sorting_ranges_length
@@ -6676,7 +6676,7 @@ kernels:
     description: null
     definition: |
       Insert Python definition here
-    automatic-tests: true
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_zero_mask
