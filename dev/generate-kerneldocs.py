@@ -3,9 +3,15 @@
 import os
 
 import yaml
-from parser_utils import indent_code
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+def indent_code(code, indent):
+    finalcode = ""
+    for line in code.splitlines():
+        finalcode += " " * indent + line + "\n"
+    return finalcode
 
 
 def genkerneldocs():
