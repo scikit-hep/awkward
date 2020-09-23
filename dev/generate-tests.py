@@ -7,8 +7,6 @@ from itertools import product
 
 import yaml
 from numpy import uint8
-from parser_utils import (PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST,
-                          TEST_BLACKLIST)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -142,23 +140,18 @@ class Specification(object):
                 tempdict = {}
                 try:
                     funcPy(**temp)
-                    if self.name not in SUCCESS_TEST_BLACKLIST or any(
-                        self.name in x for x in SUCCESS_TEST_BLACKLIST
-                    ):
-                        for arg in self.args:
-                            if arg.direction == "out":
-                                assert isinstance(temp[arg.name], dict)
-                                temparglist = self.dicttolist(
-                                    temp[arg.name], arg.typename
-                                )
-                                intests[arg.name] = self.getdummyvalue(
-                                    arg.typename, len(temparglist)
-                                )
-                                outtests[arg.name] = temparglist
-                            else:
-                                intests[arg.name] = temp[arg.name]
-                        tempdict["outargs"] = copy.deepcopy(outtests)
-                        tempdict["success"] = True
+                    for arg in self.args:
+                        if arg.direction == "out":
+                            assert isinstance(temp[arg.name], dict)
+                            temparglist = self.dicttolist(temp[arg.name], arg.typename)
+                            intests[arg.name] = self.getdummyvalue(
+                                arg.typename, len(temparglist)
+                            )
+                            outtests[arg.name] = temparglist
+                        else:
+                            intests[arg.name] = temp[arg.name]
+                    tempdict["outargs"] = copy.deepcopy(outtests)
+                    tempdict["success"] = True
                 except ValueError:
                     for arg in self.args:
                         if arg.direction == "out":
@@ -192,8 +185,7 @@ def readspec():
                     specdict[childfunc["name"]] = Specification(
                         childfunc,
                         data,
-                        (spec["name"] in TEST_BLACKLIST)
-                        or (spec["name"] in PYGEN_BLACKLIST),
+                        not spec["automatic-tests"],
                     )
     return specdict
 
