@@ -821,8 +821,11 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                         awkward1.layout.ListArray64,
                     )):
                         starts, stops = x.starts, x.stops
-                        lencontent = nplike.max(stops)
-                        nextinputs.append(x.content[:lencontent])
+                        if len(stops) == 0:
+                            nextinputs.append(x.content[:0])
+                        else:
+                            lencontent = nplike.max(stops)
+                            nextinputs.append(x.content[:lencontent])
 
                     else:
                         nextinputs.append(x)
