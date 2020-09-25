@@ -19,3 +19,9 @@ def test_empty_listarray():
         )
     )
     assert awkward1.to_list(a * 3) == []
+
+    starts = awkward1.layout.Index64(numpy.array([], dtype=numpy.int64))
+    stops = awkward1.layout.Index64(numpy.array([3, 3, 5], dtype=numpy.int64))
+    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    array = awkward1.Array(awkward1.layout.ListArray64(starts, stops, content))
+    array + array
