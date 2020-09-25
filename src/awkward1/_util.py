@@ -518,7 +518,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                         offsets[-1] = stops[-1]
                 elif (
                     not nplike.array_equal(offsets[:-1], starts) or
-                    offsets[-1] != stops[-1]
+                    (len(stops) !=0 and offsets[-1] != stops[-1])
                 ):
                     return False
             elif isinstance(x, awkward1.layout.RegularArray):
@@ -821,7 +821,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                         awkward1.layout.ListArray64,
                     )):
                         starts, stops = x.starts, x.stops
-                        if len(stops) == 0:
+                        if len(starts) == 0 or len(stops) == 0:
                             nextinputs.append(x.content[:0])
                         else:
                             lencontent = nplike.max(stops)
