@@ -1,0 +1,115 @@
+- name: awkward_index_carry
+  specializations:
+    - name: awkward_IndexU32_carry_64
+      args:
+        - name: toindex
+          type: List[uint32_t]
+          direction: out
+        - name: fromindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: carry
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenfromindex
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_IndexU8_carry_64
+      args:
+        - name: toindex
+          type: List[uint8_t]
+          direction: out
+        - name: fromindex
+          type: Const[List[uint8_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: carry
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenfromindex
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Index64_carry_64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: fromindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: carry
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenfromindex
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Index8_carry_64
+      args:
+        - name: toindex
+          type: List[int8_t]
+          direction: out
+        - name: fromindex
+          type: Const[List[int8_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: carry
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenfromindex
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Index32_carry_64
+      args:
+        - name: toindex
+          type: List[int32_t]
+          direction: out
+        - name: fromindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: carry
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenfromindex
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_index_carry(toindex , fromindex , carry , lenfromindex , length ):
+        for i in range(length):
+            j = carry[i]
+            if j > lenfromindex:
+                raise ValueError("index out of range")
+            toindex[i] = fromindex[j]
+  description: null

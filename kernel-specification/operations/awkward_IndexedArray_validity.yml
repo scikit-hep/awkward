@@ -1,0 +1,66 @@
+- name: awkward_IndexedArray_validity
+  specializations:
+    - name: awkward_IndexedArray32_validity
+      args:
+        - name: index
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: isoption
+          type: bool
+          direction: in
+          role: ByteMaskedArray-valid_when
+    - name: awkward_IndexedArrayU32_validity
+      args:
+        - name: index
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: isoption
+          type: bool
+          direction: in
+          role: ByteMaskedArray-valid_when
+    - name: awkward_IndexedArray64_validity
+      args:
+        - name: index
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: isoption
+          type: bool
+          direction: in
+          role: ByteMaskedArray-valid_when
+  definition: |
+    def awkward_IndexedArray_validity(index , length , lencontent , isoption ):
+        for i in range(length):
+            idx = index[i]
+            if not (isoption):
+                if idx < 0:
+                    raise ValueError("index[i] < 0")
+            if idx >= lencontent:
+                raise ValueError("index[i] >= len(content)")
+  description: null

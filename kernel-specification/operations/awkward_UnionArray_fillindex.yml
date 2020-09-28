@@ -1,0 +1,58 @@
+- name: awkward_UnionArray_fillindex
+  specializations:
+    - name: awkward_UnionArray_fillindex_to64_fromU32
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: toindexoffset
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_UnionArray_fillindex_to64_from64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: toindexoffset
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_UnionArray_fillindex_to64_from32
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: toindexoffset
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_UnionArray_fillindex(toindex , toindexoffset , fromindex , length ):
+        for i in range(length):
+            toindex[toindexoffset + i] = float(fromindex[i])
+  description: null

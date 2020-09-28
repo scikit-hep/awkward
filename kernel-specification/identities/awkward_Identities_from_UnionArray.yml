@@ -1,0 +1,238 @@
+- name: awkward_Identities_from_UnionArray
+  specializations:
+    - name: awkward_Identities64_from_UnionArray8_U32
+      args:
+        - name: uniquecontents
+          type: List[bool]
+          direction: out
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: Identities-array
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+        - name: which
+          type: int64_t
+          direction: in
+          role: UnionArray-which
+    - name: awkward_Identities32_from_UnionArray8_32
+      args:
+        - name: uniquecontents
+          type: List[bool]
+          direction: out
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: Identities-array
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+        - name: which
+          type: int64_t
+          direction: in
+          role: UnionArray-which
+    - name: awkward_Identities32_from_UnionArray8_U32
+      args:
+        - name: uniquecontents
+          type: List[bool]
+          direction: out
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: Identities-array
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+        - name: which
+          type: int64_t
+          direction: in
+          role: UnionArray-which
+    - name: awkward_Identities64_from_UnionArray8_64
+      args:
+        - name: uniquecontents
+          type: List[bool]
+          direction: out
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: Identities-array
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+        - name: which
+          type: int64_t
+          direction: in
+          role: UnionArray-which
+    - name: awkward_Identities32_from_UnionArray8_64
+      args:
+        - name: uniquecontents
+          type: List[bool]
+          direction: out
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: Identities-array
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+        - name: which
+          type: int64_t
+          direction: in
+          role: UnionArray-which
+    - name: awkward_Identities64_from_UnionArray8_32
+      args:
+        - name: uniquecontents
+          type: List[bool]
+          direction: out
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: Identities-array
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+        - name: which
+          type: int64_t
+          direction: in
+          role: UnionArray-which
+  definition: |
+    def awkward_Identities_from_UnionArray(uniquecontents , toptr , fromptr , fromtags , fromindex , tolength , fromlength , fromwidth , which ):
+        for k in range(tolength * fromwidth):
+            toptr[k] = -1
+        for i in range(fromlength):
+            if fromtags[i] == which:
+                j = fromindex[i]
+                if j >= tolength:
+                    raise ValueError("max(index) > len(content)")
+                else:
+                    if j < 0:
+                        raise ValueError("min(index) < 0")
+                    else:
+                        if toptr[j * fromwidth] != -1:
+                            uniquecontents[0] = False
+                            return
+                        for k in range(fromwidth):
+                            toptr[(j * fromwidth) + k] = fromptr[(i * fromwidth) + k]
+        uniquecontents[0] = True
+  description: null

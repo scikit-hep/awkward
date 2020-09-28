@@ -1,0 +1,16 @@
+- name: awkward_ListOffsetArray_local_preparenext_64
+  args:
+    - name: tocarry
+      type: List[int64_t]
+      direction: out
+    - name: fromindex
+      type: Const[List[int64_t]]
+      direction: in
+      role: IndexedArray-index
+    - name: length
+      type: int64_t
+      direction: in
+      role: default
+  definition: |
+    Insert Python definition here
+  description: null

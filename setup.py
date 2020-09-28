@@ -17,7 +17,7 @@ from setuptools import setup, Extension
 
 
 extras = {
-    "cuda": ["awkward1-cuda-kernels"],
+    "cuda": ["awkward1-cuda-kernels==" + open("VERSION_INFO").read().strip()],
     "test": open("requirements-test.txt").read().strip().split("\n"),
     "dev":  open("requirements-dev.txt").read().strip().split("\n"),
 }
@@ -45,6 +45,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+        build_args = []
         cmake_args = [
             "-DCMAKE_INSTALL_PREFIX={0}".format(extdir),
             "-DPYTHON_EXECUTABLE={0}".format(sys.executable),
@@ -55,26 +56,22 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         ]
         try:
            compiler_path = self.compiler.compiler_cxx[0]
-           cmake_args.append("-DCMAKE_CXX_COMPILER={0}".format(compiler_path))
+           cmake_args += ["-DCMAKE_CXX_COMPILER={0}".format(compiler_path)]
         except AttributeError:
-            print("Not able to access compiler path (on Windows), using CMake default")
+            print("Not able to access compiler path, using CMake default")
 
         cfg = "Debug" if self.debug else "Release"
-        build_args = ["--config", cfg]
+        build_args += ["--config", cfg]
+        cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
 
         if platform.system() == "Windows":
             cmake_args += [
                 "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{0}={1}".format(cfg.upper(), extdir),
                 "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE",
             ]
-            if sys.maxsize > 2**32:
+            cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
+            if sys.maxsize > 2**32 and cmake_generator != "NMake Makefiles" and "Win64" not in cmake_generator:
                 cmake_args += ["-A", "x64"]
-            build_args += ["--", "/m"]
-        else:
-            cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
-
-        if platform.system() == "Windows":
-            build_args += ["/m"]
         else:
             build_args += ["-j", str(multiprocessing.cpu_count())]
 
@@ -82,12 +79,9 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
              os.makedirs(self.build_temp)
         build_dir = self.build_temp
 
-        # for scikit-build:
-        # build_dir = os.path.join(DIR, "_pybuild")
-
         subprocess.check_call(["cmake", "-S", ext.sourcedir, "-B", build_dir] + cmake_args)
         subprocess.check_call(["cmake", "--build", build_dir] + build_args)
-        subprocess.check_call(["cmake", "--build", build_dir, "--target", "install"])
+        subprocess.check_call(["cmake", "--build", build_dir, "--config", cfg, "--target", "install"])
 
 
 def tree(x):
@@ -116,11 +110,20 @@ if platform.system() == "Windows":
             tree(outerdir)
 
             print("--- copying libraries -----------------------------------------")
-            dlldir = os.path.join(os.path.join("build", "temp.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "Release", "Release")
+            dlldir = os.path.join(os.path.join("build", "temp.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "Release")
+            found = False
             for x in os.listdir(dlldir):
-                if x.startswith("awkward"):
+                if x.endswith(".lib") or x.endswith(".exp") or x.endswith(".dll"):
                     print("copying", os.path.join(dlldir, x), "-->", os.path.join(self.build_lib, "awkward1", x))
                     shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward1", x))
+                    found = True
+            if not found:
+                dlldir = os.path.join(dlldir, "Release")
+                for x in os.listdir(dlldir):
+                    if x.endswith(".lib") or x.endswith(".exp") or x.endswith(".dll"):
+                        print("copying", os.path.join(dlldir, x), "-->", os.path.join(self.build_lib, "awkward1", x))
+                        shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward1", x))
+                        found = True
 
             print("--- deleting libraries ----------------------------------------")
             for x in os.listdir(outerdir):
@@ -175,16 +178,13 @@ setup(name = "awkward1",
       install_requires = install_requires,
       tests_require = extras["test"],
       extras_require = extras,
-
-      # cmake_args=['-DBUILD_TESTING=OFF'],      # for scikit-build
       ext_modules = [
-          CMakeExtension("awkward"),             # NOT scikit-build
+          CMakeExtension("awkward"),
       ],
       cmdclass = {
-          "build_ext": CMakeBuild,               # NOT scikit-build
+          "build_ext": CMakeBuild,
           "install": Install,
       },
-
       classifiers = [
 #         "Development Status :: 1 - Planning",
 #         "Development Status :: 2 - Pre-Alpha",

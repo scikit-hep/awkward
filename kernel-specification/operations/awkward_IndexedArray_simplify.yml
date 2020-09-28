@@ -1,0 +1,203 @@
+- name: awkward_IndexedArray_simplify
+  specializations:
+    - name: awkward_IndexedArray64_simplify64_to64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: outerindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: outerlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: innerindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray2-index
+        - name: innerlength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+    - name: awkward_IndexedArray64_simplifyU32_to64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: outerindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: outerlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: innerindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray2-index
+        - name: innerlength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+    - name: awkward_IndexedArrayU32_simplify32_to64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: outerindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: outerlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: innerindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray2-index
+        - name: innerlength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+    - name: awkward_IndexedArray32_simplify32_to64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: outerindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: outerlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: innerindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray2-index
+        - name: innerlength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+    - name: awkward_IndexedArray32_simplify64_to64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: outerindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: outerlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: innerindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray2-index
+        - name: innerlength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+    - name: awkward_IndexedArray64_simplify32_to64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: outerindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: outerlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: innerindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray2-index
+        - name: innerlength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+    - name: awkward_IndexedArray32_simplifyU32_to64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: outerindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: outerlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: innerindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray2-index
+        - name: innerlength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+    - name: awkward_IndexedArrayU32_simplifyU32_to64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: outerindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: outerlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: innerindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray2-index
+        - name: innerlength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+    - name: awkward_IndexedArrayU32_simplify64_to64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: outerindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: outerlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: innerindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray2-index
+        - name: innerlength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+  definition: |
+    def awkward_IndexedArray_simplify(toindex , outerindex , outerlength , innerindex , innerlength ):
+        for i in range(outerlength):
+            j = outerindex[i]
+            if j < 0:
+                toindex[i] = -1
+            else:
+                if j >= innerlength:
+                    raise ValueError("index out of range")
+                else:
+                    toindex[i] = innerindex[j]
+  description: null

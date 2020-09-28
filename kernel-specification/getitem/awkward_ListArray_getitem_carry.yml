@@ -1,0 +1,94 @@
+- name: awkward_ListArray_getitem_carry
+  specializations:
+    - name: awkward_ListArray64_getitem_carry_64
+      args:
+        - name: tostarts
+          type: List[int64_t]
+          direction: out
+        - name: tostops
+          type: List[int64_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-stops
+        - name: fromcarry
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: lencarry
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArrayU32_getitem_carry_64
+      args:
+        - name: tostarts
+          type: List[uint32_t]
+          direction: out
+        - name: tostops
+          type: List[uint32_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: fromcarry
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: lencarry
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArray32_getitem_carry_64
+      args:
+        - name: tostarts
+          type: List[int32_t]
+          direction: out
+        - name: tostops
+          type: List[int32_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: fromcarry
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: lencarry
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_ListArray_getitem_carry(tostarts , tostops , fromstarts , fromstops , fromcarry , lenstarts , lencarry ):
+        for i in range(lencarry):
+            if fromcarry[i] >= lenstarts:
+                raise ValueError("index out of range")
+            tostarts[i] = float(fromstarts[fromcarry[i]])
+            tostops[i] = float(fromstops[fromcarry[i]])
+  description: null

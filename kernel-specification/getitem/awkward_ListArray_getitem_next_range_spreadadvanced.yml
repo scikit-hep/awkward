@@ -1,0 +1,60 @@
+- name: awkward_ListArray_getitem_next_range_spreadadvanced
+  specializations:
+    - name: awkward_ListArray64_getitem_next_range_spreadadvanced_64
+      args:
+        - name: toadvanced
+          type: List[int64_t]
+          direction: out
+        - name: fromadvanced
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromoffsets
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArrayU32_getitem_next_range_spreadadvanced_64
+      args:
+        - name: toadvanced
+          type: List[int64_t]
+          direction: out
+        - name: fromadvanced
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromoffsets
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArray32_getitem_next_range_spreadadvanced_64
+      args:
+        - name: toadvanced
+          type: List[int64_t]
+          direction: out
+        - name: fromadvanced
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromoffsets
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_ListArray_getitem_next_range_spreadadvanced(toadvanced , fromadvanced , fromoffsets , lenstarts ):
+        for i in range(lenstarts):
+            count = fromoffsets[i + 1] - fromoffsets[i]
+            for j in range(count):
+                toadvanced[fromoffsets[i] + j] = fromadvanced[i]
+  description: null

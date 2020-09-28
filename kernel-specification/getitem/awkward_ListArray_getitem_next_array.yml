@@ -1,0 +1,115 @@
+- name: awkward_ListArray_getitem_next_array
+  specializations:
+    - name: awkward_ListArray32_getitem_next_array_64
+      args:
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: toadvanced
+          type: List[int64_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: fromarray
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: default
+        - name: lenarray
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: ListArray-length
+    - name: awkward_ListArray64_getitem_next_array_64
+      args:
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: toadvanced
+          type: List[int64_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-stops
+        - name: fromarray
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: default
+        - name: lenarray
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: ListArray-length
+    - name: awkward_ListArrayU32_getitem_next_array_64
+      args:
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: toadvanced
+          type: List[int64_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: fromarray
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: default
+        - name: lenarray
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: ListArray-length
+  definition: |
+    def awkward_ListArray_getitem_next_array(tocarry , toadvanced , fromstarts , fromstops , fromarray , lenstarts , lenarray , lencontent ):
+        for i in range(lenstarts):
+            if fromstops[i] < fromstarts[i]:
+                raise ValueError("stops[i] < starts[i]")
+            if (fromstarts[i] != fromstops[i]) and (fromstops[i] > lencontent):
+                raise ValueError("stops[i] > len(content)")
+            length = fromstops[i] - fromstarts[i]
+            for j in range(lenarray):
+                regular_at = fromarray[j]
+                if regular_at < 0:
+                    regular_at += length
+                if not ((0 <= regular_at) and (regular_at < length)):
+                    raise ValueError("index out of range")
+                tocarry[(i * lenarray) + j] = fromstarts[i] + regular_at
+                toadvanced[(i * lenarray) + j] = j
+  description: null

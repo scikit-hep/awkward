@@ -1,0 +1,65 @@
+- name: awkward_ListOffsetArray_rpad_axis1
+  specializations:
+    - name: awkward_ListOffsetArrayU32_rpad_axis1_64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: fromoffsets
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: target
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListOffsetArray64_rpad_axis1_64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: fromoffsets
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: target
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListOffsetArray32_rpad_axis1_64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: fromoffsets
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: target
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_ListOffsetArray_rpad_axis1(toindex , fromoffsets , fromlength , target ):
+        count = 0
+        for i in range(fromlength):
+            rangeval = float(fromoffsets[i + 1] - fromoffsets[i])
+            for j in range(rangeval):
+                toindex[count] = float(fromoffsets[i]) + j
+                count = count + 1
+            for j in range(rangeval, target):
+                toindex[count] = -1
+                count = count + 1
+  description: null

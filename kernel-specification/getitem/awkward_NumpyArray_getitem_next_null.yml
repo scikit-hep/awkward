@@ -1,0 +1,26 @@
+- name: awkward_NumpyArray_getitem_next_null
+  specializations:
+    - name: awkward_NumpyArray_getitem_next_null_64
+      args:
+        - name: toptr
+          type: List[uint8_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: len
+          type: int64_t
+          direction: in
+          role: default
+        - name: stride
+          type: int64_t
+          direction: in
+          role: default
+        - name: pos
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+  definition: |
+    Insert Python definition here
+  description: null

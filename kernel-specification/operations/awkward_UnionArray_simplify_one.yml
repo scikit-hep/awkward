@@ -1,0 +1,105 @@
+- name: awkward_UnionArray_simplify_one
+  specializations:
+    - name: awkward_UnionArray8_U32_simplify_one_to8_64
+      args:
+        - name: totags
+          type: List[int8_t]
+          direction: out
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: towhich
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwhich
+          type: int64_t
+          direction: in
+          role: UnionArray-which
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: base
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_UnionArray8_32_simplify_one_to8_64
+      args:
+        - name: totags
+          type: List[int8_t]
+          direction: out
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: towhich
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwhich
+          type: int64_t
+          direction: in
+          role: UnionArray-which
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: base
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_UnionArray8_64_simplify_one_to8_64
+      args:
+        - name: totags
+          type: List[int8_t]
+          direction: out
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: towhich
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwhich
+          type: int64_t
+          direction: in
+          role: UnionArray-which
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: base
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_UnionArray_simplify_one(totags , toindex , fromtags , fromindex , towhich , fromwhich , length , base ):
+        for i in range(length):
+            if fromtags[i] == fromwhich:
+                totags[i] = float(towhich)
+                toindex[i] = float(fromindex[i] + base)
+  description: null

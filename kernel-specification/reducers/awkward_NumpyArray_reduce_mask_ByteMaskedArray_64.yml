@@ -1,0 +1,24 @@
+- name: awkward_NumpyArray_reduce_mask_ByteMaskedArray_64
+  args:
+    - name: toptr
+      type: List[int8_t]
+      direction: out
+    - name: parents
+      type: Const[List[int64_t]]
+      direction: in
+      role: reducer-parents
+    - name: lenparents
+      type: int64_t
+      direction: in
+      role: reducer-lenparents
+    - name: outlength
+      type: int64_t
+      direction: in
+      role: reducer-outlength
+  definition: |
+    def awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(toptr , parents , lenparents , outlength ):
+        for i in range(outlength):
+            toptr[i] = 1
+        for i in range(lenparents):
+            toptr[parents[i]] = 0
+  description: null

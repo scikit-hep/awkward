@@ -1,0 +1,16 @@
+- name: awkward_zero_mask
+  specializations:
+    - name: awkward_zero_mask8
+      args:
+        - name: tomask
+          type: List[int8_t]
+          direction: out
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_zero_mask(tomask , length ):
+        for i in range(length):
+            tomask[i] = 0
+  description: null

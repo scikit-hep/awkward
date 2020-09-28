@@ -1,0 +1,75 @@
+- name: awkward_UnionArray_flatten_length
+  specializations:
+    - name: awkward_UnionArray32_flatten_length_64
+      args:
+        - name: total_length
+          type: List[int64_t]
+          direction: out
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: offsetsraws
+          type: List[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-rawoffsets
+    - name: awkward_UnionArray64_flatten_length_64
+      args:
+        - name: total_length
+          type: List[int64_t]
+          direction: out
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: offsetsraws
+          type: List[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-rawoffsets
+    - name: awkward_UnionArrayU32_flatten_length_64
+      args:
+        - name: total_length
+          type: List[int64_t]
+          direction: out
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: offsetsraws
+          type: List[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-rawoffsets
+  definition: |
+    def awkward_UnionArray_flatten_length(total_length , fromtags , fromindex , length , offsetsraws ):
+        total_length[0] = 0
+        for i in range(length):
+            tag = fromtags[i]
+            idx = fromindex[i]
+            start = offsetsraws[tag][idx]
+            stop = offsetsraws[tag][idx + 1]
+            total_length[0] = total_length[0] + (stop - start)
+  description: null

@@ -1,0 +1,37 @@
+- name: awkward_NumpyArray_getitem_next_range
+  specializations:
+    - name: awkward_NumpyArray_getitem_next_range_64
+      args:
+        - name: nextcarryptr
+          type: List[int64_t]
+          direction: out
+        - name: carryptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: lencarry
+          type: int64_t
+          direction: in
+          role: default
+        - name: lenhead
+          type: int64_t
+          direction: in
+          role: default
+        - name: skip
+          type: int64_t
+          direction: in
+          role: default
+        - name: start
+          type: int64_t
+          direction: in
+          role: default
+        - name: step
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_NumpyArray_getitem_next_range(nextcarryptr , carryptr , lencarry , lenhead , skip , start , step ):
+        for i in range(lencarry):
+            for j in range(lenhead):
+                nextcarryptr[(i * lenhead) + j] = ((skip * carryptr[i]) + start) + (j * step)
+  description: null

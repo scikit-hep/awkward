@@ -1,0 +1,82 @@
+- name: awkward_UnionArray_project
+  specializations:
+    - name: awkward_UnionArray8_U32_project_64
+      args:
+        - name: lenout
+          type: List[int64_t]
+          direction: out
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: which
+          type: int64_t
+          direction: in
+          role: UnionArray-which
+    - name: awkward_UnionArray8_64_project_64
+      args:
+        - name: lenout
+          type: List[int64_t]
+          direction: out
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: which
+          type: int64_t
+          direction: in
+          role: UnionArray-which
+    - name: awkward_UnionArray8_32_project_64
+      args:
+        - name: lenout
+          type: List[int64_t]
+          direction: out
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: fromtags
+          type: Const[List[int8_t]]
+          direction: in
+          role: UnionArray-tags
+        - name: fromindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: which
+          type: int64_t
+          direction: in
+          role: UnionArray-which
+  definition: |
+    def awkward_UnionArray_project(lenout , tocarry , fromtags , fromindex , length , which ):
+        lenout[0] = 0
+        for i in range(length):
+            if fromtags[i] == which:
+                tocarry[lenout[0]] = fromindex[i]
+                lenout[0] = lenout[0] + 1
+  description: null

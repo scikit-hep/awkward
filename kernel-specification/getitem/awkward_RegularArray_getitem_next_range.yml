@@ -1,0 +1,33 @@
+- name: awkward_RegularArray_getitem_next_range
+  specializations:
+    - name: awkward_RegularArray_getitem_next_range_64
+      args:
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: regular_start
+          type: int64_t
+          direction: in
+          role: default
+        - name: step
+          type: int64_t
+          direction: in
+          role: default
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: size
+          type: int64_t
+          direction: in
+          role: default
+        - name: nextsize
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_RegularArray_getitem_next_range(tocarry , regular_start , step , length , size , nextsize ):
+        for i in range(length):
+            for j in range(nextsize):
+                tocarry[(i * nextsize) + j] = ((i * size) + regular_start) + (j * step)
+  description: null

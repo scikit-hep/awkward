@@ -1,0 +1,18 @@
+- name: awkward_Index8_to_Index64
+  args:
+    - name: toptr
+      type: List[int64_t]
+      direction: out
+    - name: fromptr
+      type: Const[List[int8_t]]
+      direction: in
+      role: IndexedArray-index
+    - name: length
+      type: int64_t
+      direction: in
+      role: default
+  definition: |
+    def awkward_Index8_to_Index64(toptr , fromptr , length ):
+        for i in range(length):
+            toptr[i] = int(fromptr[i])
+  description: null

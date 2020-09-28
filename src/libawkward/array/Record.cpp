@@ -6,8 +6,7 @@
 #include <sstream>
 #include <memory>
 
-#include "awkward/kernels/identities.h"
-#include "awkward/kernels/getitem.h"
+#include "awkward/kernels.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/ArrayType.h"
 

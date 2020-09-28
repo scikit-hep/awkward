@@ -1,0 +1,24 @@
+- name: awkward_ByteMaskedArray_mask
+  specializations:
+    - name: awkward_ByteMaskedArray_mask8
+      args:
+        - name: tomask
+          type: List[int8_t]
+          direction: out
+        - name: frommask
+          type: Const[List[int8_t]]
+          direction: in
+          role: ByteMaskedArray-mask
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: validwhen
+          type: bool
+          direction: in
+          role: ByteMaskedArray-valid_when
+  definition: |
+    def awkward_ByteMaskedArray_mask(tomask , frommask , length , validwhen ):
+        for i in range(length):
+            tomask[i] = (frommask[i] != 0) != validwhen
+  description: null

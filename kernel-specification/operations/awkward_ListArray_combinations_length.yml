@@ -1,0 +1,113 @@
+- name: awkward_ListArray_combinations_length
+  specializations:
+    - name: awkward_ListArray64_combinations_length_64
+      args:
+        - name: totallen
+          type: List[int64_t]
+          direction: out
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: n
+          type: int64_t
+          direction: in
+          role: default
+        - name: replacement
+          type: bool
+          direction: in
+          role: ByteMaskedArray-valid_when
+        - name: starts
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: stops
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-stops
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArrayU32_combinations_length_64
+      args:
+        - name: totallen
+          type: List[int64_t]
+          direction: out
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: n
+          type: int64_t
+          direction: in
+          role: default
+        - name: replacement
+          type: bool
+          direction: in
+          role: ByteMaskedArray-valid_when
+        - name: starts
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: stops
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArray32_combinations_length_64
+      args:
+        - name: totallen
+          type: List[int64_t]
+          direction: out
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: n
+          type: int64_t
+          direction: in
+          role: default
+        - name: replacement
+          type: bool
+          direction: in
+          role: ByteMaskedArray-valid_when
+        - name: starts
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: stops
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_ListArray_combinations_length(totallen , tooffsets , n , replacement , starts , stops , length ):
+        totallen[0] = 0
+        tooffsets[0] = 0
+        for i in range(length):
+            size = int(stops[i] - starts[i])
+            if replacement:
+                size += n - 1
+            thisn = n
+    
+            if thisn > size:
+                combinationslen = 0
+            else:
+                if thisn == size:
+                    combinationslen = 1
+                else:
+                    if (thisn * 2) > size:
+                        thisn = size - thisn
+                    combinationslen = size
+                    j = 2
+                    while j <= thisn:
+                        combinationslen *= (size - j) + 1
+                        combinationslen /= j
+                        j = j + 1
+            totallen[0] = totallen[0] + combinationslen
+            tooffsets[i + 1] = tooffsets[i] + combinationslen
+  description: null

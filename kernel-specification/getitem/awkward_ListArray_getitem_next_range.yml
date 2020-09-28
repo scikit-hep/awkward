@@ -1,0 +1,127 @@
+- name: awkward_ListArray_getitem_next_range
+  specializations:
+    - name: awkward_ListArray32_getitem_next_range_64
+      args:
+        - name: tooffsets
+          type: List[int32_t]
+          direction: out
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[int32_t]]
+          direction: in
+          role: default
+        - name: fromstops
+          type: Const[List[int32_t]]
+          direction: in
+          role: default
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: default
+        - name: start
+          type: int64_t
+          direction: in
+          role: default
+        - name: stop
+          type: int64_t
+          direction: in
+          role: default
+        - name: step
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArray64_getitem_next_range_64
+      args:
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[int64_t]]
+          direction: in
+          role: default
+        - name: fromstops
+          type: Const[List[int64_t]]
+          direction: in
+          role: default
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: default
+        - name: start
+          type: int64_t
+          direction: in
+          role: default
+        - name: stop
+          type: int64_t
+          direction: in
+          role: default
+        - name: step
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArrayU32_getitem_next_range_64
+      args:
+        - name: tooffsets
+          type: List[uint32_t]
+          direction: out
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[uint32_t]]
+          direction: in
+          role: default
+        - name: fromstops
+          type: Const[List[uint32_t]]
+          direction: in
+          role: default
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: default
+        - name: start
+          type: int64_t
+          direction: in
+          role: default
+        - name: stop
+          type: int64_t
+          direction: in
+          role: default
+        - name: step
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_ListArray_getitem_next_range(tooffsets , tocarry , fromstarts , fromstops , lenstarts , start , stop , step ):
+        k = 0
+        tooffsets[0] = 0
+        if step > 0:
+            for i in range(lenstarts):
+                length = fromstops[i] - fromstarts[i]
+                regular_start = start
+                regular_stop = stop
+                awkward_regularize_rangeslice(regular_start, regular_stop, step > 0, start != kSliceNone, stop != kSliceNone, length)
+                j = regular_start
+                while j < regular_stop:
+                    tocarry[k] = fromstarts[i] + j
+                    k = k + 1
+                    j += step
+                tooffsets[i + 1] = float(k)
+        else:
+            for i in range(lenstarts):
+                length = fromstops[i] - fromstarts[i]
+                regular_start = start
+                regular_stop = stop
+                awkward_regularize_rangeslice(regular_start, regular_stop, step > 0, start != kSliceNone, stop != kSliceNone, length)
+                j = regular_start
+                while j > regular_stop:
+                    tocarry[k] = fromstarts[i] + j
+                    k = k + 1
+                    j += step
+                tooffsets[i + 1] = float(k)
+  description: null

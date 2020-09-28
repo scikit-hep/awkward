@@ -1,0 +1,345 @@
+- name: awkward_reduce_sum
+  specializations:
+    - name: awkward_reduce_sum_uint32_uint16_64
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[uint16_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_uint32_uint32_64
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[uint32_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_int32_int16_64
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int16_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_uint64_uint8_64
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_int32_int32_64
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_int64_int64_64
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_uint64_uint64_64
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[uint64_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_uint64_uint32_64
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[uint32_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_uint64_uint16_64
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[uint16_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_int64_int8_64
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_uint32_uint8_64
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_float32_float32_64
+      args:
+        - name: toptr
+          type: List[float]
+          direction: out
+        - name: fromptr
+          type: Const[List[float]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_int64_int16_64
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int16_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_int32_int8_64
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_int64_int32_64
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+    - name: awkward_reduce_sum_float64_float64_64
+      args:
+        - name: toptr
+          type: List[double]
+          direction: out
+        - name: fromptr
+          type: Const[List[double]]
+          direction: in
+          role: reducer-fromptr
+        - name: parents
+          type: Const[List[int64_t]]
+          direction: in
+          role: reducer-parents
+        - name: lenparents
+          type: int64_t
+          direction: in
+          role: reducer-lenparents
+        - name: outlength
+          type: int64_t
+          direction: in
+          role: reducer-outlength
+  definition: |
+    def awkward_reduce_sum(toptr , fromptr , parents , lenparents , outlength ):
+        for i in range(outlength):
+            toptr[i] = float(0)
+        for i in range(lenparents):
+            toptr[parents[i]] += float(fromptr[i])
+  description: null

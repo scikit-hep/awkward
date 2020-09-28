@@ -248,8 +248,22 @@ def numba_record_lower(layouttype, behavior):
 
 
 def overload(behavior, signature):
-    behavior = Behavior(awkward1.behavior, behavior)
-    return behavior[signature]
+    if not any(s is None for s in signature):
+        behavior = Behavior(awkward1.behavior, behavior)
+        for key, custom in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == len(signature)
+                and key[0] == signature[0]
+                and all(
+                    k == s or (
+                        isinstance(k, type)
+                        and isinstance(s, type)
+                        and issubclass(s, k)
+                    ) for k, s in zip(key[1:], signature[1:])
+                )
+            ):
+                return custom
 
 
 def numba_attrs(layouttype, behavior):
@@ -388,18 +402,6 @@ def extra(args, kwargs, defaults):
         else:
             out.append(default)
     return out
-
-
-def called_by_module(modulename):
-    frame = inspect.currentframe()
-    while frame is not None:
-        name = getattr(inspect.getmodule(frame), "__name__", None)
-        if name is not None and (
-            name == modulename or name.startswith(modulename + ".")
-        ):
-            return True
-        frame = frame.f_back
-    return False
 
 
 def key2index(keys, key):

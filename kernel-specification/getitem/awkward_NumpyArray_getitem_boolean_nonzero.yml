@@ -1,0 +1,29 @@
+- name: awkward_NumpyArray_getitem_boolean_nonzero
+  specializations:
+    - name: awkward_NumpyArray_getitem_boolean_nonzero_64
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: ByteMaskedArray-mask
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: stride
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_NumpyArray_getitem_boolean_nonzero(toptr , fromptr , length , stride ):
+        k = 0
+        i = 0
+        while i < length:
+            if fromptr[i] != 0:
+                toptr[k] = i
+                k = k + 1
+            i += stride
+  description: null

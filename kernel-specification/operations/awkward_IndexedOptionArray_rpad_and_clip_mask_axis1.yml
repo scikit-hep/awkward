@@ -1,0 +1,25 @@
+- name: awkward_IndexedOptionArray_rpad_and_clip_mask_axis1
+  specializations:
+    - name: awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: frommask
+          type: Const[List[int8_t]]
+          direction: in
+          role: ByteMaskedArray-mask
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(toindex , frommask , length ):
+        count = 0
+        for i in range(length):
+            if frommask[i]:
+                toindex[i] = -1
+            else:
+                toindex[i] = count
+                count = count + 1
+  description: null

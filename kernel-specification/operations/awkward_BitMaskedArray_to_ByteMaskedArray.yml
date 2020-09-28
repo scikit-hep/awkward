@@ -1,0 +1,60 @@
+- name: awkward_BitMaskedArray_to_ByteMaskedArray
+  args:
+    - name: tobytemask
+      type: List[int8_t]
+      direction: out
+    - name: frombitmask
+      type: Const[List[uint8_t]]
+      direction: in
+      role: BitMaskedArray-mask
+    - name: bitmasklength
+      type: int64_t
+      direction: in
+      role: default
+    - name: validwhen
+      type: bool
+      direction: in
+      role: BitMaskedArray-valid_when
+    - name: lsb_order
+      type: bool
+      direction: in
+      role: BitMaskedArray-lsb_order
+  definition: |
+    def awkward_BitMaskedArray_to_ByteMaskedArray(tobytemask , frombitmask , bitmasklength , validwhen , lsb_order ):
+        if lsb_order:
+            for i in range(bitmasklength):
+                byte = frombitmask[i]
+                tobytemask[(i * 8) + 0] = (byte & uint8(1)) != validwhen
+                byte >>= 1
+                tobytemask[(i * 8) + 1] = (byte & uint8(1)) != validwhen
+                byte >>= 1
+                tobytemask[(i * 8) + 2] = (byte & uint8(1)) != validwhen
+                byte >>= 1
+                tobytemask[(i * 8) + 3] = (byte & uint8(1)) != validwhen
+                byte >>= 1
+                tobytemask[(i * 8) + 4] = (byte & uint8(1)) != validwhen
+                byte >>= 1
+                tobytemask[(i * 8) + 5] = (byte & uint8(1)) != validwhen
+                byte >>= 1
+                tobytemask[(i * 8) + 6] = (byte & uint8(1)) != validwhen
+                byte >>= 1
+                tobytemask[(i * 8) + 7] = (byte & uint8(1)) != validwhen
+        else:
+            for i in range(bitmasklength):
+                byte = frombitmask[i]
+                tobytemask[(i * 8) + 0] = ((byte & uint8(128)) != 0) != validwhen
+                byte <<= 1
+                tobytemask[(i * 8) + 1] = ((byte & uint8(128)) != 0) != validwhen
+                byte <<= 1
+                tobytemask[(i * 8) + 2] = ((byte & uint8(128)) != 0) != validwhen
+                byte <<= 1
+                tobytemask[(i * 8) + 3] = ((byte & uint8(128)) != 0) != validwhen
+                byte <<= 1
+                tobytemask[(i * 8) + 4] = ((byte & uint8(128)) != 0) != validwhen
+                byte <<= 1
+                tobytemask[(i * 8) + 5] = ((byte & uint8(128)) != 0) != validwhen
+                byte <<= 1
+                tobytemask[(i * 8) + 6] = ((byte & uint8(128)) != 0) != validwhen
+                byte <<= 1
+                tobytemask[(i * 8) + 7] = ((byte & uint8(128)) != 0) != validwhen
+  description: null

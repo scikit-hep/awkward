@@ -6,11 +6,8 @@
 #include <sstream>
 #include <type_traits>
 
-#include "awkward/kernels/identities.h"
-#include "awkward/kernels/getitem.h"
-#include "awkward/kernels/operations.h"
-#include "awkward/kernels/reducers.h"
-#include "awkward/kernels/sorting.h"
+#include "awkward/kernels.h"
+#include "awkward/kernel-utils.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"

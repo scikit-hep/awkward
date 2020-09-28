@@ -1,0 +1,26 @@
+- name: awkward_index_rpad_and_clip_axis1
+  specializations:
+    - name: awkward_index_rpad_and_clip_axis1_64
+      args:
+        - name: tostarts
+          type: List[int64_t]
+          direction: out
+        - name: tostops
+          type: List[int64_t]
+          direction: out
+        - name: target
+          type: int64_t
+          direction: in
+          role: default
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_index_rpad_and_clip_axis1(tostarts , tostops , target , length ):
+        offset = 0
+        for i in range(length):
+            tostarts[i] = offset
+            offset = offset + target
+            tostops[i] = offset
+  description: null

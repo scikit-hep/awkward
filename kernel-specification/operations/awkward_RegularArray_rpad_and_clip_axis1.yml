@@ -1,0 +1,28 @@
+- name: awkward_RegularArray_rpad_and_clip_axis1
+  specializations:
+    - name: awkward_RegularArray_rpad_and_clip_axis1_64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: target
+          type: int64_t
+          direction: in
+          role: default
+        - name: size
+          type: int64_t
+          direction: in
+          role: default
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_RegularArray_rpad_and_clip_axis1(toindex , target , size , length ):
+        shorter = target if target < size else size
+        for i in range(length):
+            for j in range(shorter):
+                toindex[(i * target) + j] = (i * size) + j
+            for j in range(shorter, target):
+                toindex[(i * target) + j] = -1
+  description: null

@@ -4,11 +4,9 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
-#include "awkward/kernels/operations.h"
-#include "awkward/kernels/getitem.h"
-#include "awkward/kernels/identities.h"
-#include "awkward/kernels/reducers.h"
-#include "awkward/kernels/cuda-utils.h"
+#include "awkward/kernels.h"
+#include "awkward/kernel-utils.h"
+#include "awkward/cuda-utils.h"
 
 #include "awkward/kernel-dispatch.h"
 

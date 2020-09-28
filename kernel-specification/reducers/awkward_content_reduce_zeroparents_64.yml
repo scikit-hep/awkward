@@ -1,0 +1,14 @@
+- name: awkward_content_reduce_zeroparents_64
+  args:
+    - name: toparents
+      type: List[int64_t]
+      direction: out
+    - name: length
+      type: int64_t
+      direction: in
+      role: reducer-length
+  definition: |
+    def awkward_content_reduce_zeroparents_64(toparents , length ):
+        for i in range(length):
+            toparents[i] = 0
+  description: null

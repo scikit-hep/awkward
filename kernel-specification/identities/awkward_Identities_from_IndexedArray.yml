@@ -1,0 +1,187 @@
+- name: awkward_Identities_from_IndexedArray
+  specializations:
+    - name: awkward_Identities32_from_IndexedArray32
+      args:
+        - name: uniquecontents
+          type: List[bool]
+          direction: out
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: Identities-array
+        - name: fromindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Identities64_from_IndexedArrayU32
+      args:
+        - name: uniquecontents
+          type: List[bool]
+          direction: out
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: Identities-array
+        - name: fromindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Identities32_from_IndexedArray64
+      args:
+        - name: uniquecontents
+          type: List[bool]
+          direction: out
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: Identities-array
+        - name: fromindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Identities64_from_IndexedArray64
+      args:
+        - name: uniquecontents
+          type: List[bool]
+          direction: out
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: Identities-array
+        - name: fromindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Identities32_from_IndexedArrayU32
+      args:
+        - name: uniquecontents
+          type: List[bool]
+          direction: out
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: Identities-array
+        - name: fromindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Identities64_from_IndexedArray32
+      args:
+        - name: uniquecontents
+          type: List[bool]
+          direction: out
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: Identities-array
+        - name: fromindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_Identities_from_IndexedArray(uniquecontents , toptr , fromptr , fromindex , tolength , fromlength , fromwidth ):
+        for k in range(tolength * fromwidth):
+            toptr[k] = -1
+        for i in range(fromlength):
+            j = fromindex[i]
+            if j >= tolength:
+                raise ValueError("max(index) > len(content)")
+            else:
+                if j >= 0:
+                    if toptr[j * fromwidth] != -1:
+                        uniquecontents[0] = False
+                        return
+                    for k in range(fromwidth):
+                        toptr[(j * fromwidth) + k] = fromptr[(i * fromwidth) + k]
+        uniquecontents[0] = True
+  description: null

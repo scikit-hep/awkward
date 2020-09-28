@@ -1,0 +1,69 @@
+- name: awkward_ListArray_validity
+  specializations:
+    - name: awkward_ListArrayU32_validity
+      args:
+        - name: starts
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: stops
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArray32_validity
+      args:
+        - name: starts
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: stops
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArray64_validity
+      args:
+        - name: starts
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: stops
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-stops
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_ListArray_validity(starts , stops , length , lencontent ):
+        for i in range(length):
+            start = starts[i]
+            stop = stops[i]
+            if start != stop:
+                if start > stop:
+                    raise ValueError("start[i] > stop[i]")
+                if start < 0:
+                    raise ValueError("start[i] < 0")
+                if stop > lencontent:
+                    raise ValueError("stop[i] > len(content)")
+  description: null

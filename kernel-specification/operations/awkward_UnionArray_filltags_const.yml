@@ -1,0 +1,24 @@
+- name: awkward_UnionArray_filltags_const
+  specializations:
+    - name: awkward_UnionArray_filltags_to8_const
+      args:
+        - name: totags
+          type: List[int8_t]
+          direction: out
+        - name: totagsoffset
+          type: int64_t
+          direction: in
+          role: default
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: base
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_UnionArray_filltags_const(totags , totagsoffset , length , base ):
+        for i in range(length):
+            totags[totagsoffset + i] = float(base)
+  description: null

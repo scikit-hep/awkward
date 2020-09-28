@@ -1,0 +1,25 @@
+- name: awkward_RegularArray_getitem_carry
+  specializations:
+    - name: awkward_RegularArray_getitem_carry_64
+      args:
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: fromcarry
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lencarry
+          type: int64_t
+          direction: in
+          role: default
+        - name: size
+          type: int64_t
+          direction: in
+          role: RegularArray-size
+  definition: |
+    def awkward_RegularArray_getitem_carry(tocarry , fromcarry , lencarry , size ):
+        for i in range(lencarry):
+            for j in range(size):
+                tocarry[(i * size) + j] = (fromcarry[i] * size) + j
+  description: null

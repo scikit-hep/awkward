@@ -1,0 +1,53 @@
+- name: awkward_ListArray_getitem_jagged_shrink
+  specializations:
+    - name: awkward_ListArray_getitem_jagged_shrink_64
+      args:
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: tosmalloffsets
+          type: List[int64_t]
+          direction: out
+        - name: tolargeoffsets
+          type: List[int64_t]
+          direction: out
+        - name: slicestarts
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: slicestops
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-stops
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: missing
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+  definition: |
+    def awkward_ListArray_getitem_jagged_shrink(tocarry , tosmalloffsets , tolargeoffsets , slicestarts , slicestops , length , missing ):
+        k = 0
+        if length == 0:
+            tosmalloffsets[0] = 0
+            tolargeoffsets[0] = 0
+        else:
+            tosmalloffsets[0] = slicestarts[0]
+            tolargeoffsets[0] = slicestarts[0]
+        for i in range(length):
+            slicestart = slicestarts[i]
+            slicestop = slicestops[i]
+            if slicestart != slicestop:
+                smallcount = 0
+                for j in range(slicestart, slicestop):
+                    if missing[j] >= 0:
+                        tocarry[k] = j
+                        k = k + 1
+                        smallcount = smallcount + 1
+                tosmalloffsets[i + 1] = tosmalloffsets[i] + smallcount
+            else:
+                tosmalloffsets[i + 1] = tosmalloffsets[i]
+            tolargeoffsets[i + 1] = tolargeoffsets[i] + (slicestop - slicestart)
+  description: null

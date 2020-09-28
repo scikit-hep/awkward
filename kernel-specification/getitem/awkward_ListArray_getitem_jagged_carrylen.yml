@@ -1,0 +1,25 @@
+- name: awkward_ListArray_getitem_jagged_carrylen
+  specializations:
+    - name: awkward_ListArray_getitem_jagged_carrylen_64
+      args:
+        - name: carrylen
+          type: List[int64_t]
+          direction: out
+        - name: slicestarts
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: slicestops
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-stops
+        - name: sliceouterlen
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_ListArray_getitem_jagged_carrylen(carrylen , slicestarts , slicestops , sliceouterlen ):
+        carrylen[0] = 0
+        for i in range(sliceouterlen):
+            carrylen[0] = carrylen[0] + int(slicestops[i] - slicestarts[i])
+  description: null

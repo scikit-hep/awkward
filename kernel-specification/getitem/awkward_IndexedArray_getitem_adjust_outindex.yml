@@ -1,0 +1,46 @@
+- name: awkward_IndexedArray_getitem_adjust_outindex
+  specializations:
+    - name: awkward_IndexedArray_getitem_adjust_outindex_64
+      args:
+        - name: tomask
+          type: List[int8_t]
+          direction: out
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: tononzero
+          type: List[int64_t]
+          direction: out
+        - name: fromindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: fromindexlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: nonzero
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: nonzerolength
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_IndexedArray_getitem_adjust_outindex(tomask , toindex , tononzero , fromindex , fromindexlength , nonzero , nonzerolength ):
+        j = 0
+        k = 0
+        for i in range(fromindexlength):
+            fromval = fromindex[i]
+            tomask[i] = fromval < 0
+            if fromval < 0:
+                toindex[k] = -1
+                k = k + 1
+            else:
+                if (j < nonzerolength) and (fromval == nonzero[j]):
+                    tononzero[j] = fromval + (k - j)
+                    toindex[k] = j
+                    j = j + 1
+                    k = k + 1
+  description: null

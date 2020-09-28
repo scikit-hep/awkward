@@ -1,0 +1,104 @@
+- name: awkward_ListArray_fill
+  specializations:
+    - name: awkward_ListArray_fill_to64_from64
+      args:
+        - name: tostarts
+          type: List[int64_t]
+          direction: out
+        - name: tostartsoffset
+          type: int64_t
+          direction: in
+          role: default
+        - name: tostops
+          type: List[int64_t]
+          direction: out
+        - name: tostopsoffset
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromstarts
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-stops
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: base
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArray_fill_to64_from32
+      args:
+        - name: tostarts
+          type: List[int64_t]
+          direction: out
+        - name: tostartsoffset
+          type: int64_t
+          direction: in
+          role: default
+        - name: tostops
+          type: List[int64_t]
+          direction: out
+        - name: tostopsoffset
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromstarts
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: base
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArray_fill_to64_fromU32
+      args:
+        - name: tostarts
+          type: List[int64_t]
+          direction: out
+        - name: tostartsoffset
+          type: int64_t
+          direction: in
+          role: default
+        - name: tostops
+          type: List[int64_t]
+          direction: out
+        - name: tostopsoffset
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromstarts
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: base
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_ListArray_fill(tostarts , tostartsoffset , tostops , tostopsoffset , fromstarts , fromstops , length , base ):
+        for i in range(length):
+            tostarts[tostartsoffset + i] = float(fromstarts[i] + base)
+            tostops[tostopsoffset + i] = float(fromstops[i] + base)
+  description: null

@@ -1,0 +1,64 @@
+- name: awkward_Identities_from_RegularArray
+  specializations:
+    - name: awkward_Identities32_from_RegularArray
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: Identities-array
+        - name: size
+          type: int64_t
+          direction: in
+          role: RegularArray-size
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Identities64_from_RegularArray
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: Identities-array
+        - name: size
+          type: int64_t
+          direction: in
+          role: RegularArray-size
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_Identities_from_RegularArray(toptr , fromptr , size , tolength , fromlength , fromwidth ):
+        for i in range(fromlength):
+            for j in range(size):
+                for k in range(fromwidth):
+                    toptr[(((i * size) + j) * (fromwidth + 1)) + k] = fromptr[(i * fromwidth) + k]
+                toptr[(((i * size) + j) * (fromwidth + 1)) + fromwidth] = float(j)
+        k = ((fromlength + 1) * size) * (fromwidth + 1)
+        while k < (tolength * (fromwidth + 1)):
+            toptr[k] = -1
+            k = k + 1
+  description: null

@@ -1,0 +1,27 @@
+- name: awkward_slicemissing_check_same
+  args:
+    - name: same
+      type: List[bool]
+      direction: out
+    - name: bytemask
+      type: Const[List[int8_t]]
+      direction: in
+      role: ByteMaskedArray-mask
+    - name: missingindex
+      type: Const[List[int64_t]]
+      direction: in
+      role: IndexedArray-index
+    - name: length
+      type: int64_t
+      direction: in
+      role: default
+  definition: |
+    def awkward_slicemissing_check_same(same , bytemask , missingindex , length ):
+        same[0] = True
+        for i in range(length):
+            left = bytemask[i] != 0
+            right = missingindex[i] < 0
+            if left != right:
+                same[0] = False
+                return
+  description: null

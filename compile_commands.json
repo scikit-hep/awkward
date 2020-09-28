@@ -1,0 +1,367 @@
+[
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -D_ext_EXPORTS -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -I/home/trickarcher/projects/awkward-1.0/pybind11/include -I/usr/include/python3.8 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -flto -fno-fat-lto-objects -std=c++11 -o CMakeFiles/_ext.dir/src/python/_ext.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/python/_ext.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/python/_ext.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -D_ext_EXPORTS -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -I/home/trickarcher/projects/awkward-1.0/pybind11/include -I/usr/include/python3.8 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -flto -fno-fat-lto-objects -std=c++11 -o CMakeFiles/_ext.dir/src/python/content.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/python/content.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/python/content.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -D_ext_EXPORTS -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -I/home/trickarcher/projects/awkward-1.0/pybind11/include -I/usr/include/python3.8 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -flto -fno-fat-lto-objects -std=c++11 -o CMakeFiles/_ext.dir/src/python/forms.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/python/forms.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/python/forms.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -D_ext_EXPORTS -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -I/home/trickarcher/projects/awkward-1.0/pybind11/include -I/usr/include/python3.8 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -flto -fno-fat-lto-objects -std=c++11 -o CMakeFiles/_ext.dir/src/python/identities.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/python/identities.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/python/identities.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -D_ext_EXPORTS -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -I/home/trickarcher/projects/awkward-1.0/pybind11/include -I/usr/include/python3.8 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -flto -fno-fat-lto-objects -std=c++11 -o CMakeFiles/_ext.dir/src/python/index.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/python/index.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/python/index.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -D_ext_EXPORTS -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -I/home/trickarcher/projects/awkward-1.0/pybind11/include -I/usr/include/python3.8 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -flto -fno-fat-lto-objects -std=c++11 -o CMakeFiles/_ext.dir/src/python/io.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/python/io.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/python/io.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -D_ext_EXPORTS -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -I/home/trickarcher/projects/awkward-1.0/pybind11/include -I/usr/include/python3.8 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -flto -fno-fat-lto-objects -std=c++11 -o CMakeFiles/_ext.dir/src/python/kernel_utils.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/python/kernel_utils.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/python/kernel_utils.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -D_ext_EXPORTS -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -I/home/trickarcher/projects/awkward-1.0/pybind11/include -I/usr/include/python3.8 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -flto -fno-fat-lto-objects -std=c++11 -o CMakeFiles/_ext.dir/src/python/partition.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/python/partition.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/python/partition.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -D_ext_EXPORTS -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -I/home/trickarcher/projects/awkward-1.0/pybind11/include -I/usr/include/python3.8 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -flto -fno-fat-lto-objects -std=c++11 -o CMakeFiles/_ext.dir/src/python/startup.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/python/startup.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/python/startup.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -D_ext_EXPORTS -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -I/home/trickarcher/projects/awkward-1.0/pybind11/include -I/usr/include/python3.8 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -flto -fno-fat-lto-objects -std=c++11 -o CMakeFiles/_ext.dir/src/python/types.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/python/types.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/python/types.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -D_ext_EXPORTS -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -I/home/trickarcher/projects/awkward-1.0/pybind11/include -I/usr/include/python3.8 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -flto -fno-fat-lto-objects -std=c++11 -o CMakeFiles/_ext.dir/src/python/virtual.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/python/virtual.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/python/virtual.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/test0074.dir/tests/test_0074-argsort-and-sort-rawarray.cpp.o -c /home/trickarcher/projects/awkward-1.0/tests/test_0074-argsort-and-sort-rawarray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/tests/test_0074-argsort-and-sort-rawarray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/test0030.dir/tests/test_0030-recordarray-in-numba.cpp.o -c /home/trickarcher/projects/awkward-1.0/tests/test_0030-recordarray-in-numba.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/tests/test_0030-recordarray-in-numba.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/test0019.dir/tests/test_0019-use-json-library.cpp.o -c /home/trickarcher/projects/awkward-1.0/tests/test_0019-use-json-library.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/tests/test_0019-use-json-library.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/test0016.dir/tests/test_0016-finish-getitem-for-rawarray.cpp.o -c /home/trickarcher/projects/awkward-1.0/tests/test_0016-finish-getitem-for-rawarray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/tests/test_0016-finish-getitem-for-rawarray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/Content.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/Content.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/Content.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/Identities.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/Identities.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/Identities.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/Index.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/Index.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/Index.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/Iterator.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/Iterator.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/Iterator.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/Reducer.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/Reducer.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/Reducer.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/Slice.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/Slice.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/Slice.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/BitMaskedArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/BitMaskedArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/BitMaskedArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/ByteMaskedArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/ByteMaskedArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/ByteMaskedArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/EmptyArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/EmptyArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/EmptyArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/IndexedArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/IndexedArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/IndexedArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/ListArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/ListArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/ListArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/ListOffsetArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/ListOffsetArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/ListOffsetArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/None.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/None.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/None.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/NumpyArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/NumpyArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/NumpyArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/Record.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/Record.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/Record.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/RecordArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/RecordArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/RecordArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/RegularArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/RegularArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/RegularArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/UnionArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/UnionArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/UnionArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/UnmaskedArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/UnmaskedArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/UnmaskedArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/array/VirtualArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/array/VirtualArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/array/VirtualArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/ArrayBuilder.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/ArrayBuilder.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/ArrayBuilder.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/ArrayBuilderOptions.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/ArrayBuilderOptions.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/ArrayBuilderOptions.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/BoolBuilder.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/BoolBuilder.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/BoolBuilder.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/Builder.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/Builder.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/Builder.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/Float64Builder.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/Float64Builder.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/Float64Builder.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/GrowableBuffer.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/GrowableBuffer.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/GrowableBuffer.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/IndexedBuilder.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/IndexedBuilder.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/IndexedBuilder.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/Int64Builder.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/Int64Builder.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/Int64Builder.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/ListBuilder.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/ListBuilder.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/ListBuilder.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/OptionBuilder.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/OptionBuilder.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/OptionBuilder.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/RecordBuilder.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/RecordBuilder.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/RecordBuilder.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/StringBuilder.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/StringBuilder.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/StringBuilder.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/TupleBuilder.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/TupleBuilder.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/TupleBuilder.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/UnionBuilder.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/UnionBuilder.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/UnionBuilder.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/builder/UnknownBuilder.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/builder/UnknownBuilder.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/builder/UnknownBuilder.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/io/json.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/io/json.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/io/json.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/io/uproot.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/io/uproot.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/io/uproot.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/kernel-dispatch.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/kernel-dispatch.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/kernel-dispatch.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/partition/IrregularlyPartitionedArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/partition/IrregularlyPartitionedArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/partition/IrregularlyPartitionedArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/partition/PartitionedArray.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/partition/PartitionedArray.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/partition/PartitionedArray.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/type/ArrayType.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/type/ArrayType.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/type/ArrayType.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/type/ListType.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/type/ListType.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/type/ListType.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/type/OptionType.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/type/OptionType.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/type/OptionType.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/type/PrimitiveType.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/type/PrimitiveType.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/type/PrimitiveType.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/type/RecordType.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/type/RecordType.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/type/RecordType.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/type/RegularType.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/type/RegularType.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/type/RegularType.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/type/Type.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/type/Type.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/type/Type.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/type/UnionType.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/type/UnionType.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/type/UnionType.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/type/UnknownType.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/type/UnknownType.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/type/UnknownType.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/util.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/util.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/util.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/virtual/ArrayCache.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/virtual/ArrayCache.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/virtual/ArrayCache.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DLIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-objects.dir/src/libawkward/virtual/ArrayGenerator.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/libawkward/virtual/ArrayGenerator.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/libawkward/virtual/ArrayGenerator.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-cpu-kernels-objects.dir/src/cpu-kernels/allocators.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/cpu-kernels/allocators.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/cpu-kernels/allocators.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-cpu-kernels-objects.dir/src/cpu-kernels/getitem.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/cpu-kernels/getitem.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/cpu-kernels/getitem.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-cpu-kernels-objects.dir/src/cpu-kernels/identities.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/cpu-kernels/identities.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/cpu-kernels/identities.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-cpu-kernels-objects.dir/src/cpu-kernels/operations.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/cpu-kernels/operations.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/cpu-kernels/operations.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-cpu-kernels-objects.dir/src/cpu-kernels/reducers.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/cpu-kernels/reducers.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/cpu-kernels/reducers.cpp"
+},
+{
+  "directory": "/home/trickarcher/projects/awkward-1.0/build",
+  "command": "/usr/bin/c++ -DVERSION_INFO=\\\"0.2.38\\\" -I/home/trickarcher/projects/awkward-1.0/include -I/home/trickarcher/projects/awkward-1.0/rapidjson/include -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -std=c++11 -o CMakeFiles/awkward-cpu-kernels-objects.dir/src/cpu-kernels/sorting.cpp.o -c /home/trickarcher/projects/awkward-1.0/src/cpu-kernels/sorting.cpp",
+  "file": "/home/trickarcher/projects/awkward-1.0/src/cpu-kernels/sorting.cpp"
+}
+]

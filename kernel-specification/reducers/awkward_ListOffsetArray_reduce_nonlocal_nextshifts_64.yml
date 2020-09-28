@@ -1,0 +1,55 @@
+- name: awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64
+  args:
+    - name: nummissing
+      type: List[int64_t]
+      direction: out
+    - name: missing
+      type: List[int64_t]
+      direction: out
+    - name: nextshifts
+      type: List[int64_t]
+      direction: out
+    - name: offsets
+      type: Const[List[int64_t]]
+      direction: in
+      role: reducer-offsets
+    - name: length
+      type: int64_t
+      direction: in
+      role: reducer-length
+    - name: starts
+      type: Const[List[int64_t]]
+      direction: in
+      role: reducer-starts
+    - name: parents
+      type: Const[List[int64_t]]
+      direction: in
+      role: reducer-parents
+    - name: maxcount
+      type: int64_t
+      direction: in
+      role: reducer-maxcount
+    - name: nextlen
+      type: int64_t
+      direction: in
+      role: reducer-nextlen
+    - name: nextcarry
+      type: Const[List[int64_t]]
+      direction: in
+      role: reducer-nextcarry
+  definition: |
+    def awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(nummissing , missing , nextshifts , offsets , length , starts , parents , maxcount , nextlen , nextcarry ):
+        for i in range(length):
+            start = offsets[i]
+            stop = offsets[i + 1]
+            count = stop - start
+            if starts[parents[i]] == i:
+                for k in range(maxcount):
+                    nummissing[k] = 0
+            for k in range(count, maxcount):
+                nummissing[k] = nummissing[k] + 1
+            for j in range(count):
+                missing[start + j] = nummissing[j]
+        for j in range(nextlen):
+            nextshifts[j] = missing[nextcarry[j]]
+  description: null

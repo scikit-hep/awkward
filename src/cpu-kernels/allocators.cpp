@@ -2,7 +2,7 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/allocators.cpp", line)
 
-#include "awkward/kernels/allocators.h"
+#include "awkward/allocators.h"
 
 void* awkward_malloc(int64_t bytelength) {
   if (bytelength == 0) {

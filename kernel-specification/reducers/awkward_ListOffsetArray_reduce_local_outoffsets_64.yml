@@ -1,0 +1,31 @@
+- name: awkward_ListOffsetArray_reduce_local_outoffsets_64
+  args:
+    - name: outoffsets
+      type: List[int64_t]
+      direction: out
+    - name: parents
+      type: Const[List[int64_t]]
+      direction: in
+      role: reducer-parents
+    - name: lenparents
+      type: int64_t
+      direction: in
+      role: reducer-lenparents
+    - name: outlength
+      type: int64_t
+      direction: in
+      role: reducer-outlength
+  definition: |
+    def awkward_ListOffsetArray_reduce_local_outoffsets_64(outoffsets , parents , lenparents , outlength ):
+        k = 0
+        last = -1
+        for i in range(lenparents):
+            while last < parents[i]:
+                outoffsets[k] = i
+                k = k + 1
+                last = last + 1
+    
+        while k <= outlength:
+            outoffsets[k] = lenparents
+            k = k + 1
+  description: null

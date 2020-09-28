@@ -6,10 +6,10 @@
 template <typename T, typename C>
 __global__ void
 awkward_ListOffsetArray_rpad_and_clip_axis1_kernel(
-    T* toindex,
-    const C* fromoffsets,
-    int64_t length,
-    int64_t target) {
+  T* toindex,
+  const C* fromoffsets,
+  int64_t length,
+  int64_t target) {
   int64_t thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
   int64_t thread_idy = blockIdx.y * blockDim.y + threadIdx.y;
 

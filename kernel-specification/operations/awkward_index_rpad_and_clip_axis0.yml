@@ -1,0 +1,23 @@
+- name: awkward_index_rpad_and_clip_axis0
+  specializations:
+    - name: awkward_index_rpad_and_clip_axis0_64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: target
+          type: int64_t
+          direction: in
+          role: default
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_index_rpad_and_clip_axis0(toindex , target , length ):
+        shorter = target if target < length else length
+        for i in range(shorter):
+            toindex[i] = i
+        for i in range(shorter, target):
+            toindex[i] = -1
+  description: null

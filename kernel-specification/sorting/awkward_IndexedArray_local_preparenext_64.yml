@@ -1,0 +1,28 @@
+- name: awkward_IndexedArray_local_preparenext_64
+  args:
+    - name: tocarry
+      type: List[int64_t]
+      direction: out
+    - name: starts
+      type: Const[List[int64_t]]
+      direction: in
+      role: ListArray-starts
+    - name: parents
+      type: Const[List[int64_t]]
+      direction: in
+      role: IndexedArray-index
+    - name: parentslength
+      type: const int64_t
+      direction: in
+      role: default
+    - name: nextparents
+      type: Const[List[int64_t]]
+      direction: in
+      role: IndexedArray-index
+    - name: nextlen
+      type: const int64_t
+      direction: in
+      role: default
+  definition: |
+    Insert Python definition here
+  description: null

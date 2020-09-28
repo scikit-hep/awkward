@@ -1,0 +1,151 @@
+- name: awkward_ListArray_getitem_jagged_apply
+  specializations:
+    - name: awkward_ListArray64_getitem_jagged_apply_64
+      args:
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: slicestarts
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: slicestops
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-stops
+        - name: sliceouterlen
+          type: int64_t
+          direction: in
+          role: ListArray-length
+        - name: sliceindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: sliceinnerlen
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromstarts
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray2-starts
+        - name: fromstops
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray2-stops
+        - name: contentlen
+          type: int64_t
+          direction: in
+          role: ListArray2-length
+    - name: awkward_ListArrayU32_getitem_jagged_apply_64
+      args:
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: slicestarts
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: slicestops
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-stops
+        - name: sliceouterlen
+          type: int64_t
+          direction: in
+          role: ListArray-length
+        - name: sliceindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: sliceinnerlen
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromstarts
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray2-starts
+        - name: fromstops
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray2-stops
+        - name: contentlen
+          type: int64_t
+          direction: in
+          role: ListArray2-length
+    - name: awkward_ListArray32_getitem_jagged_apply_64
+      args:
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: slicestarts
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: slicestops
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-stops
+        - name: sliceouterlen
+          type: int64_t
+          direction: in
+          role: ListArray-length
+        - name: sliceindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: sliceinnerlen
+          type: int64_t
+          direction: in
+          role: IndexedArray-length
+        - name: fromstarts
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray2-starts
+        - name: fromstops
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray2-stops
+        - name: contentlen
+          type: int64_t
+          direction: in
+          role: ListArray2-length
+  definition: |
+    def awkward_ListArray_getitem_jagged_apply(tooffsets , tocarry , slicestarts , slicestops , sliceouterlen , sliceindex , sliceinnerlen , fromstarts , fromstops , contentlen ):
+        k = 0
+        for i in range(sliceouterlen):
+            slicestart = slicestarts[i]
+            slicestop = slicestops[i]
+            tooffsets[i] = float(k)
+            if slicestart != slicestop:
+                if slicestop < slicestart:
+                    raise ValueError("jagged slice's stops[i] < starts[i]")
+                if slicestop > sliceinnerlen:
+                    raise ValueError("jagged slice's offsets extend beyond its content")
+                start = int(fromstarts[i])
+                stop = int(fromstops[i])
+                if stop < start:
+                    raise ValueError("stops[i] < starts[i]")
+                if (start != stop) and (stop > contentlen):
+                    raise ValueError("stops[i] > len(content)")
+                count = stop - start
+                for j in range(slicestart, slicestop):
+                    index = int(sliceindex[j])
+                    if index < 0:
+                        index += count
+                    if not ((0 <= index) and (index < count)):
+                        raise ValueError("index out of range")
+                    tocarry[k] = start + index
+                    k = k + 1
+            tooffsets[i + 1] = float(k)
+  description: null

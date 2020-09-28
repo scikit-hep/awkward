@@ -1,0 +1,44 @@
+- name: awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64
+  args:
+    - name: outstarts
+      type: List[int64_t]
+      direction: out
+    - name: outstops
+      type: List[int64_t]
+      direction: out
+    - name: distincts
+      type: Const[List[int64_t]]
+      direction: in
+      role: reducer-distincts
+    - name: lendistincts
+      type: int64_t
+      direction: in
+      role: reducer-lendistincts
+    - name: gaps
+      type: Const[List[int64_t]]
+      direction: in
+      role: reducer-gaps
+    - name: outlength
+      type: int64_t
+      direction: in
+      role: reducer-outlength
+  definition: |
+    def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(outstarts , outstops , distincts , lendistincts , gaps , outlength ):
+        j = 0
+        k = 0
+        maxdistinct = -1
+        for i in range(lendistincts):
+            if maxdistinct < distincts[i]:
+                maxdistinct = distincts[i]
+                for gappy in range(gaps[j]):
+                    outstarts[k] = i
+                    outstops[k] = i
+                    k = k + 1
+                j = j + 1
+            if distincts[i] != -1:
+                outstops[k - 1] = i + 1
+        while k < outlength:
+            outstarts[k] = lendistincts + 1
+            outstops[k] = lendistincts + 1
+            k = k + 1
+  description: null

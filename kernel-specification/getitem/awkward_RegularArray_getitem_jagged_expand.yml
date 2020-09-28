@@ -1,0 +1,29 @@
+- name: awkward_RegularArray_getitem_jagged_expand
+  specializations:
+    - name: awkward_RegularArray_getitem_jagged_expand_64
+      args:
+        - name: multistarts
+          type: List[int64_t]
+          direction: out
+        - name: multistops
+          type: List[int64_t]
+          direction: out
+        - name: singleoffsets
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: regularsize
+          type: int64_t
+          direction: in
+          role: RegularArray-size
+        - name: regularlength
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_RegularArray_getitem_jagged_expand(multistarts , multistops , singleoffsets , regularsize , regularlength ):
+        for i in range(regularlength):
+            for j in range(regularsize):
+                multistarts[(i * regularsize) + j] = singleoffsets[j]
+                multistops[(i * regularsize) + j] = singleoffsets[j + 1]
+  description: null

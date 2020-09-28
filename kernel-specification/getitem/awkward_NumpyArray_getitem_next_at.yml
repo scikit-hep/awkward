@@ -1,0 +1,28 @@
+- name: awkward_NumpyArray_getitem_next_at
+  specializations:
+    - name: awkward_NumpyArray_getitem_next_at_64
+      args:
+        - name: nextcarryptr
+          type: List[int64_t]
+          direction: out
+        - name: carryptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: lencarry
+          type: int64_t
+          direction: in
+          role: default
+        - name: skip
+          type: int64_t
+          direction: in
+          role: default
+        - name: at
+          type: int64_t
+          direction: in
+          role: ListArray-at
+  definition: |
+    def awkward_NumpyArray_getitem_next_at(nextcarryptr , carryptr , lencarry , skip , at ):
+        for i in range(lencarry):
+            nextcarryptr[i] = (skip * carryptr[i]) + at
+  description: null

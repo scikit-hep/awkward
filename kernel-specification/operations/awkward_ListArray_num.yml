@@ -1,0 +1,60 @@
+- name: awkward_ListArray_num
+  specializations:
+    - name: awkward_ListArrayU32_num_64
+      args:
+        - name: tonum
+          type: List[int64_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArray64_num_64
+      args:
+        - name: tonum
+          type: List[int64_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-stops
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListArray32_num_64
+      args:
+        - name: tonum
+          type: List[int64_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_ListArray_num(tonum , fromstarts , fromstops , length ):
+        for i in range(length):
+            start = fromstarts[i]
+            stop = fromstops[i]
+            tonum[i] = float(stop - start)
+  description: null

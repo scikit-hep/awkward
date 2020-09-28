@@ -1,0 +1,30 @@
+- name: awkward_ByteMaskedArray_overlay_mask
+  specializations:
+    - name: awkward_ByteMaskedArray_overlay_mask8
+      args:
+        - name: tomask
+          type: List[int8_t]
+          direction: out
+        - name: theirmask
+          type: Const[List[int8_t]]
+          direction: in
+          role: ByteMaskedArray-mask
+        - name: mymask
+          type: Const[List[int8_t]]
+          direction: in
+          role: ByteMaskedArray2-mask
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: validwhen
+          type: bool
+          direction: in
+          role: ByteMaskedArray-valid_when
+  definition: |
+    def awkward_ByteMaskedArray_overlay_mask(tomask , theirmask , mymask , length , validwhen ):
+        for i in range(length):
+            theirs = theirmask[i]
+            mine = (mymask[i] != 0) != validwhen
+            tomask[i] = 1 if theirs | mine else 0
+  description: null

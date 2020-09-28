@@ -1,0 +1,48 @@
+- name: awkward_ListOffsetArray_compact_offsets
+  specializations:
+    - name: awkward_ListOffsetArrayU32_compact_offsets_64
+      args:
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: fromoffsets
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListOffsetArray32_compact_offsets_64
+      args:
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: fromoffsets
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListOffsetArray64_compact_offsets_64
+      args:
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: fromoffsets
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_ListOffsetArray_compact_offsets(tooffsets , fromoffsets , length ):
+        diff = int(fromoffsets[0])
+        tooffsets[0] = 0
+        for i in range(length):
+            tooffsets[i + 1] = fromoffsets[i + 1] - diff
+  description: null

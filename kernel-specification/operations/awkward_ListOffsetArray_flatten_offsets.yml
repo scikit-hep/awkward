@@ -1,0 +1,70 @@
+- name: awkward_ListOffsetArray_flatten_offsets
+  specializations:
+    - name: awkward_ListOffsetArray32_flatten_offsets_64
+      args:
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: outeroffsets
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: outeroffsetslen
+          type: int64_t
+          direction: in
+          role: default
+        - name: inneroffsets
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray2-offsets
+        - name: inneroffsetslen
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListOffsetArrayU32_flatten_offsets_64
+      args:
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: outeroffsets
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: outeroffsetslen
+          type: int64_t
+          direction: in
+          role: default
+        - name: inneroffsets
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray2-offsets
+        - name: inneroffsetslen
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_ListOffsetArray64_flatten_offsets_64
+      args:
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: outeroffsets
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: outeroffsetslen
+          type: int64_t
+          direction: in
+          role: default
+        - name: inneroffsets
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray2-offsets
+        - name: inneroffsetslen
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_ListOffsetArray_flatten_offsets(tooffsets , outeroffsets , outeroffsetslen , inneroffsets , inneroffsetslen ):
+        for i in range(outeroffsetslen):
+            tooffsets[i] = inneroffsets[outeroffsets[i]]
+  description: null

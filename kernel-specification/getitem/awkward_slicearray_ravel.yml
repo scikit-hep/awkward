@@ -1,0 +1,34 @@
+- name: awkward_slicearray_ravel
+  specializations:
+    - name: awkward_slicearray_ravel_64
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: default
+        - name: ndim
+          type: int64_t
+          direction: in
+          role: default
+        - name: shape
+          type: Const[List[int64_t]]
+          direction: in
+          role: default
+        - name: strides
+          type: Const[List[int64_t]]
+          direction: in
+          role: default
+  definition: |
+    def awkward_slicearray_ravel(toptr , fromptr , ndim , shape , strides ):
+        if ndim == 1:
+            for i in range(shape[0]):
+                toptr[i] = fromptr[i * strides[0]]
+        else:
+            for i in range(shape[0]):
+                err = awkward_slicearray_ravel(toptr[i * shape[1]], fromptr[i * strides[0]], ndim - 1, shape[1], strides[1])
+                if err.str != nullptr:
+                    return err
+  description: null

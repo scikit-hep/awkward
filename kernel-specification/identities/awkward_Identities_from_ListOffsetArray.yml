@@ -1,0 +1,172 @@
+- name: awkward_Identities_from_ListOffsetArray
+  specializations:
+    - name: awkward_Identities32_from_ListOffsetArray32
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: Identities-array
+        - name: fromoffsets
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Identities32_from_ListOffsetArray64
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: Identities-array
+        - name: fromoffsets
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Identities64_from_ListOffsetArray64
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: Identities-array
+        - name: fromoffsets
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Identities32_from_ListOffsetArrayU32
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: Identities-array
+        - name: fromoffsets
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Identities64_from_ListOffsetArrayU32
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: Identities-array
+        - name: fromoffsets
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_Identities64_from_ListOffsetArray32
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: Identities-array
+        - name: fromoffsets
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: tolength
+          type: int64_t
+          direction: in
+          role: ListOffsetArray-length
+        - name: fromlength
+          type: int64_t
+          direction: in
+          role: default
+        - name: fromwidth
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_Identities_from_ListOffsetArray(toptr , fromptr , fromoffsets , tolength , fromlength , fromwidth ):
+        globalstart = fromoffsets[0]
+        globalstop = fromoffsets[fromlength]
+        for k in range(globalstart * (fromwidth + 1)):
+            toptr[k] = -1
+        k = globalstop * (fromwidth + 1)
+        while k < (tolength * (fromwidth + 1)):
+            toptr[k] = -1
+            k = k + 1
+        for i in range(fromlength):
+            start = fromoffsets[i]
+            stop = fromoffsets[i + 1]
+            if (start != stop) and (stop > tolength):
+                raise ValueError("max(stop) > len(content)")
+            for j in range(start, stop):
+                for k in range(fromwidth):
+                    toptr[(j * (fromwidth + 1)) + k] = fromptr[(i * fromwidth) + k]
+                toptr[(j * (fromwidth + 1)) + fromwidth] = float(j - start)
+  description: null

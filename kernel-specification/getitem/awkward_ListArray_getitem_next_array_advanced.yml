@@ -1,0 +1,126 @@
+- name: awkward_ListArray_getitem_next_array_advanced
+  specializations:
+    - name: awkward_ListArray32_getitem_next_array_advanced_64
+      args:
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: toadvanced
+          type: List[int64_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[int32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: fromarray
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: fromadvanced
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray2-offsets
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: default
+        - name: lenarray
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: ListArray-length
+    - name: awkward_ListArrayU32_getitem_next_array_advanced_64
+      args:
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: toadvanced
+          type: List[int64_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[uint32_t]]
+          direction: in
+          role: ListArray-stops
+        - name: fromarray
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: fromadvanced
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray2-offsets
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: default
+        - name: lenarray
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: ListArray-length
+    - name: awkward_ListArray64_getitem_next_array_advanced_64
+      args:
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: toadvanced
+          type: List[int64_t]
+          direction: out
+        - name: fromstarts
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-starts
+        - name: fromstops
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListArray-stops
+        - name: fromarray
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: fromadvanced
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray2-offsets
+        - name: lenstarts
+          type: int64_t
+          direction: in
+          role: default
+        - name: lenarray
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: ListArray-length
+  definition: |
+    def awkward_ListArray_getitem_next_array_advanced(tocarry , toadvanced , fromstarts , fromstops , fromarray , fromadvanced , lenstarts , lenarray , lencontent ):
+        for i in range(lenstarts):
+            if fromstops[i] < fromstarts[i]:
+                raise ValueError("stops[i] < starts[i]")
+            if (fromstarts[i] != fromstops[i]) and (fromstops[i] > lencontent):
+                raise ValueError("stops[i] > len(content)")
+            length = fromstops[i] - fromstarts[i]
+            regular_at = fromarray[fromadvanced[i]]
+            if regular_at < 0:
+                regular_at += length
+            if not ((0 <= regular_at) and (regular_at < length)):
+                raise ValueError("index out of range")
+            tocarry[i] = fromstarts[i] + regular_at
+            toadvanced[i] = i
+  description: null

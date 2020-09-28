@@ -1,0 +1,33 @@
+- name: awkward_RegularArray_getitem_next_array
+  specializations:
+    - name: awkward_RegularArray_getitem_next_array_64
+      args:
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: toadvanced
+          type: List[int64_t]
+          direction: out
+        - name: fromarray
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: lenarray
+          type: int64_t
+          direction: in
+          role: default
+        - name: size
+          type: int64_t
+          direction: in
+          role: RegularArray-size
+  definition: |
+    def awkward_RegularArray_getitem_next_array(tocarry , toadvanced , fromarray , length , lenarray , size ):
+        for i in range(length):
+            for j in range(lenarray):
+                tocarry[(i * lenarray) + j] = (i * size) + fromarray[j]
+                toadvanced[(i * lenarray) + j] = j
+  description: null

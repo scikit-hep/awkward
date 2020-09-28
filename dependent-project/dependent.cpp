@@ -6,7 +6,7 @@
 
 #include "awkward/builder/ArrayBuilder.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
-#include "awkward/kernels/getitem.h"
+#include "awkward/kernels.h"
 
 namespace py = pybind11;
 namespace ak = awkward;

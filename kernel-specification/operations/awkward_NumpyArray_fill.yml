@@ -1,0 +1,1707 @@
+- name: awkward_NumpyArray_fill
+  specializations:
+    - name: awkward_NumpyArray_fill_touint8_fromuint32
+      args:
+        - name: toptr
+          type: List[uint8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint32_fromuint8
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint8_fromuint64
+      args:
+        - name: toptr
+          type: List[int8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint8_fromint16
+      args:
+        - name: toptr
+          type: List[uint8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint8_fromint8
+      args:
+        - name: toptr
+          type: List[int8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint64_fromuint32
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint8_fromint64
+      args:
+        - name: toptr
+          type: List[int8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint32_fromfloat32
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[float]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint32_fromfloat32
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[float]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint16_fromfloat32
+      args:
+        - name: toptr
+          type: List[int16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[float]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat64_fromuint32
+      args:
+        - name: toptr
+          type: List[double]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint64_fromuint8
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint64_fromuint32
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint64_fromint64
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint64_fromint8
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint8_fromfloat32
+      args:
+        - name: toptr
+          type: List[int8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[float]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat64_fromint32
+      args:
+        - name: toptr
+          type: List[double]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint8_fromint16
+      args:
+        - name: toptr
+          type: List[int8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint32_fromint32
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint8_fromuint32
+      args:
+        - name: toptr
+          type: List[int8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint16_fromint32
+      args:
+        - name: toptr
+          type: List[uint16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint32_fromuint16
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint16_fromint16
+      args:
+        - name: toptr
+          type: List[uint16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat64_fromfloat32
+      args:
+        - name: toptr
+          type: List[double]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[float]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint8_fromuint8
+      args:
+        - name: toptr
+          type: List[uint8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint64_fromuint64
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint8_fromfloat32
+      args:
+        - name: toptr
+          type: List[uint8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[float]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint16_fromuint8
+      args:
+        - name: toptr
+          type: List[int16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat32_fromfloat64
+      args:
+        - name: toptr
+          type: List[float]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[double]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint32_fromuint16
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint32_fromint64
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint32_fromint32
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint16_fromfloat64
+      args:
+        - name: toptr
+          type: List[uint16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[double]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint8_fromint8
+      args:
+        - name: toptr
+          type: List[uint8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint32_fromint8
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint8_fromuint16
+      args:
+        - name: toptr
+          type: List[uint8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat32_fromuint8
+      args:
+        - name: toptr
+          type: List[float]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat64_fromint64
+      args:
+        - name: toptr
+          type: List[double]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint16_fromint16
+      args:
+        - name: toptr
+          type: List[int16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint16_fromint32
+      args:
+        - name: toptr
+          type: List[int16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint16_fromint8
+      args:
+        - name: toptr
+          type: List[int16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint32_fromint64
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint16_fromuint8
+      args:
+        - name: toptr
+          type: List[uint16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint32_fromuint64
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint64_fromint8
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint32_fromfloat64
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[double]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint16_fromuint16
+      args:
+        - name: toptr
+          type: List[int16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint64_fromint32
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat32_fromuint16
+      args:
+        - name: toptr
+          type: List[float]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint16_fromint64
+      args:
+        - name: toptr
+          type: List[uint16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat32_fromfloat32
+      args:
+        - name: toptr
+          type: List[float]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[float]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint8_fromint32
+      args:
+        - name: toptr
+          type: List[uint8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint16_fromint64
+      args:
+        - name: toptr
+          type: List[int16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint8_fromuint8
+      args:
+        - name: toptr
+          type: List[int8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint16_fromuint64
+      args:
+        - name: toptr
+          type: List[uint16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint16_fromuint64
+      args:
+        - name: toptr
+          type: List[int16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint8_fromfloat64
+      args:
+        - name: toptr
+          type: List[int8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[double]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat64_fromint8
+      args:
+        - name: toptr
+          type: List[double]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint64_fromfloat32
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[float]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint64_fromfloat64
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[double]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint16_fromfloat64
+      args:
+        - name: toptr
+          type: List[int16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[double]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint64_fromint64
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint32_fromuint32
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint64_fromuint8
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat32_fromint32
+      args:
+        - name: toptr
+          type: List[float]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint32_fromuint32
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint64_fromuint64
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat32_fromuint64
+      args:
+        - name: toptr
+          type: List[float]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint32_fromint8
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint8_fromuint16
+      args:
+        - name: toptr
+          type: List[int8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint64_fromuint16
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat64_fromint16
+      args:
+        - name: toptr
+          type: List[double]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint32_fromint16
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat64_fromuint16
+      args:
+        - name: toptr
+          type: List[double]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint16_fromuint16
+      args:
+        - name: toptr
+          type: List[uint16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint64_fromuint16
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint32_fromfloat64
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[double]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint32_fromuint64
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint64_fromint16
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat64_fromfloat64
+      args:
+        - name: toptr
+          type: List[double]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[double]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat64_fromuint8
+      args:
+        - name: toptr
+          type: List[double]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint64_fromint32
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint16_fromfloat32
+      args:
+        - name: toptr
+          type: List[uint16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[float]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat32_fromint16
+      args:
+        - name: toptr
+          type: List[float]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint16_fromint8
+      args:
+        - name: toptr
+          type: List[uint16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat32_fromint64
+      args:
+        - name: toptr
+          type: List[float]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint8_fromfloat64
+      args:
+        - name: toptr
+          type: List[uint8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[double]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat32_fromint8
+      args:
+        - name: toptr
+          type: List[float]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat64_fromuint64
+      args:
+        - name: toptr
+          type: List[double]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint64_fromfloat64
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[double]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint64_fromfloat32
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[float]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint64_fromint16
+      args:
+        - name: toptr
+          type: List[uint64_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint16_fromuint32
+      args:
+        - name: toptr
+          type: List[uint16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint8_fromint32
+      args:
+        - name: toptr
+          type: List[int8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint8_fromint64
+      args:
+        - name: toptr
+          type: List[uint8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tofloat32_fromuint32
+      args:
+        - name: toptr
+          type: List[float]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint32_fromint16
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_touint8_fromuint64
+      args:
+        - name: toptr
+          type: List[uint8_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint16_fromuint32
+      args:
+        - name: toptr
+          type: List[int16_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_toint32_fromuint8
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_NumpyArray_fill(toptr , tooffset , fromptr , length ):
+        for i in range(length):
+            toptr[tooffset + i] = float(fromptr[i])
+  description: null

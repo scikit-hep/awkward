@@ -1,0 +1,21 @@
+- name: awkward_RegularArray_compact_offsets
+  specializations:
+    - name: awkward_RegularArray_compact_offsets64
+      args:
+        - name: tooffsets
+          type: List[int64_t]
+          direction: out
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+        - name: size
+          type: int64_t
+          direction: in
+          role: RegularArray-size
+  definition: |
+    def awkward_RegularArray_compact_offsets(tooffsets , length , size ):
+        tooffsets[0] = 0
+        for i in range(length):
+            tooffsets[i + 1] = (i + 1) * size
+  description: null

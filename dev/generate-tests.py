@@ -1,14 +1,12 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 import copy
-import json
 import os
 from collections import OrderedDict
 from itertools import product
 
 import yaml
 from numpy import uint8
-from parser_utils import PYGEN_BLACKLIST, SUCCESS_TEST_BLACKLIST, TEST_BLACKLIST
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -30,7 +28,7 @@ class Specification(object):
                 Argument(
                     arg["name"],
                     arg["type"],
-                    arg["direction"],
+                    arg["dir"],
                     arg["role"] if "role" in arg.keys() else "default",
                 )
             )
@@ -142,23 +140,18 @@ class Specification(object):
                 tempdict = {}
                 try:
                     funcPy(**temp)
-                    if self.name not in SUCCESS_TEST_BLACKLIST or any(
-                        self.name in x for x in SUCCESS_TEST_BLACKLIST
-                    ):
-                        for arg in self.args:
-                            if arg.direction == "out":
-                                assert isinstance(temp[arg.name], dict)
-                                temparglist = self.dicttolist(
-                                    temp[arg.name], arg.typename
-                                )
-                                intests[arg.name] = self.getdummyvalue(
-                                    arg.typename, len(temparglist)
-                                )
-                                outtests[arg.name] = temparglist
-                            else:
-                                intests[arg.name] = temp[arg.name]
-                        tempdict["outargs"] = copy.deepcopy(outtests)
-                        tempdict["success"] = True
+                    for arg in self.args:
+                        if arg.direction == "out":
+                            assert isinstance(temp[arg.name], dict)
+                            temparglist = self.dicttolist(temp[arg.name], arg.typename)
+                            intests[arg.name] = self.getdummyvalue(
+                                arg.typename, len(temparglist)
+                            )
+                            outtests[arg.name] = temparglist
+                        else:
+                            intests[arg.name] = temp[arg.name]
+                    tempdict["outargs"] = copy.deepcopy(outtests)
+                    tempdict["success"] = True
                 except ValueError:
                     for arg in self.args:
                         if arg.direction == "out":
@@ -181,35 +174,19 @@ def readspec():
     genpykernels()
     specdict = {}
     with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "samples.json")
-    ) as testjson:
-        data = json.load(testjson)
-        with open(
-            os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
-        ) as infile:
-            mainspec = yaml.safe_load(infile)["kernels"]
-            for filedir in mainspec.values():
-                for relpath in filedir.values():
-                    with open(
-                        os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
-                    ) as specfile:
-                        indspec = yaml.safe_load(specfile)[0]
-                        if "def " in indspec["definition"]:
-                            if "specializations" in indspec.keys():
-                                for childfunc in indspec["specializations"]:
-                                    specdict[childfunc["name"]] = Specification(
-                                        childfunc,
-                                        data,
-                                        (indspec["name"] in TEST_BLACKLIST)
-                                        or (indspec["name"] in PYGEN_BLACKLIST),
-                                    )
-                            else:
-                                specdict[indspec["name"]] = Specification(
-                                    indspec,
-                                    data,
-                                    (indspec["name"] in TEST_BLACKLIST)
-                                    or (indspec["name"] in PYGEN_BLACKLIST),
-                                )
+        os.path.join(CURRENT_DIR, "..", "kernel-specification.yml"), "r"
+    ) as specfile:
+        loadfile = yaml.safe_load(specfile)
+        indspec = loadfile["kernels"]
+        data = loadfile["tests"]
+        for spec in indspec:
+            if "def " in spec["definition"]:
+                for childfunc in spec["specializations"]:
+                    specdict[childfunc["name"]] = Specification(
+                        childfunc,
+                        data,
+                        not spec["automatic-tests"],
+                    )
     return specdict
 
 
@@ -230,20 +207,12 @@ def gettypename(spectype):
 
 def getfuncnames():
     funcs = {}
-    with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
-    ) as infile:
-        mainspec = yaml.safe_load(infile)["kernels"]
-        for filedir in mainspec.values():
-            for relpath in filedir.values():
-                with open(
-                    os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
-                ) as specfile:
-                    indspec = yaml.safe_load(specfile)[0]
-                    funcs[indspec["name"]] = []
-                    if "specializations" in indspec.keys():
-                        for childfunc in indspec["specializations"]:
-                            funcs[indspec["name"]].append(childfunc["name"])
+    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
+        indspec = yaml.safe_load(specfile)["kernels"]
+        for spec in indspec:
+            funcs[spec["name"]] = []
+            for childfunc in spec["specializations"]:
+                funcs[spec["name"]].append(childfunc["name"])
     return funcs
 
 
@@ -255,29 +224,21 @@ kMaxInt64  = 9223372036854775806
 kSliceNone = kMaxInt64 + 1
 """
     with open(
-        os.path.join(CURRENT_DIR, "..", "kernel-specification", "kernelnames.yml")
-    ) as infile:
-        mainspec = yaml.safe_load(infile)["kernels"]
+        os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py"), "w"
+    ) as outfile:
+        outfile.write(prefix)
         with open(
-            os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py"), "w"
-        ) as outfile:
-            outfile.write(prefix)
-            for filedir in mainspec.values():
-                for relpath in filedir.values():
-                    with open(
-                        os.path.join(CURRENT_DIR, "..", "kernel-specification", relpath)
-                    ) as specfile:
-                        indspec = yaml.safe_load(specfile)[0]
-                        if "def " in indspec["definition"]:
-                            outfile.write(indspec["definition"] + "\n")
-                            if "specializations" in indspec.keys():
-                                for childfunc in indspec["specializations"]:
-                                    outfile.write(
-                                        "{0} = {1}\n".format(
-                                            childfunc["name"], indspec["name"]
-                                        )
-                                    )
-                                outfile.write("\n\n")
+            os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")
+        ) as specfile:
+            indspec = yaml.safe_load(specfile)["kernels"]
+            for spec in indspec:
+                if "def " in spec["definition"]:
+                    outfile.write(spec["definition"] + "\n")
+                    for childfunc in spec["specializations"]:
+                        outfile.write(
+                            "{0} = {1}\n".format(childfunc["name"], spec["name"])
+                        )
+                    outfile.write("\n\n")
 
 
 def gettypeval(typename):

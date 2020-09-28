@@ -1,0 +1,26 @@
+- name: awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64
+  args:
+    - name: maxcount
+      type: List[int64_t]
+      direction: out
+    - name: offsetscopy
+      type: List[int64_t]
+      direction: out
+    - name: offsets
+      type: Const[List[int64_t]]
+      direction: in
+      role: reducer-offsets
+    - name: length
+      type: int64_t
+      direction: in
+      role: reducer-length
+  definition: |
+    def awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(maxcount , offsetscopy , offsets , length ):
+        maxcount[0] = 0
+        offsetscopy[0] = offsets[0]
+        for i in range(length):
+            count = offsets[i + 1] - offsets[i]
+            if maxcount[0] < count:
+                maxcount[0] = count
+            offsetscopy[i + 1] = offsets[i + 1]
+  description: null

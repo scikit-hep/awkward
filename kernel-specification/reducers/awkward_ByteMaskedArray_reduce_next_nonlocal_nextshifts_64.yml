@@ -1,0 +1,28 @@
+- name: awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64
+  args:
+    - name: nextshifts
+      type: List[int64_t]
+      direction: out
+    - name: mask
+      type: Const[List[int8_t]]
+      direction: in
+      role: reducer-mask
+    - name: length
+      type: int64_t
+      direction: in
+      role: reducer-length
+    - name: valid_when
+      type: bool
+      direction: in
+      role: reducer-valid_when
+  definition: |
+    def awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(nextshifts , mask , length , valid_when ):
+        nullsum = 0
+        k = 0
+        for i in range(length):
+            if (mask[i] != 0) == (valid_when != 0):
+                nextshifts[k] = nullsum
+                k = k + 1
+            else:
+                nullsum = nullsum + 1
+  description: null

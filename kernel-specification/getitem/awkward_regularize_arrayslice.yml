@@ -1,0 +1,25 @@
+- name: awkward_regularize_arrayslice
+  specializations:
+    - name: awkward_regularize_arrayslice_64
+      args:
+        - name: flatheadptr
+          type: List[int64_t]
+          direction: in
+          role: NumpyArray-ptr
+        - name: lenflathead
+          type: int64_t
+          direction: in
+          role: default
+        - name: length
+          type: int64_t
+          direction: in
+          role: NumpyArray-length
+  definition: |
+    def awkward_regularize_arrayslice(flatheadptr , lenflathead , length ):
+        for i in range(lenflathead):
+            original = flatheadptr[i]
+            if flatheadptr[i] < 0:
+                flatheadptr[i] += length
+            if (flatheadptr[i] < 0) or (flatheadptr[i] >= length):
+                raise ValueError("index out of range")
+  description: null

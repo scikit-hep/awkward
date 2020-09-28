@@ -1,0 +1,30 @@
+- name: awkward_ByteMaskedArray_getitem_carry
+  specializations:
+    - name: awkward_ByteMaskedArray_getitem_carry_64
+      args:
+        - name: tomask
+          type: List[int8_t]
+          direction: out
+        - name: frommask
+          type: Const[List[int8_t]]
+          direction: in
+          role: ByteMaskedArray-mask
+        - name: lenmask
+          type: int64_t
+          direction: in
+          role: ByteMaskedArray-length
+        - name: fromcarry
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: lencarry
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_ByteMaskedArray_getitem_carry(tomask , frommask , lenmask , fromcarry , lencarry ):
+        for i in range(lencarry):
+            if fromcarry[i] >= lenmask:
+                raise ValueError("index out of range")
+            tomask[i] = frommask[fromcarry[i]]
+  description: null

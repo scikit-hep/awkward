@@ -1,0 +1,28 @@
+- name: awkward_RegularArray_getitem_next_array_regularize
+  specializations:
+    - name: awkward_RegularArray_getitem_next_array_regularize_64
+      args:
+        - name: toarray
+          type: List[int64_t]
+          direction: out
+        - name: fromarray
+          type: Const[List[int64_t]]
+          direction: in
+          role: ListOffsetArray-offsets
+        - name: lenarray
+          type: int64_t
+          direction: in
+          role: default
+        - name: size
+          type: int64_t
+          direction: in
+          role: RegularArray-size
+  definition: |
+    def awkward_RegularArray_getitem_next_array_regularize(toarray , fromarray , lenarray , size ):
+        for j in range(lenarray):
+            toarray[j] = fromarray[j]
+            if toarray[j] < 0:
+                toarray[j] += size
+            if not ((0 <= toarray[j]) and (toarray[j] < size)):
+                raise ValueError("index out of range")
+  description: null

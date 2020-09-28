@@ -1,0 +1,177 @@
+- name: awkward_NumpyArray_fill_tobool
+  specializations:
+    - name: awkward_NumpyArray_fill_tobool_fromint16
+      args:
+        - name: toptr
+          type: List[bool]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tobool_fromfloat32
+      args:
+        - name: toptr
+          type: List[bool]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[float]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tobool_fromint64
+      args:
+        - name: toptr
+          type: List[bool]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tobool_fromuint32
+      args:
+        - name: toptr
+          type: List[bool]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tobool_fromfloat64
+      args:
+        - name: toptr
+          type: List[bool]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[double]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tobool_fromint8
+      args:
+        - name: toptr
+          type: List[bool]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tobool_fromuint64
+      args:
+        - name: toptr
+          type: List[bool]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint64_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tobool_fromuint8
+      args:
+        - name: toptr
+          type: List[bool]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint8_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tobool_fromint32
+      args:
+        - name: toptr
+          type: List[bool]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[int32_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_NumpyArray_fill_tobool_fromuint16
+      args:
+        - name: toptr
+          type: List[bool]
+          direction: out
+        - name: tooffset
+          type: int64_t
+          direction: in
+          role: IndexedArray-index-offset
+        - name: fromptr
+          type: Const[List[uint16_t]]
+          direction: in
+          role: NumpyArray-ptr
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_NumpyArray_fill_tobool(toptr , tooffset , fromptr , length ):
+        for i in range(length):
+            toptr[tooffset + i] = True if fromptr[i] > 0 else False
+  description: null

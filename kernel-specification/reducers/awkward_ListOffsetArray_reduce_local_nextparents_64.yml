@@ -1,0 +1,22 @@
+- name: awkward_ListOffsetArray_reduce_local_nextparents_64
+  args:
+    - name: nextparents
+      type: List[int64_t]
+      direction: out
+    - name: offsets
+      type: Const[List[int64_t]]
+      direction: in
+      role: reducer-offsets
+    - name: length
+      type: int64_t
+      direction: in
+      role: reducer-length
+  definition: |
+    def awkward_ListOffsetArray_reduce_local_nextparents_64(nextparents , offsets , length ):
+        initialoffset = offsets[0]
+        for i in range(length):
+            j = offsets[i] - initialoffset
+            while j < (offsets[i + 1] - initialoffset):
+                nextparents[j] = i
+                j = j + 1
+  description: null

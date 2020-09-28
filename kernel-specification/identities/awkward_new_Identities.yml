@@ -1,0 +1,25 @@
+- name: awkward_new_Identities
+  specializations:
+    - name: awkward_new_Identities64
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_new_Identities32
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_new_Identities(toptr , length ):
+        for i in range(length):
+            toptr[i] = i
+  description: null

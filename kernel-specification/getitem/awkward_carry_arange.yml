@@ -1,0 +1,34 @@
+- name: awkward_carry_arange
+  specializations:
+    - name: awkward_carry_arange32
+      args:
+        - name: toptr
+          type: List[int32_t]
+          direction: out
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_carry_arange64
+      args:
+        - name: toptr
+          type: List[int64_t]
+          direction: out
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_carry_arangeU32
+      args:
+        - name: toptr
+          type: List[uint32_t]
+          direction: out
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_carry_arange(toptr , length ):
+        for i in range(length):
+            toptr[i] = i
+  description: null

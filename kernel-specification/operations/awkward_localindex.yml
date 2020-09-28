@@ -1,0 +1,16 @@
+- name: awkward_localindex
+  specializations:
+    - name: awkward_localindex_64
+      args:
+        - name: toindex
+          type: List[int64_t]
+          direction: out
+        - name: length
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_localindex(toindex , length ):
+        for i in range(length):
+            toindex[i] = i
+  description: null

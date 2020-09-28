@@ -1,0 +1,28 @@
+- name: awkward_reduce_sum_int64_bool_64
+  args:
+    - name: toptr
+      type: List[int64_t]
+      direction: out
+    - name: fromptr
+      type: Const[List[bool]]
+      direction: in
+      role: reducer-fromptr
+    - name: parents
+      type: Const[List[int64_t]]
+      direction: in
+      role: reducer-parents
+    - name: lenparents
+      type: int64_t
+      direction: in
+      role: reducer-lenparents
+    - name: outlength
+      type: int64_t
+      direction: in
+      role: reducer-outlength
+  definition: |
+    def awkward_reduce_sum_int64_bool_64(toptr , fromptr , parents , lenparents , outlength ):
+        for i in range(outlength):
+            toptr[i] = 0
+        for i in range(lenparents):
+            toptr[parents[i]] += fromptr[i] != 0
+  description: null

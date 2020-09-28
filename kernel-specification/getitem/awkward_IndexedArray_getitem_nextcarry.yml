@@ -1,0 +1,64 @@
+- name: awkward_IndexedArray_getitem_nextcarry
+  specializations:
+    - name: awkward_IndexedArray64_getitem_nextcarry_64
+      args:
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: fromindex
+          type: Const[List[int64_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: lenindex
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_IndexedArrayU32_getitem_nextcarry_64
+      args:
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: fromindex
+          type: Const[List[uint32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: lenindex
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: default
+    - name: awkward_IndexedArray32_getitem_nextcarry_64
+      args:
+        - name: tocarry
+          type: List[int64_t]
+          direction: out
+        - name: fromindex
+          type: Const[List[int32_t]]
+          direction: in
+          role: IndexedArray-index
+        - name: lenindex
+          type: int64_t
+          direction: in
+          role: default
+        - name: lencontent
+          type: int64_t
+          direction: in
+          role: default
+  definition: |
+    def awkward_IndexedArray_getitem_nextcarry(tocarry , fromindex , lenindex , lencontent ):
+        k = 0
+        for i in range(lenindex):
+            j = fromindex[i]
+            if (j < 0) or (j >= lencontent):
+                raise ValueError("index out of range")
+            else:
+                tocarry[k] = j
+                k = k + 1
+  description: null
