@@ -849,53 +849,23 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
-  - name: awkward_Index32_to_Index64
+  - name: awkward_Index_to_Index64
     specializations:
       - name: awkward_Index32_to_Index64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
-    description: null
-    definition: |
-      def awkward_Index32_to_Index64(toptr, fromptr, length):
-          for i in range(length):
-              toptr[i] = int(fromptr[i])
-    automatic-tests: true
-    manual-tests: []
-
-  - name: awkward_Index8_to_Index64
-    specializations:
       - name: awkward_Index8_to_Index64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
-    description: null
-    definition: |
-      def awkward_Index8_to_Index64(toptr, fromptr, length):
-          for i in range(length):
-              toptr[i] = int(fromptr[i])
-    automatic-tests: true
-    manual-tests: []
-
-  - name: awkward_IndexU32_to_Index64
-    specializations:
       - name: awkward_IndexU32_to_Index64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
-    description: null
-    definition: |
-      def awkward_IndexU32_to_Index64(toptr, fromptr, length):
-          for i in range(length):
-              toptr[i] = int(fromptr[i])
-    automatic-tests: true
-    manual-tests: []
-
-  - name: awkward_IndexU8_to_Index64
-    specializations:
       - name: awkward_IndexU8_to_Index64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
@@ -903,7 +873,7 @@ kernels:
           - {name: length, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      def awkward_IndexU8_to_Index64(toptr, fromptr, length):
+      def awkward_Index_to_Index64(toptr, fromptr, length):
           for i in range(length):
               toptr[i] = int(fromptr[i])
     automatic-tests: true
