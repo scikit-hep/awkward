@@ -3,46 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_ListArray_combinations.cpp", line)
 
 #include "awkward/kernels.h"
-
-template <typename T>
-void awkward_ListArray_combinations_step(
-  T** tocarry,
-  int64_t* toindex,
-  int64_t* fromindex,
-  int64_t j,
-  int64_t stop,
-  int64_t n,
-  bool replacement) {
-  while (fromindex[j] < stop) {
-    if (replacement) {
-      for (int64_t k = j + 1;  k < n;  k++) {
-        fromindex[k] = fromindex[j];
-      }
-    }
-    else {
-      for (int64_t k = j + 1;  k < n;  k++) {
-        fromindex[k] = fromindex[j] + (k - j);
-      }
-    }
-    if (j + 1 == n) {
-      for (int64_t k = 0;  k < n;  k++) {
-        tocarry[k][toindex[k]] = fromindex[k];
-        toindex[k]++;
-      }
-    }
-    else {
-      awkward_ListArray_combinations_step<T>(
-        tocarry,
-        toindex,
-        fromindex,
-        j + 1,
-        stop,
-        n,
-        replacement);
-    }
-    fromindex[j]++;
-  }
-}
+#include "awkward/kernel-utils.h"
 
 template <typename C, typename T>
 ERROR awkward_ListArray_combinations(
