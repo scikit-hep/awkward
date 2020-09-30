@@ -108,6 +108,9 @@ extern "C" {
       bool replacement
     );
 
+  EXPORT_SYMBOL void* awkward_malloc(int64_t bytelength);
+  EXPORT_SYMBOL void awkward_free(void const *ptr);
+
 }
 
 #endif // AWKWARD_KERNEL_UTILS_H_
