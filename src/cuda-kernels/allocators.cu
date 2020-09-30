@@ -2,7 +2,7 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/allocators.cu", line)
 
-#include "awkward/allocators.h"
+#include "awkward/kernel-utils.h"
 
 void* awkward_malloc(int64_t bytelength) {
   void* out = nullptr;
