@@ -198,18 +198,3 @@ void awkward_ListArray_combinations_step_64(
       replacement
     );
 }
-
-void* awkward_malloc(int64_t bytelength) {
-  if (bytelength == 0) {
-    return nullptr;
-  }
-  else {
-    uint8_t* out = new uint8_t[bytelength];
-    return reinterpret_cast<void*>(out);
-  }
-}
-
-void awkward_free(void const *ptr) {
-  uint8_t const* in = reinterpret_cast<uint8_t const*>(ptr);
-  delete [] in;
-}
