@@ -5,9 +5,8 @@
 #include "awkward/kernels.h"
 #include "awkward/kernel-utils.h"
 
-template <typename C, typename T>
-ERROR awkward_RegularArray_combinations(
-  T** tocarry,
+ERROR awkward_RegularArray_combinations_64(
+  int64_t** tocarry,
   int64_t* toindex,
   int64_t* fromindex,
   int64_t n,
@@ -21,7 +20,7 @@ ERROR awkward_RegularArray_combinations(
     int64_t start = size*i;
     int64_t stop = start + size;
     fromindex[0] = start;
-    awkward_ListArray_combinations_step<T>(
+    awkward_ListArray_combinations_step_64(
       tocarry,
       toindex,
       fromindex,
@@ -31,21 +30,4 @@ ERROR awkward_RegularArray_combinations(
       replacement);
   }
   return success();
-}
-ERROR awkward_RegularArray_combinations_64(
-  int64_t** tocarry,
-  int64_t* toindex,
-  int64_t* fromindex,
-  int64_t n,
-  bool replacement,
-  int64_t size,
-  int64_t length) {
-  return awkward_RegularArray_combinations<int32_t, int64_t>(
-    tocarry,
-    toindex,
-    fromindex,
-    n,
-    replacement,
-    size,
-    length);
 }

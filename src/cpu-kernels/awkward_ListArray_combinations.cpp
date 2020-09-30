@@ -5,9 +5,9 @@
 #include "awkward/kernels.h"
 #include "awkward/kernel-utils.h"
 
-template <typename C, typename T>
+template <typename C>
 ERROR awkward_ListArray_combinations(
-  T** tocarry,
+  int64_t** tocarry,
   int64_t* toindex,
   int64_t* fromindex,
   int64_t n,
@@ -22,7 +22,7 @@ ERROR awkward_ListArray_combinations(
     int64_t start = (int64_t)starts[i];
     int64_t stop = (int64_t)stops[i];
     fromindex[0] = start;
-    awkward_ListArray_combinations_step<T>(
+    awkward_ListArray_combinations_step_64(
       tocarry,
       toindex,
       fromindex,
@@ -42,7 +42,7 @@ ERROR awkward_ListArray32_combinations_64(
   const int32_t* starts,
   const int32_t* stops,
   int64_t length) {
-  return awkward_ListArray_combinations<int32_t, int64_t>(
+  return awkward_ListArray_combinations<int32_t>(
     tocarry,
     toindex,
     fromindex,
@@ -61,7 +61,7 @@ ERROR awkward_ListArrayU32_combinations_64(
   const uint32_t* starts,
   const uint32_t* stops,
   int64_t length) {
-  return awkward_ListArray_combinations<uint32_t, int64_t>(
+  return awkward_ListArray_combinations<uint32_t>(
     tocarry,
     toindex,
     fromindex,
@@ -80,7 +80,7 @@ ERROR awkward_ListArray64_combinations_64(
   const int64_t* starts,
   const int64_t* stops,
   int64_t length) {
-  return awkward_ListArray_combinations<int64_t, int64_t>(
+  return awkward_ListArray_combinations<int64_t>(
     tocarry,
     toindex,
     fromindex,

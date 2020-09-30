@@ -4339,7 +4339,7 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
-  - name: awkward_RegularArray_combinations
+  - name: awkward_RegularArray_combinations_64
     specializations:
       - name: awkward_RegularArray_combinations_64
         args:
