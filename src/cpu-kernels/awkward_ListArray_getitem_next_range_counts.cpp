@@ -4,7 +4,7 @@
 
 #include "awkward/kernels.h"
 
-template <typename C, typename T>
+template <typename C>
 ERROR awkward_ListArray_getitem_next_range_counts(
   int64_t* total,
   const C* fromoffsets,
@@ -19,7 +19,7 @@ ERROR awkward_ListArray32_getitem_next_range_counts_64(
   int64_t* total,
   const int32_t* fromoffsets,
   int64_t lenstarts) {
-  return awkward_ListArray_getitem_next_range_counts<int32_t, int64_t>(
+  return awkward_ListArray_getitem_next_range_counts<int32_t>(
     total,
     fromoffsets,
     lenstarts);
@@ -28,7 +28,7 @@ ERROR awkward_ListArrayU32_getitem_next_range_counts_64(
   int64_t* total,
   const uint32_t* fromoffsets,
   int64_t lenstarts) {
-  return awkward_ListArray_getitem_next_range_counts<uint32_t, int64_t>(
+  return awkward_ListArray_getitem_next_range_counts<uint32_t>(
     total,
     fromoffsets,
     lenstarts);
@@ -37,7 +37,7 @@ ERROR awkward_ListArray64_getitem_next_range_counts_64(
   int64_t* total,
   const int64_t* fromoffsets,
   int64_t lenstarts) {
-  return awkward_ListArray_getitem_next_range_counts<int64_t, int64_t>(
+  return awkward_ListArray_getitem_next_range_counts<int64_t>(
     total,
     fromoffsets,
     lenstarts);
