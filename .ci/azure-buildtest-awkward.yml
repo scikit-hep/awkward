@@ -69,6 +69,14 @@ jobs:
           python.version: "3.8"
           python.architecture: "x64"
           numpy.version: "latest"
+        "py39-32bit":
+          python.version: "3.9"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py39-64bit":
+          python.version: "3.9"
+          python.architecture: "x64"
+          numpy.version: "latest"
 
     steps:
       - checkout: self
@@ -136,6 +144,10 @@ jobs:
           numpy.version: "latest"
         "py38":
           python.version: "3.8"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py39":
+          python.version: "3.9"
           python.architecture: "x64"
           numpy.version: "latest"
 
@@ -246,6 +258,10 @@ jobs:
           numpy.version: "latest"
         "py38-np*":
           python.version: "3.8"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py39-np*":
+          python.version: "3.9"
           python.architecture: "x64"
           numpy.version: "latest"
 
