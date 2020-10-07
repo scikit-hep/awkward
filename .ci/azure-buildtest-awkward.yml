@@ -30,7 +30,7 @@ jobs:
   - job: Windows
 
     pool:
-      vmImage: "vs2017-win2016"
+      vmImage: "windows-2019"
 
     variables:
       PIP_ONLY_BINARY: cmake
@@ -119,7 +119,7 @@ jobs:
   - job: MacOS
 
     pool:
-      vmImage: "macOS-10.14"
+      vmImage: "macOS-10.15"
 
     variables:
       PIP_ONLY_BINARY: cmake
@@ -229,7 +229,7 @@ jobs:
   - job: Linux
 
     pool:
-      vmImage: "ubuntu-16.04"
+      vmImage: "ubuntu-18.04"
 
     variables:
       PIP_ONLY_BINARY: cmake
