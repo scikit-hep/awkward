@@ -4,6 +4,8 @@
 
 #include <pybind11/numpy.h>
 
+#include "awkward/kernel-utils.h"
+
 #include "awkward/python/identities.h"
 #include "awkward/python/util.h"
 

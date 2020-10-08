@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import numbers
 import json
+import warnings
 
 try:
     from collections.abc import Iterable
@@ -371,11 +372,11 @@ def unzip(array):
         >>> y
         <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
     """
-    keys = awkward1.operations.describe.keys(array)
-    if len(keys) == 0:
+    fields = awkward1.operations.describe.fields(array)
+    if len(fields) == 0:
         return (array,)
     else:
-        return tuple(array[n] for n in keys)
+        return tuple(array[n] for n in fields)
 
 
 def with_name(array, name, highlevel=True):
@@ -1474,8 +1475,8 @@ def cartesian(
             produced at the same level of nesting; if True, they are grouped
             in nested lists by combinations that share a common item from
             each of the `arrays`; if an iterable of str or int, group common
-            items for a chosen set of keys from the `array` dict or slots
-            of the `array` iterable.
+            items for a chosen set of keys from the `array` dict or integer
+            slots of the `array` iterable.
         parameters (None or dict): Parameters for the new
             #ak.layout.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
@@ -1993,6 +1994,7 @@ def combinations(
     n,
     replacement=False,
     axis=1,
+    fields=None,
     keys=None,
     parameters=None,
     with_name=None,
@@ -2010,9 +2012,9 @@ def combinations(
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
-        keys (None or list of str): If None, the pairs/triples/etc. are
-            tuples with unnamed fields; otherwise, these `keys` name the
-            fields. The number of `keys` must be equal to `n`.
+        fields (None or list of str): If None, the pairs/triples/etc. are
+            tuples with unnamed fields; otherwise, these `fields` name the
+            fields. The number of `fields` must be equal to `n`.
         parameters (None or dict): Parameters for the new
             #ak.layout.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
@@ -2101,9 +2103,9 @@ def combinations(
          [(7, 7), (7, 7), (7, 7)]
         ]
 
-    To get records instead of tuples, pass a set of field names to `keys`.
+    To get records instead of tuples, pass a set of field names to `fields`.
 
-        >>> ak.to_list(ak.combinations(array, 2, keys=["x", "y"]))
+        >>> ak.to_list(ak.combinations(array, 2, fields=["x", "y"]))
         [
          [{'x': 1, 'y': 2}, {'x': 1, 'y': 3}, {'x': 1, 'y': 4},
                             {'x': 2, 'y': 3}, {'x': 2, 'y': 4},
@@ -2134,6 +2136,21 @@ def combinations(
     The #ak.argcombinations form can be particularly useful as nested indexing
     in #ak.Array.__getitem__.
     """
+    if keys is not None:
+        if fields is None:
+            fields = keys
+            warnings.warn(
+                "'keys' is deprecated in ak.combinations, will be removed "
+                "in 0.4.0. Use 'fields' instead.",
+                DeprecationWarning,
+            )
+        else:
+            raise TypeError(
+                "cannot set both 'keys' and 'fields' in ak.combinations; "
+                "'keys' is deprecated, will be removed in 0.4.0. "
+                "Use 'fields' instead."
+            )
+
     if parameters is None:
         parameters = {}
     else:
@@ -2145,7 +2162,7 @@ def combinations(
         array, allow_record=False, allow_other=False
     )
     out = layout.combinations(
-        n, replacement=replacement, keys=keys, parameters=parameters, axis=axis
+        n, replacement=replacement, keys=fields, parameters=parameters, axis=axis
     )
     if highlevel:
         return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
@@ -2158,6 +2175,7 @@ def argcombinations(
     n,
     replacement=False,
     axis=1,
+    fields=None,
     keys=None,
     parameters=None,
     with_name=None,
@@ -2175,9 +2193,9 @@ def argcombinations(
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
-        keys (None or list of str): If None, the pairs/triples/etc. are
-            tuples with unnamed fields; otherwise, these `keys` name the
-            fields. The number of `keys` must be equal to `n`.
+        fields (None or list of str): If None, the pairs/triples/etc. are
+            tuples with unnamed fields; otherwise, these `fields` name the
+            fields. The number of `fields` must be equal to `n`.
         parameters (None or dict): Parameters for the new
             #ak.layout.RecordArray node that is created by this operation.
         with_name (None or str): Assigns a `"__record__"` name to the new
@@ -2195,6 +2213,21 @@ def argcombinations(
     #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
     complete description.
     """
+    if keys is not None:
+        if fields is None:
+            fields = keys
+            warnings.warn(
+                "'keys' is deprecated in ak.argcombinations, will be removed "
+                "in 0.4.0. Use 'fields' instead.",
+                DeprecationWarning,
+            )
+        else:
+            raise TypeError(
+                "cannot set both 'keys' and 'fields' in ak.argcombinations; "
+                "'keys' is deprecated, will be removed in 0.4.0. "
+                "Use 'fields' instead."
+            )
+
     if parameters is None:
         parameters = {}
     else:
@@ -2212,7 +2245,7 @@ def argcombinations(
             array, allow_record=False, allow_other=False
         ).localindex(axis)
         out = layout.combinations(
-            n, replacement=replacement, keys=keys, parameters=parameters, axis=axis
+            n, replacement=replacement, keys=fields, parameters=parameters, axis=axis
         )
         if highlevel:
             return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))

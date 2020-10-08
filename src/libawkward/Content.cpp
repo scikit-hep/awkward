@@ -9,8 +9,7 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/prettywriter.h"
 
-#include "awkward/kernels/operations.h"
-#include "awkward/kernels/reducers.h"
+#include "awkward/kernels.h"
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"

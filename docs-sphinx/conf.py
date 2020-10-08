@@ -61,8 +61,6 @@ subprocess.check_call(["doxygen", os.path.join("docs-doxygen", "Doxyfile")], cwd
 exec(open("prepare_docstrings.py").read(), dict(globals()))
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
-specgen = os.path.join(current_dir, "..", "dev", "generate-kernelspec.py")
-subprocess.check_call([sys.executable, specgen])
 docgen = os.path.join(current_dir, "..", "dev", "generate-kerneldocs.py")
 subprocess.check_call([sys.executable, docgen])
 

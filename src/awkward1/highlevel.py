@@ -474,52 +474,6 @@ class Array(
         """
         return awkward1.operations.convert.to_list(self)
 
-    def tojson(
-        self, destination=None, pretty=False, maxdecimals=None, buffersize=65536
-    ):
-        """
-        Args:
-            destination (None or str): If None, this method returns a JSON str;
-                if a str, it uses that as a file name and writes (overwrites)
-                that file (returning None).
-            pretty (bool): If True, indent the output for human readability; if
-                False, output compact JSON without spaces.
-            maxdecimals (None or int): If an int, limit the number of
-                floating-point decimals to this number; if None, write all
-                digits.
-            buffersize (int): Size (in bytes) of the buffer used by the JSON
-                parser.
-
-        Converts this Array into a JSON string or file; same as #ak.to_json
-        (but without the underscore, like #ak.Array.tolist).
-
-        Awkward Array types have the following JSON translations.
-
-           * #ak.types.PrimitiveType: converted into JSON booleans and numbers.
-           * #ak.types.OptionType: missing values are converted into None.
-           * #ak.types.ListType: converted into JSON lists.
-           * #ak.types.RegularType: also converted into JSON lists. JSON (and
-             Python) forms lose information about the regularity of list
-             lengths.
-           * #ak.types.ListType with parameter `"__array__"` equal to
-             `"__bytestring__"` or `"__string__"`: converted into JSON strings.
-           * #ak.types.RecordArray without field names: converted into JSON
-             objects with numbers as strings for keys.
-           * #ak.types.RecordArray with field names: converted into JSON
-             objects.
-           * #ak.types.UnionArray: JSON data are naturally heterogeneous.
-
-        See also #ak.to_json and #ak.from_json.
-        """
-        warnings.warn(
-            ".tojson is deprecated, will be removed in 0.3.0. Use\n\n"
-            "    ak.to_json(array)\n\ninstead.",
-            DeprecationWarning,
-        )
-        return awkward1.operations.convert.to_json(
-            self, destination, pretty, maxdecimals, buffersize
-        )
-
     @property
     def nbytes(self):
         """
@@ -539,6 +493,87 @@ class Array(
         array buffers.
         """
         return self._layout.nbytes
+
+    @property
+    def ndim(self):
+        """
+        Number of dimensions (nested variable-length lists and/or regular arrays)
+        before reaching a numeric type or a record.
+
+        There may be nested lists within the record, as field values, but this
+        number of dimensions does not count those.
+
+        (Some fields may have different depths than others, which is why they
+        are not counted.)
+        """
+        return self.layout.purelist_depth
+
+    @property
+    def fields(self):
+        """
+        List of field names or tuple slot numbers (as strings) of the outermost
+        record or tuple in this array.
+
+        If the array contains nested records, only the fields of the outermost
+        record are shown. If it contains tuples instead of records, its fields
+        are string representations of integers, such as `"0"`, `"1"`, `"2"`, etc.
+        The records or tuples may be within multiple layers of nested lists.
+
+        If the array contains neither tuples nor records, it is an empty list.
+
+        See also #ak.fields.
+        """
+        return awkward1.operations.describe.fields(self)
+
+    @property
+    def type(self):
+        """
+        The high-level type of this array.
+
+        The high-level type ignores #layout differences like
+        #ak.layout.ListArray64 versus #ak.layout.ListOffsetArray64, but
+        not differences like "regular-sized lists" (i.e.
+        #ak.layout.RegularArray) versus "variable-sized lists" (i.e.
+        #ak.layout.ListArray64 and similar).
+
+        Types are rendered as [Datashape](https://datashape.readthedocs.io/)
+        strings, which makes the same distinctions.
+
+        For example,
+
+            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+                      [],
+                      [{"x": 3.3, "y": [3, 3, 3]}]])
+
+        has type
+
+            3 * var * {"x": float64, "y": var * int64}
+
+        but
+
+            ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
+
+        has type
+
+            2 * 3 * 5 * int64
+
+        Some cases, like heterogeneous data, require [extensions beyond the
+        Datashape specification](https://github.com/blaze/datashape/issues/237).
+        For example,
+
+            ak.Array([1, "two", [3, 3, 3]])
+
+        has type
+
+            3 * union[int64, string, var * int64]
+
+        but "union" is not a Datashape type-constructor. (Its syntax is
+        similar to existing type-constructors, so it's a plausible addition
+        to the language.)
+
+        See also #ak.type.
+        """
+        return awkward1.operations.describe.type(self)
 
     def __len__(self):
         """
@@ -1620,51 +1655,6 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         """
         return awkward1.operations.convert.to_list(self)
 
-    def tojson(
-        self, destination=None, pretty=False, maxdecimals=None, buffersize=65536
-    ):
-        """
-        Args:
-            destination (None or str): If None, this method returns a JSON str;
-                if a str, it uses that as a file name and writes (overwrites)
-                that file (returning None).
-            pretty (bool): If True, indent the output for human readability; if
-                False, output compact JSON without spaces.
-            maxdecimals (None or int): If an int, limit the number of
-                floating-point decimals to this number; if None, write all
-                digits.
-            buffersize (int): Size (in bytes) of the buffer used by the JSON
-                parser.
-
-        Converts this Record into a JSON string or file.
-
-        Awkward Array types have the following JSON translations.
-
-           * #ak.types.PrimitiveType: converted into JSON booleans and numbers.
-           * #ak.types.OptionType: missing values are converted into None.
-           * #ak.types.ListType: converted into JSON lists.
-           * #ak.types.RegularType: also converted into JSON lists. JSON (and
-             Python) forms lose information about the regularity of list
-             lengths.
-           * #ak.types.ListType with parameter `"__array__"` equal to
-             `"__bytestring__"` or `"__string__"`: converted into JSON strings.
-           * #ak.types.RecordArray without field names: converted into JSON
-             objects with numbers as strings for keys.
-           * #ak.types.RecordArray with field names: converted into JSON
-             objects.
-           * #ak.types.UnionArray: JSON data are naturally heterogeneous.
-
-        See also #ak.to_json and #ak.from_json.
-        """
-        warnings.warn(
-            ".tojson is deprecated, will be removed in 0.3.0. Use\n\n"
-            "    ak.to_json(array)\n\ninstead.",
-            DeprecationWarning,
-        )
-        return awkward1.operations.convert.to_json(
-            self, destination, pretty, maxdecimals, buffersize
-        )
-
     @property
     def nbytes(self):
         """
@@ -1684,6 +1674,28 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         array buffers.
         """
         return self._layout.nbytes
+
+    @property
+    def fields(self):
+        """
+        List of field names or tuple slot numbers (as strings) of this record.
+
+        If this is actually a tuple its fields are string representations of
+        integers, such as `"0"`, `"1"`, `"2"`, etc.
+
+        See also #ak.fields.
+        """
+        return awkward1.operations.describe.fields(self)
+
+    @property
+    def type(self):
+        """
+        The high-level type of this record, like the `type` of an array, but
+        the outermost structure is a record-type, not a number of elements.
+
+        See also #ak.type.
+        """
+        return awkward1.operations.describe.type(self)
 
     def __getitem__(self, where):
         """

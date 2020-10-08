@@ -248,8 +248,22 @@ def numba_record_lower(layouttype, behavior):
 
 
 def overload(behavior, signature):
-    behavior = Behavior(awkward1.behavior, behavior)
-    return behavior[signature]
+    if not any(s is None for s in signature):
+        behavior = Behavior(awkward1.behavior, behavior)
+        for key, custom in behavior.items():
+            if (
+                isinstance(key, tuple)
+                and len(key) == len(signature)
+                and key[0] == signature[0]
+                and all(
+                    k == s or (
+                        isinstance(k, type)
+                        and isinstance(s, type)
+                        and issubclass(s, k)
+                    ) for k, s in zip(key[1:], signature[1:])
+                )
+            ):
+                return custom
 
 
 def numba_attrs(layouttype, behavior):
@@ -504,7 +518,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                         offsets[-1] = stops[-1]
                 elif (
                     not nplike.array_equal(offsets[:-1], starts) or
-                    offsets[-1] != stops[-1]
+                    (len(stops) !=0 and offsets[-1] != stops[-1])
                 ):
                     return False
             elif isinstance(x, awkward1.layout.RegularArray):
@@ -807,8 +821,11 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                         awkward1.layout.ListArray64,
                     )):
                         starts, stops = x.starts, x.stops
-                        lencontent = nplike.max(stops)
-                        nextinputs.append(x.content[:lencontent])
+                        if len(starts) == 0 or len(stops) == 0:
+                            nextinputs.append(x.content[:0])
+                        else:
+                            lencontent = nplike.max(stops)
+                            nextinputs.append(x.content[:lencontent])
 
                     else:
                         nextinputs.append(x)

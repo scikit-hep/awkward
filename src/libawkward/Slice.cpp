@@ -6,7 +6,7 @@
 #include <sstream>
 #include <type_traits>
 
-#include "awkward/kernels/getitem.h"
+#include "awkward/kernels.h"
 #include "awkward/util.h"
 
 #define AWKWARD_SLICE_NO_EXTERN_TEMPLATE

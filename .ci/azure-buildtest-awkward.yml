@@ -93,10 +93,6 @@ jobs:
         displayName: "Build"
 
       - script: |
-          python dev/generate-kernelspec.py
-        displayName: "Generate Kernel specification"
-
-      - script: |
           python dev/generate-tests.py
         displayName: "Generate Kernel tests"
 
@@ -164,10 +160,6 @@ jobs:
       - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
-
-      - script: |
-          python dev/generate-kernelspec.py
-        displayName: "Generate Kernel specification"
 
       - script: |
           python dev/generate-tests.py
@@ -286,10 +278,6 @@ jobs:
       - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
-
-      - script: |
-          python dev/generate-kernelspec.py
-        displayName: "Generate Kernel specification"
 
       - script: |
           python dev/generate-tests.py
