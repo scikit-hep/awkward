@@ -14,5 +14,5 @@ kernelspec:
 Combinatorics
 =============
 
-   * **[Cartesian/cross product and "n choose k"](how-to-combinatorics-cartesian-combinations)**
+   * **[Cartesian product and "n choose k"](how-to-combinatorics-cartesian-combinations)**
    * **[Best match between collections](how-to-combinatorics-best-match)**

@@ -113,7 +113,7 @@
   expand_sections: true
   sections:
     - file: how-to-combinatorics-cartesian-combinations
-      title: 'Cartesian/cross product and "n choose k"'
+      title: 'Cartesian product and "n choose k"'
     - file: how-to-combinatorics-best-match
       title: "Best match between collections"
 
