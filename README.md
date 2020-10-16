@@ -107,7 +107,7 @@ Most users will get a precompiled binary (wheel) for your operating system and P
 
 Awkward Array is also available using [conda](https://anaconda.org/conda-forge/awkward1):
 ```bash
-conda install awkward1
+conda install awkward1 -c conda-forge
 ```
 
    * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues). If you have a general "How do I…?" question, we'll answer it as a new [example in the tutorial](https://awkward-array.org/how-to.html).
