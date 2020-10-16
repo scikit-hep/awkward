@@ -103,8 +103,12 @@ Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward1/) u
 ```bash
 pip install awkward1
 ```
-
 Most users will get a precompiled binary (wheel) for your operating system and Python version. If not, the above attempts to compile from source.
+
+Awkward Array is also available using [conda](https://anaconda.org/conda-forge/awkward1):
+```bash
+conda install awkward1
+```
 
    * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues). If you have a general "How do I…?" question, we'll answer it as a new [example in the tutorial](https://awkward-array.org/how-to.html).
    * If you have a problem that's too specific to be new documentation or it isn't exclusively related to Awkward Array, it might be more appropriate to ask on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
