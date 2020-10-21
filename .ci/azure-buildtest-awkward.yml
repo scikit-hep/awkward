@@ -89,12 +89,12 @@ jobs:
         displayName: "Show versions"
 
       - script: |
-          python dev/kernel-diagnostics.py --check-sorted
-        displayName: "Check if kernel specification is sorted"
-
-      - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
+
+      - script: |
+          python dev/kernel-diagnostics.py --check-sorted
+        displayName: "Check if kernel specification is sorted"
 
       - script: |
           python dev/generate-tests.py
@@ -162,12 +162,12 @@ jobs:
         displayName: "Print versions"
 
       - script: |
-          python dev/kernel-diagnostics.py --check-sorted
-        displayName: "Check if kernel specification is sorted"
-
-      - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
+
+      - script: |
+          python dev/kernel-diagnostics.py --check-sorted
+        displayName: "Check if kernel specification is sorted"
 
       - script: |
           python dev/generate-tests.py
@@ -284,12 +284,12 @@ jobs:
         displayName: "Print versions"
 
       - script: |
-          python dev/kernel-diagnostics.py --check-sorted
-        displayName: "Check if kernel specification is sorted"
-
-      - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
+
+      - script: |
+          python dev/kernel-diagnostics.py --check-sorted
+        displayName: "Check if kernel specification is sorted"
 
       - script: |
           python dev/generate-tests.py
