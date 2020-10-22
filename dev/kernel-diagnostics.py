@@ -3,6 +3,7 @@
 import argparse
 import copy
 import os
+import sys
 from collections import OrderedDict
 
 import yaml
@@ -75,14 +76,18 @@ def check_specorder(kerneldict):
         if dictkernel != kernelnames[count]:
             print("Order in specification: ", kerneldict.keys())
             print("Sorted order: ", kernelnames)
-            raise Exception("Parent kernels not sorted in specification")
+            raise Exception("Kernels not sorted in specification")
         count += 1
     for kernel, specializations in kerneldict.items():
         display = []
-        flag = False
         try:
             count = 0
             display = []
+            flag = False
+            if sys.version_info.major == 2:
+                for dummy in specializations:
+                    if type(sort_specializations(dummy)) == str:
+                        raise TypeError
             for specialization in sorted(
                 copy.copy(specializations), key=sort_specializations
             ):
@@ -93,6 +98,7 @@ def check_specorder(kerneldict):
         except TypeError:
             count = 0
             display = []
+            flag = False
             for specialization in sorted(copy.copy(specializations)):
                 if specialization != specializations[count]:
                     flag = True
@@ -102,7 +108,8 @@ def check_specorder(kerneldict):
             print("For kernel: " + kernel)
             print("Order in specification = ", specializations)
             print("Sorted order = ", display)
-            raise Exception("Child kernels not sorted in specification")
+            raise Exception("Kernel specializations not sorted in specification")
+    print("Kernel specification file is properly sorted")
 
 
 if __name__ == "__main__":
