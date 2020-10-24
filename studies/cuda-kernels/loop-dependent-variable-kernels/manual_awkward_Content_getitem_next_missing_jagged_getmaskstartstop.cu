@@ -1,6 +1,6 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/manual_awkward_Content_getitem_next_missing_jagged_getmaskstartstop.cu", line)
 
-#include "awkward/kernels/getitem.h"
+#include "awkward/kernels.h"
 #include "standard_parallel_algorithms.h"
 
 __global__ void

@@ -1,6 +1,6 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/manual_awkward_UnionArray_project.cu", line)
 
-#include "awkward/kernels/getitem.h"
+#include "awkward/kernels.h"
 #include "standard_parallel_algorithms.h"
 
 template <typename C>

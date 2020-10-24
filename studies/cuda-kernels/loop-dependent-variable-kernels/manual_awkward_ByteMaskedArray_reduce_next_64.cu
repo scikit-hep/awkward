@@ -1,7 +1,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/manual_awkward_ByteMaskedArray_reduce_next.cu", line)
 
 #include "standard_parallel_algorithms.h"
-#include "awkward/kernels/reducers.h"
+#include "awkward/kernels.h"
 
 __global__ void
 awkward_ByteMaskedArray_reduce_next_64_filter_mask(

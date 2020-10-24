@@ -400,19 +400,16 @@ extern "C" {
     int64_t* toptr,
     const int32_t* fromptr,
     int64_t length);
-
   EXPORT_SYMBOL ERROR
   awkward_Index8_to_Index64(
     int64_t* toptr,
     const int8_t* fromptr,
     int64_t length);
-
   EXPORT_SYMBOL ERROR
   awkward_IndexU32_to_Index64(
     int64_t* toptr,
     const uint32_t* fromptr,
     int64_t length);
-
   EXPORT_SYMBOL ERROR
   awkward_IndexU8_to_Index64(
     int64_t* toptr,

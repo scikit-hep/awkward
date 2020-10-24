@@ -1,6 +1,6 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/manual_awkward_IndexedOptionArray_rpad_and_clip_mask_axis1.cu", line)
 
-#include "awkward/kernels/operations.h"
+#include "awkward/kernels.h"
 #include "standard_parallel_algorithms.h"
 
 __global__ void

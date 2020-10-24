@@ -7,7 +7,7 @@ cd ../..
 
 echo "Running setup"
 sudo pip uninstall awkward1_cuda_kernels && sudo ./cuda-build.sh --install
-python dev/generate-kernelspec.py && python dev/generate-tests.py
+python python dev/generate-tests.py
 
 echo "Testing"
 pytest -vvrs tests-cuda-kernels

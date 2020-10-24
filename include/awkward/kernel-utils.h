@@ -97,6 +97,20 @@ extern "C" {
       int64_t length
     );
 
+  EXPORT_SYMBOL void
+    awkward_ListArray_combinations_step_64(
+      int64_t** tocarry,
+      int64_t* toindex,
+      int64_t* fromindex,
+      int64_t j,
+      int64_t stop,
+      int64_t n,
+      bool replacement
+    );
+
+  EXPORT_SYMBOL void* awkward_malloc(int64_t bytelength);
+  EXPORT_SYMBOL void awkward_free(void const *ptr);
+
 }
 
 #endif // AWKWARD_KERNEL_UTILS_H_

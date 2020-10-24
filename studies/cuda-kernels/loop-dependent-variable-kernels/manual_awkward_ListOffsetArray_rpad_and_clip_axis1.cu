@@ -1,6 +1,6 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/manual_awkward_ListOffsetArray_rpad_and_clip_axis1.cu", line)
 
-#include "awkward/kernels/operations.h"
+#include "awkward/kernels.h"
 #include "standard_parallel_algorithms.h"
 
 template <typename T, typename C>

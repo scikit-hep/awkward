@@ -24,24 +24,25 @@
       title: "Generic array-sets"
 
 - file: how-to-create
-  title: "Creating arrays"
+  title: "Creating new arrays"
   expand_sections: true
   sections:
     - file: how-to-create-arraybuilder
       title: "ArrayBuilder (easy & general)"
     - file: how-to-create-layout
       title: "Layout (faster)"
+    - file: how-to-create-records
+      title: "Arrays of records"
+    - file: how-to-create-strings
+      title: "Arrays of strings"
+    - file: how-to-create-categorical
+      title: "Arrays of categories"
+    - file: how-to-create-cross-references
+      title: "Cross-references"
     - file: how-to-create-lazy
       title: "Lazy arrays"
-
-- file: how-to-use-in-numba
-  title: "Using arrays in Numba"
-  expand_sections: true
-  sections:
-    - file: how-to-use-in-numba-features
-      title: "Supported features"
-    - file: how-to-use-in-numba-arraybuilder
-      title: "Building array output"
+    - file: how-to-create-partitioned
+      title: "Partitioned arrays"
 
 - file: how-to-examine
   title: "Examining arrays"
@@ -112,9 +113,18 @@
   expand_sections: true
   sections:
     - file: how-to-combinatorics-cartesian-combinations
-      title: 'Cartesian/cross product and "n choose k"'
+      title: 'Cartesian product and "n choose k"'
     - file: how-to-combinatorics-best-match
       title: "Best match between collections"
+
+- file: how-to-use-in-numba
+  title: "Using arrays in Numba"
+  expand_sections: true
+  sections:
+    - file: how-to-use-in-numba-features
+      title: "Supported features"
+    - file: how-to-use-in-numba-arraybuilder
+      title: "Building array output"
 
 - file: how-to-specialize
   title: "Specialized behavior"
