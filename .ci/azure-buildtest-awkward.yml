@@ -33,7 +33,7 @@ jobs:
       vmImage: "vs2017-win2016"
 
     variables:
-      PIP_ONLY_BINARY: cmake
+      PIP_ONLY_BINARY: cmake,numpy
 
     strategy:
       matrix:
@@ -122,7 +122,7 @@ jobs:
       vmImage: "macOS-10.15"
 
     variables:
-      PIP_ONLY_BINARY: cmake
+      PIP_ONLY_BINARY: cmake,numpy
 
     strategy:
       matrix:
@@ -232,7 +232,7 @@ jobs:
       vmImage: "ubuntu-18.04"
 
     variables:
-      PIP_ONLY_BINARY: cmake
+      PIP_ONLY_BINARY: cmake,numpy
 
     strategy:
       matrix:
