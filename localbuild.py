@@ -25,6 +25,7 @@ args = arguments.parse_args()
 args.buildpython = not args.no_buildpython
 args.dependencies = not args.no_dependencies
 
+
 if sys.version_info[0] >= 3:
     git_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], stdout=subprocess.PIPE)
     os.chdir(git_root.stdout.decode().strip())
