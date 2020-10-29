@@ -1027,7 +1027,7 @@ namespace awkward {
           if (istuple()) {
             if (numfields() == raw->numfields()) {
               for (size_t i = 0;  i < contents_.size();  i++) {
-                ContentPtr field = raw->field(i);
+                ContentPtr field = raw->field((int64_t)i);
                 for_each_field[i].push_back(field.get()->getitem_range_nowrap(0, raw->length()));
               }
             }
@@ -1065,7 +1065,7 @@ namespace awkward {
             std::sort(those_keys.begin(), those_keys.end());
             if (these_keys == those_keys) {
               for (size_t i = 0;  i < contents_.size();  i++) {
-                ContentPtr field = raw->field(key(i));
+                ContentPtr field = raw->field(key((int64_t)i));
                 ContentPtr trimmed = field.get()->getitem_range_nowrap(0, raw->length());
                 for_each_field[i].push_back(trimmed);
               }
