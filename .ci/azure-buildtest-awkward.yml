@@ -27,204 +27,225 @@ pr:
       - "*"
 
 jobs:
-  # - job: Windows
+  - job: Windows
 
-  #   pool:
-  #     vmImage: "vs2017-win2016"
+    pool:
+      vmImage: "vs2017-win2016"
 
-  #   variables:
-  #     PIP_ONLY_BINARY: cmake,numpy
+    variables:
+      PIP_ONLY_BINARY: cmake,numpy
 
-  #   strategy:
-  #     matrix:
-  #       "py27-32bit":
-  #         python.version: "2.7"
-  #         python.architecture: "x86"
-  #         numpy.version: "1.16.5"
-  #       "py27-64bit":
-  #         python.version: "2.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "1.16.5"
-  #       "py35-64bit":
-  #         python.version: "3.5"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py36-64bit":
-  #         python.version: "3.6"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py37-32bit":
-  #         python.version: "3.7"
-  #         python.architecture: "x86"
-  #         numpy.version: "latest"
-  #       "py37-64bit":
-  #         python.version: "3.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py38-32bit":
-  #         python.version: "3.8"
-  #         python.architecture: "x86"
-  #         numpy.version: "latest"
-  #       "py38-64bit":
-  #         python.version: "3.8"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py39-32bit":
-  #         python.version: "3.9"
-  #         python.architecture: "x86"
-  #         numpy.version: "latest"
-  #       "py39-64bit":
-  #         python.version: "3.9"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
+    strategy:
+      matrix:
+        "py27-32bit":
+          python.version: "2.7"
+          python.architecture: "x86"
+          numpy.version: "1.16.5"
+        "py27-64bit":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.16.5"
+        "py35-64bit":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36-64bit":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37-32bit":
+          python.version: "3.7"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py37-64bit":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py38-32bit":
+          python.version: "3.8"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py38-64bit":
+          python.version: "3.8"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py39-32bit":
+          python.version: "3.9"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py39-64bit":
+          python.version: "3.9"
+          python.architecture: "x64"
+          numpy.version: "latest"
 
-  #   steps:
-  #     - checkout: self
-  #       submodules: recursive
+    steps:
+      - checkout: self
+        submodules: recursive
 
-  #     - task: UsePythonVersion@0
-  #       inputs:
-  #         versionSpec: '$(python.version)'
-  #         architecture: '$(python.architecture)'
-  #       displayName: 'Python $(python.version)'
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
+        displayName: 'Python $(python.version)'
 
-  #     - script: |
-  #         python -m pip install --upgrade pip
-  #       displayName: "Install Pip"
+      - script: |
+          python -m pip install --upgrade pip
+        displayName: "Install Pip"
 
-  #     - script: |
-  #         python -m pip list
-  #       displayName: "Show versions"
+      - script: |
+          python -m pip list
+        displayName: "Show versions"
 
-  #     - script: |
-  #         python -m pip install -v .[test,dev]
-  #       displayName: "Build"
+      - script: |
+          python -m pip install -v .[test,dev]
+        displayName: "Build for 3.9"
+        condition: "eq(variables['python.version'], '3.9')"
 
-  #     - script: |
-  #         python dev/generate-tests.py
-  #       displayName: "Generate Kernel tests"
+      - script: |
+          python -m pip install -v .[test,dev]
+        displayName: "Build"
+        condition: "ne(variables['python.version'], '3.9')"
 
-  #     - script: |
-  #         python -m pytest -vv -rs tests-spec
-  #       displayName: "Test specification"
+      - script: |
+          python dev/generate-tests.py
+        displayName: "Generate Kernel tests"
+        condition: "ne(variables['python.version'], '3.9')"
 
-  #     - script: |
-  #         python -m pytest -vv -rs tests-cpu-kernels
-  #       displayName: "Test CPU kernels"
+      - script: |
+          python -m pytest -vv -rs tests-spec
+        displayName: "Test specification"
+        condition: "ne(variables['python.version'], '3.9')"
 
-  #     - script: |
-  #         python -m pytest -vv -rs tests
-  #       displayName: "Test"
+      - script: |
+          python -m pytest -vv -rs tests-cpu-kernels
+        displayName: "Test CPU kernels"
+        condition: "ne(variables['python.version'], '3.9')"
 
-  # - job: MacOS
+      - script: |
+          python -m pytest -vv -rs tests
+        displayName: "Test"
 
-  #   pool:
-  #     vmImage: "macOS-10.15"
+  - job: MacOS
 
-  #   variables:
-  #     PIP_ONLY_BINARY: cmake,numpy
+    pool:
+      vmImage: "macOS-10.15"
 
-  #   strategy:
-  #     matrix:
-  #       "py27":
-  #         python.version: "2.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "1.16.5"
-  #       "py35":
-  #         python.version: "3.5"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py36":
-  #         python.version: "3.6"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py37":
-  #         python.version: "3.7"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py38":
-  #         python.version: "3.8"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
-  #       "py39":
-  #         python.version: "3.9"
-  #         python.architecture: "x64"
-  #         numpy.version: "latest"
+    variables:
+      PIP_ONLY_BINARY: cmake,numpy
 
-  #   steps:
-  #     - checkout: self
-  #       submodules: recursive
+    strategy:
+      matrix:
+        "py27":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.16.5"
+        "py35":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py36":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py37":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py38":
+          python.version: "3.8"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py39":
+          python.version: "3.9"
+          python.architecture: "x64"
+          numpy.version: "latest"
 
-  #     - task: UsePythonVersion@0
-  #       inputs:
-  #         versionSpec: '$(python.version)'
-  #         architecture: '$(python.architecture)'
-  #       displayName: 'Python $(python.version)'
+    steps:
+      - checkout: self
+        submodules: recursive
 
-  #     - script: |
-  #         python -m pip install --upgrade pip
-  #       displayName: "Install Pip"
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
+        displayName: 'Python $(python.version)'
 
-  #     - script: |
-  #         python -m pip list
-  #       displayName: "Print versions"
+      - script: |
+          python -m pip install --upgrade pip
+        displayName: "Install Pip"
 
-  #     - script: |
-  #         python -m pip install -v .[test,dev]
-  #       displayName: "Build"
+      - script: |
+          python -m pip list
+        displayName: "Print versions"
 
-  #     - script: |
-  #         python dev/generate-tests.py
-  #       displayName: "Generate Kernel tests"
+      - script: |
+          python -m pip install -v .[test,dev]
+        displayName: "Build for 3.9"
+        condition: "eq(variables['python.version'], '3.9')"
 
-  #     - script: |
-  #         python -m pytest -vv -rs tests-spec
-  #       displayName: "Test specification"
+      - script: |
+          python -m pip install -v .[test,dev]
+        displayName: "Build"
+        condition: "ne(variables['python.version'], '3.9')"
 
-  #     - script: |
-  #         python -m pytest -vv -rs tests-cpu-kernels
-  #       displayName: "Test CPU kernels"
+      - script: |
+          python dev/generate-tests.py
+        displayName: "Generate Kernel tests"
+        condition: "ne(variables['python.version'], '3.9')"
 
-  #     - script: |
-  #         python -m pytest -vv -rs tests
-  #       displayName: "Test"
+      - script: |
+          python -m pytest -vv -rs tests-spec
+        displayName: "Test specification"
+        condition: "ne(variables['python.version'], '3.9')"
 
-  #     - script: |
-  #         echo '===== include directory ============================='
-  #         ls -R `python -m awkward1.config --incdir`
-  #         echo '===== library directory ============================='
-  #         ls `python -m awkward1.config --libdir`
-  #         echo '===== compilation ==================================='
-  #         which g++
-  #         g++ minimal.cpp `python -m awkward1.config --cflags --static-libs` -o minimal
-  #         otool -L minimal
-  #         ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
-  #       workingDirectory: dependent-project
-  #       displayName: "Test dependent project 1"
+      - script: |
+          python -m pytest -vv -rs tests-cpu-kernels
+        displayName: "Test CPU kernels"
+        condition: "ne(variables['python.version'], '3.9')"
 
-  #     - script: |
-  #         rm -f minimal
-  #         g++ minimal.cpp `python -m awkward1.config --cflags --libs` -o minimal
-  #         export DYLD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$DYLD_LIBRARY_PATH
-  #         echo $DYLD_LIBRARY_PATH
-  #         otool -L minimal
-  #         ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
-  #       workingDirectory: dependent-project
-  #       displayName: "Test dependent project 2"
+      - script: |
+          python -m pytest -vv -rs tests
+        displayName: "Test"
 
-  #     - script: |
-  #         which python
-  #         python -c 'import sys; print(sys.version)'
-  #         cmake -S . -B build -DPYTHON_EXECUTABLE:FILEPATH=`which python`
-  #         cmake --build build
-  #         export DYLD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$DYLD_LIBRARY_PATH
-  #         echo $DYLD_LIBRARY_PATH
-  #         ls build/dependent*
-  #         otool -L build/dependent*
-  #         touch build/__init__.py
-  #         python -m pytest -vv test-python.py
-  #       workingDirectory: dependent-project
-  #       displayName: "Test dependent project 3"
+      - script: |
+          echo '===== include directory ============================='
+          ls -R `python -m awkward1.config --incdir`
+          echo '===== library directory ============================='
+          ls `python -m awkward1.config --libdir`
+          echo '===== compilation ==================================='
+          which g++
+          g++ minimal.cpp `python -m awkward1.config --cflags --static-libs` -o minimal
+          otool -L minimal
+          ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
+        workingDirectory: dependent-project
+        displayName: "Test dependent project 1"
+        condition: "ne(variables['python.version'], '3.9')"
+
+      - script: |
+          rm -f minimal
+          g++ minimal.cpp `python -m awkward1.config --cflags --libs` -o minimal
+          export DYLD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$DYLD_LIBRARY_PATH
+          echo $DYLD_LIBRARY_PATH
+          otool -L minimal
+          ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
+        workingDirectory: dependent-project
+        displayName: "Test dependent project 2"
+        condition: "ne(variables['python.version'], '3.9')"
+
+      - script: |
+          which python
+          python -c 'import sys; print(sys.version)'
+          cmake -S . -B build -DPYTHON_EXECUTABLE:FILEPATH=`which python`
+          cmake --build build
+          export DYLD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$DYLD_LIBRARY_PATH
+          echo $DYLD_LIBRARY_PATH
+          ls build/dependent*
+          otool -L build/dependent*
+          touch build/__init__.py
+          python -m pytest -vv test-python.py
+        workingDirectory: dependent-project
+        displayName: "Test dependent project 3"
+        condition: "ne(variables['python.version'], '3.9')"
 
   - job: Linux
 
@@ -236,22 +257,22 @@ jobs:
 
     strategy:
       matrix:
-        # "py27-np13":
-        #   python.version: "2.7"
-        #   python.architecture: "x64"
-        #   numpy.version: "1.13.1"
-        # "py27-np16":
-        #   python.version: "2.7"
-        #   python.architecture: "x64"
-        #   numpy.version: "1.16.5"
-        # "py35-np13":
-        #   python.version: "3.5"
-        #   python.architecture: "x64"
-        #   numpy.version: "1.13.1"
-        # "py36-np*":
-        #   python.version: "3.6"
-        #   python.architecture: "x64"
-        #   numpy.version: "latest"
+        "py27-np13":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.13.1"
+        "py27-np16":
+          python.version: "2.7"
+          python.architecture: "x64"
+          numpy.version: "1.16.5"
+        "py35-np13":
+          python.version: "3.5"
+          python.architecture: "x64"
+          numpy.version: "1.13.1"
+        "py36-np*":
+          python.version: "3.6"
+          python.architecture: "x64"
+          numpy.version: "latest"
         "py37-np*":
           python.version: "3.7"
           python.architecture: "x64"
