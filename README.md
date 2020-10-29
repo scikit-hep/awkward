@@ -3,7 +3,7 @@
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
 [![NSF-1836650](https://img.shields.io/badge/NSF-1836650-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1836650)
 [![DOI](https://zenodo.org/badge/137079949.svg)](https://zenodo.org/badge/latestdoi/137079949)
-[![Python 2.7 3.5 3.6 3.7 3.8](docs-img/logo/python-badge.svg)](https://www.python.org)
+[![Python 2.7, 3.5‒3.9](https://img.shields.io/badge/python-2.7%2c%203.5%E2%80%923.9-blue)](https://www.python.org)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
