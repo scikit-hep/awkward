@@ -232,7 +232,7 @@ jobs:
       vmImage: "ubuntu-18.04"
 
     variables:
-      PIP_ONLY_BINARY: :all:
+      PIP_ONLY_BINARY: ":all:"
 
     strategy:
       matrix:
