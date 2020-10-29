@@ -33,7 +33,7 @@ jobs:
       vmImage: "vs2017-win2016"
 
     variables:
-      PIP_ONLY_BINARY: cmake,numpy
+      PIP_ONLY_BINARY: cmake
 
     strategy:
       matrix:
@@ -97,7 +97,7 @@ jobs:
         displayName: "Show versions"
 
       - script: |
-          python -m pip install -v .[test,dev]
+          python -m pip install -v .[test]
         displayName: "Build for 3.9"
         condition: "eq(variables['python.version'], '3.9')"
 
@@ -131,7 +131,7 @@ jobs:
       vmImage: "macOS-10.15"
 
     variables:
-      PIP_ONLY_BINARY: cmake,numpy
+      PIP_ONLY_BINARY: cmake
 
     strategy:
       matrix:
@@ -179,7 +179,7 @@ jobs:
         displayName: "Print versions"
 
       - script: |
-          python -m pip install -v .[test,dev]
+          python -m pip install -v .[test]
         displayName: "Build for 3.9"
         condition: "eq(variables['python.version'], '3.9')"
 
