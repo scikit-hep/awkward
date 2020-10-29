@@ -252,14 +252,14 @@ jobs:
         #   python.version: "3.6"
         #   python.architecture: "x64"
         #   numpy.version: "latest"
-        # "py37-np*":
-        #   python.version: "3.7"
-        #   python.architecture: "x64"
-        #   numpy.version: "latest"
-        # "py38-np*":
-        #   python.version: "3.8"
-        #   python.architecture: "x64"
-        #   numpy.version: "latest"
+        "py37-np*":
+          python.version: "3.7"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py38-np*":
+          python.version: "3.8"
+          python.architecture: "x64"
+          numpy.version: "latest"
         "py39-np*":
           python.version: "3.9"
           python.architecture: "x64"
@@ -292,24 +292,29 @@ jobs:
         displayName: "Print versions"
 
       - script: |
-          python -m pip install -v .
+          python -m pip install -v .[test]
+        displayName: "Build for 3.9"
+        condition: "eq(variables['python.version'], '3.9')"
+
+      - script: |
+          python -m pip install -v .[test,dev]
         displayName: "Build"
+        condition: "ne(variables['python.version'], '3.9')"
 
-      # - script: |
-      #     python -m pip install -v .[test,dev]
-      #   displayName: "Build"
+      - script: |
+          python dev/generate-tests.py
+        displayName: "Generate Kernel tests"
+        condition: "ne(variables['python.version'], '3.9')"
 
-      # - script: |
-      #     python dev/generate-tests.py
-      #   displayName: "Generate Kernel tests"
+      - script: |
+          python -m pytest -vv -rs tests-spec
+        displayName: "Test specification"
+        condition: "ne(variables['python.version'], '3.9')"
 
-      # - script: |
-      #     python -m pytest -vv -rs tests-spec
-      #   displayName: "Test specification"
-
-      # - script: |
-      #     python -m pytest -vv -rs tests-cpu-kernels
-      #   displayName: "Test CPU kernels"
+      - script: |
+          python -m pytest -vv -rs tests-cpu-kernels
+        displayName: "Test CPU kernels"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           python -m pytest -vv -rs tests
