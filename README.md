@@ -10,39 +10,6 @@ Awkward Array is a library for **nested, variable-sized data**, including arbitr
 
 Arrays are **dynamically typed**, but operations on them are **compiled and fast**. Their behavior coincides with NumPy when array dimensions are regular and generalizes when they're not.
 
-<table>
-  <tr>
-    <td width="66%" valign="top">
-      <a href="https://awkward-array.org">
-        <img src="docs-img/panel-tutorials.png" width="570">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.org">
-        How-to tutorials
-        </a>
-      </b></p>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="docs-img/panel-sphinx.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        Python API reference
-        </a>
-      </b></p>
-      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="docs-img/panel-doxygen.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++ API reference
-        </a>
-      </b></p>
-    </td>
-  </tr>
-</table>
-
 # Motivating example
 
 Given an array of objects with `x`, `y` fields and variable-length nested lists like
@@ -103,7 +70,8 @@ Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward1) us
 ```bash
 pip install awkward1
 ```
-Most users will get a precompiled binary (wheel) for your operating system and Python version. If not, the above attempts to compile from source.
+
+You will likely get a precompiled binary (wheel), depending on your operating system and Python version. If not, pip attempts to compile from source (which requires a C++ compiler, make, and CMake).
 
 Awkward Array is also available using [conda](https://anaconda.org/conda-forge/awkward1), which always installs a binary:
 ```bash
@@ -119,9 +87,42 @@ conda update --all
 
 ## Getting help
 
+<table>
+  <tr>
+    <td width="66%" valign="top">
+      <a href="https://awkward-array.org">
+        <img src="docs-img/panel-tutorials.png" width="570">
+      </a>
+      <p align="center"><b>
+        <a href="https://awkward-array.org">
+        How-to tutorials
+        </a>
+      </b></p>
+    </td>
+    <td width="33%" valign="top">
+      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        <img src="docs-img/panel-sphinx.png" width="268">
+      </a>
+      <p align="center"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        Python API reference
+        </a>
+      </b></p>
+      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        <img src="docs-img/panel-doxygen.png" width="268">
+      </a>
+      <p align="center"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        C++ API reference
+        </a>
+      </b></p>
+    </td>
+  </tr>
+</table>
+
    * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues).
    * If you have a "How do I...?" question, ask about it on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
-   * The [Gitter Scikit-HEP/awkward-array](https://gitter.im/Scikit-HEP/awkward-array) is a way to get in touch with all Scikit-HEP developers and users.
+   * To ask questions in real time, try the Gitter [Scikit-HEP/awkward-array](https://gitter.im/Scikit-HEP/awkward-array) channel.
 
 ## Installation for developers
 
