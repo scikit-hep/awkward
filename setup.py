@@ -24,7 +24,6 @@ extras = {
 extras["all"] = sum(extras.values(), [])
 
 install_requires = open("requirements.txt").read().strip().split("\n")
-tests_require = extras["test"]
 
 
 class CMakeExtension(Extension):
