@@ -1590,7 +1590,7 @@ namespace awkward {
                                                      strides,
                                                      0,
                                                      1,
-                                                     std::string("c"),
+                                                     format_,
                                                      util::dtype::uint8,
                                                      ptr_lib);
 
