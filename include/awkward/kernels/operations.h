@@ -493,6 +493,21 @@ extern "C" {
       int64_t length);
 
   /// @param tooffsets outparam
+  /// @param length intparam
+  /// @param fromleft inparam role: ListOffsetArray-offsets
+  /// @param leftlen inparam
+  /// @param fromright inparam role: ListOffsetArray-offsets
+  /// @param rightlen inparam
+  EXPORT_SYMBOL struct Error
+    awkward_ListOffsetArray64_merge_offsets_64(
+      int64_t* tooffsets,
+      int64_t length,
+      const int64_t* fromleft,
+      const int64_t leftlen,
+      const int64_t* fromright,
+      const int64_t rightlen);
+
+  /// @param tooffsets outparam
   /// @param fromoffsets inparam role: ListOffsetArray-offsets
   /// @param length inparam
   EXPORT_SYMBOL struct Error
@@ -1971,6 +1986,21 @@ extern "C" {
       int64_t totagsoffset,
       int64_t length,
       int64_t base);
+
+  /// @param totags outparam
+  /// @param toindex outparam
+  /// @param fromleft inparam
+  /// @param leftlen inparam
+  /// @param fromright inparam
+  /// @param rightlen inparam
+  EXPORT_SYMBOL struct Error
+    awkward_UnionArray_mergetags_to8_const(
+      int8_t* totags,
+      int64_t* toindex,
+      const int64_t* fromleft,
+      const int64_t leftlen,
+      const int64_t* fromright,
+      const int64_t rightlen);
 
   /// @param toindex outparam
   /// @param toindexoffset inparam

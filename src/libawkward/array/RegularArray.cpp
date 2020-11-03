@@ -666,6 +666,11 @@ namespace awkward {
     return toListOffsetArray64(true).get()->offsets_and_flattened(axis, depth);
   }
 
+  const std::pair<Index64, ContentPtr>
+  RegularArray::offsets_and_concatenate(int64_t axis, int64_t depth) const {
+    return toListOffsetArray64(true).get()->offsets_and_concatenate(axis, depth);
+  }
+
   bool
   RegularArray::mergeable(const ContentPtr& other, bool mergebool) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {

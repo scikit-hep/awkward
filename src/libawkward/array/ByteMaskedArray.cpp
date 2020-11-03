@@ -799,6 +799,49 @@ namespace awkward {
     }
   }
 
+  const std::pair<Index64, ContentPtr>
+  ByteMaskedArray::offsets_and_concatenate(int64_t axis, int64_t depth) const {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
+      throw std::invalid_argument(
+        std::string("axis=0 not allowed for concatenate") + FILENAME(__LINE__));
+    }
+    else {
+      int64_t numnull;
+      std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
+      Index64 nextcarry = pair.first;
+      Index64 outindex = pair.second;
+
+      ContentPtr next = content_.get()->carry(nextcarry, false);
+
+      std::pair<Index64, ContentPtr> offsets_flattened =
+        next.get()->offsets_and_concatenate(posaxis, depth);
+      Index64 offsets = offsets_flattened.first;
+      ContentPtr flattened = offsets_flattened.second;
+
+      if (offsets.length() == 0) {
+        return std::pair<Index64, ContentPtr>(
+          offsets,
+          std::make_shared<IndexedOptionArray64>(Identities::none(),
+                                                 util::Parameters(),
+                                                 outindex,
+                                                 flattened));
+      }
+      else {
+        Index64 outoffsets(offsets.length() + numnull);
+        struct Error err = kernel::IndexedArray_flatten_none2empty_64<int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          outoffsets.data(),
+          outindex.data(),
+          outindex.length(),
+          offsets.data(),
+          offsets.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::pair<Index64, ContentPtr>(outoffsets, flattened);
+      }
+    }
+  }
+
   bool
   ByteMaskedArray::mergeable(const ContentPtr& other, bool mergebool) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {

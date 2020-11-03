@@ -9,6 +9,83 @@ import numpy
 
 import awkward1
 
+def test_list_offset_array_megre():
+    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+    content2 = awkward1.layout.NumpyArray(numpy.array([999.999, 0.11, 0.22, 0.33, 0.44, 0.55, 0.66, 0.77, 0.88, 0.99]))
+    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10], dtype=numpy.int64))
+    array   = awkward1.layout.ListOffsetArray64(offsets, content)
+
+    assert awkward1.to_list(array) == [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]
+
+    # array1 = [[[1.1 2.2] [3.3]] [] [[4.4 5.5]] [[6.6 7.7 8.8] [] [9.9]]]
+    # array2 = [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]]
+    offsets2 = awkward1.layout.Index64(numpy.array([1, 3, 4, 4, 6, 9, 9, 10], dtype=numpy.int64))
+    array2   = awkward1.layout.ListOffsetArray64(offsets2, content)
+    array22   = awkward1.layout.ListOffsetArray64(offsets2, content2)
+
+    assert awkward1.to_list(array2) == [[1.1, 2.2], [3.3], [], [4.4, 5.5], [6.6, 7.7, 8.8], [], [9.9]]
+    assert awkward1.to_list(array.merge(array2, 0)) == [[0.0, 1.1, 2.2],
+                                                        [],
+                                                        [3.3, 4.4],
+                                                        [5.5],
+                                                        [6.6, 7.7, 8.8, 9.9],
+                                                        [1.1, 2.2],
+                                                        [3.3],
+                                                        [],
+                                                        [4.4, 5.5],
+                                                        [6.6, 7.7, 8.8],
+                                                        [],
+                                                        [9.9]]
+
+    assert awkward1.to_list(array.merge(array2, 1)) == [[0.0, 1.1, 2.2, 1.1, 2.2],
+                                                        [3.3],
+                                                        [3.3, 4.4],
+                                                        [5.5, 4.4, 5.5],
+                                                        [6.6, 7.7, 8.8, 9.9, 6.6, 7.7, 8.8],
+                                                        [],
+                                                        [9.9]]
+
+    with pytest.raises(ValueError) as err:
+        assert awkward1.to_list(array.merge(array2, 2))
+    assert str(err.value).startswith("axis out of range for concatenate")
+
+    offsets3 = awkward1.layout.Index64(numpy.array([0, 3, 3, 5], dtype=numpy.int64))
+    array3   = awkward1.layout.ListOffsetArray64(offsets3, array)
+
+    assert awkward1.to_list(array3) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5], [6.6, 7.7, 8.8, 9.9]]]
+
+    offsets4 = awkward1.layout.Index64(numpy.array([1, 3, 4, 4, 6, 7, 7], dtype=numpy.int64))
+    array4   = awkward1.layout.ListOffsetArray64(offsets4, array22)
+
+    assert awkward1.to_list(array4) == [[[0.33], []], [[0.44, 0.55]], [], [[0.66, 0.77, 0.88], []], [[0.99]], []]
+
+    assert awkward1.to_list(array3.merge(array4, 0)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4]],
+                                                         [],
+                                                         [[5.5], [6.6, 7.7, 8.8, 9.9]],
+                                                         [[0.33], []],
+                                                         [[0.44, 0.55]],
+                                                         [],
+                                                         [[0.66, 0.77, 0.88], []],
+                                                         [[0.99]],
+                                                         []]
+
+    assert awkward1.to_list(array3.merge(array4, 1)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4], [0.33], []],
+                                                         [[0.44, 0.55]],
+                                                         [[5.5], [6.6, 7.7, 8.8, 9.9]],
+                                                         [[0.66, 0.77, 0.88], []],
+                                                         [[0.99]],
+                                                         []]
+
+    # [[0.0, 1.1, 2.2, 3.3, 4.4], [], [5.5, 6.6, 7.7, 8.8, 9.9]]
+    # [[3.3], [4.4, 5.5], [], [6.6, 7.7, 8.8], [9.9], []]
+    # [[0.0, 1.1, 2.2, 3.3, 4.4, 3.3],\n [4.4, 5.5],\n [5.5, 6.6, 7.7, 8.8, 9.9],\n [6.6, 7.7, 8.8],\n [9.9],\n []]
+    assert awkward1.to_list(array3.merge(array4, 2)) == [[[0.0, 1.1, 2.2], [], [3.3, 4.4], [0.33], []],
+                                                         [[0.44, 0.55]],
+                                                         [[5.5], [6.6, 7.7, 8.8, 9.9]],
+                                                         [[0.66, 0.77, 0.88], []],
+                                                         [[0.99]],
+                                                         []]
+
 def test_listoffsetarray_merge():
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5, 6, 7, 8, 9]))
     offsets1 = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 9]))

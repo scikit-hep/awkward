@@ -834,6 +834,12 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::pair<Index64, ContentPtr>
+  ListArrayOf<T>::offsets_and_concatenate(int64_t axis, int64_t depth) const {
+    return toListOffsetArray64(true).get()->offsets_and_concatenate(axis, depth);
+  }
+
+  template <typename T>
   bool
   ListArrayOf<T>::mergeable(const ContentPtr& other, bool mergebool) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {

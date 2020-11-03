@@ -892,6 +892,50 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::pair<Index64, ContentPtr>
+  ListOffsetArrayOf<T>::offsets_and_concatenate(int64_t axis,
+                                              int64_t depth) const {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
+      throw std::invalid_argument(
+        std::string("axis=0 not allowed for concatenate") + FILENAME(__LINE__));
+    }
+    else if (posaxis == depth + 1) {
+      ContentPtr listoffsetarray = toListOffsetArray64(true);
+      ListOffsetArray64* raw =
+        dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
+      return std::pair<Index64, ContentPtr>(raw->offsets(), raw->content());
+    }
+    else {
+      std::pair<Index64, ContentPtr> pair =
+        content_.get()->offsets_and_concatenate(posaxis, depth + 1);
+      Index64 inneroffsets = pair.first;
+      if (inneroffsets.length() == 0) {
+        return std::pair<Index64, ContentPtr>(
+                 Index64(0),
+                 std::make_shared<ListOffsetArrayOf<T>>(Identities::none(),
+                                                        util::Parameters(),
+                                                        offsets_,
+                                                        pair.second));
+      }
+      else {
+        Index64 tooffsets(offsets_.length());
+        struct Error err = kernel::ListOffsetArray_flatten_offsets_64<T>(
+          kernel::lib::cpu,   // DERIVE
+          tooffsets.data(),
+          offsets_.data(),
+          offsets_.length(),
+          inneroffsets.data(),
+          inneroffsets.length());
+        util::handle_error(err, classname(), identities_.get());
+        return std::pair<Index64, ContentPtr>(
+                 tooffsets,
+                 shallow_copy());
+      }
+    }
+  }
+
+  template <typename T>
   bool
   ListOffsetArrayOf<T>::mergeable(const ContentPtr& other,
                                   bool mergebool) const {
@@ -978,264 +1022,269 @@ namespace awkward {
   template <typename T>
   const ContentPtr
   ListOffsetArrayOf<T>::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
-    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return merge(raw->array(), axis, depth);
-    }
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
+      if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+        return merge(raw->array(), axis, depth);
+      }
 
-    if (!parameters_equal(other.get()->parameters())) {
-      return merge_as_union(other);
-    }
+      if (!parameters_equal(other.get()->parameters())) {
+        return merge_as_union(other);
+      }
 
-    if (dynamic_cast<EmptyArray*>(other.get())) {
-      return shallow_copy();
-    }
-    else if (IndexedArray32* rawother =
-             dynamic_cast<IndexedArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy(), axis, depth);
-    }
-    else if (IndexedArrayU32* rawother =
-             dynamic_cast<IndexedArrayU32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy(), axis, depth);
-    }
-    else if (IndexedArray64* rawother =
-             dynamic_cast<IndexedArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy(), axis, depth);
-    }
-    else if (IndexedOptionArray32* rawother =
-             dynamic_cast<IndexedOptionArray32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy(), axis, depth);
-    }
-    else if (IndexedOptionArray64* rawother =
-             dynamic_cast<IndexedOptionArray64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy(), axis, depth);
-    }
-    else if (ByteMaskedArray* rawother =
-             dynamic_cast<ByteMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy(), axis, depth);
-    }
-    else if (BitMaskedArray* rawother =
-             dynamic_cast<BitMaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy(), axis, depth);
-    }
-    else if (UnmaskedArray* rawother =
-             dynamic_cast<UnmaskedArray*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy(), axis, depth);
-    }
-    else if (UnionArray8_32* rawother =
-             dynamic_cast<UnionArray8_32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy(), axis, depth);
-    }
-    else if (UnionArray8_U32* rawother =
-             dynamic_cast<UnionArray8_U32*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy(), axis, depth);
-    }
-    else if (UnionArray8_64* rawother =
-             dynamic_cast<UnionArray8_64*>(other.get())) {
-      return rawother->reverse_merge(shallow_copy(), axis, depth);
-    }
+      if (dynamic_cast<EmptyArray*>(other.get())) {
+        return shallow_copy();
+      }
+      else if (IndexedArray32* rawother =
+               dynamic_cast<IndexedArray32*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (IndexedArrayU32* rawother =
+               dynamic_cast<IndexedArrayU32*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (IndexedArray64* rawother =
+               dynamic_cast<IndexedArray64*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (IndexedOptionArray32* rawother =
+               dynamic_cast<IndexedOptionArray32*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (IndexedOptionArray64* rawother =
+               dynamic_cast<IndexedOptionArray64*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (ByteMaskedArray* rawother =
+               dynamic_cast<ByteMaskedArray*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (BitMaskedArray* rawother =
+               dynamic_cast<BitMaskedArray*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (UnmaskedArray* rawother =
+               dynamic_cast<UnmaskedArray*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (UnionArray8_32* rawother =
+               dynamic_cast<UnionArray8_32*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (UnionArray8_U32* rawother =
+               dynamic_cast<UnionArray8_U32*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
+      else if (UnionArray8_64* rawother =
+               dynamic_cast<UnionArray8_64*>(other.get())) {
+        return rawother->reverse_merge(shallow_copy(), axis, depth);
+      }
 
-    int64_t mylength = length();
-    int64_t theirlength = other.get()->length();
-    Index64 starts(mylength + theirlength);
-    Index64 stops(mylength + theirlength);
+      int64_t mylength = length();
+      int64_t theirlength = other.get()->length();
+      Index64 starts(mylength + theirlength);
+      Index64 stops(mylength + theirlength);
 
-    IndexOf<T> self_starts = util::make_starts(offsets_);
-    IndexOf<T> self_stops = util::make_stops(offsets_);
+      IndexOf<T> self_starts = util::make_starts(offsets_);
+      IndexOf<T> self_stops = util::make_stops(offsets_);
 
-    if (std::is_same<T, int32_t>::value) {
-      struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        0,
-        stops.data(),
-        0,
-        reinterpret_cast<int32_t*>(self_starts.data()),
-        reinterpret_cast<int32_t*>(self_stops.data()),
-        mylength,
-        0);
-      util::handle_error(err, classname(), identities_.get());
-    }
-    else if (std::is_same<T, uint32_t>::value) {
-      struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        0,
-        stops.data(),
-        0,
-        reinterpret_cast<uint32_t*>(self_starts.data()),
-        reinterpret_cast<uint32_t*>(self_stops.data()),
-        mylength,
-        0);
-      util::handle_error(err, classname(), identities_.get());
-    }
-    else if (std::is_same<T, int64_t>::value) {
-      struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        0,
-        stops.data(),
-        0,
-        reinterpret_cast<int64_t*>(self_starts.data()),
-        reinterpret_cast<int64_t*>(self_stops.data()),
-        mylength,
-        0);
-      util::handle_error(err, classname(), identities_.get());
-    }
-    else {
-      throw std::runtime_error(
-        std::string("unrecognized ListOffsetArray specialization")
-        + FILENAME(__LINE__));
-    }
+      if (std::is_same<T, int32_t>::value) {
+        struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          starts.data(),
+          0,
+          stops.data(),
+          0,
+          reinterpret_cast<int32_t*>(self_starts.data()),
+          reinterpret_cast<int32_t*>(self_stops.data()),
+          mylength,
+          0);
+        util::handle_error(err, classname(), identities_.get());
+      }
+      else if (std::is_same<T, uint32_t>::value) {
+        struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          starts.data(),
+          0,
+          stops.data(),
+          0,
+          reinterpret_cast<uint32_t*>(self_starts.data()),
+          reinterpret_cast<uint32_t*>(self_stops.data()),
+          mylength,
+          0);
+        util::handle_error(err, classname(), identities_.get());
+      }
+      else if (std::is_same<T, int64_t>::value) {
+        struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          starts.data(),
+          0,
+          stops.data(),
+          0,
+          reinterpret_cast<int64_t*>(self_starts.data()),
+          reinterpret_cast<int64_t*>(self_stops.data()),
+          mylength,
+          0);
+        util::handle_error(err, classname(), identities_.get());
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ListOffsetArray specialization")
+          + FILENAME(__LINE__));
+      }
 
-    int64_t mycontentlength = content_.get()->length();
-    ContentPtr content;
-    if (ListArray32* rawother =
-        dynamic_cast<ListArray32*>(other.get())) {
-      content = content_.get()->merge(rawother->content(), axis, depth);
-      Index32 other_starts = rawother->starts();
-      Index32 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (ListArrayU32* rawother =
-             dynamic_cast<ListArrayU32*>(other.get())) {
-      content = content_.get()->merge(rawother->content(), axis, depth);
-      IndexU32 other_starts = rawother->starts();
-      IndexU32 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (ListArray64* rawother =
-             dynamic_cast<ListArray64*>(other.get())) {
-      content = content_.get()->merge(rawother->content(), axis, depth);
-      Index64 other_starts = rawother->starts();
-      Index64 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (ListOffsetArray32* rawother =
-             dynamic_cast<ListOffsetArray32*>(other.get())) {
-      content = content_.get()->merge(rawother->content(), axis, depth);
-      Index32 other_starts = rawother->starts();
-      Index32 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (ListOffsetArrayU32* rawother =
-             dynamic_cast<ListOffsetArrayU32*>(other.get())) {
-      content = content_.get()->merge(rawother->content(), axis, depth);
-      IndexU32 other_starts = rawother->starts();
-      IndexU32 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (ListOffsetArray64* rawother =
-             dynamic_cast<ListOffsetArray64*>(other.get())) {
-      content = content_.get()->merge(rawother->content(), axis, depth);
-      Index64 other_starts = rawother->starts();
-      Index64 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else if (RegularArray* rawregulararray =
-             dynamic_cast<RegularArray*>(other.get())) {
-      ContentPtr listoffsetarray = rawregulararray->toListOffsetArray64(true);
-      ListOffsetArray64* rawother =
-        dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
-      content = content_.get()->merge(rawother->content(), axis, depth);
-      Index64 other_starts = rawother->starts();
-      Index64 other_stops = rawother->stops();
-      struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        starts.data(),
-        mylength,
-        stops.data(),
-        mylength,
-        other_starts.data(),
-        other_stops.data(),
-        theirlength,
-        mycontentlength);
-      util::handle_error(err,
-                         rawother->classname(),
-                         rawother->identities().get());
-    }
-    else {
-      throw std::invalid_argument(
-        std::string("cannot merge ") + classname() + std::string(" with ") +
-        other.get()->classname() + FILENAME(__LINE__));
-    }
+      int64_t mycontentlength = content_.get()->length();
+      ContentPtr content;
+      if (ListArray32* rawother =
+          dynamic_cast<ListArray32*>(other.get())) {
+        content = content_.get()->merge(rawother->content(), axis, depth);
+        Index32 other_starts = rawother->starts();
+        Index32 other_stops = rawother->stops();
+        struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          starts.data(),
+          mylength,
+          stops.data(),
+          mylength,
+          other_starts.data(),
+          other_stops.data(),
+          theirlength,
+          mycontentlength);
+        util::handle_error(err,
+                           rawother->classname(),
+                           rawother->identities().get());
+      }
+      else if (ListArrayU32* rawother =
+               dynamic_cast<ListArrayU32*>(other.get())) {
+        content = content_.get()->merge(rawother->content(), axis, depth);
+        IndexU32 other_starts = rawother->starts();
+        IndexU32 other_stops = rawother->stops();
+        struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          starts.data(),
+          mylength,
+          stops.data(),
+          mylength,
+          other_starts.data(),
+          other_stops.data(),
+          theirlength,
+          mycontentlength);
+        util::handle_error(err,
+                           rawother->classname(),
+                           rawother->identities().get());
+      }
+      else if (ListArray64* rawother =
+               dynamic_cast<ListArray64*>(other.get())) {
+        content = content_.get()->merge(rawother->content(), axis, depth);
+        Index64 other_starts = rawother->starts();
+        Index64 other_stops = rawother->stops();
+        struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          starts.data(),
+          mylength,
+          stops.data(),
+          mylength,
+          other_starts.data(),
+          other_stops.data(),
+          theirlength,
+          mycontentlength);
+        util::handle_error(err,
+                           rawother->classname(),
+                           rawother->identities().get());
+      }
+      else if (ListOffsetArray32* rawother =
+               dynamic_cast<ListOffsetArray32*>(other.get())) {
+        content = content_.get()->merge(rawother->content(), axis, depth);
+        Index32 other_starts = rawother->starts();
+        Index32 other_stops = rawother->stops();
+        struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          starts.data(),
+          mylength,
+          stops.data(),
+          mylength,
+          other_starts.data(),
+          other_stops.data(),
+          theirlength,
+          mycontentlength);
+        util::handle_error(err,
+                           rawother->classname(),
+                           rawother->identities().get());
+      }
+      else if (ListOffsetArrayU32* rawother =
+               dynamic_cast<ListOffsetArrayU32*>(other.get())) {
+        content = content_.get()->merge(rawother->content(), axis, depth);
+        IndexU32 other_starts = rawother->starts();
+        IndexU32 other_stops = rawother->stops();
+        struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          starts.data(),
+          mylength,
+          stops.data(),
+          mylength,
+          other_starts.data(),
+          other_stops.data(),
+          theirlength,
+          mycontentlength);
+        util::handle_error(err,
+                           rawother->classname(),
+                           rawother->identities().get());
+      }
+      else if (ListOffsetArray64* rawother =
+               dynamic_cast<ListOffsetArray64*>(other.get())) {
+        content = content_.get()->merge(rawother->content(), axis, depth);
+        Index64 other_starts = rawother->starts();
+        Index64 other_stops = rawother->stops();
+        struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          starts.data(),
+          mylength,
+          stops.data(),
+          mylength,
+          other_starts.data(),
+          other_stops.data(),
+          theirlength,
+          mycontentlength);
+        util::handle_error(err,
+                           rawother->classname(),
+                           rawother->identities().get());
+      }
+      else if (RegularArray* rawregulararray =
+               dynamic_cast<RegularArray*>(other.get())) {
+        ContentPtr listoffsetarray = rawregulararray->toListOffsetArray64(true);
+        ListOffsetArray64* rawother =
+          dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
+        content = content_.get()->merge(rawother->content(), axis, depth);
+        Index64 other_starts = rawother->starts();
+        Index64 other_stops = rawother->stops();
+        struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          starts.data(),
+          mylength,
+          stops.data(),
+          mylength,
+          other_starts.data(),
+          other_stops.data(),
+          theirlength,
+          mycontentlength);
+        util::handle_error(err,
+                           rawother->classname(),
+                           rawother->identities().get());
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("cannot merge ") + classname() + std::string(" with ") +
+          other.get()->classname() + FILENAME(__LINE__));
+      }
 
-    return std::make_shared<ListArray64>(Identities::none(),
-                                         parameters_,
-                                         starts,
-                                         stops,
-                                         content);
+      return std::make_shared<ListArray64>(Identities::none(),
+                                           parameters_,
+                                           starts,
+                                           stops,
+                                           content);
+    } else {
+      return merge_as_union(other, posaxis, depth);
+    }
   }
 
   template <>

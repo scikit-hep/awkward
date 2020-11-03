@@ -629,6 +629,12 @@ namespace awkward {
     virtual const std::pair<Index64, ContentPtr>
       offsets_and_flattened(int64_t axis, int64_t depth) const = 0;
 
+    /// @brief Returns (a) an offsets {@link IndexOf Index} and (b) a flattened
+    /// version of the array at some `axis` depth.
+    ///
+    virtual const std::pair<Index64, ContentPtr>
+      offsets_and_concatenate(int64_t axis, int64_t depth) const = 0;
+
     /// @brief Returns `true` if this array can be merged with the `other`;
     /// `false` otherwise.
     ///
@@ -1050,7 +1056,7 @@ namespace awkward {
     /// @brief Concatenates this array with `other` by creating a
     /// {@link UnionArrayOf UnionArray} instead of actually merging the data.
     const ContentPtr
-      merge_as_union(const ContentPtr& other) const;
+      merge_as_union(const ContentPtr& other, int64_t axis = 0, int64_t depth = 0) const;
 
     /// @brief Internal function to handle the `axis = 0` case of #rpad
     /// and #rpad_and_clip.

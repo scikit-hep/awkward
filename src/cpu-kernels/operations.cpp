@@ -839,6 +839,48 @@ ERROR awkward_ListOffsetArray64_compact_offsets_64(
 }
 
 template <typename C, typename T>
+ERROR awkward_ListOffsetArray_merge_offsets(
+  T* tooffsets,
+  int64_t length,
+  const C* fromleft,
+  const int64_t leftlen,
+  const C* fromright,
+  const int64_t rightlen) {
+  int64_t a = 0;
+  int64_t b = 0;
+  tooffsets[0] = 0;
+  for (int64_t i = 1; i < length; i++) {
+    if (i < leftlen) {
+      a =  fromleft[i] - fromleft[i - 1];
+    } else {
+      a = 0;
+    }
+    if (i < rightlen) {
+      b = fromright[i] - fromright[i - 1];
+    } else {
+      b = 0;
+    }
+    tooffsets[i] = tooffsets[i - 1] + a + b;
+  }
+  return success();
+}
+ERROR awkward_ListOffsetArray64_merge_offsets_64(
+  int64_t* tooffsets,
+  int64_t length,
+  const int64_t* fromleft,
+  const int64_t leftlen,
+  const int64_t* fromright,
+  const int64_t rightlen) {
+  return awkward_ListOffsetArray_merge_offsets<int64_t, int64_t>(
+    tooffsets,
+    length,
+    fromleft,
+    leftlen,
+    fromright,
+    rightlen);
+}
+
+template <typename C, typename T>
 ERROR awkward_ListArray_broadcast_tooffsets(
   T* tocarry,
   const T* fromoffsets,
@@ -2273,6 +2315,68 @@ ERROR awkward_UnionArray_filltags_to8_const(
     totagsoffset,
     length,
     base);
+}
+
+template <typename TO>
+ERROR awkward_UnionArray_mergetags_const(
+  TO* totags,
+  int64_t* toindex,
+  const int64_t* fromleft,
+  const int64_t leftlen,
+  const int64_t* fromright,
+  const int64_t rightlen) {
+  int64_t ileft = 0;
+  int64_t iright = 0;
+  int64_t leftsize = 0;
+  int64_t rightsize = 0;
+  int8_t tag = 0;
+  int64_t j = 0;
+  int64_t li = 0;
+  int64_t ri = 0;
+  int64_t length = leftlen + rightlen;
+  for (int64_t m = 0; m < length; m++) {
+    if (tag == 0  &&  ileft < leftlen) {
+      leftsize = fromleft[ileft + 1] - fromleft[ileft];
+      for (int64_t i = 0; i < leftsize; i++) {
+        toindex[j] = li++;
+        totags[j++] = (TO)tag;
+      }
+    }
+    if (tag == 1  &&  iright < rightlen) {
+      rightsize = fromright[iright + 1] - fromright[iright];
+      for (int64_t i = 0; i < rightsize; i++) {
+        toindex[j] = ri++;
+        totags[j++] = (TO)tag;
+      }
+    }
+    if (tag == 0) {
+      if (iright < rightlen) {
+        tag = 1;
+      }
+      ileft++;
+    } else {
+      if (ileft < leftlen) {
+        tag = 0;
+      }
+      iright++;
+    }
+  }
+  return success();
+}
+ERROR awkward_UnionArray_mergetags_to8_const(
+  int8_t* totags,
+  int64_t* toindex,
+  const int64_t* fromleft,
+  const int64_t leftlen,
+  const int64_t* fromright,
+  const int64_t rightlen) {
+  return awkward_UnionArray_mergetags_const<int8_t>(
+    totags,
+    toindex,
+    fromleft,
+    leftlen,
+    fromright,
+    rightlen);
 }
 
 template <typename TO>

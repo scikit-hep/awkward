@@ -1122,47 +1122,101 @@ namespace awkward {
   }
 
   const ContentPtr
-  Content::merge_as_union(const ContentPtr& other) const {
-    int64_t mylength = length();
-    int64_t theirlength = other.get()->length();
-    Index8 tags(mylength + theirlength);
-    Index64 index(mylength + theirlength);
+  Content::merge_as_union(const ContentPtr& other, int64_t axis, int64_t depth) const {
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
+      int64_t mylength = length();
+      int64_t theirlength = other.get()->length();
+      Index8 tags(mylength + theirlength);
+      Index64 index(mylength + theirlength);
 
-    ContentPtrVec contents({ shallow_copy(), other });
+      ContentPtrVec contents({ shallow_copy(), other });
 
-    struct Error err1 = kernel::UnionArray_filltags_to8_const(
-      kernel::lib::cpu,   // DERIVE
-      tags.data(),
-      0,
-      mylength,
-      0);
-    util::handle_error(err1, classname(), identities_.get());
-    struct Error err2 = kernel::UnionArray_fillindex_count_64(
-      kernel::lib::cpu,   // DERIVE
-      index.data(),
-      0,
-      mylength);
-    util::handle_error(err2, classname(), identities_.get());
+      struct Error err1 = kernel::UnionArray_filltags_to8_const(
+        kernel::lib::cpu,   // DERIVE
+        tags.data(),
+        0,
+        mylength,
+        0);
+      util::handle_error(err1, classname(), identities_.get());
+      struct Error err2 = kernel::UnionArray_fillindex_count_64(
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
+        0,
+        mylength);
+      util::handle_error(err2, classname(), identities_.get());
 
-    struct Error err3 = kernel::UnionArray_filltags_to8_const(
-      kernel::lib::cpu,   // DERIVE
-      tags.data(),
-      mylength,
-      theirlength,
-      1);
-    util::handle_error(err3, classname(), identities_.get());
-    struct Error err4 = kernel::UnionArray_fillindex_count_64(
-      kernel::lib::cpu,   // DERIVE
-      index.data(),
-      mylength,
-      theirlength);
-    util::handle_error(err4, classname(), identities_.get());
+      struct Error err3 = kernel::UnionArray_filltags_to8_const(
+        kernel::lib::cpu,   // DERIVE
+        tags.data(),
+        mylength,
+        theirlength,
+        1);
+      util::handle_error(err3, classname(), identities_.get());
+      struct Error err4 = kernel::UnionArray_fillindex_count_64(
+        kernel::lib::cpu,   // DERIVE
+        index.data(),
+        mylength,
+        theirlength);
+      util::handle_error(err4, classname(), identities_.get());
 
-    return std::make_shared<UnionArray8_64>(Identities::none(),
-                                            util::Parameters(),
-                                            tags,
-                                            index,
-                                            contents);
+      return std::make_shared<UnionArray8_64>(Identities::none(),
+                                              util::Parameters(),
+                                              tags,
+                                              index,
+                                              contents);
+    }
+    else if (posaxis == depth + 1) {
+      auto left = offsets_and_concatenate(posaxis, depth);
+      auto right = other.get()->offsets_and_concatenate(posaxis, depth);
+      int64_t mylength = left.first.length() - 1;
+      int64_t theirlength = right.first.length() - 1;
+
+      Index8 tags(left.second.get()->length()
+        + right.second.get()->length());
+      Index64 index(tags.length());
+      struct Error err5 = kernel::UnionArray_mergetags_to8_const(
+        kernel::lib::cpu,   // DERIVE
+        tags.data(),
+        index.data(),
+        left.first.data(),
+        mylength,
+        right.first.data(),
+        theirlength);
+      util::handle_error(err5, classname(), identities_.get());
+
+      int64_t longest = (left.first.length() > right.first.length()) ?
+        left.first.length() : right.first.length();
+      Index64 offsets(longest);
+      struct Error err6 = kernel::ListOffsetArray_merge_offsets_64(
+        kernel::lib::cpu,   // DERIVE
+        offsets.data(),
+        offsets.length(),
+        left.first.data(),
+        left.first.length(),
+        right.first.data(),
+        right.first.length());
+      util::handle_error(err6, classname(), identities_.get());
+
+      ContentPtrVec contents({ left.second, right.second });
+
+      ContentPtr out = std::make_shared<UnionArray8_64>(Identities::none(),
+                                                        util::Parameters(),
+                                                        tags,
+                                                        index,
+                                                        contents);
+
+      return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                 util::Parameters(),
+                                                 offsets,
+                                                 out);
+    } else {
+      auto left = offsets_and_concatenate(posaxis, depth);
+      auto right = other.get()->offsets_and_concatenate(posaxis, depth);
+
+      ContentPtr out = left.second.get()->merge(right.second, axis - 1, depth);
+      return out;
+    }
   }
 
   const ContentPtr

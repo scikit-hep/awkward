@@ -152,6 +152,9 @@ namespace awkward {
     const std::pair<Index64, ContentPtr>
       offsets_and_flattened(int64_t axis, int64_t depth) const override;
 
+    const std::pair<Index64, ContentPtr>
+      offsets_and_concatenate(int64_t axis, int64_t depth) const override;
+
     /// @exception std::runtime_error is always thrown
     bool
       mergeable(const ContentPtr& other, bool mergebool) const override;
