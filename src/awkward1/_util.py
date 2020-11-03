@@ -7,6 +7,7 @@ import re
 import sys
 import os
 import weakref
+import warnings
 
 try:
     from collections.abc import Mapping, MutableMapping
@@ -44,6 +45,21 @@ def exception_suffix(filename):
             + filename
             + line
             + ")")
+
+
+def deprecate(exception, version, date=None):
+    if awkward1.deprecations_as_errors:
+        raise exception
+    else:
+        if date is None:
+            date = ""
+        else:
+            date = " (target date: " + date + ")"
+        message = """In version {0}{1}, this will be an error.
+(Set ak.deprecations_as_errors = True to get a stack trace now.)
+
+{2}: {3}""".format(version, date, type(exception).__name__, str(exception))
+        warnings.warn(message, DeprecationWarning)
 
 
 virtualtypes = (awkward1.layout.VirtualArray,)
@@ -475,7 +491,7 @@ def completely_flatten(array):
         )
 
 
-def broadcast_and_apply(inputs, getfunction, behavior):
+def broadcast_and_apply(inputs, getfunction, behavior, allow_records=True):
     def checklength(inputs):
         length = len(inputs[0])
         for x in inputs[1:]:
@@ -864,6 +880,13 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     )
 
         elif any(isinstance(x, recordtypes) for x in inputs):
+            if not allow_records:
+                exception = ValueError(
+                    "cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs))
+                    + exception_suffix(__file__)
+                )
+                deprecate(exception, "1.0.0", "2020-12-01")
+
             keys = None
             length = None
             istuple = True

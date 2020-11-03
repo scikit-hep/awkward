@@ -3439,9 +3439,14 @@ def _form_to_layout(
         return awkward1.layout.NumpyArray(array, identities, parameters)
 
     elif isinstance(form, awkward1.forms.RecordForm):
+        items = list(form.contents.items())
+        if form.istuple:
+            items.sort(key=lambda x: int(x[0]))
         contents = []
         minlength = None
-        for content_form in form.contents.values():
+        keys = []
+        for key, content_form in items:
+            keys.append(key)
             content = _form_to_layout(
                 content_form,
                 container,
@@ -3461,7 +3466,7 @@ def _form_to_layout(
 
         return awkward1.layout.RecordArray(
             contents,
-            None if form.istuple else form.contents.keys(),
+            None if form.istuple else keys,
             minlength,
             identities,
             parameters,

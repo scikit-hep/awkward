@@ -36,12 +36,3 @@ def test_jagged():
     assert awkward1.to_list(array) == [[1.0, 2.0, 3.0], [], [4.0, None, 5.0]]
     assert awkward1.to_list(parabola(array)) == [[3.0, 12.0, 27.0], [], [48.0, None, 75.0]]
     assert awkward1.to_list(grad_parabola(array)) == [[6.0, 12.0, 18.0], [], [24.0, None, 30.0]]
-
-def test_record():
-    grad_parabola = awkward1.autograd.elementwise_grad(parabola)
-
-    array = awkward1.Array([{"x": 0.0, "y": []}, {"x": 1.0, "y": [1.0]}, None, {"x": 2.0, "y": [1.0, None, 2.0]}], check_valid=True)
-
-    assert awkward1.to_list(array) == [{"x": 0.0, "y": []}, {"x": 1.0, "y": [1.0]}, None, {"x": 2.0, "y": [1.0, None, 2.0]}]
-    assert awkward1.to_list(parabola(array)) == [{"x": 0.0, "y": []}, {"x": 3.0, "y": [3.0]}, None, {"x": 12.0, "y": [3.0, None, 12.0]}]
-    assert awkward1.to_list(grad_parabola(array)) == [{"x": 0.0, "y": []}, {"x": 6.0, "y": [6.0]}, None, {"x": 12.0, "y": [6.0, None, 12.0]}]

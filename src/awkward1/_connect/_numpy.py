@@ -104,7 +104,9 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
         return None
 
-    out = awkward1._util.broadcast_and_apply(inputs, getfunction, behavior)
+    out = awkward1._util.broadcast_and_apply(
+        inputs, getfunction, behavior, allow_records=False
+    )
     assert isinstance(out, tuple) and len(out) == 1
     return awkward1._util.wrap(out[0], behavior)
 
