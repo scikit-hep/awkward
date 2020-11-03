@@ -70,7 +70,38 @@ def from_numpy(
             )
 
         if len(array.shape) == 0:
-            data = awkward1.layout.NumpyArray(array.reshape(1))
+            array = array.reshape(1)
+
+        if array.dtype.kind == "S":
+            asbytes = array.reshape(-1)
+            itemsize = array.dtype.itemsize
+            starts = numpy.arange(0, len(asbytes)*itemsize, itemsize, dtype=np.int64)
+            stops = starts + numpy.char.str_len(asbytes)
+            data = awkward1.layout.ListArray64(
+                awkward1.layout.Index64(starts),
+                awkward1.layout.Index64(stops),
+                awkward1.layout.NumpyArray(
+                    asbytes.view("u1"), parameters={"__array__": "byte"}
+                ),
+                parameters={"__array__": "bytestring"},
+            )
+            for size in array.shape[-1:0:-1]:
+                data = awkward1.layout.RegularArray(data, size)
+        elif array.dtype.kind == "U":
+            asbytes = numpy.char.encode(array.reshape(-1), "utf-8", "surrogateescape")
+            itemsize = array.dtype.itemsize // 4
+            starts = numpy.arange(0, len(asbytes)*itemsize, itemsize, dtype=np.int64)
+            stops = starts + numpy.char.str_len(asbytes)
+            data = awkward1.layout.ListArray64(
+                awkward1.layout.Index64(starts),
+                awkward1.layout.Index64(stops),
+                awkward1.layout.NumpyArray(
+                    asbytes.view("u1"), parameters={"__array__": "char"}
+                ),
+                parameters={"__array__": "string"},
+            )
+            for size in array.shape[-1:0:-1]:
+                data = awkward1.layout.RegularArray(data, size)
         else:
             data = awkward1.layout.NumpyArray(array)
 
@@ -1532,7 +1563,7 @@ def to_layout(
     array,
     allow_record=True,
     allow_other=False,
-    numpytype=(np.number, np.bool_, np.bool),
+    numpytype=(np.number, np.bool_, np.bool, np.str_, np.bytes_),
 ):
     """
     Args:
@@ -1574,32 +1605,13 @@ def to_layout(
     elif allow_record and isinstance(array, awkward1.layout.Record):
         return array
 
-    elif isinstance(array, numpy.ma.MaskedArray):
-        mask = numpy.ma.getmask(array)
-        data = numpy.ma.getdata(array)
-        if mask is False:
-            out = awkward1.layout.UnmaskedArray(
-                awkward1.layout.NumpyArray(data.reshape(-1))
-            )
-        else:
-            out = awkward1.layout.ByteMaskedArray(
-                awkward1.layout.Index8(mask.reshape(-1)),
-                awkward1.layout.NumpyArray(data.reshape(-1)),
-            )
-        for size in array.shape[:0:-1]:
-            out = awkward1.layout.RegularArray(out, size)
-        return out
-
-    elif isinstance(array, np.ndarray):
+    elif isinstance(array, (np.ndarray, numpy.ma.MaskedArray)):
         if not issubclass(array.dtype.type, numpytype):
             raise ValueError(
                 "NumPy {0} not allowed".format(repr(array.dtype))
                 + awkward1._util.exception_suffix(__file__)
             )
-        out = awkward1.layout.NumpyArray(array.reshape(-1))
-        for size in array.shape[:0:-1]:
-            out = awkward1.layout.RegularArray(out, size)
-        return out
+        return from_numpy(array, regulararray=True, recordarray=True, highlevel=False)
 
     elif isinstance(array, (str, bytes)) or (
         awkward1._util.py27 and isinstance(array, awkward1._util.unicode)
@@ -2412,7 +2424,7 @@ def to_parquet(array, where, explode_records=False, **options):
         array: Data to write to a Parquet file.
         where (str, Path, file-like object): Where to write the Parquet file.
         explode_records (bool): If True, lists of records are written as
-            records of lists, so that nested keys become top-level fields
+            records of lists, so that nested fields become top-level fields
             (which can be zipped when read back).
         options: All other options are passed to pyarrow.parquet.ParquetWriter.
             In particular, if no `schema` is given, a schema is derived from
@@ -2585,7 +2597,10 @@ def from_parquet(
         state = _ParquetState(file, use_threads, source, options)
 
         if lazy_cache == "attach":
-            lazy_cache = {}
+            lazy_cache = awkward1._util.MappingProxy({})
+            toattach = lazy_cache
+        elif lazy_cache is not None:
+            lazy_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
             toattach = lazy_cache
         else:
             toattach = None
@@ -3717,7 +3732,10 @@ def from_arrayset(
         form = _wrap_record_with_virtual(form)
 
         if lazy_cache == "attach":
-            lazy_cache = {}
+            lazy_cache = awkward1._util.MappingProxy({})
+            toattach = lazy_cache
+        elif lazy_cache is not None:
+            lazy_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
             toattach = lazy_cache
         else:
             toattach = None
@@ -3921,7 +3939,18 @@ def to_pandas(
               2         3.0  NaN
               3         4.0  NaN
     """
-    pandas = awkward1._connect._pandas.get_pandas()
+    try:
+        import pandas
+    except ImportError:
+        raise ImportError(
+            """install the 'pandas' package with:
+
+    pip install pandas --upgrade
+
+or
+
+    conda install pandas"""
+        )
 
     if how is not None:
         out = None

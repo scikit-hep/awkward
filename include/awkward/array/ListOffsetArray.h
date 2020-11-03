@@ -49,6 +49,9 @@ namespace awkward {
     int64_t
       purelist_depth() const override;
 
+    bool
+      dimension_optiontype() const override;
+
     const std::pair<int64_t, int64_t>
       minmax_depth() const override;
 
@@ -121,7 +124,8 @@ namespace awkward {
     ListOffsetArrayOf<T>(const IdentitiesPtr& identities,
                          const util::Parameters& parameters,
                          const IndexOf<T>& offsets,
-                         const ContentPtr& content);
+                         const ContentPtr& content,
+                         bool represents_regular = false);
 
     /// @brief Positions where one nested list stops and the next starts in
     /// the #content; the `offsets` must be monotonically increasing.
@@ -309,7 +313,7 @@ namespace awkward {
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
     const ContentPtr
-      merge(const ContentPtr& other, int64_t axis, int64_t depth) const override;
+      mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const override;
 
     const SliceItemPtr
       asslice() const override;
@@ -413,6 +417,7 @@ namespace awkward {
     const IndexOf<T> offsets_;
     /// @brief See #content.
     const ContentPtr content_;
+    const bool represents_regular_;
   };
 
 #ifndef AWKWARD_LISTOFFSETARRAY_NO_EXTERN_TEMPLATE

@@ -15,7 +15,7 @@ jobs:
   - job: "CUDA"
 
     pool:
-      vmImage: "ubuntu-16.04"
+      vmImage: "ubuntu-18.04"
 
     steps:
       - checkout: self
@@ -36,9 +36,11 @@ jobs:
       - script: |
           python -m pip install --upgrade pip
         displayName: "Install Pip"
+
       - script: |
           python -m pip install twine wheel
         displayName: "Install Twine & Wheel"
+
       - script: |
           python -m pip list
         displayName: "Print versions"
@@ -46,6 +48,7 @@ jobs:
       - script: |
           bash cuda-build.sh
         displayName: "Build"
+
       - script: |
           ls dist
           rm -rf dist/awkward1_cuda_kernels-*-py3-none-any.whl dist/awkward1_cuda_kernels dist/awkward1_cuda_kernels-*.dist-info dist/tmp_WHEEL
@@ -62,7 +65,7 @@ jobs:
   - job: Linux
 
     pool:
-      vmImage: "ubuntu-16.04"
+      vmImage: "ubuntu-18.04"
 
     variables:
       PIP_ONLY_BINARY: cmake
@@ -104,10 +107,6 @@ jobs:
       - script: |
           if [[ $PLAT = "manylinux2010_x86_64" ]]; then
             python setup.py sdist
-          else
-            # Disable manylinux1 pyproject build since cmake is not packaged for Python 3.8 + manylinux1
-            rm pyproject.toml
-            python -m pip install "setuptools>=42.0.0" "wheel==0.34.2"
           fi
           docker run -e PLAT=$(PLAT) -v `pwd`:/io $(DOCKER_IMAGE) /io/.ci/linux-build.sh
         displayName: "Build"
@@ -178,6 +177,14 @@ jobs:
           python.version: "3.8"
           python.architecture: "x64"
           numpy.version: "latest"
+        "py39-32bit":
+          python.version: "3.9"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py39-64bit":
+          python.version: "3.9"
+          python.architecture: "x64"
+          numpy.version: "latest"
 
     steps:
       - checkout: self
@@ -222,7 +229,7 @@ jobs:
   - job: MacOS
 
     pool:
-      vmImage: "macOS-10.14"
+      vmImage: "macOS-10.15"
 
     variables:
       PIP_ONLY_BINARY: cmake
@@ -233,16 +240,16 @@ jobs:
           python.version: "2.7"
           python.architecture: "x64"
           numpy.version: "latest"
-        "py36":
-          python.version: "3.6"
-          python.architecture: "x64"
-          numpy.version: "latest"
         "py37":
           python.version: "3.7"
           python.architecture: "x64"
           numpy.version: "latest"
         "py38":
           python.version: "3.8"
+          python.architecture: "x64"
+          numpy.version: "latest"
+        "py39":
+          python.version: "3.9"
           python.architecture: "x64"
           numpy.version: "latest"
 
@@ -259,16 +266,16 @@ jobs:
       - script: |
           case $(python.version) in
           2.7)
-            FULL_VERSION=2.7.17
-            ;;
-          3.6)
-            FULL_VERSION=3.6.8
+            FULL_VERSION=2.7.18
             ;;
           3.7)
-            FULL_VERSION=3.7.5
+            FULL_VERSION=3.7.9
             ;;
           3.8)
-            FULL_VERSION=3.8.0
+            FULL_VERSION=3.8.6
+            ;;
+          3.9)
+            FULL_VERSION=3.9.0
             ;;
           esac
 

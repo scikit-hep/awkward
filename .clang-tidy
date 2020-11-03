@@ -14,7 +14,8 @@ Checks: -*,
   ,readability-container-size-empty,
   ,readability-redundant-string-cstr,
   ,readability-static-definition-in-anonymous-namespace,
-  ,readability-uniqueptr-delete-release
+  ,readability-uniqueptr-delete-release,
+  ,cppcoreguidelines-pro-type-member-init
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false

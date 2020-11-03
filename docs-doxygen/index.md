@@ -6,10 +6,10 @@ Arrays are **dynamically typed**, but operations on them are **compiled and fast
 
 ## Documentation
 
-   * [How-to documentation for data analysts](https://awkward-array.org/how-to.html)
-   * [How-it-works tutorials for developers](https://awkward-array.org/how-it-works.html)
+   * [Main page (quickstart)](https://awkward-array.org>)
    * C++ API reference: **this site**
    * [Python API reference](../index.html)
+   * [GitHub repository](https://github.com/scikit-hep/awkward-1.0)
 
 ## Navigation
 

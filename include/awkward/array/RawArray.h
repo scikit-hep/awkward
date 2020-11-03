@@ -1,7 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("include/awkward/array/RawArray.h", line)
-#define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("include/awkward/array/RawArray.h", line)
+#define FILENAME(line) std::string("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/master/include/awkward/array/RawArray.h#L" #line ")")
+#define FILENAME_C(line) ("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/master/include/awkward/array/RawArray.h#L" #line ")")
 
 #ifndef AWKWARD_RAWARRAY_H_
 #define AWKWARD_RAWARRAY_H_
@@ -19,10 +19,8 @@
 
 #include "awkward/common.h"
 #include "awkward/kernel-dispatch.h"
-#include "awkward/kernels/identities.h"
-#include "awkward/kernels/getitem.h"
-#include "awkward/kernels/operations.h"
-#include "awkward/kernels/sorting.h"
+#include "awkward/kernels.h"
+#include "awkward/kernel-utils.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/util.h"
 #include "awkward/Slice.h"
@@ -86,6 +84,11 @@ namespace awkward {
     int64_t
       purelist_depth() const override {
       return 1;
+    }
+
+    bool
+      dimension_optiontype() const override {
+      return false;
     }
 
     const std::pair<int64_t, int64_t>
@@ -836,7 +839,7 @@ namespace awkward {
       else {
         throw std::invalid_argument(
           std::string("axis out of range for flatten") + FILENAME(__LINE__));
-      }      
+      }
     }
 
     bool
@@ -891,66 +894,9 @@ namespace awkward {
     }
 
     const ContentPtr
-      merge(const ContentPtr& other, int64_t axis, int64_t depth) const override {
-      if (dynamic_cast<EmptyArray*>(other.get())) {
-        return shallow_copy();
-      }
-      else if (IndexedArray32* rawother =
-               dynamic_cast<IndexedArray32*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy(), axis, depth);
-      }
-      else if (IndexedArrayU32* rawother =
-               dynamic_cast<IndexedArrayU32*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy(), axis, depth);
-      }
-      else if (IndexedArray64* rawother =
-               dynamic_cast<IndexedArray64*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy(), axis, depth);
-      }
-      else if (IndexedOptionArray32* rawother =
-               dynamic_cast<IndexedOptionArray32*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy(), axis, depth);
-      }
-      else if (IndexedOptionArray64* rawother =
-               dynamic_cast<IndexedOptionArray64*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy(), axis, depth);
-      }
-      else if (ByteMaskedArray* rawother =
-               dynamic_cast<ByteMaskedArray*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy(), axis, depth);
-      }
-      else if (BitMaskedArray* rawother =
-               dynamic_cast<BitMaskedArray*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy(), axis, depth);
-      }
-      else if (UnmaskedArray* rawother =
-               dynamic_cast<UnmaskedArray*>(other.get())) {
-        return rawother->reverse_merge(shallow_copy(), axis, depth);
-      }
-
-      if (RawArrayOf<T>* rawother =
-          dynamic_cast<RawArrayOf<T>*>(other.get())) {
-        std::shared_ptr<T> ptr =
-          std::shared_ptr<T>(new T[(size_t)(length_ + rawother->length())],
-                             kernel::array_deleter<T>());
-        memcpy(ptr.get(),
-               &ptr_.get()[(size_t)offset_],
-               sizeof(T)*((size_t)length_));
-        memcpy(&ptr.get()[(size_t)length_],
-               &rawother->ptr().get()[(size_t)rawother->offset()],
-               sizeof(T)*((size_t)rawother->length()));
-        return std::make_shared<RawArrayOf<T>>(Identities::none(),
-                                               util::Parameters(),
-                                               ptr,
-                                               0,
-                                               length_ + rawother->length(),
-                                               itemsize_);
-      }
-      else {
-        throw std::invalid_argument(
-          std::string("cannot merge ") + classname() + std::string(" with ")
-          + other.get()->classname() + FILENAME(__LINE__));
-      }
+      mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const override {
+      throw std::runtime_error(
+        std::string("not implemented RawArrayOf<T>::mergemany")+ FILENAME(__LINE__));
     }
 
     const SliceItemPtr

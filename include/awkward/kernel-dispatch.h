@@ -5,9 +5,8 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
-#include "awkward/kernels/allocators.h"
-#include "awkward/kernels/getitem.h"
-#include "awkward/kernels/sorting.h"
+#include "awkward/kernel-utils.h"
+#include "awkward/kernels.h"
 
 #include <sstream>
 
@@ -182,8 +181,7 @@ namespace awkward {
       }
       else {
         throw std::runtime_error(
-          std::string("unrecognized ptr_lib in ptr_alloc<bool>")
-          + FILENAME_FOR_EXCEPTIONS("include/awkward/kernel-dispatch.h", __LINE__));
+          std::string("unrecognized ptr_lib in ptr_alloc<bool>"));
       }
     }
 
@@ -1691,8 +1689,9 @@ namespace awkward {
       int64_t* tocarry,
       const int64_t* starts,
       const int64_t* parents,
-      int64_t parentslength,
-      const int64_t* nextparents);
+      const int64_t parentslength,
+      const int64_t* nextparents,
+      const int64_t nextlen);
 
   }
 }

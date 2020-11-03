@@ -7,6 +7,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "awkward/kernel-utils.h"
+
 #include "awkward/array/RegularArray.h"
 
 #include "awkward/array/VirtualArray.h"
@@ -114,6 +116,18 @@ namespace awkward {
     }
     else {
       return form_.get()->purelist_depth();
+    }
+  }
+
+  bool
+  VirtualForm::dimension_optiontype() const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+        std::string("VirtualForm cannot determine its type without an expected Form")
+        + FILENAME(__LINE__));
+    }
+    else {
+      return form_.get()->dimension_optiontype();
     }
   }
 
@@ -683,8 +697,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  VirtualArray::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
-    return array().get()->merge(other, axis, depth);
+  VirtualArray::mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+    return array().get()->mergemany(others, axis, depth);
   }
 
   const SliceItemPtr

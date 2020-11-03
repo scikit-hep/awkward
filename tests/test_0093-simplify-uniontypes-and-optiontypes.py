@@ -249,8 +249,8 @@ def test_merge_parameters():
     one = awkward1.from_iter([[121, 117, 99, 107, 121], [115, 116, 117, 102, 102]], highlevel=False)
     two = awkward1.from_iter(["good", "stuff"], highlevel=False)
 
-    assert awkward1.to_list(one.merge(two)) == [[121, 117, 99, 107, 121], [115, 116, 117, 102, 102], "good", "stuff"]
-    assert awkward1.to_list(two.merge(one)) == ["good", "stuff", [121, 117, 99, 107, 121], [115, 116, 117, 102, 102]]
+    assert awkward1.to_list(awkward1.concatenate([one, two])) == [[121, 117, 99, 107, 121], [115, 116, 117, 102, 102], "good", "stuff"]
+    assert awkward1.to_list(awkward1.concatenate([two, one])) == ["good", "stuff", [121, 117, 99, 107, 121], [115, 116, 117, 102, 102]]
 
 def test_bytemask():
     array = awkward1.from_iter(["one", "two", None, "three", None, None, "four"], highlevel=False)

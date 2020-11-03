@@ -152,7 +152,7 @@ def test_cumsum():
     assert np_prefixsum.tolist() == [3, 8, 13, 13, 15]
 
     cp_prefixsum = cupy.empty(5)
-    assert cupy.cumsum([3, 5, 5, 0, 2], out=cp_prefixsum).tolist() == [3, 8, 13, 13, 15]
+    assert cupy.cumsum(cupy.array([3, 5, 5, 0, 2]), out=cp_prefixsum).tolist() == [3, 8, 13, 13, 15]
     assert cp_prefixsum.tolist() == [3, 8, 13, 13, 15]
 
 

@@ -33,6 +33,7 @@ lib = ctypes.CDLL(CPU_KERNEL_SO)
 class Error(ctypes.Structure):
     _fields_ = [
         ("str", ctypes.POINTER(ctypes.c_char)),
+        ("filename", ctypes.POINTER(ctypes.c_char)),
         ("identity", ctypes.c_int64),
         ("attempt", ctypes.c_int64),
         ("pass_through", ctypes.c_bool),

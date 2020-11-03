@@ -62,6 +62,9 @@ namespace awkward {
     int64_t
       purelist_depth() const override;
 
+    bool
+      dimension_optiontype() const override;
+
     const std::pair<int64_t, int64_t>
       minmax_depth() const override;
 
@@ -319,15 +322,15 @@ namespace awkward {
 
     const std::pair<Index64, ContentPtr>
       offsets_and_concatenate(int64_t axis, int64_t depth) const override;
-      
+
     bool
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
     const ContentPtr
-      reverse_merge(const ContentPtr& other, int64_t axis, int64_t depth) const;
+      reverse_merge(const ContentPtr& other, int64_t axis, int64_t depth) const override;
 
     const ContentPtr
-      merge(const ContentPtr& other, int64_t axis, int64_t depth) const override;
+      mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const override;
 
     const SliceItemPtr
       asslice() const override;

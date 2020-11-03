@@ -72,6 +72,9 @@ namespace awkward {
     int64_t
       purelist_depth() const override;
 
+    bool
+      dimension_optiontype() const override;
+
     const std::pair<int64_t, int64_t>
       minmax_depth() const override;
 
@@ -417,7 +420,7 @@ namespace awkward {
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
     const ContentPtr
-      merge(const ContentPtr& other, int64_t axis, int64_t depth) const override;
+      mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const override;
 
     const SliceItemPtr
       asslice() const override;
@@ -559,11 +562,6 @@ namespace awkward {
       numbers_to_type(const std::string& name) const override;
 
   protected:
-    /// @brief Internal function to merge two byte arrays without promoting
-    /// the types to int64.
-    const ContentPtr
-      merge_bytes(const std::shared_ptr<NumpyArray>& other) const;
-
     /// @brief Internal function that propagates the derivation of a contiguous
     /// version of this array from one axis to the next.
     ///

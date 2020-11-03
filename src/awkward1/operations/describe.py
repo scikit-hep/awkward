@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import numbers
+import warnings
 
 import awkward1.layout
 import awkward1.nplike
@@ -170,7 +171,11 @@ def type(array):
         if len(array.shape) == 0:
             return type(array.reshape((1,))[0])
         else:
-            out = awkward1.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
+            try:
+                out = type.dtype2primitive[array.dtype.type]
+            except KeyError:
+                raise TypeError("numpy array type is unrecognized by awkward: %r" % array.dtype.type)
+            out = awkward1.types.PrimitiveType(out)
             for x in array.shape[-1:0:-1]:
                 out = awkward1.types.RegularType(out, x)
             return awkward1.types.ArrayType(out, array.shape[0])
@@ -191,6 +196,8 @@ def type(array):
 
 
 type.dtype2primitive = {
+    np.bool: "bool",
+    np.bool_: "bool",
     np.int8: "int8",
     np.int16: "int16",
     np.int32: "int32",
@@ -241,12 +248,20 @@ def parameters(array):
 
 
 def keys(array):
+    warnings.warn(
+        "ak.keys is deprecated, will be removed in 0.4.0. Use ak.fields instead.",
+        DeprecationWarning,
+    )
+    return fields(array)
+
+
+def fields(array):
     """
-    Extracts record or tuple keys from `array` (many types supported,
-    including all Awkward Arrays and Records).
+    Extracts record fields or tuple slot numbers from `array` (many types
+    supported, including all Awkward Arrays and Records).
 
     If the array contains nested records, only the outermost record is
-    queried. If it contains tuples instead of records, the keys are
+    queried. If it contains tuples instead of records, this function outputs
     string representations of integers, such as `"0"`, `"1"`, `"2"`, etc.
     The records or tuples may be within multiple layers of nested lists.
 

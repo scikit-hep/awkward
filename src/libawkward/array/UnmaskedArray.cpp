@@ -6,9 +6,8 @@
 #include <sstream>
 #include <type_traits>
 
-#include "awkward/kernels/identities.h"
-#include "awkward/kernels/getitem.h"
-#include "awkward/kernels/operations.h"
+#include "awkward/kernels.h"
+#include "awkward/kernel-utils.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -88,6 +87,11 @@ namespace awkward {
   int64_t
   UnmaskedForm::purelist_depth() const {
     return content_.get()->purelist_depth();
+  }
+
+  bool
+  UnmaskedForm::dimension_optiontype() const {
+    return true;
   }
 
   const std::pair<int64_t, int64_t>
@@ -700,15 +704,15 @@ namespace awkward {
 
   const ContentPtr
   UnmaskedArray::reverse_merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
-    ContentPtr indexedoptionarray = toIndexedOptionArray64();
-    IndexedOptionArray64* raw =
-      dynamic_cast<IndexedOptionArray64*>(indexedoptionarray.get());
-    return raw->reverse_merge(other, axis, depth);
+    return toIndexedOptionArray64().get()->reverse_merge(other, axis, depth);
   }
 
   const ContentPtr
-  UnmaskedArray::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
-    return toIndexedOptionArray64().get()->merge(other, axis, depth);
+  UnmaskedArray::mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
+    return toIndexedOptionArray64().get()->mergemany(others, axis, depth);
   }
 
   const SliceItemPtr
@@ -766,14 +770,18 @@ namespace awkward {
                              int64_t outlength,
                              bool mask,
                              bool keepdims) const {
-    return content_.get()->reduce_next(reducer,
-                                       negaxis,
-                                       starts,
-                                       shifts,
-                                       parents,
-                                       outlength,
-                                       mask,
-                                       keepdims);
+    ContentPtr next = content_;
+    if (RegularArray* raw = dynamic_cast<RegularArray*>(next.get())) {
+      next = raw->toListOffsetArray64(true);
+    }
+    return next.get()->reduce_next(reducer,
+                                   negaxis,
+                                   starts,
+                                   shifts,
+                                   parents,
+                                   outlength,
+                                   mask,
+                                   keepdims);
   }
 
   const ContentPtr

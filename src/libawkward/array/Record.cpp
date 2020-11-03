@@ -6,8 +6,7 @@
 #include <sstream>
 #include <memory>
 
-#include "awkward/kernels/identities.h"
-#include "awkward/kernels/getitem.h"
+#include "awkward/kernels.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/ArrayType.h"
 
@@ -243,6 +242,11 @@ namespace awkward {
     return 0;
   }
 
+  bool
+  Record::dimension_optiontype() const {
+    return false;
+  }
+
   const std::pair<int64_t, int64_t>
   Record::minmax_depth() const {
     std::pair<int64_t, int64_t> out = array_.get()->minmax_depth();
@@ -326,7 +330,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  Record::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
+  Record::mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
     throw std::invalid_argument(
       std::string("Record cannot be merged because it is not an array")
       + FILENAME(__LINE__));

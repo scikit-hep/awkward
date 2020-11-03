@@ -7,7 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "awkward/kernels/operations.h"
+#include "awkward/kernels.h"
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/IndexedArray.h"
@@ -62,6 +62,11 @@ namespace awkward {
   int64_t
   EmptyForm::purelist_depth() const {
     return 1;
+  }
+
+  bool
+  EmptyForm::dimension_optiontype() const {
+    return false;
   }
 
   const std::pair<int64_t, int64_t>
@@ -416,12 +421,26 @@ namespace awkward {
 
   bool
   EmptyArray::mergeable(const ContentPtr& other, bool mergebool) const {
+    if (!parameters_equal(other.get()->parameters())) {
+      return false;
+    }
     return true;
   }
 
   const ContentPtr
-  EmptyArray::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
-    return other;
+  EmptyArray::mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
+
+    else if (others.size() == 1) {
+      return others[0];
+    }
+
+    else {
+      ContentPtrVec tail_others(others.begin() + 1, others.end());
+      return others[0].get()->mergemany(tail_others, axis, depth);
+    }
   }
 
   const SliceItemPtr

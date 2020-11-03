@@ -4,6 +4,8 @@
 
 #include <pybind11/numpy.h>
 
+#include "awkward/kernel-utils.h"
+
 #include "awkward/python/identities.h"
 #include "awkward/python/util.h"
 
@@ -1241,6 +1243,15 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                [](const T& self, const py::object& other) -> py::object {
             return box(self.merge_as_union(unbox_content(other)));
           })
+          .def("mergemany",   // FIXME: temporary!
+               [](const T& self, const py::iterable& pyothers, int64_t axis) -> py::object {
+            ak::ContentPtrVec others;
+            for (auto pyother : pyothers) {
+              others.push_back(unbox_content(pyother));
+            }
+            return box(self.mergemany(others, axis, 0));
+          }, py::arg("pyothers"),
+             py::arg("axis") = 0)
           .def("count",
                [](const T& self, int64_t axis, bool mask, bool keepdims)
                -> py::object {
@@ -2193,6 +2204,7 @@ make_RegularArray(const py::handle& m, const std::string& name) {
            &ak::RegularArray::compact_offsets64,
            py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::RegularArray::broadcast_tooffsets64)
+      .def("toListOffsetArray64", &ak::RegularArray::toListOffsetArray64)
       .def("simplify", [](const ak::RegularArray& self) {
         return box(self.shallow_simplify());
       })

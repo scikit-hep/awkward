@@ -2,46 +2,13 @@
 
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
 [![NSF-1836650](https://img.shields.io/badge/NSF-1836650-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1836650)
-[![DOI](https://zenodo.org/badge/137079949.svg)](https://zenodo.org/badge/latestdoi/137079949)
-[![Python 2.7 3.5 3.6 3.7 3.8](docs-img/logo/python-badge.svg)](https://www.python.org)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3952674.svg)](https://doi.org/10.5281/zenodo.3952674)
+[![Python 2.7, 3.5‒3.9](https://img.shields.io/badge/python-2.7%2c%203.5%E2%80%923.9-blue)](https://www.python.org)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 
 Arrays are **dynamically typed**, but operations on them are **compiled and fast**. Their behavior coincides with NumPy when array dimensions are regular and generalizes when they're not.
-
-<table>
-  <tr>
-    <td width="66%" valign="top">
-      <a href="https://awkward-array.org">
-        <img src="docs-img/panel-tutorials.png" width="570">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.org">
-        How-to tutorials
-        </a>
-      </b></p>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="docs-img/panel-sphinx.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        Python API reference
-        </a>
-      </b></p>
-      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="docs-img/panel-doxygen.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++ API reference
-        </a>
-      </b></p>
-    </td>
-  </tr>
-</table>
 
 # Motivating example
 
@@ -98,17 +65,64 @@ Our [presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) provides a good i
 
 # Installation
 
-Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward1/) using pip:
+Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward1) using pip:
 
 ```bash
 pip install awkward1
 ```
 
-Most users will get a precompiled binary (wheel) for your operating system and Python version. If not, the above attempts to compile from source.
+You will likely get a precompiled binary (wheel), depending on your operating system and Python version. If not, pip attempts to compile from source (which requires a C++ compiler, make, and CMake).
 
-   * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues). If you have a general "How do I…?" question, we'll answer it as a new [example in the tutorial](https://awkward-array.org/how-to.html).
-   * If you have a problem that's too specific to be new documentation or it isn't exclusively related to Awkward Array, it might be more appropriate to ask on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
-   * The [Gitter Scikit-HEP/community](https://gitter.im/Scikit-HEP/community) is a way to get in touch with all Scikit-HEP developers and users.
+Awkward Array is also available using [conda](https://anaconda.org/conda-forge/awkward1), which always installs a binary:
+```bash
+conda install -c conda-forge awkward1
+```
+
+If you have already added `conda-forge` as a channel, the `-c conda-forge` is unnecessary. Adding the channel is recommended because it ensures that all of your packages use compatible versions:
+
+```bash
+conda config --add channels conda-forge
+conda update --all
+```
+
+## Getting help
+
+<table>
+  <tr>
+    <td width="66%" valign="top">
+      <a href="https://awkward-array.org">
+        <img src="docs-img/panel-tutorials.png" width="570">
+      </a>
+      <p align="center"><b>
+        <a href="https://awkward-array.org">
+        How-to tutorials
+        </a>
+      </b></p>
+    </td>
+    <td width="33%" valign="top">
+      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        <img src="docs-img/panel-sphinx.png" width="268">
+      </a>
+      <p align="center"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        Python API reference
+        </a>
+      </b></p>
+      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        <img src="docs-img/panel-doxygen.png" width="268">
+      </a>
+      <p align="center"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        C++ API reference
+        </a>
+      </b></p>
+    </td>
+  </tr>
+</table>
+
+   * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues).
+   * If you have a "How do I...?" question, ask about it on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
+   * To ask questions in real time, try the Gitter [Scikit-HEP/awkward-array](https://gitter.im/Scikit-HEP/awkward-array) chat room.
 
 ## Installation for developers
 
@@ -135,23 +149,25 @@ The `--pytest tests` runs the integration tests from the `tests` directory (drop
 For more fine-grained testing, we also have tests of the low-level kernels, which can be invoked with
 
 ```bash
-python dev/generate-kernelspec.py
 python dev/generate-tests.py
-python -m pytest -vv -rs tests-cpu-kernels
 python -m pytest -vv -rs tests-spec
+python -m pytest -vv -rs tests-cpu-kernels
 ```
 
 Furthermore, if you have an Nvidia GPU, you can build and locally install the experimental CUDA plug-in with
 
 ```bash
 pip uninstall -y awkward1-cuda-kernels
+python dev/generate-cuda.py
 ./cuda-build.sh --install
 ```
 
 The `--install` does a local `pip install` on your system, which is the only way to use it. You can run its tests with
 
 ```bash
-python -m pytest tests-cuda
+python dev/generate-tests.py
+python -m pytest -vv -rs tests-cuda-kernels
+python -m pytest -vv -rs tests-cuda
 ```
 
    * [Continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) and [continuous deployment](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=4&_a=summary) are hosted by [Azure Pipelines](https://azure.microsoft.com/en-us/services/devops/pipelines/).
@@ -176,8 +192,8 @@ C++ projects can link against the shared libraries `libawkward-cpu-kernels.so` a
    * [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
    * [CHEP talk](https://indico.cern.ch/event/773049/contributions/3473258) on November 7, 2019.
    * [CHEP 2019 proceedings](https://arxiv.org/abs/2001.06307) (to be published in _EPJ Web of Conferences_).
-   * [Demo for Coffea developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs-demo-notebooks/2019-12-20-coffea-demo.ipynb) on December 20, 2019.
-   * [Demo for Numba developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs-demo-notebooks/2020-01-22-numba-demo-EVALUATED.ipynb) on January 22, 2020.
+   * [Demo for Coffea developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs-jupyter/2019-12-20-coffea-demo.ipynb) on December 20, 2019.
+   * [Demo for Numba developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs-jupyter/2020-01-22-numba-demo-EVALUATED.ipynb) on January 22, 2020.
    * [Summary poster](https://github.com/jpivarski/2020-02-27-irishep-poster/blob/master/pivarski-irishep-poster.pdf) on February 27, 2020.
    * [Demo for Electron Ion Collider users](https://github.com/jpivarski/2020-04-08-eic-jlab#readme) ([video](https://www.youtube.com/watch?v=FoxNS6nlbD0)) on April 8, 2020.
    * [Presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) (video) on July 5, 2020.
