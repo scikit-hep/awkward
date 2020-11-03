@@ -85,7 +85,7 @@ def test_explode(tmp_path):
     awkward1.to_parquet(array3, os.path.join(tmp_path, "array3.parquet"), explode_records=True)
     awkward1.to_parquet(array4, os.path.join(tmp_path, "array4.parquet"), explode_records=True)
 
-    assert awkward1.from_parquet(os.path.join(tmp_path, "array3.parquet")) == [
+    assert awkward1.from_parquet(os.path.join(tmp_path, "array3.parquet")).tolist() == [
         {"x": [1, 2, 3], "y": [1.1, 2.2, 3.3]},
         {"x": [], "y": []},
         {"x": [4, 5], "y": [4.4, 5.5]},
@@ -93,7 +93,7 @@ def test_explode(tmp_path):
         {"x": [], "y": []},
         {"x": [6, 7, 8, 9], "y": [6.6, 7.7, 8.8, 9.9]},
     ]
-    assert awkward1.from_parquet(os.path.join(tmp_path, "array4.parquet")) == [
+    assert awkward1.from_parquet(os.path.join(tmp_path, "array4.parquet")).tolist() == [
         {"x": [1, 2, 3], "y": [1.1, 2.2, 3.3]},
         {"x": [], "y": []},
         {"x": [4, 5], "y": [4.4, 5.5]},

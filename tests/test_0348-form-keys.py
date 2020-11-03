@@ -72,16 +72,16 @@ def test_bitmaskedarray():
     assert pickle.loads(pickle.dumps(awkward1.Array(bitmaskedarray), -1)).tolist() == [None, 1.1, 2.2, None, None]
 
 def test_recordarray():
-    assert awkward1.from_arrayset(*awkward1.to_arrayset([(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])])) == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
-    assert awkward1.from_arrayset(*awkward1.to_arrayset([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}])) == [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]
+    assert awkward1.from_arrayset(*awkward1.to_arrayset([(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])])).tolist() == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
+    assert awkward1.from_arrayset(*awkward1.to_arrayset([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}])).tolist() == [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]
 
-    assert pickle.loads(pickle.dumps(awkward1.Array([(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]), -1)) == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
-    assert pickle.loads(pickle.dumps(awkward1.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]), -1)) == [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]
+    assert pickle.loads(pickle.dumps(awkward1.Array([(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]), -1)).tolist() == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
+    assert pickle.loads(pickle.dumps(awkward1.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]), -1)).tolist() == [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}]
 
 
 def test_record():
-    assert pickle.loads(pickle.dumps(awkward1.Record({"x": 2.2, "y": [1, 2]}), -1)) == {"x": 2.2, "y": [1, 2]}
-    assert pickle.loads(pickle.dumps(awkward1.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}])[1], -1)) == {"x": 2.2, "y": [1, 2]}
+    assert pickle.loads(pickle.dumps(awkward1.Record({"x": 2.2, "y": [1, 2]}), -1)).tolist() == {"x": 2.2, "y": [1, 2]}
+    assert pickle.loads(pickle.dumps(awkward1.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}])[1], -1)).tolist() == {"x": 2.2, "y": [1, 2]}
 
 
 def test_regulararray():
