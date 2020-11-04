@@ -11,9 +11,13 @@ import awkward1
 
 
 def test_this_should_raise_a_warning():
+    awkward1.deprecations_as_errors = True
+
     one = awkward1.Array([{"x": 1}, {"x": 2}, {"x": 3}])
     two = awkward1.Array([{"x": 1.1}, {"x": 2.2}, {"x": 3.3}])
-    one + two
+
+    with pytest.raises(ValueError):
+        one + two
 
 def test_this_should_not():
     def overload_add(left, right):
