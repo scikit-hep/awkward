@@ -1427,6 +1427,12 @@ class Array(
         self.behavior = behavior
         self._caches = awkward1._util.find_caches(self._layout)
 
+    def __copy__(self):
+        return Array(self._layout, behavior=self._behavior)
+
+    def __deepcopy__(self, memo):
+        return Array(self._layout.deep_copy(), behavior=self._behavior)
+
 
 class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     """
@@ -2006,6 +2012,12 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         self.layout = layout
         self.behavior = behavior
         self._caches = awkward1._util.find_caches(self._layout)
+
+    def __copy__(self):
+        return Record(self._layout, behavior=self._behavior)
+
+    def __deepcopy__(self, memo):
+        return Record(self._layout.deep_copy(), behavior=self._behavior)
 
 
 class ArrayBuilder(Iterable, Sized):

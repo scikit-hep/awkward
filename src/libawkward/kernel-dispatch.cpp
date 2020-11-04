@@ -1012,6 +1012,30 @@ namespace awkward {
     }
 
 
+    ERROR NumpyArray_copy(
+      kernel::lib ptr_lib,
+      uint8_t *toptr,
+      const uint8_t *fromptr,
+      int64_t len) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_copy(
+          toptr,
+          fromptr,
+          len);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_copy")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_copy")
+          + FILENAME(__LINE__));
+      }
+    }
+
+
     ERROR NumpyArray_contiguous_copy_64(
       kernel::lib ptr_lib,
       uint8_t *toptr,

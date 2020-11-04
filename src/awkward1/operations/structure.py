@@ -23,6 +23,18 @@ import awkward1.nplike
 np = awkward1.nplike.NumpyMetadata.instance()
 
 
+@awkward1._connect._numpy.implements("copy")
+def copy(array):
+    """
+    """
+    layout = awkward1.operations.convert.to_layout(
+        array,
+        allow_record=True,
+        allow_other=False,
+    )
+    return awkward1._util.wrap(layout.deep_copy(), awkward1._util.behaviorof(array))
+
+
 def mask(array, mask, valid_when=True, highlevel=True):
     """
     Args:
