@@ -2476,23 +2476,22 @@ def virtual(
     gen = awkward1.layout.ArrayGenerator(
         generate, args, kwargs, form=form, length=length
     )
-    if cache is not None:
-        toattach = awkward1._util.MappingProxy.maybe_wrap(cache)
-        cache = awkward1.layout.ArrayCache(toattach)
-    else:
-        toattach = None
+    if cache is not None and not isinstance(cache, awkward1.layout.ArrayCache):
+        cache = awkward1.layout.ArrayCache(
+            awkward1._util.MappingProxy.maybe_wrap(cache)
+        )
 
     out = awkward1.layout.VirtualArray(
         gen, cache, cache_key=cache_key, parameters=parameters
     )
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior=behavior, cache=toattach)
+        return awkward1._util.wrap(out, behavior=behavior)
     else:
         return out
 
 
-def with_cache(array, cache, chain=None, highlevel=True):
+def with_cache(array, cache, highlevel=True):
     """
     Args:
         array: Data to search for nested virtual arrays.
@@ -2502,14 +2501,6 @@ def with_cache(array, cache, chain=None, highlevel=True):
             re-generated if `__getitem__` raises a `KeyError`. This mapping may
             evict elements according to any caching algorithm (LRU, LFR, RR,
             TTL, etc.).
-        chain (None, "first", "last", or bool): If None, the provided `cache`
-            simply replaces any existing virtual array caches. If "first", the
-            provided `cache` becomes first in a chain of caches; virtual arrays
-            will attempt to `__getitem__`/`__setitem__` the provided `cache`
-            first, falling back to preexisting caches if necessary. If "last",
-            the provided `cache` becomes last in a chain of caches: the
-            preexisting caches get priority. If a bool, True is equivalent to
-            "first" and False is equivalent to None.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
@@ -2539,50 +2530,19 @@ def with_cache(array, cache, chain=None, highlevel=True):
 
     Viewing the `array2["x"]` filled `cache2` and not `cache1`.
 
-    We can also chain `cache1` and `cache2`:
-
-        >>> array3 = ak.with_cache(array2, cache1, chain="first")
-        >>> array3
-        <Array [{x: [1.1, 2.2, 3.3], ... 5.5], y: 300}] type='3 * {"x": var * float64, ...'>
-        >>>
-        >>> len(cache1), len(cache2)
-        (1, 1)
-
-    The request for `array3["x"]` deferred to the already-filled `cache2`,
-    while the request for `array3["y"]` put a new array into `cache1`.
-
     See #ak.virtual.
     """
-    if chain is True:
-        chain = "first"
-    elif chain is False:
-        chain = None
-    elif chain is not None and chain not in ("first", "last"):
-        raise ValueError(
-            "chain must be None, 'first', 'last', or bool"
-            + awkward1._util.exception_suffix(__file__)
+    if cache is not None and not isinstance(cache, awkward1.layout.ArrayCache):
+        cache = awkward1.layout.ArrayCache(
+            awkward1._util.MappingProxy.maybe_wrap(cache)
         )
-
-    if isinstance(cache, awkward1.layout.ArrayCache):
-        cache = cache.mutablemapping
-
-    toattach = awkward1._util.MappingProxy.maybe_wrap(cache)
-    cache = awkward1.layout.ArrayCache(toattach)
 
     def getfunction(layout, depth):
         if isinstance(layout, awkward1.layout.VirtualArray):
-            if chain is None:
-                newcache = cache
-            elif cache is None:
+            if cache is None:
                 newcache = layout.cache
             elif layout.cache is None:
                 newcache = cache
-            elif chain == "first":
-                raise NotImplementedError("To properly chain caches we need to find and chain all layout caches, returning them as highlevel")
-                # newcache = awkward1.layout.ArrayCache(_CacheChain(cache, layout.cache))
-            elif chain == "last":
-                raise NotImplementedError("To properly chain caches we need to find and chain all layout caches, returning them as highlevel")
-                # newcache = awkward1.layout.ArrayCache(_CacheChain(layout.cache, cache))
             return lambda: awkward1.layout.VirtualArray(
                 layout.generator,
                 newcache,
@@ -2597,47 +2557,9 @@ def with_cache(array, cache, chain=None, highlevel=True):
         awkward1.operations.convert.to_layout(array), getfunction
     )
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array), toattach)
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:
         return out
-
-
-class _CacheChain(MutableMapping):
-    def __init__(self, first, last):
-        if isinstance(first, awkward1.layout.ArrayCache):
-            first = first.mutablemapping
-        if isinstance(last, awkward1.layout.ArrayCache):
-            last = last.mutablemapping
-        self.first = first
-        self.last = last
-
-    def __getitem__(self, where):
-        try:
-            return self.first[where]
-        except KeyError:
-            return self.last[where]
-
-    def __setitem__(self, where, what):
-        if where not in self.last:
-            self.first[where] = what
-
-    def __delitem__(self, where):
-        try:
-            del self.first[where]
-        except KeyError:
-            del self.last[where]
-
-    def __iter__(self):
-        seen = set()
-        for x in self.first:
-            seen.add(x)
-            yield x
-        for x in self.last:
-            if x not in seen:
-                yield x
-
-    def __len__(self):
-        return len(set(self.first).union(set(self.last)))
 
 
 @awkward1._connect._numpy.implements("size")

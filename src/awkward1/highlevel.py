@@ -60,9 +60,6 @@ class Array(
         with_name (None or str): Gives tuples and records a name that can be
             used to override their behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
-        cache (None or MutableMapping): Stores data for any
-            #ak.layout.VirtualArray nodes that this Array might contain.
-            Persists through `__getitem__` but not any other operations.
         kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Array will be placed in
             main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
             the Array will be placed in GPU global memory using CUDA; if None,
@@ -215,7 +212,6 @@ class Array(
         behavior=None,
         with_name=None,
         check_valid=False,
-        cache=None,
         kernels=None,
     ):
         if isinstance(
@@ -287,7 +283,7 @@ class Array(
         if check_valid:
             awkward1.operations.describe.validity_error(self, exception=True)
 
-        self.cache = cache
+        self._caches = awkward1._util.find_caches(self._layout)
 
     @property
     def layout(self):
@@ -376,18 +372,8 @@ class Array(
             )
 
     @property
-    def cache(self):
-        return self._cache
-
-    @cache.setter
-    def cache(self, value):
-        if value is None or isinstance(value, MutableMapping):
-            self._cache = value
-        else:
-            raise TypeError(
-                "cache must be None or a MutableMapping"
-                + awkward1._util.exception_suffix(__file__)
-            )
+    def caches(self):
+        return self._caches
 
     class Mask(object):
         def __init__(self, array, valid_when):
@@ -970,9 +956,7 @@ class Array(
         acting at the last level, while the higher levels of the indexer all
         have the same dimension as the array being indexed.
         """
-        return awkward1._util.wrap(
-            self._layout[where], self._behavior, cache=self._cache
-        )
+        return awkward1._util.wrap(self._layout[where], self._behavior)
 
     def __setitem__(self, where, what):
         """
@@ -1436,7 +1420,7 @@ class Array(
             self.__class__ = awkward1._util.arrayclass(layout, behavior)
         self.layout = layout
         self.behavior = behavior
-        self.cache = None
+        self._caches = awkward1._util.find_caches(self._layout)
 
 
 class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
@@ -1451,9 +1435,6 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         with_name (None or str): Gives the record type a name that can be
             used to override its behavior (see below).
         check_valid (bool): If True, verify that the #layout is valid.
-        cache (None or MutableMapping): Stores data for any
-            #ak.layout.VirtualArray nodes that this Array might contain.
-            Persists through `__getitem__` but not any other operations.
         kernels (None, `"cpu"`, or `"cuda"`): If `"cpu"`, the Record will be placed in
             main memory for use with other `"cpu"` Arrays and Records; if `"cuda"`,
             the Record will be placed in GPU global memory using CUDA; if None,
@@ -1482,7 +1463,6 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         behavior=None,
         with_name=None,
         check_valid=False,
-        cache=None,
         kernels=None,
     ):
         if isinstance(data, awkward1.layout.Record):
@@ -1536,7 +1516,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if check_valid:
             awkward1.operations.describe.validity_error(self, exception=True)
 
-        self.cache = cache
+        self._caches = awkward1._util.find_caches(self._layout)
 
     @property
     def layout(self):
@@ -1619,18 +1599,8 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             )
 
     @property
-    def cache(self):
-        return self._cache
-
-    @cache.setter
-    def cache(self, value):
-        if value is None or isinstance(value, MutableMapping):
-            self._cache = value
-        else:
-            raise TypeError(
-                "cache must be None or a MutableMapping"
-                + awkward1._util.exception_suffix(__file__)
-            )
+    def caches(self):
+        return self._caches
 
     def tolist(self):
         """
@@ -1723,9 +1693,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             >>> record["y", 1]
             2
         """
-        return awkward1._util.wrap(
-            self._layout[where], self._behavior, cache=self._cache
-        )
+        return awkward1._util.wrap(self._layout[where], self._behavior)
 
     def __setitem__(self, where, what):
         """
@@ -2027,7 +1995,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             self.__class__ = awkward1._util.recordclass(layout, behavior)
         self.layout = layout
         self.behavior = behavior
-        self.cache = None
+        self._caches = awkward1._util.find_caches(self._layout)
 
 
 class ArrayBuilder(Iterable, Sized):

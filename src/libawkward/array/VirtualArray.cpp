@@ -328,7 +328,7 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::peek_array() const {
-    if (cache_.get() != nullptr) {
+    if (cache_.get() != nullptr  &&  !cache_.get()->is_broken()) {
       return cache_.get()->get(cache_key());
     }
     return ContentPtr(nullptr);

@@ -2527,7 +2527,7 @@ def from_parquet(
     row_groups=None,
     use_threads=True,
     lazy=False,
-    lazy_cache="attach",
+    lazy_cache="new",
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
@@ -2547,10 +2547,9 @@ def from_parquet(
             #ak.layout.VirtualArray, possibly in #ak.partition.PartitionedArray
             if the file has more than one row group); if False, read all
             requested data immediately.
-        lazy_cache (None, "attach", or MutableMapping): If lazy, pass this
-            cache to the VirtualArrays. If "attach", a new dict is created
-            and attached to the output array as a "cache" parameter on
-            #ak.Array.
+        lazy_cache (None, "new", or MutableMapping): If lazy, pass this
+            cache to the VirtualArrays. If "new", a new dict (keep-forever cache)
+            is created. If None, no cache is used.
         lazy_cache_key (None or str): If lazy, pass this cache_key to the
             VirtualArrays. If None, a process-unique string is constructed.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -2593,22 +2592,18 @@ def from_parquet(
         else:
             return out
 
+    hold_cache = None
     if lazy:
         state = _ParquetState(file, use_threads, source, options)
 
-        if lazy_cache == "attach":
-            lazy_cache = awkward1._util.MappingProxy({})
-            toattach = lazy_cache
-        elif lazy_cache is not None:
-            lazy_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
-            toattach = lazy_cache
-        else:
-            toattach = None
-
-        if lazy_cache is None:
-            cache = None
-        else:
-            cache = awkward1.layout.ArrayCache(lazy_cache)
+        if lazy_cache == "new":
+            hold_cache = awkward1._util.MappingProxy({})
+            lazy_cache = awkward1.layout.ArrayCache(hold_cache)
+        elif lazy_cache is not None and not isinstance(
+            lazy_cache, awkward1.layout.ArrayCache
+        ):
+            hold_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
+            lazy_cache = awkward1.layout.ArrayCache(hold_cache)
 
         if lazy_cache_key is None:
             lazy_cache_key = "ak.from_parquet:{0}".format(_from_parquet_key())
@@ -2631,7 +2626,9 @@ def from_parquet(
                     cache_key = "{0}[{1}]".format(lazy_cache_key, row_group)
                 else:
                     cache_key = "{0}.{1}[{2}]".format(lazy_cache_key, column, row_group)
-                fields.append(awkward1.layout.VirtualArray(generator, cache, cache_key))
+                fields.append(
+                    awkward1.layout.VirtualArray(generator, lazy_cache, cache_key)
+                )
 
             if all_columns == [""]:
                 partitions.append(fields[0])
@@ -2646,7 +2643,7 @@ def from_parquet(
                 partitions, offsets[1:]
             )
         if highlevel:
-            return awkward1._util.wrap(out, behavior, cache=toattach)
+            return awkward1._util.wrap(out, behavior)
         else:
             return out
 
@@ -2841,20 +2838,6 @@ def to_arrayset(
         <Array [[1, 2, 3], [], [4, ... [], [], [10]] type='8 * var * int64'>
         >>> ak.partitions(ak.from_arrayset(form, container, 4))
         [3, 1, 3, 1]
-
-    Which can also lazily load partitions as they are observed:
-
-        >>> lazy = ak.from_arrayset(form, container, 4, lazy=True, lazy_lengths=[3, 1, 3, 1])
-        >>> lazy.cache
-        {}
-        >>> lazy
-        <Array [[1, 2, 3], [], [4, ... [], [], [10]] type='8 * var * int64'>
-        >>> len(lazy.cache)
-        3
-        >>> lazy + 100
-        <Array [[101, 102, 103], [], ... [], [], [110]] type='8 * var * int64'>
-        >>> len(lazy.cache)
-        4
 
     See also #ak.from_arrayset.
     """
@@ -3573,7 +3556,9 @@ def _form_to_layout(
             sep,
             partition_first,
         )
-        return awkward1.layout.VirtualArray(generator, cache, cache_key + sep + node_cache_key)
+        return awkward1.layout.VirtualArray(
+            generator, cache, cache_key + sep + node_cache_key
+        )
 
     else:
         raise AssertionError(
@@ -3627,7 +3612,7 @@ def from_arrayset(
     sep="-",
     partition_first=False,
     lazy=False,
-    lazy_cache="attach",
+    lazy_cache="new",
     lazy_cache_key=None,
     lazy_lengths=None,
     highlevel=True,
@@ -3664,10 +3649,9 @@ def from_arrayset(
             if `num_partitions` is not None); if False, read all requested data
             immediately. Any RecordArray child nodes will additionally be
             read on demand.
-        lazy_cache (None, "attach", or MutableMapping): If lazy, pass this
-            cache to the VirtualArrays. If "attach", a new dict is created
-            and attached to the output array as a "cache" parameter on
-            #ak.Array.
+        lazy_cache (None, "new", or MutableMapping): If lazy, pass this
+            cache to the VirtualArrays. If "new", a new dict (keep-forever cache)
+            is created. If None, no cache is used.
         lazy_cache_key (None or str): If lazy, pass this cache_key to the
             VirtualArrays. If None, a process-unique string is constructed.
         lazy_lengths (None, int, or iterable of ints): If lazy and
@@ -3733,26 +3717,21 @@ def from_arrayset(
         tmp2 = partition_format
         partition_format = lambda x: tmp2.format(x)
 
+    hold_cache = None
     if lazy:
         form = _wrap_record_with_virtual(form)
 
-        if lazy_cache == "attach":
-            lazy_cache = awkward1._util.MappingProxy({})
-            toattach = lazy_cache
-        elif lazy_cache is not None:
-            lazy_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
-            toattach = lazy_cache
-        else:
-            toattach = None
-
-        if lazy_cache is not None:
-            lazy_cache = awkward1.layout.ArrayCache(lazy_cache)
+        if lazy_cache == "new":
+            hold_cache = awkward1._util.MappingProxy({})
+            lazy_cache = awkward1.layout.ArrayCache(hold_cache)
+        elif lazy_cache is not None and not isinstance(
+            lazy_cache, awkward1.layout.ArrayCache
+        ):
+            hold_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
+            lazy_cache = awkward1.layout.ArrayCache(hold_cache)
 
         if lazy_cache_key is None:
             lazy_cache_key = "ak.from_arrayset:{0}".format(_from_arrayset_key())
-
-    else:
-        toattach = None
 
     if num_partitions is None:
         args = (form, container, None, prefix, sep, partition_first)
@@ -3826,7 +3805,7 @@ def from_arrayset(
         )
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior, cache=toattach)
+        return awkward1._util.wrap(out, behavior)
     else:
         return out
 
