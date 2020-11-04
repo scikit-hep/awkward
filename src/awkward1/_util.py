@@ -10,9 +10,11 @@ import weakref
 import warnings
 
 try:
-    from collections.abc import Mapping, MutableMapping
+    from collections.abc import Mapping
+    from collections.abc import MutableMapping
 except ImportError:
-    from collections import Mapping, MutableMapping
+    from collections import Mapping
+    from collections import MutableMapping
 
 import awkward1.layout
 import awkward1.partition
@@ -388,20 +390,16 @@ def behaviorof(*arrays):
     return behavior
 
 
-def wrap(content, behavior, cache=None):
+def wrap(content, behavior):
     import awkward1.highlevel
 
     if isinstance(
         content, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
     ):
-        return awkward1.highlevel.Array(
-            content, behavior=behavior, cache=cache, kernels=None
-        )
+        return awkward1.highlevel.Array(content, behavior=behavior, kernels=None)
 
     elif isinstance(content, awkward1.layout.Record):
-        return awkward1.highlevel.Record(
-            content, behavior=behavior, cache=cache, kernels=None
-        )
+        return awkward1.highlevel.Record(content, behavior=behavior, kernels=None)
 
     else:
         return content
@@ -1343,6 +1341,21 @@ def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
             "unrecognized Content type: {0}".format(type(layout))
             + exception_suffix(__file__)
         )
+
+
+def find_caches(layout):
+    found = set()
+    caches = []
+    def apply(layout, depth):
+        if isinstance(layout, awkward1.layout.VirtualArray):
+            if layout.cache is not None:
+                cache = layout.cache.mutablemapping
+                if id(cache) not in found:
+                    found.add(id(cache))
+                    caches.append(cache)
+
+    recursive_walk(layout, apply, materialize=False)
+    return tuple(caches)
 
 
 def highlevel_type(layout, behavior, isarray):
