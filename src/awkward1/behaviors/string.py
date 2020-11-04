@@ -31,13 +31,26 @@ class ByteBehavior(awkward1.highlevel.Array):
         for x in self.__bytes__():
             yield x
 
+    def __eq__(self, other):
+        if isinstance(other, (bytes, ByteBehavior)):
+            return bytes(self) == bytes(other)
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not self.__eq__(self, other)
+
     def __add__(self, other):
-        if isinstance(other, (bytes, ByteBehavior, CharBehavior)):
+        if isinstance(other, (bytes, ByteBehavior)):
             return bytes(self) + bytes(other)
+        else:
+            raise TypeError("can only concatenate bytes to bytes")
 
     def __radd__(self, other):
-        if isinstance(other, (bytes, ByteBehavior, CharBehavior)):
+        if isinstance(other, (bytes, ByteBehavior)):
             return bytes(other) + bytes(self)
+        else:
+            raise TypeError("can only concatenate bytes to bytes")
 
 
 class CharBehavior(awkward1.highlevel.Array):
@@ -60,13 +73,26 @@ class CharBehavior(awkward1.highlevel.Array):
         for x in self.__str__():
             yield x
 
+    def __eq__(self, other):
+        if isinstance(other, (str, CharBehavior)):
+            return str(self) == str(other)
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not self.__eq__(self, other)
+
     def __add__(self, other):
-        if isinstance(other, (str, ByteBehavior, CharBehavior)):
+        if isinstance(other, (str, CharBehavior)):
             return str(self) + str(other)
+        else:
+            raise TypeError("can only concatenate str to str")
 
     def __radd__(self, other):
-        if isinstance(other, (str, ByteBehavior, CharBehavior)):
+        if isinstance(other, (str, CharBehavior)):
             return str(other) + str(self)
+        else:
+            raise TypeError("can only concatenate str to str")
 
 
 awkward1.behavior["byte"] = ByteBehavior
