@@ -212,8 +212,13 @@ class Array(
         behavior=None,
         with_name=None,
         check_valid=False,
+        cache=None,
         kernels=None,
     ):
+        if cache is not None:
+            exception = TypeError("__init__() got an unexpected keyword argument 'cache'")
+            awkward1._util.deprecate(exception, "1.0.0", date="2020-12-01")
+
         if isinstance(
             data, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
         ):
@@ -1463,8 +1468,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         behavior=None,
         with_name=None,
         check_valid=False,
+        cache=None,
         kernels=None,
     ):
+        if cache is not None:
+            exception = TypeError("__init__() got an unexpected keyword argument 'cache'")
+            awkward1._util.deprecate(exception, "1.0.0", date="2020-12-01")
+
         if isinstance(data, awkward1.layout.Record):
             layout = data
 

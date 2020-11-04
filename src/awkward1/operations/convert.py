@@ -10,8 +10,10 @@ import threading
 
 try:
     from collections.abc import Iterable
+    from collections.abc import MutableMapping
 except ImportError:
     from collections import Iterable
+    from collections import MutableMapping
 
 import awkward1.layout
 import awkward1._ext
@@ -2599,10 +2601,15 @@ def from_parquet(
         if lazy_cache == "new":
             hold_cache = awkward1._util.MappingProxy({})
             lazy_cache = awkward1.layout.ArrayCache(hold_cache)
+        elif lazy_cache == "attach":
+            exception = TypeError("lazy_cache must be a MutableMapping")
+            awkward1._util.deprecate(exception, "1.0.0", date="2020-12-01")
         elif lazy_cache is not None and not isinstance(
             lazy_cache, awkward1.layout.ArrayCache
         ):
             hold_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
+            if not isinstance(hold_cache, MutableMapping):
+                raise TypeError("lazy_cache must be a MutableMapping")
             lazy_cache = awkward1.layout.ArrayCache(hold_cache)
 
         if lazy_cache_key is None:
@@ -3724,10 +3731,15 @@ def from_arrayset(
         if lazy_cache == "new":
             hold_cache = awkward1._util.MappingProxy({})
             lazy_cache = awkward1.layout.ArrayCache(hold_cache)
+        elif lazy_cache == "attach":
+            exception = TypeError("lazy_cache must be a MutableMapping")
+            awkward1._util.deprecate(exception, "1.0.0", date="2020-12-01")
         elif lazy_cache is not None and not isinstance(
             lazy_cache, awkward1.layout.ArrayCache
         ):
             hold_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
+            if not isinstance(hold_cache, MutableMapping):
+                raise TypeError("lazy_cache must be a MutableMapping")
             lazy_cache = awkward1.layout.ArrayCache(hold_cache)
 
         if lazy_cache_key is None:
