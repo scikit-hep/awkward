@@ -1282,6 +1282,15 @@ namespace awkward {
   }
 
   const ContentPtr
+  Content::mergemany_as_union(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+    ContentPtr out = shallow_copy();
+    for (const auto & array : others) {
+      out = out.get()->merge_as_union(array, axis, depth);
+    }
+    return out;
+  }
+
+  const ContentPtr
   Content::rpad_axis0(int64_t target, bool clip) const {
     if (!clip  &&  target < length()) {
       return shallow_copy();

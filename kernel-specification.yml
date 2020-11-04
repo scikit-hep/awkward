@@ -4784,14 +4784,14 @@ kernels:
             ri = 0
             length = leftlen + rightlen
             for m in range(length):
-              if tag == 0  &&  ileft < leftlen:
+              if tag == 0  and  ileft < leftlen:
                 leftsize = fromleft[ileft + 1] - fromleft[ileft]
                 for i in range(leftsize):
                   toindex[j] = li + 1
                   li = li + 1
                   totags[j] = tag
                   j = j + 1
-              if tag == 1  &&  iright < rightlen:
+              if tag == 1  and  iright < rightlen:
                 rightsize = fromright[iright + 1] - fromright[iright]
                 for i in range(rightsize):
                   toindex[j] = ri + 1

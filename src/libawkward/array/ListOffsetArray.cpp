@@ -1031,12 +1031,17 @@ namespace awkward {
     if (others.empty()) {
       return shallow_copy();
     }
-    ContentPtr listarray = std::make_shared<ListArrayOf<T>>(identities_,
-                                                            parameters_,
-                                                            starts(),
-                                                            stops(),
-                                                            content_);
-    return listarray.get()->mergemany(others, axis, depth);
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
+      ContentPtr listarray = std::make_shared<ListArrayOf<T>>(identities_,
+                                                              parameters_,
+                                                              starts(),
+                                                              stops(),
+                                                              content_);
+      return listarray.get()->mergemany(others, axis, depth);
+    } else {
+      return mergemany_as_union(others, posaxis, depth);
+    }
   }
 
   template <>
