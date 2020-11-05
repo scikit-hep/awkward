@@ -3968,19 +3968,6 @@ or
         elif isinstance(layout, awkward1._util.indexedtypes):
             return recurse(layout.project(), row_arrays, col_names)
 
-        elif isinstance(layout, awkward1._util.uniontypes):
-            raise NotImplementedError(
-                "to_pandas for a UnionArray"
-                + awkward1._util.exception_suffix(__file__)
-            )
-
-        elif isinstance(layout, awkward1._util.optiontypes):
-            return recurse(
-                awkward1.operations.structure.fill_none(layout, np.nan, highlevel=False),
-                row_arrays,
-                col_names,
-            )
-
         elif layout.parameter("__array__") in ("string", "bytestring"):
             return [(to_numpy(layout), row_arrays, col_names)]
 
@@ -4003,14 +3990,18 @@ or
             )
             return recurse(flattened, newrows, col_names)
 
-        elif isinstance(layout, awkward1.layout.RecordArray) and layout.istuple:
-            return sum(
-                [
-                    recurse(layout.field(n), row_arrays, col_names + ("slot" + n,))
-                    for n in layout.keys()
-                ],
-                [],
-            )
+        elif isinstance(layout, awkward1._util.uniontypes):
+            layout = awkward1._util.union_to_record(layout, anonymous)
+            if isinstance(layout, awkward1._util.uniontypes):
+                return [(to_numpy(layout), row_arrays, col_names)]
+            else:
+                return sum(
+                    [
+                        recurse(layout.field(n), row_arrays, col_names + (n,))
+                        for n in layout.keys()
+                    ],
+                    [],
+                )
 
         elif isinstance(layout, awkward1.layout.RecordArray):
             return sum(
