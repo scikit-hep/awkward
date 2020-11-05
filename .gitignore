@@ -4,6 +4,7 @@ docs/demos/test-program
 docs/demos/test-program.cpp
 .ci/logs/
 .clangd/
+kernel-specification/
 
 # Generated CUDA kernels
 src/cuda-kernels/awkward_*.cu
