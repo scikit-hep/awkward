@@ -86,6 +86,36 @@ def test_list_offset_array_megre():
                                                          [[0.99]],
                                                          []]
 
+def test_list_array_merge():
+    one = awkward1.Array([[1, 2, 3], [], [4, 5]]).layout
+    two = awkward1.Array([[1.1, 2.2], [3.3, 4.4]]).layout
+
+    one = awkward1.layout.ListArray64(one.starts, one.stops, one.content)
+    two = awkward1.layout.ListArray64(two.starts, two.stops, two.content)
+    assert awkward1.to_list(one.merge(two, 0)) == [[1, 2, 3], [], [4, 5], [1.1, 2.2], [3.3, 4.4]]
+    assert awkward1.to_list(one.merge(two, 1)) == [[1, 2, 3, 1.1, 2.2], [3.3, 4.4], [4, 5]]
+
+def test_records_merge():
+    one = awkward1.Array([{"x": 1, "y": [1]}, {"x": 2, "y": [1, 2]}, {"x": 3, "y": [1, 2, 3]}]).layout
+    two = awkward1.Array([{"y": [], "x": 4}, {"y": [3, 2, 1], "x": 5}]).layout
+    assert awkward1.to_list(one.merge(two, 0)) == [{"x": 1, "y": [1]}, {"x": 2, "y": [1, 2]}, {"x": 3, "y": [1, 2, 3]},
+                                                   {"y": [], "x": 4}, {"y": [3, 2, 1], "x": 5}]
+    with pytest.raises(ValueError) as err:
+        awkward1.to_list(one.merge(two, 1))
+    assert str(err.value).startswith("arrays of records cannot be concatenated (but their contents can be; try a different 'axis')")
+
+    with pytest.raises(ValueError) as err:
+        awkward1.to_list(one.merge(two, 2))
+    "axis out of range for concatenate"
+
+def test_indexed_array_merge():
+    one = awkward1.Array([[1, 2, 3], [None, 4], None, [None, 5]]).layout
+    two = awkward1.Array([6, 7, 8]).layout
+    three = awkward1.Array([[6.6], [7.7, 8.8]]).layout
+
+    assert awkward1.to_list(one.merge(two, 0)) == [[1, 2, 3], [None, 4], None, [None, 5], 6, 7, 8]
+    assert awkward1.to_list(one.merge(three, 1)) == [[1, 2, 3, 6.6], [None, 4, 7.7, 8.8], [], [None, 5]]
+
 def test_listoffsetarray_merge():
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5, 6, 7, 8, 9]))
     offsets1 = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 9]))

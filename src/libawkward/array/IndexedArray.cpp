@@ -1612,157 +1612,161 @@ namespace awkward {
     if (others.empty()) {
       return shallow_copy();
     }
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
+      std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
+      ContentPtrVec head = head_tail.first;
+      ContentPtrVec tail = head_tail.second;
 
-    std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
-    ContentPtrVec head = head_tail.first;
-    ContentPtrVec tail = head_tail.second;
-
-    int64_t total_length = 0;
-    for (auto array : head) {
-      total_length += array.get()->length();
-    }
-
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-
-    bool is_option = false;
-    ContentPtrVec contents;
-    int64_t contentlength_so_far = 0;
-    int64_t length_so_far = 0;
-    Index64 nextindex(total_length);
-    for (auto array : head) {
-      if (ByteMaskedArray* raw = dynamic_cast<ByteMaskedArray*>(array.get())) {
-        array = raw->toIndexedOptionArray64();
-      }
-      else if (BitMaskedArray* raw = dynamic_cast<BitMaskedArray*>(array.get())) {
-        array = raw->toIndexedOptionArray64();
-      }
-      else if (UnmaskedArray* raw = dynamic_cast<UnmaskedArray*>(array.get())) {
-        array = raw->toIndexedOptionArray64();
+      int64_t total_length = 0;
+      for (auto array : head) {
+        total_length += array.get()->length();
       }
 
-      if (IndexedArray32* raw = dynamic_cast<IndexedArray32*>(array.get())) {
-        is_option = false;
-        contents.push_back(raw->content());
-        Index32 array_index = raw->index();
-        struct Error err = kernel::IndexedArray_fill<int32_t, int64_t>(
-          ptr_lib,
-          nextindex.data(),
-          length_so_far,
-          array_index.data(),
-          array.get()->length(),
-          contentlength_so_far);
-        util::handle_error(err, array.get()->classname(), array.get()->identities().get());
-        contentlength_so_far += raw->content().get()->length();
-        length_so_far += array.get()->length();
+      kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+
+      bool is_option = false;
+      ContentPtrVec contents;
+      int64_t contentlength_so_far = 0;
+      int64_t length_so_far = 0;
+      Index64 nextindex(total_length);
+      for (auto array : head) {
+        if (ByteMaskedArray* raw = dynamic_cast<ByteMaskedArray*>(array.get())) {
+          array = raw->toIndexedOptionArray64();
+        }
+        else if (BitMaskedArray* raw = dynamic_cast<BitMaskedArray*>(array.get())) {
+          array = raw->toIndexedOptionArray64();
+        }
+        else if (UnmaskedArray* raw = dynamic_cast<UnmaskedArray*>(array.get())) {
+          array = raw->toIndexedOptionArray64();
+        }
+
+        if (IndexedArray32* raw = dynamic_cast<IndexedArray32*>(array.get())) {
+          is_option = false;
+          contents.push_back(raw->content());
+          Index32 array_index = raw->index();
+          struct Error err = kernel::IndexedArray_fill<int32_t, int64_t>(
+            ptr_lib,
+            nextindex.data(),
+            length_so_far,
+            array_index.data(),
+            array.get()->length(),
+            contentlength_so_far);
+          util::handle_error(err, array.get()->classname(), array.get()->identities().get());
+          contentlength_so_far += raw->content().get()->length();
+          length_so_far += array.get()->length();
+        }
+        else if (IndexedArrayU32* raw = dynamic_cast<IndexedArrayU32*>(array.get())) {
+          is_option = false;
+          contents.push_back(raw->content());
+          IndexU32 array_index = raw->index();
+          struct Error err = kernel::IndexedArray_fill<uint32_t, int64_t>(
+            ptr_lib,
+            nextindex.data(),
+            length_so_far,
+            array_index.data(),
+            array.get()->length(),
+            contentlength_so_far);
+          util::handle_error(err, array.get()->classname(), array.get()->identities().get());
+          contentlength_so_far += raw->content().get()->length();
+          length_so_far += array.get()->length();
+        }
+        else if (IndexedArray64* raw = dynamic_cast<IndexedArray64*>(array.get())) {
+          is_option = false;
+          contents.push_back(raw->content());
+          Index64 array_index = raw->index();
+          struct Error err = kernel::IndexedArray_fill<int64_t, int64_t>(
+            ptr_lib,
+            nextindex.data(),
+            length_so_far,
+            array_index.data(),
+            array.get()->length(),
+            contentlength_so_far);
+          util::handle_error(err, array.get()->classname(), array.get()->identities().get());
+          contentlength_so_far += raw->content().get()->length();
+          length_so_far += array.get()->length();
+        }
+        else if (IndexedOptionArray32* raw = dynamic_cast<IndexedOptionArray32*>(array.get())) {
+          is_option = true;
+          contents.push_back(raw->content());
+          Index32 array_index = raw->index();
+          struct Error err = kernel::IndexedArray_fill<int32_t, int64_t>(
+            ptr_lib,
+            nextindex.data(),
+            length_so_far,
+            array_index.data(),
+            array.get()->length(),
+            contentlength_so_far);
+          util::handle_error(err, array.get()->classname(), array.get()->identities().get());
+          contentlength_so_far += raw->content().get()->length();
+          length_so_far += array.get()->length();
+        }
+        else if (IndexedOptionArray64* raw = dynamic_cast<IndexedOptionArray64*>(array.get())) {
+          is_option = true;
+          contents.push_back(raw->content());
+          Index64 array_index = raw->index();
+          struct Error err = kernel::IndexedArray_fill<int64_t, int64_t>(
+            ptr_lib,
+            nextindex.data(),
+            length_so_far,
+            array_index.data(),
+            array.get()->length(),
+            contentlength_so_far);
+          util::handle_error(err, array.get()->classname(), array.get()->identities().get());
+          contentlength_so_far += raw->content().get()->length();
+          length_so_far += array.get()->length();
+        }
+        else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
+          ;
+        }
+        else {
+          contents.push_back(array);
+          struct Error err = kernel::IndexedArray_fill_to64_count(
+            ptr_lib,
+            nextindex.data(),
+            length_so_far,
+            array.get()->length(),
+            contentlength_so_far);
+          util::handle_error(err, array.get()->classname(), array.get()->identities().get());
+          contentlength_so_far += array.get()->length();
+          length_so_far += array.get()->length();
+        }
       }
-      else if (IndexedArrayU32* raw = dynamic_cast<IndexedArrayU32*>(array.get())) {
-        is_option = false;
-        contents.push_back(raw->content());
-        IndexU32 array_index = raw->index();
-        struct Error err = kernel::IndexedArray_fill<uint32_t, int64_t>(
-          ptr_lib,
-          nextindex.data(),
-          length_so_far,
-          array_index.data(),
-          array.get()->length(),
-          contentlength_so_far);
-        util::handle_error(err, array.get()->classname(), array.get()->identities().get());
-        contentlength_so_far += raw->content().get()->length();
-        length_so_far += array.get()->length();
-      }
-      else if (IndexedArray64* raw = dynamic_cast<IndexedArray64*>(array.get())) {
-        is_option = false;
-        contents.push_back(raw->content());
-        Index64 array_index = raw->index();
-        struct Error err = kernel::IndexedArray_fill<int64_t, int64_t>(
-          ptr_lib,
-          nextindex.data(),
-          length_so_far,
-          array_index.data(),
-          array.get()->length(),
-          contentlength_so_far);
-        util::handle_error(err, array.get()->classname(), array.get()->identities().get());
-        contentlength_so_far += raw->content().get()->length();
-        length_so_far += array.get()->length();
-      }
-      else if (IndexedOptionArray32* raw = dynamic_cast<IndexedOptionArray32*>(array.get())) {
-        is_option = true;
-        contents.push_back(raw->content());
-        Index32 array_index = raw->index();
-        struct Error err = kernel::IndexedArray_fill<int32_t, int64_t>(
-          ptr_lib,
-          nextindex.data(),
-          length_so_far,
-          array_index.data(),
-          array.get()->length(),
-          contentlength_so_far);
-        util::handle_error(err, array.get()->classname(), array.get()->identities().get());
-        contentlength_so_far += raw->content().get()->length();
-        length_so_far += array.get()->length();
-      }
-      else if (IndexedOptionArray64* raw = dynamic_cast<IndexedOptionArray64*>(array.get())) {
-        is_option = true;
-        contents.push_back(raw->content());
-        Index64 array_index = raw->index();
-        struct Error err = kernel::IndexedArray_fill<int64_t, int64_t>(
-          ptr_lib,
-          nextindex.data(),
-          length_so_far,
-          array_index.data(),
-          array.get()->length(),
-          contentlength_so_far);
-        util::handle_error(err, array.get()->classname(), array.get()->identities().get());
-        contentlength_so_far += raw->content().get()->length();
-        length_so_far += array.get()->length();
-      }
-      else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
-        ;
+
+      ContentPtrVec tail_contents(contents.begin() + 1, contents.end());
+      ContentPtr nextcontent = contents[0].get()->mergemany(tail_contents, axis, depth);
+
+      ContentPtr next(nullptr);
+      if (is_option) {
+        next = std::make_shared<IndexedOptionArray64>(Identities::none(),
+                                                      parameters_,
+                                                      nextindex,
+                                                      nextcontent);
       }
       else {
-        contents.push_back(array);
-        struct Error err = kernel::IndexedArray_fill_to64_count(
-          ptr_lib,
-          nextindex.data(),
-          length_so_far,
-          array.get()->length(),
-          contentlength_so_far);
-        util::handle_error(err, array.get()->classname(), array.get()->identities().get());
-        contentlength_so_far += array.get()->length();
-        length_so_far += array.get()->length();
+        next = std::make_shared<IndexedArray64>(Identities::none(),
+                                                parameters_,
+                                                nextindex,
+                                                nextcontent);
       }
-    }
 
-    ContentPtrVec tail_contents(contents.begin() + 1, contents.end());
-    ContentPtr nextcontent = contents[0].get()->mergemany(tail_contents, axis, depth);
+      if (tail.empty()) {
+        return next;
+      }
 
-    ContentPtr next(nullptr);
-    if (is_option) {
-      next = std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                    parameters_,
-                                                    nextindex,
-                                                    nextcontent);
-    }
-    else {
-      next = std::make_shared<IndexedArray64>(Identities::none(),
-                                              parameters_,
-                                              nextindex,
-                                              nextcontent);
-    }
+      ContentPtr reversed = tail[0].get()->reverse_merge(next, axis, depth);
+      if (tail.size() == 1) {
+        return reversed;
+      }
+      else {
+        return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()), axis, depth);
+      }
 
-    if (tail.empty()) {
-      return next;
+      throw std::runtime_error(
+        std::string("not implemented: ") + classname() + std::string("::mergemany"));
+    } else {
+      return mergemany_as_union(others, posaxis, depth);
     }
-
-    ContentPtr reversed = tail[0].get()->reverse_merge(next, axis, depth);
-    if (tail.size() == 1) {
-      return reversed;
-    }
-    else {
-      return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()), axis, depth);
-    }
-
-    throw std::runtime_error(
-      std::string("not implemented: ") + classname() + std::string("::mergemany"));
   }
 
   template <typename T, bool ISOPTION>
