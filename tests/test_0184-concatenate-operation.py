@@ -106,7 +106,7 @@ def test_records_merge():
 
     with pytest.raises(ValueError) as err:
         awkward1.to_list(one.merge(two, 2))
-    "axis out of range for concatenate"
+    assert str(err.value).startswith("axis out of range for concatenate")
 
 def test_indexed_array_merge():
     one = awkward1.Array([[1, 2, 3], [None, 4], None, [None, 5]]).layout
@@ -115,6 +115,16 @@ def test_indexed_array_merge():
 
     assert awkward1.to_list(one.merge(two, 0)) == [[1, 2, 3], [None, 4], None, [None, 5], 6, 7, 8]
     assert awkward1.to_list(one.merge(three, 1)) == [[1, 2, 3, 6.6], [None, 4, 7.7, 8.8], [], [None, 5]]
+
+def test_bytemasked_merge():
+    one = awkward1.Array([1, 2, 3, 4, 5, 6]).mask[[True, True, False, True, False, True]].layout
+    two = awkward1.Array([7, 99, 999, 8, 9]).mask[[True, False, False, True, True]].layout
+
+    assert awkward1.to_list(one.merge(two, 0)) == [1, 2, None, 4, None, 6, 7, None, None, 8, 9]
+
+    with pytest.raises(ValueError) as err:
+        awkward1.to_list(one.merge(two, 1))
+    assert str(err.value).startswith("axis out of range for concatenate")
 
 def test_listoffsetarray_merge():
     content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3, 4, 5, 6, 7, 8, 9]))
@@ -528,45 +538,45 @@ def test_numpyarray_reverse_merge_axis1():
                                                    [95, 96, 97, 98, 99],
                                                    [100, 101, 102, 103, 104]]]
 
-# def test_numpyarray_same_merge_axis2():
-#
-#     np1 = numpy.arange(2*7*5).reshape(2, 7, 5)
-#     np2 = numpy.arange(2*7*5).reshape(2, 7, 5)
-#     ak1 = awkward1.layout.NumpyArray(np1)
-#     ak2 = awkward1.layout.NumpyArray(np2)
-#
-#     # assert awkward1.to_list(numpy.concatenate([np1, np2], 2)) == [[[0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
-#     #                                                                [5, 6, 7, 8, 9, 5, 6, 7, 8, 9],
-#     #                                                                [10, 11, 12, 13, 14, 10, 11, 12, 13, 14],
-#     #                                                                [15, 16, 17, 18, 19, 15, 16, 17, 18, 19],
-#     #                                                                [20, 21, 22, 23, 24, 20, 21, 22, 23, 24],
-#     #                                                                [25, 26, 27, 28, 29, 25, 26, 27, 28, 29],
-#     #                                                                [30, 31, 32, 33, 34, 30, 31, 32, 33, 34]],
-#     #
-#     #                                                               [[35, 36, 37, 38, 39, 35, 36, 37, 38, 39],
-#     #                                                                [40, 41, 42, 43, 44, 40, 41, 42, 43, 44],
-#     #                                                                [45, 46, 47, 48, 49, 45, 46, 47, 48, 49],
-#     #                                                                [50, 51, 52, 53, 54, 50, 51, 52, 53, 54],
-#     #                                                                [55, 56, 57, 58, 59, 55, 56, 57, 58, 59],
-#     #                                                                [60, 61, 62, 63, 64, 60, 61, 62, 63, 64],
-#     #                                                                [65, 66, 67, 68, 69, 65, 66, 67, 68, 69]]]
-#
-#     assert awkward1.to_list(ak1.merge(ak2, 2)) == [[[0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
-#                                                     [5, 6, 7, 8, 9, 5, 6, 7, 8, 9],
-#                                                     [10, 11, 12, 13, 14, 10, 11, 12, 13, 14],
-#                                                     [15, 16, 17, 18, 19, 15, 16, 17, 18, 19],
-#                                                     [20, 21, 22, 23, 24, 20, 21, 22, 23, 24],
-#                                                     [25, 26, 27, 28, 29, 25, 26, 27, 28, 29],
-#                                                     [30, 31, 32, 33, 34, 30, 31, 32, 33, 34]],
-#
-#                                                    [[35, 36, 37, 38, 39, 35, 36, 37, 38, 39],
-#                                                     [40, 41, 42, 43, 44, 40, 41, 42, 43, 44],
-#                                                     [45, 46, 47, 48, 49, 45, 46, 47, 48, 49],
-#                                                     [50, 51, 52, 53, 54, 50, 51, 52, 53, 54],
-#                                                     [55, 56, 57, 58, 59, 55, 56, 57, 58, 59],
-#                                                     [60, 61, 62, 63, 64, 60, 61, 62, 63, 64],
-#                                                     [65, 66, 67, 68, 69, 65, 66, 67, 68, 69]]]
-#
+def test_numpyarray_same_merge_axis2():
+
+    np1 = numpy.arange(2*7*5).reshape(2, 7, 5)
+    np2 = numpy.arange(2*7*5).reshape(2, 7, 5)
+    ak1 = awkward1.layout.NumpyArray(np1)
+    ak2 = awkward1.layout.NumpyArray(np2)
+
+    assert awkward1.to_list(numpy.concatenate([np1, np2], 2)) == [[[0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
+                                                                   [5, 6, 7, 8, 9, 5, 6, 7, 8, 9],
+                                                                   [10, 11, 12, 13, 14, 10, 11, 12, 13, 14],
+                                                                   [15, 16, 17, 18, 19, 15, 16, 17, 18, 19],
+                                                                   [20, 21, 22, 23, 24, 20, 21, 22, 23, 24],
+                                                                   [25, 26, 27, 28, 29, 25, 26, 27, 28, 29],
+                                                                   [30, 31, 32, 33, 34, 30, 31, 32, 33, 34]],
+
+                                                                  [[35, 36, 37, 38, 39, 35, 36, 37, 38, 39],
+                                                                   [40, 41, 42, 43, 44, 40, 41, 42, 43, 44],
+                                                                   [45, 46, 47, 48, 49, 45, 46, 47, 48, 49],
+                                                                   [50, 51, 52, 53, 54, 50, 51, 52, 53, 54],
+                                                                   [55, 56, 57, 58, 59, 55, 56, 57, 58, 59],
+                                                                   [60, 61, 62, 63, 64, 60, 61, 62, 63, 64],
+                                                                   [65, 66, 67, 68, 69, 65, 66, 67, 68, 69]]]
+
+    # assert awkward1.to_list(ak1.merge(ak2, 2)) == [[[0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
+    #                                                 [5, 6, 7, 8, 9, 5, 6, 7, 8, 9],
+    #                                                 [10, 11, 12, 13, 14, 10, 11, 12, 13, 14],
+    #                                                 [15, 16, 17, 18, 19, 15, 16, 17, 18, 19],
+    #                                                 [20, 21, 22, 23, 24, 20, 21, 22, 23, 24],
+    #                                                 [25, 26, 27, 28, 29, 25, 26, 27, 28, 29],
+    #                                                 [30, 31, 32, 33, 34, 30, 31, 32, 33, 34]],
+    #
+    #                                                [[35, 36, 37, 38, 39, 35, 36, 37, 38, 39],
+    #                                                 [40, 41, 42, 43, 44, 40, 41, 42, 43, 44],
+    #                                                 [45, 46, 47, 48, 49, 45, 46, 47, 48, 49],
+    #                                                 [50, 51, 52, 53, 54, 50, 51, 52, 53, 54],
+    #                                                 [55, 56, 57, 58, 59, 55, 56, 57, 58, 59],
+    #                                                 [60, 61, 62, 63, 64, 60, 61, 62, 63, 64],
+    #                                                 [65, 66, 67, 68, 69, 65, 66, 67, 68, 69]]]
+
 # def test_numpyarray_merge_axis2():
 #
 #     np1 = numpy.arange(2*7*5).reshape(2, 7, 5)
