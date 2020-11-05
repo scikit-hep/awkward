@@ -2604,6 +2604,8 @@ def from_parquet(
         elif lazy_cache == "attach":
             exception = TypeError("lazy_cache must be a MutableMapping")
             awkward1._util.deprecate(exception, "1.0.0", date="2020-12-01")
+            hold_cache = awkward1._util.MappingProxy({})
+            lazy_cache = awkward1.layout.ArrayCache(hold_cache)
         elif lazy_cache is not None and not isinstance(
             lazy_cache, awkward1.layout.ArrayCache
         ):
@@ -3734,6 +3736,8 @@ def from_arrayset(
         elif lazy_cache == "attach":
             exception = TypeError("lazy_cache must be a MutableMapping")
             awkward1._util.deprecate(exception, "1.0.0", date="2020-12-01")
+            hold_cache = awkward1._util.MappingProxy({})
+            lazy_cache = awkward1.layout.ArrayCache(hold_cache)
         elif lazy_cache is not None and not isinstance(
             lazy_cache, awkward1.layout.ArrayCache
         ):
