@@ -2738,7 +2738,7 @@ kernels:
             else:
               b = 0
             tooffsets[i + 1] = tooffsets[i] + a + b
-    automatic-tests: true
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_ListOffsetArray_flatten_offsets
@@ -4806,7 +4806,7 @@ kernels:
                 if ileft < leftlen:
                   tag = 0
                 iright = iright + 1
-    automatic-tests: true
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_UnionArray_flatten_combine
