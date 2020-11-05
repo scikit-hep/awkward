@@ -87,6 +87,9 @@ class NumpyMetadata(Singleton):
 
     ndarray = numpy.ndarray
 
+    nan = numpy.nan
+    inf = numpy.inf
+
 if hasattr(numpy, "float16"):
     NumpyMetadata.float16 = numpy.float16
 
