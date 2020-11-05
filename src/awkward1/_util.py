@@ -1620,3 +1620,96 @@ class MappingProxy(MutableMapping):
 
     def __len__(self):
         return len(self.base)
+
+
+def make_union(tags, index, contents, identities, parameters):
+    if isinstance(index, awkward1.layout.Index32):
+        return awkward1.layout.UnionArray8_32(
+            tags, index, contents, identities, parameters
+        )
+    elif isinstance(index, awkward1.layout.IndexU32):
+        return awkward1.layout.UnionArray8_U32(
+            tags, index, contents, identities, parameters
+        )
+    elif isinstance(index, awkward1.layout.Index64):
+        return awkward1.layout.UnionArray8_64(
+            tags, index, contents, identities, parameters
+        )
+    else:
+        raise AssertionError(index)
+
+
+def union_to_record(unionarray, anonymous):
+    nplike = awkward1.nplike.of(unionarray)
+
+    contents = []
+    for layout in unionarray.contents:
+        if isinstance(layout, virtualtypes):
+            contents.append(layout.array)
+        elif isinstance(layout, indexedtypes):
+            contents.append(layout.project())
+        elif isinstance(layout, uniontypes):
+            contents.append(union_to_record(layout, anonymous))
+        elif isinstance(layout, optiontypes):
+            contents.append(awkward1.operations.structure.fill_none(
+                layout, np.nan, highlevel=False
+            ))
+        else:
+            contents.append(layout)
+
+    if not any(isinstance(x, awkward1.layout.RecordArray) for x in contents):
+        return make_union(
+            unionarray.tags,
+            unionarray.index,
+            contents,
+            unionarray.identities,
+            unionarray.parameters,
+        )
+
+    else:
+        seen = set()
+        all_names = []
+        for layout in contents:
+            if isinstance(layout, awkward1.layout.RecordArray):
+                for key in layout.keys():
+                    if key not in seen:
+                        seen.add(key)
+                        all_names.append(key)
+            else:
+                if anonymous not in seen:
+                    seen.add(anonymous)
+                    all_names.append(anonymous)
+
+        missingarray = awkward1.layout.IndexedOptionArray64(
+            awkward1.layout.Index64(nplike.full(len(unionarray), -1, dtype=np.int64)),
+            awkward1.layout.EmptyArray(),
+        )
+
+        all_fields = []
+        for name in all_names:
+            union_contents = []
+            for layout in contents:
+                if isinstance(layout, awkward1.layout.RecordArray):
+                    for key in layout.keys():
+                        if name == key:
+                            union_contents.append(layout.field(key))
+                            break
+                    else:
+                        union_contents.append(missingarray)
+                else:
+                    if name == anonymous:
+                        union_contents.append(layout)
+                    else:
+                        union_contents.append(missingarray)
+
+            all_fields.append(
+                make_union(
+                    unionarray.tags,
+                    unionarray.index,
+                    union_contents,
+                    unionarray.identities,
+                    unionarray.parameters,
+                ).simplify()
+            )
+
+        return awkward1.layout.RecordArray(all_fields, all_names, len(unionarray))

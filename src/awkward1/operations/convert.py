@@ -3962,7 +3962,13 @@ or
         return out
 
     def recurse(layout, row_arrays, col_names):
-        if layout.parameter("__array__") in ("string", "bytestring"):
+        if isinstance(layout, awkward1._util.virtualtypes):
+            return recurse(layout.array, row_arrays, col_names)
+
+        elif isinstance(layout, awkward1._util.indexedtypes):
+            return recurse(layout.project(), row_arrays, col_names)
+
+        elif layout.parameter("__array__") in ("string", "bytestring"):
             return [(to_numpy(layout), row_arrays, col_names)]
 
         elif layout.purelist_depth > 1:
@@ -3983,6 +3989,19 @@ or
                 - numpy.repeat(starts, counts)
             )
             return recurse(flattened, newrows, col_names)
+
+        elif isinstance(layout, awkward1._util.uniontypes):
+            layout = awkward1._util.union_to_record(layout, anonymous)
+            if isinstance(layout, awkward1._util.uniontypes):
+                return [(to_numpy(layout), row_arrays, col_names)]
+            else:
+                return sum(
+                    [
+                        recurse(layout.field(n), row_arrays, col_names + (n,))
+                        for n in layout.keys()
+                    ],
+                    [],
+                )
 
         elif isinstance(layout, awkward1.layout.RecordArray):
             return sum(
@@ -4054,6 +4073,10 @@ or
             tables.append(pandas.DataFrame(data=column, index=index, columns=columns))
 
         last_row_arrays = row_arrays
+
+    for table in tables:
+        if isinstance(table.columns, pandas.MultiIndex) and table.columns.nlevels == 1:
+            table.columns = table.columns.get_level_values(0)
 
     return tables
 
