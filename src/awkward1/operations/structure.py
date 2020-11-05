@@ -725,9 +725,6 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     must have the same lengths and nested lists are each concatenated,
     element for element, and similarly for deeper levels.
     """
-    # if axis != 0:
-    #     raise NotImplementedError("axis={0}".format(axis))
-    #
     contents = [
         awkward1.operations.convert.to_layout(x, allow_record=False) for x in arrays
     ]
