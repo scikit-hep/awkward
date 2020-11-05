@@ -24,7 +24,6 @@ extras = {
 extras["all"] = sum(extras.values(), [])
 
 install_requires = open("requirements.txt").read().strip().split("\n")
-tests_require = extras["test"]
 
 
 class CMakeExtension(Extension):
@@ -157,7 +156,11 @@ else:
 
 
 setup(name = "awkward1",
-      packages = [x for x in setuptools.find_packages(where="src") if x != "awkward1_cuda_kernels"],
+      packages = [
+          x
+          for x in setuptools.find_packages(where="src")
+          if x != "awkward1_cuda_kernels"
+      ],
       package_dir = {"awkward1": "src/awkward1"},
       version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",

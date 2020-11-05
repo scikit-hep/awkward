@@ -932,10 +932,22 @@ namespace awkward {
     ssize_t byteoffset = byteoffset_;
     if (copyarrays) {
       NumpyArray tmp = contiguous();
-      ptr = tmp.ptr();
-      shape = tmp.shape();
-      strides = tmp.strides();
-      byteoffset = tmp.byteoffset();
+      if (ptr_.get() != tmp.ptr().get()) {
+        ptr = tmp.ptr();
+        shape = tmp.shape();
+        strides = tmp.strides();
+        byteoffset = tmp.byteoffset();
+      }
+      else {
+        ptr = std::shared_ptr<void>(
+          kernel::malloc<void>(ptr_lib_, bytelength()));
+        struct Error err = kernel::NumpyArray_copy(
+          kernel::lib::cpu,   // DERIVE
+          reinterpret_cast<uint8_t*>(ptr.get()),
+          reinterpret_cast<uint8_t*>(data()),
+          bytelength());
+        util::handle_error(err, classname(), identities_.get());
+      }
     }
     IdentitiesPtr identities = identities_;
     if (copyidentities  &&  identities_.get() != nullptr) {
@@ -1590,7 +1602,7 @@ namespace awkward {
                                                      strides,
                                                      0,
                                                      1,
-                                                     std::string("c"),
+                                                     format_,
                                                      util::dtype::uint8,
                                                      ptr_lib);
 

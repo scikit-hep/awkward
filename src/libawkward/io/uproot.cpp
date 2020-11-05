@@ -20,22 +20,24 @@ namespace awkward {
 
   template <>
   int32_t byteswap<int32_t>(int32_t big) {
-    return ((big >> 24) & 0x000000ff) |
-           ((big >>  8) & 0x0000ff00) |
-           ((big <<  8) & 0x00ff0000) |
-           ((big << 24) & 0xff000000);
+    uint64_t biggie = (uint64_t)big;
+    return (int32_t)((biggie >> 24) & 0x000000ff) |
+                    ((biggie >>  8) & 0x0000ff00) |
+                    ((biggie <<  8) & 0x00ff0000) |
+                    ((biggie << 24) & 0xff000000);
   }
 
   template <>
   int64_t byteswap<int64_t>(int64_t big) {
-    return ((big >> 56) & 0x00000000000000ff) |
-           ((big >> 40) & 0x000000000000ff00) |
-           ((big >> 24) & 0x0000000000ff0000) |
-           ((big >>  8) & 0x00000000ff000000) |
-           ((big <<  8) & 0x000000ff00000000) |
-           ((big << 24) & 0x0000ff0000000000) |
-           ((big << 40) & 0x00ff000000000000) |
-           ((big << 56) & 0xff00000000000000);
+    uint64_t biggie = (uint64_t)big;
+    return (int64_t)((biggie >> 56) & 0x00000000000000ff) |
+                    ((biggie >> 40) & 0x000000000000ff00) |
+                    ((biggie >> 24) & 0x0000000000ff0000) |
+                    ((biggie >>  8) & 0x00000000ff000000) |
+                    ((biggie <<  8) & 0x000000ff00000000) |
+                    ((biggie << 24) & 0x0000ff0000000000) |
+                    ((biggie << 40) & 0x00ff000000000000) |
+                    ((biggie << 56) & 0xff00000000000000);
   }
 
   template <>
@@ -76,8 +78,8 @@ namespace awkward {
         pos += sizeof(int32_t);
 
         for (int64_t j = 0;  j < length;  j++) {
-          content.append(byteswap(*reinterpret_cast<double*>(&data_ptr[pos])));
-          pos += sizeof(double);
+          content.append(byteswap(*reinterpret_cast<T*>(&data_ptr[pos])));
+          pos += sizeof(T);
         }
 
         last_offsets2 += length;

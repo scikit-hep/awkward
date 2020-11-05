@@ -68,6 +68,29 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             for x in out
         )
 
+    def adjust_apply_ufunc(apply_ufunc, ufunc, method, inputs, kwargs):
+        nextinputs = [
+            awkward1._util.wrap(x, behavior)
+            if isinstance(x, (awkward1.layout.Content, awkward1.layout.Record))
+            else x
+            for x in inputs
+        ]
+
+        out = apply_ufunc(ufunc, method, nextinputs, kwargs)
+
+        if out is NotImplemented:
+            return None
+        else:
+            if not isinstance(out, tuple):
+                out = (out,)
+            out = tuple(
+                x.layout
+                if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record))
+                else x
+                for x in out
+            )
+            return lambda: out
+
     def getfunction(inputs, depth):
         signature = [ufunc]
         for x in inputs:
@@ -102,9 +125,54 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             )
             return lambda: (awkward1.layout.NumpyArray(result),)
 
+        for x in inputs:
+            if isinstance(x, awkward1.layout.Content):
+                chained_behavior = awkward1._util.Behavior(awkward1.behavior, behavior)
+                apply_ufunc = chained_behavior[numpy.ufunc, x.parameter("__array__")]
+                if apply_ufunc is not None:
+                    out = adjust_apply_ufunc(
+                        apply_ufunc, ufunc, method, inputs, kwargs
+                    )
+                    if out is not None:
+                        return out
+                apply_ufunc = chained_behavior[numpy.ufunc, x.parameter("__record__")]
+                if apply_ufunc is not None:
+                    out = adjust_apply_ufunc(
+                        apply_ufunc, ufunc, method, inputs, kwargs
+                    )
+                    if out is not None:
+                        return out
+
+        if all(
+            x.parameter("__array__") is not None
+            or x.parameter("__record__") is not None
+            for x in inputs if isinstance(x, awkward1.layout.Content)
+        ):
+            custom_types = []
+            for x in inputs:
+                if isinstance(x, awkward1.layout.Content):
+                    if x.parameter("__array__") is not None:
+                        custom_types.append(x.parameter("__array__"))
+                    elif x.parameter("__record__") is not None:
+                        custom_types.append(x.parameter("__record__"))
+                    else:
+                        custom_types.append(type(x).__name__)
+                else:
+                    custom_types.append(type(x).__name__)
+            exception = ValueError(
+                "no overloads for custom types: {0}({1})".format(
+                    ufunc.__name__,
+                    ", ".join(custom_types),
+                )
+                + awkward1._util.exception_suffix(__file__)
+            )
+            awkward1._util.deprecate(exception, "1.0.0", date="2020-12-01")
+
         return None
 
-    out = awkward1._util.broadcast_and_apply(inputs, getfunction, behavior)
+    out = awkward1._util.broadcast_and_apply(
+        inputs, getfunction, behavior, allow_records=False
+    )
     assert isinstance(out, tuple) and len(out) == 1
     return awkward1._util.wrap(out[0], behavior)
 

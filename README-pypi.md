@@ -4,39 +4,6 @@ Awkward Array is a library for **nested, variable-sized data**, including arbitr
 
 Arrays are **dynamically typed**, but operations on them are **compiled and fast**. Their behavior coincides with NumPy when array dimensions are regular and generalizes when they're not.
 
-<table>
-  <tr>
-    <td width="66%" valign="top">
-      <a href="https://awkward-array.org">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-tutorials.png" width="570">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.org">
-        How-to tutorials
-        </a>
-      </b></p>
-    </td>
-    <td width="33%" valign="top">
-      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-sphinx.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        Python API reference
-        </a>
-      </b></p>
-      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="268">
-      </a>
-      <p align="center"><b>
-        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        C++ API reference
-        </a>
-      </b></p>
-    </td>
-  </tr>
-</table>
-
 # Motivating example
 
 Given an array of objects with `x`, `y` fields and variable-length nested lists like
@@ -92,14 +59,61 @@ Our [presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) provides a good i
 
 # Installation
 
-Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward1/) using pip:
+Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward1) using pip:
 
 ```bash
 pip install awkward1
 ```
 
-Most users will get a precompiled binary (wheel) for your operating system and Python version. If not, the above attempts to compile from source.
+You will likely get a precompiled binary (wheel), depending on your operating system and Python version. If not, pip attempts to compile from source (which requires a C++ compiler, make, and CMake).
 
-   * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues). If you have a general "How do I…?" question, we'll answer it as a new [example in the tutorial](https://awkward-array.org/how-to.html).
-   * If you have a problem that's too specific to be new documentation or it isn't exclusively related to Awkward Array, it might be more appropriate to ask on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
-   * The [Gitter Scikit-HEP/community](https://gitter.im/Scikit-HEP/community) is a way to get in touch with all Scikit-HEP developers and users.
+Awkward Array is also available using [conda](https://anaconda.org/conda-forge/awkward1), which always installs a binary:
+```bash
+conda install -c conda-forge awkward1
+```
+
+If you have already added `conda-forge` as a channel, the `-c conda-forge` is unnecessary. Adding the channel is recommended because it ensures that all of your packages use compatible versions:
+
+```bash
+conda config --add channels conda-forge
+conda update --all
+```
+
+## Getting help
+
+<table>
+  <tr>
+    <td width="66%" valign="top">
+      <a href="https://awkward-array.org">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-tutorials.png" width="570">
+      </a>
+      <p align="center"><b>
+        <a href="https://awkward-array.org">
+        How-to tutorials
+        </a>
+      </b></p>
+    </td>
+    <td width="33%" valign="top">
+      <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-sphinx.png" width="268">
+      </a>
+      <p align="center"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
+        Python API reference
+        </a>
+      </b></p>
+      <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="268">
+      </a>
+      <p align="center"><b>
+        <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
+        C++ API reference
+        </a>
+      </b></p>
+    </td>
+  </tr>
+</table>
+
+   * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward-1.0/issues).
+   * If you have a "How do I...?" question, ask about it on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
+   * To ask questions in real time, try the Gitter [Scikit-HEP/awkward-array](https://gitter.im/Scikit-HEP/awkward-array) chat room.

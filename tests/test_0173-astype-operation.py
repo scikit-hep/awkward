@@ -64,7 +64,7 @@ def test_RegularArray_and_ListArray():
     assert str(awkward1.type(listarray_bool)) == "var * 2 * var * bool"
 
 def test_ufunc_afterward():
-    assert awkward1.to_list(awkward1.values_astype(awkward1.Array([{"x": 1.1}, {"x": 3.3}]), numpy.float32) + 1) == [{"x": 2.0999999046325684}, {"x": 4.300000190734863}]
+    assert (awkward1.values_astype(awkward1.Array([{"x": 1.1}, {"x": 3.3}]), numpy.float32)["x"] + 1).tolist() == [2.0999999046325684, 4.300000190734863]
 
 def test_string():
     assert awkward1.values_astype(awkward1.Array([{"x": 1.1, "y": "hello"}]), numpy.float32).tolist() == [{'x': 1.100000023841858, 'y': 'hello'}]

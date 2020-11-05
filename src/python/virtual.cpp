@@ -322,13 +322,25 @@ PyArrayCache::PyArrayCache(const py::object& mutablemapping)
                           ? mutablemapping
                           : py::weakref((const py::handle&) mutablemapping)) {}
 
+bool
+PyArrayCache::is_broken() const {
+  if (mutablemapping_.is(py::none())) {
+    return false;
+  }
+  const py::object out = mutablemapping_();
+  if (out.is(py::none())) {
+    return true;
+  }
+  return false;
+}
+
 const py::object
 PyArrayCache::mutablemapping() const {
-  if ( mutablemapping_.is(py::none()) ) {
+  if (mutablemapping_.is(py::none())) {
     return mutablemapping_;
   }
   const py::object out = mutablemapping_();
-  if ( out.is(py::none()) ) {
+  if (out.is(py::none())) {
     throw std::runtime_error(
       std::string("PyArrayCache has lost its weak reference to mapping")
       + FILENAME(__LINE__));
@@ -366,16 +378,23 @@ const std::string
 PyArrayCache::tostring_part(const std::string& indent,
                             const std::string& pre,
                             const std::string& post) const {
-  std::string repr =
-    mutablemapping().attr("__repr__")().cast<std::string>();
-  if (repr.length() > 50) {
-    repr = repr.substr(0, 47) + std::string("...");
+  if (is_broken()) {
+    std::stringstream out;
+    out << indent << pre << "<ArrayCache is_broken=\"true\"/>" << post;
+    return out.str();
   }
-  std::stringstream out;
-  out << indent << pre << "<ArrayCache mapping=\""
-      << repr << "\"/>"
-      << post;
-  return out.str();
+  else {
+    std::string repr =
+      mutablemapping().attr("__repr__")().cast<std::string>();
+    if (repr.length() > 50) {
+      repr = repr.substr(0, 47) + std::string("...");
+    }
+    std::stringstream out;
+    out << indent << pre << "<ArrayCache mapping=\""
+        << repr << "\"/>"
+        << post;
+    return out.str();
+  }
 }
 
 py::class_<PyArrayCache, std::shared_ptr<PyArrayCache>>
@@ -384,6 +403,7 @@ make_PyArrayCache(const py::handle& m, const std::string& name) {
                      std::shared_ptr<PyArrayCache>>(m, name.c_str())
       .def(py::init<const py::object&>(),
            py::arg("mutablemapping"))
+      .def_property_readonly("is_broken", &PyArrayCache::is_broken)
       .def_property_readonly("mutablemapping", &PyArrayCache::mutablemapping)
       .def("__repr__", [](const PyArrayCache& self) -> std::string {
         return self.tostring_part("", "", "");

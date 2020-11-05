@@ -1794,8 +1794,15 @@ namespace awkward {
       stops_.data());
     util::handle_error(err, classname(), identities_.get());
 
+    ContentPtr asListOffsetArray64 = toListOffsetArray64(true);
+    ContentPtr next_content;
+    if (ListOffsetArrayOf<int64_t>* raw =
+          dynamic_cast<ListOffsetArrayOf<int64_t>*>(asListOffsetArray64.get())) {
+      next_content = raw->content();
+    }
+
     Index64 sliceoffsets = slicecontent.offsets();
-    ContentPtr outcontent = content_.get()->getitem_next_jagged(
+    ContentPtr outcontent = next_content.get()->getitem_next_jagged(
       util::make_starts(sliceoffsets),
       util::make_stops(sliceoffsets),
       slicecontent.content(),
