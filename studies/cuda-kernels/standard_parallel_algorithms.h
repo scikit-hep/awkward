@@ -5,7 +5,7 @@
 #pragma once
 
 static void
-HandleError(cudaError_t err, const char *file, int line) {
+HandleError(cudaError_t err, const char* file, int line) {
   if (err != cudaSuccess) {
     int aa = 0;
     printf("%s in %s at line %d\n", cudaGetErrorString(err), file, line);
@@ -15,51 +15,49 @@ HandleError(cudaError_t err, const char *file, int line) {
 }
 #define HANDLE_ERROR(err) (HandleError(err, __FILE__, __LINE__))
 
-inline dim3 threads(int64_t length) {
+inline dim3
+threads(int64_t length) {
   if (length > 1024) {
-    return  dim3(1024);
+    return dim3(1024);
   }
   return dim3(length);
 }
 
-inline dim3 blocks(int64_t length) {
+inline dim3
+blocks(int64_t length) {
   if (length > 1024) {
     return dim3(ceil((length) / 1024.0));
   }
   return dim3(1);
 }
 
-inline dim3 threads_2d(int64_t length_x, int64_t length_y) {
-	if(length_x > 32 && length_y > 32) {
-		return dim3(32, 32);
-	}
-	else if(length_x > 32 && length_y <= 32) {
-		return dim3(32, length_y);
-	}
-	else if(length_x <= 32 && length_y > 32) {
-		return dim3(length_x, 32);
-	}
-	else {
-		return dim3(length_x, length_y);
-	}
+inline dim3
+threads_2d(int64_t length_x, int64_t length_y) {
+  if (length_x > 32 && length_y > 32) {
+    return dim3(32, 32);
+  } else if (length_x > 32 && length_y <= 32) {
+    return dim3(32, length_y);
+  } else if (length_x <= 32 && length_y > 32) {
+    return dim3(length_x, 32);
+  } else {
+    return dim3(length_x, length_y);
+  }
 }
 
-inline dim3 blocks_2d(int64_t length_x, int64_t length_y) {
-	if(length_x > 32 && length_y > 32) {
-		return dim3(ceil(length_x / 32.0), ceil(length_y / 32.0));
-	}
-	else if(length_x > 32 && length_y <= 32) {
-		return dim3(ceil(length_x / 32.0), 1);
-	}
-	else if(length_x <= 32 && length_y > 32) {
-		return dim3(1, ceil(length_y / 32.0));
-	}
-	else {
-		return dim3(1, 1);
-	}
+inline dim3
+blocks_2d(int64_t length_x, int64_t length_y) {
+  if (length_x > 32 && length_y > 32) {
+    return dim3(ceil(length_x / 32.0), ceil(length_y / 32.0));
+  } else if (length_x > 32 && length_y <= 32) {
+    return dim3(ceil(length_x / 32.0), 1);
+  } else if (length_x <= 32 && length_y > 32) {
+    return dim3(1, ceil(length_y / 32.0));
+  } else {
+    return dim3(1, 1);
+  }
 }
 
-template<typename T>
+template <typename T>
 __global__ void
 exclusive_scan_kernel(T* d_in,
                       T* d_out,
@@ -112,8 +110,6 @@ copy(T* out, F* in, int64_t length) {
     out[thread_id] = (T)(in[thread_id]);
   }
 }
-
-
 
 template <typename T, typename F>
 void

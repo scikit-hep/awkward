@@ -11,7 +11,6 @@ awkward_UnionArray_project_filter_mask(
     int8_t* filtered_mask,
     int64_t length) {
   int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-
   if(thread_id < length) {
     if (fromtags[thread_id] == which) {
       filtered_mask[thread_id] = 1;

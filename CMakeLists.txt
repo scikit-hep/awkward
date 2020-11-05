@@ -95,6 +95,9 @@ set_target_properties(awkward-static PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 set_target_properties(awkward PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(awkward PROPERTIES VISIBILITY_INLINES_HIDDEN ON)
 
+file(GLOB CUDA_KERNEL_SOURCES CONFIGURE_DEPENDS "studies/cuda-kernels/loop-dependent-variable-kernels/*.cu")
+add_library(awkward-cuda-kernels OBJECT ${CUDA_KERNEL_SOURCES})
+
 if (APPLE)
   set_target_properties(awkward PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
 else()
