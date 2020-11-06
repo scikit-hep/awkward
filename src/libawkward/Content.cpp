@@ -945,7 +945,12 @@ namespace awkward {
   const ContentPtr
   Content::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
     ContentPtrVec others({ other });
-    return mergemany_as_union(others, axis, depth);
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth) {
+      return mergemany(others);
+    } else {
+      return mergemany_as_union(others, axis, depth);
+    }
   }
 
   const ContentPtr

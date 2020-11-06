@@ -108,7 +108,7 @@ namespace awkward {
             dst = dst.get()->merge_as_union(piece);
           }
           else {
-            dst = dst.get()->merge(piece, 0, 0);
+            dst = dst.get()->mergemany({piece});
           }
           if (UnionArray8_32* raw
                   = dynamic_cast<UnionArray8_32*>(dst.get())) {
