@@ -743,10 +743,10 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
         if batch[-1].mergeable(x, mergebool=mergebool):
             batch.append(x)
         else:
-            collapsed = batch[0].mergemany(batch[1:], axis)
+            collapsed = batch[0].mergemany(batch[1:]) if axis == 0 else batch[0].mergemany_as_union(batch[1:], axis)
             batch = [collapsed.merge_as_union(x)]
 
-    out = batch[0].mergemany(batch[1:], axis)
+    out = batch[0].mergemany(batch[1:]) if axis == 0 else batch[0].mergemany_as_union(batch[1:], axis)
     if isinstance(out, awkward1._util.uniontypes):
         out = out.simplify(mergebool=mergebool)
 

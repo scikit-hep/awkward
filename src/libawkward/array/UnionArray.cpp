@@ -1476,9 +1476,9 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::reverse_merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
+  UnionArrayOf<T, I>::reverse_merge(const ContentPtr& other) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
-      return reverse_merge(raw->array(), axis, depth);
+      return reverse_merge(raw->array());
     }
 
     int64_t theirlength = other.get()->length();
@@ -1594,7 +1594,7 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+  UnionArrayOf<T, I>::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {
       return shallow_copy();
     }
@@ -1726,12 +1726,12 @@ namespace awkward {
       return next;
     }
 
-    ContentPtr reversed = tail[0].get()->reverse_merge(next, axis, depth);
+    ContentPtr reversed = tail[0].get()->reverse_merge(next);
     if (tail.size() == 1) {
       return reversed;
     }
     else {
-      return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()), axis, depth);
+      return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()));
     }
   }
 

@@ -697,8 +697,8 @@ namespace awkward {
   }
 
   const ContentPtr
-  VirtualArray::mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
-    return array().get()->mergemany(others, axis, depth);
+  VirtualArray::mergemany(const ContentPtrVec& others) const {
+    return array().get()->mergemany(others);
   }
 
   const SliceItemPtr

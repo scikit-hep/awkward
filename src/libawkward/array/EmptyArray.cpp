@@ -428,7 +428,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  EmptyArray::mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+  EmptyArray::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {
       return shallow_copy();
     }
@@ -439,7 +439,7 @@ namespace awkward {
 
     else {
       ContentPtrVec tail_others(others.begin() + 1, others.end());
-      return others[0].get()->mergemany(tail_others, axis, depth);
+      return others[0].get()->mergemany(tail_others);
     }
   }
 

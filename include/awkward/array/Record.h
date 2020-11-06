@@ -189,7 +189,7 @@ namespace awkward {
 
     /// @exception std::runtime_error is always thrown
     const ContentPtr
-      mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const override;
+      mergemany(const ContentPtrVec& others) const override;
 
     /// @exception std::runtime_error is always thrown
     const SliceItemPtr

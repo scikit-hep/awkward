@@ -309,13 +309,13 @@ namespace awkward {
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
     const ContentPtr
-      reverse_merge(const ContentPtr& other, int64_t axis, int64_t depth) const override;
+      reverse_merge(const ContentPtr& other) const override;
 
     const std::pair<ContentPtrVec, ContentPtrVec>
       merging_strategy(const ContentPtrVec& others) const override;
 
     const ContentPtr
-      mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const override;
+      mergemany(const ContentPtrVec& others) const override;
 
     const SliceItemPtr
       asslice() const override;

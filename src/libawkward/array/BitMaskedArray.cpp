@@ -781,16 +781,16 @@ namespace awkward {
   }
 
   const ContentPtr
-  BitMaskedArray::reverse_merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
-    return toIndexedOptionArray64().get()->reverse_merge(other, axis, depth);
+  BitMaskedArray::reverse_merge(const ContentPtr& other) const {
+    return toIndexedOptionArray64().get()->reverse_merge(other);
   }
 
   const ContentPtr
-  BitMaskedArray::mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+  BitMaskedArray::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {
       return shallow_copy();
     }
-    return toIndexedOptionArray64().get()->mergemany(others, axis, depth);
+    return toIndexedOptionArray64().get()->mergemany(others);
   }
 
   const SliceItemPtr

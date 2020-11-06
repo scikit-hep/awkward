@@ -1027,21 +1027,16 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListOffsetArrayOf<T>::mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+  ListOffsetArrayOf<T>::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {
       return shallow_copy();
     }
-    int64_t posaxis = axis_wrap_if_negative(axis);
-    if (posaxis == depth) {
-      ContentPtr listarray = std::make_shared<ListArrayOf<T>>(identities_,
-                                                              parameters_,
-                                                              starts(),
-                                                              stops(),
-                                                              content_);
-      return listarray.get()->mergemany(others, axis, depth);
-    } else {
-      return mergemany_as_union(others, posaxis, depth);
-    }
+    ContentPtr listarray = std::make_shared<ListArrayOf<T>>(identities_,
+                                                            parameters_,
+                                                            starts(),
+                                                            stops(),
+                                                            content_);
+    return listarray.get()->mergemany(others);
   }
 
   template <>

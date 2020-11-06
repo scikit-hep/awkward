@@ -330,7 +330,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  Record::mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+  Record::mergemany(const ContentPtrVec& others) const {
     throw std::invalid_argument(
       std::string("Record cannot be merged because it is not an array")
       + FILENAME(__LINE__));

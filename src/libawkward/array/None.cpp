@@ -243,7 +243,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  None::mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+  None::mergemany(const ContentPtrVec& others) const {
     throw std::runtime_error(
       std::string("undefined operation: None::mergemany")
       + FILENAME(__LINE__));

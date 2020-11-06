@@ -936,7 +936,7 @@ namespace awkward {
   }
 
   const ContentPtr
-  Content::reverse_merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
+  Content::reverse_merge(const ContentPtr& other) const {
     throw std::runtime_error(
       std::string("undefined operation: ") + classname() + ("::reverse_merge")
       + FILENAME(__LINE__));
@@ -945,7 +945,7 @@ namespace awkward {
   const ContentPtr
   Content::merge(const ContentPtr& other, int64_t axis, int64_t depth) const {
     ContentPtrVec others({ other });
-    return mergemany(others, axis, depth);
+    return mergemany_as_union(others, axis, depth);
   }
 
   const ContentPtr

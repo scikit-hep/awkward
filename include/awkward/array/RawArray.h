@@ -894,7 +894,7 @@ namespace awkward {
     }
 
     const ContentPtr
-      mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const override {
+      mergemany(const ContentPtrVec& others) const override {
       throw std::runtime_error(
         std::string("not implemented RawArrayOf<T>::mergemany")+ FILENAME(__LINE__));
     }

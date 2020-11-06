@@ -764,11 +764,11 @@ namespace awkward {
   }
 
   const ContentPtr
-  RegularArray::mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+  RegularArray::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {
       return shallow_copy();
     }
-    return toListOffsetArray64(true).get()->mergemany(others, axis, depth);
+    return toListOffsetArray64(true).get()->mergemany(others);
   }
 
   const SliceItemPtr

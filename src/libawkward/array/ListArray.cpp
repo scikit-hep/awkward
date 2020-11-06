@@ -928,213 +928,208 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
-  ListArrayOf<T>::mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+  ListArrayOf<T>::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {
       return shallow_copy();
     }
-    int64_t posaxis = axis_wrap_if_negative(axis);
-    if (posaxis == depth) {
-      std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
-      ContentPtrVec head = head_tail.first;
-      ContentPtrVec tail = head_tail.second;
+    std::pair<ContentPtrVec, ContentPtrVec> head_tail = merging_strategy(others);
+    ContentPtrVec head = head_tail.first;
+    ContentPtrVec tail = head_tail.second;
 
-      int64_t total_length = 0;
-      for (auto array : head) {
-        total_length += array.get()->length();
+    int64_t total_length = 0;
+    for (auto array : head) {
+      total_length += array.get()->length();
+    }
+
+    ContentPtrVec contents;
+    for (auto array : head) {
+      if (ListArray32* raw = dynamic_cast<ListArray32*>(array.get())) {
+        contents.push_back(raw->content());
       }
-
-      ContentPtrVec contents;
-      for (auto array : head) {
-        if (ListArray32* raw = dynamic_cast<ListArray32*>(array.get())) {
-          contents.push_back(raw->content());
-        }
-        else if (ListArrayU32* raw = dynamic_cast<ListArrayU32*>(array.get())) {
-          contents.push_back(raw->content());
-        }
-        else if (ListArray64* raw = dynamic_cast<ListArray64*>(array.get())) {
-          contents.push_back(raw->content());
-        }
-        else if (ListOffsetArray32* raw = dynamic_cast<ListOffsetArray32*>(array.get())) {
-          contents.push_back(raw->content());
-        }
-        else if (ListOffsetArrayU32* raw = dynamic_cast<ListOffsetArrayU32*>(array.get())) {
-          contents.push_back(raw->content());
-        }
-        else if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(array.get())) {
-          contents.push_back(raw->content());
-        }
-        else if (RegularArray* raw = dynamic_cast<RegularArray*>(array.get())) {
-          contents.push_back(raw->content());
-        }
-        else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
-          ;
-        }
-        else {
-          // FIXME:???
-          return mergemany_as_union(others, posaxis, depth);
-
-          throw std::invalid_argument(
-            std::string("cannot merge ") + classname() + std::string(" with ")
-            + array.get()->classname() + FILENAME(__LINE__));
-        }
+      else if (ListArrayU32* raw = dynamic_cast<ListArrayU32*>(array.get())) {
+        contents.push_back(raw->content());
       }
-      ContentPtrVec tail_contents(contents.begin() + 1, contents.end());
-      ContentPtr nextcontent = contents[0].get()->mergemany(tail_contents, axis, depth);
-
-      Index64 nextstarts(total_length);
-      Index64 nextstops(total_length);
-
-      kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-
-      int64_t contentlength_so_far = 0;
-      int64_t length_so_far = 0;
-      for (auto array : head) {
-        if (ListArray32* raw = dynamic_cast<ListArray32*>(array.get())) {
-          Index32 array_starts = raw->starts();
-          Index32 array_stops = raw->stops();
-          struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
-            ptr_lib,
-            nextstarts.data(),
-            length_so_far,
-            nextstops.data(),
-            length_so_far,
-            array_starts.data(),
-            array_stops.data(),
-            raw->length(),
-            contentlength_so_far);
-          util::handle_error(err, raw->classname(), raw->identities().get());
-          contentlength_so_far += raw->content().get()->length();
-          length_so_far += raw->length();
-        }
-        else if (ListArrayU32* raw = dynamic_cast<ListArrayU32*>(array.get())) {
-          IndexU32 array_starts = raw->starts();
-          IndexU32 array_stops = raw->stops();
-          struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
-            ptr_lib,
-            nextstarts.data(),
-            length_so_far,
-            nextstops.data(),
-            length_so_far,
-            array_starts.data(),
-            array_stops.data(),
-            raw->length(),
-            contentlength_so_far);
-          util::handle_error(err, raw->classname(), raw->identities().get());
-          contentlength_so_far += raw->content().get()->length();
-          length_so_far += raw->length();
-        }
-        else if (ListArray64* raw = dynamic_cast<ListArray64*>(array.get())) {
-          Index64 array_starts = raw->starts();
-          Index64 array_stops = raw->stops();
-          struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-            ptr_lib,
-            nextstarts.data(),
-            length_so_far,
-            nextstops.data(),
-            length_so_far,
-            array_starts.data(),
-            array_stops.data(),
-            raw->length(),
-            contentlength_so_far);
-          util::handle_error(err, raw->classname(), raw->identities().get());
-          contentlength_so_far += raw->content().get()->length();
-          length_so_far += raw->length();
-        }
-        else if (ListOffsetArray32* raw = dynamic_cast<ListOffsetArray32*>(array.get())) {
-          Index32 array_starts = raw->starts();
-          Index32 array_stops = raw->stops();
-          struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
-            ptr_lib,
-            nextstarts.data(),
-            length_so_far,
-            nextstops.data(),
-            length_so_far,
-            array_starts.data(),
-            array_stops.data(),
-            raw->length(),
-            contentlength_so_far);
-          util::handle_error(err, raw->classname(), raw->identities().get());
-          contentlength_so_far += raw->content().get()->length();
-          length_so_far += raw->length();
-        }
-        else if (ListOffsetArrayU32* raw = dynamic_cast<ListOffsetArrayU32*>(array.get())) {
-          IndexU32 array_starts = raw->starts();
-          IndexU32 array_stops = raw->stops();
-          struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
-            ptr_lib,
-            nextstarts.data(),
-            length_so_far,
-            nextstops.data(),
-            length_so_far,
-            array_starts.data(),
-            array_stops.data(),
-            raw->length(),
-            contentlength_so_far);
-          util::handle_error(err, raw->classname(), raw->identities().get());
-          contentlength_so_far += raw->content().get()->length();
-          length_so_far += raw->length();
-        }
-        else if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(array.get())) {
-          Index64 array_starts = raw->starts();
-          Index64 array_stops = raw->stops();
-          struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-            ptr_lib,
-            nextstarts.data(),
-            length_so_far,
-            nextstops.data(),
-            length_so_far,
-            array_starts.data(),
-            array_stops.data(),
-            raw->length(),
-            contentlength_so_far);
-          util::handle_error(err, raw->classname(), raw->identities().get());
-          contentlength_so_far += raw->content().get()->length();
-          length_so_far += raw->length();
-        }
-        else if (RegularArray* rawregular = dynamic_cast<RegularArray*>(array.get())) {
-          ContentPtr listoffsetarray = rawregular->toListOffsetArray64(true);
-          ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
-          Index64 array_starts = raw->starts();
-          Index64 array_stops = raw->stops();
-          struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
-            ptr_lib,
-            nextstarts.data(),
-            length_so_far,
-            nextstops.data(),
-            length_so_far,
-            array_starts.data(),
-            array_stops.data(),
-            raw->length(),
-            contentlength_so_far);
-          util::handle_error(err, raw->classname(), raw->identities().get());
-          contentlength_so_far += raw->content().get()->length();
-          length_so_far += raw->length();
-        }
-        else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
-          ;
-        }
-        // other classes already excluded
+      else if (ListArray64* raw = dynamic_cast<ListArray64*>(array.get())) {
+        contents.push_back(raw->content());
       }
-
-      ContentPtr next = std::make_shared<ListArray64>(Identities::none(),
-                                                      parameters_,
-                                                      nextstarts,
-                                                      nextstops,
-                                                      nextcontent);
-
-      if (tail.empty()) {
-        return next;
+      else if (ListOffsetArray32* raw = dynamic_cast<ListOffsetArray32*>(array.get())) {
+        contents.push_back(raw->content());
       }
-
-      ContentPtr reversed = tail[0].get()->reverse_merge(next, axis, depth);
-      if (tail.size() == 1) {
-        return reversed;
+      else if (ListOffsetArrayU32* raw = dynamic_cast<ListOffsetArrayU32*>(array.get())) {
+        contents.push_back(raw->content());
+      }
+      else if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(array.get())) {
+        contents.push_back(raw->content());
+      }
+      else if (RegularArray* raw = dynamic_cast<RegularArray*>(array.get())) {
+        contents.push_back(raw->content());
+      }
+      else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
+        ;
       }
       else {
-        return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()), axis, depth);
+        // FIXME:???
+        return mergemany_as_union(others, 0, 0);
+
+        throw std::invalid_argument(
+          std::string("cannot merge ") + classname() + std::string(" with ")
+          + array.get()->classname() + FILENAME(__LINE__));
       }
-    } else {
-      return mergemany_as_union(others, posaxis, depth);
+    }
+    ContentPtrVec tail_contents(contents.begin() + 1, contents.end());
+    ContentPtr nextcontent = contents[0].get()->mergemany(tail_contents);
+
+    Index64 nextstarts(total_length);
+    Index64 nextstops(total_length);
+
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+
+    int64_t contentlength_so_far = 0;
+    int64_t length_so_far = 0;
+    for (auto array : head) {
+      if (ListArray32* raw = dynamic_cast<ListArray32*>(array.get())) {
+        Index32 array_starts = raw->starts();
+        Index32 array_stops = raw->stops();
+        struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
+          ptr_lib,
+          nextstarts.data(),
+          length_so_far,
+          nextstops.data(),
+          length_so_far,
+          array_starts.data(),
+          array_stops.data(),
+          raw->length(),
+          contentlength_so_far);
+        util::handle_error(err, raw->classname(), raw->identities().get());
+        contentlength_so_far += raw->content().get()->length();
+        length_so_far += raw->length();
+      }
+      else if (ListArrayU32* raw = dynamic_cast<ListArrayU32*>(array.get())) {
+        IndexU32 array_starts = raw->starts();
+        IndexU32 array_stops = raw->stops();
+        struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
+          ptr_lib,
+          nextstarts.data(),
+          length_so_far,
+          nextstops.data(),
+          length_so_far,
+          array_starts.data(),
+          array_stops.data(),
+          raw->length(),
+          contentlength_so_far);
+        util::handle_error(err, raw->classname(), raw->identities().get());
+        contentlength_so_far += raw->content().get()->length();
+        length_so_far += raw->length();
+      }
+      else if (ListArray64* raw = dynamic_cast<ListArray64*>(array.get())) {
+        Index64 array_starts = raw->starts();
+        Index64 array_stops = raw->stops();
+        struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
+          ptr_lib,
+          nextstarts.data(),
+          length_so_far,
+          nextstops.data(),
+          length_so_far,
+          array_starts.data(),
+          array_stops.data(),
+          raw->length(),
+          contentlength_so_far);
+        util::handle_error(err, raw->classname(), raw->identities().get());
+        contentlength_so_far += raw->content().get()->length();
+        length_so_far += raw->length();
+      }
+      else if (ListOffsetArray32* raw = dynamic_cast<ListOffsetArray32*>(array.get())) {
+        Index32 array_starts = raw->starts();
+        Index32 array_stops = raw->stops();
+        struct Error err = kernel::ListArray_fill<int32_t, int64_t>(
+          ptr_lib,
+          nextstarts.data(),
+          length_so_far,
+          nextstops.data(),
+          length_so_far,
+          array_starts.data(),
+          array_stops.data(),
+          raw->length(),
+          contentlength_so_far);
+        util::handle_error(err, raw->classname(), raw->identities().get());
+        contentlength_so_far += raw->content().get()->length();
+        length_so_far += raw->length();
+      }
+      else if (ListOffsetArrayU32* raw = dynamic_cast<ListOffsetArrayU32*>(array.get())) {
+        IndexU32 array_starts = raw->starts();
+        IndexU32 array_stops = raw->stops();
+        struct Error err = kernel::ListArray_fill<uint32_t, int64_t>(
+          ptr_lib,
+          nextstarts.data(),
+          length_so_far,
+          nextstops.data(),
+          length_so_far,
+          array_starts.data(),
+          array_stops.data(),
+          raw->length(),
+          contentlength_so_far);
+        util::handle_error(err, raw->classname(), raw->identities().get());
+        contentlength_so_far += raw->content().get()->length();
+        length_so_far += raw->length();
+      }
+      else if (ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(array.get())) {
+        Index64 array_starts = raw->starts();
+        Index64 array_stops = raw->stops();
+        struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
+          ptr_lib,
+          nextstarts.data(),
+          length_so_far,
+          nextstops.data(),
+          length_so_far,
+          array_starts.data(),
+          array_stops.data(),
+          raw->length(),
+          contentlength_so_far);
+        util::handle_error(err, raw->classname(), raw->identities().get());
+        contentlength_so_far += raw->content().get()->length();
+        length_so_far += raw->length();
+      }
+      else if (RegularArray* rawregular = dynamic_cast<RegularArray*>(array.get())) {
+        ContentPtr listoffsetarray = rawregular->toListOffsetArray64(true);
+        ListOffsetArray64* raw = dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
+        Index64 array_starts = raw->starts();
+        Index64 array_stops = raw->stops();
+        struct Error err = kernel::ListArray_fill<int64_t, int64_t>(
+          ptr_lib,
+          nextstarts.data(),
+          length_so_far,
+          nextstops.data(),
+          length_so_far,
+          array_starts.data(),
+          array_stops.data(),
+          raw->length(),
+          contentlength_so_far);
+        util::handle_error(err, raw->classname(), raw->identities().get());
+        contentlength_so_far += raw->content().get()->length();
+        length_so_far += raw->length();
+      }
+      else if (EmptyArray* raw = dynamic_cast<EmptyArray*>(array.get())) {
+        ;
+      }
+      // other classes already excluded
+    }
+
+    ContentPtr next = std::make_shared<ListArray64>(Identities::none(),
+                                                    parameters_,
+                                                    nextstarts,
+                                                    nextstops,
+                                                    nextcontent);
+
+    if (tail.empty()) {
+      return next;
+    }
+
+    ContentPtr reversed = tail[0].get()->reverse_merge(next);
+    if (tail.size() == 1) {
+      return reversed;
+    }
+    else {
+      return reversed.get()->mergemany(ContentPtrVec(tail.begin() + 1, tail.end()));
     }
   }
 

@@ -687,7 +687,7 @@ namespace awkward {
     /// Only arrays that need to be reversible have this function:
     /// option-type and union-type arrays. Others raise a runtime error.
     virtual const ContentPtr
-      reverse_merge(const ContentPtr& other, int64_t axis, int64_t depth) const;
+      reverse_merge(const ContentPtr& other) const;
 
     /// @brief An array with this and the `other` concatenated (this
     /// first, `other` last).
@@ -697,7 +697,7 @@ namespace awkward {
     /// @brief Returns an array with this and the `others` concatenated
     /// (in order, this first, `others` last).
     virtual const ContentPtr
-      mergemany(const ContentPtrVec& others, int64_t axis, int64_t depth) const = 0;
+      mergemany(const ContentPtrVec& others) const = 0;
 
     /// @brief Converts this array into a SliceItem that can be used in
     /// getitem.
