@@ -2122,7 +2122,6 @@ def combinations(
     replacement=False,
     axis=1,
     fields=None,
-    keys=None,
     parameters=None,
     with_name=None,
     highlevel=True,
@@ -2263,21 +2262,6 @@ def combinations(
     The #ak.argcombinations form can be particularly useful as nested indexing
     in #ak.Array.__getitem__.
     """
-    if keys is not None:
-        if fields is None:
-            fields = keys
-            warnings.warn(
-                "'keys' is deprecated in ak.combinations, will be removed "
-                "in 0.4.0. Use 'fields' instead.",
-                DeprecationWarning,
-            )
-        else:
-            raise TypeError(
-                "cannot set both 'keys' and 'fields' in ak.combinations; "
-                "'keys' is deprecated, will be removed in 0.4.0. "
-                "Use 'fields' instead."
-            )
-
     if parameters is None:
         parameters = {}
     else:
@@ -2303,7 +2287,6 @@ def argcombinations(
     replacement=False,
     axis=1,
     fields=None,
-    keys=None,
     parameters=None,
     with_name=None,
     highlevel=True,
@@ -2340,21 +2323,6 @@ def argcombinations(
     #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
     complete description.
     """
-    if keys is not None:
-        if fields is None:
-            fields = keys
-            warnings.warn(
-                "'keys' is deprecated in ak.argcombinations, will be removed "
-                "in 0.4.0. Use 'fields' instead.",
-                DeprecationWarning,
-            )
-        else:
-            raise TypeError(
-                "cannot set both 'keys' and 'fields' in ak.argcombinations; "
-                "'keys' is deprecated, will be removed in 0.4.0. "
-                "Use 'fields' instead."
-            )
-
     if parameters is None:
         parameters = {}
     else:

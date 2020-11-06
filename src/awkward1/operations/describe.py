@@ -247,14 +247,6 @@ def parameters(array):
         return {}
 
 
-def keys(array):
-    warnings.warn(
-        "ak.keys is deprecated, will be removed in 0.4.0. Use ak.fields instead.",
-        DeprecationWarning,
-    )
-    return fields(array)
-
-
 def fields(array):
     """
     Extracts record fields or tuple slot numbers from `array` (many types
