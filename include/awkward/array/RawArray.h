@@ -834,11 +834,11 @@ namespace awkward {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis == depth) {
         throw std::invalid_argument(
-          std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
+          std::string("axis=0 not allowed for concatenate") + FILENAME(__LINE__));
       }
       else {
         throw std::invalid_argument(
-          std::string("axis out of range for flatten") + FILENAME(__LINE__));
+          std::string("axis out of range for concatenate") + FILENAME(__LINE__));
       }
     }
 

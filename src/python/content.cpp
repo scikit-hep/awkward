@@ -1251,7 +1251,7 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
             }
             return box(self.mergemany(others));
           })
-          .def("mergemany_as_union",   // FIXME: temporary!
+          .def("mergemany_as_union",
                [](const T& self, const py::iterable& pyothers, int64_t axis) -> py::object {
             ak::ContentPtrVec others;
             for (auto pyother : pyothers) {

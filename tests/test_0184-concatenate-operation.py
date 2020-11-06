@@ -113,8 +113,8 @@ def test_indexed_array_merge():
     two = awkward1.Array([6, 7, 8]).layout
     three = awkward1.Array([[6.6], [7.7, 8.8]]).layout
 
-    assert awkward1.to_list(one.merge(two, 0)) == [[1, 2, 3], [None, 4], None, [None, 5], 6, 7, 8]
-    assert awkward1.to_list(one.merge(three, 1)) == [[1, 2, 3, 6.6], [None, 4, 7.7, 8.8], [], [None, 5]]
+    assert awkward1.to_list(awkward1.concatenate([one, two], 0)) == [[1, 2, 3], [None, 4], None, [None, 5], 6, 7, 8]
+    assert awkward1.to_list(awkward1.concatenate([one, three], 1)) == [[1, 2, 3, 6.6], [None, 4, 7.7, 8.8], [], [None, 5]]
 
 def test_bytemasked_merge():
     one = awkward1.Array([1, 2, 3, 4, 5, 6]).mask[[True, True, False, True, False, True]].layout

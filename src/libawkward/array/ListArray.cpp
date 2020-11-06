@@ -968,9 +968,6 @@ namespace awkward {
         ;
       }
       else {
-        // FIXME:???
-        return mergemany_as_union(others, 0, 0);
-
         throw std::invalid_argument(
           std::string("cannot merge ") + classname() + std::string(" with ")
           + array.get()->classname() + FILENAME(__LINE__));
