@@ -12,8 +12,7 @@ void awkward_IndexedArray_getitem_nextcarry_outindex_kernel(
   int64_t* prefixedsum_mask,
   int64_t lenindex,
   int64_t lencontent,
-  unsigned long long* error_i,
-  int* error_flag) {
+  unsigned long long* error_i) {
 
   /**
    * Here the thread_id has a unsigned long long data type rather than a int64_t
@@ -24,7 +23,6 @@ void awkward_IndexedArray_getitem_nextcarry_outindex_kernel(
   C j = fromindex[thread_id];
 
   if (j >= lencontent) {
-    atomicCAS(error_flag, 0, 1);
     atomicMin(error_i, thread_id);
   }
   else if (j < 0) {
@@ -51,6 +49,12 @@ awkward_IndexedArray_getitem_nextcarry_outindex_filter_mask(
   }
 }
 
+__global__ void
+awkward_IndexedArray_getitem_nextcarry_outindex_initialize_error_i(
+    unsigned long long* error_i,
+    unsigned long long value) {
+  *error_i = value;
+}
 
 template <typename C, typename T>
 ERROR awkward_IndexedArray_getitem_nextcarry_outindex(
@@ -79,13 +83,12 @@ ERROR awkward_IndexedArray_getitem_nextcarry_outindex(
   exclusive_scan(res_temp, filtered_mask, lenindex);
 
   unsigned long long * dev_error_i;
-  int* dev_error_flag;
   unsigned long long error_i;
-  int error_flag;
 
   HANDLE_ERROR(cudaMalloc((void**)&dev_error_i, sizeof(unsigned long long)));
-  HANDLE_ERROR(cudaMalloc((void**)&dev_error_flag, sizeof(int)));
-  HANDLE_ERROR(cudaMemset(dev_error_flag, 0, 1));
+  awkward_IndexedArray_getitem_nextcarry_outindex_initialize_error_i<<<1,1>>>(
+      dev_error_i,
+      lenindex + 1);
 
   awkward_IndexedArray_getitem_nextcarry_outindex_kernel<C, T><<<blocks_per_grid, threads_per_block>>>(
     tocarry,
@@ -94,13 +97,11 @@ ERROR awkward_IndexedArray_getitem_nextcarry_outindex(
     res_temp,
     lenindex,
     lencontent,
-    dev_error_i,
-    dev_error_flag);
+    dev_error_i);
 
   HANDLE_ERROR(cudaMemcpy(&error_i, dev_error_i, sizeof(unsigned long long), cudaMemcpyDeviceToHost));
-  HANDLE_ERROR(cudaMemcpy(&error_flag, dev_error_flag, sizeof(int), cudaMemcpyDeviceToHost));
 
-  if(error_flag == 1) {
+  if(error_i != lenindex + 1) {
     C error_j;
     HANDLE_ERROR(cudaMemcpy(&error_j, fromindex + error_i, sizeof(C), cudaMemcpyDeviceToHost));
     return failure("index out of range", error_i, error_j, FILENAME(__LINE__));
