@@ -192,7 +192,12 @@ namespace awkward {
 
   const FormPtr
   ListOffsetForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<ListOffsetForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      offsets_,
+      content_.get()->getitem_field(key));
   }
 
   ////////// ListOffsetArray

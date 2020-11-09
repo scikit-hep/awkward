@@ -193,7 +193,14 @@ namespace awkward {
 
   const FormPtr
   BitMaskedForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<BitMaskedForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      mask_,
+      content_.get()->getitem_field(key),
+      valid_when_,
+      lsb_order_);
   }
 
   ////////// BitMaskedArray

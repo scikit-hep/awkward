@@ -202,7 +202,13 @@ namespace awkward {
 
   const FormPtr
   ListForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<ListForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      starts_,
+      stops_,
+      content_.get()->getitem_field(key));
   }
 
   ////////// ListArray

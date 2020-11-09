@@ -179,7 +179,12 @@ namespace awkward {
 
   const FormPtr
   RegularForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<RegularForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      content_.get()->getitem_field(key),
+      size_);
   }
 
   ////////// RegularArray

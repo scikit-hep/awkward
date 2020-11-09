@@ -185,7 +185,13 @@ namespace awkward {
 
   const FormPtr
   ByteMaskedForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<ByteMaskedForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      mask_,
+      content_.get()->getitem_field(key),
+      valid_when_);
   }
 
   ////////// ByteMaskedArray

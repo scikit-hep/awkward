@@ -230,11 +230,7 @@ namespace awkward {
 
     /// @brief Internal function for extracting record field
     ///
-    /// WARNING: this function returns the field from the innermost record
-    /// form it finds, and does not wrap it with the context.
-    /// Used by VirtualArray::getitem_field to determine certain parameters
-    /// without materialization. A possible extension would be to wrap output
-    /// at each layer to fully specify the form.
+    /// Matches the operation of Content#getitem_field.
     virtual const FormPtr
       getitem_field(const std::string& key) const = 0;
 

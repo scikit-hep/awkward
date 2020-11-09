@@ -202,7 +202,12 @@ namespace awkward {
 
   const FormPtr
   IndexedForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<IndexedForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      index_,
+      content_.get()->getitem_field(key));
   }
 
   ////////// IndexedOptionForm
@@ -365,7 +370,12 @@ namespace awkward {
 
   const FormPtr
   IndexedOptionForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<IndexedOptionForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      index_,
+      content_.get()->getitem_field(key));
   }
 
   ////////// IndexedArray
