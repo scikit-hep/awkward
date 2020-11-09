@@ -2215,7 +2215,6 @@ namespace awkward {
                                             bool ascending,
                                             bool stable,
                                             bool keepdims) const {
-    int64_t localaxis = negaxis;
     int64_t index_length = index_.length();
     int64_t parents_length = parents.length();
 
@@ -2243,7 +2242,7 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
 
     ContentPtr next = content_.get()->carry(nextcarry, false);
-    ContentPtr out = next.get()->argsort_next(localaxis,
+    ContentPtr out = next.get()->argsort_next(negaxis,
                                               starts,
                                               nextparents,
                                               outlength,
@@ -2269,7 +2268,7 @@ namespace awkward {
             out);
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
-    if (!branchdepth.first  &&  localaxis == branchdepth.second) {
+    if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       return out;
     }
     else {

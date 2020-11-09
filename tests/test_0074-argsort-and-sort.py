@@ -7,7 +7,7 @@ import sys
 import pytest
 import numpy
 
-import pickle
+# import pickle
 import awkward1
 
 def test_gordons_test():
