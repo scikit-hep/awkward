@@ -237,6 +237,18 @@ namespace awkward {
                     bool check_parameters,
                     bool check_form_key,
                     bool compatibility_check) const {
+    if (compatibility_check) {
+      if (VirtualForm* raw = dynamic_cast<VirtualForm*>(other.get())) {
+        if (raw->form().get() != nullptr) {
+          return equal(raw->form(),
+                       check_identities,
+                       check_parameters,
+                       check_form_key,
+                       compatibility_check);
+        }
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -538,26 +550,6 @@ namespace awkward {
                                         FormKey(nullptr),
                                         recordlookup_,
                                         contents);
-  }
-
-  bool
-  RecordArray::has_virtual_form() const {
-    for (auto x : contents_) {
-      if (x.get()->has_virtual_form()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  bool
-  RecordArray::has_virtual_length() const {
-    for (auto x : contents_) {
-      if (x.get()->has_virtual_length()) {
-        return true;
-      }
-    }
-    return false;
   }
 
   const std::string

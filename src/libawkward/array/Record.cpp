@@ -99,16 +99,6 @@ namespace awkward {
     return array_.get()->form(materialize);
   }
 
-  bool
-  Record::has_virtual_form() const {
-    return array_.get()->has_virtual_form();
-  }
-
-  bool
-  Record::has_virtual_length() const {
-    return array_.get()->has_virtual_length();
-  }
-
   const std::string
   Record::tostring_part(const std::string& indent,
                         const std::string& pre,

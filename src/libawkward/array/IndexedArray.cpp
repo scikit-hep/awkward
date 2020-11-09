@@ -175,6 +175,18 @@ namespace awkward {
                      bool check_parameters,
                      bool check_form_key,
                      bool compatibility_check) const {
+    if (compatibility_check) {
+      if (VirtualForm* raw = dynamic_cast<VirtualForm*>(other.get())) {
+        if (raw->form().get() != nullptr) {
+          return equal(raw->form(),
+                       check_identities,
+                       check_parameters,
+                       check_form_key,
+                       compatibility_check);
+        }
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -202,7 +214,12 @@ namespace awkward {
 
   const FormPtr
   IndexedForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<IndexedForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      index_,
+      content_.get()->getitem_field(key));
   }
 
   ////////// IndexedOptionForm
@@ -338,6 +355,18 @@ namespace awkward {
                            bool check_parameters,
                            bool check_form_key,
                            bool compatibility_check) const {
+    if (compatibility_check) {
+      if (VirtualForm* raw = dynamic_cast<VirtualForm*>(other.get())) {
+        if (raw->form().get() != nullptr) {
+          return equal(raw->form(),
+                       check_identities,
+                       check_parameters,
+                       check_form_key,
+                       compatibility_check);
+        }
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -365,7 +394,12 @@ namespace awkward {
 
   const FormPtr
   IndexedOptionForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<IndexedOptionForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      index_,
+      content_.get()->getitem_field(key));
   }
 
   ////////// IndexedArray
@@ -961,18 +995,6 @@ namespace awkward {
                                            index_.form(),
                                            content_.get()->form(materialize));
     }
-  }
-
-  template <typename T, bool ISOPTION>
-  bool
-  IndexedArrayOf<T, ISOPTION>::has_virtual_form() const {
-    return content_.get()->has_virtual_form();
-  }
-
-  template <typename T, bool ISOPTION>
-  bool
-  IndexedArrayOf<T, ISOPTION>::has_virtual_length() const {
-    return content_.get()->has_virtual_length();
   }
 
   template <typename T, bool ISOPTION>
