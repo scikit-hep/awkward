@@ -16,8 +16,10 @@ def test_gordons_test():
     # with open('arg_sort_boom.pcl', 'rb') as f:
     #     data = pickle.load(f)
     #
-    #     assert awkward1.to_list(awkward1.argsort(data, axis=1)) == [[5, 4, 3, 2, 1, 0], [1, 0]]
-
+    #     so = awkward1.argsort(data, axis=-1)
+    #     assert awkward1.to_list(so) == [[5, 4, 3, 2, 1, 0], [1, 0]]
+    #     assert awkward1.to_list(awkward1.sort(data, axis=-1)) == data[so]
+        
 def test_EmptyArray():
     array = awkward1.layout.EmptyArray()
     assert awkward1.to_list(array.sort(0, True, False)) == []

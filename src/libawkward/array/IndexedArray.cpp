@@ -2194,6 +2194,10 @@ namespace awkward {
             outindex,
             raw->content()));
       }
+      if (IndexedArrayOf<int64_t, ISOPTION>* raw =
+        dynamic_cast<IndexedArrayOf<int64_t, ISOPTION>*>(out.get())) {
+          return out;
+      }
       else {
         throw std::runtime_error(
           std::string("sort_next with unbranching depth > negaxis is only "
