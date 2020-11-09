@@ -20,7 +20,11 @@ def test():
     tmp1 = virtualarray["x"]
     assert json.loads(str(tmp1.layout.form)) == {
         "class": "VirtualArray",
-        "form": None,
+        "form": {
+            "class": "ListOffsetArray64",
+            "offsets": "i64",
+            "content": "int64"
+        },
         "has_length": True
     }
     assert len(cache) == 0
@@ -28,7 +32,15 @@ def test():
     tmp2 = virtualarray["y"]
     assert json.loads(str(tmp2.layout.form)) == {
         "class": "VirtualArray",
-        "form": None,
+        "form": {
+            "class": "ListOffsetArray64",
+            "offsets": "i64",
+            "content": {
+                "class": "ListOffsetArray64",
+                "offsets": "i64",
+                "content": "int64"
+            }
+        },
         "has_length": True
     }
     assert len(cache) == 0

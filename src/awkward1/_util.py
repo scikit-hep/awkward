@@ -556,6 +556,7 @@ def broadcast_and_apply(inputs, getfunction, behavior, allow_records=True):
                 for x in inputs
                 if isinstance(x, awkward1.layout.Content)
             )
+
             if maxdepth > 0 and all(
                 x.purelist_isregular
                 for x in inputs

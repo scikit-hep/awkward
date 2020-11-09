@@ -221,6 +221,19 @@ namespace awkward {
                      bool check_parameters,
                      bool check_form_key,
                      bool compatibility_check) const {
+    if (compatibility_check) {
+      if (form_.get() != nullptr) {
+        return form_.get()->equal(other,
+                                  check_identities,
+                                  check_parameters,
+                                  check_form_key,
+                                  compatibility_check);
+      }
+      else {
+        return true;
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -234,40 +247,23 @@ namespace awkward {
       return false;
     }
     if (VirtualForm* t = dynamic_cast<VirtualForm*>(other.get())) {
-      if (compatibility_check) {
-        // Called by ArrayGenerator::generate_and_check; `this` is the expected
-        // Form and `t` is the Form of the generated array, so `this` is allowed
-        // to have less information than `t`.
-        if (form_.get() != nullptr  &&  t->form().get() != nullptr) {
-          if (!form_.get()->equal(t->form(),
-                                  check_identities,
-                                  check_parameters,
-                                  check_form_key,
-                                  compatibility_check)) {
-            return false;
-          }
-        }
-        return true;
+      // Called by Form.__eq__ in Python; should be an equivalence relation.
+      if (form_.get() == nullptr  &&  t->form().get() != nullptr) {
+        return false;
       }
-      else {
-        // Called by Form.__eq__ in Python; should be an equivalence relation.
-        if (form_.get() == nullptr  &&  t->form().get() != nullptr) {
+      else if (form_.get() != nullptr  &&  t->form().get() == nullptr) {
+        return false;
+      }
+      else if (form_.get() != nullptr  &&  t->form().get() != nullptr) {
+        if (!form_.get()->equal(t->form(),
+                                check_identities,
+                                check_parameters,
+                                check_form_key,
+                                compatibility_check)) {
           return false;
         }
-        else if (form_.get() != nullptr  &&  t->form().get() == nullptr) {
-          return false;
-        }
-        else if (form_.get() != nullptr  &&  t->form().get() != nullptr) {
-          if (!form_.get()->equal(t->form(),
-                                  check_identities,
-                                  check_parameters,
-                                  check_form_key,
-                                  compatibility_check)) {
-            return false;
-          }
-        }
-        return has_length_ == t->has_length();
       }
+      return has_length_ == t->has_length();
     }
 
     else {
@@ -568,16 +564,16 @@ namespace awkward {
 
     util::Parameters params;
     if (generator_.get()->form().get() != nullptr) {
-      FormPtr tmp = form(false).get()->getitem_field(key);
-      std::string record = tmp.get()->purelist_parameter("__record__");
+      sliceform = generator_.get()->form().get()->getitem_field(key);
+      std::string record = sliceform.get()->purelist_parameter("__record__");
       if (record != std::string("null")) {
         params["__record__"] = record;
       }
-      std::string array = tmp.get()->purelist_parameter("__array__");
+      std::string array = sliceform.get()->purelist_parameter("__array__");
       if (array != std::string("null")) {
         params["__array__"] = array;
       }
-      std::string doc = tmp.get()->purelist_parameter("__doc__");
+      std::string doc = sliceform.get()->purelist_parameter("__doc__");
       if (doc != std::string("null")) {
         params["__doc__"] = doc;
       }
