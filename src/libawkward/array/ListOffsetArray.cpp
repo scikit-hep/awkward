@@ -494,18 +494,6 @@ namespace awkward {
   }
 
   template <typename T>
-  bool
-  ListOffsetArrayOf<T>::has_virtual_form() const {
-    return content_.get()->has_virtual_form();
-  }
-
-  template <typename T>
-  bool
-  ListOffsetArrayOf<T>::has_virtual_length() const {
-    return content_.get()->has_virtual_length();
-  }
-
-  template <typename T>
   const std::string
   ListOffsetArrayOf<T>::tostring_part(const std::string& indent,
                                       const std::string& pre,

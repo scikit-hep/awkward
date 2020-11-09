@@ -203,16 +203,6 @@ namespace awkward {
                                        FormKey(nullptr));
   }
 
-  bool
-  EmptyArray::has_virtual_form() const {
-    return false;
-  }
-
-  bool
-  EmptyArray::has_virtual_length() const {
-    return false;
-  }
-
   const std::string
   EmptyArray::tostring_part(const std::string& indent,
                             const std::string& pre,

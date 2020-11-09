@@ -349,16 +349,6 @@ namespace awkward {
                                           content_.get()->form(materialize));
   }
 
-  bool
-  UnmaskedArray::has_virtual_form() const {
-    return content_.get()->has_virtual_form();
-  }
-
-  bool
-  UnmaskedArray::has_virtual_length() const {
-    return content_.get()->has_virtual_length();
-  }
-
   const std::string
   UnmaskedArray::tostring_part(const std::string& indent,
                                const std::string& pre,

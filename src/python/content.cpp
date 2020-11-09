@@ -1144,8 +1144,6 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                                          -> std::shared_ptr<ak::Form> {
             return self.form(false);
           })
-          .def_property_readonly("has_virtual_form", &T::has_virtual_form)
-          .def_property_readonly("has_virtual_length", &T::has_virtual_length)
           .def("__len__", &len<T>)
           .def("__getitem__", &getitem<T>)
           .def("__iter__", &iter<T>)

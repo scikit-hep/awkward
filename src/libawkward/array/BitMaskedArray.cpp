@@ -447,16 +447,6 @@ namespace awkward {
                                            lsb_order_);
   }
 
-  bool
-  BitMaskedArray::has_virtual_form() const {
-    return content_.get()->has_virtual_form();
-  }
-
-  bool
-  BitMaskedArray::has_virtual_length() const {
-    return content_.get()->has_virtual_length();
-  }
-
   const std::string
   BitMaskedArray::tostring_part(const std::string& indent,
                                 const std::string& pre,

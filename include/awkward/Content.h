@@ -330,15 +330,6 @@ namespace awkward {
     virtual const FormPtr
       form(bool materialize) const = 0;
 
-    /// @brief If true, the array contains a VirtualArray with an unknown Form.
-    virtual bool
-      has_virtual_form() const = 0;
-
-    /// @brief If true, the array contains a VirtualArray with an unknown
-    /// length.
-    virtual bool
-      has_virtual_length() const = 0;
-
     /// @brief Internal function to build an output string for #tostring.
     ///
     /// @param indent Indentation depth as a string of spaces.

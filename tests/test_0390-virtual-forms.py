@@ -3,6 +3,8 @@
 from __future__ import absolute_import
 from collections import defaultdict
 
+import json
+
 import pytest
 import awkward1
 
@@ -66,11 +68,10 @@ def test_virtual_slice_numba():
     x2 = awkward1.Array([1, 2, 3, 4, 5])
     x = awkward1.zip({"x1": x1, "x2": x2}, with_name="xthing")
     xv = awkward1.virtual(lambda: gen(x, "x"), length=len(x), form=x.layout.form)
-    y = x1 * 10.
+    y = x1 * 10.0
     yv = awkward1.virtual(lambda: gen(y, "y"), length=len(y), form=y.layout.form)
     array = awkward1.zip({"x": xv, "y": yv}, with_name="Point", depth_limit=1)
-    virtual = awkward1.virtual(lambda: gen(array, "array"), length=len(array), form=array.layout.form)
-
+    virtual = awkward1.virtual(lambda: gen(array, "array"), length=len(array), form=awkward1.forms.Form.fromjson(json.dumps({"class": "RecordArray", "contents": {"x": {"class": "VirtualArray", "form": json.loads(str(x.layout.form)), "has_length": True}, "y": {"class": "VirtualArray", "form": json.loads(str(y.layout.form)), "has_length": True}}, "parameters": {"__record__": "Point"}})))
 
     @numba.njit
     def dostuff(array):

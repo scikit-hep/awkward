@@ -855,28 +855,6 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  bool
-  UnionArrayOf<T, I>::has_virtual_form() const {
-    for (auto x : contents_) {
-      if (x.get()->has_virtual_form()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  template <typename T, typename I>
-  bool
-  UnionArrayOf<T, I>::has_virtual_length() const {
-    for (auto x : contents_) {
-      if (x.get()->has_virtual_length()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  template <typename T, typename I>
   const std::string
   UnionArrayOf<T, I>::tostring_part(const std::string& indent,
                                     const std::string& pre,

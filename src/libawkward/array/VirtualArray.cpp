@@ -416,16 +416,6 @@ namespace awkward {
                                          generator_length >= 0);
   }
 
-  bool
-  VirtualArray::has_virtual_form() const {
-    return generator_.get()->form().get() == nullptr;
-  }
-
-  bool
-  VirtualArray::has_virtual_length() const {
-    return generator_.get()->length() < 0;
-  }
-
   const std::string
   VirtualArray::tostring_part(const std::string& indent,
                             const std::string& pre,
@@ -575,18 +565,19 @@ namespace awkward {
     slice.append(SliceField(key));
     slice.become_sealed();
     FormPtr sliceform(nullptr);
+
     util::Parameters params;
-    if (!has_virtual_form()) {
-      sliceform = form(false).get()->getitem_field(key);
-      std::string record = sliceform.get()->purelist_parameter("__record__");
+    if (generator_.get()->form().get() != nullptr) {
+      FormPtr tmp = form(false).get()->getitem_field(key);
+      std::string record = tmp.get()->purelist_parameter("__record__");
       if (record != std::string("null")) {
         params["__record__"] = record;
       }
-      std::string array = sliceform.get()->purelist_parameter("__array__");
+      std::string array = tmp.get()->purelist_parameter("__array__");
       if (array != std::string("null")) {
         params["__array__"] = array;
       }
-      std::string doc = sliceform.get()->purelist_parameter("__doc__");
+      std::string doc = tmp.get()->purelist_parameter("__doc__");
       if (doc != std::string("null")) {
         params["__doc__"] = doc;
       }

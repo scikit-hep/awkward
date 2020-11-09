@@ -550,11 +550,7 @@ def broadcast_and_apply(inputs, getfunction, behavior, allow_records=True):
         nplike = awkward1.nplike.of(*inputs)
 
         # handle implicit right-broadcasting (i.e. NumPy-like)
-        if any(isinstance(x, listtypes) for x in inputs) and not any(
-            isinstance(x, (awkward1.layout.Content, awkward1.layout.Record))
-            and x.has_virtual_form
-            for x in inputs
-        ):
+        if any(isinstance(x, listtypes) for x in inputs):
             maxdepth = max(
                 x.purelist_depth
                 for x in inputs

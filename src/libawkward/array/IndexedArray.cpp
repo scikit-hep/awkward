@@ -974,18 +974,6 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  bool
-  IndexedArrayOf<T, ISOPTION>::has_virtual_form() const {
-    return content_.get()->has_virtual_form();
-  }
-
-  template <typename T, bool ISOPTION>
-  bool
-  IndexedArrayOf<T, ISOPTION>::has_virtual_length() const {
-    return content_.get()->has_virtual_length();
-  }
-
-  template <typename T, bool ISOPTION>
   const std::string
   IndexedArrayOf<T, ISOPTION>::tostring_part(const std::string& indent,
                                              const std::string& pre,

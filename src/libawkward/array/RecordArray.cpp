@@ -540,26 +540,6 @@ namespace awkward {
                                         contents);
   }
 
-  bool
-  RecordArray::has_virtual_form() const {
-    for (auto x : contents_) {
-      if (x.get()->has_virtual_form()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  bool
-  RecordArray::has_virtual_length() const {
-    for (auto x : contents_) {
-      if (x.get()->has_virtual_length()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   const std::string
   RecordArray::tostring_part(const std::string& indent,
                              const std::string& pre,

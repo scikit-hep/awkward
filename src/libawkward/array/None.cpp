@@ -53,20 +53,6 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
-  bool
-  None::has_virtual_form() const {
-    throw std::runtime_error(
-      std::string("undefined operation: None::has_virtual_form")
-      + FILENAME(__LINE__));
-  }
-
-  bool
-  None::has_virtual_length() const {
-    throw std::runtime_error(
-      std::string("undefined operation: None::has_virtual_length")
-      + FILENAME(__LINE__));
-  }
-
   const std::string
   None::tostring_part(const std::string& indent,
                       const std::string& pre,

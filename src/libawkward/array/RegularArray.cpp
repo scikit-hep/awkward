@@ -415,16 +415,6 @@ namespace awkward {
                                          size_);
   }
 
-  bool
-  RegularArray::has_virtual_form() const {
-    return content_.get()->has_virtual_form();
-  }
-
-  bool
-  RegularArray::has_virtual_length() const {
-    return content_.get()->has_virtual_length();
-  }
-
   const std::string
   RegularArray::tostring_part(const std::string& indent,
                               const std::string& pre,

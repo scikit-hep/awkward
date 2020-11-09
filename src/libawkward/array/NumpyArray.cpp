@@ -616,16 +616,6 @@ namespace awkward {
                                        dtype_);
   }
 
-  bool
-  NumpyArray::has_virtual_form() const {
-    return false;
-  }
-
-  bool
-  NumpyArray::has_virtual_length() const {
-    return false;
-  }
-
   const std::string
   NumpyArray::tostring_part(const std::string& indent,
                             const std::string& pre,
