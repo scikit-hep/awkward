@@ -17,7 +17,7 @@ namespace awkward {
 
   const FormPtr
   ArrayGenerator::form() const {
-    if ( form_.get() == nullptr && inferred_form_.get() != nullptr ) {
+    if (form_.get() == nullptr  &&  inferred_form_.get() != nullptr) {
       return inferred_form_;
     }
     return form_;
