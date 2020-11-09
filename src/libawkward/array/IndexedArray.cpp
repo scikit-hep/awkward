@@ -2215,6 +2215,7 @@ namespace awkward {
                                             bool ascending,
                                             bool stable,
                                             bool keepdims) const {
+    int64_t localaxis = negaxis;
     int64_t index_length = index_.length();
     int64_t parents_length = parents.length();
 
@@ -2242,7 +2243,7 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
 
     ContentPtr next = content_.get()->carry(nextcarry, false);
-    ContentPtr out = next.get()->argsort_next(negaxis,
+    ContentPtr out = next.get()->argsort_next(localaxis,
                                               starts,
                                               nextparents,
                                               outlength,
@@ -2268,7 +2269,7 @@ namespace awkward {
             out);
 
     std::pair<bool, int64_t> branchdepth = branch_depth();
-    if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+    if (!branchdepth.first  &&  localaxis == branchdepth.second) {
       return out;
     }
     else {
@@ -2303,10 +2304,15 @@ namespace awkward {
             outindex,
             raw->content()));
       }
+      if (IndexedArrayOf<int64_t, ISOPTION>* raw =
+        dynamic_cast<IndexedArrayOf<int64_t, ISOPTION>*>(out.get())) {
+          return out;
+      }
       else {
         throw std::runtime_error(
           std::string("argsort_next with unbranching depth > negaxis is only "
-                      "expected to return RegularArray or ListOffsetArray64; "
+                      "expected to return RegularArray or ListOffsetArray64 or "
+                      "IndexedArrayOf<int64_t, ISOPTION>; "
                       "instead, it returned ") + out.get()->classname()
           + FILENAME(__LINE__));
       }

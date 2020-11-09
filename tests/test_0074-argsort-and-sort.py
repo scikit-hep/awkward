@@ -7,7 +7,16 @@ import sys
 import pytest
 import numpy
 
+import pickle
 import awkward1
+
+def test_gordons_test():
+    array = awkward1.Array([[149, 115, 73.5, 49.1, 44.1, 40.8], [151, 94.8]]).layout
+    assert awkward1.to_list(array.argsort(1, True, False)) == [[5, 4, 3, 2, 1, 0], [1, 0]]
+    # with open('arg_sort_boom.pcl', 'rb') as f:
+    #     data = pickle.load(f)
+    #
+    #     assert awkward1.to_list(awkward1.argsort(data, axis=1)) == [[5, 4, 3, 2, 1, 0], [1, 0]]
 
 def test_EmptyArray():
     array = awkward1.layout.EmptyArray()
