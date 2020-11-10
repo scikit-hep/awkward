@@ -1885,7 +1885,7 @@ def to_arrow(array):
 
             types = pyarrow.struct(
                 [
-                    pyarrow.field(layout.keys()[i], values[i].type)
+                    pyarrow.field(layout.key(i), values[i].type)
                     for i in range(len(values))
                 ]
             )
@@ -1965,14 +1965,44 @@ def to_arrow(array):
                     return pyarrow.DictionaryArray.from_arrays(index, dictionary, bytemask)
 
             else:
-                if len(layout.content) == 0:
-                    empty = recurse(layout.content)
+                layout_content = layout.content
+
+                if len(layout_content) == 0:
+                    empty = recurse(layout_content)
                     if mask is None:
                         return empty
                     else:
                         return pyarrow.array([None] * len(index)).cast(empty.type)
+
+                elif isinstance(layout_content, awkward1.layout.RecordArray):
+                    values = [
+                        recurse(x[:len(layout_content)][index])
+                        for x in layout_content.contents
+                    ]
+
+                    min_list_len = min(map(len, values))
+
+                    types = pyarrow.struct(
+                        [
+                            pyarrow.field(layout_content.key(i), values[i].type)
+                            for i in range(len(values))
+                        ]
+                    )
+
+                    if mask is not None:
+                        return pyarrow.Array.from_buffers(
+                            types,
+                            min_list_len,
+                            [pyarrow.py_buffer(mask)],
+                            children=values,
+                        )
+                    else:
+                        return pyarrow.Array.from_buffers(
+                            types, min_list_len, [None], children=values
+                        )
+
                 else:
-                    return recurse(layout.content[index], mask)
+                    return recurse(layout_content[index], mask)
 
         elif isinstance(
             layout,
