@@ -4,14 +4,12 @@
 #include "standard_parallel_algorithms.h"
 
 __global__ void
-awkward_IndexedArray_getitem_adjust_outindex_64_filter_k_and_mask(
+awkward_IndexedArray_getitem_adjust_outindex_filter_k_and_mask(
     int64_t* fromindex,
     int8_t* filtered_k,
     int8_t* tomask,
     int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     tomask[thread_id] = (fromindex[thread_id] < 0);
@@ -22,6 +20,22 @@ awkward_IndexedArray_getitem_adjust_outindex_64_filter_k_and_mask(
   }
 }
 
+__global__ void
+awkward_IndexedArray_getitem_adjust_outindex_filter_j(
+    int64_t* fromindex,
+    int8_t* filtered_j,
+    int8_t* tomask,
+    int64_t length) {
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+
+  if(thread_id < length) {
+    tomask[thread_id] = (fromindex[thread_id] < 0);
+    if(fromindex[thread_id] < 0) {
+      filtered_k[thread_id] = 1;
+    }
+    else if(thread_id < nonzerolength)
+  }
+}
 
 __global__ void
 awkward_IndexedArray_getitem_adjust_outindex_kernel(
@@ -32,9 +46,7 @@ awkward_IndexedArray_getitem_adjust_outindex_kernel(
     int64_t* starts_out,
     int64_t* stops_out,
     int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     int64_t pre_in = prefixed_index[thread_id] - 1;

@@ -16,10 +16,10 @@ void awkward_ListOffsetArray_rpad_axis1_kernel(
   if(thread_idx < fromlength) {
     int64_t rangeval = (T)(fromoffsets[thread_idx + 1] - fromoffsets[thread_idx]);
 
-	  if(thread_idy < rangeval) {
+    if(thread_idy < rangeval) {
       toindex[thread_idx * target + thread_idy] = (T)fromoffsets[thread_idx] + thread_idy;
     }
-	  else if(thread_idy >= rangeval && thread_idy < target) {
+    else if(thread_idy >= rangeval && thread_idy < target) {
       toindex[thread_idx * target + thread_idy] = -1;
     }
   }
