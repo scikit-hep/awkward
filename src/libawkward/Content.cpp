@@ -1278,11 +1278,10 @@ namespace awkward {
                                                  offsets,
                                                  out);
     } else {
-      auto left = offsets_and_concatenate(posaxis, depth);
-      auto right = other.get()->offsets_and_concatenate(posaxis, depth);
-
-      ContentPtr out = left.second.get()->merge_as_union(right.second, axis - 1, depth);
-      return out;
+      throw std::runtime_error(
+        std::string("FIXME: unhandled case of merge_as_union in axis \n")
+        + std::to_string(axis) + std::string(" > depth ") + std::to_string(depth)
+        + FILENAME(__LINE__));
     }
   }
 

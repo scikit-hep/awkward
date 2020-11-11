@@ -752,9 +752,9 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
                 batch.append(x)
             else:
                 collapsed = batch[0].mergemany(batch[1:])
-                batch = [collapsed.merge_as_union(x, axis)]
+                batch = [collapsed.merge_as_union(x, 0)]
 
-        out = batch[0].mergemany(batch[1:]) if axis == 0 else batch[0].mergemany_as_union(batch[1:], axis)
+        out = batch[0].mergemany(batch[1:])
     else:
         length = len(contents[0])
         if any(len(lst) != length for lst in contents[1:]):

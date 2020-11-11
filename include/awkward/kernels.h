@@ -2532,25 +2532,6 @@ extern "C" {
     int64_t size);
 
   EXPORT_SYMBOL ERROR
-  awkward_RegularArray_merge_offsets64(
-    int64_t* tooffsets,
-    int64_t tolength,
-    int64_t length,
-    int64_t size,
-    int64_t otherlength,
-    int64_t othersize);
-
-  EXPORT_SYMBOL struct Error
-  awkward_RegularArray_merge_tags8_index64(
-    int8_t* totags,
-    int64_t* toindex,
-    int64_t tolength,
-    int64_t length,
-    int64_t size,
-    int64_t otherlength,
-    int64_t othersize);
-
-  EXPORT_SYMBOL ERROR
   awkward_RegularArray_getitem_carry_64(
     int64_t* tocarry,
     const int64_t* fromcarry,
