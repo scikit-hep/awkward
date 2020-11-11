@@ -692,7 +692,7 @@ namespace awkward {
     /// @brief An array with this and the `other` concatenated (this
     /// first, `other` last).
     const ContentPtr
-      merge(const ContentPtr& other, int64_t axis, int64_t depth) const;
+      merge(const ContentPtr& other) const;
 
     /// @brief Returns an array with this and the `others` concatenated
     /// (in order, this first, `others` last).
