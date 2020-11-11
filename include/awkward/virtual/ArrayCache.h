@@ -33,6 +33,10 @@ namespace awkward {
     virtual void
       set(const std::string& key, const ContentPtr& value) = 0;
 
+    /// @brief Returns true if the cache cannot be used for any reason.
+    virtual bool
+      is_broken() const = 0;
+
     virtual const std::string
       tostring_part(const std::string& indent,
                     const std::string& pre,

@@ -11,6 +11,7 @@ import json
 import glob
 import multiprocessing
 
+
 arguments = argparse.ArgumentParser()
 arguments.add_argument("--clean", default=False, action="store_true")
 arguments.add_argument("--release", action="store_true")

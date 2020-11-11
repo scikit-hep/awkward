@@ -438,28 +438,3 @@ def test_highlevel():
 
     assert awkward1.to_list(array[2]) == [4.4, 5.5]
     assert counter[0] == 1
-
-@pytest.mark.skip("YAGNI")
-def test_cache_chain():
-    cache1 = {}
-
-    one = awkward1.virtual(lambda: [[1.1, 2.2, 3.3], [], [4.4, 5.5]], cache=cache1, length=3)
-    two = awkward1.virtual(lambda: [100, 200, 300], cache=cache1, length=3)
-    array1 = awkward1.zip({"x": one, "y": two}, depth_limit=1)
-
-    assert len(cache1) == 0
-
-    cache2 = {}
-    array2 = awkward1.with_cache(array1, cache2)
-
-    assert awkward1.to_list(array2["x"]) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
-
-    assert len(cache1) == 0
-    assert len(cache2) == 1
-
-    array3 = awkward1.with_cache(array2, cache1, chain="first")
-
-    assert awkward1.to_list(array3) == [{"x": [1.1, 2.2, 3.3], "y": 100}, {"x": [], "y": 200}, {"x": [4.4, 5.5], "y": 300}]
-
-    assert len(cache1) == 1
-    assert len(cache2) == 1

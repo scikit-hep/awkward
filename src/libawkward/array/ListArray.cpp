@@ -202,7 +202,13 @@ namespace awkward {
 
   const FormPtr
   ListForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<ListForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      starts_,
+      stops_,
+      content_.get()->getitem_field(key));
   }
 
   ////////// ListArray
@@ -464,18 +470,6 @@ namespace awkward {
                                       starts_.form(),
                                       stops_.form(),
                                       content_.get()->form(materialize));
-  }
-
-  template <typename T>
-  bool
-  ListArrayOf<T>::has_virtual_form() const {
-    return content_.get()->has_virtual_form();
-  }
-
-  template <typename T>
-  bool
-  ListArrayOf<T>::has_virtual_length() const {
-    return content_.get()->has_virtual_length();
   }
 
   template <typename T>
@@ -1794,8 +1788,15 @@ namespace awkward {
       stops_.data());
     util::handle_error(err, classname(), identities_.get());
 
+    ContentPtr asListOffsetArray64 = toListOffsetArray64(true);
+    ContentPtr next_content;
+    if (ListOffsetArrayOf<int64_t>* raw =
+          dynamic_cast<ListOffsetArrayOf<int64_t>*>(asListOffsetArray64.get())) {
+      next_content = raw->content();
+    }
+
     Index64 sliceoffsets = slicecontent.offsets();
-    ContentPtr outcontent = content_.get()->getitem_next_jagged(
+    ContentPtr outcontent = next_content.get()->getitem_next_jagged(
       util::make_starts(sliceoffsets),
       util::make_stops(sliceoffsets),
       slicecontent.content(),

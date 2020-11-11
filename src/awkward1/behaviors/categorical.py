@@ -110,6 +110,25 @@ def _categorical_equal(one, two):
 awkward1.behavior[awkward1.nplike.numpy.equal, "categorical", "categorical"] = _categorical_equal
 
 
+def _apply_ufunc(ufunc, method, inputs, kwargs):
+    nextinputs = []
+    for x in inputs:
+        if (
+            isinstance(x, awkward1.highlevel.Array)
+            and isinstance(x.layout, awkward1._util.indexedtypes)
+        ):
+            nextinputs.append(awkward1.highlevel.Array(
+                x.layout.project(), behavior=awkward1._util.behaviorof(x)
+            ))
+        else:
+            nextinputs.append(x)
+
+    return getattr(ufunc, method)(*nextinputs, **kwargs)
+
+
+awkward1.behavior[awkward1.nplike.numpy.ufunc, "categorical"] = _apply_ufunc
+
+
 def is_categorical(array):
     """
     Args:

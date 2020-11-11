@@ -17,7 +17,7 @@ namespace awkward {
 
   const FormPtr
   ArrayGenerator::form() const {
-    if ( form_.get() == nullptr && inferred_form_.get() != nullptr ) {
+    if (form_.get() == nullptr  &&  inferred_form_.get() != nullptr) {
       return inferred_form_;
     }
     return form_;
@@ -101,6 +101,21 @@ namespace awkward {
     out << indent << "    <slice>" << slice_.tostring() << "</slice>\n";
     out << content_.get()->tostring_part(
              indent + std::string("    "), "<content>", "</content>\n");
+    if (length_ >= 0) {
+      out << indent << "    <length>" << length_ << "</length>\n";
+    }
+    if (form_.get() != nullptr) {
+      std::string formstr = form_.get()->tojson(true, false);
+      std::string replace = std::string("\n")
+                                + indent + std::string("        ");
+      size_t pos = 0;
+      while ((pos = formstr.find("\n", pos)) != std::string::npos) {
+        formstr.replace(pos, 1, replace);
+        pos += replace.length();
+      }
+      out << indent << "    <form>\n" << indent << "        " << formstr
+          << "\n" << indent << "    </form>\n";
+    }
     out << indent << "</SliceGenerator>" << post;
     return out.str();
   }

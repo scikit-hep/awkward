@@ -69,6 +69,14 @@ jobs:
           python.version: "3.8"
           python.architecture: "x64"
           numpy.version: "latest"
+        "py39-32bit":
+          python.version: "3.9"
+          python.architecture: "x86"
+          numpy.version: "latest"
+        "py39-64bit":
+          python.version: "3.9"
+          python.architecture: "x64"
+          numpy.version: "latest"
 
     steps:
       - checkout: self
@@ -89,8 +97,14 @@ jobs:
         displayName: "Show versions"
 
       - script: |
+          python -m pip install -v .[test]
+        displayName: "Build for 3.9"
+        condition: "eq(variables['python.version'], '3.9')"
+
+      - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           python dev/kernel-diagnostics.py --check-sorted
@@ -99,14 +113,17 @@ jobs:
       - script: |
           python dev/generate-tests.py
         displayName: "Generate Kernel tests"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           python -m pytest -vv -rs tests-spec
         displayName: "Test specification"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           python -m pytest -vv -rs tests-cpu-kernels
         displayName: "Test CPU kernels"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           python -m pytest -vv -rs tests
@@ -115,7 +132,7 @@ jobs:
   - job: MacOS
 
     pool:
-      vmImage: "macOS-10.14"
+      vmImage: "macOS-10.15"
 
     variables:
       PIP_ONLY_BINARY: cmake
@@ -142,6 +159,10 @@ jobs:
           python.version: "3.8"
           python.architecture: "x64"
           numpy.version: "latest"
+        "py39":
+          python.version: "3.9"
+          python.architecture: "x64"
+          numpy.version: "latest"
 
     steps:
       - checkout: self
@@ -162,8 +183,14 @@ jobs:
         displayName: "Print versions"
 
       - script: |
+          python -m pip install -v .[test]
+        displayName: "Build for 3.9"
+        condition: "eq(variables['python.version'], '3.9')"
+
+      - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           python dev/kernel-diagnostics.py --check-sorted
@@ -172,14 +199,17 @@ jobs:
       - script: |
           python dev/generate-tests.py
         displayName: "Generate Kernel tests"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           python -m pytest -vv -rs tests-spec
         displayName: "Test specification"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           python -m pytest -vv -rs tests-cpu-kernels
         displayName: "Test CPU kernels"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           python -m pytest -vv -rs tests
@@ -197,6 +227,7 @@ jobs:
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
         workingDirectory: dependent-project
         displayName: "Test dependent project 1"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           rm -f minimal
@@ -207,6 +238,7 @@ jobs:
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
         workingDirectory: dependent-project
         displayName: "Test dependent project 2"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           which python
@@ -221,11 +253,12 @@ jobs:
           python -m pytest -vv test-python.py
         workingDirectory: dependent-project
         displayName: "Test dependent project 3"
+        condition: "ne(variables['python.version'], '3.9')"
 
   - job: Linux
 
     pool:
-      vmImage: "ubuntu-16.04"
+      vmImage: "ubuntu-18.04"
 
     variables:
       PIP_ONLY_BINARY: cmake
@@ -256,6 +289,10 @@ jobs:
           python.version: "3.8"
           python.architecture: "x64"
           numpy.version: "latest"
+        "py39-np*":
+          python.version: "3.9"
+          python.architecture: "x64"
+          numpy.version: "latest"
 
     steps:
       - checkout: self
@@ -284,8 +321,14 @@ jobs:
         displayName: "Print versions"
 
       - script: |
+          python -m pip install -v .[test]
+        displayName: "Build for 3.9"
+        condition: "eq(variables['python.version'], '3.9')"
+
+      - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           python dev/kernel-diagnostics.py --check-sorted
@@ -294,14 +337,17 @@ jobs:
       - script: |
           python dev/generate-tests.py
         displayName: "Generate Kernel tests"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           python -m pytest -vv -rs tests-spec
         displayName: "Test specification"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           python -m pytest -vv -rs tests-cpu-kernels
         displayName: "Test CPU kernels"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           python -m pytest -vv -rs tests
@@ -310,13 +356,13 @@ jobs:
       - script: |
           python dev/generate-cuda.py
         displayName: "Generate CUDA kernels"
-        condition: "ne(variables['python.version'], '3.8')"
+        condition: "and(ne(variables['python.version'], '3.8'), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pip install wheel
           bash cuda-build.sh
         displayName: "Build the cuda-kernels"
-        condition: "ne(variables['python.version'], '2.7')"
+        condition: "and(ne(variables['python.version'], '2.7'), ne(variables['python.version'], '3.9'))"
 
       - script: |
           echo '===== include directory ============================='
@@ -329,6 +375,7 @@ jobs:
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
         workingDirectory: dependent-project
         displayName: "Test dependent project 1"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           rm -f minimal
@@ -339,6 +386,7 @@ jobs:
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
         workingDirectory: dependent-project
         displayName: "Test dependent project 2"
+        condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
           which python
@@ -353,3 +401,4 @@ jobs:
           python -m pytest -vv test-python.py
         workingDirectory: dependent-project
         displayName: "Test dependent project 3"
+        condition: "ne(variables['python.version'], '3.9')"

@@ -3241,6 +3241,19 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_NumpyArray_copy
+    specializations:
+      - name: awkward_NumpyArray_copy
+        args:
+          - {name: toptr, type: "List[uint8_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: len, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_NumpyArray_contiguous_copy
     specializations:
       - name: awkward_NumpyArray_contiguous_copy_64

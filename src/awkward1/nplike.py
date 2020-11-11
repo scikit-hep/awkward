@@ -68,6 +68,8 @@ class NumpyMetadata(Singleton):
     float64 = numpy.float64
     complex64 = numpy.complex64
     complex128 = numpy.complex128
+    str_ = numpy.str_
+    bytes_ = numpy.bytes_
 
     intp = numpy.intp
     integer = numpy.integer
@@ -84,6 +86,9 @@ class NumpyMetadata(Singleton):
     newaxis = numpy.newaxis
 
     ndarray = numpy.ndarray
+
+    nan = numpy.nan
+    inf = numpy.inf
 
 if hasattr(numpy, "float16"):
     NumpyMetadata.float16 = numpy.float16
@@ -280,6 +285,10 @@ class Numpy(NumpyLike):
     def ma(self):
         return self._module.ma
 
+    @property
+    def char(self):
+        return self._module.char
+
 
 class Cupy(NumpyLike):
     def __init__(self):
@@ -302,6 +311,14 @@ or
         raise ValueError(
             "CUDA arrays cannot have missing values until CuPy implements "
             "numpy.ma.MaskedArray"
+            + awkward1._util.exception_suffix(__file__)
+        )
+
+    @property
+    def char(self):
+        raise ValueError(
+            "CUDA arrays cannot do string manipulations until CuPy implements "
+            "numpy.char"
             + awkward1._util.exception_suffix(__file__)
         )
 

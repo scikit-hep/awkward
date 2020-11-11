@@ -77,16 +77,6 @@ def test_implicit_broadcasting():
     assert awkward1.to_list(lsarray + numpy.array([100, 200])) == awkward1.to_list(nparray + numpy.array([[[100]], [[200]]]))
     assert awkward1.to_list(numpy.array([100, 200]) + lsarray) == awkward1.to_list(numpy.array([[[100]], [[200]]]) + nparray)
 
-def test_records():
-    array = awkward1.Array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], [], [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}], [{"x": 100, "y": 200}]], check_valid=True)
-    record = array[-1, -1]
-
-    assert awkward1.to_list(array[0] + record) == [{"x": 101, "y": 201.1}, {"x": 102, "y": 202.2}, {"x": 103, "y": 203.3}]
-
-    assert awkward1.to_list(array + record) == [[{"x": 101, "y": 201.1}, {"x": 102, "y": 202.2}, {"x": 103, "y": 203.3}], [], [{"x": 104, "y": 204.4}, {"x": 105, "y": 205.5}], [{"x": 200, "y": 400.0}]]
-
-    assert awkward1.to_list(record + record) == {"x": 200, "y": 400}
-
 def test_tonumpy():
     assert numpy.array_equal(awkward1.to_numpy(awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)), numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
     assert numpy.array_equal(awkward1.to_numpy(awkward1.Array(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]), check_valid=True)), numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))

@@ -221,6 +221,19 @@ namespace awkward {
                      bool check_parameters,
                      bool check_form_key,
                      bool compatibility_check) const {
+    if (compatibility_check) {
+      if (form_.get() != nullptr) {
+        return form_.get()->equal(other,
+                                  check_identities,
+                                  check_parameters,
+                                  check_form_key,
+                                  compatibility_check);
+      }
+      else {
+        return true;
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -234,40 +247,23 @@ namespace awkward {
       return false;
     }
     if (VirtualForm* t = dynamic_cast<VirtualForm*>(other.get())) {
-      if (compatibility_check) {
-        // Called by ArrayGenerator::generate_and_check; `this` is the expected
-        // Form and `t` is the Form of the generated array, so `this` is allowed
-        // to have less information than `t`.
-        if (form_.get() != nullptr  &&  t->form().get() != nullptr) {
-          if (!form_.get()->equal(t->form(),
-                                  check_identities,
-                                  check_parameters,
-                                  check_form_key,
-                                  compatibility_check)) {
-            return false;
-          }
-        }
-        return true;
+      // Called by Form.__eq__ in Python; should be an equivalence relation.
+      if (form_.get() == nullptr  &&  t->form().get() != nullptr) {
+        return false;
       }
-      else {
-        // Called by Form.__eq__ in Python; should be an equivalence relation.
-        if (form_.get() == nullptr  &&  t->form().get() != nullptr) {
+      else if (form_.get() != nullptr  &&  t->form().get() == nullptr) {
+        return false;
+      }
+      else if (form_.get() != nullptr  &&  t->form().get() != nullptr) {
+        if (!form_.get()->equal(t->form(),
+                                check_identities,
+                                check_parameters,
+                                check_form_key,
+                                compatibility_check)) {
           return false;
         }
-        else if (form_.get() != nullptr  &&  t->form().get() == nullptr) {
-          return false;
-        }
-        else if (form_.get() != nullptr  &&  t->form().get() != nullptr) {
-          if (!form_.get()->equal(t->form(),
-                                  check_identities,
-                                  check_parameters,
-                                  check_form_key,
-                                  compatibility_check)) {
-            return false;
-          }
-        }
-        return has_length_ == t->has_length();
       }
+      return has_length_ == t->has_length();
     }
 
     else {
@@ -328,7 +324,7 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::peek_array() const {
-    if (cache_.get() != nullptr) {
+    if (cache_.get() != nullptr  &&  !cache_.get()->is_broken()) {
       return cache_.get()->get(cache_key());
     }
     return ContentPtr(nullptr);
@@ -414,16 +410,6 @@ namespace awkward {
                                          FormKey(nullptr),
                                          generator_form,
                                          generator_length >= 0);
-  }
-
-  bool
-  VirtualArray::has_virtual_form() const {
-    return generator_.get()->form().get() == nullptr;
-  }
-
-  bool
-  VirtualArray::has_virtual_length() const {
-    return generator_.get()->length() < 0;
   }
 
   const std::string
@@ -575,21 +561,24 @@ namespace awkward {
     slice.append(SliceField(key));
     slice.become_sealed();
     FormPtr sliceform(nullptr);
+
     util::Parameters params;
-    if (!has_virtual_form()) {
-      std::string record =
-          form(false).get()->getitem_field(key)->purelist_parameter(
-              "__record__");
+    if (generator_.get()->form().get() != nullptr) {
+      sliceform = generator_.get()->form().get()->getitem_field(key);
+      std::string record = sliceform.get()->purelist_parameter("__record__");
       if (record != std::string("null")) {
         params["__record__"] = record;
       }
-      std::string doc =
-          form(false).get()->getitem_field(key)->purelist_parameter(
-              "__doc__");
+      std::string array = sliceform.get()->purelist_parameter("__array__");
+      if (array != std::string("null")) {
+        params["__array__"] = array;
+      }
+      std::string doc = sliceform.get()->purelist_parameter("__doc__");
       if (doc != std::string("null")) {
         params["__doc__"] = doc;
       }
     }
+
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  sliceform, generator_.get()->length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
@@ -1007,6 +996,10 @@ namespace awkward {
     std::string record = purelist_parameter("__record__");
     if (record != std::string("null")) {
       params["__record__"] = record;
+    }
+    std::string array = purelist_parameter("__array__");
+    if (array != std::string("null")) {
+      params["__array__"] = array;
     }
     std::string doc = purelist_parameter("__doc__");
     if (doc != std::string("null")) {

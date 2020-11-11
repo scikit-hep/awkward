@@ -13,6 +13,7 @@
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/VirtualArray.h"
 
 #include "awkward/array/EmptyArray.h"
 
@@ -116,6 +117,18 @@ namespace awkward {
                    bool check_parameters,
                    bool check_form_key,
                    bool compatibility_check) const {
+    if (compatibility_check) {
+      if (VirtualForm* raw = dynamic_cast<VirtualForm*>(other.get())) {
+        if (raw->form().get() != nullptr) {
+          return equal(raw->form(),
+                       check_identities,
+                       check_parameters,
+                       check_form_key,
+                       compatibility_check);
+        }
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
@@ -201,16 +214,6 @@ namespace awkward {
     return std::make_shared<EmptyForm>(identities_.get() != nullptr,
                                        parameters_,
                                        FormKey(nullptr));
-  }
-
-  bool
-  EmptyArray::has_virtual_form() const {
-    return false;
-  }
-
-  bool
-  EmptyArray::has_virtual_length() const {
-    return false;
   }
 
   const std::string
