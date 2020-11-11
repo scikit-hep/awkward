@@ -2729,15 +2729,15 @@ kernels:
           b = 0
           tooffsets[0] = 0
           for i in range(length - 1):
-            if i < leftlen:
-              a =  fromleft[i + 1] - fromleft[i]
-            else:
-              a = 0
-            if i < rightlen:
-              b = fromright[i + 1] - fromright[i]
-            else:
-              b = 0
-            tooffsets[i + 1] = tooffsets[i] + a + b
+              if i < leftlen:
+                  a =  fromleft[i + 1] - fromleft[i]
+              else:
+                  a = 0
+              if i < rightlen:
+                  b = fromright[i + 1] - fromright[i]
+              else:
+                  b = 0
+              tooffsets[i + 1] = tooffsets[i] + a + b
     automatic-tests: false
     manual-tests: []
 
@@ -4747,38 +4747,38 @@ kernels:
     description: null
     definition: |
       def awkward_UnionArray_mergetags_const(totags, toindex, fromleft, leftlen, fromright, rightlen):
-            ileft = 0
-            iright = 0
-            leftsize = 0
-            rightsize = 0
-            tag = 0
-            j = 0
-            li = 0
-            ri = 0
-            length = leftlen + rightlen
-            for m in range(length):
+          ileft = 0
+          iright = 0
+          leftsize = 0
+          rightsize = 0
+          tag = 0
+          j = 0
+          li = 0
+          ri = 0
+          length = leftlen + rightlen
+          for m in range(length):
               if tag == 0 and ileft < leftlen:
-                leftsize = fromleft[ileft + 1] - fromleft[ileft]
-                for i in range(leftsize):
-                  toindex[j] = li + 1
-                  li = li + 1
-                  totags[j] = tag
-                  j = j + 1
+                  leftsize = fromleft[ileft + 1] - fromleft[ileft]
+                  for i in range(leftsize):
+                      toindex[j] = li + 1
+                      li = li + 1
+                      totags[j] = tag
+                      j = j + 1
               if tag == 1 and iright < rightlen:
-                rightsize = fromright[iright + 1] - fromright[iright]
-                for i in range(rightsize):
-                  toindex[j] = ri + 1
-                  ri = ri + 1
-                  totags[j] = tag
-                  j = j + 1
+                  rightsize = fromright[iright + 1] - fromright[iright]
+                  for i in range(rightsize):
+                      toindex[j] = ri + 1
+                      ri = ri + 1
+                      totags[j] = tag
+                      j = j + 1
               if tag == 0:
-                if iright < rightlen:
-                  tag = 1
-                ileft = ileft + 1
+                  if iright < rightlen:
+                      tag = 1
+                  ileft = ileft + 1
               else:
-                if ileft < leftlen:
-                  tag = 0
-                iright = iright + 1
+                  if ileft < leftlen:
+                      tag = 0
+                  iright = iright + 1
     automatic-tests: false
     manual-tests: []
 

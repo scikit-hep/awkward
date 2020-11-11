@@ -764,15 +764,8 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
 
         def getfunction(inputs, depth):
             if depth == axis:
-                arr = inputs
-                batch = [arr[0]]
-                for x in arr[1:]:
-                    collapsed = batch[0].mergemany_as_union(batch[1:], 1)
-                    batch = [collapsed.merge_as_union(x, 1)]
-                out = batch[0].mergemany_as_union(batch[1:], 1)
-                return lambda: (
-                    out,
-                )
+                out = inputs[0].mergemany_as_union(inputs[1:], 1)
+                return lambda: (out,)
             else:
                 return None
 
