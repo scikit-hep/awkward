@@ -19,6 +19,34 @@ import awkward1
 #      `__array__` and `__record__`.
 
 
+def test_0459_types():
+    plain_plain = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4])
+    array_plain = awkward1.with_parameter(plain_plain, "__array__", "zoinks")
+    plain_isdoc = awkward1.with_parameter(plain_plain, "__doc__", "This is a zoink.")
+    array_isdoc = awkward1.with_parameter(array_plain, "__doc__", "This is a zoink.")
+    assert awkward1.parameters(plain_plain) == {}
+    assert awkward1.parameters(array_plain) == {"__array__": "zoinks"}
+    assert awkward1.parameters(plain_isdoc) == {"__doc__": "This is a zoink."}
+    assert awkward1.parameters(array_isdoc) == {"__array__": "zoinks", "__doc__": "This is a zoink."}
+
+    assert awkward1.type(plain_plain) == awkward1.type(plain_plain)
+    assert awkward1.type(array_plain) == awkward1.type(array_plain)
+    assert awkward1.type(plain_isdoc) == awkward1.type(plain_isdoc)
+    assert awkward1.type(array_isdoc) == awkward1.type(array_isdoc)
+
+    assert awkward1.type(plain_plain) != awkward1.type(array_plain)
+    assert awkward1.type(array_plain) != awkward1.type(plain_plain)
+
+    assert awkward1.type(plain_plain) == awkward1.type(plain_isdoc)
+    assert awkward1.type(plain_isdoc) == awkward1.type(plain_plain)
+
+    assert awkward1.type(array_plain) == awkward1.type(array_isdoc)
+    assert awkward1.type(array_isdoc) == awkward1.type(array_plain)
+
+    assert awkward1.type(plain_isdoc) != awkward1.type(array_isdoc)
+    assert awkward1.type(array_isdoc) != awkward1.type(plain_isdoc)
+
+
 def test_0459():
     plain_plain = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4])
     array_plain = awkward1.with_parameter(plain_plain, "__array__", "zoinks")
@@ -50,14 +78,14 @@ def test_0459():
     assert isinstance(awkward1.concatenate([array_isdoc, plain_isdoc]).layout, awkward1.layout.UnionArray8_64)
 
     assert awkward1.parameters(awkward1.concatenate([plain_plain, plain_isdoc])) == {}
-    assert awkward1.parameters(awkward1.concatenate([array_plain, array_isdoc])) == {}
+    assert awkward1.parameters(awkward1.concatenate([array_plain, array_isdoc])) == {"__array__": "zoinks"}
     assert awkward1.parameters(awkward1.concatenate([plain_isdoc, plain_plain])) == {}
-    assert awkward1.parameters(awkward1.concatenate([array_isdoc, array_plain])) == {}
+    assert awkward1.parameters(awkward1.concatenate([array_isdoc, array_plain])) == {"__array__": "zoinks"}
 
-    # assert isinstance(awkward1.concatenate([plain_plain, plain_isdoc]).layout, awkward1.layout.NumpyArray)
-    # assert isinstance(awkward1.concatenate([array_plain, array_isdoc]).layout, awkward1.layout.NumpyArray)
-    # assert isinstance(awkward1.concatenate([plain_isdoc, plain_plain]).layout, awkward1.layout.NumpyArray)
-    # assert isinstance(awkward1.concatenate([array_isdoc, array_plain]).layout, awkward1.layout.NumpyArray)
+    assert isinstance(awkward1.concatenate([plain_plain, plain_isdoc]).layout, awkward1.layout.NumpyArray)
+    assert isinstance(awkward1.concatenate([array_plain, array_isdoc]).layout, awkward1.layout.NumpyArray)
+    assert isinstance(awkward1.concatenate([plain_isdoc, plain_plain]).layout, awkward1.layout.NumpyArray)
+    assert isinstance(awkward1.concatenate([array_isdoc, array_plain]).layout, awkward1.layout.NumpyArray)
 
 
 def test_0522():

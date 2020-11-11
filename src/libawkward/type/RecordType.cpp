@@ -157,7 +157,7 @@ namespace awkward {
   bool
   RecordType::equal(const TypePtr& other, bool check_parameters) const {
     if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
-      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters(), false)) {
         return false;
       }
       if (numfields() != t->numfields()) {

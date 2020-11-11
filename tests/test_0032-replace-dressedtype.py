@@ -16,25 +16,25 @@ py27 = (sys.version_info[0] < 3)
 def test_types_with_parameters():
     t = awkward1.types.UnknownType()
     assert t.parameters == {}
-    t.parameters = {"key": ["val", "ue"]}
-    assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.types.UnknownType(parameters={"key": ["val", "ue"]})
-    assert t.parameters == {"key": ["val", "ue"]}
+    t.parameters = {"__array__": ["val", "ue"]}
+    assert t.parameters == {"__array__": ["val", "ue"]}
+    t = awkward1.types.UnknownType(parameters={"__array__": ["val", "ue"]})
+    assert t.parameters == {"__array__": ["val", "ue"]}
 
-    t = awkward1.types.PrimitiveType("int32", parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.types.PrimitiveType("float64", parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.types.ArrayType(awkward1.types.PrimitiveType("int32"), 100, parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.types.ListType(awkward1.types.PrimitiveType("int32"), parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.types.RegularType(awkward1.types.PrimitiveType("int32"), 5, parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.types.OptionType(awkward1.types.PrimitiveType("int32"), parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.types.UnionType((awkward1.types.PrimitiveType("int32"), awkward1.types.PrimitiveType("float64")), parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
-    t = awkward1.types.RecordType({"one": awkward1.types.PrimitiveType("int32"), "two": awkward1.types.PrimitiveType("float64")}, parameters={"key": ["val", "ue"]}); assert t.parameters == {"key": ["val", "ue"]}
+    t = awkward1.types.PrimitiveType("int32", parameters={"__array__": ["val", "ue"]}); assert t.parameters == {"__array__": ["val", "ue"]}
+    t = awkward1.types.PrimitiveType("float64", parameters={"__array__": ["val", "ue"]}); assert t.parameters == {"__array__": ["val", "ue"]}
+    t = awkward1.types.ArrayType(awkward1.types.PrimitiveType("int32"), 100, parameters={"__array__": ["val", "ue"]}); assert t.parameters == {"__array__": ["val", "ue"]}
+    t = awkward1.types.ListType(awkward1.types.PrimitiveType("int32"), parameters={"__array__": ["val", "ue"]}); assert t.parameters == {"__array__": ["val", "ue"]}
+    t = awkward1.types.RegularType(awkward1.types.PrimitiveType("int32"), 5, parameters={"__array__": ["val", "ue"]}); assert t.parameters == {"__array__": ["val", "ue"]}
+    t = awkward1.types.OptionType(awkward1.types.PrimitiveType("int32"), parameters={"__array__": ["val", "ue"]}); assert t.parameters == {"__array__": ["val", "ue"]}
+    t = awkward1.types.UnionType((awkward1.types.PrimitiveType("int32"), awkward1.types.PrimitiveType("float64")), parameters={"__array__": ["val", "ue"]}); assert t.parameters == {"__array__": ["val", "ue"]}
+    t = awkward1.types.RecordType({"one": awkward1.types.PrimitiveType("int32"), "two": awkward1.types.PrimitiveType("float64")}, parameters={"__array__": ["val", "ue"]}); assert t.parameters == {"__array__": ["val", "ue"]}
 
-    t = awkward1.types.UnknownType(parameters={"key1": ["val", "ue"], "key2": u"one \u2192 two"})
-    assert t.parameters == {"key2": u"one \u2192 two", "key1": ["val", "ue"]}
+    t = awkward1.types.UnknownType(parameters={"key1": ["val", "ue"], "__record__": u"one \u2192 two"})
+    assert t.parameters == {"__record__": u"one \u2192 two", "key1": ["val", "ue"]}
 
-    assert t == awkward1.types.UnknownType(parameters={"key2": u"one \u2192 two", "key1": ["val", "ue"]})
-    assert t != awkward1.types.UnknownType(parameters={"key": ["val", "ue"]})
+    assert t == awkward1.types.UnknownType(parameters={"__record__": u"one \u2192 two", "key1": ["val", "ue"]})
+    assert t != awkward1.types.UnknownType(parameters={"__array__": ["val", "ue"]})
 
 def test_dress():
     class Dummy(awkward1.highlevel.Array):

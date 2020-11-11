@@ -192,7 +192,7 @@ namespace awkward {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -372,7 +372,7 @@ namespace awkward {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -1432,7 +1432,7 @@ namespace awkward {
       return mergeable(raw->array(), mergebool);
     }
 
-    if (!parameters_equal(other.get()->parameters())) {
+    if (!parameters_equal(other.get()->parameters(), false)) {
       return false;
     }
 
@@ -1535,9 +1535,12 @@ namespace awkward {
         std::string("unrecognized IndexedArray specialization") + FILENAME(__LINE__));
     }
 
+    util::Parameters parameters(parameters_);
+    util::merge_parameters(parameters, other.get()->parameters());
+
     return std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
       Identities::none(),
-      parameters_,
+      parameters,
       index,
       content);
   }
@@ -1598,12 +1601,15 @@ namespace awkward {
 
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 
+    util::Parameters parameters(parameters_);
     bool is_option = false;
     ContentPtrVec contents;
     int64_t contentlength_so_far = 0;
     int64_t length_so_far = 0;
     Index64 nextindex(total_length);
     for (auto array : head) {
+      util::merge_parameters(parameters, array.get()->parameters());
+
       if (ByteMaskedArray* raw = dynamic_cast<ByteMaskedArray*>(array.get())) {
         array = raw->toIndexedOptionArray64();
       }
@@ -1712,13 +1718,13 @@ namespace awkward {
     ContentPtr next(nullptr);
     if (is_option) {
       next = std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                    parameters_,
+                                                    parameters,
                                                     nextindex,
                                                     nextcontent);
     }
     else {
       next = std::make_shared<IndexedArray64>(Identities::none(),
-                                              parameters_,
+                                              parameters,
                                               nextindex,
                                               nextcontent);
     }

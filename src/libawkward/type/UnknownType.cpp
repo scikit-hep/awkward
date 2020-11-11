@@ -40,7 +40,7 @@ namespace awkward {
   bool
   UnknownType::equal(const TypePtr& other, bool check_parameters) const {
     if (UnknownType* t = dynamic_cast<UnknownType*>(other.get())) {
-      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters(), false)) {
         return false;
       }
       return true;

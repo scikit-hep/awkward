@@ -1164,8 +1164,8 @@ namespace awkward {
   }
 
   bool
-  Content::parameters_equal(const util::Parameters& other) const {
-    return util::parameters_equal(parameters_, other);
+  Content::parameters_equal(const util::Parameters& other, bool check_all) const {
+    return util::parameters_equal(parameters_, other, check_all);
   }
 
   bool
