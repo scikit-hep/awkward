@@ -97,4 +97,15 @@ def test_0522():
     assert unionarray.tolist() == [0.0, 1.1, 2.2, 0, 100, 3.3, 4.4, 200, 300, 400]
 
     assert (unionarray + 10).tolist() == [10.0, 11.1, 12.2, 10, 110, 13.3, 14.4, 210, 310, 410]
-    # assert (10 + unionarray).tolist() == [10.0, 11.1, 12.2, 10, 110, 13.3, 14.4, 210, 310, 410]
+    assert (10 + unionarray).tolist() == [10.0, 11.1, 12.2, 10, 110, 13.3, 14.4, 210, 310, 410]
+
+    assert (unionarray + range(0, 100, 10)).tolist() == [0.0, 11.1, 22.2, 30, 140, 53.3, 64.4, 270, 380, 490]
+    assert (range(0, 100, 10) + unionarray).tolist() == [0.0, 11.1, 22.2, 30, 140, 53.3, 64.4, 270, 380, 490]
+
+    assert (unionarray + numpy.arange(0, 100, 10)).tolist() == [0.0, 11.1, 22.2, 30, 140, 53.3, 64.4, 270, 380, 490]
+    assert (numpy.arange(0, 100, 10) + unionarray).tolist() == [0.0, 11.1, 22.2, 30, 140, 53.3, 64.4, 270, 380, 490]
+
+    assert (unionarray + awkward1.Array(numpy.arange(0, 100, 10))).tolist() == [0.0, 11.1, 22.2, 30, 140, 53.3, 64.4, 270, 380, 490]
+    assert (awkward1.Array(numpy.arange(0, 100, 10)) + unionarray).tolist() == [0.0, 11.1, 22.2, 30, 140, 53.3, 64.4, 270, 380, 490]
+
+    assert (unionarray + unionarray).tolist() == [0.0, 2.2, 4.4, 0, 200, 6.6, 8.8, 400, 600, 800]

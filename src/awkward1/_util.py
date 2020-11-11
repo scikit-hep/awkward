@@ -647,9 +647,11 @@ def broadcast_and_apply(inputs, getfunction, behavior, allow_records=True):
                 index[mask] = nplike.arange(nplike.count_nonzero(mask))
                 nextinputs = []
                 numoutputs = None
-                for i, x in enumerate(inputs):
+                i = 0
+                for x in inputs:
                     if isinstance(x, uniontypes):
                         nextinputs.append(x[mask].project(combo[str(i)]))
+                        i += 1
                     elif isinstance(x, awkward1.layout.Content):
                         nextinputs.append(x[mask])
                     else:
@@ -662,6 +664,7 @@ def broadcast_and_apply(inputs, getfunction, behavior, allow_records=True):
 
             tags = awkward1.layout.Index8(tags)
             index = awkward1.layout.Index64(index)
+
             return tuple(
                 awkward1.layout.UnionArray8_64(
                     tags, index, [x[i] for x in outcontents]
