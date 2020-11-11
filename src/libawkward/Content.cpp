@@ -1281,7 +1281,7 @@ namespace awkward {
       auto left = offsets_and_concatenate(posaxis, depth);
       auto right = other.get()->offsets_and_concatenate(posaxis, depth);
 
-      ContentPtr out = left.second.get()->merge(right.second, axis - 1, depth);
+      ContentPtr out = left.second.get()->merge_as_union(right.second, axis - 1, depth);
       return out;
     }
   }

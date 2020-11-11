@@ -725,6 +725,8 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     must have the same lengths and nested lists are each concatenated,
     element for element, and similarly for deeper levels.
     """
+    behavior = awkward1._util.behaviorof(*arrays)
+
     contents = [
         awkward1.operations.convert.to_layout(x, allow_record=False) for x in arrays
     ]
@@ -738,20 +740,49 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             + awkward1._util.exception_suffix(__file__)
         )
 
-    batch = [contents[0]]
-    for x in contents[1:]:
-        if batch[-1].mergeable(x, mergebool=mergebool):
-            batch.append(x)
-        else:
-            collapsed = batch[0].mergemany(batch[1:]) if axis == 0 else batch[0].mergemany_as_union(batch[1:], axis)
-            batch = [collapsed.merge_as_union(x)]
+    if axis < 0:
+        raise ValueError(
+            "the 'axis' of concatenate must be non-negative"
+            + awkward1._util.exception_suffix(__file__)
+        )
+    elif axis == 0:
+        batch = [contents[0]]
+        for x in contents[1:]:
+            if batch[-1].mergeable(x, mergebool=mergebool):
+                batch.append(x)
+            else:
+                collapsed = batch[0].mergemany(batch[1:])
+                batch = [collapsed.merge_as_union(x, axis)]
 
-    out = batch[0].mergemany(batch[1:]) if axis == 0 else batch[0].mergemany_as_union(batch[1:], axis)
+        out = batch[0].mergemany(batch[1:]) if axis == 0 else batch[0].mergemany_as_union(batch[1:], axis)
+    else:
+        length = len(contents[0])
+        if any(len(lst) != length for lst in contents[1:]):
+            raise ValueError("all arrays must have the same length for concatenate in axis > 0"
+                + awkward1._util.exception_suffix(__file__)
+            )
+
+        def getfunction(inputs, depth):
+            if depth == axis:
+                arr = inputs
+                batch = [arr[0]]
+                for x in arr[1:]:
+                    collapsed = batch[0].mergemany_as_union(batch[1:], 1)
+                    batch = [collapsed.merge_as_union(x, 1)]
+                out = batch[0].mergemany_as_union(batch[1:], 1)
+                return lambda: (
+                    out,
+                )
+            else:
+                return None
+
+        out = awkward1._util.broadcast_and_apply(arrays, getfunction, behavior)[0]
+
     if isinstance(out, awkward1._util.uniontypes):
         out = out.simplify(mergebool=mergebool)
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(*arrays))
+        return awkward1._util.wrap(out, behavior)
     else:
         return out
 
