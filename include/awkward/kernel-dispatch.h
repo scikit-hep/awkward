@@ -968,25 +968,6 @@ namespace awkward {
       int64_t length,
       int64_t size);
 
-    ERROR RegularArray_merge_offsets_64(
-      kernel::lib ptr_lib,
-      int64_t* tooffsets,
-      int64_t tolength,
-      int64_t length,
-      int64_t size,
-      int64_t otherlength,
-      int64_t othersize);
-
-    ERROR RegularArray_merge_tags_8_index_64(
-      kernel::lib ptr_lib,
-      int8_t* totags,
-      int64_t* toindex,
-      int64_t tolength,
-      int64_t length,
-      int64_t size,
-      int64_t otherlength,
-      int64_t othersize);
-
     template <typename T>
     ERROR ListOffsetArray_compact_offsets_64(
       kernel::lib ptr_lib,

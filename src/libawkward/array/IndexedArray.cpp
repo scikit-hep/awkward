@@ -1517,7 +1517,7 @@ namespace awkward {
     int64_t mylength = length();
     Index64 index(theirlength + mylength);
 
-    ContentPtr content = other.get()->mergemany({ content_ });
+    ContentPtr content = other.get()->merge(content_);
     struct Error err1 = kernel::IndexedArray_fill_to64_count(
       kernel::lib::cpu,   // DERIVE
       index.data(),

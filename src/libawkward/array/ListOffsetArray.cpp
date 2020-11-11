@@ -900,7 +900,7 @@ namespace awkward {
   template <typename T>
   const std::pair<Index64, ContentPtr>
   ListOffsetArrayOf<T>::offsets_and_concatenate(int64_t axis,
-                                              int64_t depth) const {
+                                                int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
       throw std::invalid_argument(
@@ -934,9 +934,8 @@ namespace awkward {
           inneroffsets.data(),
           inneroffsets.length());
         util::handle_error(err, classname(), identities_.get());
-        return std::pair<Index64, ContentPtr>(
-                 tooffsets,
-                 shallow_copy());
+        return std::pair<Index64, ContentPtr>(tooffsets,
+                                              shallow_copy());
       }
     }
   }

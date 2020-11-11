@@ -4417,33 +4417,6 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
-  - name: awkward_RegularArray_merge_offsets
-    specializations:
-      - name: awkward_RegularArray_merge_offsets64
-        args:
-          - {name: tooffsets, type: "List[int64_t]", dir: out}
-          - {name: tolength, type: "int64_t", dir: in, role: default}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: size, type: "int64_t", dir: in, role: RegularArray-size}
-          - {name: otherlength, type: "int64_t", dir: in, role: default}
-          - {name: othersize, type: "int64_t", dir: in, role: RegularArray-size}
-    description: null
-    definition: |
-      def awkward_RegularArray_merge_offsets(tooffsets, tolength, length, size, otherlength, othersize):
-          tooffsets[0] = 0
-          n = 1
-          for i in range(tolength - 1):
-            tmp = 0
-            if n * size <= length:
-              tmp = tmp + size
-            if n * othersize <= otherlength:
-              tmp = tmp + othersize
-            tmp = tmp + tooffsets[i]
-            tooffsets[i + 1] = tmp
-            n = n + 1
-    automatic-tests: true
-    manual-tests: []
-
   - name: awkward_RegularArray_getitem_carry
     specializations:
       - name: awkward_RegularArray_getitem_carry_64

@@ -506,7 +506,7 @@ namespace awkward {
                 len,
                 contents[k].get()->length());
               util::handle_error(err, classname(), identities_.get());
-              contents[k] = contents[k].get()->mergemany({innercontents[j]});
+              contents[k] = contents[k].get()->merge(innercontents[j]);
               unmerged = false;
               break;
             }
@@ -553,7 +553,7 @@ namespace awkward {
                 len,
                 contents[k].get()->length());
               util::handle_error(err, classname(), identities_.get());
-              contents[k] = contents[k].get()->mergemany({innercontents[j]});
+              contents[k] = contents[k].get()->merge(innercontents[j]);
               unmerged = false;
               break;
             }
@@ -600,7 +600,7 @@ namespace awkward {
                 len,
                 contents[k].get()->length());
               util::handle_error(err, classname(), identities_.get());
-              contents[k] = contents[k].get()->mergemany({innercontents[j]});
+              contents[k] = contents[k].get()->merge(innercontents[j]);
               unmerged = false;
               break;
             }
@@ -639,7 +639,7 @@ namespace awkward {
               len,
               contents[k].get()->length());
             util::handle_error(err, classname(), identities_.get());
-            contents[k] = contents[k].get()->mergemany({contents_[i]});
+            contents[k] = contents[k].get()->merge(contents_[i]);
             unmerged = false;
             break;
           }
