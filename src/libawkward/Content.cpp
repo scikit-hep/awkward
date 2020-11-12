@@ -1184,7 +1184,51 @@ namespace awkward {
   }
 
   const ContentPtr
-  Content::merge_as_union(const ContentPtr& other, int64_t axis, int64_t depth) const {
+  Content::merge_as_union(const ContentPtr& other) const {
+    int64_t mylength = length();
+    int64_t theirlength = other.get()->length();
+    Index8 tags(mylength + theirlength);
+    Index64 index(mylength + theirlength);
+
+    ContentPtrVec contents({ shallow_copy(), other });
+
+    struct Error err1 = kernel::UnionArray_filltags_to8_const(
+      kernel::lib::cpu,   // DERIVE
+      tags.data(),
+      0,
+      mylength,
+      0);
+    util::handle_error(err1, classname(), identities_.get());
+    struct Error err2 = kernel::UnionArray_fillindex_count_64(
+      kernel::lib::cpu,   // DERIVE
+      index.data(),
+      0,
+      mylength);
+    util::handle_error(err2, classname(), identities_.get());
+
+    struct Error err3 = kernel::UnionArray_filltags_to8_const(
+      kernel::lib::cpu,   // DERIVE
+      tags.data(),
+      mylength,
+      theirlength,
+      1);
+    util::handle_error(err3, classname(), identities_.get());
+    struct Error err4 = kernel::UnionArray_fillindex_count_64(
+      kernel::lib::cpu,   // DERIVE
+      index.data(),
+      mylength,
+      theirlength);
+    util::handle_error(err4, classname(), identities_.get());
+
+    return std::make_shared<UnionArray8_64>(Identities::none(),
+                                            util::Parameters(),
+                                            tags,
+                                            index,
+                                            contents);
+  }
+
+  const ContentPtr
+  Content::concatenate_here(const ContentPtr& other, int64_t axis, int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
       int64_t mylength = length();
@@ -1282,11 +1326,23 @@ namespace awkward {
 
   const ContentPtr
   Content::mergemany_as_union(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
-    ContentPtr out = shallow_copy();
-    for (const auto & array : others) {
-      out = out.get()->merge_as_union(array, axis, depth);
+    if (others.empty()) {
+      return shallow_copy();
     }
-    return out;
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth + 1) {
+      ContentPtr out;
+      for (const auto& array : others) {
+        out = concatenate_here(array, axis, depth);
+      }
+      return out;
+    }
+    else {
+      throw std::runtime_error(
+        std::string("FIXME: unhandled case of mergemany_as_union in axis \n")
+        + std::to_string(axis) + std::string(" > depth ") + std::to_string(depth)
+        + FILENAME(__LINE__));
+    }
   }
 
   const ContentPtr
