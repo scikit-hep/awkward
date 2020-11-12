@@ -629,31 +629,6 @@ namespace awkward {
     }
   }
 
-  const std::pair<Index64, ContentPtr>
-  UnmaskedArray::offsets_and_concatenate(int64_t axis, int64_t depth) const {
-    int64_t posaxis = axis_wrap_if_negative(axis);
-    if (posaxis == depth) {
-      throw std::invalid_argument(
-        std::string("axis=0 not allowed for flatten") + FILENAME(__LINE__));
-    }
-    else {
-      std::pair<Index64, ContentPtr> offsets_flattened =
-        content_.get()->offsets_and_concatenate(posaxis, depth);
-      Index64 offsets = offsets_flattened.first;
-      ContentPtr flattened = offsets_flattened.second;
-      if (offsets.length() == 0) {
-        return std::pair<Index64, ContentPtr>(
-          offsets,
-          std::make_shared<UnmaskedArray>(Identities::none(),
-                                          util::Parameters(),
-                                          flattened));
-      }
-      else {
-        return offsets_flattened;
-      }
-    }
-  }
-
   bool
   UnmaskedArray::mergeable(const ContentPtr& other, bool mergebool) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {

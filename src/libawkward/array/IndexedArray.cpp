@@ -1425,54 +1425,6 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  const std::pair<Index64, ContentPtr>
-  IndexedArrayOf<T, ISOPTION>::offsets_and_concatenate(int64_t axis,
-                                                       int64_t depth) const {
-    int64_t posaxis = axis_wrap_if_negative(axis);
-    if (posaxis == depth) {
-      throw std::invalid_argument(
-        std::string("axis=0 not allowed for concatenate") + FILENAME(__LINE__));
-    }
-    else if (ISOPTION) {
-      int64_t numnull;
-      std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);
-      Index64 nextcarry = pair.first;
-      IndexOf<T> outindex = pair.second;
-
-      ContentPtr next = content_.get()->carry(nextcarry, false);
-
-      std::pair<Index64, ContentPtr> offsets_flattened =
-        next.get()->offsets_and_concatenate(posaxis, depth);
-      Index64 offsets = offsets_flattened.first;
-      ContentPtr flattened = offsets_flattened.second;
-
-      if (offsets.length() == 0) {
-        return std::pair<Index64, ContentPtr>(
-          offsets,
-          std::make_shared<IndexedArrayOf<T, ISOPTION>>(Identities::none(),
-                                                        util::Parameters(),
-                                                        outindex,
-                                                        flattened));
-      }
-      else {
-        Index64 outoffsets(offsets.length() + numnull);
-        struct Error err = kernel::IndexedArray_flatten_none2empty_64<T>(
-          kernel::lib::cpu,   // DERIVE
-          outoffsets.data(),
-          outindex.data(),
-          outindex.length(),
-          offsets.data(),
-          offsets.length());
-        util::handle_error(err, classname(), identities_.get());
-        return std::pair<Index64, ContentPtr>(outoffsets, flattened);
-      }
-    }
-    else {
-      return project().get()->offsets_and_concatenate(posaxis, depth);
-    }
-  }
-
-  template <typename T, bool ISOPTION>
   bool
   IndexedArrayOf<T, ISOPTION>::mergeable(const ContentPtr& other,
                                          bool mergebool) const {

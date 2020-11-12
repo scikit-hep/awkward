@@ -819,19 +819,6 @@ namespace awkward {
       }
     }
 
-  const std::pair<Index64, ContentPtr>
-    offsets_and_concatenate(int64_t axis, int64_t depth) const override {
-      int64_t toaxis = axis_wrap_if_negative(axis);
-      if (toaxis == depth) {
-        throw std::invalid_argument(
-          std::string("axis=0 not allowed for concatenate") + FILENAME(__LINE__));
-      }
-      else {
-        throw std::invalid_argument(
-          std::string("axis out of range for concatenate") + FILENAME(__LINE__));
-      }
-    }
-
     bool
       mergeable(const ContentPtr& other, bool mergebool) const override {
       if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {

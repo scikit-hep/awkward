@@ -1416,22 +1416,6 @@ namespace awkward {
     }
   }
 
-  const std::pair<Index64, ContentPtr>
-  NumpyArray::offsets_and_concatenate(int64_t axis, int64_t depth) const {
-    int64_t posaxis = axis_wrap_if_negative(axis);
-    if (posaxis == depth) {
-      throw std::invalid_argument(
-        std::string("axis=0 not allowed for concatenate") + FILENAME(__LINE__));
-    }
-    else if (shape_.size() != 1  ||  !iscontiguous()) {
-      return toRegularArray().get()->offsets_and_concatenate(posaxis, depth);
-    }
-    else {
-      throw std::invalid_argument(
-        std::string("axis out of range for concatenate") + FILENAME(__LINE__));
-    }
-  }
-
   bool
   NumpyArray::mergeable(const ContentPtr& other, bool mergebool) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {

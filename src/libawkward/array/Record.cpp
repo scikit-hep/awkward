@@ -305,13 +305,6 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
-  const std::pair<Index64, ContentPtr>
-  Record::offsets_and_concatenate(int64_t axis, int64_t depth) const {
-    throw std::invalid_argument(
-      std::string("Record cannot be concatenate because it is not an array")
-      + FILENAME(__LINE__));
-  }
-
   bool
   Record::mergeable(const ContentPtr& other, bool mergebool) const {
     throw std::invalid_argument(

@@ -903,49 +903,6 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::pair<Index64, ContentPtr>
-  ListOffsetArrayOf<T>::offsets_and_concatenate(int64_t axis,
-                                                int64_t depth) const {
-    int64_t posaxis = axis_wrap_if_negative(axis);
-    if (posaxis == depth) {
-      throw std::invalid_argument(
-        std::string("axis=0 not allowed for concatenate") + FILENAME(__LINE__));
-    }
-    else if (posaxis == depth + 1) {
-      ContentPtr listoffsetarray = toListOffsetArray64(true);
-      ListOffsetArray64* raw =
-        dynamic_cast<ListOffsetArray64*>(listoffsetarray.get());
-      return std::pair<Index64, ContentPtr>(raw->offsets(), raw->content());
-    }
-    else {
-      std::pair<Index64, ContentPtr> pair =
-        content_.get()->offsets_and_concatenate(posaxis, depth + 1);
-      Index64 inneroffsets = pair.first;
-      if (inneroffsets.length() == 0) {
-        return std::pair<Index64, ContentPtr>(
-                 Index64(0),
-                 std::make_shared<ListOffsetArrayOf<T>>(Identities::none(),
-                                                        util::Parameters(),
-                                                        offsets_,
-                                                        pair.second));
-      }
-      else {
-        Index64 tooffsets(offsets_.length());
-        struct Error err = kernel::ListOffsetArray_flatten_offsets_64<T>(
-          kernel::lib::cpu,   // DERIVE
-          tooffsets.data(),
-          offsets_.data(),
-          offsets_.length(),
-          inneroffsets.data(),
-          inneroffsets.length());
-        util::handle_error(err, classname(), identities_.get());
-        return std::pair<Index64, ContentPtr>(tooffsets,
-                                              shallow_copy());
-      }
-    }
-  }
-
-  template <typename T>
   bool
   ListOffsetArrayOf<T>::mergeable(const ContentPtr& other,
                                   bool mergebool) const {

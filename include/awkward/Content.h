@@ -626,12 +626,6 @@ namespace awkward {
     virtual const std::pair<Index64, ContentPtr>
       offsets_and_flattened(int64_t axis, int64_t depth) const = 0;
 
-    /// @brief Returns (a) an offsets {@link IndexOf Index} and (b) a flattened
-    /// version of the array at some `axis` depth.
-    ///
-    virtual const std::pair<Index64, ContentPtr>
-      offsets_and_concatenate(int64_t axis, int64_t depth) const = 0;
-
     /// @brief Returns `true` if this array can be merged with the `other`;
     /// `false` otherwise.
     ///

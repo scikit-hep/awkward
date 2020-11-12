@@ -406,22 +406,6 @@ namespace awkward {
     }
   }
 
-  const std::pair<Index64, ContentPtr>
-  EmptyArray::offsets_and_concatenate(int64_t axis, int64_t depth) const {
-    int64_t posaxis = axis_wrap_if_negative(axis);
-    if (posaxis == depth) {
-      throw std::invalid_argument(
-        std::string("axis=0 not allowed for concatenate") + FILENAME(__LINE__));
-    }
-    else {
-      Index64 offsets(1);
-      offsets.setitem_at_nowrap(0, 0);
-      return std::pair<Index64, ContentPtr>(
-        offsets,
-        std::make_shared<EmptyArray>(Identities::none(), util::Parameters()));
-    }
-  }
-
   bool
   EmptyArray::mergeable(const ContentPtr& other, bool mergebool) const {
     if (!parameters_equal(other.get()->parameters(), false)) {

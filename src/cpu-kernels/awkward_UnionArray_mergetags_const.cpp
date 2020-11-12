@@ -16,7 +16,7 @@ ERROR awkward_UnionArray_mergetags_const(
   int64_t iright = 0;
   int64_t leftsize = 0;
   int64_t rightsize = 0;
-  int8_t tag = 0;
+  TO tag = (TO)0;
   int64_t j = 0;
   int64_t li = 0;
   int64_t ri = 0;
@@ -36,14 +36,14 @@ ERROR awkward_UnionArray_mergetags_const(
         totags[j++] = (TO)tag;
       }
     }
-    if (tag == 0) {
+    if (tag == (TO)0) {
       if (iright < rightlen) {
-        tag = 1;
+        tag = (TO)1;
       }
       ileft++;
     } else {
       if (ileft < leftlen) {
-        tag = 0;
+        tag = (TO)0;
       }
       iright++;
     }

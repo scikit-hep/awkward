@@ -912,40 +912,6 @@ namespace awkward {
     }
   }
 
-  const std::pair<Index64, ContentPtr>
-  RecordArray::offsets_and_concatenate(int64_t axis, int64_t depth) const {
-    int64_t posaxis = axis_wrap_if_negative(axis);
-    if (posaxis == depth) {
-      throw std::invalid_argument(
-        std::string("axis=0 not allowed for concatenate") + FILENAME(__LINE__));
-    }
-    else if (posaxis == depth + 1) {
-      throw std::invalid_argument(
-        std::string("arrays of records cannot be concatenated (but their contents can be; "
-                    "try a different 'axis')") + FILENAME(__LINE__));
-    }
-    else {
-      ContentPtrVec contents;
-      for (auto content : contents_) {
-        ContentPtr trimmed = content.get()->getitem_range(0, length());
-        std::pair<Index64, ContentPtr> pair =
-          trimmed.get()->offsets_and_concatenate(posaxis, depth);
-        if (pair.first.length() != 0) {
-          throw std::runtime_error(
-            std::string("RecordArray content with axis > depth + 1 returned a non-empty "
-                        "offsets from offsets_and_concatenate") + FILENAME(__LINE__));
-        }
-        contents.push_back(pair.second);
-      }
-      return std::pair<Index64, ContentPtr>(
-        Index64(0),
-        std::make_shared<RecordArray>(Identities::none(),
-                                      util::Parameters(),
-                                      contents,
-                                      recordlookup_));
-    }
-  }
-
   bool
   RecordArray::mergeable(const ContentPtr& other, bool mergebool) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {

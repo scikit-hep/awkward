@@ -1273,8 +1273,8 @@ namespace awkward {
                                               contents);
     }
     else if (posaxis == depth + 1) {
-      auto left = offsets_and_concatenate(posaxis, depth);
-      auto right = other.get()->offsets_and_concatenate(posaxis, depth);
+      auto left = offsets_and_flattened(posaxis, depth);
+      auto right = other.get()->offsets_and_flattened(posaxis, depth);
       int64_t mylength = left.first.length() - 1;
       int64_t theirlength = right.first.length() - 1;
 

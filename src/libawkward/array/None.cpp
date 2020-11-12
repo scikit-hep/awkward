@@ -214,13 +214,6 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
-  const std::pair<Index64, ContentPtr>
-  None::offsets_and_concatenate(int64_t axis, int64_t depth) const {
-    throw std::runtime_error(
-      std::string("undefined operation: None::offsets_and_concatenate")
-      + FILENAME(__LINE__));
-  }
-
   bool
   None::mergeable(const ContentPtr& other, bool mergebool) const {
     throw std::runtime_error(

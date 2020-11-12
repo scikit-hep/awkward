@@ -675,11 +675,6 @@ namespace awkward {
     return array().get()->offsets_and_flattened(axis, depth);
   }
 
-  const std::pair<Index64, ContentPtr>
-  VirtualArray::offsets_and_concatenate(int64_t axis, int64_t depth) const {
-    return array().get()->offsets_and_concatenate(axis, depth);
-  }
-
   bool
   VirtualArray::mergeable(const ContentPtr& other, bool mergebool) const {
     return array().get()->mergeable(other, mergebool);
