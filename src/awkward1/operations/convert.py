@@ -76,7 +76,7 @@ def from_numpy(
 
         if array.dtype.kind == "S":
             asbytes = array.reshape(-1)
-            itemsize = array.dtype.itemsize
+            itemsize = asbytes.dtype.itemsize
             starts = numpy.arange(0, len(asbytes)*itemsize, itemsize, dtype=np.int64)
             stops = starts + numpy.char.str_len(asbytes)
             data = awkward1.layout.ListArray64(
@@ -91,7 +91,7 @@ def from_numpy(
                 data = awkward1.layout.RegularArray(data, size)
         elif array.dtype.kind == "U":
             asbytes = numpy.char.encode(array.reshape(-1), "utf-8", "surrogateescape")
-            itemsize = array.dtype.itemsize // 4
+            itemsize = asbytes.dtype.itemsize
             starts = numpy.arange(0, len(asbytes)*itemsize, itemsize, dtype=np.int64)
             stops = starts + numpy.char.str_len(asbytes)
             data = awkward1.layout.ListArray64(
