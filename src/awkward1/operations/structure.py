@@ -778,8 +778,6 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     must have the same lengths and nested lists are each concatenated,
     element for element, and similarly for deeper levels.
     """
-    behavior = awkward1._util.behaviorof(*arrays)
-
     contents = [
         awkward1.operations.convert.to_layout(x, allow_record=False) for x in arrays
     ]
@@ -793,12 +791,7 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             + awkward1._util.exception_suffix(__file__)
         )
 
-    if axis < 0:
-        raise ValueError(
-            "the 'axis' of concatenate must be non-negative"
-            + awkward1._util.exception_suffix(__file__)
-        )
-    elif axis == 0:
+    if axis == 0:
         batch = [contents[0]]
         for x in contents[1:]:
             if batch[-1].mergeable(x, mergebool=mergebool):
@@ -808,6 +801,14 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
                 batch = [collapsed.merge_as_union(x)]
 
         out = batch[0].mergemany(batch[1:])
+
+        if isinstance(out, awkward1._util.uniontypes):
+            out = out.simplify(mergebool=mergebool)
+
+        if highlevel:
+            return awkward1._util.wrap(out, behavior = awkward1._util.behaviorof(*arrays))
+        else:
+            return out
     else:
         length = len(contents[0])
         if any(len(lst) != length for lst in contents[1:]):
@@ -822,16 +823,15 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             else:
                 return None
 
-        out = awkward1._util.broadcast_and_apply(arrays, getfunction, behavior)[0]
+        out = awkward1._util.broadcast_and_apply(arrays, getfunction, behavior = awkward1._util.behaviorof(*arrays))[0]
 
-    if isinstance(out, awkward1._util.uniontypes):
-        out = out.simplify(mergebool=mergebool)
+        if isinstance(out, awkward1._util.uniontypes):
+            out = out.simplify(mergebool=mergebool)
 
-    if highlevel:
-        return awkward1._util.wrap(out, behavior)
-    else:
-        return out
-
+        if highlevel:
+            return awkward1._util.wrap(out, behavior = awkward1._util.behaviorof(*arrays))
+        else:
+            return out
 
 @awkward1._connect._numpy.implements("where")
 def where(condition, *args, **kwargs):
