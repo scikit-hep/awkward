@@ -230,11 +230,7 @@ namespace awkward {
 
     /// @brief Internal function for extracting record field
     ///
-    /// WARNING: this function returns the field from the innermost record
-    /// form it finds, and does not wrap it with the context.
-    /// Used by VirtualArray::getitem_field to determine certain parameters
-    /// without materialization. A possible extension would be to wrap output
-    /// at each layer to fully specify the form.
+    /// Matches the operation of Content#getitem_field.
     virtual const FormPtr
       getitem_field(const std::string& key) const = 0;
 
@@ -333,15 +329,6 @@ namespace awkward {
     /// {@link VirtualArray VirtualArrays} encountered along the way.
     virtual const FormPtr
       form(bool materialize) const = 0;
-
-    /// @brief If true, the array contains a VirtualArray with an unknown Form.
-    virtual bool
-      has_virtual_form() const = 0;
-
-    /// @brief If true, the array contains a VirtualArray with an unknown
-    /// length.
-    virtual bool
-      has_virtual_length() const = 0;
 
     /// @brief Internal function to build an output string for #tostring.
     ///
@@ -1082,8 +1069,11 @@ namespace awkward {
     /// Equality is checked at the level of JSON DOMs. The `value` does not
     /// need to be exactly the same string; it needs to have equivalent JSON
     /// value.
+    ///
+    /// If `check_all`, every parameter is checked; otherwise, only
+    /// `"__array__"` and `"__record__"` are checked.
     bool
-      parameters_equal(const util::Parameters& other) const;
+      parameters_equal(const util::Parameters& other, bool check_all) const;
 
     /// @brief Returns `true` if the parameter associated with `key` is a
     /// string; `false` otherwise.

@@ -107,6 +107,11 @@ jobs:
         condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
+          python dev/kernel-diagnostics.py --check-sorted
+        displayName: "Check if kernel specification is sorted"
+        condition: "ne(variables['python.version'], '3.9')"
+
+      - script: |
           python dev/generate-tests.py
         displayName: "Generate Kernel tests"
         condition: "ne(variables['python.version'], '3.9')"
@@ -186,6 +191,11 @@ jobs:
       - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
+        condition: "ne(variables['python.version'], '3.9')"
+
+      - script: |
+          python dev/kernel-diagnostics.py --check-sorted
+        displayName: "Check if kernel specification is sorted"
         condition: "ne(variables['python.version'], '3.9')"
 
       - script: |
@@ -320,6 +330,11 @@ jobs:
       - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
+        condition: "ne(variables['python.version'], '3.9')"
+
+      - script: |
+          python dev/kernel-diagnostics.py --check-sorted
+        displayName: "Check if kernel specification is sorted"
         condition: "ne(variables['python.version'], '3.9')"
 
       - script: |

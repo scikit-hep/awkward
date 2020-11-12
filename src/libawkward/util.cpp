@@ -565,22 +565,79 @@ namespace awkward {
     }
 
     bool
-    parameters_equal(const Parameters &self, const Parameters &other) {
-      std::set<std::string> checked;
-      for (auto pair : self) {
-        if (!parameter_equals(other, pair.first, pair.second)) {
-          return false;
-        }
-        checked.insert(pair.first);
-      }
-      for (auto pair : other) {
-        if (checked.find(pair.first) == checked.end()) {
-          if (!parameter_equals(self, pair.first, pair.second)) {
+    parameters_equal(const Parameters &self, const Parameters &other, bool check_all) {
+      if (check_all) {
+        std::set<std::string> checked;
+        for (auto pair : self) {
+          if (!parameter_equals(other, pair.first, pair.second)) {
             return false;
           }
+          checked.insert(pair.first);
+        }
+        for (auto pair : other) {
+          if (checked.find(pair.first) == checked.end()) {
+            if (!parameter_equals(self, pair.first, pair.second)) {
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+      else {
+        auto self_array = self.find("__array__");
+        auto other_array = other.find("__array__");
+        auto self_record = self.find("__record__");
+        auto other_record = other.find("__record__");
+        std::string my_array;
+        std::string your_array;
+        std::string my_record;
+        std::string your_record;
+        if (self_array == self.end()) {
+          my_array = "null";
+        }
+        else {
+          my_array = self_array->second;
+        }
+        if (other_array == other.end()) {
+          your_array = "null";
+        }
+        else {
+          your_array = other_array->second;
+        }
+        if (self_record == self.end()) {
+          my_record = "null";
+        }
+        else {
+          my_record = self_record->second;
+        }
+        if (other_record == other.end()) {
+          your_record = "null";
+        }
+        else {
+          your_record = other_record->second;
+        }
+        rj::Document mine_array;
+        rj::Document yours_array;
+        rj::Document mine_record;
+        rj::Document yours_record;
+        mine_array.Parse<rj::kParseNanAndInfFlag>(my_array.c_str());
+        yours_array.Parse<rj::kParseNanAndInfFlag>(your_array.c_str());
+        mine_record.Parse<rj::kParseNanAndInfFlag>(my_record.c_str());
+        yours_record.Parse<rj::kParseNanAndInfFlag>(your_record.c_str());
+        return mine_array == yours_array  &&  mine_record == yours_record;
+      }
+    }
+
+    void
+    merge_parameters(Parameters& output, const Parameters& input) {
+      for (auto it = output.cbegin();  it != output.cend();  ) {
+        if (parameter_equals(input, it->first, it->second)) {
+          ++it;
+        }
+        else {
+          it = output.erase(it);
         }
       }
-      return true;
     }
 
     bool

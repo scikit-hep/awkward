@@ -110,7 +110,9 @@ def evaluate(
             return None
 
     behavior = awkward1._util.behaviorof(*arrays)
-    out = awkward1._util.broadcast_and_apply(arrays, getfunction, behavior)
+    out = awkward1._util.broadcast_and_apply(
+        arrays, getfunction, behavior, allow_records=False
+    )
     assert isinstance(out, tuple) and len(out) == 1
     return awkward1._util.wrap(out[0], behavior)
 
@@ -151,7 +153,9 @@ def re_evaluate(local_dict=None):
             return None
 
     behavior = awkward1._util.behaviorof(*arrays)
-    out = awkward1._util.broadcast_and_apply(arrays, getfunction, behavior)
+    out = awkward1._util.broadcast_and_apply(
+        arrays, getfunction, behavior, allow_records=False
+    )
     assert isinstance(out, tuple) and len(out) == 1
     return awkward1._util.wrap(out[0], behavior)
 

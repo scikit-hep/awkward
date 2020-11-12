@@ -241,12 +241,24 @@ namespace awkward {
                    bool check_parameters,
                    bool check_form_key,
                    bool compatibility_check) const {
+    if (compatibility_check) {
+      if (VirtualForm* raw = dynamic_cast<VirtualForm*>(other.get())) {
+        if (raw->form().get() != nullptr) {
+          return equal(raw->form(),
+                       check_identities,
+                       check_parameters,
+                       check_form_key,
+                       compatibility_check);
+        }
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -616,16 +628,6 @@ namespace awkward {
                                        dtype_);
   }
 
-  bool
-  NumpyArray::has_virtual_form() const {
-    return false;
-  }
-
-  bool
-  NumpyArray::has_virtual_length() const {
-    return false;
-  }
-
   const std::string
   NumpyArray::tostring_part(const std::string& indent,
                             const std::string& pre,
@@ -932,10 +934,22 @@ namespace awkward {
     ssize_t byteoffset = byteoffset_;
     if (copyarrays) {
       NumpyArray tmp = contiguous();
-      ptr = tmp.ptr();
-      shape = tmp.shape();
-      strides = tmp.strides();
-      byteoffset = tmp.byteoffset();
+      if (ptr_.get() != tmp.ptr().get()) {
+        ptr = tmp.ptr();
+        shape = tmp.shape();
+        strides = tmp.strides();
+        byteoffset = tmp.byteoffset();
+      }
+      else {
+        ptr = std::shared_ptr<void>(
+          kernel::malloc<void>(ptr_lib_, bytelength()));
+        struct Error err = kernel::NumpyArray_copy(
+          kernel::lib::cpu,   // DERIVE
+          reinterpret_cast<uint8_t*>(ptr.get()),
+          reinterpret_cast<uint8_t*>(data()),
+          bytelength());
+        util::handle_error(err, classname(), identities_.get());
+      }
     }
     IdentitiesPtr identities = identities_;
     if (copyidentities  &&  identities_.get() != nullptr) {
@@ -1424,7 +1438,7 @@ namespace awkward {
       return mergeable(raw->array(), mergebool);
     }
 
-    if (!parameters_equal(other.get()->parameters())) {
+    if (!parameters_equal(other.get()->parameters(), false)) {
       return false;
     }
 
@@ -1584,8 +1598,11 @@ namespace awkward {
 
       std::shared_ptr<void> ptr(kernel::malloc<void>(ptr_lib, total_length));
 
+      util::Parameters parameters(parameters_);
       int64_t length_so_far = 0;
       for (auto contiguous_array : contiguous_arrays) {
+        util::merge_parameters(parameters, contiguous_array.parameters());
+
         struct Error err = kernel::NumpyArray_fill<uint8_t, uint8_t>(
           ptr_lib,
           reinterpret_cast<uint8_t*>(ptr.get()),
@@ -1600,7 +1617,7 @@ namespace awkward {
       std::vector<ssize_t> strides({ 1 });
 
       ContentPtr next = std::make_shared<NumpyArray>(Identities::none(),
-                                                     parameters_,
+                                                     parameters,
                                                      ptr,
                                                      shape,
                                                      strides,
@@ -1625,8 +1642,11 @@ namespace awkward {
 
     // handle booleans and numbers
 
+    util::Parameters parameters(parameters_);
     util::dtype nextdtype = dtype_;
     for (auto contiguous_array : contiguous_arrays) {
+      util::merge_parameters(parameters, contiguous_array.parameters());
+
       util::dtype thatdtype = contiguous_array.dtype();
 
       if (nextdtype == util::dtype::complex256  ||
@@ -2429,7 +2449,7 @@ namespace awkward {
     }
 
     ContentPtr next = std::make_shared<NumpyArray>(Identities::none(),
-                                                   parameters_,
+                                                   parameters,
                                                    ptr,
                                                    shape,
                                                    strides,

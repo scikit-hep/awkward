@@ -23,6 +23,59 @@ import awkward1.nplike
 np = awkward1.nplike.NumpyMetadata.instance()
 
 
+@awkward1._connect._numpy.implements("copy")
+def copy(array):
+    """
+    Returns a deep copy of the array (no memory shared with original).
+
+    This is identical to `np.copy` and `copy.deepcopy`.
+
+    It's only useful to explicitly copy an array if you're going to change it
+    in-place. This doesn't come up often because Awkward Arrays are immutable.
+    That is to say, the Awkward Array library doesn't have any operations that
+    change an array in-place, but the data in the array might be owned by another
+    library that can change it in-place.
+
+    For example, if the array comes from NumPy:
+
+        >>> underlying_array = np.array([1.1, 2.2, 3.3, 4.4, 5.5])
+        >>> wrapper = ak.Array(underlying_array)
+        >>> duplicate = ak.copy(wrapper)
+        >>> underlying_array[2] = 123
+        >>> underlying_array
+        array([  1.1,   2.2, 123. ,   4.4,   5.5])
+        >>> wrapper
+        <Array [1.1, 2.2, 123, 4.4, 5.5] type='5 * float64'>
+        >>> duplicate
+        <Array [1.1, 2.2, 3.3, 4.4, 5.5] type='5 * float64'>
+
+    There is an exception to this rule: you can add fields to records in an
+    #ak.Array in-place. However, this changes the #ak.Array wrapper without
+    affecting the underlying layout data (it *replaces* its layout), so a
+    shallow copy will do:
+
+        >>> original = ak.Array([{"x": 1}, {"x": 2}, {"x": 3}])
+        >>> shallow_copy = copy.copy(original)
+        >>> shallow_copy["y"] = original.x**2
+        >>> shallow_copy
+        <Array [{x: 1, y: 1}, ... y: 4}, {x: 3, y: 9}] type='3 * {"x": int64, "y": int64}'>
+        >>> original
+        <Array [{x: 1}, {x: 2}, {x: 3}] type='3 * {"x": int64}'>
+
+    This is key to Awkward Array's efficiency (memory and speed): operations that
+    only change part of a structure re-use pieces from the original ("structural
+    sharing"). Changing data in-place would result in many surprising long-distance
+    changes, so we don't support it. However, an #ak.Array's data might come from
+    a mutable third-party library, so this function allows you to make a true copy.
+    """
+    layout = awkward1.operations.convert.to_layout(
+        array,
+        allow_record=True,
+        allow_other=False,
+    )
+    return awkward1._util.wrap(layout.deep_copy(), awkward1._util.behaviorof(array))
+
+
 def mask(array, mask, valid_when=True, highlevel=True):
     """
     Args:
@@ -1063,6 +1116,80 @@ def flatten(array, axis=1, highlevel=True):
         return out
 
 
+def local_index(array, axis=-1, highlevel=True):
+    """
+    Args:
+        array: Array to index.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    For example,
+
+        >>> array = ak.Array([
+        ...     [[0.0, 1.1, 2.2], []],
+        ...     [[3.3, 4.4]],
+        ...     [],
+        ...     [[5.5], [], [6.6, 7.7, 8.8, 9.9]]])
+        >>> ak.local_index(array, axis=0)
+        <Array [0, 1, 2, 3] type='4 * int64'>
+        >>> ak.local_index(array, axis=1)
+        <Array [[0, 1], [0], [], [0, 1, 2]] type='4 * var * int64'>
+        >>> ak.local_index(array, axis=2)
+        <Array [[[0, 1, 2], []], ... [], [0, 1, 2, 3]]] type='4 * var * var * int64'>
+
+    Note that you can make a Pandas-style MultiIndex by calling this function on
+    every axis.
+
+        >>> multiindex = ak.zip([ak.local_index(array, i) for i in range(array.ndim)])
+        >>> multiindex
+        <Array [[[(0, 0, 0), (0, 0, ... ), (3, 2, 3)]]] type='4 * var * var * (int64, in...'>
+        >>> ak.to_list(multiindex)
+        [[[(0, 0, 0), (0, 0, 1), (0, 0, 2)], []],
+         [[(1, 0, 0), (1, 0, 1)]],
+         [],
+         [[(3, 0, 0)], [], [(3, 2, 0), (3, 2, 1), (3, 2, 2), (3, 2, 3)]]]
+        >>> ak.to_list(ak.flatten(ak.flatten(multiindex)))
+        [(0, 0, 0),
+         (0, 0, 1),
+         (0, 0, 2),
+         (1, 0, 0),
+         (1, 0, 1),
+         (3, 0, 0),
+         (3, 2, 0),
+         (3, 2, 1),
+         (3, 2, 2),
+         (3, 2, 3)]
+
+    But if you're interested in Pandas, you may want to use #ak.to_pandas directly.
+
+        >>> ak.to_pandas(array)
+                                    values
+        entry subentry subsubentry
+        0     0        0               0.0
+                       1               1.1
+                       2               2.2
+        1     0        0               3.3
+                       1               4.4
+        3     0        0               5.5
+              2        0               6.6
+                       1               7.7
+                       2               8.8
+                       3               9.9
+    """
+    layout = awkward1.operations.convert.to_layout(
+        array, allow_record=True, allow_other=False
+    )
+    out = layout.localindex(axis)
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
+
+
 @awkward1._connect._numpy.implements("sort")
 def sort(array, axis=-1, ascending=True, stable=True, highlevel=True):
     """
@@ -2013,7 +2140,6 @@ def combinations(
     replacement=False,
     axis=1,
     fields=None,
-    keys=None,
     parameters=None,
     with_name=None,
     highlevel=True,
@@ -2154,21 +2280,6 @@ def combinations(
     The #ak.argcombinations form can be particularly useful as nested indexing
     in #ak.Array.__getitem__.
     """
-    if keys is not None:
-        if fields is None:
-            fields = keys
-            warnings.warn(
-                "'keys' is deprecated in ak.combinations, will be removed "
-                "in 0.4.0. Use 'fields' instead.",
-                DeprecationWarning,
-            )
-        else:
-            raise TypeError(
-                "cannot set both 'keys' and 'fields' in ak.combinations; "
-                "'keys' is deprecated, will be removed in 0.4.0. "
-                "Use 'fields' instead."
-            )
-
     if parameters is None:
         parameters = {}
     else:
@@ -2194,7 +2305,6 @@ def argcombinations(
     replacement=False,
     axis=1,
     fields=None,
-    keys=None,
     parameters=None,
     with_name=None,
     highlevel=True,
@@ -2231,21 +2341,6 @@ def argcombinations(
     #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
     complete description.
     """
-    if keys is not None:
-        if fields is None:
-            fields = keys
-            warnings.warn(
-                "'keys' is deprecated in ak.argcombinations, will be removed "
-                "in 0.4.0. Use 'fields' instead.",
-                DeprecationWarning,
-            )
-        else:
-            raise TypeError(
-                "cannot set both 'keys' and 'fields' in ak.argcombinations; "
-                "'keys' is deprecated, will be removed in 0.4.0. "
-                "Use 'fields' instead."
-            )
-
     if parameters is None:
         parameters = {}
     else:
@@ -2494,23 +2589,22 @@ def virtual(
     gen = awkward1.layout.ArrayGenerator(
         generate, args, kwargs, form=form, length=length
     )
-    if cache is not None:
-        toattach = awkward1._util.MappingProxy.maybe_wrap(cache)
-        cache = awkward1.layout.ArrayCache(toattach)
-    else:
-        toattach = None
+    if cache is not None and not isinstance(cache, awkward1.layout.ArrayCache):
+        cache = awkward1.layout.ArrayCache(
+            awkward1._util.MappingProxy.maybe_wrap(cache)
+        )
 
     out = awkward1.layout.VirtualArray(
         gen, cache, cache_key=cache_key, parameters=parameters
     )
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior=behavior, cache=toattach)
+        return awkward1._util.wrap(out, behavior=behavior)
     else:
         return out
 
 
-def with_cache(array, cache, chain=None, highlevel=True):
+def with_cache(array, cache, highlevel=True):
     """
     Args:
         array: Data to search for nested virtual arrays.
@@ -2520,14 +2614,6 @@ def with_cache(array, cache, chain=None, highlevel=True):
             re-generated if `__getitem__` raises a `KeyError`. This mapping may
             evict elements according to any caching algorithm (LRU, LFR, RR,
             TTL, etc.).
-        chain (None, "first", "last", or bool): If None, the provided `cache`
-            simply replaces any existing virtual array caches. If "first", the
-            provided `cache` becomes first in a chain of caches; virtual arrays
-            will attempt to `__getitem__`/`__setitem__` the provided `cache`
-            first, falling back to preexisting caches if necessary. If "last",
-            the provided `cache` becomes last in a chain of caches: the
-            preexisting caches get priority. If a bool, True is equivalent to
-            "first" and False is equivalent to None.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
@@ -2557,50 +2643,19 @@ def with_cache(array, cache, chain=None, highlevel=True):
 
     Viewing the `array2["x"]` filled `cache2` and not `cache1`.
 
-    We can also chain `cache1` and `cache2`:
-
-        >>> array3 = ak.with_cache(array2, cache1, chain="first")
-        >>> array3
-        <Array [{x: [1.1, 2.2, 3.3], ... 5.5], y: 300}] type='3 * {"x": var * float64, ...'>
-        >>>
-        >>> len(cache1), len(cache2)
-        (1, 1)
-
-    The request for `array3["x"]` deferred to the already-filled `cache2`,
-    while the request for `array3["y"]` put a new array into `cache1`.
-
     See #ak.virtual.
     """
-    if chain is True:
-        chain = "first"
-    elif chain is False:
-        chain = None
-    elif chain is not None and chain not in ("first", "last"):
-        raise ValueError(
-            "chain must be None, 'first', 'last', or bool"
-            + awkward1._util.exception_suffix(__file__)
+    if cache is not None and not isinstance(cache, awkward1.layout.ArrayCache):
+        cache = awkward1.layout.ArrayCache(
+            awkward1._util.MappingProxy.maybe_wrap(cache)
         )
-
-    if isinstance(cache, awkward1.layout.ArrayCache):
-        cache = cache.mutablemapping
-
-    toattach = awkward1._util.MappingProxy.maybe_wrap(cache)
-    cache = awkward1.layout.ArrayCache(toattach)
 
     def getfunction(layout, depth):
         if isinstance(layout, awkward1.layout.VirtualArray):
-            if chain is None:
-                newcache = cache
-            elif cache is None:
+            if cache is None:
                 newcache = layout.cache
             elif layout.cache is None:
                 newcache = cache
-            elif chain == "first":
-                raise NotImplementedError("To properly chain caches we need to find and chain all layout caches, returning them as highlevel")
-                # newcache = awkward1.layout.ArrayCache(_CacheChain(cache, layout.cache))
-            elif chain == "last":
-                raise NotImplementedError("To properly chain caches we need to find and chain all layout caches, returning them as highlevel")
-                # newcache = awkward1.layout.ArrayCache(_CacheChain(layout.cache, cache))
             return lambda: awkward1.layout.VirtualArray(
                 layout.generator,
                 newcache,
@@ -2615,47 +2670,9 @@ def with_cache(array, cache, chain=None, highlevel=True):
         awkward1.operations.convert.to_layout(array), getfunction
     )
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array), toattach)
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
     else:
         return out
-
-
-class _CacheChain(MutableMapping):
-    def __init__(self, first, last):
-        if isinstance(first, awkward1.layout.ArrayCache):
-            first = first.mutablemapping
-        if isinstance(last, awkward1.layout.ArrayCache):
-            last = last.mutablemapping
-        self.first = first
-        self.last = last
-
-    def __getitem__(self, where):
-        try:
-            return self.first[where]
-        except KeyError:
-            return self.last[where]
-
-    def __setitem__(self, where, what):
-        if where not in self.last:
-            self.first[where] = what
-
-    def __delitem__(self, where):
-        try:
-            del self.first[where]
-        except KeyError:
-            del self.last[where]
-
-    def __iter__(self):
-        seen = set()
-        for x in self.first:
-            seen.add(x)
-            yield x
-        for x in self.last:
-            if x not in seen:
-                yield x
-
-    def __len__(self):
-        return len(set(self.first).union(set(self.last)))
 
 
 @awkward1._connect._numpy.implements("size")

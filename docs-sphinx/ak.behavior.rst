@@ -261,18 +261,26 @@ For example,
 
 .. code-block:: python
 
-    >>> ak.to_list(one == two)
-    [[{'x': False, 'y': False}, {'x': True, 'y': True}, {'x': False, 'y': False}],
-     [],
-     [{'x': False, 'y': False}, {'x': True, 'y': True}],
-     [{'x': False, 'y': False}],
-     [{'x': False, 'y': False}, {'x': True, 'y': True}, {'x': False, 'y': False}]]
+    >>> ak.Array([[1, 2, 3], [], [4]]) == ak.Array([[3, 2, 1], [], [4]])
+    <Array [[False, True, False], [], [True]] type='3 * var * bool'>
+
+
+However, this does not apply to records or named types until they are explicitly
+overridden:
+
+.. code-block:: python
+
+    >>> one == two
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    ...
+    ValueError: no overloads for custom types: equal(point, point)
 
 We might want to take an object-oriented view in which the ``==`` operation
-applies to points, rather than their components. If we try to do it by adding
-``__eq__`` as a method on ``PointArray``, it would work if the ``PointArray``
-is the top of the data structure, but not if it's nested within another
-structure.
+applies to points, regardless of how deeply they are nested. If we try to do
+it by adding ``__eq__`` as a method on ``PointArray``, it would work if the
+``PointArray`` is the top of the data structure, but not if it's nested within
+another structure.
 
 Instead, we should override ``np.equal`` itself. Custom ufunc overrides are
 checked at every step in broadcasting, so the override would be applied if
@@ -309,6 +317,70 @@ Similarly for overriding ``abs``
      [10.406248123122953, 11.892854997854805, 13.379461872586655]]
 
 and all other ufuncs.
+
+If you need a placeholder for "any number," use ``numbers.Real``,
+``numbers.Integral``, etc. Non-arrays are resolved by type; builtin Python
+numbers and NumPy numbers are subclasses of the generic number types in the
+``numbers`` library.
+
+Also, for commutative operations, be sure to override both operator orders.
+(Function signatures are matched to ``ak.behavior`` using multiple dispatch.)
+
+.. code-block:: python
+
+    >>> import numbers
+    >>> def point_lmult(point, scalar):
+    ...     return ak.Array({"x": point.x * scalar, "y": point.y * scalar})
+    ... 
+    >>> def point_rmult(scalar, point):
+    ...     return point_lmult(point, scalar)
+    ... 
+    >>> ak.behavior[np.multiply, "point", numbers.Real] = point_lmult
+    >>> ak.behavior[np.multiply, numbers.Real, "point"] = point_rmult
+    >>> ak.to_list(one * 10)
+    [[{'x': 10, 'y': 11.0}, {'x': 20, 'y': 22.0}, {'x': 30, 'y': 33.0}],
+     [],
+     [{'x': 40, 'y': 44.0}, {'x': 50, 'y': 55.0}],
+     [{'x': 60, 'y': 66.0}],
+     [{'x': 70, 'y': 77.0}, {'x': 80, 'y': 88.0}, {'x': 90, 'y': 99.0}]]
+
+If you need to override ufuncs in more generality, you can use the
+"apply_ufunc" interface:
+
+.. code-block:: python
+
+    >>> def apply_ufunc(ufunc, method, args, kwargs):
+    ...     if ufunc in (np.sin, np.cos, np.tan):
+    ...         x = ufunc(args[0].x)
+    ...         y = ufunc(args[0].y)
+    ...         return ak.Array({"x": x, "y": y})
+    ...     else:
+    ...         return NotImplemented
+    ... 
+    >>> ak.behavior[np.ufunc, "point"] = apply_ufunc
+    >>> ak.to_list(np.sin(one))
+    [[{'x': 0.8414709848078965, 'y': 0.8912073600614354},
+      {'x': 0.9092974268256817, 'y': 0.8084964038195901},
+      {'x': 0.1411200080598672, 'y': -0.1577456941432482}],
+     [],
+     [{'x': -0.7568024953079282, 'y': -0.951602073889516},
+      {'x': -0.9589242746631385, 'y': -0.7055403255703919}],
+     [{'x': -0.27941549819892586, 'y': 0.31154136351337786}],
+     [{'x': 0.6569865987187891, 'y': 0.9881682338770004},
+      {'x': 0.9893582466233818, 'y': 0.5849171928917617},
+      {'x': 0.4121184852417566, 'y': -0.45753589377532133}]]
+    >>> np.sqrt(one)
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    ...
+    ValueError: no overloads for custom types: sqrt(point)
+
+But be forewarned: the ``ak.behavior[np.ufunc, name]`` syntax will match
+*any* ufunc that has an array containing an array with type ``name``
+*anywhere* in the argument list. The first array in the argument list
+with type ``name`` will be matched instead of more detailed argument lists
+with type ``name`` at a later spot in the list. The "apply_ufunc" interface
+is *greedy*.
 
 Mixin decorators
 ================
@@ -389,10 +461,10 @@ are a behavior overlaid on arrays.
 
 There are four predefined string behaviors:
 
-   * :doc:`_auto/ak.behaviors.string.CharBehavior`: an array of UTF-8 encoded characters;
-   * :doc:`_auto/ak.behaviors.string.ByteBehavior`: an array of unencoded characters;
-   * :doc:`_auto/ak.behaviors.string.StringBehavior`: an array of variable-length UTF-8 encoded strings;
-   * :doc:`_auto/ak.behaviors.string.ByteStringBehavior`: an array of variable-length unencoded bytestrings.
+   * :doc:`_auto/ak.CharBehavior`: an array of UTF-8 encoded characters;
+   * :doc:`_auto/ak.ByteBehavior`: an array of unencoded characters;
+   * :doc:`_auto/ak.StringBehavior`: an array of variable-length UTF-8 encoded strings;
+   * :doc:`_auto/ak.ByteStringBehavior`: an array of variable-length unencoded bytestrings.
 
 All four override the string representations (``__str__`` and ``__repr__``),
 but the string behaviors additionally override equality:

@@ -1616,16 +1616,6 @@ kernels:
           - {name: starts, type: "Const[List[int32_t]]", dir: in}
           - {name: stops, type: "Const[List[int32_t]]", dir: in}
           - {name: length, type: "int64_t", dir: in}
-      - name: awkward_ListArrayU32_combinations_64
-        args:
-          - {name: tocarry, type: "List[List[int64_t]]", dir: out}
-          - {name: toindex, type: "List[int64_t]", dir: out}
-          - {name: fromindex, type: "List[int64_t]", dir: in}
-          - {name: n, type: "int64_t", dir: in}
-          - {name: replacement, type: "bool", dir: in}
-          - {name: starts, type: "Const[List[uint32_t]]", dir: in}
-          - {name: stops, type: "Const[List[uint32_t]]", dir: in}
-          - {name: length, type: "int64_t", dir: in}
       - name: awkward_ListArray64_combinations_64
         args:
           - {name: tocarry, type: "List[List[int64_t]]", dir: out}
@@ -1635,6 +1625,16 @@ kernels:
           - {name: replacement, type: "bool", dir: in}
           - {name: starts, type: "Const[List[int64_t]]", dir: in}
           - {name: stops, type: "Const[List[int64_t]]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+      - name: awkward_ListArrayU32_combinations_64
+        args:
+          - {name: tocarry, type: "List[List[int64_t]]", dir: out}
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "List[int64_t]", dir: in}
+          - {name: n, type: "int64_t", dir: in}
+          - {name: replacement, type: "bool", dir: in}
+          - {name: starts, type: "Const[List[uint32_t]]", dir: in}
+          - {name: stops, type: "Const[List[uint32_t]]", dir: in}
           - {name: length, type: "int64_t", dir: in}
     description: null
     definition: |
@@ -3284,6 +3284,19 @@ kernels:
                   stops_out[k] = stops_in[i]
                   k = k + 1
     automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_NumpyArray_copy
+    specializations:
+      - name: awkward_NumpyArray_copy
+        args:
+          - {name: toptr, type: "List[uint8_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: len, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_NumpyArray_contiguous_copy

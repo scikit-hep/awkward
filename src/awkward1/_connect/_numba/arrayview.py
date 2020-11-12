@@ -321,6 +321,11 @@ class ArrayView(object):
             allow_other=False,
             numpytype=(np.number, np.bool_, np.bool),
         )
+        while (
+            isinstance(layout, awkward1.layout.VirtualArray)
+            and isinstance(layout.generator, awkward1.layout.SliceGenerator)
+        ):
+            layout = layout.array
         layout = awkward1.operations.convert.regularize_numpyarray(
             layout, allow_empty=False, highlevel=False
         )

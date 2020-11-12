@@ -87,8 +87,3 @@ def test_unionarray():
     assert awkward1.to_list(one) == [0.0, 1.1, 2.2, 3.3, 4, 5]
     assert awkward1.to_list(two) == [0, 100, 200.3, 300.3, 400.4, 500.5]
     assert awkward1.to_list(one + two) == [0.0, 101.1, 202.5, 303.6, 404.4, 505.5]
-
-def test_recordarray():
-    one = awkward1.Array([{"x": 0, "y": []}, {"x": 1, "y": [1.1]}, {"x": 2, "y": [1.1, 2.2]}], check_valid=True)
-    two = awkward1.Array([{"x": 0, "y": []}, {"x": 100, "y": [100]}, {"x": 1000, "y": [1000, 2000]}], check_valid=True)
-    assert awkward1.to_list(one + two) == [{"x": 0, "y": []}, {"x": 101, "y": [101.1]}, {"x": 1002, "y": [1001.1, 2002.2]}]

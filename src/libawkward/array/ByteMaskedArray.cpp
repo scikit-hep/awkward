@@ -157,12 +157,24 @@ namespace awkward {
                         bool check_parameters,
                         bool check_form_key,
                         bool compatibility_check) const {
+    if (compatibility_check) {
+      if (VirtualForm* raw = dynamic_cast<VirtualForm*>(other.get())) {
+        if (raw->form().get() != nullptr) {
+          return equal(raw->form(),
+                       check_identities,
+                       check_parameters,
+                       check_form_key,
+                       compatibility_check);
+        }
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -185,7 +197,13 @@ namespace awkward {
 
   const FormPtr
   ByteMaskedForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<ByteMaskedForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      mask_,
+      content_.get()->getitem_field(key),
+      valid_when_);
   }
 
   ////////// ByteMaskedArray
@@ -435,16 +453,6 @@ namespace awkward {
                                             mask_.form(),
                                             content_.get()->form(materialize),
                                             valid_when_);
-  }
-
-  bool
-  ByteMaskedArray::has_virtual_form() const {
-    return content_.get()->has_virtual_form();
-  }
-
-  bool
-  ByteMaskedArray::has_virtual_length() const {
-    return content_.get()->has_virtual_length();
   }
 
   const std::string
@@ -851,7 +859,7 @@ namespace awkward {
       return mergeable(raw->array(), mergebool);
     }
 
-    if (!parameters_equal(other.get()->parameters())) {
+    if (!parameters_equal(other.get()->parameters(), false)) {
       return false;
     }
 

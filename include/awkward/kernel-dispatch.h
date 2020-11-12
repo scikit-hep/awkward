@@ -269,6 +269,12 @@ namespace awkward {
       int64_t skip,
       int64_t stride);
 
+    ERROR NumpyArray_copy(
+      kernel::lib ptr_lib,
+      uint8_t* toptr,
+      const uint8_t* fromptr,
+      int64_t len);
+
     ERROR NumpyArray_contiguous_copy_64(
       kernel::lib ptr_lib,
       uint8_t* toptr,

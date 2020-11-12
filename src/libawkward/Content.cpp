@@ -1164,8 +1164,8 @@ namespace awkward {
   }
 
   bool
-  Content::parameters_equal(const util::Parameters& other) const {
-    return util::parameters_equal(parameters_, other);
+  Content::parameters_equal(const util::Parameters& other, bool check_all) const {
+    return util::parameters_equal(parameters_, other, check_all);
   }
 
   bool
@@ -1607,6 +1607,10 @@ namespace awkward {
                                                 const RegularArray* raw,
                                                 int64_t length,
                                                 const std::string& classname) {
+    if (length == 0) {
+      length = 1;  // if this is in a tuple-slice and really should be 0, it will be trimmed later
+    }
+
     Index64 index(missing.index());
     Index64 outindex(index.length()*length);
 
@@ -1623,6 +1627,7 @@ namespace awkward {
                              util::Parameters(),
                              outindex,
                              raw->content());
+
     return std::make_shared<RegularArray>(Identities::none(),
                                           util::Parameters(),
                                           out.simplify_optiontype(),

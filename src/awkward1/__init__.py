@@ -14,6 +14,8 @@ if distutils.version.LooseVersion(numpy.__version__) < distutils.version.LooseVe
 ):
     raise ImportError("Numpy 1.13.1 or later required")
 
+deprecations_as_errors = False
+
 # NumPy-like alternatives
 import awkward1.nplike
 

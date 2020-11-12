@@ -268,12 +268,24 @@ namespace awkward {
                    bool check_parameters,
                    bool check_form_key,
                    bool compatibility_check) const {
+    if (compatibility_check) {
+      if (VirtualForm* raw = dynamic_cast<VirtualForm*>(other.get())) {
+        if (raw->form().get() != nullptr) {
+          return equal(raw->form(),
+                       check_identities,
+                       check_parameters,
+                       check_form_key,
+                       compatibility_check);
+        }
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -852,28 +864,6 @@ namespace awkward {
                                        tags_.form(),
                                        index_.form(),
                                        contents);
-  }
-
-  template <typename T, typename I>
-  bool
-  UnionArrayOf<T, I>::has_virtual_form() const {
-    for (auto x : contents_) {
-      if (x.get()->has_virtual_form()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  template <typename T, typename I>
-  bool
-  UnionArrayOf<T, I>::has_virtual_length() const {
-    for (auto x : contents_) {
-      if (x.get()->has_virtual_length()) {
-        return true;
-      }
-    }
-    return false;
   }
 
   template <typename T, typename I>
@@ -1468,7 +1458,7 @@ namespace awkward {
       return mergeable(raw->array(), mergebool);
     }
 
-    if (!parameters_equal(other.get()->parameters())) {
+    if (!parameters_equal(other.get()->parameters(), false)) {
       return false;
     }
     return true;
@@ -1558,8 +1548,11 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
 
+    util::Parameters parameters(parameters_);
+    util::merge_parameters(parameters, other.get()->parameters());
+
     return std::make_shared<UnionArray8_64>(Identities::none(),
-                                            parameters_,
+                                            parameters,
                                             tags,
                                             index,
                                             contents);
@@ -1615,7 +1608,10 @@ namespace awkward {
 
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 
+    util::Parameters parameters(parameters_);
     for (auto array : head) {
+      util::merge_parameters(parameters, array.get()->parameters());
+
       if (UnionArray8_32* raw = dynamic_cast<UnionArray8_32*>(array.get())) {
         Index8 union_tags = raw->tags();
         Index32 union_index = raw->index();
@@ -1715,7 +1711,7 @@ namespace awkward {
     }
 
     ContentPtr next = std::make_shared<UnionArray8_64>(Identities::none(),
-                                                       parameters_,
+                                                       parameters,
                                                        nexttags,
                                                        nextindex,
                                                        nextcontents);

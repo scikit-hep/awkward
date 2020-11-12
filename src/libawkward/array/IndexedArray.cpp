@@ -175,12 +175,24 @@ namespace awkward {
                      bool check_parameters,
                      bool check_form_key,
                      bool compatibility_check) const {
+    if (compatibility_check) {
+      if (VirtualForm* raw = dynamic_cast<VirtualForm*>(other.get())) {
+        if (raw->form().get() != nullptr) {
+          return equal(raw->form(),
+                       check_identities,
+                       check_parameters,
+                       check_form_key,
+                       compatibility_check);
+        }
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -202,7 +214,12 @@ namespace awkward {
 
   const FormPtr
   IndexedForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<IndexedForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      index_,
+      content_.get()->getitem_field(key));
   }
 
   ////////// IndexedOptionForm
@@ -338,12 +355,24 @@ namespace awkward {
                            bool check_parameters,
                            bool check_form_key,
                            bool compatibility_check) const {
+    if (compatibility_check) {
+      if (VirtualForm* raw = dynamic_cast<VirtualForm*>(other.get())) {
+        if (raw->form().get() != nullptr) {
+          return equal(raw->form(),
+                       check_identities,
+                       check_parameters,
+                       check_form_key,
+                       compatibility_check);
+        }
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -365,7 +394,12 @@ namespace awkward {
 
   const FormPtr
   IndexedOptionForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<IndexedOptionForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      index_,
+      content_.get()->getitem_field(key));
   }
 
   ////////// IndexedArray
@@ -964,18 +998,6 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
-  bool
-  IndexedArrayOf<T, ISOPTION>::has_virtual_form() const {
-    return content_.get()->has_virtual_form();
-  }
-
-  template <typename T, bool ISOPTION>
-  bool
-  IndexedArrayOf<T, ISOPTION>::has_virtual_length() const {
-    return content_.get()->has_virtual_length();
-  }
-
-  template <typename T, bool ISOPTION>
   const std::string
   IndexedArrayOf<T, ISOPTION>::tostring_part(const std::string& indent,
                                              const std::string& pre,
@@ -1458,7 +1480,7 @@ namespace awkward {
       return mergeable(raw->array(), mergebool);
     }
 
-    if (!parameters_equal(other.get()->parameters())) {
+    if (!parameters_equal(other.get()->parameters(), false)) {
       return false;
     }
 
@@ -1561,9 +1583,12 @@ namespace awkward {
         std::string("unrecognized IndexedArray specialization") + FILENAME(__LINE__));
     }
 
+    util::Parameters parameters(parameters_);
+    util::merge_parameters(parameters, other.get()->parameters());
+
     return std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
       Identities::none(),
-      parameters_,
+      parameters,
       index,
       content);
   }
@@ -1624,12 +1649,15 @@ namespace awkward {
 
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 
+    util::Parameters parameters(parameters_);
     bool is_option = false;
     ContentPtrVec contents;
     int64_t contentlength_so_far = 0;
     int64_t length_so_far = 0;
     Index64 nextindex(total_length);
     for (auto array : head) {
+      util::merge_parameters(parameters, array.get()->parameters());
+
       if (ByteMaskedArray* raw = dynamic_cast<ByteMaskedArray*>(array.get())) {
         array = raw->toIndexedOptionArray64();
       }
@@ -1738,13 +1766,13 @@ namespace awkward {
     ContentPtr next(nullptr);
     if (is_option) {
       next = std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                    parameters_,
+                                                    parameters,
                                                     nextindex,
                                                     nextcontent);
     }
     else {
       next = std::make_shared<IndexedArray64>(Identities::none(),
-                                              parameters_,
+                                              parameters,
                                               nextindex,
                                               nextcontent);
     }

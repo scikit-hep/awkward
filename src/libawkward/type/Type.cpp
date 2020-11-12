@@ -59,8 +59,8 @@ namespace awkward {
   }
 
   bool
-  Type::parameters_equal(const util::Parameters& other) const {
-    return util::parameters_equal(parameters_, other);
+  Type::parameters_equal(const util::Parameters& other, bool check_all) const {
+    return util::parameters_equal(parameters_, other, check_all);
   }
 
   bool

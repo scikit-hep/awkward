@@ -10,8 +10,10 @@ import threading
 
 try:
     from collections.abc import Iterable
+    from collections.abc import MutableMapping
 except ImportError:
     from collections import Iterable
+    from collections import MutableMapping
 
 import awkward1.layout
 import awkward1._ext
@@ -1883,7 +1885,7 @@ def to_arrow(array):
 
             types = pyarrow.struct(
                 [
-                    pyarrow.field(layout.keys()[i], values[i].type)
+                    pyarrow.field(layout.key(i), values[i].type)
                     for i in range(len(values))
                 ]
             )
@@ -1963,14 +1965,44 @@ def to_arrow(array):
                     return pyarrow.DictionaryArray.from_arrays(index, dictionary, bytemask)
 
             else:
-                if len(layout.content) == 0:
-                    empty = recurse(layout.content)
+                layout_content = layout.content
+
+                if len(layout_content) == 0:
+                    empty = recurse(layout_content)
                     if mask is None:
                         return empty
                     else:
                         return pyarrow.array([None] * len(index)).cast(empty.type)
+
+                elif isinstance(layout_content, awkward1.layout.RecordArray):
+                    values = [
+                        recurse(x[:len(layout_content)][index])
+                        for x in layout_content.contents
+                    ]
+
+                    min_list_len = min(map(len, values))
+
+                    types = pyarrow.struct(
+                        [
+                            pyarrow.field(layout_content.key(i), values[i].type)
+                            for i in range(len(values))
+                        ]
+                    )
+
+                    if mask is not None:
+                        return pyarrow.Array.from_buffers(
+                            types,
+                            min_list_len,
+                            [pyarrow.py_buffer(mask)],
+                            children=values,
+                        )
+                    else:
+                        return pyarrow.Array.from_buffers(
+                            types, min_list_len, [None], children=values
+                        )
+
                 else:
-                    return recurse(layout.content[index], mask)
+                    return recurse(layout_content[index], mask)
 
         elif isinstance(
             layout,
@@ -2527,7 +2559,7 @@ def from_parquet(
     row_groups=None,
     use_threads=True,
     lazy=False,
-    lazy_cache="attach",
+    lazy_cache="new",
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
@@ -2547,10 +2579,9 @@ def from_parquet(
             #ak.layout.VirtualArray, possibly in #ak.partition.PartitionedArray
             if the file has more than one row group); if False, read all
             requested data immediately.
-        lazy_cache (None, "attach", or MutableMapping): If lazy, pass this
-            cache to the VirtualArrays. If "attach", a new dict is created
-            and attached to the output array as a "cache" parameter on
-            #ak.Array.
+        lazy_cache (None, "new", or MutableMapping): If lazy, pass this
+            cache to the VirtualArrays. If "new", a new dict (keep-forever cache)
+            is created. If None, no cache is used.
         lazy_cache_key (None or str): If lazy, pass this cache_key to the
             VirtualArrays. If None, a process-unique string is constructed.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -2593,22 +2624,25 @@ def from_parquet(
         else:
             return out
 
+    hold_cache = None
     if lazy:
         state = _ParquetState(file, use_threads, source, options)
 
-        if lazy_cache == "attach":
-            lazy_cache = awkward1._util.MappingProxy({})
-            toattach = lazy_cache
-        elif lazy_cache is not None:
-            lazy_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
-            toattach = lazy_cache
-        else:
-            toattach = None
-
-        if lazy_cache is None:
-            cache = None
-        else:
-            cache = awkward1.layout.ArrayCache(lazy_cache)
+        if lazy_cache == "new":
+            hold_cache = awkward1._util.MappingProxy({})
+            lazy_cache = awkward1.layout.ArrayCache(hold_cache)
+        elif lazy_cache == "attach":
+            exception = TypeError("lazy_cache must be a MutableMapping")
+            awkward1._util.deprecate(exception, "1.0.0", date="2020-12-01")
+            hold_cache = awkward1._util.MappingProxy({})
+            lazy_cache = awkward1.layout.ArrayCache(hold_cache)
+        elif lazy_cache is not None and not isinstance(
+            lazy_cache, awkward1.layout.ArrayCache
+        ):
+            hold_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
+            if not isinstance(hold_cache, MutableMapping):
+                raise TypeError("lazy_cache must be a MutableMapping")
+            lazy_cache = awkward1.layout.ArrayCache(hold_cache)
 
         if lazy_cache_key is None:
             lazy_cache_key = "ak.from_parquet:{0}".format(_from_parquet_key())
@@ -2631,7 +2665,9 @@ def from_parquet(
                     cache_key = "{0}[{1}]".format(lazy_cache_key, row_group)
                 else:
                     cache_key = "{0}.{1}[{2}]".format(lazy_cache_key, column, row_group)
-                fields.append(awkward1.layout.VirtualArray(generator, cache, cache_key))
+                fields.append(
+                    awkward1.layout.VirtualArray(generator, lazy_cache, cache_key)
+                )
 
             if all_columns == [""]:
                 partitions.append(fields[0])
@@ -2646,7 +2682,7 @@ def from_parquet(
                 partitions, offsets[1:]
             )
         if highlevel:
-            return awkward1._util.wrap(out, behavior, cache=toattach)
+            return awkward1._util.wrap(out, behavior)
         else:
             return out
 
@@ -2841,20 +2877,6 @@ def to_arrayset(
         <Array [[1, 2, 3], [], [4, ... [], [], [10]] type='8 * var * int64'>
         >>> ak.partitions(ak.from_arrayset(form, container, 4))
         [3, 1, 3, 1]
-
-    Which can also lazily load partitions as they are observed:
-
-        >>> lazy = ak.from_arrayset(form, container, 4, lazy=True, lazy_lengths=[3, 1, 3, 1])
-        >>> lazy.cache
-        {}
-        >>> lazy
-        <Array [[1, 2, 3], [], [4, ... [], [], [10]] type='8 * var * int64'>
-        >>> len(lazy.cache)
-        3
-        >>> lazy + 100
-        <Array [[101, 102, 103], [], ... [], [], [110]] type='8 * var * int64'>
-        >>> len(lazy.cache)
-        4
 
     See also #ak.from_arrayset.
     """
@@ -3439,9 +3461,14 @@ def _form_to_layout(
         return awkward1.layout.NumpyArray(array, identities, parameters)
 
     elif isinstance(form, awkward1.forms.RecordForm):
+        items = list(form.contents.items())
+        if form.istuple:
+            items.sort(key=lambda x: int(x[0]))
         contents = []
         minlength = None
-        for content_form in form.contents.values():
+        keys = []
+        for key, content_form in items:
+            keys.append(key)
             content = _form_to_layout(
                 content_form,
                 container,
@@ -3461,7 +3488,7 @@ def _form_to_layout(
 
         return awkward1.layout.RecordArray(
             contents,
-            None if form.istuple else form.contents.keys(),
+            None if form.istuple else keys,
             minlength,
             identities,
             parameters,
@@ -3568,7 +3595,9 @@ def _form_to_layout(
             sep,
             partition_first,
         )
-        return awkward1.layout.VirtualArray(generator, cache, cache_key + sep + node_cache_key)
+        return awkward1.layout.VirtualArray(
+            generator, cache, cache_key + sep + node_cache_key
+        )
 
     else:
         raise AssertionError(
@@ -3622,7 +3651,7 @@ def from_arrayset(
     sep="-",
     partition_first=False,
     lazy=False,
-    lazy_cache="attach",
+    lazy_cache="new",
     lazy_cache_key=None,
     lazy_lengths=None,
     highlevel=True,
@@ -3659,10 +3688,9 @@ def from_arrayset(
             if `num_partitions` is not None); if False, read all requested data
             immediately. Any RecordArray child nodes will additionally be
             read on demand.
-        lazy_cache (None, "attach", or MutableMapping): If lazy, pass this
-            cache to the VirtualArrays. If "attach", a new dict is created
-            and attached to the output array as a "cache" parameter on
-            #ak.Array.
+        lazy_cache (None, "new", or MutableMapping): If lazy, pass this
+            cache to the VirtualArrays. If "new", a new dict (keep-forever cache)
+            is created. If None, no cache is used.
         lazy_cache_key (None or str): If lazy, pass this cache_key to the
             VirtualArrays. If None, a process-unique string is constructed.
         lazy_lengths (None, int, or iterable of ints): If lazy and
@@ -3728,26 +3756,28 @@ def from_arrayset(
         tmp2 = partition_format
         partition_format = lambda x: tmp2.format(x)
 
+    hold_cache = None
     if lazy:
         form = _wrap_record_with_virtual(form)
 
-        if lazy_cache == "attach":
-            lazy_cache = awkward1._util.MappingProxy({})
-            toattach = lazy_cache
-        elif lazy_cache is not None:
-            lazy_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
-            toattach = lazy_cache
-        else:
-            toattach = None
-
-        if lazy_cache is not None:
-            lazy_cache = awkward1.layout.ArrayCache(lazy_cache)
+        if lazy_cache == "new":
+            hold_cache = awkward1._util.MappingProxy({})
+            lazy_cache = awkward1.layout.ArrayCache(hold_cache)
+        elif lazy_cache == "attach":
+            exception = TypeError("lazy_cache must be a MutableMapping")
+            awkward1._util.deprecate(exception, "1.0.0", date="2020-12-01")
+            hold_cache = awkward1._util.MappingProxy({})
+            lazy_cache = awkward1.layout.ArrayCache(hold_cache)
+        elif lazy_cache is not None and not isinstance(
+            lazy_cache, awkward1.layout.ArrayCache
+        ):
+            hold_cache = awkward1._util.MappingProxy.maybe_wrap(lazy_cache)
+            if not isinstance(hold_cache, MutableMapping):
+                raise TypeError("lazy_cache must be a MutableMapping")
+            lazy_cache = awkward1.layout.ArrayCache(hold_cache)
 
         if lazy_cache_key is None:
             lazy_cache_key = "ak.from_arrayset:{0}".format(_from_arrayset_key())
-
-    else:
-        toattach = None
 
     if num_partitions is None:
         args = (form, container, None, prefix, sep, partition_first)
@@ -3821,7 +3851,7 @@ def from_arrayset(
         )
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior, cache=toattach)
+        return awkward1._util.wrap(out, behavior)
     else:
         return out
 
@@ -3962,7 +3992,13 @@ or
         return out
 
     def recurse(layout, row_arrays, col_names):
-        if layout.parameter("__array__") in ("string", "bytestring"):
+        if isinstance(layout, awkward1._util.virtualtypes):
+            return recurse(layout.array, row_arrays, col_names)
+
+        elif isinstance(layout, awkward1._util.indexedtypes):
+            return recurse(layout.project(), row_arrays, col_names)
+
+        elif layout.parameter("__array__") in ("string", "bytestring"):
             return [(to_numpy(layout), row_arrays, col_names)]
 
         elif layout.purelist_depth > 1:
@@ -3983,6 +4019,19 @@ or
                 - numpy.repeat(starts, counts)
             )
             return recurse(flattened, newrows, col_names)
+
+        elif isinstance(layout, awkward1._util.uniontypes):
+            layout = awkward1._util.union_to_record(layout, anonymous)
+            if isinstance(layout, awkward1._util.uniontypes):
+                return [(to_numpy(layout), row_arrays, col_names)]
+            else:
+                return sum(
+                    [
+                        recurse(layout.field(n), row_arrays, col_names + (n,))
+                        for n in layout.keys()
+                    ],
+                    [],
+                )
 
         elif isinstance(layout, awkward1.layout.RecordArray):
             return sum(
@@ -4054,6 +4103,10 @@ or
             tables.append(pandas.DataFrame(data=column, index=index, columns=columns))
 
         last_row_arrays = row_arrays
+
+    for table in tables:
+        if isinstance(table.columns, pandas.MultiIndex) and table.columns.nlevels == 1:
+            table.columns = table.columns.get_level_values(0)
 
     return tables
 

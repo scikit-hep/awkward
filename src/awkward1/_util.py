@@ -7,11 +7,14 @@ import re
 import sys
 import os
 import weakref
+import warnings
 
 try:
-    from collections.abc import Mapping, MutableMapping
+    from collections.abc import Mapping
+    from collections.abc import MutableMapping
 except ImportError:
-    from collections import Mapping, MutableMapping
+    from collections import Mapping
+    from collections import MutableMapping
 
 import awkward1.layout
 import awkward1.partition
@@ -44,6 +47,21 @@ def exception_suffix(filename):
             + filename
             + line
             + ")")
+
+
+def deprecate(exception, version, date=None):
+    if awkward1.deprecations_as_errors:
+        raise exception
+    else:
+        if date is None:
+            date = ""
+        else:
+            date = " (target date: " + date + ")"
+        message = """In version {0}{1}, this will be an error.
+(Set ak.deprecations_as_errors = True to get a stack trace now.)
+
+{2}: {3}""".format(version, date, type(exception).__name__, str(exception))
+        warnings.warn(message, DeprecationWarning)
 
 
 virtualtypes = (awkward1.layout.VirtualArray,)
@@ -372,20 +390,16 @@ def behaviorof(*arrays):
     return behavior
 
 
-def wrap(content, behavior, cache=None):
+def wrap(content, behavior):
     import awkward1.highlevel
 
     if isinstance(
         content, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
     ):
-        return awkward1.highlevel.Array(
-            content, behavior=behavior, cache=cache, kernels=None
-        )
+        return awkward1.highlevel.Array(content, behavior=behavior, kernels=None)
 
     elif isinstance(content, awkward1.layout.Record):
-        return awkward1.highlevel.Record(
-            content, behavior=behavior, cache=cache, kernels=None
-        )
+        return awkward1.highlevel.Record(content, behavior=behavior, kernels=None)
 
     else:
         return content
@@ -475,7 +489,7 @@ def completely_flatten(array):
         )
 
 
-def broadcast_and_apply(inputs, getfunction, behavior):
+def broadcast_and_apply(inputs, getfunction, behavior, allow_records=True):
     def checklength(inputs):
         length = len(inputs[0])
         for x in inputs[1:]:
@@ -536,16 +550,13 @@ def broadcast_and_apply(inputs, getfunction, behavior):
         nplike = awkward1.nplike.of(*inputs)
 
         # handle implicit right-broadcasting (i.e. NumPy-like)
-        if any(isinstance(x, listtypes) for x in inputs) and not any(
-            isinstance(x, (awkward1.layout.Content, awkward1.layout.Record))
-            and x.has_virtual_form
-            for x in inputs
-        ):
+        if any(isinstance(x, listtypes) for x in inputs):
             maxdepth = max(
                 x.purelist_depth
                 for x in inputs
                 if isinstance(x, awkward1.layout.Content)
             )
+
             if maxdepth > 0 and all(
                 x.purelist_isregular
                 for x in inputs
@@ -636,9 +647,11 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                 index[mask] = nplike.arange(nplike.count_nonzero(mask))
                 nextinputs = []
                 numoutputs = None
-                for i, x in enumerate(inputs):
+                i = 0
+                for x in inputs:
                     if isinstance(x, uniontypes):
                         nextinputs.append(x[mask].project(combo[str(i)]))
+                        i += 1
                     elif isinstance(x, awkward1.layout.Content):
                         nextinputs.append(x[mask])
                     else:
@@ -651,6 +664,7 @@ def broadcast_and_apply(inputs, getfunction, behavior):
 
             tags = awkward1.layout.Index8(tags)
             index = awkward1.layout.Index64(index)
+
             return tuple(
                 awkward1.layout.UnionArray8_64(
                     tags, index, [x[i] for x in outcontents]
@@ -864,6 +878,13 @@ def broadcast_and_apply(inputs, getfunction, behavior):
                     )
 
         elif any(isinstance(x, recordtypes) for x in inputs):
+            if not allow_records:
+                exception = ValueError(
+                    "cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs))
+                    + exception_suffix(__file__)
+                )
+                deprecate(exception, "1.0.0", "2020-12-01")
+
             keys = None
             length = None
             istuple = True
@@ -1322,6 +1343,21 @@ def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
         )
 
 
+def find_caches(layout):
+    found = set()
+    caches = []
+    def apply(layout, depth):
+        if isinstance(layout, awkward1.layout.VirtualArray):
+            if layout.cache is not None:
+                cache = layout.cache.mutablemapping
+                if id(cache) not in found:
+                    found.add(id(cache))
+                    caches.append(cache)
+
+    recursive_walk(layout, apply, materialize=False)
+    return tuple(caches)
+
+
 def highlevel_type(layout, behavior, isarray):
     if isarray:
         return awkward1.types.ArrayType(layout.type(typestrs(behavior)), len(layout))
@@ -1584,3 +1620,96 @@ class MappingProxy(MutableMapping):
 
     def __len__(self):
         return len(self.base)
+
+
+def make_union(tags, index, contents, identities, parameters):
+    if isinstance(index, awkward1.layout.Index32):
+        return awkward1.layout.UnionArray8_32(
+            tags, index, contents, identities, parameters
+        )
+    elif isinstance(index, awkward1.layout.IndexU32):
+        return awkward1.layout.UnionArray8_U32(
+            tags, index, contents, identities, parameters
+        )
+    elif isinstance(index, awkward1.layout.Index64):
+        return awkward1.layout.UnionArray8_64(
+            tags, index, contents, identities, parameters
+        )
+    else:
+        raise AssertionError(index)
+
+
+def union_to_record(unionarray, anonymous):
+    nplike = awkward1.nplike.of(unionarray)
+
+    contents = []
+    for layout in unionarray.contents:
+        if isinstance(layout, virtualtypes):
+            contents.append(layout.array)
+        elif isinstance(layout, indexedtypes):
+            contents.append(layout.project())
+        elif isinstance(layout, uniontypes):
+            contents.append(union_to_record(layout, anonymous))
+        elif isinstance(layout, optiontypes):
+            contents.append(awkward1.operations.structure.fill_none(
+                layout, np.nan, highlevel=False
+            ))
+        else:
+            contents.append(layout)
+
+    if not any(isinstance(x, awkward1.layout.RecordArray) for x in contents):
+        return make_union(
+            unionarray.tags,
+            unionarray.index,
+            contents,
+            unionarray.identities,
+            unionarray.parameters,
+        )
+
+    else:
+        seen = set()
+        all_names = []
+        for layout in contents:
+            if isinstance(layout, awkward1.layout.RecordArray):
+                for key in layout.keys():
+                    if key not in seen:
+                        seen.add(key)
+                        all_names.append(key)
+            else:
+                if anonymous not in seen:
+                    seen.add(anonymous)
+                    all_names.append(anonymous)
+
+        missingarray = awkward1.layout.IndexedOptionArray64(
+            awkward1.layout.Index64(nplike.full(len(unionarray), -1, dtype=np.int64)),
+            awkward1.layout.EmptyArray(),
+        )
+
+        all_fields = []
+        for name in all_names:
+            union_contents = []
+            for layout in contents:
+                if isinstance(layout, awkward1.layout.RecordArray):
+                    for key in layout.keys():
+                        if name == key:
+                            union_contents.append(layout.field(key))
+                            break
+                    else:
+                        union_contents.append(missingarray)
+                else:
+                    if name == anonymous:
+                        union_contents.append(layout)
+                    else:
+                        union_contents.append(missingarray)
+
+            all_fields.append(
+                make_union(
+                    unionarray.tags,
+                    unionarray.index,
+                    union_contents,
+                    unionarray.identities,
+                    unionarray.parameters,
+                ).simplify()
+            )
+
+        return awkward1.layout.RecordArray(all_fields, all_names, len(unionarray))

@@ -1650,6 +1650,12 @@ extern "C" {
     int64_t length);
 
   EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_copy(
+    uint8_t* toptr,
+    const uint8_t* fromptr,
+    int64_t len);
+
+  EXPORT_SYMBOL ERROR
   awkward_NumpyArray_contiguous_copy_64(
     uint8_t* toptr,
     const uint8_t* fromptr,
