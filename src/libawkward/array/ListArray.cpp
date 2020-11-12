@@ -179,7 +179,7 @@ namespace awkward {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -838,7 +838,7 @@ namespace awkward {
       return mergeable(raw->array(), mergebool);
     }
 
-    if (!parameters_equal(other.get()->parameters())) {
+    if (!parameters_equal(other.get()->parameters(), false)) {
       return false;
     }
 
@@ -930,8 +930,11 @@ namespace awkward {
       total_length += array.get()->length();
     }
 
+    util::Parameters parameters(parameters_);
     ContentPtrVec contents;
     for (auto array : head) {
+      util::merge_parameters(parameters, array.get()->parameters());
+
       if (ListArray32* raw = dynamic_cast<ListArray32*>(array.get())) {
         contents.push_back(raw->content());
       }
@@ -1101,7 +1104,7 @@ namespace awkward {
     }
 
     ContentPtr next = std::make_shared<ListArray64>(Identities::none(),
-                                                    parameters_,
+                                                    parameters,
                                                     nextstarts,
                                                     nextstops,
                                                     nextcontent);

@@ -1063,8 +1063,11 @@ namespace awkward {
     /// Equality is checked at the level of JSON DOMs. The `value` does not
     /// need to be exactly the same string; it needs to have equivalent JSON
     /// value.
+    ///
+    /// If `check_all`, every parameter is checked; otherwise, only
+    /// `"__array__"` and `"__record__"` are checked.
     bool
-      parameters_equal(const util::Parameters& other) const;
+      parameters_equal(const util::Parameters& other, bool check_all) const;
 
     /// @brief Returns `true` if the parameter associated with `key` is a
     /// string; `false` otherwise.

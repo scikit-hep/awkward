@@ -48,7 +48,7 @@ namespace awkward {
   bool
   RegularType::equal(const TypePtr& other, bool check_parameters) const {
     if (RegularType* t = dynamic_cast<RegularType*>(other.get())) {
-      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters(), false)) {
         return false;
       }
       return (size() == t->size()  &&

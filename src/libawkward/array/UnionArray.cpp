@@ -285,7 +285,7 @@ namespace awkward {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -1390,7 +1390,7 @@ namespace awkward {
       return mergeable(raw->array(), mergebool);
     }
 
-    if (!parameters_equal(other.get()->parameters())) {
+    if (!parameters_equal(other.get()->parameters(), false)) {
       return false;
     }
     return true;
@@ -1480,8 +1480,11 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
 
+    util::Parameters parameters(parameters_);
+    util::merge_parameters(parameters, other.get()->parameters());
+
     return std::make_shared<UnionArray8_64>(Identities::none(),
-                                            parameters_,
+                                            parameters,
                                             tags,
                                             index,
                                             contents);
@@ -1537,7 +1540,10 @@ namespace awkward {
 
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 
+    util::Parameters parameters(parameters_);
     for (auto array : head) {
+      util::merge_parameters(parameters, array.get()->parameters());
+
       if (UnionArray8_32* raw = dynamic_cast<UnionArray8_32*>(array.get())) {
         Index8 union_tags = raw->tags();
         Index32 union_index = raw->index();
@@ -1637,7 +1643,7 @@ namespace awkward {
     }
 
     ContentPtr next = std::make_shared<UnionArray8_64>(Identities::none(),
-                                                       parameters_,
+                                                       parameters,
                                                        nexttags,
                                                        nextindex,
                                                        nextcontents);

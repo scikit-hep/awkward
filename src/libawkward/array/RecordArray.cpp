@@ -254,7 +254,7 @@ namespace awkward {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -918,7 +918,7 @@ namespace awkward {
       return mergeable(raw->array(), mergebool);
     }
 
-    if (!parameters_equal(other.get()->parameters())) {
+    if (!parameters_equal(other.get()->parameters(), false)) {
       return false;
     }
 
@@ -1005,6 +1005,7 @@ namespace awkward {
     ContentPtrVec head = head_tail.first;
     ContentPtrVec tail = head_tail.second;
 
+    util::Parameters parameters(parameters_);
     ContentPtrVec headless(head.begin() + 1, head.end());
 
     std::vector<ContentPtrVec> for_each_field;
@@ -1015,6 +1016,8 @@ namespace awkward {
 
     if (istuple()) {
       for (auto array : headless) {
+        util::merge_parameters(parameters, array.get()->parameters());
+
         if (RecordArray* raw = dynamic_cast<RecordArray*>(array.get())) {
           if (istuple()) {
             if (numfields() == raw->numfields()) {
@@ -1098,7 +1101,7 @@ namespace awkward {
     }
 
     ContentPtr next = std::make_shared<RecordArray>(Identities::none(),
-                                                    parameters_,
+                                                    parameters,
                                                     nextcontents,
                                                     recordlookup_,
                                                     minlength);
