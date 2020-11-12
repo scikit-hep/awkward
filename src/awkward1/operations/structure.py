@@ -750,7 +750,7 @@ def full_like(array, fill_value, highlevel=True):
                 asbytes = fill_value
             elif (
                 isinstance(fill_value, str)
-                or (awkward1._util.py27 and isinstance(custom, awkward1._util.unicode))
+                or (awkward1._util.py27 and isinstance(fill_value, awkward1._util.unicode))
             ):
                 asbytes = fill_value.encode("utf-8", "surrogateescape")
             else:
