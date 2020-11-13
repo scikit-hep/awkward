@@ -91,12 +91,44 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             )
             return lambda: out
 
+    def is_fully_regular(layout):
+        if (
+            isinstance(layout, awkward1.layout.RegularArray)
+            and layout.parameter("__record__") is None
+            and layout.parameter("__array__") is None
+        ):
+            if isinstance(layout.content, awkward1.layout.NumpyArray):
+                return True
+            elif isinstance(layout.content, awkward1.layout.RegularArray):
+                return is_fully_regular(layout.content)
+            else:
+                return False
+        else:
+            return False
+
+    def deregulate(layout):
+        if not is_fully_regular(layout):
+            return layout
+        else:
+            shape = [len(layout)]
+            node = layout
+            while isinstance(node, awkward1.layout.RegularArray):
+                shape.append(node.size)
+                node = node.content
+            nparray = awkward1.nplike.of(node).asarray(node)
+            nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
+            return awkward1.layout.NumpyArray(
+                nparray,
+                node.identities,
+                node.parameters,
+            )
+
     def getfunction(inputs, depth):
         signature = [ufunc]
         for x in inputs:
             if isinstance(x, awkward1.layout.Content):
-                record = x.parameters.get("__record__")
-                array = x.parameters.get("__array__")
+                record = x.parameter("__record__")
+                array = x.parameter("__array__")
                 if record is not None:
                     signature.append(record)
                 elif array is not None:
@@ -112,6 +144,8 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         if custom is not None:
             return lambda: adjust(custom, inputs, kwargs)
 
+        inputs = [deregulate(x) for x in inputs]
+
         if all(
             isinstance(x, awkward1.layout.NumpyArray)
             or not isinstance(
@@ -123,7 +157,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             result = getattr(ufunc, method)(
                 *[nplike.asarray(x) for x in inputs], **kwargs
             )
-            return lambda: (awkward1.layout.NumpyArray(result),)
+            return lambda: (awkward1.operations.convert.from_numpy(result, highlevel=False),)
 
         for x in inputs:
             if isinstance(x, awkward1.layout.Content):
@@ -239,6 +273,7 @@ except AttributeError:
         __add__, __radd__, __iadd__ = _numeric_methods(um.add, "add")
         __sub__, __rsub__, __isub__ = _numeric_methods(um.subtract, "sub")
         __mul__, __rmul__, __imul__ = _numeric_methods(um.multiply, "mul")
+        __matmul__, __rmatmul__, __imatmul__ = _numeric_methods(um.matmul, "matmul")
         if sys.version_info.major < 3:
             __div__, __rdiv__, __idiv__ = _numeric_methods(um.divide, "div")
         __truediv__, __rtruediv__, __itruediv__ = _numeric_methods(
@@ -265,5 +300,5 @@ except AttributeError:
         __neg__ = _unary_method(um.negative, "neg")
         if hasattr(um, "positive"):
             __pos__ = _unary_method(um.positive, "pos")
-            __abs__ = _unary_method(um.absolute, "abs")
-            __invert__ = _unary_method(um.invert, "invert")
+        __abs__ = _unary_method(um.absolute, "abs")
+        __invert__ = _unary_method(um.invert, "invert")
