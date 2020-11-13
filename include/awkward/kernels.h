@@ -1399,31 +1399,6 @@ extern "C" {
     int64_t length);
 
   EXPORT_SYMBOL ERROR
-  awkward_ListOffsetArray32_merge_offsets_64(
-    int64_t* tooffsets,
-    int64_t length,
-    const int32_t* fromleft,
-    int64_t leftlen,
-    const int32_t* fromright,
-    int64_t rightlen);
-  EXPORT_SYMBOL ERROR
-  awkward_ListOffsetArray64_merge_offsets_64(
-    int64_t* tooffsets,
-    int64_t length,
-    const int64_t* fromleft,
-    int64_t leftlen,
-    const int64_t* fromright,
-    int64_t rightlen);
-  EXPORT_SYMBOL ERROR
-  awkward_ListOffsetArray32U_merge_offsets_64(
-    int64_t* tooffsets,
-    int64_t length,
-    const uint32_t* fromleft,
-    int64_t leftlen,
-    const uint32_t* fromright,
-    int64_t rightlen);
-
-  EXPORT_SYMBOL ERROR
   awkward_ListOffsetArray32_flatten_offsets_64(
     int64_t* tooffsets,
     const int32_t* outeroffsets,
@@ -2675,15 +2650,6 @@ extern "C" {
     int64_t totagsoffset,
     int64_t length,
     int64_t base);
-
-  EXPORT_SYMBOL ERROR
-  awkward_UnionArray_mergetags_to8_const(
-    int8_t* totags,
-    int64_t* toindex,
-    const int64_t* fromleft,
-    int64_t leftlen,
-    const int64_t* fromright,
-    int64_t rightlen);
 
   EXPORT_SYMBOL ERROR
   awkward_UnionArray32_flatten_combine_64(
