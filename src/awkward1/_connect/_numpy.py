@@ -146,6 +146,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
         inputs = [deregulate(x) for x in inputs]
 
+        if ufunc is numpy.matmul:
+            custom_matmul = getfunction_matmul(inputs)
+            if custom_matmul is not None:
+                return custom_matmul(inputs)
+
         if all(
             isinstance(x, awkward1.layout.NumpyArray)
             or not isinstance(
@@ -209,6 +214,28 @@ def array_ufunc(ufunc, method, inputs, kwargs):
     )
     assert isinstance(out, tuple) and len(out) == 1
     return awkward1._util.wrap(out[0], behavior)
+
+
+def getfunction_matmul(inputs):
+    if len(inputs) == 2 and all(
+        isinstance(x, awkward1._util.listtypes)
+        and isinstance(x.content, awkward1._util.listtypes)
+        and isinstance(x.content.content, awkward1.layout.NumpyArray)
+        for x in inputs
+    ):
+        print(awkward1.to_list(inputs[0]))
+        print(awkward1.to_list(inputs[1]))
+
+
+
+
+
+
+
+        raise Exception("HERE")
+
+    else:
+        return None
 
 
 try:
