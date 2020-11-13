@@ -91,12 +91,44 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             )
             return lambda: out
 
+    def is_fully_regular(layout):
+        if (
+            isinstance(layout, awkward1.layout.RegularArray)
+            and layout.parameter("__record__") is None
+            and layout.parameter("__array__") is None
+        ):
+            if isinstance(layout.content, awkward1.layout.NumpyArray):
+                return True
+            elif isinstance(layout.content, awkward1.layout.RegularArray):
+                return is_fully_regular(layout.content)
+            else:
+                return False
+        else:
+            return False
+
+    def deregulate(layout):
+        if not is_fully_regular(layout):
+            return layout
+        else:
+            shape = [len(layout)]
+            node = layout
+            while isinstance(node, awkward1.layout.RegularArray):
+                shape.append(node.size)
+                node = node.content
+            nparray = awkward1.nplike.of(node).asarray(node)
+            nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
+            return awkward1.layout.NumpyArray(
+                nparray,
+                node.identities,
+                node.parameters,
+            )
+
     def getfunction(inputs, depth):
         signature = [ufunc]
         for x in inputs:
             if isinstance(x, awkward1.layout.Content):
-                record = x.parameters.get("__record__")
-                array = x.parameters.get("__array__")
+                record = x.parameter("__record__")
+                array = x.parameter("__array__")
                 if record is not None:
                     signature.append(record)
                 elif array is not None:
@@ -112,6 +144,13 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         if custom is not None:
             return lambda: adjust(custom, inputs, kwargs)
 
+        inputs = [deregulate(x) for x in inputs]
+
+        if ufunc is numpy.matmul:
+            custom_matmul = getfunction_matmul(inputs)
+            if custom_matmul is not None:
+                return custom_matmul
+
         if all(
             isinstance(x, awkward1.layout.NumpyArray)
             or not isinstance(
@@ -123,7 +162,9 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             result = getattr(ufunc, method)(
                 *[nplike.asarray(x) for x in inputs], **kwargs
             )
-            return lambda: (awkward1.layout.NumpyArray(result),)
+            return lambda: (
+                awkward1.operations.convert.from_numpy(result, highlevel=False),
+            )
 
         for x in inputs:
             if isinstance(x, awkward1.layout.Content):
@@ -175,6 +216,118 @@ def array_ufunc(ufunc, method, inputs, kwargs):
     )
     assert isinstance(out, tuple) and len(out) == 1
     return awkward1._util.wrap(out[0], behavior)
+
+
+def matmul_for_numba(lefts, rights, dtype):
+    total_outer = 0
+    total_inner = 0
+    total_content = 0
+
+    for A, B in zip(lefts, rights):
+        first = -1
+        for Ai in A:
+            if first == -1:
+                first = len(Ai)
+            elif first != len(Ai):
+                raise ValueError(
+                    "one of the left matrices in np.matmul is not rectangular"
+                )
+        if first == -1:
+            first = 0
+        rowsA = len(A)
+        colsA = first
+
+        first = -1
+        for Bi in B:
+            if first == -1:
+                first = len(Bi)
+            elif first != len(Bi):
+                raise ValueError(
+                    "one of the right matrices in np.matmul is not rectangular"
+                )
+        if first == -1:
+            first = 0
+        rowsB = len(B)
+        colsB = first
+
+        if colsA != rowsB:
+            raise ValueError(
+                u"one of the pairs of matrices in np.matmul do not match shape: "
+                u"(n \u00d7 k) @ (k \u00d7 m)"
+            )
+
+        total_outer += 1
+        total_inner += rowsA
+        total_content += rowsA * colsB
+
+    outer = numpy.empty(total_outer + 1, numpy.int64)
+    inner = numpy.empty(total_inner + 1, numpy.int64)
+    content = numpy.zeros(total_content, dtype)
+
+    outer[0] = 0
+    inner[0] = 0
+    outer_i = 1
+    inner_i = 1
+    content_i = 0
+    for A, B in zip(lefts, rights):
+        rows = len(A)
+        cols = 0
+        if len(B) > 0:
+            cols = len(B[0])
+        mids = 0
+        if len(A) > 0:
+            mids = len(A[0])
+
+        for i in range(rows):
+            for j in range(cols):
+                for v in range(mids):
+                    pos = content_i + i*cols + j
+                    content[pos] += A[i][v] * B[v][j]
+
+        outer[outer_i] = outer[outer_i - 1] + rows
+        outer_i += 1
+        for i in range(rows):
+            inner[inner_i] = inner[inner_i - 1] + cols
+            inner_i += 1
+        content_i += rows * cols
+
+    return outer, inner, content
+
+
+matmul_for_numba.numbafied = None
+
+
+def getfunction_matmul(inputs):
+    if len(inputs) == 2 and all(
+        isinstance(x, awkward1._util.listtypes)
+        and isinstance(x.content, awkward1._util.listtypes)
+        and isinstance(x.content.content, awkward1.layout.NumpyArray)
+        for x in inputs
+    ):
+        awkward1._connect._numba.register_and_check()
+        import numba
+
+        if matmul_for_numba.numbafied is None:
+            matmul_for_numba.numbafied = numba.njit(matmul_for_numba)
+
+        lefts = awkward1.highlevel.Array(inputs[0])
+        rights = awkward1.highlevel.Array(inputs[1])
+        dtype = numpy.asarray(lefts[0:0, 0:0, 0:0] + rights[0:0, 0:0, 0:0]).dtype
+
+        outer, inner, content = matmul_for_numba.numbafied(lefts, rights, dtype)
+
+        return lambda: (
+            awkward1.layout.ListOffsetArray64(
+                awkward1.layout.Index64(outer),
+                awkward1.layout.ListOffsetArray64(
+                    awkward1.layout.Index64(inner),
+                    awkward1.layout.NumpyArray(content),
+                ),
+            ),
+        )
+
+    else:
+        return None
 
 
 try:
@@ -239,6 +392,7 @@ except AttributeError:
         __add__, __radd__, __iadd__ = _numeric_methods(um.add, "add")
         __sub__, __rsub__, __isub__ = _numeric_methods(um.subtract, "sub")
         __mul__, __rmul__, __imul__ = _numeric_methods(um.multiply, "mul")
+        __matmul__, __rmatmul__, __imatmul__ = _numeric_methods(um.matmul, "matmul")
         if sys.version_info.major < 3:
             __div__, __rdiv__, __idiv__ = _numeric_methods(um.divide, "div")
         __truediv__, __rtruediv__, __itruediv__ = _numeric_methods(
@@ -265,5 +419,5 @@ except AttributeError:
         __neg__ = _unary_method(um.negative, "neg")
         if hasattr(um, "positive"):
             __pos__ = _unary_method(um.positive, "pos")
-            __abs__ = _unary_method(um.absolute, "abs")
-            __invert__ = _unary_method(um.invert, "invert")
+        __abs__ = _unary_method(um.absolute, "abs")
+        __invert__ = _unary_method(um.invert, "invert")

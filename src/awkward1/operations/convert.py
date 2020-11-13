@@ -307,7 +307,10 @@ def to_numpy(array, allow_missing=True):
     elif isinstance(array, awkward1.layout.RegularArray):
         out = to_numpy(array.content, allow_missing=allow_missing)
         head, tail = out.shape[0], out.shape[1:]
-        shape = (head // array.size, array.size) + tail
+        if array.size == 0:
+            shape = (0, 0) + tail
+        else:
+            shape = (head // array.size, array.size) + tail
         return out[: shape[0] * array.size].reshape(shape)
 
     elif isinstance(array, awkward1._util.listtypes):

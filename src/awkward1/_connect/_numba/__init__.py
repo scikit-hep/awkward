@@ -44,6 +44,9 @@ def register():
     import awkward1._connect._numba.layout
     import awkward1._connect._numba.builder
 
+    if hasattr(awkward1.numba, "ArrayViewType"):
+        return
+
     n = awkward1.numba
     n.ArrayViewType = awkward1._connect._numba.arrayview.ArrayViewType
     n.ArrayViewModel = awkward1._connect._numba.arrayview.ArrayViewModel
