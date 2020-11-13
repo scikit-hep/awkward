@@ -1240,7 +1240,7 @@ namespace awkward {
       ContentPtrVec contents({mine.second});
       int64_t longest = mine.first.length();
       int64_t other_length = 0;
-      std::vector<std::pair<Index64, int64_t>> offsets({std::pair<Index64, int64_t>(mine.first, longest)});
+      std::vector<Index64> offsets({mine.first});
 
       for (const auto& array : others) {
         auto const& other = array.get()->offsets_and_flattened(posaxis, depth);
@@ -1248,7 +1248,7 @@ namespace awkward {
         contents.emplace_back(other.second);
         other_length = other.first.length();
         longest = (longest > other_length) ? longest : other_length;
-        offsets.emplace_back(std::pair<Index64, int64_t>(other.first, other_length));
+        offsets.emplace_back(other.first);
       }
 
       Index8 tags(contents_length);
@@ -1265,9 +1265,9 @@ namespace awkward {
       int64_t start = 0;
       int64_t stop = 0;
       for (const auto& i : offsets) {
-        for (int64_t j = 0; j < i.second; j++) {
+        for (int64_t j = 0; j < i.length(); j++) {
           start = out_offsets.data()[j];
-          stop = i.first.data()[j];
+          stop = i.data()[j];
           out_offsets.data()[j] = start + stop;
         }
       }
@@ -1279,9 +1279,9 @@ namespace awkward {
         tag = 0;
         for (const auto& offset : offsets) {
           ind = 0;
-          if (i < offset.second - 1) {
-            int64_t start = offset.first.data()[i];
-            int64_t stop = offset.first.data()[i + 1];
+          if (i < offset.length() - 1) {
+            int64_t start = offset.data()[i];
+            int64_t stop = offset.data()[i + 1];
             int64_t diff = stop - start;
             for (int64_t j = 0; j < diff; j++) {
               tags.data()[counter] = tag;
