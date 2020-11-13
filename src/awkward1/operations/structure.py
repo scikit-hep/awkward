@@ -803,11 +803,6 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
         out = batch[0].mergemany(batch[1:])
 
     else:
-        length = len(contents[0])
-        if any(len(lst) != length for lst in contents[1:]):
-            raise ValueError("all arrays must have the same length for concatenate in axis > 0"
-                + awkward1._util.exception_suffix(__file__)
-            )
 
         def getfunction(inputs, depth):
             if depth == axis:
@@ -816,13 +811,13 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             else:
                 return None
 
-        out = awkward1._util.broadcast_and_apply(contents, getfunction, behavior = awkward1._util.behaviorof(*arrays))[0]
+        out = awkward1._util.broadcast_and_apply(contents, getfunction, behavior=awkward1._util.behaviorof(*arrays))[0]
 
     if isinstance(out, awkward1._util.uniontypes):
         out = out.simplify(mergebool=mergebool)
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior = awkward1._util.behaviorof(*arrays))
+        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(*arrays))
     else:
         return out
 
