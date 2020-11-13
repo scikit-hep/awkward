@@ -149,7 +149,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         if ufunc is numpy.matmul:
             custom_matmul = getfunction_matmul(inputs)
             if custom_matmul is not None:
-                return custom_matmul(inputs)
+                return custom_matmul
 
         if all(
             isinstance(x, awkward1.layout.NumpyArray)
@@ -162,7 +162,9 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             result = getattr(ufunc, method)(
                 *[nplike.asarray(x) for x in inputs], **kwargs
             )
-            return lambda: (awkward1.operations.convert.from_numpy(result, highlevel=False),)
+            return lambda: (
+                awkward1.operations.convert.from_numpy(result, highlevel=False),
+            )
 
         for x in inputs:
             if isinstance(x, awkward1.layout.Content):
@@ -216,6 +218,85 @@ def array_ufunc(ufunc, method, inputs, kwargs):
     return awkward1._util.wrap(out[0], behavior)
 
 
+def matmul_for_numba(lefts, rights, dtype):
+    total_outer = 0
+    total_inner = 0
+    total_content = 0
+
+    for A, B in zip(lefts, rights):
+        first = -1
+        for Ai in A:
+            if first == -1:
+                first = len(Ai)
+            elif first != len(Ai):
+                raise ValueError(
+                    "one of the left matrices in np.matmul is not rectangular"
+                )
+        if first == -1:
+            first = 0
+        rowsA = len(A)
+        colsA = first
+
+        first = -1
+        for Bi in B:
+            if first == -1:
+                first = len(Bi)
+            elif first != len(Bi):
+                raise ValueError(
+                    "one of the right matrices in np.matmul is not rectangular"
+                )
+        if first == -1:
+            first = 0
+        rowsB = len(B)
+        colsB = first
+
+        if colsA != rowsB:
+            raise ValueError(
+                u"one of the pairs of matrices in np.matmul do not match shape: "
+                u"(n \u00d7 k) @ (k \u00d7 m)"
+            )
+
+        total_outer += 1
+        total_inner += rowsA
+        total_content += rowsA * colsB
+
+    outer = numpy.empty(total_outer + 1, numpy.int64)
+    inner = numpy.empty(total_inner + 1, numpy.int64)
+    content = numpy.zeros(total_content, dtype)
+
+    outer[0] = 0
+    inner[0] = 0
+    outer_i = 1
+    inner_i = 1
+    content_i = 0
+    for A, B in zip(lefts, rights):
+        rows = len(A)
+        cols = 0
+        if len(B) > 0:
+            cols = len(B[0])
+        mids = 0
+        if len(A) > 0:
+            mids = len(A[0])
+
+        for i in range(rows):
+            for j in range(cols):
+                for v in range(mids):
+                    pos = content_i + i*cols + j
+                    content[pos] += A[i][v] * B[v][j]
+
+        outer[outer_i] = outer[outer_i - 1] + rows
+        outer_i += 1
+        for i in range(rows):
+            inner[inner_i] = inner[inner_i - 1] + cols
+            inner_i += 1
+        content_i += rows * cols
+
+    return outer, inner, content
+
+
+matmul_for_numba.numbafied = None
+
+
 def getfunction_matmul(inputs):
     if len(inputs) == 2 and all(
         isinstance(x, awkward1._util.listtypes)
@@ -223,16 +304,27 @@ def getfunction_matmul(inputs):
         and isinstance(x.content.content, awkward1.layout.NumpyArray)
         for x in inputs
     ):
-        print(awkward1.to_list(inputs[0]))
-        print(awkward1.to_list(inputs[1]))
+        awkward1._connect._numba.register_and_check()
+        import numba
 
+        if matmul_for_numba.numbafied is None:
+            matmul_for_numba.numbafied = numba.njit(matmul_for_numba)
 
+        lefts = awkward1.highlevel.Array(inputs[0])
+        rights = awkward1.highlevel.Array(inputs[1])
+        dtype = numpy.asarray(lefts[0:0, 0:0, 0:0] + rights[0:0, 0:0, 0:0]).dtype
 
+        outer, inner, content = matmul_for_numba.numbafied(lefts, rights, dtype)
 
-
-
-
-        raise Exception("HERE")
+        return lambda: (
+            awkward1.layout.ListOffsetArray64(
+                awkward1.layout.Index64(outer),
+                awkward1.layout.ListOffsetArray64(
+                    awkward1.layout.Index64(inner),
+                    awkward1.layout.NumpyArray(content),
+                ),
+            ),
+        )
 
     else:
         return None

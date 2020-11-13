@@ -38,9 +38,34 @@ def test_regular():
     assert numpy.matmul(numpy.array([a22, i22, i22, a22]), numpy.array([b22, i22, b22, i22])).tolist() == numpy.matmul(awkward1.Array(numpy.array([a22, i22, i22, a22])), awkward1.Array(numpy.array([b22, i22, b22, i22]))).tolist()
 
 
-# def test_irregular():
-#     i22 = numpy.array([[1, 0], [0, 1]])
-#     a22 = numpy.array([[1, 2], [3, 4]])
-#     b22 = numpy.array([[5, 6], [7, 8]])
+numba = pytest.importorskip("numba")
 
-#     assert numpy.matmul(numpy.array([a22, i22, i22, a22]), numpy.array([b22, i22, b22, i22])) == numpy.matmul(awkward1.Array([a22, i22, i22, a22]), awkward1.Array([b22, i22, b22, i22]))
+def test_irregular():
+    i22 = numpy.array([[1, 0], [0, 1]])
+    a22 = numpy.array([[1, 2], [3, 4]])
+    b22 = numpy.array([[5, 6], [7, 8]])
+
+    assert numpy.matmul(numpy.array([a22, i22, i22, a22]), numpy.array([b22, i22, b22, i22])) == numpy.matmul(awkward1.Array([a22, i22, i22, a22]), awkward1.Array([b22, i22, b22, i22]))
+
+    lefts = awkward1.Array([
+        [[1, 2], [3, 4], [5, 6]],
+        [[1, 2, 3, 4], [5, 6, 7, 8]],
+        [[1], [2], [3], [4]],
+    ])
+    rights = awkward1.Array([
+        [[7, 8, 9], [10, 11, 12]],
+        [[8, 10], [11, 12], [13, 14], [15, 16]],
+        [[5, 6, 7]],
+    ])
+
+    assert numpy.matmul(lefts, rights).tolist() == [
+        [[ 27,  30,  33],
+         [ 61,  68,  75],
+         [ 95, 106, 117]],
+        [[129, 140],
+         [317, 348]],
+        [[ 5,  6,  7],
+         [10, 12, 14],
+         [15, 18, 21],
+         [20, 24, 28]]
+    ]
