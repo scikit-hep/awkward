@@ -635,6 +635,7 @@ namespace awkward {
     /// @param other The other array to merge with.
     /// @param mergebool If `true`, consider boolean types to be equivalent
     /// to integers.
+
     virtual bool
       mergeable(const ContentPtr& other, bool mergebool) const = 0;
 
@@ -1088,11 +1089,6 @@ namespace awkward {
     /// {@link UnionArrayOf UnionArray} instead of actually merging the data.
     const ContentPtr
       merge_as_union(const ContentPtr& other) const;
-
-    /// @brief Concatenates this array with `other` in `axis` by creating a
-    /// {@link UnionArrayOf UnionArray} instead of actually merging the data.
-    const ContentPtr
-      concatenate_here(const ContentPtr& other, int64_t axis = 0, int64_t depth = 0) const;
 
     /// @brief Concatenates this array with `other` by creating a
     /// {@link UnionArrayOf UnionArray} instead of actually merging the data.

@@ -1228,83 +1228,71 @@ namespace awkward {
   }
 
   const ContentPtr
-  Content::concatenate_here(const ContentPtr& other, int64_t axis, int64_t depth) const {
-    int64_t posaxis = axis_wrap_if_negative(axis);
-    if (posaxis == depth) {
-      int64_t mylength = length();
-      int64_t theirlength = other.get()->length();
-      Index8 tags(mylength + theirlength);
-      Index64 index(mylength + theirlength);
-
-      ContentPtrVec contents({ shallow_copy(), other });
-
-      struct Error err1 = kernel::UnionArray_filltags_to8_const(
-        kernel::lib::cpu,   // DERIVE
-        tags.data(),
-        0,
-        mylength,
-        0);
-      util::handle_error(err1, classname(), identities_.get());
-      struct Error err2 = kernel::UnionArray_fillindex_count_64(
-        kernel::lib::cpu,   // DERIVE
-        index.data(),
-        0,
-        mylength);
-      util::handle_error(err2, classname(), identities_.get());
-
-      struct Error err3 = kernel::UnionArray_filltags_to8_const(
-        kernel::lib::cpu,   // DERIVE
-        tags.data(),
-        mylength,
-        theirlength,
-        1);
-      util::handle_error(err3, classname(), identities_.get());
-      struct Error err4 = kernel::UnionArray_fillindex_count_64(
-        kernel::lib::cpu,   // DERIVE
-        index.data(),
-        mylength,
-        theirlength);
-      util::handle_error(err4, classname(), identities_.get());
-
-      return std::make_shared<UnionArray8_64>(Identities::none(),
-                                              util::Parameters(),
-                                              tags,
-                                              index,
-                                              contents);
+  Content::mergemany_as_union(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+    if (others.empty()) {
+      return shallow_copy();
     }
-    else if (posaxis == depth + 1) {
-      auto left = offsets_and_flattened(posaxis, depth);
-      auto right = other.get()->offsets_and_flattened(posaxis, depth);
-      int64_t mylength = left.first.length() - 1;
-      int64_t theirlength = right.first.length() - 1;
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth + 1) {
+      auto const& mine = offsets_and_flattened(posaxis, depth);
+      int64_t contents_length = mine.second.get()->length();
 
-      Index8 tags(left.second.get()->length()
-        + right.second.get()->length());
-      Index64 index(tags.length());
-      struct Error err5 = kernel::UnionArray_mergetags_to8_const(
-        kernel::lib::cpu,   // DERIVE
-        tags.data(),
-        index.data(),
-        left.first.data(),
-        mylength,
-        right.first.data(),
-        theirlength);
-      util::handle_error(err5, classname(), identities_.get());
+      ContentPtrVec contents({mine.second});
+      int64_t longest = mine.first.length();
+      int64_t other_length = 0;
+      std::vector<std::pair<Index64, int64_t>> offsets({std::pair<Index64, int64_t>(mine.first, longest)});
 
-      int64_t longest = (left.first.length() > right.first.length()) ?
-        left.first.length() : right.first.length();
-      Index64 offsets(longest);
-      struct Error err6 = kernel::ListOffsetArray_merge_offsets_64(
-        kernel::lib::cpu,   // DERIVE
-        offsets.data(),
-        offsets.length(),
-        left.first.data(),
-        left.first.length(),
-        right.first.data(),
-        right.first.length());
-      util::handle_error(err6, classname(), identities_.get());
+      for (const auto& array : others) {
+        auto const& other = array.get()->offsets_and_flattened(posaxis, depth);
+        contents_length += other.second.get()->length();
+        contents.emplace_back(other.second);
+        other_length = other.first.length();
+        longest = (longest > other_length) ? longest : other_length;
+        offsets.emplace_back(std::pair<Index64, int64_t>(other.first, other_length));
+      }
 
-      ContentPtrVec contents({ left.second, right.second });
+      Index8 tags(contents_length);
+      Index64 index(contents_length);
+      for (int64_t i = 0; i < contents_length; i++) {
+        tags.data()[i] = 0;
+        index.data()[i] = 0;
+      }
+      Index64 out_offsets(longest);
+      for (int64_t i = 0; i < longest; i++) {
+        out_offsets.data()[i] = 0;
+      }
+
+      int64_t start = 0;
+      int64_t stop = 0;
+      for (const auto& i : offsets) {
+        for (int64_t j = 0; j < i.second; j++) {
+          start = out_offsets.data()[j];
+          stop = i.first.data()[j];
+          out_offsets.data()[j] = start + stop;
+        }
+      }
+
+      int8_t tag = 0;
+      int64_t counter = 0;
+      int64_t ind = 0;
+      for (int64_t i = 0; i < longest; i++) {
+        tag = 0;
+        for (const auto& offset : offsets) {
+          ind = 0;
+          if (i < offset.second - 1) {
+            int64_t start = offset.first.data()[i];
+            int64_t stop = offset.first.data()[i + 1];
+            int64_t diff = stop - start;
+            for (int64_t j = 0; j < diff; j++) {
+              tags.data()[counter] = tag;
+              index.data()[counter] = start + ind;
+              counter++;
+              ind++;
+            }
+          }
+          tag++;
+        }
+      }
 
       ContentPtr out = std::make_shared<UnionArray8_64>(Identities::none(),
                                                         util::Parameters(),
@@ -1314,28 +1302,8 @@ namespace awkward {
 
       return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                  util::Parameters(),
-                                                 offsets,
+                                                 out_offsets,
                                                  out);
-    } else {
-      throw std::runtime_error(
-        std::string("FIXME: unhandled case of merge_as_union in axis \n")
-        + std::to_string(axis) + std::string(" > depth ") + std::to_string(depth)
-        + FILENAME(__LINE__));
-    }
-  }
-
-  const ContentPtr
-  Content::mergemany_as_union(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
-    if (others.empty()) {
-      return shallow_copy();
-    }
-    int64_t posaxis = axis_wrap_if_negative(axis);
-    if (posaxis == depth + 1) {
-      ContentPtr out;
-      for (const auto& array : others) {
-        out = concatenate_here(array, axis, depth);
-      }
-      return out;
     }
     else {
       throw std::runtime_error(

@@ -12,19 +12,19 @@ ERROR awkward_ListOffsetArray_merge_offsets(
   const int64_t leftlen,
   const C* fromright,
   const int64_t rightlen) {
-  int64_t a = 0;
-  int64_t b = 0;
+  T a = 0;
+  T b = 0;
   tooffsets[0] = 0;
   for (int64_t i = 1; i < length; i++) {
     if (i < leftlen) {
-      a =  fromleft[i] - fromleft[i - 1];
+      a = (T)(fromleft[i] - fromleft[i - 1]);
     } else {
-      a = 0;
+      a = (T)0;
     }
     if (i < rightlen) {
-      b = fromright[i] - fromright[i - 1];
+      b = (T)(fromright[i] - fromright[i - 1]);
     } else {
-      b = 0;
+      b = (T)0;
     }
     tooffsets[i] = tooffsets[i - 1] + a + b;
   }
