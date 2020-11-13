@@ -137,6 +137,18 @@ class NumpyLike(Singleton):
         # shape/len, value[, dtype=]
         return self._module.full(*args, **kwargs)
 
+    def full_like(self, *args, **kwargs):
+        # array, fill_value
+        return self._module.full_like(*args, **kwargs)
+
+    def zeros_like(self, *args, **kwargs):
+        # array
+        return self._module.zeros_like(*args, **kwargs)
+
+    def ones_like(self, *args, **kwargs):
+        # array
+        return self._module.ones_like(*args, **kwargs)
+
     def arange(self, *args, **kwargs):
         # stop[, dtype=]
         # start, stop[, dtype=]
