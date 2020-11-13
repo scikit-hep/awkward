@@ -7,6 +7,7 @@ import json
 import collections
 import math
 import threading
+import distutils.version
 
 try:
     from collections.abc import Iterable
@@ -1669,6 +1670,29 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True):
         return out
 
 
+def _import_pyarrow(name):
+    try:
+        import pyarrow
+    except ImportError:
+        raise ImportError("""to use {0}, you must install pyarrow:
+
+    pip install pyarrow
+
+or
+
+    conda install -c conda-forge pyarrow
+""".format(name))
+    else:
+        if (
+            distutils.version.LooseVersion(pyarrow.__version__)
+            < distutils.version.LooseVersion("2.0.0")
+        ):
+            raise ImportError(
+                "pyarrow 2.0.0 or later required for {0}".format(name)
+            )
+        return pyarrow
+
+
 def to_arrow(array):
     """
     Args:
@@ -1682,8 +1706,7 @@ def to_arrow(array):
 
     See also #ak.from_arrow.
     """
-
-    import pyarrow
+    pyarrow = _import_pyarrow("ak.to_arrow")
 
     layout = to_layout(array, allow_record=False, allow_other=False)
 
@@ -1907,39 +1930,63 @@ def to_arrow(array):
                 awkward1.layout.UnionArray8_U32,
             ),
         ):
-            values = [recurse(x) for x in layout.contents]
+            tags = numpy.asarray(layout.tags)
+            index = numpy.asarray(layout.index)
+            copied_index = False
+            if mask is not None:
+                bytemask = (
+                    numpy.unpackbits(mask)
+                    .reshape(-1, 8)[:, ::-1]
+                    .reshape(-1)
+                    .view(np.bool_)
+                )[:len(tags)]
+
+            values = []
+            for tag, content in enumerate(layout.contents):
+                selected_tags = tags == tag
+                this_index = index[selected_tags]
+                if mask is not None:
+                    length = int(numpy.ceil(len(this_index) / 8.0)) * 8
+                    if len(numpy.unique(this_index)) == len(this_index):
+                        this_bytemask = numpy.zeros(length, dtype=np.uint8)
+                        this_bytemask[this_index] = bytemask[selected_tags]
+                    else:
+                        this_bytemask = numpy.empty(length, dtype=np.uint8)
+                        this_bytemask[: len(this_index)] = bytemask[selected_tags]
+                        this_bytemask[len(this_index) :] = 0
+
+                        content = content[this_index]
+                        this_index = numpy.arange(len(this_index))
+                        if not copied_index:
+                            copied_index = True
+                            index = numpy.array(index, copy=True)
+                        index[selected_tags] = this_index
+
+                    this_mask = numpy.packbits(
+                        this_bytemask.reshape(-1, 8)[:, ::-1].reshape(-1)
+                    )
+
+                else:
+                    this_mask = None
+
+                values.append(recurse(content, this_mask))
+
             types = pyarrow.union(
                 [pyarrow.field(str(i), values[i].type) for i in range(len(values))],
                 "dense",
                 list(range(len(values))),
             )
 
-            if mask is not None:
-                return pyarrow.Array.from_buffers(
-                    types,
-                    len(layout.tags),
-                    [
-                        pyarrow.py_buffer(mask),
-                        pyarrow.py_buffer(numpy.asarray(layout.tags)),
-                        pyarrow.py_buffer(
-                            numpy.asarray(layout.index).astype(np.int32)
-                        ),
-                    ],
-                    children=values,
-                )
-            else:
-                return pyarrow.Array.from_buffers(
-                    types,
-                    len(layout.tags),
-                    [
-                        None,
-                        pyarrow.py_buffer(numpy.asarray(layout.tags)),
-                        pyarrow.py_buffer(
-                            numpy.asarray(layout.index).astype(np.int32)
-                        ),
-                    ],
-                    children=values,
-                )
+            return pyarrow.Array.from_buffers(
+                types,
+                len(layout.tags),
+                [
+                    None,
+                    pyarrow.py_buffer(tags),
+                    pyarrow.py_buffer(index.astype(np.int32)),
+                ],
+                children=values,
+            )
 
         elif isinstance(
             layout,
@@ -2063,6 +2110,7 @@ def to_arrow(array):
                 8 * math.ceil(len(layout.content) / 8), dtype=np.bool
             )
             bytemask[: len(mask)] = mask
+            bytemask[len(mask) :] = 0
             bitmask = numpy.packbits(bytemask.reshape(-1, 8)[:, ::-1].reshape(-1))
 
             return recurse(layout.content[: len(layout)], bitmask).slice(
@@ -2096,8 +2144,7 @@ def from_arrow(array, highlevel=True, behavior=None):
 
     See also #ak.to_arrow.
     """
-
-    import pyarrow
+    pyarrow = _import_pyarrow("ak.from_arrow")
 
     def popbuffers(array, tpe, buffers, length):
         if isinstance(tpe, pyarrow.lib.DictionaryType):
@@ -2470,8 +2517,7 @@ def to_parquet(array, where, explode_records=False, **options):
     See also #ak.to_arrow, which is used as an intermediate step.
     See also #ak.from_parquet.
     """
-
-    import pyarrow
+    pyarrow = _import_pyarrow("ak.to_parquet")
     import pyarrow.parquet
 
     options["where"] = where
@@ -2598,8 +2644,7 @@ def from_parquet(
     See also #ak.from_arrow, which is used as an intermediate step.
     See also #ak.to_parquet.
     """
-
-    import pyarrow
+    pyarrow = _import_pyarrow("ak.from_parquet")
     import pyarrow.parquet
 
     file = pyarrow.parquet.ParquetFile(source, **options)
