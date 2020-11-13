@@ -982,16 +982,6 @@ namespace awkward {
       int64_t length);
 
     template <typename T>
-    ERROR ListOffsetArray_merge_offsets_64(
-      kernel::lib ptr_lib,
-      int64_t* tooffsets,
-      int64_t length,
-      const T* fromleft,
-      const int64_t leftlen,
-      const T* fromright,
-      const int64_t rightlen);
-
-    template <typename T>
     ERROR ListArray_broadcast_tooffsets_64(
       kernel::lib ptr_lib,
       int64_t* tocarry,
@@ -1092,15 +1082,6 @@ namespace awkward {
       int64_t* toindex,
       int64_t toindexoffset,
       int64_t length);
-
-    ERROR UnionArray_mergetags_to8_const(
-      kernel::lib ptr_lib,
-      int8_t* totags,
-      int64_t* toindex,
-      const int64_t* fromleft,
-      const int64_t leftlen,
-      const int64_t* fromright,
-      const int64_t rightlen);
 
     template <typename T, typename I>
     ERROR UnionArray_simplify8_32_to8_64(

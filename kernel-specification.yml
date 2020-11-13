@@ -2696,51 +2696,6 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
-  - name: awkward_ListOffsetArray_merge_offsets
-    specializations:
-      - name: awkward_ListOffsetArray32_merge_offsets_64
-        args:
-          - {name: tooffsets, type: "List[int64_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: fromleft, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: leftlen, type: "int64_t", dir: in, role: default}
-          - {name: fromright, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: rightlen, type: "int64_t", dir: in, role: default}
-      - name: awkward_ListOffsetArray64_merge_offsets_64
-        args:
-          - {name: tooffsets, type: "List[int64_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: fromleft, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: leftlen, type: "int64_t", dir: in, role: default}
-          - {name: fromright, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: rightlen, type: "int64_t", dir: in, role: default}
-      - name: awkward_ListOffsetArrayU32_merge_offsets_64
-        args:
-          - {name: tooffsets, type: "List[int64_t]", dir: out}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: fromleft, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: leftlen, type: "int64_t", dir: in, role: default}
-          - {name: fromright, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: rightlen, type: "int64_t", dir: in, role: default}
-    description: null
-    definition: |
-      def awkward_ListOffsetArray_merge_offsets(tooffsets, length, fromleft, leftlen, fromright, rightlen):
-          a = 0
-          b = 0
-          tooffsets[0] = 0
-          for i in range(length - 1):
-              if i < leftlen:
-                  a =  fromleft[i + 1] - fromleft[i]
-              else:
-                  a = 0
-              if i < rightlen:
-                  b = fromright[i + 1] - fromright[i]
-              else:
-                  b = 0
-              tooffsets[i + 1] = tooffsets[i] + a + b
-    automatic-tests: false
-    manual-tests: []
-
   - name: awkward_ListOffsetArray_flatten_offsets
     specializations:
       - name: awkward_ListOffsetArray32_flatten_offsets_64
@@ -4745,54 +4700,6 @@ kernels:
           for i in range(length):
               totags[totagsoffset + i] = float(base)
     automatic-tests: true
-    manual-tests: []
-
-  - name: awkward_UnionArray_mergetags_const
-    specializations:
-      - name: awkward_UnionArray_mergetags_to8_const
-        args:
-          - {name: totags, type: "List[int8_t]", dir: out}
-          - {name: toindex, type: "List[int64_t]", dir: out}
-          - {name: fromleft, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
-          - {name: leftlen, type: "int64_t", dir: in, role: default}
-          - {name: fromright, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
-          - {name: rightlen, type: "int64_t", dir: in, role: default}
-    description: null
-    definition: |
-      def awkward_UnionArray_mergetags_const(totags, toindex, fromleft, leftlen, fromright, rightlen):
-          ileft = 0
-          iright = 0
-          leftsize = 0
-          rightsize = 0
-          tag = 0
-          j = 0
-          li = 0
-          ri = 0
-          length = leftlen + rightlen
-          for m in range(length):
-              if tag == 0 and ileft < leftlen:
-                  leftsize = fromleft[ileft + 1] - fromleft[ileft]
-                  for i in range(leftsize):
-                      toindex[j] = li + 1
-                      li = li + 1
-                      totags[j] = tag
-                      j = j + 1
-              if tag == 1 and iright < rightlen:
-                  rightsize = fromright[iright + 1] - fromright[iright]
-                  for i in range(rightsize):
-                      toindex[j] = ri + 1
-                      ri = ri + 1
-                      totags[j] = tag
-                      j = j + 1
-              if tag == 0:
-                  if iright < rightlen:
-                      tag = 1
-                  ileft = ileft + 1
-              else:
-                  if ileft < leftlen:
-                      tag = 0
-                  iright = iright + 1
-    automatic-tests: false
     manual-tests: []
 
   - name: awkward_UnionArray_flatten_combine
