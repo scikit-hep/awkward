@@ -9,6 +9,7 @@ import numpy
 
 import awkward1 as ak
 
+# FIXME:
 # ak.deprecations_as_errors = True
 
 def test_list_offset_array_concatenate():
@@ -190,6 +191,8 @@ def test_numbers_and_records_concatenate():
         ]),
     ]
 
+    # FIXME: this operation relies on a deprecated feature
+    # and produces a warning
     assert ak.concatenate([numbers[0], records[0]], 1) == [
         [1.1, 2.2, 3.3, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}],
         [],
@@ -197,39 +200,32 @@ def test_numbers_and_records_concatenate():
         [6.6, 7.7, 8.8, 9.9, {"x": 3.3, "y": [1, 2, 3]}, {"x": 4.4, "y": [1, 2, 3, 4]}],
     ]
 
-    numbers = [
-        ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6, 7.7, 8.8, 9.9]]),
-        ak.Array([[10, 20], [30], [], [40, 50, 60]]),
-        ak.Array(numpy.array([[101, 102, 103], [201, 202, 203], [301, 302, 303], [401, 402, 403]])),
-    ]
-    records = [
-        ak.Array([[{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}], [], [{"x": 2.2, "y": [1, 2]}]]),
-        ak.Array([[{"x": 3.3, "y": [1, 2, 3]}], [{"x": 4.4, "y": [2, 1]}, {"x": 5.5, "y": [1]}], []]),
-    ]
-
-    assert ak.concatenate([numbers[0], numbers[1]], 1) == [
+    assert ak.concatenate([numbers[0], numbers[1]], axis=1) == [
         [1.1, 2.2, 3.3, 10, 20],
         [30],
         [4.4, 5.5],
         [6.6, 7.7, 8.8, 9.9, 40, 50, 60],
     ]
 
-    assert ak.to_list(ak.concatenate(numbers, 1)) == [
+    assert ak.to_list(ak.concatenate(numbers, axis=1)) == [
         [1.1, 2.2, 3.3, 10, 20, 101, 102, 103],
         [30, 201, 202, 203],
         [4.4, 5.5, 301, 302, 303],
         [6.6, 7.7, 8.8, 9.9, 40, 50, 60, 401, 402, 403]]
 
-    assert ak.to_list(ak.concatenate(records, 1)) == [
-        [{'x': 0.0, 'y': []}, {'x': 1.1, 'y': [1]}, {'x': 3.3, 'y': [1, 2, 3]}],
-        [{'x': 4.4, 'y': [2, 1]}, {'x': 5.5, 'y': [1]}],
-        [{'x': 2.2, 'y': [1, 2]}]]
+    assert ak.to_list(ak.concatenate(records, axis=1)) == [
+        [{'x': 0.0, 'y': []}, {'x': 1.1, 'y': [1]}, {'x': 0.0, 'y': []}],
+        [{'x': 1.1, 'y': [1]}, {'x': 2.2, 'y': [1, 2]}],
+        [{'x': 2.2, 'y': [1, 2]}],
+        [{'x': 3.3, 'y': [1, 2, 3]},
+         {'x': 4.4, 'y': [1, 2, 3, 4]},
+         {'x': 3.3, 'y': [1, 2, 3]}]]
 
     with pytest.raises(ValueError) as err:
-        ak.to_list(ak.concatenate([numbers, records], 1))
+        ak.to_list(ak.concatenate([numbers, records], axis=1))
     assert str(err.value).startswith("scalar Record can only be sliced by field name (string); try \"0\"")
 
-def test_jims_test():
+def test_broadcast_and_apply_levels():
     arrays = [
     ak.Array([[[0.0, 1.1, 2.2], []], [[3.3, 4.4]], [[5.5], [6.6, 7.7, 8.8, 9.9]]]),
     ak.Array([[[10, 20], [30]], [[40]], [[50, 60, 70], [80, 90]]]),
