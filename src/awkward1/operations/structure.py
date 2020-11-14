@@ -803,6 +803,13 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
         out = batch[0].mergemany(batch[1:])
 
     else:
+        batch = [contents[0]]
+        for x in contents[1:]:
+            if batch[-1].mergeable(x, mergebool=mergebool):
+                batch.append(x)
+            else:
+                collapsed = batch[0].mergemany_as_union(batch[1:], 1)
+                batch = [collapsed.merge_as_union(x, 1)]
 
         def getfunction(inputs, depth):
             if depth == axis:
@@ -811,7 +818,7 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             else:
                 return None
 
-        out = awkward1._util.broadcast_and_apply(contents, getfunction, behavior=awkward1._util.behaviorof(*arrays))[0]
+        out = awkward1._util.broadcast_and_apply(batch, getfunction, behavior=awkward1._util.behaviorof(*arrays))[0]
 
     if isinstance(out, awkward1._util.uniontypes):
         out = out.simplify(mergebool=mergebool)

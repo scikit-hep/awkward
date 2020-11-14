@@ -1088,7 +1088,7 @@ namespace awkward {
     /// @brief Concatenates this array with `other` by creating a
     /// {@link UnionArrayOf UnionArray} instead of actually merging the data.
     const ContentPtr
-      merge_as_union(const ContentPtr& other) const;
+      merge_as_union(const ContentPtr& other, int64_t axis = 0, int64_t depth = 0) const;
 
     /// @brief Concatenates this array with `other` by creating a
     /// {@link UnionArrayOf UnionArray} instead of actually merging the data.
