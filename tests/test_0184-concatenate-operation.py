@@ -9,7 +9,7 @@ import numpy
 
 import awkward1 as ak
 
-ak.deprecations_as_errors = True
+#ak.deprecations_as_errors = True
 
 def test_list_offset_array_concatenate():
     content_one = ak.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
@@ -190,14 +190,12 @@ def test_numbers_and_records_concatenate():
         ]),
     ]
 
-    # FIXME: this operation relies on a deprecated feature
-    # and produces a warning
-    # assert ak.concatenate([numbers[0], records[0]], 1) == [
-    #     [1.1, 2.2, 3.3, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}],
-    #     [],
-    #     [4.4, 5.5, {"x": 2.2, "y": [1, 2]}],
-    #     [6.6, 7.7, 8.8, 9.9, {"x": 3.3, "y": [1, 2, 3]}, {"x": 4.4, "y": [1, 2, 3, 4]}],
-    # ]
+    assert ak.concatenate([numbers[0], records[0]], 1) == [
+        [1.1, 2.2, 3.3, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}],
+        [],
+        [4.4, 5.5, {"x": 2.2, "y": [1, 2]}],
+        [6.6, 7.7, 8.8, 9.9, {"x": 3.3, "y": [1, 2, 3]}, {"x": 4.4, "y": [1, 2, 3, 4]}],
+    ]
 
     assert ak.concatenate([numbers[0], numbers[1]], axis=1) == [
         [1.1, 2.2, 3.3, 10, 20],

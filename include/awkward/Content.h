@@ -1090,10 +1090,15 @@ namespace awkward {
     const ContentPtr
       merge_as_union(const ContentPtr& other, int64_t axis = 0, int64_t depth = 0) const;
 
-    /// @brief Concatenates this array with `other` by creating a
+    /// @brief Concatenates this array with `others` by creating a
     /// {@link UnionArrayOf UnionArray} instead of actually merging the data.
     const ContentPtr
       mergemany_as_union(const ContentPtrVec& others, int64_t axis = 0, int64_t depth = 0) const;
+
+    /// @brief Concatenates this array with `others` by creating a
+    /// {@link UnionArrayOf UnionArray} of flattened contents at `axis`
+    const ContentPtr
+      concatenate_here(const ContentPtrVec& others, int64_t axis, int64_t depth) const;
 
     /// @brief Internal function to handle the `axis = 0` case of #rpad
     /// and #rpad_and_clip.

@@ -1229,68 +1229,7 @@ namespace awkward {
                                               contents);
       }
       else if (posaxis == depth + 1) {
-        auto const& mine = offsets_and_flattened(posaxis, depth);
-        auto const& their = other.get()->offsets_and_flattened(posaxis, depth);
-        int64_t contents_length = mine.second.get()->length() + their.second.get()->length();
-
-        ContentPtrVec contents({mine.second, their.second});
-        std::vector<Index64> offsets({mine.first, their.first});
-        int64_t longest = mine.first.length() > their.first.length() ?
-          mine.first.length() : their.first.length();
-
-        Index8 tags(contents_length);
-        Index64 index(contents_length);
-        for (int64_t i = 0; i < contents_length; i++) {
-          tags.data()[i] = 0;
-          index.data()[i] = 0;
-        }
-        Index64 out_offsets(longest);
-        for (int64_t i = 0; i < longest; i++) {
-          out_offsets.data()[i] = 0;
-        }
-
-        int64_t start = 0;
-        int64_t stop = 0;
-        for (const auto& i : offsets) {
-          for (int64_t j = 0; j < i.length(); j++) {
-            start = out_offsets.data()[j];
-            stop = i.data()[j];
-            out_offsets.data()[j] = start + stop;
-          }
-        }
-
-        int8_t tag = 0;
-        int64_t counter = 0;
-        int64_t ind = 0;
-        for (int64_t i = 0; i < longest; i++) {
-          tag = 0;
-          for (const auto& offset : offsets) {
-            ind = 0;
-            if (i < offset.length() - 1) {
-              int64_t start = offset.data()[i];
-              int64_t stop = offset.data()[i + 1];
-              int64_t diff = stop - start;
-              for (int64_t j = 0; j < diff; j++) {
-                tags.data()[counter] = tag;
-                index.data()[counter] = start + ind;
-                counter++;
-                ind++;
-              }
-            }
-            tag++;
-          }
-        }
-
-        ContentPtr out = std::make_shared<UnionArray8_64>(Identities::none(),
-                                                          util::Parameters(),
-                                                          tags,
-                                                          index,
-                                                          contents);
-
-        return std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                   util::Parameters(),
-                                                   out_offsets,
-                                                   out);
+        return concatenate_here({other}, posaxis, depth);
      } else {
        throw std::runtime_error(
          std::string("FIXME: unhandled case of merge_as_union in axis \n")
@@ -1306,76 +1245,7 @@ namespace awkward {
     }
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth + 1) {
-      auto const& mine = offsets_and_flattened(posaxis, depth);
-      int64_t contents_length = mine.second.get()->length();
-
-      ContentPtrVec contents({mine.second});
-      int64_t longest = mine.first.length();
-      int64_t other_length = 0;
-      std::vector<Index64> offsets({mine.first});
-
-      for (const auto& array : others) {
-        auto const& other = array.get()->offsets_and_flattened(posaxis, depth);
-        contents_length += other.second.get()->length();
-        contents.emplace_back(other.second);
-        other_length = other.first.length();
-        longest = (longest > other_length) ? longest : other_length;
-        offsets.emplace_back(other.first);
-      }
-
-      Index8 tags(contents_length);
-      Index64 index(contents_length);
-      for (int64_t i = 0; i < contents_length; i++) {
-        tags.data()[i] = 0;
-        index.data()[i] = 0;
-      }
-      Index64 out_offsets(longest);
-      for (int64_t i = 0; i < longest; i++) {
-        out_offsets.data()[i] = 0;
-      }
-
-      int64_t start = 0;
-      int64_t stop = 0;
-      for (const auto& i : offsets) {
-        for (int64_t j = 0; j < i.length(); j++) {
-          start = out_offsets.data()[j];
-          stop = i.data()[j];
-          out_offsets.data()[j] = start + stop;
-        }
-      }
-
-      int8_t tag = 0;
-      int64_t counter = 0;
-      int64_t ind = 0;
-      for (int64_t i = 0; i < longest; i++) {
-        tag = 0;
-        for (const auto& offset : offsets) {
-          ind = 0;
-          if (i < offset.length() - 1) {
-            int64_t start = offset.data()[i];
-            int64_t stop = offset.data()[i + 1];
-            int64_t diff = stop - start;
-            for (int64_t j = 0; j < diff; j++) {
-              tags.data()[counter] = tag;
-              index.data()[counter] = start + ind;
-              counter++;
-              ind++;
-            }
-          }
-          tag++;
-        }
-      }
-
-      ContentPtr out = std::make_shared<UnionArray8_64>(Identities::none(),
-                                                        util::Parameters(),
-                                                        tags,
-                                                        index,
-                                                        contents);
-
-      return std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                 util::Parameters(),
-                                                 out_offsets,
-                                                 out);
+      return concatenate_here(others, posaxis, depth);
     }
     else {
       throw std::runtime_error(
@@ -1383,6 +1253,80 @@ namespace awkward {
         + std::to_string(axis) + std::string(" > depth ") + std::to_string(depth)
         + FILENAME(__LINE__));
     }
+  }
+
+  const ContentPtr
+  Content::concatenate_here(const ContentPtrVec& others, int64_t posaxis, int64_t depth) const {
+    auto const& mine = offsets_and_flattened(posaxis, depth);
+    int64_t contents_length = mine.second.get()->length();
+
+    ContentPtrVec contents({mine.second});
+    int64_t longest = mine.first.length();
+    int64_t other_length = 0;
+    std::vector<Index64> offsets({mine.first});
+
+    for (const auto& array : others) {
+      auto const& other = array.get()->offsets_and_flattened(posaxis, depth);
+      contents_length += other.second.get()->length();
+      contents.emplace_back(other.second);
+      other_length = other.first.length();
+      longest = (longest > other_length) ? longest : other_length;
+      offsets.emplace_back(other.first);
+    }
+
+    Index8 tags(contents_length);
+    Index64 index(contents_length);
+    for (int64_t i = 0; i < contents_length; i++) {
+      tags.data()[i] = 0;
+      index.data()[i] = 0;
+    }
+    Index64 out_offsets(longest);
+    for (int64_t i = 0; i < longest; i++) {
+      out_offsets.data()[i] = 0;
+    }
+
+    int64_t start = 0;
+    int64_t stop = 0;
+    for (const auto& i : offsets) {
+      for (int64_t j = 0; j < i.length(); j++) {
+        start = out_offsets.data()[j];
+        stop = i.data()[j];
+        out_offsets.data()[j] = start + stop;
+      }
+    }
+
+    int8_t tag = 0;
+    int64_t counter = 0;
+    int64_t ind = 0;
+    for (int64_t i = 0; i < longest; i++) {
+      tag = 0;
+      for (const auto& offset : offsets) {
+        ind = 0;
+        if (i < offset.length() - 1) {
+          int64_t start = offset.data()[i];
+          int64_t stop = offset.data()[i + 1];
+          int64_t diff = stop - start;
+          for (int64_t j = 0; j < diff; j++) {
+            tags.data()[counter] = tag;
+            index.data()[counter] = start + ind;
+            counter++;
+            ind++;
+          }
+        }
+        tag++;
+      }
+    }
+
+    ContentPtr out = std::make_shared<UnionArray8_64>(Identities::none(),
+                                                      util::Parameters(),
+                                                      tags,
+                                                      index,
+                                                      contents);
+
+    return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                               util::Parameters(),
+                                               out_offsets,
+                                               out);
   }
 
   const ContentPtr
