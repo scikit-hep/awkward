@@ -977,12 +977,6 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     must have the same lengths and nested lists are each concatenated,
     element for element, and similarly for deeper levels.
     """
-    if axis != 0:
-        raise NotImplementedError(
-            "axis={0}".format(axis)
-            + awkward1._util.exception_suffix(__file__)
-        )
-
     contents = [
         awkward1.operations.convert.to_layout(x, allow_record=False) for x in arrays
     ]
@@ -996,15 +990,35 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             + awkward1._util.exception_suffix(__file__)
         )
 
-    batch = [contents[0]]
-    for x in contents[1:]:
-        if batch[-1].mergeable(x, mergebool=mergebool):
-            batch.append(x)
-        else:
-            collapsed = batch[0].mergemany(batch[1:])
-            batch = [collapsed.merge_as_union(x)]
+    if axis == 0:
+        batch = [contents[0]]
+        for x in contents[1:]:
+            if batch[-1].mergeable(x, mergebool=mergebool):
+                batch.append(x)
+            else:
+                collapsed = batch[0].mergemany(batch[1:])
+                batch = [collapsed.merge_as_union(x)]
 
-    out = batch[0].mergemany(batch[1:])
+        out = batch[0].mergemany(batch[1:])
+
+    else:
+        batch = [contents[0]]
+        for x in contents[1:]:
+            if batch[-1].mergeable(x, mergebool=mergebool):
+                batch.append(x)
+            else:
+                collapsed = batch[0].mergemany_as_union(batch[1:], 1)
+                batch = [collapsed.merge_as_union(x, 1)]
+
+        def getfunction(inputs, depth):
+            if depth == axis:
+                out = inputs[0].mergemany_as_union(inputs[1:], 1)
+                return lambda: (out,)
+            else:
+                return None
+
+        out = awkward1._util.broadcast_and_apply(batch, getfunction, behavior=awkward1._util.behaviorof(*arrays))[0]
+
     if isinstance(out, awkward1._util.uniontypes):
         out = out.simplify(mergebool=mergebool)
 

@@ -13,6 +13,11 @@ ERROR awkward_zero_mask(
   }
   return success();
 }
+ERROR awkward_zero_mask64(
+  int64_t* tomask,
+  int64_t length) {
+  return awkward_zero_mask<int64_t>(tomask, length);
+}
 ERROR awkward_zero_mask8(
   int8_t* tomask,
   int64_t length) {

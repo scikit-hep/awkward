@@ -1683,7 +1683,7 @@ kernels:
               if replacement:
                   size += n - 1
               thisn = n
-      
+
               if thisn > size:
                   combinationslen = 0
               else:
@@ -2729,6 +2729,23 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_ListOffsetArray_merge_offsets
+    specializations:
+      - name: awkward_ListOffsetArray64_merge_offsets_64
+        args:
+          - {name: tooffsets, type: "List[int64_t]", dir: out}
+          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_ListOffsetArray_merge_offsets(
+          tooffsets, fromoffsets, length
+      ):
+          for i in range(length):
+              tooffsets[i] = tooffsets[i] + fromoffsets[i]
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_ListOffsetArray_getitem_adjust_offsets
     specializations:
       - name: awkward_ListOffsetArray_getitem_adjust_offsets_64
@@ -2754,7 +2771,7 @@ kernels:
                   tononzero[j] = nonzero[j] - slicestart
                   j = j + 1
                   count = count + 1
-      
+
               tooffsets[i + 1] = tooffsets[i] + count
     automatic-tests: true
     manual-tests: []
@@ -2811,7 +2828,7 @@ kernels:
                       tononzero[j] = nonzero[j] - slicestart
                   k = k + 1
                   count = count + 1
-      
+
               tooffsets[i + 1] = tooffsets[i] + count
     automatic-tests: true
     manual-tests: []
@@ -2886,7 +2903,7 @@ kernels:
                   outoffsets[k] = i
                   k = k + 1
                   last = last + 1
-      
+
           while k <= outlength:
               outoffsets[k] = lenparents
               k = k + 1
@@ -4700,6 +4717,30 @@ kernels:
           for i in range(length):
               totags[totagsoffset + i] = float(base)
     automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_UnionArray_mergetags_const
+    specializations:
+      - name: awkward_UnionArray_mergetags_to8_const
+        args:
+          - {name: totags, type: "List[int8_t]", dir: out}
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: offset, type: "int64_t", dir: in, role: default}
+          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: index, type: "int64_t", dir: in, role: default}
+          - {name: tag, type: "int8_t", dir: in, role: default}
+          - {name: nextoffset, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_UnionArray_mergetags_const(totags, toindex, offset, fromoffsets, index, tag, nextoffset):
+          start = fromoffsets[index]
+          stop = fromoffsets[index + 1]
+          diff = stop - start
+          for i in range(diff):
+              totags[offset + i] = tag
+              toindex[offset + i] = start + i
+          nextoffset = offset + diff - 1
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_UnionArray_flatten_combine
@@ -6664,6 +6705,10 @@ kernels:
 
   - name: awkward_zero_mask
     specializations:
+      - name: awkward_zero_mask64
+        args:
+          - {name: tomask, type: "List[int64_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_zero_mask8
         args:
           - {name: tomask, type: "List[int8_t]", dir: out}
