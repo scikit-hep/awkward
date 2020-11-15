@@ -2665,7 +2665,7 @@ extern "C" {
     const int64_t* fromoffsets,
     int64_t index,
     int8_t tag,
-    int64_t nextoffset);
+    int64_t* nextoffset);
 
   EXPORT_SYMBOL ERROR
   awkward_UnionArray32_flatten_combine_64(
