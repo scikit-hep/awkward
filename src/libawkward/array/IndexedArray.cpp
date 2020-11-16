@@ -998,6 +998,12 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  kernel::lib
+  IndexedArrayOf<T, ISOPTION>::kernels() const {
+    return kernels_compare(index_.ptr_lib(), content_);
+  }
+
+  template <typename T, bool ISOPTION>
   const std::string
   IndexedArrayOf<T, ISOPTION>::tostring_part(const std::string& indent,
                                              const std::string& pre,

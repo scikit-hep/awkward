@@ -427,6 +427,24 @@ namespace awkward {
                                          size_);
   }
 
+  kernel::lib
+  RegularArray::kernels() const {
+    if (identities_.get() == nullptr) {
+      return content_.get()->kernels();
+    }
+    else {
+      if (dynamic_cast<EmptyArray*>(content_.get())) {
+        return identities_.get()->ptr_lib();
+      }
+      else if (content_.get()->kernels() == identities_.get()->ptr_lib()) {
+        return identities_.get()->ptr_lib();
+      }
+      else {
+        return kernel::lib::size;
+      }
+    }
+  }
+
   const std::string
   RegularArray::tostring_part(const std::string& indent,
                               const std::string& pre,

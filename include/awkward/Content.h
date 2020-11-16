@@ -330,6 +330,13 @@ namespace awkward {
     virtual const FormPtr
       form(bool materialize) const = 0;
 
+    /// @brief Returns the kernel library enum for all nested `ptr_lib`
+    /// within the array's tree structure. If different libraries are
+    /// associated with nodes of the same tree, this returns `kernel::lib::size`
+    /// to indicate that it is "mixed".
+    virtual kernel::lib
+      kernels() const = 0;
+
     /// @brief Internal function to build an output string for #tostring.
     ///
     /// @param indent Indentation depth as a string of spaces.
@@ -1294,6 +1301,10 @@ namespace awkward {
       parameters_tostring(const std::string& indent,
                           const std::string& pre,
                           const std::string& post) const;
+
+    /// @brief Internal function to support most of the logic in #kernels.
+    kernel::lib
+      kernels_compare(kernel::lib from_index, const ContentPtr& content) const;
 
   protected:
     /// @brief See #identities.

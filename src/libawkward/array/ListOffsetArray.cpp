@@ -506,6 +506,12 @@ namespace awkward {
   }
 
   template <typename T>
+  kernel::lib
+  ListOffsetArrayOf<T>::kernels() const {
+    return kernels_compare(offsets_.ptr_lib(), content_);
+  }
+
+  template <typename T>
   const std::string
   ListOffsetArrayOf<T>::tostring_part(const std::string& indent,
                                       const std::string& pre,

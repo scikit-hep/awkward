@@ -1680,4 +1680,24 @@ namespace awkward {
       return out.str();
     }
   }
+
+  kernel::lib
+  Content::kernels_compare(kernel::lib from_index, const ContentPtr& content) const {
+    kernel::lib from_content = content.get()->kernels();
+    if (dynamic_cast<EmptyArray*>(content.get())  ||  from_index == from_content) {
+      if (identities_.get() == nullptr) {
+        return from_index;
+      }
+      else if (from_index == identities_.get()->ptr_lib()) {
+        return from_index;
+      }
+      else {
+        return kernel::lib::size;
+      }
+    }
+    else {
+      return kernel::lib::size;
+    }
+  }
+
 }

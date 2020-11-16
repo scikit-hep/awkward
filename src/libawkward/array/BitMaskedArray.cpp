@@ -459,6 +459,11 @@ namespace awkward {
                                            lsb_order_);
   }
 
+  kernel::lib
+  BitMaskedArray::kernels() const {
+    return kernels_compare(mask_.ptr_lib(), content_);
+  }
+
   const std::string
   BitMaskedArray::tostring_part(const std::string& indent,
                                 const std::string& pre,

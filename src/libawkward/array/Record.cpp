@@ -99,6 +99,11 @@ namespace awkward {
     return array_.get()->form(materialize);
   }
 
+  kernel::lib
+  Record::kernels() const {
+    return array_.get()->kernels();
+  }
+
   const std::string
   Record::tostring_part(const std::string& indent,
                         const std::string& pre,

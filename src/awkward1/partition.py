@@ -166,6 +166,19 @@ class PartitionedArray(object):
     def purelist_parameter(self, *args, **kwargs):
         return first(self).purelist_parameter(*args, **kwargs)
 
+    @property
+    def kernels(self):
+        out = None
+        for x in self.partitions:
+            if out is None:
+                out = x.kernels
+            elif out != x.kernels:
+                return "mixed"
+        if out is None:
+            return "cpu"
+        else:
+            return out
+
     def tojson(self, *args, **kwargs):
         return self._ext.tojson(*args, **kwargs)
 

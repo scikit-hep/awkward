@@ -53,6 +53,13 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
+  kernel::lib
+  None::kernels() const {
+    throw std::runtime_error(
+      std::string("undefined operation: None::kernels")
+      + FILENAME(__LINE__));
+  }
+
   const std::string
   None::tostring_part(const std::string& indent,
                       const std::string& pre,

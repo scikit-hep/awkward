@@ -473,6 +473,19 @@ namespace awkward {
   }
 
   template <typename T>
+  kernel::lib
+  ListArrayOf<T>::kernels() const {
+    kernel::lib starts = starts_.ptr_lib();
+    kernel::lib stops = stops_.ptr_lib();
+    if (starts == stops) {
+      return kernels_compare(starts, content_);
+    }
+    else {
+      return kernel::lib::size;
+    }
+  }
+
+  template <typename T>
   const std::string
   ListArrayOf<T>::tostring_part(const std::string& indent,
                                 const std::string& pre,

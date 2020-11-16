@@ -455,6 +455,11 @@ namespace awkward {
                                             valid_when_);
   }
 
+  kernel::lib
+  ByteMaskedArray::kernels() const {
+    return kernels_compare(mask_.ptr_lib(), content_);
+  }
+
   const std::string
   ByteMaskedArray::tostring_part(const std::string& indent,
                                  const std::string& pre,
