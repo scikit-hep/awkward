@@ -1942,7 +1942,7 @@ make_Record(const py::handle& m, const std::string& name) {
       .def("setparameter", &setparameter<ak::Record>)
       .def("parameter", &parameter<ak::Record>)
       .def("purelist_parameter", &purelist_parameter<ak::Record>)
-      .def_property_readonly("kernels", [](const T& self) -> py::str {
+      .def_property_readonly("kernels", [](const ak::Record& self) -> py::str {
         switch (self.kernels()) {
           case ak::kernel::lib::cpu:
             return py::str("cpu");

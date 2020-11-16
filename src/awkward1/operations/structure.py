@@ -539,12 +539,7 @@ def with_field(base, what, where=None, highlevel=True):
         )
 
         def getfunction(inputs, depth):
-            tmptime.append(time.time())
-
             nplike = awkward1.nplike.of(*inputs)
-
-            tmptime[-1] = time.time() - tmptime[-1]
-
             base, what = inputs
             if isinstance(base, awkward1.layout.RecordArray):
                 if not isinstance(what, awkward1.layout.Content):
@@ -570,10 +565,6 @@ def with_field(base, what, where=None, highlevel=True):
             return awkward1._util.wrap(out[0], behavior=behavior)
         else:
             return out[0]
-
-
-import time
-tmptime = []
 
 
 def with_parameter(array, parameter, value, highlevel=True):
