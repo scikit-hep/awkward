@@ -186,7 +186,9 @@ box(const std::shared_ptr<ak::Content>& content) {
   }
   else {
     throw std::runtime_error(
-      std::string("missing boxer for Content subtype") + FILENAME(__LINE__));
+      std::string("missing boxer for Content subtype: ") +
+      (content.get() == nullptr ? std::string("nullptr") : content.get()->classname()) +
+      std::string(" ") + FILENAME(__LINE__));
   }
 }
 

@@ -767,6 +767,9 @@ namespace awkward {
                                            recordlookup_,
                                            stop - start);
     }
+    else if (start == 0  &&  stop == length_) {
+      return shallow_copy();
+    }
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
