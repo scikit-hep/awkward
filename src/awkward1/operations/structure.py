@@ -1003,6 +1003,13 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
         out = batch[0].mergemany(batch[1:])
 
     else:
+        for x in contents[1:]:
+            if x.axis_wrap_if_negative(axis) != posaxis:
+                raise ValueError(
+                    "cannot concatenate arrays in different axis"
+                    + awkward1._util.exception_suffix(__file__)
+                )
+
         def getfunction(inputs, depth):
             if depth == posaxis:
                 out = inputs[0].mergemany_as_union(inputs[1:], 1)
@@ -1010,7 +1017,8 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             else:
                 return None
 
-        out = awkward1._util.broadcast_and_apply(contents, getfunction, behavior=awkward1._util.behaviorof(*arrays))[0]
+        out = awkward1._util.broadcast_and_apply(contents, getfunction,
+            behavior=awkward1._util.behaviorof(*arrays))[0]
 
     if isinstance(out, awkward1._util.uniontypes):
         out = out.simplify(mergebool=mergebool)
