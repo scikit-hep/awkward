@@ -1003,7 +1003,6 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
         out = batch[0].mergemany(batch[1:])
 
     else:
-        allow_records=True
         for x in contents[1:]:
             if x.axis_wrap_if_negative(axis) != posaxis:
                 raise ValueError(

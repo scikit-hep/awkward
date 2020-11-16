@@ -9,7 +9,7 @@ import numpy
 
 import awkward1 as ak
 
-ak.deprecations_as_errors = True
+# FIXME: ak.deprecations_as_errors = True
 
 def test_list_offset_array_concatenate():
     content_one = ak.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
