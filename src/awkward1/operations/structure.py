@@ -978,7 +978,7 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     element for element, and similarly for deeper levels.
     """
     contents = [
-        awkward1.operations.convert.to_layout(x, allow_record=False) for x in arrays
+        awkward1.operations.convert.to_layout(x, allow_record=False if axis == 0 else True) for x in arrays
     ]
     contents = [
         x.toContent() if isinstance(x, awkward1.partition.PartitionedArray) else x
@@ -989,8 +989,8 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             "need at least one array to concatenate"
             + awkward1._util.exception_suffix(__file__)
         )
-    posaxis = contents[0].axis_wrap_if_negative(axis)
 
+    posaxis = contents[0].axis_wrap_if_negative(axis)
     if posaxis == 0:
         batch = [contents[0]]
         for x in contents[1:]:
@@ -1003,6 +1003,7 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
         out = batch[0].mergemany(batch[1:])
 
     else:
+        allow_records=True
         for x in contents[1:]:
             if x.axis_wrap_if_negative(axis) != posaxis:
                 raise ValueError(
@@ -1018,7 +1019,7 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
                 return None
 
         out = awkward1._util.broadcast_and_apply(contents, getfunction,
-            behavior=awkward1._util.behaviorof(*arrays))[0]
+            behavior=awkward1._util.behaviorof(*arrays), allow_records=True)[0]
 
     if isinstance(out, awkward1._util.uniontypes):
         out = out.simplify(mergebool=mergebool)
