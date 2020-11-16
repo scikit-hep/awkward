@@ -152,6 +152,7 @@ def test_numpyarray_concatenate():
     assert ak.to_list(numpy.concatenate([np2, np1], 1)) == ak.to_list(ak.concatenate([ak2, ak1], 1))
     assert ak.to_list(numpy.concatenate([np1, np2], 2)) == ak.to_list(ak.concatenate([ak1, ak2], 2))
     assert ak.to_list(numpy.concatenate([np2, np1], 2)) == ak.to_list(ak.concatenate([ak2, ak1], 2))
+    assert ak.to_list(numpy.concatenate([np2, np1], -1)) == ak.to_list(ak.concatenate([ak2, ak1], -1))
 
 def test_numbers_and_records_concatenate():
     numbers = [
@@ -247,4 +248,31 @@ def test_broadcast_and_apply_levels():
         [[0.0, 1.1, 2.2, 10, 20], [30]],
         [[3.3, 4.4, 40]],
         [[5.5, 50, 60, 70], [6.6, 7.7, 8.8, 9.9, 80, 90]],
+    ]
+
+def test_negative_axis_concatenate():
+    arrays = [
+    ak.Array([[[0.0, 1.1, 2.2], []], [[3.3, 4.4]], [[5.5], [6.6, 7.7, 8.8, 9.9]]]),
+    ak.Array([[[10, 20], [30]], [[40]], [[50, 60, 70], [80, 90]]]),
+    ]
+
+    assert ak.concatenate(arrays, axis=-1).tolist() == [
+        [[0.0, 1.1, 2.2, 10, 20], [30]],
+        [[3.3, 4.4, 40]],
+        [[5.5, 50, 60, 70], [6.6, 7.7, 8.8, 9.9, 80, 90]],
+    ]
+
+    assert ak.concatenate(arrays, axis=-2).tolist() == [
+        [[0.0, 1.1, 2.2], [], [10, 20], [30]],
+        [[3.3, 4.4], [40]],
+        [[5.5], [6.6, 7.7, 8.8, 9.9], [50, 60, 70], [80, 90]],
+    ]
+
+    assert ak.concatenate(arrays, axis=-3).tolist() == [
+        [[0.0, 1.1, 2.2], []],
+        [[3.3, 4.4]],
+        [[5.5], [6.6, 7.7, 8.8, 9.9]],
+        [[10, 20], [30]],
+        [[40]],
+        [[50, 60, 70], [80, 90]],
     ]

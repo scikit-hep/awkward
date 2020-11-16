@@ -989,8 +989,9 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             "need at least one array to concatenate"
             + awkward1._util.exception_suffix(__file__)
         )
+    posaxis = contents[0].axis_wrap_if_negative(axis)
 
-    if axis == 0:
+    if posaxis == 0:
         batch = [contents[0]]
         for x in contents[1:]:
             if batch[-1].mergeable(x, mergebool=mergebool):
@@ -1011,7 +1012,7 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
                 batch = [collapsed.merge_as_union(x, 1)]
 
         def getfunction(inputs, depth):
-            if depth == axis:
+            if depth == posaxis:
                 out = inputs[0].mergemany_as_union(inputs[1:], 1)
                 return lambda: (out,)
             else:

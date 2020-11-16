@@ -1258,6 +1258,10 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
             return box(self.mergemany_as_union(others, axis, 0));
           }, py::arg("pyothers"),
              py::arg("axis") = 0)
+          .def("axis_wrap_if_negative",
+            [](const T& self, int64_t axis) {
+              return self.axis_wrap_if_negative(axis);
+          })
           .def("count",
                [](const T& self, int64_t axis, bool mask, bool keepdims)
                -> py::object {
