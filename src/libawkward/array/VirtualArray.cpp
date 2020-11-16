@@ -425,6 +425,23 @@ namespace awkward {
     }
   }
 
+  void
+  VirtualArray::caches(std::vector<ArrayCachePtr>& out) const {
+    ContentPtr peek = peek_array();
+    if (cache_.get() != nullptr) {
+      bool found = false;
+      for (auto oldcache : out) {
+        if (oldcache.get() == cache_.get()) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        out.push_back(cache_);
+      }
+    }
+  }
+
   const std::string
   VirtualArray::tostring_part(const std::string& indent,
                             const std::string& pre,

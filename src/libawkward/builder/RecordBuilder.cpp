@@ -15,6 +15,7 @@
 #include "awkward/type/UnknownType.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
+#include "awkward/virtual/ArrayCache.h"
 
 #include "awkward/builder/RecordBuilder.h"
 
@@ -109,11 +110,13 @@ namespace awkward {
       contents.push_back(contents_[i].get()->snapshot());
       recordlookup.get()->push_back(keys_[i]);
     }
+    std::vector<ArrayCachePtr> caches;  // nothing is virtual here
     return std::make_shared<RecordArray>(Identities::none(),
                                          parameters,
                                          contents,
                                          recordlookup,
-                                         length_);
+                                         length_,
+                                         caches);
   }
 
   bool

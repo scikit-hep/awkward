@@ -641,6 +641,9 @@ namespace awkward {
     }
   }
 
+  void
+  NumpyArray::caches(std::vector<ArrayCachePtr>& out) const { }
+
   const std::string
   NumpyArray::tostring_part(const std::string& indent,
                             const std::string& pre,

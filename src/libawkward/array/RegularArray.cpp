@@ -445,6 +445,11 @@ namespace awkward {
     }
   }
 
+  void
+  RegularArray::caches(std::vector<ArrayCachePtr>& out) const {
+    content_.get()->caches(out);
+  }
+
   const std::string
   RegularArray::tostring_part(const std::string& indent,
                               const std::string& pre,

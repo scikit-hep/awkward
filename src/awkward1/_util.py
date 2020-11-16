@@ -1344,18 +1344,26 @@ def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
 
 
 def find_caches(layout):
-    found = set()
-    caches = []
-    def apply(layout, depth):
-        if isinstance(layout, awkward1.layout.VirtualArray):
-            if layout.cache is not None:
-                cache = layout.cache.mutablemapping
-                if id(cache) not in found:
-                    found.add(id(cache))
-                    caches.append(cache)
+    if isinstance(layout, awkward1.partition.PartitionedArray):
+        seen = set()
+        mutablemappings = []
+        for partition in layout.partitions:
+            for cache in partition.caches:
+                x = cache.mutablemapping
+                if id(x) not in seen:
+                    seen.add(id(x))
+                    mutablemappings.append(x)
+    else:
+        mutablemappings = []
+        for cache in layout.caches:
+            x = cache.mutablemapping
+            for y in mutablemappings:
+                if x is y:
+                    break
+            else:
+                mutablemappings.append(x)
 
-    recursive_walk(layout, apply, materialize=False)
-    return tuple(caches)
+    return tuple(mutablemappings)
 
 
 def highlevel_type(layout, behavior, isarray):
@@ -1597,14 +1605,17 @@ class MappingProxy(MutableMapping):
     This can be used to wrap plain dict instances if need be,
     since they are not able to be weak referenced.
     """
-    def __init__(self, base):
-        self.base = base
-
     @classmethod
     def maybe_wrap(cls, mapping):
         if type(mapping) is dict:
             return cls(mapping)
         return mapping
+
+    def __init__(self, base):
+        self.base = base
+
+    def __repr__(self):
+        return repr(self.base)
 
     def __getitem__(self, key):
         return self.base[key]

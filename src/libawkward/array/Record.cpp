@@ -104,6 +104,11 @@ namespace awkward {
     return array_.get()->kernels();
   }
 
+  void
+  Record::caches(std::vector<ArrayCachePtr>& out) const {
+    array_.get()->caches(out);
+  }
+
   const std::string
   Record::tostring_part(const std::string& indent,
                         const std::string& pre,

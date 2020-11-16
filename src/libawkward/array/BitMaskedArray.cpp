@@ -464,6 +464,11 @@ namespace awkward {
     return kernels_compare(mask_.ptr_lib(), content_);
   }
 
+  void
+  BitMaskedArray::caches(std::vector<ArrayCachePtr>& out) const {
+    content_.get()->caches(out);
+  }
+
   const std::string
   BitMaskedArray::tostring_part(const std::string& indent,
                                 const std::string& pre,

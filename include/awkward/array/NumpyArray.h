@@ -321,6 +321,9 @@ namespace awkward {
     kernel::lib
       kernels() const override;
 
+    void
+      caches(std::vector<ArrayCachePtr>& out) const override;
+
     const std::string
       tostring_part(const std::string& indent,
                     const std::string& pre,

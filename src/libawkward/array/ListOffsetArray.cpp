@@ -512,6 +512,12 @@ namespace awkward {
   }
 
   template <typename T>
+  void
+  ListOffsetArrayOf<T>::caches(std::vector<ArrayCachePtr>& out) const {
+    content_.get()->caches(out);
+  }
+
+  template <typename T>
   const std::string
   ListOffsetArrayOf<T>::tostring_part(const std::string& indent,
                                       const std::string& pre,

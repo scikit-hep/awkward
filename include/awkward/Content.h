@@ -21,6 +21,8 @@ namespace awkward {
   class Form;
   using FormPtr       = std::shared_ptr<Form>;
   using FormKey       = std::shared_ptr<std::string>;
+  class ArrayCache;
+  using ArrayCachePtr = std::shared_ptr<ArrayCache>;
 
   /// @class Form
   ///
@@ -336,6 +338,11 @@ namespace awkward {
     /// to indicate that it is "mixed".
     virtual kernel::lib
       kernels() const = 0;
+
+    /// @brief Accumulates all the unique #ArrayCache objects from nested
+    /// #VirtualArray nodes. (Uniqueness is determined by pointer value.)
+    virtual void
+      caches(std::vector<ArrayCachePtr>& out) const = 0;
 
     /// @brief Internal function to build an output string for #tostring.
     ///

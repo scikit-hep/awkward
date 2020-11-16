@@ -60,6 +60,13 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
+  void
+  None::caches(std::vector<ArrayCachePtr>& out) const {
+    throw std::runtime_error(
+      std::string("undefined operation: None::caches")
+      + FILENAME(__LINE__));
+  }
+
   const std::string
   None::tostring_part(const std::string& indent,
                       const std::string& pre,

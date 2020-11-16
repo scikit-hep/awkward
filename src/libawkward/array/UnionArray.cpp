@@ -900,6 +900,14 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  void
+  UnionArrayOf<T, I>::caches(std::vector<ArrayCachePtr>& out) const {
+    for (auto content : contents_) {
+      content.get()->caches(out);
+    }
+  }
+
+  template <typename T, typename I>
   const std::string
   UnionArrayOf<T, I>::tostring_part(const std::string& indent,
                                     const std::string& pre,
