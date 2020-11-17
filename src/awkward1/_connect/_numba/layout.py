@@ -602,6 +602,18 @@ class NumpyArrayType(ContentType):
         arraypos = builder.add(viewproxy.start, atval)
         return getat(context, builder, arrayptr, arraypos, rettype)
 
+    @property
+    def ndim(self):
+        return self.arraytype.ndim
+
+    @property
+    def is_optiontype(self):
+        return False
+
+    @property
+    def is_recordtype(self):
+        return False
+
 
 class RegularArrayType(ContentType):
     IDENTITIES = 0
@@ -706,6 +718,18 @@ class RegularArrayType(ContentType):
         proxyout.sharedptrs = viewproxy.sharedptrs
         proxyout.pylookup = viewproxy.pylookup
         return proxyout._getvalue()
+
+    @property
+    def ndim(self):
+        return 1 + self.contenttype.ndim
+
+    @property
+    def is_optiontype(self):
+        return False
+
+    @property
+    def is_recordtype(self):
+        return False
 
 
 class ListArrayType(ContentType):
@@ -909,6 +933,18 @@ class ListArrayType(ContentType):
         proxyout.pylookup = viewproxy.pylookup
         return proxyout._getvalue()
 
+    @property
+    def ndim(self):
+        return 1 + self.contenttype.ndim
+
+    @property
+    def is_optiontype(self):
+        return False
+
+    @property
+    def is_recordtype(self):
+        return False
+
 
 class IndexedArrayType(ContentType):
     IDENTITIES = 0
@@ -1065,6 +1101,18 @@ class IndexedArrayType(ContentType):
             False,
             False,
         )
+
+    @property
+    def ndim(self):
+        return self.contenttype.ndim
+
+    @property
+    def is_optiontype(self):
+        return False
+
+    @property
+    def is_recordtype(self):
+        return self.contenttype.is_recordtype
 
 
 class IndexedOptionArrayType(ContentType):
@@ -1238,6 +1286,18 @@ class IndexedOptionArrayType(ContentType):
 
         return output._getvalue()
 
+    @property
+    def ndim(self):
+        return self.contenttype.ndim
+
+    @property
+    def is_optiontype(self):
+        return True
+
+    @property
+    def is_recordtype(self):
+        return self.contenttype.is_recordtype
+
 
 class ByteMaskedArrayType(ContentType):
     IDENTITIES = 0
@@ -1399,6 +1459,18 @@ class ByteMaskedArrayType(ContentType):
                 output.data = numba.core.cgutils.get_null_value(output.data.type)
 
         return output._getvalue()
+
+    @property
+    def ndim(self):
+        return self.contenttype.ndim
+
+    @property
+    def is_optiontype(self):
+        return True
+
+    @property
+    def is_recordtype(self):
+        return self.contenttype.is_recordtype
 
 
 class BitMaskedArrayType(ContentType):
@@ -1590,6 +1662,18 @@ class BitMaskedArrayType(ContentType):
 
         return output._getvalue()
 
+    @property
+    def ndim(self):
+        return self.contenttype.ndim
+
+    @property
+    def is_optiontype(self):
+        return True
+
+    @property
+    def is_recordtype(self):
+        return self.contenttype.is_recordtype
+
 
 class UnmaskedArrayType(ContentType):
     IDENTITIES = 0
@@ -1711,6 +1795,18 @@ class UnmaskedArrayType(ContentType):
         output.data = outdata
 
         return output._getvalue()
+
+    @property
+    def ndim(self):
+        return self.contenttype.ndim
+
+    @property
+    def is_optiontype(self):
+        return True
+
+    @property
+    def is_recordtype(self):
+        return self.contenttype.is_recordtype
 
 
 class RecordArrayType(ContentType):
@@ -2084,6 +2180,22 @@ class RecordArrayType(ContentType):
             False,
         )
 
+    @property
+    def is_tuple(self):
+        return self.recordlookup is None
+
+    @property
+    def ndim(self):
+        return 1
+
+    @property
+    def is_optiontype(self):
+        return False
+
+    @property
+    def is_recordtype(self):
+        return True
+
 
 class UnionArrayType(ContentType):
     IDENTITIES = 0
@@ -2279,6 +2391,29 @@ class UnionArrayType(ContentType):
             type(self).__name__ + ".lower_getitem_field not implemented"
             + awkward1._util.exception_suffix(__file__)
         )
+
+    @property
+    def ndim(self):
+        out = None
+        for contenttype in self.contenttypes:
+            if out is None:
+                out = contenttype.ndim
+            elif out != contenttype.ndim:
+                return None
+        return out
+
+    @property
+    def is_optiontype(self):
+        return any(x.is_optiontype for x in self.contents)
+
+    @property
+    def is_recordtype(self):
+        if all(x.is_recordtype for x in self.contents):
+            return True
+        elif all(not x.is_recordtype for x in self.contents):
+            return False
+        else:
+            return None
 
 
 class VirtualArrayType(ContentType):
@@ -2575,4 +2710,92 @@ class VirtualArrayType(ContentType):
             atval,
             wrapneg,
             checkbounds,
+        )
+
+    @property
+    def ndim(self):
+        return self.generator_form.purelist_depth
+
+    @property
+    def is_optiontype(self):
+        return optiontype_of_form(self.generator_form)
+
+    @property
+    def is_recordtype(self):
+        return recordtype_of_form(self.generator_form)
+
+
+def optiontype_of_form(form):
+    if form is None:
+        return None
+
+    elif isinstance(form, (
+        awkward1.forms.NumpyForm,
+        awkward1.forms.EmptyForm,
+        awkward1.forms.RegularForm,
+        awkward1.forms.ListForm,
+        awkward1.forms.ListOffsetForm,
+        awkward1.forms.IndexedForm,
+        awkward1.forms.RecordForm,
+    )):
+        return False
+
+    elif isinstance(form, (
+        awkward1.forms.IndexedOptionForm,
+        awkward1.forms.ByteMaskedForm,
+        awkward1.forms.BitMaskedForm,
+        awkward1.forms.UnmaskedForm,
+    )):
+        return False
+
+    elif isinstance(form, awkward1.forms.UnionForm):
+        return any(optiontype_of_form(x) for x in form.contents)
+
+    elif isinstance(form, awkward1.forms.VirtualForm):
+        return optiontype_of_form(form.form)
+
+    else:
+        raise AssertionError(
+            "unrecognized Form type: {0}".format(type(form))
+            + awkward1._util.exception_suffix(__file__)
+        )
+
+
+def recordtype_of_form(form):
+    if form is None:
+        return None
+
+    elif isinstance(form, (
+        awkward1.forms.NumpyForm,
+        awkward1.forms.EmptyForm,
+        awkward1.forms.RegularForm,
+        awkward1.forms.ListForm,
+        awkward1.forms.ListOffsetForm,
+    )):
+        return False
+
+    elif isinstance(form, (
+        awkward1.forms.IndexedForm,
+        awkward1.forms.IndexedOptionForm,
+        awkward1.forms.ByteMaskedForm,
+        awkward1.forms.BitMaskedForm,
+        awkward1.forms.UnmaskedForm,
+    )):
+        return recordtype_of_form(form.content)
+
+    elif isinstance(form, (
+        awkward1.forms.RecordForm,
+    )):
+        return True
+
+    elif isinstance(form, awkward1.forms.UnionForm):
+        return any(recordtype_of_form(x) for x in form.contents)
+
+    elif isinstance(form, awkward1.forms.VirtualForm):
+        return recordtype_of_form(form.form)
+
+    else:
+        raise AssertionError(
+            "unrecognized Form type: {0}".format(type(form))
+            + awkward1._util.exception_suffix(__file__)
         )

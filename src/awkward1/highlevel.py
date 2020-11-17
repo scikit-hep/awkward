@@ -1442,6 +1442,12 @@ class Array(
                 "use ak.any() or ak.all()"
             )
 
+    def __contains__(self, element):
+        for test in awkward1._util.completely_flatten(self._layout):
+            if element in test:
+                return True
+        return False
+
 
 class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     """
@@ -2033,6 +2039,12 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             "the truth value of a record is ambiguous; "
             "use ak.any() or ak.all() or pick a field"
         )
+
+    def __contains__(self, element):
+        for test in awkward1._util.completely_flatten(self._layout):
+            if element in test:
+                return True
+        return False
 
 
 class ArrayBuilder(Iterable, Sized):
