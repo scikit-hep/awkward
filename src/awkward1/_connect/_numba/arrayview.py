@@ -17,6 +17,17 @@ import awkward1.nplike
 np = awkward1.nplike.NumpyMetadata.instance()
 
 
+########## for code that's built up from strings
+
+def code_to_function(code, function_name, debug=False):
+    if debug:
+        print("################### " + function_name)
+        print(code)
+    namespace = {}
+    exec(code, namespace)
+    return namespace[function_name]
+
+
 ########## Lookup
 
 class Lookup(object):
@@ -1025,6 +1036,88 @@ for binop in (
     operator.xor,
 ) + (() if not hasattr(operator, "matmul") else (operator.matmul,)):
     register_binary_operator(binop)
+
+
+########## contains
+
+
+@numba.core.typing.templates.infer_global(operator.contains)
+class type_contains(numba.core.typing.templates.AbstractTemplate):
+    def generic(self, args, kwargs):
+        if (
+            len(args) == 2 and len(kwargs) == 0 and
+            isinstance(args[0], (ArrayViewType, RecordViewType))
+        ):
+            if args[1] == numba.types.none:
+                return numba.boolean(args[0], args[1])
+            elif isinstance(args[1], (numba.types.Number, numba.types.Boolean)):
+                return numba.boolean(args[0], args[1])
+            elif (
+                isinstance(args[1], numba.types.Optional) and
+                isinstance(args[1].type, (numba.types.Number, numba.types.Boolean))
+            ):
+                return numba.boolean(args[0], args[1])
+
+
+@numba.extending.lower_builtin(operator.contains, ArrayViewType, numba.types.none)
+@numba.extending.lower_builtin(operator.contains, ArrayViewType, numba.types.Number)
+@numba.extending.lower_builtin(operator.contains, ArrayViewType, numba.types.Boolean)
+@numba.extending.lower_builtin(operator.contains, ArrayViewType, numba.types.Optional)
+@numba.extending.lower_builtin(operator.contains, RecordViewType, numba.types.none)
+@numba.extending.lower_builtin(operator.contains, RecordViewType, numba.types.Number)
+@numba.extending.lower_builtin(operator.contains, RecordViewType, numba.types.Boolean)
+@numba.extending.lower_builtin(operator.contains, RecordViewType, numba.types.Optional)
+@numba.extending.lower_builtin(operator.contains, numba.types.Optional, numba.types.none)
+@numba.extending.lower_builtin(operator.contains, numba.types.Optional, numba.types.Number)
+@numba.extending.lower_builtin(operator.contains, numba.types.Optional, numba.types.Boolean)
+@numba.extending.lower_builtin(operator.contains, numba.types.Optional, numba.types.Optional)
+def lower_contains(context, builder, sig, args):
+    statements = []
+
+    def add_statement(indent, name, arraytype, is_array):
+        if is_array:
+            statements.append("for x in " + name + ":")
+            name = "x"
+            indent = indent + "    "
+
+        if isinstance(arraytype, awkward1._connect._numba.layout.RecordArrayType):
+            if arraytype.is_tuple:
+                for fi, ft in enumerate(arraytype.contenttypes):
+                    add_statement(indent, name + "[" + repr(fi) + "]", ft, False)
+            else:
+                for fn, ft in zip(arraytype.recordlookup, arraytype.contenttypes):
+                    add_statement(indent, name + "[" + repr(fn) + "]", ft, False)
+
+        elif arraytype.ndim == 1 and not arraytype.is_recordtype:
+            if arraytype.is_optiontype:
+                statements.append(
+                    indent + "if (element is None and {0} is None) or "
+                    "({0} is not None and element == {0}): return True".format(name)
+                )
+            else:
+                statements.append(indent + "if element == {0}: return True".format(name))
+
+        else:
+            if arraytype.is_optiontype:
+                statements.append(
+                    indent + "if (element is None and {0} is None) or "
+                    "({0} is not None and element in {0}): return True".format(name)
+                )
+            else:
+                statements.append(indent + "if element in {0}: return True".format(name))
+
+    if isinstance(sig.args[0], ArrayViewType):
+        add_statement("", "obj", sig.args[0].type, True)
+    else:
+        add_statement("", "obj", sig.args[0].arrayviewtype.type, False)
+
+    contains_impl = code_to_function("""
+def contains_impl(obj, element):
+    {0}
+    return False
+""".format("\n    ".join(statements)), "contains_impl")
+    return context.compile_internal(builder, contains_impl, sig, args)
+
 
 ########## PartitionedView
 
