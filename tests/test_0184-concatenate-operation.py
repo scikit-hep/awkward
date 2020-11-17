@@ -9,6 +9,14 @@ import numpy
 
 import awkward1
 
+def test_concatenate_number():
+    assert awkward1.to_list(awkward1.concatenate([awkward1.Array([[1, 2, 3], [], [4, 5]]), 999], axis=1)) == [[1, 2, 3, 999], [999], [4, 5, 999]]
+    assert str(awkward1.type(awkward1.concatenate([
+        awkward1.Array([[1, 2, 3], [], [4, 5]]),
+        awkward1.Array([[123], [223], [323]])], axis=1))) == "3 * var * int64"
+
+    assert awkward1.concatenate([awkward1.Array([[1, 2, 3], [], [4, 5]]), awkward1.Array([123, 223, 323])], axis=1) == []
+
 def test_list_offset_array_concatenate():
     content_one = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     content_two = awkward1.layout.NumpyArray(numpy.array([999.999, 0.11, 0.22, 0.33, 0.44, 0.55, 0.66, 0.77, 0.88, 0.99]))

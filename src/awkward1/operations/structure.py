@@ -978,7 +978,8 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     element for element, and similarly for deeper levels.
     """
     contents = [
-        awkward1.operations.convert.to_layout(x, allow_record=False if axis == 0 else True) for x in arrays
+        awkward1.operations.convert.to_layout(x, allow_record=False if axis == 0 else True,
+            allow_other=True) for x in arrays
     ]
     contents = [
         x.toContent() if isinstance(x, awkward1.partition.PartitionedArray) else x
@@ -1004,7 +1005,7 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
 
     else:
         for x in contents[1:]:
-            if x.axis_wrap_if_negative(axis) != posaxis:
+            if isinstance(x, awkward1.layout.Content) and x.axis_wrap_if_negative(axis) != posaxis:
                 raise ValueError(
                     "cannot concatenate arrays in different axis"
                     + awkward1._util.exception_suffix(__file__)
@@ -1012,7 +1013,13 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
 
         def getfunction(inputs, depth):
             if depth == posaxis:
-                out = inputs[0].mergemany_as_union(inputs[1:], 1)
+                nplike = awkward1.nplike.of(*inputs)
+                next_length = len(inputs[0])
+                what = [
+                    x if isinstance(x, awkward1.layout.Content) else awkward1.layout.NumpyArray(nplike.repeat(x, next_length).reshape(next_length, 1))
+                    for x in inputs
+                ]
+                out = what[0].mergemany_as_union(what[1:], 1)
                 return lambda: (out,)
             else:
                 return None

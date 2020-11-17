@@ -1306,7 +1306,7 @@ namespace awkward {
                                                       util::Parameters(),
                                                       tags,
                                                       index,
-                                                      contents);
+                                                      contents).get()->simplify_uniontype(true);
 
     return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                util::Parameters(),
