@@ -9,6 +9,10 @@ import numpy
 
 import awkward1
 
+def test_keep_None_in_place_test():
+    assert awkward1.to_list(awkward1.argsort(awkward1.Array([[3, 2, 1], [], None, [4, 5]]), axis=1)) == [[2, 1, 0], [], None, [0, 1]]
+    assert awkward1.to_list(awkward1.sort(awkward1.Array([[3, 2, 1], [], None, [4, 5]]), axis=1)) == [[1, 2, 3], [], None, [4, 5]]
+
 def test_EmptyArray():
     array = awkward1.layout.EmptyArray()
     assert awkward1.to_list(array.sort(0, True, False)) == []
@@ -24,26 +28,12 @@ def test_NumpyArray():
 
     array2 = awkward1.layout.NumpyArray(numpy.array([[3.3, 2.2, 4.4],
                                                     [1.1, 5.5, 3.3]]))
-    # np.sort(array2, axis=1)
-    # array([[2.2, 3.3, 4.4],
-    #        [1.1, 3.3, 5.5]])
-    assert awkward1.to_list(array2.sort(1, True, False)) == [
-        [2.2, 3.3, 4.4],
-        [1.1, 3.3, 5.5]]
 
-    # np.sort(array2, axis=0)
-    # array([[1.1, 2.2, 3.3],
-    #        [3.3, 5.5, 4.4]])
-    assert awkward1.to_list(array2.sort(0, True, False)) == [
-        [1.1, 2.2, 3.3],
-        [3.3, 5.5, 4.4]]
+    assert awkward1.to_list(array2.sort(1, True, False)) == awkward1.to_list(numpy.sort(array2, axis=1))
+    assert awkward1.to_list(array2.sort(0, True, False)) == awkward1.to_list(numpy.sort(array2, axis=0))
 
-    assert awkward1.to_list(array2.argsort(1, True, False)) == [
-        [1, 0, 2],
-        [0, 2, 1]]
-    assert awkward1.to_list(array2.argsort(0, True, False)) == [
-        [1, 0, 1],
-        [0, 1, 0]]
+    assert awkward1.to_list(array2.argsort(1, True, False)) == awkward1.to_list(numpy.argsort(array2, 1))
+    assert awkward1.to_list(array2.argsort(0, True, False)) == awkward1.to_list(numpy.argsort(array2, 0))
 
     with pytest.raises(ValueError) as err:
         array2.sort(2, True, False)
@@ -187,10 +177,19 @@ def test_IndexedOffsetArray():
     #     [  5.5 ],
     #     []]
 
-    # FIXME: assert awkward1.to_list(array.argsort(1, True, False)) == [[1, 0, 2], [], [0, 1], [0], [2, 1, 0]]
-    # [[1, 0, 2], [None, None, None], [-3, -2, None], [-4, None, None], [-4, -5, -6]]
-    # FIXME: assert awkward1.to_list(array.argsort(0, True, False)) == [[3, 0, 1, 2], [2, 0, 1], [1, 0]]
-    # [[3, 0, -2], [0, -1, -4], [1, None, -3], [2, None, None], [None, None, None]]
+    assert awkward1.to_list(array.argsort(1, True, False)) == [
+        [   1,    0,    2],
+        [None, None, None],
+        [   0,    1, None],
+        [   0, None, None],
+        [   2,    1,    0]]
+
+    assert awkward1.to_list(array.argsort(0, True, False)) == [
+        [   3,    1,    2],
+        [   0,    0,    0],
+        [   1, None,    1],
+        [   2, None, None],
+        [None, None, None]]
 
     content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
     index1 = awkward1.layout.Index32(numpy.array([1, 2, 3, 4], dtype=numpy.int32))
@@ -214,67 +213,10 @@ def test_3d():
         [[ -1.1,   -2.2,   -3.3,   -4.4,   -5.5],      # 3
          [ -6.6,   -7.7,   -8.8,   -9.9,  -10.1],      # 4
          [-11.11, -12.12, -13.13, -14.14, -15.15]]]))  # 5
-    assert awkward1.to_list(array.argsort(2, True, False)) == [
-        [[0, 1, 2, 3, 4],
-         [0, 1, 2, 3, 4],
-         [0, 1, 2, 3, 4]],
-
-        [[4, 3, 2, 1, 0],
-         [4, 3, 2, 1, 0],
-         [4, 3, 2, 1, 0]]]
-
-# np.sort(array, axis=2)
-# array([[[  1.1 ,   2.2 ,   3.3 ,   4.4 ,   5.5 ],
-#         [  6.6 ,   7.7 ,   8.8 ,   9.9 ,  10.1 ],
-#         [ 11.11,  12.12,  13.13,  14.14,  15.15]],
-#
-#        [[ -5.5 ,  -4.4 ,  -3.3 ,  -2.2 ,  -1.1 ],
-#         [-10.1 ,  -9.9 ,  -8.8 ,  -7.7 ,  -6.6 ],
-#         [-15.15, -14.14, -13.13, -12.12, -11.11]]])
-
-    assert awkward1.to_list(array.sort(2, True, False)) == [
-        [[  1.1,    2.2,    3.3,    4.4,    5.5 ],
-         [  6.6,    7.7,    8.8,    9.9,   10.10],
-         [ 11.11,  12.12,  13.13,  14.14,  15.15]],
-
-        [[ -5.5,   -4.4,   -3.3,   -2.2,   -1.1],
-         [-10.1,   -9.9,   -8.8,   -7.7,   -6.6],
-         [-15.15, -14.14, -13.13, -12.12, -11.11]]]
-
-# np.argsort(array, 2)
-# array([[[0, 1, 2, 3, 4],
-#         [0, 1, 2, 3, 4],
-#         [0, 1, 2, 3, 4]],
-#
-#        [[4, 3, 2, 1, 0],
-#         [4, 3, 2, 1, 0],
-#         [4, 3, 2, 1, 0]]])
-    assert awkward1.to_list(array.argsort(2, True, False)) == [
-       [[0, 1, 2, 3, 4],
-        [0, 1, 2, 3, 4],
-        [0, 1, 2, 3, 4]],
-
-       [[4, 3, 2, 1, 0],
-        [4, 3, 2, 1, 0],
-        [4, 3, 2, 1, 0]]]
-
-# np.sort(array, axis=1)
-# array([[[  1.1 ,   2.2 ,   3.3 ,   4.4 ,   5.5 ],
-#         [  6.6 ,   7.7 ,   8.8 ,   9.9 ,  10.1 ],
-#         [ 11.11,  12.12,  13.13,  14.14,  15.15]],
-#
-#        [[-11.11, -12.12, -13.13, -14.14, -15.15],
-#         [ -6.6 ,  -7.7 ,  -8.8 ,  -9.9 , -10.1 ],
-#         [ -1.1 ,  -2.2 ,  -3.3 ,  -4.4 ,  -5.5 ]]])
-
-    assert awkward1.to_list(array.sort(1, True, False)) == [
-    [[  1.1,    2.2,    3.3,    4.4,    5.5],
-     [  6.6,    7.7,    8.8,    9.9,   10.1],
-     [ 11.11,  12.12,  13.13,  14.14,  15.15]],
-
-    [[-11.11, -12.12, -13.13, -14.14, -15.15],
-     [ -6.6,   -7.7,   -8.8,   -9.9,  -10.1],
-     [ -1.1,   -2.2,   -3.3,   -4.4,   -5.5]]]
+    assert awkward1.to_list(array.argsort(2, True, False)) == awkward1.to_list(numpy.argsort(array, 2))
+    assert awkward1.to_list(array.sort(2, True, False)) == awkward1.to_list(numpy.sort(array, 2))
+    assert awkward1.to_list(array.argsort(1, True, False)) == awkward1.to_list(numpy.argsort(array, 1))
+    assert awkward1.to_list(array.sort(1, True, False)) == awkward1.to_list(numpy.sort(array, 1))
 
     assert awkward1.to_list(array.sort(1, False, False)) == [
     [[ 11.11,  12.12,  13.13,  14.14,  15.15],
@@ -285,59 +227,8 @@ def test_3d():
      [ -6.6,   -7.7,   -8.8,   -9.9,  -10.1],
      [-11.11, -12.12, -13.13, -14.14, -15.15]]]
 
-# np.argsort(array, 1)
-# array([[[0, 0, 0, 0, 0],
-#         [1, 1, 1, 1, 1],
-#         [2, 2, 2, 2, 2]],
-#
-#        [[2, 2, 2, 2, 2],
-#         [1, 1, 1, 1, 1],
-#         [0, 0, 0, 0, 0]]])
-
-    assert awkward1.to_list(array.argsort(1, True, False)) == [
-        [[0, 0, 0, 0, 0],
-         [1, 1, 1, 1, 1],
-         [2, 2, 2, 2, 2]],
-
-        [[2, 2, 2, 2, 2],
-         [1, 1, 1, 1, 1],
-         [0, 0, 0, 0, 0]]]
-
-# np.sort(array, axis=0)
-# array([[[ -1.1 ,  -2.2 ,  -3.3 ,  -4.4 ,  -5.5 ],
-#         [ -6.6 ,  -7.7 ,  -8.8 ,  -9.9 , -10.1 ],
-#         [-11.11, -12.12, -13.13, -14.14, -15.15]],
-#
-#        [[  1.1 ,   2.2 ,   3.3 ,   4.4 ,   5.5 ],
-#         [  6.6 ,   7.7 ,   8.8 ,   9.9 ,  10.1 ],
-#         [ 11.11,  12.12,  13.13,  14.14,  15.15]]])
-
-    assert awkward1.to_list(array.sort(0, True, False)) == [
-    [[ -1.1,   -2.2,   -3.3,   -4.4,   -5.5],
-     [ -6.6,   -7.7,   -8.8,   -9.9,  -10.1],
-     [-11.11, -12.12, -13.13, -14.14, -15.15]],
-
-    [[  1.1,    2.2,    3.3,    4.4,    5.5],
-     [  6.6,    7.7,    8.8,    9.9,   10.1],
-     [ 11.11,  12.12,  13.13,  14.14,  15.15]]]
-
-# np.argsort(array, 0)
-# array([[[1, 1, 1, 1, 1],
-#         [1, 1, 1, 1, 1],
-#         [1, 1, 1, 1, 1]],
-#
-#        [[0, 0, 0, 0, 0],
-#         [0, 0, 0, 0, 0],
-#         [0, 0, 0, 0, 0]]])
-
-    assert awkward1.to_list(array.argsort(0, True, False)) == [
-       [[1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1]],
-
-       [[0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0]]]
+    assert awkward1.to_list(array.sort(0, True, False)) == awkward1.to_list(numpy.sort(array, 0))
+    assert awkward1.to_list(array.argsort(0, True, False)) == awkward1.to_list(numpy.argsort(array, 0))
 
 def test_RecordArray():
     array = awkward1.Array([{"x": 0.0, "y": []},
