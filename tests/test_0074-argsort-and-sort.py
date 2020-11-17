@@ -7,19 +7,22 @@ import sys
 import pytest
 import numpy
 
-# import pickle
+#import pickle
 import awkward1
 
-def test_gordons_test():
-    array = awkward1.Array([[149, 115, 73.5, 49.1, 44.1, 40.8], [151, 94.8]]).layout
-    assert awkward1.to_list(array.argsort(1, True, False)) == [[5, 4, 3, 2, 1, 0], [1, 0]]
-    # with open('arg_sort_boom.pcl', 'rb') as f:
-    #     data = pickle.load(f)
-    #
-    #     so = awkward1.argsort(data, axis=-1)
-    #     assert awkward1.to_list(so) == [[5, 4, 3, 2, 1, 0], [1, 0]]
-    #     assert awkward1.to_list(awkward1.sort(data, axis=-1)) == data[so]
-        
+# def test_gordons_test():
+#     array = awkward1.Array([[149, 115, 73.5, 49.1, 44.1, 40.8], [151, 94.8]]).layout
+#     assert awkward1.to_list(array.argsort(1, True, False)) == [[5, 4, 3, 2, 1, 0], [1, 0]]
+#     with open('arg_sort_boom.pcl', 'rb') as f:
+#         data = pickle.load(f)
+#
+#         so = awkward1.argsort(data, axis=-1)
+#         assert awkward1.to_list(so) == [[5, 4, 3, 2, 1, 0], [1, 0]]
+#         assert awkward1.to_list(awkward1.sort(data, axis=-1)) == data[so]
+
+def test_keep_None_in_place_test():
+    assert awkward1.to_list(awkward1.argsort(awkward1.Array([[3, 2, 1], [], None, [4, 5]]), axis=1)) == [[2, 1, 0], [], None, [0, 1]]
+
 def test_EmptyArray():
     array = awkward1.layout.EmptyArray()
     assert awkward1.to_list(array.sort(0, True, False)) == []
@@ -35,26 +38,12 @@ def test_NumpyArray():
 
     array2 = awkward1.layout.NumpyArray(numpy.array([[3.3, 2.2, 4.4],
                                                     [1.1, 5.5, 3.3]]))
-    # np.sort(array2, axis=1)
-    # array([[2.2, 3.3, 4.4],
-    #        [1.1, 3.3, 5.5]])
-    assert awkward1.to_list(array2.sort(1, True, False)) == [
-        [2.2, 3.3, 4.4],
-        [1.1, 3.3, 5.5]]
 
-    # np.sort(array2, axis=0)
-    # array([[1.1, 2.2, 3.3],
-    #        [3.3, 5.5, 4.4]])
-    assert awkward1.to_list(array2.sort(0, True, False)) == [
-        [1.1, 2.2, 3.3],
-        [3.3, 5.5, 4.4]]
+    assert awkward1.to_list(array2.sort(1, True, False)) == awkward1.to_list(numpy.sort(array2, axis=1))
+    assert awkward1.to_list(array2.sort(0, True, False)) == awkward1.to_list(numpy.sort(array2, axis=0))
 
-    assert awkward1.to_list(array2.argsort(1, True, False)) == [
-        [1, 0, 2],
-        [0, 2, 1]]
-    assert awkward1.to_list(array2.argsort(0, True, False)) == [
-        [1, 0, 1],
-        [0, 1, 0]]
+    assert awkward1.to_list(array2.argsort(1, True, False)) == awkward1.to_list(numpy.argsort(array2, 1))
+    assert awkward1.to_list(array2.argsort(0, True, False)) == awkward1.to_list(numpy.argsort(array2, 0))
 
     with pytest.raises(ValueError) as err:
         array2.sort(2, True, False)

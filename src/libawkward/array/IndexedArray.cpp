@@ -2133,6 +2133,13 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
 
     ContentPtr next = content_.get()->carry(nextcarry, false);
+
+    bool inject_nones = false;
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    if (numnull > 0  &&  !branchdepth.first  &&  negaxis != branchdepth.second) {
+      keepdims = false;
+      inject_nones = true;
+    }
     ContentPtr out = next.get()->sort_next(negaxis,
                                            starts,
                                            nextparents,
@@ -2158,7 +2165,13 @@ namespace awkward {
             nextoutindex,
             out);
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
+    if(inject_nones) {
+      out = std::make_shared<RegularArray>(Identities::none(),
+                                           util::Parameters(),
+                                           out,
+                                           parents_length);
+    }
+
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       return out;
     }
@@ -2201,7 +2214,8 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("sort_next with unbranching depth > negaxis is only "
-                      "expected to return RegularArray or ListOffsetArray64; "
+                      "expected to return RegularArray or ListOffsetArray64 or "
+                      "IndexedArrayOf<int64_t, ISOPTION>; "
                       "instead, it returned ") + out.get()->classname()
           + FILENAME(__LINE__));
       }
@@ -2246,6 +2260,13 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
 
     ContentPtr next = content_.get()->carry(nextcarry, false);
+
+    bool inject_nones = false;
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+    if (numnull > 0  &&  !branchdepth.first  &&  negaxis != branchdepth.second) {
+      keepdims = false;
+      inject_nones = true;
+    }
     ContentPtr out = next.get()->argsort_next(negaxis,
                                               starts,
                                               nextparents,
@@ -2266,12 +2287,18 @@ namespace awkward {
     util::handle_error(err3, classname(), identities_.get());
 
     out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
-            Identities::none(),
-            util::Parameters(),
-            nextoutindex,
-            out);
+        Identities::none(),
+        util::Parameters(),
+        nextoutindex,
+        out);
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
+    if(inject_nones) {
+      out = std::make_shared<RegularArray>(Identities::none(),
+                                           util::Parameters(),
+                                           out,
+                                           parents_length);
+    }
+
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       return out;
     }
