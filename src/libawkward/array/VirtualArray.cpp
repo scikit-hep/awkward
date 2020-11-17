@@ -427,7 +427,6 @@ namespace awkward {
 
   void
   VirtualArray::caches(std::vector<ArrayCachePtr>& out) const {
-    ContentPtr peek = peek_array();
     if (cache_.get() != nullptr) {
       bool found = false;
       for (auto oldcache : out) {
