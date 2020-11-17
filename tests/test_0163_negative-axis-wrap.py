@@ -34,19 +34,19 @@ def test_array_3d():
 def test_list_array():
     array = awkward1.Array(numpy.arange(3*5*2).reshape(3, 5, 2).tolist())
     assert awkward1.num(array, axis=0) == 3
-    assert awkward1.num(array, axis=1) == [5, 5, 5]
-    assert awkward1.num(array, axis=2) == [[2, 2, 2, 2, 2],
-                                           [2, 2, 2, 2, 2],
-                                           [2, 2, 2, 2, 2]]
+    assert awkward1.num(array, axis=1).tolist() == [5, 5, 5]
+    assert awkward1.num(array, axis=2).tolist() == [[2, 2, 2, 2, 2],
+                                                    [2, 2, 2, 2, 2],
+                                                    [2, 2, 2, 2, 2]]
 
     with pytest.raises(ValueError) as err:
         assert awkward1.num(array, axis=3)
     assert str(err.value).startswith("'axis' out of range for 'num'")
 
-    assert awkward1.num(array, axis=-1) == [5, 5, 5]
-    assert awkward1.num(array, axis=-2) == [[2, 2, 2, 2, 2],
-                                           [2, 2, 2, 2, 2],
-                                           [2, 2, 2, 2, 2]]
+    assert awkward1.num(array, axis=-1).tolist() == [[2, 2, 2, 2, 2],
+                                                     [2, 2, 2, 2, 2],
+                                                     [2, 2, 2, 2, 2]]
+    assert awkward1.num(array, axis=-2).tolist() == [5, 5, 5]
     assert awkward1.num(array, axis=-3) == 3
     with pytest.raises(ValueError) as err:
         assert awkward1.num(array, axis=-4)

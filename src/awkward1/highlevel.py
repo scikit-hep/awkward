@@ -1433,6 +1433,15 @@ class Array(
     def __deepcopy__(self, memo):
         return Array(self._layout.deep_copy(), behavior=self._behavior)
 
+    def __bool__(self):
+        if len(self) == 1:
+            return bool(self[0])
+        else:
+            raise ValueError(
+                "the truth value of an array whose length is not 1 is ambiguous; "
+                "use ak.any() or ak.all()"
+            )
+
 
 class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     """
@@ -2019,6 +2028,12 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     def __deepcopy__(self, memo):
         return Record(self._layout.deep_copy(), behavior=self._behavior)
 
+    def __bool__(self):
+        raise ValueError(
+            "the truth value of a record is ambiguous; "
+            "use ak.any() or ak.all() or pick a field"
+        )
+
 
 class ArrayBuilder(Iterable, Sized):
     """
@@ -2312,6 +2327,15 @@ class ArrayBuilder(Iterable, Sized):
         import awkward1._connect._numba.builder
 
         return awkward1._connect._numba.builder.ArrayBuilderType(self._behavior)
+
+    def __bool__(self):
+        if len(self) == 1:
+            return bool(self[0])
+        else:
+            raise ValueError(
+                "the truth value of an array whose length is not 1 is ambiguous; "
+                "use ak.any() or ak.all()"
+            )
 
     def snapshot(self):
         """

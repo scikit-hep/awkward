@@ -158,5 +158,5 @@ def test_ByteMaskedArray():
     listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, bytemaskedarray)
     array = awkward1.Array(listoffsetarray)
     assert array.tolist() == [[1.1, 2.2], [3.3, None], [None, 4.4, 5.5]]
-    assert awkward1.max(array, axis=1) == [2.2, 3.3, 5.5]
-    assert awkward1.argmax(array, axis=1) == [1, 0, 2]
+    assert awkward1.max(array, axis=1).tolist() == [2.2, 3.3, 5.5]
+    assert awkward1.argmax(array, axis=1).tolist() == [1, 0, 2]
