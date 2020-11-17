@@ -59,8 +59,8 @@ awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64(
   HANDLE_ERROR(cudaMalloc((void**)&filtered_mask_k, sizeof(int8_t) * length));
   HANDLE_ERROR(
       cudaMalloc((void**)&filtered_mask_nullsum, sizeof(int8_t) * length));
-  HANDLE_ERROR(cudaMemset(filtered_mask_k, length, 0));
-  HANDLE_ERROR(cudaMemset(filtered_mask_nullsum, length, 0));
+  HANDLE_ERROR(cudaMemset(filtered_mask_k, 0, sizeof(int8_t) * length));
+  HANDLE_ERROR(cudaMemset(filtered_mask_nullsum, 0, sizeof(int8_t) * length));
 
   awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64_filter_mask<<<
       blocks_per_grid,

@@ -10,12 +10,28 @@ void awkward_ListOffsetArray_reduce_nonlocal_preparenext_64_initialize_distincts
   int64_t* distincts,
   int64_t distinctlen) {
 
-  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < distinctlen) {
     distincts[thread_id] = -1;
   }
 }
+
+__global__
+void awkward_ListOffsetArray_reduce_nonlocal_preparenext_64_filter_k(
+  int64_t* offsetscopy,
+  const int64_t* offsets,
+  int8_t* filter_k,
+  int64_t length) {
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+
+  if(thread_id < length) {
+    if (offsetscopy[thread_id] < offsets[thread_id + 1]) {
+      filter_k[thread_id] = 1;
+    }
+  }
+}
+
 ERROR awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
   int64_t* nextcarry,
   int64_t* nextparents,
@@ -40,12 +56,13 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
   blocks_per_grid = blocks(nextlen);
   threads_per_block = threads(nextlen);
 
-  int8_t* k_mask_arr;
+  int8_t* f;
 
-  HANDLE_ERROR(cudaMalloc(k_mask_arr, sizeof(int8_t) * length));
-  HANDLE_ERROR(cudaMemset(k_mask_arr, nextlen, 0));
+  HANDLE_ERROR(cudaMalloc(k_mask, sizeof(int8_t) * length * nextlen));
+  HANDLE_ERROR(cudaMemset(k_mask, 0, sizeof(int8_t) * length * nextlen));
   awkward_ListOffsetArray_reduce_nonlocal_preparenext_64_k_mask(
-      k_mask_arr)
+      k_mask,
+      )
   int64_t k = 0;
   while (k < nextlen) {
     int64_t j = 0;

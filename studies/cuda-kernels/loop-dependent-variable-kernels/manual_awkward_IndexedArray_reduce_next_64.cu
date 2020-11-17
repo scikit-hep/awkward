@@ -57,7 +57,7 @@ awkward_IndexedArray_reduce_next_64(int64_t* nextcarry,
   int8_t* filtered_mask;
   HANDLE_ERROR(cudaMalloc((void**)&filtered_mask, sizeof(int8_t) * length));
   HANDLE_ERROR(cudaMemset(
-      filtered_mask, length, 0));
+      filtered_mask, 0, sizeof(int8_t) * length));
 
   awkward_IndexedArray_reduce_next_64_filter_mask<<<blocks_per_grid,
                                                     threads_per_block>>>(

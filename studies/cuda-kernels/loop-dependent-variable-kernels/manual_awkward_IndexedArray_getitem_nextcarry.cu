@@ -69,7 +69,7 @@ ERROR awkward_IndexedArray_getitem_nextcarry(
 
   HANDLE_ERROR(cudaMalloc((void**)&filtered_mask, sizeof(int8_t) * lenindex));
   HANDLE_ERROR(cudaMalloc((void**)&res_temp, sizeof(int64_t) * lenindex));
-  HANDLE_ERROR(cudaMemset(filtered_mask, 0, lenindex));
+  HANDLE_ERROR(cudaMemset(filtered_mask, 0, sizeof(int8_t) * lenindex));
 
   awkward_IndexedArray_getitem_nextcarry_filter_mask<C><<<blocks_per_grid, threads_per_block>>>(
     fromindex,

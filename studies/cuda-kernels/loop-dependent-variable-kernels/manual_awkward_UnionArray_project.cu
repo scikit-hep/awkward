@@ -53,7 +53,7 @@ ERROR awkward_UnionArray_project(
 
   HANDLE_ERROR(cudaMalloc((void**)&filtered_mask, sizeof(int8_t) * length));
   HANDLE_ERROR(cudaMalloc((void**)&res_temp, sizeof(int64_t) * length));
-  HANDLE_ERROR(cudaMemset(filtered_mask, 0, length));
+  HANDLE_ERROR(cudaMemset(filtered_mask, 0, sizeof(int8_t) * length));
 
   awkward_UnionArray_project_filter_mask<C><<<blocks_per_grid, threads_per_block>>>(
       fromtags,
