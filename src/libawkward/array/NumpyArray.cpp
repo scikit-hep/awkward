@@ -628,6 +628,22 @@ namespace awkward {
                                        dtype_);
   }
 
+  kernel::lib
+  NumpyArray::kernels() const {
+    if (identities_.get() == nullptr) {
+      return ptr_lib_;
+    }
+    else if (ptr_lib_ == identities_.get()->ptr_lib()) {
+      return ptr_lib_;
+    }
+    else {
+      return kernel::lib::size;
+    }
+  }
+
+  void
+  NumpyArray::caches(std::vector<ArrayCachePtr>& out) const { }
+
   const std::string
   NumpyArray::tostring_part(const std::string& indent,
                             const std::string& pre,

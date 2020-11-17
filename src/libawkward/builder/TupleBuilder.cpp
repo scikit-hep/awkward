@@ -73,11 +73,13 @@ namespace awkward {
     for (size_t i = 0;  i < contents_.size();  i++) {
       contents.push_back(contents_[i].get()->snapshot());
     }
+    std::vector<ArrayCachePtr> caches;  // nothing is virtual here
     return std::make_shared<RecordArray>(Identities::none(),
                                          util::Parameters(),
                                          contents,
                                          util::RecordLookupPtr(nullptr),
-                                         length_);
+                                         length_,
+                                         caches);
   }
 
   bool

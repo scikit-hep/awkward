@@ -867,6 +867,47 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  kernel::lib
+  UnionArrayOf<T, I>::kernels() const {
+    kernel::lib last = kernel::lib::size;
+    for (auto content : contents_) {
+      if (last == kernel::lib::size) {
+        last = content.get()->kernels();
+      }
+      else if (last != content.get()->kernels()) {
+        return kernel::lib::size;
+      }
+    }
+    if (identities_.get() == nullptr) {
+      if (last == kernel::lib::size) {
+        return kernel::lib::cpu;
+      }
+      else {
+        return last;
+      }
+    }
+    else {
+      if (last == kernel::lib::size) {
+        return identities_.get()->ptr_lib();
+      }
+      else if (last == identities_.get()->ptr_lib()) {
+        return last;
+      }
+      else {
+        return kernel::lib::size;
+      }
+    }
+  }
+
+  template <typename T, typename I>
+  void
+  UnionArrayOf<T, I>::caches(std::vector<ArrayCachePtr>& out) const {
+    for (auto content : contents_) {
+      content.get()->caches(out);
+    }
+  }
+
+  template <typename T, typename I>
   const std::string
   UnionArrayOf<T, I>::tostring_part(const std::string& indent,
                                     const std::string& pre,

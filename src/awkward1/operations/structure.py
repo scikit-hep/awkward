@@ -2771,9 +2771,8 @@ def virtual(
         generate, args, kwargs, form=form, length=length
     )
     if cache is not None and not isinstance(cache, awkward1.layout.ArrayCache):
-        cache = awkward1.layout.ArrayCache(
-            awkward1._util.MappingProxy.maybe_wrap(cache)
-        )
+        maybe_wrapped = awkward1._util.MappingProxy.maybe_wrap(cache)
+        cache = awkward1.layout.ArrayCache(maybe_wrapped)
 
     out = awkward1.layout.VirtualArray(
         gen, cache, cache_key=cache_key, parameters=parameters
@@ -2827,9 +2826,8 @@ def with_cache(array, cache, highlevel=True):
     See #ak.virtual.
     """
     if cache is not None and not isinstance(cache, awkward1.layout.ArrayCache):
-        cache = awkward1.layout.ArrayCache(
-            awkward1._util.MappingProxy.maybe_wrap(cache)
-        )
+        maybe_wrapped = awkward1._util.MappingProxy.maybe_wrap(cache)
+        cache = awkward1.layout.ArrayCache(maybe_wrapped)
 
     def getfunction(layout, depth):
         if isinstance(layout, awkward1.layout.VirtualArray):

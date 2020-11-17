@@ -216,6 +216,14 @@ namespace awkward {
                                        FormKey(nullptr));
   }
 
+  kernel::lib
+  EmptyArray::kernels() const {
+    return kernel::lib::cpu;
+  }
+
+  void
+  EmptyArray::caches(std::vector<ArrayCachePtr>& out) const { }
+
   const std::string
   EmptyArray::tostring_part(const std::string& indent,
                             const std::string& pre,

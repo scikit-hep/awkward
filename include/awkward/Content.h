@@ -21,6 +21,8 @@ namespace awkward {
   class Form;
   using FormPtr       = std::shared_ptr<Form>;
   using FormKey       = std::shared_ptr<std::string>;
+  class ArrayCache;
+  using ArrayCachePtr = std::shared_ptr<ArrayCache>;
 
   /// @class Form
   ///
@@ -329,6 +331,18 @@ namespace awkward {
     /// {@link VirtualArray VirtualArrays} encountered along the way.
     virtual const FormPtr
       form(bool materialize) const = 0;
+
+    /// @brief Returns the kernel library enum for all nested `ptr_lib`
+    /// within the array's tree structure. If different libraries are
+    /// associated with nodes of the same tree, this returns `kernel::lib::size`
+    /// to indicate that it is "mixed".
+    virtual kernel::lib
+      kernels() const = 0;
+
+    /// @brief Accumulates all the unique #ArrayCache objects from nested
+    /// #VirtualArray nodes. (Uniqueness is determined by pointer value.)
+    virtual void
+      caches(std::vector<ArrayCachePtr>& out) const = 0;
 
     /// @brief Internal function to build an output string for #tostring.
     ///
@@ -1294,6 +1308,10 @@ namespace awkward {
       parameters_tostring(const std::string& indent,
                           const std::string& pre,
                           const std::string& post) const;
+
+    /// @brief Internal function to support most of the logic in #kernels.
+    kernel::lib
+      kernels_compare(kernel::lib from_index, const ContentPtr& content) const;
 
   protected:
     /// @brief See #identities.

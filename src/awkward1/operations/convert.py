@@ -563,61 +563,6 @@ def kernels(*arrays):
     See #ak.to_kernels.
     """
     libs = set()
-
-    def apply(layout, depth):
-        if (
-            isinstance(layout, awkward1.layout.Content) and
-            layout.identities is not None
-        ):
-            libs.add(layout.identities.ptr_lib)
-
-        if isinstance(layout, awkward1.layout.NumpyArray):
-            libs.add(layout.ptr_lib)
-
-        elif isinstance(layout, (
-            awkward1.layout.ListArray32,
-            awkward1.layout.ListArrayU32,
-            awkward1.layout.ListArray64,
-        )):
-            libs.add(layout.starts.ptr_lib)
-            libs.add(layout.stops.ptr_lib)
-
-        elif isinstance(layout, (
-            awkward1.layout.ListOffsetArray32,
-            awkward1.layout.ListOffsetArrayU32,
-            awkward1.layout.ListOffsetArray64,
-        )):
-            libs.add(layout.offsets.ptr_lib)
-
-        elif isinstance(layout, (
-            awkward1.layout.IndexedArray32,
-            awkward1.layout.IndexedArrayU32,
-            awkward1.layout.IndexedArray64,
-            awkward1.layout.IndexedOptionArray32,
-            awkward1.layout.IndexedOptionArray64,
-        )):
-            libs.add(layout.index.ptr_lib)
-
-        elif isinstance(layout, (
-            awkward1.layout.ByteMaskedArray,
-            awkward1.layout.BitMaskedArray,
-        )):
-            libs.add(layout.mask.ptr_lib)
-
-        elif isinstance(layout, (
-            awkward1.layout.UnionArray8_32,
-            awkward1.layout.UnionArray8_U32,
-            awkward1.layout.UnionArray8_64,
-        )):
-            libs.add(layout.tags.ptr_lib)
-            libs.add(layout.index.ptr_lib)
-
-        elif isinstance(layout, awkward1.layout.VirtualArray):
-            libs.add(layout.ptr_lib)
-
-        elif isinstance(layout, awkward1.partition.PartitionedArray):
-            pass
-
     for array in arrays:
         layout = awkward1.operations.convert.to_layout(
             array,
@@ -630,7 +575,7 @@ def kernels(*arrays):
             awkward1.layout.Record,
             awkward1.partition.PartitionedArray
         )):
-            awkward1._util.recursive_walk(layout, apply, materialize=False)
+            libs.add(layout.kernels)
 
         elif isinstance(layout, awkward1.nplike.numpy.ndarray):
             libs.add("cpu")

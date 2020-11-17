@@ -412,6 +412,35 @@ namespace awkward {
                                          generator_length >= 0);
   }
 
+  kernel::lib
+  VirtualArray::kernels() const {
+    if (identities_.get() == nullptr) {
+      return ptr_lib_;
+    }
+    else if (ptr_lib_ == identities_.get()->ptr_lib()) {
+      return ptr_lib_;
+    }
+    else {
+      return kernel::lib::size;
+    }
+  }
+
+  void
+  VirtualArray::caches(std::vector<ArrayCachePtr>& out) const {
+    if (cache_.get() != nullptr) {
+      bool found = false;
+      for (auto oldcache : out) {
+        if (oldcache.get() == cache_.get()) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        out.push_back(cache_);
+      }
+    }
+  }
+
   const std::string
   VirtualArray::tostring_part(const std::string& indent,
                             const std::string& pre,
