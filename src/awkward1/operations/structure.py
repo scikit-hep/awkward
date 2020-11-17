@@ -1064,22 +1064,23 @@ def where(condition, *args, **kwargs):
         (), kwargs, [("mergebool", True), ("highlevel", True)]
     )
 
-    akcondition = awkward1.operations.convert.to_layout(condition, allow_record=False)
-
-    if isinstance(akcondition, awkward1.partition.PartitionedArray):
-        akcondition = akcondition.replace_partitions(
-            [
-                awkward1.layout.NumpyArray(awkward1.operations.convert.to_numpy(x))
-                for x in akcondition.partitions
-            ]
-        )
-    else:
-        akcondition = awkward1.layout.NumpyArray(
-            awkward1.operations.convert.to_numpy(akcondition)
-        )
+    akcondition = awkward1.operations.convert.to_layout(
+        condition, allow_record=False, allow_other=False
+    )
 
     if len(args) == 0:
         nplike = awkward1.nplike.of(akcondition)
+        if isinstance(akcondition, awkward1.partition.PartitionedArray):
+            akcondition = akcondition.replace_partitions(
+                [
+                    awkward1.layout.NumpyArray(awkward1.operations.convert.to_numpy(x))
+                    for x in akcondition.partitions
+                ]
+            )
+        else:
+            akcondition = awkward1.layout.NumpyArray(
+                awkward1.operations.convert.to_numpy(akcondition)
+            )
         out = nplike.nonzero(awkward1.operations.convert.to_numpy(akcondition))
         if highlevel:
             return tuple(
@@ -1098,47 +1099,41 @@ def where(condition, *args, **kwargs):
         )
 
     elif len(args) == 2:
-        nplike = awkward1.nplike.of(akcondition, args[0], args[1])
-        x = awkward1.operations.convert.to_layout(args[0], allow_record=False)
-        y = awkward1.operations.convert.to_layout(args[1], allow_record=False)
+        left, right = [
+            awkward1.operations.convert.to_layout(x, allow_record=False, allow_other=True)
+            for x in args
+        ]
+        good_arrays = [akcondition]
+        if isinstance(left, awkward1.layout.Content):
+            good_arrays.append(left)
+        if isinstance(right, awkward1.layout.Content):
+            good_arrays.append(right)
+        nplike = awkward1.nplike.of(*good_arrays)
 
-        def do_one(akcondition, x, y):
-            tags = nplike.asarray(akcondition) == 0
-            assert tags.itemsize == 1
-            index = nplike.empty(len(tags), dtype=np.int64)
-            index = nplike.arange(len(akcondition), dtype=np.int64)
+        def getfunction(inputs, depth):
+            akcondition, left, right = inputs
+            if isinstance(akcondition, awkward1.layout.NumpyArray):
+                npcondition = nplike.asarray(akcondition)
+                tags = awkward1.layout.Index8((npcondition == 0).view(np.int8))
+                index = awkward1.layout.Index64(nplike.arange(len(tags), dtype=np.int64))
+                if not isinstance(left, awkward1.layout.Content):
+                    left = awkward1.layout.NumpyArray(nplike.repeat(left, len(tags)))
+                if not isinstance(right, awkward1.layout.Content):
+                    right = awkward1.layout.NumpyArray(nplike.repeat(right, len(tags)))
+                tmp = awkward1.layout.UnionArray8_64(tags, index, [left, right])
+                return lambda: (tmp.simplify(mergebool=mergebool),)
+            else:
+                return None
 
-            tags = awkward1.layout.Index8(tags.view(np.int8))
-            index = awkward1.layout.Index64(index)
-            tmp = awkward1.layout.UnionArray8_64(tags, index, [x, y])
-            return tmp.simplify(mergebool=mergebool)
-
-        sample = None
-        if isinstance(akcondition, awkward1.partition.PartitionedArray):
-            sample = akcondition
-        elif isinstance(x, awkward1.partition.PartitionedArray):
-            sample = x
-        elif isinstance(y, awkward1.partition.PartitionedArray):
-            sample = y
-
-        if sample is not None:
-            akcondition, x, y = awkward1.partition.partition_as(
-                sample, (akcondition, x, y)
-            )
-            output = []
-            for part in awkward1.partition.iterate(
-                sample.numpartitions, (akcondition, x, y)
-            ):
-                output.append(do_one(*part))
-
-            out = awkward1.partition.IrregularlyPartitionedArray(output)
-
-        else:
-            out = do_one(akcondition, x, y)
-
-        return awkward1._util.wrap(
-            out, behavior=awkward1._util.behaviorof(condition, *args)
+        behavior = awkward1._util.behaviorof(akcondition, left, right)
+        out = awkward1._util.broadcast_and_apply(
+            [akcondition, left, right], getfunction, behavior
         )
+
+        if highlevel:
+            return awkward1._util.wrap(out[0], behavior=behavior)
+        else:
+            return out[0]
 
     else:
         raise TypeError(
