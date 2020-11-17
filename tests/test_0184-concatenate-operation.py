@@ -155,6 +155,8 @@ def test_numpyarray_concatenate():
     assert ak.to_list(numpy.concatenate([np2, np1], -1)) == ak.to_list(ak.concatenate([ak2, ak1], -1))
 
 def test_numbers_and_records_concatenate():
+    ak.deprecations_as_errors = True
+
     numbers = [
             ak.Array([
                 [1.1, 2.2, 3.3],
@@ -191,14 +193,14 @@ def test_numbers_and_records_concatenate():
         ]),
     ]
 
-    assert ak.concatenate([numbers[0], records[0]], 1) == [
+    assert ak.to_list(ak.concatenate([numbers[0], records[0]], 1)) == [
         [1.1, 2.2, 3.3, {"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}],
         [],
         [4.4, 5.5, {"x": 2.2, "y": [1, 2]}],
         [6.6, 7.7, 8.8, 9.9, {"x": 3.3, "y": [1, 2, 3]}, {"x": 4.4, "y": [1, 2, 3, 4]}],
     ]
 
-    assert ak.concatenate([numbers[0], numbers[1]], axis=1) == [
+    assert ak.to_list(ak.concatenate([numbers[0], numbers[1]], axis=1)) == [
         [1.1, 2.2, 3.3, 10, 20],
         [30],
         [4.4, 5.5],
