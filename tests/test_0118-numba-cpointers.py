@@ -380,10 +380,10 @@ def test_RegularArray_getitem():
     def f1(x, i):
         return x[i]
 
-    assert f1(array, -2) == [1.1, 2.2, 3.3]
-    assert f1(array,  0) == [1.1, 2.2, 3.3]
-    assert f1(array,  1) == [4.4, 5.5, 6.6]
-    assert f1(array, -1) == [4.4, 5.5, 6.6]
+    assert f1(array, -2).tolist() == [1.1, 2.2, 3.3]
+    assert f1(array,  0).tolist() == [1.1, 2.2, 3.3]
+    assert f1(array,  1).tolist() == [4.4, 5.5, 6.6]
+    assert f1(array, -1).tolist() == [4.4, 5.5, 6.6]
 
     @numba.njit
     def f2(x, i, j):

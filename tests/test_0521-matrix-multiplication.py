@@ -45,7 +45,7 @@ def test_irregular():
     a22 = numpy.array([[1, 2], [3, 4]])
     b22 = numpy.array([[5, 6], [7, 8]])
 
-    assert numpy.matmul(numpy.array([a22, i22, i22, a22]), numpy.array([b22, i22, b22, i22])) == numpy.matmul(awkward1.Array([a22, i22, i22, a22]), awkward1.Array([b22, i22, b22, i22]))
+    assert numpy.matmul(numpy.array([a22, i22, i22, a22]), numpy.array([b22, i22, b22, i22])).tolist() == numpy.matmul(awkward1.Array([a22, i22, i22, a22]), awkward1.Array([b22, i22, b22, i22])).tolist()
 
     lefts = awkward1.Array([
         [[1, 2], [3, 4], [5, 6]],

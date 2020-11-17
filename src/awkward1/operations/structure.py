@@ -977,14 +977,8 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     must have the same lengths and nested lists are each concatenated,
     element for element, and similarly for deeper levels.
     """
-    if axis != 0:
-        raise NotImplementedError(
-            "axis={0}".format(axis)
-            + awkward1._util.exception_suffix(__file__)
-        )
-
     contents = [
-        awkward1.operations.convert.to_layout(x, allow_record=False) for x in arrays
+        awkward1.operations.convert.to_layout(x, allow_record=False if axis == 0 else True) for x in arrays
     ]
     contents = [
         x.toContent() if isinstance(x, awkward1.partition.PartitionedArray) else x
@@ -996,15 +990,36 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             + awkward1._util.exception_suffix(__file__)
         )
 
-    batch = [contents[0]]
-    for x in contents[1:]:
-        if batch[-1].mergeable(x, mergebool=mergebool):
-            batch.append(x)
-        else:
-            collapsed = batch[0].mergemany(batch[1:])
-            batch = [collapsed.merge_as_union(x)]
+    posaxis = contents[0].axis_wrap_if_negative(axis)
+    if posaxis == 0:
+        batch = [contents[0]]
+        for x in contents[1:]:
+            if batch[-1].mergeable(x, mergebool=mergebool):
+                batch.append(x)
+            else:
+                collapsed = batch[0].mergemany(batch[1:])
+                batch = [collapsed.merge_as_union(x)]
 
-    out = batch[0].mergemany(batch[1:])
+        out = batch[0].mergemany(batch[1:])
+
+    else:
+        for x in contents[1:]:
+            if x.axis_wrap_if_negative(axis) != posaxis:
+                raise ValueError(
+                    "cannot concatenate arrays in different axis"
+                    + awkward1._util.exception_suffix(__file__)
+                )
+
+        def getfunction(inputs, depth):
+            if depth == posaxis:
+                out = inputs[0].mergemany_as_union(inputs[1:], 1)
+                return lambda: (out,)
+            else:
+                return None
+
+        out = awkward1._util.broadcast_and_apply(contents, getfunction,
+            behavior=awkward1._util.behaviorof(*arrays), allow_records=True)[0]
+
     if isinstance(out, awkward1._util.uniontypes):
         out = out.simplify(mergebool=mergebool)
 

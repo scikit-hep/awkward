@@ -1228,6 +1228,93 @@ namespace awkward {
   }
 
   const ContentPtr
+  Content::mergemany_as_union(const ContentPtrVec& others, int64_t axis, int64_t depth) const {
+    if (others.empty()) {
+      return shallow_copy();
+    }
+    int64_t posaxis = axis_wrap_if_negative(axis);
+    if (posaxis == depth + 1) {
+      return concatenate_here(others, posaxis, depth);
+    }
+    else {
+      throw std::runtime_error(
+        std::string("FIXME: unhandled case of mergemany_as_union in axis \n")
+        + std::to_string(axis) + std::string(" > depth ") + std::to_string(depth)
+        + FILENAME(__LINE__));
+    }
+  }
+
+  const ContentPtr
+  Content::concatenate_here(const ContentPtrVec& others, int64_t posaxis, int64_t depth) const {
+    auto const& mine = offsets_and_flattened(posaxis, depth);
+    int64_t contents_length = mine.second.get()->length();
+
+    ContentPtrVec contents({mine.second});
+    int64_t longest = mine.first.length();
+    int64_t other_length = 0;
+    std::vector<Index64> from_offsets({mine.first});
+
+    for (const auto& array : others) {
+      auto const& other = array.get()->offsets_and_flattened(posaxis, depth);
+      contents_length += other.second.get()->length();
+      contents.emplace_back(other.second);
+      other_length = other.first.length();
+      longest = (longest > other_length) ? longest : other_length;
+      from_offsets.emplace_back(other.first);
+    }
+
+    Index64 to_offsets(longest);
+    struct Error err1 = kernel::zero_mask64(
+      kernel::lib::cpu,   // DERIVE
+      to_offsets.data(),
+      longest);
+    util::handle_error(err1, classname(), identities_.get());
+
+    for (const auto& offset : from_offsets) {
+      struct Error err2 = kernel::ListOffsetArray_merge_offsets_64(
+        kernel::lib::cpu,   // DERIVE
+        to_offsets.data(),
+        offset.data(),
+        offset.length());
+      util::handle_error(err2, classname(), identities_.get());
+    }
+
+    Index8 tags(contents_length);
+    Index64 index(contents_length);
+    int8_t tag = 0;
+    int64_t counter = 0;
+    for (int64_t ind = 0; ind < longest; ind++) {
+      tag = 0;
+      for (const auto& offset : from_offsets) {
+        if (ind < offset.length() - 1) {
+          struct Error err3 = kernel::UnionArray_mergetags_to8_const(
+            kernel::lib::cpu,   // DERIVE
+            tags.data(),
+            index.data(),
+            counter,
+            offset.data(),
+            ind,
+            tag,
+            &counter);
+          util::handle_error(err3, classname(), identities_.get());
+        }
+        tag++;
+      }
+    }
+
+    ContentPtr out = std::make_shared<UnionArray8_64>(Identities::none(),
+                                                      util::Parameters(),
+                                                      tags,
+                                                      index,
+                                                      contents);
+
+    return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                               util::Parameters(),
+                                               to_offsets,
+                                               out);
+  }
+
+  const ContentPtr
   Content::rpad_axis0(int64_t target, bool clip) const {
     if (!clip  &&  target < length()) {
       return shallow_copy();
