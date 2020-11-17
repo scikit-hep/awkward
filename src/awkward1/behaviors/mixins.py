@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 from __future__ import absolute_import
+import sys
 
 import awkward1.highlevel
 
@@ -22,8 +23,12 @@ def mixin_class(registry):
 
     def register(cls):
         name = cls.__name__
-        registry[name] = type(name + "Record", (cls, awkward1.highlevel.Record), {})
-        registry["*", name] = type(name + "Array", (cls, awkward1.highlevel.Array), {})
+        record = type(name + "Record", (cls, awkward1.highlevel.Record), {"__module__": cls.__module__})
+        setattr(sys.modules[cls.__module__], name + "Record", record)
+        registry[name] = record
+        array = type(name + "Array", (cls, awkward1.highlevel.Array), {"__module__": cls.__module__})
+        setattr(sys.modules[cls.__module__], name + "Array", array)
+        registry["*", name] = array
         for basecls in cls.mro():
             for method in basecls.__dict__.values():
                 if hasattr(method, "_awkward_mixin"):
@@ -86,5 +91,6 @@ __all__ = [
     and x not in (
         "absolute_import",
         "awkward1",
+        "sys",
     )
 ]
