@@ -9,6 +9,26 @@ import numpy
 
 import awkward1
 
+def test_concatenate_number():
+    assert awkward1.to_list(awkward1.concatenate([
+        awkward1.Array([[1, 2, 3], [], [4, 5]]), 999], axis=1)) == [
+            [1, 2, 3, 999], [999], [4, 5, 999]]
+    assert awkward1.to_list(awkward1.concatenate([
+        awkward1.Array([[[1.1], [2.2, 3.3]], [[]], [[4.4], [5.5]]]), 999], axis=2)) == [
+            [[1.1, 999.0], [2.2, 3.3, 999.0]], [[999.0]], [[4.4, 999.0], [5.5, 999.0]]]
+    assert str(awkward1.type(awkward1.concatenate([
+        awkward1.Array([[1, 2, 3], [], [4, 5]]),
+        awkward1.Array([[123], [223], [323]])], axis=1))) == "3 * var * int64"
+    assert awkward1.to_list(awkward1.concatenate([
+        awkward1.Array([[1, 2, 3], [], [4, 5]]),
+        awkward1.Array([[123], [223], [323]])], axis=1)) == [
+                [1, 2, 3, 123], [223], [4, 5, 323]]
+
+    one = awkward1.Array([[1, 2, 3], [], [4, 5]])
+    two = awkward1.Array([123, 223, 323])
+    assert awkward1.to_list(awkward1.concatenate([one, two], axis=1)) == [
+            [1, 2, 3, 123], [223], [4, 5, 323]]
+
 def test_list_offset_array_concatenate():
     content_one = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
     content_two = awkward1.layout.NumpyArray(numpy.array([999.999, 0.11, 0.22, 0.33, 0.44, 0.55, 0.66, 0.77, 0.88, 0.99]))
@@ -276,3 +296,83 @@ def test_negative_axis_concatenate():
         [[40]],
         [[50, 60, 70], [80, 90]],
     ]
+
+def test_even_more():
+    dim1 = awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5])
+    dim1a = awkward1.Array([[1.1], [2.2], [3.3], [4.4], [5.5]])
+    dim1b = awkward1.Array(numpy.array([[1.1], [2.2], [3.3], [4.4], [5.5]]))
+    dim2 = awkward1.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]])
+    dim3 = awkward1.Array([[[0, 1, 2], []], [[3, 4]], [], [[5], [6, 7, 8, 9]], []])
+
+    assert awkward1.concatenate([dim1, 999]).tolist() == [1.1, 2.2, 3.3, 4.4, 5.5, 999]
+    assert awkward1.concatenate([999, dim1]).tolist() == [999, 1.1, 2.2, 3.3, 4.4, 5.5]
+
+    assert awkward1.concatenate([dim1, dim2]).tolist() == [1.1, 2.2, 3.3, 4.4, 5.5, [0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]]
+    assert awkward1.concatenate([dim2, dim1]).tolist() == [[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9], 1.1, 2.2, 3.3, 4.4, 5.5]
+
+    with pytest.raises(ValueError):
+        awkward1.concatenate([dim1, 999], axis=1)
+
+    assert awkward1.concatenate([dim2, 999], axis=1).tolist() == [[0, 1, 2, 999], [999], [3, 4, 999], [5, 999], [6, 7, 8, 9, 999]]
+
+    assert awkward1.concatenate([999, dim2], axis=1).tolist() == [[999, 0, 1, 2], [999], [999, 3, 4], [999, 5], [999, 6, 7, 8, 9]]
+
+    assert awkward1.concatenate([dim1, dim2], axis=1).tolist() == [[1.1, 0, 1, 2], [2.2], [3.3, 3, 4], [4.4, 5], [5.5, 6, 7, 8, 9]]
+    assert awkward1.concatenate([dim2, dim1], axis=1).tolist() == [[0, 1, 2, 1.1], [2.2], [3, 4, 3.3], [5, 4.4], [6, 7, 8, 9, 5.5]]
+    assert awkward1.concatenate([dim1a, dim2], axis=1).tolist() == [[1.1, 0, 1, 2], [2.2], [3.3, 3, 4], [4.4, 5], [5.5, 6, 7, 8, 9]]
+    assert awkward1.concatenate([dim2, dim1a], axis=1).tolist() == [[0, 1, 2, 1.1], [2.2], [3, 4, 3.3], [5, 4.4], [6, 7, 8, 9, 5.5]]
+    assert awkward1.concatenate([dim1b, dim2], axis=1).tolist() == [[1.1, 0, 1, 2], [2.2], [3.3, 3, 4], [4.4, 5], [5.5, 6, 7, 8, 9]]
+    assert awkward1.concatenate([dim2, dim1b], axis=1).tolist() == [[0, 1, 2, 1.1], [2.2], [3, 4, 3.3], [5, 4.4], [6, 7, 8, 9, 5.5]]
+
+    assert awkward1.concatenate([123, dim1, dim2]).tolist() == [123, 1.1, 2.2, 3.3, 4.4, 5.5, [0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]]
+    assert awkward1.concatenate([123, dim2, dim1]).tolist() == [123, [0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9], 1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.concatenate([dim1, 123, dim2]).tolist() == [1.1, 2.2, 3.3, 4.4, 5.5, 123, [0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]]
+    assert awkward1.concatenate([dim1, dim2, 123]).tolist() == [1.1, 2.2, 3.3, 4.4, 5.5, [0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9], 123]
+    assert awkward1.concatenate([dim2, 123, dim1]).tolist() == [[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9], 123, 1.1, 2.2, 3.3, 4.4, 5.5]
+    assert awkward1.concatenate([dim2, dim1, 123]).tolist() == [[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9], 1.1, 2.2, 3.3, 4.4, 5.5, 123]
+
+    assert awkward1.concatenate([123, dim1, dim2], axis=1).tolist() == [[123, 1.1, 0, 1, 2], [123, 2.2], [123, 3.3, 3, 4], [123, 4.4, 5], [123, 5.5, 6, 7, 8, 9]]
+    assert awkward1.concatenate([123, dim2, dim1], axis=1).tolist() == [[123, 0, 1, 2, 1.1], [123, 2.2], [123, 3, 4, 3.3], [123, 5, 4.4], [123, 6, 7, 8, 9, 5.5]]
+    assert awkward1.concatenate([dim1, 123, dim2], axis=1).tolist() == [[1.1, 123, 0, 1, 2], [2.2, 123], [3.3, 123, 3, 4], [4.4, 123, 5], [5.5, 123, 6, 7, 8, 9]]
+    assert awkward1.concatenate([dim1, dim2, 123], axis=1).tolist() == [[1.1, 0, 1, 2, 123], [2.2, 123], [3.3, 3, 4, 123], [4.4, 5, 123], [5.5, 6, 7, 8, 9, 123]]
+    assert awkward1.concatenate([dim2, 123, dim1], axis=1).tolist() == [[0, 1, 2, 123, 1.1], [123, 2.2], [3, 4, 123, 3.3], [5, 123, 4.4], [6, 7, 8, 9, 123, 5.5]]
+    assert awkward1.concatenate([dim2, dim1, 123], axis=1).tolist() == [[0, 1, 2, 1.1, 123], [2.2, 123], [3, 4, 3.3, 123], [5, 4.4, 123], [6, 7, 8, 9, 5.5, 123]]
+
+    assert awkward1.concatenate([123, dim1a, dim2], axis=1).tolist() == [[123, 1.1, 0, 1, 2], [123, 2.2], [123, 3.3, 3, 4], [123, 4.4, 5], [123, 5.5, 6, 7, 8, 9]]
+    assert awkward1.concatenate([123, dim2, dim1a], axis=1).tolist() == [[123, 0, 1, 2, 1.1], [123, 2.2], [123, 3, 4, 3.3], [123, 5, 4.4], [123, 6, 7, 8, 9, 5.5]]
+    assert awkward1.concatenate([dim1a, 123, dim2], axis=1).tolist() == [[1.1, 123, 0, 1, 2], [2.2, 123], [3.3, 123, 3, 4], [4.4, 123, 5], [5.5, 123, 6, 7, 8, 9]]
+    assert awkward1.concatenate([dim1a, dim2, 123], axis=1).tolist() == [[1.1, 0, 1, 2, 123], [2.2, 123], [3.3, 3, 4, 123], [4.4, 5, 123], [5.5, 6, 7, 8, 9, 123]]
+    assert awkward1.concatenate([dim2, 123, dim1a], axis=1).tolist() == [[0, 1, 2, 123, 1.1], [123, 2.2], [3, 4, 123, 3.3], [5, 123, 4.4], [6, 7, 8, 9, 123, 5.5]]
+    assert awkward1.concatenate([dim2, dim1a, 123], axis=1).tolist() == [[0, 1, 2, 1.1, 123], [2.2, 123], [3, 4, 3.3, 123], [5, 4.4, 123], [6, 7, 8, 9, 5.5, 123]]
+
+    assert awkward1.concatenate([123, dim1b, dim2], axis=1).tolist() == [[123, 1.1, 0, 1, 2], [123, 2.2], [123, 3.3, 3, 4], [123, 4.4, 5], [123, 5.5, 6, 7, 8, 9]]
+    assert awkward1.concatenate([123, dim2, dim1b], axis=1).tolist() == [[123, 0, 1, 2, 1.1], [123, 2.2], [123, 3, 4, 3.3], [123, 5, 4.4], [123, 6, 7, 8, 9, 5.5]]
+    assert awkward1.concatenate([dim1b, 123, dim2], axis=1).tolist() == [[1.1, 123, 0, 1, 2], [2.2, 123], [3.3, 123, 3, 4], [4.4, 123, 5], [5.5, 123, 6, 7, 8, 9]]
+    assert awkward1.concatenate([dim1b, dim2, 123], axis=1).tolist() == [[1.1, 0, 1, 2, 123], [2.2, 123], [3.3, 3, 4, 123], [4.4, 5, 123], [5.5, 6, 7, 8, 9, 123]]
+    assert awkward1.concatenate([dim2, 123, dim1b], axis=1).tolist() == [[0, 1, 2, 123, 1.1], [123, 2.2], [3, 4, 123, 3.3], [5, 123, 4.4], [6, 7, 8, 9, 123, 5.5]]
+    assert awkward1.concatenate([dim2, dim1b, 123], axis=1).tolist() == [[0, 1, 2, 1.1, 123], [2.2, 123], [3, 4, 3.3, 123], [5, 4.4, 123], [6, 7, 8, 9, 5.5, 123]]
+
+    assert awkward1.concatenate([dim3, 123]).tolist() == [[[0, 1, 2], []], [[3, 4]], [], [[5], [6, 7, 8, 9]], [], 123]
+    assert awkward1.concatenate([123, dim3]).tolist() == [123, [[0, 1, 2], []], [[3, 4]], [], [[5], [6, 7, 8, 9]], []]
+
+    assert awkward1.concatenate([dim3, 123], axis=1).tolist() == [[[0, 1, 2], [], 123], [[3, 4], 123], [123], [[5], [6, 7, 8, 9], 123], [123]]
+    assert awkward1.concatenate([123, dim3], axis=1).tolist() == [[123, [0, 1, 2], []], [123, [3, 4]], [123], [123, [5], [6, 7, 8, 9]], [123]]
+
+    assert awkward1.concatenate([dim3, dim1], axis=1).tolist() == [[[0, 1, 2], [], 1.1], [[3, 4], 2.2], [3.3], [[5], [6, 7, 8, 9], 4.4], [5.5]]
+    assert awkward1.concatenate([dim1, dim3], axis=1).tolist() == [[1.1, [0, 1, 2], []], [2.2, [3, 4]], [3.3], [4.4, [5], [6, 7, 8, 9]], [5.5]]
+
+    assert awkward1.concatenate([dim3, dim2], axis=1).tolist() == [[[0, 1, 2], [], [0, 1, 2]], [[3, 4], []], [[3, 4]], [[5], [6, 7, 8, 9], [5]], [[6, 7, 8, 9]]]
+    assert awkward1.concatenate([dim2, dim3], axis=1).tolist() == [[[0, 1, 2], [0, 1, 2], []], [[], [3, 4]], [[3, 4]], [[5], [5], [6, 7, 8, 9]], [[6, 7, 8, 9]]]
+
+    assert awkward1.concatenate([dim3, 123], axis=2).tolist() == [[[0, 1, 2, 123], [123]], [[3, 4, 123]], [], [[5, 123], [6, 7, 8, 9, 123]], []]
+    assert awkward1.concatenate([123, dim3], axis=2).tolist() == [[[123, 0, 1, 2], [123]], [[123, 3, 4]], [], [[123, 5], [123, 6, 7, 8, 9]], []]
+
+    assert awkward1.concatenate([dim3, dim3], axis=2).tolist() == [[[0, 1, 2, 0, 1, 2], []], [[3, 4, 3, 4]], [], [[5, 5], [6, 7, 8, 9, 6, 7, 8, 9]], []]
+
+    rec1 = awkward1.Array([{"x": [1, 2], "y": [1.1]}, {"x": [], "y": [2.2, 3.3]}, {"x": [3], "y": []}, {"x": [5, 6, 7], "y": []}, {"x": [8, 9], "y": [4.4, 5.5]}])
+    rec2 = awkward1.Array([{"x": [100], "y": [10, 20]}, {"x": [200], "y": []}, {"x": [300, 400], "y": [30]}, {"x": [], "y": [40, 50]}, {"x": [400, 500], "y": [60]}])
+
+    assert awkward1.concatenate([rec1, rec2]).tolist() == [{"x": [1, 2], "y": [1.1]}, {"x": [], "y": [2.2, 3.3]}, {"x": [3], "y": []}, {"x": [5, 6, 7], "y": []}, {"x": [8, 9], "y": [4.4, 5.5]}, {"x": [100], "y": [10, 20]}, {"x": [200], "y": []}, {"x": [300, 400], "y": [30]}, {"x": [], "y": [40, 50]}, {"x": [400, 500], "y": [60]}]
+
+    # maybe someday...
+    # assert awkward1.concatenate([rec1, rec2], axis=1) == [{"x": [1, 2, 100], "y": [1.1, 10, 20]}, {"x": [200], "y": [2.2, 3.3]}, {"x": [3, 300, 400], "y": [30]}, {"x": [5, 6, 7], "y": [40, 50]}, {"x": [8, 9, 400, 500], "y": [4.4, 5.5, 60]}]
