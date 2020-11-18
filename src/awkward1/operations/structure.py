@@ -985,14 +985,21 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
         x.toContent() if isinstance(x, awkward1.partition.PartitionedArray) else x
         for x in contents
     ]
-    if len(contents) == 0:
+    if not any(isinstance(x, awkward1.layout.Content) for x in contents):
         raise ValueError(
             "need at least one array to concatenate"
             + awkward1._util.exception_suffix(__file__)
         )
 
-    posaxis = contents[0].axis_wrap_if_negative(axis)
+    posaxis = [
+        x for x in contents if isinstance(x, awkward1.layout.Content)
+    ][0].axis_wrap_if_negative(axis)
     if posaxis == 0:
+        contents = [
+            x if isinstance(x, awkward1.layout.Content)
+            else awkward1.operations.convert.to_layout([x])
+            for x in contents
+        ]
         batch = [contents[0]]
         for x in contents[1:]:
             if batch[-1].mergeable(x, mergebool=mergebool):
@@ -1014,13 +1021,24 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
         def getfunction(inputs, depth):
             if depth == posaxis:
                 nplike = awkward1.nplike.of(*inputs)
-                next_length = len(inputs[0])
-                what = [
-                    x if isinstance(x, awkward1.layout.Content) else
-                        awkward1.layout.RegularArray(
-                            awkward1.layout.NumpyArray(nplike.repeat(x, next_length)), 1)
-                    for x in inputs
-                ]
+                next_length = len([
+                    x for x in inputs if isinstance(x, awkward1.layout.Content)
+                ][0])
+                max_depth = max([
+                    x.purelist_depth for x in inputs if isinstance(x, awkward1.layout.Content)
+                ])
+                what = []
+                for x in inputs:
+                    if isinstance(x, awkward1.layout.Content):
+                        if x.purelist_depth < max_depth:
+                            what.append(awkward1.layout.RegularArray(x, 1))
+                        else:
+                            what.append(x)
+                    else:
+                        what.append(awkward1.layout.RegularArray(
+                            awkward1.layout.NumpyArray(nplike.repeat(x, next_length)),
+                            1
+                        ))
                 out = what[0].mergemany_as_union(what[1:], 1)
                 return lambda: (out,)
             else:
