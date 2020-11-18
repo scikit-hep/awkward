@@ -20,6 +20,16 @@ def test_deep():
     assert 4 not in array
 
 
+def test_bug():
+    @numba.njit
+    def f2(array):
+        return array[2][1]
+
+    assert f2(awkward1.Array([[], [], [1, 2, None, 3]])) == 2
+    assert f2(awkward1.Array([[], [0], [1, 2, None, 3]])) == 2
+    assert f2(awkward1.Array([[], [0, 123], [1, 2, None, 3]])) == 2
+
+
 def test_numba():
     @numba.njit
     def f1(array):

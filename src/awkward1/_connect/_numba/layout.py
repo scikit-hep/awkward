@@ -607,6 +607,10 @@ class NumpyArrayType(ContentType):
         return self.arraytype.ndim
 
     @property
+    def inner_dtype(self):
+        return self.arraytype.dtype
+
+    @property
     def is_optiontype(self):
         return False
 
@@ -722,6 +726,10 @@ class RegularArrayType(ContentType):
     @property
     def ndim(self):
         return 1 + self.contenttype.ndim
+
+    @property
+    def inner_dtype(self):
+        return self.contenttype.inner_dtype
 
     @property
     def is_optiontype(self):
@@ -938,6 +946,10 @@ class ListArrayType(ContentType):
         return 1 + self.contenttype.ndim
 
     @property
+    def inner_dtype(self):
+        return self.contenttype.inner_dtype
+
+    @property
     def is_optiontype(self):
         return False
 
@@ -1107,6 +1119,10 @@ class IndexedArrayType(ContentType):
         return self.contenttype.ndim
 
     @property
+    def inner_dtype(self):
+        return self.contenttype.inner_dtype
+
+    @property
     def is_optiontype(self):
         return False
 
@@ -1257,12 +1273,12 @@ class IndexedOptionArrayType(ContentType):
                 )
                 proxynext = context.make_helper(builder, nextviewtype)
                 proxynext.pos = nextpos
-                proxynext.start = viewproxy.start
+                proxynext.start = context.get_constant(numba.intp, 0)
                 proxynext.stop = builder.add(
                     awkward1._connect._numba.castint(
                         context, builder, self.indextype.dtype, numba.intp, nextat
                     ),
-                    builder.add(viewproxy.start, context.get_constant(numba.intp, 1)),
+                    context.get_constant(numba.intp, 1),
                 )
                 proxynext.arrayptrs = viewproxy.arrayptrs
                 proxynext.sharedptrs = viewproxy.sharedptrs
@@ -1289,6 +1305,10 @@ class IndexedOptionArrayType(ContentType):
     @property
     def ndim(self):
         return self.contenttype.ndim
+
+    @property
+    def inner_dtype(self):
+        return None
 
     @property
     def is_optiontype(self):
@@ -1463,6 +1483,10 @@ class ByteMaskedArrayType(ContentType):
     @property
     def ndim(self):
         return self.contenttype.ndim
+
+    @property
+    def inner_dtype(self):
+        return None
 
     @property
     def is_optiontype(self):
@@ -1667,6 +1691,10 @@ class BitMaskedArrayType(ContentType):
         return self.contenttype.ndim
 
     @property
+    def inner_dtype(self):
+        return None
+
+    @property
     def is_optiontype(self):
         return True
 
@@ -1799,6 +1827,10 @@ class UnmaskedArrayType(ContentType):
     @property
     def ndim(self):
         return self.contenttype.ndim
+
+    @property
+    def inner_dtype(self):
+        return None
 
     @property
     def is_optiontype(self):
@@ -2189,6 +2221,10 @@ class RecordArrayType(ContentType):
         return 1
 
     @property
+    def inner_dtype(self):
+        return None
+
+    @property
     def is_optiontype(self):
         return False
 
@@ -2401,6 +2437,11 @@ class UnionArrayType(ContentType):
             elif out != contenttype.ndim:
                 return None
         return out
+
+    @property
+    def inner_dtype(self):
+        context = numba.core.typing.Context()
+        return context.unify_types(*[x.inner_dtype for x in self.contenttypes])
 
     @property
     def is_optiontype(self):
@@ -2717,12 +2758,61 @@ class VirtualArrayType(ContentType):
         return self.generator_form.purelist_depth
 
     @property
+    def inner_dtype(self):
+        return inner_dtype_of_form(self.generator_form)
+
+    @property
     def is_optiontype(self):
         return optiontype_of_form(self.generator_form)
 
     @property
     def is_recordtype(self):
         return recordtype_of_form(self.generator_form)
+
+
+def inner_dtype_of_form(form):
+    if form is None:
+        return None
+
+    elif isinstance(form, (
+        awkward1.forms.NumpyForm,
+    )):
+        return numba.from_dtype(form.to_numpy())
+
+    elif isinstance(form, (
+        awkward1.forms.EmptyForm,
+    )):
+        return numba.types.float64
+
+    elif isinstance(form, (
+        awkward1.forms.RegularForm,
+        awkward1.forms.ListForm,
+        awkward1.forms.ListOffsetForm,
+        awkward1.forms.IndexedForm,
+    )):
+        return inner_dtype_of_form(form.content)
+
+    elif isinstance(form, (
+        awkward1.forms.RecordForm,
+        awkward1.forms.IndexedOptionForm,
+        awkward1.forms.ByteMaskedForm,
+        awkward1.forms.BitMaskedForm,
+        awkward1.forms.UnmaskedForm,
+    )):
+        return None
+
+    elif isinstance(form, awkward1.forms.UnionForm):
+        context = numba.core.typing.Context()
+        return context.unify_types(*[inner_dtype_of_form(x) for x in form.contents])
+
+    elif isinstance(form, awkward1.forms.VirtualForm):
+        return inner_dtype_of_form(form.form)
+
+    else:
+        raise AssertionError(
+            "unrecognized Form type: {0}".format(type(form))
+            + awkward1._util.exception_suffix(__file__)
+        )
 
 
 def optiontype_of_form(form):

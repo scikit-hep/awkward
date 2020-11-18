@@ -19,11 +19,11 @@ np = awkward1.nplike.NumpyMetadata.instance()
 
 ########## for code that's built up from strings
 
-def code_to_function(code, function_name, debug=False):
+def code_to_function(code, function_name, externals={}, debug=False):
     if debug:
         print("################### " + function_name)
         print(code)
-    namespace = {}
+    namespace = dict(externals)
     exec(code, namespace)
     return namespace[function_name]
 
@@ -1038,85 +1038,212 @@ for binop in (
     register_binary_operator(binop)
 
 
-########## contains
+########## __contains__
 
-
-@numba.core.typing.templates.infer_global(operator.contains)
-class type_contains(numba.core.typing.templates.AbstractTemplate):
-    def generic(self, args, kwargs):
-        if (
-            len(args) == 2 and len(kwargs) == 0 and
-            isinstance(args[0], (ArrayViewType, RecordViewType))
-        ):
-            if args[1] == numba.types.none:
-                return numba.boolean(args[0], args[1])
-            elif isinstance(args[1], (numba.types.Number, numba.types.Boolean)):
-                return numba.boolean(args[0], args[1])
-            elif (
-                isinstance(args[1], numba.types.Optional) and
-                isinstance(args[1].type, (numba.types.Number, numba.types.Boolean))
-            ):
-                return numba.boolean(args[0], args[1])
-
-
-@numba.extending.lower_builtin(operator.contains, ArrayViewType, numba.types.none)
-@numba.extending.lower_builtin(operator.contains, ArrayViewType, numba.types.Number)
-@numba.extending.lower_builtin(operator.contains, ArrayViewType, numba.types.Boolean)
-@numba.extending.lower_builtin(operator.contains, ArrayViewType, numba.types.Optional)
-@numba.extending.lower_builtin(operator.contains, RecordViewType, numba.types.none)
-@numba.extending.lower_builtin(operator.contains, RecordViewType, numba.types.Number)
-@numba.extending.lower_builtin(operator.contains, RecordViewType, numba.types.Boolean)
-@numba.extending.lower_builtin(operator.contains, RecordViewType, numba.types.Optional)
-@numba.extending.lower_builtin(operator.contains, numba.types.Optional, numba.types.none)
-@numba.extending.lower_builtin(operator.contains, numba.types.Optional, numba.types.Number)
-@numba.extending.lower_builtin(operator.contains, numba.types.Optional, numba.types.Boolean)
-@numba.extending.lower_builtin(operator.contains, numba.types.Optional, numba.types.Optional)
-def lower_contains(context, builder, sig, args):
-    statements = []
-
-    def add_statement(indent, name, arraytype, is_array):
-        if is_array:
-            statements.append("for x in " + name + ":")
-            name = "x"
-            indent = indent + "    "
-
-        if isinstance(arraytype, awkward1._connect._numba.layout.RecordArrayType):
-            if arraytype.is_tuple:
-                for fi, ft in enumerate(arraytype.contenttypes):
-                    add_statement(indent, name + "[" + repr(fi) + "]", ft, False)
-            else:
-                for fn, ft in zip(arraytype.recordlookup, arraytype.contenttypes):
-                    add_statement(indent, name + "[" + repr(fn) + "]", ft, False)
-
-        elif arraytype.ndim == 1 and not arraytype.is_recordtype:
-            if arraytype.is_optiontype:
-                statements.append(
-                    indent + "if (element is None and {0} is None) or "
-                    "({0} is not None and element == {0}): return True".format(name)
+@numba.extending.overload(operator.contains)
+def overload_contains(obj, element):
+    if (
+            isinstance(obj, (ArrayViewType, RecordViewType)) and
+            (
+                (element == numba.types.none) or
+                (isinstance(element, (numba.types.Number, numba.types.Boolean))) or
+                (
+                    isinstance(element, numba.types.Optional) and
+                    isinstance(element.type, (numba.types.Number, numba.types.Boolean))
                 )
-            else:
-                statements.append(indent + "if element == {0}: return True".format(name))
+            )
+       ):
+        statements = []
 
+        def add_statement(indent, name, arraytype, is_array):
+            if is_array:
+                statements.append("for x in " + name + ":")
+                name = "x"
+                indent = indent + "    "
+
+            if isinstance(arraytype, awkward1._connect._numba.layout.RecordArrayType):
+                if arraytype.is_tuple:
+                    for fi, ft in enumerate(arraytype.contenttypes):
+                        add_statement(indent, name + "[" + repr(fi) + "]", ft, False)
+                else:
+                    for fn, ft in zip(arraytype.recordlookup, arraytype.contenttypes):
+                        add_statement(indent, name + "[" + repr(fn) + "]", ft, False)
+
+            elif arraytype.ndim == 1 and not arraytype.is_recordtype:
+                if arraytype.is_optiontype:
+                    statements.append(
+                        indent + "print(element is None, {0} is None, {0})".format(name)
+                    )
+                    statements.append(
+                        indent + "if (element is None and {0} is None) or "
+                        "({0} is not None and element == {0}): return True".format(name)
+                    )
+                else:
+                    statements.append(indent + "if element == {0}: return True".format(name))
+
+            else:
+                if arraytype.is_optiontype:
+                    statements.append(
+                        indent + "if (element is None and {0} is None) or "
+                        "({0} is not None and element in {0}): return True".format(name)
+                    )
+                else:
+                    statements.append(indent + "if element in {0}: return True".format(name))
+
+        if isinstance(obj, ArrayViewType):
+            add_statement("", "obj", obj.type, True)
         else:
-            if arraytype.is_optiontype:
-                statements.append(
-                    indent + "if (element is None and {0} is None) or "
-                    "({0} is not None and element in {0}): return True".format(name)
-                )
-            else:
-                statements.append(indent + "if element in {0}: return True".format(name))
+            add_statement("", "obj", obj.arrayviewtype.type, False)
 
-    if isinstance(sig.args[0], ArrayViewType):
-        add_statement("", "obj", sig.args[0].type, True)
-    else:
-        add_statement("", "obj", sig.args[0].arrayviewtype.type, False)
-
-    contains_impl = code_to_function("""
+        return code_to_function("""
 def contains_impl(obj, element):
+    print("contains_impl", element)
     {0}
-    return False
-""".format("\n    ".join(statements)), "contains_impl")
-    return context.compile_internal(builder, contains_impl, sig, args)
+    return False""".format("\n    ".join(statements)), "contains_impl")
+
+
+########## np.array and np.asarray
+
+
+array_supported = (
+    numba.types.boolean,
+    numba.types.int8,
+    numba.types.int16,
+    numba.types.int32,
+    numba.types.int64,
+    numba.types.uint8,
+    numba.types.uint16,
+    numba.types.uint32,
+    numba.types.uint64,
+    numba.types.float32,
+    numba.types.float64,
+)
+
+
+@numba.extending.overload(awkward1.nplike.numpy.array)
+def overload_np_array(array, dtype=None):
+    if isinstance(array, ArrayViewType):
+        ndim = array.type.ndim
+        inner_dtype = array.type.inner_dtype
+        if ndim is not None and inner_dtype in array_supported:
+            declare_shape = []
+            compute_shape = []
+            specify_shape = ["len(array)"]
+            ensure_shape = []
+            array_name = "array"
+            for i in range(ndim - 1):
+                declare_shape.append("shape{0} = -1".format(i))
+                compute_shape.append(
+                    "{0}for x{1} in {2}:".format("    " * i, i, array_name)
+                )
+                compute_shape.append(
+                    "{0}    if shape{1} == -1:".format("    " * i, i)
+                )
+                compute_shape.append(
+                    "{0}        shape{1} = len(x{1})".format("    " * i, i)
+                )
+                compute_shape.append(
+                    "{0}    elif shape{1} != len(x{1}):".format("    " * i, i)
+                )
+                compute_shape.append(
+                    "{0}        raise ValueError('cannot convert to NumPy because "
+                    "subarray lengths are not regular')".format("    " * i)
+                )
+                specify_shape.append("shape{0}".format(i))
+                ensure_shape.append(
+                    "if shape{0} == -1: shape{0} = 0".format(i)
+                )
+                array_name = "x{0}".format(i)
+
+            fill_array = []
+            index = []
+            array_name = "array"
+            for i in range(ndim):
+                fill_array.append(
+                    "{0}for i{1}, x{1} in enumerate({2}):".format("    " * i, i, array_name)
+                )
+                index.append("i{0}".format(i))
+                array_name = "x{0}".format(i)
+
+            fill_array.append(
+                "{0}out[{1}] = x{2}".format("    " * ndim, "][".join(index), ndim - 1)
+            )
+
+            return code_to_function("""
+def array_impl(array, dtype=None):
+    {0}
+    {1}
+    {2}
+    out = numpy.zeros(({3}), {4})
+    {5}
+    return out
+""".format("\n    ".join(declare_shape),
+           "\n    ".join(compute_shape),
+           "\n    ".join(ensure_shape),
+           ", ".join(specify_shape),
+           "numpy.{0}".format(inner_dtype) if dtype is None else "dtype",
+           "\n    ".join(fill_array)),
+                "array_impl", {"numpy": awkward1.nplike.numpy})
+
+
+@numba.extending.type_callable(awkward1.nplike.numpy.asarray)
+def type_asarray(context):
+    def typer(arrayview):
+        if (
+            isinstance(arrayview, ArrayViewType) and
+            isinstance(arrayview.type, awkward1._connect._numba.layout.NumpyArrayType) and
+            arrayview.type.ndim == 1 and
+            arrayview.type.inner_dtype in array_supported
+        ):
+            return numba.types.Array(arrayview.type.inner_dtype, 1, "C")
+    return typer
+
+
+@numba.extending.lower_builtin(awkward1.nplike.numpy.asarray, ArrayViewType)
+def lower_asarray(context, builder, sig, args):
+    rettype, (viewtype,) = sig.return_type, sig.args
+    viewval, = args
+    viewproxy = context.make_helper(builder, viewtype, viewval)
+    assert isinstance(viewtype.type, awkward1._connect._numba.layout.NumpyArrayType)
+
+    whichpos = awkward1._connect._numba.layout.posat(
+        context, builder, viewproxy.pos, viewtype.type.ARRAY
+    )
+    arrayptr = awkward1._connect._numba.layout.getat(
+        context, builder, viewproxy.arrayptrs, whichpos
+    )
+
+    itemsize = context.get_constant(numba.intp, rettype.dtype.bitwidth // 8)
+
+    data = numba.core.cgutils.pointer_add(
+        builder,
+        arrayptr,
+        builder.mul(viewproxy.start, itemsize),
+        context.get_value_type(numba.types.CPointer(rettype.dtype)),
+    )
+
+    shape = context.make_tuple(
+        builder,
+        numba.types.UniTuple(numba.types.intp, 1),
+        (builder.sub(viewproxy.stop, viewproxy.start),),
+    )
+    strides = context.make_tuple(
+        builder,
+        numba.types.UniTuple(numba.types.intp, 1),
+        (itemsize,),
+    )
+
+    out = numba.np.arrayobj.make_array(rettype)(context, builder)
+    numba.np.arrayobj.populate_array(
+        out,
+        data=data,
+        shape=shape,
+        strides=strides,
+        itemsize=itemsize,
+        meminfo=None,
+        parent=None,
+    )
+    return out._getvalue()
 
 
 ########## PartitionedView
