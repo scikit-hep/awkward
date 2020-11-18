@@ -1255,12 +1255,27 @@ namespace awkward {
     std::vector<Index64> from_offsets({mine.first});
 
     for (const auto& array : others) {
-      auto const& other = array.get()->offsets_and_flattened(posaxis, depth);
-      contents_length += other.second.get()->length();
-      contents.emplace_back(other.second);
-      other_length = other.first.length();
-      longest = (longest > other_length) ? longest : other_length;
-      from_offsets.emplace_back(other.first);
+      NumpyArray* content = dynamic_cast<NumpyArray*>(array.get());
+      if(content != nullptr  &&  content->ndim() == 1) {
+        ContentPtr out = std::make_shared<RegularArray>(Identities::none(),
+                                             util::Parameters(),
+                                             array,
+                                             1);
+          auto const& other = out.get()->offsets_and_flattened(posaxis, depth);
+          contents_length += other.second.get()->length();
+          contents.emplace_back(other.second);
+          other_length = other.first.length();
+          longest = (longest > other_length) ? longest : other_length;
+          from_offsets.emplace_back(other.first);
+      }
+      else {
+        auto const& other = array.get()->offsets_and_flattened(posaxis, depth);
+        contents_length += other.second.get()->length();
+        contents.emplace_back(other.second);
+        other_length = other.first.length();
+        longest = (longest > other_length) ? longest : other_length;
+        from_offsets.emplace_back(other.first);
+      }
     }
 
     Index64 to_offsets(longest);

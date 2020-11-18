@@ -1016,7 +1016,9 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
                 nplike = awkward1.nplike.of(*inputs)
                 next_length = len(inputs[0])
                 what = [
-                    x if isinstance(x, awkward1.layout.Content) else awkward1.layout.NumpyArray(nplike.repeat(x, next_length).reshape(next_length, 1))
+                    x if isinstance(x, awkward1.layout.Content) else
+                        awkward1.layout.RegularArray(
+                            awkward1.layout.NumpyArray(nplike.repeat(x, next_length)), 1)
                     for x in inputs
                 ]
                 out = what[0].mergemany_as_union(what[1:], 1)
