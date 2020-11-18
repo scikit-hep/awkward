@@ -496,6 +496,7 @@ def broadcast_and_apply(
     allow_records=True,
     left_broadcast=True,
     right_broadcast=True,
+    numpy_to_regular=False
 ):
     def checklength(inputs):
         length = len(inputs[0])
@@ -555,6 +556,12 @@ def broadcast_and_apply(
 
     def apply(inputs, depth):
         nplike = awkward1.nplike.of(*inputs)
+
+        if numpy_to_regular:
+            inputs = [
+                x.toRegularArray() if isinstance(x, awkward1.layout.NumpyArray) else x
+                for x in inputs
+            ]
 
         # handle implicit right-broadcasting (i.e. NumPy-like)
         if right_broadcast and any(isinstance(x, listtypes) for x in inputs):
@@ -1042,7 +1049,17 @@ def broadcast_unpack(x, isscalar):
             return x[0]
 
 
-def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=True):
+def recursively_apply(
+    layout,
+    getfunction,
+    args=(),
+    depth=1,
+    keep_parameters=True,
+    numpy_to_regular=False,
+):
+    if numpy_to_regular and isinstance(layout, awkward1.layout.NumpyArray):
+        layout = layout.toRegularArray()
+
     custom = getfunction(layout, depth, *args)
     if custom is not None:
         return custom()
@@ -1050,7 +1067,14 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
     elif isinstance(layout, awkward1.partition.PartitionedArray):
         return awkward1.partition.IrregularlyPartitionedArray(
             [
-                recursively_apply(x, getfunction, args, depth, keep_parameters)
+                recursively_apply(
+                    x,
+                    getfunction,
+                    args,
+                    depth,
+                    keep_parameters,
+                    numpy_to_regular,
+                )
                 for x in layout.partitions
             ]
         )
@@ -1072,7 +1096,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
     elif isinstance(layout, awkward1.layout.RegularArray):
         return awkward1.layout.RegularArray(
             recursively_apply(
-                layout.content, getfunction, args, depth + 1, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth + 1,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.size,
             layout.identities,
@@ -1084,7 +1113,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
             layout.starts,
             layout.stops,
             recursively_apply(
-                layout.content, getfunction, args, depth + 1, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth + 1,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.identities,
             layout.parameters if keep_parameters else None,
@@ -1095,7 +1129,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
             layout.starts,
             layout.stops,
             recursively_apply(
-                layout.content, getfunction, args, depth + 1, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth + 1,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.identities,
             layout.parameters if keep_parameters else None,
@@ -1106,7 +1145,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
             layout.starts,
             layout.stops,
             recursively_apply(
-                layout.content, getfunction, args, depth + 1, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth + 1,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.identities,
             layout.parameters if keep_parameters else None,
@@ -1116,7 +1160,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         return awkward1.layout.ListOffsetArray32(
             layout.offsets,
             recursively_apply(
-                layout.content, getfunction, args, depth + 1, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth + 1,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.identities,
             layout.parameters if keep_parameters else None,
@@ -1126,7 +1175,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         return awkward1.layout.ListOffsetArrayU32(
             layout.offsets,
             recursively_apply(
-                layout.content, getfunction, args, depth + 1, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth + 1,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.identities,
             layout.parameters if keep_parameters else None,
@@ -1136,7 +1190,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         return awkward1.layout.ListOffsetArray64(
             layout.offsets,
             recursively_apply(
-                layout.content, getfunction, args, depth + 1, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth + 1,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.identities,
             layout.parameters if keep_parameters else None,
@@ -1146,7 +1205,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         return awkward1.layout.IndexedArray32(
             layout.index,
             recursively_apply(
-                layout.content, getfunction, args, depth, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.identities,
             layout.parameters if keep_parameters else None,
@@ -1156,7 +1220,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         return awkward1.layout.IndexedArrayU32(
             layout.index,
             recursively_apply(
-                layout.content, getfunction, args, depth, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.identities,
             layout.parameters if keep_parameters else None,
@@ -1166,7 +1235,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         return awkward1.layout.IndexedArray64(
             layout.index,
             recursively_apply(
-                layout.content, getfunction, args, depth, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.identities,
             layout.parameters if keep_parameters else None,
@@ -1176,7 +1250,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         return awkward1.layout.IndexedOptionArray32(
             layout.index,
             recursively_apply(
-                layout.content, getfunction, args, depth, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.identities,
             layout.parameters if keep_parameters else None,
@@ -1186,7 +1265,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         return awkward1.layout.IndexedOptionArray64(
             layout.index,
             recursively_apply(
-                layout.content, getfunction, args, depth, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.identities,
             layout.parameters if keep_parameters else None,
@@ -1196,7 +1280,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         return awkward1.layout.ByteMaskedArray(
             layout.mask,
             recursively_apply(
-                layout.content, getfunction, args, depth, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.valid_when,
             layout.identities,
@@ -1207,7 +1296,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
         return awkward1.layout.BitMaskedArray(
             layout.mask,
             recursively_apply(
-                layout.content, getfunction, args, depth, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.valid_when,
             len(layout),
@@ -1219,7 +1313,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
     elif isinstance(layout, awkward1.layout.UnmaskedArray):
         return awkward1.layout.UnmaskedArray(
             recursively_apply(
-                layout.content, getfunction, args, depth, keep_parameters
+                layout.content,
+                getfunction,
+                args,
+                depth,
+                keep_parameters,
+                numpy_to_regular,
             ),
             layout.identities,
             layout.parameters if keep_parameters else None,
@@ -1228,7 +1327,14 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
     elif isinstance(layout, awkward1.layout.RecordArray):
         return awkward1.layout.RecordArray(
             [
-                recursively_apply(x, getfunction, args, depth, keep_parameters)
+                recursively_apply(
+                    x,
+                    getfunction,
+                    args,
+                    depth,
+                    keep_parameters,
+                    numpy_to_regular,
+                )
                 for x in layout.contents
             ],
             layout.recordlookup,
@@ -1239,7 +1345,14 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
 
     elif isinstance(layout, awkward1.layout.Record):
         return awkward1.layout.Record(
-            recursively_apply(layout.array, getfunction, args, depth, keep_parameters),
+            recursively_apply(
+                layout.array,
+                getfunction,
+                args,
+                depth,
+                keep_parameters,
+                numpy_to_regular,
+            ),
             layout.at,
         )
 
@@ -1248,7 +1361,14 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
             layout.tags,
             layout.index,
             [
-                recursively_apply(x, getfunction, args, depth, keep_parameters)
+                recursively_apply(
+                    x,
+                    getfunction,
+                    args,
+                    depth,
+                    keep_parameters,
+                    numpy_to_regular,
+                )
                 for x in layout.contents
             ],
             layout.identities,
@@ -1260,7 +1380,14 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
             layout.tags,
             layout.index,
             [
-                recursively_apply(x, getfunction, args, depth, keep_parameters)
+                recursively_apply(
+                    x,
+                    getfunction,
+                    args,
+                    depth,
+                    keep_parameters,
+                    numpy_to_regular,
+                )
                 for x in layout.contents
             ],
             layout.identities,
@@ -1272,7 +1399,14 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
             layout.tags,
             layout.index,
             [
-                recursively_apply(x, getfunction, args, depth, keep_parameters)
+                recursively_apply(
+                    x,
+                    getfunction,
+                    args,
+                    depth,
+                    keep_parameters,
+                    numpy_to_regular,
+                )
                 for x in layout.contents
             ],
             layout.identities,
@@ -1281,7 +1415,12 @@ def recursively_apply(layout, getfunction, args=(), depth=1, keep_parameters=Tru
 
     elif isinstance(layout, awkward1.layout.VirtualArray):
         return recursively_apply(
-            layout.array, getfunction, args, depth, keep_parameters
+            layout.array,
+            getfunction,
+            args,
+            depth,
+            keep_parameters,
+            numpy_to_regular,
         )
 
     else:

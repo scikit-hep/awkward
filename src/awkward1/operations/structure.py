@@ -432,6 +432,108 @@ def unzip(array):
         return tuple(array[n] for n in fields)
 
 
+def to_regular(array, axis=1, highlevel=True):
+    """
+    Args:
+        array: Array to convert.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Converts a variable-length axis into a regular one, if possible.
+
+        >>> irregular = ak.from_iter(np.arange(2*3*5).reshape(2, 3, 5))
+        >>> ak.type(irregular)
+        2 * var * var * int64
+        >>> ak.type(ak.to_regular(irregular))
+        2 * 3 * var * int64
+        >>> ak.type(ak.to_regular(irregular, axis=2))
+        2 * var * 5 * int64
+        >>> ak.type(ak.to_regular(irregular, axis=-1))
+        2 * var * 5 * int64
+
+    But truly irregular data cannot be converted.
+
+        >>> ak.to_regular(ak.Array([[1, 2, 3], [], [4, 5]]))
+        ValueError: in ListOffsetArray64, cannot convert to RegularArray because
+        subarray lengths are not regular
+
+    See also #ak.from_regular.
+    """
+
+    posaxis = [axis]
+    def getfunction(layout, depth):
+        posaxis[0] = layout.axis_wrap_if_negative(posaxis[0])
+        if posaxis[0] == depth and isinstance(layout, awkward1.layout.RegularArray):
+            return lambda: layout
+        elif posaxis[0] == depth and isinstance(layout, awkward1._util.listtypes):
+            return lambda: layout.toRegularArray()
+        elif posaxis[0] < depth:
+            raise ValueError("array has no axis {0}".format(axis))
+        else:
+            return None
+
+    out = awkward1.operations.convert.to_layout(array)
+    if axis != 0:
+        out = awkward1._util.recursively_apply(out, getfunction, numpy_to_regular=True)
+
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
+
+
+def from_regular(array, axis=1, highlevel=True):
+    """
+    Args:
+        array: Array to convert.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Converts a regular axis into an irregular one.
+
+        >>> regular = ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
+        >>> ak.type(regular)
+        2 * 3 * 5 * int64
+        >>> ak.type(ak.from_regular(regular))
+        2 * var * 5 * int64
+        >>> ak.type(ak.from_regular(regular, axis=2))
+        2 * 3 * var * int64
+        >>> ak.type(ak.from_regular(regular, axis=-1))
+        2 * 3 * var * int64
+
+    See also #ak.to_regular.
+    """
+
+    posaxis = [axis]
+    def getfunction(layout, depth):
+        posaxis[0] = layout.axis_wrap_if_negative(posaxis[0])
+        if posaxis[0] == depth and isinstance(layout, awkward1.layout.RegularArray):
+            return lambda: layout.toListOffsetArray64(False)
+        elif posaxis[0] == depth and isinstance(layout, awkward1._util.listtypes):
+            return lambda: layout
+        elif posaxis[0] < depth:
+            raise ValueError("array has no axis {0}".format(axis))
+        else:
+            return None
+
+    out = awkward1.operations.convert.to_layout(array)
+    if axis != 0:
+        out = awkward1._util.recursively_apply(out, getfunction, numpy_to_regular=True)
+
+    if highlevel:
+        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+    else:
+        return out
+
+
 def with_name(array, name, highlevel=True):
     """
     Args:
