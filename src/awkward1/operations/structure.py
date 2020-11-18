@@ -476,7 +476,7 @@ def with_name(array, name, highlevel=True):
         return out
 
 
-def with_field(base, what, where=None, highlevel=True):
+def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
     """
     Args:
         base: Data containing records or tuples.
@@ -485,6 +485,9 @@ def with_field(base, what, where=None, highlevel=True):
             has no name (can be accessed as an integer slot number in a
             string); If str, the name of the new field. If iterable, it is
             interpreted as a path where to add the field in a nested record.
+        right_broadcast (bool): If True, follow rules for implicit
+            right-broadcasting, which force the dimensionality of `base` and
+            `what` to match by expanding `base` (usually undesirable).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
@@ -557,7 +560,7 @@ def with_field(base, what, where=None, highlevel=True):
         else:
             base = base[keys]
             out = awkward1._util.broadcast_and_apply(
-                [base, what], getfunction, behavior
+                [base, what], getfunction, behavior, right_broadcast=right_broadcast
             )
         assert isinstance(out, tuple) and len(out) == 1
 

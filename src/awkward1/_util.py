@@ -489,7 +489,14 @@ def completely_flatten(array):
         )
 
 
-def broadcast_and_apply(inputs, getfunction, behavior, allow_records=True):
+def broadcast_and_apply(
+    inputs,
+    getfunction,
+    behavior,
+    allow_records=True,
+    left_broadcast=True,
+    right_broadcast=True,
+):
     def checklength(inputs):
         length = len(inputs[0])
         for x in inputs[1:]:
@@ -550,7 +557,7 @@ def broadcast_and_apply(inputs, getfunction, behavior, allow_records=True):
         nplike = awkward1.nplike.of(*inputs)
 
         # handle implicit right-broadcasting (i.e. NumPy-like)
-        if any(isinstance(x, listtypes) for x in inputs):
+        if right_broadcast and any(isinstance(x, listtypes) for x in inputs):
             maxdepth = max(
                 x.purelist_depth
                 for x in inputs
@@ -799,7 +806,7 @@ def broadcast_and_apply(inputs, getfunction, behavior, allow_records=True):
                     elif isinstance(x, listtypes):
                         nextinputs.append(x.broadcast_tooffsets64(offsets).content)
                     # handle implicit left-broadcasting (unlike NumPy)
-                    elif isinstance(x, awkward1.layout.Content):
+                    elif left_broadcast and isinstance(x, awkward1.layout.Content):
                         nextinputs.append(
                             awkward1.layout.RegularArray(x, 1)
                             .broadcast_tooffsets64(offsets)
