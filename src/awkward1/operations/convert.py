@@ -795,6 +795,7 @@ def to_list(array):
             + awkward1._util.exception_suffix(__file__)
         )
 
+
 def from_json(
     source, highlevel=True, behavior=None, initial=1024, resize=1.5, buffersize=65536
 ):

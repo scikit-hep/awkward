@@ -551,10 +551,10 @@ namespace awkward {
     else {
       auto where = reader.GetErrorOffset();
       throw std::invalid_argument(
-      std::string("JSON error at char ")
-      + std::to_string(where) + std::string(": \"") + source[where] + std::string("\" ")
-      + std::string(rj::GetParseError_En(reader.GetParseErrorCode()))
-      + FILENAME(__LINE__));
+        std::string("JSON error at char ")
+        + std::to_string(where) + std::string(": \"") + source[where] + std::string("\" ")
+        + std::string(rj::GetParseError_En(reader.GetParseErrorCode()))
+        + FILENAME(__LINE__));
     }
   }
 
@@ -586,31 +586,6 @@ namespace awkward {
     //     + std::string(rj::GetParseError_En(reader.GetParseErrorCode()))
     //     + FILENAME(__LINE__));
     // }
-    return handler.snapshot();
-  }
-
-  const ContentPtr
-  FromJsonStream(FILE* source,
-                 const ArrayBuilderOptions& options,
-                 int64_t buffersize) {
-    Handler handler(options);
-    rj::Reader reader;
-    std::shared_ptr<char> buffer(new char[(size_t)buffersize],
-                                 kernel::array_deleter<char>());
-    rj::FileReadStream stream(source,
-                              buffer.get(),
-                              ((size_t)buffersize)*sizeof(char));
-
-    if (reader.Parse(stream, handler)) {
-      return handler.snapshot();
-    }
-    else {
-      throw std::invalid_argument(
-        std::string("JSON error at char ")
-        + std::to_string(reader.GetErrorOffset()) + std::string(": ")
-        + std::string(rj::GetParseError_En(reader.GetParseErrorCode()))
-        + FILENAME(__LINE__));
-    }
     return handler.snapshot();
   }
 }
