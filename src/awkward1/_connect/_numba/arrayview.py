@@ -1182,6 +1182,66 @@ def array_impl(array, dtype=None):
                 "array_impl", {"numpy": awkward1.nplike.numpy})
 
 
+@numba.extending.type_callable(awkward1.nplike.numpy.asarray)
+def type_asarray(context):
+    def typer(arrayview):
+        if (
+            isinstance(arrayview, ArrayViewType) and
+            isinstance(arrayview.type, awkward1._connect._numba.layout.NumpyArrayType) and
+            arrayview.type.ndim == 1 and
+            arrayview.type.inner_dtype in array_supported
+        ):
+            return numba.types.Array(arrayview.type.inner_dtype, 1, "C")
+    return typer
+
+
+@numba.extending.lower_builtin(awkward1.nplike.numpy.asarray, ArrayViewType)
+def lower_asarray(context, builder, sig, args):
+    rettype, (viewtype,) = sig.return_type, sig.args
+    viewval, = args
+    viewproxy = context.make_helper(builder, viewtype, viewval)
+    assert isinstance(viewtype.type, awkward1._connect._numba.layout.NumpyArrayType)
+
+    whichpos = awkward1._connect._numba.layout.posat(
+        context, builder, viewproxy.pos, viewtype.type.ARRAY
+    )
+    arrayptr = awkward1._connect._numba.layout.getat(
+        context, builder, viewproxy.arrayptrs, whichpos
+    )
+
+    itemsize = context.get_constant(numba.intp, rettype.dtype.bitwidth // 8)
+
+    data = numba.core.cgutils.pointer_add(
+        builder,
+        arrayptr,
+        builder.mul(viewproxy.start, itemsize),
+        context.get_value_type(numba.types.CPointer(rettype.dtype)),
+    )
+
+    shape = context.make_tuple(
+        builder,
+        numba.types.UniTuple(numba.types.intp, 1),
+        (builder.sub(viewproxy.stop, viewproxy.start),),
+    )
+    strides = context.make_tuple(
+        builder,
+        numba.types.UniTuple(numba.types.intp, 1),
+        (itemsize,),
+    )
+
+    out = numba.np.arrayobj.make_array(rettype)(context, builder)
+    numba.np.arrayobj.populate_array(
+        out,
+        data=data,
+        shape=shape,
+        strides=strides,
+        itemsize=itemsize,
+        meminfo=None,
+        parent=None,
+    )
+    return out._getvalue()
+
+
 ########## PartitionedView
 
 
