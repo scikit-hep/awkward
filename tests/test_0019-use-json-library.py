@@ -31,8 +31,8 @@ def test_fromfile(tmp_path):
     with open(os.path.join(str(tmp_path), "tmp2.json"), "w") as f:
         f.write("[[1.1, 2.2, 3], []], [4, 5.5]]")
 
-    # FIXME? with pytest.raises(ValueError):
-    assert awkward1.to_list(awkward1.from_json(os.path.join(str(tmp_path), "tmp2.json"))) == [[1.1, 2.2, 3.0], []]
+    with pytest.raises(ValueError):
+        awkward1.to_list(awkward1.from_json(os.path.join(str(tmp_path), "tmp2.json"))) == [[1.1, 2.2, 3.0], []]
 
 def test_tostring():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))

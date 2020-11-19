@@ -487,7 +487,20 @@ namespace awkward {
 
     bool
     String(const char* str, rj::SizeType length, bool copy) {
-      builder_.string(str, (int64_t)length);
+      if(std::string_view(str, length) == std::string_view("NaN")) {
+        //builder_.real(std::numeric_limits<double>::quiet_NaN());
+        builder_.real(99999.99999);
+      } else if(std::string_view(str, length) == std::string_view("inf")) {
+        //builder_.real(std::numeric_limits<double>::infinity());
+        builder_.real(99999.99999);
+
+      } else if(std::string_view(str, length) == std::string_view("-inf")) {
+        //builder_.real(-std::numeric_limits<double>::infinity());
+        builder_.real(-99999.99999);
+
+      }
+      else
+        builder_.string(str, (int64_t)length);
       return true;
     }
 
@@ -569,23 +582,26 @@ namespace awkward {
     rj::FileReadStream stream(source,
                               buffer.get(),
                               ((size_t)buffersize)*sizeof(char));
-    auto start = stream.Tell();
     bool scan = true;
+    bool has_error = false;
     while (scan) {
+      scan = false;
       reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
-      auto stop = stream.Tell();
-      (stop > start) ? scan = true : scan = false;
-      start = stop;
+      if(stream.Peek() == '\n') {
+        scan = true;
+      } else if (stream.Peek() == '\r') {
+        scan = true;
+      } else if (stream.Peek() != 0) {
+        has_error = true;
+      }
     }
-    //   return handler.snapshot();
-    // }
-    // else {
-    //   throw std::invalid_argument(
-    //     std::string("JSON File error at char ")
-    //     + std::to_string(reader.GetErrorOffset()) + std::string(": ")
-    //     + std::string(rj::GetParseError_En(reader.GetParseErrorCode()))
-    //     + FILENAME(__LINE__));
-    // }
+    if(has_error) {
+      throw std::invalid_argument(
+        std::string("JSON File error at char ")
+        + std::to_string(stream.Tell()) + std::string(": \'")
+        + stream.Peek() + std::string("\'")
+        + FILENAME(__LINE__));
+    }
     return handler.snapshot();
   }
 }
