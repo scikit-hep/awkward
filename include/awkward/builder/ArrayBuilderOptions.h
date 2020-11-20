@@ -3,7 +3,6 @@
 #ifndef AWKWARD_ARRAYBUILDEROPTIONS_H_
 #define AWKWARD_ARRAYBUILDEROPTIONS_H_
 
-#include <array>
 #include <cmath>
 #include <cstring>
 
@@ -24,7 +23,7 @@ namespace awkward {
     /// when its {@link GrowableBuffer#length length} reaches its
     /// {@link GrowableBuffer#reserved reserved}.
     ArrayBuilderOptions(int64_t initial, double resize,
-      bool convert_nan_and_inf = true, bool replace_nan_and_inf_ = false);
+      bool convert_nan_and_inf = false, bool replace_nan_and_inf_ = false);
 
     /// @brief The initial number of
     /// {@link GrowableBuffer#reserved reserved} entries for a GrowableBuffer.
@@ -45,12 +44,6 @@ namespace awkward {
     /// alternative configurable strings
     bool
       replaceNanAndInf() const { return replace_nan_and_inf_; }
-
-    // /// @brief Replace 'NaN' or 'Inf' with a user defined string
-    // const char*
-    //   replaceNanOrInf(const char* from) const {
-    //     return value(NanAndInfOptionsMap, from);
-    //   }
 
   private:
     /// See #initial.
