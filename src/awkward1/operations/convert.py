@@ -798,7 +798,9 @@ def to_list(array):
 
 def from_json(
     source, highlevel=True, behavior=None, initial=1024, resize=1.5, buffersize=65536,
-    convertNanAndInf=False, replaceNanAndInf=False
+    convertNanAndInf=False, replaceNanAndInf=False,
+    fromNan='NaN', fromInf='inf', fromMinusInf='-inf',
+    toNan='NaN', toInf='inf', toMinusInf='-inf'
 ):
     """
     Args:
@@ -832,7 +834,9 @@ def from_json(
     """
     layout = awkward1._ext.fromjson(
         source, initial=initial, resize=resize, buffersize=buffersize,
-        convertNanAndInf=convertNanAndInf, replaceNanAndInf=replaceNanAndInf
+        convertNanAndInf=convertNanAndInf, replaceNanAndInf=replaceNanAndInf,
+        fromNan=fromNan, fromInf=fromInf, fromMinusInf=fromMinusInf,
+        toNan=toNan, toInf=toInf, toMinusInf=toMinusInf
     )
     if highlevel:
         return awkward1._util.wrap(layout, behavior)

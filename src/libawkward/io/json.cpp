@@ -21,32 +21,6 @@
 namespace rj = rapidjson;
 
 namespace awkward {
-  template <class T>
-    struct NameValuePair {
-      using value_type = T;
-      const T value;
-      const char* const name;
-    };
-
-    // FIXME: expose it to highlevel?
-    const std::array<awkward::NameValuePair<const char*>, 5> NanAndInfOptionsMap{
-         {{"None", "NaN"},
-          {"None", "Nan"},
-          {"None", "nan"},
-          {"Infinity", "inf"},
-          {"-Infinity", "-inf"}}};
-
-    template <class Mapping, class N>
-      typename Mapping::value_type::value_type value(Mapping a, N from_name) {
-        auto pos = std::find_if(
-        std::begin(a), std::end(a), [&from_name](const typename Mapping::value_type& t) {
-          return (strcmp(from_name, t.name) == 0); });
-        if (pos != std::end(a)) {
-          return pos->value;
-        }
-        return from_name;
-      }
-
   ////////// writing to JSON
   ToJson::~ToJson() = default;
 
@@ -498,11 +472,19 @@ namespace awkward {
   class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
   public:
     Handler(const ArrayBuilderOptions& options,
-      bool convertNanAndInf, bool replaceNanAndInf)
+      bool convertNanAndInf, bool replaceNanAndInf, const char* fromNan,
+      const char* fromInf, const char* fromMinusInf, const char* toNan,
+      const char* toInf, const char* toMinusInf)
         : builder_(options)
         , depth_(0)
         , convertNanAndInf_(convertNanAndInf)
-        , replaceNanAndInf_(replaceNanAndInf) { }
+        , replaceNanAndInf_(replaceNanAndInf)
+        , fromNan_(fromNan)
+        , fromInf_(fromInf)
+        , fromMinusInf_(fromMinusInf)
+        , toNan_(toNan)
+        , toInf_(toInf)
+        , toMinusInf_(toMinusInf) { }
 
     const ContentPtr snapshot() const {
       return builder_.snapshot();
@@ -519,18 +501,30 @@ namespace awkward {
     bool
     String(const char* str, rj::SizeType length, bool copy) {
       if (convertNanAndInf_) {
-        if (strcmp(str, "NaN") == 0) {
+        if (strcmp(str, fromNan_) == 0) {
           builder_.real(std::numeric_limits<double>::quiet_NaN());
-        } else if(strcmp(str, "inf") == 0) {
+          return true;
+        } else if(strcmp(str, fromInf_) == 0) {
           builder_.real(std::numeric_limits<double>::infinity());
-        } else if(strcmp(str, "-inf") == 0) {
+          return true;
+        } else if(strcmp(str, fromMinusInf_) == 0) {
           builder_.real(-std::numeric_limits<double>::infinity());
+          return true;
         }
-      } else if (replaceNanAndInf_) {
-        builder_.string(awkward::value(awkward::NanAndInfOptionsMap, str));
-      } else {
-        builder_.string(str, (int64_t)length);
       }
+      if (replaceNanAndInf_) {
+        if (strcmp(str, fromNan_) == 0) {
+          builder_.string(toNan_);
+          return true;
+        } else if(strcmp(str, fromInf_) == 0) {
+          builder_.string(toInf_);
+          return true;
+        } else if(strcmp(str, fromMinusInf_) == 0) {
+          builder_.string(toMinusInf_);
+          return true;
+        }
+      }
+      builder_.string(str, (int64_t)length);
       return true;
     }
 
@@ -583,13 +577,27 @@ namespace awkward {
     int64_t depth_;
     bool convertNanAndInf_;
     bool replaceNanAndInf_;
+    const char* fromNan_;
+    const char* fromInf_;
+    const char* fromMinusInf_;
+    const char* toNan_;
+    const char* toInf_;
+    const char* toMinusInf_;
   };
 
   const ContentPtr
   FromJsonString(const char* source, const ArrayBuilderOptions& options,
     bool convertNanAndInf,
-    bool replaceNanAndInf) {
-    Handler handler(options, convertNanAndInf, replaceNanAndInf);
+    bool replaceNanAndInf,
+    const char* fromNan,
+    const char* fromInf,
+    const char* fromMinusInf,
+    const char* toNan,
+    const char* toInf,
+    const char* toMinusInf) {
+    Handler handler(options, convertNanAndInf, replaceNanAndInf,
+      fromNan, fromInf, fromMinusInf,
+      toNan, toInf, toMinusInf);
     rj::Reader reader;
     rj::StringStream stream(source);
     if (reader.Parse(stream, handler)) {
@@ -610,8 +618,16 @@ namespace awkward {
                const ArrayBuilderOptions& options,
                int64_t buffersize,
                bool convertNanAndInf,
-               bool replaceNanAndInf) {
-    Handler handler(options, convertNanAndInf, replaceNanAndInf);
+               bool replaceNanAndInf,
+               const char* fromNan,
+               const char* fromInf,
+               const char* fromMinusInf,
+               const char* toNan,
+               const char* toInf,
+               const char* toMinusInf) {
+    Handler handler(options, convertNanAndInf, replaceNanAndInf,
+      fromNan, fromInf, fromMinusInf,
+      toNan, toInf, toMinusInf);
     rj::Reader reader;
     std::shared_ptr<char> buffer(new char[(size_t)buffersize],
                                  kernel::array_deleter<char>());

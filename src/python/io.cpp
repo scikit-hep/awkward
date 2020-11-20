@@ -2,7 +2,10 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/io.cpp", line)
 
+#include <map>
 #include <string>
+#include <vector>
+#include <pybind11/stl.h>
 
 #include "awkward/Content.h"
 #include "awkward/Index.h"
@@ -25,7 +28,13 @@ make_fromjson(py::module& m, const std::string& name) {
            double resize,
            int64_t buffersize,
            bool convert_nan_and_inf,
-           bool replace_nan_and_inf) -> std::shared_ptr<ak::Content> {
+           bool replace_nan_and_inf,
+           const char* fromNan,
+           const char* fromInf,
+           const char* fromMinusInf,
+           const char* toNan,
+           const char* toInf,
+           const char* toMinusInf) -> std::shared_ptr<ak::Content> {
     bool isarray = false;
     bool isrecord = false;
     for (char const &x: source) {
@@ -41,13 +50,29 @@ make_fromjson(py::module& m, const std::string& name) {
     }
     if (isarray) {
       return ak::FromJsonString(
-        source.c_str(), ak::ArrayBuilderOptions(initial, resize),
-          convert_nan_and_inf, replace_nan_and_inf);
+        source.c_str(),
+        ak::ArrayBuilderOptions(initial, resize),
+        convert_nan_and_inf,
+        replace_nan_and_inf,
+        fromNan,
+        fromInf,
+        fromMinusInf,
+        toNan,
+        toInf,
+        toMinusInf);
     }
     if (isrecord) {
       return ak::FromJsonString(
-        source.c_str(), ak::ArrayBuilderOptions(initial, resize),
-        convert_nan_and_inf, replace_nan_and_inf
+        source.c_str(),
+        ak::ArrayBuilderOptions(initial, resize),
+        convert_nan_and_inf,
+        replace_nan_and_inf,
+        fromNan,
+        fromInf,
+        fromMinusInf,
+        toNan,
+        toInf,
+        toMinusInf
       ).get()->getitem_at_nowrap(0).get()->getitem_at_nowrap(0);
     }
     else {
@@ -69,7 +94,13 @@ make_fromjson(py::module& m, const std::string& name) {
                            ak::ArrayBuilderOptions(initial, resize),
                            buffersize,
                            convert_nan_and_inf,
-                           replace_nan_and_inf);
+                           replace_nan_and_inf,
+                           fromNan,
+                           fromInf,
+                           fromMinusInf,
+                           toNan,
+                           toInf,
+                           toMinusInf);
       }
       catch (...) {
         fclose(file);
@@ -83,7 +114,13 @@ make_fromjson(py::module& m, const std::string& name) {
       py::arg("resize") = 1.5,
       py::arg("buffersize") = 65536,
       py::arg("convertNanAndInf") = false,
-      py::arg("replaceNanAndInf") = false);
+      py::arg("replaceNanAndInf") = false,
+      py::arg("fromNan"),
+      py::arg("fromInf"),
+      py::arg("fromMinusInf"),
+      py::arg("toNan"),
+      py::arg("toInf"),
+      py::arg("toMinusInf"));
 }
 
 ////////// Uproot connector
