@@ -11,6 +11,8 @@ What you're looking for might already be possible as a combination of existing f
 
 Here are some links to documentation, to help you in your search.
 
-   * [The tutorials site](https://scikit-hep.org/awkward-1.0/index.html)
+   * [The tutorials site](https://awkward-array.org/)
    * [The C++ API](https://awkward-array.readthedocs.io/en/latest/_static/index.html)
    * [The Python API](https://awkward-array.readthedocs.io/en/latest/index.html)
+   * [StackOverflow: [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array)
+   * [Gitter: Scikit-HEP/awkward-array room](https://gitter.im/Scikit-HEP/awkward-array)
