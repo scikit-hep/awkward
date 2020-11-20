@@ -3,9 +3,12 @@
 #include "awkward/builder/ArrayBuilderOptions.h"
 
 namespace awkward {
-  ArrayBuilderOptions::ArrayBuilderOptions(int64_t initial, double resize)
+  ArrayBuilderOptions::ArrayBuilderOptions(int64_t initial, double resize,
+    bool convert_nan_and_inf, bool replace_nan_and_inf)
       : initial_(initial)
-      , resize_(resize) { }
+      , resize_(resize)
+      , convert_nan_and_inf_(convert_nan_and_inf)
+      , replace_nan_and_inf_(replace_nan_and_inf) { }
 
   int64_t
   ArrayBuilderOptions::initial() const {

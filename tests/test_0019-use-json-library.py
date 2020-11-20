@@ -32,7 +32,7 @@ def test_fromfile(tmp_path):
         f.write("[[1.1, 2.2, 3], []], [4, 5.5]]")
 
     with pytest.raises(ValueError):
-        awkward1.to_list(awkward1.from_json(os.path.join(str(tmp_path), "tmp2.json"))) == [[1.1, 2.2, 3.0], []]
+        awkward1.to_list(awkward1.from_json(os.path.join(str(tmp_path), "tmp2.json")))
 
 def test_tostring():
     content = awkward1.layout.NumpyArray(numpy.arange(2*3*5*7).reshape(-1, 7))

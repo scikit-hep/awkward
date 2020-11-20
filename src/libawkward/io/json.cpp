@@ -19,6 +19,32 @@
 namespace rj = rapidjson;
 
 namespace awkward {
+  template <class T>
+    struct NameValuePair {
+      using value_type = T;
+      const T value;
+      const char* const name;
+    };
+
+    // FIXME: expose it to highlevel?
+    const std::array<awkward::NameValuePair<const char*>, 5> NanAndInfOptionsMap{
+         {{"None", "NaN"},
+          {"None", "Nan"},
+          {"None", "nan"},
+          {"Infinity", "inf"},
+          {"-Infinity", "-inf"}}};
+
+    template <class Mapping, class N>
+      typename Mapping::value_type::value_type value(Mapping a, N from_name) {
+        auto pos = std::find_if(
+        std::begin(a), std::end(a), [&from_name](const typename Mapping::value_type& t) {
+          return (strcmp(from_name, t.name) == 0); });
+        if (pos != std::end(a)) {
+          return pos->value;
+        }
+        return from_name;
+      }
+
   ////////// writing to JSON
   ToJson::~ToJson() = default;
 
@@ -487,15 +513,19 @@ namespace awkward {
 
     bool
     String(const char* str, rj::SizeType length, bool copy) {
-      if(strcmp(str, "NaN") == 0) {
-        builder_.real(std::numeric_limits<double>::quiet_NaN());
-      } else if(strcmp(str, "inf") == 0) {
-        builder_.real(std::numeric_limits<double>::infinity());
-      } else if(strcmp(str, "-inf") == 0) {
-        builder_.real(-std::numeric_limits<double>::infinity());
-      }
-      else
+      if (builder_.convertNanAndInf()) {
+        if (strcmp(str, "NaN") == 0) {
+          builder_.real(std::numeric_limits<double>::quiet_NaN());
+        } else if(strcmp(str, "inf") == 0) {
+          builder_.real(std::numeric_limits<double>::infinity());
+        } else if(strcmp(str, "-inf") == 0) {
+          builder_.real(-std::numeric_limits<double>::infinity());
+        }
+      } else if (builder_.replaceNanAndInf()) {
+        builder_.string(awkward::value(awkward::NanAndInfOptionsMap, str));
+      } else {
         builder_.string(str, (int64_t)length);
+      }
       return true;
     }
 

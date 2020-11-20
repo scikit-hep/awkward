@@ -797,7 +797,8 @@ def to_list(array):
 
 
 def from_json(
-    source, highlevel=True, behavior=None, initial=1024, resize=1.5, buffersize=65536
+    source, highlevel=True, behavior=None, initial=1024, resize=1.5, buffersize=65536,
+    convertNanAndInf=False, replaceNanAndInf=False
 ):
     """
     Args:
@@ -813,6 +814,11 @@ def from_json(
             should be strictly greater than 1.
         buffersize (int): Size (in bytes) of the buffer used by the JSON
             parser.
+        convertNanAndInf (bool): Option flag to replace 'NaN' and 'Inf'
+            with floats
+        replaceNanAndInf (bool): Option flag to replace 'NaN' and 'Inf'
+            with strings
+
 
     Converts a JSON string into an Awkward Array.
 
@@ -825,7 +831,8 @@ def from_json(
     See also #ak.to_json.
     """
     layout = awkward1._ext.fromjson(
-        source, initial=initial, resize=resize, buffersize=buffersize
+        source, initial=initial, resize=resize, buffersize=buffersize,
+        convertNanAndInf=convertNanAndInf, replaceNanAndInf=replaceNanAndInf
     )
     if highlevel:
         return awkward1._util.wrap(layout, behavior)

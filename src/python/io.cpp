@@ -23,7 +23,9 @@ make_fromjson(py::module& m, const std::string& name) {
         [](const std::string& source,
            int64_t initial,
            double resize,
-           int64_t buffersize) -> std::shared_ptr<ak::Content> {
+           int64_t buffersize,
+           bool convert_nan_and_inf,
+           bool replace_nan_and_inf) -> std::shared_ptr<ak::Content> {
     bool isarray = false;
     bool isrecord = false;
     for (char const &x: source) {
@@ -39,11 +41,13 @@ make_fromjson(py::module& m, const std::string& name) {
     }
     if (isarray) {
       return ak::FromJsonString(
-        source.c_str(), ak::ArrayBuilderOptions(initial, resize));
+        source.c_str(), ak::ArrayBuilderOptions(initial, resize,
+          convert_nan_and_inf, replace_nan_and_inf));
     }
     if (isrecord) {
       return ak::FromJsonString(
-        source.c_str(), ak::ArrayBuilderOptions(initial, resize)
+        source.c_str(), ak::ArrayBuilderOptions(initial, resize,
+          convert_nan_and_inf, replace_nan_and_inf)
       ).get()->getitem_at_nowrap(0).get()->getitem_at_nowrap(0);
     }
     else {
@@ -62,7 +66,8 @@ make_fromjson(py::module& m, const std::string& name) {
       std::shared_ptr<ak::Content> out(nullptr);
       try {
         out = FromJsonFile(file,
-                           ak::ArrayBuilderOptions(initial, resize),
+                           ak::ArrayBuilderOptions(initial, resize,
+                             convert_nan_and_inf, replace_nan_and_inf),
                            buffersize);
       }
       catch (...) {
@@ -75,7 +80,9 @@ make_fromjson(py::module& m, const std::string& name) {
   }, py::arg("source"),
       py::arg("initial") = 1024,
       py::arg("resize") = 1.5,
-      py::arg("buffersize") = 65536);
+      py::arg("buffersize") = 65536,
+      py::arg("convertNanAndInf") = false,
+      py::arg("replaceNanAndInf") = false);
 }
 
 ////////// Uproot connector
