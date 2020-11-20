@@ -497,9 +497,12 @@ namespace awkward {
 
   class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
   public:
-    Handler(const ArrayBuilderOptions& options)
+    Handler(const ArrayBuilderOptions& options,
+      bool convertNanAndInf, bool replaceNanAndInf)
         : builder_(options)
-        , depth_(0) { }
+        , depth_(0)
+        , convertNanAndInf_(convertNanAndInf)
+        , replaceNanAndInf_(replaceNanAndInf) { }
 
     const ContentPtr snapshot() const {
       return builder_.snapshot();
@@ -515,7 +518,7 @@ namespace awkward {
 
     bool
     String(const char* str, rj::SizeType length, bool copy) {
-      if (builder_.convertNanAndInf()) {
+      if (convertNanAndInf_) {
         if (strcmp(str, "NaN") == 0) {
           builder_.real(std::numeric_limits<double>::quiet_NaN());
         } else if(strcmp(str, "inf") == 0) {
@@ -523,7 +526,7 @@ namespace awkward {
         } else if(strcmp(str, "-inf") == 0) {
           builder_.real(-std::numeric_limits<double>::infinity());
         }
-      } else if (builder_.replaceNanAndInf()) {
+      } else if (replaceNanAndInf_) {
         builder_.string(awkward::value(awkward::NanAndInfOptionsMap, str));
       } else {
         builder_.string(str, (int64_t)length);
@@ -578,11 +581,15 @@ namespace awkward {
   private:
     ArrayBuilder builder_;
     int64_t depth_;
+    bool convertNanAndInf_;
+    bool replaceNanAndInf_;
   };
 
   const ContentPtr
-  FromJsonString(const char* source, const ArrayBuilderOptions& options) {
-    Handler handler(options);
+  FromJsonString(const char* source, const ArrayBuilderOptions& options,
+    bool convertNanAndInf,
+    bool replaceNanAndInf) {
+    Handler handler(options, convertNanAndInf, replaceNanAndInf);
     rj::Reader reader;
     rj::StringStream stream(source);
     if (reader.Parse(stream, handler)) {
@@ -601,8 +608,10 @@ namespace awkward {
   const ContentPtr
   FromJsonFile(FILE* source,
                const ArrayBuilderOptions& options,
-               int64_t buffersize) {
-    Handler handler(options);
+               int64_t buffersize,
+               bool convertNanAndInf,
+               bool replaceNanAndInf) {
+    Handler handler(options, convertNanAndInf, replaceNanAndInf);
     rj::Reader reader;
     std::shared_ptr<char> buffer(new char[(size_t)buffersize],
                                  kernel::array_deleter<char>());
@@ -622,7 +631,7 @@ namespace awkward {
         has_error = true;
       }
     }
-    if(has_error) {
+    if (has_error) {
       throw std::invalid_argument(
         std::string("JSON File error at char ")
         + std::to_string(stream.Tell()) + std::string(": \'")

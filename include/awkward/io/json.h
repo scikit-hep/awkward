@@ -20,7 +20,8 @@ namespace awkward {
   /// @param options Configuration options for building an array with an
   /// ArrayBuilder.
   LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
-    FromJsonString(const char* source, const ArrayBuilderOptions& options);
+    FromJsonString(const char* source, const ArrayBuilderOptions& options,
+      bool convertNanAndInf = false, bool replaceNanAndInf = false);
 
   /// @brief Convert a JSON-encoded file into a Content array using an
   /// ArrayBuilder.
@@ -32,7 +33,9 @@ namespace awkward {
   LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
     FromJsonFile(FILE* source,
                  const ArrayBuilderOptions& options,
-                 int64_t buffersize);
+                 int64_t buffersize,
+                 bool convertNanAndInf = false,
+                 bool replaceNanAndInf = false);
 
   /// @class ToJson
   ///

@@ -287,14 +287,6 @@ namespace awkward {
     void
       extend(const ContentPtr& array);
 
-    /// @brief Configurable flag option to replace 'NaN' and 'Inf' with floats
-    bool
-      convertNanAndInf() const { return convert_nan_and_inf_; }
-
-    /// @brief Configurable flag option to replace 'NaN' and 'Inf' with floats
-    bool
-      replaceNanAndInf() const { return replace_nan_and_inf_; }
-
   private:
     /// @brief Internal function to replace the root node of the ArrayBuilder's
     /// Builder tree with a new root.
@@ -307,10 +299,6 @@ namespace awkward {
     static const char* utf8_encoding;
     /// @brief Root node of the Builder tree.
     BuilderPtr builder_;
-    /// @brief Flag to convert NaN and Inf to floats
-    const bool convert_nan_and_inf_;
-    /// @brief Flag to replace NaN and Inf with strings
-    const bool replace_nan_and_inf_;
   };
 }
 

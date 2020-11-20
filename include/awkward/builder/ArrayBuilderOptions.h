@@ -22,8 +22,7 @@ namespace awkward {
     /// @param resize The factor with which a GrowableBuffer is resized
     /// when its {@link GrowableBuffer#length length} reaches its
     /// {@link GrowableBuffer#reserved reserved}.
-    ArrayBuilderOptions(int64_t initial, double resize,
-      bool convert_nan_and_inf = false, bool replace_nan_and_inf_ = false);
+    ArrayBuilderOptions(int64_t initial, double resize);
 
     /// @brief The initial number of
     /// {@link GrowableBuffer#reserved reserved} entries for a GrowableBuffer.
@@ -36,24 +35,11 @@ namespace awkward {
     double
       resize() const;
 
-    /// @brief Configurable option flag to convert 'NaN' and 'Inf' to floats
-    bool
-      convertNanAndInf() const { return convert_nan_and_inf_; }
-
-    /// @brief Configurable option flag to replace 'NaN' and 'Inf' with
-    /// alternative configurable strings
-    bool
-      replaceNanAndInf() const { return replace_nan_and_inf_; }
-
   private:
     /// See #initial.
     int64_t initial_;
     /// See #resize.
     double resize_;
-    /// @brief Flag to convert 'NaN' and 'Inf' to floats
-    const bool convert_nan_and_inf_;
-    /// @brief Flag to replace 'NaN' and 'Inf' with strings
-    const bool replace_nan_and_inf_;
   };
 }
 

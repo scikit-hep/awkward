@@ -41,13 +41,13 @@ make_fromjson(py::module& m, const std::string& name) {
     }
     if (isarray) {
       return ak::FromJsonString(
-        source.c_str(), ak::ArrayBuilderOptions(initial, resize,
-          convert_nan_and_inf, replace_nan_and_inf));
+        source.c_str(), ak::ArrayBuilderOptions(initial, resize),
+          convert_nan_and_inf, replace_nan_and_inf);
     }
     if (isrecord) {
       return ak::FromJsonString(
-        source.c_str(), ak::ArrayBuilderOptions(initial, resize,
-          convert_nan_and_inf, replace_nan_and_inf)
+        source.c_str(), ak::ArrayBuilderOptions(initial, resize),
+        convert_nan_and_inf, replace_nan_and_inf
       ).get()->getitem_at_nowrap(0).get()->getitem_at_nowrap(0);
     }
     else {
@@ -66,9 +66,10 @@ make_fromjson(py::module& m, const std::string& name) {
       std::shared_ptr<ak::Content> out(nullptr);
       try {
         out = FromJsonFile(file,
-                           ak::ArrayBuilderOptions(initial, resize,
-                             convert_nan_and_inf, replace_nan_and_inf),
-                           buffersize);
+                           ak::ArrayBuilderOptions(initial, resize),
+                           buffersize,
+                           convert_nan_and_inf,
+                           replace_nan_and_inf);
       }
       catch (...) {
         fclose(file);

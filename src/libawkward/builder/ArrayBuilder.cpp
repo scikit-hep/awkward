@@ -8,9 +8,7 @@
 
 namespace awkward {
   ArrayBuilder::ArrayBuilder(const ArrayBuilderOptions& options)
-      : builder_(UnknownBuilder::fromempty(options))
-        , convert_nan_and_inf_(options.convertNanAndInf())
-        , replace_nan_and_inf_(options.replaceNanAndInf()) { }
+      : builder_(UnknownBuilder::fromempty(options)) { }
 
   const std::string
   ArrayBuilder::tostring() const {
