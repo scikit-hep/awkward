@@ -487,17 +487,12 @@ namespace awkward {
 
     bool
     String(const char* str, rj::SizeType length, bool copy) {
-      if(std::string_view(str, length) == std::string_view("NaN")) {
-        //builder_.real(std::numeric_limits<double>::quiet_NaN());
-        builder_.real(99999.99999);
-      } else if(std::string_view(str, length) == std::string_view("inf")) {
-        //builder_.real(std::numeric_limits<double>::infinity());
-        builder_.real(99999.99999);
-
-      } else if(std::string_view(str, length) == std::string_view("-inf")) {
-        //builder_.real(-std::numeric_limits<double>::infinity());
-        builder_.real(-99999.99999);
-
+      if(strcmp(str, "NaN") == 0) {
+        builder_.real(std::numeric_limits<double>::quiet_NaN());
+      } else if(strcmp(str, "inf") == 0) {
+        builder_.real(std::numeric_limits<double>::infinity());
+      } else if(strcmp(str, "-inf") == 0) {
+        builder_.real(-std::numeric_limits<double>::infinity());
       }
       else
         builder_.string(str, (int64_t)length);
