@@ -107,7 +107,11 @@ namespace awkward {
     const char* nan_string,
     const char* infinity_string,
     const char* minus_infinity_string)
-      : impl_(new ToJsonString::Impl(maxdecimals)) { }
+      : impl_(new ToJsonString::Impl(maxdecimals))
+      , nan_string_(nan_string)
+      , infinity_string_(infinity_string)
+      , minus_infinity_string_(minus_infinity_string) {
+    }
 
   ToJsonString::~ToJsonString() {
     delete impl_;
@@ -130,7 +134,17 @@ namespace awkward {
 
   void
   ToJsonString::real(double x) {
-    impl_->real(x);
+    // FIXME: what about negative 'NaN'?
+    if (nan_string_ != nullptr  &&  std::isnan(x)) {
+      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
+    } else if (infinity_string_ != nullptr  &&  std::isinf(x)  &&  !std::signbit(x)) {
+      impl_->string(infinity_string_, (int64_t)strlen(infinity_string_));
+    } else if (minus_infinity_string_ != nullptr  &&  std::isinf(x)  &&  std::signbit(x)) {
+      impl_->string(minus_infinity_string_, (int64_t)strlen(minus_infinity_string_));
+    }
+    else {
+      impl_->real(x);
+    }
   }
 
   void
@@ -209,7 +223,10 @@ namespace awkward {
     const char* nan_string,
     const char* infinity_string,
     const char* minus_infinity_string)
-      : impl_(new ToJsonPrettyString::Impl(maxdecimals)) { }
+      : impl_(new ToJsonPrettyString::Impl(maxdecimals))
+      , nan_string_(nan_string)
+      , infinity_string_(infinity_string)
+      , minus_infinity_string_(minus_infinity_string) { }
 
   ToJsonPrettyString::~ToJsonPrettyString() {
     delete impl_;
@@ -232,7 +249,16 @@ namespace awkward {
 
   void
   ToJsonPrettyString::real(double x) {
-    impl_->real(x);
+    if (nan_string_ != nullptr  &&  std::isnan(x)) {
+      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
+    } else if (infinity_string_ != nullptr  &&  std::isinf(x)  &&  !std::signbit(x)) {
+      impl_->string(infinity_string_, (int64_t)strlen(infinity_string_));
+    } else if (minus_infinity_string_ != nullptr  &&  std::isinf(x)  &&  std::signbit(x)) {
+      impl_->string(minus_infinity_string_, (int64_t)strlen(minus_infinity_string_));
+    }
+    else {
+      impl_->real(x);
+    }
   }
 
   void
@@ -315,7 +341,10 @@ namespace awkward {
                          const char* nan_string,
                          const char* infinity_string,
                          const char* minus_infinity_string)
-      : impl_(new ToJsonFile::Impl(destination, maxdecimals, buffersize)) { }
+      : impl_(new ToJsonFile::Impl(destination, maxdecimals, buffersize))
+      , nan_string_(nan_string)
+      , infinity_string_(infinity_string)
+      , minus_infinity_string_(minus_infinity_string) { }
 
   ToJsonFile::~ToJsonFile() {
     delete impl_;
@@ -338,7 +367,16 @@ namespace awkward {
 
   void
   ToJsonFile::real(double x) {
-    impl_->real(x);
+    if (nan_string_ != nullptr  &&  std::isnan(x)) {
+      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
+    } else if (infinity_string_ != nullptr  &&  std::isinf(x)  &&  !std::signbit(x)) {
+      impl_->string(infinity_string_, (int64_t)strlen(infinity_string_));
+    } else if (minus_infinity_string_ != nullptr  &&  std::isinf(x)  &&  std::signbit(x)) {
+      impl_->string(minus_infinity_string_, (int64_t)strlen(minus_infinity_string_));
+    }
+    else {
+      impl_->real(x);
+    }
   }
 
   void
@@ -418,7 +456,10 @@ namespace awkward {
                                      const char* minus_infinity_string)
       : impl_(new ToJsonPrettyFile::Impl(destination,
                                          maxdecimals,
-                                         buffersize)) { }
+                                         buffersize))
+      , nan_string_(nan_string)
+      , infinity_string_(infinity_string)
+      , minus_infinity_string_(minus_infinity_string) { }
 
   ToJsonPrettyFile::~ToJsonPrettyFile() {
     delete impl_;
@@ -441,7 +482,16 @@ namespace awkward {
 
   void
   ToJsonPrettyFile::real(double x) {
-    impl_->real(x);
+    if (nan_string_ != nullptr  &&  std::isnan(x)) {
+      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
+    } else if (infinity_string_ != nullptr  &&  std::isinf(x)  &&  !std::signbit(x)) {
+      impl_->string(infinity_string_, (int64_t)strlen(infinity_string_));
+    } else if (minus_infinity_string_ != nullptr  &&  std::isinf(x)  &&  std::signbit(x)) {
+      impl_->string(minus_infinity_string_, (int64_t)strlen(minus_infinity_string_));
+    }
+    else {
+      impl_->real(x);
+    }
   }
 
   void
@@ -663,8 +713,8 @@ namespace awkward {
     bool nan_and_inf_as_float_;
   };
 
-  template<typename H, typename S>
-  const ContentPtr do_parse(H& handler, rj::Reader& reader, S& stream)
+  template<typename HANDLER, typename STREAM>
+  const ContentPtr do_parse(HANDLER& handler, rj::Reader& reader, STREAM& stream)
   {
     bool scan = true;
     bool has_error = false;

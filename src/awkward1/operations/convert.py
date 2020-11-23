@@ -857,6 +857,9 @@ def to_json(array,
             destination=None,
             pretty=False,
             maxdecimals=None,
+            nan_string=None,
+            infinity_string=None,
+            minus_infinity_string=None,
             buffersize=65536
 ):
     """
@@ -932,10 +935,14 @@ def to_json(array,
         )
 
     if destination is None:
-        return out.tojson(pretty=pretty, maxdecimals=maxdecimals)
+        return out.tojson(pretty=pretty, maxdecimals=maxdecimals,
+            nan_string=nan_string, infinity_string=infinity_string,
+            minus_infinity_string=minus_infinity_string)
     else:
         return out.tojson(
-            destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize
+            destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize,
+                nan_string=nan_string, infinity_string=infinity_string,
+                minus_infinity_string=minus_infinity_string
         )
 
 

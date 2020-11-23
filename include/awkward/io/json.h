@@ -137,6 +137,9 @@ namespace awkward {
   private:
     class Impl;
     Impl* impl_;
+    const char* nan_string_;
+    const char* infinity_string_;
+    const char* minus_infinity_string_;
   };
 
   /// @class ToJsonPrettyString
@@ -182,6 +185,9 @@ namespace awkward {
   private:
     class Impl;
     Impl* impl_;
+    const char* nan_string_;
+    const char* infinity_string_;
+    const char* minus_infinity_string_;
   };
 
   /// @class ToJsonFile
@@ -226,6 +232,9 @@ namespace awkward {
   private:
     class Impl;
     Impl* impl_;
+    const char* nan_string_;
+    const char* infinity_string_;
+    const char* minus_infinity_string_;
   };
 
   /// @class ToJsonPrettyFile
@@ -272,6 +281,9 @@ namespace awkward {
   private:
     class Impl;
     Impl* impl_;
+    const char* nan_string_;
+    const char* infinity_string_;
+    const char* minus_infinity_string_;
   };
 }
 

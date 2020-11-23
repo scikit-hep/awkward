@@ -928,7 +928,11 @@ namespace awkward {
     /// does not preserve the type information of an array. In particular,
     /// the distinction between ListType and RegularType is lost.
     const std::string
-      tojson(bool pretty, int64_t maxdecimals) const;
+      tojson(bool pretty,
+             int64_t maxdecimals,
+             const char* nan_string = nullptr,
+             const char* infinity_string = nullptr,
+             const char* minus_infinity_string = nullptr) const;
 
     /// @brief Writes a JSON representation of this array to a `destination`
     /// file.
@@ -948,7 +952,10 @@ namespace awkward {
       tojson(FILE* destination,
              bool pretty,
              int64_t maxdecimals,
-             int64_t buffersize) const;
+             int64_t buffersize,
+             const char* nan_string = nullptr,
+             const char* infinity_string = nullptr,
+             const char* minus_infinity_string = nullptr) const;
 
     /// @brief The number of bytes contained in all array buffers,
     /// {@link IndexOf Index} buffers, and Identities buffers, not including

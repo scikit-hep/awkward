@@ -11,6 +11,25 @@ import numpy
 
 import awkward1
 
+def test_tostring():
+    str = """{"x": 1.1, "y": []}
+             {"x": 2.2, "y": [1]}
+             {"x": 3.3, "y": [1, 2]}
+             {"x": 4.4, "y": [1, 2, 3]}
+             {"x": 5.5, "y": [1, 2, 3, 4]}
+             {"x": 6.6, "y": [1, 2, 3, 4, 5]}"""
+
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'x': 1.1, 'y': []}],
+        [{'x': 2.2, 'y': [1]}],
+        [{'x': 3.3, 'y': [1, 2]}],
+        [{'x': 4.4, 'y': [1, 2, 3]}],
+        [{'x': 5.5, 'y': [1, 2, 3, 4]}],
+        [{'x': 6.6, 'y': [1, 2, 3, 4, 5]}]]
+
+    assert awkward1.to_json(array) == '[[{"x":1.1,"y":[]}],[{"x":2.2,"y":[1]}],[{"x":3.3,"y":[1,2]}],[{"x":4.4,"y":[1,2,3]}],[{"x":5.5,"y":[1,2,3,4]}],[{"x":6.6,"y":[1,2,3,4,5]}]]'
+
 def test_fromstring():
     str = """{\"x\": 1.1, \"y\": []}
         {\"x\": 2.2, \"y\": [1]}
@@ -28,6 +47,10 @@ def test_fromstring():
         [{'x': 5.5, 'y': [1, 2, 3, 4]}],
         [{'x': 6.6, 'y': [1, 2, 3, 4, 5]}]]
 
+def test_array_tojson():
+    array = awkward1.layout.NumpyArray(numpy.array([[float('nan'), float('nan'), 1.1], [float('inf'), 3.3, float('-inf')]]))
+    assert awkward1.to_json(array, nan_string='NaN', infinity_string='inf',
+        minus_infinity_string='-inf') == '[["NaN","NaN",1.1],["inf",3.3,"-inf"]]'
 
 def test_fromfile():
     array = awkward1.from_json('tests/samples/test-record-array.json')
