@@ -821,11 +821,15 @@ def from_json(source,
             should be strictly greater than 1.
         buffersize (int): Size (in bytes) of the buffer used by the JSON
             parser.
-        convertNanAndInf (bool): Option flag to replace 'NaN' and 'Inf'
-            with floats
-        replaceNanAndInf (bool): Option flag to replace 'NaN' and 'Inf'
-            with strings
-
+        nan_string (None or str): user-defined string for a not-a-number (NaN) value
+            representation in JSON format
+        infinity_string (None or str): user-defined string for a positive infinity
+            representation in JSON format
+        minus_infinity_string (None or str): user-defined string for a negative
+            infinity representation in JSON format
+        nan_and_inf_as_float (bool): Option flag if 'True' to replace 'NaN' and 'Inf'
+            with floats, it 'False' to replace 'NaN' and 'Inf' with user defined strings
+            defined by nan_string, infinity_string, and minus_infinity_string
 
     Converts a JSON string into an Awkward Array.
 
@@ -874,6 +878,12 @@ def to_json(array,
             floating-point decimals to this number; if None, write all digits.
         buffersize (int): Size (in bytes) of the buffer used by the JSON
             parser.
+        nan_string (None or str) user-defined string for a not-a-number (NaN) value
+            representation in JSON format
+        infinity_string (None or str) user-defined string for a positive infinity
+            representation in JSON format
+        minus_infinity_string (None or str) user-defined string for a negative
+            infinity representation in JSON format
 
     Converts `array` (many types supported, including all Awkward Arrays and
     Records) into a JSON string or file.

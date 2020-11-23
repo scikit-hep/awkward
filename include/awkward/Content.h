@@ -922,6 +922,12 @@ namespace awkward {
     /// If `false`, return a compact representation.
     /// @param maxdecimals Maximum number of decimals for floating-point
     /// numbers or `-1` for no limit.
+    /// @param nan_string user-defined string for a not-a-number (NaN) value
+    /// representation in JSON format
+    /// @param infinity_string user-defined string for a positive infinity
+    /// representation in JSON format
+    /// @param minus_infinity_string user-defined string for a negative
+    /// infinity representation in JSON format
     ///
     /// Although the JSON output contains all of the data from the array
     /// (and therefore might not be safe to print to the screen), it
@@ -943,6 +949,12 @@ namespace awkward {
     /// @param maxdecimals Maximum number of decimals for floating-point
     /// numbers or `-1` for no limit.
     /// @param buffersize Size of a temporary buffer in bytes.
+    /// @param nan_string user-defined string for a not-a-number (NaN) value
+    /// representation in JSON format
+    /// @param infinity_string user-defined string for a positive infinity
+    /// representation in JSON format
+    /// @param minus_infinity_string user-defined string for a negative
+    /// infinity representation in JSON format
     ///
     /// Although the JSON output contains all of the data from the array
     /// (and therefore might not be safe to print to the screen), it

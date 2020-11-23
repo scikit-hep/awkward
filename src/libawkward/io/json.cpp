@@ -16,8 +16,6 @@
 
 #include "awkward/io/json.h"
 
-#include <array>
-
 namespace rj = rapidjson;
 
 namespace awkward {

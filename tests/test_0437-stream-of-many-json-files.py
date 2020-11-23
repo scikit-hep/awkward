@@ -12,6 +12,8 @@ import numpy
 import awkward1
 
 def test_tostring():
+    # write a json string from an array built from
+    # multiple json fragments from a string
     str = """{"x": 1.1, "y": []}
              {"x": 2.2, "y": [1]}
              {"x": 3.3, "y": [1, 2]}
@@ -31,12 +33,13 @@ def test_tostring():
     assert awkward1.to_json(array) == '[[{"x":1.1,"y":[]}],[{"x":2.2,"y":[1]}],[{"x":3.3,"y":[1,2]}],[{"x":4.4,"y":[1,2,3]}],[{"x":5.5,"y":[1,2,3,4]}],[{"x":6.6,"y":[1,2,3,4,5]}]]'
 
 def test_fromstring():
-    str = """{\"x\": 1.1, \"y\": []}
-        {\"x\": 2.2, \"y\": [1]}
-        {\"x\": 3.3, \"y\": [1, 2]}
-        {\"x\": 4.4, \"y\": [1, 2, 3]}
-        {\"x\": 5.5, \"y\": [1, 2, 3, 4]}
-        {\"x\": 6.6, \"y\": [1, 2, 3, 4, 5]}"""
+    # read multiple json fragments from a string
+    str = """{"x": 1.1, "y": []}
+             {"x": 2.2, "y": [1]}
+             {"x": 3.3, "y": [1, 2]}
+             {"x": 4.4, "y": [1, 2, 3]}
+             {"x": 5.5, "y": [1, 2, 3, 4]}
+             {"x": 6.6, "y": [1, 2, 3, 4, 5]}"""
 
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
@@ -48,11 +51,16 @@ def test_fromstring():
         [{'x': 6.6, 'y': [1, 2, 3, 4, 5]}]]
 
 def test_array_tojson():
-    array = awkward1.layout.NumpyArray(numpy.array([[float('nan'), float('nan'), 1.1], [float('inf'), 3.3, float('-inf')]]))
+    # convert float 'nan' and 'inf' to user-defined strings
+    array = awkward1.layout.NumpyArray(numpy.array([
+        [float('nan'), float('nan'), 1.1],
+        [float('inf'), 3.3, float('-inf')]]))
+
     assert awkward1.to_json(array, nan_string='NaN', infinity_string='inf',
         minus_infinity_string='-inf') == '[["NaN","NaN",1.1],["inf",3.3,"-inf"]]'
 
 def test_fromfile():
+    # read multiple json fragments from a json file
     array = awkward1.from_json('tests/samples/test-record-array.json')
     assert awkward1.to_list(array) == [
         [{'x': 1.1, 'y': []}],
@@ -62,11 +70,14 @@ def test_fromfile():
         [{'x': 5.5, 'y': [1, 2, 3, 4]}],
         [{'x': 6.6, 'y': [1, 2, 3, 4, 5]}]]
 
+    # read json file containg 'nan' and 'inf' user-defined strings
+    # and replace 'nan' and 'inf' strings with floats
     array = awkward1.from_json('tests/samples/test.json', nan_and_inf_as_float=True,
         infinity_string='inf', minus_infinity_string='-inf')
 
     assert awkward1.to_list(array[0:5]) == [1.1, 2.2, 3.3, float('inf'), float('-inf')]
 
+    # read json file containg 'nan' and 'inf' user-defined strings
     array = awkward1.from_json('tests/samples/test.json')
 
     assert awkward1.to_list(array) == [1.1, 2.2, 3.3, 'inf', '-inf',
@@ -85,6 +96,8 @@ def test_fromfile():
           [64.64],
           [65.65, 66.66, 'NaN', 'NaN', 67.67, 68.68, 69.69]]]]
 
+    # read json file containg 'nan' and 'inf' user-defined strings
+    # and replace 'nan' and 'inf' strings with a predefined 'None' string
     array = awkward1.from_json('tests/samples/test.json',
         infinity_string='inf', minus_infinity_string='-inf', nan_string='NaN')
 
@@ -104,6 +117,9 @@ def test_fromfile():
           [64.64],
           [65.65, 66.66, 'None', 'None', 67.67, 68.68, 69.69]]]]
 
+    # read json file containg multiple definitions of 'nan' and 'inf'
+    # user-defined strings
+    # replace can only work for one string definition
     array = awkward1.from_json('tests/samples/test-nan-inf.json', nan_and_inf_as_float=True,
         infinity_string='Infinity', nan_string='None')
 
