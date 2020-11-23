@@ -471,20 +471,9 @@ namespace awkward {
 
   class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
   public:
-    Handler(const ArrayBuilderOptions& options,
-      bool convertNanAndInf, bool replaceNanAndInf, const char* fromNan,
-      const char* fromInf, const char* fromMinusInf, const char* toNan,
-      const char* toInf, const char* toMinusInf)
+    Handler(const ArrayBuilderOptions& options)
         : builder_(options)
-        , depth_(0)
-        , convertNanAndInf_(convertNanAndInf)
-        , replaceNanAndInf_(replaceNanAndInf)
-        , fromNan_(fromNan)
-        , fromInf_(fromInf)
-        , fromMinusInf_(fromMinusInf)
-        , toNan_(toNan)
-        , toInf_(toInf)
-        , toMinusInf_(toMinusInf) { }
+        , depth_(0) { }
 
     const ContentPtr snapshot() const {
       return builder_.snapshot();
@@ -500,29 +489,94 @@ namespace awkward {
 
     bool
     String(const char* str, rj::SizeType length, bool copy) {
-      if (convertNanAndInf_) {
-        if (strcmp(str, fromNan_) == 0) {
-          builder_.real(std::numeric_limits<double>::quiet_NaN());
-          return true;
-        } else if(strcmp(str, fromInf_) == 0) {
-          builder_.real(std::numeric_limits<double>::infinity());
-          return true;
-        } else if(strcmp(str, fromMinusInf_) == 0) {
-          builder_.real(-std::numeric_limits<double>::infinity());
-          return true;
-        }
+      builder_.string(str, (int64_t)length);
+      return true;
+    }
+
+    bool
+    StartArray() {
+      if (depth_ != 0) {
+        builder_.beginlist();
       }
-      if (replaceNanAndInf_) {
-        if (strcmp(str, fromNan_) == 0) {
-          builder_.string(toNan_);
-          return true;
-        } else if(strcmp(str, fromInf_) == 0) {
-          builder_.string(toInf_);
-          return true;
-        } else if(strcmp(str, fromMinusInf_) == 0) {
-          builder_.string(toMinusInf_);
-          return true;
-        }
+      depth_++;
+      return true;
+    }
+
+    bool
+    EndArray(rj::SizeType numfields) {
+      depth_--;
+      if (depth_ != 0) {
+        builder_.endlist();
+      }
+      return true;
+    }
+
+    bool
+    StartObject() {
+      if (depth_ == 0) {
+        builder_.beginlist();
+      }
+      depth_++;
+      builder_.beginrecord();
+      return true;
+    }
+
+    bool
+    EndObject(rj::SizeType numfields) {
+      depth_--;
+      builder_.endrecord();
+      if (depth_ == 0) {
+        builder_.endlist();
+      }
+      return true;
+    }
+
+    bool
+    Key(const char* str, rj::SizeType length, bool copy) {
+      builder_.field_check(str);
+      return true;
+    }
+
+  private:
+    ArrayBuilder builder_;
+    int64_t depth_;
+  };
+
+  class HandlerNanAndInf: public rj::BaseReaderHandler<rj::UTF8<>, HandlerNanAndInf> {
+  public:
+    HandlerNanAndInf(const ArrayBuilderOptions& options,
+      const char* nan_string,
+      const char* infinity_string,
+      const char* minus_infinity_string)
+        : builder_(options)
+        , depth_(0)
+        , nan_string_(nan_string)
+        , infinity_string_(infinity_string)
+        , minus_infinity_string_(minus_infinity_string) { }
+
+    const ContentPtr snapshot() const {
+      return builder_.snapshot();
+    }
+
+    bool Null()               { builder_.null();              return true; }
+    bool Bool(bool x)         { builder_.boolean(x);          return true; }
+    bool Int(int x)           { builder_.integer((int64_t)x); return true; }
+    bool Uint(unsigned int x) { builder_.integer((int64_t)x); return true; }
+    bool Int64(int64_t x)     { builder_.integer(x);          return true; }
+    bool Uint64(uint64_t x)   { builder_.integer((int64_t)x); return true; }
+    bool Double(double x)     { builder_.real(x);             return true; }
+
+    bool
+    String(const char* str, rj::SizeType length, bool copy) {
+      if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
+        builder_.real(std::numeric_limits<double>::quiet_NaN());
+        return true;
+      } else if(infinity_string_ != nullptr  &&  strcmp(str, infinity_string_) == 0) {
+        builder_.real(std::numeric_limits<double>::infinity());
+        return true;
+      } else if(minus_infinity_string_ != nullptr  &&  strcmp(str, minus_infinity_string_) == 0) {
+        builder_.real(-std::numeric_limits<double>::infinity());
+        return true;
       }
       builder_.string(str, (int64_t)length);
       return true;
@@ -575,65 +629,14 @@ namespace awkward {
   private:
     ArrayBuilder builder_;
     int64_t depth_;
-    bool convertNanAndInf_;
-    bool replaceNanAndInf_;
-    const char* fromNan_;
-    const char* fromInf_;
-    const char* fromMinusInf_;
-    const char* toNan_;
-    const char* toInf_;
-    const char* toMinusInf_;
+    const char* nan_string_;
+    const char* infinity_string_;
+    const char* minus_infinity_string_;
   };
 
-  const ContentPtr
-  FromJsonString(const char* source, const ArrayBuilderOptions& options,
-    bool convertNanAndInf,
-    bool replaceNanAndInf,
-    const char* fromNan,
-    const char* fromInf,
-    const char* fromMinusInf,
-    const char* toNan,
-    const char* toInf,
-    const char* toMinusInf) {
-    Handler handler(options, convertNanAndInf, replaceNanAndInf,
-      fromNan, fromInf, fromMinusInf,
-      toNan, toInf, toMinusInf);
-    rj::Reader reader;
-    rj::StringStream stream(source);
-    if (reader.Parse(stream, handler)) {
-      return handler.snapshot();
-    }
-    else {
-      auto where = reader.GetErrorOffset();
-      throw std::invalid_argument(
-        std::string("JSON error at char ")
-        + std::to_string(where) + std::string(": \"") + source[where] + std::string("\" ")
-        + std::string(rj::GetParseError_En(reader.GetParseErrorCode()))
-        + FILENAME(__LINE__));
-    }
-  }
-
-  const ContentPtr
-  FromJsonFile(FILE* source,
-               const ArrayBuilderOptions& options,
-               int64_t buffersize,
-               bool convertNanAndInf,
-               bool replaceNanAndInf,
-               const char* fromNan,
-               const char* fromInf,
-               const char* fromMinusInf,
-               const char* toNan,
-               const char* toInf,
-               const char* toMinusInf) {
-    Handler handler(options, convertNanAndInf, replaceNanAndInf,
-      fromNan, fromInf, fromMinusInf,
-      toNan, toInf, toMinusInf);
-    rj::Reader reader;
-    std::shared_ptr<char> buffer(new char[(size_t)buffersize],
-                                 kernel::array_deleter<char>());
-    rj::FileReadStream stream(source,
-                              buffer.get(),
-                              ((size_t)buffersize)*sizeof(char));
+  template<typename T>
+  const ContentPtr do_parse(T handler, rj::Reader& reader, rj::FileReadStream& stream)
+  {
     bool scan = true;
     bool has_error = false;
     while (scan) {
@@ -655,5 +658,60 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     return handler.snapshot();
+  }
+
+  const ContentPtr
+  FromJsonString(const char* source,
+                 const ArrayBuilderOptions& options,
+                 const char* nan_string,
+                 const char* infinity_string,
+                 const char* minus_infinity_string,
+                 bool convert_nan_and_inf) {
+    rj::Reader reader;
+    rj::StringStream stream(source);
+
+    if(convert_nan_and_inf) {
+      HandlerNanAndInf handler (options, nan_string, infinity_string,
+        minus_infinity_string);
+      if (reader.Parse(stream, handler)) {
+        return handler.snapshot();
+      }
+    } else {
+      Handler handler (options);
+      if (reader.Parse(stream, handler)) {
+        return handler.snapshot();
+      }
+    }
+    auto where = reader.GetErrorOffset();
+    throw std::invalid_argument(
+      std::string("JSON error at char ")
+      + std::to_string(where) + std::string(": \"") + source[where] + std::string("\" ")
+      + std::string(rj::GetParseError_En(reader.GetParseErrorCode()))
+      + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
+  FromJsonFile(FILE* source,
+               const ArrayBuilderOptions& options,
+               const char* nan_string,
+               const char* infinity_string,
+               const char* minus_infinity_string,
+               bool convert_nan_and_inf,
+               int64_t buffersize) {
+    rj::Reader reader;
+    std::shared_ptr<char> buffer(new char[(size_t)buffersize],
+                                 kernel::array_deleter<char>());
+    rj::FileReadStream stream(source,
+                              buffer.get(),
+                              ((size_t)buffersize)*sizeof(char));
+    if (convert_nan_and_inf) {
+      HandlerNanAndInf handler(options, nan_string, infinity_string,
+        minus_infinity_string);
+      return do_parse(handler, reader, stream);
+    }
+    else {
+      Handler handler(options);
+      return do_parse(handler, reader, stream);
+    }
   }
 }

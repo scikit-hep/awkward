@@ -796,11 +796,16 @@ def to_list(array):
         )
 
 
-def from_json(
-    source, highlevel=True, behavior=None, initial=1024, resize=1.5, buffersize=65536,
-    convertNanAndInf=False, replaceNanAndInf=False,
-    fromNan='NaN', fromInf='inf', fromMinusInf='-inf',
-    toNan='NaN', toInf='inf', toMinusInf='-inf'
+def from_json(source,
+              nan_string=None,
+              infinity_string=None,
+              minus_infinity_string=None,
+              convert_nan_and_inf=False,
+              highlevel=True,
+              behavior=None,
+              initial=1024,
+              resize=1.5,
+              buffersize=65536
 ):
     """
     Args:
@@ -833,10 +838,14 @@ def from_json(
     See also #ak.to_json.
     """
     layout = awkward1._ext.fromjson(
-        source, initial=initial, resize=resize, buffersize=buffersize,
-        convertNanAndInf=convertNanAndInf, replaceNanAndInf=replaceNanAndInf,
-        fromNan=fromNan, fromInf=fromInf, fromMinusInf=fromMinusInf,
-        toNan=toNan, toInf=toInf, toMinusInf=toMinusInf
+        source,
+        nan_string=nan_string,
+        infinity_string=infinity_string,
+        minus_infinity_string=minus_infinity_string,
+        convert_nan_and_inf=convert_nan_and_inf,
+        initial=initial,
+        resize=resize,
+        buffersize=buffersize
     )
     if highlevel:
         return awkward1._util.wrap(layout, behavior)
@@ -844,7 +853,15 @@ def from_json(
         return layout
 
 
-def to_json(array, destination=None, pretty=False, maxdecimals=None, buffersize=65536):
+def to_json(array,
+            destination=None,
+            pretty=False,
+            maxdecimals=None,
+            nan_string=None,
+            infinity_string=None,
+            minus_infinity_string=None,
+            buffersize=65536
+):
     """
     Args:
         array: Data to convert to JSON.
