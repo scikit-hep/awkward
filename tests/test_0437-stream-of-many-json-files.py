@@ -59,6 +59,9 @@ def test_array_tojson():
     assert awkward1.to_json(array, nan_string='NaN', infinity_string='inf',
         minus_infinity_string='-inf') == '[["NaN","NaN",1.1],["inf",3.3,"-inf"]]'
 
+    array2 = awkward1.Array([[0, 2], None, None, None, None, None])
+    assert awkward1.to_json(array2, nan_string='NaN') == '[[0,2],"NaN","NaN","NaN","NaN","NaN"]'
+
 def test_fromfile():
     # read multiple json fragments from a json file
     array = awkward1.from_json('tests/samples/test-record-array.json')

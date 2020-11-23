@@ -117,7 +117,12 @@ namespace awkward {
 
   void
   ToJsonString::null() {
-    impl_->null();
+    if (nan_string_ != nullptr) {
+      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
+    }
+    else {
+      impl_->null();
+    }
   }
 
   void
@@ -232,7 +237,12 @@ namespace awkward {
 
   void
   ToJsonPrettyString::null() {
-    impl_->null();
+    if (nan_string_ != nullptr) {
+      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
+    }
+    else {
+      impl_->null();
+    }
   }
 
   void
@@ -350,7 +360,12 @@ namespace awkward {
 
   void
   ToJsonFile::null() {
-    impl_->null();
+    if (nan_string_ != nullptr) {
+      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
+    }
+    else {
+      impl_->null();
+    }
   }
 
   void
@@ -465,7 +480,12 @@ namespace awkward {
 
   void
   ToJsonPrettyFile::null() {
-    impl_->null();
+    if (nan_string_ != nullptr) {
+      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
+    }
+    else {
+      impl_->null();
+    }
   }
 
   void
