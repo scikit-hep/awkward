@@ -103,7 +103,10 @@ namespace awkward {
     rj::Writer<rj::StringBuffer> writer_;
   };
 
-  ToJsonString::ToJsonString(int64_t maxdecimals)
+  ToJsonString::ToJsonString(int64_t maxdecimals,
+    const char* nan_string,
+    const char* infinity_string,
+    const char* minus_infinity_string)
       : impl_(new ToJsonString::Impl(maxdecimals)) { }
 
   ToJsonString::~ToJsonString() {
@@ -202,7 +205,10 @@ namespace awkward {
     rj::PrettyWriter<rj::StringBuffer> writer_;
   };
 
-  ToJsonPrettyString::ToJsonPrettyString(int64_t maxdecimals)
+  ToJsonPrettyString::ToJsonPrettyString(int64_t maxdecimals,
+    const char* nan_string,
+    const char* infinity_string,
+    const char* minus_infinity_string)
       : impl_(new ToJsonPrettyString::Impl(maxdecimals)) { }
 
   ToJsonPrettyString::~ToJsonPrettyString() {
@@ -305,7 +311,10 @@ namespace awkward {
 
   ToJsonFile::ToJsonFile(FILE* destination,
                          int64_t maxdecimals,
-                         int64_t buffersize)
+                         int64_t buffersize,
+                         const char* nan_string,
+                         const char* infinity_string,
+                         const char* minus_infinity_string)
       : impl_(new ToJsonFile::Impl(destination, maxdecimals, buffersize)) { }
 
   ToJsonFile::~ToJsonFile() {
@@ -403,7 +412,10 @@ namespace awkward {
 
   ToJsonPrettyFile::ToJsonPrettyFile(FILE* destination,
                                      int64_t maxdecimals,
-                                     int64_t buffersize)
+                                     int64_t buffersize,
+                                     const char* nan_string,
+                                     const char* infinity_string,
+                                     const char* minus_infinity_string)
       : impl_(new ToJsonPrettyFile::Impl(destination,
                                          maxdecimals,
                                          buffersize)) { }
@@ -547,12 +559,14 @@ namespace awkward {
     HandlerNanAndInf(const ArrayBuilderOptions& options,
       const char* nan_string,
       const char* infinity_string,
-      const char* minus_infinity_string)
+      const char* minus_infinity_string,
+      bool nan_and_inf_as_float)
         : builder_(options)
         , depth_(0)
         , nan_string_(nan_string)
         , infinity_string_(infinity_string)
-        , minus_infinity_string_(minus_infinity_string) { }
+        , minus_infinity_string_(minus_infinity_string)
+        , nan_and_inf_as_float_(nan_and_inf_as_float) { }
 
     const ContentPtr snapshot() const {
       return builder_.snapshot();
@@ -568,15 +582,29 @@ namespace awkward {
 
     bool
     String(const char* str, rj::SizeType length, bool copy) {
-      if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
-        builder_.real(std::numeric_limits<double>::quiet_NaN());
-        return true;
-      } else if(infinity_string_ != nullptr  &&  strcmp(str, infinity_string_) == 0) {
-        builder_.real(std::numeric_limits<double>::infinity());
-        return true;
-      } else if(minus_infinity_string_ != nullptr  &&  strcmp(str, minus_infinity_string_) == 0) {
-        builder_.real(-std::numeric_limits<double>::infinity());
-        return true;
+      if (nan_and_inf_as_float_) {
+        if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
+          builder_.real(std::numeric_limits<double>::quiet_NaN());
+          return true;
+        } else if(infinity_string_ != nullptr  &&  strcmp(str, infinity_string_) == 0) {
+          builder_.real(std::numeric_limits<double>::infinity());
+          return true;
+        } else if(minus_infinity_string_ != nullptr  &&  strcmp(str, minus_infinity_string_) == 0) {
+          builder_.real(-std::numeric_limits<double>::infinity());
+          return true;
+        }
+      }
+      else {
+        if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
+          builder_.string("None", (int64_t)strlen("None"));
+          return true;
+        } else if(infinity_string_ != nullptr  &&  strcmp(str, infinity_string_) == 0) {
+          builder_.string("None", (int64_t)strlen("None"));
+          return true;
+        } else if(minus_infinity_string_ != nullptr  &&  strcmp(str, minus_infinity_string_) == 0) {
+          builder_.string("None", (int64_t)strlen("None"));
+          return true;
+        }
       }
       builder_.string(str, (int64_t)length);
       return true;
@@ -632,10 +660,11 @@ namespace awkward {
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
+    bool nan_and_inf_as_float_;
   };
 
-  template<typename T>
-  const ContentPtr do_parse(T handler, rj::Reader& reader, rj::FileReadStream& stream)
+  template<typename H, typename S>
+  const ContentPtr do_parse(H& handler, rj::Reader& reader, S& stream)
   {
     bool scan = true;
     bool has_error = false;
@@ -666,21 +695,17 @@ namespace awkward {
                  const char* nan_string,
                  const char* infinity_string,
                  const char* minus_infinity_string,
-                 bool convert_nan_and_inf) {
+                 bool nan_and_inf_as_float) {
     rj::Reader reader;
     rj::StringStream stream(source);
-
-    if(convert_nan_and_inf) {
+    if(nan_and_inf_as_float  ||  nan_string != nullptr
+      ||  nan_string != nullptr  ||  nan_string != nullptr) {
       HandlerNanAndInf handler (options, nan_string, infinity_string,
-        minus_infinity_string);
-      if (reader.Parse(stream, handler)) {
-        return handler.snapshot();
-      }
+        minus_infinity_string, nan_and_inf_as_float);
+      return do_parse(handler, reader, stream);
     } else {
       Handler handler (options);
-      if (reader.Parse(stream, handler)) {
-        return handler.snapshot();
-      }
+      return do_parse(handler, reader, stream);
     }
     auto where = reader.GetErrorOffset();
     throw std::invalid_argument(
@@ -693,20 +718,21 @@ namespace awkward {
   const ContentPtr
   FromJsonFile(FILE* source,
                const ArrayBuilderOptions& options,
+               int64_t buffersize,
                const char* nan_string,
                const char* infinity_string,
                const char* minus_infinity_string,
-               bool convert_nan_and_inf,
-               int64_t buffersize) {
+               bool nan_and_inf_as_float) {
     rj::Reader reader;
     std::shared_ptr<char> buffer(new char[(size_t)buffersize],
                                  kernel::array_deleter<char>());
     rj::FileReadStream stream(source,
                               buffer.get(),
                               ((size_t)buffersize)*sizeof(char));
-    if (convert_nan_and_inf) {
+    if (nan_and_inf_as_float  ||  nan_string != nullptr
+      ||  nan_string != nullptr  ||  nan_string != nullptr) {
       HandlerNanAndInf handler(options, nan_string, infinity_string,
-        minus_infinity_string);
+        minus_infinity_string, nan_and_inf_as_float);
       return do_parse(handler, reader, stream);
     }
     else {

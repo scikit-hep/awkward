@@ -22,10 +22,10 @@ namespace awkward {
   LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
     FromJsonString(const char* source,
                    const ArrayBuilderOptions& options,
-                   const char* nan_string,
-                   const char* infinity_string,
-                   const char* minus_infinity_string,
-                   bool convert_nan_and_inf);
+                   const char* nan_string = nullptr,
+                   const char* infinity_string = nullptr,
+                   const char* minus_infinity_string = nullptr,
+                   bool convert_nan_and_inf = false);
 
   /// @brief Convert a JSON-encoded file into a Content array using an
   /// ArrayBuilder.
@@ -37,11 +37,11 @@ namespace awkward {
   LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
     FromJsonFile(FILE* source,
                  const ArrayBuilderOptions& options,
-                 const char* nan_string,
-                 const char* infinity_string,
-                 const char* minus_infinity_string,
-                 bool convert_nan_and_inf,
-                 int64_t buffersize);
+                 int64_t buffersize,
+                 const char* nan_string = nullptr,
+                 const char* infinity_string = nullptr,
+                 const char* minus_infinity_string = nullptr,
+                 bool convert_nan_and_inf = false);
 
   /// @class ToJson
   ///
@@ -103,7 +103,10 @@ namespace awkward {
     ///
     /// @param maxdecimals Maximum number of decimals for floating-point
     /// numbers or `-1` for full precision.
-    ToJsonString(int64_t maxdecimals);
+    ToJsonString(int64_t maxdecimals,
+      const char* nan_string = nullptr,
+      const char* infinity_string = nullptr,
+      const char* minus_infinity_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonString();
     void
@@ -145,7 +148,10 @@ namespace awkward {
     ///
     /// @param maxdecimals Maximum number of decimals for floating-point
     /// numbers or `-1` for full precision.
-    ToJsonPrettyString(int64_t maxdecimals);
+    ToJsonPrettyString(int64_t maxdecimals,
+      const char* nan_string = nullptr,
+      const char* infinity_string = nullptr,
+      const char* minus_infinity_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonPrettyString();
     void
@@ -189,7 +195,10 @@ namespace awkward {
     /// @param maxdecimals Maximum number of decimals for floating-point
     /// numbers or `-1` for full precision.
     /// @param buffersize Number of bytes for an intermediate buffer.
-    ToJsonFile(FILE* destination, int64_t maxdecimals, int64_t buffersize);
+    ToJsonFile(FILE* destination, int64_t maxdecimals, int64_t buffersize,
+      const char* nan_string = nullptr,
+      const char* infinity_string = nullptr,
+      const char* minus_infinity_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonFile();
     void
@@ -232,7 +241,10 @@ namespace awkward {
     /// @param buffersize Number of bytes for an intermediate buffer.
     ToJsonPrettyFile(FILE* destination,
                      int64_t maxdecimals,
-                     int64_t buffersize);
+                     int64_t buffersize,
+                     const char* nan_string = nullptr,
+                     const char* infinity_string = nullptr,
+                     const char* minus_infinity_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonPrettyFile();
     void

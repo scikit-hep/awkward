@@ -27,7 +27,7 @@ make_fromjson(py::module& m, const std::string& name) {
            const char* nan_string,
            const char* infinity_string,
            const char* minus_infinity_string,
-           bool convert_nan_and_inf,
+           bool nan_and_inf_as_float,
            int64_t initial,
            double resize,
            int64_t buffersize) -> std::shared_ptr<ak::Content> {
@@ -51,7 +51,7 @@ make_fromjson(py::module& m, const std::string& name) {
         nan_string,
         infinity_string,
         minus_infinity_string,
-        convert_nan_and_inf);
+        nan_and_inf_as_float);
     }
     if (isrecord) {
       return ak::FromJsonString(
@@ -60,8 +60,8 @@ make_fromjson(py::module& m, const std::string& name) {
         nan_string,
         infinity_string,
         minus_infinity_string,
-        convert_nan_and_inf
-      ).get()->getitem_at_nowrap(0).get()->getitem_at_nowrap(0);
+        nan_and_inf_as_float
+      );
     }
     else {
 #ifdef _MSC_VER
@@ -80,11 +80,11 @@ make_fromjson(py::module& m, const std::string& name) {
       try {
         out = FromJsonFile(file,
                            ak::ArrayBuilderOptions(initial, resize),
+                           buffersize,
                            nan_string,
                            infinity_string,
                            minus_infinity_string,
-                           convert_nan_and_inf,
-                           buffersize);
+                           nan_and_inf_as_float);
       }
       catch (...) {
         fclose(file);
@@ -97,7 +97,7 @@ make_fromjson(py::module& m, const std::string& name) {
      py::arg("nan_string") = nullptr,
      py::arg("infinity_string") = nullptr,
      py::arg("minus_infinity_string") = nullptr,
-     py::arg("convert_nan_and_inf") = false,
+     py::arg("nan_and_inf_as_float") = false,
      py::arg("initial") = 1024,
      py::arg("resize") = 1.5,
      py::arg("buffersize") = 65536);
