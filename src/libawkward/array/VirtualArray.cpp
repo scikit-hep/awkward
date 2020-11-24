@@ -917,9 +917,21 @@ namespace awkward {
   }
 
   const ContentPtr
+  VirtualArray::getitem_next(const SliceItemPtr& head,
+                             const Slice& tail,
+                             const Index64& advanced) const {
+    if (head.get() == nullptr) {
+      return shallow_copy();
+    }
+    else {
+      return array().get()->getitem_next(head, tail, advanced);
+    }
+  }
+
+  const ContentPtr
   VirtualArray::getitem_next(const SliceAt& at,
-                           const Slice& tail,
-                           const Index64& advanced) const {
+                             const Slice& tail,
+                             const Index64& advanced) const {
     throw std::runtime_error(
       std::string("undefined operation: VirtualArray::getitem_next(at)")
       + FILENAME(__LINE__));
@@ -927,8 +939,8 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_next(const SliceRange& range,
-                           const Slice& tail,
-                           const Index64& advanced) const {
+                             const Slice& tail,
+                             const Index64& advanced) const {
     throw std::runtime_error(
       std::string("undefined operation: VirtualArray::getitem_next(range)")
       + FILENAME(__LINE__));
@@ -936,8 +948,8 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_next(const SliceArray64& array,
-                           const Slice& tail,
-                           const Index64& advanced) const {
+                             const Slice& tail,
+                             const Index64& advanced) const {
     throw std::runtime_error(
       std::string("undefined operation: VirtualArray::getitem_next(array)")
       + FILENAME(__LINE__));
@@ -945,8 +957,8 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_next(const SliceField& field,
-                           const Slice& tail,
-                           const Index64& advanced) const {
+                             const Slice& tail,
+                             const Index64& advanced) const {
     throw std::runtime_error(
       std::string("undefined operation: VirtualArray::getitem_next(field)")
       + FILENAME(__LINE__));
@@ -954,8 +966,8 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_next(const SliceFields& fields,
-                           const Slice& tail,
-                           const Index64& advanced) const {
+                             const Slice& tail,
+                             const Index64& advanced) const {
     throw std::runtime_error(
       std::string("undefined operation: VirtualArray::getitem_next(fields)")
       + FILENAME(__LINE__));
@@ -963,8 +975,8 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_next(const SliceJagged64& jagged,
-                           const Slice& tail,
-                           const Index64& advanced) const {
+                             const Slice& tail,
+                             const Index64& advanced) const {
     throw std::runtime_error(
       std::string("undefined operation: VirtualArray::getitem_next(jagged)")
       + FILENAME(__LINE__));
@@ -972,9 +984,20 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_next_jagged(const Index64& slicestarts,
-                                  const Index64& slicestops,
-                                  const SliceArray64& slicecontent,
-                                  const Slice& tail) const {
+                                    const Index64& slicestops,
+                                    const SliceItemPtr& slicecontent,
+                                    const Slice& tail) const {
+    return array().get()->getitem_next_jagged(slicestarts,
+                                              slicestops,
+                                              slicecontent,
+                                              tail);
+  }
+
+  const ContentPtr
+  VirtualArray::getitem_next_jagged(const Index64& slicestarts,
+                                    const Index64& slicestops,
+                                    const SliceArray64& slicecontent,
+                                    const Slice& tail) const {
     throw std::runtime_error(
       std::string("undefined operation: VirtualArray::getitem_next_jagged(array)")
       + FILENAME(__LINE__));
@@ -982,9 +1005,9 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_next_jagged(const Index64& slicestarts,
-                                  const Index64& slicestops,
-                                  const SliceMissing64& slicecontent,
-                                  const Slice& tail) const {
+                                    const Index64& slicestops,
+                                    const SliceMissing64& slicecontent,
+                                    const Slice& tail) const {
     throw std::runtime_error(
       std::string("undefined operation: VirtualArray::getitem_next_jagged(missing)")
       + FILENAME(__LINE__));
@@ -992,9 +1015,9 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::getitem_next_jagged(const Index64& slicestarts,
-                                  const Index64& slicestops,
-                                  const SliceJagged64& slicecontent,
-                                  const Slice& tail) const {
+                                    const Index64& slicestops,
+                                    const SliceJagged64& slicecontent,
+                                    const Slice& tail) const {
     throw std::runtime_error(
       std::string("undefined operation: VirtualArray::getitem_next_jagged(jagged)")
       + FILENAME(__LINE__));

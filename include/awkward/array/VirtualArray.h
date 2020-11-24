@@ -229,6 +229,17 @@ namespace awkward {
       getitem_fields(const std::vector<std::string>& keys) const override;
 
     const ContentPtr
+      getitem_next(const SliceItemPtr& head,
+                   const Slice& tail,
+                   const Index64& advanced) const override;
+
+    const ContentPtr
+      getitem_next_jagged(const Index64& slicestarts,
+                          const Index64& slicestops,
+                          const SliceItemPtr& slicecontent,
+                          const Slice& tail) const override;
+
+    const ContentPtr
       carry(const Index64& carry, bool allow_lazy) const override;
 
     int64_t
