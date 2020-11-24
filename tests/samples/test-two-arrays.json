@@ -1,0 +1,23 @@
+{"one": 1, "two": 2.2}{"one": 10, "two": 22}
+{"one": 1, "two": 2.2}     {"one": 10, "two": 22}
+{"one": 1, "two": 2.2}  \t   {"one": 10, "two": 22}
+{"one": 1, "two": 2.2}\n{"one": 10, "two": 22}
+{"one": 1, "two": 2.2}\n\r{"one": 10, "two": 22}
+{"one": 1, "two": 2.2}     \n     {"one": 10, "two": 22}
+{"one": 1, "two": 2.2}     \n\r     {"one": 10, "two": 22}
+{"one": 1, "two": 2.2}{"one": 10, "two": 22}\n
+{"one": 1, "two": 2.2}{"one": 10, "two": 22}\n\r
+{"one": 1, "two": 2.2}\n{"one": 10, "two": 22}\n
+{"one": 1, "two": 2.2}\n\r{"one": 10, "two": 22}\n\r
+["one", "two"]["uno", "dos"]
+["one", "two"]\n["uno", "dos"]
+["one", "two"]\n\r["uno", "dos"]
+["one", "two"]     ["uno", "dos"]
+["one", "two"]  \n   ["uno", "dos"]
+["one", "two"]  \n\r   ["uno", "dos"]
+"one""two"
+"one"\n"two"
+"one"\n\r"two"
+"one"     "two"
+"one"  \n   "two"
+"one"  \n\r   "two"
