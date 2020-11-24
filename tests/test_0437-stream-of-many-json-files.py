@@ -284,6 +284,38 @@ def test_two_arrays():
     # but when they come form a file ValueError is thown
     # this fails: assert awkward1.to_list(array) == []
 
+def test_blanc_lines():
+    str = """{"one": 1, "two": 2.2}
+
+    {"one": 10, "two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}
+
+    {"one": 10, "two": 22}
+    """
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    # FIXME: the string is treated as a file name
+    # str = """1
+    # 2
+    #
+    # 3"""
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == []
+
+    # str = """1
+    #     2
+    #
+    #     3
+    #     """
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == []
+
 
 def test_tostring():
     # write a json string from an array built from
