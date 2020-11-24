@@ -117,12 +117,7 @@ namespace awkward {
 
   void
   ToJsonString::null() {
-    if (nan_string_ != nullptr) {
-      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
-    }
-    else {
-      impl_->null();
-    }
+    impl_->null();
   }
 
   void
@@ -137,7 +132,6 @@ namespace awkward {
 
   void
   ToJsonString::real(double x) {
-    // FIXME: what about negative 'NaN'?
     if (nan_string_ != nullptr  &&  std::isnan(x)) {
       impl_->string(nan_string_, (int64_t)strlen(nan_string_));
     } else if (infinity_string_ != nullptr  &&  std::isinf(x)  &&  !std::signbit(x)) {
@@ -237,12 +231,7 @@ namespace awkward {
 
   void
   ToJsonPrettyString::null() {
-    if (nan_string_ != nullptr) {
-      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
-    }
-    else {
-      impl_->null();
-    }
+    impl_->null();
   }
 
   void
@@ -360,12 +349,7 @@ namespace awkward {
 
   void
   ToJsonFile::null() {
-    if (nan_string_ != nullptr) {
-      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
-    }
-    else {
-      impl_->null();
-    }
+    impl_->null();
   }
 
   void
@@ -480,12 +464,7 @@ namespace awkward {
 
   void
   ToJsonPrettyFile::null() {
-    if (nan_string_ != nullptr) {
-      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
-    }
-    else {
-      impl_->null();
-    }
+    impl_->null();
   }
 
   void
