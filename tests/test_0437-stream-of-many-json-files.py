@@ -278,12 +278,6 @@ def test_two_arrays():
         'one', 'two',
         'one', 'two']
 
-# def test_two_arrays_from_file():
-    # array = awkward1.from_json('tests/samples/test-two-arrays-with-spaces.json')
-    # FIXME: the strings that are parsed as strings are ok,
-    # but when they come form a file ValueError is thown
-    # this fails: assert awkward1.to_list(array) == []
-
 def test_blanc_lines():
     str = """{"one": 1, "two": 2.2}
 
