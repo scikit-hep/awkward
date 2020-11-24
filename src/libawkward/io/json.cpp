@@ -535,7 +535,14 @@ namespace awkward {
         , depth_(0) { }
 
     const ContentPtr snapshot() const {
-      return builder_.snapshot();
+      if (depth_ == 0) {
+        return builder_.snapshot();
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("JSON error array or record is not complete ")
+          + FILENAME(__LINE__));
+      }
     }
 
     bool Null()               { builder_.null();              return true; }
@@ -616,7 +623,14 @@ namespace awkward {
         , nan_and_inf_as_float_(nan_and_inf_as_float) { }
 
     const ContentPtr snapshot() const {
-      return builder_.snapshot();
+      if (depth_ == 0) {
+        return builder_.snapshot();
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("JSON error array or record is not complete ")
+          + FILENAME(__LINE__));
+      }
     }
 
     bool Null()               { builder_.null();              return true; }
@@ -715,18 +729,50 @@ namespace awkward {
   {
     bool scan = true;
     bool has_error = false;
+    bool done = false;
+    size_t where = stream.Tell();
     while (scan) {
       scan = false;
-      reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
+      done = reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
       if(stream.Peek() == '\n') {
         scan = true;
       } else if (stream.Peek() == '\r') {
         scan = true;
-      } else if (stream.Peek() != 0) {
-        has_error = true;
+      } else if (done  &&  (stream.Peek() == '{'
+        ||  stream.Peek() == '['  ||  stream.Peek() == ' '
+        ||  stream.Peek() == '"')) {
+        scan = true;
+      }
+      while (stream.Peek() == '\\') {
+        stream.Take();
+        if (stream.Peek() == 'n'  ||  'r'  ||  't') {
+          stream.Take();
+          scan = true;
+        } else {
+          scan = false;
+          has_error = true;
+        }
+      }
+      if (stream.Peek() == 0) {
+        done = true;
+        has_error = false;
+      }
+      else if (stream.Peek() != 0) {
+        if (stream.Peek() != '{'  ||  stream.Peek() != '['  ||  stream.Peek() != ' ') {
+          has_error = true;
+        }
+      }
+      else {
+        done = true;
+      }
+      if (stream.Tell() >= where) {
+        where = stream.Tell();
+      }
+      else {
+        done = true;
       }
     }
-    if (has_error) {
+    if (has_error  ||  !done) {
       throw std::invalid_argument(
         std::string("JSON File error at char ")
         + std::to_string(stream.Tell()) + std::string(": \'")

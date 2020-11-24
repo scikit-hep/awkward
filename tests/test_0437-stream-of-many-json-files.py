@@ -11,6 +11,280 @@ import numpy
 
 import awkward1
 
+def test_unfinished_fragment_exception():
+    # read unfinished json fragments
+    strs0 = """{"one": 1, "two": 2.2,"""
+    with pytest.raises(ValueError):
+        awkward1.from_json(strs0)
+
+    strs1 = """{"one": 1,
+        "two": 2.2,"""
+    with pytest.raises(ValueError):
+        awkward1.from_json(strs1)
+
+    strs2 = """{"one": 1,
+        "two": 2.2,
+        """
+    with pytest.raises(ValueError):
+        awkward1.from_json(strs2)
+
+    strs3 = """{"one": 1, "two": 2.2, "three": "THREE"}
+        {"one": 10, "two": 22,"""
+    with pytest.raises(ValueError):
+        awkward1.from_json(strs3)
+
+    strs4 = """{"one": 1, "two": 2.2, "three": "THREE"}
+        {"one": 10, "two": 22,
+        """
+    with pytest.raises(ValueError):
+        awkward1.from_json(strs4)
+
+    strs5 = """["one", "two","""
+    with pytest.raises(ValueError):
+        awkward1.from_json(strs5)
+
+    strs6 = """["one",
+        "two","""
+    with pytest.raises(ValueError):
+        awkward1.from_json(strs6)
+
+    strs7 = """["one",
+        "two",
+        """
+    with pytest.raises(ValueError):
+        awkward1.from_json(strs7)
+
+def test_two_arrays():
+
+    str = """{"one": 1, "two": 2.2}{"one": 10, "two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}     {"one": 10, "two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, \t "two": 2.2}{"one": 10, "two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}  \t   {"one": 10, "two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}\n{"one": 10, "two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}\n\r{"one": 10, "two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}     \n     {"one": 10, "two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}     \n\r     {"one": 10, "two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}{"one": 10, "two": 22}\n"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}{"one": 10, "two": 22}\n\r"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}\n{"one": 10, "two": 22}\n"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}\n\r{"one": 10, "two": 22}\n\r"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, \n"two": 2.2}{"one": 10, "two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, \n\r"two": 2.2}{"one": 10, "two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, \n"two": 2.2}\n{"one": 10, "two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, \n\r"two": 2.2}\n\r{"one": 10, "two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, \n"two": 2.2}\n{"one": 10, "two": 22}\n"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, \n\r"two": 2.2}\n\r{"one": 10, "two": 22}\n\r"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}{"one": 10, \n"two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}{"one": 10, \n\r"two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}\n{"one": 10, \n"two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """{"one": 1, "two": 2.2}\n\r{"one": 10, \n\r"two": 22}"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+
+    str = """["one", "two"]["uno", "dos"]"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two', 'uno', 'dos']
+
+    str = """["one", "two"]\n["uno", "dos"]"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two', 'uno', 'dos']
+
+    str = """["one", "two"]\n\r["uno", "dos"]"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two', 'uno', 'dos']
+
+    str = """["one", "two"]     ["uno", "dos"]"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two', 'uno', 'dos']
+
+    str = """["one", "two"]  \n   ["uno", "dos"]"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two', 'uno', 'dos']
+
+    str = """["one", "two"]  \n\r   ["uno", "dos"]"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two', 'uno', 'dos']
+
+    str = """["one", \n "two"]["uno", "dos"]"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two', 'uno', 'dos']
+
+    str = """["one", \n "two"]\n["uno", "dos"]"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two', 'uno', 'dos']
+
+    str = """["one", \n\r "two"]["uno", "dos"]"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two', 'uno', 'dos']
+
+    str = """["one", \n\r "two"]\n\r["uno", "dos"]"""
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two', 'uno', 'dos']
+
+    # FIXME: a string that does not start with '{' or '[' is treated
+    # as a file name
+    #
+    # str = '"one""two"'
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == [
+    #     'one', 'two']
+    #
+    # str = '"one"\n"two"'
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == [
+    #     'one', 'two']
+    #
+    # str = '"one"\n\r"two"'
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == [
+    #     'one', 'two']
+    #
+    # str = '"one"     "two"'
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == [
+    #     'one', 'two']
+    #
+    # str = '"one"  \n   "two"'
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == [
+    #     'one', 'two']
+    #
+    # str = '"one"  \n\r   "two"'
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == [
+    #     'one', 'two']
+
+    # FIXME: a string that does not start with '{' or '[' is treated
+    # as a file name, but it is ok if it comes from a file and follows
+    # another array or record
+    array = awkward1.from_json('tests/samples/test-two-arrays.json')
+    assert awkward1.to_list(array) == [
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
+        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
+        'one', 'two', 'uno', 'dos',
+        'one', 'two', 'uno', 'dos',
+        'one', 'two', 'uno', 'dos',
+        'one', 'two', 'uno', 'dos',
+        'one', 'two', 'uno', 'dos',
+        'one', 'two', 'uno', 'dos',
+        'one', 'two',
+        'one', 'two',
+        'one', 'two',
+        'one', 'two',
+        'one', 'two',
+        'one', 'two']
+
+# def test_two_arrays_from_file():
+    # array = awkward1.from_json('tests/samples/test-two-arrays-with-spaces.json')
+    # FIXME: the strings that are parsed as strings are ok,
+    # but when they come form a file ValueError is thown
+    # this fails: assert awkward1.to_list(array) == []
+
+
 def test_tostring():
     # write a json string from an array built from
     # multiple json fragments from a string
