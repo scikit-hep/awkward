@@ -216,42 +216,36 @@ def test_two_arrays():
     assert awkward1.to_list(array) == [
         'one', 'two', 'uno', 'dos']
 
-    # FIXME: a string that does not start with '{' or '[' is treated
-    # as a file name
-    #
-    # str = '"one""two"'
-    # array = awkward1.from_json(str)
-    # assert awkward1.to_list(array) == [
-    #     'one', 'two']
-    #
-    # str = '"one"\n"two"'
-    # array = awkward1.from_json(str)
-    # assert awkward1.to_list(array) == [
-    #     'one', 'two']
-    #
-    # str = '"one"\n\r"two"'
-    # array = awkward1.from_json(str)
-    # assert awkward1.to_list(array) == [
-    #     'one', 'two']
-    #
-    # str = '"one"     "two"'
-    # array = awkward1.from_json(str)
-    # assert awkward1.to_list(array) == [
-    #     'one', 'two']
-    #
-    # str = '"one"  \n   "two"'
-    # array = awkward1.from_json(str)
-    # assert awkward1.to_list(array) == [
-    #     'one', 'two']
-    #
-    # str = '"one"  \n\r   "two"'
-    # array = awkward1.from_json(str)
-    # assert awkward1.to_list(array) == [
-    #     'one', 'two']
+    str = '"one""two"'
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two']
 
-    # FIXME: a string that does not start with '{' or '[' is treated
-    # as a file name, but it is ok if it comes from a file and follows
-    # another array or record
+    str = '"one"\n"two"'
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two']
+
+    str = '"one"\n\r"two"'
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two']
+
+    str = '"one"     "two"'
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two']
+
+    str = '"one"  \n   "two"'
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two']
+
+    str = '"one"  \n\r   "two"'
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [
+        'one', 'two']
+
     array = awkward1.from_json('tests/samples/test-two-arrays.json')
     assert awkward1.to_list(array) == [
         [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
@@ -294,21 +288,22 @@ def test_blanc_lines():
     assert awkward1.to_list(array) == [
         [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
 
-    # FIXME: the string is treated as a file name
-    # str = """1
-    # 2
-    #
-    # 3"""
-    # array = awkward1.from_json(str)
-    # assert awkward1.to_list(array) == []
+    str = """ "
+    1
+    2
 
-    # str = """1
-    #     2
-    #
-    #     3
-    #     """
-    # array = awkward1.from_json(str)
-    # assert awkward1.to_list(array) == []
+    3 " """
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [1, 2, 3]
+
+    str = """ "
+        1
+        2
+
+        3"
+        """
+    array = awkward1.from_json(str)
+    assert awkward1.to_list(array) == [1, 2, 3]
 
 
 def test_tostring():
