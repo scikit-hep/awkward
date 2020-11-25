@@ -1022,9 +1022,11 @@ class Array(
                 "only fields may be assigned in-place (by field name)"
                 + awkward1._util.exception_suffix(__file__)
             )
-        self._layout = awkward1.operations.structure.with_field(
+        array = awkward1.operations.structure.with_field(
             self._layout, what, where
-        ).layout
+        )
+        self._layout = array.layout
+        self._caches = awkward1._util.find_caches(self._layout)
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -1752,9 +1754,11 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                 "only fields may be assigned in-place (by field name)"
                 + awkward1._util.exception_suffix(__file__)
             )
-        self._layout = awkward1.operations.structure.with_field(
+        array = awkward1.operations.structure.with_field(
             self._layout, what, where
-        ).layout
+        )
+        self._layout = array.layout
+        self._caches = awkward1._util.find_caches(self._layout)
         self._numbaview = None
 
     def __getattr__(self, where):
