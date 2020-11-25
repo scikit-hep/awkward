@@ -422,6 +422,13 @@ class ContentType(numba.types.Type):
         return viewval
 
 
+def type_bitwidth(numbatype):
+    if isinstance(numbatype, numba.types.Boolean):
+        return 8
+    else:
+        return numbatype.bitwidth
+
+
 def posat(context, builder, pos, offset):
     return builder.add(pos, context.get_constant(numba.intp, offset))
 
@@ -430,13 +437,17 @@ def getat(context, builder, baseptr, offset, rettype=None):
     ptrtype = None
     if rettype is not None:
         ptrtype = context.get_value_type(numba.types.CPointer(rettype))
-        bitwidth = rettype.bitwidth
+        bitwidth = type_bitwidth(rettype)
     else:
         bitwidth = numba.intp.bitwidth
     byteoffset = builder.mul(offset, context.get_constant(numba.intp, bitwidth // 8))
-    return builder.load(
+    out = builder.load(
         numba.core.cgutils.pointer_add(builder, baseptr, byteoffset, ptrtype)
     )
+    if rettype is not None and isinstance(rettype, numba.types.Boolean):
+        return builder.icmp_signed("!=", out, context.get_constant(numba.int8, 0),)
+    else:
+        return out
 
 
 def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds):
@@ -600,7 +611,7 @@ class NumpyArrayType(ContentType):
             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
         )
         arraypos = builder.add(viewproxy.start, atval)
-        return getat(context, builder, arrayptr, arraypos, rettype)
+        return getat(context, builder, arrayptr, arraypos, rettype=rettype)
 
     @property
     def ndim(self):
@@ -921,12 +932,16 @@ class ListArrayType(ContentType):
         startspos = posat(context, builder, viewproxy.pos, self.STARTS)
         startsptr = getat(context, builder, viewproxy.arrayptrs, startspos)
         startsarraypos = builder.add(viewproxy.start, atval)
-        start = getat(context, builder, startsptr, startsarraypos, self.indextype.dtype)
+        start = getat(
+            context, builder, startsptr, startsarraypos, rettype=self.indextype.dtype
+        )
 
         stopspos = posat(context, builder, viewproxy.pos, self.STOPS)
         stopsptr = getat(context, builder, viewproxy.arrayptrs, stopspos)
         stopsarraypos = builder.add(viewproxy.start, atval)
-        stop = getat(context, builder, stopsptr, stopsarraypos, self.indextype.dtype)
+        stop = getat(
+            context, builder, stopsptr, stopsarraypos, rettype=self.indextype.dtype
+        )
 
         proxyout = context.make_helper(builder, rettype)
         proxyout.pos = nextpos
@@ -1083,7 +1098,9 @@ class IndexedArrayType(ContentType):
         indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
         indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
         indexarraypos = builder.add(viewproxy.start, atval)
-        nextat = getat(context, builder, indexptr, indexarraypos, self.indextype.dtype)
+        nextat = getat(
+            context, builder, indexptr, indexarraypos, rettype=self.indextype.dtype
+        )
 
         nextviewtype = awkward1._connect._numba.arrayview.wrap(
             self.contenttype, viewtype, None
@@ -1254,7 +1271,9 @@ class IndexedOptionArrayType(ContentType):
         indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
         indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
         indexarraypos = builder.add(viewproxy.start, atval)
-        nextat = getat(context, builder, indexptr, indexarraypos, self.indextype.dtype)
+        nextat = getat(
+            context, builder, indexptr, indexarraypos, rettype=self.indextype.dtype
+        )
 
         output = context.make_helper(builder, rettype)
 
@@ -1435,7 +1454,9 @@ class ByteMaskedArrayType(ContentType):
         maskpos = posat(context, builder, viewproxy.pos, self.MASK)
         maskptr = getat(context, builder, viewproxy.arrayptrs, maskpos)
         maskarraypos = builder.add(viewproxy.start, atval)
-        byte = getat(context, builder, maskptr, maskarraypos, self.masktype.dtype)
+        byte = getat(
+            context, builder, maskptr, maskarraypos, rettype=self.masktype.dtype
+        )
 
         output = context.make_helper(builder, rettype)
 
@@ -1631,7 +1652,9 @@ class BitMaskedArrayType(ContentType):
         maskpos = posat(context, builder, viewproxy.pos, self.MASK)
         maskptr = getat(context, builder, viewproxy.arrayptrs, maskpos)
         maskarraypos = builder.add(viewproxy.start, bitatval)
-        byte = getat(context, builder, maskptr, maskarraypos, self.masktype.dtype)
+        byte = getat(
+            context, builder, maskptr, maskarraypos, rettype=self.masktype.dtype
+        )
         if self.lsb_order:
             # ((byte >> ((uint8_t)shift)) & ((uint8_t)1))
             asbool = builder.and_(
