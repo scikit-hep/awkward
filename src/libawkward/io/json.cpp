@@ -730,20 +730,20 @@ namespace awkward {
     bool scan = true;
     bool has_error = false;
     bool done = false;
-    size_t where = stream.Tell();
-    while (scan) {
+    while (stream.Peek() != '\0'  &&  scan) {
       scan = false;
       done = reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
-      if(stream.Peek() == '\n') {
+      if(stream.Peek() == '\n'  ||  stream.Peek() == '\r'
+        ||  stream.Peek() == '\t'  ||  stream.Peek() == ' ') {
+        stream.Take();
         scan = true;
-      } else if (stream.Peek() == '\r') {
-        scan = true;
-      } else if (done  &&  (stream.Peek() == '{'
+      }
+      else if (done  &&  (stream.Peek() == '{'
         ||  stream.Peek() == '['  ||  stream.Peek() == ' '
         ||  stream.Peek() == '"')) {
         scan = true;
       }
-      while (stream.Peek() == '\\') {
+      else if (stream.Peek() == '\\') {
         stream.Take();
         if (stream.Peek() == 'n'  ||  'r'  ||  't') {
           stream.Take();
@@ -753,7 +753,7 @@ namespace awkward {
           has_error = true;
         }
       }
-      if (stream.Peek() == 0) {
+      else if (stream.Peek() == 0) {
         done = true;
         has_error = false;
       }
@@ -761,15 +761,6 @@ namespace awkward {
         if (stream.Peek() != '{'  ||  stream.Peek() != '['  ||  stream.Peek() != ' ') {
           has_error = true;
         }
-      }
-      else {
-        done = true;
-      }
-      if (stream.Tell() >= where) {
-        where = stream.Tell();
-      }
-      else {
-        done = true;
       }
     }
     if (has_error  ||  !done) {
