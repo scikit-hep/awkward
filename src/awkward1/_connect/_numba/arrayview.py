@@ -1072,9 +1072,6 @@ def overload_contains(obj, element):
             elif arraytype.ndim == 1 and not arraytype.is_recordtype:
                 if arraytype.is_optiontype:
                     statements.append(
-                        indent + "print(element is None, {0} is None, {0})".format(name)
-                    )
-                    statements.append(
                         indent + "if (element is None and {0} is None) or "
                         "({0} is not None and element == {0}): return True".format(name)
                     )
@@ -1097,7 +1094,6 @@ def overload_contains(obj, element):
 
         return code_to_function("""
 def contains_impl(obj, element):
-    print("contains_impl", element)
     {0}
     return False""".format("\n    ".join(statements)), "contains_impl")
 
@@ -1213,7 +1209,8 @@ def lower_asarray(context, builder, sig, args):
         context, builder, viewproxy.arrayptrs, whichpos
     )
 
-    itemsize = context.get_constant(numba.intp, rettype.dtype.bitwidth // 8)
+    bitwidth = awkward1._connect._numba.layout.type_bitwidth(rettype.dtype)
+    itemsize = context.get_constant(numba.intp, bitwidth // 8)
 
     data = numba.core.cgutils.pointer_add(
         builder,
