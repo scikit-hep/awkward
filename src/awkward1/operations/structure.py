@@ -603,6 +603,9 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
     other.)
     """
 
+    if isinstance(what, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
+        what_caches = what.caches
+
     if not (
         where is None
         or isinstance(where, str)
