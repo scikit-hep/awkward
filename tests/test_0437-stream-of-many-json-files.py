@@ -59,112 +59,112 @@ def test_two_arrays():
     str = """{"one": 1, "two": 2.2}{"one": 10, "two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}     {"one": 10, "two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, \t "two": 2.2}{"one": 10, "two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}  \t   {"one": 10, "two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}\n{"one": 10, "two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}\n\r{"one": 10, "two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}     \n     {"one": 10, "two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}     \n\r     {"one": 10, "two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}{"one": 10, "two": 22}\n"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}{"one": 10, "two": 22}\n\r"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}\n{"one": 10, "two": 22}\n"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}\n\r{"one": 10, "two": 22}\n\r"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, \n"two": 2.2}{"one": 10, "two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, \n\r"two": 2.2}{"one": 10, "two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, \n"two": 2.2}\n{"one": 10, "two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, \n\r"two": 2.2}\n\r{"one": 10, "two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, \n"two": 2.2}\n{"one": 10, "two": 22}\n"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, \n\r"two": 2.2}\n\r{"one": 10, "two": 22}\n\r"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}{"one": 10, \n"two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}{"one": 10, \n\r"two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}\n{"one": 10, \n"two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}\n\r{"one": 10, \n\r"two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """["one", "two"]["uno", "dos"]"""
     array = awkward1.from_json(str)
@@ -216,35 +216,35 @@ def test_two_arrays():
     assert awkward1.to_list(array) == [
         'one', 'two', 'uno', 'dos']
 
-    str = '"one""two"'
-    array = awkward1.from_json(str)
-    assert awkward1.to_list(array) == [
-        'one', 'two']
-
-    str = '"one"\n"two"'
-    array = awkward1.from_json(str)
-    assert awkward1.to_list(array) == [
-        'one', 'two']
-
-    str = '"one"\n\r"two"'
-    array = awkward1.from_json(str)
-    assert awkward1.to_list(array) == [
-        'one', 'two']
-
-    str = '"one"     "two"'
-    array = awkward1.from_json(str)
-    assert awkward1.to_list(array) == [
-        'one', 'two']
-
-    str = '"one"  \n   "two"'
-    array = awkward1.from_json(str)
-    assert awkward1.to_list(array) == [
-        'one', 'two']
-
-    str = '"one"  \n\r   "two"'
-    array = awkward1.from_json(str)
-    assert awkward1.to_list(array) == [
-        'one', 'two']
+    # str = '"one""two"'
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == [
+    #     'one', 'two']
+    #
+    # str = '"one"\n"two"'
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == [
+    #     'one', 'two']
+    #
+    # str = '"one"\n\r"two"'
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == [
+    #     'one', 'two']
+    #
+    # str = '"one"     "two"'
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == [
+    #     'one', 'two']
+    #
+    # str = '"one"  \n   "two"'
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == [
+    #     'one', 'two']
+    #
+    # str = '"one"  \n\r   "two"'
+    # array = awkward1.from_json(str)
+    # assert awkward1.to_list(array) == [
+    #     'one', 'two']
 
     array = awkward1.from_json('tests/samples/test-two-arrays.json')
     assert awkward1.to_list(array) == [
@@ -259,12 +259,12 @@ def test_two_arrays():
         [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
         [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
         [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}],
-        'one', 'two', 'uno', 'dos',
-        'one', 'two', 'uno', 'dos',
-        'one', 'two', 'uno', 'dos',
-        'one', 'two', 'uno', 'dos',
-        'one', 'two', 'uno', 'dos',
-        'one', 'two', 'uno', 'dos',
+        ['one', 'two'], ['uno', 'dos'],
+        ['one', 'two'], ['uno', 'dos'],
+        ['one', 'two'], ['uno', 'dos'],
+        ['one', 'two'], ['uno', 'dos'],
+        ['one', 'two'], ['uno', 'dos'],
+        ['one', 'two'], ['uno', 'dos'],
         'one', 'two',
         'one', 'two',
         'one', 'two',
@@ -278,7 +278,7 @@ def test_blanc_lines():
     {"one": 10, "two": 22}"""
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """{"one": 1, "two": 2.2}
 
@@ -286,7 +286,7 @@ def test_blanc_lines():
     """
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'one': 1, 'two': 2.2}], [{'one': 10, 'two': 22.0}]]
+        {'one': 1, 'two': 2.2}, {'one': 10, 'two': 22.0}]
 
     str = """ "
     1
@@ -318,14 +318,14 @@ def test_tostring():
 
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'x': 1.1, 'y': []}],
-        [{'x': 2.2, 'y': [1]}],
-        [{'x': 3.3, 'y': [1, 2]}],
-        [{'x': 4.4, 'y': [1, 2, 3]}],
-        [{'x': 5.5, 'y': [1, 2, 3, 4]}],
-        [{'x': 6.6, 'y': [1, 2, 3, 4, 5]}]]
+        {'x': 1.1, 'y': []},
+        {'x': 2.2, 'y': [1]},
+        {'x': 3.3, 'y': [1, 2]},
+        {'x': 4.4, 'y': [1, 2, 3]},
+        {'x': 5.5, 'y': [1, 2, 3, 4]},
+        {'x': 6.6, 'y': [1, 2, 3, 4, 5]}]
 
-    assert awkward1.to_json(array) == '[[{"x":1.1,"y":[]}],[{"x":2.2,"y":[1]}],[{"x":3.3,"y":[1,2]}],[{"x":4.4,"y":[1,2,3]}],[{"x":5.5,"y":[1,2,3,4]}],[{"x":6.6,"y":[1,2,3,4,5]}]]'
+    assert awkward1.to_json(array) == '[{"x":1.1,"y":[]},{"x":2.2,"y":[1]},{"x":3.3,"y":[1,2]},{"x":4.4,"y":[1,2,3]},{"x":5.5,"y":[1,2,3,4]},{"x":6.6,"y":[1,2,3,4,5]}]'
 
 def test_fromstring():
     # read multiple json fragments from a string
@@ -338,12 +338,12 @@ def test_fromstring():
 
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [
-        [{'x': 1.1, 'y': []}],
-        [{'x': 2.2, 'y': [1]}],
-        [{'x': 3.3, 'y': [1, 2]}],
-        [{'x': 4.4, 'y': [1, 2, 3]}],
-        [{'x': 5.5, 'y': [1, 2, 3, 4]}],
-        [{'x': 6.6, 'y': [1, 2, 3, 4, 5]}]]
+        {'x': 1.1, 'y': []},
+        {'x': 2.2, 'y': [1]},
+        {'x': 3.3, 'y': [1, 2]},
+        {'x': 4.4, 'y': [1, 2, 3]},
+        {'x': 5.5, 'y': [1, 2, 3, 4]},
+        {'x': 6.6, 'y': [1, 2, 3, 4, 5]}]
 
 def test_array_tojson():
     # convert float 'nan' and 'inf' to user-defined strings
@@ -361,12 +361,12 @@ def test_fromfile():
     # read multiple json fragments from a json file
     array = awkward1.from_json('tests/samples/test-record-array.json')
     assert awkward1.to_list(array) == [
-        [{'x': 1.1, 'y': []}],
-        [{'x': 2.2, 'y': [1]}],
-        [{'x': 3.3, 'y': [1, 2]}],
-        [{'x': 4.4, 'y': [1, 2, 3]}],
-        [{'x': 5.5, 'y': [1, 2, 3, 4]}],
-        [{'x': 6.6, 'y': [1, 2, 3, 4, 5]}]]
+        {'x': 1.1, 'y': []},
+        {'x': 2.2, 'y': [1]},
+        {'x': 3.3, 'y': [1, 2]},
+        {'x': 4.4, 'y': [1, 2, 3]},
+        {'x': 5.5, 'y': [1, 2, 3, 4]},
+        {'x': 6.6, 'y': [1, 2, 3, 4, 5]}]
 
     # read json file containg 'nan' and 'inf' user-defined strings
     # and replace 'nan' and 'inf' strings with floats
@@ -444,3 +444,7 @@ def test_fromfile():
            59.59,   60.6,    61.61,   62.62,   63.63],
           [64.64],
           [65.65, 66.66, 'NaN', 'NaN', 67.67, 68.68, 69.69]]]]
+
+def test_three():
+    array = awkward1.from_json('["one", \n"two"] \n ["three"]')
+    assert awkward1.to_list(array) == ['one', 'two', 'three']

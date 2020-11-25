@@ -561,19 +561,15 @@ namespace awkward {
 
     bool
     StartArray() {
-      if (depth_ != 0) {
-        builder_.beginlist();
-      }
+      builder_.beginlist();
       depth_++;
       return true;
     }
 
     bool
     EndArray(rj::SizeType numfields) {
+      builder_.endlist();
       depth_--;
-      if (depth_ != 0) {
-        builder_.endlist();
-      }
       return true;
     }
 

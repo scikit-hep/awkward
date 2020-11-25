@@ -90,7 +90,7 @@ make_fromjson(py::module& m, const std::string& name) {
           + std::string("\" could not be opened for reading")
           + FILENAME(__LINE__));
       }
-      std::shared_ptr<ak::Content> out(nullptr);
+      ak::ContentPtr out(nullptr);
       try {
         out = FromJsonFile(file,
                            ak::ArrayBuilderOptions(initial, resize),
