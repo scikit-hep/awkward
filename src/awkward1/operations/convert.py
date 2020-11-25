@@ -800,7 +800,6 @@ def from_json(source,
               nan_string=None,
               infinity_string=None,
               minus_infinity_string=None,
-              nan_and_inf_as_float=False,
               highlevel=True,
               behavior=None,
               initial=1024,
@@ -810,6 +809,12 @@ def from_json(source,
     """
     Args:
         source (str): JSON-formatted string to convert into an array.
+        nan_string (None or str): If not None, strings with this value will be
+            interpreted as floating-point NaN values.
+        infinity_string (None or str): If not None, strings with this value will
+            be interpreted as floating-point positive infinity values.
+        minus_infinity_string (None or str): If not None, strings with this value
+            will be interpreted as floating-point negative infinity values.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (bool): Custom #ak.behavior for the output array, if
@@ -821,15 +826,6 @@ def from_json(source,
             should be strictly greater than 1.
         buffersize (int): Size (in bytes) of the buffer used by the JSON
             parser.
-        nan_string (None or str): user-defined string for a not-a-number (NaN) value
-            representation in JSON format
-        infinity_string (None or str): user-defined string for a positive infinity
-            representation in JSON format
-        minus_infinity_string (None or str): user-defined string for a negative
-            infinity representation in JSON format
-        nan_and_inf_as_float (bool): Option flag if 'True' to replace 'NaN' and 'Inf'
-            with floats, it 'False' to replace 'NaN' and 'Inf' with user defined strings
-            defined by nan_string, infinity_string, and minus_infinity_string
 
     Converts a JSON string into an Awkward Array.
 
@@ -841,6 +837,11 @@ def from_json(source,
 
     See also #ak.to_json.
     """
+    nan_and_inf_as_float = (
+        nan_string is not None
+        or infinity_string is not None
+        or minus_infinity_string is not None
+    )
     layout = awkward1._ext.fromjson(
         source,
         nan_string=nan_string,
@@ -876,14 +877,15 @@ def to_json(array,
             False, output compact JSON without spaces.
         maxdecimals (None or int): If an int, limit the number of
             floating-point decimals to this number; if None, write all digits.
+        nan_string (None or str): If not None, floating-point NaN values will be
+            replaced with this string instead of a JSON number.
+        infinity_string (None or str): If not None, floating-point positive infinity
+            values will be replaced with this string instead of a JSON number.
+        minus_infinity_string (None or str): If not None, floating-point negative
+            infinity values will be replaced with this string instead of a JSON
+            number.
         buffersize (int): Size (in bytes) of the buffer used by the JSON
             parser.
-        nan_string (None or str) user-defined string for a not-a-number (NaN) value
-            representation in JSON format
-        infinity_string (None or str) user-defined string for a positive infinity
-            representation in JSON format
-        minus_infinity_string (None or str) user-defined string for a negative
-            infinity representation in JSON format
 
     Converts `array` (many types supported, including all Awkward Arrays and
     Records) into a JSON string or file.

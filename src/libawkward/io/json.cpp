@@ -655,18 +655,6 @@ namespace awkward {
           return true;
         }
       }
-      else {
-        if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
-          builder_.string("None", (int64_t)strlen("None"));
-          return true;
-        } else if(infinity_string_ != nullptr  &&  strcmp(str, infinity_string_) == 0) {
-          builder_.string("None", (int64_t)strlen("None"));
-          return true;
-        } else if(minus_infinity_string_ != nullptr  &&  strcmp(str, minus_infinity_string_) == 0) {
-          builder_.string("None", (int64_t)strlen("None"));
-          return true;
-        }
-      }
       builder_.string(str, (int64_t)length);
       return true;
     }
