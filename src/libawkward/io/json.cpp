@@ -13,6 +13,7 @@
 
 #include "awkward/builder/ArrayBuilder.h"
 #include "awkward/Content.h"
+#include "awkward/array/RegularArray.h"
 
 #include "awkward/io/json.h"
 
@@ -532,17 +533,33 @@ namespace awkward {
   public:
     Handler(const ArrayBuilderOptions& options)
         : builder_(options)
-        , depth_(0) { }
+        , depth_(0)
+        , roots_(0) { }
 
     const ContentPtr snapshot() const {
       if (depth_ == 0) {
-        return builder_.snapshot();
+        if (roots_ > 1) {
+          ContentPtr out = builder_.snapshot();
+          return std::make_shared<RegularArray>(Identities::none(),
+            util::Parameters(), out, 1);
+        }
+        else {
+          return builder_.snapshot();
+        }
       }
       else {
         throw std::invalid_argument(
           std::string("JSON error array or record is not complete ")
           + FILENAME(__LINE__));
       }
+    }
+
+    void next_root() {
+      roots_++;
+    }
+
+    rj::SizeType nroots() {
+      return (rj::SizeType)(roots_ + 1);
     }
 
     bool Null()               { builder_.null();              return true; }
@@ -561,15 +578,19 @@ namespace awkward {
 
     bool
     StartArray() {
-      builder_.beginlist();
+      if (depth_ != 0) {
+        builder_.beginlist();
+      }
       depth_++;
       return true;
     }
 
     bool
     EndArray(rj::SizeType numfields) {
-      builder_.endlist();
       depth_--;
+      if (depth_ != 0) {
+        builder_.endlist();
+      }
       return true;
     }
 
@@ -602,6 +623,7 @@ namespace awkward {
   private:
     ArrayBuilder builder_;
     int64_t depth_;
+    int64_t roots_;
   };
 
   class HandlerNanAndInf: public rj::BaseReaderHandler<rj::UTF8<>, HandlerNanAndInf> {
@@ -613,6 +635,7 @@ namespace awkward {
       bool nan_and_inf_as_float)
         : builder_(options)
         , depth_(0)
+        , roots_(0)
         , nan_string_(nan_string)
         , infinity_string_(infinity_string)
         , minus_infinity_string_(minus_infinity_string)
@@ -620,13 +643,28 @@ namespace awkward {
 
     const ContentPtr snapshot() const {
       if (depth_ == 0) {
-        return builder_.snapshot();
+        if (roots_ > 1) {
+          ContentPtr out = builder_.snapshot();
+          return std::make_shared<RegularArray>(Identities::none(),
+            util::Parameters(), out, 1);
+        }
+        else {
+          return builder_.snapshot();
+        }
       }
       else {
         throw std::invalid_argument(
           std::string("JSON error array or record is not complete ")
           + FILENAME(__LINE__));
       }
+    }
+
+    void next_root() {
+      roots_++;
+    }
+
+    rj::SizeType nroots() {
+      return (rj::SizeType)(roots_ + 1);
     }
 
     bool Null()               { builder_.null();              return true; }
@@ -702,6 +740,228 @@ namespace awkward {
   private:
     ArrayBuilder builder_;
     int64_t depth_;
+    int64_t roots_;
+    const char* nan_string_;
+    const char* infinity_string_;
+    const char* minus_infinity_string_;
+    bool nan_and_inf_as_float_;
+  };
+
+  class StringHandler: public rj::BaseReaderHandler<rj::UTF8<>, StringHandler> {
+  public:
+    StringHandler(const ArrayBuilderOptions& options)
+        : builder_(options)
+        , depth_(0)
+        , roots_(0) { }
+
+    const ContentPtr snapshot() const {
+      if (depth_ == 0) {
+        return builder_.snapshot();
+        ContentPtr out = builder_.snapshot();
+        return std::make_shared<RegularArray>(Identities::none(),
+          util::Parameters(), out, out.get()->length());
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("JSON error array or record is not complete ")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    void next_root() {
+      if (roots_ == 0) {
+        roots_++;
+      }
+    }
+
+    rj::SizeType nroots() {
+      return (rj::SizeType)(roots_ + 1);
+    }
+
+    void begin_list() {
+      builder_.beginlist();
+      depth_++;
+    }
+
+    void end_list() {
+      builder_.beginlist();
+      depth_--;
+    }
+
+    bool Null()               { builder_.null();              return true; }
+    bool Bool(bool x)         { builder_.boolean(x);          return true; }
+    bool Int(int x)           { builder_.integer((int64_t)x); return true; }
+    bool Uint(unsigned int x) { builder_.integer((int64_t)x); return true; }
+    bool Int64(int64_t x)     { builder_.integer(x);          return true; }
+    bool Uint64(uint64_t x)   { builder_.integer((int64_t)x); return true; }
+    bool Double(double x)     { builder_.real(x);             return true; }
+
+    bool
+    String(const char* str, rj::SizeType length, bool copy) {
+      builder_.string(str, (int64_t)length);
+      return true;
+    }
+
+    bool
+    StartArray() {
+      if (depth_ != 0) {
+        builder_.beginlist();
+      }
+      depth_++;
+      return true;
+    }
+
+    bool
+    EndArray(rj::SizeType numfields) {
+      depth_--;
+      if (depth_ != 0) {
+        builder_.endlist();
+      }
+      return true;
+    }
+
+    bool
+    StartObject() {
+      if (depth_ == 0) {
+        builder_.beginlist();
+      }
+      depth_++;
+      builder_.beginrecord();
+      return true;
+    }
+
+    bool
+    EndObject(rj::SizeType numfields) {
+      depth_--;
+      builder_.endrecord();
+      if (depth_ == 0) {
+        builder_.endlist();
+      }
+      return true;
+    }
+
+    bool
+    Key(const char* str, rj::SizeType length, bool copy) {
+      builder_.field_check(str);
+      return true;
+    }
+
+  private:
+    ArrayBuilder builder_;
+    int64_t depth_;
+    int64_t roots_;
+  };
+
+  class StringHandlerNanAndInf: public rj::BaseReaderHandler<rj::UTF8<>, StringHandlerNanAndInf> {
+  public:
+    StringHandlerNanAndInf(const ArrayBuilderOptions& options,
+      const char* nan_string,
+      const char* infinity_string,
+      const char* minus_infinity_string,
+      bool nan_and_inf_as_float)
+        : builder_(options)
+        , depth_(0)
+        , roots_(0)
+        , nan_string_(nan_string)
+        , infinity_string_(infinity_string)
+        , minus_infinity_string_(minus_infinity_string)
+        , nan_and_inf_as_float_(nan_and_inf_as_float) { }
+
+    const ContentPtr snapshot() const {
+      if (depth_ == 0) {
+        return builder_.snapshot();
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("JSON error array or record is not complete ")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    void next_root() {
+      if (depth_ == 0) {
+        roots_++;
+      }
+    }
+
+    rj::SizeType nroots() {
+      return (rj::SizeType)(roots_ + 1);
+    }
+
+    bool Null()               { builder_.null();              return true; }
+    bool Bool(bool x)         { builder_.boolean(x);          return true; }
+    bool Int(int x)           { builder_.integer((int64_t)x); return true; }
+    bool Uint(unsigned int x) { builder_.integer((int64_t)x); return true; }
+    bool Int64(int64_t x)     { builder_.integer(x);          return true; }
+    bool Uint64(uint64_t x)   { builder_.integer((int64_t)x); return true; }
+    bool Double(double x)     { builder_.real(x);             return true; }
+
+    bool
+    String(const char* str, rj::SizeType length, bool copy) {
+      if (nan_and_inf_as_float_) {
+        if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
+          builder_.real(std::numeric_limits<double>::quiet_NaN());
+          return true;
+        } else if(infinity_string_ != nullptr  &&  strcmp(str, infinity_string_) == 0) {
+          builder_.real(std::numeric_limits<double>::infinity());
+          return true;
+        } else if(minus_infinity_string_ != nullptr  &&  strcmp(str, minus_infinity_string_) == 0) {
+          builder_.real(-std::numeric_limits<double>::infinity());
+          return true;
+        }
+      }
+      builder_.string(str, (int64_t)length);
+      return true;
+    }
+
+    bool
+    StartArray() {
+      if (depth_ != 0) {
+        builder_.beginlist();
+      }
+      depth_++;
+      return true;
+    }
+
+    bool
+    EndArray(rj::SizeType numfields) {
+      depth_--;
+      if (depth_ != 0) {
+        builder_.endlist();
+      }
+      return true;
+    }
+
+    bool
+    StartObject() {
+      if (depth_ == 0) {
+        builder_.beginlist();
+      }
+      depth_++;
+      builder_.beginrecord();
+      return true;
+    }
+
+    bool
+    EndObject(rj::SizeType numfields) {
+      depth_--;
+      builder_.endrecord();
+      if (depth_ == 0) {
+        builder_.endlist();
+      }
+      return true;
+    }
+
+    bool
+    Key(const char* str, rj::SizeType length, bool copy) {
+      builder_.field_check(str);
+      return true;
+    }
+
+  private:
+    ArrayBuilder builder_;
+    int64_t depth_;
+    int64_t roots_;
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
@@ -714,9 +974,12 @@ namespace awkward {
     bool scan = true;
     bool has_error = false;
     bool done = false;
+
+    handler.StartArray();
     while (stream.Peek() != '\0'  &&  scan) {
       scan = false;
       done = reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
+      handler.next_root();
       if(stream.Peek() == '\n'  ||  stream.Peek() == '\r'
         ||  stream.Peek() == '\t'  ||  stream.Peek() == ' ') {
         stream.Take();
@@ -754,6 +1017,62 @@ namespace awkward {
         + stream.Peek() + std::string("\'")
         + FILENAME(__LINE__));
     }
+    handler.EndArray(handler.nroots());
+    return handler.snapshot();
+  }
+
+  template<typename HANDLER, typename STREAM>
+  const ContentPtr do_parse_string(HANDLER& handler, rj::Reader& reader, STREAM& stream)
+  {
+    bool scan = true;
+    bool has_error = false;
+    bool done = false;
+    handler.StartArray();
+
+    while (stream.Peek() != '\0'  &&  scan) {
+      scan = false;
+      handler.StartArray();
+      done = reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
+      handler.EndArray(1);
+      handler.next_root();
+      if(stream.Peek() == '\n'  ||  stream.Peek() == '\r'
+        ||  stream.Peek() == '\t'  ||  stream.Peek() == ' ') {
+        stream.Take();
+        scan = true;
+      }
+      else if (done  &&  (stream.Peek() == '{'
+        ||  stream.Peek() == '['  ||  stream.Peek() == ' '
+        ||  stream.Peek() == '"')) {
+        scan = true;
+      }
+      else if (stream.Peek() == '\\') {
+        stream.Take();
+        if (stream.Peek() == 'n'  ||  'r'  ||  't') {
+          stream.Take();
+          scan = true;
+        } else {
+          scan = false;
+          has_error = true;
+        }
+      }
+      else if (stream.Peek() == 0) {
+        done = true;
+        has_error = false;
+      }
+      else if (stream.Peek() != 0) {
+        if (stream.Peek() != '{'  ||  stream.Peek() != '['  ||  stream.Peek() != ' ') {
+          has_error = true;
+        }
+      }
+    }
+    if (has_error  ||  !done) {
+      throw std::invalid_argument(
+        std::string("JSON File error at char ")
+        + std::to_string(stream.Tell()) + std::string(": \'")
+        + stream.Peek() + std::string("\'")
+        + FILENAME(__LINE__));
+    }
+    handler.EndArray(handler.nroots());
     return handler.snapshot();
   }
 
@@ -774,6 +1093,32 @@ namespace awkward {
     } else {
       Handler handler (options);
       return do_parse(handler, reader, stream);
+    }
+    auto where = reader.GetErrorOffset();
+    throw std::invalid_argument(
+      std::string("JSON error at char ")
+      + std::to_string(where) + std::string(": \"") + source[where] + std::string("\" ")
+      + std::string(rj::GetParseError_En(reader.GetParseErrorCode()))
+      + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
+  FromJsonStringIncremental(const char* source,
+                            const ArrayBuilderOptions& options,
+                            const char* nan_string,
+                            const char* infinity_string,
+                            const char* minus_infinity_string,
+                            bool nan_and_inf_as_float) {
+    rj::Reader reader;
+    rj::StringStream stream(source);
+    if(nan_and_inf_as_float  ||  nan_string != nullptr
+      ||  nan_string != nullptr  ||  nan_string != nullptr) {
+      StringHandlerNanAndInf handler (options, nan_string, infinity_string,
+        minus_infinity_string, nan_and_inf_as_float);
+      return do_parse_string(handler, reader, stream);
+    } else {
+      StringHandler handler (options);
+      return do_parse_string(handler, reader, stream);
     }
     auto where = reader.GetErrorOffset();
     throw std::invalid_argument(

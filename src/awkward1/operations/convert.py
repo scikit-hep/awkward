@@ -854,8 +854,7 @@ def from_json(source,
     )
     if highlevel:
         return awkward1._util.wrap(layout.content
-            if not (isinstance(layout, awkward1.layout.NumpyArray) or
-            isinstance(layout, awkward1.layout.UnionArray8_64))
+            if not isinstance(layout, awkward1.layout.NumpyArray)
             else layout, behavior)
     else:
         return layout.content if not isinstance(layout, awkward1.layout.NumpyArray) else layout

@@ -68,7 +68,7 @@ make_fromjson(py::module& m, const std::string& name) {
       );
     }
     if (isstring) {
-      return ak::FromJsonString(
+      return ak::FromJsonStringIncremental(
         source.c_str(),
         ak::ArrayBuilderOptions(initial, resize),
         nan_string,
