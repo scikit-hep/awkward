@@ -4,7 +4,6 @@ from __future__ import absolute_import
 
 import numbers
 import json
-import warnings
 
 try:
     from collections.abc import Iterable
@@ -13,17 +12,11 @@ except ImportError:
     from collections import Iterable
     from collections import MutableMapping
 
-import awkward1._util
-import awkward1.layout
-import awkward1._connect._numpy
-import awkward1.operations.convert
-import awkward1.nplike
+import awkward1 as ak
 
+np = ak.nplike.NumpyMetadata.instance()
 
-np = awkward1.nplike.NumpyMetadata.instance()
-
-
-@awkward1._connect._numpy.implements("copy")
+@ak._connect._numpy.implements("copy")
 def copy(array):
     """
     Returns a deep copy of the array (no memory shared with original).
@@ -68,12 +61,12 @@ def copy(array):
     changes, so we don't support it. However, an #ak.Array's data might come from
     a mutable third-party library, so this function allows you to make a true copy.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array,
         allow_record=True,
         allow_other=False,
     )
-    return awkward1._util.wrap(layout.deep_copy(), awkward1._util.behaviorof(array))
+    return ak._util.wrap(layout.deep_copy(), ak._util.behaviorof(array))
 
 
 def mask(array, mask, valid_when=True, highlevel=True):
@@ -157,36 +150,36 @@ def mask(array, mask, valid_when=True, highlevel=True):
 
     def getfunction(inputs, depth):
         layoutarray, layoutmask = inputs
-        if isinstance(layoutmask, awkward1.layout.NumpyArray):
-            m = awkward1.nplike.of(layoutmask).asarray(layoutmask)
+        if isinstance(layoutmask, ak.layout.NumpyArray):
+            m = ak.nplike.of(layoutmask).asarray(layoutmask)
             if not issubclass(m.dtype.type, (np.bool, np.bool_)):
                 raise ValueError(
                     "mask must have boolean type, not " "{0}".format(repr(m.dtype))
-                    + awkward1._util.exception_suffix(__file__)
+                    + ak._util.exception_suffix(__file__)
                 )
-            bytemask = awkward1.layout.Index8(m.view(np.int8))
+            bytemask = ak.layout.Index8(m.view(np.int8))
             return lambda: (
-                awkward1.layout.ByteMaskedArray(
+                ak.layout.ByteMaskedArray(
                     bytemask, layoutarray, valid_when=valid_when
                 ).simplify(),
             )
         else:
             return None
 
-    layoutarray = awkward1.operations.convert.to_layout(
+    layoutarray = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
-    layoutmask = awkward1.operations.convert.to_layout(
+    layoutmask = ak.operations.convert.to_layout(
         mask, allow_record=True, allow_other=False
     )
 
-    behavior = awkward1._util.behaviorof(array, mask)
-    out = awkward1._util.broadcast_and_apply(
+    behavior = ak._util.behaviorof(array, mask)
+    out = ak._util.broadcast_and_apply(
         [layoutarray, layoutmask], getfunction, behavior
     )
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
-        return awkward1._util.wrap(out[0], behavior)
+        return ak._util.wrap(out[0], behavior)
     else:
         return out[0]
 
@@ -250,12 +243,12 @@ def num(array, axis=1, highlevel=True):
         >>> ak.mask(array, ak.num(array) > 0)[:, 0]
         <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     out = layout.num(axis=axis)
     if highlevel:
-        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
     else:
         return out
 
@@ -350,7 +343,7 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
     if depth_limit is not None and depth_limit <= 0:
         raise ValueError(
             "depth_limit must be None or at least 1"
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
 
     if isinstance(arrays, dict):
@@ -359,7 +352,7 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
         for n, x in arrays.items():
             recordlookup.append(n)
             layouts.append(
-                awkward1.operations.convert.to_layout(
+                ak.operations.convert.to_layout(
                     x, allow_record=False, allow_other=False
                 )
             )
@@ -369,7 +362,7 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
         layouts = []
         for x in arrays:
             layouts.append(
-                awkward1.operations.convert.to_layout(
+                ak.operations.convert.to_layout(
                     x, allow_record=False, allow_other=False
                 )
             )
@@ -390,18 +383,18 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
             ) for x in inputs)
         ):
             return lambda: (
-                awkward1.layout.RecordArray(
+                ak.layout.RecordArray(
                     inputs, recordlookup, parameters=parameters
                 ),
             )
         else:
             return None
 
-    behavior = awkward1._util.behaviorof(*arrays)
-    out = awkward1._util.broadcast_and_apply(layouts, getfunction, behavior)
+    behavior = ak._util.behaviorof(*arrays)
+    out = ak._util.broadcast_and_apply(layouts, getfunction, behavior)
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
-        return awkward1._util.wrap(out[0], behavior)
+        return ak._util.wrap(out[0], behavior)
     else:
         return out[0]
 
@@ -425,7 +418,7 @@ def unzip(array):
         >>> y
         <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
     """
-    fields = awkward1.operations.describe.fields(array)
+    fields = ak.operations.describe.fields(array)
     if len(fields) == 0:
         return (array,)
     else:
@@ -467,21 +460,21 @@ def to_regular(array, axis=1, highlevel=True):
     posaxis = [axis]
     def getfunction(layout, depth):
         posaxis[0] = layout.axis_wrap_if_negative(posaxis[0])
-        if posaxis[0] == depth and isinstance(layout, awkward1.layout.RegularArray):
+        if posaxis[0] == depth and isinstance(layout, ak.layout.RegularArray):
             return lambda: layout
-        elif posaxis[0] == depth and isinstance(layout, awkward1._util.listtypes):
+        elif posaxis[0] == depth and isinstance(layout, ak._util.listtypes):
             return lambda: layout.toRegularArray()
         elif posaxis[0] < depth:
             raise ValueError("array has no axis {0}".format(axis))
         else:
             return None
 
-    out = awkward1.operations.convert.to_layout(array)
+    out = ak.operations.convert.to_layout(array)
     if axis != 0:
-        out = awkward1._util.recursively_apply(out, getfunction, numpy_to_regular=True)
+        out = ak._util.recursively_apply(out, getfunction, numpy_to_regular=True)
 
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
@@ -515,21 +508,21 @@ def from_regular(array, axis=1, highlevel=True):
     posaxis = [axis]
     def getfunction(layout, depth):
         posaxis[0] = layout.axis_wrap_if_negative(posaxis[0])
-        if posaxis[0] == depth and isinstance(layout, awkward1.layout.RegularArray):
+        if posaxis[0] == depth and isinstance(layout, ak.layout.RegularArray):
             return lambda: layout.toListOffsetArray64(False)
-        elif posaxis[0] == depth and isinstance(layout, awkward1._util.listtypes):
+        elif posaxis[0] == depth and isinstance(layout, ak._util.listtypes):
             return lambda: layout
         elif posaxis[0] < depth:
             raise ValueError("array has no axis {0}".format(axis))
         else:
             return None
 
-    out = awkward1.operations.convert.to_layout(array)
+    out = ak.operations.convert.to_layout(array)
     if axis != 0:
-        out = awkward1._util.recursively_apply(out, getfunction, numpy_to_regular=True)
+        out = ak._util.recursively_apply(out, getfunction, numpy_to_regular=True)
 
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
@@ -556,10 +549,10 @@ def with_name(array, name, highlevel=True):
     """
 
     def getfunction(layout, depth):
-        if isinstance(layout, awkward1.layout.RecordArray):
+        if isinstance(layout, ak.layout.RecordArray):
             parameters = dict(layout.parameters)
             parameters["__record__"] = name
-            return lambda: awkward1.layout.RecordArray(
+            return lambda: ak.layout.RecordArray(
                 layout.contents,
                 layout.recordlookup,
                 len(layout),
@@ -569,11 +562,11 @@ def with_name(array, name, highlevel=True):
         else:
             return None
 
-    out = awkward1._util.recursively_apply(
-        awkward1.operations.convert.to_layout(array), getfunction
+    out = ak._util.recursively_apply(
+        ak.operations.convert.to_layout(array), getfunction
     )
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
@@ -603,7 +596,7 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
     other.)
     """
 
-    if isinstance(what, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
+    if isinstance(what, (ak.highlevel.Array, ak.highlevel.Record)):
         what_caches = what.caches
 
     if not (
@@ -614,7 +607,7 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
         raise TypeError(
             "New fields may only be assigned by field name(s) "
             "or as a new integer slot by passing None for 'where'"
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
     if (
         not isinstance(where, str)
@@ -632,26 +625,26 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
         if not (isinstance(where, str) or where is None):
             where = where[0]
 
-        behavior = awkward1._util.behaviorof(base, what)
-        base = awkward1.operations.convert.to_layout(
+        behavior = ak._util.behaviorof(base, what)
+        base = ak.operations.convert.to_layout(
             base, allow_record=True, allow_other=False
         )
         if base.numfields < 0:
             raise ValueError(
                 "no tuples or records in array; cannot add a new field"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
-        what = awkward1.operations.convert.to_layout(
+        what = ak.operations.convert.to_layout(
             what, allow_record=True, allow_other=True
         )
 
         def getfunction(inputs, depth):
-            nplike = awkward1.nplike.of(*inputs)
+            nplike = ak.nplike.of(*inputs)
             base, what = inputs
-            if isinstance(base, awkward1.layout.RecordArray):
-                if not isinstance(what, awkward1.layout.Content):
-                    what = awkward1.layout.NumpyArray(nplike.repeat(what, len(base)))
+            if isinstance(base, ak.layout.RecordArray):
+                if not isinstance(what, ak.layout.Content):
+                    what = ak.layout.NumpyArray(nplike.repeat(what, len(base)))
                 return lambda: (base.setitem_field(where, what),)
             else:
                 return None
@@ -661,16 +654,16 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
             keys.remove(where)
         if len(keys) == 0:
             # the only key was removed, so just create new Record
-            out = (awkward1.layout.RecordArray([what], [where]),)
+            out = (ak.layout.RecordArray([what], [where]),)
         else:
             base = base[keys]
-            out = awkward1._util.broadcast_and_apply(
+            out = ak._util.broadcast_and_apply(
                 [base, what], getfunction, behavior, right_broadcast=right_broadcast
             )
         assert isinstance(out, tuple) and len(out) == 1
 
         if highlevel:
-            return awkward1._util.wrap(out[0], behavior=behavior)
+            return ak._util.wrap(out[0], behavior=behavior)
         else:
             return out[0]
 
@@ -693,11 +686,11 @@ def with_parameter(array, parameter, value, highlevel=True):
     You can also remove a single parameter with this function, since setting
     a parameter to None is equivalent to removing it.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
 
-    if isinstance(layout, awkward1.partition.PartitionedArray):
+    if isinstance(layout, ak.partition.PartitionedArray):
         out = layout.replace_partitions(
             x.withparameter(parameter, value) for x in layout.partitions
         )
@@ -705,7 +698,7 @@ def with_parameter(array, parameter, value, highlevel=True):
         out = layout.withparameter(parameter, value)
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
     else:
         return out
 
@@ -723,16 +716,16 @@ def without_parameters(array, highlevel=True):
     Note that a "new array" is a lightweight shallow copy, not a duplication
     of large data buffers.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
 
-    out = awkward1._util.recursively_apply(
+    out = ak._util.recursively_apply(
         layout, lambda layout, depth: None, keep_parameters=False
     )
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
     else:
         return out
 
@@ -740,7 +733,7 @@ def without_parameters(array, highlevel=True):
 _ZEROS = object()
 
 
-@awkward1._connect._numpy.implements("zeros_like")
+@ak._connect._numpy.implements("zeros_like")
 def zeros_like(array, highlevel=True):
     """
     Args:
@@ -758,7 +751,7 @@ def zeros_like(array, highlevel=True):
     return full_like(array, _ZEROS, highlevel=highlevel)
 
 
-@awkward1._connect._numpy.implements("ones_like")
+@ak._connect._numpy.implements("ones_like")
 def ones_like(array, highlevel=True):
     """
     Args:
@@ -776,7 +769,7 @@ def ones_like(array, highlevel=True):
     return full_like(array, 1, highlevel=highlevel)
 
 
-@awkward1._connect._numpy.implements("full_like")
+@ak._connect._numpy.implements("full_like")
 def full_like(array, fill_value, highlevel=True):
     """
     Args:
@@ -837,91 +830,91 @@ def full_like(array, fill_value, highlevel=True):
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
 
     def getfunction(layout, depth):
         if layout.parameter("__array__") == "bytestring" and fill_value is _ZEROS:
-            nplike = awkward1.nplike.of(layout)
+            nplike = ak.nplike.of(layout)
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
-            return lambda: awkward1.layout.ListArray64(
-                awkward1.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
-                awkward1.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
-                awkward1.layout.NumpyArray(asbytes, parameters={"__array__": "byte"}),
+            return lambda: ak.layout.ListArray64(
+                ak.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+                ak.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+                ak.layout.NumpyArray(asbytes, parameters={"__array__": "byte"}),
                 parameters={"__array__": "bytestring"},
             )
 
         elif layout.parameter("__array__") == "bytestring":
-            nplike = awkward1.nplike.of(layout)
+            nplike = ak.nplike.of(layout)
             if isinstance(fill_value, bytes):
                 asbytes = fill_value
             elif (
                 isinstance(fill_value, str)
-                or (awkward1._util.py27 and isinstance(fill_value, awkward1._util.unicode))
+                or (ak._util.py27 and isinstance(fill_value, ak._util.unicode))
             ):
                 asbytes = fill_value.encode("utf-8", "surrogateescape")
             else:
                 asbytes = str(fill_value).encode("utf-8", "surrogateescape")
             asbytes = nplike.frombuffer(asbytes, dtype=np.uint8)
 
-            return lambda: awkward1.layout.ListArray64(
-                awkward1.layout.Index64(
+            return lambda: ak.layout.ListArray64(
+                ak.layout.Index64(
                     nplike.zeros(len(layout), dtype=np.int64)
                 ),
-                awkward1.layout.Index64(
+                ak.layout.Index64(
                     nplike.full(len(layout), len(asbytes), dtype=np.int64)
                 ),
-                awkward1.layout.NumpyArray(
+                ak.layout.NumpyArray(
                     asbytes, parameters={"__array__": "byte"}
                 ),
                 parameters={"__array__": "bytestring"},
             )
 
         elif layout.parameter("__array__") == "string" and fill_value is _ZEROS:
-            nplike = awkward1.nplike.of(layout)
+            nplike = ak.nplike.of(layout)
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
-            return lambda: awkward1.layout.ListArray64(
-                awkward1.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
-                awkward1.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
-                awkward1.layout.NumpyArray(asbytes, parameters={"__array__": "char"}),
+            return lambda: ak.layout.ListArray64(
+                ak.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+                ak.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
+                ak.layout.NumpyArray(asbytes, parameters={"__array__": "char"}),
                 parameters={"__array__": "string"},
             )
 
         elif layout.parameter("__array__") == "string":
-            nplike = awkward1.nplike.of(layout)
+            nplike = ak.nplike.of(layout)
             asstr = str(fill_value).encode("utf-8", "surrogateescape")
             asbytes = nplike.frombuffer(asstr, dtype=np.uint8)
-            return lambda: awkward1.layout.ListArray64(
-                awkward1.layout.Index64(
+            return lambda: ak.layout.ListArray64(
+                ak.layout.Index64(
                     nplike.zeros(len(layout), dtype=np.int64)
                 ),
-                awkward1.layout.Index64(
+                ak.layout.Index64(
                     nplike.full(len(layout), len(asbytes), dtype=np.int64)
                 ),
-                awkward1.layout.NumpyArray(
+                ak.layout.NumpyArray(
                     asbytes, parameters={"__array__": "char"}
                 ),
                 parameters={"__array__": "string"},
             )
 
-        elif isinstance(layout, awkward1.layout.NumpyArray):
-            nplike = awkward1.nplike.of(layout)
+        elif isinstance(layout, ak.layout.NumpyArray):
+            nplike = ak.nplike.of(layout)
             original = nplike.asarray(layout)
             if fill_value == 0 or fill_value is _ZEROS:
-                return lambda: awkward1.layout.NumpyArray(
+                return lambda: ak.layout.NumpyArray(
                     nplike.zeros_like(original),
                     layout.identities,
                     layout.parameters,
                 )
             elif fill_value == 1:
-                return lambda: awkward1.layout.NumpyArray(
+                return lambda: ak.layout.NumpyArray(
                     nplike.ones_like(original),
                     layout.identities,
                     layout.parameters,
                 )
             else:
-                return lambda: awkward1.layout.NumpyArray(
+                return lambda: ak.layout.NumpyArray(
                     nplike.full_like(original, fill_value),
                     layout.identities,
                     layout.parameters,
@@ -929,14 +922,14 @@ def full_like(array, fill_value, highlevel=True):
         else:
             return None
 
-    out = awkward1._util.recursively_apply(layout, getfunction)
+    out = ak._util.recursively_apply(layout, getfunction)
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
 
-@awkward1._connect._numpy.implements("broadcast_arrays")
+@ak._connect._numpy.implements("broadcast_arrays")
 def broadcast_arrays(*arrays, **kwargs):
     """
     Args:
@@ -1036,35 +1029,35 @@ def broadcast_arrays(*arrays, **kwargs):
     #ak.Array.type, but it is lost when converting an array into JSON or
     Python objects.
     """
-    (highlevel,) = awkward1._util.extra((), kwargs, [("highlevel", True)])
+    (highlevel,) = ak._util.extra((), kwargs, [("highlevel", True)])
 
     inputs = []
     for x in arrays:
-        y = awkward1.operations.convert.to_layout(
+        y = ak.operations.convert.to_layout(
             x, allow_record=True, allow_other=True
         )
-        if isinstance(y, awkward1.partition.PartitionedArray):
+        if isinstance(y, ak.partition.PartitionedArray):
             y = y.toContent()
-        if not isinstance(y, (awkward1.layout.Content, awkward1.layout.Record)):
-            y = awkward1.layout.NumpyArray(awkward1.nplike.of(*arrays).array([y]))
+        if not isinstance(y, (ak.layout.Content, ak.layout.Record)):
+            y = ak.layout.NumpyArray(ak.nplike.of(*arrays).array([y]))
         inputs.append(y)
 
     def getfunction(inputs, depth):
-        if all(isinstance(x, awkward1.layout.NumpyArray) for x in inputs):
+        if all(isinstance(x, ak.layout.NumpyArray) for x in inputs):
             return lambda: tuple(inputs)
         else:
             return None
 
-    behavior = awkward1._util.behaviorof(*arrays)
-    out = awkward1._util.broadcast_and_apply(inputs, getfunction, behavior)
+    behavior = ak._util.behaviorof(*arrays)
+    out = ak._util.broadcast_and_apply(inputs, getfunction, behavior)
     assert isinstance(out, tuple)
     if highlevel:
-        return [awkward1._util.wrap(x, behavior) for x in out]
+        return [ak._util.wrap(x, behavior) for x in out]
     else:
         return list(out)
 
 
-@awkward1._connect._numpy.implements("concatenate")
+@ak._connect._numpy.implements("concatenate")
 def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     """
     Args:
@@ -1086,26 +1079,26 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     element for element, and similarly for deeper levels.
     """
     contents = [
-        awkward1.operations.convert.to_layout(x, allow_record=False if axis == 0 else True,
+        ak.operations.convert.to_layout(x, allow_record=False if axis == 0 else True,
             allow_other=True) for x in arrays
     ]
     contents = [
-        x.toContent() if isinstance(x, awkward1.partition.PartitionedArray) else x
+        x.toContent() if isinstance(x, ak.partition.PartitionedArray) else x
         for x in contents
     ]
-    if not any(isinstance(x, awkward1.layout.Content) for x in contents):
+    if not any(isinstance(x, ak.layout.Content) for x in contents):
         raise ValueError(
             "need at least one array to concatenate"
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
 
     posaxis = [
-        x for x in contents if isinstance(x, awkward1.layout.Content)
+        x for x in contents if isinstance(x, ak.layout.Content)
     ][0].axis_wrap_if_negative(axis)
     if posaxis == 0:
         contents = [
-            x if isinstance(x, awkward1.layout.Content)
-            else awkward1.operations.convert.to_layout([x])
+            x if isinstance(x, ak.layout.Content)
+            else ak.operations.convert.to_layout([x])
             for x in contents
         ]
         batch = [contents[0]]
@@ -1120,31 +1113,31 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
 
     else:
         for x in contents[1:]:
-            if isinstance(x, awkward1.layout.Content) and x.axis_wrap_if_negative(axis) != posaxis:
+            if isinstance(x, ak.layout.Content) and x.axis_wrap_if_negative(axis) != posaxis:
                 raise ValueError(
                     "cannot concatenate arrays in different axis"
-                    + awkward1._util.exception_suffix(__file__)
+                    + ak._util.exception_suffix(__file__)
                 )
 
         def getfunction(inputs, depth):
             if depth == posaxis:
-                nplike = awkward1.nplike.of(*inputs)
+                nplike = ak.nplike.of(*inputs)
                 next_length = len([
-                    x for x in inputs if isinstance(x, awkward1.layout.Content)
+                    x for x in inputs if isinstance(x, ak.layout.Content)
                 ][0])
                 max_depth = max([
-                    x.purelist_depth for x in inputs if isinstance(x, awkward1.layout.Content)
+                    x.purelist_depth for x in inputs if isinstance(x, ak.layout.Content)
                 ])
                 what = []
                 for x in inputs:
-                    if isinstance(x, awkward1.layout.Content):
+                    if isinstance(x, ak.layout.Content):
                         if x.purelist_depth < max_depth:
-                            what.append(awkward1.layout.RegularArray(x, 1))
+                            what.append(ak.layout.RegularArray(x, 1))
                         else:
                             what.append(x)
                     else:
-                        what.append(awkward1.layout.RegularArray(
-                            awkward1.layout.NumpyArray(nplike.repeat(x, next_length)),
+                        what.append(ak.layout.RegularArray(
+                            ak.layout.NumpyArray(nplike.repeat(x, next_length)),
                             1
                         ))
                 out = what[0].mergemany_as_union(what[1:], 1)
@@ -1152,19 +1145,19 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             else:
                 return None
 
-        out = awkward1._util.broadcast_and_apply(contents, getfunction,
-            behavior=awkward1._util.behaviorof(*arrays), allow_records=True)[0]
+        out = ak._util.broadcast_and_apply(contents, getfunction,
+            behavior=ak._util.behaviorof(*arrays), allow_records=True)[0]
 
-    if isinstance(out, awkward1._util.uniontypes):
+    if isinstance(out, ak._util.uniontypes):
         out = out.simplify(mergebool=mergebool)
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(*arrays))
+        return ak._util.wrap(out, behavior=ak._util.behaviorof(*arrays))
     else:
         return out
 
 
-@awkward1._connect._numpy.implements("where")
+@ak._connect._numpy.implements("where")
 def where(condition, *args, **kwargs):
     """
     Args:
@@ -1195,78 +1188,78 @@ def where(condition, *args, **kwargs):
     for all `i`. The structure of `x` and `y` do not need to be the same; if
     they are incompatible types, the output will have #ak.type.UnionType.
     """
-    mergebool, highlevel = awkward1._util.extra(
+    mergebool, highlevel = ak._util.extra(
         (), kwargs, [("mergebool", True), ("highlevel", True)]
     )
 
-    akcondition = awkward1.operations.convert.to_layout(
+    akcondition = ak.operations.convert.to_layout(
         condition, allow_record=False, allow_other=False
     )
 
     if len(args) == 0:
-        nplike = awkward1.nplike.of(akcondition)
-        if isinstance(akcondition, awkward1.partition.PartitionedArray):
+        nplike = ak.nplike.of(akcondition)
+        if isinstance(akcondition, ak.partition.PartitionedArray):
             akcondition = akcondition.replace_partitions(
                 [
-                    awkward1.layout.NumpyArray(awkward1.operations.convert.to_numpy(x))
+                    ak.layout.NumpyArray(ak.operations.convert.to_numpy(x))
                     for x in akcondition.partitions
                 ]
             )
         else:
-            akcondition = awkward1.layout.NumpyArray(
-                awkward1.operations.convert.to_numpy(akcondition)
+            akcondition = ak.layout.NumpyArray(
+                ak.operations.convert.to_numpy(akcondition)
             )
-        out = nplike.nonzero(awkward1.operations.convert.to_numpy(akcondition))
+        out = nplike.nonzero(ak.operations.convert.to_numpy(akcondition))
         if highlevel:
             return tuple(
-                awkward1._util.wrap(
-                    awkward1.layout.NumpyArray(x), awkward1._util.behaviorof(condition)
+                ak._util.wrap(
+                    ak.layout.NumpyArray(x), ak._util.behaviorof(condition)
                 )
                 for x in out
             )
         else:
-            return tuple(awkward1.layout.NumpyArray(x) for x in out)
+            return tuple(ak.layout.NumpyArray(x) for x in out)
 
     elif len(args) == 1:
         raise ValueError(
             "either both or neither of x and y should be given"
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
 
     elif len(args) == 2:
         left, right = [
-            awkward1.operations.convert.to_layout(x, allow_record=False, allow_other=True)
+            ak.operations.convert.to_layout(x, allow_record=False, allow_other=True)
             for x in args
         ]
         good_arrays = [akcondition]
-        if isinstance(left, awkward1.layout.Content):
+        if isinstance(left, ak.layout.Content):
             good_arrays.append(left)
-        if isinstance(right, awkward1.layout.Content):
+        if isinstance(right, ak.layout.Content):
             good_arrays.append(right)
-        nplike = awkward1.nplike.of(*good_arrays)
+        nplike = ak.nplike.of(*good_arrays)
 
         def getfunction(inputs, depth):
             akcondition, left, right = inputs
-            if isinstance(akcondition, awkward1.layout.NumpyArray):
+            if isinstance(akcondition, ak.layout.NumpyArray):
                 npcondition = nplike.asarray(akcondition)
-                tags = awkward1.layout.Index8((npcondition == 0).view(np.int8))
-                index = awkward1.layout.Index64(nplike.arange(len(tags), dtype=np.int64))
-                if not isinstance(left, awkward1.layout.Content):
-                    left = awkward1.layout.NumpyArray(nplike.repeat(left, len(tags)))
-                if not isinstance(right, awkward1.layout.Content):
-                    right = awkward1.layout.NumpyArray(nplike.repeat(right, len(tags)))
-                tmp = awkward1.layout.UnionArray8_64(tags, index, [left, right])
+                tags = ak.layout.Index8((npcondition == 0).view(np.int8))
+                index = ak.layout.Index64(nplike.arange(len(tags), dtype=np.int64))
+                if not isinstance(left, ak.layout.Content):
+                    left = ak.layout.NumpyArray(nplike.repeat(left, len(tags)))
+                if not isinstance(right, ak.layout.Content):
+                    right = ak.layout.NumpyArray(nplike.repeat(right, len(tags)))
+                tmp = ak.layout.UnionArray8_64(tags, index, [left, right])
                 return lambda: (tmp.simplify(mergebool=mergebool),)
             else:
                 return None
 
-        behavior = awkward1._util.behaviorof(akcondition, left, right)
-        out = awkward1._util.broadcast_and_apply(
+        behavior = ak._util.behaviorof(akcondition, left, right)
+        out = ak._util.broadcast_and_apply(
             [akcondition, left, right], getfunction, behavior
         )
 
         if highlevel:
-            return awkward1._util.wrap(out[0], behavior=behavior)
+            return ak._util.wrap(out[0], behavior=behavior)
         else:
             return out[0]
 
@@ -1274,7 +1267,7 @@ def where(condition, *args, **kwargs):
         raise TypeError(
             "where() takes from 1 to 3 positional arguments but {0} were "
             "given".format(len(args) + 1)
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
 
 
@@ -1361,36 +1354,36 @@ def flatten(array, axis=1, highlevel=True):
     However, it is important to keep in mind that this is a special case:
     #ak.flatten and `content` are not interchangeable!
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
-    nplike = awkward1.nplike.of(layout)
+    nplike = ak.nplike.of(layout)
 
     if axis is None:
-        out = awkward1._util.completely_flatten(layout)
+        out = ak._util.completely_flatten(layout)
         assert isinstance(out, tuple) and all(isinstance(x, np.ndarray) for x in out)
 
         if any(isinstance(x, nplike.ma.MaskedArray) for x in out):
-            out = awkward1.layout.NumpyArray(nplike.ma.concatenate(out))
+            out = ak.layout.NumpyArray(nplike.ma.concatenate(out))
         else:
-            out = awkward1.layout.NumpyArray(nplike.concatenate(out))
+            out = ak.layout.NumpyArray(nplike.concatenate(out))
 
     elif axis == 0:
 
         def apply(layout):
-            if isinstance(layout, awkward1._util.virtualtypes):
+            if isinstance(layout, ak._util.virtualtypes):
                 return apply(layout.array)
 
-            elif isinstance(layout, awkward1._util.unknowntypes):
-                return apply(awkward1.layout.NumpyArray(nplike.array([])))
+            elif isinstance(layout, ak._util.unknowntypes):
+                return apply(ak.layout.NumpyArray(nplike.array([])))
 
-            elif isinstance(layout, awkward1._util.indexedtypes):
+            elif isinstance(layout, ak._util.indexedtypes):
                 return apply(layout.project())
 
-            elif isinstance(layout, awkward1._util.uniontypes):
+            elif isinstance(layout, ak._util.uniontypes):
                 if not any(
-                    isinstance(x, awkward1._util.optiontypes)
-                    and not isinstance(x, awkward1.layout.UnmaskedArray)
+                    isinstance(x, ak._util.optiontypes)
+                    and not isinstance(x, ak.layout.UnmaskedArray)
                     for x in layout.contents
                 ):
                     return layout
@@ -1400,8 +1393,8 @@ def flatten(array, axis=1, highlevel=True):
                 bigmask = nplike.empty(len(index), dtype=np.bool_)
                 for tag, content in enumerate(layout.contents):
                     if isinstance(
-                        content, awkward1._util.optiontypes
-                    ) and not isinstance(content, awkward1.layout.UnmaskedArray):
+                        content, ak._util.optiontypes
+                    ) and not isinstance(content, ak.layout.UnmaskedArray):
                         bigmask[:] = False
                         bigmask[tags == tag] = nplike.asarray(
                             content.bytemask()
@@ -1409,27 +1402,27 @@ def flatten(array, axis=1, highlevel=True):
                         index[bigmask] = -1
 
                 good = index >= 0
-                return awkward1.layout.UnionArray8_64(
-                    awkward1.layout.Index8(tags[good]),
-                    awkward1.layout.Index64(index[good]),
+                return ak.layout.UnionArray8_64(
+                    ak.layout.Index8(tags[good]),
+                    ak.layout.Index64(index[good]),
                     layout.contents,
                 )
 
-            elif isinstance(layout, awkward1._util.optiontypes):
+            elif isinstance(layout, ak._util.optiontypes):
                 return layout.project()
 
             else:
                 return layout
 
-        if isinstance(layout, awkward1.partition.PartitionedArray):
-            out = awkward1.partition.IrregularlyPartitionedArray(
+        if isinstance(layout, ak.partition.PartitionedArray):
+            out = ak.partition.IrregularlyPartitionedArray(
                 [apply(x) for x in layout.partitions]
             )
         else:
             out = apply(layout)
 
         if highlevel:
-            return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+            return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
         else:
             return out
 
@@ -1437,7 +1430,7 @@ def flatten(array, axis=1, highlevel=True):
         out = layout.flatten(axis)
 
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
@@ -1506,17 +1499,17 @@ def local_index(array, axis=-1, highlevel=True):
                        2               8.8
                        3               9.9
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
     out = layout.localindex(axis)
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
 
-@awkward1._connect._numpy.implements("sort")
+@ak._connect._numpy.implements("sort")
 def sort(array, axis=-1, ascending=True, stable=True, highlevel=True):
     """
     Args:
@@ -1540,17 +1533,17 @@ def sort(array, axis=-1, ascending=True, stable=True, highlevel=True):
         >>> ak.sort(ak.Array([[7, 5, 7], [], [2], [8, 2]]))
         <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     out = layout.sort(axis, ascending, stable)
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
 
-@awkward1._connect._numpy.implements("argsort")
+@ak._connect._numpy.implements("argsort")
 def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True):
     """
     Args:
@@ -1585,12 +1578,12 @@ def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True):
         >>> data[index]
         <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     out = layout.argsort(axis, ascending, stable)
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
@@ -1709,7 +1702,7 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True):
         >>> ak.type(ak.pad_none(array, 2, axis=2, clip=True))
         3 * var *   2 * ?float64
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     if clip:
@@ -1717,7 +1710,7 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True):
     else:
         out = layout.rpad(target, axis)
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
@@ -1755,44 +1748,44 @@ def fill_none(array, value, highlevel=True):
 
     The values could be floating-point numbers or strings.
     """
-    arraylayout = awkward1.operations.convert.to_layout(
+    arraylayout = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
-    nplike = awkward1.nplike.of(arraylayout)
+    nplike = ak.nplike.of(arraylayout)
 
-    if isinstance(arraylayout, awkward1.partition.PartitionedArray):
-        out = awkward1.partition.apply(
+    if isinstance(arraylayout, ak.partition.PartitionedArray):
+        out = ak.partition.apply(
             lambda x: fill_none(x, value, highlevel=False), arraylayout
         )
 
     else:
         if isinstance(value, Iterable) and not (
             isinstance(value, (str, bytes))
-            or (awkward1._util.py27 and isinstance(value, awkward1._util.unicode))
+            or (ak._util.py27 and isinstance(value, ak._util.unicode))
         ):
-            valuelayout = awkward1.operations.convert.to_layout(
+            valuelayout = ak.operations.convert.to_layout(
                 value, allow_record=True, allow_other=False
             )
-            if isinstance(valuelayout, awkward1.layout.Record):
+            if isinstance(valuelayout, ak.layout.Record):
                 valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
             elif len(valuelayout) == 0:
-                offsets = awkward1.layout.Index64(
+                offsets = ak.layout.Index64(
                     nplike.array([0, 0], dtype=np.int64)
                 )
-                valuelayout = awkward1.layout.ListOffsetArray64(offsets, valuelayout)
+                valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
             else:
-                valuelayout = awkward1.layout.RegularArray(
+                valuelayout = ak.layout.RegularArray(
                     valuelayout, len(valuelayout)
                 )
         else:
-            valuelayout = awkward1.operations.convert.to_layout(
+            valuelayout = ak.operations.convert.to_layout(
                 [value], allow_record=True, allow_other=False
             )
 
         out = arraylayout.fillna(valuelayout)
 
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
@@ -1809,18 +1802,18 @@ def is_none(array, highlevel=True):
     """
 
     def apply(layout):
-        nplike = awkward1.nplike.of(layout)
+        nplike = ak.nplike.of(layout)
 
-        if isinstance(layout, awkward1._util.virtualtypes):
+        if isinstance(layout, ak._util.virtualtypes):
             return apply(layout.array)
 
-        elif isinstance(layout, awkward1._util.unknowntypes):
-            return apply(awkward1.layout.NumpyArray(nplike.array([])))
+        elif isinstance(layout, ak._util.unknowntypes):
+            return apply(ak.layout.NumpyArray(nplike.array([])))
 
-        elif isinstance(layout, awkward1._util.indexedtypes):
+        elif isinstance(layout, ak._util.indexedtypes):
             return apply(layout.project())
 
-        elif isinstance(layout, awkward1._util.uniontypes):
+        elif isinstance(layout, ak._util.uniontypes):
             contents = [apply(layout.project(i)) for i in range(layout.numcontents)]
             out = nplike.empty(len(layout), dtype=np.bool_)
             tags = nplike.asarray(layout.tags)
@@ -1828,23 +1821,23 @@ def is_none(array, highlevel=True):
                 out[tags == tag] = content
             return out
 
-        elif isinstance(layout, awkward1._util.optiontypes):
+        elif isinstance(layout, ak._util.optiontypes):
             return nplike.asarray(layout.bytemask()).view(np.bool_)
 
         else:
             return nplike.zeros(len(layout), dtype=np.bool_)
 
-    layout = awkward1.operations.convert.to_layout(array, allow_record=False)
+    layout = ak.operations.convert.to_layout(array, allow_record=False)
 
-    if isinstance(layout, awkward1.partition.PartitionedArray):
-        out = awkward1.partition.apply(
-            lambda x: awkward1.layout.NumpyArray(apply(x)), layout
+    if isinstance(layout, ak.partition.PartitionedArray):
+        out = ak.partition.apply(
+            lambda x: ak.layout.NumpyArray(apply(x)), layout
         )
     else:
-        out = awkward1.layout.NumpyArray(apply(layout))
+        out = ak.layout.NumpyArray(apply(layout))
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
     else:
         return out
 
@@ -1870,25 +1863,25 @@ def singletons(array, highlevel=True):
     """
 
     def getfunction(layout, depth):
-        nplike = awkward1.nplike.of(layout)
+        nplike = ak.nplike.of(layout)
 
-        if isinstance(layout, awkward1._util.optiontypes):
+        if isinstance(layout, ak._util.optiontypes):
             nulls = nplike.asarray(layout.bytemask()).view(np.bool_)
             offsets = nplike.ones(len(layout) + 1, dtype=np.int64)
             offsets[0] = 0
             offsets[1:][nulls] = 0
             nplike.cumsum(offsets, out=offsets)
-            return lambda: awkward1.layout.ListOffsetArray64(
-                awkward1.layout.Index64(offsets), layout.project()
+            return lambda: ak.layout.ListOffsetArray64(
+                ak.layout.Index64(offsets), layout.project()
             )
         else:
             return None
 
-    layout = awkward1.operations.convert.to_layout(array)
-    out = awkward1._util.recursively_apply(layout, getfunction)
+    layout = ak.operations.convert.to_layout(array)
+    out = ak._util.recursively_apply(layout, getfunction)
 
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
@@ -1918,14 +1911,14 @@ def firsts(array, axis=1, highlevel=True):
     if axis <= 0:
         raise NotImplementedError(
             "ak.firsts with axis={0}".format(axis)
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
     toslice = (slice(None, None, None),) * axis + (0,)
-    out = awkward1.mask(array, awkward1.num(array, axis=axis) > 0, highlevel=False)[
+    out = ak.mask(array, ak.num(array, axis=axis) > 0, highlevel=False)[
         toslice
     ]
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
@@ -2131,27 +2124,27 @@ def cartesian(
     #ak.argcartesian form can be particularly useful as nested indexing in
     #ak.Array.__getitem__.
     """
-    behavior = awkward1._util.behaviorof(*arrays)
-    nplike = awkward1.nplike.of(*arrays)
+    behavior = ak._util.behaviorof(*arrays)
+    nplike = ak.nplike.of(*arrays)
 
     is_partitioned = False
     if isinstance(arrays, dict):
         new_arrays = {}
         for n, x in arrays.items():
-            new_arrays[n] = awkward1.operations.convert.to_layout(
+            new_arrays[n] = ak.operations.convert.to_layout(
                 x, allow_record=False, allow_other=False
             )
-            if isinstance(new_arrays[n], awkward1.partition.PartitionedArray):
+            if isinstance(new_arrays[n], ak.partition.PartitionedArray):
                 is_partitioned = True
     else:
         new_arrays = []
         for x in arrays:
             new_arrays.append(
-                awkward1.operations.convert.to_layout(
+                ak.operations.convert.to_layout(
                     x, allow_record=False, allow_other=False
                 )
             )
-            if isinstance(new_arrays[-1], awkward1.partition.PartitionedArray):
+            if isinstance(new_arrays[-1], ak.partition.PartitionedArray):
                 is_partitioned = True
 
     if with_name is not None:
@@ -2164,7 +2157,7 @@ def cartesian(
     if axis < 0:
         raise ValueError(
             "the 'axis' of cartesian must be non-negative"
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
 
     elif axis == 0:
@@ -2178,7 +2171,7 @@ def cartesian(
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be dict keys "
                     "for a dict of arrays"
-                    + awkward1._util.exception_suffix(__file__)
+                    + ak._util.exception_suffix(__file__)
                 )
             recordlookup = []
             layouts = []
@@ -2200,7 +2193,7 @@ def cartesian(
                 raise ValueError(
                     "the 'nested' prarmeter of cartesian must be integers in "
                     "[0, len(arrays) - 1) for an iterable of arrays"
-                    + awkward1._util.exception_suffix(__file__)
+                    + ak._util.exception_suffix(__file__)
                 )
             recordlookup = None
             layouts = []
@@ -2208,44 +2201,44 @@ def cartesian(
                 layouts.append(x)
 
         layouts = [
-            x.toContent() if isinstance(x, awkward1.partition.PartitionedArray) else x
+            x.toContent() if isinstance(x, ak.partition.PartitionedArray) else x
             for x in layouts
         ]
 
         indexes = [
-            awkward1.layout.Index64(x.reshape(-1))
+            ak.layout.Index64(x.reshape(-1))
             for x in nplike.meshgrid(
                 *[nplike.arange(len(x), dtype=np.int64) for x in layouts],
                 indexing="ij"
             )
         ]
         outs = [
-            awkward1.layout.IndexedArray64(x, y)
+            ak.layout.IndexedArray64(x, y)
             for x, y in __builtins__["zip"](indexes, layouts)
         ]
 
-        result = awkward1.layout.RecordArray(outs, recordlookup, parameters=parameters)
+        result = ak.layout.RecordArray(outs, recordlookup, parameters=parameters)
         for i in range(len(new_arrays) - 1, -1, -1):
             if i in nested:
-                result = awkward1.layout.RegularArray(result, len(layouts[i + 1]))
+                result = ak.layout.RegularArray(result, len(layouts[i + 1]))
 
     elif is_partitioned:
         sample = None
         if isinstance(new_arrays, dict):
             for x in new_arrays.values():
-                if isinstance(x, awkward1.partition.PartitionedArray):
+                if isinstance(x, ak.partition.PartitionedArray):
                     sample = x
                     break
         else:
             for x in new_arrays:
-                if isinstance(x, awkward1.partition.PartitionedArray):
+                if isinstance(x, ak.partition.PartitionedArray):
                     sample = x
                     break
 
-        partition_arrays = awkward1.partition.partition_as(sample, new_arrays)
+        partition_arrays = ak.partition.partition_as(sample, new_arrays)
 
         output = []
-        for part_arrays in awkward1.partition.iterate(
+        for part_arrays in ak.partition.iterate(
             sample.numpartitions, partition_arrays
         ):
             output.append(
@@ -2259,7 +2252,7 @@ def cartesian(
                 )
             )
 
-        result = awkward1.partition.IrregularlyPartitionedArray(output)
+        result = ak.partition.IrregularlyPartitionedArray(output)
 
     else:
 
@@ -2267,7 +2260,7 @@ def cartesian(
             if i == 0:
                 return layout
             else:
-                return awkward1.layout.RegularArray(newaxis(layout, i - 1), 1)
+                return ak.layout.RegularArray(newaxis(layout, i - 1), 1)
 
         def getfunction1(layout, depth, i):
             if depth == 2:
@@ -2280,7 +2273,7 @@ def cartesian(
                 inside = len(new_arrays) - i - 1
                 outside = i
                 return lambda: newaxis(
-                    awkward1._util.recursively_apply(
+                    ak._util.recursively_apply(
                         layout, getfunction1, args=(inside,)
                     ),
                     outside,
@@ -2289,8 +2282,8 @@ def cartesian(
                 return None
 
         def apply(x, i):
-            return awkward1._util.recursively_apply(
-                awkward1.operations.convert.to_layout(
+            return ak._util.recursively_apply(
+                ak.operations.convert.to_layout(
                     x, allow_record=False, allow_other=False
                 ),
                 getfunction2,
@@ -2308,7 +2301,7 @@ def cartesian(
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be dict keys "
                     "for a dict of arrays"
-                    + awkward1._util.exception_suffix(__file__)
+                    + ak._util.exception_suffix(__file__)
                 )
             recordlookup = []
             layouts = []
@@ -2328,7 +2321,7 @@ def cartesian(
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be integers in "
                     "[0, len(arrays) - 1) for an iterable of arrays"
-                    + awkward1._util.exception_suffix(__file__)
+                    + ak._util.exception_suffix(__file__)
                 )
             recordlookup = None
             layouts = []
@@ -2340,14 +2333,14 @@ def cartesian(
         def getfunction3(inputs, depth):
             if depth == axis + len(new_arrays):
                 return lambda: (
-                    awkward1.layout.RecordArray(
+                    ak.layout.RecordArray(
                         inputs, recordlookup, parameters=parameters
                     ),
                 )
             else:
                 return None
 
-        out = awkward1._util.broadcast_and_apply(layouts, getfunction3, behavior)
+        out = ak._util.broadcast_and_apply(layouts, getfunction3, behavior)
         assert isinstance(out, tuple) and len(out) == 1
         result = out[0]
 
@@ -2356,7 +2349,7 @@ def cartesian(
             result = flatten(result, axis=axis, highlevel=False)
 
     if highlevel:
-        return awkward1._util.wrap(result, behavior)
+        return ak._util.wrap(result, behavior)
     else:
         return result
 
@@ -2421,7 +2414,7 @@ def argcartesian(
     if axis < 0:
         raise ValueError(
             "the 'axis' of argcartesian must be non-negative"
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
 
     else:
@@ -2429,7 +2422,7 @@ def argcartesian(
             layouts = dict(
                 (
                     n,
-                    awkward1.operations.convert.to_layout(
+                    ak.operations.convert.to_layout(
                         x, allow_record=False, allow_other=False
                     ).localindex(axis),
                 )
@@ -2437,7 +2430,7 @@ def argcartesian(
             )
         else:
             layouts = [
-                awkward1.operations.convert.to_layout(
+                ak.operations.convert.to_layout(
                     x, allow_record=False, allow_other=False
                 ).localindex(axis)
                 for x in arrays
@@ -2455,7 +2448,7 @@ def argcartesian(
         )
 
         if highlevel:
-            return awkward1._util.wrap(result, awkward1._util.behaviorof(*arrays))
+            return ak._util.wrap(result, ak._util.behaviorof(*arrays))
         else:
             return result
 
@@ -2613,14 +2606,14 @@ def combinations(
     if with_name is not None:
         parameters["__record__"] = with_name
 
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     out = layout.combinations(
         n, replacement=replacement, keys=fields, parameters=parameters, axis=axis
     )
     if highlevel:
-        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
     else:
         return out
 
@@ -2677,17 +2670,17 @@ def argcombinations(
     if axis < 0:
         raise ValueError(
             "the 'axis' for argcombinations must be non-negative"
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
     else:
-        layout = awkward1.operations.convert.to_layout(
+        layout = ak.operations.convert.to_layout(
             array, allow_record=False, allow_other=False
         ).localindex(axis)
         out = layout.combinations(
             n, replacement=replacement, keys=fields, parameters=parameters, axis=axis
         )
         if highlevel:
-            return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+            return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
         else:
             return out
 
@@ -2707,10 +2700,10 @@ def partitions(array):
     Arrays can only be partitioned in the first dimension; it is intended
     for performing calculations in memory-sized chunks.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
-    if isinstance(layout, awkward1.partition.PartitionedArray):
+    if isinstance(layout, ak.partition.PartitionedArray):
         return layout.lengths
     else:
         return None
@@ -2742,16 +2735,16 @@ def partitioned(generate, numpartitions, highlevel=True, behavior=None):
     partitions = []
     stops = []
     for partitionid in range(numpartitions):
-        layout = awkward1.operations.convert.to_layout(
+        layout = ak.operations.convert.to_layout(
             generate(partitionid), allow_record=False, allow_other=False
         )
         total_length += len(layout)
         partitions.append(layout)
         stops.append(total_length)
 
-    out = awkward1.partition.IrregularlyPartitionedArray(partitions, stops)
+    out = ak.partition.IrregularlyPartitionedArray(partitions, stops)
     if highlevel:
-        return awkward1._util.wrap(out, behavior=behavior)
+        return ak._util.wrap(out, behavior=behavior)
     else:
         return out
 
@@ -2781,12 +2774,12 @@ def repartition(array, lengths, highlevel=True):
     Arrays can only be partitioned in the first dimension; it is intended
     for performing calculations in memory-sized chunks.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
 
     if lengths is None:
-        if isinstance(layout, awkward1.partition.PartitionedArray):
+        if isinstance(layout, ak.partition.PartitionedArray):
             out = layout.toContent()
         else:
             out = layout
@@ -2796,7 +2789,7 @@ def repartition(array, lengths, highlevel=True):
             if lengths < 1:
                 raise ValueError(
                     "lengths must be at least 1 (and probably considerably more)"
-                    + awkward1._util.exception_suffix(__file__)
+                    + ak._util.exception_suffix(__file__)
                 )
 
             howmany = len(layout) // lengths
@@ -2816,18 +2809,18 @@ def repartition(array, lengths, highlevel=True):
             raise ValueError(
                 "cannot repartition array of length {0} into "
                 "these lengths".format(len(layout))
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
-        if isinstance(layout, awkward1.partition.PartitionedArray):
+        if isinstance(layout, ak.partition.PartitionedArray):
             out = layout.repartition(stops)
         else:
-            out = awkward1.partition.IrregularlyPartitionedArray.toPartitioned(
+            out = ak.partition.IrregularlyPartitionedArray.toPartitioned(
                 layout, stops
             )
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior=awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
     else:
         return out
 
@@ -2883,7 +2876,7 @@ def virtual(
 
         >>> len(array)
         3
-        >>> awkward1.type(array)
+        >>> ak.type(array)
         3 * var * float64
         >>> array[2]
         generating
@@ -2902,29 +2895,29 @@ def virtual(
         "uint8",
         "bool",
     ):
-        form = awkward1.forms.Form.fromjson('"' + form + '"')
+        form = ak.forms.Form.fromjson('"' + form + '"')
 
     elif isinstance(form, (str, bytes)) or (
-        awkward1._util.py27 and isinstance(form, awkward1._util.unicode)
+        ak._util.py27 and isinstance(form, ak._util.unicode)
     ):
-        form = awkward1.forms.Form.fromjson(form)
+        form = ak.forms.Form.fromjson(form)
 
-    elif form is not None and not isinstance(form, awkward1.forms.Form):
-        form = awkward1.forms.Form.fromjson(json.dumps(form))
+    elif form is not None and not isinstance(form, ak.forms.Form):
+        form = ak.forms.Form.fromjson(json.dumps(form))
 
-    gen = awkward1.layout.ArrayGenerator(
+    gen = ak.layout.ArrayGenerator(
         generate, args, kwargs, form=form, length=length
     )
-    if cache is not None and not isinstance(cache, awkward1.layout.ArrayCache):
-        maybe_wrapped = awkward1._util.MappingProxy.maybe_wrap(cache)
-        cache = awkward1.layout.ArrayCache(maybe_wrapped)
+    if cache is not None and not isinstance(cache, ak.layout.ArrayCache):
+        maybe_wrapped = ak._util.MappingProxy.maybe_wrap(cache)
+        cache = ak.layout.ArrayCache(maybe_wrapped)
 
-    out = awkward1.layout.VirtualArray(
+    out = ak.layout.VirtualArray(
         gen, cache, cache_key=cache_key, parameters=parameters
     )
 
     if highlevel:
-        return awkward1._util.wrap(out, behavior=behavior)
+        return ak._util.wrap(out, behavior=behavior)
     else:
         return out
 
@@ -2970,17 +2963,17 @@ def with_cache(array, cache, highlevel=True):
 
     See #ak.virtual.
     """
-    if cache is not None and not isinstance(cache, awkward1.layout.ArrayCache):
-        maybe_wrapped = awkward1._util.MappingProxy.maybe_wrap(cache)
-        cache = awkward1.layout.ArrayCache(maybe_wrapped)
+    if cache is not None and not isinstance(cache, ak.layout.ArrayCache):
+        maybe_wrapped = ak._util.MappingProxy.maybe_wrap(cache)
+        cache = ak.layout.ArrayCache(maybe_wrapped)
 
     def getfunction(layout, depth):
-        if isinstance(layout, awkward1.layout.VirtualArray):
+        if isinstance(layout, ak.layout.VirtualArray):
             if cache is None:
                 newcache = layout.cache
             elif layout.cache is None:
                 newcache = cache
-            return lambda: awkward1.layout.VirtualArray(
+            return lambda: ak.layout.VirtualArray(
                 layout.generator,
                 newcache,
                 layout.cache_key,
@@ -2990,16 +2983,16 @@ def with_cache(array, cache, highlevel=True):
         else:
             return None
 
-    out = awkward1._util.recursively_apply(
-        awkward1.operations.convert.to_layout(array), getfunction
+    out = ak._util.recursively_apply(
+        ak.operations.convert.to_layout(array), getfunction
     )
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
 
-@awkward1._connect._numpy.implements("size")
+@ak._connect._numpy.implements("size")
 def size(array, axis=None):
     """
     Args:
@@ -3021,19 +3014,19 @@ def size(array, axis=None):
     if axis is not None and axis < 0:
         raise NotImplementedError(
             "ak.size with axis < 0"
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
 
     def recurse(layout, axis, sizes):
-        nplike = awkward1.nplike.of(layout)
+        nplike = ak.nplike.of(layout)
 
-        if isinstance(layout, awkward1._util.virtualtypes):
+        if isinstance(layout, ak._util.virtualtypes):
             recurse(layout.array, axis, sizes)
-        elif isinstance(layout, awkward1._util.unknowntypes):
+        elif isinstance(layout, ak._util.unknowntypes):
             pass
-        elif isinstance(layout, awkward1._util.indexedtypes):
+        elif isinstance(layout, ak._util.indexedtypes):
             recurse(layout.content, axis, sizes)
-        elif isinstance(layout, awkward1._util.uniontypes):
+        elif isinstance(layout, ak._util.uniontypes):
             compare = None
             for x in layout.contents:
                 inner = []
@@ -3043,13 +3036,13 @@ def size(array, axis=None):
                 elif compare != inner:
                     raise ValueError(
                         "ak.size is ambiguous due to union of different " "sizes"
-                        + awkward1._util.exception_suffix(__file__)
+                        + ak._util.exception_suffix(__file__)
                     )
             sizes.extend(compare)
-        elif isinstance(layout, awkward1._util.optiontypes):
+        elif isinstance(layout, ak._util.optiontypes):
             return recurse(layout.content, axis, sizes)
-        elif isinstance(layout, awkward1._util.listtypes):
-            if isinstance(layout, awkward1.layout.RegularArray):
+        elif isinstance(layout, ak._util.listtypes):
+            if isinstance(layout, ak.layout.RegularArray):
                 sizes.append(layout.size)
             else:
                 sizes.append(None)
@@ -3057,7 +3050,7 @@ def size(array, axis=None):
                 recurse(layout.content, axis, sizes)
             elif axis > 0:
                 recurse(layout.content, axis - 1, sizes)
-        elif isinstance(layout, awkward1._util.recordtypes):
+        elif isinstance(layout, ak._util.recordtypes):
             compare = None
             for x in layout.contents:
                 inner = []
@@ -3067,10 +3060,10 @@ def size(array, axis=None):
                 elif compare != inner:
                     raise ValueError(
                         "ak.size is ambiguous due to record of different " "sizes"
-                        + awkward1._util.exception_suffix(__file__)
+                        + ak._util.exception_suffix(__file__)
                     )
             sizes.extend(compare)
-        elif isinstance(layout, awkward1.layout.NumpyArray):
+        elif isinstance(layout, ak.layout.NumpyArray):
             if axis is None:
                 sizes.extend(nplike.asarray(layout).shape[1:])
             else:
@@ -3078,13 +3071,13 @@ def size(array, axis=None):
         else:
             raise AssertionError(
                 "unrecognized Content type"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
-    layout = awkward1.operations.convert.to_layout(array, allow_record=False)
-    if isinstance(layout, awkward1.partition.PartitionedArray):
+    layout = ak.operations.convert.to_layout(array, allow_record=False)
+    if isinstance(layout, ak.partition.PartitionedArray):
         layout = layout.toContent()
-    layout = awkward1.layout.RegularArray(layout, len(layout))
+    layout = ak.layout.RegularArray(layout, len(layout))
 
     sizes = []
     recurse(layout, axis, sizes)
@@ -3097,7 +3090,7 @@ def size(array, axis=None):
                     "ak.size is ambiguous due to variable-length arrays "
                     "(try ak.flatten to remove structure or ak.to_numpy "
                     "to force regularity, if possible)"
-                    + awkward1._util.exception_suffix(__file__)
+                    + ak._util.exception_suffix(__file__)
                 )
             else:
                 out *= size
@@ -3108,13 +3101,13 @@ def size(array, axis=None):
                 "ak.size is ambiguous due to variable-length arrays at "
                 "axis {0} (try ak.flatten to remove structure or "
                 "ak.to_numpy to force regularity, if possible)".format(axis)
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
         else:
             return sizes[-1]
 
 
-@awkward1._connect._numpy.implements("atleast_1d")
+@ak._connect._numpy.implements("atleast_1d")
 def atleast_1d(*arrays):
     """
     Args:
@@ -3134,8 +3127,8 @@ def atleast_1d(*arrays):
 
     Note: this function returns a NumPy array, not an Awkward Array.
     """
-    nplike = awkward1.nplike.of(*arrays)
-    return nplike.atleast_1d(*[awkward1.operations.convert.to_numpy(x) for x in arrays])
+    nplike = ak.nplike.of(*arrays)
+    return nplike.atleast_1d(*[ak.operations.convert.to_numpy(x) for x in arrays])
 
 _dtype_to_string = {
     np.dtype(np.bool): "bool",
@@ -3179,16 +3172,16 @@ def values_astype(array, to, highlevel=True):
     if to_str is None:
         raise ValueError(
             "cannot use {0} to cast the numeric type of an array".format(to_dtype)
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
 
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     out = layout.numbers_to_type(to_str)
 
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 

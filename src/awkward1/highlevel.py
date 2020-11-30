@@ -4,32 +4,23 @@ from __future__ import absolute_import
 
 import re
 import keyword
-import warnings
 
 try:
     from collections.abc import Iterable
     from collections.abc import Sized
-    from collections.abc import MutableMapping
 except ImportError:
     from collections import Iterable
     from collections import Sized
-    from collections import MutableMapping
 
-import awkward1._connect._numpy
-import awkward1.nplike
-import awkward1.layout
-import awkward1.operations.convert
-import awkward1.operations.structure
+import awkward1 as ak
 
-
-np = awkward1.nplike.NumpyMetadata.instance()
-numpy = awkward1.nplike.Numpy.instance()
+np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
-
 def _suffix(array):
-    out = awkward1.operations.convert.kernels(array)
+    out = ak.operations.convert.kernels(array)
     if out is None or out == "cpu":
         return ""
     else:
@@ -37,7 +28,7 @@ def _suffix(array):
 
 
 class Array(
-    awkward1._connect._numpy.NDArrayOperatorsMixin,
+    ak._connect._numpy.NDArrayOperatorsMixin,
     Iterable,
     Sized,
 ):
@@ -217,10 +208,10 @@ class Array(
     ):
         if cache is not None:
             exception = TypeError("__init__() got an unexpected keyword argument 'cache'")
-            awkward1._util.deprecate(exception, "1.0.0", date="2020-12-01")
+            ak._util.deprecate(exception, "1.0.0", date="2020-12-01")
 
         if isinstance(
-            data, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+            data, (ak.layout.Content, ak.partition.PartitionedArray)
         ):
             layout = data
 
@@ -228,13 +219,13 @@ class Array(
             layout = data.layout
 
         elif isinstance(data, np.ndarray) and data.dtype != np.dtype("O"):
-            layout = awkward1.operations.convert.from_numpy(data, highlevel=False)
+            layout = ak.operations.convert.from_numpy(data, highlevel=False)
 
         elif type(data).__module__.startswith("cupy."):
-            layout = awkward1.operations.convert.from_cupy(data, highlevel=False)
+            layout = ak.operations.convert.from_cupy(data, highlevel=False)
 
         elif type(data).__module__ == "pyarrow" or type(data).__module__.startswith("pyarrow."):
-            layout = awkward1.operations.convert.from_arrow(data, highlevel=False)
+            layout = ak.operations.convert.from_arrow(data, highlevel=False)
 
         elif isinstance(data, dict):
             keys = []
@@ -245,38 +236,38 @@ class Array(
             parameters = None
             if with_name is not None:
                 parameters = {"__record__": with_name}
-            layout = awkward1.layout.RecordArray(
+            layout = ak.layout.RecordArray(
                 contents, keys, parameters=parameters
             )
 
         elif isinstance(data, str):
-            layout = awkward1.operations.convert.from_json(data, highlevel=False)
+            layout = ak.operations.convert.from_json(data, highlevel=False)
 
         else:
-            layout = awkward1.operations.convert.from_iter(
+            layout = ak.operations.convert.from_iter(
                 data, highlevel=False, allow_record=False
             )
 
         if not isinstance(
-            layout, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+            layout, (ak.layout.Content, ak.partition.PartitionedArray)
         ):
             raise TypeError(
-                "could not convert data into an awkward1.Array"
-                + awkward1._util.exception_suffix(__file__)
+                "could not convert data into an ak.Array"
+                + ak._util.exception_suffix(__file__)
             )
 
         if with_name is not None:
-            layout = awkward1.operations.structure.with_name(
+            layout = ak.operations.structure.with_name(
                 layout, with_name, highlevel=False
             )
         if self.__class__ is Array:
-            self.__class__ = awkward1._util.arrayclass(layout, behavior)
+            self.__class__ = ak._util.arrayclass(layout, behavior)
 
         if (
             kernels is not None
-            and kernels != awkward1.operations.convert.kernels(layout)
+            and kernels != ak.operations.convert.kernels(layout)
         ):
-            layout = awkward1.operations.convert.to_kernels(
+            layout = ak.operations.convert.to_kernels(
                 layout, kernels, highlevel=False
             )
 
@@ -286,9 +277,9 @@ class Array(
         if isinstance(docstr, str):
             self.__doc__ = docstr
         if check_valid:
-            awkward1.operations.describe.validity_error(self, exception=True)
+            ak.operations.describe.validity_error(self, exception=True)
 
-        self._caches = awkward1._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self._layout)
 
     @property
     def layout(self):
@@ -337,14 +328,14 @@ class Array(
     @layout.setter
     def layout(self, layout):
         if isinstance(
-            layout, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+            layout, (ak.layout.Content, ak.partition.PartitionedArray)
         ):
             self._layout = layout
             self._numbaview = None
         else:
             raise TypeError(
-                "layout must be a subclass of awkward1.layout.Content"
-                + awkward1._util.exception_suffix(__file__)
+                "layout must be a subclass of ak.layout.Content"
+                + ak._util.exception_suffix(__file__)
             )
 
     @property
@@ -373,7 +364,7 @@ class Array(
         else:
             raise TypeError(
                 "behavior must be None or a dict"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @property
@@ -398,7 +389,7 @@ class Array(
             suffix = _suffix(self)
             limit_value -= len(suffix)
 
-            value = awkward1._util.minimally_touching_string(
+            value = ak._util.minimally_touching_string(
                 limit_value, self._array._layout, self._array._behavior
             )
 
@@ -408,7 +399,7 @@ class Array(
                 name = type(self._array).__name__
             limit_type = limit_total - (len(value) + len(name) + len("<.mask  type=>"))
             typestr = repr(
-                str(awkward1._util.highlevel_type(self._array._layout, self._array._behavior, True))
+                str(ak._util.highlevel_type(self._array._layout, self._array._behavior, True))
             )
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
@@ -416,7 +407,7 @@ class Array(
             return "<{0}.mask{1} {2} type={3}>".format(name, suffix, value, typestr)
 
         def __getitem__(self, where):
-            return awkward1.operations.structure.mask(
+            return ak.operations.structure.mask(
                 self._array, where, self._valid_when
             )
 
@@ -463,7 +454,7 @@ class Array(
 
         See also #ak.to_list and #ak.from_iter.
         """
-        return awkward1.operations.convert.to_list(self)
+        return ak.operations.convert.to_list(self)
 
     @property
     def nbytes(self):
@@ -514,7 +505,7 @@ class Array(
 
         See also #ak.fields.
         """
-        return awkward1.operations.describe.fields(self)
+        return ak.operations.describe.fields(self)
 
     @property
     def type(self):
@@ -564,7 +555,7 @@ class Array(
 
         See also #ak.type.
         """
-        return awkward1.operations.describe.type(self)
+        return ak.operations.describe.type(self)
 
     def __len__(self):
         """
@@ -609,7 +600,7 @@ class Array(
         See also #ak.to_list.
         """
         for x in self._layout:
-            yield awkward1._util.wrap(x, self._behavior)
+            yield ak._util.wrap(x, self._behavior)
 
     def __getitem__(self, where):
         """
@@ -961,7 +952,7 @@ class Array(
         acting at the last level, while the higher levels of the indexer all
         have the same dimension as the array being indexed.
         """
-        return awkward1._util.wrap(self._layout[where], self._behavior)
+        return ak._util.wrap(self._layout[where], self._behavior)
 
     def __setitem__(self, where, what):
         """
@@ -1020,13 +1011,13 @@ class Array(
         ):
             raise TypeError(
                 "only fields may be assigned in-place (by field name)"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
-        array = awkward1.operations.structure.with_field(
+        array = ak.operations.structure.with_field(
             self._layout, what, where
         )
         self._layout = array.layout
-        self._caches = awkward1._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self._layout)
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -1078,12 +1069,12 @@ class Array(
                     raise AttributeError(
                         "while trying to get field {0}, an exception "
                         "occurred:\n{1}: {2}".format(repr(where), type(err), str(err))
-                        + awkward1._util.exception_suffix(__file__)
+                        + ak._util.exception_suffix(__file__)
                     )
             else:
                 raise AttributeError(
                     "no field named {0}".format(repr(where))
-                    + awkward1._util.exception_suffix(__file__)
+                    + ak._util.exception_suffix(__file__)
                 )
 
     def __dir__(self):
@@ -1261,7 +1252,7 @@ class Array(
         return self._repr()
 
     def _str(self, limit_value=85):
-        return awkward1._util.minimally_touching_string(
+        return ak._util.minimally_touching_string(
             limit_value, self._layout, self._behavior
         )
 
@@ -1269,7 +1260,7 @@ class Array(
         suffix = _suffix(self)
         limit_value -= len(suffix)
 
-        value = awkward1._util.minimally_touching_string(
+        value = ak._util.minimally_touching_string(
             limit_value, self._layout, self._behavior
         )
 
@@ -1278,7 +1269,7 @@ class Array(
         except AttributeError:
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(str(awkward1._util.highlevel_type(self._layout, self._behavior, True)))
+        typestr = repr(str(ak._util.highlevel_type(self._layout, self._behavior, True)))
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
@@ -1309,7 +1300,7 @@ class Array(
         nested lists in a NumPy `"O"` array are severed from the array and
         cannot be sliced as dimensions.
         """
-        return awkward1._connect._numpy.convert_to_array(self._layout, args, kwargs)
+        return ak._connect._numpy.convert_to_array(self._layout, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -1368,7 +1359,7 @@ class Array(
 
         See also #__array_function__.
         """
-        return awkward1._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
         """
@@ -1387,7 +1378,7 @@ class Array(
 
         See also #__array_ufunc__.
         """
-        return awkward1._connect._numpy.array_function(func, types, args, kwargs)
+        return ak._connect._numpy.array_function(func, types, args, kwargs)
 
     @property
     def numba_type(self):
@@ -1401,9 +1392,9 @@ class Array(
         """
         import awkward1._connect._numba
 
-        awkward1._connect._numba.register_and_check()
+        ak._connect._numba.register_and_check()
         if self._numbaview is None:
-            self._numbaview = awkward1._connect._numba.arrayview.ArrayView.fromarray(
+            self._numbaview = ak._connect._numba.arrayview.ArrayView.fromarray(
                 self
             )
         import numba
@@ -1411,8 +1402,8 @@ class Array(
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, container, num_partitions = awkward1.to_arrayset(self)
-        if self._behavior is awkward1.behavior:
+        form, container, num_partitions = ak.to_arrayset(self)
+        if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
@@ -1420,14 +1411,14 @@ class Array(
 
     def __setstate__(self, state):
         form, container, num_partitions, behavior = state
-        layout = awkward1.from_arrayset(
+        layout = ak.from_arrayset(
             form, container, num_partitions, highlevel=False
         )
         if self.__class__ is Array:
-            self.__class__ = awkward1._util.arrayclass(layout, behavior)
+            self.__class__ = ak._util.arrayclass(layout, behavior)
         self.layout = layout
         self.behavior = behavior
-        self._caches = awkward1._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self._layout)
 
     def __copy__(self):
         return Array(self._layout, behavior=self._behavior)
@@ -1445,13 +1436,13 @@ class Array(
             )
 
     def __contains__(self, element):
-        for test in awkward1._util.completely_flatten(self._layout):
+        for test in ak._util.completely_flatten(self._layout):
             if element in test:
                 return True
         return False
 
 
-class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
+class Record(ak._connect._numpy.NDArrayOperatorsMixin):
     """
     Args:
         data (#ak.layout.Record, #ak.Record, str, or dict):
@@ -1496,48 +1487,48 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
     ):
         if cache is not None:
             exception = TypeError("__init__() got an unexpected keyword argument 'cache'")
-            awkward1._util.deprecate(exception, "1.0.0", date="2020-12-01")
+            ak._util.deprecate(exception, "1.0.0", date="2020-12-01")
 
-        if isinstance(data, awkward1.layout.Record):
+        if isinstance(data, ak.layout.Record):
             layout = data
 
         elif isinstance(data, Record):
             layout = data.layout
 
         elif isinstance(data, str):
-            layout = awkward1.operations.convert.from_json(data, highlevel=False)
+            layout = ak.operations.convert.from_json(data, highlevel=False)
 
         elif isinstance(data, dict):
-            layout = awkward1.operations.convert.from_iter([data], highlevel=False)[0]
+            layout = ak.operations.convert.from_iter([data], highlevel=False)[0]
 
         elif isinstance(data, Iterable):
             raise TypeError(
-                "could not convert non-dict into an awkward1.Record; try awkward1.Array"
-                + awkward1._util.exception_suffix(__file__)
+                "could not convert non-dict into an ak.Record; try ak.Array"
+                + ak._util.exception_suffix(__file__)
             )
 
         else:
             layout = None
 
-        if not isinstance(layout, awkward1.layout.Record):
+        if not isinstance(layout, ak.layout.Record):
             raise TypeError(
-                "could not convert data into an awkward1.Record"
-                + awkward1._util.exception_suffix(__file__)
+                "could not convert data into an ak.Record"
+                + ak._util.exception_suffix(__file__)
             )
 
         if self.__class__ is Record:
-            self.__class__ = awkward1._util.recordclass(layout, behavior)
+            self.__class__ = ak._util.recordclass(layout, behavior)
 
         if with_name is not None:
-            layout = awkward1.operations.structure.with_name(
+            layout = ak.operations.structure.with_name(
                 layout, with_name, highlevel=False
             )
 
         if (
             kernels is not None
-            and kernels != awkward1.operations.convert.kernels(layout)
+            and kernels != ak.operations.convert.kernels(layout)
         ):
-            layout = awkward1.operations.convert.to_kernels(
+            layout = ak.operations.convert.to_kernels(
                 layout, kernels, highlevel=False
             )
 
@@ -1547,9 +1538,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         if isinstance(docstr, str):
             self.__doc__ = docstr
         if check_valid:
-            awkward1.operations.describe.validity_error(self, exception=True)
+            ak.operations.describe.validity_error(self, exception=True)
 
-        self._caches = awkward1._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self._layout)
 
     @property
     def layout(self):
@@ -1593,13 +1584,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
     @layout.setter
     def layout(self, layout):
-        if isinstance(layout, awkward1.layout.Record):
+        if isinstance(layout, ak.layout.Record):
             self._layout = layout
             self._numbaview = None
         else:
             raise TypeError(
-                "layout must be a subclass of awkward1.layout.Record"
-                + awkward1._util.exception_suffix(__file__)
+                "layout must be a subclass of ak.layout.Record"
+                + ak._util.exception_suffix(__file__)
             )
 
     @property
@@ -1628,7 +1619,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         else:
             raise TypeError(
                 "behavior must be None or a dict"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @property
@@ -1656,7 +1647,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See also #ak.to_list and #ak.from_iter.
         """
-        return awkward1.operations.convert.to_list(self)
+        return ak.operations.convert.to_list(self)
 
     @property
     def nbytes(self):
@@ -1688,7 +1679,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See also #ak.fields.
         """
-        return awkward1.operations.describe.fields(self)
+        return ak.operations.describe.fields(self)
 
     @property
     def type(self):
@@ -1698,7 +1689,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See also #ak.type.
         """
-        return awkward1.operations.describe.type(self)
+        return ak.operations.describe.type(self)
 
     def __getitem__(self, where):
         """
@@ -1726,7 +1717,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             >>> record["y", 1]
             2
         """
-        return awkward1._util.wrap(self._layout[where], self._behavior)
+        return ak._util.wrap(self._layout[where], self._behavior)
 
     def __setitem__(self, where, what):
         """
@@ -1752,13 +1743,13 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         ):
             raise TypeError(
                 "only fields may be assigned in-place (by field name)"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
-        array = awkward1.operations.structure.with_field(
+        array = ak.operations.structure.with_field(
             self._layout, what, where
         )
         self._layout = array.layout
-        self._caches = awkward1._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self._layout)
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -1799,12 +1790,12 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
                     raise AttributeError(
                         "while trying to get field {0}, an exception "
                         "occurred:\n{1}: {2}".format(repr(where), type(err), str(err))
-                        + awkward1._util.exception_suffix(__file__)
+                        + ak._util.exception_suffix(__file__)
                     )
             else:
                 raise AttributeError(
                     "no field named {0}".format(repr(where))
-                    + awkward1._util.exception_suffix(__file__)
+                    + ak._util.exception_suffix(__file__)
                 )
 
     def __dir__(self):
@@ -1950,7 +1941,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         return self._repr()
 
     def _str(self, limit_value=85):
-        return awkward1._util.minimally_touching_string(
+        return ak._util.minimally_touching_string(
             limit_value + 2, self._layout, self._behavior
         )[1:-1]
 
@@ -1958,7 +1949,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         suffix = _suffix(self)
         limit_value -= len(suffix)
 
-        value = awkward1._util.minimally_touching_string(
+        value = ak._util.minimally_touching_string(
             limit_value + 2, self._layout, self._behavior
         )[1:-1]
 
@@ -1968,7 +1959,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
         typestr = repr(
-            str(awkward1._util.highlevel_type(self._layout, self._behavior, False))
+            str(ak._util.highlevel_type(self._layout, self._behavior, False))
         )
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
@@ -1989,7 +1980,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
         See #ak.Array.__array_ufunc__ for a more complete description.
         """
-        return awkward1._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     @property
     def numba_type(self):
@@ -2003,9 +1994,9 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         """
         import awkward1._connect._numba
 
-        awkward1._connect._numba.register_and_check()
+        ak._connect._numba.register_and_check()
         if self._numbaview is None:
-            self._numbaview = awkward1._connect._numba.arrayview.RecordView.fromrecord(
+            self._numbaview = ak._connect._numba.arrayview.RecordView.fromrecord(
                 self
             )
         import numba
@@ -2013,8 +2004,8 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, container, num_partitions = awkward1.to_arrayset(self._layout.array)
-        if self._behavior is awkward1.behavior:
+        form, container, num_partitions = ak.to_arrayset(self._layout.array)
+        if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
@@ -2022,15 +2013,15 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
 
     def __setstate__(self, state):
         form, container, num_partitions, behavior, at = state
-        array = awkward1.from_arrayset(
+        array = ak.from_arrayset(
             form, container, num_partitions, highlevel=False
         )
-        layout = awkward1.layout.Record(array, at)
+        layout = ak.layout.Record(array, at)
         if self.__class__ is Record:
-            self.__class__ = awkward1._util.recordclass(layout, behavior)
+            self.__class__ = ak._util.recordclass(layout, behavior)
         self.layout = layout
         self.behavior = behavior
-        self._caches = awkward1._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self._layout)
 
     def __copy__(self):
         return Record(self._layout, behavior=self._behavior)
@@ -2045,7 +2036,7 @@ class Record(awkward1._connect._numpy.NDArrayOperatorsMixin):
         )
 
     def __contains__(self, element):
-        for test in awkward1._util.completely_flatten(self._layout):
+        for test in ak._util.completely_flatten(self._layout):
             if element in test:
                 return True
         return False
@@ -2163,7 +2154,7 @@ class ArrayBuilder(Iterable, Sized):
         >>> builder.snapshot()
         <Array [... 1.23, -0.498, 0.272], -0.0519]]]] type='1 * var * var * union[var * ...'>
         >>> ak.to_list(builder)
-        [[[[2.052949634260401, 0.9522057655747124], [[[0.2560810133948006], 1.8668954120287653, 0.8933700720920406, 0.31709173110067773], 0.38515995466456676, -1.6259655150460695, [[0.18211022402412927], 0.46592679548320143, 0.39275072293709223], [-0.572569956850481, 1.3991748897028693, -0.15414122174138611, -0.20008742443379549]], [[[-0.7410750761192828, -0.34455689325781347], -0.8446675414135969], [-0.8139112572198548, -0.7250728258598154, -0.42851563653684244, [1.0498296931855706, 1.6969612860075955, -0.18093559189614564, 1.078608791657082]]], [[0.5172670690419124]]], [[-1.9731106633939228, 0.5778640337060391], [-1.2488533773832633, -2.1458066486349434, -0.5439318468515132, [[0.2419441207503176, -2.313974422156488, [-0.6811651539055098, 0.08323572953509818], 1.801261721511669, 0.16653718365329456], -0.6348811801078983, [0.016350096268563003, [-1.2867920376687112, 0.38205295881313484, 1.4093210810506318, -0.2698869943849985, -0.48804922126979045]]], -0.6297773736098737, -2.5333506573111424], [-1.6680144776019314, 0.5862818687707498]], [0.6266171347177766, [[-0.7660737060966999, -0.677432480564727, -1.1527197837522167], -0.5025371508398492, [0.3610998752041169, 0.4811870365139723, -0.8030689233086394, [1.1538103888031122, -1.0955905747145644], -1.3980944016010062, 1.2822990047991039]], 0.939566155023095, [1.3581048298505891, [0.36949478822799947, 1.096666130135532, -0.2769024331557954, -0.7993215902675834], [-0.4103823967097248], [0.6789480075462166, 0.8991579880810466, 0.7900472554969632]], [], [0.6772644918729233, [-0.48385354748861575, -0.39154812719778437], 1.069329510451712, 0.8057750827838897, -0.3440192823735095], [[1.5687828887524105, -1.6086288847970498, [-0.6907842744344904], -0.42627155869364414], 0.33605387861917574, -0.7329513818714791, 0.5040026160756554, -1.2529377572694538, -1.1566264096307166], [[0.6407540268295862], [-0.017540252205401917], -0.9530971110439417], [[0.41643810453893765, -0.682997865214066, 0.7930286671567052], 0.5142103949393788]], [[0.6271004836147108, [0.5895664560584991, -0.7563863809912544]], [1.6176958047983054, 0.5226854288884638, 0.24149248202497436], -1.0912185170716135, [-1.1122535648683918], 0.22727974012353094], [-0.4161362684360263, [[0.4234696267033054], 0.7866791657813567, [1.225201951430818, -0.49790730839958713, 0.2715010029532568], -0.051866117232298316]]]]
+        [[[[2.05, 0.95], [[[0.25], 1.86, 0.89, 0.31], 0.38, -1.62, [[0.18], 0.46, 0.39], [-0.57, 1.39, -0.15, -0.20]], [[[-0.74, -0.34], -0.84], [-0.81, -0.72, -0.42, [1.04, 1.69, -0.18, 1.07]]], [[0.51]]], [[-1.97, 0.57], [-1.24, -2.14, -0.54, [[0.24, -2.31, [-0.68, 0.08], 1.80, 0.16], -0.63, [0.01, [-1.28, 0.38, 1.40, -0.26, -0.48]]], -0.62, -2.53], [-1.66, 0.58]], [0.62, [[-0.76, -0.67, -1.15], -0.50, [0.36, 0.48, -0.80, [1.15, -1.09], -1.39, 1.28]], 0.93, [1.35, [0.36, 1.09, -0.27, -0.79], [-0.41], [0.67, 0.89, 0.79]], [], [0.67, [-0.48, -0.39], 1.06, 0.80, -0.34], [[1.56, -1.60, [-0.69], -0.42], 0.33, -0.73, 0.50, -1.25, -1.15], [[0.64], [-0.01], -0.95], [[0.41, -0.68, 0.79], 0.51]], [[0.62, [0.58, -0.75]], [1.61, 0.52, 0.24], -1.09, [-1.11], 0.22], [-0.41, [[0.42], 0.78, [1.22, -0.49, 0.27], -0.05xs]]]]
         >>> ak.type(builder.snapshot())
         1 * var * var * union[var * union[float64, var * union[var * union[float64, var * float64], float64]], float64]
 
@@ -2173,7 +2164,7 @@ class ArrayBuilder(Iterable, Sized):
     """
 
     def __init__(self, behavior=None, initial=1024, resize=1.5):
-        self._layout = awkward1.layout.ArrayBuilder(initial=initial, resize=resize)
+        self._layout = ak.layout.ArrayBuilder(initial=initial, resize=resize)
         self.behavior = behavior
 
     @classmethod
@@ -2191,7 +2182,7 @@ class ArrayBuilder(Iterable, Sized):
         with no accumulated data, but Numba needs to wrap existing data
         when returning from a lowered function.
         """
-        assert isinstance(layout, awkward1.layout.ArrayBuilder)
+        assert isinstance(layout, ak.layout.ArrayBuilder)
         out = cls.__new__(cls)
         out._layout = layout
         out.behavior = behavior
@@ -2223,7 +2214,7 @@ class ArrayBuilder(Iterable, Sized):
         else:
             raise TypeError(
                 "behavior must be None or a dict"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     def __len__(self):
@@ -2242,7 +2233,7 @@ class ArrayBuilder(Iterable, Sized):
 
         See #ak.Array.__getitem__ for a more complete description.
         """
-        return awkward1._util.wrap(self._layout[where], self._behavior)
+        return ak._util.wrap(self._layout[where], self._behavior)
 
     def __iter__(self):
         """
@@ -2291,7 +2282,7 @@ class ArrayBuilder(Iterable, Sized):
         value = self._str(limit_value=limit_value, snapshot=snapshot)
 
         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
-        typestrs = awkward1._util.typestrs(self._behavior)
+        typestrs = ak._util.typestrs(self._behavior)
         typestr = repr(str(snapshot.layout.type(typestrs)))
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
@@ -2306,7 +2297,7 @@ class ArrayBuilder(Iterable, Sized):
 
         See #ak.Array.__array__ for a more complete description.
         """
-        return awkward1._connect._numpy.convert_to_array(self.snapshot(), args, kwargs)
+        return ak._connect._numpy.convert_to_array(self.snapshot(), args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -2316,7 +2307,7 @@ class ArrayBuilder(Iterable, Sized):
 
         See #ak.Array.__array_ufunc__ for a more complete description.
         """
-        return awkward1._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
         """
@@ -2325,7 +2316,7 @@ class ArrayBuilder(Iterable, Sized):
 
         See #ak.ArrayBuilder.__array_ufunc__ for a more complete description.
         """
-        return awkward1._connect._numpy.array_function(func, types, args, kwargs)
+        return ak._connect._numpy.array_function(func, types, args, kwargs)
 
     @property
     def numba_type(self):
@@ -2339,10 +2330,10 @@ class ArrayBuilder(Iterable, Sized):
         """
         import awkward1._connect._numba
 
-        awkward1._connect._numba.register_and_check()
+        ak._connect._numba.register_and_check()
         import awkward1._connect._numba.builder
 
-        return awkward1._connect._numba.builder.ArrayBuilderType(self._behavior)
+        return ak._connect._numba.builder.ArrayBuilderType(self._behavior)
 
     def __bool__(self):
         if len(self) == 1:
@@ -2370,7 +2361,7 @@ class ArrayBuilder(Iterable, Sized):
         buffers are deleted exactly once.
         """
         layout = self._layout.snapshot()
-        return awkward1._util.wrap(layout, self._behavior)
+        return ak._util.wrap(layout, self._behavior)
 
     def null(self):
         """
@@ -2586,7 +2577,7 @@ class ArrayBuilder(Iterable, Sized):
                 raise TypeError(
                     "'append' method can only be used with 'at' when "
                     "'obj' is an ak.Array"
-                    + awkward1._util.exception_suffix(__file__)
+                    + ak._util.exception_suffix(__file__)
                 )
 
     def extend(self, obj):
@@ -2602,7 +2593,7 @@ class ArrayBuilder(Iterable, Sized):
         else:
             raise TypeError(
                 "'extend' method requires an ak.Array"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     class _Nested(object):
@@ -2621,7 +2612,7 @@ class ArrayBuilder(Iterable, Sized):
                 - len("<ArrayBuilder.  type=>")
                 - len(self._name)
             )
-            typestrs = awkward1._util.typestrs(self._arraybuilder._behavior)
+            typestrs = ak._util.typestrs(self._arraybuilder._behavior)
             typestr = repr(str(snapshot.layout.type(typestrs)))
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]

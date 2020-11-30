@@ -6,14 +6,11 @@ import sys
 
 import numpy
 
-import awkward1.layout
-import awkward1.operations.convert
-import awkward1._util
-import awkward1.nplike
+import awkward1 as ak
 
 
 def convert_to_array(layout, args, kwargs):
-    out = awkward1.operations.convert.to_numpy(layout, allow_missing=False)
+    out = ak.operations.convert.to_numpy(layout, allow_missing=False)
     if args == () and kwargs == {}:
         return out
     else:
@@ -44,16 +41,16 @@ def array_ufunc(ufunc, method, inputs, kwargs):
     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
         return NotImplemented
 
-    behavior = awkward1._util.behaviorof(*inputs)
+    behavior = ak._util.behaviorof(*inputs)
     inputs = [
-        awkward1.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+        ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
         for x in inputs
     ]
 
     def adjust(custom, inputs, kwargs):
         args = [
-            awkward1._util.wrap(x, behavior)
-            if isinstance(x, (awkward1.layout.Content, awkward1.layout.Record))
+            ak._util.wrap(x, behavior)
+            if isinstance(x, (ak.layout.Content, ak.layout.Record))
             else x
             for x in inputs
         ]
@@ -63,15 +60,15 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
         return tuple(
             x.layout
-            if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record))
+            if isinstance(x, (ak.highlevel.Array, ak.highlevel.Record))
             else x
             for x in out
         )
 
     def adjust_apply_ufunc(apply_ufunc, ufunc, method, inputs, kwargs):
         nextinputs = [
-            awkward1._util.wrap(x, behavior)
-            if isinstance(x, (awkward1.layout.Content, awkward1.layout.Record))
+            ak._util.wrap(x, behavior)
+            if isinstance(x, (ak.layout.Content, ak.layout.Record))
             else x
             for x in inputs
         ]
@@ -85,7 +82,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 out = (out,)
             out = tuple(
                 x.layout
-                if isinstance(x, (awkward1.highlevel.Array, awkward1.highlevel.Record))
+                if isinstance(x, (ak.highlevel.Array, ak.highlevel.Record))
                 else x
                 for x in out
             )
@@ -93,13 +90,13 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
     def is_fully_regular(layout):
         if (
-            isinstance(layout, awkward1.layout.RegularArray)
+            isinstance(layout, ak.layout.RegularArray)
             and layout.parameter("__record__") is None
             and layout.parameter("__array__") is None
         ):
-            if isinstance(layout.content, awkward1.layout.NumpyArray):
+            if isinstance(layout.content, ak.layout.NumpyArray):
                 return True
-            elif isinstance(layout.content, awkward1.layout.RegularArray):
+            elif isinstance(layout.content, ak.layout.RegularArray):
                 return is_fully_regular(layout.content)
             else:
                 return False
@@ -112,12 +109,12 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         else:
             shape = [len(layout)]
             node = layout
-            while isinstance(node, awkward1.layout.RegularArray):
+            while isinstance(node, ak.layout.RegularArray):
                 shape.append(node.size)
                 node = node.content
-            nparray = awkward1.nplike.of(node).asarray(node)
+            nparray = ak.nplike.of(node).asarray(node)
             nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
-            return awkward1.layout.NumpyArray(
+            return ak.layout.NumpyArray(
                 nparray,
                 node.identities,
                 node.parameters,
@@ -126,21 +123,21 @@ def array_ufunc(ufunc, method, inputs, kwargs):
     def getfunction(inputs, depth):
         signature = [ufunc]
         for x in inputs:
-            if isinstance(x, awkward1.layout.Content):
+            if isinstance(x, ak.layout.Content):
                 record = x.parameter("__record__")
                 array = x.parameter("__array__")
                 if record is not None:
                     signature.append(record)
                 elif array is not None:
                     signature.append(array)
-                elif isinstance(x, awkward1.layout.NumpyArray):
-                    signature.append(awkward1.nplike.of(x).asarray(x).dtype.type)
+                elif isinstance(x, ak.layout.NumpyArray):
+                    signature.append(ak.nplike.of(x).asarray(x).dtype.type)
                 else:
                     signature.append(None)
             else:
                 signature.append(type(x))
 
-        custom = awkward1._util.overload(behavior, signature)
+        custom = ak._util.overload(behavior, signature)
         if custom is not None:
             return lambda: adjust(custom, inputs, kwargs)
 
@@ -152,23 +149,23 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 return custom_matmul
 
         if all(
-            isinstance(x, awkward1.layout.NumpyArray)
+            isinstance(x, ak.layout.NumpyArray)
             or not isinstance(
-                x, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+                x, (ak.layout.Content, ak.partition.PartitionedArray)
             )
             for x in inputs
         ):
-            nplike = awkward1.nplike.of(*inputs)
+            nplike = ak.nplike.of(*inputs)
             result = getattr(ufunc, method)(
                 *[nplike.asarray(x) for x in inputs], **kwargs
             )
             return lambda: (
-                awkward1.operations.convert.from_numpy(result, highlevel=False),
+                ak.operations.convert.from_numpy(result, highlevel=False),
             )
 
         for x in inputs:
-            if isinstance(x, awkward1.layout.Content):
-                chained_behavior = awkward1._util.Behavior(awkward1.behavior, behavior)
+            if isinstance(x, ak.layout.Content):
+                chained_behavior = ak._util.Behavior(ak.behavior, behavior)
                 apply_ufunc = chained_behavior[numpy.ufunc, x.parameter("__array__")]
                 if apply_ufunc is not None:
                     out = adjust_apply_ufunc(
@@ -187,11 +184,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         if all(
             x.parameter("__array__") is not None
             or x.parameter("__record__") is not None
-            for x in inputs if isinstance(x, awkward1.layout.Content)
+            for x in inputs if isinstance(x, ak.layout.Content)
         ):
             custom_types = []
             for x in inputs:
-                if isinstance(x, awkward1.layout.Content):
+                if isinstance(x, ak.layout.Content):
                     if x.parameter("__array__") is not None:
                         custom_types.append(x.parameter("__array__"))
                     elif x.parameter("__record__") is not None:
@@ -205,17 +202,17 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                     ufunc.__name__,
                     ", ".join(custom_types),
                 )
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
-            awkward1._util.deprecate(exception, "1.0.0", date="2020-12-01")
+            ak._util.deprecate(exception, "1.0.0", date="2020-12-01")
 
         return None
 
-    out = awkward1._util.broadcast_and_apply(
+    out = ak._util.broadcast_and_apply(
         inputs, getfunction, behavior, allow_records=False
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return awkward1._util.wrap(out[0], behavior)
+    return ak._util.wrap(out[0], behavior)
 
 
 def matmul_for_numba(lefts, rights, dtype):
@@ -299,29 +296,29 @@ matmul_for_numba.numbafied = None
 
 def getfunction_matmul(inputs):
     if len(inputs) == 2 and all(
-        isinstance(x, awkward1._util.listtypes)
-        and isinstance(x.content, awkward1._util.listtypes)
-        and isinstance(x.content.content, awkward1.layout.NumpyArray)
+        isinstance(x, ak._util.listtypes)
+        and isinstance(x.content, ak._util.listtypes)
+        and isinstance(x.content.content, ak.layout.NumpyArray)
         for x in inputs
     ):
-        awkward1._connect._numba.register_and_check()
+        ak._connect._numba.register_and_check()
         import numba
 
         if matmul_for_numba.numbafied is None:
             matmul_for_numba.numbafied = numba.njit(matmul_for_numba)
 
-        lefts = awkward1.highlevel.Array(inputs[0])
-        rights = awkward1.highlevel.Array(inputs[1])
+        lefts = ak.highlevel.Array(inputs[0])
+        rights = ak.highlevel.Array(inputs[1])
         dtype = numpy.asarray(lefts[0:0, 0:0, 0:0] + rights[0:0, 0:0, 0:0]).dtype
 
         outer, inner, content = matmul_for_numba.numbafied(lefts, rights, dtype)
 
         return lambda: (
-            awkward1.layout.ListOffsetArray64(
-                awkward1.layout.Index64(outer),
-                awkward1.layout.ListOffsetArray64(
-                    awkward1.layout.Index64(inner),
-                    awkward1.layout.NumpyArray(content),
+            ak.layout.ListOffsetArray64(
+                ak.layout.Index64(outer),
+                ak.layout.ListOffsetArray64(
+                    ak.layout.Index64(inner),
+                    ak.layout.NumpyArray(content),
                 ),
             ),
         )

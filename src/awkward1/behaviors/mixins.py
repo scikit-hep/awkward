@@ -1,10 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 from __future__ import absolute_import
+
 import sys
 
-import awkward1.highlevel
-
+import awkward1 as ak
 
 def mixin_class(registry):
     """
@@ -23,10 +23,10 @@ def mixin_class(registry):
 
     def register(cls):
         name = cls.__name__
-        record = type(name + "Record", (cls, awkward1.highlevel.Record), {"__module__": cls.__module__})
+        record = type(name + "Record", (cls, ak.highlevel.Record), {"__module__": cls.__module__})
         setattr(sys.modules[cls.__module__], name + "Record", record)
         registry[name] = record
-        array = type(name + "Array", (cls, awkward1.highlevel.Array), {"__module__": cls.__module__})
+        array = type(name + "Array", (cls, ak.highlevel.Array), {"__module__": cls.__module__})
         setattr(sys.modules[cls.__module__], name + "Array", array)
         registry["*", name] = array
         for basecls in cls.mro():
@@ -68,7 +68,7 @@ def mixin_class_method(ufunc, rhs=None, transpose=True):
         if not isinstance(rhs, (set, type(None))):
             raise ValueError(
                 "expected a set of right-hand-side argument types"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
         if transpose and rhs is not None:
 

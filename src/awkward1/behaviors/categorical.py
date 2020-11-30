@@ -2,21 +2,16 @@
 
 from __future__ import absolute_import
 
-import awkward1.highlevel
-import awkward1.nplike
-import awkward1.operations.convert
-import awkward1.operations.reducers
-import awkward1._util
+import awkward1 as ak
+
+np = ak.nplike.NumpyMetadata.instance()
 
 
-np = awkward1.nplike.NumpyMetadata.instance()
-
-
-class CategoricalBehavior(awkward1.highlevel.Array):
+class CategoricalBehavior(ak.highlevel.Array):
     __name__ = "Array"
 
 
-awkward1.behavior["categorical"] = CategoricalBehavior
+ak.behavior["categorical"] = CategoricalBehavior
 
 
 class _HashableDict(object):
@@ -63,38 +58,38 @@ def _hashable(obj):
 
 
 def _categorical_equal(one, two):
-    behavior = awkward1._util.behaviorof(one, two)
+    behavior = ak._util.behaviorof(one, two)
 
     one, two = one.layout, two.layout
 
     assert isinstance(
-        one, awkward1._util.indexedtypes + awkward1._util.indexedoptiontypes
+        one, ak._util.indexedtypes + ak._util.indexedoptiontypes
     )
     assert isinstance(
-        two, awkward1._util.indexedtypes + awkward1._util.indexedoptiontypes
+        two, ak._util.indexedtypes + ak._util.indexedoptiontypes
     )
     assert one.parameter("__array__") == "categorical"
     assert two.parameter("__array__") == "categorical"
 
-    one_index = awkward1.nplike.numpy.asarray(one.index)
-    two_index = awkward1.nplike.numpy.asarray(two.index)
-    one_content = awkward1._util.wrap(one.content, behavior)
-    two_content = awkward1._util.wrap(two.content, behavior)
+    one_index = ak.nplike.numpy.asarray(one.index)
+    two_index = ak.nplike.numpy.asarray(two.index)
+    one_content = ak._util.wrap(one.content, behavior)
+    two_content = ak._util.wrap(two.content, behavior)
 
     if (
         len(one_content) == len(two_content) and
-        awkward1.operations.reducers.all(one_content == two_content, axis=None)
+        ak.operations.reducers.all(one_content == two_content, axis=None)
     ):
         one_mapped = one_index
 
     else:
-        one_list = awkward1.operations.convert.to_list(one_content)
-        two_list = awkward1.operations.convert.to_list(two_content)
+        one_list = ak.operations.convert.to_list(one_content)
+        two_list = ak.operations.convert.to_list(two_content)
         one_hashable = [_hashable(x) for x in one_list]
         two_hashable = [_hashable(x) for x in two_list]
         two_lookup = {x: i for i, x in enumerate(two_hashable)}
 
-        one_to_two = awkward1.nplike.numpy.empty(len(one_hashable) + 1, dtype=np.int64)
+        one_to_two = ak.nplike.numpy.empty(len(one_hashable) + 1, dtype=np.int64)
         for i, x in enumerate(one_hashable):
             one_to_two[i] = two_lookup.get(x, len(two_hashable))
         one_to_two[-1] = -1
@@ -102,23 +97,23 @@ def _categorical_equal(one, two):
         one_mapped = one_to_two[one_index]
 
     out = one_mapped == two_index
-    return awkward1._util.wrap(
-        awkward1.layout.NumpyArray(out), awkward1._util.behaviorof(one, two)
+    return ak._util.wrap(
+        ak.layout.NumpyArray(out), ak._util.behaviorof(one, two)
     )
 
 
-awkward1.behavior[awkward1.nplike.numpy.equal, "categorical", "categorical"] = _categorical_equal
+ak.behavior[ak.nplike.numpy.equal, "categorical", "categorical"] = _categorical_equal
 
 
 def _apply_ufunc(ufunc, method, inputs, kwargs):
     nextinputs = []
     for x in inputs:
         if (
-            isinstance(x, awkward1.highlevel.Array)
-            and isinstance(x.layout, awkward1._util.indexedtypes)
+            isinstance(x, ak.highlevel.Array)
+            and isinstance(x.layout, ak._util.indexedtypes)
         ):
-            nextinputs.append(awkward1.highlevel.Array(
-                x.layout.project(), behavior=awkward1._util.behaviorof(x)
+            nextinputs.append(ak.highlevel.Array(
+                x.layout.project(), behavior=ak._util.behaviorof(x)
             ))
         else:
             nextinputs.append(x)
@@ -126,7 +121,7 @@ def _apply_ufunc(ufunc, method, inputs, kwargs):
     return getattr(ufunc, method)(*nextinputs, **kwargs)
 
 
-awkward1.behavior[awkward1.nplike.numpy.ufunc, "categorical"] = _apply_ufunc
+ak.behavior[ak.nplike.numpy.ufunc, "categorical"] = _apply_ufunc
 
 
 def is_categorical(array):
@@ -142,7 +137,7 @@ def is_categorical(array):
     See also #ak.categories, #ak.to_categorical, #ak.from_categorical.
     """
 
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     return layout.purelist_parameter("__array__") == "categorical"
@@ -172,8 +167,8 @@ def categories(array, highlevel=True):
         else:
             return None
 
-    awkward1._util.recursively_apply(
-        awkward1.operations.convert.to_layout(
+    ak._util.recursively_apply(
+        ak.operations.convert.to_layout(
             array, allow_record=False, allow_other=False
         ),
         getfunction,
@@ -182,7 +177,7 @@ def categories(array, highlevel=True):
     if output[0] is None:
         return None
     elif highlevel:
-        return awkward1._util.wrap(output[0], awkward1._util.behaviorof(array))
+        return ak._util.wrap(output[0], ak._util.behaviorof(array))
     else:
         return output[0]
 
@@ -258,28 +253,28 @@ def to_categorical(array, highlevel=True):
         if (layout.purelist_depth == 1 or (
             layout.purelist_depth == 2 and (p == "string" or p == "bytestring")
         )):
-            if isinstance(layout, awkward1._util.optiontypes):
+            if isinstance(layout, ak._util.optiontypes):
                 layout = layout.simplify()
 
-            if isinstance(layout, awkward1._util.indexedoptiontypes):
+            if isinstance(layout, ak._util.indexedoptiontypes):
                 content = layout.content
-                cls = awkward1.layout.IndexedOptionArray64
-            elif isinstance(layout, awkward1._util.indexedtypes):
+                cls = ak.layout.IndexedOptionArray64
+            elif isinstance(layout, ak._util.indexedtypes):
                 content = layout.content
-                cls = awkward1.layout.IndexedArray64
-            elif isinstance(layout, awkward1._util.optiontypes):
+                cls = ak.layout.IndexedArray64
+            elif isinstance(layout, ak._util.optiontypes):
                 content = layout.content
-                cls = awkward1.layout.IndexedOptionArray64
+                cls = ak.layout.IndexedOptionArray64
             else:
                 content = layout
-                cls = awkward1.layout.IndexedArray64
+                cls = ak.layout.IndexedArray64
 
-            content_list = awkward1.operations.convert.to_list(content)
+            content_list = ak.operations.convert.to_list(content)
             hashable = [_hashable(x) for x in content_list]
 
             lookup = {}
-            is_first = awkward1.nplike.numpy.empty(len(hashable), dtype=np.bool_)
-            mapping = awkward1.nplike.numpy.empty(len(hashable), dtype=np.int64)
+            is_first = ak.nplike.numpy.empty(len(hashable), dtype=np.bool_)
+            mapping = ak.nplike.numpy.empty(len(hashable), dtype=np.int64)
             for i, x in enumerate(hashable):
                 if x in lookup:
                     is_first[i] = False
@@ -289,23 +284,23 @@ def to_categorical(array, highlevel=True):
                     lookup[x] = j = len(lookup)
                     mapping[i] = j
 
-            if isinstance(layout, awkward1._util.indexedoptiontypes):
-                original_index = awkward1.nplike.numpy.asarray(layout.index)
+            if isinstance(layout, ak._util.indexedoptiontypes):
+                original_index = ak.nplike.numpy.asarray(layout.index)
                 index = mapping[original_index]
                 index[original_index < 0] = -1
-                index = awkward1.layout.Index64(index)
+                index = ak.layout.Index64(index)
 
-            elif isinstance(layout, awkward1._util.indexedtypes):
-                original_index = awkward1.nplike.numpy.asarray(layout.index)
-                index = awkward1.layout.Index64(mapping[original_index])
+            elif isinstance(layout, ak._util.indexedtypes):
+                original_index = ak.nplike.numpy.asarray(layout.index)
+                index = ak.layout.Index64(mapping[original_index])
 
-            elif isinstance(layout, awkward1._util.optiontypes):
-                mask = awkward1.nplike.numpy.asarray(layout.bytemask())
+            elif isinstance(layout, ak._util.optiontypes):
+                mask = ak.nplike.numpy.asarray(layout.bytemask())
                 mapping[mask.view(np.bool_)] = -1
-                index = awkward1.layout.Index64(mapping)
+                index = ak.layout.Index64(mapping)
 
             else:
-                index = awkward1.layout.Index64(mapping)
+                index = ak.layout.Index64(mapping)
 
             out = cls(index, content[is_first], parameters={"__array__": "categorical"})
             return lambda: out
@@ -313,14 +308,14 @@ def to_categorical(array, highlevel=True):
         else:
             return None
 
-    out = awkward1._util.recursively_apply(
-        awkward1.operations.convert.to_layout(
+    out = ak._util.recursively_apply(
+        ak.operations.convert.to_layout(
             array, allow_record=False, allow_other=False
         ),
         getfunction,
     )
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
@@ -344,7 +339,7 @@ def from_categorical(array, highlevel=True):
     """
     def getfunction(layout, depth):
         if layout.parameter("__array__") == "categorical":
-            out = awkward1.operations.structure.with_parameter(
+            out = ak.operations.structure.with_parameter(
                 layout, "__array__", None, highlevel=False
             )
             return lambda: out
@@ -352,14 +347,14 @@ def from_categorical(array, highlevel=True):
         else:
             return None
 
-    out = awkward1._util.recursively_apply(
-        awkward1.operations.convert.to_layout(
+    out = ak._util.recursively_apply(
+        ak.operations.convert.to_layout(
             array, allow_record=False, allow_other=False
         ),
         getfunction,
     )
     if highlevel:
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 

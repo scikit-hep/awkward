@@ -6,10 +6,7 @@ import warnings
 import sys
 import distutils.version
 
-import awkward1.layout
-import awkward1.operations.convert
-import awkward1._util
-
+import awkward1 as ak
 
 checked_version = False
 
@@ -84,18 +81,18 @@ def evaluate(
     arguments = getArguments(names, local_dict, global_dict)
 
     arrays = [
-        awkward1.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+        ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
         for x in arguments
     ]
 
     def getfunction(inputs, depth):
         if all(
-            isinstance(x, awkward1.layout.NumpyArray)
-            or not isinstance(x, awkward1.layout.Content)
+            isinstance(x, ak.layout.NumpyArray)
+            or not isinstance(x, ak.layout.Content)
             for x in inputs
         ):
             return lambda: (
-                awkward1.layout.NumpyArray(
+                ak.layout.NumpyArray(
                     numexpr.evaluate(
                         expression,
                         dict(zip(names, inputs)),
@@ -109,12 +106,12 @@ def evaluate(
         else:
             return None
 
-    behavior = awkward1._util.behaviorof(*arrays)
-    out = awkward1._util.broadcast_and_apply(
+    behavior = ak._util.behaviorof(*arrays)
+    out = ak._util.broadcast_and_apply(
         arrays, getfunction, behavior, allow_records=False
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return awkward1._util.wrap(out[0], behavior)
+    return ak._util.wrap(out[0], behavior)
 
 
 evaluate.evaluate = evaluate
@@ -128,36 +125,36 @@ def re_evaluate(local_dict=None):
     except KeyError:
         raise RuntimeError(
             "not a previous evaluate() execution found"
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
     names = numexpr.necompiler._numexpr_last["argnames"]
     arguments = getArguments(names, local_dict)
 
     arrays = [
-        awkward1.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+        ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
         for x in arguments
     ]
 
     def getfunction(inputs, depth):
         if all(
-            isinstance(x, awkward1.layout.NumpyArray)
-            or not isinstance(x, awkward1.layout.Content)
+            isinstance(x, ak.layout.NumpyArray)
+            or not isinstance(x, ak.layout.Content)
             for x in inputs
         ):
             return lambda: (
-                awkward1.layout.NumpyArray(
+                ak.layout.NumpyArray(
                     numexpr.re_evaluate(dict(zip(names, inputs)))
                 ),
             )
         else:
             return None
 
-    behavior = awkward1._util.behaviorof(*arrays)
-    out = awkward1._util.broadcast_and_apply(
+    behavior = ak._util.behaviorof(*arrays)
+    out = ak._util.broadcast_and_apply(
         arrays, getfunction, behavior, allow_records=False
     )
     assert isinstance(out, tuple) and len(out) == 1
-    return awkward1._util.wrap(out[0], behavior)
+    return ak._util.wrap(out[0], behavior)
 
 
 evaluate.re_evaluate = re_evaluate

@@ -2,11 +2,9 @@
 
 from __future__ import absolute_import
 
-import inspect
 import re
 import sys
 import os
-import weakref
 import warnings
 
 try:
@@ -16,18 +14,13 @@ except ImportError:
     from collections import Mapping
     from collections import MutableMapping
 
-import awkward1.layout
-import awkward1.partition
-import awkward1.nplike
+import awkward1 as ak
 
-
-np = awkward1.nplike.NumpyMetadata.instance()
-
+np = ak.nplike.NumpyMetadata.instance()
 
 py27 = sys.version_info[0] < 3
 py35 = sys.version_info[0] == 3 and sys.version_info[1] <= 5
 win = os.name == "nt"
-
 
 # to silence flake8 F821 errors
 if py27:
@@ -43,14 +36,14 @@ def exception_suffix(filename):
     filename = filename.replace("\\", "/")
     filename = "/src/awkward1/" + filename.split("awkward1/")[1]
     return ("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/"
-            + awkward1.__version__
+            + ak.__version__
             + filename
             + line
             + ")")
 
 
 def deprecate(exception, version, date=None):
-    if awkward1.deprecations_as_errors:
+    if ak.deprecations_as_errors:
         raise exception
     else:
         if date is None:
@@ -64,46 +57,46 @@ def deprecate(exception, version, date=None):
         warnings.warn(message, DeprecationWarning)
 
 
-virtualtypes = (awkward1.layout.VirtualArray,)
+virtualtypes = (ak.layout.VirtualArray,)
 
-unknowntypes = (awkward1.layout.EmptyArray,)
+unknowntypes = (ak.layout.EmptyArray,)
 
 indexedtypes = (
-    awkward1.layout.IndexedArray32,
-    awkward1.layout.IndexedArrayU32,
-    awkward1.layout.IndexedArray64,
+    ak.layout.IndexedArray32,
+    ak.layout.IndexedArrayU32,
+    ak.layout.IndexedArray64,
 )
 
 uniontypes = (
-    awkward1.layout.UnionArray8_32,
-    awkward1.layout.UnionArray8_U32,
-    awkward1.layout.UnionArray8_64,
+    ak.layout.UnionArray8_32,
+    ak.layout.UnionArray8_U32,
+    ak.layout.UnionArray8_64,
 )
 
 indexedoptiontypes = (
-    awkward1.layout.IndexedOptionArray32,
-    awkward1.layout.IndexedOptionArray64,
+    ak.layout.IndexedOptionArray32,
+    ak.layout.IndexedOptionArray64,
 )
 
 optiontypes = (
-    awkward1.layout.IndexedOptionArray32,
-    awkward1.layout.IndexedOptionArray64,
-    awkward1.layout.ByteMaskedArray,
-    awkward1.layout.BitMaskedArray,
-    awkward1.layout.UnmaskedArray,
+    ak.layout.IndexedOptionArray32,
+    ak.layout.IndexedOptionArray64,
+    ak.layout.ByteMaskedArray,
+    ak.layout.BitMaskedArray,
+    ak.layout.UnmaskedArray,
 )
 
 listtypes = (
-    awkward1.layout.RegularArray,
-    awkward1.layout.ListArray32,
-    awkward1.layout.ListArrayU32,
-    awkward1.layout.ListArray64,
-    awkward1.layout.ListOffsetArray32,
-    awkward1.layout.ListOffsetArrayU32,
-    awkward1.layout.ListOffsetArray64,
+    ak.layout.RegularArray,
+    ak.layout.ListArray32,
+    ak.layout.ListArrayU32,
+    ak.layout.ListArray64,
+    ak.layout.ListOffsetArray32,
+    ak.layout.ListOffsetArrayU32,
+    ak.layout.ListOffsetArray64,
 )
 
-recordtypes = (awkward1.layout.RecordArray,)
+recordtypes = (ak.layout.RecordArray,)
 
 
 class Behavior(Mapping):
@@ -139,29 +132,29 @@ class Behavior(Mapping):
 
 
 def arrayclass(layout, behavior):
-    layout = awkward1.partition.first(layout)
-    behavior = Behavior(awkward1.behavior, behavior)
+    layout = ak.partition.first(layout)
+    behavior = Behavior(ak.behavior, behavior)
     arr = layout.parameter("__array__")
     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
         cls = behavior[arr]
-        if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
+        if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
     rec = layout.parameter("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
         cls = behavior[".", rec]
-        if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
+        if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
     deeprec = layout.purelist_parameter("__record__")
     if isinstance(deeprec, str) or (py27 and isinstance(deeprec, unicode)):
         cls = behavior["*", deeprec]
-        if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Array):
+        if isinstance(cls, type) and issubclass(cls, ak.highlevel.Array):
             return cls
-    return awkward1.highlevel.Array
+    return ak.highlevel.Array
 
 
 def custom_broadcast(layout, behavior):
-    layout = awkward1.partition.first(layout)
-    behavior = Behavior(awkward1.behavior, behavior)
+    layout = ak.partition.first(layout)
+    behavior = Behavior(ak.behavior, behavior)
     custom = layout.parameter("__array__")
     if not (isinstance(custom, str) or (py27 and isinstance(custom, unicode))):
         custom = layout.parameter("__record__")
@@ -180,7 +173,7 @@ def custom_broadcast(layout, behavior):
 
 
 def numba_array_typer(layouttype, behavior):
-    behavior = Behavior(awkward1.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     arr = layouttype.parameters.get("__array__")
     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
         typer = behavior["__numba_typer__", arr]
@@ -200,7 +193,7 @@ def numba_array_typer(layouttype, behavior):
 
 
 def numba_array_lower(layouttype, behavior):
-    behavior = Behavior(awkward1.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     arr = layouttype.parameters.get("__array__")
     if isinstance(arr, str) or (py27 and isinstance(arr, unicode)):
         lower = behavior["__numba_lower__", arr]
@@ -220,18 +213,18 @@ def numba_array_lower(layouttype, behavior):
 
 
 def recordclass(layout, behavior):
-    layout = awkward1.partition.first(layout)
-    behavior = Behavior(awkward1.behavior, behavior)
+    layout = ak.partition.first(layout)
+    behavior = Behavior(ak.behavior, behavior)
     rec = layout.parameter("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
         cls = behavior[rec]
-        if isinstance(cls, type) and issubclass(cls, awkward1.highlevel.Record):
+        if isinstance(cls, type) and issubclass(cls, ak.highlevel.Record):
             return cls
-    return awkward1.highlevel.Record
+    return ak.highlevel.Record
 
 
 def typestrs(behavior):
-    behavior = Behavior(awkward1.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     out = {}
     for key, typestr in behavior.items():
         if (
@@ -246,7 +239,7 @@ def typestrs(behavior):
 
 
 def numba_record_typer(layouttype, behavior):
-    behavior = Behavior(awkward1.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
         typer = behavior["__numba_typer__", rec]
@@ -256,7 +249,7 @@ def numba_record_typer(layouttype, behavior):
 
 
 def numba_record_lower(layouttype, behavior):
-    behavior = Behavior(awkward1.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
         lower = behavior["__numba_lower__", rec]
@@ -267,7 +260,7 @@ def numba_record_lower(layouttype, behavior):
 
 def overload(behavior, signature):
     if not any(s is None for s in signature):
-        behavior = Behavior(awkward1.behavior, behavior)
+        behavior = Behavior(ak.behavior, behavior)
         for key, custom in behavior.items():
             if (
                 isinstance(key, tuple)
@@ -285,7 +278,7 @@ def overload(behavior, signature):
 
 
 def numba_attrs(layouttype, behavior):
-    behavior = Behavior(awkward1.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
         for key, typer in behavior.items():
@@ -300,7 +293,7 @@ def numba_attrs(layouttype, behavior):
 
 
 def numba_methods(layouttype, behavior):
-    behavior = Behavior(awkward1.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     rec = layouttype.parameters.get("__record__")
     if isinstance(rec, str) or (py27 and isinstance(rec, unicode)):
         for key, typer in behavior.items():
@@ -316,12 +309,10 @@ def numba_methods(layouttype, behavior):
 
 
 def numba_unaryops(unaryop, left, behavior):
-    import awkward1._connect._numba.layout
-
-    behavior = Behavior(awkward1.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     done = False
 
-    if isinstance(left, awkward1._connect._numba.layout.ContentType):
+    if isinstance(left, ak._connect._numba.layout.ContentType):
         left = left.parameters.get("__record__")
         if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
             done = True
@@ -340,17 +331,15 @@ def numba_unaryops(unaryop, left, behavior):
 
 
 def numba_binops(binop, left, right, behavior):
-    import awkward1._connect._numba.layout
-
-    behavior = Behavior(awkward1.behavior, behavior)
+    behavior = Behavior(ak.behavior, behavior)
     done = False
 
-    if isinstance(left, awkward1._connect._numba.layout.ContentType):
+    if isinstance(left, ak._connect._numba.layout.ContentType):
         left = left.parameters.get("__record__")
         if not (isinstance(left, str) or (py27 and isinstance(left, unicode))):
             done = True
 
-    if isinstance(right, awkward1._connect._numba.layout.ContentType):
+    if isinstance(right, ak._connect._numba.layout.ContentType):
         right = right.parameters.get("__record__")
         if not isinstance(right, str) and not (py27 and isinstance(right, unicode)):
             done = True
@@ -376,9 +365,9 @@ def behaviorof(*arrays):
             isinstance(
                 x,
                 (
-                    awkward1.highlevel.Array,
-                    awkward1.highlevel.Record,
-                    awkward1.highlevel.ArrayBuilder,
+                    ak.highlevel.Array,
+                    ak.highlevel.Record,
+                    ak.highlevel.ArrayBuilder,
                 ),
             )
             and x.behavior is not None
@@ -391,15 +380,13 @@ def behaviorof(*arrays):
 
 
 def wrap(content, behavior):
-    import awkward1.highlevel
-
     if isinstance(
-        content, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+        content, (ak.layout.Content, ak.partition.PartitionedArray)
     ):
-        return awkward1.highlevel.Array(content, behavior=behavior, kernels=None)
+        return ak.highlevel.Array(content, behavior=behavior, kernels=None)
 
-    elif isinstance(content, awkward1.layout.Record):
-        return awkward1.highlevel.Record(content, behavior=behavior, kernels=None)
+    elif isinstance(content, ak.layout.Record):
+        return ak.highlevel.Record(content, behavior=behavior, kernels=None)
 
     else:
         return content
@@ -445,7 +432,7 @@ key2index._pattern = re.compile(r"^[1-9][0-9]*$")
 
 
 def completely_flatten(array):
-    if isinstance(array, awkward1.partition.PartitionedArray):
+    if isinstance(array, ak.partition.PartitionedArray):
         out = []
         for partition in array.partitions:
             for outi in completely_flatten(partition):
@@ -456,7 +443,7 @@ def completely_flatten(array):
         return completely_flatten(array.array)
 
     elif isinstance(array, unknowntypes):
-        return (awkward1.nplike.of(array).array([], dtype=np.bool_),)
+        return (ak.nplike.of(array).array([], dtype=np.bool_),)
 
     elif isinstance(array, indexedtypes):
         return completely_flatten(array.project())
@@ -479,8 +466,8 @@ def completely_flatten(array):
             out.extend(completely_flatten(array.field(i)))
         return tuple(out)
 
-    elif isinstance(array, awkward1.layout.NumpyArray):
-        return (awkward1.nplike.of(array).asarray(array),)
+    elif isinstance(array, ak.layout.NumpyArray):
+        return (ak.nplike.of(array).asarray(array),)
 
     else:
         raise RuntimeError(
@@ -514,18 +501,18 @@ def broadcast_and_apply(
         offsets = None
         for x in inputs:
             if isinstance(x, (
-                awkward1.layout.ListOffsetArray32,
-                awkward1.layout.ListOffsetArrayU32,
-                awkward1.layout.ListOffsetArray64,
+                ak.layout.ListOffsetArray32,
+                ak.layout.ListOffsetArrayU32,
+                ak.layout.ListOffsetArray64,
             )):
                 if offsets is None:
                     offsets = nplike.asarray(x.offsets)
                 elif not nplike.array_equal(offsets, nplike.asarray(x.offsets)):
                     return False
             elif isinstance(x, (
-                awkward1.layout.ListArray32,
-                awkward1.layout.ListArrayU32,
-                awkward1.layout.ListArray64,
+                ak.layout.ListArray32,
+                ak.layout.ListArrayU32,
+                ak.layout.ListArray64,
             )):
                 starts = nplike.asarray(x.starts)
                 stops = nplike.asarray(x.stops)
@@ -543,23 +530,23 @@ def broadcast_and_apply(
                     (len(stops) !=0 and offsets[-1] != stops[-1])
                 ):
                     return False
-            elif isinstance(x, awkward1.layout.RegularArray):
+            elif isinstance(x, ak.layout.RegularArray):
                 my_offsets = nplike.arange(0, len(x.content), x.size)
                 if offsets is None:
                     offsets = my_offsets
                 elif not nplike.array_equal(offsets, my_offsets):
                     return False
-            elif isinstance(x, awkward1.layout.Content):
+            elif isinstance(x, ak.layout.Content):
                 return False
         else:
             return True
 
     def apply(inputs, depth):
-        nplike = awkward1.nplike.of(*inputs)
+        nplike = ak.nplike.of(*inputs)
 
         if numpy_to_regular:
             inputs = [
-                x.toRegularArray() if isinstance(x, awkward1.layout.NumpyArray) else x
+                x.toRegularArray() if isinstance(x, ak.layout.NumpyArray) else x
                 for x in inputs
             ]
 
@@ -568,25 +555,25 @@ def broadcast_and_apply(
             maxdepth = max(
                 x.purelist_depth
                 for x in inputs
-                if isinstance(x, awkward1.layout.Content)
+                if isinstance(x, ak.layout.Content)
             )
 
             if maxdepth > 0 and all(
                 x.purelist_isregular
                 for x in inputs
-                if isinstance(x, awkward1.layout.Content)
+                if isinstance(x, ak.layout.Content)
             ):
                 nextinputs = []
                 for x in inputs:
-                    if isinstance(x, awkward1.layout.Content):
+                    if isinstance(x, ak.layout.Content):
                         while x.purelist_depth < maxdepth:
-                            x = awkward1.layout.RegularArray(x, 1)
+                            x = ak.layout.RegularArray(x, 1)
                     nextinputs.append(x)
                 if any(x is not y for x, y in zip(inputs, nextinputs)):
                     return apply(nextinputs, depth)
 
         # now all lengths must agree
-        checklength([x for x in inputs if isinstance(x, awkward1.layout.Content)])
+        checklength([x for x in inputs if isinstance(x, ak.layout.Content)])
 
         function = getfunction(inputs, depth)
 
@@ -605,19 +592,19 @@ def broadcast_and_apply(
                 [
                     x
                     if not isinstance(x, unknowntypes)
-                    else awkward1.layout.NumpyArray(nplike.array([], dtype=np.bool_))
+                    else ak.layout.NumpyArray(nplike.array([], dtype=np.bool_))
                     for x in inputs
                 ],
                 depth,
             )
 
         elif any(
-            isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1 for x in inputs
+            isinstance(x, ak.layout.NumpyArray) and x.ndim > 1 for x in inputs
         ):
             return apply(
                 [
                     x
-                    if not (isinstance(x, awkward1.layout.NumpyArray) and x.ndim > 1)
+                    if not (isinstance(x, ak.layout.NumpyArray) and x.ndim > 1)
                     else x.toRegularArray()
                     for x in inputs
                 ],
@@ -666,7 +653,7 @@ def broadcast_and_apply(
                     if isinstance(x, uniontypes):
                         nextinputs.append(x[mask].project(combo[str(i)]))
                         i += 1
-                    elif isinstance(x, awkward1.layout.Content):
+                    elif isinstance(x, ak.layout.Content):
                         nextinputs.append(x[mask])
                     else:
                         nextinputs.append(x)
@@ -676,11 +663,11 @@ def broadcast_and_apply(
                     assert numoutputs == len(outcontents[-1])
                 numoutputs = len(outcontents[-1])
 
-            tags = awkward1.layout.Index8(tags)
-            index = awkward1.layout.Index64(index)
+            tags = ak.layout.Index8(tags)
+            index = ak.layout.Index64(index)
 
             return tuple(
-                awkward1.layout.UnionArray8_64(
+                ak.layout.UnionArray8_64(
                     tags, index, [x[i] for x in outcontents]
                 ).simplify()
                 for i in range(numoutputs)
@@ -696,24 +683,24 @@ def broadcast_and_apply(
                     else:
                         nplike.bitwise_or(mask, m, out=mask)
 
-            nextmask = awkward1.layout.Index8(mask.view(np.int8))
+            nextmask = ak.layout.Index8(mask.view(np.int8))
             index = nplike.full(len(mask), -1, dtype=np.int64)
             index[~mask] = nplike.arange(
                 len(mask) - nplike.count_nonzero(mask), dtype=np.int64
             )
-            index = awkward1.layout.Index64(index)
+            index = ak.layout.Index64(index)
             if any(not isinstance(x, optiontypes) for x in inputs):
                 nextindex = nplike.arange(len(mask), dtype=np.int64)
                 nextindex[mask] = -1
-                nextindex = awkward1.layout.Index64(nextindex)
+                nextindex = ak.layout.Index64(nextindex)
 
             nextinputs = []
             for x in inputs:
                 if isinstance(x, optiontypes):
                     nextinputs.append(x.project(nextmask))
-                elif isinstance(x, awkward1.layout.Content):
+                elif isinstance(x, ak.layout.Content):
                     nextinputs.append(
-                        awkward1.layout.IndexedOptionArray64(nextindex, x).project(
+                        ak.layout.IndexedOptionArray64(nextindex, x).project(
                             nextmask
                         )
                     )
@@ -723,13 +710,13 @@ def broadcast_and_apply(
             outcontent = apply(nextinputs, depth)
             assert isinstance(outcontent, tuple)
             return tuple(
-                awkward1.layout.IndexedOptionArray64(index, x).simplify()
+                ak.layout.IndexedOptionArray64(index, x).simplify()
                 for x in outcontent
             )
 
         elif any(isinstance(x, listtypes) for x in inputs):
             if all(
-                isinstance(x, awkward1.layout.RegularArray)
+                isinstance(x, ak.layout.RegularArray)
                 or not isinstance(x, listtypes)
                 for x in inputs
             ):
@@ -737,23 +724,23 @@ def broadcast_and_apply(
                     [
                         x.size
                         for x in inputs
-                        if isinstance(x, awkward1.layout.RegularArray)
+                        if isinstance(x, ak.layout.RegularArray)
                     ]
                 )
                 for x in inputs:
-                    if isinstance(x, awkward1.layout.RegularArray):
+                    if isinstance(x, ak.layout.RegularArray):
                         if maxsize > 1 and x.size == 1:
-                            tmpindex = awkward1.layout.Index64(
+                            tmpindex = ak.layout.Index64(
                                 nplike.repeat(
                                     nplike.arange(len(x), dtype=np.int64), maxsize
                                 )
                             )
                 nextinputs = []
                 for x in inputs:
-                    if isinstance(x, awkward1.layout.RegularArray):
+                    if isinstance(x, ak.layout.RegularArray):
                         if maxsize > 1 and x.size == 1:
                             nextinputs.append(
-                                awkward1.layout.IndexedArray64(
+                                ak.layout.IndexedArray64(
                                     tmpindex, x.content[: len(x) * x.size]
                                 ).project()
                             )
@@ -774,13 +761,13 @@ def broadcast_and_apply(
                 assert isinstance(outcontent, tuple)
 
                 return tuple(
-                    awkward1.layout.RegularArray(x, maxsize) for x in outcontent
+                    ak.layout.RegularArray(x, maxsize) for x in outcontent
                 )
 
             elif not all_same_offsets(nplike, inputs):
                 fcns = [
                     custom_broadcast(x, behavior)
-                    if isinstance(x, awkward1.layout.Content)
+                    if isinstance(x, ak.layout.Content)
                     else None
                     for x in inputs
                 ]
@@ -789,7 +776,7 @@ def broadcast_and_apply(
                 for x, fcn in zip(inputs, fcns):
                     if (
                         isinstance(x, listtypes)
-                        and not isinstance(x, awkward1.layout.RegularArray)
+                        and not isinstance(x, ak.layout.RegularArray)
                         and fcn is None
                     ):
                         first = x
@@ -799,7 +786,7 @@ def broadcast_and_apply(
                     secondround = True
                     for x in inputs:
                         if isinstance(x, listtypes) and not isinstance(
-                            x, awkward1.layout.RegularArray
+                            x, ak.layout.RegularArray
                         ):
                             first = x
                             break
@@ -813,9 +800,9 @@ def broadcast_and_apply(
                     elif isinstance(x, listtypes):
                         nextinputs.append(x.broadcast_tooffsets64(offsets).content)
                     # handle implicit left-broadcasting (unlike NumPy)
-                    elif left_broadcast and isinstance(x, awkward1.layout.Content):
+                    elif left_broadcast and isinstance(x, ak.layout.Content):
                         nextinputs.append(
-                            awkward1.layout.RegularArray(x, 1)
+                            ak.layout.RegularArray(x, 1)
                             .broadcast_tooffsets64(offsets)
                             .content
                         )
@@ -826,7 +813,7 @@ def broadcast_and_apply(
                 assert isinstance(outcontent, tuple)
 
                 return tuple(
-                    awkward1.layout.ListOffsetArray64(offsets, x) for x in outcontent
+                    ak.layout.ListOffsetArray64(offsets, x) for x in outcontent
                 )
 
             else:
@@ -835,18 +822,18 @@ def broadcast_and_apply(
 
                 for x in inputs:
                     if isinstance(x, (
-                        awkward1.layout.ListOffsetArray32,
-                        awkward1.layout.ListOffsetArrayU32,
-                        awkward1.layout.ListOffsetArray64,
+                        ak.layout.ListOffsetArray32,
+                        ak.layout.ListOffsetArrayU32,
+                        ak.layout.ListOffsetArray64,
                     )):
                         offsets = x.offsets
                         lencontent = offsets[-1]
                         nextinputs.append(x.content[:lencontent])
 
                     elif isinstance(x, (
-                        awkward1.layout.ListArray32,
-                        awkward1.layout.ListArrayU32,
-                        awkward1.layout.ListArray64,
+                        ak.layout.ListArray32,
+                        ak.layout.ListArrayU32,
+                        ak.layout.ListArray64,
                     )):
                         starts, stops = x.starts, x.stops
                         if len(starts) == 0 or len(stops) == 0:
@@ -860,29 +847,29 @@ def broadcast_and_apply(
 
                 outcontent = apply(nextinputs, depth + 1)
 
-                if isinstance(offsets, awkward1.layout.Index32):
+                if isinstance(offsets, ak.layout.Index32):
                     return tuple(
-                        awkward1.layout.ListOffsetArray32(offsets, x) for x in outcontent
+                        ak.layout.ListOffsetArray32(offsets, x) for x in outcontent
                     )
-                elif isinstance(offsets, awkward1.layout.IndexU32):
+                elif isinstance(offsets, ak.layout.IndexU32):
                     return tuple(
-                        awkward1.layout.ListOffsetArrayU32(offsets, x) for x in outcontent
+                        ak.layout.ListOffsetArrayU32(offsets, x) for x in outcontent
                     )
-                elif isinstance(offsets, awkward1.layout.Index64):
+                elif isinstance(offsets, ak.layout.Index64):
                     return tuple(
-                        awkward1.layout.ListOffsetArray64(offsets, x) for x in outcontent
+                        ak.layout.ListOffsetArray64(offsets, x) for x in outcontent
                     )
-                elif isinstance(starts, awkward1.layout.Index32):
+                elif isinstance(starts, ak.layout.Index32):
                     return tuple(
-                        awkward1.layout.ListArray32(starts, stops, x) for x in outcontent
+                        ak.layout.ListArray32(starts, stops, x) for x in outcontent
                     )
-                elif isinstance(starts, awkward1.layout.IndexU32):
+                elif isinstance(starts, ak.layout.IndexU32):
                     return tuple(
-                        awkward1.layout.ListArrayU32(starts, stops, x) for x in outcontent
+                        ak.layout.ListArrayU32(starts, stops, x) for x in outcontent
                     )
-                elif isinstance(starts, awkward1.layout.Index64):
+                elif isinstance(starts, ak.layout.Index64):
                     return tuple(
-                        awkward1.layout.ListArray64(starts, stops, x) for x in outcontent
+                        ak.layout.ListArray64(starts, stops, x) for x in outcontent
                     )
                 else:
                     raise AssertionError(
@@ -942,7 +929,7 @@ def broadcast_and_apply(
                     assert numoutputs == len(outcontents[-1])
                 numoutputs = len(outcontents[-1])
             return tuple(
-                awkward1.layout.RecordArray(
+                ak.layout.RecordArray(
                     [x[i] for x in outcontents], None if istuple else keys, length
                 )
                 for i in range(numoutputs)
@@ -954,12 +941,12 @@ def broadcast_and_apply(
                 + exception_suffix(__file__)
             )
 
-    if any(isinstance(x, awkward1.partition.PartitionedArray) for x in inputs):
+    if any(isinstance(x, ak.partition.PartitionedArray) for x in inputs):
         purelist_isregular = True
         purelist_depths = set()
         for x in inputs:
             if isinstance(
-                x, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+                x, (ak.layout.Content, ak.partition.PartitionedArray)
             ):
                 if not x.purelist_isregular:
                     purelist_isregular = False
@@ -969,7 +956,7 @@ def broadcast_and_apply(
         if purelist_isregular and len(purelist_depths) > 1:
             nextinputs = []
             for x in inputs:
-                if isinstance(x, awkward1.partition.PartitionedArray):
+                if isinstance(x, ak.partition.PartitionedArray):
                     nextinputs.append(x.toContent())
                 else:
                     nextinputs.append(x)
@@ -982,13 +969,13 @@ def broadcast_and_apply(
         else:
             sample = None
             for x in inputs:
-                if isinstance(x, awkward1.partition.PartitionedArray):
+                if isinstance(x, ak.partition.PartitionedArray):
                     sample = x
                     break
-            nextinputs = awkward1.partition.partition_as(sample, inputs)
+            nextinputs = ak.partition.partition_as(sample, inputs)
 
             outputs = []
-            for part_inputs in awkward1.partition.iterate(
+            for part_inputs in ak.partition.iterate(
                 sample.numpartitions, nextinputs
             ):
                 isscalar = []
@@ -999,7 +986,7 @@ def broadcast_and_apply(
             out = ()
             for i in range(len(part)):
                 out = out + (
-                    awkward1.partition.IrregularlyPartitionedArray(
+                    ak.partition.IrregularlyPartitionedArray(
                         [x[i] for x in outputs]
                     ),
                 )
@@ -1015,19 +1002,19 @@ def broadcast_and_apply(
 def broadcast_pack(inputs, isscalar):
     maxlen = -1
     for x in inputs:
-        if isinstance(x, awkward1.layout.Content):
+        if isinstance(x, ak.layout.Content):
             maxlen = max(maxlen, len(x))
     if maxlen < 0:
         maxlen = 1
 
     nextinputs = []
     for x in inputs:
-        if isinstance(x, awkward1.layout.Record):
-            index = awkward1.nplike.of(*inputs).full(maxlen, x.at, dtype=np.int64)
-            nextinputs.append(awkward1.layout.RegularArray(x.array[index], maxlen))
+        if isinstance(x, ak.layout.Record):
+            index = ak.nplike.of(*inputs).full(maxlen, x.at, dtype=np.int64)
+            nextinputs.append(ak.layout.RegularArray(x.array[index], maxlen))
             isscalar.append(True)
-        elif isinstance(x, awkward1.layout.Content):
-            nextinputs.append(awkward1.layout.RegularArray(x, len(x)))
+        elif isinstance(x, ak.layout.Content):
+            nextinputs.append(ak.layout.RegularArray(x, len(x)))
             isscalar.append(False)
         else:
             nextinputs.append(x)
@@ -1057,15 +1044,15 @@ def recursively_apply(
     keep_parameters=True,
     numpy_to_regular=False,
 ):
-    if numpy_to_regular and isinstance(layout, awkward1.layout.NumpyArray):
+    if numpy_to_regular and isinstance(layout, ak.layout.NumpyArray):
         layout = layout.toRegularArray()
 
     custom = getfunction(layout, depth, *args)
     if custom is not None:
         return custom()
 
-    elif isinstance(layout, awkward1.partition.PartitionedArray):
-        return awkward1.partition.IrregularlyPartitionedArray(
+    elif isinstance(layout, ak.partition.PartitionedArray):
+        return ak.partition.IrregularlyPartitionedArray(
             [
                 recursively_apply(
                     x,
@@ -1079,22 +1066,22 @@ def recursively_apply(
             ]
         )
 
-    elif isinstance(layout, awkward1.layout.NumpyArray):
+    elif isinstance(layout, ak.layout.NumpyArray):
         if keep_parameters:
             return layout
         else:
-            return awkward1.layout.NumpyArray(
-                awkward1.nplike.of(layout).asarray(layout), layout.identities, None
+            return ak.layout.NumpyArray(
+                ak.nplike.of(layout).asarray(layout), layout.identities, None
             )
 
-    elif isinstance(layout, awkward1.layout.EmptyArray):
+    elif isinstance(layout, ak.layout.EmptyArray):
         if keep_parameters:
             return layout
         else:
-            return awkward1.layout.EmptyArray(layout.identities, None)
+            return ak.layout.EmptyArray(layout.identities, None)
 
-    elif isinstance(layout, awkward1.layout.RegularArray):
-        return awkward1.layout.RegularArray(
+    elif isinstance(layout, ak.layout.RegularArray):
+        return ak.layout.RegularArray(
             recursively_apply(
                 layout.content,
                 getfunction,
@@ -1108,8 +1095,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.ListArray32):
-        return awkward1.layout.ListArray32(
+    elif isinstance(layout, ak.layout.ListArray32):
+        return ak.layout.ListArray32(
             layout.starts,
             layout.stops,
             recursively_apply(
@@ -1124,8 +1111,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.ListArrayU32):
-        return awkward1.layout.ListArrayU32(
+    elif isinstance(layout, ak.layout.ListArrayU32):
+        return ak.layout.ListArrayU32(
             layout.starts,
             layout.stops,
             recursively_apply(
@@ -1140,8 +1127,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.ListArray64):
-        return awkward1.layout.ListArray64(
+    elif isinstance(layout, ak.layout.ListArray64):
+        return ak.layout.ListArray64(
             layout.starts,
             layout.stops,
             recursively_apply(
@@ -1156,8 +1143,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.ListOffsetArray32):
-        return awkward1.layout.ListOffsetArray32(
+    elif isinstance(layout, ak.layout.ListOffsetArray32):
+        return ak.layout.ListOffsetArray32(
             layout.offsets,
             recursively_apply(
                 layout.content,
@@ -1171,8 +1158,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.ListOffsetArrayU32):
-        return awkward1.layout.ListOffsetArrayU32(
+    elif isinstance(layout, ak.layout.ListOffsetArrayU32):
+        return ak.layout.ListOffsetArrayU32(
             layout.offsets,
             recursively_apply(
                 layout.content,
@@ -1186,8 +1173,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.ListOffsetArray64):
-        return awkward1.layout.ListOffsetArray64(
+    elif isinstance(layout, ak.layout.ListOffsetArray64):
+        return ak.layout.ListOffsetArray64(
             layout.offsets,
             recursively_apply(
                 layout.content,
@@ -1201,8 +1188,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.IndexedArray32):
-        return awkward1.layout.IndexedArray32(
+    elif isinstance(layout, ak.layout.IndexedArray32):
+        return ak.layout.IndexedArray32(
             layout.index,
             recursively_apply(
                 layout.content,
@@ -1216,8 +1203,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.IndexedArrayU32):
-        return awkward1.layout.IndexedArrayU32(
+    elif isinstance(layout, ak.layout.IndexedArrayU32):
+        return ak.layout.IndexedArrayU32(
             layout.index,
             recursively_apply(
                 layout.content,
@@ -1231,8 +1218,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.IndexedArray64):
-        return awkward1.layout.IndexedArray64(
+    elif isinstance(layout, ak.layout.IndexedArray64):
+        return ak.layout.IndexedArray64(
             layout.index,
             recursively_apply(
                 layout.content,
@@ -1246,8 +1233,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.IndexedOptionArray32):
-        return awkward1.layout.IndexedOptionArray32(
+    elif isinstance(layout, ak.layout.IndexedOptionArray32):
+        return ak.layout.IndexedOptionArray32(
             layout.index,
             recursively_apply(
                 layout.content,
@@ -1261,8 +1248,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.IndexedOptionArray64):
-        return awkward1.layout.IndexedOptionArray64(
+    elif isinstance(layout, ak.layout.IndexedOptionArray64):
+        return ak.layout.IndexedOptionArray64(
             layout.index,
             recursively_apply(
                 layout.content,
@@ -1276,8 +1263,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.ByteMaskedArray):
-        return awkward1.layout.ByteMaskedArray(
+    elif isinstance(layout, ak.layout.ByteMaskedArray):
+        return ak.layout.ByteMaskedArray(
             layout.mask,
             recursively_apply(
                 layout.content,
@@ -1292,8 +1279,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.BitMaskedArray):
-        return awkward1.layout.BitMaskedArray(
+    elif isinstance(layout, ak.layout.BitMaskedArray):
+        return ak.layout.BitMaskedArray(
             layout.mask,
             recursively_apply(
                 layout.content,
@@ -1310,8 +1297,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.UnmaskedArray):
-        return awkward1.layout.UnmaskedArray(
+    elif isinstance(layout, ak.layout.UnmaskedArray):
+        return ak.layout.UnmaskedArray(
             recursively_apply(
                 layout.content,
                 getfunction,
@@ -1324,8 +1311,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.RecordArray):
-        return awkward1.layout.RecordArray(
+    elif isinstance(layout, ak.layout.RecordArray):
+        return ak.layout.RecordArray(
             [
                 recursively_apply(
                     x,
@@ -1343,8 +1330,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.Record):
-        return awkward1.layout.Record(
+    elif isinstance(layout, ak.layout.Record):
+        return ak.layout.Record(
             recursively_apply(
                 layout.array,
                 getfunction,
@@ -1356,8 +1343,8 @@ def recursively_apply(
             layout.at,
         )
 
-    elif isinstance(layout, awkward1.layout.UnionArray8_32):
-        return awkward1.layout.UnionArray8_32(
+    elif isinstance(layout, ak.layout.UnionArray8_32):
+        return ak.layout.UnionArray8_32(
             layout.tags,
             layout.index,
             [
@@ -1375,8 +1362,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.UnionArray8_U32):
-        return awkward1.layout.UnionArray8_U32(
+    elif isinstance(layout, ak.layout.UnionArray8_U32):
+        return ak.layout.UnionArray8_U32(
             layout.tags,
             layout.index,
             [
@@ -1394,8 +1381,8 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.UnionArray8_64):
-        return awkward1.layout.UnionArray8_64(
+    elif isinstance(layout, ak.layout.UnionArray8_64):
+        return ak.layout.UnionArray8_64(
             layout.tags,
             layout.index,
             [
@@ -1413,7 +1400,7 @@ def recursively_apply(
             layout.parameters if keep_parameters else None,
         )
 
-    elif isinstance(layout, awkward1.layout.VirtualArray):
+    elif isinstance(layout, ak.layout.VirtualArray):
         return recursively_apply(
             layout.array,
             getfunction,
@@ -1433,52 +1420,52 @@ def recursively_apply(
 def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
     apply(layout, depth, *args)
 
-    if isinstance(layout, awkward1.partition.PartitionedArray):
+    if isinstance(layout, ak.partition.PartitionedArray):
         for x in layout.partitions:
             recursive_walk(x, apply, args, depth, materialize)
 
-    elif isinstance(layout, awkward1.layout.NumpyArray):
+    elif isinstance(layout, ak.layout.NumpyArray):
         pass
 
-    elif isinstance(layout, awkward1.layout.EmptyArray):
+    elif isinstance(layout, ak.layout.EmptyArray):
         pass
 
     elif isinstance(layout, (
-        awkward1.layout.RegularArray,
-        awkward1.layout.ListArray32,
-        awkward1.layout.ListArrayU32,
-        awkward1.layout.ListArray64,
-        awkward1.layout.ListOffsetArray32,
-        awkward1.layout.ListOffsetArrayU32,
-        awkward1.layout.ListOffsetArray64,
+        ak.layout.RegularArray,
+        ak.layout.ListArray32,
+        ak.layout.ListArrayU32,
+        ak.layout.ListArray64,
+        ak.layout.ListOffsetArray32,
+        ak.layout.ListOffsetArrayU32,
+        ak.layout.ListOffsetArray64,
     )):
         recursive_walk(layout.content, apply, args, depth + 1, materialize)
 
     elif isinstance(layout, (
-        awkward1.layout.IndexedArray32,
-        awkward1.layout.IndexedArrayU32,
-        awkward1.layout.IndexedArray64,
-        awkward1.layout.IndexedOptionArray32,
-        awkward1.layout.IndexedOptionArray64,
-        awkward1.layout.ByteMaskedArray,
-        awkward1.layout.BitMaskedArray,
-        awkward1.layout.UnmaskedArray,
+        ak.layout.IndexedArray32,
+        ak.layout.IndexedArrayU32,
+        ak.layout.IndexedArray64,
+        ak.layout.IndexedOptionArray32,
+        ak.layout.IndexedOptionArray64,
+        ak.layout.ByteMaskedArray,
+        ak.layout.BitMaskedArray,
+        ak.layout.UnmaskedArray,
     )):
         recursive_walk(layout.content, apply, args, depth, materialize)
 
     elif isinstance(layout, (
-        awkward1.layout.RecordArray,
-        awkward1.layout.UnionArray8_32,
-        awkward1.layout.UnionArray8_U32,
-        awkward1.layout.UnionArray8_64,
+        ak.layout.RecordArray,
+        ak.layout.UnionArray8_32,
+        ak.layout.UnionArray8_U32,
+        ak.layout.UnionArray8_64,
     )):
         for x in layout.contents:
             recursive_walk(x, apply, args, depth, materialize)
 
-    elif isinstance(layout, awkward1.layout.Record):
+    elif isinstance(layout, ak.layout.Record):
         recursive_walk(layout.array, apply, args, depth, materialize)
 
-    elif isinstance(layout, awkward1.layout.VirtualArray):
+    elif isinstance(layout, ak.layout.VirtualArray):
         if materialize:
             recursive_walk(layout.array, apply, args, depth, materialize)
 
@@ -1490,7 +1477,7 @@ def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
 
 
 def find_caches(layout):
-    if isinstance(layout, awkward1.partition.PartitionedArray):
+    if isinstance(layout, ak.partition.PartitionedArray):
         seen = set()
         mutablemappings = []
         for partition in layout.partitions:
@@ -1514,7 +1501,7 @@ def find_caches(layout):
 
 def highlevel_type(layout, behavior, isarray):
     if isarray:
-        return awkward1.types.ArrayType(layout.type(typestrs(behavior)), len(layout))
+        return ak.types.ArrayType(layout.type(typestrs(behavior)), len(layout))
     else:
         return layout.type(typestrs(behavior))
 
@@ -1523,9 +1510,7 @@ _is_identifier = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*$")
 
 
 def minimally_touching_string(limit_length, layout, behavior):
-    import awkward1.layout
-
-    if isinstance(layout, awkward1.layout.Record):
+    if isinstance(layout, ak.layout.Record):
         layout = layout.array[layout.at : layout.at + 1]
 
     if len(layout) == 0:
@@ -1534,24 +1519,24 @@ def minimally_touching_string(limit_length, layout, behavior):
     def forward(x, space, brackets=True, wrap=True, stop=None):
         done = False
         if wrap and isinstance(
-            x, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+            x, (ak.layout.Content, ak.partition.PartitionedArray)
         ):
             cls = arrayclass(x, behavior)
-            if cls is not awkward1.highlevel.Array:
+            if cls is not ak.highlevel.Array:
                 y = cls(x, behavior=behavior)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
                     done = True
-        if wrap and isinstance(x, awkward1.layout.Record):
+        if wrap and isinstance(x, ak.layout.Record):
             cls = recordclass(x, behavior)
-            if cls is not awkward1.highlevel.Record:
+            if cls is not ak.highlevel.Record:
                 y = cls(x, behavior=behavior)
                 if "__repr__" in type(y).__dict__:
                     yield space + repr(y)
                     done = True
         if not done:
             if isinstance(
-                x, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+                x, (ak.layout.Content, ak.partition.PartitionedArray)
             ):
                 if brackets:
                     yield space + "["
@@ -1562,7 +1547,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                     sp = ", "
                 if brackets:
                     yield "]"
-            elif isinstance(x, awkward1.layout.Record) and x.istuple:
+            elif isinstance(x, ak.layout.Record) and x.istuple:
                 yield space + "("
                 sp = ""
                 for i in range(x.numfields):
@@ -1572,7 +1557,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                         key = ""
                     sp = ", "
                 yield ")"
-            elif isinstance(x, awkward1.layout.Record):
+            elif isinstance(x, ak.layout.Record):
                 yield space + "{"
                 sp = ""
                 for k in x.keys():
@@ -1596,24 +1581,24 @@ def minimally_touching_string(limit_length, layout, behavior):
     def backward(x, space, brackets=True, wrap=True, stop=-1):
         done = False
         if wrap and isinstance(
-            x, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+            x, (ak.layout.Content, ak.partition.PartitionedArray)
         ):
             cls = arrayclass(x, behavior)
-            if cls is not awkward1.highlevel.Array:
+            if cls is not ak.highlevel.Array:
                 y = cls(x, behavior=behavior)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space
                     done = True
-        if wrap and isinstance(x, awkward1.layout.Record):
+        if wrap and isinstance(x, ak.layout.Record):
             cls = recordclass(x, behavior)
-            if cls is not awkward1.highlevel.Record:
+            if cls is not ak.highlevel.Record:
                 y = cls(x, behavior=behavior)
                 if "__repr__" in type(y).__dict__:
                     yield repr(y) + space
                     done = True
         if not done:
             if isinstance(
-                x, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+                x, (ak.layout.Content, ak.partition.PartitionedArray)
             ):
                 if brackets:
                     yield "]" + space
@@ -1624,7 +1609,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                     sp = ", "
                 if brackets:
                     yield "["
-            elif isinstance(x, awkward1.layout.Record) and x.istuple:
+            elif isinstance(x, ak.layout.Record) and x.istuple:
                 yield ")" + space
                 for i in range(x.numfields - 1, -1, -1):
                     last = None
@@ -1637,7 +1622,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                     if i != 0:
                         yield ", "
                 yield "("
-            elif isinstance(x, awkward1.layout.Record):
+            elif isinstance(x, ak.layout.Record):
                 yield "}" + space
                 keys = x.keys()
                 for i in range(len(keys) - 1, -1, -1):
@@ -1780,16 +1765,16 @@ class MappingProxy(MutableMapping):
 
 
 def make_union(tags, index, contents, identities, parameters):
-    if isinstance(index, awkward1.layout.Index32):
-        return awkward1.layout.UnionArray8_32(
+    if isinstance(index, ak.layout.Index32):
+        return ak.layout.UnionArray8_32(
             tags, index, contents, identities, parameters
         )
-    elif isinstance(index, awkward1.layout.IndexU32):
-        return awkward1.layout.UnionArray8_U32(
+    elif isinstance(index, ak.layout.IndexU32):
+        return ak.layout.UnionArray8_U32(
             tags, index, contents, identities, parameters
         )
-    elif isinstance(index, awkward1.layout.Index64):
-        return awkward1.layout.UnionArray8_64(
+    elif isinstance(index, ak.layout.Index64):
+        return ak.layout.UnionArray8_64(
             tags, index, contents, identities, parameters
         )
     else:
@@ -1797,7 +1782,7 @@ def make_union(tags, index, contents, identities, parameters):
 
 
 def union_to_record(unionarray, anonymous):
-    nplike = awkward1.nplike.of(unionarray)
+    nplike = ak.nplike.of(unionarray)
 
     contents = []
     for layout in unionarray.contents:
@@ -1808,13 +1793,13 @@ def union_to_record(unionarray, anonymous):
         elif isinstance(layout, uniontypes):
             contents.append(union_to_record(layout, anonymous))
         elif isinstance(layout, optiontypes):
-            contents.append(awkward1.operations.structure.fill_none(
+            contents.append(ak.operations.structure.fill_none(
                 layout, np.nan, highlevel=False
             ))
         else:
             contents.append(layout)
 
-    if not any(isinstance(x, awkward1.layout.RecordArray) for x in contents):
+    if not any(isinstance(x, ak.layout.RecordArray) for x in contents):
         return make_union(
             unionarray.tags,
             unionarray.index,
@@ -1827,7 +1812,7 @@ def union_to_record(unionarray, anonymous):
         seen = set()
         all_names = []
         for layout in contents:
-            if isinstance(layout, awkward1.layout.RecordArray):
+            if isinstance(layout, ak.layout.RecordArray):
                 for key in layout.keys():
                     if key not in seen:
                         seen.add(key)
@@ -1837,16 +1822,16 @@ def union_to_record(unionarray, anonymous):
                     seen.add(anonymous)
                     all_names.append(anonymous)
 
-        missingarray = awkward1.layout.IndexedOptionArray64(
-            awkward1.layout.Index64(nplike.full(len(unionarray), -1, dtype=np.int64)),
-            awkward1.layout.EmptyArray(),
+        missingarray = ak.layout.IndexedOptionArray64(
+            ak.layout.Index64(nplike.full(len(unionarray), -1, dtype=np.int64)),
+            ak.layout.EmptyArray(),
         )
 
         all_fields = []
         for name in all_names:
             union_contents = []
             for layout in contents:
-                if isinstance(layout, awkward1.layout.RecordArray):
+                if isinstance(layout, ak.layout.RecordArray):
                     for key in layout.keys():
                         if name == key:
                             union_contents.append(layout.field(key))
@@ -1869,4 +1854,4 @@ def union_to_record(unionarray, anonymous):
                 ).simplify()
             )
 
-        return awkward1.layout.RecordArray(all_fields, all_names, len(unionarray))
+        return ak.layout.RecordArray(all_fields, all_names, len(unionarray))

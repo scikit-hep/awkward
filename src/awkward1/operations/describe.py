@@ -3,15 +3,11 @@
 from __future__ import absolute_import
 
 import numbers
-import warnings
 
-import awkward1.layout
-import awkward1.nplike
+import awkward1 as ak
 
-
-np = awkward1.nplike.NumpyMetadata.instance()
-numpy = awkward1.nplike.Numpy.instance()
-
+np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 def is_valid(array, exception=False):
     """
@@ -48,18 +44,18 @@ def validity_error(array, exception=False):
 
     See also #ak.is_valid.
     """
-    if isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
+    if isinstance(array, (ak.highlevel.Array, ak.highlevel.Record)):
         return validity_error(array.layout, exception=exception)
 
-    elif isinstance(array, awkward1.highlevel.ArrayBuilder):
+    elif isinstance(array, ak.highlevel.ArrayBuilder):
         return validity_error(array.snapshot().layout, exception=exception)
 
     elif isinstance(
         array,
         (
-            awkward1.layout.Content,
-            awkward1.layout.Record,
-            awkward1.partition.PartitionedArray,
+            ak.layout.Content,
+            ak.layout.Record,
+            ak.partition.PartitionedArray,
         ),
     ):
         out = array.validityerror()
@@ -68,13 +64,13 @@ def validity_error(array, exception=False):
         else:
             return out
 
-    elif isinstance(array, awkward1.layout.ArrayBuilder):
+    elif isinstance(array, ak.layout.ArrayBuilder):
         return validity_error(array.snapshot(), exception=exception)
 
     else:
         raise TypeError(
             "not an awkward array: {0}".format(repr(array))
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
 
 
@@ -125,16 +121,16 @@ def type(array):
     to the language.)
     """
     if array is None:
-        return awkward1.types.UnknownType()
+        return ak.types.UnknownType()
 
     elif isinstance(array, (bool, np.bool, np.bool_)):
-        return awkward1.types.PrimitiveType("bool")
+        return ak.types.PrimitiveType("bool")
 
     elif isinstance(array, numbers.Integral):
-        return awkward1.types.PrimitiveType("int64")
+        return ak.types.PrimitiveType("int64")
 
     elif isinstance(array, numbers.Real):
-        return awkward1.types.PrimitiveType("float64")
+        return ak.types.PrimitiveType("float64")
 
     elif isinstance(
         array,
@@ -151,21 +147,21 @@ def type(array):
             np.float64,
         ),
     ):
-        return awkward1.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
+        return ak.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
 
-    elif isinstance(array, awkward1.highlevel.Array):
-        return awkward1._util.highlevel_type(array.layout, array.behavior, True)
+    elif isinstance(array, ak.highlevel.Array):
+        return ak._util.highlevel_type(array.layout, array.behavior, True)
 
-    elif isinstance(array, awkward1.highlevel.Record):
-        return awkward1._util.highlevel_type(array.layout, array.behavior, False)
+    elif isinstance(array, ak.highlevel.Record):
+        return ak._util.highlevel_type(array.layout, array.behavior, False)
 
-    elif isinstance(array, awkward1.highlevel.ArrayBuilder):
-        return awkward1._util.highlevel_type(
+    elif isinstance(array, ak.highlevel.ArrayBuilder):
+        return ak._util.highlevel_type(
             array.snapshot().layout, array.behavior, True
         )
 
-    elif isinstance(array, awkward1.layout.Record):
-        return array.type(awkward1._util.typestrs(None))
+    elif isinstance(array, ak.layout.Record):
+        return array.type(ak._util.typestrs(None))
 
     elif isinstance(array, np.ndarray):
         if len(array.shape) == 0:
@@ -175,23 +171,23 @@ def type(array):
                 out = type.dtype2primitive[array.dtype.type]
             except KeyError:
                 raise TypeError("numpy array type is unrecognized by awkward: %r" % array.dtype.type)
-            out = awkward1.types.PrimitiveType(out)
+            out = ak.types.PrimitiveType(out)
             for x in array.shape[-1:0:-1]:
-                out = awkward1.types.RegularType(out, x)
-            return awkward1.types.ArrayType(out, array.shape[0])
+                out = ak.types.RegularType(out, x)
+            return ak.types.ArrayType(out, array.shape[0])
 
-    elif isinstance(array, awkward1.layout.ArrayBuilder):
-        return array.type(awkward1._util.typestrs(None))
+    elif isinstance(array, ak.layout.ArrayBuilder):
+        return array.type(ak._util.typestrs(None))
 
     elif isinstance(
-        array, (awkward1.layout.Content, awkward1.partition.PartitionedArray)
+        array, (ak.layout.Content, ak.partition.PartitionedArray)
     ):
-        return array.type(awkward1._util.typestrs(None))
+        return array.type(ak._util.typestrs(None))
 
     else:
         raise TypeError(
             "unrecognized array type: {0}".format(repr(array))
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
 
 
@@ -224,23 +220,23 @@ def parameters(array):
     See #ak.Array and #ak.behavior for a more complete description of
     behaviors.
     """
-    if isinstance(array, (awkward1.highlevel.Array, awkward1.highlevel.Record)):
+    if isinstance(array, (ak.highlevel.Array, ak.highlevel.Record)):
         return array.layout.parameters
 
     elif isinstance(
         array,
         (
-            awkward1.layout.Content,
-            awkward1.layout.Record,
-            awkward1.partition.PartitionedArray,
+            ak.layout.Content,
+            ak.layout.Record,
+            ak.partition.PartitionedArray,
         ),
     ):
         return array.parameters
 
-    elif isinstance(array, awkward1.highlevel.ArrayBuilder):
+    elif isinstance(array, ak.highlevel.ArrayBuilder):
         return array.snapshot().layout.parameters
 
-    elif isinstance(array, awkward1.layout.ArrayBuilder):
+    elif isinstance(array, ak.layout.ArrayBuilder):
         return array.snapshot().parameters
 
     else:
@@ -260,7 +256,7 @@ def fields(array):
     If the array contains neither tuples nor records, this returns an empty
     list.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
     return layout.keys()

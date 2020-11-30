@@ -25,7 +25,13 @@ import awkward1.types
 import awkward1.forms
 import awkward1.partition
 
+# internal
+import awkward1._cpu_kernels
+import awkward1._libawkward
+import awkward1._util
+
 # third-party connectors
+import awkward1._connect._numpy
 import awkward1._connect._numba
 
 numba = type(awkward1._connect._numba)("numba")

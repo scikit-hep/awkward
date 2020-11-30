@@ -7,7 +7,7 @@ import json
 # don't import awkward1._connect._uproot in awkward1/__init__.py!
 import uproot4
 
-import awkward1._io
+import awkward1 as ak
 
 
 def can_optimize(interpretation, form):
@@ -37,8 +37,8 @@ def can_optimize(interpretation, form):
 def basket_array(form, data, byte_offsets, extra):
     # FIXME: uproot4_issue_90 is just a placeholder, to show how it would be done
 
-    return awkward1._io.uproot_issue_90(
+    return ak._io.uproot_issue_90(
         form,
-        awkward1.layout.NumpyArray(data),
-        awkward1.layout.Index32(byte_offsets),
+        ak.layout.NumpyArray(data),
+        ak.layout.Index32(byte_offsets),
     )

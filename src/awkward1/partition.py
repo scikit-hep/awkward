@@ -9,16 +9,13 @@ try:
 except ImportError:
     from collections import Iterable
 
-import awkward1._ext
-import awkward1._util
+import awkward1 as ak
 
-
-np = awkward1.nplike.NumpyMetadata.instance()
-numpy = awkward1.nplike.Numpy.instance()
-
+np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
 
 def single(obj):
-    if isinstance(obj, awkward1.layout.Content):
+    if isinstance(obj, ak.layout.Content):
         return IrregularlyPartitionedArray([obj])
     else:
         return obj
@@ -45,12 +42,12 @@ def partition_as(sample, arrays):
         for n, x in arrays.items():
             if isinstance(x, PartitionedArray):
                 out[n] = x.repartition(stops)
-            elif isinstance(x, awkward1.layout.Content) and (
+            elif isinstance(x, ak.layout.Content) and (
                 x.parameter("__array__") == "string"
                 or x.parameter("__array__") == "bytestring"
             ):
                 out[n] = x
-            elif isinstance(x, awkward1.layout.Content):
+            elif isinstance(x, ak.layout.Content):
                 out[n] = IrregularlyPartitionedArray.toPartitioned(x, stops)
             else:
                 out[n] = x
@@ -60,12 +57,12 @@ def partition_as(sample, arrays):
         for x in arrays:
             if isinstance(x, PartitionedArray):
                 out.append(x.repartition(stops))
-            elif isinstance(x, awkward1.layout.Content) and (
+            elif isinstance(x, ak.layout.Content) and (
                 x.parameter("__array__") == "string"
                 or x.parameter("__array__") == "bytestring"
             ):
                 out.append(x)
-            elif isinstance(x, awkward1.layout.Content):
+            elif isinstance(x, ak.layout.Content):
                 out.append(IrregularlyPartitionedArray.toPartitioned(x, stops))
             else:
                 out.append(x)
@@ -100,7 +97,7 @@ def apply(function, array):
 class PartitionedArray(object):
     @classmethod
     def from_ext(cls, obj):
-        if isinstance(obj, awkward1._ext.IrregularlyPartitionedArray):
+        if isinstance(obj, ak._ext.IrregularlyPartitionedArray):
             subcls = IrregularlyPartitionedArray
             out = subcls.__new__(subcls)
             out._ext = obj
@@ -152,7 +149,7 @@ class PartitionedArray(object):
             elif out != x.type(typestrs):
                 raise ValueError(
                     "inconsistent types in PartitionedArray"
-                    + awkward1._util.exception_suffix(__file__)
+                    + ak._util.exception_suffix(__file__)
                 )
         return out
 
@@ -307,8 +304,8 @@ class PartitionedArray(object):
             output = []
             for x in self.partitions:
                 output.append(
-                    awkward1.layout.NumpyArray(
-                        awkward1.nplike.of(x).arange(start, start + len(x), dtype=np.int64)
+                    ak.layout.NumpyArray(
+                        ak.nplike.of(x).arange(start, start + len(x), dtype=np.int64)
                     )
                 )
                 start += len(x)
@@ -341,7 +338,7 @@ class PartitionedArray(object):
     def __array__(self):
         tocat = []
         for x in self.partitions:
-            y = awkward1.operations.convert.to_numpy(x)
+            y = ak.operations.convert.to_numpy(x)
             if len(y) > 0:
                 tocat.append(y)
 
@@ -349,7 +346,7 @@ class PartitionedArray(object):
             if any(isinstance(x, numpy.ma.MaskedArray) for x in tocat):
                 return numpy.ma.concatenate(tocat)
             else:
-                return awkward1.nplike.of(tocat).concatenate(tocat)
+                return ak.nplike.of(tocat).concatenate(tocat)
         else:
             return y
 
@@ -361,7 +358,7 @@ class PartitionedArray(object):
                 out = out.merge_as_union(x)
             else:
                 out = out.merge(x)
-            if isinstance(out, awkward1._util.uniontypes):
+            if isinstance(out, ak._util.uniontypes):
                 out = out.simplify(mergebool=False)
         return out
 
@@ -369,10 +366,6 @@ class PartitionedArray(object):
         return PartitionedArray.from_ext(self._ext.repartition(*args, **kwargs))
 
     def __getitem__(self, where):
-        import awkward1.operations.convert
-        import awkward1.operations.describe
-        from awkward1.types import PrimitiveType, OptionType, UnionType
-
         if not isinstance(where, bool) and isinstance(
             where, (numbers.Integral, np.integer)
         ):
@@ -384,7 +377,7 @@ class PartitionedArray(object):
             )
 
         elif isinstance(where, str) or (
-            awkward1._util.py27 and isinstance(where, awkward1._util.unicode)
+            ak._util.py27 and isinstance(where, ak._util.unicode)
         ):
             return self.replace_partitions([x[where] for x in self.partitions])
 
@@ -397,7 +390,7 @@ class PartitionedArray(object):
             and all(
                 (
                     isinstance(x, str)
-                    or (awkward1._util.py27 and isinstance(x, awkward1._util.unicode))
+                    or (ak._util.py27 and isinstance(x, ak._util.unicode))
                 )
                 for x in where
             )
@@ -417,7 +410,7 @@ class PartitionedArray(object):
                 if not 0 <= head < len(self):
                     raise ValueError(
                         "{0} index out of range".format(type(self).__name__)
-                        + awkward1._util.exception_suffix(__file__)
+                        + ak._util.exception_suffix(__file__)
                     )
                 partitionid, index = self._ext.partitionid_index_at(head)
                 return self.partition(partitionid)[(index,) + tail]
@@ -436,7 +429,7 @@ class PartitionedArray(object):
                 )
 
             elif isinstance(head, str) or (
-                awkward1._util.py27 and isinstance(head, awkward1._util.unicode)
+                ak._util.py27 and isinstance(head, ak._util.unicode)
             ):
                 y = IrregularlyPartitionedArray([x[head] for x in self.partitions])
                 if len(tail) == 0:
@@ -447,7 +440,7 @@ class PartitionedArray(object):
             elif isinstance(head, Iterable) and all(
                 (
                     isinstance(x, str)
-                    or (awkward1._util.py27 and isinstance(x, awkward1._util.unicode))
+                    or (ak._util.py27 and isinstance(x, ak._util.unicode))
                 )
                 for x in head
             ):
@@ -463,36 +456,36 @@ class PartitionedArray(object):
                 return self.toContent()[(head,) + tail]
 
             else:
-                layout = awkward1.operations.convert.to_layout(
+                layout = ak.operations.convert.to_layout(
                     head,
                     allow_record=False,
                     allow_other=False,
                     numpytype=(np.integer, np.bool_, np.bool),
                 )
 
-                t = awkward1.operations.describe.type(layout)
+                t = ak.operations.describe.type(layout)
                 int_types = [
-                    PrimitiveType("int8"),
-                    PrimitiveType("uint8"),
-                    PrimitiveType("int16"),
-                    PrimitiveType("uint16"),
-                    PrimitiveType("int32"),
-                    PrimitiveType("uint32"),
-                    PrimitiveType("int64"),
-                    PrimitiveType("uint64"),
+                    ak.types.PrimitiveType("int8"),
+                    ak.types.PrimitiveType("uint8"),
+                    ak.types.PrimitiveType("int16"),
+                    ak.types.PrimitiveType("uint16"),
+                    ak.types.PrimitiveType("int32"),
+                    ak.types.PrimitiveType("uint32"),
+                    ak.types.PrimitiveType("int64"),
+                    ak.types.PrimitiveType("uint64"),
                 ]
-                opt_types = [OptionType(p) for p in int_types]
+                opt_types = [ak.types.OptionType(p) for p in int_types]
 
                 if (
-                    isinstance(t, OptionType)
+                    isinstance(t, ak.types.OptionType)
                     or t in int_types + opt_types
                     or (
-                        isinstance(t, UnionType)
+                        isinstance(t, ak.types.UnionType)
                         and all(ti in int_types for ti in t.types)
                     )
                     or (
-                        isinstance(t, OptionType)
-                        and isinstance(t.type, UnionType)
+                        isinstance(t, ak.types.OptionType)
+                        and isinstance(t.type, ak.types.UnionType)
                         and all(ti in int_types for ti in t.type.types)
                     )
                 ):
@@ -529,9 +522,9 @@ class IrregularlyPartitionedArray(PartitionedArray):
 
     def __init__(self, partitions, stops=None):
         if stops is None:
-            self._ext = awkward1._ext.IrregularlyPartitionedArray(partitions)
+            self._ext = ak._ext.IrregularlyPartitionedArray(partitions)
         else:
-            self._ext = awkward1._ext.IrregularlyPartitionedArray(partitions, stops)
+            self._ext = ak._ext.IrregularlyPartitionedArray(partitions, stops)
 
     @property
     def stops(self):

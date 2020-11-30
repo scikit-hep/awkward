@@ -4,13 +4,12 @@ from __future__ import absolute_import
 
 import numpy
 
-import awkward1.layout
-
+import awkward1 as ak
 
 def of(*arrays):
     libs = set()
     for array in arrays:
-        ptr_lib = awkward1.operations.convert.kernels(array)
+        ptr_lib = ak.operations.convert.kernels(array)
         if ptr_lib is None:
             pass
         elif ptr_lib == "cpu":
@@ -25,7 +24,7 @@ def of(*arrays):
     ak.to_kernels(array, 'cuda')
 
 to obtain an unmixed array in main memory or the GPU(s)."""
-            + awkward1._util.exception_suffix(__file__))
+            + ak._util.exception_suffix(__file__))
 
     if libs == set() or libs == set(["cpu"]):
         return Numpy.instance()
@@ -40,7 +39,7 @@ to obtain an unmixed array in main memory or the GPU(s)."""
     ak.to_kernels(array, 'cuda')
 
 to move one or the other to main memory or the GPU(s)."""
-            + awkward1._util.exception_suffix(__file__))
+            + ak._util.exception_suffix(__file__))
 
 
 class Singleton(object):
@@ -323,7 +322,7 @@ or
         raise ValueError(
             "CUDA arrays cannot have missing values until CuPy implements "
             "numpy.ma.MaskedArray"
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
 
     @property
@@ -331,7 +330,7 @@ or
         raise ValueError(
             "CUDA arrays cannot do string manipulations until CuPy implements "
             "numpy.char"
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
 
     @property
@@ -340,12 +339,12 @@ or
 
     def asarray(self, array, dtype=None):
         if isinstance(array, (
-            awkward1.highlevel.Array,
-            awkward1.highlevel.Record,
-            awkward1.layout.Content,
-            awkward1.layout.Record,
+            ak.highlevel.Array,
+            ak.highlevel.Record,
+            ak.layout.Content,
+            ak.layout.Record,
         )):
-            out = awkward1.operations.convert.to_cupy(array)
+            out = ak.operations.convert.to_cupy(array)
             if dtype is not None and out.dtype != dtype:
                 return self._module.asarray(out, dtype=dtype)
             else:

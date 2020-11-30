@@ -2,20 +2,15 @@
 
 from __future__ import absolute_import
 
-import awkward1.highlevel
-import awkward1.operations.convert
-import awkward1.nplike
-import awkward1._util
+import awkward1 as ak
 
+np = ak.nplike.NumpyMetadata.instance()
 
-np = awkward1.nplike.NumpyMetadata.instance()
-
-
-class ByteBehavior(awkward1.highlevel.Array):
+class ByteBehavior(ak.highlevel.Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = awkward1.nplike.of(self.layout).asarray(self.layout)
+        tmp = ak.nplike.of(self.layout).asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -53,11 +48,11 @@ class ByteBehavior(awkward1.highlevel.Array):
             raise TypeError("can only concatenate bytes to bytes")
 
 
-class CharBehavior(awkward1.highlevel.Array):
+class CharBehavior(ak.highlevel.Array):
     __name__ = "Array"
 
     def __bytes__(self):
-        tmp = awkward1.nplike.of(self.layout).asarray(self.layout)
+        tmp = ak.nplike.of(self.layout).asarray(self.layout)
         if hasattr(tmp, "tobytes"):
             return tmp.tobytes()
         else:
@@ -95,13 +90,13 @@ class CharBehavior(awkward1.highlevel.Array):
             raise TypeError("can only concatenate str to str")
 
 
-awkward1.behavior["byte"] = ByteBehavior
-awkward1.behavior["__typestr__", "byte"] = "byte"
-awkward1.behavior["char"] = CharBehavior
-awkward1.behavior["__typestr__", "char"] = "char"
+ak.behavior["byte"] = ByteBehavior
+ak.behavior["__typestr__", "byte"] = "byte"
+ak.behavior["char"] = CharBehavior
+ak.behavior["__typestr__", "char"] = "char"
 
 
-class ByteStringBehavior(awkward1.highlevel.Array):
+class ByteStringBehavior(ak.highlevel.Array):
     __name__ = "Array"
 
     def __iter__(self):
@@ -109,7 +104,7 @@ class ByteStringBehavior(awkward1.highlevel.Array):
             yield x.__bytes__()
 
 
-class StringBehavior(awkward1.highlevel.Array):
+class StringBehavior(ak.highlevel.Array):
     __name__ = "Array"
 
     def __iter__(self):
@@ -117,15 +112,15 @@ class StringBehavior(awkward1.highlevel.Array):
             yield x.__str__()
 
 
-awkward1.behavior["bytestring"] = ByteStringBehavior
-awkward1.behavior["__typestr__", "bytestring"] = "bytes"
-awkward1.behavior["string"] = StringBehavior
-awkward1.behavior["__typestr__", "string"] = "string"
+ak.behavior["bytestring"] = ByteStringBehavior
+ak.behavior["__typestr__", "bytestring"] = "bytes"
+ak.behavior["string"] = StringBehavior
+ak.behavior["__typestr__", "string"] = "string"
 
 
 def _string_equal(one, two):
-    nplike = awkward1.nplike.of(one, two)
-    behavior = awkward1._util.behaviorof(one, two)
+    nplike = ak.nplike.of(one, two)
+    behavior = ak._util.behaviorof(one, two)
 
     one, two = one.layout, two.layout
 
@@ -140,35 +135,35 @@ def _string_equal(one, two):
     possible_counts = counts1[possible]
 
     if len(possible_counts) > 0:
-        onepossible = awkward1.without_parameters(one[possible])
-        twopossible = awkward1.without_parameters(two[possible])
+        onepossible = ak.without_parameters(one[possible])
+        twopossible = ak.without_parameters(two[possible])
 
-        reduced = awkward1.all(onepossible == twopossible, axis=-1).layout
+        reduced = ak.all(onepossible == twopossible, axis=-1).layout
 
         # update same-length strings with a verdict about their characters
         out[possible] = reduced
 
-    return awkward1._util.wrap(awkward1.layout.NumpyArray(out), behavior)
+    return ak._util.wrap(ak.layout.NumpyArray(out), behavior)
 
 
-awkward1.behavior[awkward1.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
-awkward1.behavior[awkward1.nplike.numpy.equal, "string", "string"] = _string_equal
+ak.behavior[ak.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
+ak.behavior[ak.nplike.numpy.equal, "string", "string"] = _string_equal
 
 
 def _string_broadcast(layout, offsets):
-    nplike = awkward1.nplike.of(offsets)
+    nplike = ak.nplike.of(offsets)
     offsets = nplike.asarray(offsets)
     counts = offsets[1:] - offsets[:-1]
-    if awkward1._util.win:
+    if ak._util.win:
         counts = counts.astype(np.int32)
     parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
-    return awkward1.layout.IndexedArray64(
-        awkward1.layout.Index64(parents), layout
+    return ak.layout.IndexedArray64(
+        ak.layout.Index64(parents), layout
     ).project()
 
 
-awkward1.behavior["__broadcast__", "bytestring"] = _string_broadcast
-awkward1.behavior["__broadcast__", "string"] = _string_broadcast
+ak.behavior["__broadcast__", "bytestring"] = _string_broadcast
+ak.behavior["__broadcast__", "string"] = _string_broadcast
 
 
 def _string_numba_typer(viewtype):
@@ -187,45 +182,45 @@ def _string_numba_lower(
     import llvmlite.llvmpy.core
     import awkward1._connect._numba.layout
 
-    whichpos = awkward1._connect._numba.layout.posat(
+    whichpos = ak._connect._numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.CONTENT
     )
-    nextpos = awkward1._connect._numba.layout.getat(
+    nextpos = ak._connect._numba.layout.getat(
         context, builder, viewproxy.arrayptrs, whichpos
     )
 
-    whichnextpos = awkward1._connect._numba.layout.posat(
+    whichnextpos = ak._connect._numba.layout.posat(
         context, builder, nextpos, viewtype.type.contenttype.ARRAY
     )
 
-    startspos = awkward1._connect._numba.layout.posat(
+    startspos = ak._connect._numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.STARTS
     )
-    startsptr = awkward1._connect._numba.layout.getat(
+    startsptr = ak._connect._numba.layout.getat(
         context, builder, viewproxy.arrayptrs, startspos
     )
     startsarraypos = builder.add(viewproxy.start, atval)
-    start = awkward1._connect._numba.layout.getat(
+    start = ak._connect._numba.layout.getat(
         context, builder, startsptr, startsarraypos, viewtype.type.indextype.dtype
     )
 
-    stopspos = awkward1._connect._numba.layout.posat(
+    stopspos = ak._connect._numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.STOPS
     )
-    stopsptr = awkward1._connect._numba.layout.getat(
+    stopsptr = ak._connect._numba.layout.getat(
         context, builder, viewproxy.arrayptrs, stopspos
     )
     stopsarraypos = builder.add(viewproxy.start, atval)
-    stop = awkward1._connect._numba.layout.getat(
+    stop = ak._connect._numba.layout.getat(
         context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype
     )
 
-    baseptr = awkward1._connect._numba.layout.getat(
+    baseptr = ak._connect._numba.layout.getat(
         context, builder, viewproxy.arrayptrs, whichnextpos
     )
     rawptr = builder.add(
         baseptr,
-        awkward1._connect._numba.castint(
+        ak._connect._numba.castint(
             context, builder, viewtype.type.indextype.dtype, numba.intp, start
         ),
     )
@@ -236,7 +231,7 @@ def _string_numba_lower(
         ),
     )
     strsize = builder.sub(stop, start)
-    strsize_cast = awkward1._connect._numba.castint(
+    strsize_cast = ak._connect._numba.castint(
         context, builder, viewtype.type.indextype.dtype, numba.intp, strsize
     )
 
@@ -258,10 +253,10 @@ def _string_numba_lower(
     return out
 
 
-awkward1.behavior["__numba_typer__", "bytestring"] = _string_numba_typer
-awkward1.behavior["__numba_lower__", "bytestring"] = _string_numba_lower
-awkward1.behavior["__numba_typer__", "string"] = _string_numba_typer
-awkward1.behavior["__numba_lower__", "string"] = _string_numba_lower
+ak.behavior["__numba_typer__", "bytestring"] = _string_numba_typer
+ak.behavior["__numba_lower__", "bytestring"] = _string_numba_lower
+ak.behavior["__numba_typer__", "string"] = _string_numba_typer
+ak.behavior["__numba_lower__", "string"] = _string_numba_lower
 
 
 __all__ = [

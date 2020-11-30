@@ -6,19 +6,11 @@ import numba
 import numba.core.typing
 import numba.core.typing.ctypes_utils
 
-import awkward1.nplike
-import awkward1.operations.convert
-import awkward1._util
-import awkward1._libawkward
-import awkward1._connect._numba.layout
-import awkward1._connect._numba.arrayview
-import awkward1._libawkward
+import awkward1 as ak
 
-
-numpy = awkward1.nplike.Numpy.instance()
+numpy = ak.nplike.Numpy.instance()
 
 dynamic_addrs = {}
-
 
 def globalstring(context, builder, pyvalue):
     import llvmlite.ir.types
@@ -37,8 +29,8 @@ def globalstring(context, builder, pyvalue):
 class ArrayBuilderType(numba.types.Type):
     def __init__(self, behavior):
         super(ArrayBuilderType, self).__init__(
-            name="awkward1.ArrayBuilderType({0})".format(
-                awkward1._connect._numba.repr_behavior(behavior)
+            name="ak.ArrayBuilderType({0})".format(
+                ak._connect._numba.repr_behavior(behavior)
             )
         )
         self.behavior = behavior
@@ -79,10 +71,8 @@ def unbox_ArrayBuilder(arraybuildertype, arraybuilderobj, c):
 
 @numba.extending.box(ArrayBuilderType)
 def box_ArrayBuilder(arraybuildertype, arraybuilderval, c):
-    import awkward1.highlevel
-
     ArrayBuilder_obj = c.pyapi.unserialize(
-        c.pyapi.serialize_object(awkward1.highlevel.ArrayBuilder)
+        c.pyapi.serialize_object(ak.highlevel.ArrayBuilder)
     )
     behavior_obj = c.pyapi.unserialize(
         c.pyapi.serialize_object(arraybuildertype.behavior)
@@ -137,10 +127,10 @@ def lower_len(context, builder, sig, args):
     call(
         context,
         builder,
-        awkward1._libawkward.ArrayBuilder_length,
+        ak._libawkward.ArrayBuilder_length,
         (proxyin.rawptr, result),
     )
-    return awkward1._connect._numba.castint(
+    return ak._connect._numba.castint(
         context, builder, numba.int64, numba.intp, builder.load(result)
     )
 
@@ -156,7 +146,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number of arguments for ArrayBuilder.clear"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("null")
@@ -166,7 +156,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number of arguments for ArrayBuilder.null"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("boolean")
@@ -180,7 +170,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number or types of arguments for ArrayBuilder.boolean"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("integer")
@@ -194,7 +184,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number or types of arguments for ArrayBuilder.integer"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("real")
@@ -208,7 +198,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number or types of arguments for ArrayBuilder.real"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("begin_list")
@@ -218,7 +208,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number of arguments for ArrayBuilder.begin_list"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("end_list")
@@ -228,7 +218,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number of arguments for ArrayBuilder.end_list"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("begin_tuple")
@@ -242,7 +232,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number or types of arguments for ArrayBuilder.begin_tuple"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("index")
@@ -256,7 +246,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number or types of arguments for ArrayBuilder.index"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("end_tuple")
@@ -266,7 +256,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number of arguments for ArrayBuilder.end_tuple"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("begin_record")
@@ -282,7 +272,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number or types of arguments for ArrayBuilder.begin_record"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("field")
@@ -296,7 +286,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number or types of arguments for ArrayBuilder.field"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("end_record")
@@ -306,21 +296,19 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         else:
             raise TypeError(
                 "wrong number of arguments for ArrayBuilder.end_record"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("append")
     def resolve_append(self, arraybuildertype, args, kwargs):
-        import awkward1.highlevel
-
         if (
             len(args) == 1
             and len(kwargs) == 0
             and isinstance(
                 args[0],
                 (
-                    awkward1._connect._numba.arrayview.ArrayViewType,
-                    awkward1._connect._numba.arrayview.RecordViewType,
+                    ak._connect._numba.arrayview.ArrayViewType,
+                    ak._connect._numba.arrayview.RecordViewType,
                     numba.types.Boolean,
                     numba.types.Integer,
                     numba.types.Float,
@@ -347,7 +335,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         elif (
             len(args) == 2
             and len(kwargs) == 0
-            and isinstance(args[0], awkward1._connect._numba.arrayview.ArrayViewType)
+            and isinstance(args[0], ak._connect._numba.arrayview.ArrayViewType)
             and isinstance(args[1], numba.types.Integer)
         ):
             return numba.types.none(args[0], args[1])
@@ -358,7 +346,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
                         isinstance(key, tuple)
                         and len(key) == 3
                         and key[0] == "__numba_lower__"
-                        and key[1] == awkward1.highlevel.ArrayBuilder.append
+                        and key[1] == ak.highlevel.ArrayBuilder.append
                         and (
                             args[0] == key[2]
                             or (
@@ -373,7 +361,7 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
 
             raise TypeError(
                 "wrong number or types of arguments for ArrayBuilder.append"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
     @numba.core.typing.templates.bound_function("extend")
@@ -381,13 +369,13 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
         if (
             len(args) == 1
             and len(kwargs) == 0
-            and isinstance(args[0], awkward1._connect._numba.arrayview.ArrayViewType)
+            and isinstance(args[0], ak._connect._numba.arrayview.ArrayViewType)
         ):
             return numba.types.none(args[0])
         else:
             raise TypeError(
                 "wrong number or types of arguments for ArrayBuilder.extend"
-                + awkward1._util.exception_suffix(__file__)
+                + ak._util.exception_suffix(__file__)
             )
 
 
@@ -396,7 +384,7 @@ def lower_clear(context, builder, sig, args):
     (arraybuildertype,) = sig.args
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(context, builder, awkward1._libawkward.ArrayBuilder_clear, (proxyin.rawptr,))
+    call(context, builder, ak._libawkward.ArrayBuilder_clear, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 
@@ -405,7 +393,7 @@ def lower_null(context, builder, sig, args):
     (arraybuildertype,) = sig.args
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(context, builder, awkward1._libawkward.ArrayBuilder_null, (proxyin.rawptr,))
+    call(context, builder, ak._libawkward.ArrayBuilder_null, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 
@@ -416,7 +404,7 @@ def lower_boolean(context, builder, sig, args):
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     x = builder.zext(xval, context.get_value_type(numba.uint8))
     call(
-        context, builder, awkward1._libawkward.ArrayBuilder_boolean, (proxyin.rawptr, x)
+        context, builder, ak._libawkward.ArrayBuilder_boolean, (proxyin.rawptr, x)
     )
     return context.get_dummy_value()
 
@@ -426,9 +414,9 @@ def lower_integer(context, builder, sig, args):
     arraybuildertype, xtype = sig.args
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    x = awkward1._connect._numba.castint(context, builder, xtype, numba.int64, xval)
+    x = ak._connect._numba.castint(context, builder, xtype, numba.int64, xval)
     call(
-        context, builder, awkward1._libawkward.ArrayBuilder_integer, (proxyin.rawptr, x)
+        context, builder, ak._libawkward.ArrayBuilder_integer, (proxyin.rawptr, x)
     )
     return context.get_dummy_value()
 
@@ -449,7 +437,7 @@ def lower_real(context, builder, sig, args):
         x = builder.fptrunc(xval, context.get_value_type(numba.types.float64))
     else:
         x = xval
-    call(context, builder, awkward1._libawkward.ArrayBuilder_real, (proxyin.rawptr, x))
+    call(context, builder, ak._libawkward.ArrayBuilder_real, (proxyin.rawptr, x))
     return context.get_dummy_value()
 
 
@@ -459,7 +447,7 @@ def lower_beginlist(context, builder, sig, args):
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     call(
-        context, builder, awkward1._libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,)
+        context, builder, ak._libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,)
     )
     return context.get_dummy_value()
 
@@ -469,7 +457,7 @@ def lower_endlist(context, builder, sig, args):
     (arraybuildertype,) = sig.args
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(context, builder, awkward1._libawkward.ArrayBuilder_endlist, (proxyin.rawptr,))
+    call(context, builder, ak._libawkward.ArrayBuilder_endlist, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 
@@ -478,13 +466,13 @@ def lower_begintuple(context, builder, sig, args):
     arraybuildertype, numfieldstype = sig.args
     arraybuilderval, numfieldsval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    numfields = awkward1._connect._numba.castint(
+    numfields = ak._connect._numba.castint(
         context, builder, numfieldstype, numba.int64, numfieldsval
     )
     call(
         context,
         builder,
-        awkward1._libawkward.ArrayBuilder_begintuple,
+        ak._libawkward.ArrayBuilder_begintuple,
         (proxyin.rawptr, numfields),
     )
     return context.get_dummy_value()
@@ -495,13 +483,13 @@ def lower_index(context, builder, sig, args):
     arraybuildertype, indextype = sig.args
     arraybuilderval, indexval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    index = awkward1._connect._numba.castint(
+    index = ak._connect._numba.castint(
         context, builder, indextype, numba.int64, indexval
     )
     call(
         context,
         builder,
-        awkward1._libawkward.ArrayBuilder_index,
+        ak._libawkward.ArrayBuilder_index,
         (proxyin.rawptr, index),
     )
     return arraybuilderval
@@ -513,7 +501,7 @@ def lower_endtuple(context, builder, sig, args):
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     call(
-        context, builder, awkward1._libawkward.ArrayBuilder_endtuple, (proxyin.rawptr,)
+        context, builder, ak._libawkward.ArrayBuilder_endtuple, (proxyin.rawptr,)
     )
     return context.get_dummy_value()
 
@@ -526,7 +514,7 @@ def lower_beginrecord(context, builder, sig, args):
     call(
         context,
         builder,
-        awkward1._libawkward.ArrayBuilder_beginrecord,
+        ak._libawkward.ArrayBuilder_beginrecord,
         (proxyin.rawptr,),
     )
     return context.get_dummy_value()
@@ -543,7 +531,7 @@ def lower_beginrecord_field(context, builder, sig, args):
     call(
         context,
         builder,
-        awkward1._libawkward.ArrayBuilder_beginrecord_fast,
+        ak._libawkward.ArrayBuilder_beginrecord_fast,
         (proxyin.rawptr, name),
     )
     return context.get_dummy_value()
@@ -558,7 +546,7 @@ def lower_field(context, builder, sig, args):
     call(
         context,
         builder,
-        awkward1._libawkward.ArrayBuilder_field_fast,
+        ak._libawkward.ArrayBuilder_field_fast,
         (proxyin.rawptr, key),
     )
     return arraybuilderval
@@ -570,7 +558,7 @@ def lower_endrecord(context, builder, sig, args):
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     call(
-        context, builder, awkward1._libawkward.ArrayBuilder_endrecord, (proxyin.rawptr,)
+        context, builder, ak._libawkward.ArrayBuilder_endrecord, (proxyin.rawptr,)
     )
     return context.get_dummy_value()
 
@@ -578,7 +566,7 @@ def lower_endrecord(context, builder, sig, args):
 @numba.extending.lower_builtin(
     "append",
     ArrayBuilderType,
-    awkward1._connect._numba.arrayview.ArrayViewType,
+    ak._connect._numba.arrayview.ArrayViewType,
     numba.types.Integer,
 )
 def lower_append_array_at(context, builder, sig, args):
@@ -586,14 +574,14 @@ def lower_append_array_at(context, builder, sig, args):
     arraybuilderval, viewval, atval = args
 
     viewproxy = context.make_helper(builder, viewtype, viewval)
-    atval = awkward1._connect._numba.layout.regularize_atval(
+    atval = ak._connect._numba.layout.regularize_atval(
         context, builder, viewproxy, attype, atval, True, True
     )
-    atval = awkward1._connect._numba.castint(
+    atval = ak._connect._numba.castint(
         context, builder, numba.intp, numba.int64, atval
     )
 
-    sharedptr = awkward1._connect._numba.layout.getat(
+    sharedptr = ak._connect._numba.layout.getat(
         context, builder, viewproxy.sharedptrs, viewproxy.pos
     )
 
@@ -601,7 +589,7 @@ def lower_append_array_at(context, builder, sig, args):
     call(
         context,
         builder,
-        awkward1._libawkward.ArrayBuilder_append_nowrap,
+        ak._libawkward.ArrayBuilder_append_nowrap,
         (
             proxyin.rawptr,
             builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)),
@@ -612,7 +600,7 @@ def lower_append_array_at(context, builder, sig, args):
 
 
 @numba.extending.lower_builtin(
-    "append", ArrayBuilderType, awkward1._connect._numba.arrayview.ArrayViewType
+    "append", ArrayBuilderType, ak._connect._numba.arrayview.ArrayViewType
 )
 def lower_append_array(context, builder, sig, args):
     arraybuildertype, viewtype = sig.args
@@ -620,18 +608,18 @@ def lower_append_array(context, builder, sig, args):
 
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     call(
-        context, builder, awkward1._libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,)
+        context, builder, ak._libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,)
     )
 
     lower_extend_array(context, builder, sig, args)
 
-    call(context, builder, awkward1._libawkward.ArrayBuilder_endlist, (proxyin.rawptr,))
+    call(context, builder, ak._libawkward.ArrayBuilder_endlist, (proxyin.rawptr,))
 
     return context.get_dummy_value()
 
 
 @numba.extending.lower_builtin(
-    "append", ArrayBuilderType, awkward1._connect._numba.arrayview.RecordViewType
+    "append", ArrayBuilderType, ak._connect._numba.arrayview.RecordViewType
 )
 def lower_append_record(context, builder, sig, args):
     arraybuildertype, recordviewtype = sig.args
@@ -642,11 +630,11 @@ def lower_append_record(context, builder, sig, args):
     arrayviewproxy = context.make_helper(
         builder, recordviewtype.arrayviewtype, recordviewproxy.arrayview
     )
-    atval = awkward1._connect._numba.castint(
+    atval = ak._connect._numba.castint(
         context, builder, numba.intp, numba.int64, recordviewproxy.at
     )
 
-    sharedptr = awkward1._connect._numba.layout.getat(
+    sharedptr = ak._connect._numba.layout.getat(
         context, builder, arrayviewproxy.sharedptrs, arrayviewproxy.pos
     )
 
@@ -654,7 +642,7 @@ def lower_append_record(context, builder, sig, args):
     call(
         context,
         builder,
-        awkward1._libawkward.ArrayBuilder_append_nowrap,
+        ak._libawkward.ArrayBuilder_append_nowrap,
         (
             proxyin.rawptr,
             builder.inttoptr(sharedptr, context.get_value_type(numba.types.voidptr)),
@@ -713,7 +701,7 @@ def lower_append_optional(context, builder, sig, args):
             else:
                 raise AssertionError(
                     repr(opttype.type)
-                    + awkward1._util.exception_suffix(__file__)
+                    + ak._util.exception_suffix(__file__)
                 )
 
         with is_not_valid:
@@ -733,7 +721,7 @@ def lower_append_none(context, builder, sig, args):
 
 
 @numba.extending.lower_builtin(
-    "extend", ArrayBuilderType, awkward1._connect._numba.arrayview.ArrayViewType
+    "extend", ArrayBuilderType, ak._connect._numba.arrayview.ArrayViewType
 )
 def lower_extend_array(context, builder, sig, args):
     arraybuildertype, viewtype = sig.args
@@ -741,19 +729,19 @@ def lower_extend_array(context, builder, sig, args):
 
     viewproxy = context.make_helper(builder, viewtype, viewval)
 
-    sharedptr = awkward1._connect._numba.layout.getat(
+    sharedptr = ak._connect._numba.layout.getat(
         context, builder, viewproxy.sharedptrs, viewproxy.pos
     )
 
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     with numba.core.cgutils.for_range(builder, viewproxy.stop, viewproxy.start) as loop:
-        atval = awkward1._connect._numba.castint(
+        atval = ak._connect._numba.castint(
             context, builder, numba.intp, numba.int64, loop.index
         )
         call(
             context,
             builder,
-            awkward1._libawkward.ArrayBuilder_append_nowrap,
+            ak._libawkward.ArrayBuilder_append_nowrap,
             (
                 proxyin.rawptr,
                 builder.inttoptr(

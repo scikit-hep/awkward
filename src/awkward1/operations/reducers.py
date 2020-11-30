@@ -2,15 +2,9 @@
 
 from __future__ import absolute_import
 
-import awkward1._util
-import awkward1._connect._numpy
-import awkward1.layout
-import awkward1.operations.convert
-import awkward1.nplike
+import awkward1 as ak
 
-
-np = awkward1.nplike.NumpyMetadata.instance()
-
+np = ak.nplike.NumpyMetadata.instance()
 
 def count(array, axis=None, keepdims=False, mask_identity=False):
     """
@@ -81,7 +75,7 @@ def count(array, axis=None, keepdims=False, mask_identity=False):
     If it is desirable to include None values in #ak.count, use #ak.fill_none
     to turn the None values into something that would be counted.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     if axis is None:
@@ -93,17 +87,17 @@ def count(array, axis=None, keepdims=False, mask_identity=False):
                 return xs[0] + reduce(xs[1:])
 
         return reduce([
-            awkward1.nplike.of(x).size(x)
-            for x in awkward1._util.completely_flatten(layout)
+            ak.nplike.of(x).size(x)
+            for x in ak._util.completely_flatten(layout)
             ])
     else:
-        behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(
+        behavior = ak._util.behaviorof(array)
+        return ak._util.wrap(
             layout.count(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
         )
 
 
-@awkward1._connect._numpy.implements("count_nonzero")
+@ak._connect._numpy.implements("count_nonzero")
 def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
@@ -135,7 +129,7 @@ def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
     count None values. If it is desirable to count them, use #ak.fill_none
     to turn them into something that would be counted.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     if axis is None:
@@ -147,18 +141,18 @@ def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
                 return xs[0] + reduce(xs[1:])
 
         return reduce([
-            awkward1.nplike.of(x).count_nonzero(x)
-            for x in awkward1._util.completely_flatten(layout)
+            ak.nplike.of(x).count_nonzero(x)
+            for x in ak._util.completely_flatten(layout)
         ])
     else:
-        behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(
+        behavior = ak._util.behaviorof(array)
+        return ak._util.wrap(
             layout.count_nonzero(axis=axis, mask=mask_identity, keepdims=keepdims),
             behavior,
         )
 
 
-@awkward1._connect._numpy.implements("sum")
+@ak._connect._numpy.implements("sum")
 def sum(array, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
@@ -330,7 +324,7 @@ def sum(array, axis=None, keepdims=False, mask_identity=False):
     the identity of addition, but it is reduced to None if
     `mask_identity=True`.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     if axis is None:
@@ -342,17 +336,17 @@ def sum(array, axis=None, keepdims=False, mask_identity=False):
                 return xs[0] + reduce(xs[1:])
 
         return reduce([
-            awkward1.nplike.of(x).sum(x)
-            for x in awkward1._util.completely_flatten(layout)
+            ak.nplike.of(x).sum(x)
+            for x in ak._util.completely_flatten(layout)
         ])
     else:
-        behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(
+        behavior = ak._util.behaviorof(array)
+        return ak._util.wrap(
             layout.sum(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
         )
 
 
-@awkward1._connect._numpy.implements("prod")
+@ak._connect._numpy.implements("prod")
 def prod(array, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
@@ -380,7 +374,7 @@ def prod(array, axis=None, keepdims=False, mask_identity=False):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     if axis is None:
@@ -392,17 +386,17 @@ def prod(array, axis=None, keepdims=False, mask_identity=False):
                 return xs[0] * reduce(xs[1:])
 
         return reduce([
-            awkward1.nplike.of(x).prod(x)
-            for x in awkward1._util.completely_flatten(layout)
+            ak.nplike.of(x).prod(x)
+            for x in ak._util.completely_flatten(layout)
         ])
     else:
-        behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(
+        behavior = ak._util.behaviorof(array)
+        return ak._util.wrap(
             layout.prod(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
         )
 
 
-@awkward1._connect._numpy.implements("any")
+@ak._connect._numpy.implements("any")
 def any(array, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
@@ -432,7 +426,7 @@ def any(array, axis=None, keepdims=False, mask_identity=False):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     if axis is None:
@@ -444,17 +438,17 @@ def any(array, axis=None, keepdims=False, mask_identity=False):
                 return xs[0] or reduce(xs[1:])
 
         return reduce([
-            awkward1.nplike.of(x).any(x)
-            for x in awkward1._util.completely_flatten(layout)
+            ak.nplike.of(x).any(x)
+            for x in ak._util.completely_flatten(layout)
         ])
     else:
-        behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(
+        behavior = ak._util.behaviorof(array)
+        return ak._util.wrap(
             layout.any(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
         )
 
 
-@awkward1._connect._numpy.implements("all")
+@ak._connect._numpy.implements("all")
 def all(array, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
@@ -484,7 +478,7 @@ def all(array, axis=None, keepdims=False, mask_identity=False):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     if axis is None:
@@ -496,17 +490,17 @@ def all(array, axis=None, keepdims=False, mask_identity=False):
                 return xs[0] and reduce(xs[1:])
 
         return reduce([
-            awkward1.nplike.of(x).all(x)
-            for x in awkward1._util.completely_flatten(layout)
+            ak.nplike.of(x).all(x)
+            for x in ak._util.completely_flatten(layout)
         ])
     else:
-        behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(
+        behavior = ak._util.behaviorof(array)
+        return ak._util.wrap(
             layout.all(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
         )
 
 
-@awkward1._connect._numpy.implements("min")
+@ak._connect._numpy.implements("min")
 def min(array, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
@@ -537,7 +531,7 @@ def min(array, axis=None, keepdims=False, mask_identity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     if axis is None:
@@ -551,16 +545,16 @@ def min(array, axis=None, keepdims=False, mask_identity=True):
                 x, y = xs[0], reduce(xs[1:])
                 return x if x < y else y
 
-        tmp = awkward1._util.completely_flatten(layout)
-        return reduce([awkward1.nplike.of(x).min(x) for x in tmp if len(x) > 0])
+        tmp = ak._util.completely_flatten(layout)
+        return reduce([ak.nplike.of(x).min(x) for x in tmp if len(x) > 0])
     else:
-        behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(
+        behavior = ak._util.behaviorof(array)
+        return ak._util.wrap(
             layout.min(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
         )
 
 
-@awkward1._connect._numpy.implements("max")
+@ak._connect._numpy.implements("max")
 def max(array, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
@@ -591,7 +585,7 @@ def max(array, axis=None, keepdims=False, mask_identity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
     if axis is None:
@@ -605,16 +599,16 @@ def max(array, axis=None, keepdims=False, mask_identity=True):
                 x, y = xs[0], reduce(xs[1:])
                 return x if x > y else y
 
-        tmp = awkward1._util.completely_flatten(layout)
-        return reduce([awkward1.nplike.of(x).max(x) for x in tmp if len(x) > 0])
+        tmp = ak._util.completely_flatten(layout)
+        return reduce([ak.nplike.of(x).max(x) for x in tmp if len(x) > 0])
     else:
-        behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(
+        behavior = ak._util.behaviorof(array)
+        return ak._util.wrap(
             layout.max(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
         )
 
 
-@awkward1._connect._numpy.implements("argmin")
+@ak._connect._numpy.implements("argmin")
 def argmin(array, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
@@ -649,18 +643,18 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
 
     if axis is None:
-        if isinstance(layout, awkward1.partition.PartitionedArray):
+        if isinstance(layout, ak.partition.PartitionedArray):
             start = 0
             best_index = None
             best_value = None
             for partition in layout.partitions:
-                for tmp in awkward1._util.completely_flatten(partition):
-                    out = awkward1.nplike.of(tmp).argmin(tmp, axis=None)
+                for tmp in ak._util.completely_flatten(partition):
+                    out = ak.nplike.of(tmp).argmin(tmp, axis=None)
                     if best_index is None or tmp[out] < best_value:
                         best_index = start + out
                         best_value = tmp[out]
@@ -670,21 +664,21 @@ def argmin(array, axis=None, keepdims=False, mask_identity=True):
         else:
             best_index = None
             best_value = None
-            for tmp in awkward1._util.completely_flatten(layout):
-                out = awkward1.nplike.of(tmp).argmin(tmp, axis=None)
+            for tmp in ak._util.completely_flatten(layout):
+                out = ak.nplike.of(tmp).argmin(tmp, axis=None)
                 if best_index is None or tmp[out] < best_value:
                     best_index = out
                     best_value = tmp[out]
             return best_index
 
     else:
-        behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(
+        behavior = ak._util.behaviorof(array)
+        return ak._util.wrap(
             layout.argmin(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
         )
 
 
-@awkward1._connect._numpy.implements("argmax")
+@ak._connect._numpy.implements("argmax")
 def argmax(array, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
@@ -719,18 +713,18 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True):
     See #ak.sum for a more complete description of nested list and missing
     value (None) handling in reducers.
     """
-    layout = awkward1.operations.convert.to_layout(
+    layout = ak.operations.convert.to_layout(
         array, allow_record=False, allow_other=False
     )
 
     if axis is None:
-        if isinstance(layout, awkward1.partition.PartitionedArray):
+        if isinstance(layout, ak.partition.PartitionedArray):
             start = 0
             best_index = None
             best_value = None
             for partition in layout.partitions:
-                for tmp in awkward1._util.completely_flatten(partition):
-                    out = awkward1.nplike.of(tmp).argmax(tmp, axis=None)
+                for tmp in ak._util.completely_flatten(partition):
+                    out = ak.nplike.of(tmp).argmax(tmp, axis=None)
                     if best_index is None or tmp[out] > best_value:
                         best_index = start + out
                         best_value = tmp[out]
@@ -740,16 +734,16 @@ def argmax(array, axis=None, keepdims=False, mask_identity=True):
         else:
             best_index = None
             best_value = None
-            for tmp in awkward1._util.completely_flatten(layout):
-                out = awkward1.nplike.of(tmp).argmax(tmp, axis=None)
+            for tmp in ak._util.completely_flatten(layout):
+                out = ak.nplike.of(tmp).argmax(tmp, axis=None)
                 if best_index is None or tmp[out] > best_value:
                     best_index = out
                     best_value = tmp[out]
             return best_index
 
     else:
-        behavior = awkward1._util.behaviorof(array)
-        return awkward1._util.wrap(
+        behavior = ak._util.behaviorof(array)
+        return ak._util.wrap(
             layout.argmax(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
         )
 
@@ -819,10 +813,10 @@ def moment(x, n, weight=None, axis=None, keepdims=False, mask_identity=True):
                 keepdims=keepdims,
                 mask_identity=mask_identity,
             )
-        return awkward1.nplike.of(sumwxn, sumw).true_divide(sumwxn, sumw)
+        return ak.nplike.of(sumwxn, sumw).true_divide(sumwxn, sumw)
 
 
-@awkward1._connect._numpy.implements("mean")
+@ak._connect._numpy.implements("mean")
 def mean(x, weight=None, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
@@ -898,10 +892,10 @@ def mean(x, weight=None, axis=None, keepdims=False, mask_identity=True):
             sumwx = sum(
                 x * weight, axis=axis, keepdims=keepdims, mask_identity=mask_identity
             )
-        return awkward1.nplike.of(sumwx, sumw).true_divide(sumwx, sumw)
+        return ak.nplike.of(sumwx, sumw).true_divide(sumwx, sumw)
 
 
-@awkward1._connect._numpy.implements("var")
+@ak._connect._numpy.implements("var")
 def var(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
@@ -977,14 +971,14 @@ def var(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
             )
         if ddof != 0:
             return (
-                awkward1.nplike.of(sumwxx, sumw).true_divide(sumwxx, sumw)
-                * awkward1.nplike.of(sumw).true_divide(sumw, sumw - ddof)
+                ak.nplike.of(sumwxx, sumw).true_divide(sumwxx, sumw)
+                * ak.nplike.of(sumw).true_divide(sumw, sumw - ddof)
             )
         else:
-            return awkward1.nplike.of(sumwxx, sumw).true_divide(sumwxx, sumw)
+            return ak.nplike.of(sumwxx, sumw).true_divide(sumwxx, sumw)
 
 
-@awkward1._connect._numpy.implements("std")
+@ak._connect._numpy.implements("std")
 def std(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
     """
     Args:
@@ -1028,7 +1022,7 @@ def std(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
     non-reducer.
     """
     with np.errstate(invalid="ignore"):
-        return awkward1.nplike.of(x, weight).sqrt(
+        return ak.nplike.of(x, weight).sqrt(
             var(
                 x,
                 weight=weight,
@@ -1106,7 +1100,7 @@ def covar(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
                 keepdims=keepdims,
                 mask_identity=mask_identity,
             )
-        return awkward1.nplike.of(sumwxy, sumw).true_divide(sumwxy, sumw)
+        return ak.nplike.of(sumwxy, sumw).true_divide(sumwxy, sumw)
 
 
 def corr(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
@@ -1187,7 +1181,7 @@ def corr(x, y, weight=None, axis=None, keepdims=False, mask_identity=True):
                 keepdims=keepdims,
                 mask_identity=mask_identity,
             )
-        nplike = awkward1.nplike.of(sumwxy, sumwxx, sumwyy)
+        nplike = ak.nplike.of(sumwxy, sumwxx, sumwyy)
         return nplike.true_divide(sumwxy, nplike.sqrt(sumwxx * sumwyy))
 
 
@@ -1245,7 +1239,7 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
     non-reducer.
     """
     with np.errstate(invalid="ignore"):
-        nplike = awkward1.nplike.of(x, y, weight)
+        nplike = ak.nplike.of(x, y, weight)
         if weight is None:
             sumw = count(x, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
             sumwx = sum(x, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
@@ -1287,16 +1281,16 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
         intercept_error = nplike.sqrt(nplike.true_divide(sumwxx, delta))
         slope_error = nplike.sqrt(nplike.true_divide(sumw, delta))
 
-        intercept = awkward1.operations.convert.to_layout(
+        intercept = ak.operations.convert.to_layout(
             intercept, allow_record=True, allow_other=True
         )
-        slope = awkward1.operations.convert.to_layout(
+        slope = ak.operations.convert.to_layout(
             slope, allow_record=True, allow_other=True
         )
-        intercept_error = awkward1.operations.convert.to_layout(
+        intercept_error = ak.operations.convert.to_layout(
             intercept_error, allow_record=True, allow_other=True
         )
-        slope_error = awkward1.operations.convert.to_layout(
+        slope_error = ak.operations.convert.to_layout(
             slope_error, allow_record=True, allow_other=True
         )
 
@@ -1304,52 +1298,52 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
         if not isinstance(
             intercept,
             (
-                awkward1.layout.Content,
-                awkward1.layout.Record,
-                awkward1.partition.PartitionedArray,
+                ak.layout.Content,
+                ak.layout.Record,
+                ak.partition.PartitionedArray,
             ),
         ):
-            intercept = awkward1.layout.NumpyArray(nplike.array([intercept]))
+            intercept = ak.layout.NumpyArray(nplike.array([intercept]))
             scalar = True
         if not isinstance(
             slope,
             (
-                awkward1.layout.Content,
-                awkward1.layout.Record,
-                awkward1.partition.PartitionedArray,
+                ak.layout.Content,
+                ak.layout.Record,
+                ak.partition.PartitionedArray,
             ),
         ):
-            slope = awkward1.layout.NumpyArray(nplike.array([slope]))
+            slope = ak.layout.NumpyArray(nplike.array([slope]))
             scalar = True
         if not isinstance(
             intercept_error,
             (
-                awkward1.layout.Content,
-                awkward1.layout.Record,
-                awkward1.partition.PartitionedArray,
+                ak.layout.Content,
+                ak.layout.Record,
+                ak.partition.PartitionedArray,
             ),
         ):
-            intercept_error = awkward1.layout.NumpyArray(nplike.array([intercept_error]))
+            intercept_error = ak.layout.NumpyArray(nplike.array([intercept_error]))
             scalar = True
         if not isinstance(
             slope_error,
             (
-                awkward1.layout.Content,
-                awkward1.layout.Record,
-                awkward1.partition.PartitionedArray,
+                ak.layout.Content,
+                ak.layout.Record,
+                ak.partition.PartitionedArray,
             ),
         ):
-            slope_error = awkward1.layout.NumpyArray(nplike.array([slope_error]))
+            slope_error = ak.layout.NumpyArray(nplike.array([slope_error]))
             scalar = True
 
         sample = None
-        if isinstance(intercept, awkward1.partition.PartitionedArray):
+        if isinstance(intercept, ak.partition.PartitionedArray):
             sample = intercept
-        elif isinstance(slope, awkward1.partition.PartitionedArray):
+        elif isinstance(slope, ak.partition.PartitionedArray):
             sample = slope
-        elif isinstance(intercept_error, awkward1.partition.PartitionedArray):
+        elif isinstance(intercept_error, ak.partition.PartitionedArray):
             sample = intercept_error
-        elif isinstance(slope_error, awkward1.partition.PartitionedArray):
+        elif isinstance(slope_error, ak.partition.PartitionedArray):
             sample = slope_error
 
         if sample is not None:
@@ -1358,24 +1352,24 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
                 slope,
                 intercept_error,
                 slope_error,
-            ) = awkward1.partition.partition_as(
+            ) = ak.partition.partition_as(
                 sample, (intercept, slope, intercept_error, slope_error)
             )
             output = []
-            for a, b, c, d in awkward1.partition.iterate(
+            for a, b, c, d in ak.partition.iterate(
                 sample.numpartitions, (intercept, slope, intercept_error, slope_error)
             ):
                 output.append(
-                    awkward1.layout.RecordArray(
+                    ak.layout.RecordArray(
                         [a, b, c, d],
                         ["intercept", "slope", "intercept_error", "slope_error"],
                         parameters={"__record__": "LinearFit"},
                     )
                 )
-            out = awkward1.partition.IrregularlyPartitionedArray(output)
+            out = ak.partition.IrregularlyPartitionedArray(output)
 
         else:
-            out = awkward1.layout.RecordArray(
+            out = ak.layout.RecordArray(
                 [intercept, slope, intercept_error, slope_error],
                 ["intercept", "slope", "intercept_error", "slope_error"],
                 parameters={"__record__": "LinearFit"},
@@ -1383,7 +1377,7 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
             if scalar:
                 out = out[0]
 
-        return awkward1._util.wrap(out, awkward1._util.behaviorof(x, y))
+        return ak._util.wrap(out, ak._util.behaviorof(x, y))
 
 
 def softmax(x, axis=None, keepdims=False, mask_identity=False):
@@ -1424,7 +1418,7 @@ def softmax(x, axis=None, keepdims=False, mask_identity=False):
     non-reducer.
     """
     with np.errstate(invalid="ignore"):
-        nplike = awkward1.nplike.of(x)
+        nplike = ak.nplike.of(x)
         expx = nplike.exp(x)
         denom = sum(expx, axis=axis, keepdims=keepdims, mask_identity=mask_identity)
         return nplike.true_divide(expx, denom)

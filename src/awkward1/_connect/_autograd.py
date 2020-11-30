@@ -2,14 +2,9 @@
 
 from __future__ import absolute_import
 
-import awkward1.layout
-import awkward1.operations.convert
-import awkward1._connect._numpy
-import awkward1._util
-import awkward1.nplike
+import awkward1 as ak
 
-
-numpy = awkward1.nplike.Numpy.instance()
+numpy = ak.nplike.Numpy.instance()
 
 NEP13Box = None
 
@@ -22,7 +17,7 @@ def register():
     if NEP13Box is None:
 
         class NEP13Box(
-            autograd.extend.Box, awkward1._connect._numpy.NDArrayOperatorsMixin
+            autograd.extend.Box, ak._connect._numpy.NDArrayOperatorsMixin
         ):
             def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
                 import autograd
@@ -48,13 +43,13 @@ def register():
 
                 out = getattr(autograd.numpy, ufunc.__name__)(*nextinputs, **kwargs)
                 return NEP13Box(
-                    awkward1.layout.NumpyArray(out._value), out._trace, out._node
+                    ak.layout.NumpyArray(out._value), out._trace, out._node
                 )
 
-        NEP13Box.register(awkward1.layout.NumpyArray)
+        NEP13Box.register(ak.layout.NumpyArray)
 
         autograd.extend.VSpace.register(
-            awkward1.layout.NumpyArray,
+            ak.layout.NumpyArray,
             lambda x: autograd.numpy.numpy_vspaces.ArrayVSpace(numpy.asarray(x)),
         )
 
@@ -68,7 +63,7 @@ def elementwise_grad(fun, argnum=0, *nary_op_args, **nary_op_kwargs):
 
     def broadcast(*args, **kwargs):
         nextargs = [
-            awkward1.operations.convert.to_layout(
+            ak.operations.convert.to_layout(
                 x, allow_record=True, allow_other=True
             )
             for x in args
@@ -76,18 +71,18 @@ def elementwise_grad(fun, argnum=0, *nary_op_args, **nary_op_kwargs):
 
         def getfunction(inputs, depth):
             if all(
-                isinstance(x, awkward1.layout.NumpyArray)
-                or not isinstance(x, awkward1.layout.Content)
+                isinstance(x, ak.layout.NumpyArray)
+                or not isinstance(x, ak.layout.Content)
                 for x in inputs
             ):
-                return lambda: (awkward1.layout.NumpyArray(gradfun(*inputs)),)
+                return lambda: (ak.layout.NumpyArray(gradfun(*inputs)),)
             else:
                 return None
 
-        behavior = awkward1._util.behaviorof(*args)
-        out = awkward1._util.broadcast_and_apply(nextargs, getfunction, behavior)
+        behavior = ak._util.behaviorof(*args)
+        out = ak._util.broadcast_and_apply(nextargs, getfunction, behavior)
         assert isinstance(out, tuple) and len(out) == 1
-        return awkward1._util.wrap(out[0], behavior)
+        return ak._util.wrap(out[0], behavior)
 
     return broadcast
 

@@ -4,10 +4,7 @@ from __future__ import absolute_import
 
 import distutils.version
 
-import awkward1.highlevel
-import awkward1.layout
-import awkward1._util
-
+import awkward1 as ak
 
 checked_version = False
 
@@ -44,10 +41,10 @@ def register():
     import awkward1._connect._numba.layout
     import awkward1._connect._numba.builder
 
-    if hasattr(awkward1.numba, "ArrayViewType"):
+    if hasattr(ak.numba, "ArrayViewType"):
         return
 
-    n = awkward1.numba
+    n = ak.numba
     n.ArrayViewType = awkward1._connect._numba.arrayview.ArrayViewType
     n.ArrayViewModel = awkward1._connect._numba.arrayview.ArrayViewModel
     n.RecordViewType = awkward1._connect._numba.arrayview.RecordViewType
@@ -66,15 +63,15 @@ def register():
     n.ArrayBuilderType = awkward1._connect._numba.builder.ArrayBuilderType
     n.ArrayBuilderModel = awkward1._connect._numba.builder.ArrayBuilderModel
 
-    @numba.extending.typeof_impl.register(awkward1.highlevel.Array)
+    @numba.extending.typeof_impl.register(ak.highlevel.Array)
     def typeof_Array(obj, c):
         return obj.numba_type
 
-    @numba.extending.typeof_impl.register(awkward1.highlevel.Record)
+    @numba.extending.typeof_impl.register(ak.highlevel.Record)
     def typeof_Record(obj, c):
         return obj.numba_type
 
-    @numba.extending.typeof_impl.register(awkward1.highlevel.ArrayBuilder)
+    @numba.extending.typeof_impl.register(ak.highlevel.ArrayBuilder)
     def typeof_ArrayBuilder(obj, c):
         return obj.numba_type
 
@@ -99,7 +96,7 @@ def castint(context, builder, fromtype, totype, val):
     if not isinstance(fromtype, numba.types.Integer):
         raise AssertionError(
             "unrecognized integer type: {0}".format(repr(fromtype))
-            + awkward1._util.exception_suffix(__file__)
+            + ak._util.exception_suffix(__file__)
         )
 
     if fromtype.bitwidth < totype.bitwidth:
