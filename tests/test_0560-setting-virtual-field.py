@@ -2,19 +2,12 @@
 
 from __future__ import absolute_import
 
-import sys
-
-import pytest
-
-import numpy
-import awkward1
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward as ak  # noqa: F401
 
 
 def test():
-    array = awkward1.Array([{"x": 1}])
-    array["y"] = awkward1.virtual(lambda: [2], cache={}, length=1)
-
-    print("NOW", type(array.caches[0]), id(array.caches[0]))
-
-
-    awkward1.to_list(array)
+    array = ak.Array([{"x": 1}])
+    array["y"] = ak.virtual(lambda: [2], cache={}, length=1)
+    ak.to_list(array)

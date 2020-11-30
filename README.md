@@ -65,17 +65,17 @@ Our [presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) provides a good i
 
 # Installation
 
-Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward1) using pip:
+Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward) using pip:
 
 ```bash
-pip install awkward1
+pip install awkward
 ```
 
 You will likely get a precompiled binary (wheel), depending on your operating system and Python version. If not, pip attempts to compile from source (which requires a C++ compiler, make, and CMake).
 
-Awkward Array is also available using [conda](https://anaconda.org/conda-forge/awkward1), which always installs a binary:
+Awkward Array is also available using [conda](https://anaconda.org/conda-forge/awkward), which always installs a binary:
 ```bash
-conda install -c conda-forge awkward1
+conda install -c conda-forge awkward
 ```
 
 If you have already added `conda-forge` as a channel, the `-c conda-forge` is unnecessary. Adding the channel is recommended because it ensures that all of your packages use compatible versions:
@@ -157,7 +157,7 @@ python -m pytest -vv -rs tests-cpu-kernels
 Furthermore, if you have an Nvidia GPU, you can build and locally install the experimental CUDA plug-in with
 
 ```bash
-pip uninstall -y awkward1-cuda-kernels
+pip uninstall -y awkward-cuda-kernels
 python dev/generate-cuda.py
 ./cuda-build.sh --install
 ```
@@ -179,7 +179,7 @@ python -m pytest -vv -rs tests-cuda
 
 ## Using Awkward Array as a dependency
 
-Python projects can simply `import awkward1`.
+Python projects can simply `import awkward`.
 
 C++ projects can link against the shared libraries `libawkward-cpu-kernels.so` and `libawkward.so` or their static library equivalents. These libraries are shipped, along with the include files, as part of pip's installation.
 
@@ -203,7 +203,7 @@ C++ projects can link against the shared libraries `libawkward-cpu-kernels.so` a
 
 Support for this work was provided by NSF cooperative agreement OAC-1836650 (IRIS-HEP), grant OAC-1450377 (DIANA/HEP) and PHY-1520942 (US-CMS LHC Ops).
 
-Thanks especially to the gracious help of awkward-array contributors (including the [original repository](https://github.com/scikit-hep/awkward-array)).
+Thanks especially to the gracious help of awkward-array contributors (including the [original repository](https://github.com/scikit-hep/awkward-0.x)).
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->

@@ -17,7 +17,7 @@ How to convert to/from NumPy
 As a generalization of NumPy, any NumPy array can be converted to an Awkward Array, but not vice-versa.
 
 ```{code-cell} ipython3
-import awkward1 as ak
+import awkward as ak
 import numpy as np
 ```
 

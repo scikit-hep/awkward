@@ -12,11 +12,11 @@ std::string StartupLibraryPathCallback::library_path() {
   std::string eager_path;
 
   try {
-    py::object awkward1_cuda_kernels = py::module::import(
-      "awkward1_cuda_kernels");
+    py::object awkward_cuda_kernels = py::module::import(
+      "awkward_cuda_kernels");
 
-    if (py::hasattr(awkward1_cuda_kernels, "shared_library_path")) {
-      py::object library_path_pyobj = py::getattr(awkward1_cuda_kernels,
+    if (py::hasattr(awkward_cuda_kernels, "shared_library_path")) {
+      py::object library_path_pyobj = py::getattr(awkward_cuda_kernels,
                                                   "shared_library_path");
       eager_path = library_path_pyobj.cast<std::string>();
     }

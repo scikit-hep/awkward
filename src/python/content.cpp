@@ -474,10 +474,10 @@ toslice_part(ak::Slice& slice, py::object obj) {
             obj,
             py::module::import("numpy").attr("ma").attr("MaskedArray"))) {
         content = unbox_content(
-            py::module::import("awkward1").attr("from_numpy")(obj,
-                                                              false,
-                                                              false,
-                                                              false));
+            py::module::import("awkward").attr("from_numpy")(obj,
+                                                             false,
+                                                             false,
+                                                             false));
       }
       else if (py::isinstance(
             obj, py::module::import("numpy").attr("ndarray"))) {
@@ -493,10 +493,10 @@ toslice_part(ak::Slice& slice, py::object obj) {
       else if (py::isinstance<ak::ArrayBuilder>(obj)) {
         content = unbox_content(obj.attr("snapshot")());
       }
-      else if (py::isinstance(obj, py::module::import("awkward1")
+      else if (py::isinstance(obj, py::module::import("awkward")
                                               .attr("Array"))) {
         py::object tmp = obj.attr("layout");
-        if (py::isinstance(tmp, py::module::import("awkward1")
+        if (py::isinstance(tmp, py::module::import("awkward")
                                            .attr("partition")
                                            .attr("PartitionedArray"))) {
           content = unbox_content(tmp.attr("toContent")());
@@ -506,23 +506,23 @@ toslice_part(ak::Slice& slice, py::object obj) {
           content = unbox_content(tmp);
         }
       }
-      else if (py::isinstance(obj, py::module::import("awkward1")
+      else if (py::isinstance(obj, py::module::import("awkward")
                                               .attr("ArrayBuilder"))) {
         content = unbox_content(obj.attr("snapshot")().attr("layout"));
       }
-      else if (py::isinstance(obj, py::module::import("awkward1")
+      else if (py::isinstance(obj, py::module::import("awkward")
                                               .attr("partition")
                                               .attr("PartitionedArray"))) {
         content = unbox_content(obj.attr("toContent")());
         obj = box(content);
       }
       else {
-        obj = py::module::import("awkward1").attr("from_iter")(obj, false);
+        obj = py::module::import("awkward").attr("from_iter")(obj, false);
 
         bool bad = false;
         py::object asarray;
         try {
-          asarray = py::module::import("awkward1").attr("to_numpy")(obj, false);
+          asarray = py::module::import("awkward").attr("to_numpy")(obj, false);
         }
         catch (py::error_already_set& exc) {
           exc.restore();
@@ -551,7 +551,7 @@ toslice_part(ak::Slice& slice, py::object obj) {
         if (content.get()->parameter_equals("__array__", "\"string\"")  ||
             content.get()->parameter_equals("__array__", "\"bytestring\"")) {
           obj = box(content);
-          obj = py::module::import("awkward1").attr("to_list")(obj);
+          obj = py::module::import("awkward").attr("to_list")(obj);
           std::vector<std::string> strings;
           for (auto x : obj) {
             strings.push_back(x.cast<std::string>());

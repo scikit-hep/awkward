@@ -94,37 +94,42 @@ jobs:
 
       - script: |
           python -m pip list
-        displayName: "Show versions"
+        displayName: "Print versions"
+
+      - script: |
+          python -m pip install flake8 flake8-print
+          python -m flake8
+        displayName: "Run flake8"
 
       - script: |
           python -m pip install -v .[test]
         displayName: "Build for 3.9"
-        condition: "eq(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), eq(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python dev/kernel-diagnostics.py --check-sorted
         displayName: "Check if kernel specification is sorted"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python dev/generate-tests.py
         displayName: "Generate Kernel tests"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests-spec
         displayName: "Test specification"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests-cpu-kernels
         displayName: "Test CPU kernels"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests
@@ -184,34 +189,39 @@ jobs:
         displayName: "Print versions"
 
       - script: |
+          python -m pip install flake8 flake8-print
+          python -m flake8
+        displayName: "Run flake8"
+
+      - script: |
           python -m pip install -v .[test]
         displayName: "Build for 3.9"
-        condition: "eq(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), eq(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python dev/kernel-diagnostics.py --check-sorted
         displayName: "Check if kernel specification is sorted"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python dev/generate-tests.py
         displayName: "Generate Kernel tests"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests-spec
         displayName: "Test specification"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests-cpu-kernels
         displayName: "Test CPU kernels"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests
@@ -219,35 +229,35 @@ jobs:
 
       - script: |
           echo '===== include directory ============================='
-          ls -R `python -m awkward1.config --incdir`
+          ls -R `python -m awkward.config --incdir`
           echo '===== library directory ============================='
-          ls `python -m awkward1.config --libdir`
+          ls `python -m awkward.config --libdir`
           echo '===== compilation ==================================='
           which g++
-          g++ minimal.cpp `python -m awkward1.config --cflags --static-libs` -o minimal
+          g++ minimal.cpp `python -m awkward.config --cflags --static-libs` -o minimal
           otool -L minimal
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
         workingDirectory: dependent-project
         displayName: "Test dependent project 1"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           rm -f minimal
-          g++ minimal.cpp `python -m awkward1.config --cflags --libs` -o minimal
-          export DYLD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$DYLD_LIBRARY_PATH
+          g++ minimal.cpp `python -m awkward.config --cflags --libs` -o minimal
+          export DYLD_LIBRARY_PATH=`python -m awkward.config --libdir`:$DYLD_LIBRARY_PATH
           echo $DYLD_LIBRARY_PATH
           otool -L minimal
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
         workingDirectory: dependent-project
         displayName: "Test dependent project 2"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           which python
           python -c 'import sys; print(sys.version)'
           cmake -S . -B build -DPYTHON_EXECUTABLE:FILEPATH=`which python`
           cmake --build build
-          export DYLD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$DYLD_LIBRARY_PATH
+          export DYLD_LIBRARY_PATH=`python -m awkward.config --libdir`:$DYLD_LIBRARY_PATH
           echo $DYLD_LIBRARY_PATH
           ls build/dependent*
           otool -L build/dependent*
@@ -255,7 +265,7 @@ jobs:
           python -m pytest -vv test-python.py
         workingDirectory: dependent-project
         displayName: "Test dependent project 3"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
   - job: Linux
 
@@ -323,34 +333,39 @@ jobs:
         displayName: "Print versions"
 
       - script: |
+          python -m pip install flake8 flake8-print
+          python -m flake8
+        displayName: "Run flake8"
+
+      - script: |
           python -m pip install -v .[test]
         displayName: "Build for 3.9"
-        condition: "eq(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), eq(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python dev/kernel-diagnostics.py --check-sorted
         displayName: "Check if kernel specification is sorted"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python dev/generate-tests.py
         displayName: "Generate Kernel tests"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests-spec
         displayName: "Test specification"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests-cpu-kernels
         displayName: "Test CPU kernels"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests
@@ -359,44 +374,44 @@ jobs:
       - script: |
           python dev/generate-cuda.py
         displayName: "Generate CUDA kernels"
-        condition: "and(ne(variables['python.version'], '3.8'), ne(variables['python.version'], '3.9'))"
+        condition: "and(succeeded(), and(ne(variables['python.version'], '3.8'), ne(variables['python.version'], '3.9')))"
 
       - script: |
           python -m pip install wheel
           bash cuda-build.sh
         displayName: "Build the cuda-kernels"
-        condition: "and(ne(variables['python.version'], '2.7'), ne(variables['python.version'], '3.9'))"
+        condition: "and(succeeded(), and(ne(variables['python.version'], '2.7'), ne(variables['python.version'], '3.9')))"
 
       - script: |
           echo '===== include directory ============================='
-          ls -R `python -m awkward1.config --incdir`
+          ls -R `python -m awkward.config --incdir`
           echo '===== library directory ============================='
-          ls `python -m awkward1.config --libdir`
+          ls `python -m awkward.config --libdir`
           echo '===== compilation ==================================='
-          g++ minimal.cpp `python -m awkward1.config --cflags --static-libs` -o minimal
+          g++ minimal.cpp `python -m awkward.config --cflags --static-libs` -o minimal
           ldd minimal
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
         workingDirectory: dependent-project
         displayName: "Test dependent project 1"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           rm -f minimal
-          g++ minimal.cpp `python -m awkward1.config --cflags --libs` -o minimal
-          export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
+          g++ minimal.cpp `python -m awkward.config --cflags --libs` -o minimal
+          export LD_LIBRARY_PATH=`python -m awkward.config --libdir`:$LD_LIBRARY_PATH
           echo $LD_LIBRARY_PATH
           ldd minimal
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
         workingDirectory: dependent-project
         displayName: "Test dependent project 2"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           which python
           python -c 'import sys; print(sys.version)'
           cmake -S . -B build -DPYTHON_EXECUTABLE:FILEPATH=`which python`
           cmake --build build
-          export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
+          export LD_LIBRARY_PATH=`python -m awkward.config --libdir`:$LD_LIBRARY_PATH
           echo $LD_LIBRARY_PATH
           ls build/dependent*
           ldd build/dependent*
@@ -404,4 +419,4 @@ jobs:
           python -m pytest -vv test-python.py
         workingDirectory: dependent-project
         displayName: "Test dependent project 3"
-        condition: "ne(variables['python.version'], '3.9')"
+        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"

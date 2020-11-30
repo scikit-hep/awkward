@@ -1,4 +1,4 @@
-# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 import re
 import os
@@ -241,7 +241,7 @@ def dofunction(link, shortname, name, astfcn):
             outfile.write(out)
 
 done_extra = False
-for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
+for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
                        key=lambda x: x.replace("/__init__.py",    "!")
                                       .replace("/highlevel",      "#")
                                       .replace("/operations",     "$")
@@ -259,7 +259,7 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                           .replace(".py", "")
                           .replace("/", "."))
 
-    shortname = (modulename.replace("awkward1.", "ak.")
+    shortname = (modulename.replace("awkward.", "ak.")
                            .replace(".highlevel", "")
                            .replace(".operations.convert", "")
                            .replace(".operations.describe", "")
@@ -269,9 +269,9 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                            .replace(".behaviors.categorical", "")
                            .replace(".behaviors.string", ""))
 
-    if modulename == "awkward1.operations.describe":
+    if modulename == "awkward.operations.describe":
         toctree.append("ak.behavior.rst")
-    elif not done_extra and modulename.startswith("awkward1._"):
+    elif not done_extra and modulename.startswith("awkward._"):
         done_extra = True
         toctree.extend(["ak.numba.register.rst",
                         "ak.numexpr.evaluate.rst",

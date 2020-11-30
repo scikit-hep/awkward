@@ -2,20 +2,15 @@
 
 from __future__ import absolute_import
 
-import sys
-
-import pytest
-import numpy
-
-import awkward1
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
 
-py27 = (sys.version_info[0] < 3)
-
 
 def test_string():
-    array = awkward1.Array(["one", "two", "three", "four", "five"], check_valid=True)
+    array = ak.Array(["one", "two", "three", "four", "five"], check_valid=True)
 
     def f1(x, i):
         return x[i]
@@ -30,7 +25,8 @@ def test_string():
     assert f1(array, 1) == "two"
     assert f1(array, 2) == "three"
 
-    if not py27:
+    if not ak._util.py27:
+
         def f2(x, i, j):
             return x[i] + x[j]
 
@@ -39,7 +35,7 @@ def test_string():
 
 
 def test_bytestring():
-    array = awkward1.Array([b"one", b"two", b"three", b"four", b"five"], check_valid=True)
+    array = ak.Array([b"one", b"two", b"three", b"four", b"five"], check_valid=True)
 
     def f1(x, i):
         return x[i]

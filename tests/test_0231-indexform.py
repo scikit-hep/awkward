@@ -2,13 +2,12 @@
 
 from __future__ import absolute_import
 
-import sys
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward as ak  # noqa: F401
 
-import pytest
-
-import awkward1
 
 def test():
     for itype in ["i8", "u8", "i32", "u32", "i64"]:
-        form = awkward1.forms.ListOffsetForm(itype, awkward1.forms.EmptyForm())
+        form = ak.forms.ListOffsetForm(itype, ak.forms.EmptyForm())
         assert form.offsets == itype

@@ -2,26 +2,25 @@
 
 from __future__ import absolute_import
 
-import sys
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward as ak  # noqa: F401
 
-import pytest
-import numpy
 
-import awkward1
-
-class Dummy(awkward1.Record):
+class Dummy(ak.Record):
     @property
     def broken(self):
         raise AttributeError("I'm broken!")
+
 
 def test():
     behavior = {}
     behavior["Dummy"] = Dummy
 
-    recordarray = awkward1.from_iter([{"x": 1}, {"x": 2}, {"x": 3}], highlevel=False)
+    recordarray = ak.from_iter([{"x": 1}, {"x": 2}, {"x": 3}], highlevel=False)
     recordarray.setparameter("__record__", "Dummy")
-    array = awkward1.Array(recordarray, behavior=behavior)
+    array = ak.Array(recordarray, behavior=behavior)
 
     with pytest.raises(AttributeError) as err:
         array[1].broken
-    assert str(err.value) == "I'm broken!"   # not "no field named 'broken'"
+    assert str(err.value) == "I'm broken!"  # not "no field named 'broken'"

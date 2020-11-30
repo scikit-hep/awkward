@@ -22,7 +22,7 @@ The high-level interface and Numba implementation are described in the [Python A
 This reference describes the
 
    * **C++ classes:** in [namespace awkward](namespaceawkward.html) (often abbreviated as "ak"), which are compiled into **libawkward.so** (or dylib or lib). This library is fully usable from C++, without Python (see [dependent-project](https://github.com/scikit-hep/awkward-1.0/tree/master/dependent-project) for an example).
-   * **pybind11 interface:** no namespace, but contained entirely within the [python directory](dir_91f33a3f1dd6262845ebd1570075970c.html), which are compiled into **awkward1._ext** for use in Python.
+   * **pybind11 interface:** no namespace, but contained entirely within the [python directory](dir_91f33a3f1dd6262845ebd1570075970c.html), which are compiled into **awkward._ext** for use in Python.
    * **CPU kernels:** no namespace, but contained entirely within the [kernels directory](dir_6225843069e7cc68401bbec110a1667f.html), which are compiled into **libawkward-cpu-kernels.so** (or dylib or lib). This library is fully usable from any language that can call functions through [FFI](https://en.wikipedia.org/wiki/Foreign_function_interface).
    * **GPU kernels:** FIXME! (not implemented yet)
 

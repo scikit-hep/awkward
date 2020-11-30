@@ -56,9 +56,9 @@ namespace awkward {
       if (!handle) {
         if (ptr_lib == kernel::lib::cuda) {
           throw std::invalid_argument(
-            std::string("array resides on a GPU, but 'awkward1-cuda-kernels' is not "
+            std::string("array resides on a GPU, but 'awkward-cuda-kernels' is not "
                         "installed; install it with:\n\n    "
-                        "pip install awkward1[cuda] --upgrade")
+                        "pip install awkward[cuda] --upgrade")
             + FILENAME(__LINE__));
         }
         else {
@@ -70,7 +70,7 @@ namespace awkward {
       return handle;
 #else
       throw std::invalid_argument(
-          std::string("array resides on a GPU, but 'awkward1-cuda-kernels' is not"
+          std::string("array resides on a GPU, but 'awkward-cuda-kernels' is not"
                       "supported on Windows") + FILENAME(__LINE__));
 #endif
     }

@@ -2,43 +2,45 @@
 
 from __future__ import absolute_import
 
-import sys
-import json
-
-import pytest
-import numpy
-
-import awkward1
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
-awkward1_connect_numba_arrayview = pytest.importorskip("awkward1._connect._numba.arrayview")
-awkward1_connect_numba_layout = pytest.importorskip("awkward1._connect._numba.layout")
+ak_connect_numba_arrayview = pytest.importorskip("awkward._connect._numba.arrayview")
+ak_connect_numba_layout = pytest.importorskip("awkward._connect._numba.layout")
+
 
 def test_numpyarray():
-    layout = awkward1.from_iter([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], highlevel=False)
+    layout = ak.from_iter(
+        [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], highlevel=False
+    )
 
-    numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
+    numbatype = ak._connect._numba.arrayview.tonumbatype(layout.form)
+    assert ak_connect_numba_layout.typeof(layout).name == numbatype.name
 
-    lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
-    lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
+    lookup1 = ak_connect_numba_arrayview.Lookup(layout)
+    lookup2 = ak_connect_numba_arrayview.Lookup(layout.form)
     numbatype.form_fill(0, layout, lookup2)
 
-    assert numpy.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
-    assert numpy.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
+    assert np.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
+    assert np.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
 
     counter = [0]
+
     def materialize():
         counter[0] += 1
         return layout
 
-    generator = awkward1.layout.ArrayGenerator(materialize, form=layout.form, length=len(layout))
-    virtualarray = awkward1.layout.VirtualArray(generator)
+    generator = ak.layout.ArrayGenerator(
+        materialize, form=layout.form, length=len(layout)
+    )
+    virtualarray = ak.layout.VirtualArray(generator)
 
-    lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
+    lookup3 = ak_connect_numba_arrayview.Lookup(virtualarray)
     assert len(lookup1.arrayptrs) + 3 == len(lookup3.arrayptrs)
 
-    array = awkward1.Array(virtualarray)
+    array = ak.Array(virtualarray)
     array.numba_type
     assert counter[0] == 0
 
@@ -52,34 +54,40 @@ def test_numpyarray():
     assert f1(array) == 5.5
     assert counter[0] == 1
 
+
 def test_listarray():
     for case in "ListOffsetArray", "ListArray":
-        layout = awkward1.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], highlevel=False)
+        layout = ak.from_iter(
+            [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], highlevel=False
+        )
         if case == "ListArray":
             layout = layout[[0, 1, 2, 3, 4]]
 
-        numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-        assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
+        numbatype = ak._connect._numba.arrayview.tonumbatype(layout.form)
+        assert ak_connect_numba_layout.typeof(layout).name == numbatype.name
 
-        lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
-        lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
+        lookup1 = ak_connect_numba_arrayview.Lookup(layout)
+        lookup2 = ak_connect_numba_arrayview.Lookup(layout.form)
         numbatype.form_fill(0, layout, lookup2)
 
-        assert numpy.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
-        assert numpy.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
+        assert np.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
+        assert np.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
 
         counter = [0]
+
         def materialize():
             counter[0] += 1
             return layout
 
-        generator = awkward1.layout.ArrayGenerator(materialize, form=layout.form, length=len(layout))
-        virtualarray = awkward1.layout.VirtualArray(generator)
+        generator = ak.layout.ArrayGenerator(
+            materialize, form=layout.form, length=len(layout)
+        )
+        virtualarray = ak.layout.VirtualArray(generator)
 
-        lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
+        lookup3 = ak_connect_numba_arrayview.Lookup(virtualarray)
         assert len(lookup1.arrayptrs) + 3 == len(lookup3.arrayptrs)
 
-        array = awkward1.Array(virtualarray)
+        array = ak.Array(virtualarray)
         array.numba_type
         assert counter[0] == 0
 
@@ -87,7 +95,7 @@ def test_listarray():
         def f3(x):
             return x
 
-        assert isinstance(f3(array).layout, awkward1.layout.VirtualArray)
+        assert isinstance(f3(array).layout, ak.layout.VirtualArray)
         assert counter[0] == 0
 
         @numba.njit
@@ -104,39 +112,51 @@ def test_listarray():
         def f2(x):
             return x[2]
 
-        assert awkward1.to_list(f2(array)) == [4.4, 5.5]
+        assert ak.to_list(f2(array)) == [4.4, 5.5]
         assert counter[0] == 1
 
-        assert awkward1.to_list(f2(array)) == [4.4, 5.5]
+        assert ak.to_list(f2(array)) == [4.4, 5.5]
         assert counter[0] == 1
 
-        assert awkward1.to_list(f3(array)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+        assert ak.to_list(f3(array)) == [
+            [1.1, 2.2, 3.3],
+            [],
+            [4.4, 5.5],
+            [6.6],
+            [7.7, 8.8, 9.9],
+        ]
+
 
 def test_regulararray():
-    layout = awkward1.from_numpy(numpy.array([[1, 2, 3], [4, 5, 6]]), regulararray=True, highlevel=False)
+    layout = ak.from_numpy(
+        np.array([[1, 2, 3], [4, 5, 6]]), regulararray=True, highlevel=False
+    )
 
-    numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
+    numbatype = ak._connect._numba.arrayview.tonumbatype(layout.form)
+    assert ak_connect_numba_layout.typeof(layout).name == numbatype.name
 
-    lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
-    lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
+    lookup1 = ak_connect_numba_arrayview.Lookup(layout)
+    lookup2 = ak_connect_numba_arrayview.Lookup(layout.form)
     numbatype.form_fill(0, layout, lookup2)
 
-    assert numpy.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
-    assert numpy.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
+    assert np.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
+    assert np.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
 
     counter = [0]
+
     def materialize():
         counter[0] += 1
         return layout
 
-    generator = awkward1.layout.ArrayGenerator(materialize, form=layout.form, length=len(layout))
-    virtualarray = awkward1.layout.VirtualArray(generator)
+    generator = ak.layout.ArrayGenerator(
+        materialize, form=layout.form, length=len(layout)
+    )
+    virtualarray = ak.layout.VirtualArray(generator)
 
-    lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
+    lookup3 = ak_connect_numba_arrayview.Lookup(virtualarray)
     assert len(lookup1.arrayptrs) + 3 == len(lookup3.arrayptrs)
 
-    array = awkward1.Array(virtualarray)
+    array = ak.Array(virtualarray)
     array.numba_type
     assert counter[0] == 0
 
@@ -144,7 +164,7 @@ def test_regulararray():
     def f3(x):
         return x
 
-    assert isinstance(f3(array).layout, awkward1.layout.VirtualArray)
+    assert isinstance(f3(array).layout, ak.layout.VirtualArray)
     assert counter[0] == 0
 
     @numba.njit
@@ -161,40 +181,48 @@ def test_regulararray():
     def f2(x):
         return x[1]
 
-    assert awkward1.to_list(f2(array)) == [4, 5, 6]
+    assert ak.to_list(f2(array)) == [4, 5, 6]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2(array)) == [4, 5, 6]
+    assert ak.to_list(f2(array)) == [4, 5, 6]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f3(array)) == [[1, 2, 3], [4, 5, 6]]
+    assert ak.to_list(f3(array)) == [[1, 2, 3], [4, 5, 6]]
+
 
 def test_indexedarray():
-    layout = awkward1.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], highlevel=False)
-    layout = awkward1.layout.IndexedArray64(awkward1.layout.Index64(numpy.array([4, 3, 2, 1, 0], dtype=numpy.int64)), layout)
+    layout = ak.from_iter(
+        [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], highlevel=False
+    )
+    layout = ak.layout.IndexedArray64(
+        ak.layout.Index64(np.array([4, 3, 2, 1, 0], dtype=np.int64)), layout
+    )
 
-    numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
+    numbatype = ak._connect._numba.arrayview.tonumbatype(layout.form)
+    assert ak_connect_numba_layout.typeof(layout).name == numbatype.name
 
-    lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
-    lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
+    lookup1 = ak_connect_numba_arrayview.Lookup(layout)
+    lookup2 = ak_connect_numba_arrayview.Lookup(layout.form)
     numbatype.form_fill(0, layout, lookup2)
 
-    assert numpy.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
-    assert numpy.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
+    assert np.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
+    assert np.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
 
     counter = [0]
+
     def materialize():
         counter[0] += 1
         return layout
 
-    generator = awkward1.layout.ArrayGenerator(materialize, form=layout.form, length=len(layout))
-    virtualarray = awkward1.layout.VirtualArray(generator)
+    generator = ak.layout.ArrayGenerator(
+        materialize, form=layout.form, length=len(layout)
+    )
+    virtualarray = ak.layout.VirtualArray(generator)
 
-    lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
+    lookup3 = ak_connect_numba_arrayview.Lookup(virtualarray)
     assert len(lookup1.arrayptrs) + 3 == len(lookup3.arrayptrs)
 
-    array = awkward1.Array(virtualarray)
+    array = ak.Array(virtualarray)
     array.numba_type
     assert counter[0] == 0
 
@@ -202,7 +230,7 @@ def test_indexedarray():
     def f3(x):
         return x
 
-    assert isinstance(f3(array).layout, awkward1.layout.VirtualArray)
+    assert isinstance(f3(array).layout, ak.layout.VirtualArray)
     assert counter[0] == 0
 
     @numba.njit
@@ -219,39 +247,52 @@ def test_indexedarray():
     def f2(x):
         return x[4]
 
-    assert awkward1.to_list(f2(array)) == [1.1, 2.2, 3.3]
+    assert ak.to_list(f2(array)) == [1.1, 2.2, 3.3]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2(array)) == [1.1, 2.2, 3.3]
+    assert ak.to_list(f2(array)) == [1.1, 2.2, 3.3]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f3(array)) == [[7.7, 8.8, 9.9], [6.6], [4.4, 5.5], [], [1.1, 2.2, 3.3]]
+    assert ak.to_list(f3(array)) == [
+        [7.7, 8.8, 9.9],
+        [6.6],
+        [4.4, 5.5],
+        [],
+        [1.1, 2.2, 3.3],
+    ]
+
 
 def test_indexedoptionarray():
-    layout = awkward1.from_iter([[1.1, 2.2, 3.3], None, [], [4.4, 5.5], None, None, [6.6], [7.7, 8.8, 9.9]], highlevel=False)
+    layout = ak.from_iter(
+        [[1.1, 2.2, 3.3], None, [], [4.4, 5.5], None, None, [6.6], [7.7, 8.8, 9.9]],
+        highlevel=False,
+    )
 
-    numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
+    numbatype = ak._connect._numba.arrayview.tonumbatype(layout.form)
+    assert ak_connect_numba_layout.typeof(layout).name == numbatype.name
 
-    lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
-    lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
+    lookup1 = ak_connect_numba_arrayview.Lookup(layout)
+    lookup2 = ak_connect_numba_arrayview.Lookup(layout.form)
     numbatype.form_fill(0, layout, lookup2)
 
-    assert numpy.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
-    assert numpy.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
+    assert np.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
+    assert np.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
 
     counter = [0]
+
     def materialize():
         counter[0] += 1
         return layout
 
-    generator = awkward1.layout.ArrayGenerator(materialize, form=layout.form, length=len(layout))
-    virtualarray = awkward1.layout.VirtualArray(generator)
+    generator = ak.layout.ArrayGenerator(
+        materialize, form=layout.form, length=len(layout)
+    )
+    virtualarray = ak.layout.VirtualArray(generator)
 
-    lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
+    lookup3 = ak_connect_numba_arrayview.Lookup(virtualarray)
     assert len(lookup1.arrayptrs) + 3 == len(lookup3.arrayptrs)
 
-    array = awkward1.Array(virtualarray)
+    array = ak.Array(virtualarray)
     array.numba_type
     assert counter[0] == 0
 
@@ -259,7 +300,7 @@ def test_indexedoptionarray():
     def f3(x):
         return x
 
-    assert isinstance(f3(array).layout, awkward1.layout.VirtualArray)
+    assert isinstance(f3(array).layout, ak.layout.VirtualArray)
     assert counter[0] == 0
 
     @numba.njit
@@ -276,46 +317,79 @@ def test_indexedoptionarray():
     def f2(x, i):
         return x[i]
 
-    assert awkward1.to_list(f2(array, 3)) == [4.4, 5.5]
+    assert ak.to_list(f2(array, 3)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2(array, 4)) == None
+    assert ak.to_list(f2(array, 4)) == None
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2(array, 3)) == [4.4, 5.5]
+    assert ak.to_list(f2(array, 3)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2(array, 4)) == None
+    assert ak.to_list(f2(array, 4)) == None
     assert counter[0] == 1
 
-    assert awkward1.to_list(f3(array)) == [[1.1, 2.2, 3.3], None, [], [4.4, 5.5], None, None, [6.6], [7.7, 8.8, 9.9]]
+    assert ak.to_list(f3(array)) == [
+        [1.1, 2.2, 3.3],
+        None,
+        [],
+        [4.4, 5.5],
+        None,
+        None,
+        [6.6],
+        [7.7, 8.8, 9.9],
+    ]
+
 
 def test_bytemaskedarray():
-    layout = awkward1.from_iter([[1.1, 2.2, 3.3], [999], [], [4.4, 5.5], [123, 321], [], [6.6], [7.7, 8.8, 9.9]], highlevel=False)
-    layout = awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([False, True, False, False, True, True, False, False], dtype=numpy.int8)), layout, valid_when=False)
+    layout = ak.from_iter(
+        [
+            [1.1, 2.2, 3.3],
+            [999],
+            [],
+            [4.4, 5.5],
+            [123, 321],
+            [],
+            [6.6],
+            [7.7, 8.8, 9.9],
+        ],
+        highlevel=False,
+    )
+    layout = ak.layout.ByteMaskedArray(
+        ak.layout.Index8(
+            np.array(
+                [False, True, False, False, True, True, False, False], dtype=np.int8
+            )
+        ),
+        layout,
+        valid_when=False,
+    )
 
-    numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
+    numbatype = ak._connect._numba.arrayview.tonumbatype(layout.form)
+    assert ak_connect_numba_layout.typeof(layout).name == numbatype.name
 
-    lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
-    lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
+    lookup1 = ak_connect_numba_arrayview.Lookup(layout)
+    lookup2 = ak_connect_numba_arrayview.Lookup(layout.form)
     numbatype.form_fill(0, layout, lookup2)
 
-    assert numpy.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
-    assert numpy.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
+    assert np.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
+    assert np.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
 
     counter = [0]
+
     def materialize():
         counter[0] += 1
         return layout
 
-    generator = awkward1.layout.ArrayGenerator(materialize, form=layout.form, length=len(layout))
-    virtualarray = awkward1.layout.VirtualArray(generator)
+    generator = ak.layout.ArrayGenerator(
+        materialize, form=layout.form, length=len(layout)
+    )
+    virtualarray = ak.layout.VirtualArray(generator)
 
-    lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
+    lookup3 = ak_connect_numba_arrayview.Lookup(virtualarray)
     assert len(lookup1.arrayptrs) + 3 == len(lookup3.arrayptrs)
 
-    array = awkward1.Array(virtualarray)
+    array = ak.Array(virtualarray)
     array.numba_type
     assert counter[0] == 0
 
@@ -323,7 +397,7 @@ def test_bytemaskedarray():
     def f3(x):
         return x
 
-    assert isinstance(f3(array).layout, awkward1.layout.VirtualArray)
+    assert isinstance(f3(array).layout, ak.layout.VirtualArray)
     assert counter[0] == 0
 
     @numba.njit
@@ -340,46 +414,102 @@ def test_bytemaskedarray():
     def f2(x, i):
         return x[i]
 
-    assert awkward1.to_list(f2(array, 3)) == [4.4, 5.5]
+    assert ak.to_list(f2(array, 3)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2(array, 4)) == None
+    assert ak.to_list(f2(array, 4)) == None
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2(array, 3)) == [4.4, 5.5]
+    assert ak.to_list(f2(array, 3)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2(array, 4)) == None
+    assert ak.to_list(f2(array, 4)) == None
     assert counter[0] == 1
 
-    assert awkward1.to_list(f3(array)) == [[1.1, 2.2, 3.3], None, [], [4.4, 5.5], None, None, [6.6], [7.7, 8.8, 9.9]]
+    assert ak.to_list(f3(array)) == [
+        [1.1, 2.2, 3.3],
+        None,
+        [],
+        [4.4, 5.5],
+        None,
+        None,
+        [6.6],
+        [7.7, 8.8, 9.9],
+    ]
+
 
 def test_bitmaskedarray():
-    layout = awkward1.from_iter([[1.1, 2.2, 3.3], [999], [], [4.4, 5.5], [123, 321], [], [6.6], [7.7, 8.8, 9.9], [3, 2, 1]], highlevel=False)
-    layout = awkward1.layout.BitMaskedArray(awkward1.layout.IndexU8(numpy.packbits(numpy.array([False, True, False, False, True, True, False, False, False, True, True, True, True, True, True, True], dtype=numpy.bool))), layout, valid_when=False, length=9, lsb_order=False)
+    layout = ak.from_iter(
+        [
+            [1.1, 2.2, 3.3],
+            [999],
+            [],
+            [4.4, 5.5],
+            [123, 321],
+            [],
+            [6.6],
+            [7.7, 8.8, 9.9],
+            [3, 2, 1],
+        ],
+        highlevel=False,
+    )
+    layout = ak.layout.BitMaskedArray(
+        ak.layout.IndexU8(
+            np.packbits(
+                np.array(
+                    [
+                        False,
+                        True,
+                        False,
+                        False,
+                        True,
+                        True,
+                        False,
+                        False,
+                        False,
+                        True,
+                        True,
+                        True,
+                        True,
+                        True,
+                        True,
+                        True,
+                    ],
+                    dtype=np.bool,
+                )
+            )
+        ),
+        layout,
+        valid_when=False,
+        length=9,
+        lsb_order=False,
+    )
 
-    numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
+    numbatype = ak._connect._numba.arrayview.tonumbatype(layout.form)
+    assert ak_connect_numba_layout.typeof(layout).name == numbatype.name
 
-    lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
-    lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
+    lookup1 = ak_connect_numba_arrayview.Lookup(layout)
+    lookup2 = ak_connect_numba_arrayview.Lookup(layout.form)
     numbatype.form_fill(0, layout, lookup2)
 
-    assert numpy.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
-    assert numpy.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
+    assert np.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
+    assert np.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
 
     counter = [0]
+
     def materialize():
         counter[0] += 1
         return layout
 
-    generator = awkward1.layout.ArrayGenerator(materialize, form=layout.form, length=len(layout))
-    virtualarray = awkward1.layout.VirtualArray(generator)
+    generator = ak.layout.ArrayGenerator(
+        materialize, form=layout.form, length=len(layout)
+    )
+    virtualarray = ak.layout.VirtualArray(generator)
 
-    lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
+    lookup3 = ak_connect_numba_arrayview.Lookup(virtualarray)
     assert len(lookup1.arrayptrs) + 3 == len(lookup3.arrayptrs)
 
-    array = awkward1.Array(virtualarray)
+    array = ak.Array(virtualarray)
     array.numba_type
     assert counter[0] == 0
 
@@ -387,7 +517,7 @@ def test_bitmaskedarray():
     def f3(x):
         return x
 
-    assert isinstance(f3(array).layout, awkward1.layout.VirtualArray)
+    assert isinstance(f3(array).layout, ak.layout.VirtualArray)
     assert counter[0] == 0
 
     @numba.njit
@@ -404,46 +534,62 @@ def test_bitmaskedarray():
     def f2(x, i):
         return x[i]
 
-    assert awkward1.to_list(f2(array, 3)) == [4.4, 5.5]
+    assert ak.to_list(f2(array, 3)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2(array, 4)) == None
+    assert ak.to_list(f2(array, 4)) == None
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2(array, 3)) == [4.4, 5.5]
+    assert ak.to_list(f2(array, 3)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2(array, 4)) == None
+    assert ak.to_list(f2(array, 4)) == None
     assert counter[0] == 1
 
-    assert awkward1.to_list(f3(array)) == [[1.1, 2.2, 3.3], None, [], [4.4, 5.5], None, None, [6.6], [7.7, 8.8, 9.9], [3.0, 2.0, 1.0]]
+    assert ak.to_list(f3(array)) == [
+        [1.1, 2.2, 3.3],
+        None,
+        [],
+        [4.4, 5.5],
+        None,
+        None,
+        [6.6],
+        [7.7, 8.8, 9.9],
+        [3.0, 2.0, 1.0],
+    ]
+
 
 def test_unmaskedarray():
-    layout = awkward1.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], highlevel=False)
-    layout = awkward1.layout.UnmaskedArray(layout)
+    layout = ak.from_iter(
+        [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]], highlevel=False
+    )
+    layout = ak.layout.UnmaskedArray(layout)
 
-    numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
+    numbatype = ak._connect._numba.arrayview.tonumbatype(layout.form)
+    assert ak_connect_numba_layout.typeof(layout).name == numbatype.name
 
-    lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
-    lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
+    lookup1 = ak_connect_numba_arrayview.Lookup(layout)
+    lookup2 = ak_connect_numba_arrayview.Lookup(layout.form)
     numbatype.form_fill(0, layout, lookup2)
 
-    assert numpy.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
-    assert numpy.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
+    assert np.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
+    assert np.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
 
     counter = [0]
+
     def materialize():
         counter[0] += 1
         return layout
 
-    generator = awkward1.layout.ArrayGenerator(materialize, form=layout.form, length=len(layout))
-    virtualarray = awkward1.layout.VirtualArray(generator)
+    generator = ak.layout.ArrayGenerator(
+        materialize, form=layout.form, length=len(layout)
+    )
+    virtualarray = ak.layout.VirtualArray(generator)
 
-    lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
+    lookup3 = ak_connect_numba_arrayview.Lookup(virtualarray)
     assert len(lookup1.arrayptrs) + 3 == len(lookup3.arrayptrs)
 
-    array = awkward1.Array(virtualarray)
+    array = ak.Array(virtualarray)
     array.numba_type
     assert counter[0] == 0
 
@@ -451,7 +597,7 @@ def test_unmaskedarray():
     def f3(x):
         return x
 
-    assert isinstance(f3(array).layout, awkward1.layout.VirtualArray)
+    assert isinstance(f3(array).layout, ak.layout.VirtualArray)
     assert counter[0] == 0
 
     @numba.njit
@@ -468,39 +614,58 @@ def test_unmaskedarray():
     def f2(x):
         return x[2]
 
-    assert awkward1.to_list(f2(array)) == [4.4, 5.5]
+    assert ak.to_list(f2(array)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2(array)) == [4.4, 5.5]
+    assert ak.to_list(f2(array)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f3(array)) == [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7, 8.8, 9.9]]
+    assert ak.to_list(f3(array)) == [
+        [1.1, 2.2, 3.3],
+        [],
+        [4.4, 5.5],
+        [6.6],
+        [7.7, 8.8, 9.9],
+    ]
+
 
 def test_recordarray():
-    layout = awkward1.from_iter([{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}], highlevel=False)
+    layout = ak.from_iter(
+        [
+            {"x": 0.0, "y": []},
+            {"x": 1.1, "y": [1]},
+            {"x": 2.2, "y": [2, 2]},
+            {"x": 3.3, "y": [3, 3, 3]},
+            {"x": 4.4, "y": [4, 4, 4, 4]},
+        ],
+        highlevel=False,
+    )
 
-    numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
+    numbatype = ak._connect._numba.arrayview.tonumbatype(layout.form)
+    assert ak_connect_numba_layout.typeof(layout).name == numbatype.name
 
-    lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
-    lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
+    lookup1 = ak_connect_numba_arrayview.Lookup(layout)
+    lookup2 = ak_connect_numba_arrayview.Lookup(layout.form)
     numbatype.form_fill(0, layout, lookup2)
 
-    assert numpy.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
-    assert numpy.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
+    assert np.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
+    assert np.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
 
     counter = [0]
+
     def materialize():
         counter[0] += 1
         return layout
 
-    generator = awkward1.layout.ArrayGenerator(materialize, form=layout.form, length=len(layout))
-    virtualarray = awkward1.layout.VirtualArray(generator)
+    generator = ak.layout.ArrayGenerator(
+        materialize, form=layout.form, length=len(layout)
+    )
+    virtualarray = ak.layout.VirtualArray(generator)
 
-    lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
+    lookup3 = ak_connect_numba_arrayview.Lookup(virtualarray)
     assert len(lookup1.arrayptrs) + 3 == len(lookup3.arrayptrs)
 
-    array = awkward1.Array(virtualarray)
+    array = ak.Array(virtualarray)
     array.numba_type
     assert counter[0] == 0
 
@@ -508,7 +673,7 @@ def test_recordarray():
     def f3(x):
         return x
 
-    assert isinstance(f3(array).layout, awkward1.layout.VirtualArray)
+    assert isinstance(f3(array).layout, ak.layout.VirtualArray)
     assert counter[0] == 0
 
     @numba.njit
@@ -555,69 +720,82 @@ def test_recordarray():
     def f2a(x):
         return x["y"][2]
 
-    assert awkward1.to_list(f2a(array)) == [2, 2]
+    assert ak.to_list(f2a(array)) == [2, 2]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2a(array)) == [2, 2]
+    assert ak.to_list(f2a(array)) == [2, 2]
     assert counter[0] == 1
 
     @numba.njit
     def f2b(x):
         return x[2]["y"]
 
-    assert awkward1.to_list(f2b(array)) == [2, 2]
+    assert ak.to_list(f2b(array)) == [2, 2]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2b(array)) == [2, 2]
+    assert ak.to_list(f2b(array)) == [2, 2]
     assert counter[0] == 1
 
     @numba.njit
     def f2c(x):
         return x.y[2]
 
-    assert awkward1.to_list(f2a(array)) == [2, 2]
+    assert ak.to_list(f2a(array)) == [2, 2]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2a(array)) == [2, 2]
+    assert ak.to_list(f2a(array)) == [2, 2]
     assert counter[0] == 1
 
     @numba.njit
     def f2d(x):
         return x[2].y
 
-    assert awkward1.to_list(f2b(array)) == [2, 2]
+    assert ak.to_list(f2b(array)) == [2, 2]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2b(array)) == [2, 2]
+    assert ak.to_list(f2b(array)) == [2, 2]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f3(array)) == [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
+    assert ak.to_list(f3(array)) == [
+        {"x": 0.0, "y": []},
+        {"x": 1.1, "y": [1]},
+        {"x": 2.2, "y": [2, 2]},
+        {"x": 3.3, "y": [3, 3, 3]},
+        {"x": 4.4, "y": [4, 4, 4, 4]},
+    ]
+
 
 def test_tuplearray():
-    layout = awkward1.from_iter([(0.0, []), (1.1, [1]), (2.2, [2, 2]), (3.3, [3, 3, 3]), (4.4, [4, 4, 4, 4])], highlevel=False)
+    layout = ak.from_iter(
+        [(0.0, []), (1.1, [1]), (2.2, [2, 2]), (3.3, [3, 3, 3]), (4.4, [4, 4, 4, 4])],
+        highlevel=False,
+    )
 
-    numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
+    numbatype = ak._connect._numba.arrayview.tonumbatype(layout.form)
+    assert ak_connect_numba_layout.typeof(layout).name == numbatype.name
 
-    lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
-    lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
+    lookup1 = ak_connect_numba_arrayview.Lookup(layout)
+    lookup2 = ak_connect_numba_arrayview.Lookup(layout.form)
     numbatype.form_fill(0, layout, lookup2)
 
-    assert numpy.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
-    assert numpy.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
+    assert np.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
+    assert np.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
 
     counter = [0]
+
     def materialize():
         counter[0] += 1
         return layout
 
-    generator = awkward1.layout.ArrayGenerator(materialize, form=layout.form, length=len(layout))
-    virtualarray = awkward1.layout.VirtualArray(generator)
+    generator = ak.layout.ArrayGenerator(
+        materialize, form=layout.form, length=len(layout)
+    )
+    virtualarray = ak.layout.VirtualArray(generator)
 
-    lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
+    lookup3 = ak_connect_numba_arrayview.Lookup(virtualarray)
     assert len(lookup1.arrayptrs) + 3 == len(lookup3.arrayptrs)
 
-    array = awkward1.Array(virtualarray)
+    array = ak.Array(virtualarray)
     array.numba_type
     assert counter[0] == 0
 
@@ -625,7 +803,7 @@ def test_tuplearray():
     def f3(x):
         return x
 
-    assert isinstance(f3(array).layout, awkward1.layout.VirtualArray)
+    assert isinstance(f3(array).layout, ak.layout.VirtualArray)
     assert counter[0] == 0
 
     @numba.njit
@@ -652,49 +830,62 @@ def test_tuplearray():
     def f2a(x):
         return x["1"][2]
 
-    assert awkward1.to_list(f2a(array)) == [2, 2]
+    assert ak.to_list(f2a(array)) == [2, 2]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2a(array)) == [2, 2]
+    assert ak.to_list(f2a(array)) == [2, 2]
     assert counter[0] == 1
 
     @numba.njit
     def f2b(x):
         return x[2]["1"]
 
-    assert awkward1.to_list(f2b(array)) == [2, 2]
+    assert ak.to_list(f2b(array)) == [2, 2]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f2b(array)) == [2, 2]
+    assert ak.to_list(f2b(array)) == [2, 2]
     assert counter[0] == 1
 
-    assert awkward1.to_list(f3(array)) == [(0.0, []), (1.1, [1]), (2.2, [2, 2]), (3.3, [3, 3, 3]), (4.4, [4, 4, 4, 4])]
+    assert ak.to_list(f3(array)) == [
+        (0.0, []),
+        (1.1, [1]),
+        (2.2, [2, 2]),
+        (3.3, [3, 3, 3]),
+        (4.4, [4, 4, 4, 4]),
+    ]
+
 
 def test_unionarray():
-    layout = awkward1.from_iter([0.0, [], 1.1, [1], 2.2, [2, 2], 3.3, [3, 3, 3], 4.4, [4, 4, 4, 4]], highlevel=False)
+    layout = ak.from_iter(
+        [0.0, [], 1.1, [1], 2.2, [2, 2], 3.3, [3, 3, 3], 4.4, [4, 4, 4, 4]],
+        highlevel=False,
+    )
 
-    numbatype = awkward1._connect._numba.arrayview.tonumbatype(layout.form)
-    assert awkward1_connect_numba_layout.typeof(layout).name == numbatype.name
+    numbatype = ak._connect._numba.arrayview.tonumbatype(layout.form)
+    assert ak_connect_numba_layout.typeof(layout).name == numbatype.name
 
-    lookup1 = awkward1_connect_numba_arrayview.Lookup(layout)
-    lookup2 = awkward1_connect_numba_arrayview.Lookup(layout.form)
+    lookup1 = ak_connect_numba_arrayview.Lookup(layout)
+    lookup2 = ak_connect_numba_arrayview.Lookup(layout.form)
     numbatype.form_fill(0, layout, lookup2)
 
-    assert numpy.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
-    assert numpy.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
+    assert np.array_equal(lookup1.arrayptrs, lookup2.arrayptrs)
+    assert np.array_equal(lookup1.sharedptrs == -1, lookup2.sharedptrs == -1)
 
     counter = [0]
+
     def materialize():
         counter[0] += 1
         return layout
 
-    generator = awkward1.layout.ArrayGenerator(materialize, form=layout.form, length=len(layout))
-    virtualarray = awkward1.layout.VirtualArray(generator)
+    generator = ak.layout.ArrayGenerator(
+        materialize, form=layout.form, length=len(layout)
+    )
+    virtualarray = ak.layout.VirtualArray(generator)
 
-    lookup3 = awkward1_connect_numba_arrayview.Lookup(virtualarray)
+    lookup3 = ak_connect_numba_arrayview.Lookup(virtualarray)
     assert len(lookup1.arrayptrs) + 3 == len(lookup3.arrayptrs)
 
-    array = awkward1.Array(virtualarray)
+    array = ak.Array(virtualarray)
     array.numba_type
     assert counter[0] == 0
 
@@ -702,32 +893,45 @@ def test_unionarray():
     def f3(x):
         return x
 
-    assert isinstance(f3(array).layout, awkward1.layout.VirtualArray)
+    assert isinstance(f3(array).layout, ak.layout.VirtualArray)
     assert counter[0] == 0
 
-    assert awkward1.to_list(f3(array)) == [0.0, [], 1.1, [1], 2.2, [2, 2], 3.3, [3, 3, 3], 4.4, [4, 4, 4, 4]]
+    assert ak.to_list(f3(array)) == [
+        0.0,
+        [],
+        1.1,
+        [1],
+        2.2,
+        [2, 2],
+        3.3,
+        [3, 3, 3],
+        4.4,
+        [4, 4, 4, 4],
+    ]
+
 
 def test_deep_virtualarrays():
-    one = awkward1.from_iter([0.0, 1.1, 2.2, 3.3, 4.4], highlevel=False)
-    two = awkward1.from_iter([[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4]], highlevel=False)
+    one = ak.from_iter([0.0, 1.1, 2.2, 3.3, 4.4], highlevel=False)
+    two = ak.from_iter([[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4]], highlevel=False)
 
     counter = [0, 0]
+
     def materialize1():
         counter[0] += 1
         return one
 
-    generator1 = awkward1.layout.ArrayGenerator(materialize1, form=one.form, length=len(one))
-    vone = awkward1.layout.VirtualArray(generator1)
+    generator1 = ak.layout.ArrayGenerator(materialize1, form=one.form, length=len(one))
+    vone = ak.layout.VirtualArray(generator1)
 
     def materialize2():
         counter[1] += 1
         return two
 
-    generator2 = awkward1.layout.ArrayGenerator(materialize2, form=two.form, length=len(two))
-    vtwo = awkward1.layout.VirtualArray(generator2)
+    generator2 = ak.layout.ArrayGenerator(materialize2, form=two.form, length=len(two))
+    vtwo = ak.layout.VirtualArray(generator2)
 
-    recordarray = awkward1.layout.RecordArray([vone, vtwo], ["x", "y"])
-    array = awkward1.Array(recordarray)
+    recordarray = ak.layout.RecordArray([vone, vtwo], ["x", "y"])
+    array = ak.Array(recordarray)
     array.numba_type
     assert counter == [0, 0]
 
@@ -736,9 +940,9 @@ def test_deep_virtualarrays():
         return x
 
     tmp1 = f3(array).layout
-    assert isinstance(tmp1, awkward1.layout.RecordArray)
-    assert isinstance(tmp1.field(0), awkward1.layout.VirtualArray)
-    assert isinstance(tmp1.field(1), awkward1.layout.VirtualArray)
+    assert isinstance(tmp1, ak.layout.RecordArray)
+    assert isinstance(tmp1.field(0), ak.layout.VirtualArray)
+    assert isinstance(tmp1.field(1), ak.layout.VirtualArray)
     assert counter == [0, 0]
 
     @numba.njit
@@ -746,7 +950,7 @@ def test_deep_virtualarrays():
         return x["x"]
 
     tmp2a = f1a(array).layout
-    assert isinstance(tmp2a, awkward1.layout.VirtualArray)
+    assert isinstance(tmp2a, ak.layout.VirtualArray)
     assert counter == [0, 0]
 
     @numba.njit
@@ -762,7 +966,7 @@ def test_deep_virtualarrays():
         return x["y"]
 
     tmp3a = f2a(array).layout
-    assert isinstance(tmp3a, awkward1.layout.VirtualArray)
+    assert isinstance(tmp3a, ak.layout.VirtualArray)
     assert counter == [1, 0]
 
     @numba.njit
@@ -770,32 +974,39 @@ def test_deep_virtualarrays():
         return x["y"][2]
 
     tmp3b = f2b(array).layout
-    assert isinstance(tmp3b, awkward1.layout.NumpyArray)
-    assert awkward1.to_list(tmp3b) == [2, 2]
+    assert isinstance(tmp3b, ak.layout.NumpyArray)
+    assert ak.to_list(tmp3b) == [2, 2]
     assert counter == [1, 1]
+
 
 def test_nested_virtualness():
     counter = [0, 0]
 
-    content = awkward1.layout.NumpyArray(numpy.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
 
     def materialize1():
         counter[1] += 1
         return content
 
-    generator1 = awkward1.layout.ArrayGenerator(materialize1, form=content.form, length=len(content))
-    virtual1 = awkward1.layout.VirtualArray(generator1)
+    generator1 = ak.layout.ArrayGenerator(
+        materialize1, form=content.form, length=len(content)
+    )
+    virtual1 = ak.layout.VirtualArray(generator1)
 
-    offsets = awkward1.layout.Index64(numpy.array([0, 3, 3, 5, 6, 10], dtype=numpy.int64))
-    listarray = awkward1.layout.ListOffsetArray64(offsets, virtual1)
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10], dtype=np.int64))
+    listarray = ak.layout.ListOffsetArray64(offsets, virtual1)
 
     def materialize2():
         counter[0] += 1
         return listarray
 
-    generator2 = awkward1.layout.ArrayGenerator(materialize2, form=listarray.form, length=len(listarray))
-    virtual2 = awkward1.layout.VirtualArray(generator2)
-    array = awkward1.Array(virtual2)
+    generator2 = ak.layout.ArrayGenerator(
+        materialize2, form=listarray.form, length=len(listarray)
+    )
+    virtual2 = ak.layout.VirtualArray(generator2)
+    array = ak.Array(virtual2)
 
     assert counter == [0, 0]
 

@@ -4,16 +4,15 @@ from __future__ import absolute_import
 
 import sys
 
-import pytest
-
-import numpy
-import awkward1
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
 
 
 def test_refcount():
-    array = awkward1.Array([1, 2, 3])
+    array = ak.Array([1, 2, 3])
 
     @numba.njit
     def f1():
@@ -38,7 +37,7 @@ def test_refcount():
 
 
 def test_Array():
-    array = awkward1.Array([1, 2, 3])
+    array = ak.Array([1, 2, 3])
 
     @numba.njit
     def f1():
@@ -46,7 +45,10 @@ def test_Array():
         return 3.14
 
     f1()
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
     @numba.njit
     def f2():
@@ -54,7 +56,10 @@ def test_Array():
 
     a = f2()
     assert a.tolist() == [1, 2, 3]
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
     @numba.njit
     def f3():
@@ -63,27 +68,42 @@ def test_Array():
     b, c = f3()
     assert b.tolist() == [1, 2, 3]
     assert c.tolist() == [1, 2, 3]
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
     del a
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
     del b
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
     del c
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
     @numba.njit
     def f4():
         return array[1]
 
     assert f4() == 2
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
 
 def test_Record():
-    record = awkward1.Record({"x": 1, "y": [1, 2, 3]})
+    record = ak.Record({"x": 1, "y": [1, 2, 3]})
 
     @numba.njit
     def f1():
@@ -93,7 +113,7 @@ def test_Record():
 
 
 def test_ArrayBuilder():
-    builder = awkward1.ArrayBuilder()
+    builder = ak.ArrayBuilder()
     assert sys.getrefcount(builder._layout) == 3
 
     @numba.njit
