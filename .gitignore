@@ -55,7 +55,7 @@ _minted-*
 ############################################################# Python
 
 # Awkward directory at top-level is temporary
-/awkward1/
+/awkward/
 /localbuild/
 
 # Byte-compiled / optimized / DLL files

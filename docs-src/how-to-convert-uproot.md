@@ -24,7 +24,7 @@ To find out which version you're using:
    * if you `import uproot4`, then it's Uproot 4.
 
 ```{code-cell} ipython3
-import awkward1 as ak
+import awkward as ak
 import numpy as np
 import uproot
 import uproot4

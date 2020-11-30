@@ -6,7 +6,7 @@ import itertools
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
-import awkward1 as ak  # noqa: F401
+import awkward as ak  # noqa: F401
 
 content = ak.layout.NumpyArray(
     np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])

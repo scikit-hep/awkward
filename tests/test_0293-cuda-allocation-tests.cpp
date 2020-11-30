@@ -27,7 +27,7 @@ public:
     StartupLibraryPathCallback() = default;
 
     const std::string library_path() const override {
-      std::string cmd_string = exec("python -c 'import awkward1_cuda_kernels; print(awkward1_cuda_kernels.shared_library_path)'");
+      std::string cmd_string = exec("python -c 'import awkward_cuda_kernels; print(awkward_cuda_kernels.shared_library_path)'");
 
       std::string library_path = (cmd_string.substr(0, cmd_string.length() - 1));
       return library_path;

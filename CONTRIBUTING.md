@@ -58,7 +58,7 @@ python -m pytest -vv -rs tests-cpu-kernels
 Furthermore, if you have an Nvidia GPU, you can build and locally install the experimental CUDA plug-in with
 
 ```bash
-pip uninstall -y awkward1-cuda-kernels
+pip uninstall -y awkward-cuda-kernels
 python dev/generate-cuda.py
 ./cuda-build.sh --install
 ```
@@ -247,7 +247,7 @@ Make sure to prepend each function definition with -
 
 We don't import names in C++ (`using`) or Python (`import from`) so that it's easy to see where objects come from and find all instances with a text search. This is sometimes in tension with the 80-character limit.
 
-In C++, `using awkward as ak` and `using pybind11 as py` are standard shorthands. For end-users, `import awkward1 as ak` is recommended, but not in the codebase (including unit tests). We also don't use `import numpy as np` in the codebase, even though it is common in scripts.
+In C++, `using awkward as ak` and `using pybind11 as py` are standard shorthands. For end-users, `import awkward as ak` is recommended, but not in the codebase (including unit tests). We also don't use `import numpy as np` in the codebase, even though it is common in scripts.
 
 ### Compiler warnings
 

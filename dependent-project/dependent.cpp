@@ -48,7 +48,7 @@ std::string consumer(const std::shared_ptr<ak::Content>& array) {
 
 PYBIND11_MODULE(dependent, m) {
   // Ensure dependencies are loaded.
-  py::module::import("awkward1");
+  py::module::import("awkward");
 
   m.def("producer", &producer);
   m.def("consumer", &consumer);

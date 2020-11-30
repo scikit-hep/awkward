@@ -5,7 +5,7 @@ from __future__ import absolute_import
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import cupy as cp  # noqa: F401
-import awkward1 as ak  # noqa: F401
+import awkward as ak  # noqa: F401
 
 
 def test_num_1():
@@ -16,7 +16,7 @@ def test_num_1():
     array = ak.Array(ak.layout.BitMaskedArray(bitmask, content, False, 9, False))
     cuda_array = ak.to_kernels(array, "cuda")
     assert ak.num(cuda_array, 0) == ak.num(array, 0)
-    assert ak.num(cuda_array, 1) == ak.num(array, 1)
+    assert ak.num(cuda_array, 1).tolist() == ak.num(array, 1).tolist()
 
 
 def test_num_2():
@@ -27,7 +27,7 @@ def test_num_2():
     array = ak.Array(ak.layout.ByteMaskedArray(bytemask, content, True))
     cuda_array = ak.to_kernels(array, "cuda")
     assert ak.num(cuda_array, 0) == ak.num(array, 0)
-    assert ak.num(cuda_array, 1) == ak.num(array, 1)
+    assert ak.num(cuda_array, 1).tolist() == ak.num(array, 1).tolist()
 
 
 def test_num_3():

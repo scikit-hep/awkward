@@ -19,7 +19,7 @@ The [Apache Arrow](https://arrow.apache.org/) data format is very similar to Awk
 The [Apache Parquet](https://parquet.apache.org/) file format has strong connections to Arrow with a large overlap in available tools, and while it's also a columnar format like Awkward and Arrow, it is implemented in a different way, which emphasizes compact storage over random access.
 
 ```{code-cell} ipython3
-import awkward1 as ak
+import awkward as ak
 import pyarrow as pa
 import pyarrow.csv
 import urllib.request

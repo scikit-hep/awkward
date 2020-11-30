@@ -18,7 +18,7 @@ github_releases = []
 numpages = int(math.ceil(len(tagslist) / 30.0))
 for pageid in range(numpages):
     print("Requesting GitHub data, page {0} of {1}".format(pageid + 1, numpages))
-    github_connection.request("GET", r"/repos/scikit-hep/awkward-1.0/releases?page={0}&per_page=30".format(pageid + 1), headers={"User-Agent": "awkward1-changelog"})
+    github_connection.request("GET", r"/repos/scikit-hep/awkward-1.0/releases?page={0}&per_page=30".format(pageid + 1), headers={"User-Agent": "awkward-changelog"})
     github_releases_text = github_connection.getresponse().read()
     try:
         github_releases_page = json.loads(github_releases_text)
@@ -37,7 +37,7 @@ pypi_connection = http.client.HTTPSConnection("pypi.org")
 
 def pypi_exists(tag):
     print("Looking for release {0} on PyPI...".format(tag))
-    pypi_connection.request("HEAD", "/project/awkward1/{0}/".format(tag))
+    pypi_connection.request("HEAD", "/project/awkward/{0}/".format(tag))
     response = pypi_connection.getresponse()
     response.read()
     return response.status == 200
@@ -69,7 +69,7 @@ with open("_auto/changelog.rst", "w") as outfile:
 
             assets = []
             if pypi_exists(tag):
-                assets.append("`pip <https://pypi.org/project/awkward1/{0}/>`__".format(tag))
+                assets.append("`pip <https://pypi.org/project/awkward/{0}/>`__".format(tag))
             if tag in tarballs:
                 assets.append("`tar <{0}>`__".format(tarballs[tag]))
             if tag in zipballs:

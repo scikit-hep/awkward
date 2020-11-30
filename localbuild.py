@@ -30,7 +30,7 @@ if sys.version_info[0] >= 3:
     os.chdir(git_root.stdout.decode().strip())
 
 if args.clean:
-    for x in ("localbuild", "awkward1", ".pytest_cache", "tests/__pycache__"):
+    for x in ("localbuild", "awkward", ".pytest_cache", "tests/__pycache__"):
         if os.path.exists(x):
             shutil.rmtree(x)
     sys.exit()
@@ -98,11 +98,11 @@ def walk(directory):
 
 # Build Python (copy sources to executable tree).
 if args.buildpython:
-    if os.path.exists("awkward1"):
-        shutil.rmtree("awkward1")
+    if os.path.exists("awkward"):
+        shutil.rmtree("awkward")
 
     # Link (don't copy) the Python files into a built directory.
-    for x in walk(os.path.join("src", "awkward1")):
+    for x in walk(os.path.join("src", "awkward")):
         olddir, oldfile = os.path.split(x)
         newdir  = olddir[3 + len(os.sep):]
         newfile = x[3 + len(os.sep):]
@@ -116,23 +116,23 @@ if args.buildpython:
 
     # The extension modules must be copied into the same directory.
     for x in glob.glob("localbuild/_ext*") + glob.glob("localbuild/libawkward*"):
-        shutil.copyfile(x, os.path.join("awkward1", os.path.split(x)[1]))
+        shutil.copyfile(x, os.path.join("awkward", os.path.split(x)[1]))
 
     # localbuild must be in the library path for some operations.
     env = dict(os.environ)
     reminder = False
-    if "awkward1" not in env.get("LD_LIBRARY_PATH", ""):
-        env["LD_LIBRARY_PATH"] = "awkward1:" + env.get("LD_LIBRARY_PATH", "")
+    if "awkward" not in env.get("LD_LIBRARY_PATH", ""):
+        env["LD_LIBRARY_PATH"] = "awkward:" + env.get("LD_LIBRARY_PATH", "")
         reminder = True
 
     # Run pytest on all or a subset of tests.
     if args.pytest is not None and not (os.path.exists(args.pytest) and not os.path.isdir(args.pytest) and not args.pytest.endswith(".py")):
         check_call(["python", "-m", "pytest", "-vv", "-rs", args.pytest], env=env)
 
-    # If you'll be using it interactively, you'll need awkward1 in the library path (for some operations).
+    # If you'll be using it interactively, you'll need awkward in the library path (for some operations).
     if reminder:
         print("")
-        print("If you plan to use awkward1 outside of this tool, be sure to")
+        print("If you plan to use awkward outside of this tool, be sure to")
         print("")
-        print("    export LD_LIBRARY_PATH=awkward1:$LD_LIBRARY_PATH")
+        print("    export LD_LIBRARY_PATH=awkward:$LD_LIBRARY_PATH")
         print("")

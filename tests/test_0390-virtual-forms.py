@@ -7,7 +7,7 @@ import json
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
-import awkward1 as ak  # noqa: F401
+import awkward as ak  # noqa: F401
 
 
 def test_virtual_record():

@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 # don't import numpy or cupy directly: see below
 import pytest  # noqa: F401
-import awkward1 as ak
+import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()

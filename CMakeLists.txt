@@ -27,9 +27,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 file(READ "VERSION_INFO" VERSION_INFO)
 string(STRIP ${VERSION_INFO} VERSION_INFO)
 add_definitions(-DVERSION_INFO="${VERSION_INFO}")
+string(REPLACE "rc" "." VERSION_INFO_SIMPLE "${VERSION_INFO}")
 
 # Let CMake know the version too
-project(awkward LANGUAGES CXX VERSION ${VERSION_INFO})
+project(awkward LANGUAGES CXX VERSION ${VERSION_INFO_SIMPLE})
 
 # Three tiers: [cpu-kernels (extern "C" interface), cuda-kernels (extern "C" interface)], libawkward (C++), and Python modules.
 file(GLOB CPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cpu-kernels/*.cpp")
@@ -122,7 +123,7 @@ if (PYBUILD)
 
   install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static
           _ext
-          LIBRARY DESTINATION awkward1 ARCHIVE DESTINATION awkward1)
+          LIBRARY DESTINATION awkward ARCHIVE DESTINATION awkward)
 
   # Third tier: install without Python modules.
 else()

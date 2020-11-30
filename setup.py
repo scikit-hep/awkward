@@ -17,7 +17,7 @@ from setuptools import setup, Extension
 
 
 extras = {
-    "cuda": ["awkward1-cuda-kernels==" + open("VERSION_INFO").read().strip()],
+    "cuda": ["awkward-cuda-kernels==" + open("VERSION_INFO").read().strip()],
     "test": open("requirements-test.txt").read().strip().split("\n"),
     "dev":  open("requirements-dev.txt").read().strip().split("\n"),
 }
@@ -103,7 +103,7 @@ if platform.system() == "Windows":
             tree("build")
 
             print("--- copying includes ------------------------------------------")
-            shutil.copytree(os.path.join("include"), os.path.join(outerdir, "awkward1", "include"))
+            shutil.copytree(os.path.join("include"), os.path.join(outerdir, "awkward", "include"))
 
             print("--- outerdir after copy ---------------------------------------")
             tree(outerdir)
@@ -113,15 +113,15 @@ if platform.system() == "Windows":
             found = False
             for x in os.listdir(dlldir):
                 if x.endswith(".lib") or x.endswith(".exp") or x.endswith(".dll"):
-                    print("copying", os.path.join(dlldir, x), "-->", os.path.join(self.build_lib, "awkward1", x))
-                    shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward1", x))
+                    print("copying", os.path.join(dlldir, x), "-->", os.path.join(self.build_lib, "awkward", x))
+                    shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward", x))
                     found = True
             if not found:
                 dlldir = os.path.join(dlldir, "Release")
                 for x in os.listdir(dlldir):
                     if x.endswith(".lib") or x.endswith(".exp") or x.endswith(".dll"):
-                        print("copying", os.path.join(dlldir, x), "-->", os.path.join(self.build_lib, "awkward1", x))
-                        shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward1", x))
+                        print("copying", os.path.join(dlldir, x), "-->", os.path.join(self.build_lib, "awkward", x))
+                        shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward", x))
                         found = True
 
             print("--- deleting libraries ----------------------------------------")
@@ -146,7 +146,7 @@ else:
             tree("build")
 
             print("--- copying includes ------------------------------------------")
-            shutil.copytree(os.path.join("include"), os.path.join(outerdir, "awkward1", "include"))
+            shutil.copytree(os.path.join("include"), os.path.join(outerdir, "awkward", "include"))
 
             print("--- outerdir after copy ---------------------------------------")
             tree(outerdir)
@@ -155,13 +155,13 @@ else:
             setuptools.command.install.install.run(self)
 
 
-setup(name = "awkward1",
+setup(name = "awkward",
       packages = [
           x
           for x in setuptools.find_packages(where="src")
-          if x != "awkward1_cuda_kernels"
+          if x != "awkward_cuda_kernels"
       ],
-      package_dir = {"awkward1": "src/awkward1"},
+      package_dir = {"awkward": "src/awkward"},
       version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
@@ -174,7 +174,7 @@ setup(name = "awkward1",
       download_url = "https://github.com/scikit-hep/awkward-1.0/releases",
       license = "BSD 3-clause",
       entry_points = {
-        "numba_extensions": ["init = awkward1._connect._numba:register"]
+        "numba_extensions": ["init = awkward._connect._numba:register"]
       },
       test_suite = "tests",
       python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",

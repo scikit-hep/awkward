@@ -94,7 +94,12 @@ jobs:
 
       - script: |
           python -m pip list
-        displayName: "Show versions"
+        displayName: "Print versions"
+
+      - script: |
+          python -m pip install flake8
+          python -m flake8
+        displayName: "Run flake8"
 
       - script: |
           python -m pip install -v .[test]
@@ -184,6 +189,11 @@ jobs:
         displayName: "Print versions"
 
       - script: |
+          python -m pip install flake8
+          python -m flake8
+        displayName: "Run flake8"
+
+      - script: |
           python -m pip install -v .[test]
         displayName: "Build for 3.9"
         condition: "eq(variables['python.version'], '3.9')"
@@ -219,12 +229,12 @@ jobs:
 
       - script: |
           echo '===== include directory ============================='
-          ls -R `python -m awkward1.config --incdir`
+          ls -R `python -m awkward.config --incdir`
           echo '===== library directory ============================='
-          ls `python -m awkward1.config --libdir`
+          ls `python -m awkward.config --libdir`
           echo '===== compilation ==================================='
           which g++
-          g++ minimal.cpp `python -m awkward1.config --cflags --static-libs` -o minimal
+          g++ minimal.cpp `python -m awkward.config --cflags --static-libs` -o minimal
           otool -L minimal
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
         workingDirectory: dependent-project
@@ -233,8 +243,8 @@ jobs:
 
       - script: |
           rm -f minimal
-          g++ minimal.cpp `python -m awkward1.config --cflags --libs` -o minimal
-          export DYLD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$DYLD_LIBRARY_PATH
+          g++ minimal.cpp `python -m awkward.config --cflags --libs` -o minimal
+          export DYLD_LIBRARY_PATH=`python -m awkward.config --libdir`:$DYLD_LIBRARY_PATH
           echo $DYLD_LIBRARY_PATH
           otool -L minimal
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
@@ -247,7 +257,7 @@ jobs:
           python -c 'import sys; print(sys.version)'
           cmake -S . -B build -DPYTHON_EXECUTABLE:FILEPATH=`which python`
           cmake --build build
-          export DYLD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$DYLD_LIBRARY_PATH
+          export DYLD_LIBRARY_PATH=`python -m awkward.config --libdir`:$DYLD_LIBRARY_PATH
           echo $DYLD_LIBRARY_PATH
           ls build/dependent*
           otool -L build/dependent*
@@ -323,6 +333,11 @@ jobs:
         displayName: "Print versions"
 
       - script: |
+          python -m pip install flake8
+          python -m flake8
+        displayName: "Run flake8"
+
+      - script: |
           python -m pip install -v .[test]
         displayName: "Build for 3.9"
         condition: "eq(variables['python.version'], '3.9')"
@@ -369,11 +384,11 @@ jobs:
 
       - script: |
           echo '===== include directory ============================='
-          ls -R `python -m awkward1.config --incdir`
+          ls -R `python -m awkward.config --incdir`
           echo '===== library directory ============================='
-          ls `python -m awkward1.config --libdir`
+          ls `python -m awkward.config --libdir`
           echo '===== compilation ==================================='
-          g++ minimal.cpp `python -m awkward1.config --cflags --static-libs` -o minimal
+          g++ minimal.cpp `python -m awkward.config --cflags --static-libs` -o minimal
           ldd minimal
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
         workingDirectory: dependent-project
@@ -382,8 +397,8 @@ jobs:
 
       - script: |
           rm -f minimal
-          g++ minimal.cpp `python -m awkward1.config --cflags --libs` -o minimal
-          export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
+          g++ minimal.cpp `python -m awkward.config --cflags --libs` -o minimal
+          export LD_LIBRARY_PATH=`python -m awkward.config --libdir`:$LD_LIBRARY_PATH
           echo $LD_LIBRARY_PATH
           ldd minimal
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
@@ -396,7 +411,7 @@ jobs:
           python -c 'import sys; print(sys.version)'
           cmake -S . -B build -DPYTHON_EXECUTABLE:FILEPATH=`which python`
           cmake --build build
-          export LD_LIBRARY_PATH=`python -m awkward1.config --libdir`:$LD_LIBRARY_PATH
+          export LD_LIBRARY_PATH=`python -m awkward.config --libdir`:$LD_LIBRARY_PATH
           echo $LD_LIBRARY_PATH
           ls build/dependent*
           ldd build/dependent*

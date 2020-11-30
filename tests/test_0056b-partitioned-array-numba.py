@@ -6,12 +6,12 @@ import sys
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
-import awkward1 as ak  # noqa: F401
+import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
 
-ak_numba = pytest.importorskip("awkward1._connect._numba")
-ak_numba_arrayview = pytest.importorskip("awkward1._connect._numba.arrayview")
+ak_numba = pytest.importorskip("awkward._connect._numba")
+ak_numba_arrayview = pytest.importorskip("awkward._connect._numba.arrayview")
 
 ak_numba.register_and_check()
 

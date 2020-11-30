@@ -7,7 +7,7 @@ import pickle
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
-import awkward1 as ak  # noqa: F401
+import awkward as ak  # noqa: F401
 
 
 @pytest.mark.skipif(ak._util.py27, reason="pybind11 pickle only works in Python 3")

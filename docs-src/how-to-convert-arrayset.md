@@ -17,7 +17,7 @@ Generic array-sets
 Most of the conversion functions target a particular library: NumPy, Arrow, Pandas, or Python itself. As a catch-all for other storage formats, Awkward Arrays can be converted to and from "array-sets," sets of named arrays with a schema that can be used to reconstruct the original array. This section will demonstrate how an array-set can be used to store an Awkward Array in an HDF5 file, which ordinarily wouldn't be able to represent nested, irregular data structures.
 
 ```{code-cell} ipython3
-import awkward1 as ak
+import awkward as ak
 import numpy as np
 import h5py
 import json

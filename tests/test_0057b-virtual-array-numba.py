@@ -4,11 +4,11 @@ from __future__ import absolute_import
 
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
-import awkward1 as ak  # noqa: F401
+import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
-ak_connect_numba_arrayview = pytest.importorskip("awkward1._connect._numba.arrayview")
-ak_connect_numba_layout = pytest.importorskip("awkward1._connect._numba.layout")
+ak_connect_numba_arrayview = pytest.importorskip("awkward._connect._numba.arrayview")
+ak_connect_numba_layout = pytest.importorskip("awkward._connect._numba.layout")
 
 
 def test_numpyarray():

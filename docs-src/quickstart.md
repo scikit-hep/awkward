@@ -50,10 +50,10 @@ Use the left-bar for tutorials (≡ button on mobile), click below for reference
 Installation
 ------------
 
-Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward1/) using pip:
+Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward/) using pip:
 
 ```bash
-pip install awkward1
+pip install awkward
 ```
 
 Most users will get a precompiled binary (wheel) for your operating system and Python version. If not, the above attempts to compile from source.

@@ -17,7 +17,7 @@ else:
 
 CPU_KERNEL_SO = None
 try:
-    CPU_KERNEL_SO = pkg_resources.resource_filename("awkward1", name)
+    CPU_KERNEL_SO = pkg_resources.resource_filename("awkward", name)
 except ModuleNotFoundError:
     CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
     TOP_DIR = os.path.join(CURRENT_DIR, "..")

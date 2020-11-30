@@ -4,7 +4,7 @@ import json
 
 import build.dependent
 
-import awkward1 as ak
+import awkward as ak
 
 def test_producer():
     complicated_data = [1.1, 2.2, 3.3, [1, 2, 3], [], [4, 5], {"x": 12.3, "y": "wow"}]

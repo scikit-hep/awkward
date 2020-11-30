@@ -56,7 +56,7 @@ In Awkward Array, metadata are embedded in data using an array node's
 
 .. code-block:: python
 
-    >>> import awkward1 as ak
+    >>> import awkward as ak
     >>> ak.behavior
 
 but behavior dicts can also be loaded into :doc:`_auto/ak.Array`,
@@ -556,7 +556,7 @@ want the string to be taken as an object. That is fixed (in
         # should return: an ak.layout.Content object of the broadcasted result
         ...
 
-    awkward1.behavior["__broadcast__", "string"] = _string_broadcast
+    awkward.behavior["__broadcast__", "string"] = _string_broadcast
 
 Very few applications would need to do this, but the ``ak.behavior`` object
 provides a lot of room for customization hooks like this.

@@ -13,9 +13,9 @@ Note that we'll be closing the issue as soon as a solution is proposed. This is 
 
 It may be necessary to include data that reproduces the bug, as a pickle file if necessary but preferably a minimal `ak.Array` constructor.
 
-Include the version number (and update if necessary, if you're not using the [latest version](https://pypi.org/project/awkward1/)).
+Include the version number (and update if necessary, if you're not using the [latest version](https://pypi.org/project/awkward/)).
 
 ```python
->>> import awkward1 as ak
+>>> import awkward as ak
 >>> ak.__version__
 ```
