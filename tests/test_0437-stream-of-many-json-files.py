@@ -292,7 +292,7 @@ def test_blanc_lines():
     1
     2
 
-    3 " """
+    3  " """
     array = awkward1.from_json(str)
     assert awkward1.to_list(array) == [1, 2, 3]
 
@@ -373,8 +373,7 @@ def test_fromfile():
     array = awkward1.from_json('tests/samples/test.json',
         infinity_string='inf', minus_infinity_string='-inf')
 
-    assert awkward1.to_list(array) == [
-         1.1, 2.2, 3.3, float('inf'), float('-inf'),
+    assert awkward1.to_list(array) == [1.1, 2.2, 3.3, float('inf'), float('-inf'),
         [4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.1, 11.11],
         [12.12, 13.13, 14.14, 15.15, 16.16, 17.17],
         [[[18.18, 19.19, 20.2, 21.21, 22.22],
