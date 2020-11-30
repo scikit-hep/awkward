@@ -55,7 +55,7 @@ jobs:
           ls dist
           python -m twine upload dist/awkward_cuda_kernels-*-py3-none-manylinux2014_x86_64.whl --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
-        condition: contains(variables['Build.SourceBranch'], 'tags')
+        condition: "and(succeeded(), contains(variables['Build.SourceBranch'], 'tags'))"
 
       - task: PublishPipelineArtifact@0
         inputs:
@@ -120,7 +120,7 @@ jobs:
       - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
-        condition: contains(variables['Build.SourceBranch'], 'tags')
+        condition: "and(succeeded(), contains(variables['Build.SourceBranch'], 'tags'))"
 
       - task: PublishPipelineArtifact@0
         inputs:
@@ -219,7 +219,7 @@ jobs:
       - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
-        condition: contains(variables['Build.SourceBranch'], 'tags')
+        condition: "and(succeeded(), contains(variables['Build.SourceBranch'], 'tags'))"
 
       - task: PublishPipelineArtifact@0
         inputs:
@@ -314,7 +314,7 @@ jobs:
       - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
-        condition: contains(variables['Build.SourceBranch'], 'tags')
+        condition: "and(succeeded(), contains(variables['Build.SourceBranch'], 'tags'))"
 
       - task: PublishPipelineArtifact@0
         inputs:

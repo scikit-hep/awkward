@@ -558,11 +558,11 @@ def broadcast_and_apply(
                 x.purelist_isregular for x in inputs if isinstance(x, ak.layout.Content)
             ):
                 nextinputs = []
-                for x in inputs:
-                    if isinstance(x, ak.layout.Content):
-                        while x.purelist_depth < maxdepth:
-                            x = ak.layout.RegularArray(x, 1)
-                    nextinputs.append(x)
+                for obj in inputs:
+                    if isinstance(obj, ak.layout.Content):
+                        while obj.purelist_depth < maxdepth:
+                            obj = ak.layout.RegularArray(obj, 1)
+                    nextinputs.append(obj)
                 if any(x is not y for x, y in zip(inputs, nextinputs)):
                     return apply(nextinputs, depth)
 
