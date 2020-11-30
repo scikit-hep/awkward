@@ -2,18 +2,14 @@
 
 from __future__ import absolute_import
 
-import sys
-import gc
-
-import pytest
-
-import numpy
-import awkward1
-
 try:
     from collections.abc import MutableMapping
 except ImportError:
     from collections import MutableMapping
+
+import pytest
+import numpy as np
+import awkward1 as ak
 
 
 class Cache(MutableMapping):
@@ -34,23 +30,23 @@ class Cache(MutableMapping):
 
 def make_arrays():
     cache = Cache()
-    x = awkward1.layout.VirtualArray(
-        awkward1.layout.ArrayGenerator(
-            lambda: awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
+    x = ak.layout.VirtualArray(
+        ak.layout.ArrayGenerator(
+            lambda: ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3]))
         ),
-        awkward1.layout.ArrayCache(cache),
+        ak.layout.ArrayCache(cache),
     )
-    y = awkward1.layout.VirtualArray(
-        awkward1.layout.ArrayGenerator(
-            lambda: awkward1.layout.NumpyArray(numpy.array([100, 200, 300]))
+    y = ak.layout.VirtualArray(
+        ak.layout.ArrayGenerator(
+            lambda: ak.layout.NumpyArray(np.array([100, 200, 300]))
         ),
-        awkward1.layout.ArrayCache(cache),
+        ak.layout.ArrayCache(cache),
     )
-    inner = awkward1.layout.RecordArray({"x": x, "y": y})
-    part = awkward1.partition.IrregularlyPartitionedArray(
+    inner = ak.layout.RecordArray({"x": x, "y": y})
+    part = ak.partition.IrregularlyPartitionedArray(
         [inner], [3]
     )
-    return awkward1.Array(part)
+    return ak.Array(part)
 
 
 def test():

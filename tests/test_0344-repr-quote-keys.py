@@ -2,23 +2,19 @@
 
 from __future__ import absolute_import
 
-import sys
-
 import pytest
-import numpy
+import numpy as np
+import awkward1 as ak
 
-import awkward1
-
-
-@pytest.mark.skipif(awkward1._util.py27 and awkward1._util.win, reason="Windows Python 2.7 inserts 'L' after numbers in repr")
+@pytest.mark.skipif(ak._util.py27 and ak._util.win, reason="Windows Python 2.7 inserts 'L' after numbers in repr")
 def test():
-    assert str(awkward1.Array([
+    assert str(ak.Array([
         {"a": 1, "a b": 2}, {"a": 1, "a b": 2}, {"a": 1, "a b": 2}, {"a": 1, "a b": 2}
     ])) in (
         "[{a: 1, 'a b': 2}, {a: 1, 'a b': 2}, {a: 1, 'a b': 2}, {a: 1, 'a b': 2}]",
         "[{'a b': 2, a: 1}, {'a b': 2, a: 1}, {'a b': 2, a: 1}, {'a b': 2, a: 1}]"
     )
-    assert repr(awkward1.Array([
+    assert repr(ak.Array([
         {"a": 1, "a b": 2}, {"a": 1, "a b": 2}, {"a": 1, "a b": 2}
     ])) in (
         "<Array [{a: 1, 'a b': 2}, ... {a: 1, 'a b': 2}] type='3 * {\"a\": int64, \"a b\": in...'>"

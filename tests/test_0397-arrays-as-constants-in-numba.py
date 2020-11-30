@@ -5,15 +5,14 @@ from __future__ import absolute_import
 import sys
 
 import pytest
-
-import numpy
-import awkward1
+import numpy as np
+import awkward1 as ak
 
 numba = pytest.importorskip("numba")
 
 
 def test_refcount():
-    array = awkward1.Array([1, 2, 3])
+    array = ak.Array([1, 2, 3])
 
     @numba.njit
     def f1():
@@ -38,7 +37,7 @@ def test_refcount():
 
 
 def test_Array():
-    array = awkward1.Array([1, 2, 3])
+    array = ak.Array([1, 2, 3])
 
     @numba.njit
     def f1():
@@ -83,7 +82,7 @@ def test_Array():
 
 
 def test_Record():
-    record = awkward1.Record({"x": 1, "y": [1, 2, 3]})
+    record = ak.Record({"x": 1, "y": [1, 2, 3]})
 
     @numba.njit
     def f1():
@@ -93,7 +92,7 @@ def test_Record():
 
 
 def test_ArrayBuilder():
-    builder = awkward1.ArrayBuilder()
+    builder = ak.ArrayBuilder()
     assert sys.getrefcount(builder._layout) == 3
 
     @numba.njit

@@ -2,21 +2,17 @@
 
 from __future__ import absolute_import
 
-import sys
-import itertools
-
-import numpy
-
-import awkward1
-import cupy
-
+import pytest
+import numpy as np
+import cupy as cp
+import awkward1 as ak
 
 def test_from_cupy():
     cupy_array_1d = cupy.arange(10)
     cupy_array_2d = cupy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]])
 
-    ak_cupy_array_1d = awkward1.from_cupy(cupy_array_1d)
-    ak_cupy_array_2d = awkward1.from_cupy(cupy_array_2d)
+    ak_cupy_array_1d = ak.from_cupy(cupy_array_1d)
+    ak_cupy_array_2d = ak.from_cupy(cupy_array_2d)
 
     for i in range(10):
         assert ak_cupy_array_1d[i] == cupy_array_1d[i]
@@ -29,30 +25,30 @@ def test_from_cupy():
 def test_from_cupy_tolist():
     cupy_array_1d = cupy.array([9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
 
-    ak_cupy_array_1d = awkward1.from_cupy(cupy_array_1d)
+    ak_cupy_array_1d = ak.from_cupy(cupy_array_1d)
 
-    assert awkward1.to_list(ak_cupy_array_1d.layout) == [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+    assert ak.to_list(ak_cupy_array_1d.layout) == [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
 
 
 def test_NumpyArray_constructor():
-    assert awkward1.kernels(awkward1.layout.NumpyArray(numpy.array([1, 2, 3]))) == "cpu"
-    assert awkward1.kernels(awkward1.layout.NumpyArray(cupy.array([1, 2, 3]))) == "cuda"
+    assert ak.kernels(ak.layout.NumpyArray(np.array([1, 2, 3]))) == "cpu"
+    assert ak.kernels(ak.layout.NumpyArray(cupy.array([1, 2, 3]))) == "cuda"
 
 
 def test_add():
-    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], kernels="cuda")
-    two = awkward1.Array([100, 200, 300], kernels="cuda")
-    assert awkward1.kernels(one) == "cuda"
-    assert awkward1.kernels(two) == "cuda"
+    one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], kernels="cuda")
+    two = ak.Array([100, 200, 300], kernels="cuda")
+    assert ak.kernels(one) == "cuda"
+    assert ak.kernels(two) == "cuda"
     three = one + two
-    assert awkward1.to_list(three) == [[101.1, 102.2, 103.3], [], [304.4, 305.5]]
-    assert awkward1.kernels(three) == "cuda"
+    assert ak.to_list(three) == [[101.1, 102.2, 103.3], [], [304.4, 305.5]]
+    assert ak.kernels(three) == "cuda"
 
 
 def test_add_2():
-    one = awkward1.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], kernels="cuda")
+    one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], kernels="cuda")
     two = 100
-    assert awkward1.kernels(one) == "cuda"
+    assert ak.kernels(one) == "cuda"
     three = one + two
-    assert awkward1.to_list(three) == [[101.1, 102.2, 103.3], [], [104.4, 105.5]]
-    assert awkward1.kernels(three) == "cuda"
+    assert ak.to_list(three) == [[101.1, 102.2, 103.3], [], [104.4, 105.5]]
+    assert ak.kernels(three) == "cuda"

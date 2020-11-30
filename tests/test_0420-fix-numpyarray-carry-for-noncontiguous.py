@@ -2,18 +2,15 @@
 
 from __future__ import absolute_import
 
-import sys
-
 import pytest
-
-import numpy
-import awkward1
+import numpy as np
+import awkward1 as ak
 
 
 def test():
-    np_content = numpy.asfortranarray(numpy.arange(15).reshape(3, 5))
-    ak_content = awkward1.layout.NumpyArray(np_content)
-    offsets = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 2, 3, 3]))
-    listoffsetarray = awkward1.layout.ListOffsetArray64(offsets, ak_content)
-    assert awkward1.to_list(listoffsetarray[1, 0]) == [0, 1, 2, 3, 4]
-    assert awkward1.to_list(listoffsetarray[3, 0]) == [5, 6, 7, 8, 9]
+    np_content = np.asfortranarray(np.arange(15).reshape(3, 5))
+    ak_content = ak.layout.NumpyArray(np_content)
+    offsets = ak.layout.Index64(np.array([0, 0, 1, 1, 2, 2, 3, 3]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, ak_content)
+    assert ak.to_list(listoffsetarray[1, 0]) == [0, 1, 2, 3, 4]
+    assert ak.to_list(listoffsetarray[3, 0]) == [5, 6, 7, 8, 9]

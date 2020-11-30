@@ -2,26 +2,23 @@
 
 from __future__ import absolute_import
 
-import sys
-
 import pytest
-
-import numpy
-import awkward1
+import numpy as np
+import awkward1 as ak
 
 
 def test():
-    one = awkward1.Array(["uno", "dos", "tres"])
-    two = awkward1.Array(["un", "deux", "trois", "quatre"])
-    three = awkward1.Array(["onay", "ootay", "eethray"])
-    merged = awkward1.concatenate([one, two, three])
-    assert awkward1.to_list(merged) == ["uno", "dos", "tres", "un", "deux", "trois", "quatre", "onay", "ootay", "eethray"]
-    assert awkward1.to_list(merged == "uno") == [True, False, False, False, False, False, False, False, False, False]
-    assert awkward1.to_list(one == numpy.array(["UNO", "dos", "tres"])) == [False, True, True]
-    assert awkward1.to_list(merged == numpy.array(["UNO", "dos", "tres", "one", "two", "three", "quatre", "onay", "two", "three"])) == [False, True, True, False, False, False, True, True, False, False]
+    one = ak.Array(["uno", "dos", "tres"])
+    two = ak.Array(["un", "deux", "trois", "quatre"])
+    three = ak.Array(["onay", "ootay", "eethray"])
+    merged = ak.concatenate([one, two, three])
+    assert ak.to_list(merged) == ["uno", "dos", "tres", "un", "deux", "trois", "quatre", "onay", "ootay", "eethray"]
+    assert ak.to_list(merged == "uno") == [True, False, False, False, False, False, False, False, False, False]
+    assert ak.to_list(one == np.array(["UNO", "dos", "tres"])) == [False, True, True]
+    assert ak.to_list(merged == np.array(["UNO", "dos", "tres", "one", "two", "three", "quatre", "onay", "two", "three"])) == [False, True, True, False, False, False, True, True, False, False]
 
 
 def test_fromnumpy():
-    assert awkward1.to_list(awkward1.from_numpy(numpy.array(["uno", "dos", "tres", "quatro"]))) == ["uno", "dos", "tres", "quatro"]
-    assert awkward1.to_list(awkward1.from_numpy(numpy.array([["uno", "dos"], ["tres", "quatro"]]))) == [["uno", "dos"], ["tres", "quatro"]]
-    assert awkward1.to_list(awkward1.from_numpy(numpy.array([["uno", "dos"], ["tres", "quatro"]]), regulararray=True)) == [["uno", "dos"], ["tres", "quatro"]]
+    assert ak.to_list(ak.from_numpy(np.array(["uno", "dos", "tres", "quatro"]))) == ["uno", "dos", "tres", "quatro"]
+    assert ak.to_list(ak.from_numpy(np.array([["uno", "dos"], ["tres", "quatro"]]))) == [["uno", "dos"], ["tres", "quatro"]]
+    assert ak.to_list(ak.from_numpy(np.array([["uno", "dos"], ["tres", "quatro"]]), regulararray=True)) == [["uno", "dos"], ["tres", "quatro"]]

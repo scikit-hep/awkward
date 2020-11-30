@@ -2,19 +2,17 @@
 
 from __future__ import absolute_import
 
-import sys
 import json
 
 import pytest
-
-import numpy
-import awkward1
+import numpy as np
+import awkward1 as ak
 
 
 def test():
-    example = awkward1.Array([[{"x": 1, "y": []}, {"x": 2, "y": [1, 1]}], []])
+    example = ak.Array([[{"x": 1, "y": []}, {"x": 2, "y": [1, 1]}], []])
     cache = {}
-    virtualarray = awkward1.virtual(lambda: example, form=example.layout.form, length=len(example))
+    virtualarray = ak.virtual(lambda: example, form=example.layout.form, length=len(example))
     assert len(cache) == 0
 
     tmp1 = virtualarray["x"]
@@ -51,24 +49,24 @@ def test():
 def test_no_break_regular_broadcasting():
     # because we redefined Form::has_virtual_form to agree with an interpretation of its name in English
 
-    assert (numpy.array([[1, 2, 3], [4, 5, 6]]) + numpy.array([[10], [20]])).tolist() == [[11, 12, 13], [24, 25, 26]]
-    assert (awkward1.Array(numpy.array([[1, 2, 3], [4, 5, 6]])) + awkward1.Array(numpy.array([[10], [20]]))).tolist() == [[11, 12, 13], [24, 25, 26]]
+    assert (np.array([[1, 2, 3], [4, 5, 6]]) + np.array([[10], [20]])).tolist() == [[11, 12, 13], [24, 25, 26]]
+    assert (ak.Array(np.array([[1, 2, 3], [4, 5, 6]])) + ak.Array(np.array([[10], [20]]))).tolist() == [[11, 12, 13], [24, 25, 26]]
     with pytest.raises(ValueError):
-        awkward1.Array([[1, 2, 3], [4, 5, 6]]) + awkward1.Array([[10], [20]])
-    left, right = awkward1.Array(numpy.array([[1, 2, 3], [4, 5, 6]])), awkward1.Array(numpy.array([[10], [20]]))
-    assert (awkward1.virtual(lambda: left, form=left.layout.form, length=len(left)) + awkward1.virtual(lambda: right, form=right.layout.form, length=len(right))).tolist() == [[11, 12, 13], [24, 25, 26]]
+        ak.Array([[1, 2, 3], [4, 5, 6]]) + ak.Array([[10], [20]])
+    left, right = ak.Array(np.array([[1, 2, 3], [4, 5, 6]])), ak.Array(np.array([[10], [20]]))
+    assert (ak.virtual(lambda: left, form=left.layout.form, length=len(left)) + ak.virtual(lambda: right, form=right.layout.form, length=len(right))).tolist() == [[11, 12, 13], [24, 25, 26]]
     with pytest.raises(ValueError):
-        left, right = awkward1.Array([[1, 2, 3], [4, 5, 6]]), awkward1.Array([[10], [20]])
-        awkward1.virtual(lambda: left, form=left.layout.form, length=len(left)) + awkward1.virtual(lambda: right, form=right.layout.form, length=len(right))
+        left, right = ak.Array([[1, 2, 3], [4, 5, 6]]), ak.Array([[10], [20]])
+        ak.virtual(lambda: left, form=left.layout.form, length=len(left)) + ak.virtual(lambda: right, form=right.layout.form, length=len(right))
 
-    assert (numpy.array([[1, 2, 3], [4, 5, 6]]) + numpy.array([10])).tolist() == [[11, 12, 13], [14, 15, 16]]
-    assert (awkward1.Array(numpy.array([[1, 2, 3], [4, 5, 6]])) + awkward1.Array(numpy.array([10]))).tolist() == [[11, 12, 13], [14, 15, 16]]
-    assert (awkward1.Array([[1, 2, 3], [4, 5, 6]]) + awkward1.Array([10])).tolist() == [[11, 12, 13], [14, 15, 16]]
-    left, right = awkward1.Array(numpy.array([[1, 2, 3], [4, 5, 6]])), awkward1.Array(numpy.array([10]))
-    assert (awkward1.virtual(lambda: left, form=left.layout.form, length=len(left)) + awkward1.virtual(lambda: right, form=right.layout.form, length=len(right))).tolist() == [[11, 12, 13], [14, 15, 16]]
-    left, right = awkward1.Array([[1, 2, 3], [4, 5, 6]]), awkward1.Array([10])
-    assert (awkward1.virtual(lambda: left, form=left.layout.form, length=len(left)) + awkward1.virtual(lambda: right, form=right.layout.form, length=len(right))).tolist() == [[11, 12, 13], [14, 15, 16]]
+    assert (np.array([[1, 2, 3], [4, 5, 6]]) + np.array([10])).tolist() == [[11, 12, 13], [14, 15, 16]]
+    assert (ak.Array(np.array([[1, 2, 3], [4, 5, 6]])) + ak.Array(np.array([10]))).tolist() == [[11, 12, 13], [14, 15, 16]]
+    assert (ak.Array([[1, 2, 3], [4, 5, 6]]) + ak.Array([10])).tolist() == [[11, 12, 13], [14, 15, 16]]
+    left, right = ak.Array(np.array([[1, 2, 3], [4, 5, 6]])), ak.Array(np.array([10]))
+    assert (ak.virtual(lambda: left, form=left.layout.form, length=len(left)) + ak.virtual(lambda: right, form=right.layout.form, length=len(right))).tolist() == [[11, 12, 13], [14, 15, 16]]
+    left, right = ak.Array([[1, 2, 3], [4, 5, 6]]), ak.Array([10])
+    assert (ak.virtual(lambda: left, form=left.layout.form, length=len(left)) + ak.virtual(lambda: right, form=right.layout.form, length=len(right))).tolist() == [[11, 12, 13], [14, 15, 16]]
 
-    assert (awkward1.Array([[1, 2, 3], [4, 5, 6]]) + awkward1.Array([10, 20])).tolist() == [[11, 12, 13], [24, 25, 26]]
-    left, right = awkward1.Array([[1, 2, 3], [4, 5, 6]]), awkward1.Array([10, 20])
-    assert (awkward1.virtual(lambda: left, form=left.layout.form, length=len(left)) + awkward1.virtual(lambda: right, form=right.layout.form, length=len(right))).tolist() == [[11, 12, 13], [24, 25, 26]]
+    assert (ak.Array([[1, 2, 3], [4, 5, 6]]) + ak.Array([10, 20])).tolist() == [[11, 12, 13], [24, 25, 26]]
+    left, right = ak.Array([[1, 2, 3], [4, 5, 6]]), ak.Array([10, 20])
+    assert (ak.virtual(lambda: left, form=left.layout.form, length=len(left)) + ak.virtual(lambda: right, form=right.layout.form, length=len(right))).tolist() == [[11, 12, 13], [24, 25, 26]]

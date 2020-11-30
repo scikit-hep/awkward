@@ -5,21 +5,20 @@ from __future__ import absolute_import
 import sys
 
 import pytest
-import numpy
-
-import awkward1
+import numpy as np
+import awkward1 as ak
 
 def test_iterator():
-    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
-    offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
-    array = awkward1.layout.ListOffsetArray32(offsets, content)
+    content = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3]))
+    offsets = ak.layout.Index32(np.array([0, 2, 2, 3], "i4"))
+    array = ak.layout.ListOffsetArray32(offsets, content)
     assert list(content) == [1.1, 2.2, 3.3]
-    assert [numpy.asarray(x).tolist() for x in array] == [[1.1, 2.2], [], [3.3]]
+    assert [np.asarray(x).tolist() for x in array] == [[1.1, 2.2], [], [3.3]]
 
 def test_refcount():
-    content = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3]))
-    offsets = awkward1.layout.Index32(numpy.array([0, 2, 2, 3], "i4"))
-    array = awkward1.layout.ListOffsetArray32(offsets, content)
+    content = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3]))
+    offsets = ak.layout.Index32(np.array([0, 2, 2, 3], "i4"))
+    array = ak.layout.ListOffsetArray32(offsets, content)
 
     assert (sys.getrefcount(content), sys.getrefcount(array)) == (2, 2)
 

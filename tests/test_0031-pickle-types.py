@@ -3,24 +3,22 @@
 from __future__ import absolute_import
 
 import sys
-import itertools
 import pickle
 
 import pytest
-import numpy
-
-import awkward1
+import numpy as np
+import awkward1 as ak
 
 if sys.version_info[0] < 3:
     pytest.skip("pybind11 pickle only works in Python 3", allow_module_level=True)
 
 def test_pickle():
-    t = awkward1.types.UnknownType(); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.types.PrimitiveType("int32"); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.types.PrimitiveType("float64"); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.types.ArrayType(awkward1.types.PrimitiveType("int32"), 100); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.types.ListType(awkward1.types.PrimitiveType("int32")); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.types.RegularType(awkward1.types.PrimitiveType("int32"), 5); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.types.OptionType(awkward1.types.PrimitiveType("int32")); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.types.UnionType((awkward1.types.PrimitiveType("int32"), awkward1.types.PrimitiveType("float64"))); assert pickle.loads(pickle.dumps(t)) == t
-    t = awkward1.types.RecordType({"one": awkward1.types.PrimitiveType("int32"), "two": awkward1.types.PrimitiveType("float64")}); assert pickle.loads(pickle.dumps(t)) == t
+    t = ak.types.UnknownType(); assert pickle.loads(pickle.dumps(t)) == t
+    t = ak.types.PrimitiveType("int32"); assert pickle.loads(pickle.dumps(t)) == t
+    t = ak.types.PrimitiveType("float64"); assert pickle.loads(pickle.dumps(t)) == t
+    t = ak.types.ArrayType(ak.types.PrimitiveType("int32"), 100); assert pickle.loads(pickle.dumps(t)) == t
+    t = ak.types.ListType(ak.types.PrimitiveType("int32")); assert pickle.loads(pickle.dumps(t)) == t
+    t = ak.types.RegularType(ak.types.PrimitiveType("int32"), 5); assert pickle.loads(pickle.dumps(t)) == t
+    t = ak.types.OptionType(ak.types.PrimitiveType("int32")); assert pickle.loads(pickle.dumps(t)) == t
+    t = ak.types.UnionType((ak.types.PrimitiveType("int32"), ak.types.PrimitiveType("float64"))); assert pickle.loads(pickle.dumps(t)) == t
+    t = ak.types.RecordType({"one": ak.types.PrimitiveType("int32"), "two": ak.types.PrimitiveType("float64")}); assert pickle.loads(pickle.dumps(t)) == t

@@ -3,32 +3,31 @@
 from __future__ import absolute_import
 
 import sys
-import itertools
 
-import numpy
-
-import awkward1
-import cupy
+import pytest
+import numpy as np
+import cupy as cp
+import awkward1 as ak
 
 def test_cupy_refcount():
     o = cupy.arange(10)
-    i = awkward1.layout.Index64.from_cupy(o)
+    i = ak.layout.Index64.from_cupy(o)
     assert sys.getrefcount(o) == 3
-    i2  = awkward1.layout.Index64.from_cupy(o)
+    i2  = ak.layout.Index64.from_cupy(o)
     assert sys.getrefcount(o) == 4
-    i3  = awkward1.layout.Index64.from_cupy(o)
+    i3  = ak.layout.Index64.from_cupy(o)
     assert sys.getrefcount(o) == 5
-    i4  = awkward1.layout.Index64.from_cupy(o)
+    i4  = ak.layout.Index64.from_cupy(o)
     assert sys.getrefcount(o) == 6
-    i5  = awkward1.layout.Index64.from_cupy(o)
+    i5  = ak.layout.Index64.from_cupy(o)
     assert sys.getrefcount(o) == 7
-    i6  = awkward1.layout.Index64.from_cupy(o)
+    i6  = ak.layout.Index64.from_cupy(o)
     assert sys.getrefcount(o) == 8
-    i7  = awkward1.layout.Index64.from_cupy(o)
+    i7  = ak.layout.Index64.from_cupy(o)
     assert sys.getrefcount(o) == 9
-    i8  = awkward1.layout.Index64.from_cupy(o)
+    i8  = ak.layout.Index64.from_cupy(o)
     assert sys.getrefcount(o) == 10
-    i9  = awkward1.layout.Index64.from_cupy(o)
+    i9  = ak.layout.Index64.from_cupy(o)
     assert sys.getrefcount(o) == 11
 
     del(i9)

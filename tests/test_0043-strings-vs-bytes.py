@@ -2,16 +2,13 @@
 
 from __future__ import absolute_import
 
-import sys
-
 import pytest
-import numpy
-
-import awkward1
+import numpy as np
+import awkward1 as ak
 
 def test():
-    array = awkward1.Array([{"x": "one"}, {"x": "two"}, {"x": "three"}], check_valid=True)
-    assert awkward1.to_list(array) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
-    assert awkward1.to_list(awkward1.from_iter(awkward1.to_list(array))) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
-    assert awkward1.to_list(array.layout) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
-    assert awkward1.to_list(awkward1.from_iter(awkward1.to_list(array.layout))) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
+    array = ak.Array([{"x": "one"}, {"x": "two"}, {"x": "three"}], check_valid=True)
+    assert ak.to_list(array) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
+    assert ak.to_list(ak.from_iter(ak.to_list(array))) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
+    assert ak.to_list(array.layout) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
+    assert ak.to_list(ak.from_iter(ak.to_list(array.layout))) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]

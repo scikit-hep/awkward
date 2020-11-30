@@ -5,9 +5,8 @@ from __future__ import absolute_import
 import sys
 
 import pytest
-import numpy
-
-import awkward1
+import numpy as np
+import awkward1 as ak
 
 numba = pytest.importorskip("numba")
 
@@ -15,7 +14,7 @@ py27 = (sys.version_info[0] < 3)
 
 
 def test_string():
-    array = awkward1.Array(["one", "two", "three", "four", "five"], check_valid=True)
+    array = ak.Array(["one", "two", "three", "four", "five"], check_valid=True)
 
     def f1(x, i):
         return x[i]
@@ -39,7 +38,7 @@ def test_string():
 
 
 def test_bytestring():
-    array = awkward1.Array([b"one", b"two", b"three", b"four", b"five"], check_valid=True)
+    array = ak.Array([b"one", b"two", b"three", b"four", b"five"], check_valid=True)
 
     def f1(x, i):
         return x[i]

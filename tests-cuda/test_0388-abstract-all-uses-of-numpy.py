@@ -2,17 +2,13 @@
 
 from __future__ import absolute_import
 
-import sys
-
 import pytest
+# don't import numpy or cupy directly: see below
+import awkward1 as ak
 
-import awkward1
-import awkward1.nplike
-
-
-np = awkward1.nplike.NumpyMetadata.instance()
-numpy = awkward1.nplike.Numpy.instance()
-cupy = awkward1.nplike.Cupy.instance()
+np = ak.nplike.NumpyMetadata.instance()
+numpy = ak.nplike.Numpy.instance()
+cupy = ak.nplike.Cupy.instance()
 
 
 ############################ array creation

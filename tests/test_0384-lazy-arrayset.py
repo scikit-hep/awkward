@@ -2,10 +2,7 @@
 
 from __future__ import absolute_import
 
-import sys
-
 import pytest
-
 import numpy as np
 import awkward1 as ak
 
@@ -81,20 +78,20 @@ def test_lazy_arrayset():
     assert len(cache) == 0
 
     assert ak.to_list(ak.num(out.listcollection)) == [3, 3, 3]
-    assert set(canary.ops) == {('get', 'kitty-node1-offsets')}
-    assert set(cache) == {'hello', 'hello-kitty-node1-virtual'}
+    assert set(canary.ops) == {("get", "kitty-node1-offsets")}
+    assert set(cache) == {"hello", "hello-kitty-node1-virtual"}
     canary.ops = []
     cache.clear()
 
-    assert ak.to_list(out.unioncollection) == [{'item1': 3}, [{'item1': 2}], {'item1': 4}]
-    assert set(canary.ops) == {('get', 'kitty-node11-tags'), ('get', 'kitty-node11-index'), ('get', 'kitty-node14-offsets'), ('get', 'kitty-node13'), ('get', 'kitty-node16')}
-    assert set(cache) == {'hello', 'hello-kitty-node11-virtual', 'hello-kitty-node13-virtual', 'hello-kitty-node16-virtual'}
+    assert ak.to_list(out.unioncollection) == [{"item1": 3}, [{"item1": 2}], {"item1": 4}]
+    assert set(canary.ops) == {("get", "kitty-node11-tags"), ("get", "kitty-node11-index"), ("get", "kitty-node14-offsets"), ("get", "kitty-node13"), ("get", "kitty-node16")}
+    assert set(cache) == {"hello", "hello-kitty-node11-virtual", "hello-kitty-node13-virtual", "hello-kitty-node16-virtual"}
     canary.ops = []
     cache.clear()
 
     assert ak.to_list(out.masked) == [None, 4, 4]
-    assert set(canary.ops) == {('get', 'kitty-node17-index'), ('get', 'kitty-node18')}
-    assert set(cache) == {'hello', 'hello-kitty-node17-virtual'}
+    assert set(canary.ops) == {("get", "kitty-node17-index"), ("get", "kitty-node18")}
+    assert set(cache) == {"hello", "hello-kitty-node17-virtual"}
     canary.ops = []
     cache.clear()
 
@@ -110,4 +107,4 @@ def test_longer_than_expected():
         )
     )
     out = ak.from_arrayset(*ak.to_arrayset(array), lazy=True, lazy_lengths=2)
-    assert ak.to_list(out) == [[{'item1': 0, 'longitem': 0}, {'item1': 1, 'longitem': 1}], [{'item1': 2, 'longitem': 2}, {'item1': 3, 'longitem': 3}]]
+    assert ak.to_list(out) == [[{"item1": 0, "longitem": 0}, {"item1": 1, "longitem": 1}], [{"item1": 2, "longitem": 2}, {"item1": 3, "longitem": 3}]]

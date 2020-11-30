@@ -2,12 +2,9 @@
 
 from __future__ import absolute_import
 
-import sys
-
 import pytest
-import numpy
-
-import awkward1
+import numpy as np
+import awkward1 as ak
 
 def test_mixing_lists_and_none():
     def add(a, b):
@@ -25,133 +22,133 @@ def test_mixing_lists_and_none():
                 outer.append(inner)
         return outer
 
-    a00 = awkward1.Array([[1.1,  2.2, 3.3],   [], [4.4, 5.5], [ 6.6, 7.7, 8.8, 9.9]], check_valid=True)
-    a01 = awkward1.Array([[1.1, None, 3.3],   [], [4.4, 5.5], [ 6.6, 7.7, 8.8, 9.9]], check_valid=True)
-    a02 = awkward1.Array([[1.1, None, 3.3],   [], [4.4, 5.5], [None, 7.7, 8.8, 9.9]], check_valid=True)
-    a10 = awkward1.Array([[1.1,  2.2, 3.3],   [],       None, [ 6.6, 7.7, 8.8, 9.9]], check_valid=True)
-    a11 = awkward1.Array([[1.1, None, 3.3],   [],       None, [ 6.6, 7.7, 8.8, 9.9]], check_valid=True)
-    a12 = awkward1.Array([[1.1, None, 3.3],   [],       None, [None, 7.7, 8.8, 9.9]], check_valid=True)
-    a20 = awkward1.Array([[1.1,  2.2, 3.3], None,       None, [ 6.6, 7.7, 8.8, 9.9]], check_valid=True)
-    a21 = awkward1.Array([[1.1, None, 3.3], None,       None, [ 6.6, 7.7, 8.8, 9.9]], check_valid=True)
-    a22 = awkward1.Array([[1.1, None, 3.3], None,       None, [None, 7.7, 8.8, 9.9]], check_valid=True)
+    a00 = ak.Array([[1.1,  2.2, 3.3],   [], [4.4, 5.5], [ 6.6, 7.7, 8.8, 9.9]], check_valid=True)
+    a01 = ak.Array([[1.1, None, 3.3],   [], [4.4, 5.5], [ 6.6, 7.7, 8.8, 9.9]], check_valid=True)
+    a02 = ak.Array([[1.1, None, 3.3],   [], [4.4, 5.5], [None, 7.7, 8.8, 9.9]], check_valid=True)
+    a10 = ak.Array([[1.1,  2.2, 3.3],   [],       None, [ 6.6, 7.7, 8.8, 9.9]], check_valid=True)
+    a11 = ak.Array([[1.1, None, 3.3],   [],       None, [ 6.6, 7.7, 8.8, 9.9]], check_valid=True)
+    a12 = ak.Array([[1.1, None, 3.3],   [],       None, [None, 7.7, 8.8, 9.9]], check_valid=True)
+    a20 = ak.Array([[1.1,  2.2, 3.3], None,       None, [ 6.6, 7.7, 8.8, 9.9]], check_valid=True)
+    a21 = ak.Array([[1.1, None, 3.3], None,       None, [ 6.6, 7.7, 8.8, 9.9]], check_valid=True)
+    a22 = ak.Array([[1.1, None, 3.3], None,       None, [None, 7.7, 8.8, 9.9]], check_valid=True)
 
-    b00 = awkward1.Array([[100,  200, 300],   [], [400, 500], [ 600, 700, 800, 900]], check_valid=True)
-    b01 = awkward1.Array([[100, None, 300],   [], [400, 500], [ 600, 700, 800, 900]], check_valid=True)
-    b02 = awkward1.Array([[100, None, 300],   [], [400, 500], [None, 700, 800, 900]], check_valid=True)
-    b10 = awkward1.Array([[100,  200, 300],   [],       None, [ 600, 700, 800, 900]], check_valid=True)
-    b11 = awkward1.Array([[100, None, 300],   [],       None, [ 600, 700, 800, 900]], check_valid=True)
-    b12 = awkward1.Array([[100, None, 300],   [],       None, [None, 700, 800, 900]], check_valid=True)
-    b20 = awkward1.Array([[100,  200, 300], None,       None, [ 600, 700, 800, 900]], check_valid=True)
-    b21 = awkward1.Array([[100, None, 300], None,       None, [ 600, 700, 800, 900]], check_valid=True)
-    b22 = awkward1.Array([[100, None, 300], None,       None, [None, 700, 800, 900]], check_valid=True)
+    b00 = ak.Array([[100,  200, 300],   [], [400, 500], [ 600, 700, 800, 900]], check_valid=True)
+    b01 = ak.Array([[100, None, 300],   [], [400, 500], [ 600, 700, 800, 900]], check_valid=True)
+    b02 = ak.Array([[100, None, 300],   [], [400, 500], [None, 700, 800, 900]], check_valid=True)
+    b10 = ak.Array([[100,  200, 300],   [],       None, [ 600, 700, 800, 900]], check_valid=True)
+    b11 = ak.Array([[100, None, 300],   [],       None, [ 600, 700, 800, 900]], check_valid=True)
+    b12 = ak.Array([[100, None, 300],   [],       None, [None, 700, 800, 900]], check_valid=True)
+    b20 = ak.Array([[100,  200, 300], None,       None, [ 600, 700, 800, 900]], check_valid=True)
+    b21 = ak.Array([[100, None, 300], None,       None, [ 600, 700, 800, 900]], check_valid=True)
+    b22 = ak.Array([[100, None, 300], None,       None, [None, 700, 800, 900]], check_valid=True)
 
     for a in (a00, a01, a02, a10, a11, a12, a20, a21, a22):
         for b in (b00, b01, b02, b10, b11, b12, b20, b21, b22):
-            assert awkward1.to_list(a + b) == add(a, b)
+            assert ak.to_list(a + b) == add(a, b)
 
 def test_explicit_broadcasting():
-    nparray = numpy.arange(2*3*5).reshape(2, 3, 5)
-    lsarray = awkward1.Array(nparray.tolist(), check_valid=True)
-    rgarray = awkward1.Array(nparray, check_valid=True)
+    nparray = np.arange(2*3*5).reshape(2, 3, 5)
+    lsarray = ak.Array(nparray.tolist(), check_valid=True)
+    rgarray = ak.Array(nparray, check_valid=True)
 
     # explicit left-broadcasting
-    assert awkward1.to_list(rgarray + numpy.array([[[100]], [[200]]])) == awkward1.to_list(nparray + numpy.array([[[100]], [[200]]]))
-    assert awkward1.to_list(lsarray + numpy.array([[[100]], [[200]]])) == awkward1.to_list(nparray + numpy.array([[[100]], [[200]]]))
-    assert awkward1.to_list(numpy.array([[[100]], [[200]]]) + rgarray) == awkward1.to_list(numpy.array([[[100]], [[200]]]) + nparray)
-    assert awkward1.to_list(numpy.array([[[100]], [[200]]]) + lsarray) == awkward1.to_list(numpy.array([[[100]], [[200]]]) + nparray)
+    assert ak.to_list(rgarray + np.array([[[100]], [[200]]])) == ak.to_list(nparray + np.array([[[100]], [[200]]]))
+    assert ak.to_list(lsarray + np.array([[[100]], [[200]]])) == ak.to_list(nparray + np.array([[[100]], [[200]]]))
+    assert ak.to_list(np.array([[[100]], [[200]]]) + rgarray) == ak.to_list(np.array([[[100]], [[200]]]) + nparray)
+    assert ak.to_list(np.array([[[100]], [[200]]]) + lsarray) == ak.to_list(np.array([[[100]], [[200]]]) + nparray)
 
     # explicit right-broadcasting
-    assert awkward1.to_list(rgarray + numpy.array([[[100, 200, 300, 400, 500]]])) == awkward1.to_list(nparray + numpy.array([[[100, 200, 300, 400, 500]]]))
-    assert awkward1.to_list(lsarray + numpy.array([[[100, 200, 300, 400, 500]]])) == awkward1.to_list(nparray + numpy.array([[[100, 200, 300, 400, 500]]]))
-    assert awkward1.to_list(numpy.array([[[100, 200, 300, 400, 500]]]) + rgarray) == awkward1.to_list(numpy.array([[[100, 200, 300, 400, 500]]]) + nparray)
-    assert awkward1.to_list(numpy.array([[[100, 200, 300, 400, 500]]]) + lsarray) == awkward1.to_list(numpy.array([[[100, 200, 300, 400, 500]]]) + nparray)
+    assert ak.to_list(rgarray + np.array([[[100, 200, 300, 400, 500]]])) == ak.to_list(nparray + np.array([[[100, 200, 300, 400, 500]]]))
+    assert ak.to_list(lsarray + np.array([[[100, 200, 300, 400, 500]]])) == ak.to_list(nparray + np.array([[[100, 200, 300, 400, 500]]]))
+    assert ak.to_list(np.array([[[100, 200, 300, 400, 500]]]) + rgarray) == ak.to_list(np.array([[[100, 200, 300, 400, 500]]]) + nparray)
+    assert ak.to_list(np.array([[[100, 200, 300, 400, 500]]]) + lsarray) == ak.to_list(np.array([[[100, 200, 300, 400, 500]]]) + nparray)
 
 def test_implicit_broadcasting():
-    nparray = numpy.arange(2*3*5).reshape(2, 3, 5)
-    lsarray = awkward1.Array(nparray.tolist(), check_valid=True)
-    rgarray = awkward1.Array(nparray, check_valid=True)
+    nparray = np.arange(2*3*5).reshape(2, 3, 5)
+    lsarray = ak.Array(nparray.tolist(), check_valid=True)
+    rgarray = ak.Array(nparray, check_valid=True)
 
-    assert awkward1.to_list(rgarray + numpy.array([100, 200, 300, 400, 500])) == awkward1.to_list(nparray + numpy.array([100, 200, 300, 400, 500]))
-    assert awkward1.to_list(numpy.array([100, 200, 300, 400, 500]) + rgarray) == awkward1.to_list(numpy.array([100, 200, 300, 400, 500]) + nparray)
+    assert ak.to_list(rgarray + np.array([100, 200, 300, 400, 500])) == ak.to_list(nparray + np.array([100, 200, 300, 400, 500]))
+    assert ak.to_list(np.array([100, 200, 300, 400, 500]) + rgarray) == ak.to_list(np.array([100, 200, 300, 400, 500]) + nparray)
 
-    assert awkward1.to_list(lsarray + numpy.array([100, 200])) == awkward1.to_list(nparray + numpy.array([[[100]], [[200]]]))
-    assert awkward1.to_list(numpy.array([100, 200]) + lsarray) == awkward1.to_list(numpy.array([[[100]], [[200]]]) + nparray)
+    assert ak.to_list(lsarray + np.array([100, 200])) == ak.to_list(nparray + np.array([[[100]], [[200]]]))
+    assert ak.to_list(np.array([100, 200]) + lsarray) == ak.to_list(np.array([[[100]], [[200]]]) + nparray)
 
 def test_tonumpy():
-    assert numpy.array_equal(awkward1.to_numpy(awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)), numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    assert numpy.array_equal(awkward1.to_numpy(awkward1.Array(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]), check_valid=True)), numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    assert numpy.array_equal(awkward1.to_numpy(awkward1.Array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]], check_valid=True)), numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
-    assert numpy.array_equal(awkward1.to_numpy(awkward1.Array(numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]), check_valid=True)), numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
-    assert numpy.array_equal(awkward1.to_numpy(awkward1.Array(["one", "two", "three"], check_valid=True)), numpy.array(["one", "two", "three"]))
-    assert numpy.array_equal(awkward1.to_numpy(awkward1.Array([b"one", b"two", b"three"], check_valid=True)), numpy.array([b"one", b"two", b"three"]))
-    assert numpy.array_equal(awkward1.to_numpy(awkward1.Array([], check_valid=True)), numpy.array([]))
+    assert np.array_equal(ak.to_numpy(ak.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)), np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    assert np.array_equal(ak.to_numpy(ak.Array(np.array([1.1, 2.2, 3.3, 4.4, 5.5]), check_valid=True)), np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    assert np.array_equal(ak.to_numpy(ak.Array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]], check_valid=True)), np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
+    assert np.array_equal(ak.to_numpy(ak.Array(np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]), check_valid=True)), np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
+    assert np.array_equal(ak.to_numpy(ak.Array(["one", "two", "three"], check_valid=True)), np.array(["one", "two", "three"]))
+    assert np.array_equal(ak.to_numpy(ak.Array([b"one", b"two", b"three"], check_valid=True)), np.array([b"one", b"two", b"three"]))
+    assert np.array_equal(ak.to_numpy(ak.Array([], check_valid=True)), np.array([]))
 
-    content0 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=numpy.float64))
-    content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3], dtype=numpy.int64))
-    tags = awkward1.layout.Index8(numpy.array([0, 1, 1, 0, 0, 0, 1, 0], dtype=numpy.int8))
-    index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 3, 2, 4], dtype=numpy.int64))
-    array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [content0, content1]), check_valid=True)
-    assert numpy.array_equal(awkward1.to_numpy(array), numpy.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5]))
+    content0 = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64))
+    content1 = ak.layout.NumpyArray(np.array([1, 2, 3], dtype=np.int64))
+    tags = ak.layout.Index8(np.array([0, 1, 1, 0, 0, 0, 1, 0], dtype=np.int8))
+    index = ak.layout.Index64(np.array([0, 0, 1, 1, 2, 3, 2, 4], dtype=np.int64))
+    array = ak.Array(ak.layout.UnionArray8_64(tags, index, [content0, content1]), check_valid=True)
+    assert np.array_equal(ak.to_numpy(array), np.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5]))
 
-    assert awkward1.to_numpy(awkward1.Array([1.1, 2.2, None, None, 3.3], check_valid=True)).tolist() == [1.1, 2.2, None, None, 3.3]
-    assert awkward1.to_numpy(awkward1.Array([[1.1, 2.2], [None, None], [3.3, 4.4]], check_valid=True)).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
-    assert awkward1.to_numpy(awkward1.Array([[1.1, 2.2], None, [3.3, 4.4]], check_valid=True)).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
+    assert ak.to_numpy(ak.Array([1.1, 2.2, None, None, 3.3], check_valid=True)).tolist() == [1.1, 2.2, None, None, 3.3]
+    assert ak.to_numpy(ak.Array([[1.1, 2.2], [None, None], [3.3, 4.4]], check_valid=True)).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
+    assert ak.to_numpy(ak.Array([[1.1, 2.2], None, [3.3, 4.4]], check_valid=True)).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
 
-    assert numpy.array_equal(awkward1.to_numpy(awkward1.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], check_valid=True)), numpy.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("x", numpy.int64), ("y", numpy.float64)]))
-    assert numpy.array_equal(awkward1.to_numpy(awkward1.Array([(1, 1.1), (2, 2.2), (3, 3.3)], check_valid=True)), numpy.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("0", numpy.int64), ("1", numpy.float64)]))
+    assert np.array_equal(ak.to_numpy(ak.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], check_valid=True)), np.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("x", np.int64), ("y", np.float64)]))
+    assert np.array_equal(ak.to_numpy(ak.Array([(1, 1.1), (2, 2.2), (3, 3.3)], check_valid=True)), np.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("0", np.int64), ("1", np.float64)]))
 
 def test_numpy_array():
-    assert numpy.array_equal(numpy.asarray(awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)), numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    assert numpy.array_equal(numpy.asarray(awkward1.Array(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]), check_valid=True)), numpy.array([1.1, 2.2, 3.3, 4.4, 5.5]))
-    assert numpy.array_equal(numpy.asarray(awkward1.Array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]], check_valid=True)), numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
-    assert numpy.array_equal(numpy.asarray(awkward1.Array(numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]), check_valid=True)), numpy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
-    assert numpy.array_equal(numpy.asarray(awkward1.Array(["one", "two", "three"], check_valid=True)), numpy.array(["one", "two", "three"]))
-    assert numpy.array_equal(numpy.asarray(awkward1.Array([b"one", b"two", b"three"], check_valid=True)), numpy.array([b"one", b"two", b"three"]))
-    assert numpy.array_equal(numpy.asarray(awkward1.Array([], check_valid=True)), numpy.array([]))
+    assert np.array_equal(np.asarray(ak.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)), np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    assert np.array_equal(np.asarray(ak.Array(np.array([1.1, 2.2, 3.3, 4.4, 5.5]), check_valid=True)), np.array([1.1, 2.2, 3.3, 4.4, 5.5]))
+    assert np.array_equal(np.asarray(ak.Array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]], check_valid=True)), np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
+    assert np.array_equal(np.asarray(ak.Array(np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]), check_valid=True)), np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
+    assert np.array_equal(np.asarray(ak.Array(["one", "two", "three"], check_valid=True)), np.array(["one", "two", "three"]))
+    assert np.array_equal(np.asarray(ak.Array([b"one", b"two", b"three"], check_valid=True)), np.array([b"one", b"two", b"three"]))
+    assert np.array_equal(np.asarray(ak.Array([], check_valid=True)), np.array([]))
 
-    content0 = awkward1.layout.NumpyArray(numpy.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=numpy.float64))
-    content1 = awkward1.layout.NumpyArray(numpy.array([1, 2, 3], dtype=numpy.int64))
-    tags = awkward1.layout.Index8(numpy.array([0, 1, 1, 0, 0, 0, 1, 0], dtype=numpy.int8))
-    index = awkward1.layout.Index64(numpy.array([0, 0, 1, 1, 2, 3, 2, 4], dtype=numpy.int64))
-    array = awkward1.Array(awkward1.layout.UnionArray8_64(tags, index, [content0, content1]), check_valid=True)
-    assert numpy.array_equal(numpy.asarray(array), numpy.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5]))
+    content0 = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64))
+    content1 = ak.layout.NumpyArray(np.array([1, 2, 3], dtype=np.int64))
+    tags = ak.layout.Index8(np.array([0, 1, 1, 0, 0, 0, 1, 0], dtype=np.int8))
+    index = ak.layout.Index64(np.array([0, 0, 1, 1, 2, 3, 2, 4], dtype=np.int64))
+    array = ak.Array(ak.layout.UnionArray8_64(tags, index, [content0, content1]), check_valid=True)
+    assert np.array_equal(np.asarray(array), np.array([1.1, 1, 2, 2.2, 3.3, 4.4, 3, 5.5]))
 
-    assert awkward1.to_numpy(awkward1.Array([1.1, 2.2, None, None, 3.3], check_valid=True)).tolist() == [1.1, 2.2, None, None, 3.3]
-    assert awkward1.to_numpy(awkward1.Array([[1.1, 2.2], [None, None], [3.3, 4.4]], check_valid=True)).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
-    assert awkward1.to_numpy(awkward1.Array([[1.1, 2.2], None, [3.3, 4.4]], check_valid=True)).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
+    assert ak.to_numpy(ak.Array([1.1, 2.2, None, None, 3.3], check_valid=True)).tolist() == [1.1, 2.2, None, None, 3.3]
+    assert ak.to_numpy(ak.Array([[1.1, 2.2], [None, None], [3.3, 4.4]], check_valid=True)).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
+    assert ak.to_numpy(ak.Array([[1.1, 2.2], None, [3.3, 4.4]], check_valid=True)).tolist() == [[1.1, 2.2], [None, None], [3.3, 4.4]]
 
-    assert numpy.array_equal(numpy.asarray(awkward1.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], check_valid=True)), numpy.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("x", numpy.int64), ("y", numpy.float64)]))
-    assert numpy.array_equal(numpy.asarray(awkward1.Array([(1, 1.1), (2, 2.2), (3, 3.3)], check_valid=True)), numpy.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("0", numpy.int64), ("1", numpy.float64)]))
+    assert np.array_equal(np.asarray(ak.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], check_valid=True)), np.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("x", np.int64), ("y", np.float64)]))
+    assert np.array_equal(np.asarray(ak.Array([(1, 1.1), (2, 2.2), (3, 3.3)], check_valid=True)), np.array([(1, 1.1), (2, 2.2), (3, 3.3)], dtype=[("0", np.int64), ("1", np.float64)]))
 
 def test_where():
-    one = awkward1.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True)
-    two = awkward1.Array([  0, 100, 200, 300, 400, 500, 600, 700, 800, 900], check_valid=True)
-    condition = awkward1.Array([False, False, False, False, False, True, False, True, False, True], check_valid=True)
+    one = ak.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9], check_valid=True)
+    two = ak.Array([  0, 100, 200, 300, 400, 500, 600, 700, 800, 900], check_valid=True)
+    condition = ak.Array([False, False, False, False, False, True, False, True, False, True], check_valid=True)
 
-    assert isinstance(awkward1.where(condition)[0], awkward1.Array)
-    assert awkward1.to_list(awkward1.where(condition)[0]) == [5, 7, 9]
+    assert isinstance(ak.where(condition)[0], ak.Array)
+    assert ak.to_list(ak.where(condition)[0]) == [5, 7, 9]
 
-    assert awkward1.to_list(awkward1.where(condition, one, two)) == awkward1.to_list(numpy.where(numpy.asarray(condition), numpy.asarray(one), numpy.asarray(two)))
+    assert ak.to_list(ak.where(condition, one, two)) == ak.to_list(np.where(np.asarray(condition), np.asarray(one), np.asarray(two)))
 
 def test_string_equal():
-    one = awkward1.Array(["one", "two", "three"], check_valid=True)
-    two = awkward1.Array(["ONE", "two", "four"], check_valid=True)
-    assert awkward1.to_list(one == two) == [False, True, False]
+    one = ak.Array(["one", "two", "three"], check_valid=True)
+    two = ak.Array(["ONE", "two", "four"], check_valid=True)
+    assert ak.to_list(one == two) == [False, True, False]
 
 def test_size():
-    assert awkward1.size(awkward1.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)) == 5
-    assert awkward1.size(awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5), check_valid=True)) == 30
-    assert awkward1.size(awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5), check_valid=True), 0) == 2
-    assert awkward1.size(awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5), check_valid=True), 1) == 3
-    assert awkward1.size(awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5), check_valid=True), 2) == 5
-    assert awkward1.size(awkward1.layout.NumpyArray(numpy.arange(2*3*5).reshape(2, 3, 5))) == 30
-    assert awkward1.size(awkward1.layout.NumpyArray(numpy.arange(2*3*5).reshape(2, 3, 5)), 0) == 2
-    assert awkward1.size(awkward1.layout.NumpyArray(numpy.arange(2*3*5).reshape(2, 3, 5)), 1) == 3
-    assert awkward1.size(awkward1.layout.NumpyArray(numpy.arange(2*3*5).reshape(2, 3, 5)), 2) == 5
-    assert numpy.size(numpy.arange(2*3*5).reshape(2, 3, 5)) == 30
-    assert numpy.size(numpy.arange(2*3*5).reshape(2, 3, 5), 0) == 2
-    assert numpy.size(numpy.arange(2*3*5).reshape(2, 3, 5), 1) == 3
-    assert numpy.size(numpy.arange(2*3*5).reshape(2, 3, 5), 2) == 5
+    assert ak.size(ak.Array([1.1, 2.2, 3.3, 4.4, 5.5], check_valid=True)) == 5
+    assert ak.size(ak.Array(np.arange(2*3*5).reshape(2, 3, 5), check_valid=True)) == 30
+    assert ak.size(ak.Array(np.arange(2*3*5).reshape(2, 3, 5), check_valid=True), 0) == 2
+    assert ak.size(ak.Array(np.arange(2*3*5).reshape(2, 3, 5), check_valid=True), 1) == 3
+    assert ak.size(ak.Array(np.arange(2*3*5).reshape(2, 3, 5), check_valid=True), 2) == 5
+    assert ak.size(ak.layout.NumpyArray(np.arange(2*3*5).reshape(2, 3, 5))) == 30
+    assert ak.size(ak.layout.NumpyArray(np.arange(2*3*5).reshape(2, 3, 5)), 0) == 2
+    assert ak.size(ak.layout.NumpyArray(np.arange(2*3*5).reshape(2, 3, 5)), 1) == 3
+    assert ak.size(ak.layout.NumpyArray(np.arange(2*3*5).reshape(2, 3, 5)), 2) == 5
+    assert np.size(np.arange(2*3*5).reshape(2, 3, 5)) == 30
+    assert np.size(np.arange(2*3*5).reshape(2, 3, 5), 0) == 2
+    assert np.size(np.arange(2*3*5).reshape(2, 3, 5), 1) == 3
+    assert np.size(np.arange(2*3*5).reshape(2, 3, 5), 2) == 5
     with pytest.raises(ValueError) as err:
-        awkward1.size(awkward1.Array(numpy.arange(2*3*5).reshape(2, 3, 5).tolist(), check_valid=True))
+        ak.size(ak.Array(np.arange(2*3*5).reshape(2, 3, 5).tolist(), check_valid=True))
     assert str(err.value).startswith("ak.size is ambiguous due to variable-length arrays (try ak.flatten to remove structure or ak.to_numpy to force regularity, if possible)")

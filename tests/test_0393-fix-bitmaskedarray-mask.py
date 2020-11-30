@@ -2,19 +2,16 @@
 
 from __future__ import absolute_import
 
-import sys
-
 import pytest
-
-import numpy
-import awkward1
+import numpy as np
+import awkward1 as ak
 
 
 def test():
-    assert numpy.asarray(awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([1, 1, 1, 1, 1], numpy.int8)), awkward1.layout.NumpyArray(numpy.array([0, 1, 2, 3, 4])), valid_when=True).bytemask()).tolist() == [0, 0, 0, 0, 0]
+    assert np.asarray(ak.layout.ByteMaskedArray(ak.layout.Index8(np.array([1, 1, 1, 1, 1], np.int8)), ak.layout.NumpyArray(np.array([0, 1, 2, 3, 4])), valid_when=True).bytemask()).tolist() == [0, 0, 0, 0, 0]
 
-    assert numpy.asarray(awkward1.layout.ByteMaskedArray(awkward1.layout.Index8(numpy.array([1, 1, 1, 1, 1], numpy.int8)), awkward1.layout.NumpyArray(numpy.array([0, 1, 2, 3, 4])), valid_when=False).bytemask()).tolist() == [1, 1, 1, 1, 1]
+    assert np.asarray(ak.layout.ByteMaskedArray(ak.layout.Index8(np.array([1, 1, 1, 1, 1], np.int8)), ak.layout.NumpyArray(np.array([0, 1, 2, 3, 4])), valid_when=False).bytemask()).tolist() == [1, 1, 1, 1, 1]
 
-    assert numpy.asarray(awkward1.layout.BitMaskedArray(awkward1.layout.IndexU8(numpy.array([31], numpy.uint8)), awkward1.layout.NumpyArray(numpy.array([0, 1, 2, 3, 4])), valid_when=True, length=5, lsb_order=True).bytemask()).tolist() == [0, 0, 0, 0, 0]
+    assert np.asarray(ak.layout.BitMaskedArray(ak.layout.IndexU8(np.array([31], np.uint8)), ak.layout.NumpyArray(np.array([0, 1, 2, 3, 4])), valid_when=True, length=5, lsb_order=True).bytemask()).tolist() == [0, 0, 0, 0, 0]
 
-    assert numpy.asarray(awkward1.layout.BitMaskedArray(awkward1.layout.IndexU8(numpy.array([31], numpy.uint8)), awkward1.layout.NumpyArray(numpy.array([0, 1, 2, 3, 4])), valid_when=False, length=5, lsb_order=True).bytemask()).tolist() == [1, 1, 1, 1, 1]
+    assert np.asarray(ak.layout.BitMaskedArray(ak.layout.IndexU8(np.array([31], np.uint8)), ak.layout.NumpyArray(np.array([0, 1, 2, 3, 4])), valid_when=False, length=5, lsb_order=True).bytemask()).tolist() == [1, 1, 1, 1, 1]

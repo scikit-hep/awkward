@@ -2,12 +2,9 @@
 
 from __future__ import absolute_import
 
-import sys
-
 import pytest
-
-import numpy
-import awkward1
+import numpy as np
+import awkward1 as ak
 
 
 numba = pytest.importorskip("numba")
@@ -16,11 +13,11 @@ numba = pytest.importorskip("numba")
 def test():
     @numba.njit
     def do_something(array):
-        out = numpy.zeros(len(array), numpy.bool_)
+        out = np.zeros(len(array), np.bool_)
         for i, x in enumerate(array):
             if x:
                 out[i] = x
         return out
 
-    array = awkward1.Array([True, False, False])
+    array = ak.Array([True, False, False])
     assert do_something(array).tolist() == [True, False, False]
