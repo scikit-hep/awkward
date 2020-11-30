@@ -6,8 +6,10 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
+
 def test_record():
     assert ak.to_list(ak.Record({"x": 1, "y": 2.2})) == {"x": 1, "y": 2.2}
+
 
 def test_fromiter():
     array = ak.Array([np.array([1, 2, 3]), np.array([4, 5, 6, 7])])

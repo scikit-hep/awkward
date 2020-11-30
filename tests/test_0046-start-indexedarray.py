@@ -6,6 +6,7 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
+
 def test_basic():
     content = ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]))
 
@@ -44,6 +45,7 @@ def test_basic():
     ind[3] = 1
     assert ak.to_list(array) == [2.2, 2.2, 0.0, 1.1, 4.4]
 
+
 def test_type():
     content = ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]))
     index = ak.layout.Index32(np.array([2, 2, 0, 3, 4], dtype=np.int32))
@@ -52,11 +54,13 @@ def test_type():
     array = ak.layout.IndexedOptionArray32(index, content)
     assert ak.type(array) == ak.types.OptionType(ak.types.PrimitiveType("float64"))
 
+
 def test_null():
     content = ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]))
     index = ak.layout.Index64(np.array([2, 2, 0, -1, 4], dtype=np.int64))
     array = ak.layout.IndexedOptionArray64(index, content)
     assert ak.to_list(array) == [2.2, 2.2, 0.0, None, 4.4]
+
 
 def test_carry():
     content = ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]))
@@ -67,8 +71,8 @@ def test_carry():
     assert ak.to_list(listoffsetarray) == [[2.2, 2.2, 0.0], [], [3.3, 4.4]]
     assert ak.to_list(listoffsetarray[::-1]) == [[3.3, 4.4], [], [2.2, 2.2, 0.0]]
     assert ak.to_list(listoffsetarray[[2, 0]]) == [[3.3, 4.4], [2.2, 2.2, 0.0]]
-    assert ak.to_list(listoffsetarray[[2, 0], 1]) == [4.4, 2.2]     # invokes carry
-    assert ak.to_list(listoffsetarray[2:, 1]) == [4.4]              # invokes carry
+    assert ak.to_list(listoffsetarray[[2, 0], 1]) == [4.4, 2.2]  # invokes carry
+    assert ak.to_list(listoffsetarray[2:, 1]) == [4.4]  # invokes carry
 
     index = ak.layout.Index64(np.array([2, 2, 0, 3, -1], dtype=np.int64))
     indexedarray = ak.layout.IndexedOptionArray64(index, content)
@@ -76,11 +80,16 @@ def test_carry():
     assert ak.to_list(listoffsetarray) == [[2.2, 2.2, 0.0], [], [3.3, None]]
     assert ak.to_list(listoffsetarray[::-1]) == [[3.3, None], [], [2.2, 2.2, 0.0]]
     assert ak.to_list(listoffsetarray[[2, 0]]) == [[3.3, None], [2.2, 2.2, 0.0]]
-    assert ak.to_list(listoffsetarray[[2, 0], 1]) == [None, 2.2]    # invokes carry
-    assert ak.to_list(listoffsetarray[2:, 1]) == [None]             # invokes carry
+    assert ak.to_list(listoffsetarray[[2, 0], 1]) == [None, 2.2]  # invokes carry
+    assert ak.to_list(listoffsetarray[2:, 1]) == [None]  # invokes carry
+
 
 def test_others():
-    content = ak.layout.NumpyArray(np.array([[0.0, 0.0], [0.1, 1.0], [0.2, 2.0], [0.3, 3.0], [0.4, 4.0], [0.5, 5.0]]))
+    content = ak.layout.NumpyArray(
+        np.array(
+            [[0.0, 0.0], [0.1, 1.0], [0.2, 2.0], [0.3, 3.0], [0.4, 4.0], [0.5, 5.0]]
+        )
+    )
     index = ak.layout.Index64(np.array([4, 0, 3, 1, 3], dtype=np.int64))
     indexedarray = ak.layout.IndexedArray64(index, content)
     assert indexedarray[3, 0] == 0.1
@@ -92,14 +101,20 @@ def test_others():
     assert ak.to_list(indexedarray[3:, ::-1]) == [[1.0, 0.1], [3.0, 0.3]]
     assert ak.to_list(indexedarray[3:, [1, 1, 0]]) == [[1.0, 1.0, 0.1], [3.0, 3.0, 0.3]]
 
+
 def test_missing():
-    content = ak.layout.NumpyArray(np.array([[0.0, 0.0], [0.1, 1.0], [0.2, 2.0], [0.3, 3.0], [0.4, 4.0], [0.5, 5.0]]))
+    content = ak.layout.NumpyArray(
+        np.array(
+            [[0.0, 0.0], [0.1, 1.0], [0.2, 2.0], [0.3, 3.0], [0.4, 4.0], [0.5, 5.0]]
+        )
+    )
     index = ak.layout.Index64(np.array([4, 0, 3, -1, 3], dtype=np.int64))
     indexedarray = ak.layout.IndexedOptionArray64(index, content)
     assert ak.to_list(indexedarray[3:, 0]) == [None, 0.3]
     assert ak.to_list(indexedarray[3:, 1]) == [None, 3.0]
     assert ak.to_list(indexedarray[3:, ::-1]) == [None, [3.0, 0.3]]
     assert ak.to_list(indexedarray[3:, [1, 1, 0]]) == [None, [3.0, 3.0, 0.3]]
+
 
 def test_highlevel():
     content = ak.layout.NumpyArray(np.array([0.0, 1.1, 2.2, 3.3, 4.4]))
@@ -109,46 +124,136 @@ def test_highlevel():
     assert str(array) == "[2.2, 2.2, 0, None, 4.4]"
     assert repr(array) == "<Array [2.2, 2.2, 0, None, 4.4] type='5 * ?float64'>"
 
+
 def test_builder():
-    assert ak.to_list(ak.Array([1.1, 2.2, 3.3, None, 4.4], check_valid=True)) == [1.1, 2.2, 3.3, None, 4.4]
-    assert ak.to_list(ak.Array([None, 2.2, 3.3, None, 4.4], check_valid=True)) == [None, 2.2, 3.3, None, 4.4]
+    assert ak.to_list(ak.Array([1.1, 2.2, 3.3, None, 4.4], check_valid=True)) == [
+        1.1,
+        2.2,
+        3.3,
+        None,
+        4.4,
+    ]
+    assert ak.to_list(ak.Array([None, 2.2, 3.3, None, 4.4], check_valid=True)) == [
+        None,
+        2.2,
+        3.3,
+        None,
+        4.4,
+    ]
 
-    assert ak.to_list(ak.Array([[1.1, 2.2, 3.3], [], [None, 4.4]], check_valid=True)) == [[1.1, 2.2, 3.3], [], [None, 4.4]]
-    assert ak.to_list(ak.Array([[1.1, 2.2, 3.3], [], None, [None, 4.4]], check_valid=True)) == [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
-    assert ak.to_list(ak.Array([[1.1, 2.2, 3.3], None, [], [None, 4.4]], check_valid=True)) == [[1.1, 2.2, 3.3], None, [], [None, 4.4]]
-    assert ak.to_list(ak.Array([[1.1, 2.2, 3.3], None, [], [None, 4.4]], check_valid=True)) != [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert ak.to_list(
+        ak.Array([[1.1, 2.2, 3.3], [], [None, 4.4]], check_valid=True)
+    ) == [[1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert ak.to_list(
+        ak.Array([[1.1, 2.2, 3.3], [], None, [None, 4.4]], check_valid=True)
+    ) == [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert ak.to_list(
+        ak.Array([[1.1, 2.2, 3.3], None, [], [None, 4.4]], check_valid=True)
+    ) == [[1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert ak.to_list(
+        ak.Array([[1.1, 2.2, 3.3], None, [], [None, 4.4]], check_valid=True)
+    ) != [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
 
-    assert ak.to_list(ak.Array([[None, 1.1, 2.2, 3.3], [], [None, 4.4]], check_valid=True)) == [[None, 1.1, 2.2, 3.3], [], [None, 4.4]]
-    assert ak.to_list(ak.Array([[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]], check_valid=True)) == [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
-    assert ak.to_list(ak.Array([[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]], check_valid=True)) == [[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]]
-    assert ak.to_list(ak.Array([[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]], check_valid=True)) != [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert ak.to_list(
+        ak.Array([[None, 1.1, 2.2, 3.3], [], [None, 4.4]], check_valid=True)
+    ) == [[None, 1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert ak.to_list(
+        ak.Array([[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]], check_valid=True)
+    ) == [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert ak.to_list(
+        ak.Array([[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]], check_valid=True)
+    ) == [[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert ak.to_list(
+        ak.Array([[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]], check_valid=True)
+    ) != [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
 
-    assert ak.to_list(ak.Array([None, [1.1, 2.2, 3.3], [], [None, 4.4]], check_valid=True)) == [None, [1.1, 2.2, 3.3], [], [None, 4.4]]
-    assert ak.to_list(ak.Array([None, [1.1, 2.2, 3.3], [], None, [None, 4.4]], check_valid=True)) == [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
-    assert ak.to_list(ak.Array([None, [1.1, 2.2, 3.3], None, [], [None, 4.4]], check_valid=True)) == [None, [1.1, 2.2, 3.3], None, [], [None, 4.4]]
-    assert ak.to_list(ak.Array([None, [1.1, 2.2, 3.3], None, [], [None, 4.4]], check_valid=True)) != [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert ak.to_list(
+        ak.Array([None, [1.1, 2.2, 3.3], [], [None, 4.4]], check_valid=True)
+    ) == [None, [1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert ak.to_list(
+        ak.Array([None, [1.1, 2.2, 3.3], [], None, [None, 4.4]], check_valid=True)
+    ) == [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert ak.to_list(
+        ak.Array([None, [1.1, 2.2, 3.3], None, [], [None, 4.4]], check_valid=True)
+    ) == [None, [1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert ak.to_list(
+        ak.Array([None, [1.1, 2.2, 3.3], None, [], [None, 4.4]], check_valid=True)
+    ) != [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
 
-    assert ak.to_list(ak.Array([None, None, None, None, None], check_valid=True)) == [None, None, None, None, None]
-    assert ak.to_list(ak.Array([[None, None, None], [], [None, None]], check_valid=True)) == [[None, None, None], [], [None, None]]
+    assert ak.to_list(ak.Array([None, None, None, None, None], check_valid=True)) == [
+        None,
+        None,
+        None,
+        None,
+        None,
+    ]
+    assert ak.to_list(
+        ak.Array([[None, None, None], [], [None, None]], check_valid=True)
+    ) == [[None, None, None], [], [None, None]]
+
 
 def test_json():
-    assert ak.to_list(ak.Array("[1.1, 2.2, 3.3, null, 4.4]", check_valid=True)) == [1.1, 2.2, 3.3, None, 4.4]
-    assert ak.to_list(ak.Array("[null, 2.2, 3.3, null, 4.4]", check_valid=True)) == [None, 2.2, 3.3, None, 4.4]
+    assert ak.to_list(ak.Array("[1.1, 2.2, 3.3, null, 4.4]", check_valid=True)) == [
+        1.1,
+        2.2,
+        3.3,
+        None,
+        4.4,
+    ]
+    assert ak.to_list(ak.Array("[null, 2.2, 3.3, null, 4.4]", check_valid=True)) == [
+        None,
+        2.2,
+        3.3,
+        None,
+        4.4,
+    ]
 
-    assert ak.to_list(ak.Array("[[1.1, 2.2, 3.3], [], [null, 4.4]]", check_valid=True)) == [[1.1, 2.2, 3.3], [], [None, 4.4]]
-    assert ak.to_list(ak.Array("[[1.1, 2.2, 3.3], [], null, [null, 4.4]]", check_valid=True)) == [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
-    assert ak.to_list(ak.Array("[[1.1, 2.2, 3.3], null, [], [null, 4.4]]", check_valid=True)) == [[1.1, 2.2, 3.3], None, [], [None, 4.4]]
-    assert ak.to_list(ak.Array("[[1.1, 2.2, 3.3], null, [], [null, 4.4]]", check_valid=True)) != [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert ak.to_list(
+        ak.Array("[[1.1, 2.2, 3.3], [], [null, 4.4]]", check_valid=True)
+    ) == [[1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert ak.to_list(
+        ak.Array("[[1.1, 2.2, 3.3], [], null, [null, 4.4]]", check_valid=True)
+    ) == [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert ak.to_list(
+        ak.Array("[[1.1, 2.2, 3.3], null, [], [null, 4.4]]", check_valid=True)
+    ) == [[1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert ak.to_list(
+        ak.Array("[[1.1, 2.2, 3.3], null, [], [null, 4.4]]", check_valid=True)
+    ) != [[1.1, 2.2, 3.3], [], None, [None, 4.4]]
 
-    assert ak.to_list(ak.Array("[[null, 1.1, 2.2, 3.3], [], [null, 4.4]]", check_valid=True)) == [[None, 1.1, 2.2, 3.3], [], [None, 4.4]]
-    assert ak.to_list(ak.Array("[[null, 1.1, 2.2, 3.3], [], null, [null, 4.4]]", check_valid=True)) == [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
-    assert ak.to_list(ak.Array("[[null, 1.1, 2.2, 3.3], null, [], [null, 4.4]]", check_valid=True)) == [[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]]
-    assert ak.to_list(ak.Array("[[null, 1.1, 2.2, 3.3], null, [], [null, 4.4]]", check_valid=True)) != [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert ak.to_list(
+        ak.Array("[[null, 1.1, 2.2, 3.3], [], [null, 4.4]]", check_valid=True)
+    ) == [[None, 1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert ak.to_list(
+        ak.Array("[[null, 1.1, 2.2, 3.3], [], null, [null, 4.4]]", check_valid=True)
+    ) == [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert ak.to_list(
+        ak.Array("[[null, 1.1, 2.2, 3.3], null, [], [null, 4.4]]", check_valid=True)
+    ) == [[None, 1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert ak.to_list(
+        ak.Array("[[null, 1.1, 2.2, 3.3], null, [], [null, 4.4]]", check_valid=True)
+    ) != [[None, 1.1, 2.2, 3.3], [], None, [None, 4.4]]
 
-    assert ak.to_list(ak.Array("[null, [1.1, 2.2, 3.3], [], [null, 4.4]]", check_valid=True)) == [None, [1.1, 2.2, 3.3], [], [None, 4.4]]
-    assert ak.to_list(ak.Array("[null, [1.1, 2.2, 3.3], [], null, [null, 4.4]]", check_valid=True)) == [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
-    assert ak.to_list(ak.Array("[null, [1.1, 2.2, 3.3], null, [], [null, 4.4]]", check_valid=True)) == [None, [1.1, 2.2, 3.3], None, [], [None, 4.4]]
-    assert ak.to_list(ak.Array("[null, [1.1, 2.2, 3.3], null, [], [null, 4.4]]", check_valid=True)) != [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert ak.to_list(
+        ak.Array("[null, [1.1, 2.2, 3.3], [], [null, 4.4]]", check_valid=True)
+    ) == [None, [1.1, 2.2, 3.3], [], [None, 4.4]]
+    assert ak.to_list(
+        ak.Array("[null, [1.1, 2.2, 3.3], [], null, [null, 4.4]]", check_valid=True)
+    ) == [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
+    assert ak.to_list(
+        ak.Array("[null, [1.1, 2.2, 3.3], null, [], [null, 4.4]]", check_valid=True)
+    ) == [None, [1.1, 2.2, 3.3], None, [], [None, 4.4]]
+    assert ak.to_list(
+        ak.Array("[null, [1.1, 2.2, 3.3], null, [], [null, 4.4]]", check_valid=True)
+    ) != [None, [1.1, 2.2, 3.3], [], None, [None, 4.4]]
 
-    assert ak.to_list(ak.Array("[null, null, null, null, null]", check_valid=True)) == [None, None, None, None, None]
-    assert ak.to_list(ak.Array("[[null, null, null], [], [null, null]]", check_valid=True)) == [[None, None, None], [], [None, None]]
+    assert ak.to_list(ak.Array("[null, null, null, null, null]", check_valid=True)) == [
+        None,
+        None,
+        None,
+        None,
+        None,
+    ]
+    assert ak.to_list(
+        ak.Array("[[null, null, null], [], [null, null]]", check_valid=True)
+    ) == [[None, None, None], [], [None, None]]

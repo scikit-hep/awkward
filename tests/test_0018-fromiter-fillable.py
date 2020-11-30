@@ -6,6 +6,7 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
+
 def test_types():
     t0 = ak.types.UnknownType()
     t1 = ak.types.PrimitiveType("int32")
@@ -30,6 +31,7 @@ def test_types():
     assert repr(t4.type) == "int32"
     assert repr(t5.type) == "var * int32"
 
+
 def test_boolean():
     a = ak.layout.ArrayBuilder()
     a.boolean(True)
@@ -40,6 +42,7 @@ def test_boolean():
     assert ak.to_list(a) == [True, True, False, True]
     assert ak.to_list(a[1:-1]) == [True, False]
 
+
 def test_big():
     a = ak.layout.ArrayBuilder(initial=90)
     for i in range(2000):
@@ -48,6 +51,7 @@ def test_big():
         a.boolean(i % 2 == 0)
     assert ak.to_list(a) == [True, False] * 1000
     assert ak.to_list(tmp) == [True, False] * 100
+
 
 def test_integer():
     a = ak.layout.ArrayBuilder()
@@ -60,6 +64,7 @@ def test_integer():
     assert ak.to_list(a) == [10, 9, 8, 7, 6]
     assert ak.to_list(a[1:-1]) == [9, 8, 7]
 
+
 def test_real():
     a = ak.layout.ArrayBuilder()
     a.real(1.1)
@@ -70,6 +75,7 @@ def test_real():
     assert ak.to_list(a.snapshot()) == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert ak.to_list(a) == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert ak.to_list(a[1:-1]) == [2.2, 3.3, 4.4]
+
 
 def test_integer_real():
     a = ak.layout.ArrayBuilder()
@@ -82,6 +88,7 @@ def test_integer_real():
     assert ak.to_list(a) == [1.0, 2.0, 3.3, 4.0, 5.0]
     assert ak.to_list(a[1:-1]) == [2.0, 3.3, 4.0]
 
+
 def test_real_integer():
     a = ak.layout.ArrayBuilder()
     a.real(1.1)
@@ -92,6 +99,7 @@ def test_real_integer():
     assert ak.to_list(a.snapshot()) == [1.1, 2.2, 3.0, 4.4, 5.5]
     assert ak.to_list(a) == [1.1, 2.2, 3.0, 4.4, 5.5]
     assert ak.to_list(a[1:-1]) == [2.2, 3.0, 4.4]
+
 
 def test_list_real():
     a = ak.layout.ArrayBuilder()
@@ -110,6 +118,7 @@ def test_list_real():
     assert ak.to_list(a) == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
     assert ak.to_list(a[1:-1]) == [[]]
     assert ak.to_list(a[1:]) == [[], [4.4, 5.5]]
+
 
 def test_list_list_real():
     a = ak.layout.ArrayBuilder()
@@ -138,9 +147,18 @@ def test_list_list_real():
     a.real(9.9)
     a.endlist()
     a.endlist()
-    assert ak.to_list(a.snapshot()) == [[[1.1, 2.2, 3.3], [], [4.4, 5.5]], [], [[6.6, 7.7], [8.8, 9.9]]]
-    assert ak.to_list(a) == [[[1.1, 2.2, 3.3], [], [4.4, 5.5]], [], [[6.6, 7.7], [8.8, 9.9]]]
+    assert ak.to_list(a.snapshot()) == [
+        [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
+        [],
+        [[6.6, 7.7], [8.8, 9.9]],
+    ]
+    assert ak.to_list(a) == [
+        [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
+        [],
+        [[6.6, 7.7], [8.8, 9.9]],
+    ]
     assert ak.to_list(a[1:]) == [[], [[6.6, 7.7], [8.8, 9.9]]]
+
 
 def test_list_errors():
     with pytest.raises(ValueError):

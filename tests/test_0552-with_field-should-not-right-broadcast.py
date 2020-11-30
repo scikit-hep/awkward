@@ -11,7 +11,18 @@ def test():
     data = ak.Array([{"x": i} for i in range(10)])
     y = ak.Array(np.array([[i, i] for i in range(10)]))
     data["y"] = y
-    assert data.tolist() == [{"x": 0, "y": [0, 0]}, {"x": 1, "y": [1, 1]}, {"x": 2, "y": [2, 2]}, {"x": 3, "y": [3, 3]}, {"x": 4, "y": [4, 4]}, {"x": 5, "y": [5, 5]}, {"x": 6, "y": [6, 6]}, {"x": 7, "y": [7, 7]}, {"x": 8, "y": [8, 8]}, {"x": 9, "y": [9, 9]}]
+    assert data.tolist() == [
+        {"x": 0, "y": [0, 0]},
+        {"x": 1, "y": [1, 1]},
+        {"x": 2, "y": [2, 2]},
+        {"x": 3, "y": [3, 3]},
+        {"x": 4, "y": [4, 4]},
+        {"x": 5, "y": [5, 5]},
+        {"x": 6, "y": [6, 6]},
+        {"x": 7, "y": [7, 7]},
+        {"x": 8, "y": [8, 8]},
+        {"x": 9, "y": [9, 9]},
+    ]
 
 
 def test_regular():
@@ -32,8 +43,11 @@ def test_regular():
     assert ak.to_list(reregular) == ak.to_list(regular)
     assert str(reregular.type) == "10 * 2 * int64"
 
+
 def test_regular_deep():
-    regular = ak.Array(np.array([[[i, i, i], [i, i, i]] for i in range(10)], dtype=np.int64))
+    regular = ak.Array(
+        np.array([[[i, i, i], [i, i, i]] for i in range(10)], dtype=np.int64)
+    )
     assert str(regular.type) == "10 * 2 * 3 * int64"
 
     irregular = ak.from_regular(regular, axis=1)

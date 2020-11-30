@@ -6,10 +6,12 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
+
 class Dummy(ak.Record):
     @property
     def broken(self):
         raise AttributeError("I'm broken!")
+
 
 def test():
     behavior = {}
@@ -21,4 +23,4 @@ def test():
 
     with pytest.raises(AttributeError) as err:
         array[1].broken
-    assert str(err.value) == "I'm broken!"   # not "no field named 'broken'"
+    assert str(err.value) == "I'm broken!"  # not "no field named 'broken'"

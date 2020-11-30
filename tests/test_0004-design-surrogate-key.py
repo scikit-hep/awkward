@@ -9,37 +9,41 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
-py27 = 2 if sys.version_info[0] < 3 else 1
 
 def test_refcount1():
     i = np.arange(12, dtype="i4").reshape(3, 4)
     assert sys.getrefcount(i) == 2
 
-    i2 = ak.layout.Identities32(ak.layout.Identities32.newref(), [(0, "hey"), (1, "there")], i)
+    i2 = ak.layout.Identities32(
+        ak.layout.Identities32.newref(), [(0, "hey"), (1, "there")], i
+    )
     assert (sys.getrefcount(i), sys.getrefcount(i2)) == (3, 2)
 
     tmp = np.asarray(i2)
-    assert tmp.tolist() == [[0,  1,  2,  3],
-                            [4,  5,  6,  7],
-                            [8,  9, 10, 11]]
+    assert tmp.tolist() == [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]]
 
-    assert (sys.getrefcount(i), sys.getrefcount(i2)) == (3, 2 + 1*py27)
+    assert (sys.getrefcount(i), sys.getrefcount(i2)) == (
+        3,
+        2 + (2 if ak._util.py27 else 1),
+    )
 
     del tmp
     assert (sys.getrefcount(i), sys.getrefcount(i2)) == (3, 2)
 
     tmp2 = i2.array
-    assert tmp2.tolist() == [[0,  1,  2,  3],
-                             [4,  5,  6,  7],
-                             [8,  9, 10, 11]]
+    assert tmp2.tolist() == [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]]
 
-    assert (sys.getrefcount(i), sys.getrefcount(i2)) == (3, 2 + 1*py27)
+    assert (sys.getrefcount(i), sys.getrefcount(i2)) == (
+        3,
+        2 + (2 if ak._util.py27 else 1),
+    )
 
     del tmp2
     assert (sys.getrefcount(i), sys.getrefcount(i2)) == (3, 2)
 
     del i2
     assert sys.getrefcount(i) == 2
+
 
 def test_refcount2():
     i = np.arange(6, dtype="i4").reshape(3, 2)
@@ -57,6 +61,7 @@ def test_refcount2():
     del i3
     gc.collect()
 
+
 def test_refcount3():
     i = np.arange(6, dtype="i4").reshape(3, 2)
     i2 = ak.layout.Identities32(ak.layout.Identities32.newref(), [], i)
@@ -68,11 +73,13 @@ def test_refcount3():
     x2.identities = None
     assert sys.getrefcount(i) == 2
 
+
 def test_numpyarray_setidentities():
     x = np.arange(160).reshape(40, 4)
     x2 = ak.layout.NumpyArray(x)
     x2.setidentities()
     assert np.asarray(x2.identities).tolist() == np.arange(40).reshape(40, 1).tolist()
+
 
 def test_listoffsetarray_setidentities():
     content = ak.layout.NumpyArray(np.arange(10))
@@ -80,14 +87,37 @@ def test_listoffsetarray_setidentities():
     jagged = ak.layout.ListOffsetArray32(offsets, content)
     jagged.setidentities()
     assert np.asarray(jagged.identities).tolist() == [[0], [1], [2], [3]]
-    assert np.asarray(jagged.content.identities).tolist() == [[0, 0], [0, 1], [0, 2], [2, 0], [2, 1], [3, 0], [3, 1], [3, 2], [3, 3], [3, 4]]
+    assert np.asarray(jagged.content.identities).tolist() == [
+        [0, 0],
+        [0, 1],
+        [0, 2],
+        [2, 0],
+        [2, 1],
+        [3, 0],
+        [3, 1],
+        [3, 2],
+        [3, 3],
+        [3, 4],
+    ]
 
-    assert np.asarray(jagged.content[3:7].identities).tolist() == [[2, 0], [2, 1], [3, 0], [3, 1]]
+    assert np.asarray(jagged.content[3:7].identities).tolist() == [
+        [2, 0],
+        [2, 1],
+        [3, 0],
+        [3, 1],
+    ]
     assert np.asarray(jagged[0].identities).tolist() == [[0, 0], [0, 1], [0, 2]]
     assert np.asarray(jagged[1].identities).tolist() == []
     assert np.asarray(jagged[2].identities).tolist() == [[2, 0], [2, 1]]
-    assert np.asarray(jagged[3].identities).tolist() == [[3, 0], [3, 1], [3, 2], [3, 3], [3, 4]]
+    assert np.asarray(jagged[3].identities).tolist() == [
+        [3, 0],
+        [3, 1],
+        [3, 2],
+        [3, 3],
+        [3, 4],
+    ]
     assert np.asarray(jagged[1:3].identities).tolist() == [[1], [2]]
+
 
 def test_setidentities_none():
     offsets = ak.layout.Index32(np.array([0, 2, 2, 3], "i4"))
@@ -107,9 +137,23 @@ def test_setidentities_none():
     assert array.identities is None
     assert array.content.identities is None
 
+
 def test_setidentities_constructor():
     offsets = ak.layout.Index32(np.array([0, 2, 2, 3], "i4"))
-    content = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3]), identities=ak.layout.Identities32(ak.layout.Identities32.newref(), [], np.array([[0, 0], [0, 1], [2, 0]], dtype="i4")))
-    array = ak.layout.ListOffsetArray32(offsets, content, identities=ak.layout.Identities32(ak.layout.Identities32.newref(), [], np.array([[0], [1], [2]], dtype="i4")))
+    content = ak.layout.NumpyArray(
+        np.array([1.1, 2.2, 3.3]),
+        identities=ak.layout.Identities32(
+            ak.layout.Identities32.newref(),
+            [],
+            np.array([[0, 0], [0, 1], [2, 0]], dtype="i4"),
+        ),
+    )
+    array = ak.layout.ListOffsetArray32(
+        offsets,
+        content,
+        identities=ak.layout.Identities32(
+            ak.layout.Identities32.newref(), [], np.array([[0], [1], [2]], dtype="i4")
+        ),
+    )
     assert np.asarray(array.identities).tolist() == [[0], [1], [2]]
     assert np.asarray(array.content.identities).tolist() == [[0, 0], [0, 1], [2, 0]]

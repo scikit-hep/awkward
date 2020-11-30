@@ -55,16 +55,53 @@ def test_numba():
     assert f2(ak.Array([[], [0], [1, 2, None, 3]])) == (False, False, True, True)
 
     assert f1(ak.Array([{"x": 0}, {"x": 1}, {"x": 2}, {"x": 3}])) == (True, True, False)
-    assert f1(ak.Array([{"x": [0]}, {"x": []}, {"x": [2]}, {"x": [3]}])) == (True, True, False)
+    assert f1(ak.Array([{"x": [0]}, {"x": []}, {"x": [2]}, {"x": [3]}])) == (
+        True,
+        True,
+        False,
+    )
 
-    assert f1(ak.Array([[], [{"x": 0}], [{"x": 1}, {"x": 2}, {"x": 3}]])) == (True, True, False)
-    assert f1(ak.Array([[], [{"x": 0, "y": 999}], [{"x": 1, "y": 999}, {"x": 2, "y": 999}, {"x": 3, "y": 999}]])) == (True, True, False)
-    assert f2(ak.Array([[], [{"x": 0}], [{"x": 1}, {"x": 2}, {"x": 3}]])) == (False, False, True, True)
-    assert f2(ak.Array([[], [{"x": 0, "y": 999}], [{"x": 1, "y": 999}, {"x": 2, "y": 999}, {"x": 3, "y": 999}]])) == (False, False, True, True)
+    assert f1(ak.Array([[], [{"x": 0}], [{"x": 1}, {"x": 2}, {"x": 3}]])) == (
+        True,
+        True,
+        False,
+    )
+    assert f1(
+        ak.Array(
+            [
+                [],
+                [{"x": 0, "y": 999}],
+                [{"x": 1, "y": 999}, {"x": 2, "y": 999}, {"x": 3, "y": 999}],
+            ]
+        )
+    ) == (True, True, False)
+    assert f2(ak.Array([[], [{"x": 0}], [{"x": 1}, {"x": 2}, {"x": 3}]])) == (
+        False,
+        False,
+        True,
+        True,
+    )
+    assert f2(
+        ak.Array(
+            [
+                [],
+                [{"x": 0, "y": 999}],
+                [{"x": 1, "y": 999}, {"x": 2, "y": 999}, {"x": 3, "y": 999}],
+            ]
+        )
+    ) == (False, False, True, True)
 
-    assert f1(ak.Array([[], [{"x": [0]}], [{"x": []}, {"x": [2]}, {"x": [3]}]])) == (True, True, False)
+    assert f1(ak.Array([[], [{"x": [0]}], [{"x": []}, {"x": [2]}, {"x": [3]}]])) == (
+        True,
+        True,
+        False,
+    )
 
-    assert f1(ak.Array([{"x": 0}, {"x": 1}, {"x": None}, {"x": 3}])) == (True, True, False)
+    assert f1(ak.Array([{"x": 0}, {"x": 1}, {"x": None}, {"x": 3}])) == (
+        True,
+        True,
+        False,
+    )
     assert f3(ak.Array([{"x": 0}, {"x": 1}, {"x": None}, {"x": 3}])) is True
     assert f1(ak.Array([{"x": 0}, {"x": 1}, None, {"x": 3}])) == (True, True, False)
     assert f3(ak.Array([{"x": 0}, {"x": 1}, None, {"x": 3}])) is True

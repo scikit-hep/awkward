@@ -16,7 +16,10 @@ def test_array():
         return np.array(x)
 
     assert isinstance(f1(ak.Array([[[1], [2], [3]], [[4], [5], [6]]])), np.ndarray)
-    assert f1(ak.Array([[[1], [2], [3]], [[4], [5], [6]]])).tolist() == [[[1], [2], [3]], [[4], [5], [6]]]
+    assert f1(ak.Array([[[1], [2], [3]], [[4], [5], [6]]])).tolist() == [
+        [[1], [2], [3]],
+        [[4], [5], [6]],
+    ]
     assert f1(ak.Array([[1, 2, 3], [4, 5, 6]])).tolist() == [[1, 2, 3], [4, 5, 6]]
     assert f1(ak.Array([1, 2, 3, 4, 5, 6])).tolist() == [1, 2, 3, 4, 5, 6]
 

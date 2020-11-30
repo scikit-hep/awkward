@@ -6,9 +6,18 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
+
 def test():
     array = ak.Array([{"x": "one"}, {"x": "two"}, {"x": "three"}], check_valid=True)
     assert ak.to_list(array) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
-    assert ak.to_list(ak.from_iter(ak.to_list(array))) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
+    assert ak.to_list(ak.from_iter(ak.to_list(array))) == [
+        {"x": "one"},
+        {"x": "two"},
+        {"x": "three"},
+    ]
     assert ak.to_list(array.layout) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
-    assert ak.to_list(ak.from_iter(ak.to_list(array.layout))) == [{"x": "one"}, {"x": "two"}, {"x": "three"}]
+    assert ak.to_list(ak.from_iter(ak.to_list(array.layout))) == [
+        {"x": "one"},
+        {"x": "two"},
+        {"x": "three"},
+    ]

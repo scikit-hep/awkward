@@ -15,6 +15,7 @@ ak_numba_arrayview = pytest.importorskip("awkward1._connect._numba.arrayview")
 
 ak_numba.register_and_check()
 
+
 def test_view():
     aslist = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     asarray = ak.repartition(ak.Array(aslist), 3)
@@ -45,6 +46,7 @@ def test_view():
             asview.stop = stop
             assert ak.to_list(asview.toarray()) == aslist[start:stop]
 
+
 def test_boxing1():
     asnumpy = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     assert sys.getrefcount(asnumpy) == 2
@@ -54,7 +56,11 @@ def test_boxing1():
     asarray = ak.Array(aspart)
     aspart = asarray._layout
 
-    assert (sys.getrefcount(asnumpy), sys.getrefcount(aslayout), sys.getrefcount(aspart)) == (3, 2, 3)
+    assert (
+        sys.getrefcount(asnumpy),
+        sys.getrefcount(aslayout),
+        sys.getrefcount(aspart),
+    ) == (3, 2, 3)
 
     @numba.njit
     def f1(x):
@@ -62,14 +68,20 @@ def test_boxing1():
 
     for i in range(5):
         f1(asarray)
-        assert (sys.getrefcount(asnumpy), sys.getrefcount(aslayout), sys.getrefcount(aspart)) == (3, 2, 3)
+        assert (
+            sys.getrefcount(asnumpy),
+            sys.getrefcount(aslayout),
+            sys.getrefcount(aspart),
+        ) == (3, 2, 3)
 
     del asarray
     del aspart
     del aslayout
     import gc
+
     gc.collect()
     assert sys.getrefcount(asnumpy) == 2
+
 
 def test_boxing2():
     asnumpy = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
@@ -80,7 +92,11 @@ def test_boxing2():
     asarray = ak.Array(aspart)
     aspart = asarray._layout
 
-    assert (sys.getrefcount(asnumpy), sys.getrefcount(aslayout), sys.getrefcount(aspart)) == (3, 2, 3)
+    assert (
+        sys.getrefcount(asnumpy),
+        sys.getrefcount(aslayout),
+        sys.getrefcount(aspart),
+    ) == (3, 2, 3)
 
     @numba.njit
     def f2(x):
@@ -91,15 +107,21 @@ def test_boxing2():
 
         assert isinstance(out.layout, ak.partition.PartitionedArray)
         assert ak.to_list(out) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        assert (sys.getrefcount(asnumpy), sys.getrefcount(aslayout), sys.getrefcount(aspart)) == (3, 2, 3)
+        assert (
+            sys.getrefcount(asnumpy),
+            sys.getrefcount(aslayout),
+            sys.getrefcount(aspart),
+        ) == (3, 2, 3)
 
     del out
     del asarray
     del aspart
     del aslayout
     import gc
+
     gc.collect()
     assert sys.getrefcount(asnumpy) == 2
+
 
 def test_boxing3():
     asnumpy = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
@@ -110,7 +132,11 @@ def test_boxing3():
     asarray = ak.Array(aspart)
     aspart = asarray._layout
 
-    assert (sys.getrefcount(asnumpy), sys.getrefcount(aslayout), sys.getrefcount(aspart)) == (3, 2, 3)
+    assert (
+        sys.getrefcount(asnumpy),
+        sys.getrefcount(aslayout),
+        sys.getrefcount(aspart),
+    ) == (3, 2, 3)
 
     @numba.njit
     def f3(x):
@@ -122,7 +148,11 @@ def test_boxing3():
         assert isinstance(out2.layout, ak.partition.PartitionedArray)
         assert ak.to_list(out1) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         assert ak.to_list(out2) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        assert (sys.getrefcount(asnumpy), sys.getrefcount(aslayout), sys.getrefcount(aspart)) == (3, 2, 3)
+        assert (
+            sys.getrefcount(asnumpy),
+            sys.getrefcount(aslayout),
+            sys.getrefcount(aspart),
+        ) == (3, 2, 3)
 
     del out1
     del out2
@@ -130,18 +160,45 @@ def test_boxing3():
     del aspart
     del aslayout
     import gc
+
     gc.collect()
     assert sys.getrefcount(asnumpy) == 2
 
+
 def test_getitem_1a():
-    array = ak.repartition(ak.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]), 3)
+    array = ak.repartition(
+        ak.Array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]), 3
+    )
 
     @numba.njit
     def f1(x, i):
         return x[i]
 
-    assert [f1(array, i) for i in range(10)] == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
-    assert [f1(array, -i) for i in range(1, 11)] == [9.9, 8.8, 7.7, 6.6, 5.5, 4.4, 3.3, 2.2, 1.1, 0.0]
+    assert [f1(array, i) for i in range(10)] == [
+        0.0,
+        1.1,
+        2.2,
+        3.3,
+        4.4,
+        5.5,
+        6.6,
+        7.7,
+        8.8,
+        9.9,
+    ]
+    assert [f1(array, -i) for i in range(1, 11)] == [
+        9.9,
+        8.8,
+        7.7,
+        6.6,
+        5.5,
+        4.4,
+        3.3,
+        2.2,
+        1.1,
+        0.0,
+    ]
+
 
 def test_getitem_1b():
     asnumpy = np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
@@ -160,17 +217,29 @@ def test_getitem_1b():
 
     for start in range(-10, 10):
         for stop in range(-10, 10):
-            assert ak.to_list(f2(array, start, stop)) == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9][start:stop]
+            assert (
+                ak.to_list(f2(array, start, stop))
+                == [0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9][start:stop]
+            )
 
     assert sys.getrefcount(asnumpy) == 3
 
     del array
     assert sys.getrefcount(asnumpy) == 2
 
+
 def test_getitem_2():
-    aslist = [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]},
-              {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5]},
-              {"x": 6.6, "y": [6, 6]}, {"x": 7.7, "y": [7]}, {"x": 8.8, "y": []}]
+    aslist = [
+        {"x": 0.0, "y": []},
+        {"x": 1.1, "y": [1]},
+        {"x": 2.2, "y": [2, 2]},
+        {"x": 3.3, "y": [3, 3, 3]},
+        {"x": 4.4, "y": [4, 4, 4, 4]},
+        {"x": 5.5, "y": [5, 5, 5]},
+        {"x": 6.6, "y": [6, 6]},
+        {"x": 7.7, "y": [7]},
+        {"x": 8.8, "y": []},
+    ]
     asarray = ak.repartition(ak.Array(aslist), 2)
 
     @numba.njit
@@ -189,13 +258,33 @@ def test_getitem_2():
     def f4a(x):
         return x["y"]
 
-    assert ak.to_list(f4a(asarray)) == [[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5], [6, 6], [7], []]
+    assert ak.to_list(f4a(asarray)) == [
+        [],
+        [1],
+        [2, 2],
+        [3, 3, 3],
+        [4, 4, 4, 4],
+        [5, 5, 5],
+        [6, 6],
+        [7],
+        [],
+    ]
 
     @numba.njit
     def f4b(x):
         return x.y
 
-    assert ak.to_list(f4b(asarray)) == [[], [1], [2, 2], [3, 3, 3], [4, 4, 4, 4], [5, 5, 5], [6, 6], [7], []]
+    assert ak.to_list(f4b(asarray)) == [
+        [],
+        [1],
+        [2, 2],
+        [3, 3, 3],
+        [4, 4, 4, 4],
+        [5, 5, 5],
+        [6, 6],
+        [7],
+        [],
+    ]
 
     @numba.njit
     def f5a(x, i):
@@ -249,6 +338,7 @@ def test_getitem_2():
     assert ak.to_list(f6d(asarray, 6)) == [6, 6]
     assert ak.to_list(f6d(asarray, -3)) == [6, 6]
 
+
 def test_len():
     array = ak.repartition(ak.Array([1.1, 2.2, 3.3, 4.4, 5.5]), 3)
 
@@ -258,12 +348,21 @@ def test_len():
 
     assert f1(array) == 5
 
-    aslist = [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]},
-              {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5]},
-              {"x": 6.6, "y": [6, 6]}, {"x": 7.7, "y": [7]}, {"x": 8.8, "y": []}]
+    aslist = [
+        {"x": 0.0, "y": []},
+        {"x": 1.1, "y": [1]},
+        {"x": 2.2, "y": [2, 2]},
+        {"x": 3.3, "y": [3, 3, 3]},
+        {"x": 4.4, "y": [4, 4, 4, 4]},
+        {"x": 5.5, "y": [5, 5, 5]},
+        {"x": 6.6, "y": [6, 6]},
+        {"x": 7.7, "y": [7]},
+        {"x": 8.8, "y": []},
+    ]
     asarray = ak.repartition(ak.Array(aslist), 2)
 
     assert f1(asarray) == 9
+
 
 def test_iter():
     asnumpy = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
@@ -288,9 +387,17 @@ def test_iter():
     del array
     assert sys.getrefcount(asnumpy) == 2
 
-    aslist = [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]},
-              {"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5]},
-              {"x": 6.6, "y": [6, 6]}, {"x": 7.7, "y": [7]}, {"x": 8.8, "y": []}]
+    aslist = [
+        {"x": 0.0, "y": []},
+        {"x": 1.1, "y": [1]},
+        {"x": 2.2, "y": [2, 2]},
+        {"x": 3.3, "y": [3, 3, 3]},
+        {"x": 4.4, "y": [4, 4, 4, 4]},
+        {"x": 5.5, "y": [5, 5, 5]},
+        {"x": 6.6, "y": [6, 6]},
+        {"x": 7.7, "y": [7]},
+        {"x": 8.8, "y": []},
+    ]
     asarray = ak.repartition(ak.Array(aslist), 2)
 
     @numba.njit

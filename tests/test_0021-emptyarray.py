@@ -6,6 +6,7 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
+
 def test_unknown():
     a = ak.from_json("[[], [], []]", highlevel=False)
     assert ak.to_list(a) == [[], [], []]
@@ -35,6 +36,7 @@ def test_unknown():
     assert str(ak.type(a)) == "var * unknown"
     assert ak.type(a) == ak.types.ListType(ak.types.UnknownType())
     assert not ak.type(a) == ak.types.PrimitiveType("float64")
+
 
 def test_getitem():
     a = ak.from_json("[]")

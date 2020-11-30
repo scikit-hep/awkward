@@ -8,6 +8,7 @@ import awkward1 as ak
 
 numba = pytest.importorskip("numba")
 
+
 def test_unmasked():
     @numba.njit
     def find_it(array):
@@ -23,6 +24,7 @@ def test_unmasked():
     array = ak.Array(unmasked)
     assert ak.to_list(find_it(array)) == {"x": 3}
 
+
 def test_indexedoption():
     @numba.njit
     def find_it(array):
@@ -35,6 +37,7 @@ def test_indexedoption():
 
     array = ak.Array([{"x": 1}, {"x": 2}, None, {"x": 3}])
     assert ak.to_list(find_it(array)) == {"x": 3}
+
 
 def test_indexed_1():
     @numba.njit
@@ -54,6 +57,7 @@ def test_indexed_1():
     assert f1(array, 101) == 2
     assert f1(array, 102) == 0
     assert f1(array, 12345) == 999
+
 
 def test_indexed_2():
     @numba.njit

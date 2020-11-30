@@ -16,6 +16,7 @@ def test_this_should_raise_a_warning():
     with pytest.raises(ValueError):
         one + two
 
+
 def test_this_should_not():
     def overload_add(left, right):
         return ak.Array({"x": left.x + right.x})
@@ -31,4 +32,3 @@ def test_this_should_not():
     )
 
     assert (one + two).tolist() == [{"x": 2.1}, {"x": 4.2}, {"x": 6.3}]
-

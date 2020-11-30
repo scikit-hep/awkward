@@ -7,6 +7,7 @@ import numpy as np
 import cupy as cp
 import awkward1 as ak
 
+
 def test_cupy_interop():
     c = cupy.arange(10)
     n = np.arange(10)
@@ -14,8 +15,14 @@ def test_cupy_interop():
     np_index_arr = ak.layout.Index64(n)
 
     # GPU->CPU
-    assert ak.to_list(np.asarray(cupy_index_arr.copy_to("cpu"))) == ak.to_list(np.asarray(np_index_arr))
+    assert ak.to_list(np.asarray(cupy_index_arr.copy_to("cpu"))) == ak.to_list(
+        np.asarray(np_index_arr)
+    )
     # CPU->CPU
-    assert ak.to_list(np.asarray(np_index_arr.copy_to("cpu"))) == ak.to_list(np.asarray(np_index_arr))
-    #CPU->GPU->CPU
-    assert ak.to_list(np.asarray(np_index_arr)) == ak.to_list(np.asarray(np_index_arr.copy_to("cuda").copy_to("cpu")))
+    assert ak.to_list(np.asarray(np_index_arr.copy_to("cpu"))) == ak.to_list(
+        np.asarray(np_index_arr)
+    )
+    # CPU->GPU->CPU
+    assert ak.to_list(np.asarray(np_index_arr)) == ak.to_list(
+        np.asarray(np_index_arr.copy_to("cuda").copy_to("cpu"))
+    )

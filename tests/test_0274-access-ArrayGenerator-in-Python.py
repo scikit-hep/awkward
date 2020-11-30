@@ -8,9 +8,12 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
+
 def test():
     content = ak.Array([1, 2, 3, 4, 5])
-    generator1 = ak.layout.ArrayGenerator(lambda a, b: a*content + b, (100,), {"b": 3})
+    generator1 = ak.layout.ArrayGenerator(
+        lambda a, b: a * content + b, (100,), {"b": 3}
+    )
     assert generator1.form is None
     assert ak.to_list(generator1()) == [103, 203, 303, 403, 503]
     assert generator1.args == (100,)
@@ -39,7 +42,9 @@ def test():
     assert ak.to_list(generator4()) == [103, 203, 303, 403, 503]
     assert generator4.args == (100,)
     assert generator4.kwargs == {"b": 3}
-    assert json.loads(generator4.form.tojson()) == json.loads(ak.forms.Form.fromjson('"int64"').tojson())
+    assert json.loads(generator4.form.tojson()) == json.loads(
+        ak.forms.Form.fromjson('"int64"').tojson()
+    )
     assert generator4.length is None
 
     generator5 = generator1.with_length(5)

@@ -26,6 +26,12 @@ def test():
     assert ak.to_list(three) == [0.0, 999, 2.2, 123, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
     assert ak.to_list(four) == [0.0, 999, 2.2, 123, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
 
-    assert ak.to_list(copy.deepcopy(ak.Array([[1, 2, 3], [], [4, 5]]))) == [[1, 2, 3], [], [4, 5]]
+    assert ak.to_list(copy.deepcopy(ak.Array([[1, 2, 3], [], [4, 5]]))) == [
+        [1, 2, 3],
+        [],
+        [4, 5],
+    ]
 
-    assert ak.to_list(copy.deepcopy(ak.Record({"one": 1, "two": 2.2}))) == ak.to_list(copy.deepcopy(ak.Record({"one": 1, "two": 2.2})))
+    assert ak.to_list(copy.deepcopy(ak.Record({"one": 1, "two": 2.2}))) == ak.to_list(
+        copy.deepcopy(ak.Record({"one": 1, "two": 2.2}))
+    )

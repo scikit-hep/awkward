@@ -10,8 +10,16 @@ import awkward1 as ak
 def test():
     one = ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]])
     two = ak.Array([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
-    condition = ak.Array([[False, True, False], [], [True, False], [True], [False, False, True, True]])
-    assert ak.where(condition, one, two).tolist() == [[0, 1, 2.2], [], [3, 4.4], [5], [6.6, 7.7, 8, 9]]
+    condition = ak.Array(
+        [[False, True, False], [], [True, False], [True], [False, False, True, True]]
+    )
+    assert ak.where(condition, one, two).tolist() == [
+        [0, 1, 2.2],
+        [],
+        [3, 4.4],
+        [5],
+        [6.6, 7.7, 8, 9],
+    ]
 
 
 def test_issue_334():

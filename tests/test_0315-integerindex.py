@@ -6,6 +6,7 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
+
 def test_integerindex_null():
     a = ak.Array([[0, 1, 2], None, [5, 6], [7]])
     b = ak.Array([[0, 1, 2], [3, 4], [5, 6], [7]])
@@ -19,6 +20,7 @@ def test_integerindex_null():
     assert ak.to_list(b[c]) == [[1], [4], [5], [7]]
     assert ak.to_list(b[d]) == [[1], None, [5], [7]]
     assert ak.to_list(b[e]) == [[1], None, None, [7]]
+
 
 def test_boolindex_null():
     a = ak.Array([[0, 1, 2], None, [5, 6]])
@@ -38,6 +40,7 @@ def test_boolindex_null():
     assert ak.to_list(b2[c]) == [[1], None, [5]]
     assert ak.to_list(b2[d]) == [[1], None, [5]]
     assert ak.to_list(b2[e]) == [[1], None, None]
+
 
 def test_integerindex_null_more():
     f = ak.Array([[0, None, 2], None, [3, 4], []])
@@ -59,9 +62,17 @@ def test_integerindex_null_more():
 
     a = ak.Array([[[0, 1, 2, None], None], [[3, 4], [5]], None, [[6]]])
     b = ak.Array([[[2, 1, None, 3], [0, 1]], [[0], None], None, [None]])
-    c = ak.Array([[[False, True, None, False], [False, True]], [[True, False], None], None, [None]])
+    c = ak.Array(
+        [
+            [[False, True, None, False], [False, True]],
+            [[True, False], None],
+            None,
+            [None],
+        ]
+    )
     assert ak.to_list(a[b]) == [[[2, 1, None, None], None], [[3], None], None, [None]]
     assert ak.to_list(a[c]) == [[[1, None], None], [[4], None], None, [None]]
+
 
 def test_silly_stuff():
     a = ak.Array([[0, 1, 2], 3])
@@ -75,4 +86,3 @@ def test_silly_stuff():
     b = ak.Array([[0, 2], None, None, None, None, None])
     with pytest.raises(ValueError):
         a[b]
-

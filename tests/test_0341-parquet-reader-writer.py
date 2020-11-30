@@ -80,8 +80,12 @@ def test_explode(tmp_path):
     )
     array4 = ak.repartition(array3, 2)
 
-    ak.to_parquet(array3, os.path.join(tmp_path, "array3.parquet"), explode_records=True)
-    ak.to_parquet(array4, os.path.join(tmp_path, "array4.parquet"), explode_records=True)
+    ak.to_parquet(
+        array3, os.path.join(tmp_path, "array3.parquet"), explode_records=True
+    )
+    ak.to_parquet(
+        array4, os.path.join(tmp_path, "array4.parquet"), explode_records=True
+    )
 
     assert ak.from_parquet(os.path.join(tmp_path, "array3.parquet")).tolist() == [
         {"x": [1, 2, 3], "y": [1.1, 2.2, 3.3]},
@@ -102,9 +106,7 @@ def test_explode(tmp_path):
 
 
 def test_oamap_samples():
-    assert ak.to_list(
-        ak.from_parquet("tests/samples/list-depths-simple.parquet")
-    ) == [
+    assert ak.to_list(ak.from_parquet("tests/samples/list-depths-simple.parquet")) == [
         {"list0": 1, "list1": [1]},
         {"list0": 2, "list1": [1, 2]},
         {"list0": 3, "list1": [1, 2, 3]},
@@ -169,9 +171,7 @@ def test_oamap_samples():
         {"u4": None, "u8": 4},
         {"u4": None, "u8": 5},
     ]
-    assert ak.to_list(
-        ak.from_parquet("tests/samples/record-primitives.parquet")
-    ) == [
+    assert ak.to_list(ak.from_parquet("tests/samples/record-primitives.parquet")) == [
         {
             "u1": 0,
             "u4": 1,

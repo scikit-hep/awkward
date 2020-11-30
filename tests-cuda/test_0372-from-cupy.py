@@ -7,6 +7,7 @@ import numpy as np
 import cupy as cp
 import awkward1 as ak
 
+
 def test_from_cupy():
     cupy_array_1d = cupy.arange(10)
     cupy_array_2d = cupy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]])

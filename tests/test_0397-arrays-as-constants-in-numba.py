@@ -45,7 +45,10 @@ def test_Array():
         return 3.14
 
     f1()
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
     @numba.njit
     def f2():
@@ -53,7 +56,10 @@ def test_Array():
 
     a = f2()
     assert a.tolist() == [1, 2, 3]
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
     @numba.njit
     def f3():
@@ -62,23 +68,38 @@ def test_Array():
     b, c = f3()
     assert b.tolist() == [1, 2, 3]
     assert c.tolist() == [1, 2, 3]
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
     del a
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
     del b
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
     del c
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
     @numba.njit
     def f4():
         return array[1]
 
     assert f4() == 2
-    assert (sys.getrefcount(array._numbaview), sys.getrefcount(array._numbaview.lookup)) == (2, 2)
+    assert (
+        sys.getrefcount(array._numbaview),
+        sys.getrefcount(array._numbaview.lookup),
+    ) == (2, 2)
 
 
 def test_Record():

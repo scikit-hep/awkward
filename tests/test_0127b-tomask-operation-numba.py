@@ -8,8 +8,11 @@ import awkward1 as ak
 
 numba = pytest.importorskip("numba")
 
+
 def test_ByteMaskedArray():
-    content = ak.from_iter([[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False)
+    content = ak.from_iter(
+        [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
+    )
     mask = ak.layout.Index8(np.array([0, 0, 1, 1, 0], dtype=np.int8))
     array = ak.Array(ak.layout.ByteMaskedArray(mask, content, valid_when=False))
     assert ak.to_list(array) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
@@ -38,10 +41,15 @@ def test_ByteMaskedArray():
     assert f3(array, 3) is None
     assert ak.to_list(f3(array, 4)) == [6.6, 7.7, 8.8, 9.9]
 
+
 def test_BitMaskedArray():
     content = ak.layout.NumpyArray(np.arange(13))
     mask = ak.layout.IndexU8(np.array([58, 59], dtype=np.uint8))
-    array = ak.Array(ak.layout.BitMaskedArray(mask, content, valid_when=True, length=13, lsb_order=True))
+    array = ak.Array(
+        ak.layout.BitMaskedArray(
+            mask, content, valid_when=True, length=13, lsb_order=True
+        )
+    )
     assert ak.to_list(array) == [None, 1, None, 3, 4, 5, None, None, 8, 9, None, 11, 12]
 
     @numba.njit
@@ -62,15 +70,64 @@ def test_BitMaskedArray():
     def f3(x, i):
         return x[i]
 
-    assert [f3(array, i) for i in range(len(array))] == [None, 1, None, 3, 4, 5, None, None, 8, 9, None, 11, 12]
+    assert [f3(array, i) for i in range(len(array))] == [
+        None,
+        1,
+        None,
+        3,
+        4,
+        5,
+        None,
+        None,
+        8,
+        9,
+        None,
+        11,
+        12,
+    ]
 
-    array = ak.Array(ak.layout.BitMaskedArray(mask, content, valid_when=True, length=13, lsb_order=False))
-    assert ak.to_list(array) == [None, None, 2, 3, 4, None, 6, None, None, None, 10, 11, 12]
+    array = ak.Array(
+        ak.layout.BitMaskedArray(
+            mask, content, valid_when=True, length=13, lsb_order=False
+        )
+    )
+    assert ak.to_list(array) == [
+        None,
+        None,
+        2,
+        3,
+        4,
+        None,
+        6,
+        None,
+        None,
+        None,
+        10,
+        11,
+        12,
+    ]
 
-    assert [f3(array, i) for i in range(len(array))] == [None, None, 2, 3, 4, None, 6, None, None, None, 10, 11, 12]
+    assert [f3(array, i) for i in range(len(array))] == [
+        None,
+        None,
+        2,
+        3,
+        4,
+        None,
+        6,
+        None,
+        None,
+        None,
+        10,
+        11,
+        12,
+    ]
+
 
 def test_UnmaskedArray():
-    content = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64))
+    content = ak.layout.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64)
+    )
     array = ak.Array(ak.layout.UnmaskedArray(content))
     assert ak.to_list(array) == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert str(ak.type(array)) == "5 * ?float64"

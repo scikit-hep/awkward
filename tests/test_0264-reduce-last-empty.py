@@ -6,7 +6,16 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
-def test():
-    assert ak.to_list(ak.prod(ak.Array([[[2, 3, 5]], [[7], [11]], [[]]]), axis=-1)) == [[30], [7, 11], [1]]
 
-    assert ak.to_list(ak.prod(ak.Array([[[2, 3, 5]], [[7], [11]], []]), axis=-1)) == [[30], [7, 11], []]
+def test():
+    assert ak.to_list(ak.prod(ak.Array([[[2, 3, 5]], [[7], [11]], [[]]]), axis=-1)) == [
+        [30],
+        [7, 11],
+        [1],
+    ]
+
+    assert ak.to_list(ak.prod(ak.Array([[[2, 3, 5]], [[7], [11]], []]), axis=-1)) == [
+        [30],
+        [7, 11],
+        [],
+    ]

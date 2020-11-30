@@ -9,6 +9,7 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
+
 def test_refcount():
     o = np.arange(10, dtype="i4")
     c = np.arange(12).reshape(3, 4)

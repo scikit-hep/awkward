@@ -8,12 +8,14 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
+
 def test_iterator():
     content = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3]))
     offsets = ak.layout.Index32(np.array([0, 2, 2, 3], "i4"))
     array = ak.layout.ListOffsetArray32(offsets, content)
     assert list(content) == [1.1, 2.2, 3.3]
     assert [np.asarray(x).tolist() for x in array] == [[1.1, 2.2], [], [3.3]]
+
 
 def test_refcount():
     content = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3]))

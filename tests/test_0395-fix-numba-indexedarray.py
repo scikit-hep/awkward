@@ -21,64 +21,96 @@ def test():
         return out
 
     numpyarray = ak.layout.NumpyArray(np.arange(100, 200, 10))
-    indexedarray = ak.layout.IndexedArray64(ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray)
-    listoffsetarray = ak.layout.ListOffsetArray64(ak.layout.Index64(np.array([0, 1, 4])), indexedarray)
+    indexedarray = ak.layout.IndexedArray64(
+        ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray
+    )
+    listoffsetarray = ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([0, 1, 4])), indexedarray
+    )
     array = ak.Array(listoffsetarray)
 
     assert reproduce(array).tolist() == [150, 140]
     assert numba.njit(reproduce)(array).tolist() == [150, 140]
 
     numpyarray = ak.layout.NumpyArray(np.arange(100, 200, 10))
-    indexedarray = ak.layout.IndexedArray64(ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray)
-    listoffsetarray = ak.layout.ListOffsetArray64(ak.layout.Index64(np.array([0, 2, 4])), indexedarray)
+    indexedarray = ak.layout.IndexedArray64(
+        ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray
+    )
+    listoffsetarray = ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([0, 2, 4])), indexedarray
+    )
     array = ak.Array(listoffsetarray)
 
     assert reproduce(array).tolist() == [150, 130]
     assert numba.njit(reproduce)(array).tolist() == [150, 130]
 
     numpyarray = ak.layout.NumpyArray(np.arange(100, 200, 10))
-    indexedarray = ak.layout.IndexedArray64(ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray)[2:]
-    listoffsetarray = ak.layout.ListOffsetArray64(ak.layout.Index64(np.array([0, 1, 4])), indexedarray)
+    indexedarray = ak.layout.IndexedArray64(
+        ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray
+    )[2:]
+    listoffsetarray = ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([0, 1, 4])), indexedarray
+    )
     array = ak.Array(listoffsetarray)
 
     assert reproduce(array).tolist() == [130, 120]
     assert numba.njit(reproduce)(array).tolist() == [130, 120]
 
     numpyarray = ak.layout.NumpyArray(np.arange(100, 200, 10))
-    indexedarray = ak.layout.IndexedArray64(ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray)[2:]
-    listoffsetarray = ak.layout.ListOffsetArray64(ak.layout.Index64(np.array([0, 2, 4])), indexedarray)
+    indexedarray = ak.layout.IndexedArray64(
+        ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray
+    )[2:]
+    listoffsetarray = ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([0, 2, 4])), indexedarray
+    )
     array = ak.Array(listoffsetarray)
 
     assert reproduce(array).tolist() == [130, 110]
     assert numba.njit(reproduce)(array).tolist() == [130, 110]
 
     numpyarray = ak.layout.NumpyArray(np.arange(100, 200, 10))[3:]
-    indexedarray = ak.layout.IndexedArray64(ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray)
-    listoffsetarray = ak.layout.ListOffsetArray64(ak.layout.Index64(np.array([0, 1, 4])), indexedarray)
+    indexedarray = ak.layout.IndexedArray64(
+        ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray
+    )
+    listoffsetarray = ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([0, 1, 4])), indexedarray
+    )
     array = ak.Array(listoffsetarray)
 
     assert reproduce(array).tolist() == [180, 170]
     assert numba.njit(reproduce)(array).tolist() == [180, 170]
 
     numpyarray = ak.layout.NumpyArray(np.arange(100, 200, 10))[3:]
-    indexedarray = ak.layout.IndexedArray64(ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray)
-    listoffsetarray = ak.layout.ListOffsetArray64(ak.layout.Index64(np.array([0, 2, 4])), indexedarray)
+    indexedarray = ak.layout.IndexedArray64(
+        ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray
+    )
+    listoffsetarray = ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([0, 2, 4])), indexedarray
+    )
     array = ak.Array(listoffsetarray)
 
     assert reproduce(array).tolist() == [180, 160]
     assert numba.njit(reproduce)(array).tolist() == [180, 160]
 
     numpyarray = ak.layout.NumpyArray(np.arange(100, 200, 10))[3:]
-    indexedarray = ak.layout.IndexedArray64(ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray)[2:]
-    listoffsetarray = ak.layout.ListOffsetArray64(ak.layout.Index64(np.array([0, 1, 4])), indexedarray)
+    indexedarray = ak.layout.IndexedArray64(
+        ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray
+    )[2:]
+    listoffsetarray = ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([0, 1, 4])), indexedarray
+    )
     array = ak.Array(listoffsetarray)
 
     assert reproduce(array).tolist() == [160, 150]
     assert numba.njit(reproduce)(array).tolist() == [160, 150]
 
     numpyarray = ak.layout.NumpyArray(np.arange(100, 200, 10))[3:]
-    indexedarray = ak.layout.IndexedArray64(ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray)[2:]
-    listoffsetarray = ak.layout.ListOffsetArray64(ak.layout.Index64(np.array([0, 2, 4])), indexedarray)
+    indexedarray = ak.layout.IndexedArray64(
+        ak.layout.Index64(np.array([5, 4, 3, 2, 1, 0])), numpyarray
+    )[2:]
+    listoffsetarray = ak.layout.ListOffsetArray64(
+        ak.layout.Index64(np.array([0, 2, 4])), indexedarray
+    )
     array = ak.Array(listoffsetarray)
 
     assert reproduce(array).tolist() == [160, 140]

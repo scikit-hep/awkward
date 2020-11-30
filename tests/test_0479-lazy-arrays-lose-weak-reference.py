@@ -15,15 +15,20 @@ import awkward1 as ak
 class Cache(MutableMapping):
     def __init__(self):
         self.data = {}
+
     def __getitem__(self, where):
         return self.data[where]
+
     def __setitem__(self, where, what):
         self.data[where] = what
+
     def __delitem__(self, where):
         del self.data[where]
+
     def __iter__(self):
         for x in self.data:
             yield x
+
     def __len__(self):
         return len(self.data)
 
@@ -43,9 +48,7 @@ def make_arrays():
         ak.layout.ArrayCache(cache),
     )
     inner = ak.layout.RecordArray({"x": x, "y": y})
-    part = ak.partition.IrregularlyPartitionedArray(
-        [inner], [3]
-    )
+    part = ak.partition.IrregularlyPartitionedArray([inner], [3])
     return ak.Array(part)
 
 

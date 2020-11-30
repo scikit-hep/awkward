@@ -6,6 +6,7 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
+
 def test():
     for itype in ["i8", "u8", "i32", "u32", "i64"]:
         form = ak.forms.ListOffsetForm(itype, ak.forms.EmptyForm())

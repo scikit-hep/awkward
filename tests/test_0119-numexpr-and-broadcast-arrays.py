@@ -8,12 +8,18 @@ import awkward1 as ak
 
 numexpr = pytest.importorskip("numexpr")
 
+
 def test_numexpr():
     a = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True)
     b = ak.Array([100, 200, 300], check_valid=True)
-    assert ak.to_list(ak.numexpr.evaluate("a + b")) == [[101.1, 102.2, 103.3], [], [304.4, 305.5]]
+    assert ak.to_list(ak.numexpr.evaluate("a + b")) == [
+        [101.1, 102.2, 103.3],
+        [],
+        [304.4, 305.5],
+    ]
     a = [1, 2, 3]
     assert ak.to_list(ak.numexpr.re_evaluate()) == [101, 202, 303]
+
 
 def test_broadcast_arrays():
     a = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True)

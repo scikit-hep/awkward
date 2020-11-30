@@ -15,8 +15,8 @@ def test_issue434():
 
 
 def test_nokeepdims():
-    nparray = np.arange(2*3*5, dtype=np.int64).reshape(2, 3, 5)
-    content = ak.layout.NumpyArray(np.arange(2*3*5, dtype=np.int64))
+    nparray = np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
+    content = ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64))
     regular = ak.layout.RegularArray(content, 5)
     listoffset = regular.toListOffsetArray64(False)
     regular_regular = ak.layout.RegularArray(regular, 3)
@@ -24,10 +24,22 @@ def test_nokeepdims():
     regular_listoffset = ak.layout.RegularArray(listoffset, 3)
     listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
 
-    assert ak.to_list(regular_regular) == [[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]], [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]
-    assert ak.to_list(listoffset_regular) == [[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]], [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]
-    assert ak.to_list(regular_listoffset) == [[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]], [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]
-    assert ak.to_list(listoffset_listoffset) == [[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]], [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]]]
+    assert ak.to_list(regular_regular) == [
+        [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
+        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
+    ]
+    assert ak.to_list(listoffset_regular) == [
+        [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
+        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
+    ]
+    assert ak.to_list(regular_listoffset) == [
+        [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
+        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
+    ]
+    assert ak.to_list(listoffset_listoffset) == [
+        [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
+        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
+    ]
 
     assert str(ak.type(ak.Array(listoffset_listoffset))) == "2 * var * var * int64"
     axis1 = ak.sum(listoffset_listoffset, axis=-1)
@@ -75,8 +87,8 @@ def test_nokeepdims():
 
 
 def test_keepdims():
-    nparray = np.arange(2*3*5, dtype=np.int64).reshape(2, 3, 5)
-    content = ak.layout.NumpyArray(np.arange(2*3*5, dtype=np.int64))
+    nparray = np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5)
+    content = ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64))
     regular = ak.layout.RegularArray(content, 5)
     listoffset = regular.toListOffsetArray64(False)
     regular_regular = ak.layout.RegularArray(regular, 3)
@@ -130,7 +142,40 @@ def test_keepdims():
 
 
 def test_nokeepdims_none1():
-    content = ak.Array([0, 1, 2, None, 4, 5, None, None, 8, 9, 10, 11, 12, None, 14, 15, 16, 17, 18, None, None, None, None, None, None, 25, 26, 27, 28, 29]).layout
+    content = ak.Array(
+        [
+            0,
+            1,
+            2,
+            None,
+            4,
+            5,
+            None,
+            None,
+            8,
+            9,
+            10,
+            11,
+            12,
+            None,
+            14,
+            15,
+            16,
+            17,
+            18,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            25,
+            26,
+            27,
+            28,
+            29,
+        ]
+    ).layout
     regular = ak.layout.RegularArray(content, 5)
     listoffset = regular.toListOffsetArray64(False)
     regular_regular = ak.layout.RegularArray(regular, 3)
@@ -172,7 +217,40 @@ def test_nokeepdims_none1():
 
 
 def test_keepdims_none1():
-    content = ak.Array([0, 1, 2, None, 4, 5, None, None, 8, 9, 10, 11, 12, None, 14, 15, 16, 17, 18, None, None, None, None, None, None, 25, 26, 27, 28, 29]).layout
+    content = ak.Array(
+        [
+            0,
+            1,
+            2,
+            None,
+            4,
+            5,
+            None,
+            None,
+            8,
+            9,
+            10,
+            11,
+            12,
+            None,
+            14,
+            15,
+            16,
+            17,
+            18,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            25,
+            26,
+            27,
+            28,
+            29,
+        ]
+    ).layout
     regular = ak.layout.RegularArray(content, 5)
     listoffset = regular.toListOffsetArray64(False)
     regular_regular = ak.layout.RegularArray(regular, 3)
@@ -214,8 +292,47 @@ def test_keepdims_none1():
 
 
 def test_nokeepdims_mask1():
-    mask = ak.layout.Index8(np.array([False, False, False, True, False, False, True, True, False, False, False, False, False, True, False, False, False, False, False, True, True, True, True, True, True, False, False, False, False, False]))
-    content = ak.layout.ByteMaskedArray(mask, ak.layout.NumpyArray(np.arange(2*3*5, dtype=np.int64)), valid_when=False)
+    mask = ak.layout.Index8(
+        np.array(
+            [
+                False,
+                False,
+                False,
+                True,
+                False,
+                False,
+                True,
+                True,
+                False,
+                False,
+                False,
+                False,
+                False,
+                True,
+                False,
+                False,
+                False,
+                False,
+                False,
+                True,
+                True,
+                True,
+                True,
+                True,
+                True,
+                False,
+                False,
+                False,
+                False,
+                False,
+            ]
+        )
+    )
+    content = ak.layout.ByteMaskedArray(
+        mask,
+        ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64)),
+        valid_when=False,
+    )
     regular = ak.layout.RegularArray(content, 5)
     listoffset = regular.toListOffsetArray64(False)
     regular_regular = ak.layout.RegularArray(regular, 3)
@@ -257,8 +374,47 @@ def test_nokeepdims_mask1():
 
 
 def test_keepdims_mask1():
-    mask = ak.layout.Index8(np.array([False, False, False, True, False, False, True, True, False, False, False, False, False, True, False, False, False, False, False, True, True, True, True, True, True, False, False, False, False, False]))
-    content = ak.layout.ByteMaskedArray(mask, ak.layout.NumpyArray(np.arange(2*3*5, dtype=np.int64)), valid_when=False)
+    mask = ak.layout.Index8(
+        np.array(
+            [
+                False,
+                False,
+                False,
+                True,
+                False,
+                False,
+                True,
+                True,
+                False,
+                False,
+                False,
+                False,
+                False,
+                True,
+                False,
+                False,
+                False,
+                False,
+                False,
+                True,
+                True,
+                True,
+                True,
+                True,
+                True,
+                False,
+                False,
+                False,
+                False,
+                False,
+            ]
+        )
+    )
+    content = ak.layout.ByteMaskedArray(
+        mask,
+        ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64)),
+        valid_when=False,
+    )
     regular = ak.layout.RegularArray(content, 5)
     listoffset = regular.toListOffsetArray64(False)
     regular_regular = ak.layout.RegularArray(regular, 3)
@@ -300,16 +456,22 @@ def test_keepdims_mask1():
 
 
 def test_nokeepdims_mask2():
-    content = ak.layout.NumpyArray(np.arange(2*3*5, dtype=np.int64))
+    content = ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64))
     regular = ak.layout.RegularArray(content, 5)
     listoffset = regular.toListOffsetArray64(False)
     mask = ak.layout.Index8(np.array([False, False, True, True, False, True]))
-    regular_regular = ak.layout.RegularArray(ak.layout.ByteMaskedArray(mask, regular, valid_when=False), 3)
+    regular_regular = ak.layout.RegularArray(
+        ak.layout.ByteMaskedArray(mask, regular, valid_when=False), 3
+    )
     listoffset_regular = regular_regular.toListOffsetArray64(False)
-    regular_listoffset = ak.layout.RegularArray(ak.layout.ByteMaskedArray(mask, listoffset, valid_when=False), 3)
+    regular_listoffset = ak.layout.RegularArray(
+        ak.layout.ByteMaskedArray(mask, listoffset, valid_when=False), 3
+    )
     listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
 
-    assert str(ak.type(ak.Array(listoffset_listoffset))) == "2 * var * option[var * int64]"
+    assert (
+        str(ak.type(ak.Array(listoffset_listoffset))) == "2 * var * option[var * int64]"
+    )
     axis1 = ak.sum(listoffset_listoffset, axis=-1)
     axis2 = ak.sum(listoffset_listoffset, axis=-2)
     axis3 = ak.sum(listoffset_listoffset, axis=-3)
@@ -343,16 +505,22 @@ def test_nokeepdims_mask2():
 
 
 def test_keepdims_mask2():
-    content = ak.layout.NumpyArray(np.arange(2*3*5, dtype=np.int64))
+    content = ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64))
     regular = ak.layout.RegularArray(content, 5)
     listoffset = regular.toListOffsetArray64(False)
     mask = ak.layout.Index8(np.array([False, False, True, True, False, True]))
-    regular_regular = ak.layout.RegularArray(ak.layout.ByteMaskedArray(mask, regular, valid_when=False), 3)
+    regular_regular = ak.layout.RegularArray(
+        ak.layout.ByteMaskedArray(mask, regular, valid_when=False), 3
+    )
     listoffset_regular = regular_regular.toListOffsetArray64(False)
-    regular_listoffset = ak.layout.RegularArray(ak.layout.ByteMaskedArray(mask, listoffset, valid_when=False), 3)
+    regular_listoffset = ak.layout.RegularArray(
+        ak.layout.ByteMaskedArray(mask, listoffset, valid_when=False), 3
+    )
     listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
 
-    assert str(ak.type(ak.Array(listoffset_listoffset))) == "2 * var * option[var * int64]"
+    assert (
+        str(ak.type(ak.Array(listoffset_listoffset))) == "2 * var * option[var * int64]"
+    )
     axis1 = ak.sum(listoffset_listoffset, axis=-1, keepdims=True)
     axis2 = ak.sum(listoffset_listoffset, axis=-2, keepdims=True)
     axis3 = ak.sum(listoffset_listoffset, axis=-3, keepdims=True)
@@ -386,7 +554,7 @@ def test_keepdims_mask2():
 
 
 def test_nokeepdims_mask3():
-    content = ak.layout.NumpyArray(np.arange(2*3*5, dtype=np.int64))
+    content = ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64))
     regular = ak.layout.RegularArray(content, 5)
     listoffset = regular.toListOffsetArray64(False)
     regular_regular = ak.layout.RegularArray(regular, 3)
@@ -395,11 +563,19 @@ def test_nokeepdims_mask3():
     listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
     mask = ak.layout.Index8(np.array([True, False]))
     regular_regular = ak.layout.ByteMaskedArray(mask, regular_regular, valid_when=False)
-    listoffset_regular = ak.layout.ByteMaskedArray(mask, listoffset_regular, valid_when=False)
-    regular_listoffset = ak.layout.ByteMaskedArray(mask, regular_listoffset, valid_when=False)
-    listoffset_listoffset = ak.layout.ByteMaskedArray(mask, listoffset_listoffset, valid_when=False)
+    listoffset_regular = ak.layout.ByteMaskedArray(
+        mask, listoffset_regular, valid_when=False
+    )
+    regular_listoffset = ak.layout.ByteMaskedArray(
+        mask, regular_listoffset, valid_when=False
+    )
+    listoffset_listoffset = ak.layout.ByteMaskedArray(
+        mask, listoffset_listoffset, valid_when=False
+    )
 
-    assert str(ak.type(ak.Array(listoffset_listoffset))) == "2 * option[var * var * int64]"
+    assert (
+        str(ak.type(ak.Array(listoffset_listoffset))) == "2 * option[var * var * int64]"
+    )
     axis1 = ak.sum(listoffset_listoffset, axis=-1)
     axis2 = ak.sum(listoffset_listoffset, axis=-2)
     axis3 = ak.sum(listoffset_listoffset, axis=-3)
@@ -433,7 +609,7 @@ def test_nokeepdims_mask3():
 
 
 def test_keepdims_mask3():
-    content = ak.layout.NumpyArray(np.arange(2*3*5, dtype=np.int64))
+    content = ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64))
     regular = ak.layout.RegularArray(content, 5)
     listoffset = regular.toListOffsetArray64(False)
     regular_regular = ak.layout.RegularArray(regular, 3)
@@ -442,11 +618,19 @@ def test_keepdims_mask3():
     listoffset_listoffset = regular_listoffset.toListOffsetArray64(False)
     mask = ak.layout.Index8(np.array([True, False]))
     regular_regular = ak.layout.ByteMaskedArray(mask, regular_regular, valid_when=False)
-    listoffset_regular = ak.layout.ByteMaskedArray(mask, listoffset_regular, valid_when=False)
-    regular_listoffset = ak.layout.ByteMaskedArray(mask, regular_listoffset, valid_when=False)
-    listoffset_listoffset = ak.layout.ByteMaskedArray(mask, listoffset_listoffset, valid_when=False)
+    listoffset_regular = ak.layout.ByteMaskedArray(
+        mask, listoffset_regular, valid_when=False
+    )
+    regular_listoffset = ak.layout.ByteMaskedArray(
+        mask, regular_listoffset, valid_when=False
+    )
+    listoffset_listoffset = ak.layout.ByteMaskedArray(
+        mask, listoffset_listoffset, valid_when=False
+    )
 
-    assert str(ak.type(ak.Array(listoffset_listoffset))) == "2 * option[var * var * int64]"
+    assert (
+        str(ak.type(ak.Array(listoffset_listoffset))) == "2 * option[var * var * int64]"
+    )
     axis1 = ak.sum(listoffset_listoffset, axis=-1, keepdims=True)
     axis2 = ak.sum(listoffset_listoffset, axis=-2, keepdims=True)
     axis3 = ak.sum(listoffset_listoffset, axis=-3, keepdims=True)

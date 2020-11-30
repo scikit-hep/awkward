@@ -6,6 +6,7 @@ import pytest
 import numpy as np
 import awkward1 as ak
 
+
 def test():
     data = ak.Array([[7, 5, 7], [], [2], [8, 2]])
     assert ak.to_list(ak.sort(data)) == [[5, 7, 7], [], [2], [2, 8]]

@@ -2,15 +2,11 @@
 
 from __future__ import absolute_import
 
-import sys
-
 import pytest
 import numpy as np
 import awkward1 as ak
 
 numba = pytest.importorskip("numba")
-
-py27 = (sys.version_info[0] < 3)
 
 
 def test_string():
@@ -29,7 +25,8 @@ def test_string():
     assert f1(array, 1) == "two"
     assert f1(array, 2) == "three"
 
-    if not py27:
+    if not ak._util.py27:
+
         def f2(x, i, j):
             return x[i] + x[j]
 

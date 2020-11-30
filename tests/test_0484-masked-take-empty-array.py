@@ -22,7 +22,17 @@ def test():
     assert ak.to_list(three[[None, None, None]]) == [None, None, None]
 
     array = ak.Array([[[0, 1, 2], []], [[], [3, 4]], [[5], [6, 7, 8, 9]]])
-    assert ak.to_list(array[:, [None, 1, None]]) == [[None, [], None], [None, [3, 4], None], [None, [6, 7, 8, 9], None]]
-    assert ak.to_list(array[:2, [None, 1, None]]) == [[None, [], None], [None, [3, 4], None]]
-    assert ak.to_list(array[1:, [None, 1, None]]) == [[None, [3, 4], None], [None, [6, 7, 8, 9], None]]
+    assert ak.to_list(array[:, [None, 1, None]]) == [
+        [None, [], None],
+        [None, [3, 4], None],
+        [None, [6, 7, 8, 9], None],
+    ]
+    assert ak.to_list(array[:2, [None, 1, None]]) == [
+        [None, [], None],
+        [None, [3, 4], None],
+    ]
+    assert ak.to_list(array[1:, [None, 1, None]]) == [
+        [None, [3, 4], None],
+        [None, [6, 7, 8, 9], None],
+    ]
     assert ak.to_list(array[:0, [None, 1, None]]) == []

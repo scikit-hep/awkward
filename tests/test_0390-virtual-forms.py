@@ -23,11 +23,13 @@ def test_virtual_record():
     assert x.layout.purelist_parameter("__record__") == "xthing"
     xv = ak.virtual(lambda: gen(x, "x"), length=len(x), form=x.layout.form)
     assert xv.layout.purelist_parameter("__record__") == "xthing"
-    y = x1 * 10.
+    y = x1 * 10.0
     yv = ak.virtual(lambda: gen(y, "y"), length=len(y), form=y.layout.form)
     array = ak.zip({"x": xv, "y": yv}, with_name="Point", depth_limit=1)
     assert array.layout.purelist_parameter("__record__") == "Point"
-    virtual = ak.virtual(lambda: gen(array, "array"), length=len(array), form=array.layout.form)
+    virtual = ak.virtual(
+        lambda: gen(array, "array"), length=len(array), form=array.layout.form
+    )
     assert virtual.layout.purelist_parameter("__record__") == "Point"
     assert len(materialize_count) == 0
 
@@ -72,7 +74,30 @@ def test_virtual_slice_numba():
     y = x1 * 10.0
     yv = ak.virtual(lambda: gen(y, "y"), length=len(y), form=y.layout.form)
     array = ak.zip({"x": xv, "y": yv}, with_name="Point", depth_limit=1)
-    virtual = ak.virtual(lambda: gen(array, "array"), length=len(array), form=ak.forms.Form.fromjson(json.dumps({"class": "RecordArray", "contents": {"x": {"class": "VirtualArray", "form": json.loads(str(x.layout.form)), "has_length": True}, "y": {"class": "VirtualArray", "form": json.loads(str(y.layout.form)), "has_length": True}}, "parameters": {"__record__": "Point"}})))
+    virtual = ak.virtual(
+        lambda: gen(array, "array"),
+        length=len(array),
+        form=ak.forms.Form.fromjson(
+            json.dumps(
+                {
+                    "class": "RecordArray",
+                    "contents": {
+                        "x": {
+                            "class": "VirtualArray",
+                            "form": json.loads(str(x.layout.form)),
+                            "has_length": True,
+                        },
+                        "y": {
+                            "class": "VirtualArray",
+                            "form": json.loads(str(y.layout.form)),
+                            "has_length": True,
+                        },
+                    },
+                    "parameters": {"__record__": "Point"},
+                }
+            )
+        ),
+    )
 
     @numba.njit
     def dostuff(array):
