@@ -9,7 +9,7 @@ import numpy
 
 import awkward1
 
-awkward0 = pytest.importorskip("awkward")
+awkward0 = pytest.importorskip("awkward0")
 
 def test_toawkward0():
     array = awkward1.from_iter([1.1, 2.2, 3.3, 4.4], highlevel=False)

@@ -954,7 +954,7 @@ def from_awkward0(
     function when their 0.x sources are replaced by 1.x).
     """
     # See https://github.com/scikit-hep/awkward-0.x/blob/405b7eaeea51b60947a79c782b1abf0d72f6729b/specification.adoc
-    import awkward as awkward0
+    import awkward0
 
     # If a source of Awkward0 arrays ever starts emitting Awkward1 arrays
     # (e.g. Uproot), this function turns into a pass-through.
@@ -1314,7 +1314,7 @@ def to_awkward0(array, keep_layout=False):
     library.
     """
     # See https://github.com/scikit-hep/awkward-0.x/blob/405b7eaeea51b60947a79c782b1abf0d72f6729b/specification.adoc
-    import awkward as awkward0
+    import awkward0
 
     def recurse(layout):
         if isinstance(layout, awkward1.partition.PartitionedArray):
