@@ -2,15 +2,15 @@
 
 from __future__ import absolute_import
 
-import pytest
-import numpy as np
-import cupy as cp
-import awkward1 as ak
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import cupy as cp  # noqa: F401
+import awkward1 as ak  # noqa: F401
 
 
 def test_from_cupy():
-    cupy_array_1d = cupy.arange(10)
-    cupy_array_2d = cupy.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]])
+    cupy_array_1d = cp.arange(10)
+    cupy_array_2d = cp.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]])
 
     ak_cupy_array_1d = ak.from_cupy(cupy_array_1d)
     ak_cupy_array_2d = ak.from_cupy(cupy_array_2d)
@@ -24,7 +24,7 @@ def test_from_cupy():
 
 
 def test_from_cupy_tolist():
-    cupy_array_1d = cupy.array([9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+    cupy_array_1d = cp.array([9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
 
     ak_cupy_array_1d = ak.from_cupy(cupy_array_1d)
 
@@ -33,7 +33,7 @@ def test_from_cupy_tolist():
 
 def test_NumpyArray_constructor():
     assert ak.kernels(ak.layout.NumpyArray(np.array([1, 2, 3]))) == "cpu"
-    assert ak.kernels(ak.layout.NumpyArray(cupy.array([1, 2, 3]))) == "cuda"
+    assert ak.kernels(ak.layout.NumpyArray(cp.array([1, 2, 3]))) == "cuda"
 
 
 def test_add():

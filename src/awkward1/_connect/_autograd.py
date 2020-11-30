@@ -16,9 +16,7 @@ def register():
 
     if NEP13Box is None:
 
-        class NEP13Box(
-            autograd.extend.Box, ak._connect._numpy.NDArrayOperatorsMixin
-        ):
+        class NEP13Box(autograd.extend.Box, ak._connect._numpy.NDArrayOperatorsMixin):
             def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
                 import autograd
 
@@ -42,9 +40,7 @@ def register():
                         nextinputs.append(x)
 
                 out = getattr(autograd.numpy, ufunc.__name__)(*nextinputs, **kwargs)
-                return NEP13Box(
-                    ak.layout.NumpyArray(out._value), out._trace, out._node
-                )
+                return NEP13Box(ak.layout.NumpyArray(out._value), out._trace, out._node)
 
         NEP13Box.register(ak.layout.NumpyArray)
 
@@ -63,9 +59,7 @@ def elementwise_grad(fun, argnum=0, *nary_op_args, **nary_op_kwargs):
 
     def broadcast(*args, **kwargs):
         nextargs = [
-            ak.operations.convert.to_layout(
-                x, allow_record=True, allow_other=True
-            )
+            ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
             for x in args
         ]
 

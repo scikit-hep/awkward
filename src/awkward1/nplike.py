@@ -6,6 +6,7 @@ import numpy
 
 import awkward1 as ak
 
+
 def of(*arrays):
     libs = set()
     for array in arrays:
@@ -18,13 +19,14 @@ def of(*arrays):
             libs.add("cuda")
         else:
             raise ValueError(
-            """structure mixes 'cpu' and 'cuda' buffers; use one of
+                """structure mixes 'cpu' and 'cuda' buffers; use one of
 
     ak.to_kernels(array, 'cpu')
     ak.to_kernels(array, 'cuda')
 
 to obtain an unmixed array in main memory or the GPU(s)."""
-            + ak._util.exception_suffix(__file__))
+                + ak._util.exception_suffix(__file__)
+            )
 
     if libs == set() or libs == set(["cpu"]):
         return Numpy.instance()
@@ -39,7 +41,8 @@ to obtain an unmixed array in main memory or the GPU(s)."""
     ak.to_kernels(array, 'cuda')
 
 to move one or the other to main memory or the GPU(s)."""
-            + ak._util.exception_suffix(__file__))
+            + ak._util.exception_suffix(__file__)
+        )
 
 
 class Singleton(object):
@@ -88,6 +91,7 @@ class NumpyMetadata(Singleton):
 
     nan = numpy.nan
     inf = numpy.inf
+
 
 if hasattr(numpy, "float16"):
     NumpyMetadata.float16 = numpy.float16
@@ -307,30 +311,28 @@ class Cupy(NumpyLike):
             import cupy
         except ImportError:
             raise ImportError(
-            """to use CUDA arrays in Python, install the 'cupy' package with:
+                """to use CUDA arrays in Python, install the 'cupy' package with:
 
     pip install cupy --upgrade
 
 or
 
     conda install cupy"""
-        )
+            )
         self._module = cupy
 
     @property
     def ma(self):
         raise ValueError(
             "CUDA arrays cannot have missing values until CuPy implements "
-            "numpy.ma.MaskedArray"
-            + ak._util.exception_suffix(__file__)
+            "numpy.ma.MaskedArray" + ak._util.exception_suffix(__file__)
         )
 
     @property
     def char(self):
         raise ValueError(
             "CUDA arrays cannot do string manipulations until CuPy implements "
-            "numpy.char"
-            + ak._util.exception_suffix(__file__)
+            "numpy.char" + ak._util.exception_suffix(__file__)
         )
 
     @property
@@ -338,12 +340,15 @@ or
         return self._module.ndarray
 
     def asarray(self, array, dtype=None):
-        if isinstance(array, (
-            ak.highlevel.Array,
-            ak.highlevel.Record,
-            ak.layout.Content,
-            ak.layout.Record,
-        )):
+        if isinstance(
+            array,
+            (
+                ak.highlevel.Array,
+                ak.highlevel.Record,
+                ak.layout.Content,
+                ak.layout.Record,
+            ),
+        ):
             out = ak.operations.convert.to_cupy(array)
             if dtype is not None and out.dtype != dtype:
                 return self._module.asarray(out, dtype=dtype)

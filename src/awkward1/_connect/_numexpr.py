@@ -87,8 +87,7 @@ def evaluate(
 
     def getfunction(inputs, depth):
         if all(
-            isinstance(x, ak.layout.NumpyArray)
-            or not isinstance(x, ak.layout.Content)
+            isinstance(x, ak.layout.NumpyArray) or not isinstance(x, ak.layout.Content)
             for x in inputs
         ):
             return lambda: (
@@ -137,14 +136,11 @@ def re_evaluate(local_dict=None):
 
     def getfunction(inputs, depth):
         if all(
-            isinstance(x, ak.layout.NumpyArray)
-            or not isinstance(x, ak.layout.Content)
+            isinstance(x, ak.layout.NumpyArray) or not isinstance(x, ak.layout.Content)
             for x in inputs
         ):
             return lambda: (
-                ak.layout.NumpyArray(
-                    numexpr.re_evaluate(dict(zip(names, inputs)))
-                ),
+                ak.layout.NumpyArray(numexpr.re_evaluate(dict(zip(names, inputs)))),
             )
         else:
             return None

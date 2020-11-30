@@ -9,6 +9,7 @@ import awkward1 as ak
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
+
 def is_valid(array, exception=False):
     """
     Args:
@@ -51,12 +52,7 @@ def validity_error(array, exception=False):
         return validity_error(array.snapshot().layout, exception=exception)
 
     elif isinstance(
-        array,
-        (
-            ak.layout.Content,
-            ak.layout.Record,
-            ak.partition.PartitionedArray,
-        ),
+        array, (ak.layout.Content, ak.layout.Record, ak.partition.PartitionedArray,),
     ):
         out = array.validityerror()
         if out is not None and exception:
@@ -156,9 +152,7 @@ def type(array):
         return ak._util.highlevel_type(array.layout, array.behavior, False)
 
     elif isinstance(array, ak.highlevel.ArrayBuilder):
-        return ak._util.highlevel_type(
-            array.snapshot().layout, array.behavior, True
-        )
+        return ak._util.highlevel_type(array.snapshot().layout, array.behavior, True)
 
     elif isinstance(array, ak.layout.Record):
         return array.type(ak._util.typestrs(None))
@@ -170,7 +164,9 @@ def type(array):
             try:
                 out = type.dtype2primitive[array.dtype.type]
             except KeyError:
-                raise TypeError("numpy array type is unrecognized by awkward: %r" % array.dtype.type)
+                raise TypeError(
+                    "numpy array type is unrecognized by awkward: %r" % array.dtype.type
+                )
             out = ak.types.PrimitiveType(out)
             for x in array.shape[-1:0:-1]:
                 out = ak.types.RegularType(out, x)
@@ -179,9 +175,7 @@ def type(array):
     elif isinstance(array, ak.layout.ArrayBuilder):
         return array.type(ak._util.typestrs(None))
 
-    elif isinstance(
-        array, (ak.layout.Content, ak.partition.PartitionedArray)
-    ):
+    elif isinstance(array, (ak.layout.Content, ak.partition.PartitionedArray)):
         return array.type(ak._util.typestrs(None))
 
     else:
@@ -224,12 +218,7 @@ def parameters(array):
         return array.layout.parameters
 
     elif isinstance(
-        array,
-        (
-            ak.layout.Content,
-            ak.layout.Record,
-            ak.partition.PartitionedArray,
-        ),
+        array, (ak.layout.Content, ak.layout.Record, ak.partition.PartitionedArray,),
     ):
         return array.parameters
 
@@ -265,11 +254,6 @@ def fields(array):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_") and x not in (
-        "absolute_import",
-        "numbers",
-        "numpy",
-        "np",
-        "awkward1",
-    )
+    if not x.startswith("_")
+    and x not in ("absolute_import", "numbers", "numpy", "np", "awkward1",)
 ]

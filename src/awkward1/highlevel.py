@@ -19,6 +19,7 @@ numpy = ak.nplike.Numpy.instance()
 
 _dir_pattern = re.compile(r"^[a-zA-Z_]\w*$")
 
+
 def _suffix(array):
     out = ak.operations.convert.kernels(array)
     if out is None or out == "cpu":
@@ -28,9 +29,7 @@ def _suffix(array):
 
 
 class Array(
-    ak._connect._numpy.NDArrayOperatorsMixin,
-    Iterable,
-    Sized,
+    ak._connect._numpy.NDArrayOperatorsMixin, Iterable, Sized,
 ):
     u"""
     Args:
@@ -207,12 +206,12 @@ class Array(
         kernels=None,
     ):
         if cache is not None:
-            exception = TypeError("__init__() got an unexpected keyword argument 'cache'")
+            exception = TypeError(
+                "__init__() got an unexpected keyword argument 'cache'"
+            )
             ak._util.deprecate(exception, "1.0.0", date="2020-12-01")
 
-        if isinstance(
-            data, (ak.layout.Content, ak.partition.PartitionedArray)
-        ):
+        if isinstance(data, (ak.layout.Content, ak.partition.PartitionedArray)):
             layout = data
 
         elif isinstance(data, Array):
@@ -224,7 +223,9 @@ class Array(
         elif type(data).__module__.startswith("cupy."):
             layout = ak.operations.convert.from_cupy(data, highlevel=False)
 
-        elif type(data).__module__ == "pyarrow" or type(data).__module__.startswith("pyarrow."):
+        elif type(data).__module__ == "pyarrow" or type(data).__module__.startswith(
+            "pyarrow."
+        ):
             layout = ak.operations.convert.from_arrow(data, highlevel=False)
 
         elif isinstance(data, dict):
@@ -236,9 +237,7 @@ class Array(
             parameters = None
             if with_name is not None:
                 parameters = {"__record__": with_name}
-            layout = ak.layout.RecordArray(
-                contents, keys, parameters=parameters
-            )
+            layout = ak.layout.RecordArray(contents, keys, parameters=parameters)
 
         elif isinstance(data, str):
             layout = ak.operations.convert.from_json(data, highlevel=False)
@@ -248,9 +247,7 @@ class Array(
                 data, highlevel=False, allow_record=False
             )
 
-        if not isinstance(
-            layout, (ak.layout.Content, ak.partition.PartitionedArray)
-        ):
+        if not isinstance(layout, (ak.layout.Content, ak.partition.PartitionedArray)):
             raise TypeError(
                 "could not convert data into an ak.Array"
                 + ak._util.exception_suffix(__file__)
@@ -263,13 +260,8 @@ class Array(
         if self.__class__ is Array:
             self.__class__ = ak._util.arrayclass(layout, behavior)
 
-        if (
-            kernels is not None
-            and kernels != ak.operations.convert.kernels(layout)
-        ):
-            layout = ak.operations.convert.to_kernels(
-                layout, kernels, highlevel=False
-            )
+        if kernels is not None and kernels != ak.operations.convert.kernels(layout):
+            layout = ak.operations.convert.to_kernels(layout, kernels, highlevel=False)
 
         self.layout = layout
         self.behavior = behavior
@@ -327,9 +319,7 @@ class Array(
 
     @layout.setter
     def layout(self, layout):
-        if isinstance(
-            layout, (ak.layout.Content, ak.partition.PartitionedArray)
-        ):
+        if isinstance(layout, (ak.layout.Content, ak.partition.PartitionedArray)):
             self._layout = layout
             self._numbaview = None
         else:
@@ -363,8 +353,7 @@ class Array(
             self._behavior = behavior
         else:
             raise TypeError(
-                "behavior must be None or a dict"
-                + ak._util.exception_suffix(__file__)
+                "behavior must be None or a dict" + ak._util.exception_suffix(__file__)
             )
 
     @property
@@ -399,7 +388,11 @@ class Array(
                 name = type(self._array).__name__
             limit_type = limit_total - (len(value) + len(name) + len("<.mask  type=>"))
             typestr = repr(
-                str(ak._util.highlevel_type(self._array._layout, self._array._behavior, True))
+                str(
+                    ak._util.highlevel_type(
+                        self._array._layout, self._array._behavior, True
+                    )
+                )
             )
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
@@ -407,9 +400,7 @@ class Array(
             return "<{0}.mask{1} {2} type={3}>".format(name, suffix, value, typestr)
 
         def __getitem__(self, where):
-            return ak.operations.structure.mask(
-                self._array, where, self._valid_when
-            )
+            return ak.operations.structure.mask(self._array, where, self._valid_when)
 
     @property
     def mask(self, valid_when=True):
@@ -1013,9 +1004,7 @@ class Array(
                 "only fields may be assigned in-place (by field name)"
                 + ak._util.exception_suffix(__file__)
             )
-        array = ak.operations.structure.with_field(
-            self._layout, what, where
-        )
+        array = ak.operations.structure.with_field(self._layout, what, where)
         self._layout = array.layout
         self._caches = ak._util.find_caches(self._layout)
         self._numbaview = None
@@ -1390,13 +1379,11 @@ class Array(
         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
         on types and signatures.
         """
-        import awkward1._connect._numba
+        import awkward1._connect._numba  # noqa: F401
 
         ak._connect._numba.register_and_check()
         if self._numbaview is None:
-            self._numbaview = ak._connect._numba.arrayview.ArrayView.fromarray(
-                self
-            )
+            self._numbaview = ak._connect._numba.arrayview.ArrayView.fromarray(self)
         import numba
 
         return numba.typeof(self._numbaview)
@@ -1411,9 +1398,7 @@ class Array(
 
     def __setstate__(self, state):
         form, container, num_partitions, behavior = state
-        layout = ak.from_arrayset(
-            form, container, num_partitions, highlevel=False
-        )
+        layout = ak.from_arrayset(form, container, num_partitions, highlevel=False)
         if self.__class__ is Array:
             self.__class__ = ak._util.arrayclass(layout, behavior)
         self.layout = layout
@@ -1486,7 +1471,9 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         kernels=None,
     ):
         if cache is not None:
-            exception = TypeError("__init__() got an unexpected keyword argument 'cache'")
+            exception = TypeError(
+                "__init__() got an unexpected keyword argument 'cache'"
+            )
             ak._util.deprecate(exception, "1.0.0", date="2020-12-01")
 
         if isinstance(data, ak.layout.Record):
@@ -1524,13 +1511,8 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
                 layout, with_name, highlevel=False
             )
 
-        if (
-            kernels is not None
-            and kernels != ak.operations.convert.kernels(layout)
-        ):
-            layout = ak.operations.convert.to_kernels(
-                layout, kernels, highlevel=False
-            )
+        if kernels is not None and kernels != ak.operations.convert.kernels(layout):
+            layout = ak.operations.convert.to_kernels(layout, kernels, highlevel=False)
 
         self.layout = layout
         self.behavior = behavior
@@ -1618,8 +1600,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
             self._behavior = behavior
         else:
             raise TypeError(
-                "behavior must be None or a dict"
-                + ak._util.exception_suffix(__file__)
+                "behavior must be None or a dict" + ak._util.exception_suffix(__file__)
             )
 
     @property
@@ -1745,9 +1726,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
                 "only fields may be assigned in-place (by field name)"
                 + ak._util.exception_suffix(__file__)
             )
-        array = ak.operations.structure.with_field(
-            self._layout, what, where
-        )
+        array = ak.operations.structure.with_field(self._layout, what, where)
         self._layout = array.layout
         self._caches = ak._util.find_caches(self._layout)
         self._numbaview = None
@@ -1992,13 +1971,11 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         See [Numba documentation](https://numba.pydata.org/numba-doc/dev/reference/types.html)
         on types and signatures.
         """
-        import awkward1._connect._numba
+        import awkward1._connect._numba  # noqa: F401
 
         ak._connect._numba.register_and_check()
         if self._numbaview is None:
-            self._numbaview = ak._connect._numba.arrayview.RecordView.fromrecord(
-                self
-            )
+            self._numbaview = ak._connect._numba.arrayview.RecordView.fromrecord(self)
         import numba
 
         return numba.typeof(self._numbaview)
@@ -2013,9 +1990,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
 
     def __setstate__(self, state):
         form, container, num_partitions, behavior, at = state
-        array = ak.from_arrayset(
-            form, container, num_partitions, highlevel=False
-        )
+        array = ak.from_arrayset(form, container, num_partitions, highlevel=False)
         layout = ak.layout.Record(array, at)
         if self.__class__ is Record:
             self.__class__ = ak._util.recordclass(layout, behavior)
@@ -2213,8 +2188,7 @@ class ArrayBuilder(Iterable, Sized):
             self._behavior = behavior
         else:
             raise TypeError(
-                "behavior must be None or a dict"
-                + ak._util.exception_suffix(__file__)
+                "behavior must be None or a dict" + ak._util.exception_suffix(__file__)
             )
 
     def __len__(self):
@@ -2331,7 +2305,7 @@ class ArrayBuilder(Iterable, Sized):
         import awkward1._connect._numba
 
         ak._connect._numba.register_and_check()
-        import awkward1._connect._numba.builder
+        import awkward1._connect._numba.builder  # noqa: F401
 
         return ak._connect._numba.builder.ArrayBuilderType(self._behavior)
 
@@ -2576,8 +2550,7 @@ class ArrayBuilder(Iterable, Sized):
             else:
                 raise TypeError(
                     "'append' method can only be used with 'at' when "
-                    "'obj' is an ak.Array"
-                    + ak._util.exception_suffix(__file__)
+                    "'obj' is an ak.Array" + ak._util.exception_suffix(__file__)
                 )
 
     def extend(self, obj):
@@ -2602,9 +2575,7 @@ class ArrayBuilder(Iterable, Sized):
 
         def __repr__(self, limit_value=40, limit_total=85):
             snapshot = self._arraybuilder.snapshot()
-            value = self._arraybuilder._str(
-                limit_value=limit_value, snapshot=snapshot
-            )
+            value = self._arraybuilder._str(limit_value=limit_value, snapshot=snapshot)
 
             limit_type = (
                 limit_total

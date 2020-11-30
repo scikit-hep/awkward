@@ -203,7 +203,7 @@ C++ projects can link against the shared libraries `libawkward-cpu-kernels.so` a
 
 Support for this work was provided by NSF cooperative agreement OAC-1836650 (IRIS-HEP), grant OAC-1450377 (DIANA/HEP) and PHY-1520942 (US-CMS LHC Ops).
 
-Thanks especially to the gracious help of awkward-array contributors (including the [original repository](https://github.com/scikit-hep/awkward-array)).
+Thanks especially to the gracious help of awkward-array contributors (including the [original repository](https://github.com/scikit-hep/awkward-0.x)).
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->

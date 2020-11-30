@@ -14,19 +14,17 @@ def can_optimize(interpretation, form):
     if isinstance(interpretation, uproot4.interpretation.objects.AsObjects):
         jsonform = json.loads(form.tojson(verbose=True))
         if (
-            jsonform["class"] == "ListOffsetArray64" and
-            jsonform["parameters"].get("uproot") == {
-                "as": "array", "header": True, "speedbump": False
-            } and
-            jsonform["content"]["class"] == "ListOffsetArray64" and
-            jsonform["content"]["parameters"].get("uproot") == {
-                "as": "vector", "header": False
-            } and
-            jsonform["content"]["content"]["class"] == "NumpyArray" and
-            jsonform["content"]["content"]["inner_shape"] == [] and
-            (
-                jsonform["content"]["content"].get("primitive") == "float64" or
-                jsonform["content"]["content"].get("primitive") == "int32"
+            jsonform["class"] == "ListOffsetArray64"
+            and jsonform["parameters"].get("uproot")
+            == {"as": "array", "header": True, "speedbump": False}
+            and jsonform["content"]["class"] == "ListOffsetArray64"
+            and jsonform["content"]["parameters"].get("uproot")
+            == {"as": "vector", "header": False}
+            and jsonform["content"]["content"]["class"] == "NumpyArray"
+            and jsonform["content"]["content"]["inner_shape"] == []
+            and (
+                jsonform["content"]["content"].get("primitive") == "float64"
+                or jsonform["content"]["content"].get("primitive") == "int32"
             )
         ):
             return True
@@ -38,7 +36,5 @@ def basket_array(form, data, byte_offsets, extra):
     # FIXME: uproot4_issue_90 is just a placeholder, to show how it would be done
 
     return ak._io.uproot_issue_90(
-        form,
-        ak.layout.NumpyArray(data),
-        ak.layout.Index32(byte_offsets),
+        form, ak.layout.NumpyArray(data), ak.layout.Index32(byte_offsets),
     )

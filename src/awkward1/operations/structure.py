@@ -7,14 +7,13 @@ import json
 
 try:
     from collections.abc import Iterable
-    from collections.abc import MutableMapping
 except ImportError:
     from collections import Iterable
-    from collections import MutableMapping
 
 import awkward1 as ak
 
 np = ak.nplike.NumpyMetadata.instance()
+
 
 @ak._connect._numpy.implements("copy")
 def copy(array):
@@ -62,9 +61,7 @@ def copy(array):
     a mutable third-party library, so this function allows you to make a true copy.
     """
     layout = ak.operations.convert.to_layout(
-        array,
-        allow_record=True,
-        allow_other=False,
+        array, allow_record=True, allow_other=False,
     )
     return ak._util.wrap(layout.deep_copy(), ak._util.behaviorof(array))
 
@@ -154,8 +151,8 @@ def mask(array, mask, valid_when=True, highlevel=True):
             m = ak.nplike.of(layoutmask).asarray(layoutmask)
             if not issubclass(m.dtype.type, (np.bool, np.bool_)):
                 raise ValueError(
-                    "mask must have boolean type, not " "{0}".format(repr(m.dtype))
-                    + ak._util.exception_suffix(__file__)
+                    "mask must have boolean type, not "
+                    "{0}".format(repr(m.dtype)) + ak._util.exception_suffix(__file__)
                 )
             bytemask = ak.layout.Index8(m.view(np.int8))
             return lambda: (
@@ -174,9 +171,7 @@ def mask(array, mask, valid_when=True, highlevel=True):
     )
 
     behavior = ak._util.behaviorof(array, mask)
-    out = ak._util.broadcast_and_apply(
-        [layoutarray, layoutmask], getfunction, behavior
-    )
+    out = ak._util.broadcast_and_apply([layoutarray, layoutmask], getfunction, behavior)
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
         return ak._util.wrap(out[0], behavior)
@@ -376,16 +371,19 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
 
     def getfunction(inputs, depth):
         if depth_limit == depth or (
-            depth_limit is None and
-            all(x.purelist_depth == 1 or (
-                x.purelist_depth == 2 and
-                x.purelist_parameter("__array__") in ("string", "bytestring", "categorical")
-            ) for x in inputs)
+            depth_limit is None
+            and all(
+                x.purelist_depth == 1
+                or (
+                    x.purelist_depth == 2
+                    and x.purelist_parameter("__array__")
+                    in ("string", "bytestring", "categorical")
+                )
+                for x in inputs
+            )
         ):
             return lambda: (
-                ak.layout.RecordArray(
-                    inputs, recordlookup, parameters=parameters
-                ),
+                ak.layout.RecordArray(inputs, recordlookup, parameters=parameters),
             )
         else:
             return None
@@ -458,6 +456,7 @@ def to_regular(array, axis=1, highlevel=True):
     """
 
     posaxis = [axis]
+
     def getfunction(layout, depth):
         posaxis[0] = layout.axis_wrap_if_negative(posaxis[0])
         if posaxis[0] == depth and isinstance(layout, ak.layout.RegularArray):
@@ -506,6 +505,7 @@ def from_regular(array, axis=1, highlevel=True):
     """
 
     posaxis = [axis]
+
     def getfunction(layout, depth):
         posaxis[0] = layout.axis_wrap_if_negative(posaxis[0])
         if posaxis[0] == depth and isinstance(layout, ak.layout.RegularArray):
@@ -597,7 +597,7 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
     """
 
     if isinstance(what, (ak.highlevel.Array, ak.highlevel.Record)):
-        what_caches = what.caches
+        what_caches = what.caches  # noqa: F841
 
     if not (
         where is None
@@ -849,9 +849,8 @@ def full_like(array, fill_value, highlevel=True):
             nplike = ak.nplike.of(layout)
             if isinstance(fill_value, bytes):
                 asbytes = fill_value
-            elif (
-                isinstance(fill_value, str)
-                or (ak._util.py27 and isinstance(fill_value, ak._util.unicode))
+            elif isinstance(fill_value, str) or (
+                ak._util.py27 and isinstance(fill_value, ak._util.unicode)
             ):
                 asbytes = fill_value.encode("utf-8", "surrogateescape")
             else:
@@ -859,15 +858,11 @@ def full_like(array, fill_value, highlevel=True):
             asbytes = nplike.frombuffer(asbytes, dtype=np.uint8)
 
             return lambda: ak.layout.ListArray64(
-                ak.layout.Index64(
-                    nplike.zeros(len(layout), dtype=np.int64)
-                ),
+                ak.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
                 ak.layout.Index64(
                     nplike.full(len(layout), len(asbytes), dtype=np.int64)
                 ),
-                ak.layout.NumpyArray(
-                    asbytes, parameters={"__array__": "byte"}
-                ),
+                ak.layout.NumpyArray(asbytes, parameters={"__array__": "byte"}),
                 parameters={"__array__": "bytestring"},
             )
 
@@ -886,15 +881,11 @@ def full_like(array, fill_value, highlevel=True):
             asstr = str(fill_value).encode("utf-8", "surrogateescape")
             asbytes = nplike.frombuffer(asstr, dtype=np.uint8)
             return lambda: ak.layout.ListArray64(
-                ak.layout.Index64(
-                    nplike.zeros(len(layout), dtype=np.int64)
-                ),
+                ak.layout.Index64(nplike.zeros(len(layout), dtype=np.int64)),
                 ak.layout.Index64(
                     nplike.full(len(layout), len(asbytes), dtype=np.int64)
                 ),
-                ak.layout.NumpyArray(
-                    asbytes, parameters={"__array__": "char"}
-                ),
+                ak.layout.NumpyArray(asbytes, parameters={"__array__": "char"}),
                 parameters={"__array__": "string"},
             )
 
@@ -903,15 +894,11 @@ def full_like(array, fill_value, highlevel=True):
             original = nplike.asarray(layout)
             if fill_value == 0 or fill_value is _ZEROS:
                 return lambda: ak.layout.NumpyArray(
-                    nplike.zeros_like(original),
-                    layout.identities,
-                    layout.parameters,
+                    nplike.zeros_like(original), layout.identities, layout.parameters,
                 )
             elif fill_value == 1:
                 return lambda: ak.layout.NumpyArray(
-                    nplike.ones_like(original),
-                    layout.identities,
-                    layout.parameters,
+                    nplike.ones_like(original), layout.identities, layout.parameters,
                 )
             else:
                 return lambda: ak.layout.NumpyArray(
@@ -1033,9 +1020,7 @@ def broadcast_arrays(*arrays, **kwargs):
 
     inputs = []
     for x in arrays:
-        y = ak.operations.convert.to_layout(
-            x, allow_record=True, allow_other=True
-        )
+        y = ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
         if isinstance(y, ak.partition.PartitionedArray):
             y = y.toContent()
         if not isinstance(y, (ak.layout.Content, ak.layout.Record)):
@@ -1079,8 +1064,10 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
     element for element, and similarly for deeper levels.
     """
     contents = [
-        ak.operations.convert.to_layout(x, allow_record=False if axis == 0 else True,
-            allow_other=True) for x in arrays
+        ak.operations.convert.to_layout(
+            x, allow_record=False if axis == 0 else True, allow_other=True
+        )
+        for x in arrays
     ]
     contents = [
         x.toContent() if isinstance(x, ak.partition.PartitionedArray) else x
@@ -1092,12 +1079,13 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             + ak._util.exception_suffix(__file__)
         )
 
-    posaxis = [
-        x for x in contents if isinstance(x, ak.layout.Content)
-    ][0].axis_wrap_if_negative(axis)
+    posaxis = [x for x in contents if isinstance(x, ak.layout.Content)][
+        0
+    ].axis_wrap_if_negative(axis)
     if posaxis == 0:
         contents = [
-            x if isinstance(x, ak.layout.Content)
+            x
+            if isinstance(x, ak.layout.Content)
             else ak.operations.convert.to_layout([x])
             for x in contents
         ]
@@ -1113,7 +1101,10 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
 
     else:
         for x in contents[1:]:
-            if isinstance(x, ak.layout.Content) and x.axis_wrap_if_negative(axis) != posaxis:
+            if (
+                isinstance(x, ak.layout.Content)
+                and x.axis_wrap_if_negative(axis) != posaxis
+            ):
                 raise ValueError(
                     "cannot concatenate arrays in different axis"
                     + ak._util.exception_suffix(__file__)
@@ -1122,12 +1113,16 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
         def getfunction(inputs, depth):
             if depth == posaxis:
                 nplike = ak.nplike.of(*inputs)
-                next_length = len([
-                    x for x in inputs if isinstance(x, ak.layout.Content)
-                ][0])
-                max_depth = max([
-                    x.purelist_depth for x in inputs if isinstance(x, ak.layout.Content)
-                ])
+                next_length = len(
+                    [x for x in inputs if isinstance(x, ak.layout.Content)][0]
+                )
+                max_depth = max(
+                    [
+                        x.purelist_depth
+                        for x in inputs
+                        if isinstance(x, ak.layout.Content)
+                    ]
+                )
                 what = []
                 for x in inputs:
                     if isinstance(x, ak.layout.Content):
@@ -1136,17 +1131,22 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
                         else:
                             what.append(x)
                     else:
-                        what.append(ak.layout.RegularArray(
-                            ak.layout.NumpyArray(nplike.repeat(x, next_length)),
-                            1
-                        ))
+                        what.append(
+                            ak.layout.RegularArray(
+                                ak.layout.NumpyArray(nplike.repeat(x, next_length)), 1
+                            )
+                        )
                 out = what[0].mergemany_as_union(what[1:], 1)
                 return lambda: (out,)
             else:
                 return None
 
-        out = ak._util.broadcast_and_apply(contents, getfunction,
-            behavior=ak._util.behaviorof(*arrays), allow_records=True)[0]
+        out = ak._util.broadcast_and_apply(
+            contents,
+            getfunction,
+            behavior=ak._util.behaviorof(*arrays),
+            allow_records=True,
+        )[0]
 
     if isinstance(out, ak._util.uniontypes):
         out = out.simplify(mergebool=mergebool)
@@ -1212,9 +1212,7 @@ def where(condition, *args, **kwargs):
         out = nplike.nonzero(ak.operations.convert.to_numpy(akcondition))
         if highlevel:
             return tuple(
-                ak._util.wrap(
-                    ak.layout.NumpyArray(x), ak._util.behaviorof(condition)
-                )
+                ak._util.wrap(ak.layout.NumpyArray(x), ak._util.behaviorof(condition))
                 for x in out
             )
         else:
@@ -1266,8 +1264,7 @@ def where(condition, *args, **kwargs):
     else:
         raise TypeError(
             "where() takes from 1 to 3 positional arguments but {0} were "
-            "given".format(len(args) + 1)
-            + ak._util.exception_suffix(__file__)
+            "given".format(len(args) + 1) + ak._util.exception_suffix(__file__)
         )
 
 
@@ -1392,13 +1389,13 @@ def flatten(array, axis=1, highlevel=True):
                 index = nplike.array(nplike.asarray(layout.index), copy=True)
                 bigmask = nplike.empty(len(index), dtype=np.bool_)
                 for tag, content in enumerate(layout.contents):
-                    if isinstance(
-                        content, ak._util.optiontypes
-                    ) and not isinstance(content, ak.layout.UnmaskedArray):
+                    if isinstance(content, ak._util.optiontypes) and not isinstance(
+                        content, ak.layout.UnmaskedArray
+                    ):
                         bigmask[:] = False
-                        bigmask[tags == tag] = nplike.asarray(
-                            content.bytemask()
-                        ).view(np.bool_)
+                        bigmask[tags == tag] = nplike.asarray(content.bytemask()).view(
+                            np.bool_
+                        )
                         index[bigmask] = -1
 
                 good = index >= 0
@@ -1769,14 +1766,10 @@ def fill_none(array, value, highlevel=True):
             if isinstance(valuelayout, ak.layout.Record):
                 valuelayout = valuelayout.array[valuelayout.at : valuelayout.at + 1]
             elif len(valuelayout) == 0:
-                offsets = ak.layout.Index64(
-                    nplike.array([0, 0], dtype=np.int64)
-                )
+                offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
                 valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
             else:
-                valuelayout = ak.layout.RegularArray(
-                    valuelayout, len(valuelayout)
-                )
+                valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout))
         else:
             valuelayout = ak.operations.convert.to_layout(
                 [value], allow_record=True, allow_other=False
@@ -1830,9 +1823,7 @@ def is_none(array, highlevel=True):
     layout = ak.operations.convert.to_layout(array, allow_record=False)
 
     if isinstance(layout, ak.partition.PartitionedArray):
-        out = ak.partition.apply(
-            lambda x: ak.layout.NumpyArray(apply(x)), layout
-        )
+        out = ak.partition.apply(lambda x: ak.layout.NumpyArray(apply(x)), layout)
     else:
         out = ak.layout.NumpyArray(apply(layout))
 
@@ -1910,13 +1901,10 @@ def firsts(array, axis=1, highlevel=True):
     """
     if axis <= 0:
         raise NotImplementedError(
-            "ak.firsts with axis={0}".format(axis)
-            + ak._util.exception_suffix(__file__)
+            "ak.firsts with axis={0}".format(axis) + ak._util.exception_suffix(__file__)
         )
     toslice = (slice(None, None, None),) * axis + (0,)
-    out = ak.mask(array, ak.num(array, axis=axis) > 0, highlevel=False)[
-        toslice
-    ]
+    out = ak.mask(array, ak.num(array, axis=axis) > 0, highlevel=False)[toslice]
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
@@ -2170,8 +2158,7 @@ def cartesian(
             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be dict keys "
-                    "for a dict of arrays"
-                    + ak._util.exception_suffix(__file__)
+                    "for a dict of arrays" + ak._util.exception_suffix(__file__)
                 )
             recordlookup = []
             layouts = []
@@ -2208,8 +2195,7 @@ def cartesian(
         indexes = [
             ak.layout.Index64(x.reshape(-1))
             for x in nplike.meshgrid(
-                *[nplike.arange(len(x), dtype=np.int64) for x in layouts],
-                indexing="ij"
+                *[nplike.arange(len(x), dtype=np.int64) for x in layouts], indexing="ij"
             )
         ]
         outs = [
@@ -2238,9 +2224,7 @@ def cartesian(
         partition_arrays = ak.partition.partition_as(sample, new_arrays)
 
         output = []
-        for part_arrays in ak.partition.iterate(
-            sample.numpartitions, partition_arrays
-        ):
+        for part_arrays in ak.partition.iterate(sample.numpartitions, partition_arrays):
             output.append(
                 cartesian(
                     part_arrays,
@@ -2273,9 +2257,7 @@ def cartesian(
                 inside = len(new_arrays) - i - 1
                 outside = i
                 return lambda: newaxis(
-                    ak._util.recursively_apply(
-                        layout, getfunction1, args=(inside,)
-                    ),
+                    ak._util.recursively_apply(layout, getfunction1, args=(inside,)),
                     outside,
                 )
             else:
@@ -2300,8 +2282,7 @@ def cartesian(
             if any(not (isinstance(n, str) and n in new_arrays) for x in nested):
                 raise ValueError(
                     "the 'nested' parameter of cartesian must be dict keys "
-                    "for a dict of arrays"
-                    + ak._util.exception_suffix(__file__)
+                    "for a dict of arrays" + ak._util.exception_suffix(__file__)
                 )
             recordlookup = []
             layouts = []
@@ -2333,9 +2314,7 @@ def cartesian(
         def getfunction3(inputs, depth):
             if depth == axis + len(new_arrays):
                 return lambda: (
-                    ak.layout.RecordArray(
-                        inputs, recordlookup, parameters=parameters
-                    ),
+                    ak.layout.RecordArray(inputs, recordlookup, parameters=parameters),
                 )
             else:
                 return None
@@ -2815,9 +2794,7 @@ def repartition(array, lengths, highlevel=True):
         if isinstance(layout, ak.partition.PartitionedArray):
             out = layout.repartition(stops)
         else:
-            out = ak.partition.IrregularlyPartitionedArray.toPartitioned(
-                layout, stops
-            )
+            out = ak.partition.IrregularlyPartitionedArray.toPartitioned(layout, stops)
 
     if highlevel:
         return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
@@ -2905,16 +2882,12 @@ def virtual(
     elif form is not None and not isinstance(form, ak.forms.Form):
         form = ak.forms.Form.fromjson(json.dumps(form))
 
-    gen = ak.layout.ArrayGenerator(
-        generate, args, kwargs, form=form, length=length
-    )
+    gen = ak.layout.ArrayGenerator(generate, args, kwargs, form=form, length=length)
     if cache is not None and not isinstance(cache, ak.layout.ArrayCache):
         maybe_wrapped = ak._util.MappingProxy.maybe_wrap(cache)
         cache = ak.layout.ArrayCache(maybe_wrapped)
 
-    out = ak.layout.VirtualArray(
-        gen, cache, cache_key=cache_key, parameters=parameters
-    )
+    out = ak.layout.VirtualArray(gen, cache, cache_key=cache_key, parameters=parameters)
 
     if highlevel:
         return ak._util.wrap(out, behavior=behavior)
@@ -3013,8 +2986,7 @@ def size(array, axis=None):
     """
     if axis is not None and axis < 0:
         raise NotImplementedError(
-            "ak.size with axis < 0"
-            + ak._util.exception_suffix(__file__)
+            "ak.size with axis < 0" + ak._util.exception_suffix(__file__)
         )
 
     def recurse(layout, axis, sizes):
@@ -3035,8 +3007,8 @@ def size(array, axis=None):
                     compare = inner
                 elif compare != inner:
                     raise ValueError(
-                        "ak.size is ambiguous due to union of different " "sizes"
-                        + ak._util.exception_suffix(__file__)
+                        "ak.size is ambiguous due to union of different "
+                        "sizes" + ak._util.exception_suffix(__file__)
                     )
             sizes.extend(compare)
         elif isinstance(layout, ak._util.optiontypes):
@@ -3059,8 +3031,8 @@ def size(array, axis=None):
                     compare = inner
                 elif compare != inner:
                     raise ValueError(
-                        "ak.size is ambiguous due to record of different " "sizes"
-                        + ak._util.exception_suffix(__file__)
+                        "ak.size is ambiguous due to record of different "
+                        "sizes" + ak._util.exception_suffix(__file__)
                     )
             sizes.extend(compare)
         elif isinstance(layout, ak.layout.NumpyArray):
@@ -3070,8 +3042,7 @@ def size(array, axis=None):
                 sizes.extend(nplike.asarray(layout).shape[1 : axis + 2])
         else:
             raise AssertionError(
-                "unrecognized Content type"
-                + ak._util.exception_suffix(__file__)
+                "unrecognized Content type" + ak._util.exception_suffix(__file__)
             )
 
     layout = ak.operations.convert.to_layout(array, allow_record=False)
@@ -3130,6 +3101,7 @@ def atleast_1d(*arrays):
     nplike = ak.nplike.of(*arrays)
     return nplike.atleast_1d(*[ak.operations.convert.to_numpy(x) for x in arrays])
 
+
 _dtype_to_string = {
     np.dtype(np.bool): "bool",
     np.dtype(np.bool_): "bool",
@@ -3155,6 +3127,7 @@ if hasattr(np, "float128"):
     _dtype_to_string[np.dtype(np.float128)] = "float128"
 if hasattr(np, "complex256"):
     _dtype_to_string[np.dtype(np.complex256)] = "complex256"
+
 
 def values_astype(array, to, highlevel=True):
     """
@@ -3189,7 +3162,9 @@ def values_astype(array, to, highlevel=True):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_") and x not in (
+    if not x.startswith("_")
+    and x
+    not in (
         "absolute_import",
         "numbers",
         "json",

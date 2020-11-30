@@ -12,6 +12,7 @@ import awkward1 as ak
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
+
 @numba.extending.typeof_impl.register(ak.layout.NumpyArray)
 @numba.extending.typeof_impl.register(ak.layout.RegularArray)
 @numba.extending.typeof_impl.register(ak.layout.ListArray32)
@@ -42,7 +43,9 @@ numpy = ak.nplike.Numpy.instance()
 def fake_typeof(obj, c):
     raise TypeError(
         "{0} objects cannot be passed directly into Numba-compiled functions; "
-        "construct a high-level ak.Array or ak.Record instead".format(type(obj).__name__)
+        "construct a high-level ak.Array or ak.Record instead".format(
+            type(obj).__name__
+        )
     )
 
 
@@ -53,27 +56,32 @@ def typeof(obj):
     elif isinstance(obj, ak.layout.RegularArray):
         return typeof_RegularArray(obj)
 
-    elif isinstance(obj, (
-        ak.layout.ListArray32,
-        ak.layout.ListArrayU32,
-        ak.layout.ListArray64,
-        ak.layout.ListOffsetArray32,
-        ak.layout.ListOffsetArrayU32,
-        ak.layout.ListOffsetArray64,
-    )):
+    elif isinstance(
+        obj,
+        (
+            ak.layout.ListArray32,
+            ak.layout.ListArrayU32,
+            ak.layout.ListArray64,
+            ak.layout.ListOffsetArray32,
+            ak.layout.ListOffsetArrayU32,
+            ak.layout.ListOffsetArray64,
+        ),
+    ):
         return typeof_ListArray(obj)
 
-    elif isinstance(obj, (
-        ak.layout.IndexedArray32,
-        ak.layout.IndexedArrayU32,
-        ak.layout.IndexedArray64,
-    )):
+    elif isinstance(
+        obj,
+        (
+            ak.layout.IndexedArray32,
+            ak.layout.IndexedArrayU32,
+            ak.layout.IndexedArray64,
+        ),
+    ):
         return typeof_IndexedArray(obj)
 
-    elif isinstance(obj, (
-        ak.layout.IndexedOptionArray32,
-        ak.layout.IndexedOptionArray64,
-    )):
+    elif isinstance(
+        obj, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64,)
+    ):
         return typeof_IndexedOptionArray(obj)
 
     elif isinstance(obj, ak.layout.ByteMaskedArray):
@@ -88,31 +96,34 @@ def typeof(obj):
     elif isinstance(obj, ak.layout.RecordArray):
         return typeof_RecordArray(obj)
 
-    elif isinstance(obj, (
-        ak.layout.UnionArray8_32,
-        ak.layout.UnionArray8_U32,
-        ak.layout.UnionArray8_64,
-    )):
+    elif isinstance(
+        obj,
+        (
+            ak.layout.UnionArray8_32,
+            ak.layout.UnionArray8_U32,
+            ak.layout.UnionArray8_64,
+        ),
+    ):
         return typeof_UnionArray(obj)
 
     elif isinstance(obj, ak.layout.VirtualArray):
         return typeof_VirtualArray(obj)
 
-    elif isinstance(obj, (
-        ak.layout.Identities32,
-        ak.layout.Identities64,
-    )):
+    elif isinstance(obj, (ak.layout.Identities32, ak.layout.Identities64,)):
         raise NotImplementedError(
             "Awkward Identities are not yet supported for functions compiled by Numba"
         )
 
-    elif isinstance(obj, (
-        ak.layout.Index8,
-        ak.layout.IndexU8,
-        ak.layout.Index32,
-        ak.layout.IndexU32,
-        ak.layout.Index64,
-    )):
+    elif isinstance(
+        obj,
+        (
+            ak.layout.Index8,
+            ak.layout.IndexU8,
+            ak.layout.Index32,
+            ak.layout.IndexU32,
+            ak.layout.Index64,
+        ),
+    ):
         raise RuntimeError(
             "Awkward Indexes should not be used directly in functions compiled by Numba"
         )
@@ -124,18 +135,13 @@ def typeof(obj):
 def typeof_NumpyArray(obj):
     t = numba.typeof(ak.nplike.of(obj).asarray(obj))
     return NumpyArrayType(
-        numba.types.Array(t.dtype, t.ndim, "A"),
-        typeof(obj.identities),
-        obj.parameters,
+        numba.types.Array(t.dtype, t.ndim, "A"), typeof(obj.identities), obj.parameters,
     )
 
 
 def typeof_RegularArray(obj):
     return RegularArrayType(
-        typeof(obj.content),
-        obj.size,
-        typeof(obj.identities),
-        obj.parameters,
+        typeof(obj.content), obj.size, typeof(obj.identities), obj.parameters,
     )
 
 
@@ -220,8 +226,7 @@ def typeof_VirtualArray(obj):
         )
     if obj.form.has_identities:
         raise NotImplementedError(
-            "TODO: identities in VirtualArray"
-            + ak._util.exception_suffix(__file__)
+            "TODO: identities in VirtualArray" + ak._util.exception_suffix(__file__)
         )
     return VirtualArrayType(obj.form.form, numba.none, obj.parameters)
 
@@ -233,7 +238,7 @@ class ContentType(numba.types.Type):
             positions.append(-1)
             sharedptrs.append(None)
         else:
-            arrays.append(ak.nplike.of(obj.identities).asarray(layout.identities))
+            arrays.append(ak.nplike.of(layout.identities).asarray(layout.identities))
             positions.append(arrays[-1])
             sharedptrs.append(None)
 
@@ -253,8 +258,7 @@ class ContentType(numba.types.Type):
             return numba.none
         else:
             raise NotImplementedError(
-                "TODO: identities in VirtualArray"
-                + ak._util.exception_suffix(__file__)
+                "TODO: identities in VirtualArray" + ak._util.exception_suffix(__file__)
             )
 
     @classmethod
@@ -446,9 +450,7 @@ def getat(context, builder, baseptr, offset, rettype=None):
 
 
 def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds):
-    atval = ak._connect._numba.castint(
-        context, builder, attype, numba.intp, atval
-    )
+    atval = ak._connect._numba.castint(context, builder, attype, numba.intp, atval)
 
     if not attype.signed:
         wrapneg = False
@@ -477,9 +479,7 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
                     builder, ValueError, ("slice index out of bounds",)
                 )
 
-    return ak._connect._numba.castint(
-        context, builder, atval.type, numba.intp, atval
-    )
+    return ak._connect._numba.castint(context, builder, atval.type, numba.intp, atval)
 
 
 class NumpyArrayType(ContentType):
@@ -568,8 +568,8 @@ class NumpyArrayType(ContentType):
         lookup.sharedptrs[pos] = lookup.sharedptrs_hold[pos].ptr()
         self.form_fill_identities(pos, layout, lookup)
 
-        lookup.original_positions[pos + self.ARRAY] = (
-            ak.nplike.of(layout).asarray(layout)
+        lookup.original_positions[pos + self.ARRAY] = ak.nplike.of(layout).asarray(
+            layout
         )
         lookup.arrayptrs[pos + self.ARRAY] = lookup.original_positions[
             pos + self.ARRAY
@@ -686,9 +686,7 @@ class RegularArrayType(ContentType):
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
         )
-        return ak.layout.RegularArray(
-            content, self.size, parameters=self.parameters
-        )
+        return ak.layout.RegularArray(content, self.size, parameters=self.parameters)
 
     def hasfield(self, key):
         return self.contenttype.hasfield(key)
@@ -756,11 +754,7 @@ class ListArrayType(ContentType):
     def tolookup(cls, layout, positions, sharedptrs, arrays):
         if isinstance(
             layout,
-            (
-                ak.layout.ListArray32,
-                ak.layout.ListArrayU32,
-                ak.layout.ListArray64,
-            ),
+            (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64,),
         ):
             starts = ak.nplike.of(layout.starts).asarray(layout.starts)
             stops = ak.nplike.of(layout.stops).asarray(layout.stops)
@@ -814,9 +808,7 @@ class ListArrayType(ContentType):
     def from_form(cls, form):
         return ListArrayType(
             cls.from_form_index(
-                form.starts
-                if isinstance(form, ak.forms.ListForm)
-                else form.offsets
+                form.starts if isinstance(form, ak.forms.ListForm) else form.offsets
             ),
             ak._connect._numba.arrayview.tonumbatype(form.content),
             cls.from_form_identities(form),
@@ -844,11 +836,7 @@ class ListArrayType(ContentType):
 
         if isinstance(
             layout,
-            (
-                ak.layout.ListArray32,
-                ak.layout.ListArrayU32,
-                ak.layout.ListArray64,
-            ),
+            (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64,),
         ):
             starts = ak.nplike.of(layout.starts).asarray(layout.starts)
             stops = ak.nplike.of(layout.stops).asarray(layout.stops)
@@ -1065,9 +1053,7 @@ class IndexedArrayType(ContentType):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        viewtype = ak._connect._numba.arrayview.wrap(
-            self.contenttype, viewtype, None
-        )
+        viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
         return self.contenttype.getitem_at_check(viewtype)
 
     def lower_getitem_at(
@@ -1238,9 +1224,7 @@ class IndexedOptionArrayType(ContentType):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        viewtype = ak._connect._numba.arrayview.wrap(
-            self.contenttype, viewtype, None
-        )
+        viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
     def lower_getitem_at(
@@ -1421,9 +1405,7 @@ class ByteMaskedArrayType(ContentType):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        viewtype = ak._connect._numba.arrayview.wrap(
-            self.contenttype, viewtype, None
-        )
+        viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
     def lower_getitem_at(
@@ -1611,9 +1593,7 @@ class BitMaskedArrayType(ContentType):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        viewtype = ak._connect._numba.arrayview.wrap(
-            self.contenttype, viewtype, None
-        )
+        viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
     def lower_getitem_at(
@@ -1786,9 +1766,7 @@ class UnmaskedArrayType(ContentType):
         return self.contenttype.hasfield(key)
 
     def getitem_at(self, viewtype):
-        viewtype = ak._connect._numba.arrayview.wrap(
-            self.contenttype, viewtype, None
-        )
+        viewtype = ak._connect._numba.arrayview.wrap(self.contenttype, viewtype, None)
         return numba.types.optional(self.contenttype.getitem_at_check(viewtype))
 
     def lower_getitem_at(
@@ -1871,9 +1849,7 @@ class RecordArrayType(ContentType):
         positions.extend([None] * layout.numfields)
         sharedptrs.extend([None] * layout.numfields)
         for i, content in enumerate(layout.contents):
-            positions[
-                pos + cls.CONTENTS + i
-            ] = ak._connect._numba.arrayview.tolookup(
+            positions[pos + cls.CONTENTS + i] = ak._connect._numba.arrayview.tolookup(
                 content, positions, sharedptrs, arrays
             )
         return pos
@@ -2045,9 +2021,7 @@ class RecordArrayType(ContentType):
                     + ak._util.exception_suffix(__file__)
                 )
         contenttype = self.contenttypes[index]
-        subviewtype = ak._connect._numba.arrayview.wrap(
-            contenttype, viewtype, None
-        )
+        subviewtype = ak._connect._numba.arrayview.wrap(contenttype, viewtype, None)
         return contenttype.getitem_range(subviewtype)
 
     def getitem_field_record(self, recordviewtype, key):
@@ -2271,9 +2245,7 @@ class UnionArrayType(ContentType):
         positions.extend([None] * layout.numcontents)
         sharedptrs.extend([None] * layout.numcontents)
         for i, content in enumerate(layout.contents):
-            positions[
-                pos + cls.CONTENTS + i
-            ] = ak._connect._numba.arrayview.tolookup(
+            positions[pos + cls.CONTENTS + i] = ak._connect._numba.arrayview.tolookup(
                 content, positions, sharedptrs, arrays
             )
         return pos
@@ -2292,9 +2264,7 @@ class UnionArrayType(ContentType):
         positions.extend([None] * form.numcontents)
         sharedptrs.extend([None] * form.numcontents)
         for i, content in enumerate(form.contents):
-            positions[
-                pos + cls.CONTENTS + i
-            ] = ak._connect._numba.arrayview.tolookup(
+            positions[pos + cls.CONTENTS + i] = ak._connect._numba.arrayview.tolookup(
                 content, positions, sharedptrs, arrays
             )
         return pos
@@ -2419,7 +2389,8 @@ class UnionArrayType(ContentType):
         checkbounds,
     ):
         raise NotImplementedError(
-            type(self).__name__ + ".lower_getitem_at not implemented"
+            type(self).__name__
+            + ".lower_getitem_at not implemented"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -2436,13 +2407,15 @@ class UnionArrayType(ContentType):
         wrapneg,
     ):
         raise NotImplementedError(
-            type(self).__name__ + ".lower_getitem_range not implemented"
+            type(self).__name__
+            + ".lower_getitem_range not implemented"
             + ak._util.exception_suffix(__file__)
         )
 
     def lower_getitem_field(self, context, builder, viewtype, viewval, viewproxy, key):
         raise NotImplementedError(
-            type(self).__name__ + ".lower_getitem_field not implemented"
+            type(self).__name__
+            + ".lower_getitem_field not implemented"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -2527,8 +2500,7 @@ class VirtualArrayType(ContentType):
         if form.form is None:
             raise ValueError(
                 "VirtualArrays without a known 'form' can't be used in Numba "
-                "(including nested)"
-                + ak._util.exception_suffix(__file__)
+                "(including nested)" + ak._util.exception_suffix(__file__)
             )
         return VirtualArrayType(
             form.form, cls.from_form_identities(form), form.parameters
@@ -2607,11 +2579,7 @@ class VirtualArrayType(ContentType):
 
             elif isinstance(
                 form,
-                (
-                    ak.forms.RegularForm,
-                    ak.forms.ListForm,
-                    ak.forms.ListOffsetForm,
-                ),
+                (ak.forms.RegularForm, ak.forms.ListForm, ak.forms.ListOffsetForm,),
             ):
                 return form.content
 
@@ -2651,9 +2619,7 @@ class VirtualArrayType(ContentType):
         def wrap(out):
             if isinstance(out, ak.forms.Form):
                 numbatype = ak._connect._numba.arrayview.tonumbatype(out)
-                return ak._connect._numba.arrayview.wrap(
-                    numbatype, viewtype, None
-                )
+                return ak._connect._numba.arrayview.wrap(numbatype, viewtype, None)
             else:
                 return out
 
@@ -2747,9 +2713,7 @@ class VirtualArrayType(ContentType):
         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
         nextpos = getat(context, builder, viewproxy.arrayptrs, whichpos)
 
-        nextviewtype = ak._connect._numba.arrayview.wrap(
-            numbatype, viewtype, None
-        )
+        nextviewtype = ak._connect._numba.arrayview.wrap(numbatype, viewtype, None)
         proxynext = context.make_helper(builder, nextviewtype)
         proxynext.pos = nextpos
         proxynext.start = viewproxy.start
@@ -2792,31 +2756,33 @@ def inner_dtype_of_form(form):
     if form is None:
         return None
 
-    elif isinstance(form, (
-        ak.forms.NumpyForm,
-    )):
+    elif isinstance(form, (ak.forms.NumpyForm,)):
         return numba.from_dtype(form.to_numpy())
 
-    elif isinstance(form, (
-        ak.forms.EmptyForm,
-    )):
+    elif isinstance(form, (ak.forms.EmptyForm,)):
         return numba.types.float64
 
-    elif isinstance(form, (
-        ak.forms.RegularForm,
-        ak.forms.ListForm,
-        ak.forms.ListOffsetForm,
-        ak.forms.IndexedForm,
-    )):
+    elif isinstance(
+        form,
+        (
+            ak.forms.RegularForm,
+            ak.forms.ListForm,
+            ak.forms.ListOffsetForm,
+            ak.forms.IndexedForm,
+        ),
+    ):
         return inner_dtype_of_form(form.content)
 
-    elif isinstance(form, (
-        ak.forms.RecordForm,
-        ak.forms.IndexedOptionForm,
-        ak.forms.ByteMaskedForm,
-        ak.forms.BitMaskedForm,
-        ak.forms.UnmaskedForm,
-    )):
+    elif isinstance(
+        form,
+        (
+            ak.forms.RecordForm,
+            ak.forms.IndexedOptionForm,
+            ak.forms.ByteMaskedForm,
+            ak.forms.BitMaskedForm,
+            ak.forms.UnmaskedForm,
+        ),
+    ):
         return None
 
     elif isinstance(form, ak.forms.UnionForm):
@@ -2837,23 +2803,29 @@ def optiontype_of_form(form):
     if form is None:
         return None
 
-    elif isinstance(form, (
-        ak.forms.NumpyForm,
-        ak.forms.EmptyForm,
-        ak.forms.RegularForm,
-        ak.forms.ListForm,
-        ak.forms.ListOffsetForm,
-        ak.forms.IndexedForm,
-        ak.forms.RecordForm,
-    )):
+    elif isinstance(
+        form,
+        (
+            ak.forms.NumpyForm,
+            ak.forms.EmptyForm,
+            ak.forms.RegularForm,
+            ak.forms.ListForm,
+            ak.forms.ListOffsetForm,
+            ak.forms.IndexedForm,
+            ak.forms.RecordForm,
+        ),
+    ):
         return False
 
-    elif isinstance(form, (
-        ak.forms.IndexedOptionForm,
-        ak.forms.ByteMaskedForm,
-        ak.forms.BitMaskedForm,
-        ak.forms.UnmaskedForm,
-    )):
+    elif isinstance(
+        form,
+        (
+            ak.forms.IndexedOptionForm,
+            ak.forms.ByteMaskedForm,
+            ak.forms.BitMaskedForm,
+            ak.forms.UnmaskedForm,
+        ),
+    ):
         return False
 
     elif isinstance(form, ak.forms.UnionForm):
@@ -2873,27 +2845,31 @@ def recordtype_of_form(form):
     if form is None:
         return None
 
-    elif isinstance(form, (
-        ak.forms.NumpyForm,
-        ak.forms.EmptyForm,
-        ak.forms.RegularForm,
-        ak.forms.ListForm,
-        ak.forms.ListOffsetForm,
-    )):
+    elif isinstance(
+        form,
+        (
+            ak.forms.NumpyForm,
+            ak.forms.EmptyForm,
+            ak.forms.RegularForm,
+            ak.forms.ListForm,
+            ak.forms.ListOffsetForm,
+        ),
+    ):
         return False
 
-    elif isinstance(form, (
-        ak.forms.IndexedForm,
-        ak.forms.IndexedOptionForm,
-        ak.forms.ByteMaskedForm,
-        ak.forms.BitMaskedForm,
-        ak.forms.UnmaskedForm,
-    )):
+    elif isinstance(
+        form,
+        (
+            ak.forms.IndexedForm,
+            ak.forms.IndexedOptionForm,
+            ak.forms.ByteMaskedForm,
+            ak.forms.BitMaskedForm,
+            ak.forms.UnmaskedForm,
+        ),
+    ):
         return recordtype_of_form(form.content)
 
-    elif isinstance(form, (
-        ak.forms.RecordForm,
-    )):
+    elif isinstance(form, (ak.forms.RecordForm,)):
         return True
 
     elif isinstance(form, ak.forms.UnionForm):

@@ -14,6 +14,7 @@ import awkward1 as ak
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
 
+
 def single(obj):
     if isinstance(obj, ak.layout.Content):
         return IrregularlyPartitionedArray([obj])

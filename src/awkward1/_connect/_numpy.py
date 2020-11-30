@@ -32,12 +32,11 @@ def implements(numpy_function):
     def decorator(function):
         implemented[getattr(numpy, numpy_function)] = function
         return function
+
     return decorator
 
 
 def array_ufunc(ufunc, method, inputs, kwargs):
-    import awkward1.highlevel
-
     if method != "__call__" or len(inputs) == 0 or "out" in kwargs:
         return NotImplemented
 
@@ -59,9 +58,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             out = (out,)
 
         return tuple(
-            x.layout
-            if isinstance(x, (ak.highlevel.Array, ak.highlevel.Record))
-            else x
+            x.layout if isinstance(x, (ak.highlevel.Array, ak.highlevel.Record)) else x
             for x in out
         )
 
@@ -114,11 +111,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 node = node.content
             nparray = ak.nplike.of(node).asarray(node)
             nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
-            return ak.layout.NumpyArray(
-                nparray,
-                node.identities,
-                node.parameters,
-            )
+            return ak.layout.NumpyArray(nparray, node.identities, node.parameters,)
 
     def getfunction(inputs, depth):
         signature = [ufunc]
@@ -150,41 +143,34 @@ def array_ufunc(ufunc, method, inputs, kwargs):
 
         if all(
             isinstance(x, ak.layout.NumpyArray)
-            or not isinstance(
-                x, (ak.layout.Content, ak.partition.PartitionedArray)
-            )
+            or not isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray))
             for x in inputs
         ):
             nplike = ak.nplike.of(*inputs)
             result = getattr(ufunc, method)(
                 *[nplike.asarray(x) for x in inputs], **kwargs
             )
-            return lambda: (
-                ak.operations.convert.from_numpy(result, highlevel=False),
-            )
+            return lambda: (ak.operations.convert.from_numpy(result, highlevel=False),)
 
         for x in inputs:
             if isinstance(x, ak.layout.Content):
                 chained_behavior = ak._util.Behavior(ak.behavior, behavior)
                 apply_ufunc = chained_behavior[numpy.ufunc, x.parameter("__array__")]
                 if apply_ufunc is not None:
-                    out = adjust_apply_ufunc(
-                        apply_ufunc, ufunc, method, inputs, kwargs
-                    )
+                    out = adjust_apply_ufunc(apply_ufunc, ufunc, method, inputs, kwargs)
                     if out is not None:
                         return out
                 apply_ufunc = chained_behavior[numpy.ufunc, x.parameter("__record__")]
                 if apply_ufunc is not None:
-                    out = adjust_apply_ufunc(
-                        apply_ufunc, ufunc, method, inputs, kwargs
-                    )
+                    out = adjust_apply_ufunc(apply_ufunc, ufunc, method, inputs, kwargs)
                     if out is not None:
                         return out
 
         if all(
             x.parameter("__array__") is not None
             or x.parameter("__record__") is not None
-            for x in inputs if isinstance(x, ak.layout.Content)
+            for x in inputs
+            if isinstance(x, ak.layout.Content)
         ):
             custom_types = []
             for x in inputs:
@@ -199,8 +185,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                     custom_types.append(type(x).__name__)
             exception = ValueError(
                 "no overloads for custom types: {0}({1})".format(
-                    ufunc.__name__,
-                    ", ".join(custom_types),
+                    ufunc.__name__, ", ".join(custom_types),
                 )
                 + ak._util.exception_suffix(__file__)
             )
@@ -278,7 +263,7 @@ def matmul_for_numba(lefts, rights, dtype):
         for i in range(rows):
             for j in range(cols):
                 for v in range(mids):
-                    pos = content_i + i*cols + j
+                    pos = content_i + i * cols + j
                     content[pos] += A[i][v] * B[v][j]
 
         outer[outer_i] = outer[outer_i - 1] + rows
@@ -317,8 +302,7 @@ def getfunction_matmul(inputs):
             ak.layout.ListOffsetArray64(
                 ak.layout.Index64(outer),
                 ak.layout.ListOffsetArray64(
-                    ak.layout.Index64(inner),
-                    ak.layout.NumpyArray(content),
+                    ak.layout.Index64(inner), ak.layout.NumpyArray(content),
                 ),
             ),
         )
@@ -403,9 +387,7 @@ except AttributeError:
             __divmod__ = _binary_method(um.divmod, "divmod")
             __rdivmod__ = _reflected_binary_method(um.divmod, "divmod")
         __pow__, __rpow__, __ipow__ = _numeric_methods(um.power, "pow")
-        __lshift__, __rlshift__, __ilshift__ = _numeric_methods(
-            um.left_shift, "lshift"
-        )
+        __lshift__, __rlshift__, __ilshift__ = _numeric_methods(um.left_shift, "lshift")
         __rshift__, __rrshift__, __irshift__ = _numeric_methods(
             um.right_shift, "rshift"
         )

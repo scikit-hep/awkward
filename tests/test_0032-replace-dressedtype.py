@@ -2,9 +2,9 @@
 
 from __future__ import absolute_import
 
-import pytest
-import numpy as np
-import awkward1 as ak
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward1 as ak  # noqa: F401
 
 
 def test_types_with_parameters():

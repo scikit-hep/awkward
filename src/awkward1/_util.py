@@ -35,11 +35,13 @@ def exception_suffix(filename):
         line = "#L" + str(sys._getframe(1).f_lineno)
     filename = filename.replace("\\", "/")
     filename = "/src/awkward1/" + filename.split("awkward1/")[1]
-    return ("\n\n(https://github.com/scikit-hep/awkward-1.0/blob/"
-            + ak.__version__
-            + filename
-            + line
-            + ")")
+    return (
+        "\n\n(https://github.com/scikit-hep/awkward-1.0/blob/"
+        + ak.__version__
+        + filename
+        + line
+        + ")"
+    )
 
 
 def deprecate(exception, version, date=None):
@@ -53,7 +55,9 @@ def deprecate(exception, version, date=None):
         message = """In version {0}{1}, this will be an error.
 (Set ak.deprecations_as_errors = True to get a stack trace now.)
 
-{2}: {3}""".format(version, date, type(exception).__name__, str(exception))
+{2}: {3}""".format(
+            version, date, type(exception).__name__, str(exception)
+        )
         warnings.warn(message, DeprecationWarning)
 
 
@@ -267,11 +271,11 @@ def overload(behavior, signature):
                 and len(key) == len(signature)
                 and key[0] == signature[0]
                 and all(
-                    k == s or (
-                        isinstance(k, type)
-                        and isinstance(s, type)
-                        and issubclass(s, k)
-                    ) for k, s in zip(key[1:], signature[1:])
+                    k == s
+                    or (
+                        isinstance(k, type) and isinstance(s, type) and issubclass(s, k)
+                    )
+                    for k, s in zip(key[1:], signature[1:])
                 )
             ):
                 return custom
@@ -364,11 +368,7 @@ def behaviorof(*arrays):
         if (
             isinstance(
                 x,
-                (
-                    ak.highlevel.Array,
-                    ak.highlevel.Record,
-                    ak.highlevel.ArrayBuilder,
-                ),
+                (ak.highlevel.Array, ak.highlevel.Record, ak.highlevel.ArrayBuilder,),
             )
             and x.behavior is not None
         ):
@@ -380,9 +380,7 @@ def behaviorof(*arrays):
 
 
 def wrap(content, behavior):
-    if isinstance(
-        content, (ak.layout.Content, ak.partition.PartitionedArray)
-    ):
+    if isinstance(content, (ak.layout.Content, ak.partition.PartitionedArray)):
         return ak.highlevel.Array(content, behavior=behavior, kernels=None)
 
     elif isinstance(content, ak.layout.Record):
@@ -421,8 +419,7 @@ def key2index(keys, key):
 
     if attempt is None:
         raise ValueError(
-            "key {0} not found in record".format(repr(key))
-            + exception_suffix(__file__)
+            "key {0} not found in record".format(repr(key)) + exception_suffix(__file__)
         )
     else:
         return attempt
@@ -483,7 +480,7 @@ def broadcast_and_apply(
     allow_records=True,
     left_broadcast=True,
     right_broadcast=True,
-    numpy_to_regular=False
+    numpy_to_regular=False,
 ):
     def checklength(inputs):
         length = len(inputs[0])
@@ -500,20 +497,22 @@ def broadcast_and_apply(
     def all_same_offsets(nplike, inputs):
         offsets = None
         for x in inputs:
-            if isinstance(x, (
-                ak.layout.ListOffsetArray32,
-                ak.layout.ListOffsetArrayU32,
-                ak.layout.ListOffsetArray64,
-            )):
+            if isinstance(
+                x,
+                (
+                    ak.layout.ListOffsetArray32,
+                    ak.layout.ListOffsetArrayU32,
+                    ak.layout.ListOffsetArray64,
+                ),
+            ):
                 if offsets is None:
                     offsets = nplike.asarray(x.offsets)
                 elif not nplike.array_equal(offsets, nplike.asarray(x.offsets)):
                     return False
-            elif isinstance(x, (
-                ak.layout.ListArray32,
-                ak.layout.ListArrayU32,
-                ak.layout.ListArray64,
-            )):
+            elif isinstance(
+                x,
+                (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64,),
+            ):
                 starts = nplike.asarray(x.starts)
                 stops = nplike.asarray(x.stops)
                 if not nplike.array_equal(starts[1:], stops[:-1]):
@@ -525,9 +524,8 @@ def broadcast_and_apply(
                     else:
                         offsets[:-1] = starts
                         offsets[-1] = stops[-1]
-                elif (
-                    not nplike.array_equal(offsets[:-1], starts) or
-                    (len(stops) !=0 and offsets[-1] != stops[-1])
+                elif not nplike.array_equal(offsets[:-1], starts) or (
+                    len(stops) != 0 and offsets[-1] != stops[-1]
                 ):
                     return False
             elif isinstance(x, ak.layout.RegularArray):
@@ -553,15 +551,11 @@ def broadcast_and_apply(
         # handle implicit right-broadcasting (i.e. NumPy-like)
         if right_broadcast and any(isinstance(x, listtypes) for x in inputs):
             maxdepth = max(
-                x.purelist_depth
-                for x in inputs
-                if isinstance(x, ak.layout.Content)
+                x.purelist_depth for x in inputs if isinstance(x, ak.layout.Content)
             )
 
             if maxdepth > 0 and all(
-                x.purelist_isregular
-                for x in inputs
-                if isinstance(x, ak.layout.Content)
+                x.purelist_isregular for x in inputs if isinstance(x, ak.layout.Content)
             ):
                 nextinputs = []
                 for x in inputs:
@@ -598,9 +592,7 @@ def broadcast_and_apply(
                 depth,
             )
 
-        elif any(
-            isinstance(x, ak.layout.NumpyArray) and x.ndim > 1 for x in inputs
-        ):
+        elif any(isinstance(x, ak.layout.NumpyArray) and x.ndim > 1 for x in inputs):
             return apply(
                 [
                     x
@@ -700,9 +692,7 @@ def broadcast_and_apply(
                     nextinputs.append(x.project(nextmask))
                 elif isinstance(x, ak.layout.Content):
                     nextinputs.append(
-                        ak.layout.IndexedOptionArray64(nextindex, x).project(
-                            nextmask
-                        )
+                        ak.layout.IndexedOptionArray64(nextindex, x).project(nextmask)
                     )
                 else:
                     nextinputs.append(x)
@@ -710,22 +700,16 @@ def broadcast_and_apply(
             outcontent = apply(nextinputs, depth)
             assert isinstance(outcontent, tuple)
             return tuple(
-                ak.layout.IndexedOptionArray64(index, x).simplify()
-                for x in outcontent
+                ak.layout.IndexedOptionArray64(index, x).simplify() for x in outcontent
             )
 
         elif any(isinstance(x, listtypes) for x in inputs):
             if all(
-                isinstance(x, ak.layout.RegularArray)
-                or not isinstance(x, listtypes)
+                isinstance(x, ak.layout.RegularArray) or not isinstance(x, listtypes)
                 for x in inputs
             ):
                 maxsize = max(
-                    [
-                        x.size
-                        for x in inputs
-                        if isinstance(x, ak.layout.RegularArray)
-                    ]
+                    [x.size for x in inputs if isinstance(x, ak.layout.RegularArray)]
                 )
                 for x in inputs:
                     if isinstance(x, ak.layout.RegularArray):
@@ -760,9 +744,7 @@ def broadcast_and_apply(
                 outcontent = apply(nextinputs, depth + 1)
                 assert isinstance(outcontent, tuple)
 
-                return tuple(
-                    ak.layout.RegularArray(x, maxsize) for x in outcontent
-                )
+                return tuple(ak.layout.RegularArray(x, maxsize) for x in outcontent)
 
             elif not all_same_offsets(nplike, inputs):
                 fcns = [
@@ -821,20 +803,26 @@ def broadcast_and_apply(
                 nextinputs = []
 
                 for x in inputs:
-                    if isinstance(x, (
-                        ak.layout.ListOffsetArray32,
-                        ak.layout.ListOffsetArrayU32,
-                        ak.layout.ListOffsetArray64,
-                    )):
+                    if isinstance(
+                        x,
+                        (
+                            ak.layout.ListOffsetArray32,
+                            ak.layout.ListOffsetArrayU32,
+                            ak.layout.ListOffsetArray64,
+                        ),
+                    ):
                         offsets = x.offsets
                         lencontent = offsets[-1]
                         nextinputs.append(x.content[:lencontent])
 
-                    elif isinstance(x, (
-                        ak.layout.ListArray32,
-                        ak.layout.ListArrayU32,
-                        ak.layout.ListArray64,
-                    )):
+                    elif isinstance(
+                        x,
+                        (
+                            ak.layout.ListArray32,
+                            ak.layout.ListArrayU32,
+                            ak.layout.ListArray64,
+                        ),
+                    ):
                         starts, stops = x.starts, x.stops
                         if len(starts) == 0 or len(stops) == 0:
                             nextinputs.append(x.content[:0])
@@ -875,13 +863,16 @@ def broadcast_and_apply(
                     raise AssertionError(
                         "unexpected offsets, starts: {0} {1}".format(
                             type(offsets), type(starts)
-                        ) + exception_suffix(__file__)
+                        )
+                        + exception_suffix(__file__)
                     )
 
         elif any(isinstance(x, recordtypes) for x in inputs):
             if not allow_records:
                 exception = ValueError(
-                    "cannot broadcast: {0}".format(", ".join(repr(type(x)) for x in inputs))
+                    "cannot broadcast: {0}".format(
+                        ", ".join(repr(type(x)) for x in inputs)
+                    )
                     + exception_suffix(__file__)
                 )
                 deprecate(exception, "1.0.0", "2020-12-01")
@@ -945,9 +936,7 @@ def broadcast_and_apply(
         purelist_isregular = True
         purelist_depths = set()
         for x in inputs:
-            if isinstance(
-                x, (ak.layout.Content, ak.partition.PartitionedArray)
-            ):
+            if isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray)):
                 if not x.purelist_isregular:
                     purelist_isregular = False
                     break
@@ -975,9 +964,7 @@ def broadcast_and_apply(
             nextinputs = ak.partition.partition_as(sample, inputs)
 
             outputs = []
-            for part_inputs in ak.partition.iterate(
-                sample.numpartitions, nextinputs
-            ):
+            for part_inputs in ak.partition.iterate(sample.numpartitions, nextinputs):
                 isscalar = []
                 part = apply(broadcast_pack(part_inputs, isscalar), 0)
                 assert isinstance(part, tuple)
@@ -986,9 +973,7 @@ def broadcast_and_apply(
             out = ()
             for i in range(len(part)):
                 out = out + (
-                    ak.partition.IrregularlyPartitionedArray(
-                        [x[i] for x in outputs]
-                    ),
+                    ak.partition.IrregularlyPartitionedArray([x[i] for x in outputs]),
                 )
             return out
 
@@ -1037,12 +1022,7 @@ def broadcast_unpack(x, isscalar):
 
 
 def recursively_apply(
-    layout,
-    getfunction,
-    args=(),
-    depth=1,
-    keep_parameters=True,
-    numpy_to_regular=False,
+    layout, getfunction, args=(), depth=1, keep_parameters=True, numpy_to_regular=False,
 ):
     if numpy_to_regular and isinstance(layout, ak.layout.NumpyArray):
         layout = layout.toRegularArray()
@@ -1055,12 +1035,7 @@ def recursively_apply(
         return ak.partition.IrregularlyPartitionedArray(
             [
                 recursively_apply(
-                    x,
-                    getfunction,
-                    args,
-                    depth,
-                    keep_parameters,
-                    numpy_to_regular,
+                    x, getfunction, args, depth, keep_parameters, numpy_to_regular,
                 )
                 for x in layout.partitions
             ]
@@ -1315,12 +1290,7 @@ def recursively_apply(
         return ak.layout.RecordArray(
             [
                 recursively_apply(
-                    x,
-                    getfunction,
-                    args,
-                    depth,
-                    keep_parameters,
-                    numpy_to_regular,
+                    x, getfunction, args, depth, keep_parameters, numpy_to_regular,
                 )
                 for x in layout.contents
             ],
@@ -1349,12 +1319,7 @@ def recursively_apply(
             layout.index,
             [
                 recursively_apply(
-                    x,
-                    getfunction,
-                    args,
-                    depth,
-                    keep_parameters,
-                    numpy_to_regular,
+                    x, getfunction, args, depth, keep_parameters, numpy_to_regular,
                 )
                 for x in layout.contents
             ],
@@ -1368,12 +1333,7 @@ def recursively_apply(
             layout.index,
             [
                 recursively_apply(
-                    x,
-                    getfunction,
-                    args,
-                    depth,
-                    keep_parameters,
-                    numpy_to_regular,
+                    x, getfunction, args, depth, keep_parameters, numpy_to_regular,
                 )
                 for x in layout.contents
             ],
@@ -1387,12 +1347,7 @@ def recursively_apply(
             layout.index,
             [
                 recursively_apply(
-                    x,
-                    getfunction,
-                    args,
-                    depth,
-                    keep_parameters,
-                    numpy_to_regular,
+                    x, getfunction, args, depth, keep_parameters, numpy_to_regular,
                 )
                 for x in layout.contents
             ],
@@ -1402,12 +1357,7 @@ def recursively_apply(
 
     elif isinstance(layout, ak.layout.VirtualArray):
         return recursively_apply(
-            layout.array,
-            getfunction,
-            args,
-            depth,
-            keep_parameters,
-            numpy_to_regular,
+            layout.array, getfunction, args, depth, keep_parameters, numpy_to_regular,
         )
 
     else:
@@ -1430,35 +1380,44 @@ def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
     elif isinstance(layout, ak.layout.EmptyArray):
         pass
 
-    elif isinstance(layout, (
-        ak.layout.RegularArray,
-        ak.layout.ListArray32,
-        ak.layout.ListArrayU32,
-        ak.layout.ListArray64,
-        ak.layout.ListOffsetArray32,
-        ak.layout.ListOffsetArrayU32,
-        ak.layout.ListOffsetArray64,
-    )):
+    elif isinstance(
+        layout,
+        (
+            ak.layout.RegularArray,
+            ak.layout.ListArray32,
+            ak.layout.ListArrayU32,
+            ak.layout.ListArray64,
+            ak.layout.ListOffsetArray32,
+            ak.layout.ListOffsetArrayU32,
+            ak.layout.ListOffsetArray64,
+        ),
+    ):
         recursive_walk(layout.content, apply, args, depth + 1, materialize)
 
-    elif isinstance(layout, (
-        ak.layout.IndexedArray32,
-        ak.layout.IndexedArrayU32,
-        ak.layout.IndexedArray64,
-        ak.layout.IndexedOptionArray32,
-        ak.layout.IndexedOptionArray64,
-        ak.layout.ByteMaskedArray,
-        ak.layout.BitMaskedArray,
-        ak.layout.UnmaskedArray,
-    )):
+    elif isinstance(
+        layout,
+        (
+            ak.layout.IndexedArray32,
+            ak.layout.IndexedArrayU32,
+            ak.layout.IndexedArray64,
+            ak.layout.IndexedOptionArray32,
+            ak.layout.IndexedOptionArray64,
+            ak.layout.ByteMaskedArray,
+            ak.layout.BitMaskedArray,
+            ak.layout.UnmaskedArray,
+        ),
+    ):
         recursive_walk(layout.content, apply, args, depth, materialize)
 
-    elif isinstance(layout, (
-        ak.layout.RecordArray,
-        ak.layout.UnionArray8_32,
-        ak.layout.UnionArray8_U32,
-        ak.layout.UnionArray8_64,
-    )):
+    elif isinstance(
+        layout,
+        (
+            ak.layout.RecordArray,
+            ak.layout.UnionArray8_32,
+            ak.layout.UnionArray8_U32,
+            ak.layout.UnionArray8_64,
+        ),
+    ):
         for x in layout.contents:
             recursive_walk(x, apply, args, depth, materialize)
 
@@ -1518,9 +1477,7 @@ def minimally_touching_string(limit_length, layout, behavior):
 
     def forward(x, space, brackets=True, wrap=True, stop=None):
         done = False
-        if wrap and isinstance(
-            x, (ak.layout.Content, ak.partition.PartitionedArray)
-        ):
+        if wrap and isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray)):
             cls = arrayclass(x, behavior)
             if cls is not ak.highlevel.Array:
                 y = cls(x, behavior=behavior)
@@ -1535,9 +1492,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                     yield space + repr(y)
                     done = True
         if not done:
-            if isinstance(
-                x, (ak.layout.Content, ak.partition.PartitionedArray)
-            ):
+            if isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray)):
                 if brackets:
                     yield space + "["
                 sp = ""
@@ -1580,9 +1535,7 @@ def minimally_touching_string(limit_length, layout, behavior):
 
     def backward(x, space, brackets=True, wrap=True, stop=-1):
         done = False
-        if wrap and isinstance(
-            x, (ak.layout.Content, ak.partition.PartitionedArray)
-        ):
+        if wrap and isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray)):
             cls = arrayclass(x, behavior)
             if cls is not ak.highlevel.Array:
                 y = cls(x, behavior=behavior)
@@ -1597,9 +1550,7 @@ def minimally_touching_string(limit_length, layout, behavior):
                     yield repr(y) + space
                     done = True
         if not done:
-            if isinstance(
-                x, (ak.layout.Content, ak.partition.PartitionedArray)
-            ):
+            if isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray)):
                 if brackets:
                     yield "]" + space
                 sp = ""
@@ -1736,6 +1687,7 @@ class MappingProxy(MutableMapping):
     This can be used to wrap plain dict instances if need be,
     since they are not able to be weak referenced.
     """
+
     @classmethod
     def maybe_wrap(cls, mapping):
         if type(mapping) is dict:
@@ -1766,17 +1718,11 @@ class MappingProxy(MutableMapping):
 
 def make_union(tags, index, contents, identities, parameters):
     if isinstance(index, ak.layout.Index32):
-        return ak.layout.UnionArray8_32(
-            tags, index, contents, identities, parameters
-        )
+        return ak.layout.UnionArray8_32(tags, index, contents, identities, parameters)
     elif isinstance(index, ak.layout.IndexU32):
-        return ak.layout.UnionArray8_U32(
-            tags, index, contents, identities, parameters
-        )
+        return ak.layout.UnionArray8_U32(tags, index, contents, identities, parameters)
     elif isinstance(index, ak.layout.Index64):
-        return ak.layout.UnionArray8_64(
-            tags, index, contents, identities, parameters
-        )
+        return ak.layout.UnionArray8_64(tags, index, contents, identities, parameters)
     else:
         raise AssertionError(index)
 
@@ -1793,9 +1739,9 @@ def union_to_record(unionarray, anonymous):
         elif isinstance(layout, uniontypes):
             contents.append(union_to_record(layout, anonymous))
         elif isinstance(layout, optiontypes):
-            contents.append(ak.operations.structure.fill_none(
-                layout, np.nan, highlevel=False
-            ))
+            contents.append(
+                ak.operations.structure.fill_none(layout, np.nan, highlevel=False)
+            )
         else:
             contents.append(layout)
 

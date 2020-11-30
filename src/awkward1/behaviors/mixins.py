@@ -6,6 +6,7 @@ import sys
 
 import awkward1 as ak
 
+
 def mixin_class(registry):
     """
     Args:
@@ -23,10 +24,14 @@ def mixin_class(registry):
 
     def register(cls):
         name = cls.__name__
-        record = type(name + "Record", (cls, ak.highlevel.Record), {"__module__": cls.__module__})
+        record = type(
+            name + "Record", (cls, ak.highlevel.Record), {"__module__": cls.__module__}
+        )
         setattr(sys.modules[cls.__module__], name + "Record", record)
         registry[name] = record
-        array = type(name + "Array", (cls, ak.highlevel.Array), {"__module__": cls.__module__})
+        array = type(
+            name + "Array", (cls, ak.highlevel.Array), {"__module__": cls.__module__}
+        )
         setattr(sys.modules[cls.__module__], name + "Array", array)
         registry["*", name] = array
         for basecls in cls.mro():
@@ -87,10 +92,5 @@ def mixin_class_method(ufunc, rhs=None, transpose=True):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_")
-    and x not in (
-        "absolute_import",
-        "awkward1",
-        "sys",
-    )
+    if not x.startswith("_") and x not in ("absolute_import", "awkward1", "sys",)
 ]

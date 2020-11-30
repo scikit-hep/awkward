@@ -14,16 +14,18 @@ np = ak.nplike.NumpyMetadata.instance()
 
 ########## for code that's built up from strings
 
+
 def code_to_function(code, function_name, externals={}, debug=False):
     if debug:
-        print("################### " + function_name)
-        print(code)
+        print("################### " + function_name)  # noqa: T001
+        print(code)  # noqa: T001
     namespace = dict(externals)
     exec(code, namespace)
     return namespace[function_name]
 
 
 ########## Lookup
+
 
 class Lookup(object):
     def __init__(self, layout):
@@ -71,11 +73,7 @@ class Lookup(object):
 
     def _view_as_array(self):
         return self.nplike.vstack(
-            [
-                self.nplike.arange(len(self.arrayptrs)),
-                self.arrayptrs,
-                self.sharedptrs,
-            ]
+            [self.nplike.arange(len(self.arrayptrs)), self.arrayptrs, self.sharedptrs]
         ).T
 
 
@@ -138,8 +136,7 @@ def tolookup(layout, positions, sharedptrs, arrays):
         )
 
     elif isinstance(
-        layout,
-        (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64),
+        layout, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64),
     ):
         return ak._connect._numba.layout.IndexedOptionArrayType.tolookup(
             layout, positions, sharedptrs, arrays
@@ -314,7 +311,7 @@ def unbox_Lookup(lookuptype, lookupobj, c):
 
 class ArrayView(object):
     @classmethod
-    def fromarray(self, array):
+    def fromarray(cls, array):
         behavior = ak._util.behaviorof(array)
         layout = ak.operations.convert.to_layout(
             array,
@@ -322,9 +319,8 @@ class ArrayView(object):
             allow_other=False,
             numpytype=(np.number, np.bool_, np.bool),
         )
-        while (
-            isinstance(layout, ak.layout.VirtualArray)
-            and isinstance(layout.generator, ak.layout.SliceGenerator)
+        while isinstance(layout, ak.layout.VirtualArray) and isinstance(
+            layout.generator, ak.layout.SliceGenerator
         ):
             layout = layout.array
         layout = ak.operations.convert.regularize_numpyarray(
@@ -394,9 +390,7 @@ class ArrayViewType(numba.types.IterableType, numba.types.Sized):
     def __init__(self, type, behavior, fields):
         super(ArrayViewType, self).__init__(
             name="ak.ArrayView({0}, {1}, {2})".format(
-                type.name,
-                ak._connect._numba.repr_behavior(behavior),
-                repr(fields),
+                type.name, ak._connect._numba.repr_behavior(behavior), repr(fields),
             )
         )
         self.type = type
@@ -592,8 +586,7 @@ class type_getitem(numba.core.typing.templates.AbstractTemplate):
                 raise TypeError(
                     "only an integer, start:stop range, or a *constant* "
                     "field name string may be used as ak.Array "
-                    "slices in compiled code"
-                    + ak._util.exception_suffix(__file__)
+                    "slices in compiled code" + ak._util.exception_suffix(__file__)
                 )
 
 
@@ -737,7 +730,7 @@ def lower_iternext(context, builder, sig, args, result):
 
 class RecordView(object):
     @classmethod
-    def fromrecord(self, record):
+    def fromrecord(cls, record):
         behavior = ak._util.behaviorof(record)
         layout = ak.operations.convert.to_layout(
             record,
@@ -905,7 +898,7 @@ class type_getattr_record(numba.core.typing.templates.AttributeTemplate):
                 class type_method(numba.core.typing.templates.AbstractTemplate):
                     key = methodname
 
-                    def generic(_, args, kwargs):
+                    def generic(self, args, kwargs):
                         if len(kwargs) == 0:
                             sig = typer(recordviewtype, args)
                             sig = numba.core.typing.templates.Signature(
@@ -962,9 +955,7 @@ def register_unary_operator(unaryop):
                     left = args[0].arrayviewtype.type
                     behavior = args[0].arrayviewtype.behavior
 
-                for typer, lower in ak._util.numba_unaryops(
-                    unaryop, left, behavior
-                ):
+                for typer, lower in ak._util.numba_unaryops(unaryop, left, behavior):
                     numba.extending.lower_builtin(unaryop, *args)(lower)
                     return typer(unaryop, args[0])
 
@@ -997,9 +988,7 @@ def register_binary_operator(binop):
                     if behavior is None:
                         behavior = args[1].arrayviewtype.behavior
 
-                for typer, lower in ak._util.numba_binops(
-                    binop, left, right, behavior
-                ):
+                for typer, lower in ak._util.numba_binops(binop, left, right, behavior):
                     numba.extending.lower_builtin(binop, *args)(lower)
                     return typer(binop, args[0], args[1])
 
@@ -1030,19 +1019,17 @@ for binop in (
 
 ########## __contains__
 
+
 @numba.extending.overload(operator.contains)
 def overload_contains(obj, element):
-    if (
-            isinstance(obj, (ArrayViewType, RecordViewType)) and
-            (
-                (element == numba.types.none) or
-                (isinstance(element, (numba.types.Number, numba.types.Boolean))) or
-                (
-                    isinstance(element, numba.types.Optional) and
-                    isinstance(element.type, (numba.types.Number, numba.types.Boolean))
-                )
-            )
-       ):
+    if isinstance(obj, (ArrayViewType, RecordViewType)) and (
+        (element == numba.types.none)
+        or (isinstance(element, (numba.types.Number, numba.types.Boolean)))
+        or (
+            isinstance(element, numba.types.Optional)
+            and isinstance(element.type, (numba.types.Number, numba.types.Boolean))
+        )
+    ):
         statements = []
 
         def add_statement(indent, name, arraytype, is_array):
@@ -1066,7 +1053,9 @@ def overload_contains(obj, element):
                         "({0} is not None and element == {0}): return True".format(name)
                     )
                 else:
-                    statements.append(indent + "if element == {0}: return True".format(name))
+                    statements.append(
+                        indent + "if element == {0}: return True".format(name)
+                    )
 
             else:
                 if arraytype.is_optiontype:
@@ -1075,17 +1064,24 @@ def overload_contains(obj, element):
                         "({0} is not None and element in {0}): return True".format(name)
                     )
                 else:
-                    statements.append(indent + "if element in {0}: return True".format(name))
+                    statements.append(
+                        indent + "if element in {0}: return True".format(name)
+                    )
 
         if isinstance(obj, ArrayViewType):
             add_statement("", "obj", obj.type, True)
         else:
             add_statement("", "obj", obj.arrayviewtype.type, False)
 
-        return code_to_function("""
+        return code_to_function(
+            """
 def contains_impl(obj, element):
     {0}
-    return False""".format("\n    ".join(statements)), "contains_impl")
+    return False""".format(
+                "\n    ".join(statements)
+            ),
+            "contains_impl",
+        )
 
 
 ########## np.array and np.asarray
@@ -1122,9 +1118,7 @@ def overload_np_array(array, dtype=None):
                 compute_shape.append(
                     "{0}for x{1} in {2}:".format("    " * i, i, array_name)
                 )
-                compute_shape.append(
-                    "{0}    if shape{1} == -1:".format("    " * i, i)
-                )
+                compute_shape.append("{0}    if shape{1} == -1:".format("    " * i, i))
                 compute_shape.append(
                     "{0}        shape{1} = len(x{1})".format("    " * i, i)
                 )
@@ -1136,9 +1130,7 @@ def overload_np_array(array, dtype=None):
                     "subarray lengths are not regular')".format("    " * i)
                 )
                 specify_shape.append("shape{0}".format(i))
-                ensure_shape.append(
-                    "if shape{0} == -1: shape{0} = 0".format(i)
-                )
+                ensure_shape.append("if shape{0} == -1: shape{0} = 0".format(i))
                 array_name = "x{0}".format(i)
 
             fill_array = []
@@ -1146,7 +1138,9 @@ def overload_np_array(array, dtype=None):
             array_name = "array"
             for i in range(ndim):
                 fill_array.append(
-                    "{0}for i{1}, x{1} in enumerate({2}):".format("    " * i, i, array_name)
+                    "{0}for i{1}, x{1} in enumerate({2}):".format(
+                        "    " * i, i, array_name
+                    )
                 )
                 index.append("i{0}".format(i))
                 array_name = "x{0}".format(i)
@@ -1155,7 +1149,8 @@ def overload_np_array(array, dtype=None):
                 "{0}out[{1}] = x{2}".format("    " * ndim, "][".join(index), ndim - 1)
             )
 
-            return code_to_function("""
+            return code_to_function(
+                """
 def array_impl(array, dtype=None):
     {0}
     {1}
@@ -1163,32 +1158,37 @@ def array_impl(array, dtype=None):
     out = numpy.zeros(({3}), {4})
     {5}
     return out
-""".format("\n    ".join(declare_shape),
-           "\n    ".join(compute_shape),
-           "\n    ".join(ensure_shape),
-           ", ".join(specify_shape),
-           "numpy.{0}".format(inner_dtype) if dtype is None else "dtype",
-           "\n    ".join(fill_array)),
-                "array_impl", {"numpy": ak.nplike.numpy})
+""".format(
+                    "\n    ".join(declare_shape),
+                    "\n    ".join(compute_shape),
+                    "\n    ".join(ensure_shape),
+                    ", ".join(specify_shape),
+                    "numpy.{0}".format(inner_dtype) if dtype is None else "dtype",
+                    "\n    ".join(fill_array),
+                ),
+                "array_impl",
+                {"numpy": ak.nplike.numpy},
+            )
 
 
 @numba.extending.type_callable(ak.nplike.numpy.asarray)
 def type_asarray(context):
     def typer(arrayview):
         if (
-            isinstance(arrayview, ArrayViewType) and
-            isinstance(arrayview.type, ak._connect._numba.layout.NumpyArrayType) and
-            arrayview.type.ndim == 1 and
-            arrayview.type.inner_dtype in array_supported
+            isinstance(arrayview, ArrayViewType)
+            and isinstance(arrayview.type, ak._connect._numba.layout.NumpyArrayType)
+            and arrayview.type.ndim == 1
+            and arrayview.type.inner_dtype in array_supported
         ):
             return numba.types.Array(arrayview.type.inner_dtype, 1, "C")
+
     return typer
 
 
 @numba.extending.lower_builtin(ak.nplike.numpy.asarray, ArrayViewType)
 def lower_asarray(context, builder, sig, args):
     rettype, (viewtype,) = sig.return_type, sig.args
-    viewval, = args
+    (viewval,) = args
     viewproxy = context.make_helper(builder, viewtype, viewval)
     assert isinstance(viewtype.type, ak._connect._numba.layout.NumpyArrayType)
 
@@ -1215,9 +1215,7 @@ def lower_asarray(context, builder, sig, args):
         (builder.sub(viewproxy.stop, viewproxy.start),),
     )
     strides = context.make_tuple(
-        builder,
-        numba.types.UniTuple(numba.types.intp, 1),
-        (itemsize,),
+        builder, numba.types.UniTuple(numba.types.intp, 1), (itemsize,),
     )
 
     out = numba.np.arrayobj.make_array(rettype)(context, builder)
@@ -1294,9 +1292,7 @@ class PartitionedViewType(numba.types.Type):
     def __init__(self, type, behavior, fields):
         super(PartitionedViewType, self).__init__(
             name="ak.PartitionedView({0}, {1}, {2})".format(
-                type.name,
-                ak._connect._numba.repr_behavior(behavior),
-                repr(fields),
+                type.name, ak._connect._numba.repr_behavior(behavior), repr(fields),
             )
         )
         self.type = type
@@ -1495,8 +1491,7 @@ class type_getitem_partitioned(numba.core.typing.templates.AbstractTemplate):
                 raise TypeError(
                     "only an integer, start:stop range, or a *constant* "
                     "field name string may be used as ak.Array "
-                    "slices in compiled code"
-                    + ak._util.exception_suffix(__file__)
+                    "slices in compiled code" + ak._util.exception_suffix(__file__)
                 )
 
 

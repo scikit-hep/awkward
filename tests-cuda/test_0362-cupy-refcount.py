@@ -4,14 +4,14 @@ from __future__ import absolute_import
 
 import sys
 
-import pytest
-import numpy as np
-import cupy as cp
-import awkward1 as ak
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import cupy as cp  # noqa: F401
+import awkward1 as ak  # noqa: F401
 
 
 def test_cupy_refcount():
-    o = cupy.arange(10)
+    o = cp.arange(10)
     i = ak.layout.Index64.from_cupy(o)
     assert sys.getrefcount(o) == 3
     i2 = ak.layout.Index64.from_cupy(o)

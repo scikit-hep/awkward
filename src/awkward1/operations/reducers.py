@@ -6,6 +6,7 @@ import awkward1 as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
+
 def count(array, axis=None, keepdims=False, mask_identity=False):
     """
     Args:
@@ -86,10 +87,9 @@ def count(array, axis=None, keepdims=False, mask_identity=False):
             else:
                 return xs[0] + reduce(xs[1:])
 
-        return reduce([
-            ak.nplike.of(x).size(x)
-            for x in ak._util.completely_flatten(layout)
-            ])
+        return reduce(
+            [ak.nplike.of(x).size(x) for x in ak._util.completely_flatten(layout)]
+        )
     else:
         behavior = ak._util.behaviorof(array)
         return ak._util.wrap(
@@ -140,10 +140,12 @@ def count_nonzero(array, axis=None, keepdims=False, mask_identity=False):
             else:
                 return xs[0] + reduce(xs[1:])
 
-        return reduce([
-            ak.nplike.of(x).count_nonzero(x)
-            for x in ak._util.completely_flatten(layout)
-        ])
+        return reduce(
+            [
+                ak.nplike.of(x).count_nonzero(x)
+                for x in ak._util.completely_flatten(layout)
+            ]
+        )
     else:
         behavior = ak._util.behaviorof(array)
         return ak._util.wrap(
@@ -335,10 +337,9 @@ def sum(array, axis=None, keepdims=False, mask_identity=False):
             else:
                 return xs[0] + reduce(xs[1:])
 
-        return reduce([
-            ak.nplike.of(x).sum(x)
-            for x in ak._util.completely_flatten(layout)
-        ])
+        return reduce(
+            [ak.nplike.of(x).sum(x) for x in ak._util.completely_flatten(layout)]
+        )
     else:
         behavior = ak._util.behaviorof(array)
         return ak._util.wrap(
@@ -385,10 +386,9 @@ def prod(array, axis=None, keepdims=False, mask_identity=False):
             else:
                 return xs[0] * reduce(xs[1:])
 
-        return reduce([
-            ak.nplike.of(x).prod(x)
-            for x in ak._util.completely_flatten(layout)
-        ])
+        return reduce(
+            [ak.nplike.of(x).prod(x) for x in ak._util.completely_flatten(layout)]
+        )
     else:
         behavior = ak._util.behaviorof(array)
         return ak._util.wrap(
@@ -437,10 +437,9 @@ def any(array, axis=None, keepdims=False, mask_identity=False):
             else:
                 return xs[0] or reduce(xs[1:])
 
-        return reduce([
-            ak.nplike.of(x).any(x)
-            for x in ak._util.completely_flatten(layout)
-        ])
+        return reduce(
+            [ak.nplike.of(x).any(x) for x in ak._util.completely_flatten(layout)]
+        )
     else:
         behavior = ak._util.behaviorof(array)
         return ak._util.wrap(
@@ -489,10 +488,9 @@ def all(array, axis=None, keepdims=False, mask_identity=False):
             else:
                 return xs[0] and reduce(xs[1:])
 
-        return reduce([
-            ak.nplike.of(x).all(x)
-            for x in ak._util.completely_flatten(layout)
-        ])
+        return reduce(
+            [ak.nplike.of(x).all(x) for x in ak._util.completely_flatten(layout)]
+        )
     else:
         behavior = ak._util.behaviorof(array)
         return ak._util.wrap(
@@ -970,10 +968,9 @@ def var(x, weight=None, ddof=0, axis=None, keepdims=False, mask_identity=True):
                 mask_identity=mask_identity,
             )
         if ddof != 0:
-            return (
-                ak.nplike.of(sumwxx, sumw).true_divide(sumwxx, sumw)
-                * ak.nplike.of(sumw).true_divide(sumw, sumw - ddof)
-            )
+            return ak.nplike.of(sumwxx, sumw).true_divide(sumwxx, sumw) * ak.nplike.of(
+                sumw
+            ).true_divide(sumw, sumw - ddof)
         else:
             return ak.nplike.of(sumwxx, sumw).true_divide(sumwxx, sumw)
 
@@ -1297,41 +1294,25 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
         scalar = False
         if not isinstance(
             intercept,
-            (
-                ak.layout.Content,
-                ak.layout.Record,
-                ak.partition.PartitionedArray,
-            ),
+            (ak.layout.Content, ak.layout.Record, ak.partition.PartitionedArray,),
         ):
             intercept = ak.layout.NumpyArray(nplike.array([intercept]))
             scalar = True
         if not isinstance(
             slope,
-            (
-                ak.layout.Content,
-                ak.layout.Record,
-                ak.partition.PartitionedArray,
-            ),
+            (ak.layout.Content, ak.layout.Record, ak.partition.PartitionedArray,),
         ):
             slope = ak.layout.NumpyArray(nplike.array([slope]))
             scalar = True
         if not isinstance(
             intercept_error,
-            (
-                ak.layout.Content,
-                ak.layout.Record,
-                ak.partition.PartitionedArray,
-            ),
+            (ak.layout.Content, ak.layout.Record, ak.partition.PartitionedArray,),
         ):
             intercept_error = ak.layout.NumpyArray(nplike.array([intercept_error]))
             scalar = True
         if not isinstance(
             slope_error,
-            (
-                ak.layout.Content,
-                ak.layout.Record,
-                ak.partition.PartitionedArray,
-            ),
+            (ak.layout.Content, ak.layout.Record, ak.partition.PartitionedArray,),
         ):
             slope_error = ak.layout.NumpyArray(nplike.array([slope_error]))
             scalar = True
@@ -1427,9 +1408,5 @@ def softmax(x, axis=None, keepdims=False, mask_identity=False):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_") and x not in (
-        "absolute_import",
-        "np",
-        "awkward1",
-    )
+    if not x.startswith("_") and x not in ("absolute_import", "np", "awkward1",)
 ]

@@ -12,6 +12,7 @@ numpy = ak.nplike.Numpy.instance()
 
 dynamic_addrs = {}
 
+
 def globalstring(context, builder, pyvalue):
     import llvmlite.ir.types
 
@@ -48,8 +49,12 @@ def lower_const_ArrayBuilder(context, builder, arraybuildertype, arraybuilder):
     layout = arraybuilder._layout
     rawptr = context.get_constant(numba.intp, arraybuilder._layout._ptr)
     proxyout = context.make_helper(builder, arraybuildertype)
-    proxyout.rawptr = builder.inttoptr(rawptr, context.get_value_type(numba.types.voidptr))
-    proxyout.pyptr = context.add_dynamic_addr(builder, id(layout), info=str(type(layout)))
+    proxyout.rawptr = builder.inttoptr(
+        rawptr, context.get_value_type(numba.types.voidptr)
+    )
+    proxyout.pyptr = context.add_dynamic_addr(
+        builder, id(layout), info=str(type(layout))
+    )
     return proxyout._getvalue()
 
 
@@ -125,10 +130,7 @@ def lower_len(context, builder, sig, args):
         builder, context.get_value_type(numba.int64)
     )
     call(
-        context,
-        builder,
-        ak._libawkward.ArrayBuilder_length,
-        (proxyin.rawptr, result),
+        context, builder, ak._libawkward.ArrayBuilder_length, (proxyin.rawptr, result),
     )
     return ak._connect._numba.castint(
         context, builder, numba.int64, numba.intp, builder.load(result)
@@ -403,9 +405,7 @@ def lower_boolean(context, builder, sig, args):
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     x = builder.zext(xval, context.get_value_type(numba.uint8))
-    call(
-        context, builder, ak._libawkward.ArrayBuilder_boolean, (proxyin.rawptr, x)
-    )
+    call(context, builder, ak._libawkward.ArrayBuilder_boolean, (proxyin.rawptr, x))
     return context.get_dummy_value()
 
 
@@ -415,9 +415,7 @@ def lower_integer(context, builder, sig, args):
     arraybuilderval, xval = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     x = ak._connect._numba.castint(context, builder, xtype, numba.int64, xval)
-    call(
-        context, builder, ak._libawkward.ArrayBuilder_integer, (proxyin.rawptr, x)
-    )
+    call(context, builder, ak._libawkward.ArrayBuilder_integer, (proxyin.rawptr, x))
     return context.get_dummy_value()
 
 
@@ -446,9 +444,7 @@ def lower_beginlist(context, builder, sig, args):
     (arraybuildertype,) = sig.args
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(
-        context, builder, ak._libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,)
-    )
+    call(context, builder, ak._libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 
@@ -487,10 +483,7 @@ def lower_index(context, builder, sig, args):
         context, builder, indextype, numba.int64, indexval
     )
     call(
-        context,
-        builder,
-        ak._libawkward.ArrayBuilder_index,
-        (proxyin.rawptr, index),
+        context, builder, ak._libawkward.ArrayBuilder_index, (proxyin.rawptr, index),
     )
     return arraybuilderval
 
@@ -500,9 +493,7 @@ def lower_endtuple(context, builder, sig, args):
     (arraybuildertype,) = sig.args
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(
-        context, builder, ak._libawkward.ArrayBuilder_endtuple, (proxyin.rawptr,)
-    )
+    call(context, builder, ak._libawkward.ArrayBuilder_endtuple, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 
@@ -512,10 +503,7 @@ def lower_beginrecord(context, builder, sig, args):
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     call(
-        context,
-        builder,
-        ak._libawkward.ArrayBuilder_beginrecord,
-        (proxyin.rawptr,),
+        context, builder, ak._libawkward.ArrayBuilder_beginrecord, (proxyin.rawptr,),
     )
     return context.get_dummy_value()
 
@@ -544,10 +532,7 @@ def lower_field(context, builder, sig, args):
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     key = globalstring(context, builder, keytype.literal_value)
     call(
-        context,
-        builder,
-        ak._libawkward.ArrayBuilder_field_fast,
-        (proxyin.rawptr, key),
+        context, builder, ak._libawkward.ArrayBuilder_field_fast, (proxyin.rawptr, key),
     )
     return arraybuilderval
 
@@ -557,9 +542,7 @@ def lower_endrecord(context, builder, sig, args):
     (arraybuildertype,) = sig.args
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(
-        context, builder, ak._libawkward.ArrayBuilder_endrecord, (proxyin.rawptr,)
-    )
+    call(context, builder, ak._libawkward.ArrayBuilder_endrecord, (proxyin.rawptr,))
     return context.get_dummy_value()
 
 
@@ -577,9 +560,7 @@ def lower_append_array_at(context, builder, sig, args):
     atval = ak._connect._numba.layout.regularize_atval(
         context, builder, viewproxy, attype, atval, True, True
     )
-    atval = ak._connect._numba.castint(
-        context, builder, numba.intp, numba.int64, atval
-    )
+    atval = ak._connect._numba.castint(context, builder, numba.intp, numba.int64, atval)
 
     sharedptr = ak._connect._numba.layout.getat(
         context, builder, viewproxy.sharedptrs, viewproxy.pos
@@ -607,9 +588,7 @@ def lower_append_array(context, builder, sig, args):
     arraybuilderval, viewval = args
 
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
-    call(
-        context, builder, ak._libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,)
-    )
+    call(context, builder, ak._libawkward.ArrayBuilder_beginlist, (proxyin.rawptr,))
 
     lower_extend_array(context, builder, sig, args)
 
@@ -700,8 +679,7 @@ def lower_append_optional(context, builder, sig, args):
                 )
             else:
                 raise AssertionError(
-                    repr(opttype.type)
-                    + ak._util.exception_suffix(__file__)
+                    repr(opttype.type) + ak._util.exception_suffix(__file__)
                 )
 
         with is_not_valid:

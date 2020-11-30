@@ -4,9 +4,9 @@ from __future__ import absolute_import
 
 import itertools
 
-import pytest
-import numpy as np
-import awkward1 as ak
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward1 as ak  # noqa: F401
 
 content = ak.layout.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(-1, 7))
 offsetsA = np.arange(0, 2 * 3 * 5 + 5, 5)

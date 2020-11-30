@@ -6,6 +6,7 @@ import awkward1 as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 
+
 class ByteBehavior(ak.highlevel.Array):
     __name__ = "Array"
 
@@ -157,9 +158,7 @@ def _string_broadcast(layout, offsets):
     if ak._util.win:
         counts = counts.astype(np.int32)
     parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
-    return ak.layout.IndexedArray64(
-        ak.layout.Index64(parents), layout
-    ).project()
+    return ak.layout.IndexedArray64(ak.layout.Index64(parents), layout).project()
 
 
 ak.behavior["__broadcast__", "bytestring"] = _string_broadcast
@@ -180,7 +179,6 @@ def _string_numba_lower(
 ):
     import numba
     import llvmlite.llvmpy.core
-    import awkward1._connect._numba.layout
 
     whichpos = ak._connect._numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.CONTENT
@@ -262,10 +260,5 @@ ak.behavior["__numba_lower__", "string"] = _string_numba_lower
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_")
-    and x not in (
-        "absolute_import",
-        "np",
-        "awkward1",
-    )
+    if not x.startswith("_") and x not in ("absolute_import", "np", "awkward1",)
 ]

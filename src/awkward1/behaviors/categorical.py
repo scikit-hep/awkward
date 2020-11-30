@@ -40,10 +40,7 @@ class _HashableList(object):
         return self.hash
 
     def __eq__(self, other):
-        return (
-            isinstance(other, _HashableList)
-            and self.values == other.values
-        )
+        return isinstance(other, _HashableList) and self.values == other.values
 
 
 def _hashable(obj):
@@ -62,12 +59,8 @@ def _categorical_equal(one, two):
 
     one, two = one.layout, two.layout
 
-    assert isinstance(
-        one, ak._util.indexedtypes + ak._util.indexedoptiontypes
-    )
-    assert isinstance(
-        two, ak._util.indexedtypes + ak._util.indexedoptiontypes
-    )
+    assert isinstance(one, ak._util.indexedtypes + ak._util.indexedoptiontypes)
+    assert isinstance(two, ak._util.indexedtypes + ak._util.indexedoptiontypes)
     assert one.parameter("__array__") == "categorical"
     assert two.parameter("__array__") == "categorical"
 
@@ -76,9 +69,8 @@ def _categorical_equal(one, two):
     one_content = ak._util.wrap(one.content, behavior)
     two_content = ak._util.wrap(two.content, behavior)
 
-    if (
-        len(one_content) == len(two_content) and
-        ak.operations.reducers.all(one_content == two_content, axis=None)
+    if len(one_content) == len(two_content) and ak.operations.reducers.all(
+        one_content == two_content, axis=None
     ):
         one_mapped = one_index
 
@@ -97,9 +89,7 @@ def _categorical_equal(one, two):
         one_mapped = one_to_two[one_index]
 
     out = one_mapped == two_index
-    return ak._util.wrap(
-        ak.layout.NumpyArray(out), ak._util.behaviorof(one, two)
-    )
+    return ak._util.wrap(ak.layout.NumpyArray(out), ak._util.behaviorof(one, two))
 
 
 ak.behavior[ak.nplike.numpy.equal, "categorical", "categorical"] = _categorical_equal
@@ -108,13 +98,12 @@ ak.behavior[ak.nplike.numpy.equal, "categorical", "categorical"] = _categorical_
 def _apply_ufunc(ufunc, method, inputs, kwargs):
     nextinputs = []
     for x in inputs:
-        if (
-            isinstance(x, ak.highlevel.Array)
-            and isinstance(x.layout, ak._util.indexedtypes)
+        if isinstance(x, ak.highlevel.Array) and isinstance(
+            x.layout, ak._util.indexedtypes
         ):
-            nextinputs.append(ak.highlevel.Array(
-                x.layout.project(), behavior=ak._util.behaviorof(x)
-            ))
+            nextinputs.append(
+                ak.highlevel.Array(x.layout.project(), behavior=ak._util.behaviorof(x))
+            )
         else:
             nextinputs.append(x)
 
@@ -168,9 +157,7 @@ def categories(array, highlevel=True):
             return None
 
     ak._util.recursively_apply(
-        ak.operations.convert.to_layout(
-            array, allow_record=False, allow_other=False
-        ),
+        ak.operations.convert.to_layout(array, allow_record=False, allow_other=False),
         getfunction,
     )
 
@@ -248,11 +235,12 @@ def to_categorical(array, highlevel=True):
 
     See also #ak.is_categorical, #ak.categories, #ak.from_categorical.
     """
+
     def getfunction(layout, depth):
         p = layout.purelist_parameter("__array__")
-        if (layout.purelist_depth == 1 or (
+        if layout.purelist_depth == 1 or (
             layout.purelist_depth == 2 and (p == "string" or p == "bytestring")
-        )):
+        ):
             if isinstance(layout, ak._util.optiontypes):
                 layout = layout.simplify()
 
@@ -309,9 +297,7 @@ def to_categorical(array, highlevel=True):
             return None
 
     out = ak._util.recursively_apply(
-        ak.operations.convert.to_layout(
-            array, allow_record=False, allow_other=False
-        ),
+        ak.operations.convert.to_layout(array, allow_record=False, allow_other=False),
         getfunction,
     )
     if highlevel:
@@ -337,6 +323,7 @@ def from_categorical(array, highlevel=True):
     See also #ak.is_categorical, #ak.categories, #ak.to_categorical,
     #ak.from_categorical.
     """
+
     def getfunction(layout, depth):
         if layout.parameter("__array__") == "categorical":
             out = ak.operations.structure.with_parameter(
@@ -348,9 +335,7 @@ def from_categorical(array, highlevel=True):
             return None
 
     out = ak._util.recursively_apply(
-        ak.operations.convert.to_layout(
-            array, allow_record=False, allow_other=False
-        ),
+        ak.operations.convert.to_layout(array, allow_record=False, allow_other=False),
         getfunction,
     )
     if highlevel:
@@ -362,10 +347,5 @@ def from_categorical(array, highlevel=True):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_")
-    and x not in (
-        "absolute_import",
-        "np",
-        "awkward1",
-    )
+    if not x.startswith("_") and x not in ("absolute_import", "np", "awkward1",)
 ]

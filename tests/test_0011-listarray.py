@@ -2,9 +2,9 @@
 
 from __future__ import absolute_import
 
-import pytest
-import numpy as np
-import awkward1 as ak
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward1 as ak  # noqa: F401
 
 content = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
 starts1 = ak.layout.Index64(np.array([0, 3, 3, 5, 6]))
