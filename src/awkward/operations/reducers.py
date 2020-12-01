@@ -499,7 +499,7 @@ def all(array, axis=None, keepdims=False, mask_identity=False):
 
 
 @ak._connect._numpy.implements("min")
-def min(array, axis=None, keepdims=False, mask_identity=True):
+def min(array, axis=None, keepdims=False, initial=None, mask_identity=True):
     """
     Args:
         array: Data to minimize.
@@ -512,6 +512,10 @@ def min(array, axis=None, keepdims=False, mask_identity=True):
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
+        initial (None or number): The maximum value of an output element, as
+            an alternative to the numeric type's natural identity (e.g. infinity
+            for floating-point types, a maximum integer for integer types).
+            If you use `initial`, you might also want `mask_identity=False`.
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
@@ -548,12 +552,15 @@ def min(array, axis=None, keepdims=False, mask_identity=True):
     else:
         behavior = ak._util.behaviorof(array)
         return ak._util.wrap(
-            layout.min(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
+            layout.min(
+                axis=axis, mask=mask_identity, keepdims=keepdims, initial=initial
+            ),
+            behavior,
         )
 
 
 @ak._connect._numpy.implements("max")
-def max(array, axis=None, keepdims=False, mask_identity=True):
+def max(array, axis=None, keepdims=False, initial=None, mask_identity=True):
     """
     Args:
         array: Data to maximize.
@@ -566,6 +573,10 @@ def max(array, axis=None, keepdims=False, mask_identity=True):
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
             broadcasted with the original array.
+        initial (None or number): The minimum value of an output element, as
+            an alternative to the numeric type's natural identity (e.g. negative
+            infinity for floating-point types, a minimum integer for integer types).
+            If you use `initial`, you might also want `mask_identity=False`.
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
@@ -602,7 +613,10 @@ def max(array, axis=None, keepdims=False, mask_identity=True):
     else:
         behavior = ak._util.behaviorof(array)
         return ak._util.wrap(
-            layout.max(axis=axis, mask=mask_identity, keepdims=keepdims), behavior
+            layout.max(
+                axis=axis, mask=mask_identity, keepdims=keepdims, initial=initial
+            ),
+            behavior,
         )
 
 
