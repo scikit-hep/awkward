@@ -1373,6 +1373,20 @@ namespace awkward {
 
   ////////// min (minimum, in which infinity is the identity)
 
+  ReducerMin::ReducerMin(double initial_f64,
+                         uint64_t initial_u64,
+                         int64_t initial_i64)
+    : initial_f64_(initial_f64)
+    , initial_u64_(initial_u64)
+    , initial_i64_(initial_i64)
+    , has_initial_(true) { }
+
+  ReducerMin::ReducerMin()
+    : initial_f64_(0.0)
+    , initial_u64_((uint64_t)0)
+    , initial_i64_((int64_t)0)
+    , has_initial_(false) { }
+
   const std::string
   ReducerMin::name() const {
     return "min";
@@ -1406,6 +1420,10 @@ namespace awkward {
                          int64_t outlength) const {
     std::shared_ptr<int8_t> ptr(new int8_t[(size_t)outlength],
                                 kernel::array_deleter<int8_t>());
+    int8_t initial = std::numeric_limits<int8_t>::max();
+    if (has_initial_) {
+      initial = (int8_t)initial_i64_;
+    }
     struct Error err = kernel::reduce_min_64<int8_t, int8_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1413,7 +1431,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<int8_t>::max());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1424,6 +1442,10 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<uint8_t> ptr(new uint8_t[(size_t)outlength],
                                  kernel::array_deleter<uint8_t>());
+    uint8_t initial = std::numeric_limits<uint8_t>::max();
+    if (has_initial_) {
+      initial = (uint8_t)initial_u64_;
+    }
     struct Error err = kernel::reduce_min_64<uint8_t, uint8_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1431,7 +1453,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<uint8_t>::max());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1442,6 +1464,10 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<int16_t> ptr(new int16_t[(size_t)outlength],
                                  kernel::array_deleter<int16_t>());
+    int16_t initial = std::numeric_limits<int16_t>::max();
+    if (has_initial_) {
+      initial = (int16_t)initial_i64_;
+    }
     struct Error err = kernel::reduce_min_64<int16_t, int16_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1449,7 +1475,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<int16_t>::max());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1460,6 +1486,10 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<uint16_t> ptr(new uint16_t[(size_t)outlength],
                                   kernel::array_deleter<uint16_t>());
+    uint16_t initial = std::numeric_limits<uint16_t>::max();
+    if (has_initial_) {
+      initial = (uint16_t)initial_u64_;
+    }
     struct Error err = kernel::reduce_min_64<uint16_t, uint16_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1467,7 +1497,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<uint16_t>::max());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1478,6 +1508,10 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
                                  kernel::array_deleter<int32_t>());
+    int32_t initial = std::numeric_limits<int32_t>::max();
+    if (has_initial_) {
+      initial = (int32_t)initial_i64_;
+    }
     struct Error err = kernel::reduce_min_64<int32_t, int32_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1485,7 +1519,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<int32_t>::max());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1496,6 +1530,10 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
                                   kernel::array_deleter<uint32_t>());
+    uint32_t initial = std::numeric_limits<uint32_t>::max();
+    if (has_initial_) {
+      initial = (uint32_t)initial_u64_;
+    }
     struct Error err = kernel::reduce_min_64<uint32_t, uint32_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1503,7 +1541,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<uint32_t>::max());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1514,6 +1552,10 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
+    int64_t initial = std::numeric_limits<int64_t>::max();
+    if (has_initial_) {
+      initial = (int64_t)initial_i64_;
+    }
     struct Error err = kernel::reduce_min_64<int64_t, int64_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1521,7 +1563,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<int64_t>::max());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1532,6 +1574,10 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
                                   kernel::array_deleter<uint64_t>());
+    uint64_t initial = std::numeric_limits<uint64_t>::max();
+    if (has_initial_) {
+      initial = (uint64_t)initial_u64_;
+    }
     struct Error err = kernel::reduce_min_64<uint64_t, uint64_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1539,7 +1585,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<uint64_t>::max());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1550,6 +1596,10 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<float> ptr(new float[(size_t)outlength],
                                kernel::array_deleter<float>());
+    float initial = std::numeric_limits<float>::infinity();
+    if (has_initial_) {
+      initial = (float)initial_f64_;
+    }
     struct Error err = kernel::reduce_min_64<float, float>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1557,7 +1607,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<float>::infinity());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1568,6 +1618,10 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<double> ptr(new double[(size_t)outlength],
                                 kernel::array_deleter<double>());
+    double initial = std::numeric_limits<double>::infinity();
+    if (has_initial_) {
+      initial = (double)initial_f64_;
+    }
     struct Error err = kernel::reduce_min_64<double, double>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1575,12 +1629,26 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<double>::infinity());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
 
   ////////// max (maximum, in which -infinity is the identity)
+
+  ReducerMax::ReducerMax(double initial_f64,
+                         uint64_t initial_u64,
+                         int64_t initial_i64)
+    : initial_f64_(initial_f64)
+    , initial_u64_(initial_u64)
+    , initial_i64_(initial_i64)
+    , has_initial_(true) { }
+
+  ReducerMax::ReducerMax()
+    : initial_f64_(0.0)
+    , initial_u64_((uint64_t)0)
+    , initial_i64_((int64_t)0)
+    , has_initial_(false) { }
 
   const std::string
   ReducerMax::name() const {
@@ -1615,6 +1683,10 @@ namespace awkward {
                          int64_t outlength) const {
     std::shared_ptr<int8_t> ptr(new int8_t[(size_t)outlength],
                                 kernel::array_deleter<int8_t>());
+    int8_t initial = std::numeric_limits<int8_t>::min();
+    if (has_initial_) {
+      initial = (int8_t)initial_i64_;
+    }
     struct Error err = kernel::reduce_max_64<int8_t, int8_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1622,7 +1694,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<int8_t>::min());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1633,6 +1705,10 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<uint8_t> ptr(new uint8_t[(size_t)outlength],
                                  kernel::array_deleter<uint8_t>());
+    uint8_t initial = std::numeric_limits<uint8_t>::min();
+    if (has_initial_) {
+      initial = (uint8_t)initial_u64_;
+    }
     struct Error err = kernel::reduce_max_64<uint8_t, uint8_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1640,7 +1716,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<uint8_t>::min());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1651,6 +1727,10 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<int16_t> ptr(new int16_t[(size_t)outlength],
                                  kernel::array_deleter<int16_t>());
+    int16_t initial = std::numeric_limits<int16_t>::min();
+    if (has_initial_) {
+      initial = (int16_t)initial_i64_;
+    }
     struct Error err = kernel::reduce_max_64<int16_t, int16_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1658,7 +1738,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<int16_t>::min());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1669,6 +1749,10 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<uint16_t> ptr(new uint16_t[(size_t)outlength],
                                   kernel::array_deleter<uint16_t>());
+    uint16_t initial = std::numeric_limits<uint16_t>::min();
+    if (has_initial_) {
+      initial = (uint16_t)initial_u64_;
+    }
     struct Error err = kernel::reduce_max_64<uint16_t, uint16_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1676,7 +1760,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<uint16_t>::min());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1687,6 +1771,10 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
                                  kernel::array_deleter<int32_t>());
+    int32_t initial = std::numeric_limits<int32_t>::min();
+    if (has_initial_) {
+      initial = (int32_t)initial_i64_;
+    }
     struct Error err = kernel::reduce_max_64<int32_t, int32_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1694,7 +1782,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<int32_t>::min());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1705,6 +1793,10 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
                                   kernel::array_deleter<uint32_t>());
+    uint32_t initial = std::numeric_limits<uint32_t>::min();
+    if (has_initial_) {
+      initial = (uint32_t)initial_u64_;
+    }
     struct Error err = kernel::reduce_max_64<uint32_t, uint32_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1712,7 +1804,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<uint32_t>::min());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1723,6 +1815,10 @@ namespace awkward {
                           int64_t outlength) const {
     std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
                                  kernel::array_deleter<int64_t>());
+    int64_t initial = std::numeric_limits<int64_t>::min();
+    if (has_initial_) {
+      initial = (int64_t)initial_i64_;
+    }
     struct Error err = kernel::reduce_max_64<int64_t, int64_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1730,7 +1826,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<int64_t>::min());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1741,6 +1837,10 @@ namespace awkward {
                            int64_t outlength) const {
     std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
                                   kernel::array_deleter<uint64_t>());
+    uint64_t initial = std::numeric_limits<uint64_t>::min();
+    if (has_initial_) {
+      initial = (uint64_t)initial_u64_;
+    }
     struct Error err = kernel::reduce_max_64<uint64_t, uint64_t>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1748,7 +1848,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      std::numeric_limits<uint64_t>::min());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1759,6 +1859,10 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<float> ptr(new float[(size_t)outlength],
                                kernel::array_deleter<float>());
+    float initial = -std::numeric_limits<float>::infinity();
+    if (has_initial_) {
+      initial = (float)initial_f64_;
+    }
     struct Error err = kernel::reduce_max_64<float, float>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1766,7 +1870,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      -std::numeric_limits<float>::infinity());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
@@ -1777,6 +1881,10 @@ namespace awkward {
                             int64_t outlength) const {
     std::shared_ptr<double> ptr(new double[(size_t)outlength],
                                 kernel::array_deleter<double>());
+    double initial = -std::numeric_limits<double>::infinity();
+    if (has_initial_) {
+      initial = (double)initial_f64_;
+    }
     struct Error err = kernel::reduce_max_64<double, double>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
@@ -1784,7 +1892,7 @@ namespace awkward {
       parents.data(),
       parents.length(),
       outlength,
-      -std::numeric_limits<double>::infinity());
+      initial);
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }

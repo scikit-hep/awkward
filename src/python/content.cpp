@@ -1338,22 +1338,46 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           }, py::arg("axis") = -1,
              py::arg("mask") = false,
              py::arg("keepdims") = false)
-          .def("min",
-               [](const T& self, int64_t axis, bool mask, bool keepdims)
-               -> py::object {
-            ak::ReducerMin reducer;
-            return box(self.reduce(reducer, axis, mask, keepdims));
+          .def("min", [](const T& self,
+                         int64_t axis,
+                         bool mask,
+                         bool keepdims,
+                         const py::object& initial) -> py::object {
+            if (initial.is(py::none())) {
+              ak::ReducerMin reducer;
+              return box(self.reduce(reducer, axis, mask, keepdims));
+            }
+            else {
+              double initial_f64 = initial.cast<double>();
+              uint64_t initial_u64 = (initial_f64 > 0 ? initial.cast<uint64_t>() : 0);
+              int64_t initial_i64 = initial.cast<int64_t>();
+              ak::ReducerMin reducer(initial_f64, initial_u64, initial_i64);
+              return box(self.reduce(reducer, axis, mask, keepdims));
+            }
           }, py::arg("axis") = -1,
              py::arg("mask") = true,
-             py::arg("keepdims") = false)
-          .def("max",
-               [](const T& self, int64_t axis, bool mask, bool keepdims)
-               -> py::object {
-            ak::ReducerMax reducer;
-            return box(self.reduce(reducer, axis, mask, keepdims));
+             py::arg("keepdims") = false,
+             py::arg("initial") = py::none())
+          .def("max", [](const T& self,
+                         int64_t axis,
+                         bool mask,
+                         bool keepdims,
+                         const py::object& initial) -> py::object {
+            if (initial.is(py::none())) {
+              ak::ReducerMax reducer;
+              return box(self.reduce(reducer, axis, mask, keepdims));
+            }
+            else {
+              double initial_f64 = initial.cast<double>();
+              uint64_t initial_u64 = (initial_f64 > 0 ? initial.cast<uint64_t>() : 0);
+              int64_t initial_i64 = initial.cast<int64_t>();
+              ak::ReducerMax reducer(initial_f64, initial_u64, initial_i64);
+              return box(self.reduce(reducer, axis, mask, keepdims));
+            }
           }, py::arg("axis") = -1,
              py::arg("mask") = true,
-             py::arg("keepdims") = false)
+             py::arg("keepdims") = false,
+             py::arg("initial") = py::none())
           .def("argmin",
                [](const T& self, int64_t axis, bool mask, bool keepdims)
                -> py::object {
