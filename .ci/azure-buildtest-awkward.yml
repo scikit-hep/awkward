@@ -112,7 +112,7 @@ jobs:
         condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
-          python dev/kernel-diagnostics.py --check-sorted
+          python dev/kernel-diagnostics.py --check-spec-sorted
         displayName: "Check if kernel specification is sorted"
         condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
@@ -204,7 +204,7 @@ jobs:
         condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
-          python dev/kernel-diagnostics.py --check-sorted
+          python dev/kernel-diagnostics.py --check-spec-sorted
         displayName: "Check if kernel specification is sorted"
         condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
@@ -348,7 +348,7 @@ jobs:
         condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
-          python dev/kernel-diagnostics.py --check-sorted
+          python dev/kernel-diagnostics.py --check-spec-sorted
         displayName: "Check if kernel specification is sorted"
         condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
