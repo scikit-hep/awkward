@@ -5,7 +5,15 @@ set -e
 
 rm -rf build dist
 mkdir build
-cp -r src/awkward1 build
+mkdir build/awkward1
+
+cat > build/awkward1/__init__.py << EOF
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
+
+from __future__ import absolute_import
+
+from awkward import *
+EOF
 
 cat > build/awkward1-setup.py << EOF
 
