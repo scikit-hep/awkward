@@ -768,15 +768,16 @@ def to_list(array):
         )
 
 
-def from_json(source,
-              nan_string=None,
-              infinity_string=None,
-              minus_infinity_string=None,
-              highlevel=True,
-              behavior=None,
-              initial=1024,
-              resize=1.5,
-              buffersize=65536
+def from_json(
+    source,
+    nan_string=None,
+    infinity_string=None,
+    minus_infinity_string=None,
+    highlevel=True,
+    behavior=None,
+    initial=1024,
+    resize=1.5,
+    buffersize=65536,
 ):
     """
     Args:
@@ -815,15 +816,8 @@ def from_json(source,
         or minus_infinity_string is not None
     )
 
-    layout = ak._ext.fromjson(
-        source,
-        nan_string=nan_string,
-        infinity_string=infinity_string,
-        minus_infinity_string=minus_infinity_string,
-        nan_and_inf_as_float=nan_and_inf_as_float,
-        initial=initial,
-        resize=resize,
-        buffersize=buffersize) if not os.path.isfile(source) else ak._ext.fromjsonfile(
+    if os.path.isfile(source):
+        layout = ak._ext.fromjsonfile(
             source,
             nan_string=nan_string,
             infinity_string=infinity_string,
@@ -831,22 +825,47 @@ def from_json(source,
             nan_and_inf_as_float=nan_and_inf_as_float,
             initial=initial,
             resize=resize,
-            buffersize=buffersize)
+            buffersize=buffersize,
+        )
+    else:
+        layout = ak._ext.fromjson(
+            source,
+            nan_string=nan_string,
+            infinity_string=infinity_string,
+            minus_infinity_string=minus_infinity_string,
+            nan_and_inf_as_float=nan_and_inf_as_float,
+            initial=initial,
+            resize=resize,
+            buffersize=buffersize,
+        )
+
+    if isinstance(layout, ak._util.listtypes):
+        layout = layout.content
+    elif isinstance(
+        layout, ak._util.optiontypes + (ak.layout.RecordArray, ak.layout.NumpyArray)
+    ):
+        layout = layout[0]
+    else:
+        raise AssertionError(
+            "unexpected case: {0}".format(type(layout).__name__)
+            + ak._util.exception_suffix(__file__)
+        )
 
     if highlevel:
-        return ak._util.wrap(layout.content, behavior)
+        return ak._util.wrap(layout, behavior)
     else:
-        return layout.content
+        return layout
 
 
-def to_json(array,
-            destination=None,
-            pretty=False,
-            maxdecimals=None,
-            nan_string=None,
-            infinity_string=None,
-            minus_infinity_string=None,
-            buffersize=65536
+def to_json(
+    array,
+    destination=None,
+    pretty=False,
+    maxdecimals=None,
+    nan_string=None,
+    infinity_string=None,
+    minus_infinity_string=None,
+    buffersize=65536,
 ):
     """
     Args:
@@ -924,14 +943,22 @@ def to_json(array,
         )
 
     if destination is None:
-        return out.tojson(pretty=pretty, maxdecimals=maxdecimals,
-            nan_string=nan_string, infinity_string=infinity_string,
-            minus_infinity_string=minus_infinity_string)
+        return out.tojson(
+            pretty=pretty,
+            maxdecimals=maxdecimals,
+            nan_string=nan_string,
+            infinity_string=infinity_string,
+            minus_infinity_string=minus_infinity_string,
+        )
     else:
         return out.tojson(
-            destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize,
-                nan_string=nan_string, infinity_string=infinity_string,
-                minus_infinity_string=minus_infinity_string
+            destination,
+            pretty=pretty,
+            maxdecimals=maxdecimals,
+            buffersize=buffersize,
+            nan_string=nan_string,
+            infinity_string=infinity_string,
+            minus_infinity_string=minus_infinity_string,
         )
 
 
