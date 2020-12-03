@@ -23,10 +23,10 @@ If you want Awkward Array to be statically linked into the executable, use `--st
 $ export LD_LIBRARY_PATH=`python -m awkward.config --libdir`:$LD_LIBRARY_PATH
 ```
 
-Now you can run this executable. (It takes two arguments, an array as JSON and an item to select and print as JSON. Also note that the internal function, `ak::FromJsonString`, changed in Awkward 1.0, so this example is less natural than it once was.)
+Now you can run this executable. (It takes two arguments, an array as JSON and an item to select and print as JSON.)
 
 ```bash
-$ ./minimal "[1.1, 2.2, 3.3] [] [4.4, 5.5] [6.6]" -2
+$ ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
 [4.4,5.5]
 ```
 
