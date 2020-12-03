@@ -6,6 +6,7 @@ import numbers
 import json
 import collections
 import math
+import os
 import threading
 import distutils.version
 
@@ -768,11 +769,25 @@ def to_list(array):
 
 
 def from_json(
-    source, highlevel=True, behavior=None, initial=1024, resize=1.5, buffersize=65536
+    source,
+    nan_string=None,
+    infinity_string=None,
+    minus_infinity_string=None,
+    highlevel=True,
+    behavior=None,
+    initial=1024,
+    resize=1.5,
+    buffersize=65536,
 ):
     """
     Args:
         source (str): JSON-formatted string to convert into an array.
+        nan_string (None or str): If not None, strings with this value will be
+            interpreted as floating-point NaN values.
+        infinity_string (None or str): If not None, strings with this value will
+            be interpreted as floating-point positive infinity values.
+        minus_infinity_string (None or str): If not None, strings with this value
+            will be interpreted as floating-point negative infinity values.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (bool): Custom #ak.behavior for the output array, if
@@ -795,16 +810,43 @@ def from_json(
 
     See also #ak.to_json.
     """
-    layout = ak._ext.fromjson(
-        source, initial=initial, resize=resize, buffersize=buffersize
-    )
+    if os.path.isfile(source):
+        layout = ak._ext.fromjsonfile(
+            source,
+            nan_string=nan_string,
+            infinity_string=infinity_string,
+            minus_infinity_string=minus_infinity_string,
+            initial=initial,
+            resize=resize,
+            buffersize=buffersize,
+        )
+    else:
+        layout = ak._ext.fromjson(
+            source,
+            nan_string=nan_string,
+            infinity_string=infinity_string,
+            minus_infinity_string=minus_infinity_string,
+            initial=initial,
+            resize=resize,
+            buffersize=buffersize,
+        )
+
     if highlevel:
         return ak._util.wrap(layout, behavior)
     else:
         return layout
 
 
-def to_json(array, destination=None, pretty=False, maxdecimals=None, buffersize=65536):
+def to_json(
+    array,
+    destination=None,
+    pretty=False,
+    maxdecimals=None,
+    nan_string=None,
+    infinity_string=None,
+    minus_infinity_string=None,
+    buffersize=65536,
+):
     """
     Args:
         array: Data to convert to JSON.
@@ -815,6 +857,13 @@ def to_json(array, destination=None, pretty=False, maxdecimals=None, buffersize=
             False, output compact JSON without spaces.
         maxdecimals (None or int): If an int, limit the number of
             floating-point decimals to this number; if None, write all digits.
+        nan_string (None or str): If not None, floating-point NaN values will be
+            replaced with this string instead of a JSON number.
+        infinity_string (None or str): If not None, floating-point positive infinity
+            values will be replaced with this string instead of a JSON number.
+        minus_infinity_string (None or str): If not None, floating-point negative
+            infinity values will be replaced with this string instead of a JSON
+            number.
         buffersize (int): Size (in bytes) of the buffer used by the JSON
             parser.
 
@@ -874,10 +923,22 @@ def to_json(array, destination=None, pretty=False, maxdecimals=None, buffersize=
         )
 
     if destination is None:
-        return out.tojson(pretty=pretty, maxdecimals=maxdecimals)
+        return out.tojson(
+            pretty=pretty,
+            maxdecimals=maxdecimals,
+            nan_string=nan_string,
+            infinity_string=infinity_string,
+            minus_infinity_string=minus_infinity_string,
+        )
     else:
         return out.tojson(
-            destination, pretty=pretty, maxdecimals=maxdecimals, buffersize=buffersize
+            destination,
+            pretty=pretty,
+            maxdecimals=maxdecimals,
+            buffersize=buffersize,
+            nan_string=nan_string,
+            infinity_string=infinity_string,
+            minus_infinity_string=minus_infinity_string,
         )
 
 

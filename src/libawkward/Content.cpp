@@ -814,14 +814,23 @@ namespace awkward {
   }
 
   const std::string
-  Content::tojson(bool pretty, int64_t maxdecimals) const {
+  Content::tojson(bool pretty, int64_t maxdecimals,
+    const char* nan_string,
+    const char* infinity_string,
+    const char* minus_infinity_string) const {
     if (pretty) {
-      ToJsonPrettyString builder(maxdecimals);
+      ToJsonPrettyString builder(maxdecimals,
+                                 nan_string,
+                                 infinity_string,
+                                 minus_infinity_string);
       tojson_part(builder, true);
       return builder.tostring();
     }
     else {
-      ToJsonString builder(maxdecimals);
+      ToJsonString builder(maxdecimals,
+                           nan_string,
+                           infinity_string,
+                           minus_infinity_string);
       tojson_part(builder, true);
       return builder.tostring();
     }
@@ -831,15 +840,28 @@ namespace awkward {
   Content::tojson(FILE* destination,
                   bool pretty,
                   int64_t maxdecimals,
-                  int64_t buffersize) const {
+                  int64_t buffersize,
+                  const char* nan_string,
+                  const char* infinity_string,
+                  const char* minus_infinity_string) const {
     if (pretty) {
-      ToJsonPrettyFile builder(destination, maxdecimals, buffersize);
+      ToJsonPrettyFile builder(destination,
+                               maxdecimals,
+                               buffersize,
+                               nan_string,
+                               infinity_string,
+                               minus_infinity_string);
       builder.beginlist();
       tojson_part(builder, true);
       builder.endlist();
     }
     else {
-      ToJsonFile builder(destination, maxdecimals, buffersize);
+      ToJsonFile builder(destination,
+                         maxdecimals,
+                         buffersize,
+                         nan_string,
+                         infinity_string,
+                         minus_infinity_string);
       builder.beginlist();
       tojson_part(builder, true);
       builder.endlist();
@@ -1256,11 +1278,11 @@ namespace awkward {
 
     for (const auto& array : others) {
       NumpyArray* content = dynamic_cast<NumpyArray*>(array.get());
-      if(content != nullptr  &&  content->ndim() == 1) {
+      if (content != nullptr  &&  content->ndim() == 1) {
         ContentPtr out = std::make_shared<RegularArray>(Identities::none(),
-                                             util::Parameters(),
-                                             array,
-                                             1);
+                                                        util::Parameters(),
+                                                        array,
+                                                        1);
           auto const& other = out.get()->offsets_and_flattened(posaxis, depth);
           contents_length += other.second.get()->length();
           contents.emplace_back(other.second);

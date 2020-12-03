@@ -101,8 +101,14 @@ namespace awkward {
     rj::Writer<rj::StringBuffer> writer_;
   };
 
-  ToJsonString::ToJsonString(int64_t maxdecimals)
-      : impl_(new ToJsonString::Impl(maxdecimals)) { }
+  ToJsonString::ToJsonString(int64_t maxdecimals,
+                             const char* nan_string,
+                             const char* infinity_string,
+                             const char* minus_infinity_string)
+      : impl_(new ToJsonString::Impl(maxdecimals))
+      , nan_string_(nan_string)
+      , infinity_string_(infinity_string)
+      , minus_infinity_string_(minus_infinity_string) { }
 
   ToJsonString::~ToJsonString() {
     delete impl_;
@@ -125,7 +131,16 @@ namespace awkward {
 
   void
   ToJsonString::real(double x) {
-    impl_->real(x);
+    if (nan_string_ != nullptr  &&  std::isnan(x)) {
+      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
+    } else if (infinity_string_ != nullptr  &&  std::isinf(x)  &&  !std::signbit(x)) {
+      impl_->string(infinity_string_, (int64_t)strlen(infinity_string_));
+    } else if (minus_infinity_string_ != nullptr  &&  std::isinf(x)  &&  std::signbit(x)) {
+      impl_->string(minus_infinity_string_, (int64_t)strlen(minus_infinity_string_));
+    }
+    else {
+      impl_->real(x);
+    }
   }
 
   void
@@ -200,8 +215,14 @@ namespace awkward {
     rj::PrettyWriter<rj::StringBuffer> writer_;
   };
 
-  ToJsonPrettyString::ToJsonPrettyString(int64_t maxdecimals)
-      : impl_(new ToJsonPrettyString::Impl(maxdecimals)) { }
+  ToJsonPrettyString::ToJsonPrettyString(int64_t maxdecimals,
+                                         const char* nan_string,
+                                         const char* infinity_string,
+                                         const char* minus_infinity_string)
+      : impl_(new ToJsonPrettyString::Impl(maxdecimals))
+      , nan_string_(nan_string)
+      , infinity_string_(infinity_string)
+      , minus_infinity_string_(minus_infinity_string) { }
 
   ToJsonPrettyString::~ToJsonPrettyString() {
     delete impl_;
@@ -224,7 +245,16 @@ namespace awkward {
 
   void
   ToJsonPrettyString::real(double x) {
-    impl_->real(x);
+    if (nan_string_ != nullptr  &&  std::isnan(x)) {
+      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
+    } else if (infinity_string_ != nullptr  &&  std::isinf(x)  &&  !std::signbit(x)) {
+      impl_->string(infinity_string_, (int64_t)strlen(infinity_string_));
+    } else if (minus_infinity_string_ != nullptr  &&  std::isinf(x)  &&  std::signbit(x)) {
+      impl_->string(minus_infinity_string_, (int64_t)strlen(minus_infinity_string_));
+    }
+    else {
+      impl_->real(x);
+    }
   }
 
   void
@@ -303,8 +333,14 @@ namespace awkward {
 
   ToJsonFile::ToJsonFile(FILE* destination,
                          int64_t maxdecimals,
-                         int64_t buffersize)
-      : impl_(new ToJsonFile::Impl(destination, maxdecimals, buffersize)) { }
+                         int64_t buffersize,
+                         const char* nan_string,
+                         const char* infinity_string,
+                         const char* minus_infinity_string)
+      : impl_(new ToJsonFile::Impl(destination, maxdecimals, buffersize))
+      , nan_string_(nan_string)
+      , infinity_string_(infinity_string)
+      , minus_infinity_string_(minus_infinity_string) { }
 
   ToJsonFile::~ToJsonFile() {
     delete impl_;
@@ -327,7 +363,16 @@ namespace awkward {
 
   void
   ToJsonFile::real(double x) {
-    impl_->real(x);
+    if (nan_string_ != nullptr  &&  std::isnan(x)) {
+      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
+    } else if (infinity_string_ != nullptr  &&  std::isinf(x)  &&  !std::signbit(x)) {
+      impl_->string(infinity_string_, (int64_t)strlen(infinity_string_));
+    } else if (minus_infinity_string_ != nullptr  &&  std::isinf(x)  &&  std::signbit(x)) {
+      impl_->string(minus_infinity_string_, (int64_t)strlen(minus_infinity_string_));
+    }
+    else {
+      impl_->real(x);
+    }
   }
 
   void
@@ -401,10 +446,16 @@ namespace awkward {
 
   ToJsonPrettyFile::ToJsonPrettyFile(FILE* destination,
                                      int64_t maxdecimals,
-                                     int64_t buffersize)
+                                     int64_t buffersize,
+                                     const char* nan_string,
+                                     const char* infinity_string,
+                                     const char* minus_infinity_string)
       : impl_(new ToJsonPrettyFile::Impl(destination,
                                          maxdecimals,
-                                         buffersize)) { }
+                                         buffersize))
+      , nan_string_(nan_string)
+      , infinity_string_(infinity_string)
+      , minus_infinity_string_(minus_infinity_string) { }
 
   ToJsonPrettyFile::~ToJsonPrettyFile() {
     delete impl_;
@@ -427,7 +478,16 @@ namespace awkward {
 
   void
   ToJsonPrettyFile::real(double x) {
-    impl_->real(x);
+    if (nan_string_ != nullptr  &&  std::isnan(x)) {
+      impl_->string(nan_string_, (int64_t)strlen(nan_string_));
+    } else if (infinity_string_ != nullptr  &&  std::isinf(x)  &&  !std::signbit(x)) {
+      impl_->string(infinity_string_, (int64_t)strlen(infinity_string_));
+    } else if (minus_infinity_string_ != nullptr  &&  std::isinf(x)  &&  std::signbit(x)) {
+      impl_->string(minus_infinity_string_, (int64_t)strlen(minus_infinity_string_));
+    }
+    else {
+      impl_->real(x);
+    }
   }
 
   void
@@ -469,115 +529,206 @@ namespace awkward {
 
   class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
   public:
-    Handler(const ArrayBuilderOptions& options)
+    Handler(const ArrayBuilderOptions& options,
+            const char* nan_string,
+            const char* infinity_string,
+            const char* minus_infinity_string)
         : builder_(options)
-        , depth_(0) { }
+        , moved_(false)
+        , nan_string_(nan_string)
+        , infinity_string_(infinity_string)
+        , minus_infinity_string_(minus_infinity_string) { }
 
-    const ContentPtr snapshot() const {
-      return builder_.snapshot();
+    void
+    reset_moved() {
+      moved_ = false;
     }
 
-    bool Null()               { builder_.null();              return true; }
-    bool Bool(bool x)         { builder_.boolean(x);          return true; }
-    bool Int(int x)           { builder_.integer((int64_t)x); return true; }
-    bool Uint(unsigned int x) { builder_.integer((int64_t)x); return true; }
-    bool Int64(int64_t x)     { builder_.integer(x);          return true; }
-    bool Uint64(uint64_t x)   { builder_.integer((int64_t)x); return true; }
-    bool Double(double x)     { builder_.real(x);             return true; }
-
     bool
-    String(const char* str, rj::SizeType length, bool copy) {
-      builder_.string(str, (int64_t)length);
+    moved() const {
+      return moved_;
+    }
+
+    bool Null() {
+      moved_ = true;
+      builder_.null();
+      return true;
+    }
+
+    bool Bool(bool x) {
+      moved_ = true;
+      builder_.boolean(x);
+      return true;
+    }
+
+    bool Int(int x) {
+      moved_ = true;
+      builder_.integer((int64_t)x);
+      return true;
+    }
+
+    bool Uint(unsigned int x) {
+      moved_ = true;
+      builder_.integer((int64_t)x);
+      return true;
+    }
+
+    bool Int64(int64_t x) {
+      moved_ = true;
+      builder_.integer(x);
+      return true;
+    }
+
+    bool Uint64(uint64_t x) {
+      moved_ = true;
+      builder_.integer((int64_t)x);
+      return true;
+    }
+
+    bool Double(double x) {
+      moved_ = true;
+      builder_.real(x);
       return true;
     }
 
     bool
-    StartArray() {
-      if (depth_ != 0) {
-        builder_.beginlist();
+    String(const char* str, rj::SizeType length, bool copy) {
+      moved_ = true;
+      if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
+        builder_.real(std::numeric_limits<double>::quiet_NaN());
+        return true;
       }
-      depth_++;
+      else if (infinity_string_ != nullptr  &&  strcmp(str, infinity_string_) == 0) {
+        builder_.real(std::numeric_limits<double>::infinity());
+        return true;
+      }
+      else if (minus_infinity_string_ != nullptr  &&  strcmp(str, minus_infinity_string_) == 0) {
+        builder_.real(-std::numeric_limits<double>::infinity());
+        return true;
+      }
+      else {
+        builder_.string(str, (int64_t)length);
+        return true;
+      }
+    }
+
+    bool
+    StartArray() {
+      moved_ = true;
+      builder_.beginlist();
       return true;
     }
 
     bool
     EndArray(rj::SizeType numfields) {
-      depth_--;
-      if (depth_ != 0) {
-        builder_.endlist();
-      }
+      moved_ = true;
+      builder_.endlist();
       return true;
     }
 
     bool
     StartObject() {
-      if (depth_ == 0) {
-        builder_.beginlist();
-      }
-      depth_++;
+      moved_ = true;
       builder_.beginrecord();
       return true;
     }
 
     bool
     EndObject(rj::SizeType numfields) {
-      depth_--;
+      moved_ = true;
       builder_.endrecord();
-      if (depth_ == 0) {
-        builder_.endlist();
-      }
       return true;
     }
 
     bool
     Key(const char* str, rj::SizeType length, bool copy) {
+      moved_ = true;
       builder_.field_check(str);
       return true;
     }
 
+    const ContentPtr snapshot() const {
+      return builder_.snapshot();
+    }
+
   private:
     ArrayBuilder builder_;
-    int64_t depth_;
+    bool moved_;
+    const char* nan_string_;
+    const char* infinity_string_;
+    const char* minus_infinity_string_;
   };
 
+  template<typename HANDLER, typename STREAM>
   const ContentPtr
-  FromJsonString(const char* source, const ArrayBuilderOptions& options) {
-    Handler handler(options);
-    rj::Reader reader;
-    rj::StringStream stream(source);
-    if (reader.Parse(stream, handler)) {
-      return handler.snapshot();
+  do_parse(HANDLER& handler, rj::Reader& reader, STREAM& stream) {
+    int64_t number = 0;
+    while (stream.Peek() != 0) {
+      handler.reset_moved();
+      bool fully_parsed = reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
+      if (handler.moved()) {
+        if (!fully_parsed) {
+          if (stream.Peek() == 0) {
+            throw std::invalid_argument(
+                std::string("incomplete JSON object at the end of the stream")
+                + FILENAME(__LINE__));
+          }
+          else {
+            throw std::invalid_argument(
+              std::string("JSON File error at char ")
+              + std::to_string(stream.Tell()) + std::string(": \'")
+              + stream.Peek() + std::string("\'")
+              + FILENAME(__LINE__));
+          }
+        }
+        else {
+          number++;
+        }
+      }
+      else if (stream.Peek() != 0) {
+        throw std::invalid_argument(
+          std::string("JSON File error at char ")
+          + std::to_string(stream.Tell()) + std::string(": \'")
+          + stream.Peek() + std::string("\'")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    ContentPtr obj = handler.snapshot();
+    if (number == 1) {
+      return obj.get()->getitem_at_nowrap(0);
     }
     else {
-      throw std::invalid_argument(
-        std::string("JSON error at char ")
-        + std::to_string(reader.GetErrorOffset()) + std::string(": ")
-        + std::string(rj::GetParseError_En(reader.GetParseErrorCode()))
-        + FILENAME(__LINE__));
+      return obj;
     }
+  }
+
+  const ContentPtr
+  FromJsonString(const char* source,
+                 const ArrayBuilderOptions& options,
+                 const char* nan_string,
+                 const char* infinity_string,
+                 const char* minus_infinity_string) {
+    rj::Reader reader;
+    rj::StringStream stream(source);
+    Handler handler(options, nan_string, infinity_string, minus_infinity_string);
+    return do_parse(handler, reader, stream);
   }
 
   const ContentPtr
   FromJsonFile(FILE* source,
                const ArrayBuilderOptions& options,
-               int64_t buffersize) {
-    Handler handler(options);
+               int64_t buffersize,
+               const char* nan_string,
+               const char* infinity_string,
+               const char* minus_infinity_string) {
     rj::Reader reader;
     std::shared_ptr<char> buffer(new char[(size_t)buffersize],
                                  kernel::array_deleter<char>());
     rj::FileReadStream stream(source,
                               buffer.get(),
                               ((size_t)buffersize)*sizeof(char));
-    if (reader.Parse(stream, handler)) {
-      return handler.snapshot();
-    }
-    else {
-      throw std::invalid_argument(
-        std::string("JSON error at char ")
-        + std::to_string(reader.GetErrorOffset()) + std::string(": ")
-        + std::string(rj::GetParseError_En(reader.GetParseErrorCode()))
-        + FILENAME(__LINE__));
-    }
-    return handler.snapshot();
+    Handler handler(options, nan_string, infinity_string, minus_infinity_string);
+    return do_parse(handler, reader, stream);
   }
 }

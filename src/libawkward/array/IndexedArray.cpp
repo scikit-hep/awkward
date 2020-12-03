@@ -2205,7 +2205,7 @@ namespace awkward {
             nextoutindex,
             out);
 
-    if(inject_nones) {
+    if (inject_nones) {
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
                                            out,
@@ -2332,7 +2332,7 @@ namespace awkward {
         nextoutindex,
         out);
 
-    if(inject_nones) {
+    if (inject_nones) {
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
                                            out,

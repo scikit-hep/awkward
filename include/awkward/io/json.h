@@ -13,27 +13,6 @@
 namespace awkward {
   class Content;
 
-  /// @brief Convert a JSON-encoded string into a Content array using an
-  /// ArrayBuilder.
-  ///
-  /// @param source Null-terminated string containing any valid JSON data.
-  /// @param options Configuration options for building an array with an
-  /// ArrayBuilder.
-  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
-    FromJsonString(const char* source, const ArrayBuilderOptions& options);
-
-  /// @brief Convert a JSON-encoded file into a Content array using an
-  /// ArrayBuilder.
-  ///
-  /// @param source C file handle to a file containing any valid JSON data.
-  /// @param options Configuration options for building an array with an
-  /// ArrayBuilder.
-  /// @param buffersize Number of bytes for an intermediate buffer.
-  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
-    FromJsonFile(FILE* source,
-                 const ArrayBuilderOptions& options,
-                 int64_t buffersize);
-
   /// @class ToJson
   ///
   /// Abstract base class for producing JSON data.
@@ -94,7 +73,16 @@ namespace awkward {
     ///
     /// @param maxdecimals Maximum number of decimals for floating-point
     /// numbers or `-1` for full precision.
-    ToJsonString(int64_t maxdecimals);
+    /// @param nan_string user-defined string for a not-a-number (NaN) value
+    /// representation in JSON format
+    /// @param infinity_string user-defined string for a positive infinity
+    /// representation in JSON format
+    /// @param minus_infinity_string user-defined string for a negative
+    /// infinity representation in JSON format
+    ToJsonString(int64_t maxdecimals,
+                 const char* nan_string = nullptr,
+                 const char* infinity_string = nullptr,
+                 const char* minus_infinity_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonString();
     void
@@ -125,6 +113,9 @@ namespace awkward {
   private:
     class Impl;
     Impl* impl_;
+    const char* nan_string_;
+    const char* infinity_string_;
+    const char* minus_infinity_string_;
   };
 
   /// @class ToJsonPrettyString
@@ -136,7 +127,16 @@ namespace awkward {
     ///
     /// @param maxdecimals Maximum number of decimals for floating-point
     /// numbers or `-1` for full precision.
-    ToJsonPrettyString(int64_t maxdecimals);
+    /// @param nan_string user-defined string for a not-a-number (NaN) value
+    /// representation in JSON format
+    /// @param infinity_string user-defined string for a positive infinity
+    /// representation in JSON format
+    /// @param minus_infinity_string user-defined string for a negative
+    /// infinity representation in JSON format
+    ToJsonPrettyString(int64_t maxdecimals,
+                       const char* nan_string = nullptr,
+                       const char* infinity_string = nullptr,
+                       const char* minus_infinity_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonPrettyString();
     void
@@ -167,6 +167,9 @@ namespace awkward {
   private:
     class Impl;
     Impl* impl_;
+    const char* nan_string_;
+    const char* infinity_string_;
+    const char* minus_infinity_string_;
   };
 
   /// @class ToJsonFile
@@ -180,7 +183,18 @@ namespace awkward {
     /// @param maxdecimals Maximum number of decimals for floating-point
     /// numbers or `-1` for full precision.
     /// @param buffersize Number of bytes for an intermediate buffer.
-    ToJsonFile(FILE* destination, int64_t maxdecimals, int64_t buffersize);
+    /// @param nan_string user-defined string for a not-a-number (NaN) value
+    /// representation in JSON format
+    /// @param infinity_string user-defined string for a positive infinity
+    /// representation in JSON format
+    /// @param minus_infinity_string user-defined string for a negative
+    /// infinity representation in JSON format
+    ToJsonFile(FILE* destination,
+               int64_t maxdecimals,
+               int64_t buffersize,
+               const char* nan_string = nullptr,
+               const char* infinity_string = nullptr,
+               const char* minus_infinity_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonFile();
     void
@@ -208,6 +222,9 @@ namespace awkward {
   private:
     class Impl;
     Impl* impl_;
+    const char* nan_string_;
+    const char* infinity_string_;
+    const char* minus_infinity_string_;
   };
 
   /// @class ToJsonPrettyFile
@@ -221,9 +238,18 @@ namespace awkward {
     /// @param maxdecimals Maximum number of decimals for floating-point
     /// numbers or `-1` for full precision.
     /// @param buffersize Number of bytes for an intermediate buffer.
+    /// @param nan_string user-defined string for a not-a-number (NaN) value
+    /// representation in JSON format
+    /// @param infinity_string user-defined string for a positive infinity
+    /// representation in JSON format
+    /// @param minus_infinity_string user-defined string for a negative
+    /// infinity representation in JSON format
     ToJsonPrettyFile(FILE* destination,
                      int64_t maxdecimals,
-                     int64_t buffersize);
+                     int64_t buffersize,
+                     const char* nan_string = nullptr,
+                     const char* infinity_string = nullptr,
+                     const char* minus_infinity_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonPrettyFile();
     void
@@ -251,7 +277,51 @@ namespace awkward {
   private:
     class Impl;
     Impl* impl_;
+    const char* nan_string_;
+    const char* infinity_string_;
+    const char* minus_infinity_string_;
   };
+
+  /// @brief Convert a JSON-encoded string into a Content array using an
+  /// ArrayBuilder.
+  ///
+  /// @param source Null-terminated string containing any valid JSON data.
+  /// @param options Configuration options for building an array with an
+  /// ArrayBuilder.
+  /// @param nan_string user-defined string for a not-a-number (NaN) value
+  /// representation in JSON format
+  /// @param infinity_string user-defined string for a positive infinity
+  /// representation in JSON format
+  /// @param minus_infinity_string user-defined string for a negative
+  /// infinity representation in JSON format
+  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
+    FromJsonString(const char* source,
+                   const ArrayBuilderOptions& options,
+                   const char* nan_string = nullptr,
+                   const char* infinity_string = nullptr,
+                   const char* minus_infinity_string = nullptr);
+
+  /// @brief Convert a JSON-encoded file into a Content array using an
+  /// ArrayBuilder.
+  ///
+  /// @param source C file handle to a file containing any valid JSON data.
+  /// @param options Configuration options for building an array with an
+  /// ArrayBuilder.
+  /// @param buffersize Number of bytes for an intermediate buffer.
+  /// @param nan_string user-defined string for a not-a-number (NaN) value
+  /// representation in JSON format
+  /// @param infinity_string user-defined string for a positive infinity
+  /// representation in JSON format
+  /// @param minus_infinity_string user-defined string for a negative
+  /// infinity representation in JSON format
+  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
+    FromJsonFile(FILE* source,
+                 const ArrayBuilderOptions& options,
+                 int64_t buffersize,
+                 const char* nan_string = nullptr,
+                 const char* infinity_string = nullptr,
+                 const char* minus_infinity_string = nullptr);
+
 }
 
 #endif // AWKWARD_IO_JSON_H_
