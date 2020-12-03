@@ -44,7 +44,6 @@ html_theme = "sphinx_rtd_theme"
 
 html_show_sourcelink = False
 html_logo = "../docs-img/logo/logo-300px-white.png"
-html_show_sourcelink = False
 html_theme_options = {"logo_only": True, "sticky_navigation": False}
 
 # Add any paths that contain custom static files (such as style sheets) here,

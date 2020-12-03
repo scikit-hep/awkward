@@ -5,6 +5,7 @@ import os
 import ast
 import glob
 import io
+import subprocess
 
 import sphinx.ext.napoleon
 
@@ -13,6 +14,13 @@ config = sphinx.ext.napoleon.Config(napoleon_use_param=True,
 
 if not os.path.exists("_auto"):
     os.mkdir("_auto")
+
+latest_commit = (
+    subprocess.run(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE)
+              .stdout
+              .decode("utf-8")
+              .strip()
+)
 
 toctree = ["_auto/changelog.rst"]
 
@@ -327,7 +335,7 @@ for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
                         ])
 
     link = ("`{0} <https://github.com/scikit-hep/awkward-1.0/blob/"
-            "master/{1}>`__".format(modulename, filename.replace("../", "")))
+            "{1}/{2}>`__".format(modulename, latest_commit, filename.replace("../", "")))
 
     module = ast.parse(open(filename).read())
 
@@ -335,8 +343,8 @@ for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
         if hasattr(toplevel, "lineno"):
             linelink = (
                 " on `line {0} <https://github.com/scikit-hep/awkward-1.0/blob/"
-                "master/{1}#L{0}>`__".format(
-                    toplevel.lineno, filename.replace("../", "")
+                "{1}/{2}#L{0}>`__".format(
+                    toplevel.lineno, latest_commit, filename.replace("../", "")
                 )
             )
         else:
