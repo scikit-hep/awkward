@@ -13,48 +13,6 @@
 namespace awkward {
   class Content;
 
-  /// @brief Convert a JSON-encoded string into a Content array using an
-  /// ArrayBuilder.
-  ///
-  /// @param source Null-terminated string containing any valid JSON data.
-  /// @param options Configuration options for building an array with an
-  /// ArrayBuilder.
-  /// @param nan_string user-defined string for a not-a-number (NaN) value
-  /// representation in JSON format
-  /// @param infinity_string user-defined string for a positive infinity
-  /// representation in JSON format
-  /// @param minus_infinity_string user-defined string for a negative
-  /// infinity representation in JSON format
-  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
-    FromJsonString(const char* source,
-                   const ArrayBuilderOptions& options,
-                   const char* nan_string = nullptr,
-                   const char* infinity_string = nullptr,
-                   const char* minus_infinity_string = nullptr,
-                   bool convert_nan_and_inf = false);
-
-  /// @brief Convert a JSON-encoded file into a Content array using an
-  /// ArrayBuilder.
-  ///
-  /// @param source C file handle to a file containing any valid JSON data.
-  /// @param options Configuration options for building an array with an
-  /// ArrayBuilder.
-  /// @param buffersize Number of bytes for an intermediate buffer.
-  /// @param nan_string user-defined string for a not-a-number (NaN) value
-  /// representation in JSON format
-  /// @param infinity_string user-defined string for a positive infinity
-  /// representation in JSON format
-  /// @param minus_infinity_string user-defined string for a negative
-  /// infinity representation in JSON format
-  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
-    FromJsonFile(FILE* source,
-                 const ArrayBuilderOptions& options,
-                 int64_t buffersize,
-                 const char* nan_string = nullptr,
-                 const char* infinity_string = nullptr,
-                 const char* minus_infinity_string = nullptr,
-                 bool convert_nan_and_inf = false);
-
   /// @class ToJson
   ///
   /// Abstract base class for producing JSON data.
@@ -323,6 +281,47 @@ namespace awkward {
     const char* infinity_string_;
     const char* minus_infinity_string_;
   };
+
+  /// @brief Convert a JSON-encoded string into a Content array using an
+  /// ArrayBuilder.
+  ///
+  /// @param source Null-terminated string containing any valid JSON data.
+  /// @param options Configuration options for building an array with an
+  /// ArrayBuilder.
+  /// @param nan_string user-defined string for a not-a-number (NaN) value
+  /// representation in JSON format
+  /// @param infinity_string user-defined string for a positive infinity
+  /// representation in JSON format
+  /// @param minus_infinity_string user-defined string for a negative
+  /// infinity representation in JSON format
+  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
+    FromJsonString(const char* source,
+                   const ArrayBuilderOptions& options,
+                   const char* nan_string = nullptr,
+                   const char* infinity_string = nullptr,
+                   const char* minus_infinity_string = nullptr);
+
+  /// @brief Convert a JSON-encoded file into a Content array using an
+  /// ArrayBuilder.
+  ///
+  /// @param source C file handle to a file containing any valid JSON data.
+  /// @param options Configuration options for building an array with an
+  /// ArrayBuilder.
+  /// @param buffersize Number of bytes for an intermediate buffer.
+  /// @param nan_string user-defined string for a not-a-number (NaN) value
+  /// representation in JSON format
+  /// @param infinity_string user-defined string for a positive infinity
+  /// representation in JSON format
+  /// @param minus_infinity_string user-defined string for a negative
+  /// infinity representation in JSON format
+  LIBAWKWARD_EXPORT_SYMBOL const ContentPtr
+    FromJsonFile(FILE* source,
+                 const ArrayBuilderOptions& options,
+                 int64_t buffersize,
+                 const char* nan_string = nullptr,
+                 const char* infinity_string = nullptr,
+                 const char* minus_infinity_string = nullptr);
+
 }
 
 #endif // AWKWARD_IO_JSON_H_

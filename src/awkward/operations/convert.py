@@ -810,19 +810,12 @@ def from_json(
 
     See also #ak.to_json.
     """
-    nan_and_inf_as_float = (
-        nan_string is not None
-        or infinity_string is not None
-        or minus_infinity_string is not None
-    )
-
     if os.path.isfile(source):
         layout = ak._ext.fromjsonfile(
             source,
             nan_string=nan_string,
             infinity_string=infinity_string,
             minus_infinity_string=minus_infinity_string,
-            nan_and_inf_as_float=nan_and_inf_as_float,
             initial=initial,
             resize=resize,
             buffersize=buffersize,
@@ -833,22 +826,9 @@ def from_json(
             nan_string=nan_string,
             infinity_string=infinity_string,
             minus_infinity_string=minus_infinity_string,
-            nan_and_inf_as_float=nan_and_inf_as_float,
             initial=initial,
             resize=resize,
             buffersize=buffersize,
-        )
-
-    if isinstance(layout, ak._util.listtypes):
-        layout = layout.content
-    elif isinstance(
-        layout, ak._util.optiontypes + (ak.layout.RecordArray, ak.layout.NumpyArray)
-    ):
-        layout = layout[0]
-    else:
-        raise AssertionError(
-            "unexpected case: {0}".format(type(layout).__name__)
-            + ak._util.exception_suffix(__file__)
         )
 
     if highlevel:
