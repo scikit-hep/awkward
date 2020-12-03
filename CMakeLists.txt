@@ -32,8 +32,6 @@ string(REPLACE "rc" "." VERSION_INFO_SIMPLE "${VERSION_INFO}")
 # Let CMake know the version too
 project(awkward LANGUAGES CXX VERSION ${VERSION_INFO_SIMPLE})
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 # Three tiers: [cpu-kernels (extern "C" interface), cuda-kernels (extern "C" interface)], libawkward (C++), and Python modules.
 file(GLOB CPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cpu-kernels/*.cpp")
 file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
