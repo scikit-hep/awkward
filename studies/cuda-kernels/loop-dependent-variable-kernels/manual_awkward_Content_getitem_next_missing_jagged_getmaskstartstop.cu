@@ -1,6 +1,6 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/manual_awkward_Content_getitem_next_missing_jagged_getmaskstartstop.cu", line)
 
-#include "awkward/kernels/getitem.h"
+#include "awkward/kernels.h"
 #include "standard_parallel_algorithms.h"
 
 __global__ void
@@ -8,9 +8,7 @@ awkward_Content_getitem_next_missing_jagged_getmaskstartstop_filter_mask(
     int64_t* index_in,
     int64_t* filtered_index,
     int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     if (index_in[thread_id] >= 0) {
@@ -28,9 +26,7 @@ awkward_Content_getitem_next_missing_jagged_getmaskstartstop_kernel(
     int64_t* starts_out,
     int64_t* stops_out,
     int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     int64_t pre_in = prefixed_index[thread_id] - 1;

@@ -1,15 +1,13 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_CUDA("src/cuda-kernels/manual_awkward_ByteMaskedArray_getitem_nextcarry.cu", line)
 
 #include "standard_parallel_algorithms.h"
-#include "awkward/kernels/getitem.h"
+#include "awkward/kernels.h"
 
 __global__ void
 awkward_ByteMaskedArray_getitem_nextcarry_filter_mask(int8_t* mask,
                                                       bool validwhen,
                                                       int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     if ((mask[thread_id] != 0) == validwhen) {
@@ -23,9 +21,7 @@ awkward_ByteMaskedArray_getitem_nextcarry_kernel(int64_t* prefixed_mask,
                                                  int64_t* to_carry,
                                                  int8_t* mask,
                                                  int64_t length) {
-  int64_t block_id =
-      blockIdx.x + blockIdx.y * gridDim.x + gridDim.x * gridDim.y * blockIdx.z;
-  int64_t thread_id = block_id * blockDim.x + threadIdx.x;
+  int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
 
   if(thread_id < length) {
     if (mask[thread_id] != 0) {
