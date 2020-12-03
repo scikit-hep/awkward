@@ -51,11 +51,11 @@ jobs:
 
       - script: |
           ls dist
-          rm -rf dist/awkward1_cuda_kernels-*-py3-none-any.whl dist/awkward1_cuda_kernels dist/awkward1_cuda_kernels-*.dist-info dist/tmp_WHEEL
+          rm -rf dist/awkward_cuda_kernels-*-py3-none-any.whl dist/awkward_cuda_kernels dist/awkward_cuda_kernels-*.dist-info dist/tmp_WHEEL
           ls dist
-          python -m twine upload dist/awkward1_cuda_kernels-*-py3-none-manylinux2014_x86_64.whl --config-file $(pypirc.secureFilePath) --verbose
+          python -m twine upload dist/awkward_cuda_kernels-*-py3-none-manylinux2014_x86_64.whl --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
-        condition: contains(variables['Build.SourceBranch'], 'tags')
+        condition: "and(succeeded(), contains(variables['Build.SourceBranch'], 'tags'))"
 
       - task: PublishPipelineArtifact@0
         inputs:
@@ -114,13 +114,13 @@ jobs:
       - script: |
           ls wheelhouse
           mkdir -p dist
-          cp wheelhouse/awkward1*manylinux*.whl dist/.
+          cp wheelhouse/awkward*manylinux*.whl dist/.
         displayName: "Copy wheels to dist"
 
       - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
-        condition: contains(variables['Build.SourceBranch'], 'tags')
+        condition: "and(succeeded(), contains(variables['Build.SourceBranch'], 'tags'))"
 
       - task: PublishPipelineArtifact@0
         inputs:
@@ -213,13 +213,13 @@ jobs:
 
       - script: |
           if not exist "dist" mkdir dist
-          cp wheelhouse/awkward1*.whl dist/.
+          cp wheelhouse/awkward*.whl dist/.
         displayName: "Copy wheels to dist"
 
       - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
-        condition: contains(variables['Build.SourceBranch'], 'tags')
+        condition: "and(succeeded(), contains(variables['Build.SourceBranch'], 'tags'))"
 
       - task: PublishPipelineArtifact@0
         inputs:
@@ -308,13 +308,13 @@ jobs:
 
       - script: |
           mkdir -p dist
-          cp wheelhouse/awkward1*.whl dist/.
+          cp wheelhouse/awkward*.whl dist/.
         displayName: "Copy wheels to dist"
 
       - script: |
           python -m twine upload dist/* --config-file $(pypirc.secureFilePath) --verbose
         displayName: "Deploy"
-        condition: contains(variables['Build.SourceBranch'], 'tags')
+        condition: "and(succeeded(), contains(variables['Build.SourceBranch'], 'tags'))"
 
       - task: PublishPipelineArtifact@0
         inputs:

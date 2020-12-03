@@ -1,30 +1,35 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 from __future__ import absolute_import
-from collections import defaultdict
 
-import pytest
-import awkward1
+import collections
+import json
+
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward as ak  # noqa: F401
 
 
 def test_virtual_record():
-    materialize_count = defaultdict(int)
+    materialize_count = collections.defaultdict(int)
 
     def gen(x, name):
         materialize_count[name] += 1
         return x
 
-    x1 = awkward1.Array([1, 2, 3, 4, 5])
-    x2 = awkward1.Array([1, 2, 3, 4, 5])
-    x = awkward1.zip({"x1": x1, "x2": x2}, with_name="xthing")
+    x1 = ak.Array([1, 2, 3, 4, 5])
+    x2 = ak.Array([1, 2, 3, 4, 5])
+    x = ak.zip({"x1": x1, "x2": x2}, with_name="xthing")
     assert x.layout.purelist_parameter("__record__") == "xthing"
-    xv = awkward1.virtual(lambda: gen(x, "x"), length=len(x), form=x.layout.form)
+    xv = ak.virtual(lambda: gen(x, "x"), length=len(x), form=x.layout.form)
     assert xv.layout.purelist_parameter("__record__") == "xthing"
-    y = x1 * 10.
-    yv = awkward1.virtual(lambda: gen(y, "y"), length=len(y), form=y.layout.form)
-    array = awkward1.zip({"x": xv, "y": yv}, with_name="Point", depth_limit=1)
+    y = x1 * 10.0
+    yv = ak.virtual(lambda: gen(y, "y"), length=len(y), form=y.layout.form)
+    array = ak.zip({"x": xv, "y": yv}, with_name="Point", depth_limit=1)
     assert array.layout.purelist_parameter("__record__") == "Point"
-    virtual = awkward1.virtual(lambda: gen(array, "array"), length=len(array), form=array.layout.form)
+    virtual = ak.virtual(
+        lambda: gen(array, "array"), length=len(array), form=array.layout.form
+    )
     assert virtual.layout.purelist_parameter("__record__") == "Point"
     assert len(materialize_count) == 0
 
@@ -48,7 +53,7 @@ def test_virtual_record():
     assert slicedvirtual.layout.purelist_parameter("__record__") == "Point"
     assert len(materialize_count) == 0
 
-    slicedvirtual = virtual[awkward1.Array([True, False, False, True, False])]
+    slicedvirtual = virtual[ak.Array([True, False, False, True, False])]
     assert len(materialize_count) == 0
     assert slicedvirtual.layout.purelist_parameter("__record__") == "Point"
     assert len(materialize_count) == 0
@@ -56,21 +61,43 @@ def test_virtual_record():
 
 def test_virtual_slice_numba():
     numba = pytest.importorskip("numba")
-    materialize_count = defaultdict(int)
+    materialize_count = collections.defaultdict(int)
 
     def gen(x, name):
         materialize_count[name] += 1
         return x
 
-    x1 = awkward1.Array([1, 2, 3, 4, 5])
-    x2 = awkward1.Array([1, 2, 3, 4, 5])
-    x = awkward1.zip({"x1": x1, "x2": x2}, with_name="xthing")
-    xv = awkward1.virtual(lambda: gen(x, "x"), length=len(x), form=x.layout.form)
-    y = x1 * 10.
-    yv = awkward1.virtual(lambda: gen(y, "y"), length=len(y), form=y.layout.form)
-    array = awkward1.zip({"x": xv, "y": yv}, with_name="Point", depth_limit=1)
-    virtual = awkward1.virtual(lambda: gen(array, "array"), length=len(array), form=array.layout.form)
-
+    x1 = ak.Array([1, 2, 3, 4, 5])
+    x2 = ak.Array([1, 2, 3, 4, 5])
+    x = ak.zip({"x1": x1, "x2": x2}, with_name="xthing")
+    xv = ak.virtual(lambda: gen(x, "x"), length=len(x), form=x.layout.form)
+    y = x1 * 10.0
+    yv = ak.virtual(lambda: gen(y, "y"), length=len(y), form=y.layout.form)
+    array = ak.zip({"x": xv, "y": yv}, with_name="Point", depth_limit=1)
+    virtual = ak.virtual(
+        lambda: gen(array, "array"),
+        length=len(array),
+        form=ak.forms.Form.fromjson(
+            json.dumps(
+                {
+                    "class": "RecordArray",
+                    "contents": {
+                        "x": {
+                            "class": "VirtualArray",
+                            "form": json.loads(str(x.layout.form)),
+                            "has_length": True,
+                        },
+                        "y": {
+                            "class": "VirtualArray",
+                            "form": json.loads(str(y.layout.form)),
+                            "has_length": True,
+                        },
+                    },
+                    "parameters": {"__record__": "Point"},
+                }
+            )
+        ),
+    )
 
     @numba.njit
     def dostuff(array):
@@ -80,7 +107,7 @@ def test_virtual_slice_numba():
         return x
 
     assert dostuff(virtual.x.x1) == 15
-    assert dict(materialize_count) == {"x": 3, "array": 3}
+    assert dict(materialize_count) == {"x": 1, "array": 1}
     materialize_count.clear()
 
     @numba.njit
@@ -102,7 +129,7 @@ def test_virtual_slice_numba():
     assert dict(materialize_count) == {"x": 1, "array": 1}
     materialize_count.clear()
 
-    slicedvirtual = virtual[awkward1.Array([True, False, False, True, False])]
+    slicedvirtual = virtual[ak.Array([True, False, False, True, False])]
     assert dostuff(slicedvirtual) == 5
     assert dict(materialize_count) == {"x": 1, "array": 2}
     materialize_count.clear()

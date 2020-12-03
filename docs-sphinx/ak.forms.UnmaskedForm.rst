@@ -7,12 +7,12 @@ In addition to the properties and methods described in :doc:`ak.forms.Form`,
 this has the following.
 
 ak.forms.UnmaskedForm.__init__
-================================
+==============================
 
 .. py:method:: ak.forms.UnmaskedForm.__init__(content, has_identities=False, parameters=None)
 
 ak.forms.UnmaskedForm.content
-===============================
+=============================
 
 .. py:attribute:: ak.forms.UnmaskedForm.content
 

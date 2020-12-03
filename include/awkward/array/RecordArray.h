@@ -127,10 +127,23 @@ namespace awkward {
     /// (ordered) fields.
     /// @param recordlookup A `std::shared_ptr<std::vector<std::string>>`
     /// optional list of key names.
+    /// @param length The length of the RecordArray; must be less than or
+    /// equal to the lengths of all #contents.
+    /// @param caches A list of all #VirtualArray caches contained within
+    /// this structure, so that they don't have to be searched repeatedly.
     /// If absent (`nullptr`), the data are tuples; otherwise, they are
     /// records. The number of names must match the number of #contents.
     /// @param length The length of the array, breaking ambiguities between
     /// #contents of different lengths and essential if there are zero fields.
+    RecordArray(const IdentitiesPtr& identities,
+                const util::Parameters& parameters,
+                const ContentPtrVec& contents,
+                const util::RecordLookupPtr& recordlookup,
+                int64_t length,
+                const std::vector<ArrayCachePtr>& caches);
+
+    /// @brief Creates a RecordArray in which #caches is derived from
+    /// the #contents.
     RecordArray(const IdentitiesPtr& identities,
                 const util::Parameters& parameters,
                 const ContentPtrVec& contents,
@@ -189,11 +202,11 @@ namespace awkward {
     const FormPtr
       form(bool materialize) const override;
 
-    bool
-      has_virtual_form() const override;
+    kernel::lib
+      kernels() const override;
 
-    bool
-      has_virtual_length() const override;
+    void
+      caches(std::vector<ArrayCachePtr>& out) const override;
 
     const std::string
       tostring_part(const std::string& indent,
@@ -445,6 +458,8 @@ namespace awkward {
     const util::RecordLookupPtr recordlookup_;
     /// @brief See #length.
     int64_t length_;
+    /// @brief See #caches.
+    const std::vector<ArrayCachePtr> caches_;
   };
 }
 

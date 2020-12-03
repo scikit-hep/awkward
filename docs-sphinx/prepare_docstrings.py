@@ -1,10 +1,11 @@
-# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 import re
 import os
 import ast
 import glob
 import io
+import subprocess
 
 import sphinx.ext.napoleon
 
@@ -13,6 +14,13 @@ config = sphinx.ext.napoleon.Config(napoleon_use_param=True,
 
 if not os.path.exists("_auto"):
     os.mkdir("_auto")
+
+latest_commit = (
+    subprocess.run(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE)
+              .stdout
+              .decode("utf-8")
+              .strip()
+)
 
 toctree = ["_auto/changelog.rst"]
 
@@ -150,7 +158,7 @@ def dodoc(docstring, qualname, names):
     out = re.sub(r"(\n:raises|^:raises)",   "\n    :raises",  out)
     return out
 
-def doclass(link, shortname, name, astcls):
+def doclass(link, linelink, shortname, name, astcls):
     if name.startswith("_"):
         return
 
@@ -172,7 +180,7 @@ def doclass(link, shortname, name, astcls):
 
     outfile = io.StringIO()
     outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
-    outfile.write("Defined in {0}.\n\n".format(link))
+    outfile.write("Defined in {0}{1}.\n\n".format(link, linelink))
     outfile.write(".. py:class:: {0}({1})\n\n".format(qualname, dosig(init)))
 
     docstring = ast.get_docstring(astcls)
@@ -215,7 +223,7 @@ def doclass(link, shortname, name, astcls):
         with open(toctree[-1], "w") as outfile:
             outfile.write(out)
 
-def dofunction(link, shortname, name, astfcn):
+def dofunction(link, linelink, shortname, name, astfcn):
     if name.startswith("_"):
         return
 
@@ -223,7 +231,7 @@ def dofunction(link, shortname, name, astfcn):
 
     outfile = io.StringIO()
     outfile.write(qualname + "\n" + "-"*len(qualname) + "\n\n")
-    outfile.write("Defined in {0}.\n\n".format(link))
+    outfile.write("Defined in {0}{1}.\n\n".format(link, linelink))
 
     functiontext = "{0}({1})".format(qualname, dosig(astfcn))
     outfile.write(".. py:function:: " + functiontext + "\n\n")
@@ -241,7 +249,7 @@ def dofunction(link, shortname, name, astfcn):
             outfile.write(out)
 
 done_extra = False
-for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
+for filename in sorted(glob.glob("../src/awkward/**/*.py", recursive=True),
                        key=lambda x: x.replace("/__init__.py",    "!")
                                       .replace("/highlevel",      "#")
                                       .replace("/operations",     "$")
@@ -259,7 +267,7 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                           .replace(".py", "")
                           .replace("/", "."))
 
-    shortname = (modulename.replace("awkward1.", "ak.")
+    shortname = (modulename.replace("awkward.", "ak.")
                            .replace(".highlevel", "")
                            .replace(".operations.convert", "")
                            .replace(".operations.describe", "")
@@ -269,9 +277,9 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                            .replace(".behaviors.categorical", "")
                            .replace(".behaviors.string", ""))
 
-    if modulename == "awkward1.operations.describe":
+    if modulename == "awkward.operations.describe":
         toctree.append("ak.behavior.rst")
-    elif not done_extra and modulename.startswith("awkward1._"):
+    elif not done_extra and modulename.startswith("awkward._"):
         done_extra = True
         toctree.extend(["ak.numba.register.rst",
                         "ak.numexpr.evaluate.rst",
@@ -327,15 +335,24 @@ for filename in sorted(glob.glob("../src/awkward1/**/*.py", recursive=True),
                         ])
 
     link = ("`{0} <https://github.com/scikit-hep/awkward-1.0/blob/"
-            "master/{1}>`__".format(modulename, filename.replace("../", "")))
+            "{1}/{2}>`__".format(modulename, latest_commit, filename.replace("../", "")))
 
     module = ast.parse(open(filename).read())
 
     for toplevel in module.body:
+        if hasattr(toplevel, "lineno"):
+            linelink = (
+                " on `line {0} <https://github.com/scikit-hep/awkward-1.0/blob/"
+                "{1}/{2}#L{0}>`__".format(
+                    toplevel.lineno, latest_commit, filename.replace("../", "")
+                )
+            )
+        else:
+            lineline = ""
         if isinstance(toplevel, ast.ClassDef):
-            doclass(link, shortname, toplevel.name, toplevel)
+            doclass(link, linelink, shortname, toplevel.name, toplevel)
         if isinstance(toplevel, ast.FunctionDef):
-            dofunction(link, shortname, toplevel.name, toplevel)
+            dofunction(link, linelink, shortname, toplevel.name, toplevel)
 
 outfile = io.StringIO()
 outfile.write(".. toctree::\n    :hidden:\n\n")

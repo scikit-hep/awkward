@@ -675,8 +675,15 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
+  ///
+  /// ReducerMin and ReducerMax are exceptions to the no-state rule: they are
+  /// parameterized by `initial`, used as an initial value in the minimization
+  /// or maximization.
   class LIBAWKWARD_EXPORT_SYMBOL ReducerMin: public Reducer {
   public:
+    ReducerMin(double initial_f64, uint64_t initial_u64, int64_t initial_i64);
+    ReducerMin();
+
     /// @brief Name of the reducer algorithm: `"min"`.
     const std::string
       name() const override;
@@ -741,6 +748,12 @@ namespace awkward {
       apply_float64(const double* data,
                     const Index64& parents,
                     int64_t outlength) const override;
+
+  private:
+    double initial_f64_;
+    uint64_t initial_u64_;
+    int64_t initial_i64_;
+    bool has_initial_;
   };
 
   /// @class ReducerMax
@@ -751,8 +764,15 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
+  ///
+  /// ReducerMin and ReducerMax are exceptions to the no-state rule: they are
+  /// parameterized by `initial`, used as an initial value in the minimization
+  /// or maximization.
   class LIBAWKWARD_EXPORT_SYMBOL ReducerMax: public Reducer {
   public:
+    ReducerMax(double initial_f64_, uint64_t initial_u64_, int64_t initial_i64_);
+    ReducerMax();
+
     /// @brief Name of the reducer algorithm: `"max"`.
     const std::string
       name() const override;
@@ -817,6 +837,12 @@ namespace awkward {
       apply_float64(const double* data,
                     const Index64& parents,
                     int64_t outlength) const override;
+
+  private:
+    double initial_f64_;
+    uint64_t initial_u64_;
+    int64_t initial_i64_;
+    bool has_initial_;
   };
 
   /// @class ReducerArgmin

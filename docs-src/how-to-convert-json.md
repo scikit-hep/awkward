@@ -17,7 +17,7 @@ How to convert to/from JSON
 Any JSON data can be converted to Awkward Arrays and any Awkward Arrays can be converted to JSON. Awkward type information, such as the distinction between fixed-size and variable-length lists, is lost in the transformation to JSON, however.
 
 ```{code-cell} ipython3
-import awkward1 as ak
+import awkward as ak
 ```
 
 From JSON to Awkward

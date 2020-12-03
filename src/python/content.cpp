@@ -186,7 +186,9 @@ box(const std::shared_ptr<ak::Content>& content) {
   }
   else {
     throw std::runtime_error(
-      std::string("missing boxer for Content subtype") + FILENAME(__LINE__));
+      std::string("missing boxer for Content subtype: ") +
+      (content.get() == nullptr ? std::string("nullptr") : content.get()->classname()) +
+      std::string(" ") + FILENAME(__LINE__));
   }
 }
 
@@ -472,10 +474,10 @@ toslice_part(ak::Slice& slice, py::object obj) {
             obj,
             py::module::import("numpy").attr("ma").attr("MaskedArray"))) {
         content = unbox_content(
-            py::module::import("awkward1").attr("from_numpy")(obj,
-                                                              false,
-                                                              false,
-                                                              false));
+            py::module::import("awkward").attr("from_numpy")(obj,
+                                                             false,
+                                                             false,
+                                                             false));
       }
       else if (py::isinstance(
             obj, py::module::import("numpy").attr("ndarray"))) {
@@ -491,10 +493,10 @@ toslice_part(ak::Slice& slice, py::object obj) {
       else if (py::isinstance<ak::ArrayBuilder>(obj)) {
         content = unbox_content(obj.attr("snapshot")());
       }
-      else if (py::isinstance(obj, py::module::import("awkward1")
+      else if (py::isinstance(obj, py::module::import("awkward")
                                               .attr("Array"))) {
         py::object tmp = obj.attr("layout");
-        if (py::isinstance(tmp, py::module::import("awkward1")
+        if (py::isinstance(tmp, py::module::import("awkward")
                                            .attr("partition")
                                            .attr("PartitionedArray"))) {
           content = unbox_content(tmp.attr("toContent")());
@@ -504,23 +506,23 @@ toslice_part(ak::Slice& slice, py::object obj) {
           content = unbox_content(tmp);
         }
       }
-      else if (py::isinstance(obj, py::module::import("awkward1")
+      else if (py::isinstance(obj, py::module::import("awkward")
                                               .attr("ArrayBuilder"))) {
         content = unbox_content(obj.attr("snapshot")().attr("layout"));
       }
-      else if (py::isinstance(obj, py::module::import("awkward1")
+      else if (py::isinstance(obj, py::module::import("awkward")
                                               .attr("partition")
                                               .attr("PartitionedArray"))) {
         content = unbox_content(obj.attr("toContent")());
         obj = box(content);
       }
       else {
-        obj = py::module::import("awkward1").attr("from_iter")(obj, false);
+        obj = py::module::import("awkward").attr("from_iter")(obj, false);
 
         bool bad = false;
         py::object asarray;
         try {
-          asarray = py::module::import("awkward1").attr("to_numpy")(obj, false);
+          asarray = py::module::import("awkward").attr("to_numpy")(obj, false);
         }
         catch (py::error_already_set& exc) {
           exc.restore();
@@ -549,7 +551,7 @@ toslice_part(ak::Slice& slice, py::object obj) {
         if (content.get()->parameter_equals("__array__", "\"string\"")  ||
             content.get()->parameter_equals("__array__", "\"bytestring\"")) {
           obj = box(content);
-          obj = py::module::import("awkward1").attr("to_list")(obj);
+          obj = py::module::import("awkward").attr("to_list")(obj);
           std::vector<std::string> strings;
           for (auto x : obj) {
             strings.push_back(x.cast<std::string>());
@@ -1144,11 +1146,36 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                                          -> std::shared_ptr<ak::Form> {
             return self.form(false);
           })
-          .def_property_readonly("has_virtual_form", &T::has_virtual_form)
-          .def_property_readonly("has_virtual_length", &T::has_virtual_length)
           .def("__len__", &len<T>)
           .def("__getitem__", &getitem<T>)
           .def("__iter__", &iter<T>)
+          .def_property_readonly("kernels", [](const T& self) -> py::str {
+            switch (self.kernels()) {
+              case ak::kernel::lib::cpu:
+                return py::str("cpu");
+              case ak::kernel::lib::cuda:
+                return py::str("cuda");
+              default:
+                return py::str("mixed");
+            }
+          })
+          .def_property_readonly("caches", [](const T& self) -> py::list {
+            std::vector<ak::ArrayCachePtr> out1;
+            self.caches(out1);
+            py::list out2(out1.size());
+            for (size_t i = 0;  i < out1.size();  i++) {
+              if (std::shared_ptr<PyArrayCache> ptr =
+                  std::dynamic_pointer_cast<PyArrayCache>(out1[i])) {
+                out2[i] = py::cast(ptr);
+              }
+              else {
+                throw std::invalid_argument(
+                  std::string("VirtualArray's cache is not a Python MutableMapping")
+                  + FILENAME(__LINE__));
+              }
+            }
+            return out2;
+          })
           .def("tojson",
                &tojson_string<T>,
                py::arg("pretty") = false,
@@ -1250,6 +1277,19 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
             }
             return box(self.mergemany(others));
           })
+          .def("mergemany_as_union",
+               [](const T& self, const py::iterable& pyothers, int64_t axis) -> py::object {
+            ak::ContentPtrVec others;
+            for (auto pyother : pyothers) {
+              others.push_back(unbox_content(pyother));
+            }
+            return box(self.mergemany_as_union(others, axis, 0));
+          }, py::arg("pyothers"),
+             py::arg("axis") = 0)
+          .def("axis_wrap_if_negative",
+            [](const T& self, int64_t axis) {
+              return self.axis_wrap_if_negative(axis);
+          })
           .def("count",
                [](const T& self, int64_t axis, bool mask, bool keepdims)
                -> py::object {
@@ -1298,22 +1338,46 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           }, py::arg("axis") = -1,
              py::arg("mask") = false,
              py::arg("keepdims") = false)
-          .def("min",
-               [](const T& self, int64_t axis, bool mask, bool keepdims)
-               -> py::object {
-            ak::ReducerMin reducer;
-            return box(self.reduce(reducer, axis, mask, keepdims));
+          .def("min", [](const T& self,
+                         int64_t axis,
+                         bool mask,
+                         bool keepdims,
+                         const py::object& initial) -> py::object {
+            if (initial.is(py::none())) {
+              ak::ReducerMin reducer;
+              return box(self.reduce(reducer, axis, mask, keepdims));
+            }
+            else {
+              double initial_f64 = initial.cast<double>();
+              uint64_t initial_u64 = (initial_f64 > 0 ? initial.cast<uint64_t>() : 0);
+              int64_t initial_i64 = initial.cast<int64_t>();
+              ak::ReducerMin reducer(initial_f64, initial_u64, initial_i64);
+              return box(self.reduce(reducer, axis, mask, keepdims));
+            }
           }, py::arg("axis") = -1,
              py::arg("mask") = true,
-             py::arg("keepdims") = false)
-          .def("max",
-               [](const T& self, int64_t axis, bool mask, bool keepdims)
-               -> py::object {
-            ak::ReducerMax reducer;
-            return box(self.reduce(reducer, axis, mask, keepdims));
+             py::arg("keepdims") = false,
+             py::arg("initial") = py::none())
+          .def("max", [](const T& self,
+                         int64_t axis,
+                         bool mask,
+                         bool keepdims,
+                         const py::object& initial) -> py::object {
+            if (initial.is(py::none())) {
+              ak::ReducerMax reducer;
+              return box(self.reduce(reducer, axis, mask, keepdims));
+            }
+            else {
+              double initial_f64 = initial.cast<double>();
+              uint64_t initial_u64 = (initial_f64 > 0 ? initial.cast<uint64_t>() : 0);
+              int64_t initial_i64 = initial.cast<int64_t>();
+              ak::ReducerMax reducer(initial_f64, initial_u64, initial_i64);
+              return box(self.reduce(reducer, axis, mask, keepdims));
+            }
           }, py::arg("axis") = -1,
              py::arg("mask") = true,
-             py::arg("keepdims") = false)
+             py::arg("keepdims") = false,
+             py::arg("initial") = py::none())
           .def("argmin",
                [](const T& self, int64_t axis, bool mask, bool keepdims)
                -> py::object {
@@ -1934,6 +1998,33 @@ make_Record(const py::handle& m, const std::string& name) {
       .def("setparameter", &setparameter<ak::Record>)
       .def("parameter", &parameter<ak::Record>)
       .def("purelist_parameter", &purelist_parameter<ak::Record>)
+      .def_property_readonly("kernels", [](const ak::Record& self) -> py::str {
+        switch (self.kernels()) {
+          case ak::kernel::lib::cpu:
+            return py::str("cpu");
+          case ak::kernel::lib::cuda:
+            return py::str("cuda");
+          default:
+            return py::str("mixed");
+        }
+      })
+      .def_property_readonly("caches", [](const ak::Record& self) -> py::list {
+        std::vector<ak::ArrayCachePtr> out1;
+        self.caches(out1);
+        py::list out2(out1.size());
+        for (size_t i = 0;  i < out1.size();  i++) {
+          if (std::shared_ptr<PyArrayCache> ptr =
+              std::dynamic_pointer_cast<PyArrayCache>(out1[i])) {
+            out2[i] = py::cast(ptr);
+          }
+          else {
+            throw std::invalid_argument(
+              std::string("VirtualArray's cache is not a Python MutableMapping")
+              + FILENAME(__LINE__));
+          }
+        }
+        return out2;
+      })
       .def("tojson",
            &tojson_string<ak::Record>,
            py::arg("pretty") = false,

@@ -2,15 +2,20 @@
 
 from __future__ import absolute_import
 
-import sys
-import itertools
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward as ak  # noqa: F401
 
-import pytest
-import numpy
-
-import awkward1
 
 def test():
-    assert awkward1.to_list(awkward1.prod(awkward1.Array([[[2, 3, 5]], [[7], [11]], [[]]]), axis=-1)) == [[30], [7, 11], [1]]
+    assert ak.to_list(ak.prod(ak.Array([[[2, 3, 5]], [[7], [11]], [[]]]), axis=-1)) == [
+        [30],
+        [7, 11],
+        [1],
+    ]
 
-    assert awkward1.to_list(awkward1.prod(awkward1.Array([[[2, 3, 5]], [[7], [11]], []]), axis=-1)) == [[30], [7, 11], []]
+    assert ak.to_list(ak.prod(ak.Array([[[2, 3, 5]], [[7], [11]], []]), axis=-1)) == [
+        [30],
+        [7, 11],
+        [],
+    ]

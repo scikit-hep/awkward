@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
+from __future__ import absolute_import
+
 import ctypes
 import os
 import platform
@@ -15,8 +17,8 @@ else:
 
 CPU_KERNEL_SO = None
 try:
-    CPU_KERNEL_SO = pkg_resources.resource_filename("awkward1", name)
-except ModuleNotFoundError:
+    CPU_KERNEL_SO = pkg_resources.resource_filename("awkward", name)
+except ImportError:
     CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
     TOP_DIR = os.path.join(CURRENT_DIR, "..")
     for root, _, files in os.walk(TOP_DIR):

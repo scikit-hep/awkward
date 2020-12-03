@@ -237,12 +237,24 @@ namespace awkward {
                     bool check_parameters,
                     bool check_form_key,
                     bool compatibility_check) const {
+    if (compatibility_check) {
+      if (VirtualForm* raw = dynamic_cast<VirtualForm*>(other.get())) {
+        if (raw->form().get() != nullptr) {
+          return equal(raw->form(),
+                       check_identities,
+                       check_parameters,
+                       check_form_key,
+                       compatibility_check);
+        }
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -317,11 +329,13 @@ namespace awkward {
                            const util::Parameters& parameters,
                            const ContentPtrVec& contents,
                            const util::RecordLookupPtr& recordlookup,
-                           int64_t length)
+                           int64_t length,
+                           const std::vector<ArrayCachePtr>& caches)
       : Content(identities, parameters)
       , contents_(contents)
       , recordlookup_(recordlookup)
-      , length_(length) {
+      , length_(length)
+      , caches_(caches) {
     if (recordlookup_.get() != nullptr  &&
         recordlookup_.get()->size() != contents_.size()) {
       throw std::invalid_argument(
@@ -330,7 +344,28 @@ namespace awkward {
     }
   }
 
-  int64_t minlength(const ContentPtrVec& contents) {
+  const std::vector<ArrayCachePtr>
+  fillcache(const ContentPtrVec& contents) {
+    std::vector<ArrayCachePtr> out;
+    for (auto content : contents) {
+      content.get()->caches(out);
+    }
+    return out;
+  }
+
+  RecordArray::RecordArray(const IdentitiesPtr& identities,
+                           const util::Parameters& parameters,
+                           const ContentPtrVec& contents,
+                           const util::RecordLookupPtr& recordlookup,
+                           int64_t length)
+      : Content(identities, parameters)
+      , contents_(contents)
+      , recordlookup_(recordlookup)
+      , length_(length)
+      , caches_(fillcache(contents)) { }
+
+  int64_t
+  minlength(const ContentPtrVec& contents) {
     if (contents.empty()) {
       return 0;
     }
@@ -406,10 +441,14 @@ namespace awkward {
         recordlookup.get()->push_back(std::to_string(where));
       }
     }
+    std::vector<ArrayCachePtr> caches(caches_);
+    what.get()->caches(caches);
     return std::make_shared<RecordArray>(identities_,
                                          parameters_,
                                          contents,
-                                         recordlookup);
+                                         recordlookup,
+                                         minlength(contents),
+                                         caches);
   }
 
   const ContentPtr
@@ -435,10 +474,14 @@ namespace awkward {
       recordlookup = util::init_recordlookup(numfields());
       recordlookup.get()->push_back(where);
     }
+    std::vector<ArrayCachePtr> caches(caches_);
+    what.get()->caches(caches);
     return std::make_shared<RecordArray>(identities_,
                                          parameters_,
                                          contents,
-                                         recordlookup);
+                                         recordlookup,
+                                         minlength(contents),
+                                         caches);
   }
 
   const std::string
@@ -540,24 +583,41 @@ namespace awkward {
                                         contents);
   }
 
-  bool
-  RecordArray::has_virtual_form() const {
-    for (auto x : contents_) {
-      if (x.get()->has_virtual_form()) {
-        return true;
+  kernel::lib
+  RecordArray::kernels() const {
+    kernel::lib last = kernel::lib::size;
+    for (auto content : contents_) {
+      if (last == kernel::lib::size) {
+        last = content.get()->kernels();
+      }
+      else if (last != content.get()->kernels()) {
+        return kernel::lib::size;
       }
     }
-    return false;
+    if (identities_.get() == nullptr) {
+      if (last == kernel::lib::size) {
+        return kernel::lib::cpu;
+      }
+      else {
+        return last;
+      }
+    }
+    else {
+      if (last == kernel::lib::size) {
+        return identities_.get()->ptr_lib();
+      }
+      else if (last == identities_.get()->ptr_lib()) {
+        return last;
+      }
+      else {
+        return kernel::lib::size;
+      }
+    }
   }
 
-  bool
-  RecordArray::has_virtual_length() const {
-    for (auto x : contents_) {
-      if (x.get()->has_virtual_length()) {
-        return true;
-      }
-    }
-    return false;
+  void
+  RecordArray::caches(std::vector<ArrayCachePtr>& out) const {
+    out.insert(out.end(), caches_.begin(), caches_.end());
   }
 
   const std::string
@@ -644,7 +704,8 @@ namespace awkward {
                                          parameters_,
                                          contents_,
                                          recordlookup_,
-                                         length_);
+                                         length_,
+                                         caches_);
   }
 
   const ContentPtr
@@ -665,7 +726,8 @@ namespace awkward {
                                          parameters_,
                                          contents,
                                          recordlookup_,
-                                         length_);
+                                         length_,
+                                         caches_);
   }
 
   void
@@ -741,7 +803,11 @@ namespace awkward {
                                            parameters_,
                                            contents_,
                                            recordlookup_,
-                                           stop - start);
+                                           stop - start,
+                                           caches_);
+    }
+    else if (start == 0  &&  stop == length_) {
+      return shallow_copy();
     }
     else {
       ContentPtrVec contents;
@@ -752,7 +818,8 @@ namespace awkward {
                                            parameters_,
                                            contents,
                                            recordlookup_,
-                                           stop - start);
+                                           stop - start,
+                                           caches_);
     }
   }
 
@@ -769,7 +836,7 @@ namespace awkward {
       recordlookup = std::make_shared<util::RecordLookup>();
     }
     for (auto key : keys) {
-      contents.push_back(field(key).get()->getitem_range_nowrap(0, length()));
+      contents.push_back(field(key));
       if (recordlookup.get() != nullptr) {
         recordlookup.get()->push_back(key);
       }
@@ -777,7 +844,9 @@ namespace awkward {
     return std::make_shared<RecordArray>(identities_,
                                          parameters_,
                                          contents,
-                                         recordlookup);
+                                         recordlookup,
+                                         length_,
+                                         caches_);
   }
 
   const ContentPtr
@@ -801,7 +870,8 @@ namespace awkward {
                                            parameters_,
                                            contents,
                                            recordlookup_,
-                                           carry.length());
+                                           carry.length(),
+                                           caches_);
     }
   }
 
@@ -866,11 +936,13 @@ namespace awkward {
       for (auto content : contents_) {
         contents.push_back(singleton);
       }
+      std::vector<ArrayCachePtr> caches;
       ContentPtr record = std::make_shared<RecordArray>(Identities::none(),
                                                         util::Parameters(),
                                                         contents,
                                                         recordlookup_,
-                                                        1);
+                                                        1,
+                                                        caches);
       return record.get()->getitem_at_nowrap(0);
     }
     else {
@@ -926,7 +998,7 @@ namespace awkward {
       return mergeable(raw->array(), mergebool);
     }
 
-    if (!parameters_equal(other.get()->parameters())) {
+    if (!parameters_equal(other.get()->parameters(), false)) {
       return false;
     }
 
@@ -1013,6 +1085,7 @@ namespace awkward {
     ContentPtrVec head = head_tail.first;
     ContentPtrVec tail = head_tail.second;
 
+    util::Parameters parameters(parameters_);
     ContentPtrVec headless(head.begin() + 1, head.end());
 
     std::vector<ContentPtrVec> for_each_field;
@@ -1023,6 +1096,8 @@ namespace awkward {
 
     if (istuple()) {
       for (auto array : headless) {
+        util::merge_parameters(parameters, array.get()->parameters());
+
         if (RecordArray* raw = dynamic_cast<RecordArray*>(array.get())) {
           if (istuple()) {
             if (numfields() == raw->numfields()) {
@@ -1106,7 +1181,7 @@ namespace awkward {
     }
 
     ContentPtr next = std::make_shared<RecordArray>(Identities::none(),
-                                                    parameters_,
+                                                    parameters,
                                                     nextcontents,
                                                     recordlookup_,
                                                     minlength);
@@ -1329,7 +1404,8 @@ namespace awkward {
                                          parameters_,
                                          contents_,
                                          util::RecordLookupPtr(nullptr),
-                                         length_);
+                                         length_,
+                                         caches_);
   }
 
   const ContentPtr
@@ -1534,7 +1610,8 @@ namespace awkward {
                                          parameters_,
                                          contents,
                                          recordlookup_,
-                                         length_);
+                                         length_,
+                                         caches_);
   }
 
   const ContentPtr

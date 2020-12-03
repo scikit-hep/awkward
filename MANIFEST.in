@@ -1,7 +1,7 @@
 include requirements*.txt VERSION_INFO CMakeLists.txt LICENSE README*.md CONTRIBUTING.md
 recursive-include include *.h
 recursive-include src *.cpp
-recursive-include src/awkward1 *.py
+recursive-include src/awkward *.py
 recursive-include tests *.cpp *.py
 include *.dll
 

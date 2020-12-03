@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 set -e
 
@@ -31,14 +31,14 @@ fi
 
 rm -rf build dist
 mkdir build
-cp -r src/awkward1_cuda_kernels build
+cp -r src/awkward_cuda_kernels build
 
-echo "__version__ ='"$AWKWARD_VERSION"'" >> build/awkward1_cuda_kernels/__init__.py
-echo "cuda_version ='"$CUDA_VERSION"'" >> build/awkward1_cuda_kernels/__init__.py
-echo "docker_image ='docker.io/nvidia/cuda:"$DOCKER_IMAGE_TAG"'" >> build/awkward1_cuda_kernels/__init__.py
+echo "__version__ ='"$AWKWARD_VERSION"'" >> build/awkward_cuda_kernels/__init__.py
+echo "cuda_version ='"$CUDA_VERSION"'" >> build/awkward_cuda_kernels/__init__.py
+echo "docker_image ='docker.io/nvidia/cuda:"$DOCKER_IMAGE_TAG"'" >> build/awkward_cuda_kernels/__init__.py
 
 export DOCKER_ARGS="-v`pwd`:/home -w/home docker.io/nvidia/cuda:"$DOCKER_IMAGE_TAG
-export BUILD_SHARED_LIBRARY="nvcc -arch=sm_35 -std=c++11 -Xcompiler -fPIC -Xcompiler -DVERSION_INFO="$AWKWARD_VERSION" -Iinclude src/cuda-kernels/*.cu --shared -o build/awkward1_cuda_kernels/libawkward-cuda-kernels.so"
+export BUILD_SHARED_LIBRARY="nvcc -arch=sm_35 -std=c++11 -Xcompiler -fPIC -Xcompiler -DVERSION_INFO="$AWKWARD_VERSION" -Iinclude src/cuda-kernels/*.cu --shared -o build/awkward_cuda_kernels/libawkward-cuda-kernels.so"
 
 docker run $DOCKER_ARGS $BUILD_SHARED_LIBRARY
 
@@ -47,10 +47,10 @@ cat > build/cuda-setup.py << EOF
 import setuptools
 from setuptools import setup
 
-setup(name = "awkward1-cuda-kernels",
-      packages = ["awkward1_cuda_kernels"],
+setup(name = "awkward-cuda-kernels",
+      packages = ["awkward_cuda_kernels"],
       package_dir = {"": "build"},
-      package_data = {"awkward1_cuda_kernels": ["*.so"]},
+      package_data = {"awkward_cuda_kernels": ["*.so"]},
       version = open("VERSION_INFO").read().strip(),
       author = "Jim Pivarski",
       author_email = "pivarski@princeton.edu",
@@ -97,17 +97,17 @@ EOF
 python build/cuda-setup.py bdist_wheel
 
 cd dist
-rm -f awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl
+rm -f awkward_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl
 
-unzip awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-any.whl
+unzip awkward_cuda_kernels-$AWKWARD_VERSION-py3-none-any.whl
 
-cp awkward1_cuda_kernels-$AWKWARD_VERSION.dist-info/WHEEL tmp_WHEEL
-cat tmp_WHEEL | sed "s/Root-Is-Purelib: true/Root-Is-Purelib: false/" | sed "s/Tag: py3-none-any/Tag: py3-none-"$PLATFORM"/" > awkward1_cuda_kernels-$AWKWARD_VERSION.dist-info/WHEEL
+cp awkward_cuda_kernels-$AWKWARD_VERSION.dist-info/WHEEL tmp_WHEEL
+cat tmp_WHEEL | sed "s/Root-Is-Purelib: true/Root-Is-Purelib: false/" | sed "s/Tag: py3-none-any/Tag: py3-none-"$PLATFORM"/" > awkward_cuda_kernels-$AWKWARD_VERSION.dist-info/WHEEL
 
-zip awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl -r awkward1_cuda_kernels awkward1_cuda_kernels-$AWKWARD_VERSION.dist-info
+zip awkward_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl -r awkward_cuda_kernels awkward_cuda_kernels-$AWKWARD_VERSION.dist-info
 
 cd ..
 
 if [ "$1" == "--install" ]; then
-    pip install dist/awkward1_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl
+    pip install dist/awkward_cuda_kernels-$AWKWARD_VERSION-py3-none-$PLATFORM.whl
 fi

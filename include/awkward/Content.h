@@ -21,6 +21,8 @@ namespace awkward {
   class Form;
   using FormPtr       = std::shared_ptr<Form>;
   using FormKey       = std::shared_ptr<std::string>;
+  class ArrayCache;
+  using ArrayCachePtr = std::shared_ptr<ArrayCache>;
 
   /// @class Form
   ///
@@ -230,11 +232,7 @@ namespace awkward {
 
     /// @brief Internal function for extracting record field
     ///
-    /// WARNING: this function returns the field from the innermost record
-    /// form it finds, and does not wrap it with the context.
-    /// Used by VirtualArray::getitem_field to determine certain parameters
-    /// without materialization. A possible extension would be to wrap output
-    /// at each layer to fully specify the form.
+    /// Matches the operation of Content#getitem_field.
     virtual const FormPtr
       getitem_field(const std::string& key) const = 0;
 
@@ -334,14 +332,17 @@ namespace awkward {
     virtual const FormPtr
       form(bool materialize) const = 0;
 
-    /// @brief If true, the array contains a VirtualArray with an unknown Form.
-    virtual bool
-      has_virtual_form() const = 0;
+    /// @brief Returns the kernel library enum for all nested `ptr_lib`
+    /// within the array's tree structure. If different libraries are
+    /// associated with nodes of the same tree, this returns `kernel::lib::size`
+    /// to indicate that it is "mixed".
+    virtual kernel::lib
+      kernels() const = 0;
 
-    /// @brief If true, the array contains a VirtualArray with an unknown
-    /// length.
-    virtual bool
-      has_virtual_length() const = 0;
+    /// @brief Accumulates all the unique #ArrayCache objects from nested
+    /// #VirtualArray nodes. (Uniqueness is determined by pointer value.)
+    virtual void
+      caches(std::vector<ArrayCachePtr>& out) const = 0;
 
     /// @brief Internal function to build an output string for #tostring.
     ///
@@ -1076,8 +1077,11 @@ namespace awkward {
     /// Equality is checked at the level of JSON DOMs. The `value` does not
     /// need to be exactly the same string; it needs to have equivalent JSON
     /// value.
+    ///
+    /// If `check_all`, every parameter is checked; otherwise, only
+    /// `"__array__"` and `"__record__"` are checked.
     bool
-      parameters_equal(const util::Parameters& other) const;
+      parameters_equal(const util::Parameters& other, bool check_all) const;
 
     /// @brief Returns `true` if the parameter associated with `key` is a
     /// string; `false` otherwise.
@@ -1098,6 +1102,16 @@ namespace awkward {
     /// {@link UnionArrayOf UnionArray} instead of actually merging the data.
     const ContentPtr
       merge_as_union(const ContentPtr& other) const;
+
+    /// @brief Concatenates this array with `others` by creating a
+    /// {@link UnionArrayOf UnionArray} instead of actually merging the data.
+    const ContentPtr
+      mergemany_as_union(const ContentPtrVec& others, int64_t axis = 0, int64_t depth = 0) const;
+
+    /// @brief Concatenates this array with `others` by creating a
+    /// {@link UnionArrayOf UnionArray} of flattened contents at `axis`
+    const ContentPtr
+      concatenate_here(const ContentPtrVec& others, int64_t axis, int64_t depth) const;
 
     /// @brief Internal function to handle the `axis = 0` case of #rpad
     /// and #rpad_and_clip.
@@ -1304,6 +1318,10 @@ namespace awkward {
       parameters_tostring(const std::string& indent,
                           const std::string& pre,
                           const std::string& post) const;
+
+    /// @brief Internal function to support most of the logic in #kernels.
+    kernel::lib
+      kernels_compare(kernel::lib from_index, const ContentPtr& content) const;
 
   protected:
     /// @brief See #identities.

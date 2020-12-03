@@ -1,4 +1,4 @@
-# BSD 3-Clause License; see https://github.com/jpivarski/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
 
 cmake_minimum_required(VERSION 3.10...3.17)
 
@@ -27,9 +27,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 file(READ "VERSION_INFO" VERSION_INFO)
 string(STRIP ${VERSION_INFO} VERSION_INFO)
 add_definitions(-DVERSION_INFO="${VERSION_INFO}")
+string(REPLACE "rc" "." VERSION_INFO_SIMPLE "${VERSION_INFO}")
 
 # Let CMake know the version too
-project(awkward LANGUAGES CXX VERSION ${VERSION_INFO})
+project(awkward LANGUAGES CXX VERSION ${VERSION_INFO_SIMPLE})
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -124,7 +125,7 @@ if (PYBUILD)
 
   install(TARGETS awkward-static awkward awkward-cpu-kernels awkward-cpu-kernels-static
           _ext
-          LIBRARY DESTINATION awkward1 ARCHIVE DESTINATION awkward1)
+          LIBRARY DESTINATION awkward ARCHIVE DESTINATION awkward)
 
   # Third tier: install without Python modules.
 else()

@@ -181,8 +181,16 @@ namespace awkward {
     /// Keys are simple strings, but values are JSON-encoded strings.
     /// For this reason, values that represent single strings are
     /// double-quoted: e.g. `"\"actual_value\""`.
+    ///
+    /// If `check_all`, every parameter is checked; otherwise, only
+    /// `"__array__"` and `"__record__"` are checked.
     bool
-      parameters_equal(const Parameters& self, const Parameters& other);
+      parameters_equal(const Parameters& self, const Parameters& other, bool check_all);
+
+    /// @brief Merges a set of `input` parameters with `output`, keeping
+    /// only those that are common to all sets.
+    void
+      merge_parameters(Parameters& output, const Parameters& input);
 
     /// @brief Returns `true` if the parameter associated with `key` is a
     /// string; `false` otherwise.

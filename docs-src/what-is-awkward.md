@@ -54,7 +54,7 @@ bikeroutes_pyobj = json.loads(bikeroutes_json)
 and then as an Awkward Array (actually an [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html) because the top-level construct is a JSON object).
 
 ```{code-cell}
-import awkward1 as ak
+import awkward as ak
 
 bikeroutes = ak.from_json(bikeroutes_json)
 # Alternatively, bikeroutes = ak.Record(bikeroutes_pyobj)

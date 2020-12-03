@@ -103,6 +103,7 @@ form_methods(py::class_<T, std::shared_ptr<T>, ak::Form>& x) {
           .def("tojson", &T::tojson,
                          py::arg("pretty") = false,
                          py::arg("verbose") = true)
+          .def_property_readonly("purelist_depth", &T::purelist_depth)
   ;
 }
 

@@ -1,8 +1,7 @@
+flake8
 PyYAML
-pycparser
-lark-parser
 numba>=0.50.0;python_version>="3.6"
 pandas>=0.24.0;python_version>="3.6"
 numexpr;python_version>="3.6"
 autograd;python_version>="3.6"
-pyarrow>=1.0;python_version>="3.6" and sys_platform != "win32"
+pyarrow>=2.0.0;python_version>="3.6" and sys_platform != "win32"

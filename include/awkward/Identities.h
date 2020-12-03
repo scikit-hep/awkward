@@ -122,6 +122,10 @@ namespace awkward {
     const int64_t
       length() const;
 
+    /// @brief The Kernel Library that ptr uses.
+    virtual kernel::lib
+      ptr_lib() const = 0;
+
     /// @brief User-friendly name of this class: `"Identities32"` or
     /// `"Identities64"`.
     virtual const std::string
@@ -317,9 +321,8 @@ namespace awkward {
     const std::shared_ptr<T>
       ptr() const;
 
-    /// @brief The Kernel Library that ptr uses.
     kernel::lib
-      ptr_lib() const;
+      ptr_lib() const override;
 
     /// @brief Raw pointer to the beginning of data (i.e. offset accounted for).
     T*

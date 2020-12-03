@@ -17,7 +17,7 @@ How to convert to Pandas
 [Pandas](https://pandas.pydata.org/) is a data analysis library for ordered time-series and relational data. In general, Pandas does not define operations for manipulating nested data structures, but in some cases, [MultiIndex/advanced indexing](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html) can do equivalent things.
 
 ```{code-cell} ipython3
-import awkward1 as ak
+import awkward as ak
 import pandas as pd
 import pyarrow as pa
 import urllib.request

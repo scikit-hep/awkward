@@ -2,16 +2,14 @@
 
 from __future__ import absolute_import
 
-import sys
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward as ak  # noqa: F401
 
-import pytest
-import numpy
-
-import awkward1
 
 def test():
-    data = awkward1.Array([[7, 5, 7], [], [2], [8, 2]])
-    assert awkward1.to_list(awkward1.sort(data)) == [[5, 7, 7], [], [2], [2, 8]]
+    data = ak.Array([[7, 5, 7], [], [2], [8, 2]])
+    assert ak.to_list(ak.sort(data)) == [[5, 7, 7], [], [2], [2, 8]]
 
-    index = awkward1.argsort(data)
-    assert awkward1.to_list(data[index]) == [[5, 7, 7], [], [2], [2, 8]]
+    index = ak.argsort(data)
+    assert ak.to_list(data[index]) == [[5, 7, 7], [], [2], [2, 8]]

@@ -20,7 +20,7 @@ def genkerneldocs():
 
 All array manipulation takes place in the lowest layer of the Awkward Array project, the "kernels." The primary implementation of these kernels are in ``libawkward-cpu-kernels.so`` (or similar names on MacOS and Windows), which has a pure C interface.
 
-A second implementation, ``libawkward-cuda-kernels.so``, is provided as a separate package, ``awkward1-cuda``, which handles arrays that reside on GPUs if CUDA is available. It satisfies the same C interface and implements the same behaviors.
+A second implementation, ``libawkward-cuda-kernels.so``, is provided as a separate package, ``awkward-cuda-kernels``, which handles arrays that reside on GPUs if CUDA is available. It satisfies the same C interface and implements the same behaviors.
 
 .. raw:: html
 

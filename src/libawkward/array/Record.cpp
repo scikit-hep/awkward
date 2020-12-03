@@ -99,14 +99,14 @@ namespace awkward {
     return array_.get()->form(materialize);
   }
 
-  bool
-  Record::has_virtual_form() const {
-    return array_.get()->has_virtual_form();
+  kernel::lib
+  Record::kernels() const {
+    return array_.get()->kernels();
   }
 
-  bool
-  Record::has_virtual_length() const {
-    return array_.get()->has_virtual_length();
+  void
+  Record::caches(std::vector<ArrayCachePtr>& out) const {
+    array_.get()->caches(out);
   }
 
   const std::string

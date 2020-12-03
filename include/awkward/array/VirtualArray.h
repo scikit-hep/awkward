@@ -172,11 +172,11 @@ namespace awkward {
     const FormPtr
       form(bool materialize) const override;
 
-    bool
-      has_virtual_form() const override;
+    kernel::lib
+      kernels() const override;
 
-    bool
-      has_virtual_length() const override;
+    void
+      caches(std::vector<ArrayCachePtr>& out) const override;
 
     const std::string
       tostring_part(const std::string& indent,
@@ -227,6 +227,17 @@ namespace awkward {
 
     const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const override;
+
+    const ContentPtr
+      getitem_next(const SliceItemPtr& head,
+                   const Slice& tail,
+                   const Index64& advanced) const override;
+
+    const ContentPtr
+      getitem_next_jagged(const Index64& slicestarts,
+                          const Index64& slicestops,
+                          const SliceItemPtr& slicecontent,
+                          const Slice& tail) const override;
 
     const ContentPtr
       carry(const Index64& carry, bool allow_lazy) const override;

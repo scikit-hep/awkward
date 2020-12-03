@@ -17,7 +17,7 @@ How to convert to/from Python objects
 Builtin Python objects like dicts and lists can be converted into Awkward Arrays, and all Awkward Arrays can be converted into Python objects. Awkward type information, such as the distinction between fixed-size and variable-length lists, is lost in the transformation to Python objects.
 
 ```{code-cell} ipython3
-import awkward1 as ak
+import awkward as ak
 import numpy as np
 import pandas as pd
 ```

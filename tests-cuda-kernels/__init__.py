@@ -7,7 +7,7 @@ import platform
 
 import pkg_resources
 
-# awkward1-cuda-kernels is only supported on Linux, but let's leave the placeholder.
+# awkward-cuda-kernels is only supported on Linux, but let's leave the placeholder.
 if platform.system() == "Windows":
     shared_library_name = "awkward-cuda-kernels.dll"
 elif platform.system() == "Darwin":
@@ -16,7 +16,7 @@ else:
     shared_library_name = "libawkward-cuda-kernels.so"
 
 CUDA_KERNEL_SO = pkg_resources.resource_filename(
-    "awkward1_cuda_kernels", shared_library_name
+    "awkward_cuda_kernels", shared_library_name
 )
 
 lib = ctypes.CDLL(CUDA_KERNEL_SO)

@@ -2,45 +2,41 @@
 
 from __future__ import absolute_import
 
-import sys
-
-import pytest
-
-import numpy
-import awkward1
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward as ak  # noqa: F401
 
 
 def test_make_mixins():
-    @awkward1.mixin_class(awkward1.behavior)
+    @ak.mixin_class(ak.behavior)
     class Point(object):
         def distance(self, other):
-            return numpy.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
+            return np.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
 
-        @awkward1.mixin_class_method(numpy.equal, {"Point"})
+        @ak.mixin_class_method(np.equal, {"Point"})
         def point_equal(self, other):
-            return numpy.logical_and(self.x == other.x, self.y == other.y)
+            return np.logical_and(self.x == other.x, self.y == other.y)
 
-        @awkward1.mixin_class_method(numpy.abs)
+        @ak.mixin_class_method(np.abs)
         def point_abs(self):
-            return numpy.sqrt(self.x ** 2 + self.y ** 2)
+            return np.sqrt(self.x ** 2 + self.y ** 2)
 
-        @awkward1.mixin_class_method(numpy.add, {"Point"})
+        @ak.mixin_class_method(np.add, {"Point"})
         def point_add(self, other):
-            print("hi")
-            return awkward1.zip(
+            return ak.zip(
                 {"x": self.x + other.x, "y": self.y + other.y}, with_name="Point",
             )
 
-    @awkward1.mixin_class(awkward1.behavior)
+    @ak.mixin_class(ak.behavior)
     class WeightedPoint(Point):
-        @awkward1.mixin_class_method(numpy.equal, {"WeightedPoint"})
+        @ak.mixin_class_method(np.equal, {"WeightedPoint"})
         def weighted_equal(self, other):
-            return numpy.logical_and(self.point_equal(other), self.weight == other.weight)
+            return np.logical_and(self.point_equal(other), self.weight == other.weight)
 
-        @awkward1.mixin_class_method(numpy.add, {"WeightedPoint"})
+        @ak.mixin_class_method(np.add, {"WeightedPoint"})
         def weighted_add(self, other):
             sumw = self.weight + other.weight
-            return awkward1.zip(
+            return ak.zip(
                 {
                     "x": (self.x * self.weight + other.x * other.weight) / sumw,
                     "y": (self.y * self.weight + other.y * other.weight) / sumw,
@@ -49,7 +45,7 @@ def test_make_mixins():
                 with_name="WeightedPoint",
             )
 
-    one = awkward1.Array(
+    one = ak.Array(
         [
             [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
             [],
@@ -57,7 +53,7 @@ def test_make_mixins():
         ],
         with_name="Point",
     )
-    two = awkward1.Array(
+    two = ak.Array(
         [
             [{"x": 0.9, "y": 1}, {"x": 2, "y": 2.2}, {"x": 2.9, "y": 3}],
             [],
@@ -65,15 +61,15 @@ def test_make_mixins():
         ],
         with_name="Point",
     )
-    wone = awkward1.Array(awkward1.with_field(one, abs(one), "weight"), with_name="WeightedPoint")
-    wtwo = awkward1.Array(awkward1.with_field(two, abs(two), "weight"), with_name="WeightedPoint")
+    wone = ak.Array(ak.with_field(one, abs(one), "weight"), with_name="WeightedPoint")
+    wtwo = ak.Array(ak.with_field(two, abs(two), "weight"), with_name="WeightedPoint")
 
-    assert awkward1.to_list(one + wone) == [
+    assert ak.to_list(one + wone) == [
         [{"x": 2, "y": 2.2}, {"x": 4, "y": 4.4}, {"x": 6, "y": 6.6}],
         [],
         [{"x": 8, "y": 8.8}, {"x": 10, "y": 11.0}],
     ]
-    assert awkward1.to_list(wone + wtwo) == [
+    assert ak.to_list(wone + wtwo) == [
         [
             {
                 "x": 0.9524937500390619,
@@ -97,12 +93,12 @@ def test_make_mixins():
             {"x": 5.0, "y": 5.5, "weight": 14.866068747318506},
         ],
     ]
-    assert awkward1.to_list(abs(one)) == [
+    assert ak.to_list(abs(one)) == [
         [1.4866068747318506, 2.973213749463701, 4.459820624195552],
         [],
         [5.946427498927402, 7.433034373659253],
     ]
-    assert awkward1.to_list(one.distance(wtwo)) == [
+    assert ak.to_list(one.distance(wtwo)) == [
         [0.14142135623730953, 0.0, 0.31622776601683783],
         [],
         [0.4123105625617664, 0.0],

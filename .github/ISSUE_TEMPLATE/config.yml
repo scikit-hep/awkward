@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+    - name: "StackOverflow: [awkward-array] tag" 
+      about: "How do I…?"
+      url: https://stackoverflow.com/questions/tagged/awkward-array
+    - name: "Gitter: Scikit-HEP/awkward-array room"
+      about: "Getting help in real-time…"
+      url: https://gitter.im/Scikit-HEP/awkward-array

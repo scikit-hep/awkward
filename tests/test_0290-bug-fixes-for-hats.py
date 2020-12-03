@@ -2,14 +2,12 @@
 
 from __future__ import absolute_import
 
-import sys
-
-import pytest
-import numpy
-
-import awkward1
+import pytest  # noqa: F401
+import numpy as np  # noqa: F401
+import awkward as ak  # noqa: F401
 
 numba = pytest.importorskip("numba")
+
 
 def test_unmasked():
     @numba.njit
@@ -21,10 +19,11 @@ def test_unmasked():
                 return item
         return None
 
-    content = awkward1.Array([{"x": 1}, {"x": 2}, {"x": 3}]).layout
-    unmasked = awkward1.layout.UnmaskedArray(content)
-    array = awkward1.Array(unmasked)
-    assert awkward1.to_list(find_it(array)) == {"x": 3}
+    content = ak.Array([{"x": 1}, {"x": 2}, {"x": 3}]).layout
+    unmasked = ak.layout.UnmaskedArray(content)
+    array = ak.Array(unmasked)
+    assert ak.to_list(find_it(array)) == {"x": 3}
+
 
 def test_indexedoption():
     @numba.njit
@@ -36,8 +35,9 @@ def test_indexedoption():
                 return item
         return None
 
-    array = awkward1.Array([{"x": 1}, {"x": 2}, None, {"x": 3}])
-    assert awkward1.to_list(find_it(array)) == {"x": 3}
+    array = ak.Array([{"x": 1}, {"x": 2}, None, {"x": 3}])
+    assert ak.to_list(find_it(array)) == {"x": 3}
+
 
 def test_indexed_1():
     @numba.njit
@@ -48,15 +48,16 @@ def test_indexed_1():
                 return i
         return 999
 
-    content = awkward1.Array([{"x": 100}, {"x": 101}, {"x": 102}]).layout
-    index = awkward1.layout.Index64(numpy.array([2, 0, 1], dtype=numpy.int64))
-    indexedarray = awkward1.layout.IndexedArray64(index, content)
-    array = awkward1.Array(indexedarray)
+    content = ak.Array([{"x": 100}, {"x": 101}, {"x": 102}]).layout
+    index = ak.layout.Index64(np.array([2, 0, 1], dtype=np.int64))
+    indexedarray = ak.layout.IndexedArray64(index, content)
+    array = ak.Array(indexedarray)
 
     assert f1(array, 100) == 1
     assert f1(array, 101) == 2
     assert f1(array, 102) == 0
     assert f1(array, 12345) == 999
+
 
 def test_indexed_2():
     @numba.njit
@@ -66,10 +67,10 @@ def test_indexed_2():
                 return item
         return None
 
-    content = awkward1.Array([{"x": 100}, {"x": 101}, {"x": 102}]).layout
-    index = awkward1.layout.Index64(numpy.array([2, 0, 1], dtype=numpy.int64))
-    indexedarray = awkward1.layout.IndexedArray64(index, content)
-    array = awkward1.Array(indexedarray)
+    content = ak.Array([{"x": 100}, {"x": 101}, {"x": 102}]).layout
+    index = ak.layout.Index64(np.array([2, 0, 1], dtype=np.int64))
+    indexedarray = ak.layout.IndexedArray64(index, content)
+    array = ak.Array(indexedarray)
 
     assert f1(array, 100).tolist() == {"x": 100}
     assert f1(array, 101).tolist() == {"x": 101}

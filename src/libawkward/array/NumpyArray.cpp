@@ -241,12 +241,24 @@ namespace awkward {
                    bool check_parameters,
                    bool check_form_key,
                    bool compatibility_check) const {
+    if (compatibility_check) {
+      if (VirtualForm* raw = dynamic_cast<VirtualForm*>(other.get())) {
+        if (raw->form().get() != nullptr) {
+          return equal(raw->form(),
+                       check_identities,
+                       check_parameters,
+                       check_form_key,
+                       compatibility_check);
+        }
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -616,15 +628,21 @@ namespace awkward {
                                        dtype_);
   }
 
-  bool
-  NumpyArray::has_virtual_form() const {
-    return false;
+  kernel::lib
+  NumpyArray::kernels() const {
+    if (identities_.get() == nullptr) {
+      return ptr_lib_;
+    }
+    else if (ptr_lib_ == identities_.get()->ptr_lib()) {
+      return ptr_lib_;
+    }
+    else {
+      return kernel::lib::size;
+    }
   }
 
-  bool
-  NumpyArray::has_virtual_length() const {
-    return false;
-  }
+  void
+  NumpyArray::caches(std::vector<ArrayCachePtr>& out) const { }
 
   const std::string
   NumpyArray::tostring_part(const std::string& indent,
@@ -1420,7 +1438,7 @@ namespace awkward {
       return mergeable(raw->array(), mergebool);
     }
 
-    if (!parameters_equal(other.get()->parameters())) {
+    if (!parameters_equal(other.get()->parameters(), false)) {
       return false;
     }
 
@@ -1580,8 +1598,11 @@ namespace awkward {
 
       std::shared_ptr<void> ptr(kernel::malloc<void>(ptr_lib, total_length));
 
+      util::Parameters parameters(parameters_);
       int64_t length_so_far = 0;
       for (auto contiguous_array : contiguous_arrays) {
+        util::merge_parameters(parameters, contiguous_array.parameters());
+
         struct Error err = kernel::NumpyArray_fill<uint8_t, uint8_t>(
           ptr_lib,
           reinterpret_cast<uint8_t*>(ptr.get()),
@@ -1596,7 +1617,7 @@ namespace awkward {
       std::vector<ssize_t> strides({ 1 });
 
       ContentPtr next = std::make_shared<NumpyArray>(Identities::none(),
-                                                     parameters_,
+                                                     parameters,
                                                      ptr,
                                                      shape,
                                                      strides,
@@ -1621,8 +1642,11 @@ namespace awkward {
 
     // handle booleans and numbers
 
+    util::Parameters parameters(parameters_);
     util::dtype nextdtype = dtype_;
     for (auto contiguous_array : contiguous_arrays) {
+      util::merge_parameters(parameters, contiguous_array.parameters());
+
       util::dtype thatdtype = contiguous_array.dtype();
 
       if (nextdtype == util::dtype::complex256  ||
@@ -2425,7 +2449,7 @@ namespace awkward {
     }
 
     ContentPtr next = std::make_shared<NumpyArray>(Identities::none(),
-                                                   parameters_,
+                                                   parameters,
                                                    ptr,
                                                    shape,
                                                    strides,

@@ -53,17 +53,17 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
-  bool
-  None::has_virtual_form() const {
+  kernel::lib
+  None::kernels() const {
     throw std::runtime_error(
-      std::string("undefined operation: None::has_virtual_form")
+      std::string("undefined operation: None::kernels")
       + FILENAME(__LINE__));
   }
 
-  bool
-  None::has_virtual_length() const {
+  void
+  None::caches(std::vector<ArrayCachePtr>& out) const {
     throw std::runtime_error(
-      std::string("undefined operation: None::has_virtual_length")
+      std::string("undefined operation: None::caches")
       + FILENAME(__LINE__));
   }
 

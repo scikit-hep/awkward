@@ -443,15 +443,21 @@ namespace awkward {
                                        typeid(T).name());
     }
 
-    bool
-      has_virtual_form() const override {
-      return false;
+    kernel::lib
+      kernels() const override {
+      if (identities_.get() == nullptr) {
+        return ptr_lib_;
+      }
+      else if (ptr_lib_ == identities_.get()->ptr_lib()) {
+        return ptr_lib_;
+      }
+      else {
+        return kernel::lib::size;
+      }
     }
 
-    bool
-      has_virtual_length() const override {
-      return false;
-    }
+    void
+      caches(std::vector<ArrayCachePtr>& out) const override { }
 
     const std::string
       tostring_part(const std::string& indent,

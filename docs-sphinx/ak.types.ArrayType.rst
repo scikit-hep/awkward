@@ -22,9 +22,9 @@ This distinction is between an :doc:`ak.types.ArrayType` and the
 .. code-block:: python
 
     >>> type(ak.type(array))
-    <class 'awkward1.types.ArrayType'>
+    <class 'awkward.types.ArrayType'>
     >>> type(ak.type(array.layout))
-    <class 'awkward1.types.ListType'>
+    <class 'awkward.types.ListType'>
 
 In addition to the properties and methods described in :doc:`ak.types.Type`,
 an ArrayType has the following.

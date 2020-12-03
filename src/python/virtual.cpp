@@ -40,7 +40,7 @@ PyArrayGenerator::kwargs() const {
 const ak::ContentPtr
 PyArrayGenerator::generate() const {
   py::object out = callable_(*args_, **kwargs_);
-  py::object layout = py::module::import("awkward1").attr("to_layout")(
+  py::object layout = py::module::import("awkward").attr("to_layout")(
                                         out, py::cast(false), py::cast(false));
   return unbox_content(layout);
 }

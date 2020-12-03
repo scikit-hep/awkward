@@ -13,6 +13,7 @@
 #include "awkward/array/IndexedArray.h"
 #include "awkward/array/NumpyArray.h"
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/VirtualArray.h"
 
 #include "awkward/array/EmptyArray.h"
 
@@ -116,12 +117,24 @@ namespace awkward {
                    bool check_parameters,
                    bool check_form_key,
                    bool compatibility_check) const {
+    if (compatibility_check) {
+      if (VirtualForm* raw = dynamic_cast<VirtualForm*>(other.get())) {
+        if (raw->form().get() != nullptr) {
+          return equal(raw->form(),
+                       check_identities,
+                       check_parameters,
+                       check_form_key,
+                       compatibility_check);
+        }
+      }
+    }
+
     if (check_identities  &&
         has_identities_ != other.get()->has_identities()) {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -203,15 +216,13 @@ namespace awkward {
                                        FormKey(nullptr));
   }
 
-  bool
-  EmptyArray::has_virtual_form() const {
-    return false;
+  kernel::lib
+  EmptyArray::kernels() const {
+    return kernel::lib::cpu;
   }
 
-  bool
-  EmptyArray::has_virtual_length() const {
-    return false;
-  }
+  void
+  EmptyArray::caches(std::vector<ArrayCachePtr>& out) const { }
 
   const std::string
   EmptyArray::tostring_part(const std::string& indent,
@@ -405,7 +416,7 @@ namespace awkward {
 
   bool
   EmptyArray::mergeable(const ContentPtr& other, bool mergebool) const {
-    if (!parameters_equal(other.get()->parameters())) {
+    if (!parameters_equal(other.get()->parameters(), false)) {
       return false;
     }
     return true;

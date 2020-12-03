@@ -179,7 +179,7 @@ namespace awkward {
       return false;
     }
     if (check_parameters  &&
-        !util::parameters_equal(parameters_, other.get()->parameters())) {
+        !util::parameters_equal(parameters_, other.get()->parameters(), false)) {
       return false;
     }
     if (check_form_key  &&
@@ -202,7 +202,13 @@ namespace awkward {
 
   const FormPtr
   ListForm::getitem_field(const std::string& key) const {
-    return content_.get()->getitem_field(key);
+    return std::make_shared<ListForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      starts_,
+      stops_,
+      content_.get()->getitem_field(key));
   }
 
   ////////// ListArray
@@ -467,15 +473,22 @@ namespace awkward {
   }
 
   template <typename T>
-  bool
-  ListArrayOf<T>::has_virtual_form() const {
-    return content_.get()->has_virtual_form();
+  kernel::lib
+  ListArrayOf<T>::kernels() const {
+    kernel::lib starts = starts_.ptr_lib();
+    kernel::lib stops = stops_.ptr_lib();
+    if (starts == stops) {
+      return kernels_compare(starts, content_);
+    }
+    else {
+      return kernel::lib::size;
+    }
   }
 
   template <typename T>
-  bool
-  ListArrayOf<T>::has_virtual_length() const {
-    return content_.get()->has_virtual_length();
+  void
+  ListArrayOf<T>::caches(std::vector<ArrayCachePtr>& out) const {
+    content_.get()->caches(out);
   }
 
   template <typename T>
@@ -844,7 +857,7 @@ namespace awkward {
       return mergeable(raw->array(), mergebool);
     }
 
-    if (!parameters_equal(other.get()->parameters())) {
+    if (!parameters_equal(other.get()->parameters(), false)) {
       return false;
     }
 
@@ -936,8 +949,11 @@ namespace awkward {
       total_length += array.get()->length();
     }
 
+    util::Parameters parameters(parameters_);
     ContentPtrVec contents;
     for (auto array : head) {
+      util::merge_parameters(parameters, array.get()->parameters());
+
       if (ListArray32* raw = dynamic_cast<ListArray32*>(array.get())) {
         contents.push_back(raw->content());
       }
@@ -1107,7 +1123,7 @@ namespace awkward {
     }
 
     ContentPtr next = std::make_shared<ListArray64>(Identities::none(),
-                                                    parameters_,
+                                                    parameters,
                                                     nextstarts,
                                                     nextstops,
                                                     nextcontent);

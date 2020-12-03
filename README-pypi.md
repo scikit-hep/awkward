@@ -59,17 +59,17 @@ Our [presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) provides a good i
 
 # Installation
 
-Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward1) using pip:
+Awkward Array can be installed [from PyPI](https://pypi.org/project/awkward) using pip:
 
 ```bash
-pip install awkward1
+pip install awkward
 ```
 
 You will likely get a precompiled binary (wheel), depending on your operating system and Python version. If not, pip attempts to compile from source (which requires a C++ compiler, make, and CMake).
 
-Awkward Array is also available using [conda](https://anaconda.org/conda-forge/awkward1), which always installs a binary:
+Awkward Array is also available using [conda](https://anaconda.org/conda-forge/awkward), which always installs a binary:
 ```bash
-conda install -c conda-forge awkward1
+conda install -c conda-forge awkward
 ```
 
 If you have already added `conda-forge` as a channel, the `-c conda-forge` is unnecessary. Adding the channel is recommended because it ensures that all of your packages use compatible versions:

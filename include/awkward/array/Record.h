@@ -76,11 +76,11 @@ namespace awkward {
     const FormPtr
       form(bool materialize) const override;
 
-    bool
-      has_virtual_form() const override;
+    kernel::lib
+      kernels() const override;
 
-    bool
-      has_virtual_length() const override;
+    void
+      caches(std::vector<ArrayCachePtr>& out) const override;
 
     const std::string
       tostring_part(const std::string& indent,

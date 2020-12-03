@@ -10,6 +10,7 @@
 #include "awkward/type/UnknownType.h"
 #include "awkward/type/OptionType.h"
 #include "awkward/util.h"
+#include "awkward/virtual/ArrayCache.h"
 
 #include "awkward/type/RecordType.h"
 
@@ -157,7 +158,7 @@ namespace awkward {
   bool
   RecordType::equal(const TypePtr& other, bool check_parameters) const {
     if (RecordType* t = dynamic_cast<RecordType*>(other.get())) {
-      if (check_parameters  &&  !parameters_equal(other.get()->parameters())) {
+      if (check_parameters  &&  !parameters_equal(other.get()->parameters(), false)) {
         return false;
       }
       if (numfields() != t->numfields()) {
@@ -225,10 +226,13 @@ namespace awkward {
     for (auto type : types_) {
       contents.push_back(type.get()->empty());
     }
+    std::vector<ArrayCachePtr> caches;  // nothing is virtual here
     return std::make_shared<RecordArray>(Identities::none(),
                                          parameters_,
                                          contents,
-                                         recordlookup_);
+                                         recordlookup_,
+                                         0,
+                                         caches);
   }
 
   const TypePtr
