@@ -21,32 +21,40 @@ void
 make_fromjson(py::module& m, const std::string& name) {
   m.def(name.c_str(),
         [](const std::string& source,
+           const char* nan_string,
+           const char* infinity_string,
+           const char* minus_infinity_string,
+           bool nan_and_inf_as_float,
            int64_t initial,
            double resize,
            int64_t buffersize) -> std::shared_ptr<ak::Content> {
-    bool isarray = false;
-    bool isrecord = false;
-    for (char const &x: source) {
-      if (x != 9  &&  x != 10  &&  x != 13  &&  x != 32) {  // whitespace
-        if (x == 91) {         // opening square bracket
-          isarray = true;
-        }
-        else if (x == 123) {   // opening curly bracket
-          isrecord = true;
-        }
-        break;
-      }
-    }
-    if (isarray) {
-      return ak::FromJsonString(
-        source.c_str(), ak::ArrayBuilderOptions(initial, resize));
-    }
-    if (isrecord) {
-      return ak::FromJsonString(
-        source.c_str(), ak::ArrayBuilderOptions(initial, resize)
-      ).get()->getitem_at_nowrap(0).get()->getitem_at_nowrap(0);
-    }
-    else {
+    return ak::FromJsonString(source.c_str(),
+                              ak::ArrayBuilderOptions(initial, resize),
+                              nan_string,
+                              infinity_string,
+                              minus_infinity_string,
+                              nan_and_inf_as_float);
+  }, py::arg("source"),
+     py::arg("nan_string") = nullptr,
+     py::arg("infinity_string") = nullptr,
+     py::arg("minus_infinity_string") = nullptr,
+     py::arg("nan_and_inf_as_float") = false,
+     py::arg("initial") = 1024,
+     py::arg("resize") = 1.5,
+     py::arg("buffersize") = 65536);
+}
+
+void
+make_fromjsonfile(py::module& m, const std::string& name) {
+  m.def(name.c_str(),
+        [](const std::string& source,
+           const char* nan_string,
+           const char* infinity_string,
+           const char* minus_infinity_string,
+           bool nan_and_inf_as_float,
+           int64_t initial,
+           double resize,
+           int64_t buffersize) -> std::shared_ptr<ak::Content> {
 #ifdef _MSC_VER
       FILE* file;
       if (fopen_s(&file, source.c_str(), "rb") != 0) {
@@ -63,7 +71,11 @@ make_fromjson(py::module& m, const std::string& name) {
       try {
         out = FromJsonFile(file,
                            ak::ArrayBuilderOptions(initial, resize),
-                           buffersize);
+                           buffersize,
+                           nan_string,
+                           infinity_string,
+                           minus_infinity_string,
+                           nan_and_inf_as_float);
       }
       catch (...) {
         fclose(file);
@@ -71,11 +83,14 @@ make_fromjson(py::module& m, const std::string& name) {
       }
       fclose(file);
       return out;
-    }
   }, py::arg("source"),
-      py::arg("initial") = 1024,
-      py::arg("resize") = 1.5,
-      py::arg("buffersize") = 65536);
+     py::arg("nan_string") = nullptr,
+     py::arg("infinity_string") = nullptr,
+     py::arg("minus_infinity_string") = nullptr,
+     py::arg("nan_and_inf_as_float") = false,
+     py::arg("initial") = 1024,
+     py::arg("resize") = 1.5,
+     py::arg("buffersize") = 65536);
 }
 
 ////////// Uproot connector
