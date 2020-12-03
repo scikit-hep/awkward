@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 #ifndef AWKWARD_LISTARRAY_H_
 #define AWKWARD_LISTARRAY_H_

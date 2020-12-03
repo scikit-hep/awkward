@@ -1,4 +1,4 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 import math
 import json
@@ -104,7 +104,7 @@ with open("_auto/changelog.rst", "w") as outfile:
             numprs += 1
 
             if first:
-                header_text = "\nUnreleased (`master branch <https://github.com/scikit-hep/awkward-1.0>`__ on GitHub)\n"
+                header_text = "\nUnreleased (`main branch <https://github.com/scikit-hep/awkward-1.0>`__ on GitHub)\n"
                 outfile.write(header_text)
                 outfile.write("="*len(header_text) + "\n\n")
 

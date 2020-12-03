@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 set -e
 
@@ -8,7 +8,7 @@ mkdir build
 mkdir build/awkward1
 
 cat > build/awkward1/__init__.py << EOF
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 from __future__ import absolute_import
 
