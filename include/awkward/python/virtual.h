@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/master/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
 #ifndef AWKWARDPY_VIRTUAL_H_
 #define AWKWARDPY_VIRTUAL_H_

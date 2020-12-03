@@ -2,7 +2,7 @@
 
     <br/>
 
-.. image:: https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/logo/logo-300px.png
+.. image:: https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/logo/logo-300px.png
     :width: 300px
     :alt: Awkward Array
 

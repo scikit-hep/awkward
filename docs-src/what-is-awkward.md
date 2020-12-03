@@ -451,7 +451,7 @@ The rest of these tutorials show how to use Awkward Array with various libraries
   <tr>
     <td width="50%" valign="top" align="center">
       <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-sphinx.png" width="80%">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/panel-sphinx.png" width="80%">
       </a>
       <p align="center" style="margin-top: 10px"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
@@ -461,7 +461,7 @@ The rest of these tutorials show how to use Awkward Array with various libraries
     </td>
     <td width="50%" valign="top" align="center">
       <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="80%">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/panel-doxygen.png" width="80%">
       </a>
       <p align="center" style="margin-top: 10px"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">

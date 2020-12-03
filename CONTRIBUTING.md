@@ -34,7 +34,7 @@ As such, you should name your branch starting with your GitHub userid and a slas
 
 Most pull requests are merged with the "squash and merge" feature, so details about commit history within a pull request are lost. Feel free, therefore, to commit with any frequency you're comfortable with. I like to make frequent commits to avoid losing work to a dead laptop, and to have more save-points to recover from.
 
-It is unnecessary to manually edit (rebase) your commit history. If, however, you do want to save a pull request as multiple commits on `master`, ask me and we'll discuss.
+It is unnecessary to manually edit (rebase) your commit history. If, however, you do want to save a pull request as multiple commits on `main`, ask me and we'll discuss. (The default branch is named `main`, not `master`.)
 
 ### Building and teseting locally
 
@@ -108,7 +108,7 @@ rm -rf docs-shinx/_auto docs_sphinx/_build docs-sphinx/_static
 
 Pull requests must pass all [continuous integration](https://dev.azure.com/jpivarski/Scikit-HEP/_build?definitionId=3&_a=summary) tests before they are merged. I will sometimes cancel non-essential builds to give priority to pull requests that are almost ready to be merged. If you needed the result of the build as a diagnostic, you can ask me to restart your job or make a trivial change to trigger a new build.
 
-Currently, we only run merge builds (the state of your branch if merged with master), not regular branch builds (the state of your branch as-is), because only merge builds can be made to run for pull requests from external forks and it makes better use of our limited execution time on Azure. If you want to enable regular branch builds, you can turn it on for your branch by editing `trigger/branches/exclude` in [.ci/azure-buildtest-awkwrad.yml](https://github.com/scikit-hep/awkward-1.0/blob/9b6fca3f6e6456860ae40979171f762e0045ce7c/.ci/azure-buildtest-awkward.yml#L1-L5). The merge build trigger is not controlled by the YAML file. It is better, however, to keep up-to-date with `git merge master`.
+Currently, we only run merge builds (the state of your branch if merged with `main`), not regular branch builds (the state of your branch as-is), because only merge builds can be made to run for pull requests from external forks and it makes better use of our limited execution time on Azure. If you want to enable regular branch builds, you can turn it on for your branch by editing `trigger/branches/exclude` in [.ci/azure-buildtest-awkwrad.yml](https://github.com/scikit-hep/awkward-1.0/blob/9b6fca3f6e6456860ae40979171f762e0045ce7c/.ci/azure-buildtest-awkward.yml#L1-L5). The merge build trigger is not controlled by the YAML file. It is better, however, to keep up-to-date with `git merge main`.
 
 ### Semi-automated testing of CUDA kernels
 
@@ -143,13 +143,13 @@ ssh -i ~/.ssh/awkward1-cuda-test.pem ubuntu@WW.XX.YY.ZZ aws ec2 stop-instances -
 
 and verify with `list-instances`. While the GPU instance is running, you can ssh into it interactively for debugging.
 
-### The master branch
+### The main branch
 
-The Awkward Array `master` branch must be kept in an unbroken state. Although the recommended way to install Awkward Array is through pip or conda, the `master` branch on GitHub must always be functional. Pull requests for bug fixes and new features are based on `master`, so it has to work for users to test our proposed changes.
+The Awkward Array `main` branch must be kept in an unbroken state. Although the recommended way to install Awkward Array is through pip or conda, the `main` branch on GitHub must always be functional. Pull requests for bug fixes and new features are based on `main`, so it has to work for users to test our proposed changes.
 
-The `master` branch is also never far from the latest released version. The [release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) shows that each release introduces at most several, sometimes only one, completed pull requests.
+The `main` branch is also never far from the latest released version. The [release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) shows that each release introduces at most several, sometimes only one, completed pull requests.
 
-Committing directly to `master` is not allowed except for
+Committing directly to `main` is not allowed except for
 
    * updating the `VERSION_INFO` file, which should be independent of pull requests
    * updating documentation or non-code files

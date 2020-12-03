@@ -1,4 +1,4 @@
-<a href="https://github.com/scikit-hep/awkward-1.0#readme"><img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/logo/logo-300px.png"></a>
+<a href="https://github.com/scikit-hep/awkward-1.0#readme"><img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/logo/logo-300px.png"></a>
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 
@@ -85,7 +85,7 @@ conda update --all
   <tr>
     <td width="66%" valign="top">
       <a href="https://awkward-array.org">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-tutorials.png" width="570">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/panel-tutorials.png" width="570">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.org">
@@ -95,7 +95,7 @@ conda update --all
     </td>
     <td width="33%" valign="top">
       <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-sphinx.png" width="268">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/panel-sphinx.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/index.html">
@@ -103,7 +103,7 @@ conda update --all
         </a>
       </b></p>
       <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">
-        <img src="https://github.com/scikit-hep/awkward-1.0/raw/master/docs-img/panel-doxygen.png" width="268">
+        <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/panel-doxygen.png" width="268">
       </a>
       <p align="center"><b>
         <a href="https://awkward-array.readthedocs.io/en/latest/_static/index.html">

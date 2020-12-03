@@ -132,6 +132,8 @@ Be sure to clone this repository recursively to get the header-only C++ dependen
 git clone --recursive https://github.com/scikit-hep/awkward-1.0.git
 ```
 
+Also be aware that the default branch is named `main`, not `master`, which could be important for pull requests from forks.
+
 You can install it on your system with pip, which uses exactly the same procedure as deployment. This is recommended if you **do not** expect to change the code.
 
 ```bash
@@ -183,7 +185,7 @@ Python projects can simply `import awkward`.
 
 C++ projects can link against the shared libraries `libawkward-cpu-kernels.so` and `libawkward.so` or their static library equivalents. These libraries are shipped, along with the include files, as part of pip's installation.
 
-   * See the [dependent-project](https://github.com/scikit-hep/awkward-1.0/tree/master/dependent-project) directory for examples.
+   * See the [dependent-project](https://github.com/scikit-hep/awkward-1.0/tree/main/dependent-project) directory for examples.
 
 # Papers and talks about Awkward Array
 
@@ -192,8 +194,8 @@ C++ projects can link against the shared libraries `libawkward-cpu-kernels.so` a
    * [PyHEP talk](https://indico.cern.ch/event/833895/contributions/3577882) on October 17, 2019.
    * [CHEP talk](https://indico.cern.ch/event/773049/contributions/3473258) on November 7, 2019.
    * [CHEP 2019 proceedings](https://arxiv.org/abs/2001.06307) (to be published in _EPJ Web of Conferences_).
-   * [Demo for Coffea developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs-jupyter/2019-12-20-coffea-demo.ipynb) on December 20, 2019.
-   * [Demo for Numba developers](https://github.com/scikit-hep/awkward-1.0/blob/master/docs-jupyter/2020-01-22-numba-demo-EVALUATED.ipynb) on January 22, 2020.
+   * [Demo for Coffea developers](https://github.com/scikit-hep/awkward-1.0/blob/main/docs-jupyter/2019-12-20-coffea-demo.ipynb) on December 20, 2019.
+   * [Demo for Numba developers](https://github.com/scikit-hep/awkward-1.0/blob/main/docs-jupyter/2020-01-22-numba-demo-EVALUATED.ipynb) on January 22, 2020.
    * [Summary poster](https://github.com/jpivarski/2020-02-27-irishep-poster/blob/master/pivarski-irishep-poster.pdf) on February 27, 2020.
    * [Demo for Electron Ion Collider users](https://github.com/jpivarski/2020-04-08-eic-jlab#readme) ([video](https://www.youtube.com/watch?v=FoxNS6nlbD0)) on April 8, 2020.
    * [Presentation at SciPy 2020](https://youtu.be/WlnUF3LRBj4) (video) on July 5, 2020.
