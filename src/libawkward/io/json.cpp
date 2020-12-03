@@ -682,10 +682,10 @@ namespace awkward {
         if (nan_string_ != nullptr  &&  strcmp(str, nan_string_) == 0) {
           builder_.real(std::numeric_limits<double>::quiet_NaN());
           return true;
-        } else if(infinity_string_ != nullptr  &&  strcmp(str, infinity_string_) == 0) {
+        } else if (infinity_string_ != nullptr  &&  strcmp(str, infinity_string_) == 0) {
           builder_.real(std::numeric_limits<double>::infinity());
           return true;
-        } else if(minus_infinity_string_ != nullptr  &&  strcmp(str, minus_infinity_string_) == 0) {
+        } else if (minus_infinity_string_ != nullptr  &&  strcmp(str, minus_infinity_string_) == 0) {
           builder_.real(-std::numeric_limits<double>::infinity());
           return true;
         }
@@ -760,7 +760,9 @@ namespace awkward {
       scan = false;
       handler.next_root();
       done = reader.Parse<rj::kParseStopWhenDoneFlag>(stream, handler);
-      if(std::isspace(stream.Peek())) {
+      char c = stream.Peek();
+      if (c == ' '  ||  c == '\f'  ||  c == '\n'  ||  c == '\r'  ||
+          c == '\t'  ||  c == '\v') {
         stream.Take();
         scan = true;
       }
@@ -809,7 +811,7 @@ namespace awkward {
                  bool nan_and_inf_as_float) {
     rj::Reader reader;
     rj::StringStream stream(source);
-    if(nan_and_inf_as_float  ||  nan_string != nullptr
+    if (nan_and_inf_as_float  ||  nan_string != nullptr
       ||  nan_string != nullptr  ||  nan_string != nullptr) {
       HandlerNanAndInf handler (options, nan_string, infinity_string,
         minus_infinity_string, nan_and_inf_as_float);

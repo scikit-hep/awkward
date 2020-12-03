@@ -1278,11 +1278,11 @@ namespace awkward {
 
     for (const auto& array : others) {
       NumpyArray* content = dynamic_cast<NumpyArray*>(array.get());
-      if(content != nullptr  &&  content->ndim() == 1) {
+      if (content != nullptr  &&  content->ndim() == 1) {
         ContentPtr out = std::make_shared<RegularArray>(Identities::none(),
-                                             util::Parameters(),
-                                             array,
-                                             1);
+                                                        util::Parameters(),
+                                                        array,
+                                                        1);
           auto const& other = out.get()->offsets_and_flattened(posaxis, depth);
           contents_length += other.second.get()->length();
           contents.emplace_back(other.second);
