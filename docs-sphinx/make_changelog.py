@@ -8,7 +8,7 @@ import http.client
 import datetime
 
 tagslist_text = subprocess.run(["git", "show-ref", "--tags"], stdout=subprocess.PIPE).stdout
-tagslist = dict(re.findall(rb"([0-9a-f]{40}) refs/tags/([0-9\.]+)", tagslist_text))
+tagslist = dict(re.findall(rb"([0-9a-f]{40}) refs/tags/([0-9\.rc]+)", tagslist_text))
 
 subjects_text = subprocess.run(["git", "log", "--format='format:%H %s'"], stdout=subprocess.PIPE).stdout
 subjects = re.findall(rb"([0-9a-f]{40}) (.*)", subjects_text)
@@ -35,9 +35,12 @@ zipballs = {x["tag_name"]: x["zipball_url"] for x in github_releases if "tag_nam
 
 pypi_connection = http.client.HTTPSConnection("pypi.org")
 
-def pypi_exists(tag):
+def pypi_exists(tag, old):
     print("Looking for release {0} on PyPI...".format(tag))
-    pypi_connection.request("HEAD", "/project/awkward/{0}/".format(tag))
+    if old:
+        pypi_connection.request("HEAD", "/project/awkward1/{0}/".format(tag))
+    else:
+        pypi_connection.request("HEAD", "/project/awkward/{0}/".format(tag))
     response = pypi_connection.getresponse()
     response.read()
     return response.status == 200
@@ -68,8 +71,12 @@ with open("_auto/changelog.rst", "w") as outfile:
                 date_text = ""
 
             assets = []
-            if pypi_exists(tag):
-                assets.append("`pip <https://pypi.org/project/awkward/{0}/>`__".format(tag))
+            if tag.startswith("0."):
+                if pypi_exists(tag, True):
+                    assets.append("`pip <https://pypi.org/project/awkward1/{0}/>`__".format(tag))
+            else:
+                if pypi_exists(tag, False):
+                    assets.append("`pip <https://pypi.org/project/awkward/{0}/>`__".format(tag))
             if tag in tarballs:
                 assets.append("`tar <{0}>`__".format(tarballs[tag]))
             if tag in zipballs:

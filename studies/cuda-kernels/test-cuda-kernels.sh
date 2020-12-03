@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
 echo "Copying files"
-cp standard_parallel_algorithms.h loop-dependent-variable-kernels/*.cu ../../src/cuda-kernels/
+
+cp standard_parallel_algorithms.h loop-dependent-variable-kernels/manual_*.cu restricted-loop-carried-array-kernels/manual_*.cu ../../src/cuda-kernels/
 cd ../..
 
 echo "Running setup"
 sudo pip uninstall awkward1_cuda_kernels && sudo ./cuda-build.sh --install
-python dev/generate-kernelspec.py && python dev/generate-tests.py
+python dev/generate-tests.py
 
 echo "Testing"
 pytest -vvrs tests-cuda-kernels
