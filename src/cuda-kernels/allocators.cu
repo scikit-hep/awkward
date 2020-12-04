@@ -5,16 +5,23 @@
 #include "awkward/kernel-utils.h"
 
 void* awkward_malloc(int64_t bytelength) {
-  void* out = nullptr;
-  if (bytelength != 0) {
+  if (bytelength == 0) {
+    // std::cout << "CUDA malloc at nullptr (0 bytes)" << std::endl;
+    return nullptr;
+  }
+  else {
+    void* out = nullptr;
     cudaError_t err = cudaMallocManaged(&out, bytelength);
     if (err != cudaError::cudaSuccess) {
-      out = nullptr;
+      // std::cout << "CUDA malloc failed (" << bytelength << " bytes)" << std::endl;
+      return nullptr;
     }
+    // std::cout << "CUDA malloc at " << out << " (" << bytelength << " bytes)" << std::endl;
+    return out;
   }
-  return out;
 }
 
 void awkward_free(void const *ptr) {
+  // std::cout << "CUDA free   at " << ptr << std::endl;
   cudaFree((void*)ptr);
 }
