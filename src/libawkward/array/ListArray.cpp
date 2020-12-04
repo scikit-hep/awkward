@@ -1321,18 +1321,23 @@ namespace awkward {
       std::vector<std::shared_ptr<int64_t>> tocarry;
       std::vector<int64_t*> tocarryraw;
       for (int64_t j = 0;  j < n;  j++) {
-        std::shared_ptr<int64_t> ptr(new int64_t[(size_t)totallen],
-                                     kernel::array_deleter<int64_t>());
+        std::shared_ptr<int64_t> ptr =
+            kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                    totallen*sizeof(int64_t));
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
-      int64_t* toindex = new int64_t[n];
-      int64_t* fromindex = new int64_t[n];
+      std::shared_ptr<int64_t> toindex =
+          kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                  n*sizeof(int64_t));
+      std::shared_ptr<int64_t> fromindex =
+          kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                  n*sizeof(int64_t));
       struct Error err2 = kernel::ListArray_combinations_64<T>(
         kernel::lib::cpu,   // DERIVE
         tocarryraw.data(),
-        toindex,
-        fromindex,
+        toindex.get(),
+        fromindex.get(),
         n,
         replacement,
         starts_.data(),

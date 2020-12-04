@@ -13,11 +13,8 @@
 namespace awkward {
   const BuilderPtr
   BoolBuilder::fromempty(const ArrayBuilderOptions& options) {
-    BuilderPtr out =
-      std::make_shared<BoolBuilder>(options,
-                                    GrowableBuffer<uint8_t>::empty(options));
-    out.get()->setthat(out);
-    return out;
+    return std::make_shared<BoolBuilder>(options,
+                                         GrowableBuffer<uint8_t>::empty(options));
   }
 
   BoolBuilder::BoolBuilder(const ArrayBuilderOptions& options,
@@ -63,7 +60,7 @@ namespace awkward {
 
   const BuilderPtr
   BoolBuilder::null() {
-    BuilderPtr out = OptionBuilder::fromvalids(options_, that_);
+    BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
     out.get()->null();
     return out;
   }
@@ -71,33 +68,33 @@ namespace awkward {
   const BuilderPtr
   BoolBuilder::boolean(bool x) {
     buffer_.append(x);
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   BoolBuilder::integer(int64_t x) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->integer(x);
     return out;
   }
 
   const BuilderPtr
   BoolBuilder::real(double x) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->real(x);
     return out;
   }
 
   const BuilderPtr
   BoolBuilder::string(const char* x, int64_t length, const char* encoding) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
     return out;
   }
 
   const BuilderPtr
   BoolBuilder::beginlist() {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
     return out;
   }
@@ -111,7 +108,7 @@ namespace awkward {
 
   const BuilderPtr
   BoolBuilder::begintuple(int64_t numfields) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
     return out;
   }
@@ -132,7 +129,7 @@ namespace awkward {
 
   const BuilderPtr
   BoolBuilder::beginrecord(const char* name, bool check) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
     return out;
   }
@@ -153,7 +150,7 @@ namespace awkward {
 
   const BuilderPtr
   BoolBuilder::append(const ContentPtr& array, int64_t at) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->append(array, at);
     return out;
   }

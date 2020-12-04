@@ -4567,9 +4567,9 @@ namespace awkward {
                          int64_t outlength,
                          bool ascending,
                          bool stable) const {
-    std::shared_ptr<int64_t> ptr(
-      new int64_t[length], kernel::array_deleter<int64_t>());
-
+    std::shared_ptr<int64_t> ptr =
+        kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                length*sizeof(int64_t));
     if (length == 0) {
       return ptr;
     }
@@ -4614,9 +4614,8 @@ namespace awkward {
                          int64_t outlength,
                          bool ascending,
                          bool stable) const {
-    std::shared_ptr<T> ptr(
-      new T[length], kernel::array_deleter<T>());
-
+    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
+                                               length*sizeof(T));
     if (length == 0) {
       return ptr;
     }
@@ -4661,9 +4660,8 @@ namespace awkward {
                           Index64& outoffsets,
                           bool ascending,
                           bool stable) const {
-    std::shared_ptr<T> ptr(
-      new T[length], kernel::array_deleter<T>());
-
+    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
+                                               length*sizeof(T));
     if (length == 0) {
       return ptr;
     }
@@ -4754,11 +4752,10 @@ namespace awkward {
   template<typename TO, typename FROM>
   const std::shared_ptr<void>
   NumpyArray::cast_to_type(const FROM* fromptr, int64_t length) const {
-    std::shared_ptr<TO>toptr (
-      new TO[length], kernel::array_deleter<TO>());
-
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<TO> toptr = kernel::malloc<TO>(ptr_lib, length*sizeof(TO));
     struct Error err = kernel::NumpyArray_fill<FROM, TO>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       toptr.get(),
       0,
       fromptr,
