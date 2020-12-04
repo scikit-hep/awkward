@@ -276,66 +276,66 @@ namespace awkward {
 
   template <>
   IndexOf<int64_t> IndexOf<int8_t>::to64() const {
-    std::shared_ptr<int64_t> ptr(
-      length_ == 0 ? nullptr : new int64_t[(size_t)length_],
-      kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr =
+        kernel::malloc<int64_t>(ptr_lib, length_*sizeof(int64_t));
     if (length_ != 0) {
       struct Error err = kernel::Index_to_Index64<int8_t>(
-        kernel::lib::cpu,   // DERIVE
+        ptr_lib,
         ptr.get(),
         &ptr_.get()[(size_t)offset_],
         length_);
       util::handle_error(err);
     }
-    return IndexOf<int64_t>(ptr, 0, length_, kernel::lib::cpu);   // DERIVE
+    return IndexOf<int64_t>(ptr, 0, length_, ptr_lib);
   }
 
   template <>
   IndexOf<int64_t> IndexOf<uint8_t>::to64() const {
-    std::shared_ptr<int64_t> ptr(
-      length_ == 0 ? nullptr : new int64_t[(size_t)length_],
-      kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr =
+        kernel::malloc<int64_t>(ptr_lib, length_*sizeof(int64_t));
     if (length_ != 0) {
       struct Error err = kernel::Index_to_Index64<uint8_t>(
-        kernel::lib::cpu,   // DERIVE
+        ptr_lib,
         ptr.get(),
         &ptr_.get()[(size_t)offset_],
         length_);
       util::handle_error(err);
     }
-    return IndexOf<int64_t>(ptr, 0, length_, kernel::lib::cpu);   // DERIVE
+    return IndexOf<int64_t>(ptr, 0, length_, ptr_lib);
   }
 
   template <>
   IndexOf<int64_t> IndexOf<int32_t>::to64() const {
-    std::shared_ptr<int64_t> ptr(
-      length_ == 0 ? nullptr : new int64_t[(size_t)length_],
-      kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr =
+        kernel::malloc<int64_t>(ptr_lib, length_*sizeof(int64_t));
     if (length_ != 0) {
       struct Error err = kernel::Index_to_Index64<int32_t>(
-        kernel::lib::cpu,   // DERIVE
+        ptr_lib,
         ptr.get(),
         &ptr_.get()[(size_t)offset_],
         length_);
       util::handle_error(err);
     }
-    return IndexOf<int64_t>(ptr, 0, length_, kernel::lib::cpu);   // DERIVE
+    return IndexOf<int64_t>(ptr, 0, length_, ptr_lib);
   }
 
   template <>
   IndexOf<int64_t> IndexOf<uint32_t>::to64() const {
-    std::shared_ptr<int64_t> ptr(
-      length_ == 0 ? nullptr : new int64_t[(size_t)length_],
-      kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr =
+        kernel::malloc<int64_t>(ptr_lib, length_*sizeof(int64_t));
     if (length_ != 0) {
       struct Error err = kernel::Index_to_Index64<uint32_t>(
-        kernel::lib::cpu,   // DERIVE
+        ptr_lib,
         ptr.get(),
         &ptr_.get()[(size_t)offset_],
         length_);
       util::handle_error(err);
     }
-    return IndexOf<int64_t>(ptr, 0, length_, kernel::lib::cpu);   // DERIVE
+    return IndexOf<int64_t>(ptr, 0, length_, ptr_lib);
   }
 
   template <>
@@ -346,10 +346,9 @@ namespace awkward {
   template <typename T>
   const IndexOf<T>
   IndexOf<T>::deep_copy() const {
-    std::shared_ptr<T> ptr(
-      length_ == 0 ? nullptr : new T[(size_t)length_],
-      kernel::array_deleter<T>());
+    std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib_, length_*sizeof(T));
     if (length_ != 0) {
+      // DERIVE Yikes! It's a memcpy! This would would actually crash if on a GPU (FIXME).
       memcpy(ptr.get(),
              &ptr_.get()[(size_t)offset_],
              sizeof(T)*((size_t)length_));

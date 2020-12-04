@@ -1413,8 +1413,9 @@ namespace awkward {
     std::vector<std::shared_ptr<int64_t>> tocarry;
     std::vector<int64_t*> tocarryraw;
     for (int64_t j = 0;  j < n;  j++) {
-      std::shared_ptr<int64_t> ptr(new int64_t[(size_t)combinationslen],
-                                   kernel::array_deleter<int64_t>());
+      std::shared_ptr<int64_t> ptr =
+          kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                  combinationslen*sizeof(int64_t));
       tocarry.push_back(ptr);
       tocarryraw.push_back(ptr.get());
     }
