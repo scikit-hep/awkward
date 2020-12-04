@@ -7,6 +7,8 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <typeindex>
+#include <unordered_map>
 
 #include "awkward/common.h"
 
@@ -163,6 +165,8 @@ namespace awkward {
       keys(const RecordLookupPtr& recordlookup, int64_t numfields);
 
     using Parameters = std::map<std::string, std::string>;
+
+    using ValidParameters = std::unordered_multimap<std::string, std::type_index>;
 
     /// @brief Returns `true` if the value associated with a `key` in
     /// `parameters` is equal to the specified `value`.
