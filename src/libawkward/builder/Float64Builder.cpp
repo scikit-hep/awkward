@@ -13,10 +13,8 @@
 namespace awkward {
   const BuilderPtr
   Float64Builder::fromempty(const ArrayBuilderOptions& options) {
-    BuilderPtr out =
-      std::make_shared<Float64Builder>(options,
-                                       GrowableBuffer<double>::empty(options));
-    return out;
+    return std::make_shared<Float64Builder>(options,
+                                            GrowableBuffer<double>::empty(options));
   }
 
   const BuilderPtr
@@ -30,8 +28,7 @@ namespace awkward {
       newraw[i] = (double)oldraw[i];
     }
     buffer.set_length(old.length());
-    BuilderPtr out = std::make_shared<Float64Builder>(options, buffer);
-    return out;
+    return std::make_shared<Float64Builder>(options, buffer);
   }
 
   Float64Builder::Float64Builder(const ArrayBuilderOptions& options,

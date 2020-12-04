@@ -18,12 +18,10 @@ namespace awkward {
   ListBuilder::fromempty(const ArrayBuilderOptions& options) {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
     offsets.append(0);
-    BuilderPtr out =
-      std::make_shared<ListBuilder>(options,
-                                    offsets,
-                                    UnknownBuilder::fromempty(options),
-                                    false);
-    return out;
+    return std::make_shared<ListBuilder>(options,
+                                         offsets,
+                                         UnknownBuilder::fromempty(options),
+                                         false);
   }
 
   ListBuilder::ListBuilder(const ArrayBuilderOptions& options,

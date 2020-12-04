@@ -19,11 +19,10 @@ namespace awkward {
     GrowableBuffer<int64_t> offsets = GrowableBuffer<int64_t>::empty(options);
     offsets.append(0);
     GrowableBuffer<uint8_t> content = GrowableBuffer<uint8_t>::empty(options);
-    BuilderPtr out = std::make_shared<StringBuilder>(options,
-                                                     offsets,
-                                                     content,
-                                                     encoding);
-    return out;
+    return std::make_shared<StringBuilder>(options,
+                                           offsets,
+                                           content,
+                                           encoding);
   }
 
   StringBuilder::StringBuilder(const ArrayBuilderOptions& options,

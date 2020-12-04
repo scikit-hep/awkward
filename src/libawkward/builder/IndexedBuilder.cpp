@@ -163,55 +163,47 @@ namespace awkward {
                                    const ContentPtr& array) {
     GrowableBuffer<int64_t> index =
       GrowableBuffer<int64_t>::full(options, -1, nullcount);
-    BuilderPtr out;
     if (std::shared_ptr<IndexedArray32> ptr =
         std::dynamic_pointer_cast<IndexedArray32>(array)) {
-      out = std::make_shared<IndexedI32Builder>(
-        options,
-        index,
-        ptr,
-        nullcount != 0);
+      return std::make_shared<IndexedI32Builder>(options,
+                                                 index,
+                                                 ptr,
+                                                 nullcount != 0);
     }
     else if (std::shared_ptr<IndexedArrayU32> ptr =
              std::dynamic_pointer_cast<IndexedArrayU32>(array)) {
-      out = std::make_shared<IndexedIU32Builder>(
-        options,
-        index,
-        ptr,
-        nullcount != 0);
+      return std::make_shared<IndexedIU32Builder>(options,
+                                                  index,
+                                                  ptr,
+                                                  nullcount != 0);
     }
     else if (std::shared_ptr<IndexedArray64> ptr =
              std::dynamic_pointer_cast<IndexedArray64>(array)) {
-      out = std::make_shared<IndexedI64Builder>(
-        options,
-        index,
-        ptr,
-        nullcount != 0);
+      return std::make_shared<IndexedI64Builder>(options,
+                                                 index,
+                                                 ptr,
+                                                 nullcount != 0);
     }
     else if (std::shared_ptr<IndexedOptionArray32> ptr =
              std::dynamic_pointer_cast<IndexedOptionArray32>(array)) {
-      out = std::make_shared<IndexedIO32Builder>(
-        options,
-        index,
-        ptr,
-        nullcount != 0);
+      return std::make_shared<IndexedIO32Builder>(options,
+                                                  index,
+                                                  ptr,
+                                                  nullcount != 0);
     }
     else if (std::shared_ptr<IndexedOptionArray64> ptr =
              std::dynamic_pointer_cast<IndexedOptionArray64>(array)) {
-      out = std::make_shared<IndexedIO64Builder>(
-        options,
-        index,
-        ptr,
-        nullcount != 0);
+      return std::make_shared<IndexedIO64Builder>(options,
+                                                  index,
+                                                  ptr,
+                                                  nullcount != 0);
     }
     else {
-      out = std::make_shared<IndexedGenericBuilder>(
-        options,
-        index,
-        array,
-        nullcount != 0);
+      return std::make_shared<IndexedGenericBuilder>(options,
+                                                     index,
+                                                     array,
+                                                     nullcount != 0);
     }
-    return out;
   }
 
   IndexedGenericBuilder::IndexedGenericBuilder(

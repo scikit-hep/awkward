@@ -4,8 +4,4 @@
 
 namespace awkward {
   Builder::~Builder() = default;
-
-  void
-  Builder::setthat(const BuilderPtr& that) {
-  }
 }

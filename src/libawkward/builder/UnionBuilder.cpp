@@ -29,11 +29,10 @@ namespace awkward {
     GrowableBuffer<int64_t> index =
       GrowableBuffer<int64_t>::arange(options, firstcontent->length());
     std::vector<BuilderPtr> contents({ firstcontent });
-    BuilderPtr out = std::make_shared<UnionBuilder>(options,
-                                                    tags,
-                                                    index,
-                                                    contents);
-    return out;
+    return std::make_shared<UnionBuilder>(options,
+                                          tags,
+                                          index,
+                                          contents);
   }
 
   UnionBuilder::UnionBuilder(const ArrayBuilderOptions& options,

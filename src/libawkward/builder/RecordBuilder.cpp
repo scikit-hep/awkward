@@ -22,18 +22,16 @@
 namespace awkward {
   const BuilderPtr
   RecordBuilder::fromempty(const ArrayBuilderOptions& options) {
-    BuilderPtr out =
-      std::make_shared<RecordBuilder>(options,
-                                      std::vector<BuilderPtr>(),
-                                      std::vector<std::string>(),
-                                      std::vector<const char*>(),
-                                      "",
-                                      nullptr,
-                                      -1,
-                                      false,
-                                      -1,
-                                      -1);
-    return out;
+    return std::make_shared<RecordBuilder>(options,
+                                           std::vector<BuilderPtr>(),
+                                           std::vector<std::string>(),
+                                           std::vector<const char*>(),
+                                           "",
+                                           nullptr,
+                                           -1,
+                                           false,
+                                           -1,
+                                           -1);
   }
 
   RecordBuilder::RecordBuilder(const ArrayBuilderOptions& options,

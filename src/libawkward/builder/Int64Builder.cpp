@@ -14,10 +14,8 @@
 namespace awkward {
   const BuilderPtr
   Int64Builder::fromempty(const ArrayBuilderOptions& options) {
-    BuilderPtr out =
-      std::make_shared<Int64Builder>(options,
-                                     GrowableBuffer<int64_t>::empty(options));
-    return out;
+    return std::make_shared<Int64Builder>(options,
+                                          GrowableBuffer<int64_t>::empty(options));
   }
 
   Int64Builder::Int64Builder(const ArrayBuilderOptions& options,

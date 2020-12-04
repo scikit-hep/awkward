@@ -19,10 +19,9 @@ namespace awkward {
     GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::full(options,
                                                                   -1,
                                                                   nullcount);
-    BuilderPtr out = std::make_shared<OptionBuilder>(options,
-                                                     index,
-                                                     content);
-    return out;
+    return std::make_shared<OptionBuilder>(options,
+                                           index,
+                                           content);
   }
 
   const BuilderPtr
@@ -30,10 +29,9 @@ namespace awkward {
                             const BuilderPtr& content) {
     GrowableBuffer<int64_t> index =
       GrowableBuffer<int64_t>::arange(options, content->length());
-    BuilderPtr out = std::make_shared<OptionBuilder>(options,
-                                                     index,
-                                                     content);
-    return out;
+    return std::make_shared<OptionBuilder>(options,
+                                           index,
+                                           content);
   }
 
   OptionBuilder::OptionBuilder(const ArrayBuilderOptions& options,

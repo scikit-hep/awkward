@@ -18,12 +18,11 @@
 namespace awkward {
   const BuilderPtr
   TupleBuilder::fromempty(const ArrayBuilderOptions& options) {
-    BuilderPtr out = std::make_shared<TupleBuilder>(options,
-                                                    std::vector<BuilderPtr>(),
-                                                    -1,
-                                                    false,
-                                                    -1);
-    return out;
+    return std::make_shared<TupleBuilder>(options,
+                                          std::vector<BuilderPtr>(),
+                                          -1,
+                                          false,
+                                          -1);
   }
 
   TupleBuilder::TupleBuilder(const ArrayBuilderOptions& options,
