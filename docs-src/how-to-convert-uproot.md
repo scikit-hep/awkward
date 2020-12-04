@@ -18,16 +18,14 @@ Uproot defaults to reading data as Awkward Arrays, so there usually isn't any ex
 
 To find out which version you're using:
 
-   * if you `import uproot` and `uproot.__version__` starts with `"3."`, then it's Uproot 3;
-   * if you `import uproot` and `uproot.__version__` starts with `"4."`, then it's Uproot 4;
    * if you `import uproot3`, then it's Uproot 3;
-   * if you `import uproot4`, then it's Uproot 4.
+   * if you `import uproot` or `import uproot4`, then it's Uproot 4.
 
 ```{code-cell} ipython3
 import awkward as ak
 import numpy as np
+import uproot3
 import uproot
-import uproot4
 ```
 
 From ROOT to Awkward with Uproot 4
@@ -38,7 +36,7 @@ By default, Uproot 4 delivers data from ROOT files as Awkward 1 arrays, even tho
 To start, open a file and look at the objects it contains.
 
 ```{code-cell} ipython3
-up4_file = uproot4.open("http://scikit-hep.org/uproot/examples/HZZ.root")
+up4_file = uproot.open("http://scikit-hep.org/uproot3/examples/HZZ.root")
 up4_file.classnames()
 ```
 
@@ -165,7 +163,7 @@ Uproot 4 is recommended unless you're dealing with legacy software built on Upro
 To start, open a file and look at the objects it contains.
 
 ```{code-cell} ipython3
-up3_file = uproot.open("http://scikit-hep.org/uproot/examples/HZZ.root")
+up3_file = uproot3.open("http://scikit-hep.org/uproot3/examples/HZZ.root")
 up3_file.classnames()
 ```
 
@@ -243,14 +241,14 @@ Since ROOT file-writing is only implemented in Uproot 3, you'll need to take int
 To open a flie for writing, use `uproot.recreate`, rather than `uproot.open`.
 
 ```{code-cell} ipython3
-file = uproot.recreate("/tmp/example.root")
+file = uproot3.recreate("/tmp/example.root")
 file
 ```
 
-The `uproot.newtree` function creates a tree that can be written. The data types for each branch have to be specified.
+The `uproot3.newtree` function creates a tree that can be written. The data types for each branch have to be specified.
 
 ```{code-cell} ipython3
-file["tree1"] = uproot.newtree({"branch1": int, "branch2": np.float32})
+file["tree1"] = uproot3.newtree({"branch1": int, "branch2": np.float32})
 ```
 
 The method for writing is `extend`, which can be called as many times as needed to write array chunks to the file.
@@ -280,10 +278,10 @@ And you will need its `counts`. (This is the Awkward 0 equivalent of [ak.num](ht
 ak0_array.counts
 ```
 
-The branch's type has to be constructed with the `uproot.newbranch` function and has to include a `size`, into which the counts will be written.
+The branch's type has to be constructed with the `uproot3.newbranch` function and has to include a `size`, into which the counts will be written.
 
 ```{code-cell} ipython3
-file["tree2"] = uproot.newtree({"branch3": uproot.newbranch(np.dtype("f8"), size="n")})
+file["tree2"] = uproot3.newtree({"branch3": uproot3.newbranch(np.dtype("f8"), size="n")})
 ```
 
 Fill each chunk by assigning the branch data and the counts in each `extend`.
@@ -292,7 +290,7 @@ Fill each chunk by assigning the branch data and the counts in each `extend`.
 file["tree2"].extend({"branch3": ak0_array, "n": ak0_array.counts})
 ```
 
-File-closure could also be enforced by putting `uproot.recreate` in a context manager (Python `with` statement).
+File-closure could also be enforced by putting `uproot3.recreate` in a context manager (Python `with` statement).
 
 ```{code-cell} ipython3
 file.close()

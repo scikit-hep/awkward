@@ -344,7 +344,7 @@ Both fields are [VirtualArray](https://awkward-array.readthedocs.io/en/latest/ak
 The array also has an attached cache, which we can query to see that nothing has been read:
 
 ```{code-cell} ipython3
-ak_lazy.cache
+ak_lazy.caches
 ```
 
 But when we actually access a field, the data are read from disk:
@@ -354,7 +354,7 @@ ak_lazy.x
 ```
 
 ```{code-cell} ipython3
-ak_lazy.cache
+ak_lazy.caches
 ```
 
 ```{code-cell} ipython3
@@ -362,7 +362,7 @@ ak_lazy.y
 ```
 
 ```{code-cell} ipython3
-ak_lazy.cache
+ak_lazy.caches
 ```
 
 A custom `lazy_cache` can be supplied: the default is a non-evicting Python dict attached to the output [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) but may be any [Mapping](https://docs.python.org/3/library/collections.abc.html#collections-abstract-base-classes).
