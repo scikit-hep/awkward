@@ -1120,7 +1120,7 @@ def from_awkward0(
         elif isinstance(array, awkward0.Table):
             # contents
             if array.istuple:
-                return ak.layout.RecordArray(
+                out = ak.layout.RecordArray(
                     [recurse(x, level + 1) for x in array.contents.values()]
                 )
             else:
@@ -1129,7 +1129,21 @@ def from_awkward0(
                 for n, x in array.contents.items():
                     keys.append(n)
                     values.append(recurse(x, level + 1))
-                return ak.layout.RecordArray(values, keys)
+                out = ak.layout.RecordArray(values, keys)
+
+            if array._view is None:
+                return out
+            elif isinstance(array._view, tuple):
+                start, step, length = array._view
+                stop = start + step * length
+                if stop < 0:
+                    stop = None
+                if step == 1 or step is None:
+                    return out[start:stop]
+                else:
+                    return out[start:stop:step]
+            else:
+                return out[array._view]
 
         elif isinstance(array, awkward0.UnionArray):
             # tags, index, contents
