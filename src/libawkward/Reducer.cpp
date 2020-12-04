@@ -39,11 +39,11 @@ namespace awkward {
                            const Index64& parents,
                            int64_t outlength) const {
     // This is the only reducer that completely ignores the data.
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
-
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_count_64(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       parents.data(),
       parents.length(),
@@ -163,10 +163,11 @@ namespace awkward {
   ReducerCountNonzero::apply_bool(const bool* data,
                                   const Index64& parents,
                                   int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<bool>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -180,11 +181,11 @@ namespace awkward {
   ReducerCountNonzero::apply_int8(const int8_t* data,
                                   const Index64& parents,
                                   int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
-
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<int8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -198,10 +199,11 @@ namespace awkward {
   ReducerCountNonzero::apply_uint8(const uint8_t* data,
                                    const Index64& parents,
                                    int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<uint8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -215,10 +217,11 @@ namespace awkward {
   ReducerCountNonzero::apply_int16(const int16_t* data,
                                    const Index64& parents,
                                    int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<int16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -232,10 +235,11 @@ namespace awkward {
   ReducerCountNonzero::apply_uint16(const uint16_t* data,
                                     const Index64& parents,
                                     int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<uint16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -249,10 +253,11 @@ namespace awkward {
   ReducerCountNonzero::apply_int32(const int32_t* data,
                                    const Index64& parents,
                                    int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<int32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -266,10 +271,11 @@ namespace awkward {
   ReducerCountNonzero::apply_uint32(const uint32_t* data,
                                     const Index64& parents,
                                     int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<uint32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -283,10 +289,11 @@ namespace awkward {
   ReducerCountNonzero::apply_int64(const int64_t* data,
                                    const Index64& parents,
                                    int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<int64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -300,10 +307,11 @@ namespace awkward {
   ReducerCountNonzero::apply_uint64(const uint64_t* data,
                                     const Index64& parents,
                                     int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<uint64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -317,10 +325,11 @@ namespace awkward {
   ReducerCountNonzero::apply_float32(const float* data,
                                      const Index64& parents,
                                      int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<float>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -334,10 +343,11 @@ namespace awkward {
   ReducerCountNonzero::apply_float64(const double* data,
                                      const Index64& parents,
                                      int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<double>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -388,21 +398,22 @@ namespace awkward {
   ReducerSum::apply_bool(const bool* data,
                          const Index64& parents,
                          int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());
+    std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
+      ptr_lib, outlength*sizeof(int32_t));
     struct Error err = kernel::reduce_sum_64<int32_t, bool>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_sum_64<int64_t, bool>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -417,21 +428,22 @@ namespace awkward {
   ReducerSum::apply_int8(const int8_t* data,
                          const Index64& parents,
                          int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());
+    std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
+      ptr_lib, outlength*sizeof(int32_t));
     struct Error err = kernel::reduce_sum_64<int32_t, int8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_sum_64<int64_t, int8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -446,21 +458,22 @@ namespace awkward {
   ReducerSum::apply_uint8(const uint8_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());
+    std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
+      ptr_lib, outlength*sizeof(uint32_t));
     struct Error err = kernel::reduce_sum_64<uint32_t, uint8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());
+    std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
+      ptr_lib, outlength*sizeof(uint64_t));
     struct Error err = kernel::reduce_sum_64<uint64_t, uint8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -475,21 +488,22 @@ namespace awkward {
   ReducerSum::apply_int16(const int16_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());
+    std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
+      ptr_lib, outlength*sizeof(int32_t));
     struct Error err = kernel::reduce_sum_64<int32_t, int16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_sum_64<int64_t, int16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -504,21 +518,22 @@ namespace awkward {
   ReducerSum::apply_uint16(const uint16_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());
+    std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
+      ptr_lib, outlength*sizeof(uint32_t));
     struct Error err = kernel::reduce_sum_64<uint32_t, uint16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());
+    std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
+      ptr_lib, outlength*sizeof(uint64_t));
     struct Error err = kernel::reduce_sum_64<uint64_t, uint16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -533,21 +548,22 @@ namespace awkward {
   ReducerSum::apply_int32(const int32_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());
+    std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
+      ptr_lib, outlength*sizeof(int32_t));
     struct Error err = kernel::reduce_sum_64<int32_t, int32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_sum_64<int64_t, int32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -562,21 +578,22 @@ namespace awkward {
   ReducerSum::apply_uint32(const uint32_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());
+    std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
+      ptr_lib, outlength*sizeof(uint32_t));
     struct Error err = kernel::reduce_sum_64<uint32_t, uint32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());
+    std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
+      ptr_lib, outlength*sizeof(uint64_t));
     struct Error err = kernel::reduce_sum_64<uint64_t, uint32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -591,10 +608,11 @@ namespace awkward {
   ReducerSum::apply_int64(const int64_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_sum_64<int64_t, int64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -608,10 +626,11 @@ namespace awkward {
   ReducerSum::apply_uint64(const uint64_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
+      ptr_lib, outlength*sizeof(uint64_t));
     struct Error err = kernel::reduce_sum_64<uint64_t, uint64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -625,10 +644,11 @@ namespace awkward {
   ReducerSum::apply_float32(const float* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<float> ptr(new float[(size_t)outlength],
-                               kernel::array_deleter<float>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<float> ptr = kernel::malloc<float>(
+      ptr_lib, outlength*sizeof(float));
     struct Error err = kernel::reduce_sum_64<float, float>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -642,10 +662,11 @@ namespace awkward {
   ReducerSum::apply_float64(const double* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<double> ptr(new double[(size_t)outlength],
-                                kernel::array_deleter<double>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<double> ptr = kernel::malloc<double>(
+      ptr_lib, outlength*sizeof(double));
     struct Error err = kernel::reduce_sum_64<double, double>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -696,21 +717,22 @@ namespace awkward {
   ReducerProd::apply_bool(const bool* data,
                           const Index64& parents,
                           int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());
+    std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
+      ptr_lib, outlength*sizeof(int32_t));
     struct Error err = kernel::reduce_prod_64<int32_t, bool>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_prod_64<int64_t, bool>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -725,21 +747,22 @@ namespace awkward {
   ReducerProd::apply_int8(const int8_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());
+    std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
+      ptr_lib, outlength*sizeof(int32_t));
     struct Error err = kernel::reduce_prod_64<int32_t, int8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_prod_64<int64_t, int8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -754,21 +777,22 @@ namespace awkward {
   ReducerProd::apply_uint8(const uint8_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());
+    std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
+      ptr_lib, outlength*sizeof(uint32_t));
     struct Error err = kernel::reduce_prod_64<uint32_t, uint8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());
+    std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
+      ptr_lib, outlength*sizeof(uint64_t));
     struct Error err = kernel::reduce_prod_64<uint64_t, uint8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -783,21 +807,22 @@ namespace awkward {
   ReducerProd::apply_int16(const int16_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());
+    std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
+      ptr_lib, outlength*sizeof(int32_t));
     struct Error err = kernel::reduce_prod_64<int32_t, int16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_prod_64<int64_t, int16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -812,21 +837,22 @@ namespace awkward {
   ReducerProd::apply_uint16(const uint16_t* data,
                             const Index64& parents,
                             int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());
+    std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
+      ptr_lib, outlength*sizeof(uint32_t));
     struct Error err = kernel::reduce_prod_64<uint32_t, uint16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());
+    std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
+      ptr_lib, outlength*sizeof(uint64_t));
     struct Error err = kernel::reduce_prod_64<uint64_t, uint16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -841,21 +867,22 @@ namespace awkward {
   ReducerProd::apply_int32(const int32_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());
+    std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
+      ptr_lib, outlength*sizeof(int32_t));
     struct Error err = kernel::reduce_prod_64<int32_t, int32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_prod_64<int64_t, int32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -870,21 +897,22 @@ namespace awkward {
   ReducerProd::apply_uint32(const uint32_t* data,
                             const Index64& parents,
                             int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
-    std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());
+    std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
+      ptr_lib, outlength*sizeof(uint32_t));
     struct Error err = kernel::reduce_prod_64<uint32_t, uint32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
       parents.length(),
       outlength);
 #else
-    std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());
+    std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
+      ptr_lib, outlength*sizeof(uint64_t));
     struct Error err = kernel::reduce_prod_64<uint64_t, uint32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -899,10 +927,11 @@ namespace awkward {
   ReducerProd::apply_int64(const int64_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_prod_64<int64_t, int64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -916,10 +945,11 @@ namespace awkward {
   ReducerProd::apply_uint64(const uint64_t* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
+      ptr_lib, outlength*sizeof(uint64_t));
     struct Error err = kernel::reduce_prod_64<uint64_t, uint64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -933,10 +963,11 @@ namespace awkward {
   ReducerProd::apply_float32(const float* data,
                              const Index64& parents,
                              int64_t outlength) const {
-    std::shared_ptr<float> ptr(new float[(size_t)outlength],
-                               kernel::array_deleter<float>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<float> ptr = kernel::malloc<float>(
+      ptr_lib, outlength*sizeof(float));
     struct Error err = kernel::reduce_prod_64<float, float>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -950,10 +981,11 @@ namespace awkward {
   ReducerProd::apply_float64(const double* data,
                              const Index64& parents,
                              int64_t outlength) const {
-    std::shared_ptr<double> ptr(new double[(size_t)outlength],
-                                kernel::array_deleter<double>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<double> ptr = kernel::malloc<double>(
+      ptr_lib, outlength*sizeof(double));
     struct Error err = kernel::reduce_prod_64<double, double>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -984,10 +1016,11 @@ namespace awkward {
   ReducerAny::apply_bool(const bool* data,
                          const Index64& parents,
                          int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<bool>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1001,10 +1034,11 @@ namespace awkward {
   ReducerAny::apply_int8(const int8_t* data,
                          const Index64& parents,
                          int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<int8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1018,10 +1052,11 @@ namespace awkward {
   ReducerAny::apply_uint8(const uint8_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<uint8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1035,10 +1070,11 @@ namespace awkward {
   ReducerAny::apply_int16(const int16_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<int16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1052,10 +1088,11 @@ namespace awkward {
   ReducerAny::apply_uint16(const uint16_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<uint16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1069,10 +1106,11 @@ namespace awkward {
   ReducerAny::apply_int32(const int32_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<int32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1086,10 +1124,11 @@ namespace awkward {
   ReducerAny::apply_uint32(const uint32_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<uint32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1103,10 +1142,11 @@ namespace awkward {
   ReducerAny::apply_int64(const int64_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<int64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1120,10 +1160,11 @@ namespace awkward {
   ReducerAny::apply_uint64(const uint64_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<uint64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1137,10 +1178,11 @@ namespace awkward {
   ReducerAny::apply_float32(const float* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<float>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1154,10 +1196,11 @@ namespace awkward {
   ReducerAny::apply_float64(const double* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<double>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1188,10 +1231,11 @@ namespace awkward {
   ReducerAll::apply_bool(const bool* data,
                          const Index64& parents,
                          int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<bool>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1205,10 +1249,11 @@ namespace awkward {
   ReducerAll::apply_int8(const int8_t* data,
                          const Index64& parents,
                          int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<int8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1222,10 +1267,11 @@ namespace awkward {
   ReducerAll::apply_uint8(const uint8_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<uint8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1239,10 +1285,11 @@ namespace awkward {
   ReducerAll::apply_int16(const int16_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<int16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1256,10 +1303,11 @@ namespace awkward {
   ReducerAll::apply_uint16(const uint16_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<uint16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1273,10 +1321,11 @@ namespace awkward {
   ReducerAll::apply_int32(const int32_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<int32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1290,10 +1339,11 @@ namespace awkward {
   ReducerAll::apply_uint32(const uint32_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<uint32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1307,10 +1357,11 @@ namespace awkward {
   ReducerAll::apply_int64(const int64_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<int64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1324,10 +1375,11 @@ namespace awkward {
   ReducerAll::apply_uint64(const uint64_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<uint64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1341,10 +1393,11 @@ namespace awkward {
   ReducerAll::apply_float32(const float* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<float>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1358,10 +1411,11 @@ namespace awkward {
   ReducerAll::apply_float64(const double* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<double>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1401,10 +1455,11 @@ namespace awkward {
   ReducerMin::apply_bool(const bool* data,
                          const Index64& parents,
                          int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<bool>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1418,14 +1473,15 @@ namespace awkward {
   ReducerMin::apply_int8(const int8_t* data,
                          const Index64& parents,
                          int64_t outlength) const {
-    std::shared_ptr<int8_t> ptr(new int8_t[(size_t)outlength],
-                                kernel::array_deleter<int8_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int8_t> ptr = kernel::malloc<int8_t>(
+      ptr_lib, outlength*sizeof(int8_t));
     int8_t initial = std::numeric_limits<int8_t>::max();
     if (has_initial_) {
       initial = (int8_t)initial_i64_;
     }
     struct Error err = kernel::reduce_min_64<int8_t, int8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1440,14 +1496,15 @@ namespace awkward {
   ReducerMin::apply_uint8(const uint8_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<uint8_t> ptr(new uint8_t[(size_t)outlength],
-                                 kernel::array_deleter<uint8_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<uint8_t> ptr = kernel::malloc<uint8_t>(
+      ptr_lib, outlength*sizeof(uint8_t));
     uint8_t initial = std::numeric_limits<uint8_t>::max();
     if (has_initial_) {
       initial = (uint8_t)initial_u64_;
     }
     struct Error err = kernel::reduce_min_64<uint8_t, uint8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1462,14 +1519,15 @@ namespace awkward {
   ReducerMin::apply_int16(const int16_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<int16_t> ptr(new int16_t[(size_t)outlength],
-                                 kernel::array_deleter<int16_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int16_t> ptr = kernel::malloc<int16_t>(
+      ptr_lib, outlength*sizeof(int16_t));
     int16_t initial = std::numeric_limits<int16_t>::max();
     if (has_initial_) {
       initial = (int16_t)initial_i64_;
     }
     struct Error err = kernel::reduce_min_64<int16_t, int16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1484,14 +1542,15 @@ namespace awkward {
   ReducerMin::apply_uint16(const uint16_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<uint16_t> ptr(new uint16_t[(size_t)outlength],
-                                  kernel::array_deleter<uint16_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<uint16_t> ptr = kernel::malloc<uint16_t>(
+      ptr_lib, outlength*sizeof(uint16_t));
     uint16_t initial = std::numeric_limits<uint16_t>::max();
     if (has_initial_) {
       initial = (uint16_t)initial_u64_;
     }
     struct Error err = kernel::reduce_min_64<uint16_t, uint16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1506,14 +1565,15 @@ namespace awkward {
   ReducerMin::apply_int32(const int32_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
+      ptr_lib, outlength*sizeof(int32_t));
     int32_t initial = std::numeric_limits<int32_t>::max();
     if (has_initial_) {
       initial = (int32_t)initial_i64_;
     }
     struct Error err = kernel::reduce_min_64<int32_t, int32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1528,14 +1588,15 @@ namespace awkward {
   ReducerMin::apply_uint32(const uint32_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
+      ptr_lib, outlength*sizeof(uint32_t));
     uint32_t initial = std::numeric_limits<uint32_t>::max();
     if (has_initial_) {
       initial = (uint32_t)initial_u64_;
     }
     struct Error err = kernel::reduce_min_64<uint32_t, uint32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1550,14 +1611,15 @@ namespace awkward {
   ReducerMin::apply_int64(const int64_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     int64_t initial = std::numeric_limits<int64_t>::max();
     if (has_initial_) {
       initial = (int64_t)initial_i64_;
     }
     struct Error err = kernel::reduce_min_64<int64_t, int64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1572,14 +1634,15 @@ namespace awkward {
   ReducerMin::apply_uint64(const uint64_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
+      ptr_lib, outlength*sizeof(uint64_t));
     uint64_t initial = std::numeric_limits<uint64_t>::max();
     if (has_initial_) {
       initial = (uint64_t)initial_u64_;
     }
     struct Error err = kernel::reduce_min_64<uint64_t, uint64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1594,14 +1657,15 @@ namespace awkward {
   ReducerMin::apply_float32(const float* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<float> ptr(new float[(size_t)outlength],
-                               kernel::array_deleter<float>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<float> ptr = kernel::malloc<float>(
+      ptr_lib, outlength*sizeof(float));
     float initial = std::numeric_limits<float>::infinity();
     if (has_initial_) {
       initial = (float)initial_f64_;
     }
     struct Error err = kernel::reduce_min_64<float, float>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1616,14 +1680,15 @@ namespace awkward {
   ReducerMin::apply_float64(const double* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<double> ptr(new double[(size_t)outlength],
-                                kernel::array_deleter<double>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<double> ptr = kernel::malloc<double>(
+      ptr_lib, outlength*sizeof(double));
     double initial = std::numeric_limits<double>::infinity();
     if (has_initial_) {
       initial = (double)initial_f64_;
     }
     struct Error err = kernel::reduce_min_64<double, double>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1664,10 +1729,11 @@ namespace awkward {
   ReducerMax::apply_bool(const bool* data,
                          const Index64& parents,
                          int64_t outlength) const {
-    std::shared_ptr<bool> ptr(new bool[(size_t)outlength],
-                              kernel::array_deleter<bool>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<bool>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1681,14 +1747,15 @@ namespace awkward {
   ReducerMax::apply_int8(const int8_t* data,
                          const Index64& parents,
                          int64_t outlength) const {
-    std::shared_ptr<int8_t> ptr(new int8_t[(size_t)outlength],
-                                kernel::array_deleter<int8_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int8_t> ptr = kernel::malloc<int8_t>(
+      ptr_lib, outlength*sizeof(int8_t));
     int8_t initial = std::numeric_limits<int8_t>::min();
     if (has_initial_) {
       initial = (int8_t)initial_i64_;
     }
     struct Error err = kernel::reduce_max_64<int8_t, int8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1703,14 +1770,15 @@ namespace awkward {
   ReducerMax::apply_uint8(const uint8_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<uint8_t> ptr(new uint8_t[(size_t)outlength],
-                                 kernel::array_deleter<uint8_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<uint8_t> ptr = kernel::malloc<uint8_t>(
+      ptr_lib, outlength*sizeof(uint8_t));
     uint8_t initial = std::numeric_limits<uint8_t>::min();
     if (has_initial_) {
       initial = (uint8_t)initial_u64_;
     }
     struct Error err = kernel::reduce_max_64<uint8_t, uint8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1725,14 +1793,15 @@ namespace awkward {
   ReducerMax::apply_int16(const int16_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<int16_t> ptr(new int16_t[(size_t)outlength],
-                                 kernel::array_deleter<int16_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int16_t> ptr = kernel::malloc<int16_t>(
+      ptr_lib, outlength*sizeof(int16_t));
     int16_t initial = std::numeric_limits<int16_t>::min();
     if (has_initial_) {
       initial = (int16_t)initial_i64_;
     }
     struct Error err = kernel::reduce_max_64<int16_t, int16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1747,14 +1816,15 @@ namespace awkward {
   ReducerMax::apply_uint16(const uint16_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<uint16_t> ptr(new uint16_t[(size_t)outlength],
-                                  kernel::array_deleter<uint16_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<uint16_t> ptr = kernel::malloc<uint16_t>(
+      ptr_lib, outlength*sizeof(uint16_t));
     uint16_t initial = std::numeric_limits<uint16_t>::min();
     if (has_initial_) {
       initial = (uint16_t)initial_u64_;
     }
     struct Error err = kernel::reduce_max_64<uint16_t, uint16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1769,14 +1839,15 @@ namespace awkward {
   ReducerMax::apply_int32(const int32_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<int32_t> ptr(new int32_t[(size_t)outlength],
-                                 kernel::array_deleter<int32_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
+      ptr_lib, outlength*sizeof(int32_t));
     int32_t initial = std::numeric_limits<int32_t>::min();
     if (has_initial_) {
       initial = (int32_t)initial_i64_;
     }
     struct Error err = kernel::reduce_max_64<int32_t, int32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1791,14 +1862,15 @@ namespace awkward {
   ReducerMax::apply_uint32(const uint32_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<uint32_t> ptr(new uint32_t[(size_t)outlength],
-                                  kernel::array_deleter<uint32_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
+      ptr_lib, outlength*sizeof(uint32_t));
     uint32_t initial = std::numeric_limits<uint32_t>::min();
     if (has_initial_) {
       initial = (uint32_t)initial_u64_;
     }
     struct Error err = kernel::reduce_max_64<uint32_t, uint32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1813,14 +1885,15 @@ namespace awkward {
   ReducerMax::apply_int64(const int64_t* data,
                           const Index64& parents,
                           int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     int64_t initial = std::numeric_limits<int64_t>::min();
     if (has_initial_) {
       initial = (int64_t)initial_i64_;
     }
     struct Error err = kernel::reduce_max_64<int64_t, int64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1835,14 +1908,15 @@ namespace awkward {
   ReducerMax::apply_uint64(const uint64_t* data,
                            const Index64& parents,
                            int64_t outlength) const {
-    std::shared_ptr<uint64_t> ptr(new uint64_t[(size_t)outlength],
-                                  kernel::array_deleter<uint64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
+      ptr_lib, outlength*sizeof(uint64_t));
     uint64_t initial = std::numeric_limits<uint64_t>::min();
     if (has_initial_) {
       initial = (uint64_t)initial_u64_;
     }
     struct Error err = kernel::reduce_max_64<uint64_t, uint64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1857,14 +1931,15 @@ namespace awkward {
   ReducerMax::apply_float32(const float* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<float> ptr(new float[(size_t)outlength],
-                               kernel::array_deleter<float>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<float> ptr = kernel::malloc<float>(
+      ptr_lib, outlength*sizeof(float));
     float initial = -std::numeric_limits<float>::infinity();
     if (has_initial_) {
       initial = (float)initial_f64_;
     }
     struct Error err = kernel::reduce_max_64<float, float>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1879,14 +1954,15 @@ namespace awkward {
   ReducerMax::apply_float64(const double* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<double> ptr(new double[(size_t)outlength],
-                                kernel::array_deleter<double>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<double> ptr = kernel::malloc<double>(
+      ptr_lib, outlength*sizeof(double));
     double initial = -std::numeric_limits<double>::infinity();
     if (has_initial_) {
       initial = (double)initial_f64_;
     }
     struct Error err = kernel::reduce_max_64<double, double>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1923,10 +1999,11 @@ namespace awkward {
   ReducerArgmin::apply_bool(const bool* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, bool>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1940,10 +2017,11 @@ namespace awkward {
   ReducerArgmin::apply_int8(const int8_t* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, int8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1957,10 +2035,11 @@ namespace awkward {
   ReducerArgmin::apply_uint8(const uint8_t* data,
                              const Index64& parents,
                              int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, uint8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1974,10 +2053,11 @@ namespace awkward {
   ReducerArgmin::apply_int16(const int16_t* data,
                              const Index64& parents,
                              int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, int16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -1991,10 +2071,11 @@ namespace awkward {
   ReducerArgmin::apply_uint16(const uint16_t* data,
                               const Index64& parents,
                               int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, uint16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2008,10 +2089,11 @@ namespace awkward {
   ReducerArgmin::apply_int32(const int32_t* data,
                              const Index64& parents,
                              int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, int32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2025,10 +2107,11 @@ namespace awkward {
   ReducerArgmin::apply_uint32(const uint32_t* data,
                               const Index64& parents,
                               int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, uint32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2042,10 +2125,11 @@ namespace awkward {
   ReducerArgmin::apply_int64(const int64_t* data,
                              const Index64& parents,
                              int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, int64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2059,10 +2143,11 @@ namespace awkward {
   ReducerArgmin::apply_uint64(const uint64_t* data,
                               const Index64& parents,
                               int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, uint64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2076,10 +2161,11 @@ namespace awkward {
   ReducerArgmin::apply_float32(const float* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, float>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2093,10 +2179,11 @@ namespace awkward {
   ReducerArgmin::apply_float64(const double* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, double>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2132,10 +2219,11 @@ namespace awkward {
   ReducerArgmax::apply_bool(const bool* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, bool>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2149,10 +2237,11 @@ namespace awkward {
   ReducerArgmax::apply_int8(const int8_t* data,
                             const Index64& parents,
                             int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, int8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2166,10 +2255,11 @@ namespace awkward {
   ReducerArgmax::apply_uint8(const uint8_t* data,
                              const Index64& parents,
                              int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, uint8_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2183,10 +2273,11 @@ namespace awkward {
   ReducerArgmax::apply_int16(const int16_t* data,
                              const Index64& parents,
                              int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, int16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2200,10 +2291,11 @@ namespace awkward {
   ReducerArgmax::apply_uint16(const uint16_t* data,
                               const Index64& parents,
                               int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, uint16_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2217,10 +2309,11 @@ namespace awkward {
   ReducerArgmax::apply_int32(const int32_t* data,
                              const Index64& parents,
                              int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, int32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2234,10 +2327,11 @@ namespace awkward {
   ReducerArgmax::apply_uint32(const uint32_t* data,
                               const Index64& parents,
                               int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, uint32_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2251,10 +2345,11 @@ namespace awkward {
   ReducerArgmax::apply_int64(const int64_t* data,
                              const Index64& parents,
                              int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, int64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2268,10 +2363,11 @@ namespace awkward {
   ReducerArgmax::apply_uint64(const uint64_t* data,
                               const Index64& parents,
                               int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, uint64_t>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2285,10 +2381,11 @@ namespace awkward {
   ReducerArgmax::apply_float32(const float* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, float>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2302,10 +2399,11 @@ namespace awkward {
   ReducerArgmax::apply_float64(const double* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    std::shared_ptr<int64_t> ptr(new int64_t[(size_t)outlength],
-                                 kernel::array_deleter<int64_t>());
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, double>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       ptr.get(),
       data,
       parents.data(),
@@ -2314,5 +2412,4 @@ namespace awkward {
     util::handle_error(err, util::quote(name()), nullptr);
     return ptr;
   }
-
 }
