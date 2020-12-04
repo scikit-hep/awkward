@@ -25,7 +25,6 @@ namespace awkward {
   const BuilderPtr
   UnknownBuilder::fromempty(const ArrayBuilderOptions& options) {
     BuilderPtr out = std::make_shared<UnknownBuilder>(options, 0);
-    out.get()->setthat(out);
     return out;
   }
 
@@ -79,7 +78,7 @@ namespace awkward {
   const BuilderPtr
   UnknownBuilder::null() {
     nullcount_++;
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr

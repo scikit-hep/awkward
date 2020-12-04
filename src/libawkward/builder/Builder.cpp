@@ -7,6 +7,5 @@ namespace awkward {
 
   void
   Builder::setthat(const BuilderPtr& that) {
-    that_ = that;
   }
 }

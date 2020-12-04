@@ -33,7 +33,6 @@ namespace awkward {
                                                     tags,
                                                     index,
                                                     contents);
-    out.get()->setthat(out);
     return out;
   }
 
@@ -89,13 +88,13 @@ namespace awkward {
   const BuilderPtr
   UnionBuilder::null() {
     if (current_ == -1) {
-      BuilderPtr out = OptionBuilder::fromvalids(options_, that_);
+      BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
       out.get()->null();
       return out;
     }
     else {
       contents_[(size_t)current_].get()->null();
-      return that_;
+      return shared_from_this();
     }
   }
 
@@ -123,7 +122,7 @@ namespace awkward {
     else {
       contents_[(size_t)current_].get()->boolean(x);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -150,7 +149,7 @@ namespace awkward {
     else {
       contents_[(size_t)current_].get()->integer(x);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -193,7 +192,7 @@ namespace awkward {
     else {
       contents_[(size_t)current_].get()->real(x);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -222,7 +221,7 @@ namespace awkward {
     else {
       contents_[(size_t)current_].get()->string(x, length, encoding);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -247,7 +246,7 @@ namespace awkward {
     else {
       contents_[(size_t)current_].get()->beginlist();
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -266,7 +265,7 @@ namespace awkward {
         current_ = -1;
       }
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -293,7 +292,7 @@ namespace awkward {
     else {
       contents_[(size_t)current_].get()->begintuple(numfields);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -306,7 +305,7 @@ namespace awkward {
     else {
       contents_[(size_t)current_].get()->index(index);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -325,7 +324,7 @@ namespace awkward {
         current_ = -1;
       }
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -354,7 +353,7 @@ namespace awkward {
     else {
       contents_[(size_t)current_].get()->beginrecord(name, check);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -367,7 +366,7 @@ namespace awkward {
     else {
       contents_[(size_t)current_].get()->field(key, check);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -386,7 +385,7 @@ namespace awkward {
         current_ = -1;
       }
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -451,6 +450,6 @@ namespace awkward {
     else {
       contents_[(size_t)current_].get()->append(array, at);
     }
-    return that_;
+    return shared_from_this();
   }
 }

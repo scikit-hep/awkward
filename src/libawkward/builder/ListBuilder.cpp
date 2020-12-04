@@ -23,7 +23,6 @@ namespace awkward {
                                     offsets,
                                     UnknownBuilder::fromempty(options),
                                     false);
-    out.get()->setthat(out);
     return out;
   }
 
@@ -70,65 +69,65 @@ namespace awkward {
   const BuilderPtr
   ListBuilder::null() {
     if (!begun_) {
-      BuilderPtr out = OptionBuilder::fromvalids(options_, that_);
+      BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
       out.get()->null();
       return out;
     }
     else {
       maybeupdate(content_.get()->null());
-      return that_;
+      return shared_from_this();
     }
   }
 
   const BuilderPtr
   ListBuilder::boolean(bool x) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->boolean(x);
       return out;
     }
     else {
       maybeupdate(content_.get()->boolean(x));
-      return that_;
+      return shared_from_this();
     }
   }
 
   const BuilderPtr
   ListBuilder::integer(int64_t x) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->integer(x);
       return out;
     }
     else {
       maybeupdate(content_.get()->integer(x));
-      return that_;
+      return shared_from_this();
     }
   }
 
   const BuilderPtr
   ListBuilder::real(double x) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->real(x);
       return out;
     }
     else {
       maybeupdate(content_.get()->real(x));
-      return that_;
+      return shared_from_this();
     }
   }
 
   const BuilderPtr
   ListBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->string(x, length, encoding);
       return out;
     }
     else {
       maybeupdate(content_.get()->string(x, length, encoding));
-      return that_;
+      return shared_from_this();
     }
   }
 
@@ -140,7 +139,7 @@ namespace awkward {
     else {
       maybeupdate(content_.get()->beginlist());
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -157,19 +156,19 @@ namespace awkward {
     else {
       maybeupdate(content_.get()->endlist());
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   ListBuilder::begintuple(int64_t numfields) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->begintuple(numfields);
       return out;
     }
     else {
       maybeupdate(content_.get()->begintuple(numfields));
-      return that_;
+      return shared_from_this();
     }
   }
 
@@ -182,7 +181,7 @@ namespace awkward {
     }
     else {
       content_.get()->index(index);
-      return that_;
+      return shared_from_this();
     }
   }
 
@@ -195,20 +194,20 @@ namespace awkward {
     }
     else {
       content_.get()->endtuple();
-      return that_;
+      return shared_from_this();
     }
   }
 
   const BuilderPtr
   ListBuilder::beginrecord(const char* name, bool check) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->beginrecord(name, check);
       return out;
     }
     else {
       maybeupdate(content_.get()->beginrecord(name, check));
-      return that_;
+      return shared_from_this();
     }
   }
 
@@ -221,7 +220,7 @@ namespace awkward {
     }
     else {
       content_.get()->field(key, check);
-      return that_;
+      return shared_from_this();
     }
   }
 
@@ -234,20 +233,20 @@ namespace awkward {
     }
     else {
       content_.get()->endrecord();
-      return that_;
+      return shared_from_this();
     }
   }
 
   const BuilderPtr
   ListBuilder::append(const ContentPtr& array, int64_t at) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->append(array, at);
       return out;
     }
     else {
       maybeupdate(content_.get()->append(array, at));
-      return that_;
+      return shared_from_this();
     }
   }
 

@@ -18,7 +18,7 @@ namespace awkward {
   ///
   /// @brief Abstract base class for nodes within an ArrayBuilder that
   /// cumulatively discover an array's type and fill it.
-  class LIBAWKWARD_EXPORT_SYMBOL Builder {
+  class LIBAWKWARD_EXPORT_SYMBOL Builder: public std::enable_shared_from_this<Builder> {
   public:
     /// @brief Virtual destructor acts as a first non-inline virtual function
     /// that determines a specific translation unit in which vtable shall be
