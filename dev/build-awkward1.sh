@@ -35,7 +35,7 @@ setup(name = "awkward1",
       download_url = "https://github.com/scikit-hep/awkward-1.0/releases",
       license = "BSD 3-clause",
       python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
-      install_requires = ["awkward>=1.0.0rc1"],
+      install_requires = ["awkward>=1.0.0"],
       classifiers = [
 #         "Development Status :: 1 - Planning",
 #         "Development Status :: 2 - Pre-Alpha",
