@@ -655,7 +655,9 @@ def lower_getattr_generic(context, builder, viewtype, viewval, attr):
     if attr == "ndim":
         return context.get_constant(numba.intp, viewtype.type.ndim)
     else:
-        return viewtype.type.lower_getitem_field(context, builder, viewtype, viewval, attr)
+        return viewtype.type.lower_getitem_field(
+            context, builder, viewtype, viewval, attr
+        )
 
 
 class IteratorType(numba.types.common.SimpleIteratorType):

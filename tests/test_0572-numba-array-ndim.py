@@ -20,7 +20,6 @@ def test():
     with pytest.raises(numba.core.errors.TypingError):
         f1(ak.Record({"x": [1, 2, 3], "y": [4]}))
 
-
     partitioned = ak.partitioned([ak.Array([[1, 2, 3], [], [4, 5]]) for i in range(5)])
 
     assert f1(partitioned) == 2
