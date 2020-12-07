@@ -2688,20 +2688,18 @@ def partitions(array):
         return None
 
 
-def partitioned(generate, numpartitions, highlevel=True, behavior=None):
+def partitioned(arrays, highlevel=True, behavior=None):
     """
     Args:
-        generate (int -> array): A function that generates an array partition
-            given a partition number.
-        numpartitions (int): Number of partitions to generate.
+        arrays (list of arrays): The arrays to logically concatenate into a
+            single partitioned array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content or #ak.partition.PartitionedArray
             subclass.
         behavior (bool): Custom #ak.behavior for the output array, if
             high-level.
 
-    Returns a partitioned array, produced by calling a function for each
-    partition.
+    Returns the logical concatenation of `arrays` as a partitioned array.
 
     Partitioning is an internal aspect of an array: it should behave
     identically to a non-partitioned array, but possibly with different
@@ -2713,9 +2711,9 @@ def partitioned(generate, numpartitions, highlevel=True, behavior=None):
     total_length = 0
     partitions = []
     stops = []
-    for partitionid in range(numpartitions):
+    for array in arrays:
         layout = ak.operations.convert.to_layout(
-            generate(partitionid), allow_record=False, allow_other=False
+            array, allow_record=False, allow_other=False
         )
         total_length += len(layout)
         partitions.append(layout)
