@@ -644,14 +644,18 @@ class type_getattr(numba.core.typing.templates.AttributeTemplate):
     key = ArrayViewType
 
     def generic_resolve(self, viewtype, attr):
-        # if attr == "???":
-        #     do_something_specific
-        return viewtype.type.getitem_field(viewtype, attr)
+        if attr == "ndim":
+            return numba.intp
+        else:
+            return viewtype.type.getitem_field(viewtype, attr)
 
 
 @numba.extending.lower_getattr_generic(ArrayViewType)
 def lower_getattr_generic(context, builder, viewtype, viewval, attr):
-    return viewtype.type.lower_getitem_field(context, builder, viewtype, viewval, attr)
+    if attr == "ndim":
+        return context.get_constant(numba.intp, viewtype.type.ndim)
+    else:
+        return viewtype.type.lower_getitem_field(context, builder, viewtype, viewval, attr)
 
 
 class IteratorType(numba.types.common.SimpleIteratorType):
@@ -1686,16 +1690,19 @@ class type_getattr_partitioned(numba.core.typing.templates.AttributeTemplate):
     key = PartitionedViewType
 
     def generic_resolve(self, partviewtype, attr):
-        # if attr == "???":
-        #     do_something_specific
-        return partviewtype.getitem_field(attr)
+        if attr == "ndim":
+            return numba.intp
+        else:
+            return partviewtype.getitem_field(attr)
 
 
 @numba.extending.lower_getattr_generic(PartitionedViewType)
 def lower_getattr_generic_partitioned(
     context, builder, partviewtype, partviewval, attr
 ):
-    if context.enable_nrt:
+    if attr == "ndim":
+        return context.get_constant(numba.intp, partviewtype.type.ndim)
+    elif context.enable_nrt:
         partviewproxy = context.make_helper(builder, partviewtype, partviewval)
         context.nrt.incref(builder, partviewtype.stopstype, partviewproxy.stops)
 
