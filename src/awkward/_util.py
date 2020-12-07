@@ -869,13 +869,12 @@ def broadcast_and_apply(
 
         elif any(isinstance(x, recordtypes) for x in inputs):
             if not allow_records:
-                exception = ValueError(
+                raise ValueError(
                     "cannot broadcast: {0}".format(
                         ", ".join(repr(type(x)) for x in inputs)
                     )
                     + exception_suffix(__file__)
                 )
-                deprecate(exception, "1.0.0", "2020-12-01")
 
             keys = None
             length = None
