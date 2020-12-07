@@ -2622,8 +2622,7 @@ def from_parquet(
             hold_cache = ak._util.MappingProxy({})
             lazy_cache = ak.layout.ArrayCache(hold_cache)
         elif lazy_cache == "attach":
-            exception = TypeError("lazy_cache must be a MutableMapping")
-            ak._util.deprecate(exception, "1.0.0", date="2020-12-01")
+            raise TypeError("lazy_cache must be a MutableMapping")
             hold_cache = ak._util.MappingProxy({})
             lazy_cache = ak.layout.ArrayCache(hold_cache)
         elif lazy_cache is not None and not isinstance(
@@ -3711,8 +3710,7 @@ def from_arrayset(
             hold_cache = ak._util.MappingProxy({})
             lazy_cache = ak.layout.ArrayCache(hold_cache)
         elif lazy_cache == "attach":
-            exception = TypeError("lazy_cache must be a MutableMapping")
-            ak._util.deprecate(exception, "1.0.0", date="2020-12-01")
+            raise TypeError("lazy_cache must be a MutableMapping")
             hold_cache = ak._util.MappingProxy({})
             lazy_cache = ak.layout.ArrayCache(hold_cache)
         elif lazy_cache is not None and not isinstance(

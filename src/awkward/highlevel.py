@@ -206,10 +206,9 @@ class Array(
         kernels=None,
     ):
         if cache is not None:
-            exception = TypeError(
+            raise TypeError(
                 "__init__() got an unexpected keyword argument 'cache'"
             )
-            ak._util.deprecate(exception, "1.0.0", date="2020-12-01")
 
         if isinstance(data, (ak.layout.Content, ak.partition.PartitionedArray)):
             layout = data
@@ -1471,10 +1470,9 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         kernels=None,
     ):
         if cache is not None:
-            exception = TypeError(
+            raise TypeError(
                 "__init__() got an unexpected keyword argument 'cache'"
             )
-            ak._util.deprecate(exception, "1.0.0", date="2020-12-01")
 
         if isinstance(data, ak.layout.Record):
             layout = data
