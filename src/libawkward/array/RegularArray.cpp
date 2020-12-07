@@ -26,6 +26,11 @@
 
 #include "awkward/array/RegularArray.h"
 
+namespace {
+  std::vector<std::string> valid_parameters = { "\"string\"", "\"bytestring\"" };
+  std::vector<std::string> non_valid_parameters = { "\"categorical\"" };
+}
+
 namespace awkward {
   ////////// RegularForm
 
@@ -667,11 +672,17 @@ namespace awkward {
               + FILENAME(__LINE__));
     }
     if (parameters_.size() != 0) {
-      std::vector<std::string> valid_parameters = { "\"string\"", "\"bytestring\"" };
-      bool result = std::none_of(valid_parameters.begin(), valid_parameters.end(),
+      bool result = std::any_of(valid_parameters.begin(), valid_parameters.end(),
         [&](const std::string& i){
           return (parameter_equals("__array__", i)) ? true : false;
         });
+    if (result) {
+      // FIXME: further checks
+    }
+    result = std::any_of(non_valid_parameters.begin(), non_valid_parameters.end(),
+      [&](const std::string& i){
+        return (parameter_equals("__array__", i)) ? true : false;
+      });
       if (result) {
         return (std::string("at ") + path + std::string(" (") + classname()
                 + std::string("): __array__ can not be ")
