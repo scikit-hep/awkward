@@ -463,13 +463,20 @@ def to_regular(array, axis=1, highlevel=True):
             return lambda: layout
         elif posaxis == depth and isinstance(layout, ak._util.listtypes):
             return lambda: layout.toRegularArray()
+        elif posaxis == 0:
+            raise ValueError("array has no axis {0}".format(axis))
         else:
             return posaxis
 
     out = ak.operations.convert.to_layout(array)
     if axis != 0:
         out = ak._util.recursively_apply(
-            out, getfunction, pass_depth=True, pass_user=True, user=axis, numpy_to_regular=True
+            out,
+            getfunction,
+            pass_depth=True,
+            pass_user=True,
+            user=axis,
+            numpy_to_regular=True,
         )
 
     if highlevel:
@@ -504,23 +511,26 @@ def from_regular(array, axis=1, highlevel=True):
     See also #ak.to_regular.
     """
 
-    posaxis = [axis]
-
-    def getfunction(layout, depth):
-        posaxis[0] = layout.axis_wrap_if_negative(posaxis[0])
-        if posaxis[0] == depth and isinstance(layout, ak.layout.RegularArray):
+    def getfunction(layout, depth, posaxis):
+        posaxis = layout.axis_wrap_if_negative(posaxis)
+        if posaxis == depth and isinstance(layout, ak.layout.RegularArray):
             return lambda: layout.toListOffsetArray64(False)
-        elif posaxis[0] == depth and isinstance(layout, ak._util.listtypes):
+        elif posaxis == depth and isinstance(layout, ak._util.listtypes):
             return lambda: layout
-        elif posaxis[0] < depth:
+        elif posaxis == 0:
             raise ValueError("array has no axis {0}".format(axis))
         else:
-            return None
+            return posaxis
 
     out = ak.operations.convert.to_layout(array)
     if axis != 0:
         out = ak._util.recursively_apply(
-            out, getfunction, pass_depth=True, numpy_to_regular=True
+            out,
+            getfunction,
+            pass_depth=True,
+            pass_user=True,
+            user=axis,
+            numpy_to_regular=True,
         )
 
     if highlevel:
@@ -1085,9 +1095,9 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             + ak._util.exception_suffix(__file__)
         )
 
-    posaxis = [x for x in contents if isinstance(x, ak.layout.Content)][
-        0
-    ].axis_wrap_if_negative(axis)
+    first_content = [x for x in contents if isinstance(x, ak.layout.Content)][0]
+    posaxis = first_content.axis_wrap_if_negative(axis)
+
     if posaxis == 0:
         contents = [
             x
