@@ -113,7 +113,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
             return ak.layout.NumpyArray(nparray, node.identities, node.parameters,)
 
-    def getfunction(inputs, depth):
+    def getfunction(inputs):
         signature = [ufunc]
         for x in inputs:
             if isinstance(x, ak.layout.Content):
@@ -193,7 +193,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         return None
 
     out = ak._util.broadcast_and_apply(
-        inputs, getfunction, behavior, allow_records=False
+        inputs, getfunction, behavior, allow_records=False, pass_depth=False
     )
     assert isinstance(out, tuple) and len(out) == 1
     return ak._util.wrap(out[0], behavior)

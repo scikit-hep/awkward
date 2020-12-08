@@ -145,7 +145,7 @@ def mask(array, mask, valid_when=True, highlevel=True):
     (which is 5 characters away from simply filtering the `array`).
     """
 
-    def getfunction(inputs, depth):
+    def getfunction(inputs):
         layoutarray, layoutmask = inputs
         if isinstance(layoutmask, ak.layout.NumpyArray):
             m = ak.nplike.of(layoutmask).asarray(layoutmask)
@@ -171,7 +171,9 @@ def mask(array, mask, valid_when=True, highlevel=True):
     )
 
     behavior = ak._util.behaviorof(array, mask)
-    out = ak._util.broadcast_and_apply([layoutarray, layoutmask], getfunction, behavior)
+    out = ak._util.broadcast_and_apply(
+        [layoutarray, layoutmask], getfunction, behavior, pass_depth=False
+    )
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
         return ak._util.wrap(out[0], behavior)
@@ -389,7 +391,7 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
             return None
 
     behavior = ak._util.behaviorof(*arrays)
-    out = ak._util.broadcast_and_apply(layouts, getfunction, behavior)
+    out = ak._util.broadcast_and_apply(layouts, getfunction, behavior, pass_depth=True)
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
         return ak._util.wrap(out[0], behavior)
@@ -639,7 +641,7 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
             what, allow_record=True, allow_other=True
         )
 
-        def getfunction(inputs, depth):
+        def getfunction(inputs):
             nplike = ak.nplike.of(*inputs)
             base, what = inputs
             if isinstance(base, ak.layout.RecordArray):
@@ -658,7 +660,11 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
         else:
             base = base[keys]
             out = ak._util.broadcast_and_apply(
-                [base, what], getfunction, behavior, right_broadcast=right_broadcast
+                [base, what],
+                getfunction,
+                behavior,
+                right_broadcast=right_broadcast,
+                pass_depth=False,
             )
         assert isinstance(out, tuple) and len(out) == 1
 
@@ -1027,14 +1033,14 @@ def broadcast_arrays(*arrays, **kwargs):
             y = ak.layout.NumpyArray(ak.nplike.of(*arrays).array([y]))
         inputs.append(y)
 
-    def getfunction(inputs, depth):
+    def getfunction(inputs):
         if all(isinstance(x, ak.layout.NumpyArray) for x in inputs):
             return lambda: tuple(inputs)
         else:
             return None
 
     behavior = ak._util.behaviorof(*arrays)
-    out = ak._util.broadcast_and_apply(inputs, getfunction, behavior)
+    out = ak._util.broadcast_and_apply(inputs, getfunction, behavior, pass_depth=False)
     assert isinstance(out, tuple)
     if highlevel:
         return [ak._util.wrap(x, behavior) for x in out]
@@ -1146,6 +1152,7 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             getfunction,
             behavior=ak._util.behaviorof(*arrays),
             allow_records=True,
+            pass_depth=True,
         )[0]
 
     if isinstance(out, ak._util.uniontypes):
@@ -1236,7 +1243,7 @@ def where(condition, *args, **kwargs):
             good_arrays.append(right)
         nplike = ak.nplike.of(*good_arrays)
 
-        def getfunction(inputs, depth):
+        def getfunction(inputs):
             akcondition, left, right = inputs
             if isinstance(akcondition, ak.layout.NumpyArray):
                 npcondition = nplike.asarray(akcondition)
@@ -1253,7 +1260,7 @@ def where(condition, *args, **kwargs):
 
         behavior = ak._util.behaviorof(akcondition, left, right)
         out = ak._util.broadcast_and_apply(
-            [akcondition, left, right], getfunction, behavior
+            [akcondition, left, right], getfunction, behavior, pass_depth=False
         )
 
         if highlevel:
@@ -2319,7 +2326,9 @@ def cartesian(
             else:
                 return None
 
-        out = ak._util.broadcast_and_apply(layouts, getfunction3, behavior)
+        out = ak._util.broadcast_and_apply(
+            layouts, getfunction3, behavior, pass_depth=True
+        )
         assert isinstance(out, tuple) and len(out) == 1
         result = out[0]
 

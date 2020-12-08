@@ -478,6 +478,8 @@ def broadcast_and_apply(
     getfunction,
     behavior,
     allow_records=True,
+    pass_depth=True,
+    pass_user=False,
     left_broadcast=True,
     right_broadcast=True,
     numpy_to_regular=False,
@@ -539,7 +541,7 @@ def broadcast_and_apply(
         else:
             return True
 
-    def apply(inputs, depth):
+    def apply(inputs, depth, user):
         nplike = ak.nplike.of(*inputs)
 
         if numpy_to_regular:
@@ -564,50 +566,61 @@ def broadcast_and_apply(
                             obj = ak.layout.RegularArray(obj, 1)
                     nextinputs.append(obj)
                 if any(x is not y for x, y in zip(inputs, nextinputs)):
-                    return apply(nextinputs, depth)
+                    return apply(nextinputs, depth, user)
 
         # now all lengths must agree
         checklength([x for x in inputs if isinstance(x, ak.layout.Content)])
 
-        function = getfunction(inputs, depth)
+        args = ()
+        if pass_depth:
+            args = args + (depth,)
+        if pass_user:
+            args = args + (user,)
+        function = getfunction(inputs, *args)
+
+        if callable(function):
+            return function()
+        else:
+            user = function
 
         # the rest of this is one switch statement
-        if function is not None:
-            return function()
-
-        elif any(isinstance(x, virtualtypes) for x in inputs):
-            return apply(
-                [x if not isinstance(x, virtualtypes) else x.array for x in inputs],
-                depth,
-            )
+        if any(isinstance(x, virtualtypes) for x in inputs):
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, virtualtypes):
+                    nextinputs.append(x.array)
+                else:
+                    nextinputs.append(x)
+            return apply(nextinputs, depth, user)
 
         elif any(isinstance(x, unknowntypes) for x in inputs):
-            return apply(
-                [
-                    x
-                    if not isinstance(x, unknowntypes)
-                    else ak.layout.NumpyArray(nplike.array([], dtype=np.bool_))
-                    for x in inputs
-                ],
-                depth,
-            )
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, unknowntypes):
+                    nextinputs.append(
+                        ak.layout.NumpyArray(nplike.array([], dtype=np.bool_))
+                    )
+                else:
+                    nextinputs.append(x)
+            return apply(nextinputs, depth, user)
 
         elif any(isinstance(x, ak.layout.NumpyArray) and x.ndim > 1 for x in inputs):
-            return apply(
-                [
-                    x
-                    if not (isinstance(x, ak.layout.NumpyArray) and x.ndim > 1)
-                    else x.toRegularArray()
-                    for x in inputs
-                ],
-                depth,
-            )
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, ak.layout.NumpyArray) and x.ndim > 1:
+                    nextinputs.append(x.toRegularArray())
+                else:
+                    nextinputs.append(x)
+            return apply(nextinputs, depth, user)
 
         elif any(isinstance(x, indexedtypes) for x in inputs):
-            return apply(
-                [x if not isinstance(x, indexedtypes) else x.project() for x in inputs],
-                depth,
-            )
+            nextinputs = []
+            for x in inputs:
+                if isinstance(x, indexedtypes):
+                    nextinputs.append(x.project())
+                else:
+                    nextinputs.append(x)
+            return apply(nextinputs, depth, user)
 
         elif any(isinstance(x, uniontypes) for x in inputs):
             tagslist = []
@@ -649,7 +662,7 @@ def broadcast_and_apply(
                         nextinputs.append(x[mask])
                     else:
                         nextinputs.append(x)
-                outcontents.append(apply(nextinputs, depth))
+                outcontents.append(apply(nextinputs, depth, user))
                 assert isinstance(outcontents[-1], tuple)
                 if numoutputs is not None:
                     assert numoutputs == len(outcontents[-1])
@@ -697,7 +710,7 @@ def broadcast_and_apply(
                 else:
                     nextinputs.append(x)
 
-            outcontent = apply(nextinputs, depth)
+            outcontent = apply(nextinputs, depth, user)
             assert isinstance(outcontent, tuple)
             return tuple(
                 ak.layout.IndexedOptionArray64(index, x).simplify() for x in outcontent
@@ -741,7 +754,7 @@ def broadcast_and_apply(
                     else:
                         nextinputs.append(x)
 
-                outcontent = apply(nextinputs, depth + 1)
+                outcontent = apply(nextinputs, depth + 1, user)
                 assert isinstance(outcontent, tuple)
 
                 return tuple(ak.layout.RegularArray(x, maxsize) for x in outcontent)
@@ -791,7 +804,7 @@ def broadcast_and_apply(
                     else:
                         nextinputs.append(x)
 
-                outcontent = apply(nextinputs, depth + 1)
+                outcontent = apply(nextinputs, depth + 1, user)
                 assert isinstance(outcontent, tuple)
 
                 return tuple(
@@ -833,7 +846,7 @@ def broadcast_and_apply(
                     else:
                         nextinputs.append(x)
 
-                outcontent = apply(nextinputs, depth + 1)
+                outcontent = apply(nextinputs, depth + 1, user)
 
                 if isinstance(offsets, ak.layout.Index32):
                     return tuple(
@@ -912,6 +925,7 @@ def broadcast_and_apply(
                             for x in inputs
                         ],
                         depth,
+                        user,
                     )
                 )
                 assert isinstance(outcontents[-1], tuple)
@@ -950,7 +964,7 @@ def broadcast_and_apply(
                     nextinputs.append(x)
 
             isscalar = []
-            out = apply(broadcast_pack(nextinputs, isscalar), 0)
+            out = apply(broadcast_pack(nextinputs, isscalar), 0, None)
             assert isinstance(out, tuple)
             return tuple(broadcast_unpack(x, isscalar) for x in out)
 
@@ -965,7 +979,7 @@ def broadcast_and_apply(
             outputs = []
             for part_inputs in ak.partition.iterate(sample.numpartitions, nextinputs):
                 isscalar = []
-                part = apply(broadcast_pack(part_inputs, isscalar), 0)
+                part = apply(broadcast_pack(part_inputs, isscalar), 0, None)
                 assert isinstance(part, tuple)
                 outputs.append(tuple(broadcast_unpack(x, isscalar) for x in part))
 
@@ -978,7 +992,7 @@ def broadcast_and_apply(
 
     else:
         isscalar = []
-        out = apply(broadcast_pack(inputs, isscalar), 0)
+        out = apply(broadcast_pack(inputs, isscalar), 0, None)
         assert isinstance(out, tuple)
         return tuple(broadcast_unpack(x, isscalar) for x in out)
 
