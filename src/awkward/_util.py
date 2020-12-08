@@ -473,7 +473,7 @@ def completely_flatten(array):
         )
 
 
-def broadcast_and_apply(
+def broadcast_and_apply(  # noqa: C901
     inputs,
     getfunction,
     behavior,
@@ -1052,7 +1052,7 @@ def recursively_apply(
         if pass_user:
             args = args + (user,)
 
-        custom = getfunction(layout, depth)
+        custom = getfunction(layout, *args)
         if callable(custom):
             return custom()
         else:
@@ -1214,10 +1214,7 @@ def recursively_apply(
             )
 
         elif isinstance(layout, ak.layout.Record):
-            return ak.layout.Record(
-                apply(layout.array, depth, user),
-                layout.at,
-            )
+            return ak.layout.Record(apply(layout.array, depth, user), layout.at,)
 
         elif isinstance(layout, ak.layout.UnionArray8_32):
             return ak.layout.UnionArray8_32(

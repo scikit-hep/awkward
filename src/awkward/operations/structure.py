@@ -472,7 +472,9 @@ def to_regular(array, axis=1, highlevel=True):
 
     out = ak.operations.convert.to_layout(array)
     if axis != 0:
-        out = ak._util.recursively_apply(out, getfunction, numpy_to_regular=True)
+        out = ak._util.recursively_apply(
+            out, getfunction, pass_depth=True, numpy_to_regular=True
+        )
 
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
@@ -521,7 +523,9 @@ def from_regular(array, axis=1, highlevel=True):
 
     out = ak.operations.convert.to_layout(array)
     if axis != 0:
-        out = ak._util.recursively_apply(out, getfunction, numpy_to_regular=True)
+        out = ak._util.recursively_apply(
+            out, getfunction, pass_depth=True, numpy_to_regular=True
+        )
 
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
@@ -550,7 +554,7 @@ def with_name(array, name, highlevel=True):
     description.
     """
 
-    def getfunction(layout, depth):
+    def getfunction(layout):
         if isinstance(layout, ak.layout.RecordArray):
             parameters = dict(layout.parameters)
             parameters["__record__"] = name
@@ -565,7 +569,7 @@ def with_name(array, name, highlevel=True):
             return None
 
     out = ak._util.recursively_apply(
-        ak.operations.convert.to_layout(array), getfunction
+        ak.operations.convert.to_layout(array), getfunction, pass_depth=False
     )
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
@@ -727,7 +731,7 @@ def without_parameters(array, highlevel=True):
     )
 
     out = ak._util.recursively_apply(
-        layout, lambda layout, depth: None, keep_parameters=False
+        layout, lambda layout: None, pass_depth=False, keep_parameters=False
     )
 
     if highlevel:
@@ -840,7 +844,7 @@ def full_like(array, fill_value, highlevel=True):
         array, allow_record=True, allow_other=False
     )
 
-    def getfunction(layout, depth):
+    def getfunction(layout):
         if layout.parameter("__array__") == "bytestring" and fill_value is _ZEROS:
             nplike = ak.nplike.of(layout)
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
@@ -915,7 +919,7 @@ def full_like(array, fill_value, highlevel=True):
         else:
             return None
 
-    out = ak._util.recursively_apply(layout, getfunction)
+    out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
@@ -1860,7 +1864,7 @@ def singletons(array, highlevel=True):
     See #ak.firsts to invert this function.
     """
 
-    def getfunction(layout, depth):
+    def getfunction(layout):
         nplike = ak.nplike.of(layout)
 
         if isinstance(layout, ak._util.optiontypes):
@@ -1876,7 +1880,7 @@ def singletons(array, highlevel=True):
             return None
 
     layout = ak.operations.convert.to_layout(array)
-    out = ak._util.recursively_apply(layout, getfunction)
+    out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
 
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
@@ -2259,6 +2263,7 @@ def cartesian(
                     return lambda: newaxis(layout, i)
                 else:
                     return None
+
             return getfunction1
 
         def getgetfunction2(i):
@@ -2266,19 +2271,22 @@ def cartesian(
                 if depth == axis:
                     inside = len(new_arrays) - i - 1
                     outside = i
-                    return lambda: newaxis(
-                        ak._util.recursively_apply(layout, getgetfunction1(inside)),
-                        outside,
+                    nextlayout = ak._util.recursively_apply(
+                        layout, getgetfunction1(inside), pass_depth=True
                     )
+                    return lambda: newaxis(nextlayout, outside)
                 else:
                     return None
+
             return getfunction2
 
         def apply(x, i):
             layout = ak.operations.convert.to_layout(
                 x, allow_record=False, allow_other=False
             )
-            return ak._util.recursively_apply(layout, getgetfunction2(i))
+            return ak._util.recursively_apply(
+                layout, getgetfunction2(i), pass_depth=True
+            )
 
         toflatten = []
         if nested is None or nested is False:
@@ -2948,7 +2956,7 @@ def with_cache(array, cache, highlevel=True):
         maybe_wrapped = ak._util.MappingProxy.maybe_wrap(cache)
         cache = ak.layout.ArrayCache(maybe_wrapped)
 
-    def getfunction(layout, depth):
+    def getfunction(layout):
         if isinstance(layout, ak.layout.VirtualArray):
             if cache is None:
                 newcache = layout.cache
@@ -2965,7 +2973,7 @@ def with_cache(array, cache, highlevel=True):
             return None
 
     out = ak._util.recursively_apply(
-        ak.operations.convert.to_layout(array), getfunction
+        ak.operations.convert.to_layout(array), getfunction, pass_depth=False
     )
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))

@@ -1623,7 +1623,7 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True):
     would rarely be used in a data analysis.
     """
 
-    def getfunction(layout, depth):
+    def getfunction(layout):
         if isinstance(layout, ak.layout.NumpyArray) and layout.ndim != 1:
             return lambda: layout.toRegularArray()
         elif isinstance(layout, ak.layout.EmptyArray) and not allow_empty:
@@ -1635,7 +1635,7 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True):
         else:
             return None
 
-    out = ak._util.recursively_apply(to_layout(array), getfunction)
+    out = ak._util.recursively_apply(to_layout(array), getfunction, pass_depth=False)
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
