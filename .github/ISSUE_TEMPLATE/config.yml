@@ -2,7 +2,7 @@ blank_issues_enabled: true
 contact_links:
     - name: "Start a discussion (GitHub)" 
       about: "How do I…?"
-      url: https://github.com/scikit-hep/awkward-1.0/discussions/new
+      url: https://github.com/scikit-hep/awkward-1.0/discussions
     - name: "StackOverflow: [awkward-array] tag" 
       about: "How do I…?"
       url: https://stackoverflow.com/questions/tagged/awkward-array
