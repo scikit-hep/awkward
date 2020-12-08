@@ -2253,31 +2253,32 @@ def cartesian(
             else:
                 return ak.layout.RegularArray(newaxis(layout, i - 1), 1)
 
-        def getfunction1(layout, depth, i):
-            if depth == 2:
-                return lambda: newaxis(layout, i)
-            else:
-                return None
+        def getgetfunction1(i):
+            def getfunction1(layout, depth):
+                if depth == 2:
+                    return lambda: newaxis(layout, i)
+                else:
+                    return None
+            return getfunction1
 
-        def getfunction2(layout, depth, i):
-            if depth == axis:
-                inside = len(new_arrays) - i - 1
-                outside = i
-                return lambda: newaxis(
-                    ak._util.recursively_apply(layout, getfunction1, args=(inside,)),
-                    outside,
-                )
-            else:
-                return None
+        def getgetfunction2(i):
+            def getfunction2(layout, depth):
+                if depth == axis:
+                    inside = len(new_arrays) - i - 1
+                    outside = i
+                    return lambda: newaxis(
+                        ak._util.recursively_apply(layout, getgetfunction1(inside)),
+                        outside,
+                    )
+                else:
+                    return None
+            return getfunction2
 
         def apply(x, i):
-            return ak._util.recursively_apply(
-                ak.operations.convert.to_layout(
-                    x, allow_record=False, allow_other=False
-                ),
-                getfunction2,
-                args=(i,),
+            layout = ak.operations.convert.to_layout(
+                x, allow_record=False, allow_other=False
             )
+            return ak._util.recursively_apply(layout, getgetfunction2(i))
 
         toflatten = []
         if nested is None or nested is False:

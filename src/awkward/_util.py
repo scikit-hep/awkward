@@ -576,12 +576,12 @@ def broadcast_and_apply(
             args = args + (depth,)
         if pass_user:
             args = args + (user,)
-        function = getfunction(inputs, *args)
 
-        if callable(function):
-            return function()
+        custom = getfunction(inputs, *args)
+        if callable(custom):
+            return custom()
         else:
-            user = function
+            user = custom
 
         # the rest of this is one switch statement
         if any(isinstance(x, virtualtypes) for x in inputs):
@@ -1035,349 +1035,227 @@ def broadcast_unpack(x, isscalar):
 
 
 def recursively_apply(
-    layout, getfunction, args=(), depth=1, keep_parameters=True, numpy_to_regular=False,
+    layout,
+    getfunction,
+    pass_depth=True,
+    pass_user=False,
+    keep_parameters=True,
+    numpy_to_regular=False,
 ):
-    if numpy_to_regular and isinstance(layout, ak.layout.NumpyArray):
-        layout = layout.toRegularArray()
+    def apply(layout, depth, user):
+        if numpy_to_regular and isinstance(layout, ak.layout.NumpyArray):
+            layout = layout.toRegularArray()
 
-    custom = getfunction(layout, depth, *args)
-    if custom is not None:
-        return custom()
+        args = ()
+        if pass_depth:
+            args = args + (depth,)
+        if pass_user:
+            args = args + (user,)
 
-    elif isinstance(layout, ak.partition.PartitionedArray):
-        return ak.partition.IrregularlyPartitionedArray(
-            [
-                recursively_apply(
-                    x, getfunction, args, depth, keep_parameters, numpy_to_regular,
-                )
-                for x in layout.partitions
-            ]
-        )
-
-    elif isinstance(layout, ak.layout.NumpyArray):
-        if keep_parameters:
-            return layout
+        custom = getfunction(layout, depth)
+        if callable(custom):
+            return custom()
         else:
-            return ak.layout.NumpyArray(
-                ak.nplike.of(layout).asarray(layout), layout.identities, None
+            user = custom
+
+        # the rest of this is one switch statement
+        if isinstance(layout, ak.partition.PartitionedArray):
+            return ak.partition.IrregularlyPartitionedArray(
+                [apply(x, depth, user) for x in layout.partitions]
             )
 
-    elif isinstance(layout, ak.layout.EmptyArray):
-        if keep_parameters:
-            return layout
+        elif isinstance(layout, ak.layout.NumpyArray):
+            if keep_parameters:
+                return layout
+            else:
+                return ak.layout.NumpyArray(
+                    ak.nplike.of(layout).asarray(layout), layout.identities, None
+                )
+
+        elif isinstance(layout, ak.layout.EmptyArray):
+            if keep_parameters:
+                return layout
+            else:
+                return ak.layout.EmptyArray(layout.identities, None)
+
+        elif isinstance(layout, ak.layout.RegularArray):
+            return ak.layout.RegularArray(
+                apply(layout.content, depth + 1, user),
+                layout.size,
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ListArray32):
+            return ak.layout.ListArray32(
+                layout.starts,
+                layout.stops,
+                apply(layout.content, depth + 1, user),
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ListArrayU32):
+            return ak.layout.ListArrayU32(
+                layout.starts,
+                layout.stops,
+                apply(layout.content, depth + 1, user),
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ListArray64):
+            return ak.layout.ListArray64(
+                layout.starts,
+                layout.stops,
+                apply(layout.content, depth + 1, user),
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ListOffsetArray32):
+            return ak.layout.ListOffsetArray32(
+                layout.offsets,
+                apply(layout.content, depth + 1, user),
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ListOffsetArrayU32):
+            return ak.layout.ListOffsetArrayU32(
+                layout.offsets,
+                apply(layout.content, depth + 1, user),
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ListOffsetArray64):
+            return ak.layout.ListOffsetArray64(
+                layout.offsets,
+                apply(layout.content, depth + 1, user),
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.IndexedArray32):
+            return ak.layout.IndexedArray32(
+                layout.index,
+                apply(layout.content, depth, user),
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.IndexedArrayU32):
+            return ak.layout.IndexedArrayU32(
+                layout.index,
+                apply(layout.content, depth, user),
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.IndexedArray64):
+            return ak.layout.IndexedArray64(
+                layout.index,
+                apply(layout.content, depth, user),
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.IndexedOptionArray32):
+            return ak.layout.IndexedOptionArray32(
+                layout.index,
+                apply(layout.content, depth, user),
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.IndexedOptionArray64):
+            return ak.layout.IndexedOptionArray64(
+                layout.index,
+                apply(layout.content, depth, user),
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.ByteMaskedArray):
+            return ak.layout.ByteMaskedArray(
+                layout.mask,
+                apply(layout.content, depth, user),
+                layout.valid_when,
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.BitMaskedArray):
+            return ak.layout.BitMaskedArray(
+                layout.mask,
+                apply(layout.content, depth, user),
+                layout.valid_when,
+                len(layout),
+                layout.lsb_order,
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.UnmaskedArray):
+            return ak.layout.UnmaskedArray(
+                apply(layout.content, depth, user),
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.RecordArray):
+            return ak.layout.RecordArray(
+                [apply(x, depth, user) for x in layout.contents],
+                layout.recordlookup,
+                len(layout),
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.Record):
+            return ak.layout.Record(
+                apply(layout.array, depth, user),
+                layout.at,
+            )
+
+        elif isinstance(layout, ak.layout.UnionArray8_32):
+            return ak.layout.UnionArray8_32(
+                layout.tags,
+                layout.index,
+                [apply(x, depth, user) for x in layout.contents],
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.UnionArray8_U32):
+            return ak.layout.UnionArray8_U32(
+                layout.tags,
+                layout.index,
+                [apply(x, depth, user) for x in layout.contents],
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.UnionArray8_64):
+            return ak.layout.UnionArray8_64(
+                layout.tags,
+                layout.index,
+                [apply(x, depth, user) for x in layout.contents],
+                layout.identities,
+                layout.parameters if keep_parameters else None,
+            )
+
+        elif isinstance(layout, ak.layout.VirtualArray):
+            return apply(layout.array, depth, user)
+
         else:
-            return ak.layout.EmptyArray(layout.identities, None)
+            raise AssertionError(
+                "unrecognized Content type: {0}".format(type(layout))
+                + exception_suffix(__file__)
+            )
 
-    elif isinstance(layout, ak.layout.RegularArray):
-        return ak.layout.RegularArray(
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth + 1,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.size,
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.ListArray32):
-        return ak.layout.ListArray32(
-            layout.starts,
-            layout.stops,
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth + 1,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.ListArrayU32):
-        return ak.layout.ListArrayU32(
-            layout.starts,
-            layout.stops,
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth + 1,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.ListArray64):
-        return ak.layout.ListArray64(
-            layout.starts,
-            layout.stops,
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth + 1,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.ListOffsetArray32):
-        return ak.layout.ListOffsetArray32(
-            layout.offsets,
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth + 1,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.ListOffsetArrayU32):
-        return ak.layout.ListOffsetArrayU32(
-            layout.offsets,
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth + 1,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.ListOffsetArray64):
-        return ak.layout.ListOffsetArray64(
-            layout.offsets,
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth + 1,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.IndexedArray32):
-        return ak.layout.IndexedArray32(
-            layout.index,
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.IndexedArrayU32):
-        return ak.layout.IndexedArrayU32(
-            layout.index,
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.IndexedArray64):
-        return ak.layout.IndexedArray64(
-            layout.index,
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.IndexedOptionArray32):
-        return ak.layout.IndexedOptionArray32(
-            layout.index,
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.IndexedOptionArray64):
-        return ak.layout.IndexedOptionArray64(
-            layout.index,
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.ByteMaskedArray):
-        return ak.layout.ByteMaskedArray(
-            layout.mask,
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.valid_when,
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.BitMaskedArray):
-        return ak.layout.BitMaskedArray(
-            layout.mask,
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.valid_when,
-            len(layout),
-            layout.lsb_order,
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.UnmaskedArray):
-        return ak.layout.UnmaskedArray(
-            recursively_apply(
-                layout.content,
-                getfunction,
-                args,
-                depth,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.RecordArray):
-        return ak.layout.RecordArray(
-            [
-                recursively_apply(
-                    x, getfunction, args, depth, keep_parameters, numpy_to_regular,
-                )
-                for x in layout.contents
-            ],
-            layout.recordlookup,
-            len(layout),
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.Record):
-        return ak.layout.Record(
-            recursively_apply(
-                layout.array,
-                getfunction,
-                args,
-                depth,
-                keep_parameters,
-                numpy_to_regular,
-            ),
-            layout.at,
-        )
-
-    elif isinstance(layout, ak.layout.UnionArray8_32):
-        return ak.layout.UnionArray8_32(
-            layout.tags,
-            layout.index,
-            [
-                recursively_apply(
-                    x, getfunction, args, depth, keep_parameters, numpy_to_regular,
-                )
-                for x in layout.contents
-            ],
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.UnionArray8_U32):
-        return ak.layout.UnionArray8_U32(
-            layout.tags,
-            layout.index,
-            [
-                recursively_apply(
-                    x, getfunction, args, depth, keep_parameters, numpy_to_regular,
-                )
-                for x in layout.contents
-            ],
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.UnionArray8_64):
-        return ak.layout.UnionArray8_64(
-            layout.tags,
-            layout.index,
-            [
-                recursively_apply(
-                    x, getfunction, args, depth, keep_parameters, numpy_to_regular,
-                )
-                for x in layout.contents
-            ],
-            layout.identities,
-            layout.parameters if keep_parameters else None,
-        )
-
-    elif isinstance(layout, ak.layout.VirtualArray):
-        return recursively_apply(
-            layout.array, getfunction, args, depth, keep_parameters, numpy_to_regular,
-        )
-
-    else:
-        raise AssertionError(
-            "unrecognized Content type: {0}".format(type(layout))
-            + exception_suffix(__file__)
-        )
+    return apply(layout, 1, None)
 
 
 def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
