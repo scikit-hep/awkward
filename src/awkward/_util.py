@@ -480,6 +480,7 @@ def broadcast_and_apply(  # noqa: C901
     allow_records=True,
     pass_depth=True,
     pass_user=False,
+    user=None,
     left_broadcast=True,
     right_broadcast=True,
     numpy_to_regular=False,
@@ -992,7 +993,7 @@ def broadcast_and_apply(  # noqa: C901
 
     else:
         isscalar = []
-        out = apply(broadcast_pack(inputs, isscalar), 0, None)
+        out = apply(broadcast_pack(inputs, isscalar), 0, user)
         assert isinstance(out, tuple)
         return tuple(broadcast_unpack(x, isscalar) for x in out)
 
@@ -1039,6 +1040,7 @@ def recursively_apply(
     getfunction,
     pass_depth=True,
     pass_user=False,
+    user=None,
     keep_parameters=True,
     numpy_to_regular=False,
 ):
@@ -1252,7 +1254,7 @@ def recursively_apply(
                 + exception_suffix(__file__)
             )
 
-    return apply(layout, 1, None)
+    return apply(layout, 1, user)
 
 
 def recursive_walk(layout, apply, args=(), depth=1, materialize=False):

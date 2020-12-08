@@ -457,23 +457,19 @@ def to_regular(array, axis=1, highlevel=True):
     See also #ak.from_regular.
     """
 
-    posaxis = [axis]
-
-    def getfunction(layout, depth):
-        posaxis[0] = layout.axis_wrap_if_negative(posaxis[0])
-        if posaxis[0] == depth and isinstance(layout, ak.layout.RegularArray):
+    def getfunction(layout, depth, posaxis):
+        posaxis = layout.axis_wrap_if_negative(posaxis)
+        if posaxis == depth and isinstance(layout, ak.layout.RegularArray):
             return lambda: layout
-        elif posaxis[0] == depth and isinstance(layout, ak._util.listtypes):
+        elif posaxis == depth and isinstance(layout, ak._util.listtypes):
             return lambda: layout.toRegularArray()
-        elif posaxis[0] < depth:
-            raise ValueError("array has no axis {0}".format(axis))
         else:
-            return None
+            return posaxis
 
     out = ak.operations.convert.to_layout(array)
     if axis != 0:
         out = ak._util.recursively_apply(
-            out, getfunction, pass_depth=True, numpy_to_regular=True
+            out, getfunction, pass_depth=True, pass_user=True, user=axis, numpy_to_regular=True
         )
 
     if highlevel:
