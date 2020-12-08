@@ -2074,6 +2074,22 @@ namespace awkward {
                                                  tail);
   }
 
+  template <typename T, typename I>
+  bool
+  UnionArrayOf<T, I>::is_unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: UnionArrayOf<T, I>::is_unique")
+      + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  bool
+  UnionArrayOf<T, I>::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: UnionArrayOf<T, I>::is_subrange_equal")
+      + FILENAME(__LINE__));
+  }
+
   template class EXPORT_TEMPLATE_INST UnionArrayOf<int8_t, int32_t>;
   template class EXPORT_TEMPLATE_INST UnionArrayOf<int8_t, uint32_t>;
   template class EXPORT_TEMPLATE_INST UnionArrayOf<int8_t, int64_t>;

@@ -993,4 +993,14 @@ namespace awkward {
     return toByteMaskedArray().get()->numbers_to_type(name);
   }
 
+  bool
+  BitMaskedArray::is_unique() const {
+    return toByteMaskedArray().get()->is_unique();
+  }
+
+  bool
+  BitMaskedArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    return toByteMaskedArray().get()->is_subrange_equal(start, stop);
+  }
+
 }

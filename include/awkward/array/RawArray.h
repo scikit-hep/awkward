@@ -1241,6 +1241,22 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
 
+    /// @brief Returns 'true' if all components of the array are unique
+    bool
+      is_unique() const override {
+        throw std::runtime_error(
+          std::string("FIXME: unimplemented operation: RawArray::is_unique")
+          + FILENAME(__LINE__));
+    }
+
+    /// @brief Returns 'true' if subranges are equal
+    bool
+      is_subrange_equal(const Index64& start, const Index64& stop) const override {
+        throw std::runtime_error(
+          std::string("FIXME: unimplemented operation: RawArray::is_subrange_equal")
+          + FILENAME(__LINE__));
+    }
+
   private:
     const kernel::lib ptr_lib_;
     const std::shared_ptr<T> ptr_;

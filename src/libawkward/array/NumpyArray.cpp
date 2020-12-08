@@ -4588,6 +4588,20 @@ namespace awkward {
     }
   }
 
+  bool
+  NumpyArray::is_unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: NumpyArray::is_unique")
+      + FILENAME(__LINE__));
+  }
+
+  bool
+  NumpyArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: NumpyArray::is_subrange_equal")
+      + FILENAME(__LINE__));
+  }
+
   template<typename T>
   const std::shared_ptr<void>
   NumpyArray::index_sort(const T* data,

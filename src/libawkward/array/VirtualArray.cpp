@@ -1042,6 +1042,20 @@ namespace awkward {
     return array().get()->numbers_to_type(name);
   }
 
+  bool
+  VirtualArray::is_unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: VirtualArray::is_unique")
+      + FILENAME(__LINE__));
+  }
+
+  bool
+  VirtualArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: VirtualArray::is_subrange_equal")
+      + FILENAME(__LINE__));
+  }
+
   const util::Parameters
   VirtualArray::forward_parameters() const {
     util::Parameters params;

@@ -28,6 +28,7 @@
 
 #define AWKWARD_LISTOFFSETARRAY_NO_EXTERN_TEMPLATE
 #include "awkward/array/ListOffsetArray.h"
+#include "awkward/operators.h"
 
 namespace {
   std::vector<std::string> valid_parameters = { "\"string\"", "\"bytestring\"" };
@@ -2117,6 +2118,22 @@ namespace awkward {
                                                   parameters_,
                                                   offsets,
                                                   content);
+  }
+
+  template <typename T>
+  bool
+  ListOffsetArrayOf<T>::is_unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: ListOffsetArrayOf<T>::is_unique")
+      + FILENAME(__LINE__));
+  }
+
+  template <typename T>
+  bool
+  ListOffsetArrayOf<T>::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: ListOffsetArrayOf<T>::is_subrange_equal")
+      + FILENAME(__LINE__));
   }
 
   template class EXPORT_TEMPLATE_INST ListOffsetArrayOf<int32_t>;

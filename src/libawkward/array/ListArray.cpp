@@ -1888,6 +1888,22 @@ namespace awkward {
                                             content);
   }
 
+  template <typename T>
+  bool
+  ListArrayOf<T>::is_unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: ListArrayOf<T>::is_unique")
+      + FILENAME(__LINE__));
+  }
+
+  template <typename T>
+  bool
+  ListArrayOf<T>::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: ListArrayOf<T>::is_subrange_equal")
+      + FILENAME(__LINE__));
+  }
+
   template class EXPORT_TEMPLATE_INST ListArrayOf<int32_t>;
   template class EXPORT_TEMPLATE_INST ListArrayOf<uint32_t>;
   template class EXPORT_TEMPLATE_INST ListArrayOf<int64_t>;

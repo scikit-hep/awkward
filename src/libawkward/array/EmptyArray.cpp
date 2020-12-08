@@ -703,4 +703,18 @@ namespace awkward {
                                         parameters());
   }
 
+  bool
+  EmptyArray::is_unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: EmptyArray::is_unique")
+      + FILENAME(__LINE__));
+  }
+
+  bool
+  EmptyArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: EmptyArray::is_subrange_equal")
+      + FILENAME(__LINE__));
+  }
+
 }

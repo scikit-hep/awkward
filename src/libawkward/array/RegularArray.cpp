@@ -9,6 +9,7 @@
 
 #include "awkward/kernels.h"
 #include "awkward/kernel-utils.h"
+#include "awkward/operators.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -1424,6 +1425,20 @@ namespace awkward {
                                           parameters_,
                                           content,
                                           size_);
+  }
+
+  bool
+  RegularArray::is_unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: RegularArray::is_unique")
+      + FILENAME(__LINE__));
+  }
+
+  bool
+  RegularArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: RegularArray::is_subrange_equal")
+      + FILENAME(__LINE__));
   }
 
 }

@@ -1348,7 +1348,12 @@ namespace awkward {
           return (parameter_equals("__array__", i)) ? true : false;
         });
       if (result) {
-        // FIXME: check Equality
+        if (parameter_equals("__array__", "\"categorical\"")  &&  !is_unique()) {
+          return (std::string("at ") + path + std::string(" (") + classname()
+                  + std::string("): not unique __array__ can not be ")
+                  + util::parameter_asstring(parameters_, "__array__")
+                  + FILENAME(__LINE__));
+        }
       }
       result = std::any_of(non_valid_parameters.begin(), non_valid_parameters.end(),
         [&](const std::string& i){
@@ -2600,6 +2605,22 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
 
     return std::pair<Index64, IndexOf<T>>(nextcarry, outindex);
+  }
+
+  template <typename T, bool ISOPTION>
+  bool
+  IndexedArrayOf<T, ISOPTION>::is_unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: IndexedArrayOf<T, ISOPTION>::is_unique")
+      + FILENAME(__LINE__));
+  }
+
+  template <typename T, bool ISOPTION>
+  bool
+  IndexedArrayOf<T, ISOPTION>::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: IndexedArrayOf<T, ISOPTION>::is_subrange_equal")
+      + FILENAME(__LINE__));
   }
 
   // IndexedArrayOf<int64_t, true> has to be first, or ld on darwin

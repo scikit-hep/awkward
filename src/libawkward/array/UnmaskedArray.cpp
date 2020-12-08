@@ -999,4 +999,18 @@ namespace awkward {
     return out2.simplify_optiontype();
   }
 
+  bool
+  UnmaskedArray::is_unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: UnmaskedArray::is_unique")
+      + FILENAME(__LINE__));
+  }
+
+  bool
+  UnmaskedArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: UnmaskedArray::is_subrange_equal")
+      + FILENAME(__LINE__));
+  }
+
 }

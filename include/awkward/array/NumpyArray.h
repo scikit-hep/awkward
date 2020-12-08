@@ -4,9 +4,7 @@
 #define AWKWARD_NUMPYARRAY_H_
 
 #include <string>
-#include <unordered_map>
 #include <memory>
-#include <typeindex>
 #include <vector>
 
 #include "awkward/common.h"
@@ -728,28 +726,36 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
 
-  /// @brief Internal function to fill JSON with boolean values.
-  void
-    tojson_boolean(ToJson& builder, bool include_beginendlist) const;
+    /// @brief Returns 'true' if all components of the array are unique
+    bool
+      is_unique() const override;
 
-  /// @brief Internal function to fill JSON with integer values.
-  template <typename T>
-  void
-    tojson_integer(ToJson& builder, bool include_beginendlist) const;
+    /// @brief Returns 'true' if subranges are equal
+    bool
+      is_subrange_equal(const Index64& start, const Index64& stop) const override;
 
-  /// @brief Internal function to fill JSON with floating-point values.
-  template <typename T>
-  void
-    tojson_real(ToJson& builder, bool include_beginendlist) const;
+    /// @brief Internal function to fill JSON with boolean values.
+    void
+      tojson_boolean(ToJson& builder, bool include_beginendlist) const;
 
-  /// @brief Internal function to fill JSON with string values.
-  void
-    tojson_string(ToJson& builder, bool include_beginendlist) const;
+    /// @brief Internal function to fill JSON with integer values.
+    template <typename T>
+    void
+      tojson_integer(ToJson& builder, bool include_beginendlist) const;
+
+    /// @brief Internal function to fill JSON with floating-point values.
+    template <typename T>
+    void
+      tojson_real(ToJson& builder, bool include_beginendlist) const;
+
+    /// @brief Internal function to fill JSON with string values.
+    void
+      tojson_string(ToJson& builder, bool include_beginendlist) const;
 
   private:
 
-  /// @brief std::sort uses intro-sort
-  ///        std::stable_sort uses mergesort
+    /// @brief std::sort uses intro-sort
+    ///        std::stable_sort uses mergesort
     template<typename T>
     const std::shared_ptr<void> index_sort(const T* data,
                                            int64_t length,
@@ -759,48 +765,48 @@ namespace awkward {
                                            bool ascending,
                                            bool stable) const;
 
+      template<typename T>
+      const std::shared_ptr<void> array_sort(const T* data,
+                                             int64_t length,
+                                             const Index64& starts,
+                                             const Index64& parents,
+                                             int64_t outlength,
+                                             bool ascending,
+                                             bool stable) const;
+
+     template<typename T>
+     const std::shared_ptr<void> string_sort(const T* data,
+                                             int64_t length,
+                                             const Index64& offsets,
+                                             Index64& outoffsets,
+                                             bool ascending,
+                                             bool stable) const;
+
     template<typename T>
-    const std::shared_ptr<void> array_sort(const T* data,
-                                           int64_t length,
-                                           const Index64& starts,
-                                           const Index64& parents,
-                                           int64_t outlength,
-                                           bool ascending,
-                                           bool stable) const;
+    const std::shared_ptr<void> as_type(const T* data,
+                                        int64_t length,
+                                        const util::dtype dtype) const;
 
-   template<typename T>
-   const std::shared_ptr<void> string_sort(const T* data,
-                                           int64_t length,
-                                           const Index64& offsets,
-                                           Index64& outoffsets,
-                                           bool ascending,
-                                           bool stable) const;
+    template<typename TO, typename FROM>
+    const std::shared_ptr<void> cast_to_type(const FROM* data,
+                                             int64_t length) const;
 
-  template<typename T>
-  const std::shared_ptr<void> as_type(const T* data,
-                                      int64_t length,
-                                      const util::dtype dtype) const;
-
-  template<typename TO, typename FROM>
-  const std::shared_ptr<void> cast_to_type(const FROM* data,
-                                           int64_t length) const;
-
-  /// @brief See #ptr.
-  std::shared_ptr<void> ptr_;
-  /// @brief See #ptr_lib
-  const kernel::lib ptr_lib_;
-  /// @brief See #shape.
-  std::vector<ssize_t> shape_;
-  /// @brief See #strides.
-  std::vector<ssize_t> strides_;
-  /// @brief See #byteoffset.
-  ssize_t byteoffset_;
-  /// @brief See #itemsize.
-  const ssize_t itemsize_;
-  /// @brief See #format.
-  const std::string format_;
-  /// @brief See #dtype.
-  const util::dtype dtype_;
+    /// @brief See #ptr.
+    std::shared_ptr<void> ptr_;
+    /// @brief See #ptr_lib
+    const kernel::lib ptr_lib_;
+    /// @brief See #shape.
+    std::vector<ssize_t> shape_;
+    /// @brief See #strides.
+    std::vector<ssize_t> strides_;
+    /// @brief See #byteoffset.
+    ssize_t byteoffset_;
+    /// @brief See #itemsize.
+    const ssize_t itemsize_;
+    /// @brief See #format.
+    const std::string format_;
+    /// @brief See #dtype.
+    const util::dtype dtype_;
 
   };
 }

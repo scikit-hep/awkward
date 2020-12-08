@@ -1464,4 +1464,18 @@ namespace awkward {
     return std::pair<Index64, Index64>(nextcarry, outindex);
   }
 
+  bool
+  ByteMaskedArray::is_unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: ByteMaskedArray::is_unique")
+      + FILENAME(__LINE__));
+  }
+
+  bool
+  ByteMaskedArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: ByteMaskedArray::is_subrange_equal")
+      + FILENAME(__LINE__));
+  }
+
 }
