@@ -33,6 +33,7 @@ def test_toregular():
 def test_cartesian():
     one = ak.Array(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7).tolist())
     two = ak.Array(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7).tolist())
+
     assert (
         str(ak.cartesian([one, two], axis=0, nested=True).type)
         == "2 * 2 * (var * var * var * int64, var * var * var * int64)"
@@ -65,3 +66,56 @@ def test_cartesian():
         str(ak.cartesian([one, two], axis=-4, nested=True).type)
         == "2 * 2 * (var * var * var * int64, var * var * var * int64)"
     )
+
+    with pytest.raises(ValueError):
+        ak.cartesian([one, two], axis=-5, nested=True)
+
+    assert (
+        str(ak.cartesian([one, two], axis=0).type)
+        == "4 * (var * var * var * int64, var * var * var * int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=1).type)
+        == "2 * var * (var * var * int64, var * var * int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=2).type)
+        == "2 * var * var * (var * int64, var * int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=3).type)
+        == "2 * var * var * var * (int64, int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=-1).type)
+        == "2 * var * var * var * (int64, int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=-2).type)
+        == "2 * var * var * (var * int64, var * int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=-3).type)
+        == "2 * var * (var * var * int64, var * var * int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=-4).type)
+        == "4 * (var * var * var * int64, var * var * var * int64)"
+    )
+
+    with pytest.raises(ValueError):
+        ak.cartesian([one, two], axis=-5)
+
+
+def test_firsts():
+    array = ak.Array([[[0, 1, 2], []], [[3, 4]], [], [[5], [6, 7, 8, 9]]])
+
+    assert str(ak.firsts(array, axis=0)) == "[[0, 1, 2], []]"
+    assert str(ak.firsts(array, axis=1)) == "[[0, 1, 2], [3, 4], None, [5]]"
+    assert str(ak.firsts(array, axis=2)) == "[[0, None], [3], [], [5, 6]]"
+    assert str(ak.firsts(array, axis=-1)) == "[[0, None], [3], [], [5, 6]]"
+    assert str(ak.firsts(array, axis=-2)) == "[[0, 1, 2], [3, 4], None, [5]]"
+    assert str(ak.firsts(array, axis=-3)) == "[[0, 1, 2], []]"
+
+    with pytest.raises(ValueError):
+        ak.firsts(array, axis=-4)

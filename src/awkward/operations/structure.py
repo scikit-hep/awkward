@@ -1927,12 +1927,38 @@ def firsts(array, axis=1, highlevel=True):
 
     See #ak.singletons to invert this function.
     """
-    if axis <= 0:
-        raise NotImplementedError(
-            "ak.firsts with axis={0}".format(axis) + ak._util.exception_suffix(__file__)
-        )
-    toslice = (slice(None, None, None),) * axis + (0,)
-    out = ak.mask(array, ak.num(array, axis=axis) > 0, highlevel=False)[toslice]
+    layout = ak.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
+    if isinstance(layout, ak.partition.PartitionedArray):
+        posaxis = None
+        for x in layout.partitions:
+            if posaxis is None:
+                posaxis = x.axis_wrap_if_negative(axis)
+            elif posaxis != x.axis_wrap_if_negative(axis):
+                raise ValueError(
+                    "ak.firsts for partitions with different axis depths"
+                    + ak._util.exception_suffix(__file__)
+                )
+    else:
+        posaxis = layout.axis_wrap_if_negative(axis)
+
+    if posaxis == 0:
+        if len(layout) == 0:
+            out = None
+        else:
+            out = layout[0]
+    else:
+        if posaxis < 0:
+            raise NotImplementedError(
+                "ak.firsts with ambiguous negative axis"
+                + ak._util.exception_suffix(__file__)
+            )
+        toslice = (slice(None, None, None),) * posaxis + (0,)
+        out = ak.mask(layout, ak.num(layout, axis=posaxis) > 0, highlevel=False)[
+            toslice
+        ]
+
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
