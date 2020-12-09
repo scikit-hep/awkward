@@ -1460,6 +1460,60 @@ def flatten(array, axis=1, highlevel=True):
         return out
 
 
+def unflatten(array, counts, highlevel=True):
+    """
+    Args:
+        array: Data to create an array with an additional level from.
+        counts (int or array): Number of elements the new level should have.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns an array with an additional level of nesting. This is roughly the
+    inverse of #ak.flatten, where `counts` were obtained by #ak.num (both with
+    `axis=1`).
+    For example,
+
+        >>> original = ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]])
+        >>> counts = ak.num(original)
+        >>> array = ak.flatten(original)
+        >>> counts
+        <Array [3, 0, 2, 1, 4] type='5 * int64'>
+        >>> array
+        <Array [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] type='10 * int64'>
+        >>> ak.unflatten(array, counts)
+        <Array [[0, 1, 2], [], ... [5], [6, 7, 8, 9]] type='5 * var * int64'>
+    """
+    layout = ak.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
+    if isinstance(counts, int):
+        out = ak.layout.RegularArray(layout, counts)
+    else:
+        counts_layout = ak.operations.convert.to_layout(
+            counts, allow_record=False, allow_other=False
+        )
+        if isinstance(counts_layout, (
+            ak.layout.IndexedOptionArray64, ak.layout.IndexedOptionArray32
+        )):
+            mask_layout = counts_layout
+            counts_layout = mask_layout.content
+        else:
+            mask_layout = None
+        nplike = ak.nplike.of(counts_layout)
+        offsets = nplike.empty(len(counts_layout) + 1, np.int64)
+        offsets[0] = 0
+        nplike.cumsum(counts_layout, out=offsets[1:])
+        offsets = ak.layout.Index64(offsets)
+        out = ak.layout.ListOffsetArray64(offsets, layout)
+        if mask_layout is not None:
+            out = mask_layout.__class__(mask_layout.index, out)
+
+    if highlevel:
+        return ak._util.wrap(out, ak._util.behaviorof(array))
+    else:
+        return out
+
+
 def local_index(array, axis=-1, highlevel=True):
     """
     Args:
