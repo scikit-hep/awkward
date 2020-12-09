@@ -28,3 +28,40 @@ def test_toregular():
     assert str(ak.to_regular(array, axis=-3).type) == (
         '1 * {"x": 2 * var * var * int64, ' '"y": var * 3 * var * var * int64}'
     )
+
+
+def test_cartesian():
+    one = ak.Array(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7).tolist())
+    two = ak.Array(np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7).tolist())
+    assert (
+        str(ak.cartesian([one, two], axis=0, nested=True).type)
+        == "2 * 2 * (var * var * var * int64, var * var * var * int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=1, nested=True).type)
+        == "2 * var * var * (var * var * int64, var * var * int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=2, nested=True).type)
+        == "2 * var * var * var * (var * int64, var * int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=3, nested=True).type)
+        == "2 * var * var * var * var * (int64, int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=-1, nested=True).type)
+        == "2 * var * var * var * var * (int64, int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=-2, nested=True).type)
+        == "2 * var * var * var * (var * int64, var * int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=-3, nested=True).type)
+        == "2 * var * var * (var * var * int64, var * var * int64)"
+    )
+    assert (
+        str(ak.cartesian([one, two], axis=-4, nested=True).type)
+        == "2 * 2 * (var * var * var * int64, var * var * var * int64)"
+    )

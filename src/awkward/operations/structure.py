@@ -1097,6 +1097,17 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
 
     first_content = [x for x in contents if isinstance(x, ak.layout.Content)][0]
     posaxis = first_content.axis_wrap_if_negative(axis)
+    if posaxis < 0:
+        raise ValueError(
+            "negative axis depth is ambiguous" + ak._util.exception_suffix(__file__)
+        )
+    for x in contents:
+        if isinstance(x, ak.layout.Content):
+            if x.axis_wrap_if_negative(axis) != posaxis:
+                raise ValueError(
+                    "arrays to concatenate do not have the same depth for "
+                    "negative axis" + ak._util.exception_suffix(__file__)
+                )
 
     if posaxis == 0:
         contents = [
@@ -2159,13 +2170,24 @@ def cartesian(
             parameters = dict(parameters)
         parameters["__record__"] = with_name
 
-    if axis < 0:
-        raise ValueError(
-            "the 'axis' of cartesian must be non-negative"
-            + ak._util.exception_suffix(__file__)
-        )
+    if isinstance(new_arrays, dict):
+        new_arrays_values = list(new_arrays.values())
+    else:
+        new_arrays_values = new_arrays
 
-    elif axis == 0:
+    posaxis = new_arrays_values[0].axis_wrap_if_negative(axis)
+    if posaxis < 0:
+        raise ValueError(
+            "negative axis depth is ambiguous" + ak._util.exception_suffix(__file__)
+        )
+    for x in new_arrays_values[1:]:
+        if x.axis_wrap_if_negative(axis) != posaxis:
+            raise ValueError(
+                "arrays to cartesian-product do not have the same depth for "
+                "negative axis" + ak._util.exception_suffix(__file__)
+            )
+
+    if posaxis == 0:
         if nested is None or nested is False:
             nested = []
 
@@ -2274,7 +2296,7 @@ def cartesian(
 
         def getgetfunction2(i):
             def getfunction2(layout, depth):
-                if depth == axis:
+                if depth == posaxis:
                     inside = len(new_arrays) - i - 1
                     outside = i
                     nextlayout = ak._util.recursively_apply(
@@ -2312,7 +2334,7 @@ def cartesian(
                 recordlookup.append(n)
                 layouts.append(apply(x, i))
                 if i < len(new_arrays) - 1 and n not in nested:
-                    toflatten.append(axis + i + 1)
+                    toflatten.append(posaxis + i + 1)
 
         else:
             if nested is True:
@@ -2331,10 +2353,10 @@ def cartesian(
             for i, x in enumerate(new_arrays):
                 layouts.append(apply(x, i))
                 if i < len(new_arrays) - 1 and i not in nested:
-                    toflatten.append(axis + i + 1)
+                    toflatten.append(posaxis + i + 1)
 
         def getfunction3(inputs, depth):
-            if depth == axis + len(new_arrays):
+            if depth == posaxis + len(new_arrays):
                 return lambda: (
                     ak.layout.RecordArray(inputs, recordlookup, parameters=parameters),
                 )
@@ -2348,8 +2370,8 @@ def cartesian(
         result = out[0]
 
         while len(toflatten) != 0:
-            axis = toflatten.pop()
-            result = flatten(result, axis=axis, highlevel=False)
+            flatten_axis = toflatten.pop()
+            result = flatten(result, axis=flatten_axis, highlevel=False)
 
     if highlevel:
         return ak._util.wrap(result, behavior)
