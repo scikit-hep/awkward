@@ -63,7 +63,7 @@ def elementwise_grad(fun, argnum=0, *nary_op_args, **nary_op_kwargs):
             for x in args
         ]
 
-        def getfunction(inputs, depth):
+        def getfunction(inputs):
             if all(
                 isinstance(x, ak.layout.NumpyArray)
                 or not isinstance(x, ak.layout.Content)
@@ -74,7 +74,9 @@ def elementwise_grad(fun, argnum=0, *nary_op_args, **nary_op_kwargs):
                 return None
 
         behavior = ak._util.behaviorof(*args)
-        out = ak._util.broadcast_and_apply(nextargs, getfunction, behavior)
+        out = ak._util.broadcast_and_apply(
+            nextargs, getfunction, behavior, pass_depth=False
+        )
         assert isinstance(out, tuple) and len(out) == 1
         return ak._util.wrap(out[0], behavior)
 

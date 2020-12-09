@@ -148,7 +148,7 @@ def categories(array, highlevel=True):
 
     output = [None]
 
-    def getfunction(layout, depth):
+    def getfunction(layout):
         if layout.parameter("__array__") == "categorical":
             output[0] = layout.content
             return lambda: layout
@@ -156,10 +156,10 @@ def categories(array, highlevel=True):
         else:
             return None
 
-    ak._util.recursively_apply(
-        ak.operations.convert.to_layout(array, allow_record=False, allow_other=False),
-        getfunction,
+    layout = ak.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
     )
+    ak._util.recursively_apply(layout, getfunction, pass_depth=False)
 
     if output[0] is None:
         return None
@@ -236,7 +236,7 @@ def to_categorical(array, highlevel=True):
     See also #ak.is_categorical, #ak.categories, #ak.from_categorical.
     """
 
-    def getfunction(layout, depth):
+    def getfunction(layout):
         p = layout.purelist_parameter("__array__")
         if layout.purelist_depth == 1 or (
             layout.purelist_depth == 2 and (p == "string" or p == "bytestring")
@@ -296,10 +296,10 @@ def to_categorical(array, highlevel=True):
         else:
             return None
 
-    out = ak._util.recursively_apply(
-        ak.operations.convert.to_layout(array, allow_record=False, allow_other=False),
-        getfunction,
+    layout = ak.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
     )
+    out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
@@ -324,7 +324,7 @@ def from_categorical(array, highlevel=True):
     #ak.from_categorical.
     """
 
-    def getfunction(layout, depth):
+    def getfunction(layout):
         if layout.parameter("__array__") == "categorical":
             out = ak.operations.structure.with_parameter(
                 layout, "__array__", None, highlevel=False
@@ -334,10 +334,10 @@ def from_categorical(array, highlevel=True):
         else:
             return None
 
-    out = ak._util.recursively_apply(
-        ak.operations.convert.to_layout(array, allow_record=False, allow_other=False),
-        getfunction,
+    layout = ak.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
     )
+    out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
@@ -347,5 +347,5 @@ def from_categorical(array, highlevel=True):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_") and x not in ("absolute_import", "np", "awkward",)
+    if not x.startswith("_") and x not in ("absolute_import", "np", "awkward")
 ]

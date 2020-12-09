@@ -145,7 +145,7 @@ def mask(array, mask, valid_when=True, highlevel=True):
     (which is 5 characters away from simply filtering the `array`).
     """
 
-    def getfunction(inputs, depth):
+    def getfunction(inputs):
         layoutarray, layoutmask = inputs
         if isinstance(layoutmask, ak.layout.NumpyArray):
             m = ak.nplike.of(layoutmask).asarray(layoutmask)
@@ -171,7 +171,9 @@ def mask(array, mask, valid_when=True, highlevel=True):
     )
 
     behavior = ak._util.behaviorof(array, mask)
-    out = ak._util.broadcast_and_apply([layoutarray, layoutmask], getfunction, behavior)
+    out = ak._util.broadcast_and_apply(
+        [layoutarray, layoutmask], getfunction, behavior, pass_depth=False
+    )
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
         return ak._util.wrap(out[0], behavior)
@@ -389,7 +391,7 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
             return None
 
     behavior = ak._util.behaviorof(*arrays)
-    out = ak._util.broadcast_and_apply(layouts, getfunction, behavior)
+    out = ak._util.broadcast_and_apply(layouts, getfunction, behavior, pass_depth=True)
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
         return ak._util.wrap(out[0], behavior)
@@ -455,22 +457,27 @@ def to_regular(array, axis=1, highlevel=True):
     See also #ak.from_regular.
     """
 
-    posaxis = [axis]
-
-    def getfunction(layout, depth):
-        posaxis[0] = layout.axis_wrap_if_negative(posaxis[0])
-        if posaxis[0] == depth and isinstance(layout, ak.layout.RegularArray):
+    def getfunction(layout, depth, posaxis):
+        posaxis = layout.axis_wrap_if_negative(posaxis)
+        if posaxis == depth and isinstance(layout, ak.layout.RegularArray):
             return lambda: layout
-        elif posaxis[0] == depth and isinstance(layout, ak._util.listtypes):
+        elif posaxis == depth and isinstance(layout, ak._util.listtypes):
             return lambda: layout.toRegularArray()
-        elif posaxis[0] < depth:
+        elif posaxis == 0:
             raise ValueError("array has no axis {0}".format(axis))
         else:
-            return None
+            return posaxis
 
     out = ak.operations.convert.to_layout(array)
     if axis != 0:
-        out = ak._util.recursively_apply(out, getfunction, numpy_to_regular=True)
+        out = ak._util.recursively_apply(
+            out,
+            getfunction,
+            pass_depth=True,
+            pass_user=True,
+            user=axis,
+            numpy_to_regular=True,
+        )
 
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
@@ -504,22 +511,27 @@ def from_regular(array, axis=1, highlevel=True):
     See also #ak.to_regular.
     """
 
-    posaxis = [axis]
-
-    def getfunction(layout, depth):
-        posaxis[0] = layout.axis_wrap_if_negative(posaxis[0])
-        if posaxis[0] == depth and isinstance(layout, ak.layout.RegularArray):
+    def getfunction(layout, depth, posaxis):
+        posaxis = layout.axis_wrap_if_negative(posaxis)
+        if posaxis == depth and isinstance(layout, ak.layout.RegularArray):
             return lambda: layout.toListOffsetArray64(False)
-        elif posaxis[0] == depth and isinstance(layout, ak._util.listtypes):
+        elif posaxis == depth and isinstance(layout, ak._util.listtypes):
             return lambda: layout
-        elif posaxis[0] < depth:
+        elif posaxis == 0:
             raise ValueError("array has no axis {0}".format(axis))
         else:
-            return None
+            return posaxis
 
     out = ak.operations.convert.to_layout(array)
     if axis != 0:
-        out = ak._util.recursively_apply(out, getfunction, numpy_to_regular=True)
+        out = ak._util.recursively_apply(
+            out,
+            getfunction,
+            pass_depth=True,
+            pass_user=True,
+            user=axis,
+            numpy_to_regular=True,
+        )
 
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
@@ -548,7 +560,7 @@ def with_name(array, name, highlevel=True):
     description.
     """
 
-    def getfunction(layout, depth):
+    def getfunction(layout):
         if isinstance(layout, ak.layout.RecordArray):
             parameters = dict(layout.parameters)
             parameters["__record__"] = name
@@ -563,7 +575,7 @@ def with_name(array, name, highlevel=True):
             return None
 
     out = ak._util.recursively_apply(
-        ak.operations.convert.to_layout(array), getfunction
+        ak.operations.convert.to_layout(array), getfunction, pass_depth=False
     )
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
@@ -639,7 +651,7 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
             what, allow_record=True, allow_other=True
         )
 
-        def getfunction(inputs, depth):
+        def getfunction(inputs):
             nplike = ak.nplike.of(*inputs)
             base, what = inputs
             if isinstance(base, ak.layout.RecordArray):
@@ -658,7 +670,11 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
         else:
             base = base[keys]
             out = ak._util.broadcast_and_apply(
-                [base, what], getfunction, behavior, right_broadcast=right_broadcast
+                [base, what],
+                getfunction,
+                behavior,
+                right_broadcast=right_broadcast,
+                pass_depth=False,
             )
         assert isinstance(out, tuple) and len(out) == 1
 
@@ -721,7 +737,7 @@ def without_parameters(array, highlevel=True):
     )
 
     out = ak._util.recursively_apply(
-        layout, lambda layout, depth: None, keep_parameters=False
+        layout, lambda layout: None, pass_depth=False, keep_parameters=False
     )
 
     if highlevel:
@@ -834,7 +850,7 @@ def full_like(array, fill_value, highlevel=True):
         array, allow_record=True, allow_other=False
     )
 
-    def getfunction(layout, depth):
+    def getfunction(layout):
         if layout.parameter("__array__") == "bytestring" and fill_value is _ZEROS:
             nplike = ak.nplike.of(layout)
             asbytes = nplike.frombuffer(b"", dtype=np.uint8)
@@ -909,7 +925,7 @@ def full_like(array, fill_value, highlevel=True):
         else:
             return None
 
-    out = ak._util.recursively_apply(layout, getfunction)
+    out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
@@ -1027,14 +1043,14 @@ def broadcast_arrays(*arrays, **kwargs):
             y = ak.layout.NumpyArray(ak.nplike.of(*arrays).array([y]))
         inputs.append(y)
 
-    def getfunction(inputs, depth):
+    def getfunction(inputs):
         if all(isinstance(x, ak.layout.NumpyArray) for x in inputs):
             return lambda: tuple(inputs)
         else:
             return None
 
     behavior = ak._util.behaviorof(*arrays)
-    out = ak._util.broadcast_and_apply(inputs, getfunction, behavior)
+    out = ak._util.broadcast_and_apply(inputs, getfunction, behavior, pass_depth=False)
     assert isinstance(out, tuple)
     if highlevel:
         return [ak._util.wrap(x, behavior) for x in out]
@@ -1079,9 +1095,20 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             + ak._util.exception_suffix(__file__)
         )
 
-    posaxis = [x for x in contents if isinstance(x, ak.layout.Content)][
-        0
-    ].axis_wrap_if_negative(axis)
+    first_content = [x for x in contents if isinstance(x, ak.layout.Content)][0]
+    posaxis = first_content.axis_wrap_if_negative(axis)
+    if posaxis < 0:
+        raise ValueError(
+            "negative axis depth is ambiguous" + ak._util.exception_suffix(__file__)
+        )
+    for x in contents:
+        if isinstance(x, ak.layout.Content):
+            if x.axis_wrap_if_negative(axis) != posaxis:
+                raise ValueError(
+                    "arrays to concatenate do not have the same depth for "
+                    "negative axis" + ak._util.exception_suffix(__file__)
+                )
+
     if posaxis == 0:
         contents = [
             x
@@ -1146,6 +1173,7 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             getfunction,
             behavior=ak._util.behaviorof(*arrays),
             allow_records=True,
+            pass_depth=True,
         )[0]
 
     if isinstance(out, ak._util.uniontypes):
@@ -1236,7 +1264,7 @@ def where(condition, *args, **kwargs):
             good_arrays.append(right)
         nplike = ak.nplike.of(*good_arrays)
 
-        def getfunction(inputs, depth):
+        def getfunction(inputs):
             akcondition, left, right = inputs
             if isinstance(akcondition, ak.layout.NumpyArray):
                 npcondition = nplike.asarray(akcondition)
@@ -1253,7 +1281,7 @@ def where(condition, *args, **kwargs):
 
         behavior = ak._util.behaviorof(akcondition, left, right)
         out = ak._util.broadcast_and_apply(
-            [akcondition, left, right], getfunction, behavior
+            [akcondition, left, right], getfunction, behavior, pass_depth=False
         )
 
         if highlevel:
@@ -1853,7 +1881,7 @@ def singletons(array, highlevel=True):
     See #ak.firsts to invert this function.
     """
 
-    def getfunction(layout, depth):
+    def getfunction(layout):
         nplike = ak.nplike.of(layout)
 
         if isinstance(layout, ak._util.optiontypes):
@@ -1869,7 +1897,7 @@ def singletons(array, highlevel=True):
             return None
 
     layout = ak.operations.convert.to_layout(array)
-    out = ak._util.recursively_apply(layout, getfunction)
+    out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
 
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
@@ -1899,12 +1927,38 @@ def firsts(array, axis=1, highlevel=True):
 
     See #ak.singletons to invert this function.
     """
-    if axis <= 0:
-        raise NotImplementedError(
-            "ak.firsts with axis={0}".format(axis) + ak._util.exception_suffix(__file__)
-        )
-    toslice = (slice(None, None, None),) * axis + (0,)
-    out = ak.mask(array, ak.num(array, axis=axis) > 0, highlevel=False)[toslice]
+    layout = ak.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
+    if isinstance(layout, ak.partition.PartitionedArray):
+        posaxis = None
+        for x in layout.partitions:
+            if posaxis is None:
+                posaxis = x.axis_wrap_if_negative(axis)
+            elif posaxis != x.axis_wrap_if_negative(axis):
+                raise ValueError(
+                    "ak.firsts for partitions with different axis depths"
+                    + ak._util.exception_suffix(__file__)
+                )
+    else:
+        posaxis = layout.axis_wrap_if_negative(axis)
+
+    if posaxis == 0:
+        if len(layout) == 0:
+            out = None
+        else:
+            out = layout[0]
+    else:
+        if posaxis < 0:
+            raise NotImplementedError(
+                "ak.firsts with ambiguous negative axis"
+                + ak._util.exception_suffix(__file__)
+            )
+        toslice = (slice(None, None, None),) * posaxis + (0,)
+        out = ak.mask(layout, ak.num(layout, axis=posaxis) > 0, highlevel=False)[
+            toslice
+        ]
+
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
@@ -2142,13 +2196,24 @@ def cartesian(
             parameters = dict(parameters)
         parameters["__record__"] = with_name
 
-    if axis < 0:
-        raise ValueError(
-            "the 'axis' of cartesian must be non-negative"
-            + ak._util.exception_suffix(__file__)
-        )
+    if isinstance(new_arrays, dict):
+        new_arrays_values = list(new_arrays.values())
+    else:
+        new_arrays_values = new_arrays
 
-    elif axis == 0:
+    posaxis = new_arrays_values[0].axis_wrap_if_negative(axis)
+    if posaxis < 0:
+        raise ValueError(
+            "negative axis depth is ambiguous" + ak._util.exception_suffix(__file__)
+        )
+    for x in new_arrays_values[1:]:
+        if x.axis_wrap_if_negative(axis) != posaxis:
+            raise ValueError(
+                "arrays to cartesian-product do not have the same depth for "
+                "negative axis" + ak._util.exception_suffix(__file__)
+            )
+
+    if posaxis == 0:
         if nested is None or nested is False:
             nested = []
 
@@ -2246,30 +2311,35 @@ def cartesian(
             else:
                 return ak.layout.RegularArray(newaxis(layout, i - 1), 1)
 
-        def getfunction1(layout, depth, i):
-            if depth == 2:
-                return lambda: newaxis(layout, i)
-            else:
-                return None
+        def getgetfunction1(i):
+            def getfunction1(layout, depth):
+                if depth == 2:
+                    return lambda: newaxis(layout, i)
+                else:
+                    return None
 
-        def getfunction2(layout, depth, i):
-            if depth == axis:
-                inside = len(new_arrays) - i - 1
-                outside = i
-                return lambda: newaxis(
-                    ak._util.recursively_apply(layout, getfunction1, args=(inside,)),
-                    outside,
-                )
-            else:
-                return None
+            return getfunction1
+
+        def getgetfunction2(i):
+            def getfunction2(layout, depth):
+                if depth == posaxis:
+                    inside = len(new_arrays) - i - 1
+                    outside = i
+                    nextlayout = ak._util.recursively_apply(
+                        layout, getgetfunction1(inside), pass_depth=True
+                    )
+                    return lambda: newaxis(nextlayout, outside)
+                else:
+                    return None
+
+            return getfunction2
 
         def apply(x, i):
+            layout = ak.operations.convert.to_layout(
+                x, allow_record=False, allow_other=False
+            )
             return ak._util.recursively_apply(
-                ak.operations.convert.to_layout(
-                    x, allow_record=False, allow_other=False
-                ),
-                getfunction2,
-                args=(i,),
+                layout, getgetfunction2(i), pass_depth=True
             )
 
         toflatten = []
@@ -2290,7 +2360,7 @@ def cartesian(
                 recordlookup.append(n)
                 layouts.append(apply(x, i))
                 if i < len(new_arrays) - 1 and n not in nested:
-                    toflatten.append(axis + i + 1)
+                    toflatten.append(posaxis + i + 1)
 
         else:
             if nested is True:
@@ -2309,23 +2379,25 @@ def cartesian(
             for i, x in enumerate(new_arrays):
                 layouts.append(apply(x, i))
                 if i < len(new_arrays) - 1 and i not in nested:
-                    toflatten.append(axis + i + 1)
+                    toflatten.append(posaxis + i + 1)
 
         def getfunction3(inputs, depth):
-            if depth == axis + len(new_arrays):
+            if depth == posaxis + len(new_arrays):
                 return lambda: (
                     ak.layout.RecordArray(inputs, recordlookup, parameters=parameters),
                 )
             else:
                 return None
 
-        out = ak._util.broadcast_and_apply(layouts, getfunction3, behavior)
+        out = ak._util.broadcast_and_apply(
+            layouts, getfunction3, behavior, pass_depth=True
+        )
         assert isinstance(out, tuple) and len(out) == 1
         result = out[0]
 
         while len(toflatten) != 0:
-            axis = toflatten.pop()
-            result = flatten(result, axis=axis, highlevel=False)
+            flatten_axis = toflatten.pop()
+            result = flatten(result, axis=flatten_axis, highlevel=False)
 
     if highlevel:
         return ak._util.wrap(result, behavior)
@@ -2938,7 +3010,7 @@ def with_cache(array, cache, highlevel=True):
         maybe_wrapped = ak._util.MappingProxy.maybe_wrap(cache)
         cache = ak.layout.ArrayCache(maybe_wrapped)
 
-    def getfunction(layout, depth):
+    def getfunction(layout):
         if isinstance(layout, ak.layout.VirtualArray):
             if cache is None:
                 newcache = layout.cache
@@ -2955,7 +3027,7 @@ def with_cache(array, cache, highlevel=True):
             return None
 
     out = ak._util.recursively_apply(
-        ak.operations.convert.to_layout(array), getfunction
+        ak.operations.convert.to_layout(array), getfunction, pass_depth=False
     )
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
