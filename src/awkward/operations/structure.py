@@ -464,7 +464,10 @@ def to_regular(array, axis=1, highlevel=True):
         elif posaxis == depth and isinstance(layout, ak._util.listtypes):
             return lambda: layout.toRegularArray()
         elif posaxis == 0:
-            raise ValueError("array has no axis {0}".format(axis))
+            raise ValueError(
+                "array has no axis {0}".format(axis)
+                + ak._util.exception_suffix(__file__)
+            )
         else:
             return posaxis
 
@@ -518,7 +521,10 @@ def from_regular(array, axis=1, highlevel=True):
         elif posaxis == depth and isinstance(layout, ak._util.listtypes):
             return lambda: layout
         elif posaxis == 0:
-            raise ValueError("array has no axis {0}".format(axis))
+            raise ValueError(
+                "array has no axis {0}".format(axis)
+                + ak._util.exception_suffix(__file__)
+            )
         else:
             return posaxis
 
@@ -1811,52 +1817,49 @@ def fill_none(array, value, highlevel=True):
         return out
 
 
-def is_none(array, highlevel=True):
+def is_none(array, axis=0, highlevel=True):
     """
     Args:
         array: Data to check for missing values (None).
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
     Returns an array whose value is True where an element of `array` is None;
-    False otherwise.
+    False otherwise (at a given `axis` depth).
     """
 
-    def apply(layout):
-        nplike = ak.nplike.of(layout)
-
-        if isinstance(layout, ak._util.virtualtypes):
-            return apply(layout.array)
-
-        elif isinstance(layout, ak._util.unknowntypes):
-            return apply(ak.layout.NumpyArray(nplike.array([])))
-
-        elif isinstance(layout, ak._util.indexedtypes):
-            return apply(layout.project())
-
-        elif isinstance(layout, ak._util.uniontypes):
-            contents = [apply(layout.project(i)) for i in range(layout.numcontents)]
-            out = nplike.empty(len(layout), dtype=np.bool_)
-            tags = nplike.asarray(layout.tags)
-            for tag, content in enumerate(contents):
-                out[tags == tag] = content
-            return out
-
-        elif isinstance(layout, ak._util.optiontypes):
-            return nplike.asarray(layout.bytemask()).view(np.bool_)
-
+    def getfunction(layout, depth, posaxis):
+        posaxis = layout.axis_wrap_if_negative(posaxis)
+        if posaxis == depth - 1:
+            nplike = ak.nplike.of(layout)
+            if isinstance(layout, ak._util.optiontypes):
+                return lambda: ak.layout.NumpyArray(
+                    nplike.asarray(layout.bytemask()).view(np.bool_)
+                )
+            elif isinstance(
+                layout,
+                (ak._util.unknowntypes, ak._util.listtypes, ak._util.recordtypes,),
+            ):
+                return lambda: ak.layout.NumpyArray(
+                    nplike.zeros(len(layout), dtype=np.bool_)
+                )
+            else:
+                return posaxis
         else:
-            return nplike.zeros(len(layout), dtype=np.bool_)
+            return posaxis
 
-    layout = ak.operations.convert.to_layout(array, allow_record=False)
+    layout = ak.operations.convert.to_layout(array)
 
-    if isinstance(layout, ak.partition.PartitionedArray):
-        out = ak.partition.apply(lambda x: ak.layout.NumpyArray(apply(x)), layout)
-    else:
-        out = ak.layout.NumpyArray(apply(layout))
+    out = ak._util.recursively_apply(
+        layout, getfunction, pass_depth=True, pass_user=True, user=axis
+    )
 
     if highlevel:
-        return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
