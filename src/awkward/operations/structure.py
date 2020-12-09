@@ -1393,7 +1393,7 @@ def flatten(array, axis=1, highlevel=True):
         else:
             out = ak.layout.NumpyArray(nplike.concatenate(out))
 
-    elif axis == 0:
+    elif axis == 0 or layout.axis_wrap_if_negative(axis) == 0:
 
         def apply(layout):
             if isinstance(layout, ak._util.virtualtypes):
