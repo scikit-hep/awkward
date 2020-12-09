@@ -115,12 +115,12 @@ def test_cartesian():
 def test_firsts():
     array = ak.Array([[[0, 1, 2], []], [[3, 4]], [], [[5], [6, 7, 8, 9]]])
 
-    assert str(ak.firsts(array, axis=0)) == "[[0, 1, 2], []]"
-    assert str(ak.firsts(array, axis=1)) == "[[0, 1, 2], [3, 4], None, [5]]"
-    assert str(ak.firsts(array, axis=2)) == "[[0, None], [3], [], [5, 6]]"
-    assert str(ak.firsts(array, axis=-1)) == "[[0, None], [3], [], [5, 6]]"
-    assert str(ak.firsts(array, axis=-2)) == "[[0, 1, 2], [3, 4], None, [5]]"
-    assert str(ak.firsts(array, axis=-3)) == "[[0, 1, 2], []]"
+    assert ak.to_list(ak.firsts(array, axis=0)) == [[0, 1, 2], []]
+    assert ak.to_list(ak.firsts(array, axis=1)) == [[0, 1, 2], [3, 4], None, [5]]
+    assert ak.to_list(ak.firsts(array, axis=2)) == [[0, None], [3], [], [5, 6]]
+    assert ak.to_list(ak.firsts(array, axis=-1)) == [[0, None], [3], [], [5, 6]]
+    assert ak.to_list(ak.firsts(array, axis=-2)) == [[0, 1, 2], [3, 4], None, [5]]
+    assert ak.to_list(ak.firsts(array, axis=-3)) == [[0, 1, 2], []]
 
     with pytest.raises(ValueError):
         ak.firsts(array, axis=-4)
