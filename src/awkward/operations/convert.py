@@ -326,7 +326,11 @@ def to_numpy(array, allow_missing=True):
         return out
 
     elif isinstance(array, ak.layout.NumpyArray):
-        return numpy.asarray(array)
+        out = ak.nplike.of(array).asarray(array)
+        if type(out).__module__.startswith("cupy."):
+            return out.get()
+        else:
+            return out
 
     elif isinstance(array, ak.layout.Content):
         raise AssertionError(
