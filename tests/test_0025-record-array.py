@@ -292,7 +292,7 @@ def test_getitem_other_types():
         [{"two": [6.6], "three": 4.4}, {"two": [7.7, 8.8, 9.9], "three": 5.5}],
     ]
 
-    regulararray2 = ak.layout.RegularArray(recordarray, 1)
+    regulararray2 = ak.layout.RegularArray(recordarray, 1, zeros_length=0)
     assert ak.to_list(regulararray2["one"]) == [[1], [2], [3], [4], [5]]
     assert ak.to_list(regulararray2["two"]) == [
         [[1.1, 2.2, 3.3]],
@@ -413,7 +413,7 @@ def test_setidentities():
 
     recordarray = ak.layout.RecordArray({"one": content1, "two": listoffsetarray})
     recordarray2 = ak.layout.RecordArray(
-        {"outer": ak.layout.RegularArray(recordarray, 1)}
+        {"outer": ak.layout.RegularArray(recordarray, 1, zeros_length=0)}
     )
     recordarray2.setidentities()
     assert recordarray2["outer"].identities.fieldloc == [(0, "outer")]

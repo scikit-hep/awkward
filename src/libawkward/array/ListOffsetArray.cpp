@@ -351,7 +351,8 @@ namespace awkward {
     return std::make_shared<RegularArray>(identities_,
                                           parameters_,
                                           content,
-                                          size);
+                                          size,
+                                          length());
   }
 
   template <typename T>
@@ -1190,7 +1191,8 @@ namespace awkward {
       return std::make_shared<RegularArray>(Identities::none(),
                                             parameters_,
                                             next.get()->simplify_optiontype(),
-                                            target);
+                                            target,
+                                            length());
     }
     else {
       return std::make_shared<ListOffsetArrayOf<T>>(
@@ -1326,7 +1328,9 @@ namespace awkward {
         out = RegularArray(Identities::none(),
                            util::Parameters(),
                            out,
-                           1).toListOffsetArray64(false).get()->shallow_copy();
+                           1,
+                           length()
+              ).toListOffsetArray64(false).get()->shallow_copy();
       }
 
       return out;
@@ -1568,7 +1572,8 @@ namespace awkward {
         return std::make_shared<RegularArray>(Identities::none(),
                                               util::Parameters(),
                                               out,
-                                              out.get()->length());
+                                              out.get()->length(),
+                                              length());
       }
     }
 
@@ -1651,7 +1656,8 @@ namespace awkward {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
                                              out,
-                                             out.get()->length());
+                                             out.get()->length(),
+                                             length());
       }
       return out;
     }
@@ -1689,7 +1695,8 @@ namespace awkward {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
                                              out,
-                                             out.get()->length());
+                                             out.get()->length(),
+                                             length());
       }
       return out;
     }
@@ -1808,7 +1815,8 @@ namespace awkward {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
                                              out,
-                                             out.get()->length());
+                                             out.get()->length(),
+                                             length());
       }
       return out;
     }
@@ -1846,7 +1854,8 @@ namespace awkward {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
                                              out,
-                                             out.get()->length());
+                                             out.get()->length(),
+                                             length());
       }
       return out;
     }

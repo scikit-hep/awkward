@@ -564,7 +564,7 @@ def broadcast_and_apply(  # noqa: C901
                 for obj in inputs:
                     if isinstance(obj, ak.layout.Content):
                         while obj.purelist_depth < maxdepth:
-                            obj = ak.layout.RegularArray(obj, 1)
+                            obj = ak.layout.RegularArray(obj, 1, len(obj))
                     nextinputs.append(obj)
                 if any(x is not y for x, y in zip(inputs, nextinputs)):
                     return apply(nextinputs, depth, user)
@@ -755,10 +755,13 @@ def broadcast_and_apply(  # noqa: C901
                     else:
                         nextinputs.append(x)
 
+                maxlen = max(
+                    [len(x) for x in nextinputs if isinstance(x, ak.layout.Content)]
+                )
                 outcontent = apply(nextinputs, depth + 1, user)
                 assert isinstance(outcontent, tuple)
 
-                return tuple(ak.layout.RegularArray(x, maxsize) for x in outcontent)
+                return tuple(ak.layout.RegularArray(x, maxsize, maxlen) for x in outcontent)
 
             elif not all_same_offsets(nplike, inputs):
                 fcns = [
@@ -798,7 +801,7 @@ def broadcast_and_apply(  # noqa: C901
                     # handle implicit left-broadcasting (unlike NumPy)
                     elif left_broadcast and isinstance(x, ak.layout.Content):
                         nextinputs.append(
-                            ak.layout.RegularArray(x, 1)
+                            ak.layout.RegularArray(x, 1, len(x))
                             .broadcast_tooffsets64(offsets)
                             .content
                         )
@@ -1010,10 +1013,10 @@ def broadcast_pack(inputs, isscalar):
     for x in inputs:
         if isinstance(x, ak.layout.Record):
             index = ak.nplike.of(*inputs).full(maxlen, x.at, dtype=np.int64)
-            nextinputs.append(ak.layout.RegularArray(x.array[index], maxlen))
+            nextinputs.append(ak.layout.RegularArray(x.array[index], maxlen, 1))
             isscalar.append(True)
         elif isinstance(x, ak.layout.Content):
-            nextinputs.append(ak.layout.RegularArray(x, len(x)))
+            nextinputs.append(ak.layout.RegularArray(x, len(x), 1))
             isscalar.append(False)
         else:
             nextinputs.append(x)
@@ -1084,6 +1087,7 @@ def recursively_apply(
             return ak.layout.RegularArray(
                 apply(layout.content, depth + 1, user),
                 layout.size,
+                len(layout),
                 layout.identities,
                 layout.parameters if keep_parameters else None,
             )

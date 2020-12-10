@@ -476,7 +476,8 @@ namespace awkward {
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
                                            out,
-                                           shape_[(size_t)i]);
+                                           shape_[(size_t)i],
+                                           shape_[(size_t)(i - 1)]);
     }
     return out;
   }
@@ -2811,7 +2812,8 @@ namespace awkward {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
                                              out,
-                                             1);
+                                             1,
+                                             length());
       }
 
       return out;
@@ -3027,7 +3029,8 @@ namespace awkward {
           Identities::none(),
           util::Parameters(),
           out,
-          parents.length() / starts.length());
+          parents.length() / starts.length(),
+          length());
       }
 
       return out;
@@ -3205,7 +3208,8 @@ namespace awkward {
           Identities::none(),
           util::Parameters(),
           out,
-          parents.length() / starts.length());
+          parents.length() / starts.length(),
+          length());
       }
       return out;
     }

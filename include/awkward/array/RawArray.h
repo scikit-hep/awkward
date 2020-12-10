@@ -994,7 +994,8 @@ namespace awkward {
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
                                            out,
-                                           length_);
+                                           length_,
+                                           1);
 
       return out;
     }
@@ -1037,7 +1038,8 @@ namespace awkward {
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
                                            out,
-                                           length_);
+                                           length_,
+                                           1);
 
       return out;
     }

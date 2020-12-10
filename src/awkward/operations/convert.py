@@ -62,7 +62,9 @@ def from_numpy(
     def recurse(array, mask):
         if regulararray and len(array.shape) > 1:
             return ak.layout.RegularArray(
-                recurse(array.reshape((-1,) + array.shape[2:]), mask), array.shape[1]
+                recurse(array.reshape((-1,) + array.shape[2:]), mask),
+                array.shape[1],
+                array.shape[0],
             )
 
         if len(array.shape) == 0:
@@ -81,8 +83,8 @@ def from_numpy(
                 ),
                 parameters={"__array__": "bytestring"},
             )
-            for size in array.shape[-1:0:-1]:
-                data = ak.layout.RegularArray(data, size)
+            for i in range(len(array.shape) - 1, 0, -1):
+                data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
         elif array.dtype.kind == "U":
             asbytes = numpy.char.encode(array.reshape(-1), "utf-8", "surrogateescape")
             itemsize = asbytes.dtype.itemsize
@@ -96,8 +98,8 @@ def from_numpy(
                 ),
                 parameters={"__array__": "string"},
             )
-            for size in array.shape[-1:0:-1]:
-                data = ak.layout.RegularArray(data, size)
+            for i in range(len(array.shape) - 1, 0, -1):
+                data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
         else:
             data = ak.layout.NumpyArray(array)
 
@@ -113,7 +115,7 @@ def from_numpy(
                     if isinstance(x, ak.layout.NumpyArray):
                         return ak.layout.UnmaskedArray(x)
                     else:
-                        return ak.layout.RegularArray(attach(x.content), x.size)
+                        return ak.layout.RegularArray(attach(x.content), x.size, len(x))
 
                 return attach(data.toRegularArray())
         else:
@@ -372,7 +374,9 @@ def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
     def recurse(array):
         if regulararray and len(array.shape) > 1:
             return ak.layout.RegularArray(
-                recurse(array.reshape((-1,) + array.shape[2:])), array.shape[1]
+                recurse(array.reshape((-1,) + array.shape[2:])),
+                array.shape[1],
+                array.shape[0],
             )
 
         if len(array.shape) == 0:
@@ -1113,8 +1117,8 @@ def from_awkward0(
                     out = ak.layout.ListArray32(
                         starts, stops, recurse(array.content, level + 1)
                     )
-                for size in array.starts.shape[:0:-1]:
-                    out = ak.layout.RegularArray(out, size)
+                for i in range(len(array.starts.shape) - 1, 0, -1):
+                    out = ak.layout.RegularArray(out, array.starts.shape[i], array.starts.shape[i - 1])
                 return out
 
         elif isinstance(array, awkward0.Table):
@@ -1167,8 +1171,8 @@ def from_awkward0(
                     tags, index, [recurse(x, level + 1) for x in array.contents]
                 )
 
-            for size in array.tags.shape[:0:-1]:
-                out = ak.layout.RegularArray(out, size)
+            for i in range(len(array.tags.shape) - 1, 0, -1):
+                out = ak.layout.RegularArray(out, array.tags.shape[i], array.tags.shape[i - 1])
             return out
 
         elif isinstance(array, awkward0.MaskedArray):
@@ -1179,8 +1183,8 @@ def from_awkward0(
                 recurse(array.content, level + 1),
                 valid_when=(not array.maskedwhen),
             )
-            for size in array.mask.shape[:0:-1]:
-                out = ak.layout.RegularArray(out, size)
+            for i in range(len(array.mask.shape) - 1, 0, -1):
+                out = ak.layout.RegularArray(out, array.mask.shape[i], array.mask.shape[i - 1])
             return out
 
         elif isinstance(array, awkward0.BitMaskedArray):
@@ -1212,9 +1216,8 @@ def from_awkward0(
                 out = ak.layout.IndexedOptionArray32(
                     index, recurse(array.content, level + 1)
                 )
-
-            for size in array.tags.shape[:0:-1]:
-                out = ak.layout.RegularArray(out, size)
+            for i in range(len(array.index.shape) - 1, 0, -1):
+                out = ak.layout.RegularArray(out, array.index.shape[i], array.index.shape[i - 1])
             return out
 
         elif isinstance(array, awkward0.IndexedArray):
@@ -1231,9 +1234,8 @@ def from_awkward0(
             else:
                 index = ak.layout.Index32(array.index.reshape(-1))
                 out = ak.layout.IndexedArray32(index, recurse(array.content, level + 1))
-
-            for size in array.tags.shape[:0:-1]:
-                out = ak.layout.RegularArray(out, size)
+            for i in range(len(array.index.shape) - 1, 0, -1):
+                out = ak.layout.RegularArray(out, array.index.shape[i], array.index.shape[i - 1])
             return out
 
         elif isinstance(array, awkward0.SparseArray):
@@ -3457,10 +3459,10 @@ def _form_to_layout(
             partition_first,
             cache,
             cache_key,
-            length,
+            length * form.size,
         )
 
-        return ak.layout.RegularArray(content, form.size, identities, parameters)
+        return ak.layout.RegularArray(content, form.size, length, identities, parameters)
 
     elif isinstance(form, ak.forms.UnionForm):
         raw_tags = (
