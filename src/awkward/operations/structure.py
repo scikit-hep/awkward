@@ -1513,13 +1513,13 @@ def unflatten(array, counts, highlevel=True):
         else:
             mask = False
         nplike = ak.nplike.of(counts_layout)
-        if nplike.asarray(counts_layout).dtype != "int":
+        if counts.dtype != "int":
             raise ValueError(
                 "non-integer counts" + ak._util.exception_suffix(__file__)
             )
-        offsets = nplike.empty(len(counts_layout) + 1, np.int64)
+        offsets = nplike.empty(len(counts) + 1, np.int64)
         offsets[0] = 0
-        nplike.cumsum(counts_layout, out=offsets[1:])
+        nplike.cumsum(counts, out=offsets[1:])
         offsets = ak.layout.Index64(offsets)
         out = ak.layout.ListOffsetArray64(offsets, layout)
         if mask is not False:
