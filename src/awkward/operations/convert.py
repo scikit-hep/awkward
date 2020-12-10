@@ -1592,6 +1592,11 @@ def to_layout(
             )
         return from_numpy(array, regulararray=True, recordarray=True, highlevel=False)
 
+    elif (
+        type(array).__module__.startswith("cupy.") and type(array).__name__ == "ndarray"
+    ):
+        return from_cupy(array, regulararray=True, highlevel=False)
+
     elif isinstance(array, (str, bytes)) or (
         ak._util.py27 and isinstance(array, ak._util.unicode)
     ):

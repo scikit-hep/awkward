@@ -1466,6 +1466,91 @@ def flatten(array, axis=1, highlevel=True):
         return out
 
 
+def unflatten(array, counts, highlevel=True):
+    """
+    Args:
+        array: Data to create an array with an additional level from.
+        counts (int or array): Number of elements the new level should have.
+            If an integer, the new level will be regularly sized; otherwise,
+            it will consist of variable-length lists with the given lengths.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns an array with an additional level of nesting. This is roughly the
+    inverse of #ak.flatten, where `counts` were obtained by #ak.num (both with
+    `axis=1`).
+
+    For example,
+
+        >>> original = ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]])
+        >>> counts = ak.num(original)
+        >>> array = ak.flatten(original)
+        >>> counts
+        <Array [3, 0, 2, 1, 4] type='5 * int64'>
+        >>> array
+        <Array [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] type='10 * int64'>
+        >>> ak.unflatten(array, counts)
+        <Array [[0, 1, 2], [], ... [5], [6, 7, 8, 9]] type='5 * var * int64'>
+    """
+    layout = ak.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
+
+    if isinstance(counts, (numbers.Integral, np.integer)):
+        if counts < 0 or counts > len(layout):
+            raise ValueError(
+                "too large counts for array or negative counts"
+                + ak._util.exception_suffix(__file__)
+            )
+        out = ak.layout.RegularArray(layout, counts)
+
+    else:
+        counts = ak.operations.convert.to_layout(
+            counts, allow_record=False, allow_other=False
+        )
+        ptr_lib = ak.operations.convert.kernels(array)
+        counts = ak.operations.convert.to_kernels(counts, ptr_lib)
+        if ptr_lib == "cpu":
+            counts = ak.operations.convert.to_numpy(counts, allow_missing=True)
+            mask = ak.nplike.numpy.ma.getmask(counts)
+            counts = ak.nplike.numpy.ma.filled(counts, 0)
+        elif ptr_lib == "cuda":
+            counts = ak.operations.convert.to_cupy(counts)
+            mask = False
+        else:
+            raise AssertionError(
+                "unrecognized kernels lib" + ak._util.exception_suffix(__file__)
+            )
+        if counts.ndim != 1:
+            raise ValueError(
+                "counts must be one-dimensional" + ak._util.exception_suffix(__file__)
+            )
+
+        nplike = ak.nplike.of(array)
+        if not issubclass(counts.dtype.type, np.integer):
+            raise ValueError(
+                "counts must be integers" + ak._util.exception_suffix(__file__)
+            )
+        offsets = nplike.empty(len(counts) + 1, np.int64)
+        offsets[0] = 0
+        nplike.cumsum(counts, out=offsets[1:])
+        if offsets[-1] > len(layout):
+            raise ValueError(
+                "sum of counts exceeds length of array"
+                + ak._util.exception_suffix(__file__)
+            )
+        offsets = ak.layout.Index64(offsets)
+        out = ak.layout.ListOffsetArray64(offsets, layout)
+        if not isinstance(mask, (np.bool, np.bool_)):
+            index = ak.layout.Index8(nplike.asarray(mask).astype(np.int8))
+            out = ak.layout.ByteMaskedArray(index, out, valid_when=False)
+
+    if highlevel:
+        return ak._util.wrap(out, ak._util.behaviorof(array))
+    else:
+        return out
+
+
 def local_index(array, axis=-1, highlevel=True):
     """
     Args:
