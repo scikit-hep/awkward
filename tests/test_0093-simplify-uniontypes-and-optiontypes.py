@@ -147,7 +147,7 @@ def test_listarray_merge():
         assert ak.to_list(array1.merge(emptyarray)) == ak.to_list(array1)
         assert ak.to_list(emptyarray.merge(array1)) == ak.to_list(array1)
 
-    regulararray = ak.layout.RegularArray(content2, 2)
+    regulararray = ak.layout.RegularArray(content2, 2, zeros_length=0)
     assert ak.to_list(regulararray) == [[1, 2], [3, 4], [5, 6]]
     assert ak.to_list(regulararray.merge(emptyarray)) == ak.to_list(regulararray)
     assert ak.to_list(emptyarray.merge(regulararray)) == ak.to_list(regulararray)
@@ -251,7 +251,7 @@ def test_listoffsetarray_merge():
         assert ak.to_list(array1.merge(emptyarray)) == ak.to_list(array1)
         assert ak.to_list(emptyarray.merge(array1)) == ak.to_list(array1)
 
-    regulararray = ak.layout.RegularArray(content2, 2)
+    regulararray = ak.layout.RegularArray(content2, 2, zeros_length=0)
     assert ak.to_list(regulararray) == [[1, 2], [3, 4], [5, 6]]
 
     for (dtype1, Index1, ListArray1) in [

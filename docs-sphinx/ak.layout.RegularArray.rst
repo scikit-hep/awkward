@@ -9,6 +9,10 @@ subinterval of the underlying data.
 If the ``content`` length is not an integer multiple of ``size``, then the length
 of the RegularArray is truncated to the largest integer multiple.
 
+An extra field ``zeros_length`` is ignored unless the ``size`` is zero. This sets the
+length of the RegularArray in only those cases, so that it is possible for an
+array to contain a non-zero number of zero-length lists with regular type.
+
 A multidimensional :doc:`ak.layout.NumpyArray` is equivalent to a one-dimensional
 :doc:`ak.layout.NumpyArray` nested within several RegularArrays, one for each
 dimension. However, RegularArrays can be used to make lists of any other type.
@@ -25,41 +29,57 @@ that exhaustively checks validity in its constructor (see
 .. code-block:: python
 
     class RegularArray(Content):
-        def __init__(self, content, size):
+        def __init__(self, content, size, zeros_length=0):
             assert isinstance(content, Content)
             assert isinstance(size, int)
-            assert size > 0
+            assert isinstance(zeros_length, int)
+            assert size >= 0
+            if size != 0:
+                length = len(self.content) // self.size   # floor division
+            else:
+                assert zeros_length >= 0
+                length = zeros_length
             self.content = content
             self.size = size
+            self.length = length
 
         @staticmethod
         def random(minlen, choices):
-            size = random_length(1, 5)
-            return RegularArray(
-                random.choice(choices).random(random_length(minlen) * size, choices), size)
+            size = random_length(0, 5)
+            zeros_length = random_length(0, 5)
+            content = random.choice(choices).random(random_length(minlen) * size, choices)
+            return RegularArray(content, size, zeros_length)
 
         def __len__(self):
-            return len(self.content) // self.size   # floor division
+            return self.length
 
         def __getitem__(self, where):
             if isinstance(where, int):
+                assert 0 <= where < len(self)
                 return self.content[(where) * self.size:(where + 1) * self.size]
             elif isinstance(where, slice) and where.step is None:
                 start = where.start * self.size
                 stop = where.stop * self.size
-                return RegularArray(self.content[start:stop], self.size)
+                zeros_length = where.stop - where.start
+                return RegularArray(self.content[start:stop], self.size, zeros_length)
             elif isinstance(where, str):
-                return RegularArray(self.content[where], self.size)
+                return RegularArray(self.content[where], self.size, self.length)
             else:
                 raise AssertionError(where)
 
         def __repr__(self):
-            return "RegularArray(" + repr(self.content) + ", " + repr(self.size) + ")"
+            if size == 0:
+                zeros_length = ", " + repr(self.length)
+            else:
+                zeros_length = ""
+            return "RegularArray(" + repr(self.content) + ", " + repr(self.size) + zeros_length + ")"
 
         def xml(self, indent="", pre="", post=""):
             out = indent + pre + "<RegularArray>\n"
             out += self.content.xml(indent + "    ", "<content>", "</content>\n")
             out += indent + "    <size>" + str(self.size) + "</size>\n"
+            if size == 0:
+                out += indent + "    <zeros_length>" + str(self.length) + "</zeros_length>\n"
             out += indent + "</RegularArray>" + post
             return out
 

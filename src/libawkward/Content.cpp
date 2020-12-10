@@ -1282,7 +1282,8 @@ namespace awkward {
         ContentPtr out = std::make_shared<RegularArray>(Identities::none(),
                                                         util::Parameters(),
                                                         array,
-                                                        1);
+                                                        1,
+                                                        array.get()->length());
           auto const& other = out.get()->offsets_and_flattened(posaxis, depth);
           contents_length += other.second.get()->length();
           contents.emplace_back(other.second);
@@ -1451,7 +1452,8 @@ namespace awkward {
     ContentPtr next = std::make_shared<RegularArray>(Identities::none(),
                                                      util::Parameters(),
                                                      shallow_copy(),
-                                                     length());
+                                                     length(),
+                                                     1);
     SliceItemPtr nexthead = where.head();
     Slice nexttail = where.tail();
     Index64 nextadvanced(0);
@@ -1579,11 +1581,13 @@ namespace awkward {
                         const Index64& advanced) const {
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
+    ContentPtr nextcontent = getitem_next(nexthead, nexttail, advanced);
     return std::make_shared<RegularArray>(
       Identities::none(),
       util::Parameters(),
-      getitem_next(nexthead, nexttail, advanced),
-      1);
+      nextcontent,
+      1,
+      nextcontent.get()->length());
   }
 
   const ContentPtr
@@ -1638,7 +1642,8 @@ namespace awkward {
     return std::make_shared<RegularArray>(Identities::none(),
                                           util::Parameters(),
                                           out.simplify_optiontype(),
-                                          index.length());
+                                          index.length(),
+                                          1);
   }
 
   const ContentPtr getitem_next_missing_jagged(const SliceMissing64& missing,
@@ -1677,8 +1682,11 @@ namespace awkward {
         starts, stops, jagged->content(), tail);
     IndexedOptionArray64 out(Identities::none(), util::Parameters(), outputmask, tmp);
     return std::make_shared<RegularArray>(
-        Identities::none(), util::Parameters(), out.simplify_optiontype(),
-        index.length());
+        Identities::none(),
+        util::Parameters(),
+        out.simplify_optiontype(),
+        index.length(),
+        1);
   }
 
   const ContentPtr
@@ -1773,16 +1781,26 @@ namespace awkward {
   const ContentPtr
   Content::getitem_next_array_wrap(const ContentPtr& outcontent,
                                    const std::vector<int64_t>& shape) const {
+    int64_t length = 0;
+    if (shape.size() >= 2) {
+      length = (int64_t)shape[shape.size() - 2];
+    }
     ContentPtr out =
       std::make_shared<RegularArray>(Identities::none(),
                                      util::Parameters(),
                                      outcontent,
-                                     (int64_t)shape[shape.size() - 1]);
+                                     (int64_t)shape[shape.size() - 1],
+                                     length);
     for (int64_t i = (int64_t)shape.size() - 2;  i >= 0;  i--) {
+      int64_t length = 0;
+      if (i > 0) {
+        length = (int64_t)shape[(size_t)(i - 1)];
+      }
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
                                            out,
-                                           (int64_t)shape[(size_t)i]);
+                                           (int64_t)shape[(size_t)i],
+                                           length);
     }
     return out;
   }

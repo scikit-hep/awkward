@@ -204,16 +204,33 @@ namespace awkward {
   RegularArray::RegularArray(const IdentitiesPtr& identities,
                              const util::Parameters& parameters,
                              const ContentPtr& content,
-                             int64_t size)
+                             int64_t size,
+                             int64_t zeros_length)
       : Content(identities, parameters)
       , content_(content)
-      , size_(size) {
+      , size_(size)
+      , length_(size != 0
+                ? content_.get()->length() / size_   // floor of length / size
+                : zeros_length) {
     if (size < 0) {
       throw std::invalid_argument(
         std::string("RegularArray size must be non-negative")
         + FILENAME(__LINE__));
     }
+    if (length_ < 0) {
+      throw std::invalid_argument(
+        std::string("RegularArray zeros_length must be non-negative "
+                    "(only checked if size == 0)")
+        + FILENAME(__LINE__));
+    }
   }
+
+  RegularArray::RegularArray(const IdentitiesPtr& identities,
+                             const util::Parameters& parameters,
+                             const ContentPtr& content,
+                             int64_t size)
+    : RegularArray(identities, parameters, content, size, 0) { }
+
 
   const ContentPtr
   RegularArray::content() const {
@@ -495,9 +512,7 @@ namespace awkward {
 
   int64_t
   RegularArray::length() const {
-    return (size_ == 0
-              ? 0
-              : content_.get()->length() / size_);   // floor of length / size
+    return length_;
   }
 
   const ContentPtr
@@ -505,7 +520,8 @@ namespace awkward {
     return std::make_shared<RegularArray>(identities_,
                                           parameters_,
                                           content_,
-                                          size_);
+                                          size_,
+                                          length_);
   }
 
   const ContentPtr
@@ -522,7 +538,8 @@ namespace awkward {
     return std::make_shared<RegularArray>(identities,
                                           parameters_,
                                           content,
-                                          size_);
+                                          size_,
+                                          length_);
   }
 
   void
@@ -593,7 +610,9 @@ namespace awkward {
     return std::make_shared<RegularArray>(
       identities_,
       parameters_,
-      content_.get()->getitem_range_nowrap(start*size_, stop*size_), size_);
+      content_.get()->getitem_range_nowrap(start*size_, stop*size_),
+      size_,
+      stop - start);
   }
 
   const ContentPtr
@@ -601,7 +620,9 @@ namespace awkward {
     return std::make_shared<RegularArray>(
       identities_,
       util::Parameters(),
-      content_.get()->getitem_field(key), size_);
+      content_.get()->getitem_field(key),
+      size_,
+      length_);
   }
 
   const ContentPtr
@@ -609,7 +630,9 @@ namespace awkward {
     return std::make_shared<RegularArray>(
       identities_,
       util::Parameters(),
-      content_.get()->getitem_fields(keys), size_);
+      content_.get()->getitem_fields(keys),
+      size_,
+      length_);
   }
 
   const ContentPtr
@@ -631,7 +654,8 @@ namespace awkward {
     return std::make_shared<RegularArray>(identities,
                                           parameters_,
                                           content_.get()->carry(nextcarry, allow_lazy),
-                                          size_);
+                                          size_,
+                                          carry.length());
   }
 
   int64_t
@@ -661,9 +685,9 @@ namespace awkward {
 
   const std::string
   RegularArray::validityerror(const std::string& path) const {
-    if (size_ < 1) {
+    if (size_ < 0) {
       return (std::string("at ") + path + std::string(" (") + classname()
-              + std::string("): ") + std::string("size < 1")
+              + std::string("): ") + std::string("size < 0")
               + FILENAME(__LINE__));
     }
     return content_.get()->validityerror(path + std::string(".content"));
@@ -697,7 +721,8 @@ namespace awkward {
       return std::make_shared<RegularArray>(Identities::none(),
                                             util::Parameters(),
                                             next,
-                                            size_);
+                                            size_,
+                                            length_);
     }
   }
 
@@ -809,7 +834,8 @@ namespace awkward {
     return std::make_shared<RegularArray>(identities_,
                                           parameters_,
                                           content().get()->fillna(value),
-                                          size_);
+                                          size_,
+                                          length_);
   }
 
   const ContentPtr
@@ -831,7 +857,8 @@ namespace awkward {
         Identities::none(),
         parameters_,
         content_.get()->rpad(target, posaxis, depth + 1),
-        size_);
+        size_,
+        length_);
     }
   }
 
@@ -861,14 +888,16 @@ namespace awkward {
         Identities::none(),
         parameters_,
         next.get()->simplify_optiontype(),
-        target);
+        target,
+        length_);
     }
     else {
       return std::make_shared<RegularArray>(
         Identities::none(),
         parameters_,
         content_.get()->rpad_and_clip(target, posaxis, depth + 1),
-        size_);
+        size_,
+        length_);
     }
   }
 
@@ -964,14 +993,16 @@ namespace awkward {
         identities_,
         util::Parameters(),
         std::make_shared<NumpyArray>(localindex),
-        size_);
+        size_,
+        length_);
     }
     else {
       return std::make_shared<RegularArray>(
         identities_,
         util::Parameters(),
         content_.get()->localindex(posaxis, depth + 1),
-        size_);
+        size_,
+        length_);
     }
   }
 
@@ -1034,16 +1065,19 @@ namespace awkward {
       std::shared_ptr<int64_t> fromindex =
           kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
                                   size*sizeof(int64_t));
-      struct Error err = kernel::RegularArray_combinations_64(
-        kernel::lib::cpu,   // DERIVE
-        tocarryraw.data(),
-        toindex.get(),
-        fromindex.get(),
-        n,
-        replacement,
-        size_,
-        length());
-      util::handle_error(err, classname(), identities_.get());
+
+      if (size_ != 0) {
+        struct Error err = kernel::RegularArray_combinations_64(
+          kernel::lib::cpu,   // DERIVE
+          tocarryraw.data(),
+          toindex.get(),
+          fromindex.get(),
+          n,
+          replacement,
+          size_,
+          length());
+        util::handle_error(err, classname(), identities_.get());
+      }
 
       ContentPtrVec contents;
       for (auto ptr : tocarry) {
@@ -1060,7 +1094,8 @@ namespace awkward {
       return std::make_shared<RegularArray>(identities_,
                                             util::Parameters(),
                                             recordarray,
-                                            combinationslen);
+                                            combinationslen,
+                                            length_);
     }
 
     else {
@@ -1075,7 +1110,8 @@ namespace awkward {
       return std::make_shared<RegularArray>(identities_,
                                             util::Parameters(),
                                             next,
-                                            size_);
+                                            size_,
+                                            length_);
     }
   }
 
@@ -1103,7 +1139,8 @@ namespace awkward {
             raw1->identities(),
             raw1->parameters(),
             raw2->toRegularArray(),
-            raw1->size());
+            raw1->size(),
+            raw1->length());
       }
     }
     return out;
@@ -1133,7 +1170,8 @@ namespace awkward {
             raw1->identities(),
             raw1->parameters(),
             raw2->toRegularArray(),
-            raw1->size());
+            raw1->size(),
+            raw1->length());
       }
     }
     return out;
@@ -1222,7 +1260,8 @@ namespace awkward {
         identities_,
         parameters_,
         nextcontent.get()->getitem_next(nexthead, nexttail, advanced),
-        nextsize);
+        nextsize,
+        length());
     }
     else {
       Index64 nextadvanced(len*nextsize);
@@ -1239,7 +1278,8 @@ namespace awkward {
         identities_,
         parameters_,
         nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced),
-        nextsize);
+        nextsize,
+        length());
     }
   }
 
@@ -1282,6 +1322,12 @@ namespace awkward {
                                                nexttail,
                                                nextadvanced),
                array.shape());
+    }
+    else if (size_ == 0) {
+      Index64 nextcarry(0);
+      Index64 nextadvanced(0);
+      ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
+      return nextcontent.get()->getitem_next(nexthead, nexttail, nextadvanced);
     }
     else {
       Index64 nextcarry(len);
@@ -1342,7 +1388,8 @@ namespace awkward {
     return std::make_shared<RegularArray>(Identities::none(),
                                           util::Parameters(),
                                           down,
-                                          jagged.length());
+                                          jagged.length(),
+                                          length());
   }
 
   const ContentPtr
@@ -1391,7 +1438,8 @@ namespace awkward {
     return std::make_shared<RegularArray>(identities,
                                           parameters_,
                                           content,
-                                          size_);
+                                          size_,
+                                          length_);
   }
 
   const ContentPtr
@@ -1404,7 +1452,8 @@ namespace awkward {
     return std::make_shared<RegularArray>(identities,
                                           parameters_,
                                           content,
-                                          size_);
+                                          size_,
+                                          length_);
   }
 
 }

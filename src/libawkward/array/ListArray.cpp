@@ -1642,7 +1642,9 @@ namespace awkward {
 
     return std::make_shared<RegularArray>(Identities::none(),
                                           util::Parameters(),
-                                          down, jagged.length());
+                                          down,
+                                          jagged.length(),
+                                          1);
   }
 
   template <typename T>

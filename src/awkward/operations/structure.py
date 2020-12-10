@@ -1160,15 +1160,12 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
                 for x in inputs:
                     if isinstance(x, ak.layout.Content):
                         if x.purelist_depth < max_depth:
-                            what.append(ak.layout.RegularArray(x, 1))
+                            what.append(ak.layout.RegularArray(x, 1, len(x)))
                         else:
                             what.append(x)
                     else:
-                        what.append(
-                            ak.layout.RegularArray(
-                                ak.layout.NumpyArray(nplike.repeat(x, next_length)), 1
-                            )
-                        )
+                        content = ak.layout.NumpyArray(nplike.repeat(x, next_length))
+                        what.append(ak.layout.RegularArray(content, 1, len(content)))
                 out = what[0].mergemany_as_union(what[1:], 1)
                 return lambda: (out,)
             else:
@@ -1888,7 +1885,7 @@ def fill_none(array, value, highlevel=True):
                 offsets = ak.layout.Index64(nplike.array([0, 0], dtype=np.int64))
                 valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
             else:
-                valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout))
+                valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout), 1)
         else:
             valuelayout = ak.operations.convert.to_layout(
                 [value], allow_record=True, allow_other=False
@@ -2359,7 +2356,7 @@ def cartesian(
         result = ak.layout.RecordArray(outs, recordlookup, parameters=parameters)
         for i in range(len(new_arrays) - 1, -1, -1):
             if i in nested:
-                result = ak.layout.RegularArray(result, len(layouts[i + 1]))
+                result = ak.layout.RegularArray(result, len(layouts[i + 1]), 0)
 
     elif is_partitioned:
         sample = None
@@ -2397,7 +2394,7 @@ def cartesian(
             if i == 0:
                 return layout
             else:
-                return ak.layout.RegularArray(newaxis(layout, i - 1), 1)
+                return ak.layout.RegularArray(newaxis(layout, i - 1), 1, 0)
 
         def getgetfunction1(i):
             def getfunction1(layout, depth):
@@ -3206,7 +3203,7 @@ def size(array, axis=None):
     layout = ak.operations.convert.to_layout(array, allow_record=False)
     if isinstance(layout, ak.partition.PartitionedArray):
         layout = layout.toContent()
-    layout = ak.layout.RegularArray(layout, len(layout))
+    layout = ak.layout.RegularArray(layout, len(layout), 1)
 
     sizes = []
     recurse(layout, axis, sizes)

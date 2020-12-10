@@ -179,7 +179,7 @@ def test_missing():
     content = ak.layout.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
     )
-    regulararray = ak.layout.RegularArray(content, 4)
+    regulararray = ak.layout.RegularArray(content, 4, zeros_length=0)
     assert ak.to_list(regulararray) == [
         [0.0, 1.1, 2.2, 3.3],
         [4.4, 5.5, 6.6, 7.7],
@@ -365,7 +365,7 @@ def test_bool_missing2():
     content = ak.layout.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
     )
-    regulararray = ak.layout.RegularArray(content, 4)
+    regulararray = ak.layout.RegularArray(content, 4, zeros_length=0)
     assert ak.to_list(regulararray) == [
         [0.0, 1.1, 2.2, 3.3],
         [4.4, 5.5, 6.6, 7.7],
@@ -492,7 +492,7 @@ def test_double_jagged():
     content = ak.from_iter(
         [[0, 1, 2, 3], [4, 5], [6, 7, 8], [9, 10, 11, 12, 13]], highlevel=False
     )
-    regulararray = ak.layout.RegularArray(content, 2)
+    regulararray = ak.layout.RegularArray(content, 2, zeros_length=0)
 
     assert ak.to_list(
         regulararray[:, ak.Array([[2, 1, 0], [-1]], check_valid=True)]
@@ -531,8 +531,8 @@ def test_jagged_masked():
 
 def test_regular_regular():
     content = ak.layout.NumpyArray(np.arange(2 * 3 * 5))
-    regulararray1 = ak.layout.RegularArray(content, 5)
-    regulararray2 = ak.layout.RegularArray(regulararray1, 3)
+    regulararray1 = ak.layout.RegularArray(content, 5, zeros_length=0)
+    regulararray2 = ak.layout.RegularArray(regulararray1, 3, zeros_length=0)
 
     assert ak.to_list(
         regulararray2[
@@ -555,8 +555,8 @@ def test_regular_regular():
 
 def test_masked_of_jagged_of_whatever():
     content = ak.layout.NumpyArray(np.arange(2 * 3 * 5))
-    regulararray1 = ak.layout.RegularArray(content, 5)
-    regulararray2 = ak.layout.RegularArray(regulararray1, 3)
+    regulararray1 = ak.layout.RegularArray(content, 5, zeros_length=0)
+    regulararray2 = ak.layout.RegularArray(regulararray1, 3, zeros_length=0)
 
     assert ak.to_list(
         regulararray2[
