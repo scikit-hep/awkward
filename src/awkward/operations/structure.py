@@ -1506,11 +1506,12 @@ def unflatten(array, counts, highlevel=True):
                 "multi-dimensional counts"
                 + ak._util.exception_suffix(__file__)
             )
-        if isinstance(counts_layout, ak._util.optiontypes):
-            mask = is_none(counts_layout, highlevel=False)
-            counts_layout = fill_none(counts_layout, 0, highlevel=False)
+        if not type(counts).__module__.startswith("cupy."):
+            counts = ak.operations.convert.to_numpy(counts, allow_missing=True)
+            mask = ak.nplike.numpy.ma.getmask(counts)
+            counts = ak.nplike.numpy.ma.filled(counts, 0)
         else:
-            mask = None
+            mask = False
         nplike = ak.nplike.of(counts_layout)
         if nplike.asarray(counts_layout).dtype != "int":
             raise ValueError(
@@ -1521,7 +1522,7 @@ def unflatten(array, counts, highlevel=True):
         nplike.cumsum(counts_layout, out=offsets[1:])
         offsets = ak.layout.Index64(offsets)
         out = ak.layout.ListOffsetArray64(offsets, layout)
-        if mask is not None:
+        if mask is not False:
             index = ak.layout.Index8(nplike.asarray(mask).astype(np.int8))
             out = ak.layout.ByteMaskedArray(index, out, valid_when=False)
 
