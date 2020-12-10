@@ -227,6 +227,8 @@ namespace awkward {
 
   Index64
   RegularArray::compact_offsets64(bool start_at_zero) const {
+    if (size_ == 0) throw std::runtime_error("compact_offsets64");
+
     int64_t len = length();
     Index64 out(len + 1);
     struct Error err = kernel::RegularArray_compact_offsets_64(
@@ -240,6 +242,8 @@ namespace awkward {
 
   const ContentPtr
   RegularArray::broadcast_tooffsets64(const Index64& offsets) const {
+    if (size_ == 0) throw std::runtime_error("broadcast_tooffsets64");
+
     if (offsets.length() == 0  ||  offsets.getitem_at_nowrap(0) != 0) {
       throw std::invalid_argument(
         std::string("broadcast_tooffsets64 can only be used with offsets that start at 0")
@@ -313,6 +317,8 @@ namespace awkward {
 
   void
   RegularArray::setidentities(const IdentitiesPtr& identities) {
+    if (size_ == 0) throw std::runtime_error("setidentities with arg");
+
     if (identities.get() == nullptr) {
       content_.get()->setidentities(identities);
     }
@@ -381,6 +387,8 @@ namespace awkward {
 
   void
   RegularArray::setidentities() {
+    if (size_ == 0) throw std::runtime_error("setidentities");
+
     if (length() < kMaxInt32) {
       IdentitiesPtr newidentities =
         std::make_shared<Identities32>(Identities::newref(),
@@ -420,6 +428,8 @@ namespace awkward {
 
   const FormPtr
   RegularArray::form(bool materialize) const {
+    if (size_ == 0) throw std::runtime_error("form");
+
     return std::make_shared<RegularForm>(identities_.get() != nullptr,
                                          parameters_,
                                          FormKey(nullptr),
@@ -614,6 +624,8 @@ namespace awkward {
 
   const ContentPtr
   RegularArray::carry(const Index64& carry, bool allow_lazy) const {
+    if (size_ == 0) throw std::runtime_error("carry");
+
     Index64 nextcarry(carry.length()*size_);
 
     struct Error err = kernel::RegularArray_getitem_carry_64(
@@ -678,11 +690,15 @@ namespace awkward {
   RegularArray::num(int64_t axis, int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
+      if (size_ == 0) throw std::runtime_error("num posaxis == depth");
+
       Index64 out(1);
       out.setitem_at_nowrap(0, length());
       return NumpyArray(out).getitem_at_nowrap(0);
     }
     else if (posaxis == depth + 1) {
+      if (size_ == 0) throw std::runtime_error("num posaxis == depth + 1");
+
       Index64 tonum(length());
       struct Error err = kernel::RegularArray_num_64(
         tonum.ptr_lib(),
@@ -693,6 +709,8 @@ namespace awkward {
       return std::make_shared<NumpyArray>(tonum);
     }
     else {
+      if (size_ == 0) throw std::runtime_error("num else");
+
       ContentPtr next = content_.get()->num(posaxis, depth + 1);
       return std::make_shared<RegularArray>(Identities::none(),
                                             util::Parameters(),
@@ -703,11 +721,15 @@ namespace awkward {
 
   const std::pair<Index64, ContentPtr>
   RegularArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+    if (size_ == 0) throw std::runtime_error("offsets_and_flattened");
+
     return toListOffsetArray64(true).get()->offsets_and_flattened(axis, depth);
   }
 
   bool
   RegularArray::mergeable(const ContentPtr& other, bool mergebool) const {
+    if (size_ == 0) throw std::runtime_error("mergeable");
+
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
       return mergeable(raw->array(), mergebool);
     }
@@ -806,6 +828,8 @@ namespace awkward {
 
   const ContentPtr
   RegularArray::fillna(const ContentPtr& value) const {
+    if (size_ == 0) throw std::runtime_error("fillna");
+
     return std::make_shared<RegularArray>(identities_,
                                           parameters_,
                                           content().get()->fillna(value),
@@ -816,9 +840,13 @@ namespace awkward {
   RegularArray::rpad(int64_t target, int64_t axis, int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
+      if (size_ == 0) throw std::runtime_error("rpad posaxis == depth");
+
       return rpad_axis0(target, false);
     }
     else if (posaxis == depth + 1) {
+      if (size_ == 0) throw std::runtime_error("rpad posaxis == depth + 1");
+
       if (target < size_) {
         return shallow_copy();
       }
@@ -827,6 +855,8 @@ namespace awkward {
       }
     }
     else {
+      if (size_ == 0) throw std::runtime_error("rpad else");
+
       return std::make_shared<RegularArray>(
         Identities::none(),
         parameters_,
@@ -841,9 +871,13 @@ namespace awkward {
                               int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
+      if (size_ == 0) throw std::runtime_error("rpad_and_clip posaxis == depth");
+
       return rpad_axis0(target, true);
     }
     else if (posaxis == depth + 1) {
+      if (size_ == 0) throw std::runtime_error("rpad_and_clip posaxis == depth + 1");
+
       Index64 index(length() * target);
       struct Error err = kernel::RegularArray_rpad_and_clip_axis1_64(
         kernel::lib::cpu,   // DERIVE
@@ -864,6 +898,8 @@ namespace awkward {
         target);
     }
     else {
+      if (size_ == 0) throw std::runtime_error("rpad_and_clip else");
+
       return std::make_shared<RegularArray>(
         Identities::none(),
         parameters_,
@@ -891,6 +927,8 @@ namespace awkward {
                                                                   keepdims);
 
     if (!content_.get()->dimension_optiontype()) {
+      if (size_ == 0) throw std::runtime_error("reduce_next optiontype");
+
       std::pair<bool, int64_t> branchdepth = branch_depth();
 
       bool convert_shallow = (negaxis == branchdepth.second);
@@ -950,9 +988,13 @@ namespace awkward {
   RegularArray::localindex(int64_t axis, int64_t depth) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
+      if (size_ == 0) throw std::runtime_error("localindex posaxis == depth");
+
       return localindex_axis0();
     }
     else if (posaxis == depth + 1) {
+      if (size_ == 0) throw std::runtime_error("localindex posaxis == depth + 1");
+
       Index64 localindex(length()*size_);
       struct Error err = kernel::RegularArray_localindex_64(
         kernel::lib::cpu,   // DERIVE
@@ -967,6 +1009,8 @@ namespace awkward {
         size_);
     }
     else {
+      if (size_ == 0) throw std::runtime_error("localindex else");
+
       return std::make_shared<RegularArray>(
         identities_,
         util::Parameters(),
@@ -990,10 +1034,14 @@ namespace awkward {
 
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
+      if (size_ == 0) throw std::runtime_error("combinations posaxis == depth");
+
       return combinations_axis0(n, replacement, recordlookup, parameters);
     }
 
     else if (posaxis == depth + 1) {
+      if (size_ == 0) throw std::runtime_error("combinations posaxis == depth + 1");
+
       int64_t size = size_;
       if (replacement) {
         size += (n - 1);
@@ -1064,6 +1112,8 @@ namespace awkward {
     }
 
     else {
+      if (size_ == 0) throw std::runtime_error("combinations else");
+
       ContentPtr next = content_.get()
                         ->getitem_range_nowrap(0, length()*size_).get()
                         ->combinations(n,
@@ -1143,6 +1193,8 @@ namespace awkward {
   RegularArray::getitem_next(const SliceAt& at,
                              const Slice& tail,
                              const Index64& advanced) const {
+    if (size_ == 0) throw std::runtime_error("getitem_next at");
+
     if (advanced.length() != 0) {
       throw std::runtime_error(
         std::string("RegularArray::getitem_next(SliceAt): advanced.length() != 0")
@@ -1169,6 +1221,8 @@ namespace awkward {
   RegularArray::getitem_next(const SliceRange& range,
                              const Slice& tail,
                              const Index64& advanced) const {
+    if (size_ == 0) throw std::runtime_error("getitem_next range");
+
     int64_t len = length();
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -1225,6 +1279,9 @@ namespace awkward {
         nextsize);
     }
     else {
+      if (size_ == 0) throw std::runtime_error("getitem_next range spreadadvanced (size == 0)");
+      if (nextsize == 0) throw std::runtime_error("getitem_next range spreadadvanced (nextsize == 0)");
+
       Index64 nextadvanced(len*nextsize);
 
       struct Error err = kernel::RegularArray_getitem_next_range_spreadadvanced_64(
@@ -1247,6 +1304,8 @@ namespace awkward {
   RegularArray::getitem_next(const SliceArray64& array,
                              const Slice& tail,
                              const Index64& advanced) const {
+    if (size_ == 0) throw std::runtime_error("getitem_next array");
+
     int64_t len = length();
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
@@ -1262,6 +1321,8 @@ namespace awkward {
     util::handle_error(err, classname(), identities_.get());
 
     if (advanced.length() == 0) {
+      if (size_ == 0) throw std::runtime_error("getitem_next array nextadvanced");
+
       Index64 nextcarry(len*flathead.length());
       Index64 nextadvanced(len*flathead.length());
 
@@ -1284,6 +1345,8 @@ namespace awkward {
                array.shape());
     }
     else {
+      if (size_ == 0) throw std::runtime_error("getitem_next array notadvanced");
+
       Index64 nextcarry(len);
       Index64 nextadvanced(len);
 
@@ -1307,6 +1370,8 @@ namespace awkward {
   RegularArray::getitem_next(const SliceJagged64& jagged,
                              const Slice& tail,
                              const Index64& advanced) const {
+    if (size_ == 0) throw std::runtime_error("getitem_next jagged");
+
     if (advanced.length() != 0) {
       throw std::invalid_argument(
         std::string("cannot mix jagged slice with NumPy-style advanced indexing")
