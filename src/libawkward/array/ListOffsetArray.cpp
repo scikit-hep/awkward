@@ -348,8 +348,6 @@ namespace awkward {
       offsets_.length());
     util::handle_error(err, classname(), identities_.get());
 
-    if (size == 0) throw std::runtime_error("ListOffsetArray::toRegularArray");
-
     return std::make_shared<RegularArray>(identities_,
                                           parameters_,
                                           content,
@@ -1188,8 +1186,6 @@ namespace awkward {
                                                util::Parameters(),
                                                outindex,
                                                content());
-
-      if (target == 0) throw std::runtime_error("ListOffsetArray::rpad_and_clip");
 
       return std::make_shared<RegularArray>(Identities::none(),
                                             parameters_,
