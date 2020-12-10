@@ -28,18 +28,21 @@ that exhaustively checks validity in its constructor (see
         def __init__(self, content, size):
             assert isinstance(content, Content)
             assert isinstance(size, int)
-            assert size > 0
+            assert size >= 0
             self.content = content
             self.size = size
 
         @staticmethod
         def random(minlen, choices):
-            size = random_length(1, 5)
+            size = random_length(0, 5)
             return RegularArray(
                 random.choice(choices).random(random_length(minlen) * size, choices), size)
 
         def __len__(self):
-            return len(self.content) // self.size   # floor division
+            if self.size == 0:
+                return 0
+            else:
+                return len(self.content) // self.size   # floor division
 
         def __getitem__(self, where):
             if isinstance(where, int):

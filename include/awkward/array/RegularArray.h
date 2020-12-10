@@ -194,7 +194,7 @@ namespace awkward {
 
     /// @copydoc Content::length()
     ///
-    /// Equal to `floor(len(content) / size)`.
+    /// Equal to `floor(len(content) / size)` or `0` if `size == 0`.
     int64_t
       length() const override;
 

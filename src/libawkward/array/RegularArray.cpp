@@ -661,9 +661,9 @@ namespace awkward {
 
   const std::string
   RegularArray::validityerror(const std::string& path) const {
-    if (size_ < 1) {
+    if (size_ < 0) {
       return (std::string("at ") + path + std::string(" (") + classname()
-              + std::string("): ") + std::string("size < 1")
+              + std::string("): ") + std::string("size < 0")
               + FILENAME(__LINE__));
     }
     return content_.get()->validityerror(path + std::string(".content"));
