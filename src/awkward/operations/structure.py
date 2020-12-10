@@ -1465,12 +1465,16 @@ def unflatten(array, counts, highlevel=True):
     Args:
         array: Data to create an array with an additional level from.
         counts (int or array): Number of elements the new level should have.
+            This is either an int or a one dimensional array of ints.
+            In the former case the additional level will be regularly sized,
+            similar to if counts were an array full with this value.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
     Returns an array with an additional level of nesting. This is roughly the
     inverse of #ak.flatten, where `counts` were obtained by #ak.num (both with
     `axis=1`).
+
     For example,
 
         >>> original = ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]])
@@ -1487,26 +1491,39 @@ def unflatten(array, counts, highlevel=True):
         array, allow_record=False, allow_other=False
     )
     if isinstance(counts, int):
+        if counts < 0 or counts > len(layout):
+            raise ValueError(
+                "too large counts for array or negative counts"
+                + ak._util.exception_suffix(__file__)
+            )
         out = ak.layout.RegularArray(layout, counts)
     else:
         counts_layout = ak.operations.convert.to_layout(
             counts, allow_record=False, allow_other=False
         )
-        if isinstance(counts_layout, (
-            ak.layout.IndexedOptionArray64, ak.layout.IndexedOptionArray32
-        )):
-            mask_layout = counts_layout
-            counts_layout = mask_layout.content
+        if counts_layout.purelist_depth != 1:
+            raise ValueError(
+                "multi-dimensional counts"
+                + ak._util.exception_suffix(__file__)
+            )
+        if isinstance(counts_layout, ak._util.optiontypes):
+            mask = is_none(counts_layout, highlevel=False)
+            counts_layout = fill_none(counts_layout, 0, highlevel=False)
         else:
-            mask_layout = None
+            mask = None
         nplike = ak.nplike.of(counts_layout)
+        if nplike.asarray(counts_layout).dtype != "int":
+            raise ValueError(
+                "non-integer counts" + ak._util.exception_suffix(__file__)
+            )
         offsets = nplike.empty(len(counts_layout) + 1, np.int64)
         offsets[0] = 0
         nplike.cumsum(counts_layout, out=offsets[1:])
         offsets = ak.layout.Index64(offsets)
         out = ak.layout.ListOffsetArray64(offsets, layout)
-        if mask_layout is not None:
-            out = mask_layout.__class__(mask_layout.index, out)
+        if mask is not None:
+            index = ak.layout.Index8(nplike.asarray(mask).astype(np.int8))
+            out = ak.layout.ByteMaskedArray(index, out, valid_when=False)
 
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
