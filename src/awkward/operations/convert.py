@@ -3193,16 +3193,19 @@ def _form_to_layout(
             container,
             partnum,
             key_format,
-            len(mask),
+            length,
             lazy_cache,
             lazy_cache_key,
         )
+
+        if length is None:
+            length = len(content)
 
         return ak.layout.BitMaskedArray(
             mask,
             content,
             form.valid_when,
-            len(content),
+            length,
             form.lsb_order,
             identities,
             parameters,
@@ -3218,12 +3221,22 @@ def _form_to_layout(
             raw_mask.view(_index_form_to_dtype[form.mask])
         )
 
+        if length is None:
+            length = len(mask)
+        elif length != len(mask):
+            raise ValueError(
+                "ByteMaskedArray length mismatch: expected {0}, observed {1}".format(
+                    length, len(mask)
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+
         content = _form_to_layout(
             form.content,
             container,
             partnum,
             key_format,
-            len(mask),
+            length,
             lazy_cache,
             lazy_cache_key,
         )
@@ -3233,6 +3246,13 @@ def _form_to_layout(
         )
 
     elif isinstance(form, ak.forms.EmptyForm):
+        if length is not None and length != 0:
+            raise ValueError(
+                "EmptyArray length mismatch: expected {0}, observed {1}".format(
+                    length, 0
+                )
+                + ak._util.exception_suffix(__file__)
+            )
         return ak.layout.EmptyArray(identities, parameters)
 
     elif isinstance(form, ak.forms.IndexedForm):
@@ -3244,6 +3264,16 @@ def _form_to_layout(
         index = _index_form_to_index[form.index](
             raw_index.view(_index_form_to_dtype[form.index])
         )
+
+        if length is None:
+            length = len(index)
+        elif length != len(index):
+            raise ValueError(
+                "IndexedArray length mismatch: expected {0}, observed {1}".format(
+                    length, len(index)
+                )
+                + ak._util.exception_suffix(__file__)
+            )
 
         content = _form_to_layout(
             form.content,
@@ -3268,6 +3298,16 @@ def _form_to_layout(
         index = _index_form_to_index[form.index](
             raw_index.view(_index_form_to_dtype[form.index])
         )
+
+        if length is None:
+            length = len(index)
+        elif length != len(index):
+            raise ValueError(
+                "IndexedOptionArray length mismatch: expected {0}, observed {1}".format(
+                    length, len(index)
+                )
+                + ak._util.exception_suffix(__file__)
+            )
 
         content = _form_to_layout(
             form.content,
@@ -3301,6 +3341,16 @@ def _form_to_layout(
             raw_stops.view(_index_form_to_dtype[form.stops])
         )
 
+        if length is None:
+            length = len(starts)
+        elif length != len(starts):
+            raise ValueError(
+                "ListArray length mismatch: expected {0}, observed {1}".format(
+                    length, len(starts)
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+
         array_starts = numpy.asarray(starts)
         array_stops = numpy.asarray(stops)[: len(array_starts)]
         array_stops = array_stops[array_starts != array_stops]
@@ -3328,6 +3378,16 @@ def _form_to_layout(
             raw_offsets.view(_index_form_to_dtype[form.offsets])
         )
 
+        if length is None:
+            length = len(offsets) - 1
+        elif length != len(offsets) - 1:
+            raise ValueError(
+                "ListOffsetArray length mismatch: expected {0}, observed {1}".format(
+                    length, len(offsets) - 1
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+
         content = _form_to_layout(
             form.content,
             container,
@@ -3354,7 +3414,11 @@ def _form_to_layout(
             dtype, inner_shape = dtype_inner_shape, ()
         else:
             dtype, inner_shape = dtype_inner_shape.subdtype
-        shape = (-1,) + inner_shape
+
+        if length is None:
+            shape = (-1,) + inner_shape
+        else:
+            shape = (length,) + inner_shape
 
         array = raw_array.view(dtype).reshape(shape)
 
@@ -3386,6 +3450,14 @@ def _form_to_layout(
 
         if length is None:
             length = minlength
+        elif minlength is not None and length > minlength:
+            raise ValueError(
+                "RecordArray length mismatch: expected {0}, minimum content is {1}".format(
+                    length, minlength
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+
         return ak.layout.RecordArray(
             contents, None if form.istuple else keys, length, identities, parameters,
         )
@@ -3425,6 +3497,16 @@ def _form_to_layout(
         index = _index_form_to_index[form.index](
             raw_index.view(_index_form_to_dtype[form.index])
         )
+
+        if length is None:
+            length = len(tags)
+        elif length != len(tags):
+            raise ValueError(
+                "UnionArray length mismatch: expected {0}, observed {1}".format(
+                    length, len(tags)
+                )
+                + ak._util.exception_suffix(__file__)
+            )
 
         contents = []
         for i, content_form in enumerate(form.contents):
@@ -3635,7 +3717,7 @@ def from_buffers(
                     + ak._util.exception_suffix(__file__)
                 ),
                 "1.1.0",
-                "January 1, 2021",
+                "February 1, 2021",
             )
 
         args = (form, container, str(partition_start), key_format, length)
@@ -3736,7 +3818,7 @@ def to_arrayset(
             is sorted or lookup performance depends on alphabetical order.
 
     **Deprecated:** This will be removed in `awkward>=1.1.0` (target date:
-    January 1, 2021). Use #ak.to_buffers instead: the arguments and return
+    February 1, 2021). Use #ak.to_buffers instead: the arguments and return
     values have changed.
 
     Decomposes an Awkward Array into a Form and a collection of arrays, so
@@ -3845,7 +3927,7 @@ def to_arrayset(
             + ak._util.exception_suffix(__file__)
         ),
         "1.1.0",
-        "January 1, 2021",
+        "February 1, 2021",
     )
 
     layout = to_layout(array, allow_record=False, allow_other=False)
@@ -3980,7 +4062,7 @@ def from_arrayset(
             high-level.
 
     **Deprecated:** This will be removed in `awkward>=1.1.0` (target date:
-    January 1, 2021). Use #ak.from_buffers instead: the arguments have changed.
+    February 1, 2021). Use #ak.from_buffers instead: the arguments have changed.
 
     Reconstructs an Awkward Array from a Form and a collection of arrays, so
     that data can be losslessly read from file formats and storage devices that
@@ -4019,7 +4101,7 @@ def from_arrayset(
             + ak._util.exception_suffix(__file__)
         ),
         "1.1.0",
-        "January 1, 2021",
+        "February 1, 2021",
     )
 
     if num_partitions is None:

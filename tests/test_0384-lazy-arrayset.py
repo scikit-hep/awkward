@@ -66,7 +66,9 @@ def test_lazy_buffers():
 
     canary = Canary()
     key_format = "kitty-{form_key}-{attribute}"
-    form, length, container = ak.to_buffers(array, container=canary, key_format=key_format)
+    form, length, container = ak.to_buffers(
+        array, container=canary, key_format=key_format
+    )
     assert not any(op[0] == "get" for op in canary.ops)
     canary.ops = []
 
@@ -115,7 +117,10 @@ def test_lazy_buffers():
     cache.clear()
 
     assert ak.to_list(out.masked) == [None, 4, 4]
-    assert set(canary.ops) == {("get", "kitty-node17-index"), ("get", "kitty-node18-data")}
+    assert set(canary.ops) == {
+        ("get", "kitty-node17-index"),
+        ("get", "kitty-node18-data"),
+    }
     assert set(cache) == {"hello", "hello(kitty-node17-virtual)"}
     canary.ops = []
     cache.clear()
