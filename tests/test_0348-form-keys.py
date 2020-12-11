@@ -15,6 +15,8 @@ import awkward as ak  # noqa: F401
 
 
 def test_numpyarray():
+    ak.deprecations_as_errors = False
+
     assert ak.from_arrayset(*ak.to_arrayset([1, 2, 3, 4, 5])).tolist() == [
         1,
         2,
@@ -32,6 +34,8 @@ def test_numpyarray():
 
 
 def test_listoffsetarray():
+    ak.deprecations_as_errors = False
+
     assert ak.from_arrayset(*ak.to_arrayset([[1, 2, 3], [], [4, 5]])).tolist() == [
         [1, 2, 3],
         [],
@@ -49,6 +53,8 @@ def test_listoffsetarray():
 
 
 def test_listarray():
+    ak.deprecations_as_errors = False
+
     listoffsetarray = ak.Array([[1, 2, 3], [], [4, 5]]).layout
     listarray = ak.layout.ListArray64(
         listoffsetarray.starts, listoffsetarray.stops, listoffsetarray.content
@@ -66,6 +72,8 @@ def test_listarray():
 
 
 def test_indexedoptionarray():
+    ak.deprecations_as_errors = False
+
     assert ak.from_arrayset(*ak.to_arrayset([1, 2, 3, None, None, 5])).tolist() == [
         1,
         2,
@@ -80,6 +88,8 @@ def test_indexedoptionarray():
 
 
 def test_indexedarray():
+    ak.deprecations_as_errors = False
+
     content = ak.Array([0.0, 1.1, 2.2, 3.3, 4.4]).layout
     index = ak.layout.Index64(np.array([3, 1, 1, 4, 2], dtype=np.int64))
     indexedarray = ak.layout.IndexedArray64(index, content)
@@ -100,6 +110,8 @@ def test_indexedarray():
 
 
 def test_emptyarray():
+    ak.deprecations_as_errors = False
+
     assert ak.from_arrayset(*ak.to_arrayset([])).tolist() == []
     assert ak.from_arrayset(*ak.to_arrayset([[], [], []])).tolist() == [[], [], []]
 
@@ -112,6 +124,8 @@ def test_emptyarray():
 
 
 def test_bytemaskedarray():
+    ak.deprecations_as_errors = False
+
     content = ak.Array([0.0, 1.1, 2.2, 3.3, 4.4]).layout
     mask = ak.layout.Index8(np.array([False, True, True, False, False], dtype=np.int8))
     bytemaskedarray = ak.layout.ByteMaskedArray(mask, content, True)
@@ -132,6 +146,8 @@ def test_bytemaskedarray():
 
 
 def test_bitmaskedarray():
+    ak.deprecations_as_errors = False
+
     content = ak.Array([0.0, 1.1, 2.2, 3.3, 4.4]).layout
     mask = ak.layout.IndexU8(
         np.packbits(np.array([False, True, True, False, False], dtype=np.int8))
@@ -154,6 +170,8 @@ def test_bitmaskedarray():
 
 
 def test_recordarray():
+    ak.deprecations_as_errors = False
+
     assert ak.from_arrayset(
         *ak.to_arrayset([(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])])
     ).tolist() == [(1.1, [1]), (2.2, [1, 2]), (3.3, [1, 2, 3])]
@@ -189,6 +207,8 @@ def test_recordarray():
 
 
 def test_record():
+    ak.deprecations_as_errors = False
+
     assert pickle.loads(
         pickle.dumps(ak.Record({"x": 2.2, "y": [1, 2]}), -1)
     ).tolist() == {"x": 2.2, "y": [1, 2]}
@@ -207,6 +227,8 @@ def test_record():
 
 
 def test_regulararray():
+    ak.deprecations_as_errors = False
+
     content = ak.Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]).layout
     regulararray = ak.layout.RegularArray(content, 3, zeros_length=0)
     assert ak.from_arrayset(*ak.to_arrayset(regulararray)).tolist() == [
@@ -224,6 +246,8 @@ def test_regulararray():
 
 
 def test_unionarray():
+    ak.deprecations_as_errors = False
+
     assert ak.from_arrayset(*ak.to_arrayset([[1, 2, 3], [], 4, 5])).tolist() == [
         [1, 2, 3],
         [],
@@ -239,6 +263,8 @@ def test_unionarray():
 
 
 def test_unmaskedarray():
+    ak.deprecations_as_errors = False
+
     content = ak.Array([1, 2, 3, 4, 5]).layout
     unmaskedarray = ak.layout.UnmaskedArray(content)
     assert ak.from_arrayset(*ak.to_arrayset(unmaskedarray)).tolist() == [1, 2, 3, 4, 5]
@@ -252,6 +278,8 @@ def test_unmaskedarray():
 
 
 def test_partitioned():
+    ak.deprecations_as_errors = False
+
     array = ak.repartition(ak.Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 3)
 
     form, container, num_partitions = ak.to_arrayset(array, partition_first=True)
@@ -298,6 +326,8 @@ def test_partitioned():
 
 
 def test_lazy():
+    ak.deprecations_as_errors = False
+
     array = ak.Array([1, 2, 3, 4, 5])
 
     form, container, num_partitions = ak.to_arrayset(array)
@@ -308,6 +338,8 @@ def test_lazy():
 
 
 def test_lazy_partitioned():
+    ak.deprecations_as_errors = False
+
     array = ak.repartition(ak.Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 3)
     form, container, num_partitions = ak.to_arrayset(array)
     assert num_partitions == 4

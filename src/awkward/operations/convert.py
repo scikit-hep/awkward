@@ -2734,7 +2734,7 @@ def to_buffers(
             `attribute` is a hard-coded string representing the buffer's function
             (e.g. `"data"`, `"offsets"`, `"index"`).
 
-    Decomposes an Awkward Array into a Form and a collection of Python buffers,
+    Decomposes an Awkward Array into a Form and a collection of memory buffers,
     so that data can be losslessly written to file formats and storage devices
     that only map names to binary blobs (such as a filesystem directory).
 
@@ -2799,9 +2799,13 @@ def to_buffers(
         >>> container = {}
         >>> lengths = []
         >>> form, length, _ = ak.to_buffers(ak.Array([[1, 2, 3], [], [4, 5]]), container, 0)
+        >>> lengths.append(length)
         >>> form, length, _ = ak.to_buffers(ak.Array([[6, 7, 8, 9]]), container, 1)
+        >>> lengths.append(length)
         >>> form, length, _ = ak.to_buffers(ak.Array([[], [], []]), container, 2)
+        >>> lengths.append(length)
         >>> form, length, _ = ak.to_buffers(ak.Array([[10]]), container, 3)
+        >>> lengths.append(length)
         >>> form
         {
             "class": "ListOffsetArray64",
@@ -2815,6 +2819,8 @@ def to_buffers(
             },
             "form_key": "node0"
         }
+        >>> lengths
+        [3, 1, 3, 1]
         >>> container
         {'part0-node0-offsets': array([0, 3, 3, 5], dtype=int64),
          'part0-node1-data': array([1, 2, 3, 4, 5]),
@@ -2857,10 +2863,24 @@ def to_buffers(
             )
 
     if isinstance(form_key, str):
-        form_key = lambda **v: form_key.format(**v)  # noqa: E731
+
+        def generate_form_key(form_key):
+            def fk(**v):
+                return form_key.format(**v)
+
+            return fk
+
+        form_key = generate_form_key(form_key)
 
     if isinstance(key_format, str):
-        key_format = lambda **v: key_format.format(**v)  # noqa: E731
+
+        def generate_key_format(key_format):
+            def kf(**v):
+                return key_format.format(**v)
+
+            return kf
+
+        key_format = generate_key_format(key_format)
 
     num_form_keys = [0]
 
@@ -2980,9 +3000,7 @@ def to_buffers(
             ),
         ):
             fk = form_key(id=str(key_index), layout=layout)
-            key = key_format(
-                form_key=fk, attribute="offsets", partition=str(part)
-            )
+            key = key_format(form_key=fk, attribute="offsets", partition=str(part))
             container[key] = little_endian(numpy.asarray(layout.offsets))
             return ak.forms.ListOffsetForm(
                 index_form(layout.offsets),
@@ -3111,13 +3129,7 @@ _index_form_to_dtype = _index_form_to_index = _form_to_layout_class = None
 
 
 def _form_to_layout(
-    form,
-    container,
-    partnum,
-    key_format,
-    length,
-    lazy_cache,
-    lazy_cache_key,
+    form, container, partnum, key_format, length, lazy_cache, lazy_cache_key,
 ):
     global _index_form_to_dtype, _index_form_to_index, _form_to_layout_class
 
@@ -3290,7 +3302,7 @@ def _form_to_layout(
         )
 
         array_starts = numpy.asarray(starts)
-        array_stops = numpy.asarray(stops)[:len(array_starts)]
+        array_stops = numpy.asarray(stops)[: len(array_starts)]
         array_stops = array_stops[array_starts != array_stops]
         content = _form_to_layout(
             form.content,
@@ -3372,8 +3384,10 @@ def _form_to_layout(
                 minlength = min(minlength, len(content))
             contents.append(content)
 
+        if length is None:
+            length = minlength
         return ak.layout.RecordArray(
-            contents, None if form.istuple else keys, minlength, identities, parameters,
+            contents, None if form.istuple else keys, length, identities, parameters,
         )
 
     elif isinstance(form, ak.forms.RegularForm):
@@ -3457,7 +3471,9 @@ def _form_to_layout(
         generator = ak.layout.ArrayGenerator(
             _form_to_layout, args, form=form.form, length=length,
         )
-        node_cache_key = key_format(form_key=form.form.form_key, attribute="virtual", partition=partnum)
+        node_cache_key = key_format(
+            form_key=form.form.form_key, attribute="virtual", partition=partnum
+        )
         return ak.layout.VirtualArray(
             generator, lazy_cache, "{0}({1})".format(lazy_cache_key, node_cache_key)
         )
@@ -3552,6 +3568,30 @@ def from_buffers(
             a low-level #ak.layout.Content subclass.
         behavior (bool): Custom #ak.behavior for the output array, if
             high-level.
+
+    Reconstitutes an Awkward Array from a Form, length, and a collection of memory
+    buffers, so that data can be losslessly read from file formats and storage
+    devices that only map names to binary blobs (such as a filesystem directory).
+
+    The first three arguments of this function are the return values of
+    #ak.to_buffers, so a full round-trip is
+
+        >>> reconstituted = ak.from_buffers(*ak.to_buffers(original))
+
+    The `container` argument lets you specify your own Mapping, which might be
+    an interface to some storage format or device (e.g. h5py). It's okay if
+    the `container` dropped NumPy's `dtype` and `shape` information, leaving
+    raw bytes, since `dtype` and `shape` can be reconstituted from the
+    #ak.forms.NumpyForm.
+
+    The `key_format` should be the same as the one used in #ak.to_buffers.
+
+    The arguments that begin with `lazy_` are only needed if `lazy` is True.
+    The `lazy_cache` and `lazy_cache_key` determine how the array or its
+    partitions are cached after being read from the `container` (in a no-eviction
+    dict attached to the output #ak.Array as `cache` if not specified).
+
+    See #ak.to_buffers for examples.
     """
 
     if isinstance(form, str) or (ak._util.py27 and isinstance(form, ak._util.unicode)):
@@ -3560,7 +3600,14 @@ def from_buffers(
         form = ak.forms.Form.fromjson(json.dumps(form))
 
     if isinstance(key_format, str):
-        key_format = lambda **v: key_format.format(**v)  # noqa: E731
+
+        def generate_key_format(key_format):
+            def kf(**v):
+                return key_format.format(**v)
+
+            return kf
+
+        key_format = generate_key_format(key_format)
 
     hold_cache = None
     if lazy:
@@ -3582,7 +3629,14 @@ def from_buffers(
 
     if length is None or isinstance(length, (numbers.Integral, np.integer)):
         if length is None:
-            print("FIXME: remember to deprecate")
+            ak._util.deprecate(
+                TypeError(
+                    "length must be an integer or an iterable of integers"
+                    + ak._util.exception_suffix(__file__)
+                ),
+                "1.1.0",
+                "January 1, 2021",
+            )
 
         args = (form, container, str(partition_start), key_format, length)
 
@@ -3681,8 +3735,9 @@ def to_arrayset(
             at the end of the keys. This can be relevant if the `container`
             is sorted or lookup performance depends on alphabetical order.
 
-    **Deprecated:** this will be removed in `awkward>=1.1.0` after January 1,
-    2021. Use #ak.to_buffers instead: the arguments and return values have changed.
+    **Deprecated:** This will be removed in `awkward>=1.1.0` (target date:
+    January 1, 2021). Use #ak.to_buffers instead: the arguments and return
+    values have changed.
 
     Decomposes an Awkward Array into a Form and a collection of arrays, so
     that data can be losslessly written to file formats and storage devices
@@ -3784,7 +3839,14 @@ def to_arrayset(
     See also #ak.from_arrayset.
     """
 
-    print("FIXME: remember to deprecate")
+    ak._util.deprecate(
+        TypeError(
+            "ak.to_arrayset is deprecated; use ak.to_buffers instead"
+            + ak._util.exception_suffix(__file__)
+        ),
+        "1.1.0",
+        "January 1, 2021",
+    )
 
     layout = to_layout(array, allow_record=False, allow_other=False)
 
@@ -3917,8 +3979,8 @@ def from_arrayset(
         behavior (bool): Custom #ak.behavior for the output array, if
             high-level.
 
-    **Deprecated:** this will be removed in `awkward>=1.1.0` after January 1,
-    2021. Use #ak.from_buffers instead: the arguments have changed.
+    **Deprecated:** This will be removed in `awkward>=1.1.0` (target date:
+    January 1, 2021). Use #ak.from_buffers instead: the arguments have changed.
 
     Reconstructs an Awkward Array from a Form and a collection of arrays, so
     that data can be losslessly read from file formats and storage devices that
@@ -3951,7 +4013,14 @@ def from_arrayset(
     See #ak.to_arrayset for examples.
     """
 
-    print("FIXME: remember to deprecate")
+    ak._util.deprecate(
+        TypeError(
+            "ak.from_arrayset is deprecated; use ak.from_buffers instead"
+            + ak._util.exception_suffix(__file__)
+        ),
+        "1.1.0",
+        "January 1, 2021",
+    )
 
     if isinstance(partition_format, str) or (
         ak._util.py27 and isinstance(partition_format, ak._util.unicode)

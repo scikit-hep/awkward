@@ -22,6 +22,8 @@ class Canary(dict):
 
 
 def test_lazy_arrayset():
+    ak.deprecations_as_errors = False
+
     array = ak.from_json(
         """
     [
@@ -122,6 +124,8 @@ def test_lazy_arrayset():
 
 
 def test_longer_than_expected():
+    ak.deprecations_as_errors = False
+
     array = ak.Array(
         ak.layout.ListOffsetArray64(
             ak.layout.Index64([0, 2, 4]),
