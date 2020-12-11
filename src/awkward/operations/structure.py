@@ -2853,7 +2853,7 @@ def partitioned(arrays, highlevel=True, behavior=None):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content or #ak.partition.PartitionedArray
             subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Returns the logical concatenation of `arrays` as a partitioned array.
@@ -2999,7 +2999,7 @@ def virtual(
             #ak.layout.VirtualArray node that is created by this operation.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Creates a virtual array, an array that is created on demand.

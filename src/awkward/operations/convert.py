@@ -42,7 +42,7 @@ def from_numpy(
             which some functions do not recognize.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Converts a NumPy array into an Awkward Array.
@@ -361,7 +361,7 @@ def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
             If the array is one-dimensional, this has no effect.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Converts a CuPy array into an Awkward Array.
@@ -588,7 +588,7 @@ def to_kernels(array, kernels, highlevel=True, behavior=None):
             `libawkward-cuda-kernels.so`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Converts an array from `"cpu"`, `"cuda"`, or `"mixed"` kernels to `"cpu"`
@@ -635,7 +635,7 @@ def from_iter(
         iterable (Python iterable): Data to convert into an Awkward Array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         allow_record (bool): If True, the outermost element may be a record
             (returning #ak.Record or #ak.layout.Record type, depending on
@@ -798,7 +798,7 @@ def from_json(
             will be interpreted as floating-point negative infinity values.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         initial (int): Initial size (in bytes) of buffers used by
             #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
@@ -977,7 +977,7 @@ def from_awkward0(
             which some functions do not recognize.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Converts an array from Awkward 0.x to Awkward 1.x.
@@ -2124,7 +2124,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             Awkward Array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Converts an Apache Arrow array into an Awkward Array.
@@ -2598,7 +2598,7 @@ def from_parquet(
             VirtualArrays. If None, a process-unique string is constructed.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         options: All other options are passed to pyarrow.parquet.ParquetFile.
 
@@ -3648,7 +3648,7 @@ def from_buffers(
             VirtualArrays. If None, a process-unique string is constructed.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Reconstitutes an Awkward Array from a Form, length, and a collection of memory
@@ -4058,7 +4058,7 @@ def from_arrayset(
             array just to determine its length.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     **Deprecated:** This will be removed in `awkward>=1.1.0` (target date:
