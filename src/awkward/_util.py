@@ -1697,3 +1697,31 @@ def union_to_record(unionarray, anonymous):
             )
 
         return ak.layout.RecordArray(all_fields, all_names, len(unionarray))
+
+
+def adjust_old_pickle(form, container, num_partitions, behavior):
+    def key_format(**v):
+        if num_partitions is None:
+            if v["attribute"] == "data":
+                return "{form_key}".format(**v)
+            else:
+                return "{form_key}-{attribute}".format(**v)
+
+        else:
+            if v["attribute"] == "data":
+                return "{form_key}-part{partition}".format(**v)
+            else:
+                return "{form_key}-{attribute}-part{partition}".format(**v)
+
+    return ak.operations.convert.from_buffers(
+        form,
+        None,
+        container,
+        partition_start=0,
+        key_format=key_format,
+        lazy=False,
+        lazy_cache="new",
+        lazy_cache_key=None,
+        highlevel=False,
+        behavior=behavior,
+    )

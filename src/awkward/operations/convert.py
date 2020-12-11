@@ -4022,14 +4022,6 @@ def from_arrayset(
         "January 1, 2021",
     )
 
-    if isinstance(partition_format, str) or (
-        ak._util.py27 and isinstance(partition_format, ak._util.unicode)
-    ):
-        tmp2 = partition_format
-
-        def partition_format(x):
-            return tmp2.format(x)
-
     if num_partitions is None:
         show_partition = False
 

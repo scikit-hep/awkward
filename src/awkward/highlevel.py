@@ -1386,16 +1386,24 @@ class Array(
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, container, num_partitions = ak.to_arrayset(self)
+        form, length, container = ak.operations.convert.to_buffers(self._layout)
         if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
-        return form, container, num_partitions, behavior
+        return form, length, container, behavior
 
     def __setstate__(self, state):
-        form, container, num_partitions, behavior = state
-        layout = ak.from_arrayset(form, container, num_partitions, highlevel=False)
+        if isinstance(state[1], dict):
+            form, container, num_partitions, behavior = state
+            layout = ak._util.adjust_old_pickle(
+                form, container, num_partitions, behavior
+            )
+        else:
+            form, length, container, behavior = state
+            layout = ak.operations.convert.from_buffers(
+                form, length, container, highlevel=False, behavior=behavior
+            )
         if self.__class__ is Array:
             self.__class__ = ak._util.arrayclass(layout, behavior)
         self.layout = layout
@@ -1975,17 +1983,25 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, container, num_partitions = ak.to_arrayset(self._layout.array)
+        form, length, container = ak.operations.convert.to_buffers(self._layout.array)
         if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
-        return form, container, num_partitions, behavior, self._layout.at
+        return form, length, container, behavior, self._layout.at
 
     def __setstate__(self, state):
-        form, container, num_partitions, behavior, at = state
-        array = ak.from_arrayset(form, container, num_partitions, highlevel=False)
-        layout = ak.layout.Record(array, at)
+        if isinstance(state[1], dict):
+            form, container, num_partitions, behavior, at = state
+            layout = ak._util.adjust_old_pickle(
+                form, container, num_partitions, behavior
+            )
+        else:
+            form, length, container, behavior, at = state
+            layout = ak.operations.convert.from_buffers(
+                form, length, container, highlevel=False, behavior=behavior
+            )
+        layout = ak.layout.Record(layout, at)
         if self.__class__ is Record:
             self.__class__ = ak._util.recordclass(layout, behavior)
         self.layout = layout
