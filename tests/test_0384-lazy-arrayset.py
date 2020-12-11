@@ -89,7 +89,7 @@ def test_lazy_arrayset():
 
     assert ak.to_list(ak.num(out.listcollection)) == [3, 3, 3]
     assert set(canary.ops) == {("get", "kitty-node1-offsets")}
-    assert set(cache) == {"hello", "hello-kitty-node1-virtual"}
+    assert set(cache) == {"hello", "hello(kitty-node1-virtual)"}
     canary.ops = []
     cache.clear()
 
@@ -107,16 +107,16 @@ def test_lazy_arrayset():
     }
     assert set(cache) == {
         "hello",
-        "hello-kitty-node11-virtual",
-        "hello-kitty-node13-virtual",
-        "hello-kitty-node16-virtual",
+        "hello(kitty-node11-virtual)",
+        "hello(kitty-node13-virtual)",
+        "hello(kitty-node16-virtual)",
     }
     canary.ops = []
     cache.clear()
 
     assert ak.to_list(out.masked) == [None, 4, 4]
     assert set(canary.ops) == {("get", "kitty-node17-index"), ("get", "kitty-node18")}
-    assert set(cache) == {"hello", "hello-kitty-node17-virtual"}
+    assert set(cache) == {"hello", "hello(kitty-node17-virtual)"}
     canary.ops = []
     cache.clear()
 
