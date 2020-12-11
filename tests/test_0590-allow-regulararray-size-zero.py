@@ -7,7 +7,9 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-empty = ak.Array(ak.layout.RegularArray(ak.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0))
+empty = ak.Array(
+    ak.layout.RegularArray(ak.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0)
+)
 
 
 def test_ListOffsetArray_rpad_and_clip():
@@ -24,7 +26,9 @@ def test_toListOffsetArray64():
 
 def test_setidentities():
     empty2 = ak.Array(
-        ak.layout.RegularArray(ak.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0)
+        ak.layout.RegularArray(
+            ak.Array([[1, 2, 3], [], [4, 5]]).layout, 0, zeros_length=0
+        )
     )
     empty2.layout.setidentities()
     assert np.asarray(empty2.layout.identities).tolist() == []

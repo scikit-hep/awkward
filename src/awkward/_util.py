@@ -761,7 +761,9 @@ def broadcast_and_apply(  # noqa: C901
                 outcontent = apply(nextinputs, depth + 1, user)
                 assert isinstance(outcontent, tuple)
 
-                return tuple(ak.layout.RegularArray(x, maxsize, maxlen) for x in outcontent)
+                return tuple(
+                    ak.layout.RegularArray(x, maxsize, maxlen) for x in outcontent
+                )
 
             elif not all_same_offsets(nplike, inputs):
                 fcns = [

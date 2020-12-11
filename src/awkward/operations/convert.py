@@ -1122,7 +1122,9 @@ def from_awkward0(
                         starts, stops, recurse(array.content, level + 1)
                     )
                 for i in range(len(array.starts.shape) - 1, 0, -1):
-                    out = ak.layout.RegularArray(out, array.starts.shape[i], array.starts.shape[i - 1])
+                    out = ak.layout.RegularArray(
+                        out, array.starts.shape[i], array.starts.shape[i - 1]
+                    )
                 return out
 
         elif isinstance(array, awkward0.Table):
@@ -1176,7 +1178,9 @@ def from_awkward0(
                 )
 
             for i in range(len(array.tags.shape) - 1, 0, -1):
-                out = ak.layout.RegularArray(out, array.tags.shape[i], array.tags.shape[i - 1])
+                out = ak.layout.RegularArray(
+                    out, array.tags.shape[i], array.tags.shape[i - 1]
+                )
             return out
 
         elif isinstance(array, awkward0.MaskedArray):
@@ -1188,7 +1192,9 @@ def from_awkward0(
                 valid_when=(not array.maskedwhen),
             )
             for i in range(len(array.mask.shape) - 1, 0, -1):
-                out = ak.layout.RegularArray(out, array.mask.shape[i], array.mask.shape[i - 1])
+                out = ak.layout.RegularArray(
+                    out, array.mask.shape[i], array.mask.shape[i - 1]
+                )
             return out
 
         elif isinstance(array, awkward0.BitMaskedArray):
@@ -1221,7 +1227,9 @@ def from_awkward0(
                     index, recurse(array.content, level + 1)
                 )
             for i in range(len(array.index.shape) - 1, 0, -1):
-                out = ak.layout.RegularArray(out, array.index.shape[i], array.index.shape[i - 1])
+                out = ak.layout.RegularArray(
+                    out, array.index.shape[i], array.index.shape[i - 1]
+                )
             return out
 
         elif isinstance(array, awkward0.IndexedArray):
@@ -1239,7 +1247,9 @@ def from_awkward0(
                 index = ak.layout.Index32(array.index.reshape(-1))
                 out = ak.layout.IndexedArray32(index, recurse(array.content, level + 1))
             for i in range(len(array.index.shape) - 1, 0, -1):
-                out = ak.layout.RegularArray(out, array.index.shape[i], array.index.shape[i - 1])
+                out = ak.layout.RegularArray(
+                    out, array.index.shape[i], array.index.shape[i - 1]
+                )
             return out
 
         elif isinstance(array, awkward0.SparseArray):
@@ -2894,13 +2904,17 @@ def to_arrayset(
             if v["attribute"] == "data":
                 return "{prefix}part{partition}{sep}node{node}".format(**v)
             else:
-                return "{prefix}part{partition}{sep}node{node}{sep}{attribute}".format(**v)
+                return "{prefix}part{partition}{sep}node{node}{sep}{attribute}".format(
+                    **v
+                )
 
         else:
             if v["attribute"] == "data":
                 return "{prefix}node{node}{sep}part{partition}".format(**v)
             else:
-                return "{prefix}node{node}{sep}{attribute}{sep}part{partition}".format(**v)
+                return "{prefix}node{node}{sep}{attribute}{sep}part{partition}".format(
+                    **v
+                )
 
     def form_key_format(**v):
         return "node{node}".format(**v)
@@ -3070,12 +3084,12 @@ def to_buffers(
             )
 
     if isinstance(key_format, str):
-        key_format = lambda **v: key_format.format(**v)
+        key_format = lambda **v: key_format.format(**v)  # noqa: E731
 
     if form_key_format is None:
-        form_key_format = lambda **v: None
+        form_key_format = lambda **v: None  # noqa: E731
     elif isinstance(form_key_format, str):
-        form_key_format = lambda **v: form_key_format.format(**v)
+        form_key_format = lambda **v: form_key_format.format(**v)  # noqa: E731
 
     num_form_keys = [0]
 
@@ -3111,7 +3125,9 @@ def to_buffers(
                 ak.layout.IndexedArray64,
             ),
         ):
-            key = key_format(node=str(key_index), attribute="index", partition=str(part))
+            key = key_format(
+                node=str(key_index), attribute="index", partition=str(part)
+            )
             container[key] = little_endian(numpy.asarray(layout.index))
 
             return ak.forms.IndexedForm(
@@ -3125,7 +3141,9 @@ def to_buffers(
         elif isinstance(
             layout, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64)
         ):
-            key = key_format(node=str(key_index), attribute="index", partition=str(part))
+            key = key_format(
+                node=str(key_index), attribute="index", partition=str(part)
+            )
             container[key] = little_endian(numpy.asarray(layout.index))
 
             return ak.forms.IndexedOptionForm(
@@ -3175,10 +3193,14 @@ def to_buffers(
             layout,
             (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64),
         ):
-            key = key_format(node=str(key_index), attribute="starts", partition=str(part))
+            key = key_format(
+                node=str(key_index), attribute="starts", partition=str(part)
+            )
             container[key] = little_endian(numpy.asarray(layout.starts))
 
-            key = key_format(node=str(key_index), attribute="stops", partition=str(part))
+            key = key_format(
+                node=str(key_index), attribute="stops", partition=str(part)
+            )
             container[key] = little_endian(numpy.asarray(layout.stops))
 
             return ak.forms.ListForm(
@@ -3198,7 +3220,9 @@ def to_buffers(
                 ak.layout.ListOffsetArray64,
             ),
         ):
-            key = key_format(node=str(key_index), attribute="offsets", partition=str(part))
+            key = key_format(
+                node=str(key_index), attribute="offsets", partition=str(part)
+            )
             container[key] = little_endian(numpy.asarray(layout.offsets))
 
             return ak.forms.ListOffsetForm(
@@ -3236,7 +3260,11 @@ def to_buffers(
                     keys.append(k)
 
             return ak.forms.RecordForm(
-                forms, keys, has_identities, parameters, form_key_format(node=str(key_index)),
+                forms,
+                keys,
+                has_identities,
+                parameters,
+                form_key_format(node=str(key_index)),
             )
 
         elif isinstance(layout, ak.layout.RegularArray):
@@ -3263,7 +3291,9 @@ def to_buffers(
             key = key_format(node=str(key_index), attribute="tags", partition=str(part))
             container[key] = little_endian(numpy.asarray(layout.tags))
 
-            key = key_format(node=str(key_index), attribute="index", partition=str(part))
+            key = key_format(
+                node=str(key_index), attribute="index", partition=str(part)
+            )
             container[key] = little_endian(numpy.asarray(layout.index))
 
             return ak.forms.UnionForm(
@@ -3306,7 +3336,9 @@ def to_buffers(
 differs from the first Form:
 
     {2}""".format(
-                        partition + part, f.tojson(True, False), form.tojson(True, False)
+                        partition + part,
+                        f.tojson(True, False),
+                        form.tojson(True, False),
                     )
                     + ak._util.exception_suffix(__file__)
                 )
@@ -3645,7 +3677,9 @@ def _form_to_layout(
             length * form.size,
         )
 
-        return ak.layout.RegularArray(content, form.size, length, identities, parameters)
+        return ak.layout.RegularArray(
+            content, form.size, length, identities, parameters
+        )
 
     elif isinstance(form, ak.forms.UnionForm):
         raw_tags = (
