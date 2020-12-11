@@ -102,10 +102,14 @@ def test_regulararray():
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
     recordarray = ak.layout.RecordArray({"x": content})
-    regulararray = ak.Array(ak.layout.RegularArray(recordarray, 3, zeros_length=0), check_valid=True)
+    regulararray = ak.Array(
+        ak.layout.RegularArray(recordarray, 3, zeros_length=0), check_valid=True
+    )
 
     content2 = ak.layout.NumpyArray(np.array([100, 200, 300]))
-    regulararray2 = ak.Array(ak.layout.RegularArray(content2, 1, zeros_length=0), check_valid=True)
+    regulararray2 = ak.Array(
+        ak.layout.RegularArray(content2, 1, zeros_length=0), check_valid=True
+    )
     assert ak.to_list(ak.with_field(regulararray, regulararray2, "y")) == [
         [{"x": 0.0, "y": 100}, {"x": 1.1, "y": 100}, {"x": 2.2, "y": 100}],
         [{"x": 3.3, "y": 200}, {"x": 4.4, "y": 200}, {"x": 5.5, "y": 200}],
@@ -115,7 +119,9 @@ def test_regulararray():
     content2 = ak.layout.NumpyArray(
         np.array([100, 200, 300, 400, 500, 600, 700, 800, 900])
     )
-    regulararray2 = ak.Array(ak.layout.RegularArray(content2, 3, zeros_length=0), check_valid=True)
+    regulararray2 = ak.Array(
+        ak.layout.RegularArray(content2, 3, zeros_length=0), check_valid=True
+    )
     assert ak.to_list(ak.with_field(regulararray, regulararray2, "y")) == [
         [{"x": 0.0, "y": 100}, {"x": 1.1, "y": 200}, {"x": 2.2, "y": 300}],
         [{"x": 3.3, "y": 400}, {"x": 4.4, "y": 500}, {"x": 5.5, "y": 600}],

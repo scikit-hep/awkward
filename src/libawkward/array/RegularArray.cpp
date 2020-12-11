@@ -474,6 +474,10 @@ namespace awkward {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " size=\"" << size_
         << "\">\n";
+    if (size_ == 0) {
+      out << indent << pre << "<" << classname() << " length=\"" << length_
+          << "\">\n";
+    }
     if (identities_.get() != nullptr) {
       out << identities_.get()->tostring_part(
                indent + std::string("    "), "", "\n");
