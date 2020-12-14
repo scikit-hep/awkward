@@ -119,7 +119,7 @@ def type(array):
     if array is None:
         return ak.types.UnknownType()
 
-    elif isinstance(array, (bool, np.bool, np.bool_)):
+    elif isinstance(array, (bool, np.bool_)):
         return ak.types.PrimitiveType("bool")
 
     elif isinstance(array, numbers.Integral):
@@ -186,7 +186,6 @@ def type(array):
 
 
 type.dtype2primitive = {
-    np.bool: "bool",
     np.bool_: "bool",
     np.int8: "int8",
     np.int16: "int16",

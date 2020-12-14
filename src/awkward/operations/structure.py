@@ -149,7 +149,7 @@ def mask(array, mask, valid_when=True, highlevel=True):
         layoutarray, layoutmask = inputs
         if isinstance(layoutmask, ak.layout.NumpyArray):
             m = ak.nplike.of(layoutmask).asarray(layoutmask)
-            if not issubclass(m.dtype.type, (np.bool, np.bool_)):
+            if not issubclass(m.dtype.type, (bool, np.bool_)):
                 raise ValueError(
                     "mask must have boolean type, not "
                     "{0}".format(repr(m.dtype)) + ak._util.exception_suffix(__file__)
@@ -1538,7 +1538,7 @@ def unflatten(array, counts, highlevel=True):
             )
         offsets = ak.layout.Index64(offsets)
         out = ak.layout.ListOffsetArray64(offsets, layout)
-        if not isinstance(mask, (np.bool, np.bool_)):
+        if not isinstance(mask, (bool, np.bool_)):
             index = ak.layout.Index8(nplike.asarray(mask).astype(np.int8))
             out = ak.layout.ByteMaskedArray(index, out, valid_when=False)
 
@@ -3258,7 +3258,6 @@ def atleast_1d(*arrays):
 
 
 _dtype_to_string = {
-    np.dtype(np.bool): "bool",
     np.dtype(np.bool_): "bool",
     np.dtype(np.int8): "int8",
     np.dtype(np.int16): "int16",
