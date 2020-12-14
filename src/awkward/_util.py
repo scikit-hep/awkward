@@ -58,7 +58,7 @@ def deprecate(exception, version, date=None):
 {2}: {3}""".format(
             version, date, type(exception).__name__, str(exception)
         )
-        warnings.warn(message, DeprecationWarning)
+        warnings.warn(message, FutureWarning)
 
 
 virtualtypes = (ak.layout.VirtualArray,)
