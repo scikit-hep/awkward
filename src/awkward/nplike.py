@@ -64,7 +64,6 @@ class Singleton(object):
 
 
 class NumpyMetadata(Singleton):
-    bool = numpy.bool
     bool_ = numpy.bool_
     int8 = numpy.int8
     int16 = numpy.int16
@@ -85,7 +84,6 @@ class NumpyMetadata(Singleton):
     integer = numpy.integer
     floating = numpy.floating
     number = numpy.number
-    object = numpy.object
     object_ = numpy.object_
     generic = numpy.generic
 

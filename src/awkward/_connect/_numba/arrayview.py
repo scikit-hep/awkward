@@ -317,7 +317,7 @@ class ArrayView(object):
             array,
             allow_record=False,
             allow_other=False,
-            numpytype=(np.number, np.bool_, np.bool),
+            numpytype=(np.number, bool, np.bool_),
         )
         while isinstance(layout, ak.layout.VirtualArray) and isinstance(
             layout.generator, ak.layout.SliceGenerator
@@ -742,7 +742,7 @@ class RecordView(object):
             record,
             allow_record=True,
             allow_other=False,
-            numpytype=(np.number, np.bool_, np.bool),
+            numpytype=(np.number, bool, np.bool_),
         )
         assert isinstance(layout, ak.layout.Record)
         arraylayout = layout.array

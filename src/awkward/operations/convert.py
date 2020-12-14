@@ -1558,7 +1558,7 @@ def to_layout(
     array,
     allow_record=True,
     allow_other=False,
-    numpytype=(np.number, np.bool_, np.bool, np.str_, np.bytes_),
+    numpytype=(np.number, np.bool_, np.str_, np.bytes_),
 ):
     """
     Args:
@@ -1710,7 +1710,7 @@ def to_arrow(array):
             length = len(numpy_arr)
             arrow_type = pyarrow.from_numpy_dtype(numpy_arr.dtype)
 
-            if issubclass(numpy_arr.dtype.type, (np.bool_, np.bool)):
+            if issubclass(numpy_arr.dtype.type, (bool, np.bool_)):
                 if len(numpy_arr) % 8 == 0:
                     ready_to_pack = numpy_arr
                 else:
@@ -2091,10 +2091,10 @@ def to_arrow(array):
             )
 
         elif isinstance(layout, ak.layout.ByteMaskedArray):
-            mask = numpy.asarray(layout.mask, dtype=np.bool) == layout.valid_when
+            mask = numpy.asarray(layout.mask, dtype=np.bool_) == layout.valid_when
 
             bytemask = numpy.zeros(
-                8 * math.ceil(len(layout.content) / 8), dtype=np.bool
+                8 * math.ceil(len(layout.content) / 8), dtype=np.bool_
             )
             bytemask[: len(mask)] = mask
             bytemask[len(mask) :] = 0
