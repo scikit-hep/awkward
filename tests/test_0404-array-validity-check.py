@@ -32,6 +32,8 @@ def test_same_categories():
     categorical1 = awkward.layout.IndexedArray64(index1, categories.layout, parameters={"__array__": "categorical"})
     categorical2 = awkward.layout.IndexedArray64(index2, categories.layout, parameters={"__array__": "categorical"})
     array1 = awkward.Array(categorical1)
+    assert awkward.to_list(categorical1.sort(0, True, True)) == ['one', 'one', 'one', 'three', 'three', 'three', 'two', 'two']
+    #assert categorical1.is_unique() == False
     array2 = awkward.Array(categorical2)
     assert array1.tolist() == ['one', 'three', 'three', 'two', 'three', 'one', 'two', 'one']
     assert array2.tolist() == ['two', 'two', 'three', 'two', 'one', 'one', 'one', 'two']

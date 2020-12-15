@@ -4674,8 +4674,8 @@ namespace awkward {
                          bool ascending,
                          bool stable,
                          bool unique) const {
-    std::shared_ptr<T> ptr(
-      new T[length], kernel::array_deleter<T>());
+    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
+                                               length*sizeof(T));
     int64_t ptr_length = length;
 
     if (length == 0) {
@@ -4733,8 +4733,8 @@ namespace awkward {
                           bool ascending,
                           bool stable,
                           bool unique) const {
-    std::shared_ptr<T> ptr(
-      new T[length], kernel::array_deleter<T>());
+    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
+                                               length*sizeof(T));
     int64_t ptr_length = length;
 
     if (length == 0) {
