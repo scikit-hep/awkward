@@ -155,7 +155,7 @@ def _string_broadcast(layout, offsets):
     nplike = ak.nplike.of(offsets)
     offsets = nplike.asarray(offsets)
     counts = offsets[1:] - offsets[:-1]
-    if ak._util.win:
+    if ak._util.win or ak._util.bits32:
         counts = counts.astype(np.int32)
     parents = nplike.repeat(nplike.arange(len(counts), dtype=counts.dtype), counts)
     return ak.layout.IndexedArray64(ak.layout.Index64(parents), layout).project()
