@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import os
+
 import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
@@ -174,3 +176,38 @@ def test_to_arrow_table():
     assert ak.from_arrow(
         ak.to_arrow_table(ak.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}]))
     ).tolist() == [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}]
+
+
+def test_to_parquet(tmp_path):
+    original = ak.Array(
+        [
+            [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
+            [],
+            [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}],
+            [],
+            [],
+            [
+                {"x": 6, "y": 6.6},
+                {"x": 7, "y": 7.7},
+                {"x": 8, "y": 8.8},
+                {"x": 9, "y": 9.9},
+            ],
+        ]
+    )
+
+    ak.to_parquet(original, os.path.join(tmp_path, "data.parquet"))
+    reconstituted = ak.from_parquet(os.path.join(tmp_path, "data.parquet"))
+    assert reconstituted.tolist() == [
+        [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
+        [],
+        [{"x": 4, "y": 4.4}, {"x": 5, "y": 5.5}],
+        [],
+        [],
+        [
+            {"x": 6, "y": 6.6},
+            {"x": 7, "y": 7.7},
+            {"x": 8, "y": 8.8},
+            {"x": 9, "y": 9.9},
+        ],
+    ]
+    assert str(reconstituted.type) == '6 * var * {"x": int64, "y": float64}'

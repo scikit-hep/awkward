@@ -2671,7 +2671,15 @@ def from_arrow(array, highlevel=True, behavior=None):
         return handle_arrow(array)
 
 
-def to_parquet(array, where, explode_records=False, **options):
+def to_parquet(
+    array,
+    where,
+    explode_records=False,
+    list_to32=False,
+    string_to32=True,
+    bytestring_to32=True,
+    **options,
+):
     """
     Args:
         array: Data to write to a Parquet file.
@@ -2679,6 +2687,12 @@ def to_parquet(array, where, explode_records=False, **options):
         explode_records (bool): If True, lists of records are written as
             records of lists, so that nested fields become top-level fields
             (which can be zipped when read back).
+        list_to32 (bool): If True, convert Awkward lists into 32-bit Arrow lists
+            if they're small enough, even if it means an extra conversion. Otherwise,
+            signed 32-bit #ak.layout.ListOffsetArray maps to Arrow `ListType` and
+            all others map to Arrow `LargeListType`.
+        string_to32 (bool): Same as the above for Arrow `string` and `large_string`.
+        bytestring_to32 (bool): Same as the above for Arrow `binary` and `large_binary`.
         options: All other options are passed to pyarrow.parquet.ParquetWriter.
             In particular, if no `schema` is given, a schema is derived from
             the array type.
@@ -2687,6 +2701,14 @@ def to_parquet(array, where, explode_records=False, **options):
 
         >>> array1 = ak.Array([[1, 2, 3], [], [4, 5], [], [], [6, 7, 8, 9]])
         >>> ak.to_parquet(array1, "array1.parquet")
+
+    If the `array` does not contain records at top-level, the Arrow table will consist
+    of one field whose name is `""`.
+
+    Parquet files can maintain the distinction between "option-type but no elements are
+    missing" and "not option-type" at all levels, including the top level. However,
+    there is no distinction between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type.
+    Be aware of these type distinctions when passing data through Arrow or Parquet.
 
     See also #ak.to_arrow, which is used as an intermediate step.
     See also #ak.from_parquet.
@@ -2701,18 +2723,38 @@ def to_parquet(array, where, explode_records=False, **options):
             for partition in layout.partitions:
                 for x in batch_iterator(partition):
                     yield x
-        elif isinstance(layout, ak.layout.RecordArray):
-            names = layout.keys()
-            fields = [to_arrow(layout[name]) for name in names]
-            yield pyarrow.RecordBatch.from_arrays(fields, names)
-        elif explode_records:
-            names = layout.keys()
-            fields = [layout[name] for name in names]
-            layout = ak.layout.RecordArray(fields, names, len(layout))
-            for x in batch_iterator(layout):
-                yield x
+
         else:
-            yield pyarrow.RecordBatch.from_arrays([to_arrow(layout)], [""])
+            if explode_records or isinstance(
+                ak.operations.describe.type(layout), ak.types.RecordType
+            ):
+                names = layout.keys()
+                contents = [layout[name] for name in names]
+            else:
+                names = [""]
+                contents = [layout]
+
+            pa_arrays = []
+            pa_fields = []
+            for name, content in zip(names, contents):
+                pa_arrays.append(
+                    to_arrow(
+                        content,
+                        list_to32=list_to32,
+                        string_to32=string_to32,
+                        bytestring_to32=bytestring_to32,
+                    )
+                )
+                pa_fields.append(
+                    pyarrow.field(name, pa_arrays[-1].type).with_nullable(
+                        isinstance(
+                            ak.operations.describe.type(content), ak.types.OptionType
+                        )
+                    )
+                )
+            yield pyarrow.RecordBatch.from_arrays(
+                pa_arrays, schema=pyarrow.schema(pa_fields)
+            )
 
     layout = to_layout(array, allow_record=False, allow_other=False)
     iterator = batch_iterator(layout)
@@ -2785,7 +2827,7 @@ def from_parquet(
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
-    **options
+    **options,
 ):
     """
     Args:
@@ -2921,7 +2963,7 @@ def to_buffers(
     form_key="node{id}",
     key_format="part{partition}-{form_key}-{attribute}",
 ):
-    u"""
+    """
     Args:
         array: Data to decompose into named buffers.
         container (None or MutableMapping): The str \u2192 NumPy arrays (or
@@ -3826,7 +3868,7 @@ def from_buffers(
     highlevel=True,
     behavior=None,
 ):
-    u"""
+    """
     Args:
         form (#ak.forms.Form or str/dict equivalent): The form of the Awkward
             Array to reconstitute from named buffers.
@@ -3995,7 +4037,7 @@ def to_arrayset(
     sep="-",
     partition_first=False,
 ):
-    u"""
+    """
     Args:
         array: Data to decompose into an arrayset.
         container (None or MutableMapping): The str \u2192 NumPy arrays (or
@@ -4223,7 +4265,7 @@ def from_arrayset(
     highlevel=True,
     behavior=None,
 ):
-    u"""
+    """
     Args:
         form (#ak.forms.Form or str/dict equivalent): The form of the Awkward
             Array to reconstitute from a set of NumPy arrays (or binary blobs).
