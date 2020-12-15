@@ -18,7 +18,7 @@ namespace awkward {
   ///
   /// @brief Abstract base class for nodes within an ArrayBuilder that
   /// cumulatively discover an array's type and fill it.
-  class LIBAWKWARD_EXPORT_SYMBOL Builder {
+  class LIBAWKWARD_EXPORT_SYMBOL Builder: public std::enable_shared_from_this<Builder> {
   public:
     /// @brief Virtual destructor acts as a first non-inline virtual function
     /// that determines a specific translation unit in which vtable shall be
@@ -143,20 +143,6 @@ namespace awkward {
     /// that shares data with the provided `array`.
     virtual const BuilderPtr
       append(const ContentPtr& array, int64_t at) = 0;
-
-    /// @brief Internal function called immediately after constructing a
-    /// Builder to keep a `std::shared_ptr` reference to itself.
-    ///
-    /// @note This is a manual implementation of
-    /// `std::enable_shared_from_this<T>`. It could be more idiomatic C++11
-    /// by using the standard library. (Hint: RecordArray already does this
-    /// to share a reference to itself with its {@link Record Records}.)
-    void
-      setthat(const BuilderPtr& that);
-
-  protected:
-    /// @brief See #setthat.
-    BuilderPtr that_;
   };
 }
 

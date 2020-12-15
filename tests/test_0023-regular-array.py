@@ -13,7 +13,7 @@ content = ak.layout.NumpyArray(
 )
 offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
 listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
-regulararray = ak.layout.RegularArray(listoffsetarray, 2)
+regulararray = ak.layout.RegularArray(listoffsetarray, 2, zeros_length=0)
 starts = ak.layout.Index64(np.array([0, 1]))
 stops = ak.layout.Index64(np.array([2, 3]))
 listarray = ak.layout.ListArray64(starts, stops, regulararray)
@@ -126,8 +126,8 @@ def test_getitem_deeper():
 
 
 content2 = ak.layout.NumpyArray(np.arange(2 * 3 * 5 * 7).reshape(-1, 7))
-regulararrayA = ak.layout.RegularArray(content2, 5)
-regulararrayB = ak.layout.RegularArray(regulararrayA, 3)
+regulararrayA = ak.layout.RegularArray(content2, 5, zeros_length=0)
+regulararrayB = ak.layout.RegularArray(regulararrayA, 3, zeros_length=0)
 modelA = np.arange(2 * 3 * 5 * 7).reshape(2 * 3, 5, 7)
 modelB = np.arange(2 * 3 * 5 * 7).reshape(2, 3, 5, 7)
 

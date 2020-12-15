@@ -42,7 +42,7 @@ def from_numpy(
             which some functions do not recognize.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Converts a NumPy array into an Awkward Array.
@@ -62,7 +62,9 @@ def from_numpy(
     def recurse(array, mask):
         if regulararray and len(array.shape) > 1:
             return ak.layout.RegularArray(
-                recurse(array.reshape((-1,) + array.shape[2:]), mask), array.shape[1]
+                recurse(array.reshape((-1,) + array.shape[2:]), mask),
+                array.shape[1],
+                array.shape[0],
             )
 
         if len(array.shape) == 0:
@@ -81,8 +83,8 @@ def from_numpy(
                 ),
                 parameters={"__array__": "bytestring"},
             )
-            for size in array.shape[-1:0:-1]:
-                data = ak.layout.RegularArray(data, size)
+            for i in range(len(array.shape) - 1, 0, -1):
+                data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
         elif array.dtype.kind == "U":
             asbytes = numpy.char.encode(array.reshape(-1), "utf-8", "surrogateescape")
             itemsize = asbytes.dtype.itemsize
@@ -96,8 +98,8 @@ def from_numpy(
                 ),
                 parameters={"__array__": "string"},
             )
-            for size in array.shape[-1:0:-1]:
-                data = ak.layout.RegularArray(data, size)
+            for i in range(len(array.shape) - 1, 0, -1):
+                data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
         else:
             data = ak.layout.NumpyArray(array)
 
@@ -113,7 +115,7 @@ def from_numpy(
                     if isinstance(x, ak.layout.NumpyArray):
                         return ak.layout.UnmaskedArray(x)
                     else:
-                        return ak.layout.RegularArray(attach(x.content), x.size)
+                        return ak.layout.RegularArray(attach(x.content), x.size, len(x))
 
                 return attach(data.toRegularArray())
         else:
@@ -326,7 +328,11 @@ def to_numpy(array, allow_missing=True):
         return out
 
     elif isinstance(array, ak.layout.NumpyArray):
-        return numpy.asarray(array)
+        out = ak.nplike.of(array).asarray(array)
+        if type(out).__module__.startswith("cupy."):
+            return out.get()
+        else:
+            return out
 
     elif isinstance(array, ak.layout.Content):
         raise AssertionError(
@@ -355,7 +361,7 @@ def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
             If the array is one-dimensional, this has no effect.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Converts a CuPy array into an Awkward Array.
@@ -372,7 +378,9 @@ def from_cupy(array, regulararray=False, highlevel=True, behavior=None):
     def recurse(array):
         if regulararray and len(array.shape) > 1:
             return ak.layout.RegularArray(
-                recurse(array.reshape((-1,) + array.shape[2:])), array.shape[1]
+                recurse(array.reshape((-1,) + array.shape[2:])),
+                array.shape[1],
+                array.shape[0],
             )
 
         if len(array.shape) == 0:
@@ -580,7 +588,7 @@ def to_kernels(array, kernels, highlevel=True, behavior=None):
             `libawkward-cuda-kernels.so`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Converts an array from `"cpu"`, `"cuda"`, or `"mixed"` kernels to `"cpu"`
@@ -627,7 +635,7 @@ def from_iter(
         iterable (Python iterable): Data to convert into an Awkward Array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         allow_record (bool): If True, the outermost element may be a record
             (returning #ak.Record or #ak.layout.Record type, depending on
@@ -790,7 +798,7 @@ def from_json(
             will be interpreted as floating-point negative infinity values.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         initial (int): Initial size (in bytes) of buffers used by
             #ak.layout.ArrayBuilder (see #ak.layout.ArrayBuilderOptions).
@@ -969,7 +977,7 @@ def from_awkward0(
             which some functions do not recognize.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Converts an array from Awkward 0.x to Awkward 1.x.
@@ -1113,14 +1121,16 @@ def from_awkward0(
                     out = ak.layout.ListArray32(
                         starts, stops, recurse(array.content, level + 1)
                     )
-                for size in array.starts.shape[:0:-1]:
-                    out = ak.layout.RegularArray(out, size)
+                for i in range(len(array.starts.shape) - 1, 0, -1):
+                    out = ak.layout.RegularArray(
+                        out, array.starts.shape[i], array.starts.shape[i - 1]
+                    )
                 return out
 
         elif isinstance(array, awkward0.Table):
             # contents
             if array.istuple:
-                return ak.layout.RecordArray(
+                out = ak.layout.RecordArray(
                     [recurse(x, level + 1) for x in array.contents.values()]
                 )
             else:
@@ -1129,7 +1139,21 @@ def from_awkward0(
                 for n, x in array.contents.items():
                     keys.append(n)
                     values.append(recurse(x, level + 1))
-                return ak.layout.RecordArray(values, keys)
+                out = ak.layout.RecordArray(values, keys)
+
+            if array._view is None:
+                return out
+            elif isinstance(array._view, tuple):
+                start, step, length = array._view
+                stop = start + step * length
+                if stop < 0:
+                    stop = None
+                if step == 1 or step is None:
+                    return out[start:stop]
+                else:
+                    return out[start:stop:step]
+            else:
+                return out[array._view]
 
         elif isinstance(array, awkward0.UnionArray):
             # tags, index, contents
@@ -1153,8 +1177,10 @@ def from_awkward0(
                     tags, index, [recurse(x, level + 1) for x in array.contents]
                 )
 
-            for size in array.tags.shape[:0:-1]:
-                out = ak.layout.RegularArray(out, size)
+            for i in range(len(array.tags.shape) - 1, 0, -1):
+                out = ak.layout.RegularArray(
+                    out, array.tags.shape[i], array.tags.shape[i - 1]
+                )
             return out
 
         elif isinstance(array, awkward0.MaskedArray):
@@ -1165,8 +1191,10 @@ def from_awkward0(
                 recurse(array.content, level + 1),
                 valid_when=(not array.maskedwhen),
             )
-            for size in array.mask.shape[:0:-1]:
-                out = ak.layout.RegularArray(out, size)
+            for i in range(len(array.mask.shape) - 1, 0, -1):
+                out = ak.layout.RegularArray(
+                    out, array.mask.shape[i], array.mask.shape[i - 1]
+                )
             return out
 
         elif isinstance(array, awkward0.BitMaskedArray):
@@ -1198,9 +1226,10 @@ def from_awkward0(
                 out = ak.layout.IndexedOptionArray32(
                     index, recurse(array.content, level + 1)
                 )
-
-            for size in array.tags.shape[:0:-1]:
-                out = ak.layout.RegularArray(out, size)
+            for i in range(len(array.index.shape) - 1, 0, -1):
+                out = ak.layout.RegularArray(
+                    out, array.index.shape[i], array.index.shape[i - 1]
+                )
             return out
 
         elif isinstance(array, awkward0.IndexedArray):
@@ -1217,9 +1246,10 @@ def from_awkward0(
             else:
                 index = ak.layout.Index32(array.index.reshape(-1))
                 out = ak.layout.IndexedArray32(index, recurse(array.content, level + 1))
-
-            for size in array.tags.shape[:0:-1]:
-                out = ak.layout.RegularArray(out, size)
+            for i in range(len(array.index.shape) - 1, 0, -1):
+                out = ak.layout.RegularArray(
+                    out, array.index.shape[i], array.index.shape[i - 1]
+                )
             return out
 
         elif isinstance(array, awkward0.SparseArray):
@@ -1528,7 +1558,7 @@ def to_layout(
     array,
     allow_record=True,
     allow_other=False,
-    numpytype=(np.number, np.bool_, np.bool, np.str_, np.bytes_),
+    numpytype=(np.number, np.bool_, np.str_, np.bytes_),
 ):
     """
     Args:
@@ -1574,6 +1604,11 @@ def to_layout(
             )
         return from_numpy(array, regulararray=True, recordarray=True, highlevel=False)
 
+    elif (
+        type(array).__module__.startswith("cupy.") and type(array).__name__ == "ndarray"
+    ):
+        return from_cupy(array, regulararray=True, highlevel=False)
+
     elif isinstance(array, (str, bytes)) or (
         ak._util.py27 and isinstance(array, ak._util.unicode)
     ):
@@ -1609,7 +1644,7 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True):
     would rarely be used in a data analysis.
     """
 
-    def getfunction(layout, depth):
+    def getfunction(layout):
         if isinstance(layout, ak.layout.NumpyArray) and layout.ndim != 1:
             return lambda: layout.toRegularArray()
         elif isinstance(layout, ak.layout.EmptyArray) and not allow_empty:
@@ -1621,7 +1656,7 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True):
         else:
             return None
 
-    out = ak._util.recursively_apply(to_layout(array), getfunction)
+    out = ak._util.recursively_apply(to_layout(array), getfunction, pass_depth=False)
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
@@ -1675,7 +1710,7 @@ def to_arrow(array):
             length = len(numpy_arr)
             arrow_type = pyarrow.from_numpy_dtype(numpy_arr.dtype)
 
-            if issubclass(numpy_arr.dtype.type, (np.bool_, np.bool)):
+            if issubclass(numpy_arr.dtype.type, (bool, np.bool_)):
                 if len(numpy_arr) % 8 == 0:
                     ready_to_pack = numpy_arr
                 else:
@@ -2056,10 +2091,10 @@ def to_arrow(array):
             )
 
         elif isinstance(layout, ak.layout.ByteMaskedArray):
-            mask = numpy.asarray(layout.mask, dtype=np.bool) == layout.valid_when
+            mask = numpy.asarray(layout.mask, dtype=np.bool_) == layout.valid_when
 
             bytemask = numpy.zeros(
-                8 * math.ceil(len(layout.content) / 8), dtype=np.bool
+                8 * math.ceil(len(layout.content) / 8), dtype=np.bool_
             )
             bytemask[: len(mask)] = mask
             bytemask[len(mask) :] = 0
@@ -2089,7 +2124,7 @@ def from_arrow(array, highlevel=True, behavior=None):
             Awkward Array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
 
     Converts an Apache Arrow array into an Awkward Array.
@@ -2563,7 +2598,7 @@ def from_parquet(
             VirtualArrays. If None, a process-unique string is constructed.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         options: All other options are passed to pyarrow.parquet.ParquetFile.
 
@@ -2608,8 +2643,7 @@ def from_parquet(
             hold_cache = ak._util.MappingProxy({})
             lazy_cache = ak.layout.ArrayCache(hold_cache)
         elif lazy_cache == "attach":
-            exception = TypeError("lazy_cache must be a MutableMapping")
-            ak._util.deprecate(exception, "1.0.0", date="2020-12-01")
+            raise TypeError("lazy_cache must be a MutableMapping")
             hold_cache = ak._util.MappingProxy({})
             lazy_cache = ak.layout.ArrayCache(hold_cache)
         elif lazy_cache is not None and not isinstance(
@@ -2670,24 +2704,1075 @@ def from_parquet(
             return out
 
 
-def _arrayset_key(
-    form_key, attribute, partition, prefix, sep, partition_first,
+def to_buffers(
+    array,
+    container=None,
+    partition_start=0,
+    form_key="node{id}",
+    key_format="part{partition}-{form_key}-{attribute}",
 ):
-    if form_key is None:
-        raise ValueError(
-            "cannot read from arrayset using Forms without form_keys"
+    u"""
+    Args:
+        array: Data to decompose into named buffers.
+        container (None or MutableMapping): The str \u2192 NumPy arrays (or
+            Python buffers) that represent the decomposed Awkward Array. This
+            `container` is only assumed to have a `__setitem__` method that
+            accepts strings as keys.
+        partition_start (non-negative int): If `array` is not partitioned, this is
+            the partition number that will be used as part of the container
+            key. If `array` is partitioned, this is the first partition number.
+        form_key (str, callable): Python format string containing
+            `"{id}"` or a function that takes non-negative integer as a string
+            and the current `layout` as keyword arguments and returns a string,
+            for use as a `form_key` on each Form node and in `key_format` (below).
+        key_format (str or callable): Python format string containing
+            `"{partition}"`, `"{form_key}"`, and/or `"{attribute}"` or a function
+            that takes these as keyword arguments and returns a string to use
+            as keys for buffers in the `container`. The `partition` is a
+            partition number (non-negative integer, passed as a string), the
+            `form_key` is the result of applying `form_key` (above), and the
+            `attribute` is a hard-coded string representing the buffer's function
+            (e.g. `"data"`, `"offsets"`, `"index"`).
+
+    Decomposes an Awkward Array into a Form and a collection of memory buffers,
+    so that data can be losslessly written to file formats and storage devices
+    that only map names to binary blobs (such as a filesystem directory).
+
+    This function returns a 3-tuple:
+
+        (form, length, container)
+
+    where the `form` is a #ak.forms.Form (which can be converted to JSON
+    with `tojson`), the `length` is either an integer (`len(array)`) or a list
+    of the lengths of each partition in `array`, and the `container` is either
+    the MutableMapping you passed in or a new dict containing the buffers (as
+    NumPy arrays).
+
+    These are also the first three arguments of #ak.from_buffers, so a full
+    round-trip is
+
+        >>> reconstituted = ak.from_buffers(*ak.to_buffers(original))
+
+    The `container` argument lets you specify your own MutableMapping, which
+    might be an interface to some storage format or device (e.g. h5py). It's
+    okay if the `container` drops NumPy's `dtype` and `shape` information,
+    leaving raw bytes, since `dtype` and `shape` can be reconstituted from
+    the #ak.forms.NumpyForm.
+
+    The `partition_start` argument lets you fill the `container` gradually or
+    in parallel. If the `array` is not partitioned, the `partition_start`
+    argument sets its partition number (for the container keys, through
+    `key_format`). If the `array` is partitioned, the first partition is numbered
+    `partition_start` and as many are filled as ar in `array`. See #ak.partitions
+    to get the number of partitions in `array`.
+
+    Here is a simple example:
+
+        >>> original = ak.Array([[1, 2, 3], [], [4, 5]])
+        >>> form, length, container = ak.to_buffers(original)
+        >>> form
+        {
+            "class": "ListOffsetArray64",
+            "offsets": "i64",
+            "content": {
+                "class": "NumpyArray",
+                "itemsize": 8,
+                "format": "l",
+                "primitive": "int64",
+                "form_key": "node1"
+            },
+            "form_key": "node0"
+        }
+        >>> length
+        3
+        >>> container
+        {'part0-node0-offsets': array([0, 3, 3, 5], dtype=int64),
+         'part0-node1-data': array([1, 2, 3, 4, 5])}
+
+    which may be read back with
+
+        >>> ak.from_buffers(form, length, container)
+        <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>
+
+    Here is an example that builds up a partitioned array:
+
+        >>> container = {}
+        >>> lengths = []
+        >>> form, length, _ = ak.to_buffers(ak.Array([[1, 2, 3], [], [4, 5]]), container, 0)
+        >>> lengths.append(length)
+        >>> form, length, _ = ak.to_buffers(ak.Array([[6, 7, 8, 9]]), container, 1)
+        >>> lengths.append(length)
+        >>> form, length, _ = ak.to_buffers(ak.Array([[], [], []]), container, 2)
+        >>> lengths.append(length)
+        >>> form, length, _ = ak.to_buffers(ak.Array([[10]]), container, 3)
+        >>> lengths.append(length)
+        >>> form
+        {
+            "class": "ListOffsetArray64",
+            "offsets": "i64",
+            "content": {
+                "class": "NumpyArray",
+                "itemsize": 8,
+                "format": "l",
+                "primitive": "int64",
+                "form_key": "node1"
+            },
+            "form_key": "node0"
+        }
+        >>> lengths
+        [3, 1, 3, 1]
+        >>> container
+        {'part0-node0-offsets': array([0, 3, 3, 5], dtype=int64),
+         'part0-node1-data': array([1, 2, 3, 4, 5]),
+         'part1-node0-offsets': array([0, 4], dtype=int64),
+         'part1-node1-data': array([6, 7, 8, 9]),
+         'part2-node0-offsets': array([0, 0, 0, 0], dtype=int64),
+         'part2-node1-data': array([], dtype=float64),
+         'part3-node0-offsets': array([0, 1], dtype=int64),
+         'part3-node1-data': array([10])}
+
+    The object returned by #ak.from_buffers is now a partitioned array:
+
+        >>> reconstituted = ak.from_buffers(form, lengths, container)
+        >>> reconstituted
+        <Array [[1, 2, 3], [], [4, ... [], [], [10]] type='8 * var * int64'>
+        >>> ak.partitions(reconstituted)
+        [3, 1, 3, 1]
+
+    See also #ak.from_buffers.
+    """
+    if container is None:
+        container = {}
+
+    def index_form(index):
+        if isinstance(index, ak.layout.Index64):
+            return "i64"
+        elif isinstance(index, ak.layout.Index32):
+            return "i32"
+        elif isinstance(index, ak.layout.IndexU32):
+            return "u32"
+        elif isinstance(index, ak.layout.Index8):
+            return "i8"
+        elif isinstance(index, ak.layout.IndexU8):
+            return "u8"
+        else:
+            raise AssertionError(
+                "unrecognized index: "
+                + repr(index)
+                + ak._util.exception_suffix(__file__)
+            )
+
+    if isinstance(form_key, str):
+
+        def generate_form_key(form_key):
+            def fk(**v):
+                return form_key.format(**v)
+
+            return fk
+
+        form_key = generate_form_key(form_key)
+
+    if isinstance(key_format, str):
+
+        def generate_key_format(key_format):
+            def kf(**v):
+                return key_format.format(**v)
+
+            return kf
+
+        key_format = generate_key_format(key_format)
+
+    num_form_keys = [0]
+
+    def little_endian(array):
+        return array.astype(array.dtype.newbyteorder("<"), copy=False)
+
+    def fill(layout, part):
+        has_identities = layout.identities is not None
+        parameters = layout.parameters
+        key_index = num_form_keys[0]
+        num_form_keys[0] += 1
+
+        if has_identities:
+            raise NotImplementedError(
+                "ak.to_buffers for an array with Identities"
+                + ak._util.exception_suffix(__file__)
+            )
+
+        if isinstance(layout, ak.layout.EmptyArray):
+            fk = form_key(id=str(key_index))
+            key = key_format(form_key=fk, attribute="data", partition=str(part))
+            container[key] = little_endian(numpy.asarray(layout))
+            return ak.forms.EmptyForm(has_identities, parameters, fk)
+
+        elif isinstance(
+            layout,
+            (
+                ak.layout.IndexedArray32,
+                ak.layout.IndexedArrayU32,
+                ak.layout.IndexedArray64,
+            ),
+        ):
+            fk = form_key(id=str(key_index), layout=layout)
+            key = key_format(form_key=fk, attribute="index", partition=str(part))
+            container[key] = little_endian(numpy.asarray(layout.index))
+            return ak.forms.IndexedForm(
+                index_form(layout.index),
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                fk,
+            )
+
+        elif isinstance(
+            layout, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64)
+        ):
+            fk = form_key(id=str(key_index), layout=layout)
+            key = key_format(form_key=fk, attribute="index", partition=str(part))
+            container[key] = little_endian(numpy.asarray(layout.index))
+            return ak.forms.IndexedOptionForm(
+                index_form(layout.index),
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                fk,
+            )
+
+        elif isinstance(layout, ak.layout.ByteMaskedArray):
+            fk = form_key(id=str(key_index), layout=layout)
+            key = key_format(form_key=fk, attribute="mask", partition=str(part))
+            container[key] = little_endian(numpy.asarray(layout.mask))
+            return ak.forms.ByteMaskedForm(
+                index_form(layout.mask),
+                fill(layout.content, part),
+                layout.valid_when,
+                has_identities,
+                parameters,
+                fk,
+            )
+
+        elif isinstance(layout, ak.layout.BitMaskedArray):
+            fk = form_key(id=str(key_index), layout=layout)
+            key = key_format(form_key=fk, attribute="mask", partition=str(part))
+            container[key] = little_endian(numpy.asarray(layout.mask))
+            return ak.forms.BitMaskedForm(
+                index_form(layout.mask),
+                fill(layout.content, part),
+                layout.valid_when,
+                layout.lsb_order,
+                has_identities,
+                parameters,
+                fk,
+            )
+
+        elif isinstance(layout, ak.layout.UnmaskedArray):
+            return ak.forms.UnmaskedForm(
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                form_key(id=str(key_index), layout=layout),
+            )
+
+        elif isinstance(
+            layout,
+            (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64),
+        ):
+            fk = form_key(id=str(key_index), layout=layout)
+            key = key_format(form_key=fk, attribute="starts", partition=str(part))
+            container[key] = little_endian(numpy.asarray(layout.starts))
+            key = key_format(form_key=fk, attribute="stops", partition=str(part))
+            container[key] = little_endian(numpy.asarray(layout.stops))
+            return ak.forms.ListForm(
+                index_form(layout.starts),
+                index_form(layout.stops),
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                fk,
+            )
+
+        elif isinstance(
+            layout,
+            (
+                ak.layout.ListOffsetArray32,
+                ak.layout.ListOffsetArrayU32,
+                ak.layout.ListOffsetArray64,
+            ),
+        ):
+            fk = form_key(id=str(key_index), layout=layout)
+            key = key_format(form_key=fk, attribute="offsets", partition=str(part))
+            container[key] = little_endian(numpy.asarray(layout.offsets))
+            return ak.forms.ListOffsetForm(
+                index_form(layout.offsets),
+                fill(layout.content, part),
+                has_identities,
+                parameters,
+                fk,
+            )
+
+        elif isinstance(layout, ak.layout.NumpyArray):
+            fk = form_key(id=str(key_index), layout=layout)
+            key = key_format(form_key=fk, attribute="data", partition=str(part))
+            array = numpy.asarray(layout)
+            container[key] = little_endian(array)
+            form = ak.forms.Form.from_numpy(array.dtype)
+            return ak.forms.NumpyForm(
+                layout.shape[1:],
+                form.itemsize,
+                form.format,
+                has_identities,
+                parameters,
+                fk,
+            )
+
+        elif isinstance(layout, ak.layout.RecordArray):
+            if layout.istuple:
+                forms = [fill(x, part) for x in layout.contents]
+                keys = None
+            else:
+                forms = []
+                keys = []
+                for k in layout.keys():
+                    forms.append(fill(layout[k], part))
+                    keys.append(k)
+
+            return ak.forms.RecordForm(
+                forms,
+                keys,
+                has_identities,
+                parameters,
+                form_key(id=str(key_index), layout=layout),
+            )
+
+        elif isinstance(layout, ak.layout.RegularArray):
+            return ak.forms.RegularForm(
+                fill(layout.content, part),
+                layout.size,
+                has_identities,
+                parameters,
+                form_key(id=str(key_index), layout=layout),
+            )
+
+        elif isinstance(
+            layout,
+            (
+                ak.layout.UnionArray8_32,
+                ak.layout.UnionArray8_U32,
+                ak.layout.UnionArray8_64,
+            ),
+        ):
+            forms = []
+            for x in layout.contents:
+                forms.append(fill(x, part))
+
+            fk = form_key(id=str(key_index), layout=layout)
+            key = key_format(form_key=fk, attribute="tags", partition=str(part))
+            container[key] = little_endian(numpy.asarray(layout.tags))
+            key = key_format(form_key=fk, attribute="index", partition=str(part))
+            container[key] = little_endian(numpy.asarray(layout.index))
+            return ak.forms.UnionForm(
+                index_form(layout.tags),
+                index_form(layout.index),
+                forms,
+                has_identities,
+                parameters,
+                fk,
+            )
+
+        elif isinstance(layout, ak.layout.VirtualArray):
+            return fill(layout.array, part)
+
+        else:
+            raise AssertionError(
+                "unrecognized layout node type: "
+                + str(type(layout))
+                + ak._util.exception_suffix(__file__)
+            )
+
+    layout = to_layout(array, allow_record=False, allow_other=False)
+
+    if isinstance(layout, ak.partition.PartitionedArray):
+        form = None
+        length = []
+        for part, content in enumerate(layout.partitions):
+            num_form_keys[0] = 0
+
+            f = fill(content, partition_start + part)
+
+            if form is None:
+                form = f
+            elif form != f:
+                raise ValueError(
+                    """the Form of partition {0}:
+
+    {1}
+
+differs from the first Form:
+
+    {2}""".format(
+                        partition_start + part,
+                        f.tojson(True, False),
+                        form.tojson(True, False),
+                    )
+                    + ak._util.exception_suffix(__file__)
+                )
+            length.append(len(content))
+
+    else:
+        form = fill(layout, partition_start)
+        length = len(layout)
+
+    return form, length, container
+
+
+_index_form_to_dtype = _index_form_to_index = _form_to_layout_class = None
+
+
+def _form_to_layout(
+    form, container, partnum, key_format, length, lazy_cache, lazy_cache_key,
+):
+    global _index_form_to_dtype, _index_form_to_index, _form_to_layout_class
+
+    if _index_form_to_dtype is None:
+        _index_form_to_dtype = {
+            "i8": np.dtype("<i1"),
+            "u8": np.dtype("<u1"),
+            "i32": np.dtype("<i4"),
+            "u32": np.dtype("<u4"),
+            "i64": np.dtype("<i8"),
+        }
+
+        _index_form_to_index = {
+            "i8": ak.layout.Index8,
+            "u8": ak.layout.IndexU8,
+            "i32": ak.layout.Index32,
+            "u32": ak.layout.IndexU32,
+            "i64": ak.layout.Index64,
+        }
+
+        _form_to_layout_class = {
+            (ak.forms.IndexedForm, "i32"): ak.layout.IndexedArray32,
+            (ak.forms.IndexedForm, "u32"): ak.layout.IndexedArrayU32,
+            (ak.forms.IndexedForm, "i64"): ak.layout.IndexedArray64,
+            (ak.forms.IndexedOptionForm, "i32"): ak.layout.IndexedOptionArray32,
+            (ak.forms.IndexedOptionForm, "i64"): ak.layout.IndexedOptionArray64,
+            (ak.forms.ListForm, "i32"): ak.layout.ListArray32,
+            (ak.forms.ListForm, "u32"): ak.layout.ListArrayU32,
+            (ak.forms.ListForm, "i64"): ak.layout.ListArray64,
+            (ak.forms.ListOffsetForm, "i32"): ak.layout.ListOffsetArray32,
+            (ak.forms.ListOffsetForm, "u32"): ak.layout.ListOffsetArrayU32,
+            (ak.forms.ListOffsetForm, "i64"): ak.layout.ListOffsetArray64,
+            (ak.forms.UnionForm, "i32"): ak.layout.UnionArray8_32,
+            (ak.forms.UnionForm, "u32"): ak.layout.UnionArray8_U32,
+            (ak.forms.UnionForm, "i64"): ak.layout.UnionArray8_64,
+        }
+
+    if form.has_identities:
+        raise NotImplementedError(
+            "ak.from_buffers for an array with Identities"
             + ak._util.exception_suffix(__file__)
         )
-    if attribute is None:
-        attribute = ""
     else:
-        attribute = sep + attribute
-    if partition is None:
-        return "{0}{1}{2}".format(prefix, form_key, attribute,)
-    elif partition_first:
-        return "{0}{1}{2}{3}{4}".format(prefix, partition, sep, form_key, attribute,)
+        identities = None
+
+    parameters = form.parameters
+    fk = form.form_key
+
+    if isinstance(form, ak.forms.BitMaskedForm):
+        raw_mask = (
+            container[key_format(form_key=fk, attribute="mask", partition=partnum)]
+            .reshape(-1)
+            .view("u1")
+        )
+        mask = _index_form_to_index[form.mask](
+            raw_mask.view(_index_form_to_dtype[form.mask])
+        )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partnum,
+            key_format,
+            length,
+            lazy_cache,
+            lazy_cache_key,
+        )
+
+        if length is None:
+            length = len(content)
+
+        return ak.layout.BitMaskedArray(
+            mask,
+            content,
+            form.valid_when,
+            length,
+            form.lsb_order,
+            identities,
+            parameters,
+        )
+
+    elif isinstance(form, ak.forms.ByteMaskedForm):
+        raw_mask = (
+            container[key_format(form_key=fk, attribute="mask", partition=partnum)]
+            .reshape(-1)
+            .view("u1")
+        )
+        mask = _index_form_to_index[form.mask](
+            raw_mask.view(_index_form_to_dtype[form.mask])
+        )
+
+        if length is None:
+            length = len(mask)
+        elif length != len(mask):
+            raise ValueError(
+                "ByteMaskedArray length mismatch: expected {0}, observed {1}".format(
+                    length, len(mask)
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partnum,
+            key_format,
+            length,
+            lazy_cache,
+            lazy_cache_key,
+        )
+
+        return ak.layout.ByteMaskedArray(
+            mask, content, form.valid_when, identities, parameters
+        )
+
+    elif isinstance(form, ak.forms.EmptyForm):
+        if length is not None and length != 0:
+            raise ValueError(
+                "EmptyArray length mismatch: expected {0}, observed {1}".format(
+                    length, 0
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+        return ak.layout.EmptyArray(identities, parameters)
+
+    elif isinstance(form, ak.forms.IndexedForm):
+        raw_index = (
+            container[key_format(form_key=fk, attribute="index", partition=partnum)]
+            .reshape(-1)
+            .view("u1")
+        )
+        index = _index_form_to_index[form.index](
+            raw_index.view(_index_form_to_dtype[form.index])
+        )
+
+        if length is None:
+            length = len(index)
+        elif length != len(index):
+            raise ValueError(
+                "IndexedArray length mismatch: expected {0}, observed {1}".format(
+                    length, len(index)
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partnum,
+            key_format,
+            0 if len(index) == 0 else numpy.max(index) + 1,
+            lazy_cache,
+            lazy_cache_key,
+        )
+
+        return _form_to_layout_class[type(form), form.index](
+            index, content, identities, parameters
+        )
+
+    elif isinstance(form, ak.forms.IndexedOptionForm):
+        raw_index = (
+            container[key_format(form_key=fk, attribute="index", partition=partnum)]
+            .reshape(-1)
+            .view("u1")
+        )
+        index = _index_form_to_index[form.index](
+            raw_index.view(_index_form_to_dtype[form.index])
+        )
+
+        if length is None:
+            length = len(index)
+        elif length != len(index):
+            raise ValueError(
+                "IndexedOptionArray length mismatch: expected {0}, observed {1}".format(
+                    length, len(index)
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partnum,
+            key_format,
+            0 if len(index) == 0 else max(0, numpy.max(index) + 1),
+            lazy_cache,
+            lazy_cache_key,
+        )
+
+        return _form_to_layout_class[type(form), form.index](
+            index, content, identities, parameters
+        )
+
+    elif isinstance(form, ak.forms.ListForm):
+        raw_starts = (
+            container[key_format(form_key=fk, attribute="starts", partition=partnum)]
+            .reshape(-1)
+            .view("u1")
+        )
+        starts = _index_form_to_index[form.starts](
+            raw_starts.view(_index_form_to_dtype[form.starts])
+        )
+        raw_stops = (
+            container[key_format(form_key=fk, attribute="stops", partition=partnum)]
+            .reshape(-1)
+            .view("u1")
+        )
+        stops = _index_form_to_index[form.stops](
+            raw_stops.view(_index_form_to_dtype[form.stops])
+        )
+
+        if length is None:
+            length = len(starts)
+        elif length != len(starts):
+            raise ValueError(
+                "ListArray length mismatch: expected {0}, observed {1}".format(
+                    length, len(starts)
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+
+        array_starts = numpy.asarray(starts)
+        array_stops = numpy.asarray(stops)[: len(array_starts)]
+        array_stops = array_stops[array_starts != array_stops]
+        content = _form_to_layout(
+            form.content,
+            container,
+            partnum,
+            key_format,
+            0 if len(array_stops) == 0 else numpy.max(array_stops),
+            lazy_cache,
+            lazy_cache_key,
+        )
+
+        return _form_to_layout_class[type(form), form.starts](
+            starts, stops, content, identities, parameters
+        )
+
+    elif isinstance(form, ak.forms.ListOffsetForm):
+        raw_offsets = (
+            container[key_format(form_key=fk, attribute="offsets", partition=partnum)]
+            .reshape(-1)
+            .view("u1")
+        )
+        offsets = _index_form_to_index[form.offsets](
+            raw_offsets.view(_index_form_to_dtype[form.offsets])
+        )
+
+        if length is None:
+            length = len(offsets) - 1
+        elif length != len(offsets) - 1:
+            raise ValueError(
+                "ListOffsetArray length mismatch: expected {0}, observed {1}".format(
+                    length, len(offsets) - 1
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partnum,
+            key_format,
+            offsets[-1],
+            lazy_cache,
+            lazy_cache_key,
+        )
+
+        return _form_to_layout_class[type(form), form.offsets](
+            offsets, content, identities, parameters
+        )
+
+    elif isinstance(form, ak.forms.NumpyForm):
+        raw_array = (
+            container[key_format(form_key=fk, attribute="data", partition=partnum)]
+            .reshape(-1)
+            .view("u1")
+        )
+
+        dtype_inner_shape = form.to_numpy()
+        if dtype_inner_shape.subdtype is None:
+            dtype, inner_shape = dtype_inner_shape, ()
+        else:
+            dtype, inner_shape = dtype_inner_shape.subdtype
+
+        if length is None:
+            shape = (-1,) + inner_shape
+        else:
+            shape = (length,) + inner_shape
+
+        array = raw_array.view(dtype).reshape(shape)
+
+        return ak.layout.NumpyArray(array, identities, parameters)
+
+    elif isinstance(form, ak.forms.RecordForm):
+        items = list(form.contents.items())
+        if form.istuple:
+            items.sort(key=lambda x: int(x[0]))
+        contents = []
+        minlength = None
+        keys = []
+        for key, content_form in items:
+            keys.append(key)
+            content = _form_to_layout(
+                content_form,
+                container,
+                partnum,
+                key_format,
+                length,
+                lazy_cache,
+                lazy_cache_key,
+            )
+            if minlength is None:
+                minlength = len(content)
+            else:
+                minlength = min(minlength, len(content))
+            contents.append(content)
+
+        if length is None:
+            length = minlength
+        elif minlength is not None and length > minlength:
+            raise ValueError(
+                "RecordArray length mismatch: expected {0}, minimum content is {1}".format(
+                    length, minlength
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+
+        return ak.layout.RecordArray(
+            contents, None if form.istuple else keys, length, identities, parameters,
+        )
+
+    elif isinstance(form, ak.forms.RegularForm):
+        if length is None:
+            length = 0
+
+        content = _form_to_layout(
+            form.content,
+            container,
+            partnum,
+            key_format,
+            length * form.size,
+            lazy_cache,
+            lazy_cache_key,
+        )
+
+        return ak.layout.RegularArray(
+            content, form.size, length, identities, parameters
+        )
+
+    elif isinstance(form, ak.forms.UnionForm):
+        raw_tags = (
+            container[key_format(form_key=fk, attribute="tags", partition=partnum)]
+            .reshape(-1)
+            .view("u1")
+        )
+        tags = _index_form_to_index[form.tags](
+            raw_tags.view(_index_form_to_dtype[form.tags])
+        )
+        raw_index = (
+            container[key_format(form_key=fk, attribute="index", partition=partnum)]
+            .reshape(-1)
+            .view("u1")
+        )
+        index = _index_form_to_index[form.index](
+            raw_index.view(_index_form_to_dtype[form.index])
+        )
+
+        if length is None:
+            length = len(tags)
+        elif length != len(tags):
+            raise ValueError(
+                "UnionArray length mismatch: expected {0}, observed {1}".format(
+                    length, len(tags)
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+
+        contents = []
+        for i, content_form in enumerate(form.contents):
+            mine = numpy.array(index)[numpy.equal(tags, i)]
+            contents.append(
+                _form_to_layout(
+                    content_form,
+                    container,
+                    partnum,
+                    key_format,
+                    0 if len(mine) == 0 else numpy.max(mine) + 1,
+                    lazy_cache,
+                    lazy_cache_key,
+                )
+            )
+
+        return _form_to_layout_class[type(form), form.index](
+            tags, index, contents, identities, parameters
+        )
+
+    elif isinstance(form, ak.forms.UnmaskedForm):
+        content = _form_to_layout(
+            form.content,
+            container,
+            partnum,
+            key_format,
+            length,
+            lazy_cache,
+            lazy_cache_key,
+        )
+
+        return ak.layout.UnmaskedArray(content, identities, parameters)
+
+    elif isinstance(form, ak.forms.VirtualForm):
+        args = (
+            form.form,
+            container,
+            partnum,
+            key_format,
+            length,
+            lazy_cache,
+            lazy_cache_key,
+        )
+        generator = ak.layout.ArrayGenerator(
+            _form_to_layout, args, form=form.form, length=length,
+        )
+        node_cache_key = key_format(
+            form_key=form.form.form_key, attribute="virtual", partition=partnum
+        )
+        return ak.layout.VirtualArray(
+            generator, lazy_cache, "{0}({1})".format(lazy_cache_key, node_cache_key)
+        )
+
     else:
-        return "{0}{1}{2}{3}{4}".format(prefix, form_key, attribute, sep, partition,)
+        raise AssertionError(
+            "unexpected form node type: "
+            + str(type(form))
+            + ak._util.exception_suffix(__file__)
+        )
+
+
+_from_buffers_key_number = 0
+_from_buffers_key_lock = threading.Lock()
+
+
+def _from_buffers_key():
+    global _from_buffers_key_number
+    with _from_buffers_key_lock:
+        out = _from_buffers_key_number
+        _from_buffers_key_number += 1
+    return out
+
+
+def _wrap_record_with_virtual(input_form):
+    def modify(form):
+        if form["class"] == "RecordArray":
+            for item in form["contents"].values():
+                modify(item)
+        elif form["class"].startswith("UnionArray"):
+            for item in form["contents"]:
+                modify(item)
+        elif "content" in form:
+            modify(form["content"])
+
+        if form["class"] == "RecordArray":
+            for key in form["contents"].keys():
+                form["contents"][key] = {
+                    "class": "VirtualArray",
+                    "has_length": True,
+                    "form": form["contents"][key],
+                }
+
+    form = json.loads(input_form.tojson())
+    modify(form)
+    return ak.forms.Form.fromjson(json.dumps(form))
+
+
+def from_buffers(
+    form,
+    length,
+    container,
+    partition_start=0,
+    key_format="part{partition}-{form_key}-{attribute}",
+    lazy=False,
+    lazy_cache="new",
+    lazy_cache_key=None,
+    highlevel=True,
+    behavior=None,
+):
+    u"""
+    Args:
+        form (#ak.forms.Form or str/dict equivalent): The form of the Awkward
+            Array to reconstitute from named buffers.
+        length (int or iterable of int): Length of the array to reconstitute as a
+            non-partitioned array or the lengths (plural) of partitions in a
+            partitioned array.
+        container (Mapping, such as dict): The str \u2192 Python buffers that
+            represent the decomposed Awkward Array. This `container` is only
+            assumed to have a `__getitem__` method that accepts strings as keys.
+        partition_start (int): First (or only) partition number to get from the
+            `container`.
+        key_format (str or callable): Python format string containing
+            `"{partition}"`, `"{form_key}"`, and/or `"{attribute}"` or a function
+            that takes these as keyword arguments and returns a string to use
+            as keys for buffers in the `container`. The `partition` is a
+            partition number (non-negative integer, passed as a string), the
+            `form_key` is a string associated with each node in the Form, and the
+            `attribute` is a hard-coded string representing the buffer's function
+            (e.g. `"data"`, `"offsets"`, `"index"`).
+        lazy (bool): If True, read the array or its partitions on demand (as
+            #ak.layout.VirtualArray, possibly in #ak.partition.PartitionedArray
+            if `num_partitions` is not None); if False, read all requested data
+            immediately. Any RecordArray child nodes will additionally be
+            read on demand.
+        lazy_cache (None, "new", or MutableMapping): If lazy, pass this
+            cache to the VirtualArrays. If "new", a new dict (keep-forever cache)
+            is created. If None, no cache is used.
+        lazy_cache_key (None or str): If lazy, pass this cache_key to the
+            VirtualArrays. If None, a process-unique string is constructed.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Reconstitutes an Awkward Array from a Form, length, and a collection of memory
+    buffers, so that data can be losslessly read from file formats and storage
+    devices that only map names to binary blobs (such as a filesystem directory).
+
+    The first three arguments of this function are the return values of
+    #ak.to_buffers, so a full round-trip is
+
+        >>> reconstituted = ak.from_buffers(*ak.to_buffers(original))
+
+    The `container` argument lets you specify your own Mapping, which might be
+    an interface to some storage format or device (e.g. h5py). It's okay if
+    the `container` dropped NumPy's `dtype` and `shape` information, leaving
+    raw bytes, since `dtype` and `shape` can be reconstituted from the
+    #ak.forms.NumpyForm.
+
+    The `key_format` should be the same as the one used in #ak.to_buffers.
+
+    The arguments that begin with `lazy_` are only needed if `lazy` is True.
+    The `lazy_cache` and `lazy_cache_key` determine how the array or its
+    partitions are cached after being read from the `container` (in a no-eviction
+    dict attached to the output #ak.Array as `cache` if not specified).
+
+    See #ak.to_buffers for examples.
+    """
+
+    if isinstance(form, str) or (ak._util.py27 and isinstance(form, ak._util.unicode)):
+        form = ak.forms.Form.fromjson(form)
+    elif isinstance(form, dict):
+        form = ak.forms.Form.fromjson(json.dumps(form))
+
+    if isinstance(key_format, str):
+
+        def generate_key_format(key_format):
+            def kf(**v):
+                return key_format.format(**v)
+
+            return kf
+
+        key_format = generate_key_format(key_format)
+
+    hold_cache = None
+    if lazy:
+        form = _wrap_record_with_virtual(form)
+
+        if lazy_cache == "new":
+            hold_cache = ak._util.MappingProxy({})
+            lazy_cache = ak.layout.ArrayCache(hold_cache)
+        elif lazy_cache is not None and not isinstance(
+            lazy_cache, ak.layout.ArrayCache
+        ):
+            hold_cache = ak._util.MappingProxy.maybe_wrap(lazy_cache)
+            if not isinstance(hold_cache, MutableMapping):
+                raise TypeError("lazy_cache must be a MutableMapping")
+            lazy_cache = ak.layout.ArrayCache(hold_cache)
+
+        if lazy_cache_key is None:
+            lazy_cache_key = "ak.from_buffers:{0}".format(_from_buffers_key())
+
+    if length is None or isinstance(length, (numbers.Integral, np.integer)):
+        if length is None:
+            ak._util.deprecate(
+                TypeError(
+                    "length must be an integer or an iterable of integers"
+                    + ak._util.exception_suffix(__file__)
+                ),
+                "1.1.0",
+                "February 1, 2021",
+            )
+
+        args = (form, container, str(partition_start), key_format, length)
+
+        if lazy:
+            generator = ak.layout.ArrayGenerator(
+                _form_to_layout,
+                args + (lazy_cache, lazy_cache_key),
+                form=form,
+                length=length,
+            )
+            out = ak.layout.VirtualArray(generator, lazy_cache, lazy_cache_key)
+
+        else:
+            out = _form_to_layout(*(args + (None, None)))
+
+    elif isinstance(length, Iterable):
+        partitions = []
+        offsets = [0]
+
+        for part, partlen in enumerate(length):
+            partnum = str(partition_start + part)
+            args = (form, container, partnum, key_format)
+
+            if lazy:
+                lazy_cache_key_part = "{0}[{1}]".format(lazy_cache_key, partnum)
+                generator = ak.layout.ArrayGenerator(
+                    _form_to_layout,
+                    args + (partlen, lazy_cache, lazy_cache_key_part),
+                    form=form,
+                    length=length[part],
+                )
+
+                partitions.append(
+                    ak.layout.VirtualArray(generator, lazy_cache, lazy_cache_key_part)
+                )
+                offsets.append(offsets[-1] + length[part])
+
+            else:
+                partitions.append(_form_to_layout(*(args + (partlen, None, None))))
+                offsets.append(offsets[-1] + len(partitions[-1]))
+
+        out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
+
+    else:
+        raise TypeError(
+            "length must be an integer or an iterable of integers, not "
+            + repr(length)
+            + ak._util.exception_suffix(__file__)
+        )
+
+    if highlevel:
+        return ak._util.wrap(out, behavior)
+    else:
+        return out
 
 
 def to_arrayset(
@@ -2731,6 +3816,10 @@ def to_arrayset(
             after the prefix (if any); if False, the partition part appears
             at the end of the keys. This can be relevant if the `container`
             is sorted or lookup performance depends on alphabetical order.
+
+    **Deprecated:** This will be removed in `awkward>=1.1.0` (target date:
+    February 1, 2021). Use #ak.to_buffers instead: the arguments and return
+    values have changed.
 
     Decomposes an Awkward Array into a Form and a collection of arrays, so
     that data can be losslessly written to file formats and storage devices
@@ -2831,750 +3920,82 @@ def to_arrayset(
 
     See also #ak.from_arrayset.
     """
-    if container is None:
-        container = {}
 
-    def index_form(index):
-        if isinstance(index, ak.layout.Index64):
-            return "i64"
-        elif isinstance(index, ak.layout.Index32):
-            return "i32"
-        elif isinstance(index, ak.layout.IndexU32):
-            return "u32"
-        elif isinstance(index, ak.layout.Index8):
-            return "i8"
-        elif isinstance(index, ak.layout.IndexU8):
-            return "u8"
-        else:
-            raise AssertionError(
-                "unrecognized index: "
-                + repr(index)
-                + ak._util.exception_suffix(__file__)
-            )
-
-    if prefix is None:
-        prefix = ""
-    else:
-        prefix = prefix + sep
-
-    if isinstance(node_format, str) or (
-        ak._util.py27 and isinstance(node_format, ak._util.unicode)
-    ):
-        tmp1 = node_format
-
-        def node_format(x):
-            return tmp1.format(x)
-
-    if isinstance(partition_format, str) or (
-        ak._util.py27 and isinstance(partition_format, ak._util.unicode)
-    ):
-        tmp2 = partition_format
-
-        def partition_format(x):
-            return tmp2.format(x)
-
-    def key(key_index, attribute, partition):
-        if partition is not None:
-            partition = partition_format(partition)
-        return _arrayset_key(
-            node_format(key_index), attribute, partition, prefix, sep, partition_first,
-        )
-
-    num_form_keys = [0]
-
-    def little_endian(array):
-        return array.astype(array.dtype.newbyteorder("<"), copy=False)
-
-    def fill(layout, part):
-        has_identities = layout.identities is not None
-        parameters = layout.parameters
-        key_index = num_form_keys[0]
-        num_form_keys[0] += 1
-
-        if has_identities:
-            raise NotImplementedError(
-                "ak.to_arrayset for an array with Identities"
-                + ak._util.exception_suffix(__file__)
-            )
-
-        if isinstance(layout, ak.layout.EmptyArray):
-            array = numpy.asarray(layout)
-            container[key(key_index, None, part)] = little_endian(array)
-            return ak.forms.EmptyForm(
-                has_identities, parameters, node_format(key_index)
-            )
-
-        elif isinstance(
-            layout,
-            (
-                ak.layout.IndexedArray32,
-                ak.layout.IndexedArrayU32,
-                ak.layout.IndexedArray64,
-            ),
-        ):
-            container[key(key_index, "index", part)] = little_endian(
-                numpy.asarray(layout.index)
-            )
-            return ak.forms.IndexedForm(
-                index_form(layout.index),
-                fill(layout.content, part),
-                has_identities,
-                parameters,
-                node_format(key_index),
-            )
-
-        elif isinstance(
-            layout, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64)
-        ):
-            container[key(key_index, "index", part)] = little_endian(
-                numpy.asarray(layout.index)
-            )
-            return ak.forms.IndexedOptionForm(
-                index_form(layout.index),
-                fill(layout.content, part),
-                has_identities,
-                parameters,
-                node_format(key_index),
-            )
-
-        elif isinstance(layout, ak.layout.ByteMaskedArray):
-            container[key(key_index, "mask", part)] = little_endian(
-                numpy.asarray(layout.mask)
-            )
-            return ak.forms.ByteMaskedForm(
-                index_form(layout.mask),
-                fill(layout.content, part),
-                layout.valid_when,
-                has_identities,
-                parameters,
-                node_format(key_index),
-            )
-
-        elif isinstance(layout, ak.layout.BitMaskedArray):
-            container[key(key_index, "mask", part)] = little_endian(
-                numpy.asarray(layout.mask)
-            )
-            return ak.forms.BitMaskedForm(
-                index_form(layout.mask),
-                fill(layout.content, part),
-                layout.valid_when,
-                layout.lsb_order,
-                has_identities,
-                parameters,
-                node_format(key_index),
-            )
-
-        elif isinstance(layout, ak.layout.UnmaskedArray):
-            return ak.forms.UnmaskedForm(
-                fill(layout.content, part),
-                has_identities,
-                parameters,
-                node_format(key_index),
-            )
-
-        elif isinstance(
-            layout,
-            (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64),
-        ):
-            container[key(key_index, "starts", part)] = little_endian(
-                numpy.asarray(layout.starts)
-            )
-            container[key(key_index, "stops", part)] = little_endian(
-                numpy.asarray(layout.stops)
-            )
-            return ak.forms.ListForm(
-                index_form(layout.starts),
-                index_form(layout.stops),
-                fill(layout.content, part),
-                has_identities,
-                parameters,
-                node_format(key_index),
-            )
-
-        elif isinstance(
-            layout,
-            (
-                ak.layout.ListOffsetArray32,
-                ak.layout.ListOffsetArrayU32,
-                ak.layout.ListOffsetArray64,
-            ),
-        ):
-            container[key(key_index, "offsets", part)] = little_endian(
-                numpy.asarray(layout.offsets)
-            )
-            return ak.forms.ListOffsetForm(
-                index_form(layout.offsets),
-                fill(layout.content, part),
-                has_identities,
-                parameters,
-                node_format(key_index),
-            )
-
-        elif isinstance(layout, ak.layout.NumpyArray):
-            array = numpy.asarray(layout)
-            container[key(key_index, None, part)] = little_endian(array)
-            form = ak.forms.Form.from_numpy(array.dtype)
-            return ak.forms.NumpyForm(
-                layout.shape[1:],
-                form.itemsize,
-                form.format,
-                has_identities,
-                parameters,
-                node_format(key_index),
-            )
-
-        elif isinstance(layout, ak.layout.RecordArray):
-            if layout.istuple:
-                forms = [fill(x, part) for x in layout.contents]
-                keys = None
-            else:
-                forms = []
-                keys = []
-                for k in layout.keys():
-                    forms.append(fill(layout[k], part))
-                    keys.append(k)
-            return ak.forms.RecordForm(
-                forms, keys, has_identities, parameters, node_format(key_index),
-            )
-
-        elif isinstance(layout, ak.layout.RegularArray):
-            return ak.forms.RegularForm(
-                fill(layout.content, part),
-                layout.size,
-                has_identities,
-                parameters,
-                node_format(key_index),
-            )
-
-        elif isinstance(
-            layout,
-            (
-                ak.layout.UnionArray8_32,
-                ak.layout.UnionArray8_U32,
-                ak.layout.UnionArray8_64,
-            ),
-        ):
-            forms = []
-            for x in layout.contents:
-                forms.append(fill(x, part))
-            container[key(key_index, "tags", part)] = little_endian(
-                numpy.asarray(layout.tags)
-            )
-            container[key(key_index, "index", part)] = little_endian(
-                numpy.asarray(layout.index)
-            )
-            return ak.forms.UnionForm(
-                index_form(layout.tags),
-                index_form(layout.index),
-                forms,
-                has_identities,
-                parameters,
-                node_format(key_index),
-            )
-
-        elif isinstance(layout, ak.layout.VirtualArray):
-            return fill(layout.array, part)
-
-        else:
-            raise AssertionError(
-                "unrecognized layout node type: "
-                + str(type(layout))
-                + ak._util.exception_suffix(__file__)
-            )
+    ak._util.deprecate(
+        TypeError(
+            "ak.to_arrayset is deprecated; use ak.to_buffers instead"
+            + ak._util.exception_suffix(__file__)
+        ),
+        "1.1.0",
+        "February 1, 2021",
+    )
 
     layout = to_layout(array, allow_record=False, allow_other=False)
 
     if isinstance(layout, ak.partition.PartitionedArray):
+        show_partition = True
         if partition is not None:
             raise ValueError(
                 "array is partitioned; an explicit 'partition' should not be "
                 "assigned" + ak._util.exception_suffix(__file__)
             )
-        form = None
-        for part, content in enumerate(layout.partitions):
-            num_form_keys[0] = 0
+    else:
+        if partition is None:
+            show_partition = False
+        else:
+            show_partition = True
 
-            f = fill(content, part)
+    if partition is None:
+        partition_start = 0
+    else:
+        partition_start = partition
 
-            if form is None:
-                form = f
-            elif form != f:
-                raise ValueError(
-                    """the Form of partition {0}:
+    def form_key(**v):
+        return "node{id}".format(**v)
 
-    {1}
+    def key_format(**v):
+        v["sep"] = sep
+        if prefix is None:
+            v["prefix"] = ""
+        else:
+            v["prefix"] = prefix + sep
 
-differs from the first Form:
+        if not show_partition:
+            if v["attribute"] == "data":
+                return "{prefix}{form_key}".format(**v)
+            else:
+                return "{prefix}{form_key}{sep}{attribute}".format(**v)
 
-    {2}""".format(
-                        part, f.tojson(True, False), form.tojson(True, False)
-                    )
-                    + ak._util.exception_suffix(__file__)
+        elif partition_first:
+            if v["attribute"] == "data":
+                return "{prefix}part{partition}{sep}{form_key}".format(**v)
+            else:
+                return "{prefix}part{partition}{sep}{form_key}{sep}{attribute}".format(
+                    **v
                 )
 
-        num_partitions = len(layout.partitions)
+        else:
+            if v["attribute"] == "data":
+                return "{prefix}{form_key}{sep}part{partition}".format(**v)
+            else:
+                return "{prefix}{form_key}{sep}{attribute}{sep}part{partition}".format(
+                    **v
+                )
 
-    else:
-        form = fill(layout, partition)
+    form, length, container = to_buffers(
+        layout,
+        container=container,
+        partition_start=partition_start,
+        form_key=form_key,
+        key_format=key_format,
+    )
+
+    if isinstance(length, (numbers.Integral, np.integer)):
         num_partitions = None
+    else:
+        num_partitions = len(length)
 
     return form, container, num_partitions
-
-
-_index_form_to_dtype = _index_form_to_index = _form_to_layout_class = None
-
-
-def _form_to_layout(
-    form,
-    container,
-    partition,
-    prefix,
-    sep,
-    partition_first,
-    cache=None,
-    cache_key=None,
-    length=None,
-):
-    global _index_form_to_dtype, _index_form_to_index, _form_to_layout_class
-
-    if _index_form_to_dtype is None:
-        _index_form_to_dtype = {
-            "i8": np.dtype("<i1"),
-            "u8": np.dtype("<u1"),
-            "i32": np.dtype("<i4"),
-            "u32": np.dtype("<u4"),
-            "i64": np.dtype("<i8"),
-        }
-
-        _index_form_to_index = {
-            "i8": ak.layout.Index8,
-            "u8": ak.layout.IndexU8,
-            "i32": ak.layout.Index32,
-            "u32": ak.layout.IndexU32,
-            "i64": ak.layout.Index64,
-        }
-
-        _form_to_layout_class = {
-            (ak.forms.IndexedForm, "i32"): ak.layout.IndexedArray32,
-            (ak.forms.IndexedForm, "u32"): ak.layout.IndexedArrayU32,
-            (ak.forms.IndexedForm, "i64"): ak.layout.IndexedArray64,
-            (ak.forms.IndexedOptionForm, "i32"): ak.layout.IndexedOptionArray32,
-            (ak.forms.IndexedOptionForm, "i64"): ak.layout.IndexedOptionArray64,
-            (ak.forms.ListForm, "i32"): ak.layout.ListArray32,
-            (ak.forms.ListForm, "u32"): ak.layout.ListArrayU32,
-            (ak.forms.ListForm, "i64"): ak.layout.ListArray64,
-            (ak.forms.ListOffsetForm, "i32"): ak.layout.ListOffsetArray32,
-            (ak.forms.ListOffsetForm, "u32"): ak.layout.ListOffsetArrayU32,
-            (ak.forms.ListOffsetForm, "i64"): ak.layout.ListOffsetArray64,
-            (ak.forms.UnionForm, "i32"): ak.layout.UnionArray8_32,
-            (ak.forms.UnionForm, "u32"): ak.layout.UnionArray8_U32,
-            (ak.forms.UnionForm, "i64"): ak.layout.UnionArray8_64,
-        }
-
-    if form.has_identities:
-        raise NotImplementedError(
-            "ak.from_arrayset for an array with Identities"
-            + ak._util.exception_suffix(__file__)
-        )
-    else:
-        identities = None
-
-    parameters = form.parameters
-
-    if isinstance(form, ak.forms.BitMaskedForm):
-        raw_mask = (
-            container[
-                _arrayset_key(
-                    form.form_key, "mask", partition, prefix, sep, partition_first,
-                )
-            ]
-            .reshape(-1)
-            .view("u1")
-        )
-        mask = _index_form_to_index[form.mask](
-            raw_mask.view(_index_form_to_dtype[form.mask])
-        )
-
-        content = _form_to_layout(
-            form.content,
-            container,
-            partition,
-            prefix,
-            sep,
-            partition_first,
-            cache,
-            cache_key,
-            len(mask),
-        )
-
-        return ak.layout.BitMaskedArray(
-            mask,
-            content,
-            form.valid_when,
-            len(content),
-            form.lsb_order,
-            identities,
-            parameters,
-        )
-
-    elif isinstance(form, ak.forms.ByteMaskedForm):
-        raw_mask = (
-            container[
-                _arrayset_key(
-                    form.form_key, "mask", partition, prefix, sep, partition_first,
-                )
-            ]
-            .reshape(-1)
-            .view("u1")
-        )
-        mask = _index_form_to_index[form.mask](
-            raw_mask.view(_index_form_to_dtype[form.mask])
-        )
-
-        content = _form_to_layout(
-            form.content,
-            container,
-            partition,
-            prefix,
-            sep,
-            partition_first,
-            cache,
-            cache_key,
-            len(mask),
-        )
-
-        return ak.layout.ByteMaskedArray(
-            mask, content, form.valid_when, identities, parameters
-        )
-
-    elif isinstance(form, ak.forms.EmptyForm):
-        return ak.layout.EmptyArray(identities, parameters)
-
-    elif isinstance(form, ak.forms.IndexedForm):
-        raw_index = (
-            container[
-                _arrayset_key(
-                    form.form_key, "index", partition, prefix, sep, partition_first,
-                )
-            ]
-            .reshape(-1)
-            .view("u1")
-        )
-        index = _index_form_to_index[form.index](
-            raw_index.view(_index_form_to_dtype[form.index])
-        )
-
-        content = _form_to_layout(
-            form.content,
-            container,
-            partition,
-            prefix,
-            sep,
-            partition_first,
-            cache,
-            cache_key,
-            numpy.max(index) + 1,
-        )
-
-        return _form_to_layout_class[type(form), form.index](
-            index, content, identities, parameters
-        )
-
-    elif isinstance(form, ak.forms.IndexedOptionForm):
-        raw_index = (
-            container[
-                _arrayset_key(
-                    form.form_key, "index", partition, prefix, sep, partition_first,
-                )
-            ]
-            .reshape(-1)
-            .view("u1")
-        )
-        index = _index_form_to_index[form.index](
-            raw_index.view(_index_form_to_dtype[form.index])
-        )
-
-        content = _form_to_layout(
-            form.content,
-            container,
-            partition,
-            prefix,
-            sep,
-            partition_first,
-            cache,
-            cache_key,
-            numpy.max(index) + 1,
-        )
-
-        return _form_to_layout_class[type(form), form.index](
-            index, content, identities, parameters
-        )
-
-    elif isinstance(form, ak.forms.ListForm):
-        raw_starts = (
-            container[
-                _arrayset_key(
-                    form.form_key, "starts", partition, prefix, sep, partition_first,
-                )
-            ]
-            .reshape(-1)
-            .view("u1")
-        )
-        starts = _index_form_to_index[form.starts](
-            raw_starts.view(_index_form_to_dtype[form.starts])
-        )
-        raw_stops = (
-            container[
-                _arrayset_key(
-                    form.form_key, "stops", partition, prefix, sep, partition_first,
-                )
-            ]
-            .reshape(-1)
-            .view("u1")
-        )
-        stops = _index_form_to_index[form.stops](
-            raw_stops.view(_index_form_to_dtype[form.stops])
-        )
-
-        content = _form_to_layout(
-            form.content,
-            container,
-            partition,
-            prefix,
-            sep,
-            partition_first,
-            cache,
-            cache_key,
-            stops[-1],
-        )
-
-        return _form_to_layout_class[type(form), form.starts](
-            starts, stops, content, identities, parameters
-        )
-
-    elif isinstance(form, ak.forms.ListOffsetForm):
-        raw_offsets = (
-            container[
-                _arrayset_key(
-                    form.form_key, "offsets", partition, prefix, sep, partition_first,
-                )
-            ]
-            .reshape(-1)
-            .view("u1")
-        )
-        offsets = _index_form_to_index[form.offsets](
-            raw_offsets.view(_index_form_to_dtype[form.offsets])
-        )
-
-        content = _form_to_layout(
-            form.content,
-            container,
-            partition,
-            prefix,
-            sep,
-            partition_first,
-            cache,
-            cache_key,
-            offsets[-1],
-        )
-
-        return _form_to_layout_class[type(form), form.offsets](
-            offsets, content, identities, parameters
-        )
-
-    elif isinstance(form, ak.forms.NumpyForm):
-        raw_array = (
-            container[
-                _arrayset_key(
-                    form.form_key, None, partition, prefix, sep, partition_first,
-                )
-            ]
-            .reshape(-1)
-            .view("u1")
-        )
-
-        dtype_inner_shape = form.to_numpy()
-        if dtype_inner_shape.subdtype is None:
-            dtype, inner_shape = dtype_inner_shape, ()
-        else:
-            dtype, inner_shape = dtype_inner_shape.subdtype
-        shape = (-1,) + inner_shape
-
-        array = raw_array.view(dtype).reshape(shape)
-
-        return ak.layout.NumpyArray(array, identities, parameters)
-
-    elif isinstance(form, ak.forms.RecordForm):
-        items = list(form.contents.items())
-        if form.istuple:
-            items.sort(key=lambda x: int(x[0]))
-        contents = []
-        minlength = None
-        keys = []
-        for key, content_form in items:
-            keys.append(key)
-            content = _form_to_layout(
-                content_form,
-                container,
-                partition,
-                prefix,
-                sep,
-                partition_first,
-                cache,
-                cache_key,
-                length,
-            )
-            if minlength is None:
-                minlength = len(content)
-            else:
-                minlength = min(minlength, len(content))
-            contents.append(content)
-
-        return ak.layout.RecordArray(
-            contents, None if form.istuple else keys, minlength, identities, parameters,
-        )
-
-    elif isinstance(form, ak.forms.RegularForm):
-        content = _form_to_layout(
-            form.content,
-            container,
-            partition,
-            prefix,
-            sep,
-            partition_first,
-            cache,
-            cache_key,
-            length,
-        )
-
-        return ak.layout.RegularArray(content, form.size, identities, parameters)
-
-    elif isinstance(form, ak.forms.UnionForm):
-        raw_tags = (
-            container[
-                _arrayset_key(
-                    form.form_key, "tags", partition, prefix, sep, partition_first,
-                )
-            ]
-            .reshape(-1)
-            .view("u1")
-        )
-        tags = _index_form_to_index[form.tags](
-            raw_tags.view(_index_form_to_dtype[form.tags])
-        )
-        raw_index = (
-            container[
-                _arrayset_key(
-                    form.form_key, "index", partition, prefix, sep, partition_first,
-                )
-            ]
-            .reshape(-1)
-            .view("u1")
-        )
-        index = _index_form_to_index[form.index](
-            raw_index.view(_index_form_to_dtype[form.index])
-        )
-
-        contents = []
-        for i, x in enumerate(form.contents):
-            applicable_indices = numpy.array(index)[numpy.equal(tags, i)]
-            contents.append(
-                _form_to_layout(
-                    x,
-                    container,
-                    partition,
-                    prefix,
-                    sep,
-                    partition_first,
-                    cache,
-                    cache_key,
-                    numpy.max(applicable_indices) + 1,
-                )
-            )
-
-        return _form_to_layout_class[type(form), form.index](
-            tags, index, contents, identities, parameters
-        )
-
-    elif isinstance(form, ak.forms.UnmaskedForm):
-        content = _form_to_layout(
-            form.content,
-            container,
-            partition,
-            prefix,
-            sep,
-            partition_first,
-            cache,
-            cache_key,
-            length,
-        )
-
-        return ak.layout.UnmaskedArray(content, identities, parameters)
-
-    elif isinstance(form, ak.forms.VirtualForm):
-        args = (
-            form.form,
-            container,
-            partition,
-            prefix,
-            sep,
-            partition_first,
-            cache,
-            cache_key,
-            length,
-        )
-        generator = ak.layout.ArrayGenerator(
-            _form_to_layout, args, form=form.form, length=length,
-        )
-        node_cache_key = _arrayset_key(
-            form.form.form_key, "virtual", partition, prefix, sep, partition_first,
-        )
-        return ak.layout.VirtualArray(
-            generator, cache, cache_key + sep + node_cache_key
-        )
-
-    else:
-        raise AssertionError(
-            "unexpected form node type: "
-            + str(type(form))
-            + ak._util.exception_suffix(__file__)
-        )
-
-
-_from_arrayset_key_number = 0
-_from_arrayset_key_lock = threading.Lock()
-
-
-def _from_arrayset_key():
-    global _from_arrayset_key_number
-    with _from_arrayset_key_lock:
-        out = _from_arrayset_key_number
-        _from_arrayset_key_number += 1
-    return out
-
-
-def _wrap_record_with_virtual(input_form):
-    def modify(form):
-        if form["class"] == "RecordArray":
-            for item in form["contents"].values():
-                modify(item)
-        elif form["class"].startswith("UnionArray"):
-            for item in form["contents"]:
-                modify(item)
-        elif "content" in form:
-            modify(form["content"])
-
-        if form["class"] == "RecordArray":
-            for key in form["contents"].keys():
-                form["contents"][key] = {
-                    "class": "VirtualArray",
-                    "has_length": True,
-                    "form": form["contents"][key],
-                }
-
-    form = json.loads(input_form.tojson())
-    modify(form)
-    return ak.forms.Form.fromjson(json.dumps(form))
 
 
 def from_arrayset(
@@ -3637,8 +4058,11 @@ def from_arrayset(
             array just to determine its length.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
-        behavior (bool): Custom #ak.behavior for the output array, if
+        behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+
+    **Deprecated:** This will be removed in `awkward>=1.1.0` (target date:
+    February 1, 2021). Use #ak.from_buffers instead: the arguments have changed.
 
     Reconstructs an Awkward Array from a Form and a collection of arrays, so
     that data can be losslessly read from file formats and storage devices that
@@ -3671,121 +4095,99 @@ def from_arrayset(
     See #ak.to_arrayset for examples.
     """
 
-    if isinstance(form, str) or (ak._util.py27 and isinstance(form, ak._util.unicode)):
-        form = ak.forms.Form.fromjson(form)
-    elif isinstance(form, dict):
-        form = ak.forms.Form.fromjson(json.dumps(form))
-
-    if prefix is None:
-        prefix = ""
-    else:
-        prefix = prefix + sep
-
-    if isinstance(partition_format, str) or (
-        ak._util.py27 and isinstance(partition_format, ak._util.unicode)
-    ):
-        tmp2 = partition_format
-
-        def partition_format(x):
-            return tmp2.format(x)
-
-    hold_cache = None
-    if lazy:
-        form = _wrap_record_with_virtual(form)
-
-        if lazy_cache == "new":
-            hold_cache = ak._util.MappingProxy({})
-            lazy_cache = ak.layout.ArrayCache(hold_cache)
-        elif lazy_cache == "attach":
-            exception = TypeError("lazy_cache must be a MutableMapping")
-            ak._util.deprecate(exception, "1.0.0", date="2020-12-01")
-            hold_cache = ak._util.MappingProxy({})
-            lazy_cache = ak.layout.ArrayCache(hold_cache)
-        elif lazy_cache is not None and not isinstance(
-            lazy_cache, ak.layout.ArrayCache
-        ):
-            hold_cache = ak._util.MappingProxy.maybe_wrap(lazy_cache)
-            if not isinstance(hold_cache, MutableMapping):
-                raise TypeError("lazy_cache must be a MutableMapping")
-            lazy_cache = ak.layout.ArrayCache(hold_cache)
-
-        if lazy_cache_key is None:
-            lazy_cache_key = "ak.from_arrayset:{0}".format(_from_arrayset_key())
+    ak._util.deprecate(
+        TypeError(
+            "ak.from_arrayset is deprecated; use ak.from_buffers instead"
+            + ak._util.exception_suffix(__file__)
+        ),
+        "1.1.0",
+        "February 1, 2021",
+    )
 
     if num_partitions is None:
-        args = (form, container, None, prefix, sep, partition_first)
+        show_partition = False
 
-        if lazy:
-            if not isinstance(lazy_lengths, numbers.Integral):
+        if lazy_lengths is None:
+            if lazy:
                 raise TypeError(
                     "for lazy=True and num_partitions=None, lazy_lengths "
                     "must be an integer, not "
                     + repr(lazy_lengths)
                     + ak._util.exception_suffix(__file__)
                 )
+            length = None
 
-            generator = ak.layout.ArrayGenerator(
-                _form_to_layout,
-                args + (lazy_cache, lazy_cache_key, lazy_lengths),
-                form=form,
-                length=lazy_lengths,
-            )
-
-            out = ak.layout.VirtualArray(generator, lazy_cache, lazy_cache_key)
+        elif isinstance(lazy_lengths, (numbers.Integral, np.integer)):
+            length = lazy_lengths
 
         else:
-            out = _form_to_layout(*args)
+            raise TypeError(
+                "for num_partitions=None, lazy_lengths "
+                "must be None or an integer, not "
+                + repr(lazy_lengths)
+                + ak._util.exception_suffix(__file__)
+            )
 
     else:
-        if lazy:
-            if isinstance(lazy_lengths, numbers.Integral):
-                lazy_lengths = [lazy_lengths] * num_partitions
-            elif (
-                isinstance(lazy_lengths, Iterable)
-                and len(lazy_lengths) == num_partitions
-                and all(isinstance(x, numbers.Integral) for x in lazy_lengths)
-            ):
-                pass
-            else:
+        show_partition = True
+
+        if lazy_lengths is None:
+            if lazy:
                 raise TypeError(
-                    "for lazy=True, lazy_lengths must be an integer or "
-                    "iterable of 'num_partitions' integers, not "
+                    "for lazy=True and isinstance(num_partitions, int), lazy_lengths "
+                    "must be an iterable of 'num_partitions' integers, not "
                     + repr(lazy_lengths)
                     + ak._util.exception_suffix(__file__)
                 )
+            length = [None] * num_partitions
 
-        partitions = []
-        offsets = [0]
+        elif isinstance(lazy_lengths, (numbers.Integral, np.integer)):
+            length = [lazy_lengths] * num_partitions
 
-        for part in range(num_partitions):
-            p = partition_format(part)
-            args = (form, container, p, prefix, sep, partition_first)
+        else:
+            length = lazy_lengths
 
-            if lazy:
-                cache_key = "{0}[{1}]".format(lazy_cache_key, part)
+    def key_format(**v):
+        v["sep"] = sep
+        if prefix is None:
+            v["prefix"] = ""
+        else:
+            v["prefix"] = prefix + sep
 
-                generator = ak.layout.ArrayGenerator(
-                    _form_to_layout,
-                    args + (lazy_cache, cache_key, lazy_lengths[part]),
-                    form=form,
-                    length=lazy_lengths[part],
-                )
-
-                partitions.append(
-                    ak.layout.VirtualArray(generator, lazy_cache, cache_key)
-                )
-                offsets.append(offsets[-1] + lazy_lengths[part])
-
+        if not show_partition:
+            if v["attribute"] == "data":
+                return "{prefix}{form_key}".format(**v)
             else:
-                partitions.append(_form_to_layout(*args))
-                offsets.append(offsets[-1] + len(partitions[-1]))
+                return "{prefix}{form_key}{sep}{attribute}".format(**v)
 
-        out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
+        elif partition_first:
+            if v["attribute"] == "data":
+                return "{prefix}part{partition}{sep}{form_key}".format(**v)
+            else:
+                return "{prefix}part{partition}{sep}{form_key}{sep}{attribute}".format(
+                    **v
+                )
 
-    if highlevel:
-        return ak._util.wrap(out, behavior)
-    else:
-        return out
+        else:
+            if v["attribute"] == "data":
+                return "{prefix}{form_key}{sep}part{partition}".format(**v)
+            else:
+                return "{prefix}{form_key}{sep}{attribute}{sep}part{partition}".format(
+                    **v
+                )
+
+    return from_buffers(
+        form,
+        length,
+        container,
+        partition_start=0,
+        key_format=key_format,
+        lazy=lazy,
+        lazy_cache=lazy_cache,
+        lazy_cache_key=lazy_cache_key,
+        highlevel=highlevel,
+        behavior=behavior,
+    )
 
 
 def to_pandas(

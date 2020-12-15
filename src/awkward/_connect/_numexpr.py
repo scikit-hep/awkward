@@ -85,7 +85,7 @@ def evaluate(
         for x in arguments
     ]
 
-    def getfunction(inputs, depth):
+    def getfunction(inputs):
         if all(
             isinstance(x, ak.layout.NumpyArray) or not isinstance(x, ak.layout.Content)
             for x in inputs
@@ -107,7 +107,7 @@ def evaluate(
 
     behavior = ak._util.behaviorof(*arrays)
     out = ak._util.broadcast_and_apply(
-        arrays, getfunction, behavior, allow_records=False
+        arrays, getfunction, behavior, allow_records=False, pass_depth=False
     )
     assert isinstance(out, tuple) and len(out) == 1
     return ak._util.wrap(out[0], behavior)
@@ -134,7 +134,7 @@ def re_evaluate(local_dict=None):
         for x in arguments
     ]
 
-    def getfunction(inputs, depth):
+    def getfunction(inputs):
         if all(
             isinstance(x, ak.layout.NumpyArray) or not isinstance(x, ak.layout.Content)
             for x in inputs
@@ -147,7 +147,7 @@ def re_evaluate(local_dict=None):
 
     behavior = ak._util.behaviorof(*arrays)
     out = ak._util.broadcast_and_apply(
-        arrays, getfunction, behavior, allow_records=False
+        arrays, getfunction, behavior, allow_records=False, pass_depth=False
     )
     assert isinstance(out, tuple) and len(out) == 1
     return ak._util.wrap(out[0], behavior)

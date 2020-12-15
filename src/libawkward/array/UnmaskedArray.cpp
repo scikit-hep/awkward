@@ -855,7 +855,8 @@ namespace awkward {
           raw->identities(),
           raw->parameters(),
           wrapped,
-          raw->size());
+          raw->size(),
+          length());
     }
     else {
       return out;
@@ -886,7 +887,8 @@ namespace awkward {
           raw->identities(),
           raw->parameters(),
           wrapped,
-          raw->size());
+          raw->size(),
+          length());
     }
     else {
       return out;

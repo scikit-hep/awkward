@@ -18,13 +18,11 @@
 namespace awkward {
   const BuilderPtr
   TupleBuilder::fromempty(const ArrayBuilderOptions& options) {
-    BuilderPtr out = std::make_shared<TupleBuilder>(options,
-                                                    std::vector<BuilderPtr>(),
-                                                    -1,
-                                                    false,
-                                                    -1);
-    out.get()->setthat(out);
-    return out;
+    return std::make_shared<TupleBuilder>(options,
+                                          std::vector<BuilderPtr>(),
+                                          -1,
+                                          false,
+                                          -1);
   }
 
   TupleBuilder::TupleBuilder(const ArrayBuilderOptions& options,
@@ -90,7 +88,7 @@ namespace awkward {
   const BuilderPtr
   TupleBuilder::null() {
     if (!begun_) {
-      BuilderPtr out = OptionBuilder::fromvalids(options_, that_);
+      BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
       out.get()->null();
       return out;
     }
@@ -105,13 +103,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->null();
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   TupleBuilder::boolean(bool x) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->boolean(x);
       return out;
     }
@@ -126,13 +124,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->boolean(x);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   TupleBuilder::integer(int64_t x) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->integer(x);
       return out;
     }
@@ -147,13 +145,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->integer(x);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   TupleBuilder::real(double x) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->real(x);
       return out;
     }
@@ -168,13 +166,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->real(x);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   TupleBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->string(x, length, encoding);
       return out;
     }
@@ -192,13 +190,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->string(x, length, encoding);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   TupleBuilder::beginlist() {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->beginlist();
       return out;
     }
@@ -214,7 +212,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->beginlist();
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -233,7 +231,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->endlist();
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -250,7 +248,7 @@ namespace awkward {
       nextindex_ = -1;
     }
     else if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->begintuple(numfields);
       return out;
     }
@@ -267,7 +265,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->begintuple(numfields);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -284,7 +282,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->index(index);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -312,13 +310,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->endtuple();
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   TupleBuilder::beginrecord(const char* name, bool check) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->beginrecord(name, check);
       return out;
     }
@@ -335,7 +333,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->beginrecord(name, check);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -354,7 +352,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->field(key, check);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -373,13 +371,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->endrecord();
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   TupleBuilder::append(const ContentPtr& array, int64_t at) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->append(array, at);
       return out;
     }
@@ -395,7 +393,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->append(array, at);
     }
-    return that_;
+    return shared_from_this();
   }
 
   void

@@ -186,7 +186,7 @@ def test_rpad_and_clip_regular_array():
         np.array([13, 9, 13, 4, 8, 3, 15, -1, 16, 2, 8], dtype=np.int64)
     )
     indexedarray = ak.layout.IndexedOptionArray64(index, content)
-    array = ak.layout.RegularArray(indexedarray, 3)
+    array = ak.layout.RegularArray(indexedarray, 3, zeros_length=0)
 
     assert ak.to_list(array.rpad_and_clip(5, 0)) == [
         [6.9, 3.9, 6.9],
@@ -254,7 +254,7 @@ def test_rpad_and_clip_regular_array():
     )
     offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
     listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
-    regulararray = ak.layout.RegularArray(listoffsetarray, 2)
+    regulararray = ak.layout.RegularArray(listoffsetarray, 2, zeros_length=0)
 
     assert ak.to_list(regulararray.rpad_and_clip(1, 0)) == [[[0.0, 1.1, 2.2], []]]
     assert ak.to_list(regulararray.rpad_and_clip(2, 0)) == [
@@ -358,7 +358,7 @@ def test_rpad_regular_array():
         np.array([13, 9, 13, 4, 8, 3, 15, -1, 16, 2, 8], dtype=np.int64)
     )
     indexedarray = ak.layout.IndexedOptionArray64(index, content)
-    array = ak.layout.RegularArray(indexedarray, 3)
+    array = ak.layout.RegularArray(indexedarray, 3, zeros_length=0)
 
     assert ak.to_list(array.rpad(5, 0)) == [
         [6.9, 3.9, 6.9],
@@ -409,7 +409,7 @@ def test_rpad_regular_array():
     )
     offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
     listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
-    regulararray = ak.layout.RegularArray(listoffsetarray, 2)
+    regulararray = ak.layout.RegularArray(listoffsetarray, 2, zeros_length=0)
 
     assert ak.to_list(regulararray.rpad(1, 0)) == [
         [[0.0, 1.1, 2.2], []],

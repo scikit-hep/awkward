@@ -71,7 +71,7 @@ def test_fillna_regular_array():
         np.array([13, 9, 13, 4, 8, 3, 15, -1, 16, 2, 8], dtype=np.int64)
     )
     indexedarray = ak.layout.IndexedOptionArray64(index, content)
-    regarray = ak.layout.RegularArray(indexedarray, 3)
+    regarray = ak.layout.RegularArray(indexedarray, 3, zeros_length=0)
 
     assert ak.to_list(regarray) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7]]
     value = ak.layout.NumpyArray(np.array([666]))

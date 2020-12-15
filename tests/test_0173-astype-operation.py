@@ -53,7 +53,7 @@ def test_RegularArray_and_ListArray():
     )
     offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
     listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
-    regulararray = ak.layout.RegularArray(listoffsetarray, 2)
+    regulararray = ak.layout.RegularArray(listoffsetarray, 2, zeros_length=0)
     starts = ak.layout.Index64(np.array([0, 1]))
     stops = ak.layout.Index64(np.array([2, 3]))
     listarray = ak.layout.ListArray64(starts, stops, regulararray)

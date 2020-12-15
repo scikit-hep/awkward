@@ -99,7 +99,7 @@ def test_toarrow_ListArray_RegularArray():
     )
     offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
     listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
-    regulararray = ak.layout.RegularArray(listoffsetarray, 2)
+    regulararray = ak.layout.RegularArray(listoffsetarray, 2, zeros_length=0)
     starts = ak.layout.Index64(np.array([0, 1]))
     stops = ak.layout.Index64(np.array([2, 3]))
     listarray = ak.layout.ListArray64(starts, stops, regulararray)
@@ -239,7 +239,7 @@ def test_toarrow_ByteMaskedArray_3():
     )
     offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
     listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
-    regulararray = ak.layout.RegularArray(listoffsetarray, 2)
+    regulararray = ak.layout.RegularArray(listoffsetarray, 2, zeros_length=0)
     starts = ak.layout.Index64(np.array([0, 1]))
     stops = ak.layout.Index64(np.array([2, 3]))
     listarray = ak.layout.ListArray64(starts, stops, regulararray)
@@ -411,7 +411,7 @@ def test_fromarrow_RegularArray():
     offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
     listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
 
-    regulararray = ak.layout.RegularArray(listoffsetarray, 2)
+    regulararray = ak.layout.RegularArray(listoffsetarray, 2, zeros_length=0)
     assert ak.to_list(
         ak.from_arrow(ak.to_arrow(regulararray), highlevel=False)
     ) == ak.to_list(regulararray)
@@ -1586,7 +1586,9 @@ def test_arrow_coverage100():
     a = ak.layout.IndexedOptionArray32(
         ak.layout.Index32(np.array([-1, 1, -1, 0, 0, -1], "i4")),
         ak.layout.RegularArray(
-            ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])), 3
+            ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+            3,
+            zeros_length=0,
         ),
     )
     assert ak.to_arrow(a).to_pylist() == [
@@ -1601,7 +1603,9 @@ def test_arrow_coverage100():
     a = ak.layout.IndexedOptionArray32(
         ak.layout.Index32(np.array([-1, 1, -1, 0, 0, -1, 1, -1], "i4")),
         ak.layout.RegularArray(
-            ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])), 3
+            ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+            3,
+            zeros_length=0,
         ),
     )
     assert ak.to_arrow(a).to_pylist() == [
@@ -1618,7 +1622,9 @@ def test_arrow_coverage100():
     a = ak.layout.IndexedOptionArray64(
         ak.layout.Index64(np.array([-1, 1, -1, 0, 0, -1, 1, -1], "i8")),
         ak.layout.RegularArray(
-            ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])), 3
+            ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+            3,
+            zeros_length=0,
         ),
     )
     assert ak.to_arrow(a).to_pylist() == [
@@ -1637,7 +1643,9 @@ def test_arrow_coverage100():
         ak.layout.IndexedOptionArray32(
             ak.layout.Index32(np.array([-1, 1, -1, 0, 0, -1], "i4")),
             ak.layout.RegularArray(
-                ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])), 3
+                ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6])),
+                3,
+                zeros_length=0,
             ),
         ),
         valid_when=True,

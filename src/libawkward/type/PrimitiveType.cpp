@@ -86,7 +86,7 @@ namespace awkward {
 
   const ContentPtr
   PrimitiveType::empty() const {
-    std::shared_ptr<void> ptr(new uint8_t[0], kernel::array_deleter<uint8_t>());
+    std::shared_ptr<void> ptr = kernel::malloc<uint8_t>(kernel::lib::cpu, 0);
     std::vector<ssize_t> shape({ 0 });
     std::vector<ssize_t> strides({ 0 });
     std::string format = util::dtype_to_format(dtype_);

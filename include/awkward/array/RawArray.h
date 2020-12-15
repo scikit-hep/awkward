@@ -606,8 +606,9 @@ namespace awkward {
       std::shared_ptr<T> ptr = ptr_;
       int64_t offset = offset_;
       if (copyarrays) {
-        ptr = std::shared_ptr<T>(new T[(size_t)length_],
-                                 kernel::array_deleter<T>());
+        ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
+                                length_*sizeof(T));
+        // DERIVE Yikes! It's a memcpy!
         memcpy(ptr.get(), &ptr_.get()[(size_t)offset_],
                sizeof(T)*((size_t)length_));
         offset = 0;
@@ -730,9 +731,8 @@ namespace awkward {
 
     const ContentPtr
       carry(const Index64& carry, bool allow_lazy) const override {
-      std::shared_ptr<T> ptr(new T[(size_t)carry.length()],
-                             kernel::array_deleter<T>());
-
+      std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
+                                                 carry.length()*sizeof(T));
       struct Error err = kernel::NumpyArray_getitem_next_null_64(
         kernel::lib::cpu,   // DERIVE
         reinterpret_cast<uint8_t*>(ptr.get()),
@@ -966,9 +966,8 @@ namespace awkward {
                 bool ascending,
                 bool stable,
                 bool keepdims) const override {
-      std::shared_ptr<T> ptr(
-                    new T[length_], kernel::array_deleter<T>());
-
+      std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
+                                                 length_*sizeof(T));
       Index64 offsets(2);
       offsets.setitem_at_nowrap(0, 0);
       offsets.setitem_at_nowrap(1, length_);
@@ -995,7 +994,8 @@ namespace awkward {
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
                                            out,
-                                           length_);
+                                           length_,
+                                           1);
 
       return out;
     }
@@ -1008,9 +1008,9 @@ namespace awkward {
                    bool ascending,
                    bool stable,
                    bool keepdims) const override {
-      std::shared_ptr<int64_t> ptr(
-        new int64_t[length_], kernel::array_deleter<int64_t>());
-
+      std::shared_ptr<int64_t> ptr =
+          kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                  length_*sizeof(int64_t));
       int64_t ranges_length = 2;
       Index64 outranges(ranges_length);
       outranges.setitem_at_nowrap(0, 0);
@@ -1038,7 +1038,8 @@ namespace awkward {
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
                                            out,
-                                           length_);
+                                           length_,
+                                           1);
 
       return out;
     }

@@ -367,7 +367,7 @@ class PartitionedArray(object):
         return PartitionedArray.from_ext(self._ext.repartition(*args, **kwargs))
 
     def __getitem__(self, where):
-        if not isinstance(where, bool) and isinstance(
+        if not isinstance(where, (bool, np.bool_)) and isinstance(
             where, (numbers.Integral, np.integer)
         ):
             return PartitionedArray.from_ext(self._ext.getitem_at(where))
@@ -403,7 +403,7 @@ class PartitionedArray(object):
                 where = (where,)
             head, tail = where[0], where[1:]
 
-            if not isinstance(head, bool) and isinstance(
+            if not isinstance(head, (bool, np.bool_)) and isinstance(
                 head, (numbers.Integral, np.integer)
             ):
                 if head < 0:
@@ -461,7 +461,7 @@ class PartitionedArray(object):
                     head,
                     allow_record=False,
                     allow_other=False,
-                    numpytype=(np.integer, np.bool_, np.bool),
+                    numpytype=(np.integer, np.bool_),
                 )
 
                 t = ak.operations.describe.type(layout)

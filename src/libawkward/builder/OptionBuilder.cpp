@@ -19,11 +19,9 @@ namespace awkward {
     GrowableBuffer<int64_t> index = GrowableBuffer<int64_t>::full(options,
                                                                   -1,
                                                                   nullcount);
-    BuilderPtr out = std::make_shared<OptionBuilder>(options,
-                                                     index,
-                                                     content);
-    out.get()->setthat(out);
-    return out;
+    return std::make_shared<OptionBuilder>(options,
+                                           index,
+                                           content);
   }
 
   const BuilderPtr
@@ -31,11 +29,9 @@ namespace awkward {
                             const BuilderPtr& content) {
     GrowableBuffer<int64_t> index =
       GrowableBuffer<int64_t>::arange(options, content->length());
-    BuilderPtr out = std::make_shared<OptionBuilder>(options,
-                                                     index,
-                                                     content);
-    out.get()->setthat(out);
-    return out;
+    return std::make_shared<OptionBuilder>(options,
+                                           index,
+                                           content);
   }
 
   OptionBuilder::OptionBuilder(const ArrayBuilderOptions& options,
@@ -83,7 +79,7 @@ namespace awkward {
     else {
       content_.get()->null();
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -96,7 +92,7 @@ namespace awkward {
     else {
       content_.get()->boolean(x);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -109,7 +105,7 @@ namespace awkward {
     else {
       content_.get()->integer(x);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -122,7 +118,7 @@ namespace awkward {
     else {
       content_.get()->real(x);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -135,7 +131,7 @@ namespace awkward {
     else {
       content_.get()->string(x, length, encoding);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -146,7 +142,7 @@ namespace awkward {
     else {
       content_.get()->beginlist();
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -163,7 +159,7 @@ namespace awkward {
         index_.append(length);
       }
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -174,7 +170,7 @@ namespace awkward {
     else {
       content_.get()->begintuple(numfields);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -187,7 +183,7 @@ namespace awkward {
     else {
       content_.get()->index(index);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -204,7 +200,7 @@ namespace awkward {
         index_.append(length);
       }
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -215,7 +211,7 @@ namespace awkward {
     else {
       content_.get()->beginrecord(name, check);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -228,7 +224,7 @@ namespace awkward {
     else {
       content_.get()->field(key, check);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -245,7 +241,7 @@ namespace awkward {
         index_.append(length);
       }
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -258,7 +254,7 @@ namespace awkward {
     else {
       content_.get()->append(array, at);
     }
-    return that_;
+    return shared_from_this();
   }
 
   void

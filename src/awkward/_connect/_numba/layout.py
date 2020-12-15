@@ -686,7 +686,7 @@ class RegularArrayType(ContentType):
         content = self.contenttype.tolayout(
             lookup, lookup.positions[pos + self.CONTENT], fields
         )
-        return ak.layout.RegularArray(content, self.size, parameters=self.parameters)
+        return ak.layout.RegularArray(content, self.size, 0, parameters=self.parameters)
 
     def hasfield(self, key):
         return self.contenttype.hasfield(key)

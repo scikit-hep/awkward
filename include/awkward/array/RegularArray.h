@@ -109,6 +109,15 @@ namespace awkward {
     /// Values in `content[i]` where `i >= length * size` are "unreachable,"
     /// and don't exist in the high level view.
     /// @param size Length of the equally sized nested lists.
+    /// @param zeros_length If `size == 0`, this is the length of the array; otherwise,
+    /// the length of the array is derived as the floor of length / size.
+    RegularArray(const IdentitiesPtr& identities,
+                 const util::Parameters& parameters,
+                 const ContentPtr& content,
+                 int64_t size,
+                 int64_t zeros_length);
+
+    /// @brief Creates a RegularArray in which `zeros_length` is zero.
     RegularArray(const IdentitiesPtr& identities,
                  const util::Parameters& parameters,
                  const ContentPtr& content,
@@ -194,7 +203,7 @@ namespace awkward {
 
     /// @copydoc Content::length()
     ///
-    /// Equal to `floor(len(content) / size)`.
+    /// Equal to `floor(len(content) / size)` or `0` if `size == 0`.
     int64_t
       length() const override;
 
@@ -378,6 +387,7 @@ namespace awkward {
   private:
     const ContentPtr content_;
     int64_t size_;
+    int64_t length_;
   };
 }
 

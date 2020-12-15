@@ -21,7 +21,7 @@ class Canary(dict):
         return super(Canary, self).__setitem__(key, value)
 
 
-def test_lazy_arrayset():
+def test_lazy_buffers():
     array = ak.from_json(
         """
     [
@@ -65,19 +65,21 @@ def test_lazy_arrayset():
     )
 
     canary = Canary()
-    prefix = "kitty"
-    form, container, npart = ak.to_arrayset(array, container=canary, prefix=prefix)
+    key_format = "kitty-{form_key}-{attribute}"
+    form, length, container = ak.to_buffers(
+        array, container=canary, key_format=key_format
+    )
     assert not any(op[0] == "get" for op in canary.ops)
     canary.ops = []
 
     cache = {}
-    out = ak.from_arrayset(
+    out = ak.from_buffers(
         form,
+        length,
         container,
+        key_format=key_format,
         lazy=True,
         lazy_cache=cache,
-        lazy_lengths=3,
-        prefix=prefix,
         lazy_cache_key="hello",
     )
     assert len(canary.ops) == 0
@@ -89,7 +91,7 @@ def test_lazy_arrayset():
 
     assert ak.to_list(ak.num(out.listcollection)) == [3, 3, 3]
     assert set(canary.ops) == {("get", "kitty-node1-offsets")}
-    assert set(cache) == {"hello", "hello-kitty-node1-virtual"}
+    assert set(cache) == {"hello", "hello(kitty-node1-virtual)"}
     canary.ops = []
     cache.clear()
 
@@ -102,21 +104,24 @@ def test_lazy_arrayset():
         ("get", "kitty-node11-tags"),
         ("get", "kitty-node11-index"),
         ("get", "kitty-node14-offsets"),
-        ("get", "kitty-node13"),
-        ("get", "kitty-node16"),
+        ("get", "kitty-node13-data"),
+        ("get", "kitty-node16-data"),
     }
     assert set(cache) == {
         "hello",
-        "hello-kitty-node11-virtual",
-        "hello-kitty-node13-virtual",
-        "hello-kitty-node16-virtual",
+        "hello(kitty-node11-virtual)",
+        "hello(kitty-node13-virtual)",
+        "hello(kitty-node16-virtual)",
     }
     canary.ops = []
     cache.clear()
 
     assert ak.to_list(out.masked) == [None, 4, 4]
-    assert set(canary.ops) == {("get", "kitty-node17-index"), ("get", "kitty-node18")}
-    assert set(cache) == {"hello", "hello-kitty-node17-virtual"}
+    assert set(canary.ops) == {
+        ("get", "kitty-node17-index"),
+        ("get", "kitty-node18-data"),
+    }
+    assert set(cache) == {"hello", "hello(kitty-node17-virtual)"}
     canary.ops = []
     cache.clear()
 
@@ -133,7 +138,7 @@ def test_longer_than_expected():
             ),
         )
     )
-    out = ak.from_arrayset(*ak.to_arrayset(array), lazy=True, lazy_lengths=2)
+    out = ak.from_buffers(*ak.to_buffers(array), lazy=True)
     assert ak.to_list(out) == [
         [{"item1": 0, "longitem": 0}, {"item1": 1, "longitem": 1}],
         [{"item1": 2, "longitem": 2}, {"item1": 3, "longitem": 3}],
