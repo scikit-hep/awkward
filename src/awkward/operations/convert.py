@@ -2678,7 +2678,7 @@ def to_parquet(
     list_to32=False,
     string_to32=True,
     bytestring_to32=True,
-    **options,
+    **options  # NOTE: a comma after **options breaks Python 2
 ):
     """
     Args:
