@@ -53,7 +53,7 @@ def test_toarrow_ListOffsetArray64():
     )
     offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 9]))
     array = ak.layout.ListOffsetArray64(offsets, content)
-    assert isinstance(ak.to_arrow(array), (pyarrow.ListArray))
+    assert isinstance(ak.to_arrow(array), (pyarrow.LargeListArray))
     assert ak.to_arrow(array).to_pylist() == [
         [1.1, 2.2, 3.3],
         [],
@@ -69,7 +69,7 @@ def test_toarrow_ListOffsetArrayU32():
     )
     offsets = ak.layout.IndexU32(np.array([0, 3, 3, 5, 6, 9]))
     array = ak.layout.ListOffsetArrayU32(offsets, content)
-    assert isinstance(ak.to_arrow(array), (pyarrow.ListArray))
+    assert isinstance(ak.to_arrow(array), (pyarrow.LargeListArray))
     assert ak.to_arrow(array).to_pylist() == [
         [1.1, 2.2, 3.3],
         [],
@@ -104,7 +104,7 @@ def test_toarrow_ListArray_RegularArray():
     stops = ak.layout.Index64(np.array([2, 3]))
     listarray = ak.layout.ListArray64(starts, stops, regulararray)
 
-    assert isinstance(ak.to_arrow(listarray), (pyarrow.ListArray))
+    assert isinstance(ak.to_arrow(listarray), (pyarrow.LargeListArray))
     assert ak.to_arrow(listarray).to_pylist() == [
         [[[0.0, 1.1, 2.2], []], [[3.3, 4.4], [5.5]]],
         [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]],

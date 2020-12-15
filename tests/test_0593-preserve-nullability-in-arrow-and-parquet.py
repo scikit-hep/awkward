@@ -12,7 +12,7 @@ pyarrow = pytest.importorskip("pyarrow")
 def test_list_to_arrow():
     ak_array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     pa_array = ak.to_arrow(ak_array)
-    assert str(pa_array.type) == "list<item: double not null>"
+    assert str(pa_array.type) == "large_list<item: double not null>"
     assert pa_array.to_pylist() == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
     ak_array = ak.Array(
@@ -21,12 +21,12 @@ def test_list_to_arrow():
         )
     )
     pa_array = ak.to_arrow(ak_array)
-    assert str(pa_array.type) == "list<item: double>"
+    assert str(pa_array.type) == "large_list<item: double>"
     assert pa_array.to_pylist() == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
 
     ak_array = ak.Array([[1.1, 2.2, None], [], [4.4, 5.5]])
     pa_array = ak.to_arrow(ak_array)
-    assert str(pa_array.type) == "list<item: double>"
+    assert str(pa_array.type) == "large_list<item: double>"
     assert pa_array.to_pylist() == [[1.1, 2.2, None], [], [4.4, 5.5]]
 
 
@@ -55,7 +55,7 @@ def test_union_to_arrow():
     pa_array = ak.to_arrow(ak_array)
     assert (
         str(pa_array.type)
-        == "dense_union<0: double=0, 1: list<item: int64 not null>=1, 2: string=2>"
+        == "dense_union<0: double=0, 1: large_list<item: int64 not null>=1, 2: string=2>"
     )
     assert pa_array.to_pylist() == [1.1, 2.2, None, [1, 2, 3], "hello"]
 
@@ -65,7 +65,7 @@ def test_union_to_arrow():
     pa_array = ak.to_arrow(ak_array)
     assert (
         str(pa_array.type)
-        == "dense_union<0: double=0, 1: list<item: int64 not null>=1, 2: string=2>"
+        == "dense_union<0: double=0, 1: large_list<item: int64 not null>=1, 2: string=2>"
     )
     assert pa_array.to_pylist() == [1.1, 2.2, [1, 2, 3], "hello"]
 
@@ -73,7 +73,7 @@ def test_union_to_arrow():
     pa_array = ak.to_arrow(ak_array)
     assert (
         str(pa_array.type)
-        == "dense_union<0: double not null=0, 1: list<item: int64 not null> not null=1, 2: string not null=2>"
+        == "dense_union<0: double not null=0, 1: large_list<item: int64 not null> not null=1, 2: string not null=2>"
     )
     assert pa_array.to_pylist() == [1.1, 2.2, [1, 2, 3], "hello"]
 
@@ -158,3 +158,19 @@ def test_union_from_arrow():
         == "5 * union[?float64, option[var * int64], option[string]]"
     )
     assert reconstituted.tolist() == [1.1, 2.2, None, [1, 2, 3], "hello"]
+
+
+def test_to_arrow_table():
+    assert ak.from_arrow(
+        ak.to_arrow_table(
+            ak.Array([[{"x": 1.1, "y": [1]}], [], [{"x": 2.2, "y": [1, 2]}]]),
+            explode_records=True,
+        )
+    ).tolist() == [
+        {"x": [1.1], "y": [[1]]},
+        {"x": [], "y": []},
+        {"x": [2.2], "y": [[1, 2]]},
+    ]
+    assert ak.from_arrow(
+        ak.to_arrow_table(ak.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}]))
+    ).tolist() == [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}]
