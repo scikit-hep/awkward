@@ -1704,7 +1704,7 @@ def to_arrow(array):
 
     layout = to_layout(array, allow_record=False, allow_other=False)
 
-    def recurse(layout, mask=None):
+    def recurse(layout, mask, is_option):
         if isinstance(layout, ak.layout.NumpyArray):
             numpy_arr = numpy.asarray(layout)
             length = len(numpy_arr)
@@ -1784,17 +1784,22 @@ def to_arrow(array):
                     )
                 return arrow_arr
 
-            content_buffer = recurse(layout.content[: offsets[-1]])
+            content_buffer = recurse(layout.content[: offsets[-1]], None, False)
+            content_type = pyarrow.list_(content_buffer.type).value_field.with_nullable(
+                isinstance(
+                    ak.operations.describe.type(layout.content), ak.types.OptionType
+                )
+            )
             if mask is None:
                 arrow_arr = pyarrow.Array.from_buffers(
-                    pyarrow.list_(content_buffer.type),
+                    pyarrow.list_(content_type),
                     len(offsets) - 1,
                     [None, pyarrow.py_buffer(offsets)],
                     children=[content_buffer],
                 )
             else:
                 arrow_arr = pyarrow.Array.from_buffers(
-                    pyarrow.list_(content_buffer.type),
+                    pyarrow.list_(content_type),
                     len(offsets) - 1,
                     [pyarrow.py_buffer(mask), pyarrow.py_buffer(offsets)],
                     children=[content_buffer],
@@ -1812,7 +1817,7 @@ def to_arrow(array):
                     layout.content,
                     parameters=layout.parameters,
                 )
-                return recurse(small_layout, mask=mask)
+                return recurse(small_layout, mask, is_option)
 
             offsets = numpy.asarray(layout.offsets, dtype=np.int64)
 
@@ -1857,17 +1862,22 @@ def to_arrow(array):
                     )
                 return arrow_arr
 
-            content_buffer = recurse(layout.content[: offsets[-1]])
+            content_buffer = recurse(layout.content[: offsets[-1]], None, False)
+            content_type = pyarrow.list_(content_buffer.type).value_field.with_nullable(
+                isinstance(
+                    ak.operations.describe.type(layout.content), ak.types.OptionType
+                )
+            )
             if mask is None:
                 arrow_arr = pyarrow.Array.from_buffers(
-                    pyarrow.large_list(content_buffer.type),
+                    pyarrow.large_list(content_type),
                     len(offsets) - 1,
                     [None, pyarrow.py_buffer(offsets)],
                     children=[content_buffer],
                 )
             else:
                 arrow_arr = pyarrow.Array.from_buffers(
-                    pyarrow.large_list(content_buffer.type),
+                    pyarrow.large_list(content_type),
                     len(offsets) - 1,
                     [pyarrow.py_buffer(mask), pyarrow.py_buffer(offsets)],
                     children=[content_buffer],
@@ -1876,29 +1886,32 @@ def to_arrow(array):
 
         elif isinstance(layout, ak.layout.RegularArray):
             return recurse(
-                layout.broadcast_tooffsets64(layout.compact_offsets64()), mask
+                layout.broadcast_tooffsets64(layout.compact_offsets64()),
+                mask,
+                is_option,
             )
 
         elif isinstance(
             layout,
             (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64,),
         ):
-            if mask is not None:
-                return recurse(
-                    layout.broadcast_tooffsets64(layout.compact_offsets64()), mask
-                )
-            else:
-                return recurse(layout.broadcast_tooffsets64(layout.compact_offsets64()))
+            return recurse(
+                layout.broadcast_tooffsets64(layout.compact_offsets64()),
+                mask,
+                is_option,
+            )
 
         elif isinstance(layout, ak.layout.RecordArray):
-            values = [recurse(x[: len(layout)]) for x in layout.contents]
+            values = [recurse(x[: len(layout)], None, False) for x in layout.contents]
 
             min_list_len = min(map(len, values))
 
             types = pyarrow.struct(
                 [
-                    pyarrow.field(layout.key(i), values[i].type)
-                    for i in range(len(values))
+                    pyarrow.field(layout.key(i), values[i].type).with_nullable(
+                        isinstance(ak.operations.describe.type(x), ak.types.OptionType)
+                    )
+                    for i, x in enumerate(layout.contents)
                 ]
             )
 
@@ -1958,10 +1971,16 @@ def to_arrow(array):
                 else:
                     this_mask = None
 
-                values.append(recurse(content, this_mask))
+                values.append(recurse(content, this_mask, is_option))
 
             types = pyarrow.union(
-                [pyarrow.field(str(i), values[i].type) for i in range(len(values))],
+                [
+                    pyarrow.field(str(i), values[i].type).with_nullable(
+                        is_option
+                        or isinstance(layout.content(i).type, ak.types.OptionType)
+                    )
+                    for i in range(len(values))
+                ],
                 "dense",
                 list(range(len(values))),
             )
@@ -1988,7 +2007,7 @@ def to_arrow(array):
             index = numpy.asarray(layout.index)
 
             if layout.parameter("__array__") == "categorical":
-                dictionary = recurse(layout.content)
+                dictionary = recurse(layout.content, None, False)
                 if mask is None:
                     return pyarrow.DictionaryArray.from_arrays(index, dictionary)
                 else:
@@ -2006,7 +2025,7 @@ def to_arrow(array):
                 layout_content = layout.content
 
                 if len(layout_content) == 0:
-                    empty = recurse(layout_content)
+                    empty = recurse(layout_content, None, False)
                     if mask is None:
                         return empty
                     else:
@@ -2014,7 +2033,7 @@ def to_arrow(array):
 
                 elif isinstance(layout_content, ak.layout.RecordArray):
                     values = [
-                        recurse(x[: len(layout_content)][index])
+                        recurse(x[: len(layout_content)][index], None, False)
                         for x in layout_content.contents
                     ]
 
@@ -2022,8 +2041,14 @@ def to_arrow(array):
 
                     types = pyarrow.struct(
                         [
-                            pyarrow.field(layout_content.key(i), values[i].type)
-                            for i in range(len(values))
+                            pyarrow.field(
+                                layout_content.key(i), values[i].type
+                            ).with_nullable(
+                                isinstance(
+                                    ak.operations.describe.type(x), ak.types.OptionType
+                                )
+                            )
+                            for i, x in enumerate(layout.contents)
                         ]
                     )
 
@@ -2040,7 +2065,7 @@ def to_arrow(array):
                         )
 
                 else:
-                    return recurse(layout_content[index], mask)
+                    return recurse(layout_content[index], mask, is_option)
 
         elif isinstance(
             layout, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64,),
@@ -2071,9 +2096,9 @@ def to_arrow(array):
                 )
 
             if mask is None:
-                return recurse(next, this_bitmask)
+                return recurse(next, this_bitmask, True)
             else:
-                return recurse(next, mask & this_bitmask)
+                return recurse(next, mask & this_bitmask, True)
 
         elif isinstance(layout, ak.layout.BitMaskedArray):
             bitmask = numpy.asarray(layout.mask, dtype=np.uint8)
@@ -2086,7 +2111,7 @@ def to_arrow(array):
             if layout.valid_when is False:
                 bitmask = ~bitmask
 
-            return recurse(layout.content[: len(layout)], bitmask).slice(
+            return recurse(layout.content[: len(layout)], bitmask, True).slice(
                 length=min(len(bitmask) * 8, len(layout.content))
             )
 
@@ -2100,12 +2125,12 @@ def to_arrow(array):
             bytemask[len(mask) :] = 0
             bitmask = numpy.packbits(bytemask.reshape(-1, 8)[:, ::-1].reshape(-1))
 
-            return recurse(layout.content[: len(layout)], bitmask).slice(
+            return recurse(layout.content[: len(layout)], bitmask, True).slice(
                 length=len(mask)
             )
 
         elif isinstance(layout, (ak.layout.UnmaskedArray)):
-            return recurse(layout.content)
+            return recurse(layout.content, None, True)
 
         else:
             raise TypeError(
@@ -2113,7 +2138,7 @@ def to_arrow(array):
                 + ak._util.exception_suffix(__file__)
             )
 
-    return recurse(layout)
+    return recurse(layout, None, False)
 
 
 def from_arrow(array, highlevel=True, behavior=None):
