@@ -33,20 +33,8 @@ import awkward._util
 # third-party connectors
 import awkward._connect._numpy
 import awkward._connect._numba
-
-numba = type(awkward._connect._numba)("numba")
-numba.register = awkward._connect._numba.register
-
 import awkward._connect._numexpr
-
-numexpr = type(awkward._connect._numexpr)("numexpr")
-numexpr.evaluate = awkward._connect._numexpr.evaluate
-numexpr.re_evaluate = awkward._connect._numexpr.re_evaluate
-
 import awkward._connect._autograd
-
-autograd = type(awkward._connect._autograd)("autograd")
-autograd.elementwise_grad = awkward._connect._autograd.elementwise_grad
 
 # high-level interface
 behavior = {}

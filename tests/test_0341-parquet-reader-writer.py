@@ -218,30 +218,45 @@ def test_oamap_samples():
             "utf8": "five",
         },
     ]
+    assert ak.to_list(ak.from_parquet("tests/samples/nonnullable-depths.parquet")) == [
+        {"whatever": {"r0": [{"r1": [{"r2": [0, 1, 2, 3]}]}]}},
+        {"whatever": {"r0": [{"r1": [{"r2": []}]}]}},
+        {"whatever": {"r0": [{"r1": []}]}},
+        {"whatever": {"r0": []}},
+        {"whatever": {"r0": []}},
+        {"whatever": {"r0": [{"r1": []}]}},
+        {"whatever": {"r0": [{"r1": [{"r2": []}]}]}},
+        {"whatever": {"r0": [{"r1": [{"r2": [0, 1, 2, 3]}]}]}},
+    ]
+    assert ak.to_list(ak.from_parquet("tests/samples/nullable-depths.parquet")) == [
+        {"whatever": {"r0": [{"r1": [{"r2": [0, 1, 2, 3]}]}]}},
+        {"whatever": {"r0": [{"r1": [{"r2": []}]}]}},
+        {"whatever": {"r0": [{"r1": []}]}},
+        {"whatever": {"r0": []}},
+        {"whatever": None},
+        {"whatever": {"r0": []}},
+        {"whatever": {"r0": [{"r1": []}]}},
+        {"whatever": {"r0": [{"r1": [{"r2": []}]}]}},
+        {"whatever": {"r0": [{"r1": [{"r2": [0, 1, 2, 3]}]}]}},
+    ]
+    assert ak.to_list(ak.from_parquet("tests/samples/nullable-levels.parquet")) == [
+        {"whatever": {"r0": {"r1": {"r2": {"r3": 1}}}}},
+        {"whatever": {"r0": {"r1": {"r2": {"r3": None}}}}},
+        {"whatever": {"r0": {"r1": {"r2": None}}}},
+        {"whatever": {"r0": None}},
+        {"whatever": None},
+        {"whatever": {"r0": None}},
+        {"whatever": {"r0": {"r1": {"r2": None}}}},
+        {"whatever": {"r0": {"r1": {"r2": {"r3": None}}}}},
+        {"whatever": {"r0": {"r1": {"r2": {"r3": 1}}}}},
+    ]
 
     # ak.to_list(ak.from_parquet("tests/samples/list-depths.parquet"))
     # ak.to_list(ak.from_parquet("tests/samples/list-depths-records-list.parquet"))
     # ak.to_list(ak.from_parquet("tests/samples/list-depths-records.parquet"))
     # ak.to_list(ak.from_parquet("tests/samples/list-depths-strings.parquet"))
     # ak.to_list(ak.from_parquet("tests/samples/list-lengths.parquet"))
-    # ak.to_list(ak.from_parquet("tests/samples/nonnullable-depths.parquet"))
-    # ak.to_list(ak.from_parquet("tests/samples/nullable-depths.parquet"))
     # ak.to_list(ak.from_parquet("tests/samples/nullable-list-depths.parquet"))
     # ak.to_list(ak.from_parquet("tests/samples/nullable-list-depths-records-list.parquet"))
     # ak.to_list(ak.from_parquet("tests/samples/nullable-list-depths-records.parquet"))
     # ak.to_list(ak.from_parquet("tests/samples/nullable-list-depths-strings.parquet"))
-
-    # Arrow 2.0.0 broke this (or was it broken before?)
-    # assert ak.to_list(
-    #     ak.from_parquet("tests/samples/nullable-levels.parquet")
-    # ) == [
-    #     {"whatever": {"r0": {"r1": {"r2": {"r3": 1}}}}},
-    #     {"whatever": {"r0": {"r1": {"r2": {"r3": None}}}}},
-    #     {"whatever": {"r0": {"r1": {"r2": None}}}},
-    #     {"whatever": {"r0": {"r1": None}}},
-    #     {"whatever": {"r0": {"r1": None}}},
-    #     {"whatever": {"r0": {"r1": None}}},
-    #     {"whatever": {"r0": {"r1": {"r2": None}}}},
-    #     {"whatever": {"r0": {"r1": {"r2": {"r3": None}}}}},
-    #     {"whatever": {"r0": {"r1": {"r2": {"r3": 1}}}}},
-    # ]
