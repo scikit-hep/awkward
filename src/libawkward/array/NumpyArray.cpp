@@ -2919,10 +2919,11 @@ namespace awkward {
     else {
       std::shared_ptr<Content> out;
       std::shared_ptr<void> ptr;
+      int64_t ptr_length = length();
 
       switch (dtype_) {
       case util::dtype::boolean:
-        ptr = array_sort<bool>(reinterpret_cast<bool*>(data()),
+        std::tie(ptr, ptr_length) = array_sort<bool>(reinterpret_cast<bool*>(data()),
                                length(),
                                starts,
                                parents,
@@ -2931,7 +2932,7 @@ namespace awkward {
                                stable);
         break;
       case util::dtype::int8:
-        ptr = array_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
+        std::tie(ptr, ptr_length) = array_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
                                  length(),
                                  starts,
                                  parents,
@@ -2940,7 +2941,7 @@ namespace awkward {
                                  stable);
         break;
       case util::dtype::int16:
-        ptr = array_sort<int16_t>(reinterpret_cast<int16_t*>(data()),
+        std::tie(ptr, ptr_length) = array_sort<int16_t>(reinterpret_cast<int16_t*>(data()),
                                   length(),
                                   starts,
                                   parents,
@@ -2949,7 +2950,7 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::int32:
-        ptr = array_sort<int32_t>(reinterpret_cast<int32_t*>(data()),
+        std::tie(ptr, ptr_length) = array_sort<int32_t>(reinterpret_cast<int32_t*>(data()),
                                   length(),
                                   starts,
                                   parents,
@@ -2958,7 +2959,7 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::int64:
-        ptr = array_sort<int64_t>(reinterpret_cast<int64_t*>(data()),
+        std::tie(ptr, ptr_length) = array_sort<int64_t>(reinterpret_cast<int64_t*>(data()),
                                   length(),
                                   starts,
                                   parents,
@@ -2967,7 +2968,7 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::uint8:
-        ptr = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
+        std::tie(ptr, ptr_length) = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
                                   length(),
                                   starts,
                                   parents,
@@ -2976,7 +2977,7 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::uint16:
-        ptr = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(data()),
+        std::tie(ptr, ptr_length) = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(data()),
                                    length(),
                                    starts,
                                    parents,
@@ -2985,7 +2986,7 @@ namespace awkward {
                                    stable);
         break;
       case util::dtype::uint32:
-        ptr = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(data()),
+        std::tie(ptr, ptr_length) = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(data()),
                                    length(),
                                    starts,
                                    parents,
@@ -2994,7 +2995,7 @@ namespace awkward {
                                    stable);
         break;
       case util::dtype::uint64:
-        ptr = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(data()),
+        std::tie(ptr, ptr_length) = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(data()),
                                    length(),
                                    starts,
                                    parents,
@@ -3006,7 +3007,7 @@ namespace awkward {
         throw std::runtime_error(
           std::string("FIXME: sort for float16 not implemented") + FILENAME(__LINE__));
       case util::dtype::float32:
-        ptr = array_sort<float>(reinterpret_cast<float*>(data()),
+        std::tie(ptr, ptr_length) = array_sort<float>(reinterpret_cast<float*>(data()),
                                 length(),
                                 starts,
                                 parents,
@@ -3015,7 +3016,7 @@ namespace awkward {
                                 stable);
         break;
       case util::dtype::float64:
-        ptr = array_sort<double>(reinterpret_cast<double*>(data()),
+        std::tie(ptr, ptr_length) = array_sort<double>(reinterpret_cast<double*>(data()),
                                  length(),
                                  starts,
                                  parents,
@@ -3244,19 +3245,22 @@ namespace awkward {
   const ContentPtr
   NumpyArray::sort_asstrings(const Index64& offsets,
                              bool ascending,
-                             bool stable) const {
+                             bool stable,
+                             bool unique) const {
     std::shared_ptr<Content> out;
     std::shared_ptr<void> ptr;
+    int64_t offsets_length = offsets.length();
 
-    Index64 outoffsets(offsets.length());
+    Index64 outoffsets(offsets_length);
 
     if (dtype_ == util::dtype::uint8) {
-      ptr = string_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
+      std::tie(ptr, offsets_length) = string_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
                                  length(),
                                  offsets,
                                  outoffsets,
                                  ascending,
-                                 stable);
+                                 stable,
+                                 unique);
     } else {
       throw std::invalid_argument(
         std::string("cannot sort NumpyArray as strings with format \"")
@@ -3273,13 +3277,19 @@ namespace awkward {
                                        format_,
                                        dtype_,
                                        ptr_lib_);
-
-   out = std::make_shared<ListOffsetArray64>(Identities::none(),
-                                             util::Parameters(),
-                                             outoffsets,
-                                             out);
-
-   return out;
+    if (unique) {
+      out = std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                util::Parameters(),
+                                                outoffsets.getitem_range(0, offsets_length),
+                                                out);
+    }
+    else {
+      out = std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                util::Parameters(),
+                                                outoffsets,
+                                                out);
+    }
+    return out;
   }
 
   const ContentPtr
@@ -4590,9 +4600,14 @@ namespace awkward {
 
   bool
   NumpyArray::is_unique() const {
-    throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: NumpyArray::is_unique")
-      + FILENAME(__LINE__));
+    const ContentPtr out = sort_data(true, true, true);
+
+    if (out.get()->length() < length()) {
+      return false;
+    }
+    else {
+      return true;
+    }
   }
 
   bool
@@ -4650,19 +4665,21 @@ namespace awkward {
   }
 
   template<typename T>
-  const std::shared_ptr<void>
+  std::tuple<const std::shared_ptr<void>, const int64_t>
   NumpyArray::array_sort(const T* data,
                          int64_t length,
                          const Index64& starts,
                          const Index64& parents,
                          int64_t outlength,
                          bool ascending,
-                         bool stable) const {
+                         bool stable,
+                         bool unique) const {
     std::shared_ptr<T> ptr(
       new T[length], kernel::array_deleter<T>());
+    int64_t ptr_length = length;
 
     if (length == 0) {
-      return ptr;
+      return std::tie(ptr, ptr_length);
     }
 
     int64_t ranges_length = 0;
@@ -4694,25 +4711,37 @@ namespace awkward {
       stable);
     util::handle_error(err3, classname(), nullptr);
 
-    return ptr;
+    if (unique) {
+      struct Error err4 = kernel::unique<T>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        length,
+        &ptr_length
+      );
+      util::handle_error(err4, classname(), nullptr);
+    }
+
+    return std::tie(ptr, ptr_length);
   }
 
   template<typename T>
-  const std::shared_ptr<void>
+  std::tuple<const std::shared_ptr<void>, const int64_t>
   NumpyArray::string_sort(const T* data,
                           int64_t length,
                           const Index64& offsets,
                           Index64& outoffsets,
                           bool ascending,
-                          bool stable) const {
+                          bool stable,
+                          bool unique) const {
     std::shared_ptr<T> ptr(
       new T[length], kernel::array_deleter<T>());
+    int64_t ptr_length = length;
 
     if (length == 0) {
-      return ptr;
+      return std::tie(ptr, ptr_length);
     }
 
-    struct Error err = kernel::NumpyArray_sort_asstrings(
+    struct Error err1 = kernel::NumpyArray_sort_asstrings(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
@@ -4721,9 +4750,20 @@ namespace awkward {
       outoffsets.data(),
       ascending,
       stable);
-    util::handle_error(err, classname(), nullptr);
+    util::handle_error(err1, classname(), nullptr);
 
-    return ptr;
+    if (unique) {
+      struct Error err2 = kernel::NumpyArray_unique_strings(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        outoffsets.data(),
+        outoffsets.length(),
+        outoffsets.data(),
+        &ptr_length);
+      util::handle_error(err2, classname(), nullptr);
+    }
+
+    return std::tie(ptr, ptr_length);
   }
 
   template<typename T>
@@ -4810,5 +4850,174 @@ namespace awkward {
     util::handle_error(err, classname(), nullptr);
 
     return toptr;
+  }
+
+  const ContentPtr
+  NumpyArray::sort_data(bool ascending,
+                        bool stable,
+                        bool unique) const {
+    Index64 starts(1);
+    starts.setitem_at_nowrap(0, 0);
+
+    Index64 parents(length());
+    struct Error err = kernel::content_reduce_zeroparents_64(
+      kernel::lib::cpu,   // DERIVE
+      parents.data(),
+      length());
+    util::handle_error(err, classname(), identities_.get());
+
+    Index64 offsets(2);
+    offsets.setitem_at_nowrap(0, 0);
+    offsets.setitem_at_nowrap(1, length());
+
+    int64_t outlength = 0;
+
+    std::shared_ptr<Content> out;
+    std::shared_ptr<void> ptr;
+    int64_t ptr_length = 0;
+
+    switch (dtype_) {
+    case util::dtype::boolean:
+      std::tie(ptr, ptr_length) = array_sort<bool>(reinterpret_cast<bool*>(data()),
+                             length(),
+                             starts,
+                             parents,
+                             outlength,
+                             ascending,
+                             stable,
+                             unique);
+      break;
+    case util::dtype::int8:
+      std::tie(ptr, ptr_length) = array_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
+                               length(),
+                               starts,
+                               parents,
+                               outlength,
+                               ascending,
+                               stable,
+                               unique);
+      break;
+    case util::dtype::int16:
+      std::tie(ptr, ptr_length) = array_sort<int16_t>(reinterpret_cast<int16_t*>(data()),
+                                length(),
+                                starts,
+                                parents,
+                                outlength,
+                                ascending,
+                                stable,
+                                unique);
+      break;
+    case util::dtype::int32:
+      std::tie(ptr, ptr_length) = array_sort<int32_t>(reinterpret_cast<int32_t*>(data()),
+                                length(),
+                                starts,
+                                parents,
+                                outlength,
+                                ascending,
+                                stable,
+                                unique);
+      break;
+    case util::dtype::int64:
+      std::tie(ptr, ptr_length) = array_sort<int64_t>(reinterpret_cast<int64_t*>(data()),
+                                length(),
+                                starts,
+                                parents,
+                                outlength,
+                                ascending,
+                                stable,
+                                unique);
+      break;
+    case util::dtype::uint8:
+      std::tie(ptr, ptr_length) = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
+                                length(),
+                                starts,
+                                parents,
+                                outlength,
+                                ascending,
+                                stable,
+                                unique);
+      break;
+    case util::dtype::uint16:
+      std::tie(ptr, ptr_length) = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(data()),
+                                 length(),
+                                 starts,
+                                 parents,
+                                 outlength,
+                                 ascending,
+                                 stable,
+                                 unique);
+      break;
+    case util::dtype::uint32:
+      std::tie(ptr, ptr_length) = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(data()),
+                                 length(),
+                                 starts,
+                                 parents,
+                                 outlength,
+                                 ascending,
+                                 stable,
+                                 unique);
+      break;
+    case util::dtype::uint64:
+      std::tie(ptr, ptr_length) = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(data()),
+                                 length(),
+                                 starts,
+                                 parents,
+                                 outlength,
+                                 ascending,
+                                 stable,
+                                 unique);
+      break;
+    case util::dtype::float16:
+      throw std::runtime_error(
+        std::string("FIXME: sort for float16 not implemented") + FILENAME(__LINE__));
+    case util::dtype::float32:
+      std::tie(ptr, ptr_length) = array_sort<float>(reinterpret_cast<float*>(data()),
+                              length(),
+                              starts,
+                              parents,
+                              outlength,
+                              ascending,
+                              stable,
+                              unique);
+      break;
+    case util::dtype::float64:
+      std::tie(ptr, ptr_length) = array_sort<double>(reinterpret_cast<double*>(data()),
+                               length(),
+                               starts,
+                               parents,
+                               outlength,
+                               ascending,
+                               stable,
+                               unique);
+      break;
+    case util::dtype::float128:
+      throw std::runtime_error(
+        std::string("FIXME: sort for float128 not implemented") + FILENAME(__LINE__));
+    case util::dtype::complex64:
+      throw std::runtime_error(
+        std::string("FIXME: sort for complex64 not implemented") + FILENAME(__LINE__));
+    case util::dtype::complex128:
+      throw std::runtime_error(
+        std::string("FIXME: sort for complex128 not implemented") + FILENAME(__LINE__));
+    case util::dtype::complex256:
+      throw std::runtime_error(
+        std::string("FIXME: sort for complex256 not implemented") + FILENAME(__LINE__));
+    default:
+      throw std::invalid_argument(
+        std::string("cannot sort NumpyArray with format \"")
+        + format_ + std::string("\"") + FILENAME(__LINE__));
+    }
+
+    out = std::make_shared<NumpyArray>(Identities::none(),
+                                       parameters_,
+                                       ptr,
+                                       std::vector<ssize_t>({ (ssize_t) ptr_length }),//shape_,
+                                       strides_,
+                                       0,
+                                       itemsize_,
+                                       format_,
+                                       dtype_,
+                                       ptr_lib_);
+    return out;
   }
 }

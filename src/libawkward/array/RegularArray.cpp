@@ -1429,16 +1429,12 @@ namespace awkward {
 
   bool
   RegularArray::is_unique() const {
-    throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: RegularArray::is_unique")
-      + FILENAME(__LINE__));
+    return toListOffsetArray64(true).get()->is_unique();
   }
 
   bool
   RegularArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
-    throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: RegularArray::is_subrange_equal")
-      + FILENAME(__LINE__));
+    return toListOffsetArray64(true).get()->is_subrange_equal(start, stop);
   }
 
 }

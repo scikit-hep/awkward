@@ -6676,6 +6676,69 @@ kernels:
     automatic-tests: false
     manual-tests: []
 
+  - name: awkward_unique
+    specializations:
+      - name: awkward_unique_bool
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+      - name: awkward_unique_int8
+        args:
+          - {name: toptr, type: "List[int8_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+      - name: awkward_unique_int16
+        args:
+          - {name: toptr, type: "List[int16_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+      - name: awkward_unique_int32
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+      - name: awkward_unique_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+      - name: awkward_unique_uint8
+        args:
+          - {name: toptr, type: "List[uint8_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+      - name: awkward_unique_uint16
+        args:
+          - {name: toptr, type: "List[uint16_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+      - name: awkward_unique_uint32
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+      - name: awkward_unique_uint64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+      - name: awkward_unique_float32
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+      - name: awkward_unique_float64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_sorting_ranges
     specializations:
       - name: awkward_sorting_ranges

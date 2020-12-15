@@ -1315,7 +1315,7 @@ namespace awkward {
     virtual const ContentPtr
       numbers_to_type(const std::string& name) const = 0;
 
-    /// @brief Returns 'true' if all components of the array are unique
+    /// @brief Returns 'true' if all components of the array are unique 
     virtual bool
       is_unique() const = 0;
 

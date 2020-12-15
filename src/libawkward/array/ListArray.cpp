@@ -1891,17 +1891,13 @@ namespace awkward {
   template <typename T>
   bool
   ListArrayOf<T>::is_unique() const {
-    throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: ListArrayOf<T>::is_unique")
-      + FILENAME(__LINE__));
+    return toListOffsetArray64(true).get()->is_unique();
   }
 
   template <typename T>
   bool
   ListArrayOf<T>::is_subrange_equal(const Index64& start, const Index64& stop) const {
-    throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: ListArrayOf<T>::is_subrange_equal")
-      + FILENAME(__LINE__));
+    return toListOffsetArray64(true).get()->is_subrange_equal(start, stop);
   }
 
   template class EXPORT_TEMPLATE_INST ListArrayOf<int32_t>;

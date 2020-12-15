@@ -452,7 +452,8 @@ namespace awkward {
     const ContentPtr
       sort_asstrings(const Index64& offsets,
                      bool ascending,
-                     bool stable) const;
+                     bool stable,
+                     bool unique = false) const;
 
     const ContentPtr
       argsort_next(int64_t negaxis,
@@ -554,6 +555,14 @@ namespace awkward {
 
     const ContentPtr
       numbers_to_type(const std::string& name) const override;
+
+    /// @brief Returns 'true' if all components of the array are unique
+    bool
+      is_unique() const override;
+
+    /// @brief Returns 'true' if subranges are equal
+    bool
+      is_subrange_equal(const Index64& start, const Index64& stop) const override;
 
   protected:
     /// @brief Internal function that propagates the derivation of a contiguous
@@ -726,14 +735,6 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
 
-    /// @brief Returns 'true' if all components of the array are unique
-    bool
-      is_unique() const override;
-
-    /// @brief Returns 'true' if subranges are equal
-    bool
-      is_subrange_equal(const Index64& start, const Index64& stop) const override;
-
     /// @brief Internal function to fill JSON with boolean values.
     void
       tojson_boolean(ToJson& builder, bool include_beginendlist) const;
@@ -766,21 +767,29 @@ namespace awkward {
                                            bool stable) const;
 
       template<typename T>
-      const std::shared_ptr<void> array_sort(const T* data,
+      std::tuple<const std::shared_ptr<void>, const int64_t> array_sort(const T* data,
                                              int64_t length,
                                              const Index64& starts,
                                              const Index64& parents,
                                              int64_t outlength,
                                              bool ascending,
-                                             bool stable) const;
+                                             bool stable,
+                                             bool unique = false) const;
 
      template<typename T>
-     const std::shared_ptr<void> string_sort(const T* data,
+     const std::shared_ptr<void> data_sort(const T* data,
+                                           int64_t length,
+                                           bool ascending,
+                                           bool stable) const;
+
+     template<typename T>
+     std::tuple<const std::shared_ptr<void>, const int64_t> string_sort(const T* data,
                                              int64_t length,
                                              const Index64& offsets,
                                              Index64& outoffsets,
                                              bool ascending,
-                                             bool stable) const;
+                                             bool stable,
+                                             bool unique = false) const;
 
     template<typename T>
     const std::shared_ptr<void> as_type(const T* data,
@@ -791,9 +800,14 @@ namespace awkward {
     const std::shared_ptr<void> cast_to_type(const FROM* data,
                                              int64_t length) const;
 
+    const ContentPtr
+    sort_data(bool ascending = true,
+              bool stable = true,
+              bool unique = false) const;
+
     /// @brief See #ptr.
     std::shared_ptr<void> ptr_;
-    /// @brief See #ptr_lib
+    /// @brief See #ptr_li
     const kernel::lib ptr_lib_;
     /// @brief See #shape.
     std::vector<ssize_t> shape_;

@@ -2123,6 +2123,20 @@ namespace awkward {
   template <typename T>
   bool
   ListOffsetArrayOf<T>::is_unique() const {
+    return toListOffsetArray64(true).get()->is_unique();
+  }
+
+  template <>
+  bool ListOffsetArrayOf<int64_t>::is_unique() const {
+    if (util::parameter_isstring(parameters_, "__array__")) {
+      if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
+        ContentPtr out = content->sort_asstrings(offsets_,
+                                                 true,
+                                                 true,
+                                                 true);
+        return (out.get()->length() == length());
+      }
+    }
     throw std::runtime_error(
       std::string("FIXME: unimplemented operation: ListOffsetArrayOf<T>::is_unique")
       + FILENAME(__LINE__));

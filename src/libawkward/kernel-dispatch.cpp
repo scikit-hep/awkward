@@ -15844,6 +15844,270 @@ namespace awkward {
     }
 
     template<>
+    ERROR unique<bool>(
+      kernel::lib ptr_lib,
+      bool *toptr,
+      int64_t length,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_unique_bool(
+          toptr,
+          length,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for unique<bool>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for unique<bool>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR unique<uint8_t>(
+      kernel::lib ptr_lib,
+      uint8_t *toptr,
+      int64_t length,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_unique_uint8(
+          toptr,
+          length,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for unique<uint8_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for unique<uint8_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR unique<int8_t>(
+      kernel::lib ptr_lib,
+      int8_t *toptr,
+      int64_t length,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_unique_int8(
+          toptr,
+          length,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for unique<int8_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for unique<int8_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR unique<uint16_t>(
+      kernel::lib ptr_lib,
+      uint16_t *toptr,
+      int64_t length,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_unique_uint16(
+          toptr,
+          length,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for unique<uint16_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for unique<uint16_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR unique<int16_t>(
+      kernel::lib ptr_lib,
+      int16_t *toptr,
+      int64_t length,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_unique_int16(
+          toptr,
+          length,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for unique<int16_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for unique<int16_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR unique<uint32_t>(
+      kernel::lib ptr_lib,
+      uint32_t *toptr,
+      int64_t length,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_unique_uint32(
+          toptr,
+          length,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for unique<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for unique<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR unique<int32_t>(
+      kernel::lib ptr_lib,
+      int32_t *toptr,
+      int64_t length,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_unique_int32(
+          toptr,
+          length,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for unique<int32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for unique<int32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR unique<uint64_t>(
+      kernel::lib ptr_lib,
+      uint64_t *toptr,
+      int64_t length,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_unique_uint64(
+          toptr,
+          length,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for unique<uint64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for unique<uint64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR unique<int64_t>(
+      kernel::lib ptr_lib,
+      int64_t *toptr,
+      int64_t length,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_unique_int64(
+          toptr,
+          length,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for unique<int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for unique<int64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR unique<float>(
+      kernel::lib ptr_lib,
+      float *toptr,
+      int64_t length,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_unique_float32(
+          toptr,
+          length,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for unique<float>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for unique<float>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR unique<double>(
+      kernel::lib ptr_lib,
+      double *toptr,
+      int64_t length,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_unique_float64(
+          toptr,
+          length,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for unique<double>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for unique<double>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
     ERROR NumpyArray_argsort<bool>(
       kernel::lib ptr_lib,
       int64_t *toptr,
@@ -16597,6 +16861,34 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("unrecognized ptr_lib for NumpyArray_sort_asstrings<uint8_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_unique_strings<uint8_t>(
+      kernel::lib ptr_lib,
+      uint8_t *toptr,
+      const int64_t *offsets,
+      int64_t offsetslength,
+      int64_t *outoffsets,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_unique_strings_uint8(
+          toptr,
+          offsets,
+          offsetslength,
+          outoffsets,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_unique_strings<uint8_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_unique_strings<uint8_t>")
           + FILENAME(__LINE__));
       }
     }
