@@ -9,7 +9,7 @@ import awkward as ak  # noqa: F401
 pyarrow = pytest.importorskip("pyarrow")
 
 
-def test_list():
+def test_list_to_arrow():
     ak_array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
     pa_array = ak.to_arrow(ak_array)
     assert str(pa_array.type) == "list<item: double not null>"
@@ -30,7 +30,7 @@ def test_list():
     assert pa_array.to_pylist() == [[1.1, 2.2, None], [], [4.4, 5.5]]
 
 
-def test_record():
+def test_record_to_arrow():
     x_content = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5]).layout
     z_content = ak.Array([1, 2, 3, None, 5]).layout
 
@@ -50,29 +50,111 @@ def test_record():
     ]
 
 
-def test_union():
+def test_union_to_arrow():
     ak_array = ak.Array([1.1, 2.2, None, [1, 2, 3], "hello"])
-    py_array = ak.to_arrow(ak_array)
+    pa_array = ak.to_arrow(ak_array)
     assert (
-        str(py_array.type)
+        str(pa_array.type)
         == "dense_union<0: double=0, 1: list<item: int64 not null>=1, 2: string=2>"
     )
-    assert py_array.to_pylist() == [1.1, 2.2, None, [1, 2, 3], "hello"]
+    assert pa_array.to_pylist() == [1.1, 2.2, None, [1, 2, 3], "hello"]
 
     ak_array = ak.Array(
         ak.layout.UnmaskedArray(ak.Array([1.1, 2.2, [1, 2, 3], "hello"]).layout)
     )
-    py_array = ak.to_arrow(ak_array)
+    pa_array = ak.to_arrow(ak_array)
     assert (
-        str(py_array.type)
+        str(pa_array.type)
         == "dense_union<0: double=0, 1: list<item: int64 not null>=1, 2: string=2>"
     )
-    assert py_array.to_pylist() == [1.1, 2.2, [1, 2, 3], "hello"]
+    assert pa_array.to_pylist() == [1.1, 2.2, [1, 2, 3], "hello"]
 
     ak_array = ak.Array([1.1, 2.2, [1, 2, 3], "hello"])
-    py_array = ak.to_arrow(ak_array)
+    pa_array = ak.to_arrow(ak_array)
     assert (
-        str(py_array.type)
+        str(pa_array.type)
         == "dense_union<0: double not null=0, 1: list<item: int64 not null> not null=1, 2: string not null=2>"
     )
-    assert py_array.to_pylist() == [1.1, 2.2, [1, 2, 3], "hello"]
+    assert pa_array.to_pylist() == [1.1, 2.2, [1, 2, 3], "hello"]
+
+
+def test_list_from_arrow():
+    original = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    pa_array = ak.to_arrow(original)
+    reconstituted = ak.from_arrow(pa_array)
+    assert str(reconstituted.type) == "3 * var * float64"
+    assert reconstituted.tolist() == [[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+
+    original = ak.Array([[1.1, 2.2, None], [], [4.4, 5.5]])
+    pa_array = ak.to_arrow(original)
+    reconstituted = ak.from_arrow(pa_array)
+    assert str(reconstituted.type) == "3 * var * ?float64"
+    assert reconstituted.tolist() == [[1.1, 2.2, None], [], [4.4, 5.5]]
+
+    original = ak.Array([[1.1, 2.2, 3.3], [], None, [4.4, 5.5]])
+    pa_array = ak.to_arrow(original)
+    reconstituted = ak.from_arrow(pa_array)
+    assert str(reconstituted.type) == "4 * option[var * float64]"
+    assert reconstituted.tolist() == [[1.1, 2.2, 3.3], [], None, [4.4, 5.5]]
+
+    original = ak.Array([[1.1, 2.2, None], [], None, [4.4, 5.5]])
+    pa_array = ak.to_arrow(original)
+    reconstituted = ak.from_arrow(pa_array)
+    assert str(reconstituted.type) == "4 * option[var * ?float64]"
+    assert reconstituted.tolist() == [[1.1, 2.2, None], [], None, [4.4, 5.5]]
+
+
+def test_record_from_arrow():
+    x_content = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5]).layout
+    z_content = ak.Array([1, 2, 3, None, 5]).layout
+
+    original = ak.Array(
+        ak.layout.RecordArray(
+            [x_content, ak.layout.UnmaskedArray(x_content), z_content,], ["x", "y", "z"]
+        )
+    )
+    pa_array = ak.to_arrow(original)
+    reconstituted = ak.from_arrow(pa_array)
+    assert str(reconstituted.type) == '5 * {"x": float64, "y": ?float64, "z": ?int64}'
+    assert reconstituted.tolist() == [
+        {"x": 1.1, "y": 1.1, "z": 1},
+        {"x": 2.2, "y": 2.2, "z": 2},
+        {"x": 3.3, "y": 3.3, "z": 3},
+        {"x": 4.4, "y": 4.4, "z": None},
+        {"x": 5.5, "y": 5.5, "z": 5},
+    ]
+
+    original = ak.Array(
+        ak.layout.ByteMaskedArray(
+            ak.layout.Index8(np.array([False, True, False, False, False], np.int8)),
+            original.layout,
+            valid_when=False,
+        )
+    )
+    pa_array = ak.to_arrow(original)
+    reconstituted = ak.from_arrow(pa_array)
+    assert str(reconstituted.type) == '5 * ?{"x": float64, "y": ?float64, "z": ?int64}'
+    assert reconstituted.tolist() == [
+        {"x": 1.1, "y": 1.1, "z": 1},
+        None,
+        {"x": 3.3, "y": 3.3, "z": 3},
+        {"x": 4.4, "y": 4.4, "z": None},
+        {"x": 5.5, "y": 5.5, "z": 5},
+    ]
+
+
+def test_union_from_arrow():
+    original = ak.Array([1.1, 2.2, [1, 2, 3], "hello"])
+    pa_array = ak.to_arrow(original)
+    reconstituted = ak.from_arrow(pa_array)
+    assert str(reconstituted.type) == "4 * union[float64, var * int64, string]"
+    assert reconstituted.tolist() == [1.1, 2.2, [1, 2, 3], "hello"]
+
+    original = ak.Array([1.1, 2.2, None, [1, 2, 3], "hello"])
+    pa_array = ak.to_arrow(original)
+    reconstituted = ak.from_arrow(pa_array)
+    assert (
+        str(reconstituted.type)
+        == "5 * union[?float64, option[var * int64], option[string]]"
+    )
+    assert reconstituted.tolist() == [1.1, 2.2, None, [1, 2, 3], "hello"]

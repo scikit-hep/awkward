@@ -2167,7 +2167,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 length,
             )
             if array is not None:
-                content = recurse(array.dictionary)
+                content = handle_arrow(array.dictionary)
             else:
                 raise NotImplementedError(
                     "Arrow dictionary inside of UnionArray"
@@ -2201,14 +2201,23 @@ def from_arrow(array, highlevel=True, behavior=None):
             child_arrays = []
             keys = []
             for i in range(tpe.num_fields):
-                child_arrays.append(
-                    popbuffers(
-                        None if array is None else array.field(tpe[i].name),
-                        tpe[i].type,
-                        buffers,
-                        length,
-                    )
+                content = popbuffers(
+                    None if array is None else array.field(tpe[i].name),
+                    tpe[i].type,
+                    buffers,
+                    length,
                 )
+                if not tpe[i].nullable:
+                    if isinstance(content, ak.layout.UnmaskedArray):
+                        content = content.content
+                    else:
+                        raise ValueError(
+                            "Arrow field {0} is nullable but content is\n\n{1}".format(
+                                tpe.value_field, content
+                            )
+                            + ak._util.exception_suffix(__file__)
+                        )
+                child_arrays.append(content)
                 keys.append(tpe[i].name)
 
             out = ak.layout.RecordArray(child_arrays, keys)
@@ -2230,6 +2239,16 @@ def from_arrow(array, highlevel=True, behavior=None):
                 buffers,
                 offsets[-1],
             )
+            if not tpe.value_field.nullable:
+                if isinstance(content, ak.layout.UnmaskedArray):
+                    content = content.content
+                else:
+                    raise ValueError(
+                        "Arrow field {0} is nullable but content is\n\n{1}".format(
+                            tpe.value_field, content
+                        )
+                        + ak._util.exception_suffix(__file__)
+                    )
 
             out = ak.layout.ListOffsetArray32(offsets, content)
             if mask is not None:
@@ -2250,6 +2269,16 @@ def from_arrow(array, highlevel=True, behavior=None):
                 buffers,
                 offsets[-1],
             )
+            if not tpe.value_field.nullable:
+                if isinstance(content, ak.layout.UnmaskedArray):
+                    content = content.content
+                else:
+                    raise ValueError(
+                        "Arrow field {0} is nullable but content is\n\n{1}".format(
+                            tpe.value_field, content
+                        )
+                        + ak._util.exception_suffix(__file__)
+                    )
 
             out = ak.layout.ListOffsetArray64(offsets, content)
             if mask is not None:
@@ -2307,6 +2336,17 @@ def from_arrow(array, highlevel=True, behavior=None):
                     contents[i] = contents[i][0:0]
                 else:
                     contents[i] = contents[i][: these.max() + 1]
+            for i in range(len(contents)):
+                if not tpe[i].nullable:
+                    if isinstance(contents[i], ak.layout.UnmaskedArray):
+                        contents[i] = contents[i].content
+                    else:
+                        raise ValueError(
+                            "Arrow field {0} is nullable but content is\n\n{1}".format(
+                                tpe.value_field, contents[i]
+                            )
+                            + ak._util.exception_suffix(__file__)
+                        )
 
             tags = ak.layout.Index8(tags)
             index = ak.layout.Index32(index)
@@ -2441,32 +2481,40 @@ def from_arrow(array, highlevel=True, behavior=None):
                 + ak._util.exception_suffix(__file__)
             )
 
-    def recurse(obj):
+    def handle_arrow(obj):
         if isinstance(obj, pyarrow.lib.Array):
             buffers = obj.buffers()
             out = popbuffers(obj, obj.type, buffers, len(obj))
             assert len(buffers) == 0
-            return out
+            if isinstance(out, ak.layout.UnmaskedArray):
+                return out.content
+            else:
+                return out
 
         elif isinstance(obj, pyarrow.lib.ChunkedArray):
-            chunks = [x for x in obj.chunks if len(x) > 0]
-            if len(chunks) == 1:
-                return recurse(chunks[0])
+            layouts = [handle_arrow(x) for x in obj.chunks if len(x) > 0]
+            if all(isinstance(x, ak.layout.UnmaskedArray) for x in layouts):
+                layouts = [x.content for x in layouts]
+            if len(layouts) == 1:
+                return layouts[0]
             else:
-                return ak.operations.structure.concatenate(
-                    [recurse(x) for x in chunks], highlevel=False
-                )
+                return ak.operations.structure.concatenate(layouts, highlevel=False)
 
         elif isinstance(obj, pyarrow.lib.RecordBatch):
-            child_array = [recurse(obj.column(x)) for x in range(obj.num_columns)]
-            keys = obj.schema.names
-            awk_arr = ak.layout.RecordArray(child_array, keys)
-            return awk_arr
+            child_array = []
+            for i in range(obj.num_columns):
+                layout = handle_arrow(obj.column(i))
+                if obj.schema.field(i).nullable and not isinstance(
+                    layout, ak._util.optiontypes
+                ):
+                    layout = ak.layout.UnmaskedArray(layout)
+                child_array.append(layout)
+            return ak.layout.RecordArray(child_array, obj.schema.names)
 
         elif isinstance(obj, pyarrow.lib.Table):
             chunks = []
             for batch in obj.to_batches():
-                chunk = recurse(batch)
+                chunk = handle_arrow(batch)
                 if len(chunk) > 0:
                     chunks.append(chunk)
             if len(chunks) == 1:
@@ -2481,9 +2529,9 @@ def from_arrow(array, highlevel=True, behavior=None):
             )
 
     if highlevel:
-        return ak._util.wrap(recurse(array), behavior)
+        return ak._util.wrap(handle_arrow(array), behavior)
     else:
-        return recurse(array)
+        return handle_arrow(array)
 
 
 def to_parquet(array, where, explode_records=False, **options):
