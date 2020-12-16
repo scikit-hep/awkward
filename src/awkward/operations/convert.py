@@ -1965,7 +1965,9 @@ def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
             )
 
         elif isinstance(layout, ak.layout.RecordArray):
-            values = [recurse(x[: len(layout)], None, False) for x in layout.contents]
+            values = [
+                recurse(x[: len(layout)], mask, is_option) for x in layout.contents
+            ]
 
             min_list_len = min(map(len, values))
 
@@ -2096,7 +2098,7 @@ def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
 
                 elif isinstance(layout_content, ak.layout.RecordArray):
                     values = [
-                        recurse(x[: len(layout_content)][index], None, False)
+                        recurse(x[: len(layout_content)][index], mask, is_option)
                         for x in layout_content.contents
                     ]
 
@@ -2111,7 +2113,7 @@ def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
                                     ak.operations.describe.type(x), ak.types.OptionType
                                 )
                             )
-                            for i, x in enumerate(layout.contents)
+                            for i, x in enumerate(layout_content.contents)
                         ]
                     )
 
@@ -2343,15 +2345,18 @@ def from_arrow(array, highlevel=True, behavior=None):
                     length,
                 )
                 if not tpe[i].nullable:
-                    if isinstance(content, ak.layout.UnmaskedArray):
-                        content = content.content
-                    else:
-                        raise ValueError(
-                            "Arrow field {0} is nullable but content is\n\n{1}".format(
-                                tpe.value_field, content
-                            )
-                            + ak._util.exception_suffix(__file__)
-                        )
+                    # if isinstance(content, ak.layout.UnmaskedArray):
+                    assert isinstance(
+                        content, (ak.layout.UnmaskedArray, ak.layout.BitMaskedArray)
+                    )
+                    content = content.content
+                    # else:
+                    #     raise ValueError(
+                    #         "Arrow struct field {0} is not nullable but content is\n\n{1}".format(
+                    #             repr(tpe[i].name), content
+                    #         )
+                    #         + ak._util.exception_suffix(__file__)
+                    #     )
                 child_arrays.append(content)
                 keys.append(tpe[i].name)
 
@@ -2375,15 +2380,18 @@ def from_arrow(array, highlevel=True, behavior=None):
                 offsets[-1],
             )
             if not tpe.value_field.nullable:
-                if isinstance(content, ak.layout.UnmaskedArray):
-                    content = content.content
-                else:
-                    raise ValueError(
-                        "Arrow field {0} is nullable but content is\n\n{1}".format(
-                            tpe.value_field, content
-                        )
-                        + ak._util.exception_suffix(__file__)
-                    )
+                # if isinstance(content, ak.layout.UnmaskedArray):
+                assert isinstance(
+                    content, (ak.layout.UnmaskedArray, ak.layout.BitMaskedArray)
+                )
+                content = content.content
+                # else:
+                #     raise ValueError(
+                #         "Arrow list item is not nullable but content is\n\n{0}".format(
+                #             content
+                #         )
+                #         + ak._util.exception_suffix(__file__)
+                #     )
 
             out = ak.layout.ListOffsetArray32(offsets, content)
             if mask is not None:
@@ -2407,15 +2415,18 @@ def from_arrow(array, highlevel=True, behavior=None):
             # https://issues.apache.org/jira/browse/ARROW-10930
             # if not tpe.value_field.nullable:
             if str(tpe).endswith(" not null>"):
-                if isinstance(content, ak.layout.UnmaskedArray):
-                    content = content.content
-                else:
-                    raise ValueError(
-                        "Arrow field {0} is nullable but content is\n\n{1}".format(
-                            tpe.value_field, content
-                        )
-                        + ak._util.exception_suffix(__file__)
-                    )
+                # if isinstance(content, ak.layout.UnmaskedArray):
+                assert isinstance(
+                    content, (ak.layout.UnmaskedArray, ak.layout.BitMaskedArray)
+                )
+                content = content.content
+                # else:
+                #     raise ValueError(
+                #         "Arrow list item is not nullable but content is\n\n{0}".format(
+                #             content
+                #         )
+                #         + ak._util.exception_suffix(__file__)
+                #     )
 
             out = ak.layout.ListOffsetArray64(offsets, content)
             if mask is not None:
@@ -2475,15 +2486,18 @@ def from_arrow(array, highlevel=True, behavior=None):
                     contents[i] = contents[i][: these.max() + 1]
             for i in range(len(contents)):
                 if not tpe[i].nullable:
-                    if isinstance(contents[i], ak.layout.UnmaskedArray):
-                        contents[i] = contents[i].content
-                    else:
-                        raise ValueError(
-                            "Arrow field {0} is nullable but content is\n\n{1}".format(
-                                tpe.value_field, contents[i]
-                            )
-                            + ak._util.exception_suffix(__file__)
-                        )
+                    # if isinstance(contents[i], ak.layout.UnmaskedArray):
+                    assert isinstance(
+                        contents[i], (ak.layout.UnmaskedArray, ak.layout.BitMaskedArray)
+                    )
+                    contents[i] = contents[i].content
+                    # else:
+                    #     raise ValueError(
+                    #         "Arrow union field {0} is not nullable but content is\n\n{1}".format(
+                    #             i, contents[i]
+                    #         )
+                    #         + ak._util.exception_suffix(__file__)
+                    #     )
 
             tags = ak.layout.Index8(tags)
             index = ak.layout.Index32(index)

@@ -211,3 +211,18 @@ def test_to_parquet(tmp_path):
         ],
     ]
     assert str(reconstituted.type) == '6 * var * {"x": int64, "y": float64}'
+
+
+def test_to_parquet_2(tmp_path):
+    array = ak.Array(
+        [
+            [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": None}],
+            [],
+            [{"x": 3.3, "y": [1, 2, 3]}, None, {"x": 4.4, "y": [1, 2, 3, 4]}],
+        ]
+    )
+    assert str(array.type) == '3 * var * ?{"x": float64, "y": option[var * int64]}'
+    ak.to_parquet(array, os.path.join(tmp_path, "complicated-example.parquet"))
+    array2 = ak.from_parquet(os.path.join(tmp_path, "complicated-example.parquet"))
+    assert str(array2.type) == str(array.type)
+    assert array2.tolist() == array.tolist()
