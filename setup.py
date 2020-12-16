@@ -71,7 +71,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             if sys.maxsize > 2**32 and cmake_generator != "NMake Makefiles" and "Win64" not in cmake_generator:
                 cmake_args += ["-A", "x64"]
                 
-        elif "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ::
+        elif "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ:
             build_args += ["-j", str(multiprocessing.cpu_count())]
             
         if platform.system() == "Darwin" and "MACOSX_DEPLOYMENT_TARGET" not in os.environ:
