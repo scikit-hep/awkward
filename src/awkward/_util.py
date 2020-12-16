@@ -21,6 +21,7 @@ np = ak.nplike.NumpyMetadata.instance()
 py27 = sys.version_info[0] < 3
 py35 = sys.version_info[0] == 3 and sys.version_info[1] <= 5
 win = os.name == "nt"
+bits32 = ak.nplike.numpy.iinfo(np.intp).bits == 32
 
 # to silence flake8 F821 errors
 if py27:
