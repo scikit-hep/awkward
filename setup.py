@@ -49,7 +49,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             "-DCMAKE_INSTALL_PREFIX={0}".format(extdir),
             "-DPYTHON_EXECUTABLE={0}".format(sys.executable),
             "-DPYBUILD=ON",
-            "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9",
             "-DPYBUILD=ON",
             "-DBUILD_TESTING=OFF",
         ]
@@ -71,8 +70,12 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
             if sys.maxsize > 2**32 and cmake_generator != "NMake Makefiles" and "Win64" not in cmake_generator:
                 cmake_args += ["-A", "x64"]
-        else:
+                
+        elif "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ::
             build_args += ["-j", str(multiprocessing.cpu_count())]
+            
+        if platform.system() == "Darwin" and "MACOSX_DEPLOYMENT_TARGET" not in os.environ:
+            cmake_args += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9"]
 
         if not os.path.exists(self.build_temp):
              os.makedirs(self.build_temp)
