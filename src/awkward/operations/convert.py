@@ -2293,6 +2293,9 @@ def from_arrow(array, highlevel=True, behavior=None):
 
     See also #ak.to_arrow, #ak.to_arrow_table.
     """
+    return _from_arrow(array, True, highlevel=highlevel, behavior=behavior)
+
+def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
     pyarrow = _import_pyarrow("ak.from_arrow")
 
     def popbuffers(array, tpe, buffers, length):
@@ -2660,7 +2663,10 @@ def from_arrow(array, highlevel=True, behavior=None):
                 ):
                     layout = ak.layout.UnmaskedArray(layout)
                 child_array.append(layout)
-            return ak.layout.RecordArray(child_array, obj.schema.names)
+            if pass_empty_field and list(obj.schema.names) == [""]:
+                return child_array[0]
+            else:
+                return ak.layout.RecordArray(child_array, obj.schema.names)
 
         elif isinstance(obj, pyarrow.lib.Table):
             chunks = []
@@ -2801,7 +2807,7 @@ class _ParquetState(object):
 
     def __call__(self, row_group, column):
         as_arrow = self.file.read_row_group(row_group, [column], self.use_threads)
-        return from_arrow(as_arrow, highlevel=False)[column]
+        return _from_arrow(as_arrow, False, highlevel=False)[column]
 
     def __getstate__(self):
         return {
@@ -2959,8 +2965,9 @@ def from_parquet(
             return out
 
     else:
-        out = from_arrow(
+        out = _from_arrow(
             file.read(columns, use_threads=use_threads),
+            False,
             highlevel=highlevel,
             behavior=behavior,
         )

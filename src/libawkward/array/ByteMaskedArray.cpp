@@ -206,6 +206,17 @@ namespace awkward {
       valid_when_);
   }
 
+  const FormPtr
+  ByteMaskedForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<ByteMaskedForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      mask_,
+      content_.get()->getitem_fields(keys),
+      valid_when_);
+  }
+
   ////////// ByteMaskedArray
 
   ByteMaskedArray::ByteMaskedArray(const IdentitiesPtr& identities,

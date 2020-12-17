@@ -223,6 +223,17 @@ namespace awkward {
       content_.get()->getitem_field(key));
   }
 
+  const FormPtr
+  ListForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<ListForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      starts_,
+      stops_,
+      content_.get()->getitem_fields(keys));
+  }
+
   ////////// ListArray
 
   template <typename T>

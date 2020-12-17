@@ -212,6 +212,16 @@ namespace awkward {
       content_.get()->getitem_field(key));
   }
 
+  const FormPtr
+  ListOffsetForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<ListOffsetForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      offsets_,
+      content_.get()->getitem_fields(keys));
+  }
+
   ////////// ListOffsetArray
 
   template <typename T>

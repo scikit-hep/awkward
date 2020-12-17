@@ -323,6 +323,26 @@ namespace awkward {
     return content(key);
   }
 
+  const FormPtr
+  RecordForm::getitem_fields(const std::vector<std::string>& keys) const {
+    util::RecordLookupPtr recordlookup(nullptr);
+    if (recordlookup_.get() != nullptr) {
+      recordlookup = std::make_shared<util::RecordLookup>();
+    }
+    std::vector<FormPtr> contents;
+    for (auto key : keys) {
+      if (recordlookup_.get() != nullptr) {
+        recordlookup.get()->push_back(key);
+      }
+      contents.push_back(contents_[(size_t)fieldindex(key)]);
+    }
+    return std::make_shared<RecordForm>(has_identities_,
+                                        util::Parameters(),
+                                        FormKey(nullptr),
+                                        recordlookup,
+                                        contents);
+  }
+
   ////////// RecordArray
 
   RecordArray::RecordArray(const IdentitiesPtr& identities,
@@ -842,7 +862,7 @@ namespace awkward {
       }
     }
     return std::make_shared<RecordArray>(identities_,
-                                         parameters_,
+                                         util::Parameters(),
                                          contents,
                                          recordlookup,
                                          length_,
