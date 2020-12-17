@@ -1700,6 +1700,7 @@ def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True):
     else:
         return out
 
+
 def is_unique(array, highlevel=True):
     """
     Args:
@@ -1715,6 +1716,7 @@ def is_unique(array, highlevel=True):
         return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
+
 
 def pad_none(array, target, axis=1, clip=False, highlevel=True):
     """
