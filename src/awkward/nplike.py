@@ -10,23 +10,31 @@ import awkward as ak
 def of(*arrays):
     libs = set()
     for array in arrays:
-        ptr_lib = ak.operations.convert.kernels(array)
-        if ptr_lib is None:
-            pass
-        elif ptr_lib == "cpu":
-            libs.add("cpu")
-        elif ptr_lib == "cuda":
-            libs.add("cuda")
+        if isinstance(array, numpy.ndarray):
+            ptr_lib = "cpu"
+        elif (
+            type(array).__module__.startswith("cupy.")
+            and type(array).__name__ == "ndarray"
+        ):
+            ptr_lib = "cuda"
         else:
-            raise ValueError(
-                """structure mixes 'cpu' and 'cuda' buffers; use one of
+            ptr_lib = ak.operations.convert.kernels(array)
+            if ptr_lib is None:
+                pass
+            elif ptr_lib == "cpu":
+                libs.add("cpu")
+            elif ptr_lib == "cuda":
+                libs.add("cuda")
+            else:
+                raise ValueError(
+                    """structure mixes 'cpu' and 'cuda' buffers; use one of
 
     ak.to_kernels(array, 'cpu')
     ak.to_kernels(array, 'cuda')
 
 to obtain an unmixed array in main memory or the GPU(s)."""
-                + ak._util.exception_suffix(__file__)
-            )
+                    + ak._util.exception_suffix(__file__)
+                )
 
     if libs == set() or libs == set(["cpu"]):
         return Numpy.instance()
@@ -56,7 +64,6 @@ class Singleton(object):
 
 
 class NumpyMetadata(Singleton):
-    bool = numpy.bool
     bool_ = numpy.bool_
     int8 = numpy.int8
     int16 = numpy.int16
@@ -77,7 +84,6 @@ class NumpyMetadata(Singleton):
     integer = numpy.integer
     floating = numpy.floating
     number = numpy.number
-    object = numpy.object
     object_ = numpy.object_
     generic = numpy.generic
 

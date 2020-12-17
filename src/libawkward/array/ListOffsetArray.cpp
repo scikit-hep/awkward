@@ -356,7 +356,8 @@ namespace awkward {
     return std::make_shared<RegularArray>(identities_,
                                           parameters_,
                                           content,
-                                          size);
+                                          size,
+                                          length());
   }
 
   template <typename T>
@@ -1210,10 +1211,12 @@ namespace awkward {
                                                util::Parameters(),
                                                outindex,
                                                content());
+
       return std::make_shared<RegularArray>(Identities::none(),
                                             parameters_,
                                             next.get()->simplify_optiontype(),
-                                            target);
+                                            target,
+                                            length());
     }
     else {
       return std::make_shared<ListOffsetArrayOf<T>>(
@@ -1349,7 +1352,9 @@ namespace awkward {
         out = RegularArray(Identities::none(),
                            util::Parameters(),
                            out,
-                           1).toListOffsetArray64(false).get()->shallow_copy();
+                           1,
+                           length()
+              ).toListOffsetArray64(false).get()->shallow_copy();
       }
 
       return out;
@@ -1497,18 +1502,23 @@ namespace awkward {
       std::vector<std::shared_ptr<int64_t>> tocarry;
       std::vector<int64_t*> tocarryraw;
       for (int64_t j = 0;  j < n;  j++) {
-        std::shared_ptr<int64_t> ptr(new int64_t[(size_t)totallen],
-                                     kernel::array_deleter<int64_t>());
+        std::shared_ptr<int64_t> ptr =
+            kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                    totallen*sizeof(int64_t));
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
-      IndexOf<int64_t> toindex(n);
-      IndexOf<int64_t> fromindex(n);
+      std::shared_ptr<int64_t> toindex =
+          kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                  n*sizeof(int64_t));
+      std::shared_ptr<int64_t> fromindex =
+          kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                  n*sizeof(int64_t));
       struct Error err2 = kernel::ListArray_combinations_64<T>(
         kernel::lib::cpu,   // DERIVE
         tocarryraw.data(),
-        toindex.data(),
-        fromindex.data(),
+        toindex.get(),
+        fromindex.get(),
         n,
         replacement,
         starts.data(),
@@ -1586,7 +1596,8 @@ namespace awkward {
         return std::make_shared<RegularArray>(Identities::none(),
                                               util::Parameters(),
                                               out,
-                                              out.get()->length());
+                                              out.get()->length(),
+                                              length());
       }
     }
 
@@ -1669,7 +1680,8 @@ namespace awkward {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
                                              out,
-                                             out.get()->length());
+                                             out.get()->length(),
+                                             length());
       }
       return out;
     }
@@ -1707,7 +1719,8 @@ namespace awkward {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
                                              out,
-                                             out.get()->length());
+                                             out.get()->length(),
+                                             length());
       }
       return out;
     }
@@ -1826,7 +1839,8 @@ namespace awkward {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
                                              out,
-                                             out.get()->length());
+                                             out.get()->length(),
+                                             length());
       }
       return out;
     }
@@ -1864,7 +1878,8 @@ namespace awkward {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
                                              out,
-                                             out.get()->length());
+                                             out.get()->length(),
+                                             length());
       }
       return out;
     }

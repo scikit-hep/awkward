@@ -22,19 +22,16 @@
 namespace awkward {
   const BuilderPtr
   RecordBuilder::fromempty(const ArrayBuilderOptions& options) {
-    BuilderPtr out =
-      std::make_shared<RecordBuilder>(options,
-                                      std::vector<BuilderPtr>(),
-                                      std::vector<std::string>(),
-                                      std::vector<const char*>(),
-                                      "",
-                                      nullptr,
-                                      -1,
-                                      false,
-                                      -1,
-                                      -1);
-    out.get()->setthat(out);
-    return out;
+    return std::make_shared<RecordBuilder>(options,
+                                           std::vector<BuilderPtr>(),
+                                           std::vector<std::string>(),
+                                           std::vector<const char*>(),
+                                           "",
+                                           nullptr,
+                                           -1,
+                                           false,
+                                           -1,
+                                           -1);
   }
 
   RecordBuilder::RecordBuilder(const ArrayBuilderOptions& options,
@@ -127,7 +124,7 @@ namespace awkward {
   const BuilderPtr
   RecordBuilder::null() {
     if (!begun_) {
-      BuilderPtr out = OptionBuilder::fromvalids(options_, that_);
+      BuilderPtr out = OptionBuilder::fromvalids(options_, shared_from_this());
       out.get()->null();
       return out;
     }
@@ -142,13 +139,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->null();
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   RecordBuilder::boolean(bool x) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->boolean(x);
       return out;
     }
@@ -163,13 +160,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->boolean(x);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   RecordBuilder::integer(int64_t x) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->integer(x);
       return out;
     }
@@ -184,13 +181,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->integer(x);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   RecordBuilder::real(double x) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->real(x);
       return out;
     }
@@ -205,13 +202,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->real(x);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   RecordBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->string(x, length, encoding);
       return out;
     }
@@ -229,13 +226,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->string(x, length, encoding);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   RecordBuilder::beginlist() {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->beginlist();
       return out;
     }
@@ -251,7 +248,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->beginlist();
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -270,13 +267,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->endlist();
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   RecordBuilder::begintuple(int64_t numfields) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->begintuple(numfields);
       return out;
     }
@@ -293,7 +290,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->begintuple(numfields);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -312,7 +309,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->index(index);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -331,7 +328,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->endtuple();
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -354,7 +351,7 @@ namespace awkward {
       nexttotry_ = 0;
     }
     else if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->beginrecord(name, check);
       return out;
     }
@@ -372,7 +369,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->beginrecord(name, check);
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
@@ -406,7 +403,7 @@ namespace awkward {
         if (pointers_[(size_t)i] == key) {
           nextindex_ = i;
           nexttotry_ = i + 1;
-          return that_;
+          return shared_from_this();
         }
         i++;
       } while (i != nexttotry_);
@@ -423,11 +420,11 @@ namespace awkward {
       }
       keys_.push_back(std::string(key));
       pointers_.push_back(key);
-      return that_;
+      return shared_from_this();
     }
     else {
       contents_[(size_t)nextindex_].get()->field(key, false);
-      return that_;
+      return shared_from_this();
     }
   }
 
@@ -452,7 +449,7 @@ namespace awkward {
         if (keys_[(size_t)i].compare(key) == 0) {
           nextindex_ = i;
           nexttotry_ = i + 1;
-          return that_;
+          return shared_from_this();
         }
         i++;
       } while (i != nexttotry_);
@@ -469,11 +466,11 @@ namespace awkward {
       }
       keys_.push_back(std::string(key));
       pointers_.push_back(nullptr);
-      return that_;
+      return shared_from_this();
     }
     else {
       contents_[(size_t)nextindex_].get()->field(key, true);
-      return that_;
+      return shared_from_this();
     }
   }
 
@@ -502,13 +499,13 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->endrecord();
     }
-    return that_;
+    return shared_from_this();
   }
 
   const BuilderPtr
   RecordBuilder::append(const ContentPtr& array, int64_t at) {
     if (!begun_) {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->append(array, at);
       return out;
     }
@@ -524,7 +521,7 @@ namespace awkward {
     else {
       contents_[(size_t)nextindex_].get()->append(array, at);
     }
-    return that_;
+    return shared_from_this();
   }
 
   void

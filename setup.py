@@ -133,6 +133,28 @@ if platform.system() == "Windows":
             print("--- begin normal install --------------------------------------")
             setuptools.command.install.install.run(self)
 
+        def get_outputs(self):
+            outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
+            outputdir = os.path.join(outerdir, "awkward")
+            outbase = self.install_lib.rstrip(os.path.sep)
+
+            outputs = []
+
+            for original in setuptools.command.install.install.get_outputs(self):
+                if "egg-info" in original:
+                    outputs.append(original)
+                if original.startswith(os.path.join(outbase, "awkward") + os.path.sep):
+                    outputs.append(original)
+
+            for root, dirs, files in os.walk(outputdir):
+                root = root[len(outerdir):].lstrip(os.path.sep)
+                for file in files:
+                    trial = os.path.join(outbase, os.path.join(root, file))
+                    if trial not in outputs:
+                        outputs.append(trial)
+
+            return outputs
+
 else:
     class Install(setuptools.command.install.install):
         def run(self):
@@ -153,6 +175,28 @@ else:
 
             print("--- begin normal install --------------------------------------")
             setuptools.command.install.install.run(self)
+
+        def get_outputs(self):
+            outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
+            outputdir = os.path.join(outerdir, "awkward")
+            outbase = self.install_lib.rstrip(os.path.sep)
+
+            outputs = []
+
+            for original in setuptools.command.install.install.get_outputs(self):
+                if "egg-info" in original:
+                    outputs.append(original)
+                if original.startswith(os.path.join(outbase, "awkward") + os.path.sep):
+                    outputs.append(original)
+
+            for root, dirs, files in os.walk(outputdir):
+                root = root[len(outerdir):].lstrip(os.path.sep)
+                for file in files:
+                    trial = os.path.join(outbase, os.path.join(root, file))
+                    if trial not in outputs:
+                        outputs.append(trial)
+
+            return outputs
 
 
 setup(name = "awkward",
@@ -210,6 +254,7 @@ setup(name = "awkward",
           "Programming Language :: Python :: 3.6",
           "Programming Language :: Python :: 3.7",
           "Programming Language :: Python :: 3.8",
+          "Programming Language :: Python :: 3.9",
           "Topic :: Scientific/Engineering",
           "Topic :: Scientific/Engineering :: Information Analysis",
           "Topic :: Scientific/Engineering :: Mathematics",

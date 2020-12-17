@@ -2308,15 +2308,18 @@ make_RegularArray(const py::handle& m, const std::string& name) {
                          ak::Content>(m, name.c_str())
       .def(py::init([](const py::object& content,
                        int64_t size,
+                       int64_t length,
                        const py::object& identities,
                        const py::object& parameters) -> ak::RegularArray {
         return ak::RegularArray(
           unbox_identities_none(identities),
           dict2parameters(parameters),
           std::shared_ptr<ak::Content>(unbox_content(content)),
-          size);
+          size,
+          length);
       }), py::arg("content"),
           py::arg("size"),
+          py::arg("zeros_length") = 0,
           py::arg("identities") = py::none(),
           py::arg("parameters") = py::none())
 

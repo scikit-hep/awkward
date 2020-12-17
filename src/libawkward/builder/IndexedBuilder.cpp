@@ -52,13 +52,13 @@ namespace awkward {
   IndexedBuilder<T>::null() {
     index_.append(-1);
     hasnull_ = true;
-    return that_;
+    return shared_from_this();
   }
 
   template <typename T>
   const BuilderPtr
   IndexedBuilder<T>::boolean(bool x) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->boolean(x);
     return out;
   }
@@ -66,7 +66,7 @@ namespace awkward {
   template <typename T>
   const BuilderPtr
   IndexedBuilder<T>::integer(int64_t x) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->integer(x);
     return out;
   }
@@ -74,7 +74,7 @@ namespace awkward {
   template <typename T>
   const BuilderPtr
   IndexedBuilder<T>::real(double x) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->real(x);
     return out;
   }
@@ -84,7 +84,7 @@ namespace awkward {
   IndexedBuilder<T>::string(const char* x,
                             int64_t length,
                             const char* encoding) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
     return out;
   }
@@ -92,7 +92,7 @@ namespace awkward {
   template <typename T>
   const BuilderPtr
   IndexedBuilder<T>::beginlist() {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginlist();
     return out;
   }
@@ -108,7 +108,7 @@ namespace awkward {
   template <typename T>
   const BuilderPtr
   IndexedBuilder<T>::begintuple(int64_t numfields) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
     return out;
   }
@@ -132,7 +132,7 @@ namespace awkward {
   template <typename T>
   const BuilderPtr
   IndexedBuilder<T>::beginrecord(const char* name, bool check) {
-    BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->beginrecord(name, check);
     return out;
   }
@@ -163,56 +163,47 @@ namespace awkward {
                                    const ContentPtr& array) {
     GrowableBuffer<int64_t> index =
       GrowableBuffer<int64_t>::full(options, -1, nullcount);
-    BuilderPtr out;
     if (std::shared_ptr<IndexedArray32> ptr =
         std::dynamic_pointer_cast<IndexedArray32>(array)) {
-      out = std::make_shared<IndexedI32Builder>(
-        options,
-        index,
-        ptr,
-        nullcount != 0);
+      return std::make_shared<IndexedI32Builder>(options,
+                                                 index,
+                                                 ptr,
+                                                 nullcount != 0);
     }
     else if (std::shared_ptr<IndexedArrayU32> ptr =
              std::dynamic_pointer_cast<IndexedArrayU32>(array)) {
-      out = std::make_shared<IndexedIU32Builder>(
-        options,
-        index,
-        ptr,
-        nullcount != 0);
+      return std::make_shared<IndexedIU32Builder>(options,
+                                                  index,
+                                                  ptr,
+                                                  nullcount != 0);
     }
     else if (std::shared_ptr<IndexedArray64> ptr =
              std::dynamic_pointer_cast<IndexedArray64>(array)) {
-      out = std::make_shared<IndexedI64Builder>(
-        options,
-        index,
-        ptr,
-        nullcount != 0);
+      return std::make_shared<IndexedI64Builder>(options,
+                                                 index,
+                                                 ptr,
+                                                 nullcount != 0);
     }
     else if (std::shared_ptr<IndexedOptionArray32> ptr =
              std::dynamic_pointer_cast<IndexedOptionArray32>(array)) {
-      out = std::make_shared<IndexedIO32Builder>(
-        options,
-        index,
-        ptr,
-        nullcount != 0);
+      return std::make_shared<IndexedIO32Builder>(options,
+                                                  index,
+                                                  ptr,
+                                                  nullcount != 0);
     }
     else if (std::shared_ptr<IndexedOptionArray64> ptr =
              std::dynamic_pointer_cast<IndexedOptionArray64>(array)) {
-      out = std::make_shared<IndexedIO64Builder>(
-        options,
-        index,
-        ptr,
-        nullcount != 0);
+      return std::make_shared<IndexedIO64Builder>(options,
+                                                  index,
+                                                  ptr,
+                                                  nullcount != 0);
     }
     else {
-      out = std::make_shared<IndexedGenericBuilder>(
-        options,
-        index,
-        array,
-        nullcount != 0);
+      return std::make_shared<IndexedGenericBuilder>(options,
+                                                     index,
+                                                     array,
+                                                     nullcount != 0);
     }
-    out.get()->setthat(out);
-    return out;
   }
 
   IndexedGenericBuilder::IndexedGenericBuilder(
@@ -252,11 +243,11 @@ namespace awkward {
       index_.append(at);
     }
     else {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->append(array, at);
       return out;
     }
-    return that_;
+    return shared_from_this();
   }
 
   ////////// IndexedI32Builder (makes IndexedArray32)
@@ -300,11 +291,11 @@ namespace awkward {
       index_.append((int64_t)array_.get()->index_at_nowrap(at));
     }
     else {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->append(array, at);
       return out;
     }
-    return that_;
+    return shared_from_this();
   }
 
   ////////// IndexedIU32Builder (makes IndexedArrayU32)
@@ -348,11 +339,11 @@ namespace awkward {
       index_.append((int64_t)array_.get()->index_at_nowrap(at));
     }
     else {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->append(array, at);
       return out;
     }
-    return that_;
+    return shared_from_this();
   }
 
   ////////// IndexedI64Builder (makes IndexedArray64)
@@ -396,11 +387,11 @@ namespace awkward {
       index_.append(array_.get()->index_at_nowrap(at));
     }
     else {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->append(array, at);
       return out;
     }
-    return that_;
+    return shared_from_this();
   }
 
   ////////// IndexedIO32Builder (makes IndexedOptionArray32)
@@ -438,11 +429,11 @@ namespace awkward {
       index_.append((int64_t)array_.get()->index_at_nowrap(at));
     }
     else {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->append(array, at);
       return out;
     }
-    return that_;
+    return shared_from_this();
   }
 
   ////////// IndexedIO64Builder (makes IndexedOptionArray64)
@@ -479,11 +470,11 @@ namespace awkward {
       index_.append(array_.get()->index_at_nowrap(at));
     }
     else {
-      BuilderPtr out = UnionBuilder::fromsingle(options_, that_);
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->append(array, at);
       return out;
     }
-    return that_;
+    return shared_from_this();
   }
 
 }

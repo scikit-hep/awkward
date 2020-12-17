@@ -231,9 +231,10 @@ namespace awkward {
   template <typename T>
   const IdentitiesPtr
   IdentitiesOf<T>::deep_copy() const {
-    std::shared_ptr<T> ptr(length_ == 0 ? nullptr : new T[(size_t)length_],
-                           kernel::array_deleter<T>());
+    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
+                                               length_*sizeof(T));
     if (length_ != 0) {
+      // DERIVE Yikes! It's a memcpy!
       memcpy(ptr.get(),
              &ptr_.get()[(size_t)offset_],
              sizeof(T)*((size_t)length_));

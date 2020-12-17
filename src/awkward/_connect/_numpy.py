@@ -113,7 +113,7 @@ def array_ufunc(ufunc, method, inputs, kwargs):
             nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
             return ak.layout.NumpyArray(nparray, node.identities, node.parameters,)
 
-    def getfunction(inputs, depth):
+    def getfunction(inputs):
         signature = [ufunc]
         for x in inputs:
             if isinstance(x, ak.layout.Content):
@@ -183,18 +183,17 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                         custom_types.append(type(x).__name__)
                 else:
                     custom_types.append(type(x).__name__)
-            exception = ValueError(
+            raise ValueError(
                 "no overloads for custom types: {0}({1})".format(
                     ufunc.__name__, ", ".join(custom_types),
                 )
                 + ak._util.exception_suffix(__file__)
             )
-            ak._util.deprecate(exception, "1.0.0", date="2020-12-01")
 
         return None
 
     out = ak._util.broadcast_and_apply(
-        inputs, getfunction, behavior, allow_records=False
+        inputs, getfunction, behavior, allow_records=False, pass_depth=False
     )
     assert isinstance(out, tuple) and len(out) == 1
     return ak._util.wrap(out[0], behavior)

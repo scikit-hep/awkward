@@ -6,8 +6,7 @@ namespace awkward {
   template <typename T>
   GrowableBuffer<T>
   GrowableBuffer<T>::empty(const ArrayBuilderOptions& options) {
-    return
-  GrowableBuffer<T>::empty(options, 0);
+    return GrowableBuffer<T>::empty(options, 0);
   }
 
   template <typename T>
@@ -18,7 +17,7 @@ namespace awkward {
     if (actual < (size_t)minreserve) {
       actual = (size_t)minreserve;
     }
-    std::shared_ptr<T> ptr(new T[actual], kernel::array_deleter<T>());
+    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu, actual*sizeof(T));
     return GrowableBuffer(options, ptr, 0, (int64_t)actual);
   }
 
@@ -43,8 +42,8 @@ namespace awkward {
     if (actual < (size_t)length) {
       actual = (size_t)length;
     }
-    T* rawptr = new T[(size_t)actual];
-    std::shared_ptr<T> ptr(rawptr, kernel::array_deleter<T>());
+    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu, actual*sizeof(T));
+    T* rawptr = ptr.get();
     for (int64_t i = 0;  i < length;  i++) {
       rawptr[i] = (T)i;
     }
@@ -64,8 +63,7 @@ namespace awkward {
   template <typename T>
   GrowableBuffer<T>::GrowableBuffer(const ArrayBuilderOptions& options)
       : GrowableBuffer(options,
-                       std::shared_ptr<T>(new T[(size_t)options.initial()],
-                                          kernel::array_deleter<T>()),
+                       kernel::malloc<T>(kernel::lib::cpu, options.initial()*sizeof(T)),
                        0,
                        options.initial()) { }
 
@@ -100,8 +98,7 @@ namespace awkward {
   void
   GrowableBuffer<T>::set_reserved(int64_t minreserved) {
     if (minreserved > reserved_) {
-      std::shared_ptr<T> ptr(new T[(size_t)minreserved],
-                             kernel::array_deleter<T>());
+      std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu, minreserved*sizeof(T));
       memcpy(ptr.get(), ptr_.get(), (size_t)length_ * sizeof(T));
       ptr_ = ptr;
       reserved_ = minreserved;
@@ -113,8 +110,7 @@ namespace awkward {
   GrowableBuffer<T>::clear() {
     length_ = 0;
     reserved_ = options_.initial();
-    ptr_ = std::shared_ptr<T>(new T[(size_t)options_.initial()],
-                              kernel::array_deleter<T>());
+    ptr_ = kernel::malloc<T>(kernel::lib::cpu, options_.initial()*sizeof(T));
   }
 
   template <typename T>

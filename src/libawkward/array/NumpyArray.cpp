@@ -482,7 +482,8 @@ namespace awkward {
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
                                            out,
-                                           shape_[(size_t)i]);
+                                           shape_[(size_t)i],
+                                           shape_[(size_t)(i - 1)]);
     }
     return out;
   }
@@ -2842,7 +2843,8 @@ namespace awkward {
         out = std::make_shared<RegularArray>(Identities::none(),
                                              util::Parameters(),
                                              out,
-                                             1);
+                                             1,
+                                             length());
       }
 
       return out;
@@ -3059,7 +3061,8 @@ namespace awkward {
           Identities::none(),
           util::Parameters(),
           out,
-          parents.length() / starts.length());
+          parents.length() / starts.length(),
+          length());
       }
 
       return out;
@@ -3237,7 +3240,8 @@ namespace awkward {
           Identities::none(),
           util::Parameters(),
           out,
-          parents.length() / starts.length());
+          parents.length() / starts.length(),
+          length());
       }
       return out;
     }
@@ -4757,9 +4761,9 @@ namespace awkward {
                          int64_t outlength,
                          bool ascending,
                          bool stable) const {
-    std::shared_ptr<int64_t> ptr(
-      new int64_t[length], kernel::array_deleter<int64_t>());
-
+    std::shared_ptr<int64_t> ptr =
+        kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                length*sizeof(int64_t));
     if (length == 0) {
       return ptr;
     }
@@ -4969,13 +4973,10 @@ namespace awkward {
   template<typename TO, typename FROM>
   const std::shared_ptr<void>
   NumpyArray::cast_to_type(const FROM* fromptr, int64_t length) const {
-    std::shared_ptr<TO> toptr = kernel::malloc<TO>(kernel::lib::cpu,   // DERIVE
-                                                   length*((int64_t)sizeof(TO)));
-    // std::shared_ptr<TO>toptr (
-    //   new TO[length], kernel::array_deleter<TO>());
-
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<TO> toptr = kernel::malloc<TO>(ptr_lib, length*sizeof(TO));
     struct Error err = kernel::NumpyArray_fill<FROM, TO>(
-      kernel::lib::cpu,   // DERIVE
+      ptr_lib,
       toptr.get(),
       0,
       fromptr,

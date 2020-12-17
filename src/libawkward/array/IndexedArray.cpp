@@ -2238,7 +2238,8 @@ namespace awkward {
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
                                            out,
-                                           parents_length);
+                                           parents_length,
+                                           0);
     }
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
@@ -2365,7 +2366,8 @@ namespace awkward {
       out = std::make_shared<RegularArray>(Identities::none(),
                                            util::Parameters(),
                                            out,
-                                           parents_length);
+                                           parents_length,
+                                           0);
     }
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {

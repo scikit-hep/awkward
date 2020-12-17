@@ -90,7 +90,8 @@ namespace awkward {
     return std::make_shared<RegularArray>(Identities::none(),
                                           parameters_,
                                           content,
-                                          size_);
+                                          size_,
+                                          0);
   }
 
   const TypePtr
