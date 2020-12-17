@@ -2295,6 +2295,7 @@ def from_arrow(array, highlevel=True, behavior=None):
     """
     return _from_arrow(array, True, highlevel=highlevel, behavior=behavior)
 
+
 def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
     pyarrow = _import_pyarrow("ak.from_arrow")
 

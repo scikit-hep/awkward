@@ -241,3 +241,23 @@ def test_to_table_2():
     array2 = ak.from_arrow(pa_table)
     assert str(array2.type) == str(array.type)
     assert array2.tolist() == array.tolist()
+
+
+def test_from_buffers():
+    array = ak.Array(
+        [
+            [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1]}, {"x": 2.2, "y": None}],
+            [],
+            [{"x": 3.3, "y": [1, 2, 3]}, None, {"x": 4.4, "y": [1, 2, 3, 4]}],
+        ]
+    )
+    assert str(array.type) == '3 * var * ?{"x": float64, "y": option[var * int64]}'
+    pa_table = ak.to_arrow_table(array)
+    awkward_array = ak.from_arrow(pa_table)
+    form, length, container = ak.to_buffers(awkward_array)
+    reconstituted = ak.from_buffers(form, length, container, lazy=True)
+    assert reconstituted[2].tolist() == [
+        {"x": 3.3, "y": [1, 2, 3]},
+        None,
+        {"x": 4.4, "y": [1, 2, 3, 4]},
+    ]
