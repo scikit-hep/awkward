@@ -560,6 +560,15 @@ namespace awkward {
     bool
       is_unique() const override;
 
+    const std::tuple<const ContentPtr,
+                     const ContentPtr,
+                     const ContentPtr,
+                     const ContentPtr>
+      unique(bool return_index,
+             bool return_inverse,
+             bool return_counts,
+             int64_t axis) const override;
+
     /// @brief Returns 'true' if subranges are equal
     bool
       is_subrange_equal(const Index64& start, const Index64& stop) const override;
@@ -777,12 +786,6 @@ namespace awkward {
                                              bool unique = false) const;
 
      template<typename T>
-     const std::shared_ptr<void> data_sort(const T* data,
-                                           int64_t length,
-                                           bool ascending,
-                                           bool stable) const;
-
-     template<typename T>
      std::tuple<const std::shared_ptr<void>, const int64_t> string_sort(const T* data,
                                              int64_t length,
                                              const Index64& offsets,
@@ -790,6 +793,12 @@ namespace awkward {
                                              bool ascending,
                                              bool stable,
                                              bool unique = false) const;
+
+    template<typename T>
+    bool subranges_equal(const T* ptr,
+                         int64_t length,
+                         const Index64& starts,
+                         const Index64& stops) const;
 
     template<typename T>
     const std::shared_ptr<void> as_type(const T* data,

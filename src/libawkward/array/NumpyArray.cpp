@@ -15,6 +15,7 @@
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/array/RegularArray.h"
+#include "awkward/array/ListArray.h"
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/EmptyArray.h"
 #include "awkward/array/IndexedArray.h"
@@ -4610,11 +4611,141 @@ namespace awkward {
     }
   }
 
-  bool
-  NumpyArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
+  const std::tuple<const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr>
+  NumpyArray::unique(bool return_index,
+                     bool return_inverse,
+                     bool return_counts,
+                     int64_t axis) const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: NumpyArray::is_subrange_equal")
+      std::string("FIXME: unimplemented operation: NumpyArray::unique")
       + FILENAME(__LINE__));
+  }
+
+  template<typename T>
+  bool
+  NumpyArray::subranges_equal(const T* data,
+                              int64_t length,
+                              const Index64& starts,
+                              const Index64& stops) const {
+    bool toequal = false;
+
+    struct Error err2 = kernel::NumpyArray_subrange_equal(
+      kernel::lib::cpu,   // DERIVE
+      data,
+      starts.data(),
+      stops.data(),
+      starts.length(),
+      &toequal);
+    util::handle_error(err2, classname(), nullptr);
+
+   return !toequal;
+}
+
+  bool
+  NumpyArray::is_subrange_equal(const Index64& starts, const Index64& stops) const {
+    if (starts.length() != stops.length()) {
+      throw std::invalid_argument(
+        std::string("NumpyArray starts length must be equal to stops length")
+        + FILENAME(__LINE__));
+    }
+
+    bool toequal = false;
+    switch (dtype_) {
+    case util::dtype::boolean:
+      toequal = subranges_equal<bool>(reinterpret_cast<bool*>(ptr_.get()),
+                                      length(),
+                                      starts,
+                                      stops);
+      break;
+    case util::dtype::int8:
+      toequal = subranges_equal<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()),
+                                        length(),
+                                        starts,
+                                        stops);
+      break;
+    case util::dtype::int16:
+      toequal = subranges_equal<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()),
+                                         length(),
+                                         starts,
+                                         stops);
+      break;
+    case util::dtype::int32:
+      toequal = subranges_equal<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()),
+                                         length(),
+                                         starts,
+                                         stops);
+      break;
+    case util::dtype::int64:
+      toequal = subranges_equal<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()),
+                                         length(),
+                                         starts,
+                                         stops);
+      break;
+    case util::dtype::uint8:
+      toequal = subranges_equal<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+                                         length(),
+                                         starts,
+                                         stops);
+      break;
+    case util::dtype::uint16:
+      toequal = subranges_equal<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
+                                          length(),
+                                          starts,
+                                          stops);
+      break;
+    case util::dtype::uint32:
+      toequal = subranges_equal<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
+                                          length(),
+                                          starts,
+                                          stops);
+      break;
+    case util::dtype::uint64:
+      toequal = subranges_equal<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()),
+                                          length(),
+                                          starts,
+                                          stops);
+      break;
+    case util::dtype::float16:
+      throw std::runtime_error(
+        std::string("FIXME: numbers_to_type for float16 not implemented")
+        + FILENAME(__LINE__));
+    case util::dtype::float32:
+      toequal = subranges_equal<float>(reinterpret_cast<float*>(ptr_.get()),
+                                       length(),
+                                       starts,
+                                       stops);
+      break;
+    case util::dtype::float64:
+      toequal = subranges_equal<double>(reinterpret_cast<double*>(ptr_.get()),
+                                        length(),
+                                        starts,
+                                        stops);
+      break;
+    case util::dtype::float128:
+      throw std::runtime_error(
+        std::string("FIXME: numbers_to_type for float128 not implemented")
+        + FILENAME(__LINE__));
+    case util::dtype::complex64:
+      throw std::runtime_error(
+        std::string("FIXME: values_astype for complex64 not implemented")
+        + FILENAME(__LINE__));
+    case util::dtype::complex128:
+      throw std::runtime_error(
+        std::string("FIXME: numbers_to_type for complex128 not implemented")
+        + FILENAME(__LINE__));
+    case util::dtype::complex256:
+      throw std::runtime_error(
+        std::string("FIXME: numbers_to_type for complex256 not implemented")
+        + FILENAME(__LINE__));
+    default:
+      throw std::invalid_argument(
+        std::string("cannot check NumpyArray::is_subrange_equal with format \"")
+        + format_ + std::string("\"") + FILENAME(__LINE__));
+    }
+    return toequal;
   }
 
   template<typename T>
@@ -4675,7 +4806,7 @@ namespace awkward {
                          bool stable,
                          bool unique) const {
     std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
-                                               length*sizeof(T));
+                                               length*((int64_t)sizeof(T)));
     int64_t ptr_length = length;
 
     if (length == 0) {
@@ -4734,7 +4865,7 @@ namespace awkward {
                           bool stable,
                           bool unique) const {
     std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
-                                               length*sizeof(T));
+                                               length*((int64_t)sizeof(T)));
     int64_t ptr_length = length;
 
     if (length == 0) {
@@ -4838,8 +4969,10 @@ namespace awkward {
   template<typename TO, typename FROM>
   const std::shared_ptr<void>
   NumpyArray::cast_to_type(const FROM* fromptr, int64_t length) const {
-    std::shared_ptr<TO>toptr (
-      new TO[length], kernel::array_deleter<TO>());
+    std::shared_ptr<TO> toptr = kernel::malloc<TO>(kernel::lib::cpu,   // DERIVE
+                                                   length*((int64_t)sizeof(TO)));
+    // std::shared_ptr<TO>toptr (
+    //   new TO[length], kernel::array_deleter<TO>());
 
     struct Error err = kernel::NumpyArray_fill<FROM, TO>(
       kernel::lib::cpu,   // DERIVE
@@ -4866,10 +4999,6 @@ namespace awkward {
       length());
     util::handle_error(err, classname(), identities_.get());
 
-    Index64 offsets(2);
-    offsets.setitem_at_nowrap(0, 0);
-    offsets.setitem_at_nowrap(1, length());
-
     int64_t outlength = 0;
 
     std::shared_ptr<Content> out;
@@ -4878,17 +5007,19 @@ namespace awkward {
 
     switch (dtype_) {
     case util::dtype::boolean:
-      std::tie(ptr, ptr_length) = array_sort<bool>(reinterpret_cast<bool*>(data()),
-                             length(),
-                             starts,
-                             parents,
-                             outlength,
-                             ascending,
-                             stable,
-                             unique);
+      std::tie(ptr, ptr_length) =
+        array_sort<bool>(reinterpret_cast<bool*>(data()),
+                         length(),
+                         starts,
+                         parents,
+                         outlength,
+                         ascending,
+                         stable,
+                         unique);
       break;
     case util::dtype::int8:
-      std::tie(ptr, ptr_length) = array_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
+      std::tie(ptr, ptr_length) =
+        array_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
                                length(),
                                starts,
                                parents,

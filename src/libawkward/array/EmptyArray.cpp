@@ -710,6 +710,19 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
+  const std::tuple<const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr>
+  EmptyArray::unique(bool return_index,
+                     bool return_inverse,
+                     bool return_counts,
+                     int64_t axis) const {
+    const ContentPtr out = std::make_shared<EmptyArray>(identities(),
+                                                        parameters());
+    return std::tie(out, out, out, out);
+  }
+
   bool
   EmptyArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
     throw std::runtime_error(

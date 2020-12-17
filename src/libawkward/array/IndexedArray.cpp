@@ -2616,6 +2616,20 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  const std::tuple<const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr>
+  IndexedArrayOf<T, ISOPTION>::unique(bool return_index,
+                                      bool return_inverse,
+                                      bool return_counts,
+                                      int64_t axis) const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: IndexedArrayOf<T, ISOPTION>::unique")
+      + FILENAME(__LINE__));
+  }
+
+  template <typename T, bool ISOPTION>
   bool
   IndexedArrayOf<T, ISOPTION>::is_subrange_equal(const Index64& start, const Index64& stop) const {
     throw std::runtime_error(

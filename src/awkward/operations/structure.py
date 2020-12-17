@@ -1584,6 +1584,21 @@ def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True):
     else:
         return out
 
+def is_unique(array, highlevel=True):
+    """
+    Args:
+        array: Data to check on uniqueness, possibly within nested lists.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+    """
+    layout = ak.operations.convert.to_layout(
+        array, allow_record=False, allow_other=False
+    )
+    out = layout.is_unique()
+    if highlevel:
+        return ak._util.wrap(out, ak._util.behaviorof(array))
+    else:
+        return out
 
 def pad_none(array, target, axis=1, clip=False, highlevel=True):
     """

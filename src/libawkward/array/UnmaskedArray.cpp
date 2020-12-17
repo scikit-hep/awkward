@@ -1004,6 +1004,20 @@ namespace awkward {
     throw std::runtime_error(
       std::string("FIXME: unimplemented operation: UnmaskedArray::is_unique")
       + FILENAME(__LINE__));
+
+  }
+
+  const std::tuple<const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr>
+  UnmaskedArray::unique(bool return_index,
+                        bool return_inverse,
+                        bool return_counts,
+                        int64_t axis) const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: UnmaskedArray::unique")
+      + FILENAME(__LINE__));
   }
 
   bool

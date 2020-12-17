@@ -9,7 +9,6 @@
 
 #include "awkward/kernels.h"
 #include "awkward/kernel-utils.h"
-#include "awkward/operators.h"
 #include "awkward/type/RegularType.h"
 #include "awkward/type/ArrayType.h"
 #include "awkward/type/UnknownType.h"
@@ -1430,6 +1429,19 @@ namespace awkward {
   bool
   RegularArray::is_unique() const {
     return toListOffsetArray64(true).get()->is_unique();
+  }
+
+  const std::tuple<const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr>
+  RegularArray::unique(bool return_index,
+                       bool return_inverse,
+                       bool return_counts,
+                       int64_t axis) const {
+    throw std::runtime_error(
+      std::string("FIXME: unimplemented operation: RegularArray::unique")
+      + FILENAME(__LINE__));
   }
 
   bool

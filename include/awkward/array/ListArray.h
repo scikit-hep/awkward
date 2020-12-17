@@ -425,6 +425,15 @@ namespace awkward {
     bool
       is_unique() const override;
 
+    const std::tuple<const ContentPtr,
+                     const ContentPtr,
+                     const ContentPtr,
+                     const ContentPtr>
+      unique(bool return_index,
+             bool return_inverse,
+             bool return_counts,
+             int64_t axis) const override;
+
     /// @brief Returns 'true' if subranges are equal
     bool
       is_subrange_equal(const Index64& start, const Index64& stop) const override;

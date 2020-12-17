@@ -1642,6 +1642,15 @@ namespace awkward {
       int64_t* tolength);
 
     template <typename T>
+    ERROR NumpyArray_subrange_equal(
+      kernel::lib ptr_lib,
+      const T* fromptr,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      bool* toequal);
+
+    template <typename T>
     ERROR NumpyArray_argsort(
       kernel::lib ptr_lib,
       int64_t* toptr,

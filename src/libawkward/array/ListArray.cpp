@@ -1895,6 +1895,21 @@ namespace awkward {
   }
 
   template <typename T>
+  const std::tuple<const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr>
+  ListArrayOf<T>::unique(bool return_index,
+                         bool return_inverse,
+                         bool return_counts,
+                         int64_t axis) const {
+    return toListOffsetArray64(true).get()->unique(return_index,
+                                                   return_inverse,
+                                                   return_counts,
+                                                   axis);
+  }
+
+  template <typename T>
   bool
   ListArrayOf<T>::is_subrange_equal(const Index64& start, const Index64& stop) const {
     return toListOffsetArray64(true).get()->is_subrange_equal(start, stop);

@@ -28,7 +28,6 @@
 
 #define AWKWARD_LISTOFFSETARRAY_NO_EXTERN_TEMPLATE
 #include "awkward/array/ListOffsetArray.h"
-#include "awkward/operators.h"
 
 namespace {
   std::vector<std::string> valid_parameters = { "\"string\"", "\"bytestring\"" };
@@ -2122,6 +2121,17 @@ namespace awkward {
 
   template <typename T>
   bool
+  ListOffsetArrayOf<T>::is_subrange_equal(const Index64& starts, const Index64& stops) const {
+    return toListOffsetArray64(true).get()->is_subrange_equal(starts, stops);
+  }
+
+  template <>
+  bool ListOffsetArrayOf<int64_t>::is_subrange_equal(const Index64& starts, const Index64& stops) const {
+    return content_.get()->is_subrange_equal(starts, stops);
+  }
+
+  template <typename T>
+  bool
   ListOffsetArrayOf<T>::is_unique() const {
     return toListOffsetArray64(true).get()->is_unique();
   }
@@ -2137,16 +2147,23 @@ namespace awkward {
         return (out.get()->length() == length());
       }
     }
-    throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: ListOffsetArrayOf<T>::is_unique")
-      + FILENAME(__LINE__));
+      // FIXME: when its content is unique:
+      // return content_.get()->is_unique();
+      // or when it's sub-ranges are unique:
+    return is_subrange_equal(util::make_starts(offsets_), util::make_stops(offsets_));
   }
 
   template <typename T>
-  bool
-  ListOffsetArrayOf<T>::is_subrange_equal(const Index64& start, const Index64& stop) const {
+  const std::tuple<const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr>
+  ListOffsetArrayOf<T>::unique(bool return_index,
+                               bool return_inverse,
+                               bool return_counts,
+                               int64_t axis) const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: ListOffsetArrayOf<T>::is_subrange_equal")
+      std::string("FIXME: unimplemented operation: ListOffsetArrayOf<T>::unique")
       + FILENAME(__LINE__));
   }
 

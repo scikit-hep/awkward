@@ -1657,8 +1657,54 @@ namespace awkward {
 
   bool
   RecordArray::is_unique() const {
+    if (contents_.empty()) {
+      return true;
+    }
+    else {
+      if (!contents_[0].get()->is_unique()) {
+        Index64 starts(1);
+        starts.setitem_at_nowrap(0, 0);
+        Index64 parents(length());
+        struct Error err = kernel::content_reduce_zeroparents_64(
+          kernel::lib::cpu,   // DERIVE
+          parents.data(),
+          length());
+        util::handle_error(err, classname(), identities_.get());
+
+        ContentPtr sorted = contents_[0].get()->argsort_next(0,
+                                                             starts,
+                                                             parents,
+                                                             length(),
+                                                             true,
+                                                             true,
+                                                             true);
+        // TODO: find non-unique value indices and check the
+        // other contents
+        ContentPtr sorted2 = contents_[1].get()->argsort_next(0,
+                                                              starts,
+                                                              parents,
+                                                              length(),
+                                                              true,
+                                                              true,
+                                                              true);
+      }
+      else {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  const std::tuple<const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr,
+                   const ContentPtr>
+  RecordArray::unique(bool return_index,
+                      bool return_inverse,
+                      bool return_counts,
+                      int64_t axis) const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: RecordArray::is_unique")
+      std::string("FIXME: unimplemented operation: RecordArray::unique")
       + FILENAME(__LINE__));
   }
 

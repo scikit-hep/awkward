@@ -16108,6 +16108,314 @@ namespace awkward {
     }
 
     template<>
+    ERROR NumpyArray_subrange_equal<bool>(
+      kernel::lib ptr_lib,
+      const bool* fromptr,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      bool* toequal) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_subrange_equal_bool(
+          fromptr,
+          fromstarts,
+          fromstops,
+          length,
+          toequal);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_subrange_equal<bool>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_subrange_equal<bool>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_subrange_equal<uint8_t>(
+      kernel::lib ptr_lib,
+      const uint8_t* fromptr,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      bool* toequal) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_subrange_equal_uint8(
+          fromptr,
+          fromstarts,
+          fromstops,
+          length,
+          toequal);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_subrange_equal<uint8_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_subrange_equal<uint8_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_subrange_equal<int8_t>(
+      kernel::lib ptr_lib,
+      const int8_t* fromptr,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      bool* toequal) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_subrange_equal_int8(
+          fromptr,
+          fromstarts,
+          fromstops,
+          length,
+          toequal);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_subrange_equal<int8_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_subrange_equal<int8_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_subrange_equal<uint16_t>(
+      kernel::lib ptr_lib,
+      const uint16_t* fromptr,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      bool* toequal) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_subrange_equal_uint16(
+          fromptr,
+          fromstarts,
+          fromstops,
+          length,
+          toequal);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_subrange_equal<uint16_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_subrange_equal<uint16_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_subrange_equal<int16_t>(
+      kernel::lib ptr_lib,
+      const int16_t* fromptr,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      bool* toequal) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_subrange_equal_int16(
+          fromptr,
+          fromstarts,
+          fromstops,
+          length,
+          toequal);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_subrange_equal<int16_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_subrange_equal<int16_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_subrange_equal<uint32_t>(
+      kernel::lib ptr_lib,
+      const uint32_t* fromptr,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      bool* toequal) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_subrange_equal_uint32(
+          fromptr,
+          fromstarts,
+          fromstops,
+          length,
+          toequal);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_subrange_equal<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_subrange_equal<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_subrange_equal<int32_t>(
+      kernel::lib ptr_lib,
+      const int32_t* fromptr,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      bool* toequal) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_subrange_equal_int32(
+          fromptr,
+          fromstarts,
+          fromstops,
+          length,
+          toequal);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_subrange_equal<int32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_subrange_equal<int32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_subrange_equal<uint64_t>(
+      kernel::lib ptr_lib,
+      const uint64_t* fromptr,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      bool* toequal) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_subrange_equal_uint64(
+          fromptr,
+          fromstarts,
+          fromstops,
+          length,
+          toequal);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_subrange_equal<uint64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_subrange_equal<uint64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_subrange_equal<int64_t>(
+      kernel::lib ptr_lib,
+      const int64_t* fromptr,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      bool* toequal) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_subrange_equal_int64(
+          fromptr,
+          fromstarts,
+          fromstops,
+          length,
+          toequal);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_subrange_equal<int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_subrange_equal<int64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_subrange_equal<float>(
+      kernel::lib ptr_lib,
+      const float* fromptr,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      bool* toequal) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_subrange_equal_float32(
+          fromptr,
+          fromstarts,
+          fromstops,
+          length,
+          toequal);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_subrange_equal<float>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_subrange_equal<float>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_subrange_equal<double>(
+      kernel::lib ptr_lib,
+      const double* fromptr,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      bool* toequal) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_subrange_equal_float64(
+          fromptr,
+          fromstarts,
+          fromstops,
+          length,
+          toequal);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_subrange_equal<double>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_subrange_equal<double>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
     ERROR NumpyArray_argsort<bool>(
       kernel::lib ptr_lib,
       int64_t *toptr,
