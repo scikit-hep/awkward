@@ -48,23 +48,23 @@ def test_ListOffsetArray():
     assert ak.to_list(listoffsetarray2) == [[0.0, 1.1, 2.2], [], [3.3, 1.1], [5.5], [6.6, 7.7, 2.2, 9.9], []]
     assert listoffsetarray2.is_unique() == True
 
-def test_RecordArray():
-    array = ak.Array(
-        [
-            {"x": 0.0, "y": []},
-            {"x": 8.0, "y": [1]},
-            {"x": 2.2, "y": [2, 2]},
-            {"x": 3.3, "y": [3, 1, 3]},
-            {"x": 4.4, "y": [4, 1, 1, 4]},
-            {"x": 5.5, "y": [5, 4, 5]},
-            {"x": 1.1, "y": [6, 1]},
-            {"x": 7.7, "y": [7]},
-            {"x": 0.0, "y": []},
-        ]
-    )
-    assert ak.to_list(array.x.layout.argsort(0, True, True)) == [0, 8, 6, 2, 3, 4, 5, 7, 1]
-
-    assert ak.is_unique(array) == False
+# def test_RecordArray():
+#     array = ak.Array(
+#         [
+#             {"x": 0.0, "y": []},
+#             {"x": 8.0, "y": [1]},
+#             {"x": 2.2, "y": [2, 2]},
+#             {"x": 3.3, "y": [3, 1, 3]},
+#             {"x": 4.4, "y": [4, 1, 1, 4]},
+#             {"x": 5.5, "y": [5, 4, 5]},
+#             {"x": 1.1, "y": [6, 1]},
+#             {"x": 7.7, "y": [7]},
+#             {"x": 0.0, "y": []},
+#         ]
+#     )
+#     assert ak.to_list(array.x.layout.argsort(0, True, True)) == [0, 8, 6, 2, 3, 4, 5, 7, 1]
+#
+#     assert ak.is_unique(array) == False
 
 def test_same_categories():
     categories = ak.Array(["one", "two", "three"])
