@@ -8,6 +8,7 @@
 .. image:: https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/logo/logo-300px.png
     :width: 300px
     :alt: Awkward Array
+    :target: https://github.com/scikit-hep/awkward-1.0
 
 :raw-html:`<p>`
 
