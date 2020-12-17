@@ -836,6 +836,7 @@ def test_slice():
     assert isinstance(virtualarray, ak.layout.VirtualArray)
 
     sliced = virtualarray[:-1]
+
     assert isinstance(sliced, ak.layout.VirtualArray)
 
     assert isinstance(sliced[1], ak.layout.NumpyArray)

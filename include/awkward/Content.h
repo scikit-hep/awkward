@@ -230,11 +230,23 @@ namespace awkward {
     void
       form_key_tojson(ToJson& builder, bool verbose) const;
 
-    /// @brief Internal function for extracting record field
+    /// @brief Returns the Form that would result from a range-slice.
+    ///
+    /// Matches the operation of Content#getitem_range.
+    virtual const FormPtr
+      getitem_range() const;
+
+    /// @brief Returns the Form that would result from a field-slice.
     ///
     /// Matches the operation of Content#getitem_field.
     virtual const FormPtr
       getitem_field(const std::string& key) const = 0;
+
+    /// @brief Returns the Form that would result from a fields-slice.
+    ///
+    /// Matches the operation of Content#getitem_fields.
+    virtual const FormPtr
+      getitem_fields(const std::vector<std::string>& keys) const = 0;
 
   protected:
     /// @brief See #has_identities

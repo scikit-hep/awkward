@@ -199,6 +199,16 @@ namespace awkward {
       size_);
   }
 
+  const FormPtr
+  RegularForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<RegularForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      content_.get()->getitem_fields(keys),
+      size_);
+  }
+
   ////////// RegularArray
 
   RegularArray::RegularArray(const IdentitiesPtr& identities,

@@ -280,6 +280,12 @@ namespace awkward {
       + std::string(" does not exist (data are not records)"));
   }
 
+  const FormPtr
+  NumpyForm::getitem_fields(const std::vector<std::string>& keys) const {
+    throw std::invalid_argument(
+      std::string("requested keys do not exist (data are not records)"));
+  }
+
   ////////// NumpyArray
 
   NumpyArray::NumpyArray(const IdentitiesPtr& identities,

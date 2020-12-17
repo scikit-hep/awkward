@@ -204,6 +204,17 @@ namespace awkward {
   }
 
   const FormPtr
+  BitMaskedForm::getitem_range() const {
+    return std::make_shared<ByteMaskedForm>(
+      has_identities_,
+      parameters_,
+      FormKey(nullptr),
+      Index::Form::i8,
+      content_.get()->getitem_range(),
+      valid_when_);
+  }
+
+  const FormPtr
   BitMaskedForm::getitem_field(const std::string& key) const {
     return std::make_shared<BitMaskedForm>(
       has_identities_,
@@ -211,6 +222,18 @@ namespace awkward {
       FormKey(nullptr),
       mask_,
       content_.get()->getitem_field(key),
+      valid_when_,
+      lsb_order_);
+  }
+
+  const FormPtr
+  BitMaskedForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<BitMaskedForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      mask_,
+      content_.get()->getitem_fields(keys),
       valid_when_,
       lsb_order_);
   }
@@ -622,29 +645,7 @@ namespace awkward {
 
   const ContentPtr
   BitMaskedArray::getitem_range_nowrap(int64_t start, int64_t stop) const {
-    int64_t bitstart = start / 8;
-    int64_t remainder = start % 8;
-    if (remainder == 0) {
-      IdentitiesPtr identities(nullptr);
-      if (identities_.get() != nullptr) {
-        identities = identities_.get()->getitem_range_nowrap(start, stop);
-      }
-      int64_t length = stop - start;
-      int64_t bitlength = length / 8;
-      int64_t remainder = length % 8;
-      int64_t bitstop = bitstart + (bitlength + (remainder != 0));
-      return std::make_shared<BitMaskedArray>(
-        identities,
-        parameters_,
-        mask_.getitem_range_nowrap(bitstart, bitstop),
-        content_.get()->getitem_range_nowrap(start, stop),
-        valid_when_,
-        length,
-        lsb_order_);
-    }
-    else {
-      return toByteMaskedArray().get()->getitem_range_nowrap(start, stop);
-    }
+    return toByteMaskedArray().get()->getitem_range_nowrap(start, stop);
   }
 
   const ContentPtr

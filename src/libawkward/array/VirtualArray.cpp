@@ -275,10 +275,23 @@ namespace awkward {
   VirtualForm::getitem_field(const std::string& key) const {
     if (form_.get() == nullptr) {
       throw std::invalid_argument(
-          "Cannot determine field without an expected Form");
+          std::string("Cannot determine field without an expected Form")
+          + FILENAME(__LINE__));
     }
     else {
       return form_.get()->getitem_field(key);
+    }
+  }
+
+  const FormPtr
+  VirtualForm::getitem_fields(const std::vector<std::string>& keys) const {
+    if (form_.get() == nullptr) {
+      throw std::invalid_argument(
+          std::string("Cannot determine fields without an expected Form")
+          + FILENAME(__LINE__));
+    }
+    else {
+      return form_.get()->getitem_fields(keys);
     }
   }
 
@@ -346,6 +359,7 @@ namespace awkward {
   VirtualArray::array() const {
     ContentPtr out(nullptr);
     kernel::lib src_ptrlib = check_key(cache_key_);
+
     if (cache_.get() != nullptr) {
       if (src_ptrlib != ptr_lib_) {
         out = cache_.get()->get(cache_key())->copy_to(ptr_lib_);
@@ -570,8 +584,14 @@ namespace awkward {
     Slice slice;
     slice.append(SliceRange(start, stop, 1));
     slice.become_sealed();
+    FormPtr sliceform(nullptr);
+
+    if (generator_.get()->form().get() != nullptr) {
+      sliceform = generator_.get()->form().get()->getitem_range();
+    }
+
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                 generator_.get()->form(), stop - start, shallow_copy(), slice);
+                 sliceform, stop - start, shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
                                           parameters_,
@@ -627,9 +647,14 @@ namespace awkward {
     Slice slice;
     slice.append(SliceFields(keys));
     slice.become_sealed();
-    FormPtr form(nullptr);
+    FormPtr sliceform(nullptr);
+
+    if (generator_.get()->form().get() != nullptr) {
+      sliceform = generator_.get()->form().get()->getitem_fields(keys);
+    }
+
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
-                 form, generator_.get()->length(), shallow_copy(), slice);
+                 sliceform, generator_.get()->length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
                                           util::Parameters(),

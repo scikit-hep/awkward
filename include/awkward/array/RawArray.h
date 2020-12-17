@@ -141,10 +141,17 @@ namespace awkward {
 
     const FormPtr
       getitem_field(const std::string& key) const override {
-      throw std::invalid_argument(std::string("key ") + util::quote(key)
-        + std::string(" does not exist (data are not records)"));
+      throw std::invalid_argument(
+        std::string("cannot slice RawForm by field name")
+        + FILENAME(__LINE__));
     }
 
+    const FormPtr
+      getitem_fields(const std::vector<std::string>& keys) const override {
+      throw std::invalid_argument(
+        std::string("cannot slice RawForm by field names")
+        + FILENAME(__LINE__));
+    }
 
   private:
     const std::string T_;

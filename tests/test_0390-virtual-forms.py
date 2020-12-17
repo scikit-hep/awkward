@@ -118,7 +118,7 @@ def test_virtual_slice_numba():
         return x
 
     assert dostuff(virtual[["x"]]) == 15
-    assert dict(materialize_count) == {"x": 1, "array": 2}
+    assert dict(materialize_count) == {"x": 1, "array": 1}
     materialize_count.clear()
 
     assert dostuff(virtual[::2]) == 9

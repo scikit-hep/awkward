@@ -318,8 +318,17 @@ namespace awkward {
   const FormPtr
   UnionForm::getitem_field(const std::string& key) const {
     throw std::invalid_argument(
-      "UnionForm breaks the one-to-one relationship "
-      "between fieldindexes and keys");
+      std::string("UnionForm breaks the one-to-one relationship "
+                  "between fieldindexes and keys")
+      + FILENAME(__LINE__));
+  }
+
+  const FormPtr
+  UnionForm::getitem_fields(const std::vector<std::string>& keys) const {
+    throw std::invalid_argument(
+      std::string("UnionForm breaks the one-to-one relationship "
+                  "between fieldindexes and keys")
+      + FILENAME(__LINE__));
   }
 
   ////////// UnionArray

@@ -156,6 +156,12 @@ namespace awkward {
       + std::string(" does not exist (data might not be records)"));
   }
 
+  const FormPtr
+  EmptyForm::getitem_fields(const std::vector<std::string>& keys) const {
+    throw std::invalid_argument(
+      std::string("requested keys do not exist (data might not be records)"));
+  }
+
   ////////// EmptyArray
 
   EmptyArray::EmptyArray(const IdentitiesPtr& identities,

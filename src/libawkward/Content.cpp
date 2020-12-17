@@ -791,6 +791,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  Form::getitem_range() const {
+    return shallow_copy();
+  }
+
   ////////// Content
 
   Content::Content(const IdentitiesPtr& identities,

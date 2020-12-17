@@ -87,6 +87,9 @@ namespace awkward {
     const FormPtr
       getitem_field(const std::string& key) const override;
 
+    const FormPtr
+      getitem_fields(const std::vector<std::string>& keys) const override;
+
   private:
     Index::Form starts_;
     Index::Form stops_;

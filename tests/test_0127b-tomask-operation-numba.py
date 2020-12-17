@@ -63,7 +63,7 @@ def test_BitMaskedArray():
         return x
 
     y = f2(array)
-    assert isinstance(y.layout, ak.layout.BitMaskedArray)
+    assert isinstance(y.layout, ak.layout.ByteMaskedArray)
     assert ak.to_list(y) == ak.to_list(array)
 
     @numba.njit

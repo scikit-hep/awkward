@@ -85,6 +85,9 @@ namespace awkward {
     const FormPtr
       getitem_field(const std::string& key) const override;
 
+    const FormPtr
+      getitem_fields(const std::vector<std::string>& keys) const override;
+
   private:
     Index::Form index_;
     const FormPtr content_;
@@ -157,6 +160,9 @@ namespace awkward {
 
     const FormPtr
       getitem_field(const std::string& key) const override;
+
+    const FormPtr
+      getitem_fields(const std::vector<std::string>& keys) const override;
 
   private:
     Index::Form index_;
