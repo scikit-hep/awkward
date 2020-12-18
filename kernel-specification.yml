@@ -1576,9 +1576,9 @@ kernels:
               tostarts[i] = k
               for j in range(stride):
                   if index[fromstarts[i] + j] > 0:
-                      k++
+                      k = k + 1
               tostops[i] = k
-          *tolength = k
+          tolength = k
     automatic-tests: false
     manual-tests: []
 
@@ -1616,7 +1616,8 @@ kernels:
               stride = fromstops[i] - fromstarts[i]
               for j in range(stride):
                   if index[fromstarts[i] + j] > 0:
-                      tocarry[k++] = index[fromstarts[i] + j]
+                      tocarry[k] = index[fromstarts[i] + j]
+                      k = k + 1
     automatic-tests: false
     manual-tests: []
 
