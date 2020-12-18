@@ -1695,14 +1695,8 @@ namespace awkward {
     return false;
   }
 
-  const std::tuple<const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr>
-  RecordArray::unique(bool return_index,
-                      bool return_inverse,
-                      bool return_counts,
-                      int64_t axis) const {
+  const ContentPtr
+  RecordArray::unique() const {
     throw std::runtime_error(
       std::string("FIXME: unimplemented operation: RecordArray::unique")
       + FILENAME(__LINE__));

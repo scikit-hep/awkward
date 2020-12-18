@@ -790,6 +790,56 @@ extern "C" {
     int64_t length,
     int64_t lencontent,
     bool isoption);
+    EXPORT_SYMBOL ERROR
+
+  awkward_IndexedArray32_ranges_next_64(
+    const int32_t* index,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    int64_t* tostarts,
+    int64_t* tostops,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_IndexedArray64_ranges_next_64(
+    const int64_t* index,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    int64_t* tostarts,
+    int64_t* tostops,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_IndexedArrayU32_ranges_next_64(
+    const uint32_t* index,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    int64_t* tostarts,
+    int64_t* tostops,
+    int64_t* tolength);
+
+  EXPORT_SYMBOL ERROR
+  awkward_IndexedArray32_ranges_carry_next_64(
+    const int32_t* index,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    int64_t* tocarry);
+  EXPORT_SYMBOL ERROR
+  awkward_IndexedArray64_ranges_carry_next_64(
+    const int64_t* index,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    int64_t* tocarry);
+  EXPORT_SYMBOL ERROR
+  awkward_IndexedArrayU32_ranges_carry_next_64(
+    const uint32_t* index,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    int64_t* tocarry);
 
   EXPORT_SYMBOL ERROR
   awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(

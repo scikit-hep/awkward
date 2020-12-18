@@ -48,6 +48,64 @@ def test_ListOffsetArray():
     assert ak.to_list(listoffsetarray2) == [[0.0, 1.1, 2.2], [], [3.3, 1.1], [5.5], [6.6, 7.7, 2.2, 9.9], []]
     assert listoffsetarray2.is_unique() == True
 
+def test_RegularArray():
+    content = ak.layout.NumpyArray(
+        np.array(
+            [
+                2.1,
+                8.4,
+                7.4,
+                1.6,
+                2.2,
+                3.4,
+                6.2,
+                5.4,
+                1.5,
+                3.9,
+                3.8,
+                3.0,
+                8.5,
+                6.9,
+                4.3,
+                3.6,
+                6.7,
+                1.8,
+                3.2,
+            ]
+        )
+    )
+    index = ak.layout.Index64(
+        np.array([13, 9, 13, 4, 8, 3, 15, -1, 16, 2, 8], dtype=np.int64)
+    )
+    indexedarray = ak.layout.IndexedOptionArray64(index, content)
+    regular_array = ak.layout.RegularArray(indexedarray, 3, zeros_length=0)
+    assert ak.to_list(regular_array) == [[6.9, 3.9, 6.9], [2.2, 1.5, 1.6], [3.6, None, 6.7]]
+    assert regular_array.is_unique() == True
+
+    index2 = ak.layout.Index64(
+        np.array([13, 9, 13, 9, 13, 13, -1, -1, -1, 2, 8], dtype=np.int64)
+    )
+    indexedarray2 = ak.layout.IndexedOptionArray64(index2, content)
+    regular_array2 = ak.layout.RegularArray(indexedarray2, 3, zeros_length=0)
+    assert ak.to_list(regular_array2) == [[6.9, 3.9, 6.9], [3.9, 6.9, 6.9], [None, None, None]]
+    assert regular_array2.is_unique() == False
+
+def test_IndexedArray():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
+    index = ak.layout.Index64(np.array([0, 2, 4, 6, 8, 9], dtype=np.int64))
+    indexedarray = ak.layout.IndexedArray64(index, content)
+
+    assert ak.to_list(indexedarray) == [0.0, 2.2, 4.4, 6.6, 8.8, 9.9]
+    assert indexedarray.is_unique() == True
+
+    index2 = ak.layout.Index64(np.array([0, 2, 9, 6, 0, 9], dtype=np.int64))
+    indexedarray2 = ak.layout.IndexedArray64(index2, content)
+
+    assert ak.to_list(indexedarray2) == [0.0, 2.2, 9.9, 6.6, 0.0, 9.9]
+    assert indexedarray2.is_unique() == False
+
 # def test_RecordArray():
 #     array = ak.Array(
 #         [

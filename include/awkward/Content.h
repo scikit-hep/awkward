@@ -1321,29 +1321,8 @@ namespace awkward {
 
     /// @brief Returns sorted unique values.
     ///
-    /// 'return_index' if 'true', also return the indices of Array (along the
-    /// specified 'axis', if provided, or in the flattened array) that result in
-    /// the unique array.
-    ///
-    /// 'return_inverse' if 'true', also return the indices of the unique array
-    /// (for the specified 'axis', if provided) that can be used to reconstruct
-    /// array.
-    ///
-    /// 'return_counts' if 'true', also return the number of times each unique
-    /// item appears in array.
-    ///
-    /// 'axis' The 'axis' to operate on.
-    ///
-    /// @note See [numpy.unique](https://numpy.org/doc/stable/reference/generated/numpy.unique.html)
-    /// for more details.
-    virtual const std::tuple<const ContentPtr,
-                             const ContentPtr,
-                             const ContentPtr,
-                             const ContentPtr>
-      unique(bool return_index = false,
-             bool return_inverse = false,
-             bool return_counts = false,
-             int64_t axis = 0) const = 0;
+    virtual const ContentPtr
+      unique() const = 0;
 
     /// @brief Returns 'true' if subranges are equal
     virtual bool

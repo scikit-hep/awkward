@@ -1642,6 +1642,26 @@ namespace awkward {
       int64_t* tolength);
 
     template <typename T>
+    ERROR IndexedArray_ranges_next_64(
+      kernel::lib ptr_lib,
+      const T* index,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t* tostarts,
+      int64_t* tostops,
+      int64_t* tolength);
+
+    template <typename T>
+    ERROR IndexedArray_ranges_carry_next_64(
+      kernel::lib ptr_lib,
+      const T* index,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t* tocarry);
+
+    template <typename T>
     ERROR NumpyArray_subrange_equal(
       kernel::lib ptr_lib,
       const T* fromptr,

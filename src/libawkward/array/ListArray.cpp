@@ -1914,18 +1914,9 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::tuple<const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr>
-  ListArrayOf<T>::unique(bool return_index,
-                         bool return_inverse,
-                         bool return_counts,
-                         int64_t axis) const {
-    return toListOffsetArray64(true).get()->unique(return_index,
-                                                   return_inverse,
-                                                   return_counts,
-                                                   axis);
+  const ContentPtr
+  ListArrayOf<T>::unique() const {
+    return toListOffsetArray64(true).get()->unique();
   }
 
   template <typename T>

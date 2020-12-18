@@ -998,15 +998,9 @@ namespace awkward {
     return toByteMaskedArray().get()->is_unique();
   }
 
-  const std::tuple<const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr>
-  BitMaskedArray::unique(bool return_index,
-                         bool return_inverse,
-                         bool return_counts,
-                         int64_t axis) const {
-    return toByteMaskedArray().get()->unique(return_index, return_inverse, return_counts, axis);
+  const ContentPtr
+  BitMaskedArray::unique() const {
+    return toByteMaskedArray().get()->unique();
   }
 
   bool

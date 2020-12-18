@@ -434,14 +434,8 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
-  const std::tuple<const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr>
-  None::unique(bool return_index,
-               bool return_inverse,
-               bool return_counts,
-               int64_t axis) const {
+  const ContentPtr
+  None::unique() const {
     throw std::runtime_error(
       std::string("FIXME: unimplemented operation: None::unique")
       + FILENAME(__LINE__));

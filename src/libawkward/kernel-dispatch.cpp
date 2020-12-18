@@ -15844,6 +15844,186 @@ namespace awkward {
     }
 
     template<>
+    ERROR IndexedArray_ranges_next_64<int32_t>(
+      kernel::lib ptr_lib,
+      const int32_t* index,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t* tostarts,
+      int64_t* tostops,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray32_ranges_next_64(
+          index,
+          fromstarts,
+          fromstops,
+          length,
+          tostarts,
+          tostops,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_ranges_next_64<int32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_ranges_next_64<int32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR IndexedArray_ranges_next_64<uint32_t>(
+      kernel::lib ptr_lib,
+      const uint32_t* index,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t* tostarts,
+      int64_t* tostops,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArrayU32_ranges_next_64(
+          index,
+          fromstarts,
+          fromstops,
+          length,
+          tostarts,
+          tostops,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_ranges_next_64<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_ranges_next_64<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR IndexedArray_ranges_next_64<int64_t>(
+      kernel::lib ptr_lib,
+      const int64_t* index,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t* tostarts,
+      int64_t* tostops,
+      int64_t* tolength) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray64_ranges_next_64(
+          index,
+          fromstarts,
+          fromstops,
+          length,
+          tostarts,
+          tostops,
+          tolength);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_ranges_next_64<int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_ranges_next_64<int64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR IndexedArray_ranges_carry_next_64<int32_t>(
+      kernel::lib ptr_lib,
+      const int32_t* index,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t* tocarry) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray32_ranges_carry_next_64(
+          index,
+          fromstarts,
+          fromstops,
+          length,
+          tocarry);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_ranges_carry_next_64<int32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_ranges_carry_next_64<int32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR IndexedArray_ranges_carry_next_64<uint32_t>(
+      kernel::lib ptr_lib,
+      const uint32_t* index,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t* tocarry) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArrayU32_ranges_carry_next_64(
+          index,
+          fromstarts,
+          fromstops,
+          length,
+          tocarry);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_ranges_carry_next_64<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_ranges_carry_next_64<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR IndexedArray_ranges_carry_next_64<int64_t>(
+      kernel::lib ptr_lib,
+      const int64_t* index,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t* tocarry) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_IndexedArray64_ranges_carry_next_64(
+          index,
+          fromstarts,
+          fromstops,
+          length,
+          tocarry);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for IndexedArray_ranges_carry_next_64<int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for IndexedArray_ranges_carry_next_64<int64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
     ERROR unique<bool>(
       kernel::lib ptr_lib,
       bool *toptr,

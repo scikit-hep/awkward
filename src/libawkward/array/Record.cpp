@@ -629,14 +629,8 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
-  const std::tuple<const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr>
-  Record::unique(bool return_index,
-                 bool return_inverse,
-                 bool return_counts,
-                 int64_t axis) const {
+  const ContentPtr
+  Record::unique() const {
     throw std::runtime_error(
       std::string("FIXME: unimplemented operation: Record::unique")
       + FILENAME(__LINE__));

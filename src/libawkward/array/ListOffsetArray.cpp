@@ -2169,14 +2169,8 @@ namespace awkward {
   }
 
   template <typename T>
-  const std::tuple<const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr>
-  ListOffsetArrayOf<T>::unique(bool return_index,
-                               bool return_inverse,
-                               bool return_counts,
-                               int64_t axis) const {
+  const ContentPtr
+  ListOffsetArrayOf<T>::unique() const {
     throw std::runtime_error(
       std::string("FIXME: unimplemented operation: ListOffsetArrayOf<T>::unique")
       + FILENAME(__LINE__));

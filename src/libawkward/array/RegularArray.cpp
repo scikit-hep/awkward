@@ -1489,14 +1489,8 @@ namespace awkward {
     return toListOffsetArray64(true).get()->is_unique();
   }
 
-  const std::tuple<const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr>
-  RegularArray::unique(bool return_index,
-                       bool return_inverse,
-                       bool return_counts,
-                       int64_t axis) const {
+  const ContentPtr
+  RegularArray::unique() const {
     throw std::runtime_error(
       std::string("FIXME: unimplemented operation: RegularArray::unique")
       + FILENAME(__LINE__));

@@ -2083,14 +2083,8 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::tuple<const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr>
-  UnionArrayOf<T, I>::unique(bool return_index,
-                             bool return_inverse,
-                             bool return_counts,
-                             int64_t axis) const {
+  const ContentPtr
+  UnionArrayOf<T, I>::unique() const {
     throw std::runtime_error(
       std::string("FIXME: unimplemented operation: UnionArrayOf<T, I>::unique")
       + FILENAME(__LINE__));

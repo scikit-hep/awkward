@@ -1536,6 +1536,91 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_IndexedArray_ranges_next_64
+    specializations:
+      - name: awkward_IndexedArray32_ranges_next_64
+        args:
+          - {name: index, type: "Const[List[int32_t]]", dir: in, role: rangesr-index}
+          - {name: fromstarts, type: "Const[List[int32_t]]", dir: in, role: ListArray-starts}
+          - {name: fromstops, type: "Const[List[int32_t]]", dir: in, role: ListArray-stops}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tostarts, type: "List[int64_t]", dir: out}
+          - {name: tostops, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+      - name: awkward_IndexedArray64_ranges_next_64
+        args:
+          - {name: index, type: "Const[List[int64_t]]", dir: in, role: rangesr-index}
+          - {name: fromstarts, type: "Const[List[int32_t]]", dir: in, role: ListArray-starts}
+          - {name: fromstops, type: "Const[List[int32_t]]", dir: in, role: ListArray-stops}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tostarts, type: "List[int64_t]", dir: out}
+          - {name: tostops, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+      - name: awkward_IndexedArrayU32_ranges_next_64
+        args:
+          - {name: index, type: "Const[List[uint32_t]]", dir: in, role: rangesr-index}
+          - {name: fromstarts, type: "Const[List[int32_t]]", dir: in, role: ListArray-starts}
+          - {name: fromstops, type: "Const[List[int32_t]]", dir: in, role: ListArray-stops}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tostarts, type: "List[int64_t]", dir: out}
+          - {name: tostops, type: "List[int64_t]", dir: out}
+          - {name: tolength, type: "int64_t", dir: out, role: default}
+    description: null
+    definition: |
+      def awkward_IndexedArray_ranges_next_64(
+          index, fromstarts, fromstops, length, tostarts, tostops, tolength
+      ):
+          k = 0
+          for i in range(length):
+              stride = fromstops[i] - fromstarts[i]
+              tostarts[i] = k
+              for j in range(stride):
+                  if index[fromstarts[i] + j] > 0:
+                      k++
+              tostops[i] = k
+          *tolength = k
+    automatic-tests: false
+    manual-tests: []
+
+
+  - name: awkward_IndexedArray_ranges_carry_next_64
+    specializations:
+      - name: awkward_IndexedArray32_ranges_carry_next_64
+        args:
+          - {name: index, type: "Const[List[int32_t]]", dir: in, role: rangesr-index}
+          - {name: fromstarts, type: "Const[List[int32_t]]", dir: in, role: ListArray-starts}
+          - {name: fromstops, type: "Const[List[int32_t]]", dir: in, role: ListArray-stops}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tocarry, type: "List[int64_t]", dir: out}
+      - name: awkward_IndexedArray64_ranges_carry_next_64
+        args:
+          - {name: index, type: "Const[List[int64_t]]", dir: in, role: rangesr-index}
+          - {name: fromstarts, type: "Const[List[int32_t]]", dir: in, role: ListArray-starts}
+          - {name: fromstops, type: "Const[List[int32_t]]", dir: in, role: ListArray-stops}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tocarry, type: "List[int64_t]", dir: out}
+      - name: awkward_IndexedArrayU32_ranges_carry_next_64
+        args:
+          - {name: index, type: "Const[List[uint32_t]]", dir: in, role: rangesr-index}
+          - {name: fromstarts, type: "Const[List[int32_t]]", dir: in, role: ListArray-starts}
+          - {name: fromstops, type: "Const[List[int32_t]]", dir: in, role: ListArray-stops}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: tocarry, type: "List[int64_t]", dir: out}
+    description: null
+    definition: |
+      def awkward_IndexedArray_ranges_carry_next_64(
+          index, fromstarts, fromstops, length, tocarry
+      ):
+          k = 0
+          for i in range(length):
+              stride = fromstops[i] - fromstarts[i]
+              for j in range(stride):
+                  if index[fromstarts[i] + j] > 0:
+                      tocarry[k++] = index[fromstarts[i] + j]
+    automatic-tests: false
+    manual-tests: []
+
+
   - name: awkward_IndexedOptionArray_rpad_and_clip_mask_axis1
     specializations:
       - name: awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64

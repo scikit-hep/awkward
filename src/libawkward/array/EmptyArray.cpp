@@ -705,29 +705,20 @@ namespace awkward {
 
   bool
   EmptyArray::is_unique() const {
-    throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: EmptyArray::is_unique")
-      + FILENAME(__LINE__));
+    // FIXME: assume that an EmptyArray is always unique
+    return true;
   }
 
-  const std::tuple<const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr>
-  EmptyArray::unique(bool return_index,
-                     bool return_inverse,
-                     bool return_counts,
-                     int64_t axis) const {
-    const ContentPtr out = std::make_shared<EmptyArray>(identities(),
-                                                        parameters());
-    return std::tie(out, out, out, out);
+  const ContentPtr
+  EmptyArray::unique() const {
+    // FIXME: assume that a unique EmptyArray has no Identities nor parameters
+    return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
   }
 
   bool
   EmptyArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
-    throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: EmptyArray::is_subrange_equal")
-      + FILENAME(__LINE__));
+    // FIXME: assume that any subrange of an EmptyArray is always unique
+    return false;
   }
 
 }

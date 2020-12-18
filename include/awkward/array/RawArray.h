@@ -1250,14 +1250,8 @@ namespace awkward {
           + FILENAME(__LINE__));
     }
 
-    const std::tuple<const ContentPtr,
-                     const ContentPtr,
-                     const ContentPtr,
-                     const ContentPtr>
-      unique(bool return_index,
-             bool return_inverse,
-             bool return_counts,
-             int64_t axis) const override {
+    const ContentPtr
+      unique() const override {
          throw std::runtime_error(
            std::string("FIXME: unimplemented operation: RawArray::unique")
            + FILENAME(__LINE__));

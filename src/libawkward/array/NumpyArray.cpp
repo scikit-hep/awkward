@@ -4606,26 +4606,13 @@ namespace awkward {
   bool
   NumpyArray::is_unique() const {
     const ContentPtr out = sort_data(true, true, true);
-
-    if (out.get()->length() < length()) {
-      return false;
-    }
-    else {
-      return true;
-    }
+    return (out.get()->length() == length());
   }
 
-  const std::tuple<const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr,
-                   const ContentPtr>
-  NumpyArray::unique(bool return_index,
-                     bool return_inverse,
-                     bool return_counts,
-                     int64_t axis) const {
-    throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: NumpyArray::unique")
-      + FILENAME(__LINE__));
+
+  const ContentPtr
+  NumpyArray::unique() const {
+    return sort_data(true, true, true);
   }
 
   template<typename T>
@@ -4634,6 +4621,10 @@ namespace awkward {
                               int64_t length,
                               const Index64& starts,
                               const Index64& stops) const {
+    if (starts.length() == 1) {
+      return getitem_range_nowrap(starts.getitem_at_nowrap(0),
+                                  stops.getitem_at_nowrap(0)).get()->is_unique();
+    }
     bool toequal = false;
 
     struct Error err2 = kernel::NumpyArray_subrange_equal(
