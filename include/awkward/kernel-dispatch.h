@@ -883,6 +883,17 @@ namespace awkward {
 
 
     template <typename T, typename I>
+    ERROR UnionArray_nestedfill_tags_index_64(
+      kernel::lib ptr_lib,
+      T* totags,
+      I* toindex,
+      int64_t* tmpstarts,
+      T tag,
+      const int64_t* fromcounts,
+      int64_t length);
+
+
+    template <typename T, typename I>
     ERROR UnionArray_flatten_combine_64(
       kernel::lib ptr_lib,
       int8_t* totags,

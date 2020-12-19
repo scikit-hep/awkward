@@ -5249,6 +5249,96 @@ namespace awkward {
     }
 
     template<>
+    ERROR UnionArray_nestedfill_tags_index_64<int8_t, int32_t>(
+      kernel::lib ptr_lib,
+      int8_t* totags,
+      int32_t* toindex,
+      int64_t* tmpstarts,
+      int8_t tag,
+      const int64_t* fromcounts,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_UnionArray8_32_nestedfill_tags_index_64(
+          totags,
+          toindex,
+          tmpstarts,
+          tag,
+          fromcounts,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for awkward_UnionArray_nestedfill_tags_index_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for awkward_UnionArray_nestedfill_tags_index_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR UnionArray_nestedfill_tags_index_64<int8_t, uint32_t>(
+      kernel::lib ptr_lib,
+      int8_t* totags,
+      uint32_t* toindex,
+      int64_t* tmpstarts,
+      int8_t tag,
+      const int64_t* fromcounts,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_UnionArray8_U32_nestedfill_tags_index_64(
+          totags,
+          toindex,
+          tmpstarts,
+          tag,
+          fromcounts,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for awkward_UnionArray_nestedfill_tags_index_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for awkward_UnionArray_nestedfill_tags_index_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR UnionArray_nestedfill_tags_index_64<int8_t, int64_t>(
+      kernel::lib ptr_lib,
+      int8_t* totags,
+      int64_t* toindex,
+      int64_t* tmpstarts,
+      int8_t tag,
+      const int64_t* fromcounts,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_UnionArray8_64_nestedfill_tags_index_64(
+          totags,
+          toindex,
+          tmpstarts,
+          tag,
+          fromcounts,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for awkward_UnionArray_nestedfill_tags_index_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for awkward_UnionArray_nestedfill_tags_index_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
     ERROR UnionArray_flatten_combine_64<int8_t, int32_t>(
       kernel::lib ptr_lib,
       int8_t *totags,

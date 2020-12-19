@@ -4789,6 +4789,33 @@ kernels:
     automatic-tests: false
     manual-tests: []
 
+  - name: awkward_UnionArray_nestedfill_tags_index
+    specializations:
+      - name: awkward_UnionArray8_64_nestedfill_tags_index_64
+        args:
+          - {name: totags, type: "List[int8_t]", dir: out}
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: tmpstarts, type: "List[int64_t]", dir: out}
+          - {name: tag, type: "int8_t", dir: in, role: default}
+          - {name: fromcounts, type: "Const[List[int64_t]]", dir: in, role: default}
+          - {name: length, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_UnionArray_nestedfill_tags_index(
+          totags, toindex, tmpstarts, tag, fromcounts, length
+      ):
+          k = 0
+          for i in range(length):
+              start = tmpstarts[i]
+              stop = start + fromcounts[i]
+              for j in range(start, stop):
+                  totags[j] = tag
+                  toindex[j] = k
+                  k += 1
+              tmpstarts[i] = stop
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_UnionArray_project
     specializations:
       - name: awkward_UnionArray8_32_project_64
