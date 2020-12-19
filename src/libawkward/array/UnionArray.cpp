@@ -394,12 +394,36 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  UnionArrayOf<T,
-               I>::UnionArrayOf(const IdentitiesPtr& identities,
-                                const util::Parameters& parameters,
-                                const IndexOf<T> tags,
-                                const IndexOf<I>& index,
-                                const ContentPtrVec& contents)
+  const std::pair<IndexOf<T>, IndexOf<I>>
+  UnionArrayOf<T, I>::nested_tags_index(const Index64& offsets,
+                                        const std::vector<Index64>& counts) {
+    int64_t contentlen = offsets.getitem_at_nowrap(offsets.length() - 1);
+
+    Index64 tmpstarts = offsets.deep_copy();
+    IndexOf<T> tags(contentlen);
+    IndexOf<I> index(contentlen);
+
+    for (T tag = 0;  tag < (T)counts.size();  tag++) {
+      struct Error err = kernel::UnionArray_nestedfill_tags_index_64(
+        kernel::lib::cpu,   // DERIVE
+        tags.data(),
+        index.data(),
+        tmpstarts.data(),
+        tag,
+        counts[(size_t)tag].data(),
+        tmpstarts.length() - 1);
+      util::handle_error(err, "UnionArray", nullptr);
+    }
+
+    return std::pair<IndexOf<T>, IndexOf<I>>(tags, index);
+  }
+
+  template <typename T, typename I>
+  UnionArrayOf<T, I>::UnionArrayOf(const IdentitiesPtr& identities,
+                                   const util::Parameters& parameters,
+                                   const IndexOf<T> tags,
+                                   const IndexOf<I>& index,
+                                   const ContentPtrVec& contents)
       : Content(identities, parameters)
       , tags_(tags)
       , index_(index)
@@ -935,7 +959,7 @@ namespace awkward {
     out << index_.tostring_part(
              indent + std::string("    "), "<index>", "</index>\n");
     for (size_t i = 0;  i < contents_.size();  i++) {
-      out << indent << "    <content index=\"" << i << "\">\n";
+      out << indent << "    <content tag=\"" << i << "\">\n";
       out << contents_[i].get()->tostring_part(
                indent + std::string("        "), "", "\n");
       out << indent << "    </content>\n";

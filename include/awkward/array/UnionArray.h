@@ -130,6 +130,11 @@ namespace awkward {
     static const IndexOf<I>
       regular_index(const IndexOf<T>& tags);
 
+    /// @brief Generates tags and index for concatenating arrays with axis != 0.
+    static const std::pair<IndexOf<T>, IndexOf<I>>
+      nested_tags_index(const Index64& offsets,
+                        const std::vector<Index64>& counts);
+
     /// @brief Creates a UnionArrayOf from a full set of parameters.
     ///
     /// @param identities Optional Identities for each element of the array

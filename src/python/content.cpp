@@ -1226,6 +1226,14 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
             pair[1] = branch_depth.second;
             return pair;
           })
+          .def_property_readonly("minmax_depth", [](const T& self)
+                                                 -> py::object {
+            std::pair<int64_t, int64_t> minmax_depth = self.minmax_depth();
+            py::tuple pair(2);
+            pair[0] = minmax_depth.first;
+            pair[1] = minmax_depth.second;
+            return pair;
+          })
           .def("getitem_nothing", &T::getitem_nothing)
           .def("getitem_at_nowrap", &T::getitem_at_nowrap)
           .def("getitem_range_nowrap", &T::getitem_range_nowrap)
@@ -1295,15 +1303,6 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
             }
             return box(self.mergemany(others));
           })
-          .def("mergemany_as_union",
-               [](const T& self, const py::iterable& pyothers, int64_t axis) -> py::object {
-            ak::ContentPtrVec others;
-            for (auto pyother : pyothers) {
-              others.push_back(unbox_content(pyother));
-            }
-            return box(self.mergemany_as_union(others, axis, 0));
-          }, py::arg("pyothers"),
-             py::arg("axis") = 0)
           .def("axis_wrap_if_negative",
             [](const T& self, int64_t axis) {
               return self.axis_wrap_if_negative(axis);
@@ -2365,6 +2364,7 @@ make_UnionArrayOf(const py::handle& m, const std::string& name) {
 
       .def_static("sparse_index", &ak::UnionArrayOf<T, I>::sparse_index)
       .def_static("regular_index", &ak::UnionArrayOf<T, I>::regular_index)
+      .def_static("nested_tags_index", &ak::UnionArrayOf<T, I>::nested_tags_index)
       .def_property_readonly("tags", &ak::UnionArrayOf<T, I>::tags)
       .def_property_readonly("index", &ak::UnionArrayOf<T, I>::index)
       .def_property_readonly("contents", &ak::UnionArrayOf<T, I>::contents)
