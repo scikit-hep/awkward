@@ -1103,16 +1103,20 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
 
     first_content = [x for x in contents if isinstance(x, ak.layout.Content)][0]
     posaxis = first_content.axis_wrap_if_negative(axis)
-    if posaxis < 0:
+    maxdepth = max(
+        [x.minmax_depth[1] for x in contents if isinstance(x, ak.layout.Content)]
+    )
+    if not 0 <= posaxis < maxdepth:
         raise ValueError(
-            "negative axis depth is ambiguous" + ak._util.exception_suffix(__file__)
+            "axis={0} is beyond the depth of this array or the depth of this array "
+            "is ambiguous".format(axis) + ak._util.exception_suffix(__file__)
         )
     for x in contents:
         if isinstance(x, ak.layout.Content):
             if x.axis_wrap_if_negative(axis) != posaxis:
                 raise ValueError(
-                    "arrays to concatenate do not have the same depth for "
-                    "negative axis" + ak._util.exception_suffix(__file__)
+                    "arrays to concatenate do not have the same depth for negative "
+                    "axis={0}".format(axis) + ak._util.exception_suffix(__file__)
                 )
 
     if posaxis == 0:
@@ -1131,43 +1135,97 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
                 batch = [collapsed.merge_as_union(x)]
 
         out = batch[0].mergemany(batch[1:])
+        if isinstance(out, ak._util.uniontypes):
+            out = out.simplify(mergebool=mergebool)
 
     else:
-        for x in contents[1:]:
-            if (
-                isinstance(x, ak.layout.Content)
-                and x.axis_wrap_if_negative(axis) != posaxis
-            ):
-                raise ValueError(
-                    "cannot concatenate arrays in different axis"
-                    + ak._util.exception_suffix(__file__)
-                )
 
         def getfunction(inputs, depth):
-            if depth == posaxis:
+            if depth == posaxis and any(
+                isinstance(x, ak._util.optiontypes) for x in inputs
+            ):
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, ak._util.optiontypes) and isinstance(
+                        x.content, ak._util.listtypes
+                    ):
+                        nextinputs.append(fill_none(x, [], highlevel=False))
+                    else:
+                        nextinputs.append(x)
+                inputs = nextinputs
+
+            if depth == posaxis and all(
+                isinstance(x, ak._util.listtypes)
+                or (isinstance(x, ak.layout.NumpyArray) and x.ndim > 1)
+                or not isinstance(x, ak.layout.Content)
+                for x in inputs
+            ):
                 nplike = ak.nplike.of(*inputs)
-                next_length = len(
-                    [x for x in inputs if isinstance(x, ak.layout.Content)][0]
+
+                length = max(
+                    [len(x) for x in inputs if isinstance(x, ak.layout.Content)]
                 )
-                max_depth = max(
-                    [
-                        x.purelist_depth
-                        for x in inputs
-                        if isinstance(x, ak.layout.Content)
-                    ]
-                )
-                what = []
+                nextinputs = []
                 for x in inputs:
                     if isinstance(x, ak.layout.Content):
-                        if x.purelist_depth < max_depth:
-                            what.append(ak.layout.RegularArray(x, 1, len(x)))
-                        else:
-                            what.append(x)
+                        nextinputs.append(x)
                     else:
-                        content = ak.layout.NumpyArray(nplike.repeat(x, next_length))
-                        what.append(ak.layout.RegularArray(content, 1, len(content)))
-                out = what[0].mergemany_as_union(what[1:], 1)
+                        nextinputs.append(
+                            ak.layout.ListOffsetArray64(
+                                ak.layout.Index64(
+                                    nplike.arange(length + 1, dtype=np.int64)
+                                ),
+                                ak.layout.NumpyArray(
+                                    nplike.broadcast_to(nplike.array([x]), (length,))
+                                ),
+                            )
+                        )
+
+                counts = nplike.zeros(len(nextinputs[0]), dtype=np.int64)
+                all_counts = []
+                all_flatten = []
+                for x in nextinputs:
+                    o, f = x.offsets_and_flatten(1)
+                    o = nplike.asarray(o)
+                    c = o[1:] - o[:-1]
+                    nplike.add(counts, c, out=counts)
+                    all_counts.append(c)
+                    all_flatten.append(f)
+
+                offsets = nplike.empty(len(nextinputs[0]) + 1, dtype=np.int64)
+                offsets[0] = 0
+                nplike.cumsum(counts, out=offsets[1:])
+                starts = offsets[:-1]
+
+                mask = nplike.empty(offsets[-1] + 1, dtype=np.int8)
+                tags = nplike.empty(offsets[-1] + 1, dtype=np.int8)
+                index = nplike.empty(offsets[-1] + 1, dtype=np.int64)
+
+                for tag in range(len(nextinputs)):
+                    stops = nplike.add(starts, all_counts[tag])
+
+                    # These six steps could be a single-pass, specialized kernel
+                    # and the 'mask' wouldn't be necessary. But it scales correctly!
+                    # ...And CuPy doesn't have ufunc.at, so it needs to be lowered.
+                    mask[:] = 0
+                    nplike._module.add.at(mask, starts, 1)
+                    nplike._module.add.at(mask, stops, -1)
+                    nplike.cumsum(mask, out=mask)
+                    tags[mask.view(np.bool_)] = tag
+                    index[mask.view(np.bool_)] = nplike.arange(len(all_flatten[tag]))
+
+                    starts = stops
+
+                out = ak.layout.ListOffsetArray64(
+                    ak.layout.Index64(offsets),
+                    ak.layout.UnionArray8_64(
+                        ak.layout.Index8(tags[:-1]),
+                        ak.layout.Index64(index[:-1]),
+                        all_flatten,
+                    ).simplify(mergebool=mergebool),
+                )
                 return lambda: (out,)
+
             else:
                 return None
 
@@ -1178,9 +1236,6 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             allow_records=True,
             pass_depth=True,
         )[0]
-
-    if isinstance(out, ak._util.uniontypes):
-        out = out.simplify(mergebool=mergebool)
 
     if highlevel:
         return ak._util.wrap(out, behavior=ak._util.behaviorof(*arrays))

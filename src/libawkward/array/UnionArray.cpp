@@ -935,7 +935,7 @@ namespace awkward {
     out << index_.tostring_part(
              indent + std::string("    "), "<index>", "</index>\n");
     for (size_t i = 0;  i < contents_.size();  i++) {
-      out << indent << "    <content index=\"" << i << "\">\n";
+      out << indent << "    <content tag=\"" << i << "\">\n";
       out << contents_[i].get()->tostring_part(
                indent + std::string("        "), "", "\n");
       out << indent << "    </content>\n";
