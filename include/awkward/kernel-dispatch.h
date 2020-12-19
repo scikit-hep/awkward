@@ -863,13 +863,6 @@ namespace awkward {
       int64_t inneroffsetslen);
 
     template <typename T>
-    ERROR ListOffsetArray_merge_offsets_64(
-      kernel::lib ptr_lib,
-      int64_t* tooffsets,
-      const T* fromoffsets,
-      int64_t length);
-
-    template <typename T>
     ERROR IndexedArray_flatten_none2empty_64(
       kernel::lib ptr_lib,
       int64_t* outoffsets,
@@ -935,11 +928,6 @@ namespace awkward {
     ERROR zero_mask8(
       kernel::lib ptr_lib,
       int8_t* tomask,
-      int64_t length);
-
-    ERROR zero_mask64(
-      kernel::lib ptr_lib,
-      int64_t* tomask,
       int64_t length);
 
     template <typename T>
@@ -1088,16 +1076,6 @@ namespace awkward {
       int64_t totagsoffset,
       int64_t length,
       int64_t base);
-
-    ERROR UnionArray_mergetags_to8_const(
-      kernel::lib ptr_lib,
-      int8_t* totags,
-      int64_t* toindex,
-      int64_t offset,
-      const int64_t* fromoffsets,
-      int64_t index,
-      int8_t tag,
-      int64_t* nextoffset);
 
     ERROR UnionArray_fillindex_count_64(
       kernel::lib ptr_lib,
