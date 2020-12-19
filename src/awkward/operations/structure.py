@@ -1195,34 +1195,14 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
                 offsets = nplike.empty(len(nextinputs[0]) + 1, dtype=np.int64)
                 offsets[0] = 0
                 nplike.cumsum(counts, out=offsets[1:])
-                starts = offsets[:-1]
 
-                mask = nplike.empty(offsets[-1] + 1, dtype=np.int8)
-                tags = nplike.empty(offsets[-1] + 1, dtype=np.int8)
-                index = nplike.empty(offsets[-1] + 1, dtype=np.int64)
-
-                for tag in range(len(nextinputs)):
-                    stops = nplike.add(starts, all_counts[tag])
-
-                    # These six steps could be a single-pass, specialized kernel
-                    # and the 'mask' wouldn't be necessary. But it scales correctly!
-                    # ...And CuPy doesn't have ufunc.at, so it needs to be lowered.
-                    mask[:] = 0
-                    nplike._module.add.at(mask, starts, 1)
-                    nplike._module.add.at(mask, stops, -1)
-                    nplike.cumsum(mask, out=mask)
-                    tags[mask.view(np.bool_)] = tag
-                    index[mask.view(np.bool_)] = nplike.arange(len(all_flatten[tag]))
-
-                    starts = stops
-
+                offsets = ak.layout.Index64(offsets)
+                tags, index = ak.layout.UnionArray8_64.nested_tags_index(
+                    offsets, [ak.layout.Index64(x) for x in all_counts],
+                )
+                inner = ak.layout.UnionArray8_64(tags, index, all_flatten)
                 out = ak.layout.ListOffsetArray64(
-                    ak.layout.Index64(offsets),
-                    ak.layout.UnionArray8_64(
-                        ak.layout.Index8(tags[:-1]),
-                        ak.layout.Index64(index[:-1]),
-                        all_flatten,
-                    ).simplify(mergebool=mergebool),
+                    offsets, inner.simplify(mergebool=mergebool)
                 )
                 return lambda: (out,)
 

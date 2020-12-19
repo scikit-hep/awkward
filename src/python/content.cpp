@@ -2364,6 +2364,7 @@ make_UnionArrayOf(const py::handle& m, const std::string& name) {
 
       .def_static("sparse_index", &ak::UnionArrayOf<T, I>::sparse_index)
       .def_static("regular_index", &ak::UnionArrayOf<T, I>::regular_index)
+      .def_static("nested_tags_index", &ak::UnionArrayOf<T, I>::nested_tags_index)
       .def_property_readonly("tags", &ak::UnionArrayOf<T, I>::tags)
       .def_property_readonly("index", &ak::UnionArrayOf<T, I>::index)
       .def_property_readonly("contents", &ak::UnionArrayOf<T, I>::contents)

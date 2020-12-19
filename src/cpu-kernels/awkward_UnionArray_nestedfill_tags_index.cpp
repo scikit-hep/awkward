@@ -21,7 +21,7 @@ ERROR awkward_UnionArray_nestedfill_tags_index(
       toindex[j] = k;
       k++;
     }
-    tmpstarts[i] = start;
+    tmpstarts[i] = stop;
   }
   return success();
 }
