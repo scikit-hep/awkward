@@ -1579,6 +1579,10 @@ namespace awkward {
 
     std::vector<NumpyArray> contiguous_arrays;
     for (auto array : head) {
+      if (VirtualArray* raw = dynamic_cast<VirtualArray*>(array.get())) {
+        array = raw->array();
+      }
+
       if (NumpyArray* raw = dynamic_cast<NumpyArray*>(array.get())) {
         contiguous_arrays.push_back(raw->contiguous());
       }

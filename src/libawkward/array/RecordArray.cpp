@@ -1118,6 +1118,10 @@ namespace awkward {
       for (auto array : headless) {
         util::merge_parameters(parameters, array.get()->parameters());
 
+        if (VirtualArray* raw = dynamic_cast<VirtualArray*>(array.get())) {
+          array = raw->array();
+        }
+
         if (RecordArray* raw = dynamic_cast<RecordArray*>(array.get())) {
           if (istuple()) {
             if (numfields() == raw->numfields()) {
@@ -1154,6 +1158,10 @@ namespace awkward {
       std::sort(these_keys.begin(), these_keys.end());
 
       for (auto array : headless) {
+        if (VirtualArray* raw = dynamic_cast<VirtualArray*>(array.get())) {
+          array = raw->array();
+        }
+
         if (RecordArray* raw = dynamic_cast<RecordArray*>(array.get())) {
           if (!istuple()) {
             std::vector<std::string> those_keys = raw->keys();

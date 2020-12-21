@@ -975,6 +975,10 @@ namespace awkward {
     util::Parameters parameters(parameters_);
     ContentPtrVec contents;
     for (auto array : head) {
+      if (VirtualArray* raw = dynamic_cast<VirtualArray*>(array.get())) {
+        array = raw->array();
+      }
+
       util::merge_parameters(parameters, array.get()->parameters());
 
       if (ListArray32* raw = dynamic_cast<ListArray32*>(array.get())) {

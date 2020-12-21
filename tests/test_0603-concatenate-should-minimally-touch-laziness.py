@@ -157,3 +157,19 @@ def test_lazy():
     ]
 
     assert container.touched
+
+    # container.touched = False
+
+    # print("one")
+    # lazy = ak.from_buffers(form, [3, 3], container, lazy=True)
+    # one = ak.concatenate([lazy.Electron, lazy.Muon], axis=1)
+
+    # print("two")
+    # lazy = ak.from_buffers(form, [3, 3], container, lazy=True)
+    # two = ak.concatenate([lazy.Muon, lazy.Muon], axis=1)
+
+    # print("three")
+    # lazy = ak.from_buffers(form, [3, 3], container, lazy=True)
+    # three = ak.concatenate([lazy.Electron, lazy.Electron], axis=1)
+
+    # raise Exception
