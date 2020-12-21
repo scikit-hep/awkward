@@ -2,11 +2,6 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_NumpyArray_unique_strings_uint8.cpp", line)
 
-#include <algorithm>
-#include <cstring>
-#include <numeric>
-#include <vector>
-
 #include "awkward/kernels.h"
 
 ERROR awkward_NumpyArray_unique_strings_uint8(

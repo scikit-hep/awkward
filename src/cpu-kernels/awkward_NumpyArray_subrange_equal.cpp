@@ -2,11 +2,6 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_NumpyArray_subrange_equal.cpp", line)
 
-#include <algorithm>
-#include <cstring>
-#include <numeric>
-#include <vector>
-
 #include "awkward/kernels.h"
 
 template <typename T>
