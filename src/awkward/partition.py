@@ -299,6 +299,18 @@ class PartitionedArray(object):
     def argmax(self, axis, mask, keepdims):
         return self.reduce("argmax", axis, mask, keepdims)
 
+    def axis_wrap_if_negative(self, axis):
+        out = None
+        for partition in self.partitions:
+            if out is None:
+                out = partition.axis_wrap_if_negative(axis)
+            elif out != partition.axis_wrap_if_negative(axis):
+                raise ValueError(
+                    "partitions have inconsistent depths"
+                    + ak._util.exception_suffix(__file__)
+                )
+        return out
+
     def localindex(self, axis):
         if first(self).axis_wrap_if_negative(axis) == 0:
             start = 0
