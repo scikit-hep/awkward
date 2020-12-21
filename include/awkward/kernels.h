@@ -4124,77 +4124,77 @@ extern "C" {
 
   EXPORT_SYMBOL ERROR
   awkward_NumpyArray_subrange_equal_bool(
-    const bool* fromptr,
+    bool* fromptr,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t length,
     bool* toequal);
   EXPORT_SYMBOL ERROR
   awkward_NumpyArray_subrange_equal_int8(
-    const int8_t* fromptr,
+    int8_t* fromptr,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t length,
     bool* toequal);
   EXPORT_SYMBOL ERROR
   awkward_NumpyArray_subrange_equal_int16(
-    const int16_t* fromptr,
+    int16_t* fromptr,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t length,
     bool* toequal);
   EXPORT_SYMBOL ERROR
   awkward_NumpyArray_subrange_equal_int32(
-    const int32_t* fromptr,
+    int32_t* fromptr,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t length,
     bool* toequal);
   EXPORT_SYMBOL ERROR
   awkward_NumpyArray_subrange_equal_int64(
-    const int64_t* fromptr,
+    int64_t* fromptr,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t length,
     bool* toequal);
   EXPORT_SYMBOL ERROR
   awkward_NumpyArray_subrange_equal_uint8(
-    const uint8_t* fromptr,
+    uint8_t* fromptr,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t length,
     bool* toequal);
   EXPORT_SYMBOL ERROR
   awkward_NumpyArray_subrange_equal_uint16(
-    const uint16_t* fromptr,
+    uint16_t* fromptr,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t length,
     bool* toequal);
   EXPORT_SYMBOL ERROR
   awkward_NumpyArray_subrange_equal_uint32(
-    const uint32_t* fromptr,
+    uint32_t* fromptr,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t length,
     bool* toequal);
   EXPORT_SYMBOL ERROR
   awkward_NumpyArray_subrange_equal_uint64(
-    const uint64_t* fromptr,
+    uint64_t* fromptr,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t length,
     bool* toequal);
   EXPORT_SYMBOL ERROR
   awkward_NumpyArray_subrange_equal_float32(
-    const float* fromptr,
+    float* fromptr,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t length,
     bool* toequal);
   EXPORT_SYMBOL ERROR
   awkward_NumpyArray_subrange_equal_float64(
-    const double* fromptr,
+    double* fromptr,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t length,

@@ -789,7 +789,7 @@ namespace awkward {
                                              bool unique = false) const;
 
     template<typename T>
-    bool subranges_equal(const T* ptr,
+    bool subranges_equal(T* ptr,
                          int64_t length,
                          const Index64& starts,
                          const Index64& stops) const;

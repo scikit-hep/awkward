@@ -106,23 +106,24 @@ def test_IndexedArray():
     assert ak.to_list(indexedarray2) == [0.0, 2.2, 9.9, 6.6, 0.0, 9.9]
     assert indexedarray2.is_unique() == False
 
-# def test_RecordArray():
-#     array = ak.Array(
-#         [
-#             {"x": 0.0, "y": []},
-#             {"x": 8.0, "y": [1]},
-#             {"x": 2.2, "y": [2, 2]},
-#             {"x": 3.3, "y": [3, 1, 3]},
-#             {"x": 4.4, "y": [4, 1, 1, 4]},
-#             {"x": 5.5, "y": [5, 4, 5]},
-#             {"x": 1.1, "y": [6, 1]},
-#             {"x": 7.7, "y": [7]},
-#             {"x": 0.0, "y": []},
-#         ]
-#     )
-#     assert ak.to_list(array.x.layout.argsort(0, True, True)) == [0, 8, 6, 2, 3, 4, 5, 7, 1]
-#
-#     assert ak.is_unique(array) == False
+def test_RecordArray():
+    array = ak.Array(
+        [
+            {"x": 0.0, "y": []},
+            {"x": 8.0, "y": [1]},
+            {"x": 2.2, "y": [2, 2]},
+            {"x": 3.3, "y": [3, 1, 3]},
+            {"x": 4.4, "y": [4, 1, 1, 4]},
+            {"x": 5.5, "y": [5, 4, 5]},
+            {"x": 1.1, "y": [6, 1]},
+            {"x": 7.7, "y": [7]},
+            {"x": 0.0, "y": []},
+        ]
+    )
+
+    assert ak.is_unique(array) == True
+    assert ak.is_unique(array.x) == False
+    assert ak.is_unique(array.y) == True
 
 def test_same_categories():
     categories = ak.Array(["one", "two", "three"])
@@ -130,11 +131,15 @@ def test_same_categories():
     index2 = ak.layout.Index64(np.array([1, 1, 2, 1, 0, 0, 0, 1], dtype=np.int64))
     categorical1 = ak.layout.IndexedArray64(index1, categories.layout, parameters={"__array__": "categorical"})
     categorical2 = ak.layout.IndexedArray64(index2, categories.layout, parameters={"__array__": "categorical"})
-    array1 = ak.Array(categorical1)
     assert ak.to_list(categorical1.sort(0, True, True)) == ['one', 'one', 'one', 'three', 'three', 'three', 'two', 'two']
-    #assert categorical1.is_unique() == False
-    array2 = ak.Array(categorical2)
+    assert categorical1.is_unique() == False
+    assert categorical1.content.is_unique() == True
+    assert categorical2.is_unique() == False
+
+    array1 = ak.Array(categorical1)
     assert array1.tolist() == ['one', 'three', 'three', 'two', 'three', 'one', 'two', 'one']
+
+    array2 = ak.Array(categorical2)
     assert array2.tolist() == ['two', 'two', 'three', 'two', 'one', 'one', 'one', 'two']
 
     assert (array1 == array2).tolist() == [False, False, True, True, False, True, False, False]

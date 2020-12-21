@@ -2662,7 +2662,12 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
 
     ContentPtr next = content_.get()->carry(nextcarry, false);
-    return next.get()->is_subrange_equal(nextstarts, nextstops);
+    if (nextstarts.length() > 1) {
+      return next.get()->is_subrange_equal(nextstarts, nextstops);
+    }
+    else {
+      return next.get()->is_unique();
+    }
   }
 
   // IndexedArrayOf<int64_t, true> has to be first, or ld on darwin

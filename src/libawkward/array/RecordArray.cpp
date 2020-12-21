@@ -1661,37 +1661,25 @@ namespace awkward {
       return true;
     }
     else {
-      if (!contents_[0].get()->is_unique()) {
-        Index64 starts(1);
-        starts.setitem_at_nowrap(0, 0);
-        Index64 parents(length());
-        struct Error err = kernel::content_reduce_zeroparents_64(
-          kernel::lib::cpu,   // DERIVE
-          parents.data(),
-          length());
-        util::handle_error(err, classname(), identities_.get());
-
-        ContentPtr sorted = contents_[0].get()->argsort_next(0,
-                                                             starts,
-                                                             parents,
-                                                             length(),
-                                                             true,
-                                                             true,
-                                                             true);
-        // TODO: find non-unique value indices and check the
-        // other contents
-        ContentPtr sorted2 = contents_[1].get()->argsort_next(0,
-                                                              starts,
-                                                              parents,
-                                                              length(),
-                                                              true,
-                                                              true,
-                                                              true);
+      std::vector<ContentPtr> contents;
+      int64_t non_unique_count = 0;
+      std::vector<int64_t> non_unique_index;
+      int64_t i = 0;
+      for (auto content : contents_) {
+        if (!content.get()->is_unique()) {
+          non_unique_count++;
+          non_unique_index.emplace_back(i);
+        }
+        i++;
       }
-      else {
+      if (non_unique_count <= 1) {
         return true;
       }
+      else {
+        // TODO: check non unique contents
+      }
     }
+
     return false;
   }
 

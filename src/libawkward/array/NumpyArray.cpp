@@ -4617,15 +4617,11 @@ namespace awkward {
 
   template<typename T>
   bool
-  NumpyArray::subranges_equal(const T* data,
+  NumpyArray::subranges_equal(T* data,
                               int64_t length,
                               const Index64& starts,
                               const Index64& stops) const {
-    if (starts.length() == 1) {
-      return getitem_range_nowrap(starts.getitem_at_nowrap(0),
-                                  stops.getitem_at_nowrap(0)).get()->is_unique();
-    }
-    bool toequal = false;
+    bool is_equal = false;
 
     struct Error err2 = kernel::NumpyArray_subrange_equal(
       kernel::lib::cpu,   // DERIVE
@@ -4633,11 +4629,11 @@ namespace awkward {
       starts.data(),
       stops.data(),
       starts.length(),
-      &toequal);
+      &is_equal);
     util::handle_error(err2, classname(), nullptr);
 
-   return !toequal;
-}
+    return !is_equal;
+  }
 
   bool
   NumpyArray::is_subrange_equal(const Index64& starts, const Index64& stops) const {
@@ -4646,59 +4642,60 @@ namespace awkward {
         std::string("NumpyArray starts length must be equal to stops length")
         + FILENAME(__LINE__));
     }
+    std::shared_ptr<void> ptr = ptr_;
 
     bool toequal = false;
     switch (dtype_) {
     case util::dtype::boolean:
-      toequal = subranges_equal<bool>(reinterpret_cast<bool*>(ptr_.get()),
+      toequal = subranges_equal<bool>(reinterpret_cast<bool*>(ptr.get()),
                                       length(),
                                       starts,
                                       stops);
       break;
     case util::dtype::int8:
-      toequal = subranges_equal<int8_t>(reinterpret_cast<int8_t*>(ptr_.get()),
+      toequal = subranges_equal<int8_t>(reinterpret_cast<int8_t*>(ptr.get()),
                                         length(),
                                         starts,
                                         stops);
       break;
     case util::dtype::int16:
-      toequal = subranges_equal<int16_t>(reinterpret_cast<int16_t*>(ptr_.get()),
+      toequal = subranges_equal<int16_t>(reinterpret_cast<int16_t*>(ptr.get()),
                                          length(),
                                          starts,
                                          stops);
       break;
     case util::dtype::int32:
-      toequal = subranges_equal<int32_t>(reinterpret_cast<int32_t*>(ptr_.get()),
+      toequal = subranges_equal<int32_t>(reinterpret_cast<int32_t*>(ptr.get()),
                                          length(),
                                          starts,
                                          stops);
       break;
     case util::dtype::int64:
-      toequal = subranges_equal<int64_t>(reinterpret_cast<int64_t*>(ptr_.get()),
+      toequal = subranges_equal<int64_t>(reinterpret_cast<int64_t*>(ptr.get()),
                                          length(),
                                          starts,
                                          stops);
       break;
     case util::dtype::uint8:
-      toequal = subranges_equal<uint8_t>(reinterpret_cast<uint8_t*>(ptr_.get()),
+      toequal = subranges_equal<uint8_t>(reinterpret_cast<uint8_t*>(ptr.get()),
                                          length(),
                                          starts,
                                          stops);
       break;
     case util::dtype::uint16:
-      toequal = subranges_equal<uint16_t>(reinterpret_cast<uint16_t*>(ptr_.get()),
+      toequal = subranges_equal<uint16_t>(reinterpret_cast<uint16_t*>(ptr.get()),
                                           length(),
                                           starts,
                                           stops);
       break;
     case util::dtype::uint32:
-      toequal = subranges_equal<uint32_t>(reinterpret_cast<uint32_t*>(ptr_.get()),
+      toequal = subranges_equal<uint32_t>(reinterpret_cast<uint32_t*>(ptr.get()),
                                           length(),
                                           starts,
                                           stops);
       break;
     case util::dtype::uint64:
-      toequal = subranges_equal<uint64_t>(reinterpret_cast<uint64_t*>(ptr_.get()),
+      toequal = subranges_equal<uint64_t>(reinterpret_cast<uint64_t*>(ptr.get()),
                                           length(),
                                           starts,
                                           stops);
@@ -4708,13 +4705,13 @@ namespace awkward {
         std::string("FIXME: numbers_to_type for float16 not implemented")
         + FILENAME(__LINE__));
     case util::dtype::float32:
-      toequal = subranges_equal<float>(reinterpret_cast<float*>(ptr_.get()),
+      toequal = subranges_equal<float>(reinterpret_cast<float*>(ptr.get()),
                                        length(),
                                        starts,
                                        stops);
       break;
     case util::dtype::float64:
-      toequal = subranges_equal<double>(reinterpret_cast<double*>(ptr_.get()),
+      toequal = subranges_equal<double>(reinterpret_cast<double*>(ptr.get()),
                                         length(),
                                         starts,
                                         stops);

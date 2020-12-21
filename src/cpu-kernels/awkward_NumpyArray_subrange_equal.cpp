@@ -9,65 +9,71 @@
 
 #include "awkward/kernels.h"
 
-namespace awkward {
-  // Checks if the first range [first1, last1) is lexicographically less than
-  // the second range [first2, last2).
-  // Complexity: At most 2·min(N1, N2)
-  template<class InputIt1, class InputIt2>
-  bool lexicographical_compare(InputIt1 first1, InputIt1 last1,
-                               InputIt2 first2, InputIt2 last2)
-  {
-      for ( ; (first1 != last1) && (first2 != last2); ++first1, (void) ++first2 ) {
-          if (*first1 < *first2) return true;
-          if (*first2 < *first1) return false;
-      }
-      return (first1 == last1) && (first2 != last2);
-  }
+template <typename T>
+void swap(T* a, T* b)
+{
+  T t = *a;
+  *a = *b;
+  *b = t;
+}
 
-  // A function to do lexicographical comparisons
-  template <typename Container>
-  bool compare(const Container& left, const Container& right) {
-    return awkward::lexicographical_compare(left.begin(), left.end(),
-                                            right.begin(), right.end());
-  }
+template <typename T>
+int partition (T* arr, int64_t low, int64_t high)
+{
+  int64_t pivot = arr[high];
+  int64_t i = (low - 1);
 
-  // Use that comparison function to sort a range:
-  template <typename ContainerIterator>
-  void sort_by_lexicographical_comapre(ContainerIterator from,
-                                       ContainerIterator to)
+  for (int64_t j = low; j <= high - 1; j++) {
+    if (arr[j] < pivot) {
+      i++;
+      swap(&arr[i], &arr[j]);
+    }
+  }
+  swap(&arr[i + 1], &arr[high]);
+  return (i + 1);
+}
+
+template <typename T>
+void quickSort(T* arr, int64_t low, int64_t high)
+{
+  if (low < high)
   {
-    std::sort(from, to, awkward::compare<typename ContainerIterator::value_type>);
+    int64_t pi = partition(arr, low, high);
+
+    quickSort(arr, low, pi - 1);
+    quickSort(arr, pi + 1, high);
   }
 }
 
 template <typename T>
 ERROR awkward_NumpyArray_subrange_equal(
-    const T* fromptr,
+    T* fromptr,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t length,
     bool* toequal) {
 
-  // FIXME: so far empty ranges are ignored
-  std::vector<std::vector<T>> ranges;
   for (int64_t i = 0; i < length; i++) {
-    std::vector<T> range;
-    for(int64_t j = fromstarts[i]; j < fromstops[i]; j++) {
-      range.push_back(fromptr[j]);
-    }
-    if (!range.empty()) {
-      ranges.push_back(range);
-    }
-    std::sort(ranges.back().begin(), ranges.back().end());
+    quickSort(fromptr, fromstarts[i], fromstops[i] - 1);
   }
-  awkward::sort_by_lexicographical_comapre(ranges.begin(), ranges.end());
 
   bool differ = true;
-  for (int64_t i = 0;  i < ranges.size() - 1;  i++) {
-    if ((ranges[i].size() == ranges[i + 1].size())  &&
-        (ranges[i] == ranges[i + 1])) {
-      differ = false;
-      break;
+  int64_t leftlen;
+  int64_t rightlen;
+  // FIXME: sort the ranges before comparisons?
+  for (int64_t i = 0;  i < length - 1;  i++) {
+    leftlen = fromstops[i] - fromstarts[i];
+    for (int64_t ii = i + 1; ii < length - 1;  ii++) {
+      rightlen = fromstops[ii] - fromstarts[ii];
+      if (leftlen == rightlen) {
+        differ = false;
+        for (int64_t j = 0; j < leftlen; j++) {
+          if (fromptr[fromstarts[i] + j] != fromptr[fromstarts[ii] + j]) {
+            differ = true;
+            break;
+          }
+        }
+      }
     }
   }
 
@@ -77,7 +83,7 @@ ERROR awkward_NumpyArray_subrange_equal(
 }
 
 ERROR awkward_NumpyArray_subrange_equal_bool(
-  const bool* fromptr,
+  bool* fromptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t length,
@@ -90,7 +96,7 @@ ERROR awkward_NumpyArray_subrange_equal_bool(
       toequal);
 }
 ERROR awkward_NumpyArray_subrange_equal_int8(
-  const int8_t* fromptr,
+  int8_t* fromptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t length,
@@ -103,7 +109,7 @@ ERROR awkward_NumpyArray_subrange_equal_int8(
       toequal);
 }
 ERROR awkward_NumpyArray_subrange_equal_uint8(
-  const uint8_t* fromptr,
+  uint8_t* fromptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t length,
@@ -116,7 +122,7 @@ ERROR awkward_NumpyArray_subrange_equal_uint8(
       toequal);
 }
 ERROR awkward_NumpyArray_subrange_equal_int16(
-  const int16_t* fromptr,
+  int16_t* fromptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t length,
@@ -129,7 +135,7 @@ ERROR awkward_NumpyArray_subrange_equal_int16(
       toequal);
 }
 ERROR awkward_NumpyArray_subrange_equal_uint16(
-  const uint16_t* fromptr,
+  uint16_t* fromptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t length,
@@ -142,7 +148,7 @@ ERROR awkward_NumpyArray_subrange_equal_uint16(
       toequal);
 }
 ERROR awkward_NumpyArray_subrange_equal_int32(
-  const int32_t* fromptr,
+  int32_t* fromptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t length,
@@ -155,7 +161,7 @@ ERROR awkward_NumpyArray_subrange_equal_int32(
       toequal);
 }
 ERROR awkward_NumpyArray_subrange_equal_uint32(
-  const uint32_t* fromptr,
+  uint32_t* fromptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t length,
@@ -168,7 +174,7 @@ ERROR awkward_NumpyArray_subrange_equal_uint32(
       toequal);
 }
 ERROR awkward_NumpyArray_subrange_equal_int64(
-  const int64_t* fromptr,
+  int64_t* fromptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t length,
@@ -181,7 +187,7 @@ ERROR awkward_NumpyArray_subrange_equal_int64(
       toequal);
 }
 ERROR awkward_NumpyArray_subrange_equal_uint64(
-  const uint64_t* fromptr,
+  uint64_t* fromptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t length,
@@ -194,7 +200,7 @@ ERROR awkward_NumpyArray_subrange_equal_uint64(
       toequal);
 }
 ERROR awkward_NumpyArray_subrange_equal_float32(
-  const float* fromptr,
+  float* fromptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t length,
@@ -207,7 +213,7 @@ ERROR awkward_NumpyArray_subrange_equal_float32(
       toequal);
 }
 ERROR awkward_NumpyArray_subrange_equal_float64(
-  const double* fromptr,
+  double* fromptr,
   const int64_t* fromstarts,
   const int64_t* fromstops,
   int64_t length,
