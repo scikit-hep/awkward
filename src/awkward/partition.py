@@ -214,6 +214,14 @@ class PartitionedArray(object):
     def purelist_depth(self):
         return first(self).purelist_depth
 
+    @property
+    def branch_depth(self):
+        return first(self).branch_depth
+
+    @property
+    def minmax_depth(self):
+        return first(self).minmax_depth
+
     def getitem_nothing(self, *args, **kwargs):
         return first(self).getitem_nothing(*args, **kwargs)
 

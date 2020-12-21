@@ -1091,20 +1091,27 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
         )
         for x in arrays
     ]
-    contents = [
-        x.toContent() if isinstance(x, ak.partition.PartitionedArray) else x
+    if not any(
+        isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray))
         for x in contents
-    ]
-    if not any(isinstance(x, ak.layout.Content) for x in contents):
+    ):
         raise ValueError(
             "need at least one array to concatenate"
             + ak._util.exception_suffix(__file__)
         )
 
-    first_content = [x for x in contents if isinstance(x, ak.layout.Content)][0]
+    first_content = [
+        x
+        for x in contents
+        if isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray))
+    ][0]
     posaxis = first_content.axis_wrap_if_negative(axis)
     maxdepth = max(
-        [x.minmax_depth[1] for x in contents if isinstance(x, ak.layout.Content)]
+        [
+            x.minmax_depth[1]
+            for x in contents
+            if isinstance(x, (ak.layout.Content, ak.partition.PartitionedArray))
+        ]
     )
     if not 0 <= posaxis < maxdepth:
         raise ValueError(
@@ -1118,6 +1125,31 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
                     "arrays to concatenate do not have the same depth for negative "
                     "axis={0}".format(axis) + ak._util.exception_suffix(__file__)
                 )
+
+    if posaxis == 0 and all(
+        isinstance(x, ak.partition.PartitionedArray) for x in contents
+    ):
+        partitions = []
+        offsets = [0]
+        for partitioned in contents:
+            start = 0
+            for stop, part in __builtins__["zip"](
+                partitioned.stops, partitioned.partitions
+            ):
+                count = stop - start
+                start = stop
+                partitions.append(part)
+                offsets.append(offsets[-1] + count)
+        out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
+        if highlevel:
+            return ak._util.wrap(out, behavior=ak._util.behaviorof(*arrays))
+        else:
+            return out
+
+    contents = [
+        x.toContent() if isinstance(x, ak.partition.PartitionedArray) else x
+        for x in contents
+    ]
 
     if posaxis == 0:
         contents = [

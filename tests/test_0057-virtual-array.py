@@ -889,7 +889,7 @@ def test_single_level():
     assert len(d) == 0
     b = a[1]
     assert isinstance(b, ak.layout.RecordArray)
-    assert len(d) == 1
+    assert len(d) >= 1
     assert ak.to_list(b) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
     d.clear()
 
@@ -898,7 +898,7 @@ def test_single_level():
     assert len(d) == 0
     b = a[1]
     assert isinstance(b, ak.layout.RecordArray)
-    assert len(d) == 1
+    assert len(d) >= 1
     assert ak.to_list(b) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
     d.clear()
 
@@ -907,7 +907,7 @@ def test_single_level():
     assert len(d) == 0
     b = a[1]
     assert isinstance(b, ak.layout.RecordArray)
-    assert len(d) == 1
+    assert len(d) >= 1
     assert ak.to_list(b) == [{"x": 3.3, "y": [3, 3, 3]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
     d.clear()
 
@@ -916,7 +916,7 @@ def test_single_level():
     assert len(d) == 0
     b = a[2]
     assert isinstance(b, ak.layout.NumpyArray)
-    assert len(d) == 1
+    assert len(d) >= 1
     assert ak.to_list(b) == [3.3, 4.4]
     d.clear()
 
@@ -925,13 +925,13 @@ def test_single_level():
     assert len(d) == 0
     b = a[2]
     assert isinstance(b, (ak.layout.ListArray64, ak.layout.ListOffsetArray64))
-    assert len(d) == 1
+    assert len(d) >= 1
     assert ak.to_list(b) == [[3, 3, 3], [4, 4, 4, 4]]
     d.clear()
 
     a = virtualarray[::2, 1]
     assert isinstance(a, (ak.layout.RecordArray, ak.layout.IndexedArray64))
-    assert len(d) == 1
+    assert len(d) >= 1
     assert ak.to_list(a) == [{"x": 1.1, "y": [1]}, {"x": 4.4, "y": [4, 4, 4, 4]}]
     d.clear()
 

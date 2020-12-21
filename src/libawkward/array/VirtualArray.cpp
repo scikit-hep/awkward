@@ -592,11 +592,10 @@ namespace awkward {
 
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  sliceform, stop - start, shallow_copy(), slice);
-    ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
                                           parameters_,
                                           generator,
-                                          cache);
+                                          cache_);
   }
 
   const ContentPtr
@@ -630,11 +629,10 @@ namespace awkward {
 
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  sliceform, generator_.get()->length(), shallow_copy(), slice);
-    ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
                                           params,
                                           generator,
-                                          cache);
+                                          cache_);
   }
 
   const ContentPtr
@@ -655,11 +653,10 @@ namespace awkward {
 
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  sliceform, generator_.get()->length(), shallow_copy(), slice);
-    ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
                                           util::Parameters(),
                                           generator,
-                                          cache);
+                                          cache_);
   }
 
   const ContentPtr
@@ -677,11 +674,10 @@ namespace awkward {
     FormPtr form(nullptr);
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  form, carry.length(), shallow_copy(), slice);
-    ArrayCachePtr cache(nullptr);
     return std::make_shared<VirtualArray>(Identities::none(),
                                           forward_parameters(),
                                           generator,
-                                          cache);
+                                          cache_);
   }
 
   int64_t
@@ -874,11 +870,10 @@ namespace awkward {
           FormPtr form(nullptr);
           ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, length, shallow_copy(), where);
-          ArrayCachePtr cache(nullptr);
           return std::make_shared<VirtualArray>(Identities::none(),
                                                 forward_parameters(),
                                                 generator,
-                                                cache);
+                                                cache_);
         }
         else {
           return array().get()->getitem(where);
@@ -890,11 +885,10 @@ namespace awkward {
         FormPtr form(nullptr);
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, generator_.get()->length(), shallow_copy(), where);
-        ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
                                               forward_parameters(),
                                               generator,
-                                              cache);
+                                              cache_);
       }
 
       else if (SliceNewAxis* newaxis =
@@ -902,11 +896,10 @@ namespace awkward {
         FormPtr form(nullptr);
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, 1, shallow_copy(), where);
-        ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
                                               forward_parameters(),
                                               generator,
-                                              cache);
+                                              cache_);
       }
 
       else if (SliceArray64* slicearray =
@@ -914,11 +907,10 @@ namespace awkward {
         FormPtr form(nullptr);
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, slicearray->length(), shallow_copy(), where);
-        ArrayCachePtr cache(nullptr);
         return std::make_shared<VirtualArray>(Identities::none(),
                                               forward_parameters(),
                                               generator,
-                                              cache);
+                                              cache_);
       }
 
       else if (SliceField* field =
