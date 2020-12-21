@@ -827,6 +827,38 @@ namespace awkward {
     }
   }
 
+  bool
+  RegularArray::referentially_identical(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_identical(other->identities())) {
+        return false;
+      }
+    }
+    if (RegularArray* raw = dynamic_cast<RegularArray*>(other.get())) {
+      if (size_ != raw->size()) {
+        return false;
+      }
+
+      if (size_ == 0) {
+        if (length_ != raw->length()) {
+          return false;
+        }
+      }
+
+      return parameters_ == raw->parameters()  &&
+             content_.get()->referentially_identical(raw->content());
+    }
+    else {
+      return false;
+    }
+  }
+
   const ContentPtr
   RegularArray::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {

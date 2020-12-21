@@ -957,6 +957,31 @@ namespace awkward {
   }
 
   template <typename T>
+  bool
+  ListArrayOf<T>::referentially_identical(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_identical(other->identities())) {
+        return false;
+      }
+    }
+    if (ListArrayOf<T>* raw = dynamic_cast<ListArrayOf<T>*>(other.get())) {
+      return starts_.referentially_identical(raw->starts())  &&
+             stops_.referentially_identical(raw->stops())  &&
+             parameters_ == raw->parameters()  &&
+             content_.get()->referentially_identical(raw->content());
+    }
+    else {
+      return false;
+    }
+  }
+
+  template <typename T>
   const ContentPtr
   ListArrayOf<T>::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {

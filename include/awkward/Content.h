@@ -664,6 +664,13 @@ namespace awkward {
     virtual bool
       mergeable(const ContentPtr& other, bool mergebool) const = 0;
 
+    /// @brief Returns `true` if this array has all the same buffers and
+    /// parameters as `other`; `false` otherwise.
+    ///
+    /// @param other The array to compare this with.
+    virtual bool
+      referentially_identical(const ContentPtr& other) const = 0;
+
     /// @brief Partitions `this` array plus a list of `others` into a `head`
     /// sequence and a `tail` sequence:
     ///

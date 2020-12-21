@@ -1095,6 +1095,53 @@ namespace awkward {
     }
   }
 
+  bool
+  RecordArray::referentially_identical(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_identical(other->identities())) {
+        return false;
+      }
+    }
+    if (RecordArray* raw = dynamic_cast<RecordArray*>(other.get())) {
+      if (length_ != raw->length()  ||
+          parameters_ != raw->parameters()) {
+        return false;
+      }
+
+      if (recordlookup_.get() == nullptr  &&  raw->recordlookup().get() != nullptr) {
+        return false;
+      }
+      if (recordlookup_.get() != nullptr  &&  raw->recordlookup().get() == nullptr) {
+        return false;
+      }
+      if (recordlookup_.get() != nullptr  &&  raw->recordlookup().get() != nullptr) {
+        if (recordlookup_.get() != raw->recordlookup().get()) {
+          return false;
+        }
+      }
+
+      if (numfields() != raw->numfields()) {
+        return false;
+      }
+      for (int64_t i = 0;  i < numfields();  i++) {
+        if (!field(i).get()->referentially_identical(raw->field(i))) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
   const ContentPtr
   RecordArray::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {

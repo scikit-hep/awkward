@@ -56,6 +56,9 @@ public:
   const std::shared_ptr<ak::ArrayGenerator>
     with_kwargs(const py::dict& kwargs) const;
 
+  virtual bool
+    referentially_identical(const ak::ArrayGeneratorPtr& other) const override;
+
 private:
   const py::object callable_;
   const py::tuple args_;

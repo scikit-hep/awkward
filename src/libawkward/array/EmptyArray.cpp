@@ -428,6 +428,27 @@ namespace awkward {
     return true;
   }
 
+  bool
+  EmptyArray::referentially_identical(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_identical(other->identities())) {
+        return false;
+      }
+    }
+    if (EmptyArray* raw = dynamic_cast<EmptyArray*>(other.get())) {
+      return parameters_ == raw->parameters();
+    }
+    else {
+      return false;
+    }
+  }
+
   const ContentPtr
   EmptyArray::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {

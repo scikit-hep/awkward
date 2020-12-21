@@ -42,6 +42,16 @@ namespace awkward {
     return false;
   }
 
+  bool
+  SliceAt::referentially_identical(const SliceItemPtr& other) const {
+    if (SliceAt* raw = dynamic_cast<SliceAt*>(other.get())) {
+      return at_ == raw->at();
+    }
+    else {
+      return false;
+    }
+  }
+
   ////////// SliceRange
 
   SliceRange::SliceRange(int64_t start, int64_t stop, int64_t step)
@@ -105,6 +115,18 @@ namespace awkward {
     return true;
   }
 
+  bool
+  SliceRange::referentially_identical(const SliceItemPtr& other) const {
+    if (SliceRange* raw = dynamic_cast<SliceRange*>(other.get())) {
+      return start_ == raw->start()  &&
+             stop_ == raw->stop()  &&
+             step_ == raw->step();
+    }
+    else {
+      return false;
+    }
+  }
+
   ////////// SliceEllipsis
 
   SliceEllipsis::SliceEllipsis() { }
@@ -124,6 +146,16 @@ namespace awkward {
     return true;
   }
 
+  bool
+  SliceEllipsis::referentially_identical(const SliceItemPtr& other) const {
+    if (SliceEllipsis* raw = dynamic_cast<SliceEllipsis*>(other.get())) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
   ////////// SliceNewAxis
 
   SliceNewAxis::SliceNewAxis() { }
@@ -141,6 +173,16 @@ namespace awkward {
   bool
   SliceNewAxis::preserves_type(const Index64& advanced) const {
     return false;
+  }
+
+  bool
+  SliceNewAxis::referentially_identical(const SliceItemPtr& other) const {
+    if (SliceNewAxis* raw = dynamic_cast<SliceNewAxis*>(other.get())) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   ////////// SliceArrayOf<T>
@@ -299,6 +341,19 @@ namespace awkward {
   }
 
   template <typename T>
+  bool
+  SliceArrayOf<T>::referentially_identical(const SliceItemPtr& other) const {
+    if (SliceArrayOf<T>* raw = dynamic_cast<SliceArrayOf<T>*>(other.get())) {
+      return shape_ == raw->shape()  &&
+             strides_ == raw->strides()  &&
+             index_.referentially_identical(raw->index());
+    }
+    else {
+      return false;
+    }
+  }
+
+  template <typename T>
   const IndexOf<T>
   SliceArrayOf<T>::ravel() const {
     int64_t length = 1;
@@ -353,6 +408,16 @@ namespace awkward {
     return false;
   }
 
+  bool
+  SliceField::referentially_identical(const SliceItemPtr& other) const {
+    if (SliceField* raw = dynamic_cast<SliceField*>(other.get())) {
+      return key_ == raw->key();
+    }
+    else {
+      return false;
+    }
+  }
+
   ////////// SliceFields
 
   SliceFields::SliceFields(const std::vector<std::string>& keys)
@@ -385,6 +450,16 @@ namespace awkward {
   bool
   SliceFields::preserves_type(const Index64& advanced) const {
     return false;
+  }
+
+  bool
+  SliceFields::referentially_identical(const SliceItemPtr& other) const {
+    if (SliceFields* raw = dynamic_cast<SliceFields*>(other.get())) {
+      return keys_ == raw->keys();
+    }
+    else {
+      return false;
+    }
   }
 
   ////////// SliceMissingOf<T>
@@ -474,6 +549,18 @@ namespace awkward {
     return true;
   }
 
+  template <typename T>
+  bool
+  SliceMissingOf<T>::referentially_identical(const SliceItemPtr& other) const {
+    if (SliceMissingOf<T>* raw = dynamic_cast<SliceMissingOf<T>*>(other.get())) {
+      return index_.referentially_identical(raw->index())  &&
+             content_.get()->referentially_identical(raw->content());
+    }
+    else {
+      return false;
+    }
+  }
+
   template class EXPORT_TEMPLATE_INST SliceMissingOf<int64_t>;
 
   ////////// SliceJaggedOf<T>
@@ -551,6 +638,18 @@ namespace awkward {
   bool
   SliceJaggedOf<T>::preserves_type(const Index64& advanced) const {
     return true;
+  }
+
+  template <typename T>
+  bool
+  SliceJaggedOf<T>::referentially_identical(const SliceItemPtr& other) const {
+    if (SliceJaggedOf<T>* raw = dynamic_cast<SliceJaggedOf<T>*>(other.get())) {
+      return offsets_.referentially_identical(raw->offsets())  &&
+             content_.get()->referentially_identical(raw->content());
+    }
+    else {
+      return false;
+    }
   }
 
   template class EXPORT_TEMPLATE_INST SliceJaggedOf<int64_t>;
@@ -839,4 +938,21 @@ namespace awkward {
     }
     return false;
   }
+
+  bool
+  Slice::referentially_identical(const Slice& other) const {
+    std::vector<SliceItemPtr> others = other.items();
+
+    if (items_.size() != others.size()) {
+      return false;
+    }
+
+    for (size_t i = 0;  i < items_.size();  i++) {
+      if (!items_[i].get()->referentially_identical(others[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 }

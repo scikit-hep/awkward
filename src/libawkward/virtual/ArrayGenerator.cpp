@@ -143,4 +143,39 @@ namespace awkward {
                                             content_,
                                             slice_);
   }
+
+  bool
+  SliceGenerator::referentially_identical(const ArrayGeneratorPtr& other) const {
+    if (length_ != other.get()->length()) {
+      return false;
+    }
+
+    if (form_.get() == nullptr  &&  other.get()->form().get() != nullptr) {
+      return false;
+    }
+    if (form_.get() != nullptr  &&  other.get()->form().get() == nullptr) {
+      return false;
+    }
+    if (form_.get() != nullptr  &&  other.get()->form().get() != nullptr) {
+      return form_.get()->equal(other.get()->form(), true, true, true, false);
+    }
+
+    if (length_ < 0  &&  other.get()->length() >= 0) {
+      return false;
+    }
+    if (length_ >= 0  &&  other.get()->length() < 0) {
+      return false;
+    }
+    if (length_ >= 0  &&  other.get()->length() >= 0  &&  length_ != other.get()->length()) {
+      return false;
+    }
+
+    if (SliceGenerator* raw = dynamic_cast<SliceGenerator*>(other.get())) {
+      return slice_.referentially_identical(raw->slice())  &&
+             content_.get()->referentially_identical(raw->content());
+    }
+    else {
+      return false;
+    }
+  }
 }

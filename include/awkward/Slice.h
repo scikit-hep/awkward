@@ -43,6 +43,13 @@ namespace awkward {
     /// {@link Content#getitem_next Content::getitem_next}.
     virtual bool
       preserves_type(const Index64& advanced) const = 0;
+
+    /// @brief Returns `true` if this slice item has all the same buffers and
+    /// parameters as `other`; `false` otherwise.
+    ///
+    /// @param other The slice item to compare this with.
+    virtual bool
+      referentially_identical(const SliceItemPtr& other) const = 0;
   };
 
   /// @class SliceAt
@@ -71,6 +78,9 @@ namespace awkward {
     /// Always `false` for SliceAt.
     bool
       preserves_type(const Index64& advanced) const override;
+
+    virtual bool
+      referentially_identical(const SliceItemPtr& other) const override;
 
   private:
     /// @brief See #at.
@@ -141,6 +151,9 @@ namespace awkward {
     bool
       preserves_type(const Index64& advanced) const override;
 
+    virtual bool
+      referentially_identical(const SliceItemPtr& other) const override;
+
   private:
     /// @brief See #start.
     const int64_t start_;
@@ -170,6 +183,9 @@ namespace awkward {
     /// Always `true` for SliceEllipsis.
     bool
       preserves_type(const Index64& advanced) const override;
+
+    virtual bool
+      referentially_identical(const SliceItemPtr& other) const override;
   };
 
   /// @class SliceNewAxis
@@ -195,6 +211,9 @@ namespace awkward {
     /// Always `false` for SliceNewAxis.
     bool
       preserves_type(const Index64& advanced) const override;
+
+    virtual bool
+      referentially_identical(const SliceItemPtr& other) const override;
   };
 
   /// @class SliceArrayOf
@@ -290,6 +309,9 @@ namespace awkward {
     bool
       preserves_type(const Index64& advanced) const override;
 
+    virtual bool
+      referentially_identical(const SliceItemPtr& other) const override;
+
     /// @brief Returns a one-dimensional contiguous version of the array,
     /// like NumPy's [ravel](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ravel.html).
     const IndexOf<T>
@@ -348,6 +370,9 @@ namespace awkward {
     bool
       preserves_type(const Index64& advanced) const override;
 
+    virtual bool
+      referentially_identical(const SliceItemPtr& other) const override;
+
   private:
     /// @brief See #key.
     const std::string key_;
@@ -388,6 +413,9 @@ namespace awkward {
     /// Always `false` for SliceFields.
     bool
       preserves_type(const Index64& advanced) const override;
+
+    virtual bool
+      referentially_identical(const SliceItemPtr& other) const override;
 
   private:
     /// @brief See #keys.
@@ -454,6 +482,9 @@ namespace awkward {
     /// @note This might not be the right choice; it should be revisited.
     bool
       preserves_type(const Index64& advanced) const override;
+
+    virtual bool
+      referentially_identical(const SliceItemPtr& other) const override;
 
   private:
     /// @brief See #index.
@@ -531,6 +562,9 @@ namespace awkward {
     /// @note This might not be the right choice; it should be revisited.
     bool
       preserves_type(const Index64& advanced) const override;
+
+    virtual bool
+      referentially_identical(const SliceItemPtr& other) const override;
 
   private:
     /// @brief See #offsets.
@@ -660,6 +694,13 @@ namespace awkward {
     /// #Slice and #become_sealed).
     bool
       isadvanced() const;
+
+    /// @brief Returns `true` if this slice has all the same buffers and
+    /// parameters as `other`; `false` otherwise.
+    ///
+    /// @param other The slice to compare this with.
+    bool
+      referentially_identical(const Slice& other) const;
 
   private:
     /// @brief See #items.

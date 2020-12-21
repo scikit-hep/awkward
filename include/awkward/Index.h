@@ -214,6 +214,9 @@ namespace awkward {
     const IndexOf<T>
       copy_to(kernel::lib ptr_lib) const;
 
+    bool
+      referentially_identical(const IndexOf<T>& other) const;
+
   private:
     /// @brief See #ptr.
     const std::shared_ptr<T> ptr_;

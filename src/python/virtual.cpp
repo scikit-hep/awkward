@@ -140,6 +140,42 @@ PyArrayGenerator::with_kwargs(const py::dict& kwargs) const {
                                             kwargs);
 }
 
+bool
+PyArrayGenerator::referentially_identical(const ak::ArrayGeneratorPtr& other) const {
+  if (length_ != other.get()->length()) {
+    return false;
+  }
+
+  if (form_.get() == nullptr  &&  other.get()->form().get() != nullptr) {
+    return false;
+  }
+  if (form_.get() != nullptr  &&  other.get()->form().get() == nullptr) {
+    return false;
+  }
+  if (form_.get() != nullptr  &&  other.get()->form().get() != nullptr) {
+    return form_.get()->equal(other.get()->form(), true, true, true, false);
+  }
+
+  if (length_ < 0  &&  other.get()->length() >= 0) {
+    return false;
+  }
+  if (length_ >= 0  &&  other.get()->length() < 0) {
+    return false;
+  }
+  if (length_ >= 0  &&  other.get()->length() >= 0  &&  length_ != other.get()->length()) {
+    return false;
+  }
+
+  if (PyArrayGenerator* raw = dynamic_cast<PyArrayGenerator*>(other.get())) {
+    return callable_.is(raw->callable())  &&
+           args_.is(raw->args())  &&
+           kwargs_.is(raw->kwargs());
+  }
+  else {
+    return false;
+  }
+}
+
 py::class_<PyArrayGenerator, std::shared_ptr<PyArrayGenerator>>
 make_PyArrayGenerator(const py::handle& m, const std::string& name) {
   return (py::class_<PyArrayGenerator,
