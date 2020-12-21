@@ -1126,32 +1126,62 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
                     "axis={0}".format(axis) + ak._util.exception_suffix(__file__)
                 )
 
-    if posaxis == 0 and all(
-        isinstance(x, ak.partition.PartitionedArray) for x in contents
-    ):
-        partitions = []
-        offsets = [0]
-        for partitioned in contents:
-            start = 0
-            for stop, part in __builtins__["zip"](
-                partitioned.stops, partitioned.partitions
-            ):
-                count = stop - start
-                start = stop
-                partitions.append(part)
-                offsets.append(offsets[-1] + count)
-        out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
-        if highlevel:
-            return ak._util.wrap(out, behavior=ak._util.behaviorof(*arrays))
+    if any(isinstance(x, ak.partition.PartitionedArray) for x in contents):
+        if posaxis == 0:
+            partitions = []
+            offsets = [0]
+            for content in contents:
+                if isinstance(content, ak.partition.PartitionedArray):
+                    start = 0
+                    for stop, part in __builtins__["zip"](
+                        content.stops, content.partitions
+                    ):
+                        count = stop - start
+                        start = stop
+                        partitions.append(part)
+                        offsets.append(offsets[-1] + count)
+                elif isinstance(content, ak.layout.Content):
+                    partitions.append(content)
+                    offsets.append(offsets[-1] + len(content))
+                else:
+                    partitions.append(ak.operations.convert.from_iter([content]))
+                    offsets.append(offsets[-1] + 1)
+
+            out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
+
         else:
-            return out
+            for content in contents:
+                if isinstance(content, ak.partition.PartitionedArray):
+                    stops = content.stops
+                    slices = []
+                    start = 0
+                    for stop in stops:
+                        slices.append(slice(start, stop))
+                        start = stop
+                    break
 
-    contents = [
-        x.toContent() if isinstance(x, ak.partition.PartitionedArray) else x
-        for x in contents
-    ]
+            partitions = []
+            offsets = [0]
+            for slc in slices:
+                newcontents = []
+                for content in contents:
+                    if isinstance(content, ak.partition.PartitionedArray):
+                        newcontents.append(content[slc].toContent())
+                    elif isinstance(content, ak.layout.Content):
+                        newcontents.append(content[slc])
+                    else:
+                        newcontents.append(content)
 
-    if posaxis == 0:
+                partitions.append(
+                    concatenate(
+                        newcontents, axis=axis, mergebool=mergebool, highlevel=False
+                    )
+                )
+                offsets.append(offsets[-1] + len(partitions[-1]))
+
+            out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
+
+    elif posaxis == 0:
         contents = [
             x
             if isinstance(x, ak.layout.Content)

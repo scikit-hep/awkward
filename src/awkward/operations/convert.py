@@ -3407,6 +3407,8 @@ def _form_to_layout(
 ):
     global _index_form_to_dtype, _index_form_to_index, _form_to_layout_class
 
+    print("_form_to_layout", type(form), length)
+
     if _index_form_to_dtype is None:
         _index_form_to_dtype = {
             "i8": np.dtype("<i1"),
