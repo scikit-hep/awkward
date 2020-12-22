@@ -798,6 +798,10 @@ namespace awkward {
 
     const std::string
       validityerror(const std::string& path) const override {
+      const std::string paramcheck = validityerror_parameters(path);
+      if (paramcheck != std::string("")) {
+        return paramcheck;
+      }
       return std::string();
     }
 

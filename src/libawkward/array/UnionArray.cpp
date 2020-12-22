@@ -1342,6 +1342,10 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   UnionArrayOf<T, I>::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     if (index_.length() < tags_.length()) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string("len(index) < len(tags)")

@@ -1680,6 +1680,146 @@ namespace awkward {
     return axis;
   }
 
+  const std::string
+  Content::validityerror_parameters(const std::string& path) const {
+    if (parameter_equals("__array__", "\"string\"")) {
+      ContentPtr content(nullptr);
+      if (const ListArray32* raw = dynamic_cast<const ListArray32*>(this)) {
+        content = raw->content();
+      }
+      else if (const ListArrayU32* raw = dynamic_cast<const ListArrayU32*>(this)) {
+        content = raw->content();
+      }
+      else if (const ListArray64* raw = dynamic_cast<const ListArray64*>(this)) {
+        content = raw->content();
+      }
+      else if (const ListOffsetArray32* raw = dynamic_cast<const ListOffsetArray32*>(this)) {
+        content = raw->content();
+      }
+      else if (const ListOffsetArrayU32* raw = dynamic_cast<const ListOffsetArrayU32*>(this)) {
+        content = raw->content();
+      }
+      else if (const ListOffsetArray64* raw = dynamic_cast<const ListOffsetArray64*>(this)) {
+        content = raw->content();
+      }
+      else if (const RegularArray* raw = dynamic_cast<const RegularArray*>(this)) {
+        content = raw->content();
+      }
+      else {
+        return (std::string("at ") + path + std::string(" (") + classname()
+                + std::string("): __array__ = \"string\" only allowed for "
+                              "ListArray, ListOffsetArray, and RegularArray"));
+      }
+      if (!content.get()->parameter_equals("__array__", "\"char\"")) {
+        return (std::string("at ") + path + std::string(" (") + classname()
+                + std::string("): __array__ = \"string\" must directly contain "
+                              "a node with __array__ = \"char\""));
+      }
+    }
+
+    if (parameter_equals("__array__", "\"bytestring\"")) {
+      ContentPtr content(nullptr);
+      if (const ListArray32* raw = dynamic_cast<const ListArray32*>(this)) {
+        content = raw->content();
+      }
+      else if (const ListArrayU32* raw = dynamic_cast<const ListArrayU32*>(this)) {
+        content = raw->content();
+      }
+      else if (const ListArray64* raw = dynamic_cast<const ListArray64*>(this)) {
+        content = raw->content();
+      }
+      else if (const ListOffsetArray32* raw = dynamic_cast<const ListOffsetArray32*>(this)) {
+        content = raw->content();
+      }
+      else if (const ListOffsetArrayU32* raw = dynamic_cast<const ListOffsetArrayU32*>(this)) {
+        content = raw->content();
+      }
+      else if (const ListOffsetArray64* raw = dynamic_cast<const ListOffsetArray64*>(this)) {
+        content = raw->content();
+      }
+      else if (const RegularArray* raw = dynamic_cast<const RegularArray*>(this)) {
+        content = raw->content();
+      }
+      else {
+        return (std::string("at ") + path + std::string(" (") + classname()
+                + std::string("): __array__ = \"bytestring\" only allowed for "
+                              "ListArray, ListOffsetArray, and RegularArray"));
+      }
+      if (!content.get()->parameter_equals("__array__", "\"byte\"")) {
+        return (std::string("at ") + path + std::string(" (") + classname()
+                + std::string("): __array__ = \"bytestring\" must directly contain "
+                              "a node with __array__ = \"byte\""));
+      }
+    }
+
+    if (parameter_equals("__array__", "\"char\"")) {
+      if (const NumpyArray* raw = dynamic_cast<const NumpyArray*>(this)) {
+        if (raw->dtype() != util::dtype::uint8) {
+          return (std::string("at ") + path + std::string(" (") + classname()
+                  + std::string("): __array__ = \"char\" requires dtype == uint8"));
+        }
+        if (raw->shape().size() != 1) {
+          return (std::string("at ") + path + std::string(" (") + classname()
+                  + std::string("): __array__ = \"char\" must be one-dimensional"));
+        }
+        /// I don't think this is strictly required.
+        // if (raw->stride() != raw->itemsize()) {
+        //   return (std::string("at ") + path + std::string(" (") + classname()
+        //           + std::string("): __array__ = \"char\" must be contiguous"));
+        // }
+      }
+      else {
+        return (std::string("at ") + path + std::string(" (") + classname()
+                + std::string("): __array__ = \"char\" only allowed for NumpyArray"));
+      }
+    }
+
+    if (parameter_equals("__array__", "\"byte\"")) {
+      if (const NumpyArray* raw = dynamic_cast<const NumpyArray*>(this)) {
+        if (raw->dtype() != util::dtype::uint8) {
+          return (std::string("at ") + path + std::string(" (") + classname()
+                  + std::string("): __array__ = \"byte\" requires dtype == uint8"));
+        }
+        if (raw->shape().size() != 1) {
+          return (std::string("at ") + path + std::string(" (") + classname()
+                  + std::string("): __array__ = \"byte\" must be one-dimensional"));
+        }
+        /// I don't think this is strictly required.
+        // if (raw->stride() != raw->itemsize()) {
+        //   return (std::string("at ") + path + std::string(" (") + classname()
+        //           + std::string("): __array__ = \"byte\" must be contiguous"));
+        // }
+      }
+      else {
+        return (std::string("at ") + path + std::string(" (") + classname()
+                + std::string("): __array__ = \"byte\" only allowed for NumpyArray"));
+      }
+    }
+
+    if (parameter_equals("__array__", "\"categorical\"")) {
+      if (dynamic_cast<const IndexedArray32*>(this)  ||
+          dynamic_cast<const IndexedArrayU32*>(this)  ||
+          dynamic_cast<const IndexedArray64*>(this)  ||
+          dynamic_cast<const IndexedOptionArray32*>(this)  ||
+          dynamic_cast<const IndexedOptionArray64*>(this)) {
+        if (!is_unique()) {
+          return (std::string("at ") + path + std::string(" (") + classname()
+                  + std::string("): __array__ = \"categorical\" requires contents "
+                                "to be unique"));
+        }
+      }
+      else {
+        return (std::string("at ") + path + std::string(" (") + classname()
+                + std::string("): __array__ = \"categorical\" only allowed for "
+                              "IndexedArray and IndexedOptionArray"));
+      }
+    }
+
+    // No constraints on __record__ YET.
+
+    return std::string("");
+  }
+
   const ContentPtr
   Content::getitem_next_array_wrap(const ContentPtr& outcontent,
                                    const std::vector<int64_t>& shape) const {

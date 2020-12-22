@@ -28,11 +28,6 @@
 
 #include "awkward/array/NumpyArray.h"
 
-namespace {
-  std::vector<std::string> valid_parameters = { "\"char\"", "\"byte\"" };
-  std::vector<std::string> non_valid_parameters = { "\"categorical\"" };
-}
-
 namespace awkward {
   ////////// NumpyForm
 
@@ -1326,6 +1321,10 @@ namespace awkward {
 
   const std::string
   NumpyArray::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     if (shape_.empty()) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): shape is zero-dimensional")
@@ -1343,31 +1342,6 @@ namespace awkward {
         return (std::string("at ") + path + std::string(" (") + classname()
                 + std::string("): shape[") + std::to_string(i)
                 + ("] % itemsize != 0")
-                + FILENAME(__LINE__));
-      }
-    }
-    if (parameters_.size() != 0) {
-      bool result = std::any_of(valid_parameters.begin(), valid_parameters.end(),
-        [&](const std::string& i){
-          return (parameter_equals("__array__", i)) ? true : false;
-        });
-      if (result) {
-        if (dtype() != util::dtype::uint8  &&  format() != "B") {
-          return (std::string("at ") + path + std::string(" (") + classname()
-                  + std::string("): __array__ can not be ")
-                  + util::parameter_asstring(parameters_, "__array__")
-                  + std::string(" and dtype ") + util::dtype_to_name(dtype_)
-                  + FILENAME(__LINE__));
-        }
-      }
-      result = std::any_of(non_valid_parameters.begin(), non_valid_parameters.end(),
-        [&](const std::string& i){
-          return (parameter_equals("__array__", i)) ? true : false;
-        });
-      if (result) {
-        return (std::string("at ") + path + std::string(" (") + classname()
-                + std::string("): __array__ can not be ")
-                + util::parameter_asstring(parameters_, "__array__")
                 + FILENAME(__LINE__));
       }
     }

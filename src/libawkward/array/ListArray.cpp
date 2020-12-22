@@ -28,11 +28,6 @@
 #include "awkward/array/ListArray.h"
 #include "awkward/common.h"
 
-namespace {
-  std::vector<std::string> valid_parameters = { "\"string\"", "\"bytestring\"" };
-  std::vector<std::string> non_valid_parameters = { "\"categorical\"" };
-}
-
 namespace awkward {
   ////////// ListForm
 
@@ -819,29 +814,14 @@ namespace awkward {
   template <typename T>
   const std::string
   ListArrayOf<T>::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     if (stops_.length() < starts_.length()) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string("len(stops) < len(starts)")
               + FILENAME(__LINE__));
-    }
-    if (parameters_.size() != 0) {
-      bool result = std::any_of(valid_parameters.begin(), valid_parameters.end(),
-        [&](const std::string& i){
-          return (parameter_equals("__array__", i)) ? true : false;
-        });
-    if (result) {
-      // FIXME: further checks
-    }
-    result = std::any_of(non_valid_parameters.begin(), non_valid_parameters.end(),
-      [&](const std::string& i){
-        return (parameter_equals("__array__", i)) ? true : false;
-      });
-      if (result) {
-        return (std::string("at ") + path + std::string(" (") + classname()
-                + std::string("): __array__ can not be ")
-                + util::parameter_asstring(parameters_, "__array__")
-                + FILENAME(__LINE__));
-      }
     }
     struct Error err = kernel::ListArray_validity<T>(
       kernel::lib::cpu,   // DERIVE

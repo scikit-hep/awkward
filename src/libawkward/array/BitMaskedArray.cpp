@@ -711,6 +711,10 @@ namespace awkward {
 
   const std::string
   BitMaskedArray::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     if (mask_.length() * 8 < length_) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string("len(mask) * 8 < length")

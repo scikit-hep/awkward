@@ -17,12 +17,6 @@
 
 #include "awkward/array/EmptyArray.h"
 
-namespace {
-  std::vector<std::string> valid_parameters = { "\"char\"", "\"byte\"",
-    "\"string\"", "\"bytestring\"" };
-  std::vector<std::string> non_valid_parameters = { "\"categorical\"" };
-}
-
 namespace awkward {
   ////////// EmptyForm
 
@@ -389,24 +383,9 @@ namespace awkward {
 
   const std::string
   EmptyArray::validityerror(const std::string& path) const {
-    if (parameters_.size() != 0) {
-      bool result = std::any_of(valid_parameters.begin(), valid_parameters.end(),
-        [&](const std::string& i){
-          return (parameter_equals("__array__", i)) ? true : false;
-        });
-    if (result) {
-      // FIXME: further checks
-    }
-    result = std::any_of(non_valid_parameters.begin(), non_valid_parameters.end(),
-      [&](const std::string& i){
-        return (parameter_equals("__array__", i)) ? true : false;
-      });
-      if (result) {
-        return (std::string("at ") + path + std::string(" (") + classname()
-                + std::string("): __array__ can not be ")
-                + util::parameter_asstring(parameters_, "__array__")
-                + FILENAME(__LINE__));
-      }
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
     }
     return std::string();
   }

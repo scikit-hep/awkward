@@ -748,6 +748,10 @@ namespace awkward {
 
   const std::string
   ByteMaskedArray::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     if (content_.get()->length() < mask_.length()) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string("len(content) < len(mask)")

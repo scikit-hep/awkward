@@ -1340,6 +1340,11 @@ namespace awkward {
       is_subrange_equal(const Index64& start, const Index64& stop) const = 0;
 
   protected:
+    /// @brief Internal function to determine if a particular set of parameters
+    /// are allowed on a particular node (centralized by parameter, not by class).
+    const std::string
+      validityerror_parameters(const std::string& path) const;
+
     /// @brief Internal function to wrap putative #getitem output with enough
     /// RegularArray nodes to satisfy a given `shape`.
     ///

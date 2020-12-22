@@ -922,6 +922,10 @@ namespace awkward {
 
   const std::string
   RecordArray::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     for (int64_t i = 0;  i < numfields();  i++) {
       if (field(i).get()->length() < length_) {
         return (std::string("at ") + path + std::string(" (") + classname()

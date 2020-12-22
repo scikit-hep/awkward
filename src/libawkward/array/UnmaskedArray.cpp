@@ -613,6 +613,10 @@ namespace awkward {
 
   const std::string
   UnmaskedArray::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     return content_.get()->validityerror(path + std::string(".content"));
   }
 
