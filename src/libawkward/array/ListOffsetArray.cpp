@@ -1504,16 +1504,16 @@ namespace awkward {
       for (int64_t j = 0;  j < n;  j++) {
         std::shared_ptr<int64_t> ptr =
             kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                    totallen*sizeof(int64_t));
+                                    totallen*(int64_t)sizeof(int64_t));
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
       std::shared_ptr<int64_t> toindex =
           kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                  n*sizeof(int64_t));
+                                  n*(int64_t)sizeof(int64_t));
       std::shared_ptr<int64_t> fromindex =
           kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                  n*sizeof(int64_t));
+                                  n*(int64_t)sizeof(int64_t));
       struct Error err2 = kernel::ListArray_combinations_64<T>(
         kernel::lib::cpu,   // DERIVE
         tocarryraw.data(),
@@ -2162,9 +2162,7 @@ namespace awkward {
         return (out.get()->length() == length());
       }
     }
-      // FIXME: when its content is unique:
-      // return content_.get()->is_unique();
-      // or when it's sub-ranges are unique:
+
     return is_subrange_equal(util::make_starts(offsets_), util::make_stops(offsets_));
   }
 
@@ -2172,7 +2170,7 @@ namespace awkward {
   const ContentPtr
   ListOffsetArrayOf<T>::unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: ListOffsetArrayOf<T>::unique")
+      std::string("FIXME: operation not yet implemented: ListOffsetArrayOf<T>::unique")
       + FILENAME(__LINE__));
   }
 

@@ -1083,16 +1083,16 @@ namespace awkward {
       for (int64_t j = 0;  j < n;  j++) {
         std::shared_ptr<int64_t> ptr =
             kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                    totallen*sizeof(int64_t));
+                                    totallen*(int64_t)sizeof(int64_t));
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
       std::shared_ptr<int64_t> toindex =
           kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                  size*sizeof(int64_t));
+                                  size*(int64_t)sizeof(int64_t));
       std::shared_ptr<int64_t> fromindex =
           kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                  size*sizeof(int64_t));
+                                  size*(int64_t)sizeof(int64_t));
 
       if (size_ != 0) {
         struct Error err = kernel::RegularArray_combinations_64(
@@ -1491,9 +1491,7 @@ namespace awkward {
 
   const ContentPtr
   RegularArray::unique() const {
-    throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: RegularArray::unique")
-      + FILENAME(__LINE__));
+    return toListOffsetArray64(true).get()->unique();
   }
 
   bool

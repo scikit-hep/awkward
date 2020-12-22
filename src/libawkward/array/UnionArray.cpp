@@ -2078,7 +2078,7 @@ namespace awkward {
   bool
   UnionArrayOf<T, I>::is_unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: UnionArrayOf<T, I>::is_unique")
+      std::string("FIXME: operation not yet implemented: UnionArrayOf<T, I>::is_unique")
       + FILENAME(__LINE__));
   }
 
@@ -2086,7 +2086,7 @@ namespace awkward {
   const ContentPtr
   UnionArrayOf<T, I>::unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: UnionArrayOf<T, I>::unique")
+      std::string("FIXME: operation not yet implemented: UnionArrayOf<T, I>::unique")
       + FILENAME(__LINE__));
   }
 
@@ -2094,7 +2094,7 @@ namespace awkward {
   bool
   UnionArrayOf<T, I>::is_subrange_equal(const Index64& start, const Index64& stop) const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: UnionArrayOf<T, I>::is_subrange_equal")
+      std::string("FIXME: operation not yet implemented: UnionArrayOf<T, I>::is_subrange_equal")
       + FILENAME(__LINE__));
   }
 

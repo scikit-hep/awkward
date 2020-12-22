@@ -15,6 +15,13 @@ def test_NumpyArray():
     array2 = ak.layout.NumpyArray(np.array([5, 6, 1, 3, 4, 5]))
     assert array2.is_unique() == False
 
+    array3 = ak.layout.NumpyArray(np.arange(2 * 3 * 5, dtype=np.int64).reshape(2, 3, 5))
+    assert ak.to_list(array3) == [
+        [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14]],
+        [[15, 16, 17, 18, 19], [20, 21, 22, 23, 24], [25, 26, 27, 28, 29]],
+    ]
+    assert array3.is_unique() == True
+
 def test_ListOffsetArray():
     array = ak.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
     assert ak.to_list(array.sort(0, True, True)) == ["five", "four", "one", "three", "two"]

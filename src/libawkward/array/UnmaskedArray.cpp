@@ -1004,7 +1004,7 @@ namespace awkward {
   bool
   UnmaskedArray::is_unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: UnmaskedArray::is_unique")
+      std::string("FIXME: operation not yet implemented: UnmaskedArray::is_unique")
       + FILENAME(__LINE__));
 
   }
@@ -1012,14 +1012,14 @@ namespace awkward {
   const ContentPtr
   UnmaskedArray::unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: UnmaskedArray::unique")
+      std::string("FIXME: operation not yet implemented: UnmaskedArray::unique")
       + FILENAME(__LINE__));
   }
 
   bool
   UnmaskedArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: UnmaskedArray::is_subrange_equal")
+      std::string("FIXME: operation not yet implemented: UnmaskedArray::is_subrange_equal")
       + FILENAME(__LINE__));
   }
 

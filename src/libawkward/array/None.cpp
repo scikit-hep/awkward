@@ -430,21 +430,21 @@ namespace awkward {
   bool
   None::is_unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: None::is_unique")
+      std::string("undefined operation: None::is_unique")
       + FILENAME(__LINE__));
   }
 
   const ContentPtr
   None::unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: None::unique")
+      std::string("undefined operation: None::unique")
       + FILENAME(__LINE__));
   }
 
   bool
   None::is_subrange_equal(const Index64& start, const Index64& stop) const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: None::is_subrange_equal")
+      std::string("undefined operation: None::is_subrange_equal")
       + FILENAME(__LINE__));
   }
 

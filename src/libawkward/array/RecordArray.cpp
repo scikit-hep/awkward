@@ -1661,22 +1661,23 @@ namespace awkward {
       return true;
     }
     else {
-      std::vector<ContentPtr> contents;
       int64_t non_unique_count = 0;
-      std::vector<int64_t> non_unique_index;
-      int64_t i = 0;
       for (auto content : contents_) {
         if (!content.get()->is_unique()) {
           non_unique_count++;
-          non_unique_index.emplace_back(i);
         }
-        i++;
+        else if (non_unique_count == 0) {
+          return true;
+        }
       }
       if (non_unique_count <= 1) {
         return true;
       }
       else {
-        // TODO: check non unique contents
+        throw std::runtime_error(
+          std::string("FIXME: RecordArray::is_unique operation on a RecordArray ")
+          + std::string("with more than one non-unique content is not implemented yet")
+          + FILENAME(__LINE__));
       }
     }
 
@@ -1686,14 +1687,14 @@ namespace awkward {
   const ContentPtr
   RecordArray::unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: RecordArray::unique")
+      std::string("FIXME: operation not yet implemented: RecordArray::unique")
       + FILENAME(__LINE__));
   }
 
   bool
   RecordArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: RecordArray::is_subrange_equal")
+      std::string("FIXME: operation not yet implemented: RecordArray::is_subrange_equal")
       + FILENAME(__LINE__));
   }
 

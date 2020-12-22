@@ -1250,7 +1250,8 @@ namespace awkward {
           + FILENAME(__LINE__));
     }
 
-    const ContentPtr
+  /// @brief Returns an array where all components are unique
+  const ContentPtr
       unique() const override {
          throw std::runtime_error(
            std::string("FIXME: unimplemented operation: RawArray::unique")

@@ -1045,21 +1045,21 @@ namespace awkward {
   bool
   VirtualArray::is_unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: VirtualArray::is_unique")
+      std::string("FIXME: operation not yet implemented: VirtualArray::is_unique")
       + FILENAME(__LINE__));
   }
 
   const ContentPtr
   VirtualArray::unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: VirtualArray::unique")
+      std::string("FIXME: operation not yet implemented: VirtualArray::unique")
       + FILENAME(__LINE__));
   }
 
   bool
   VirtualArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: VirtualArray::is_subrange_equal")
+      std::string("FIXME: operation not yet implemented: VirtualArray::is_subrange_equal")
       + FILENAME(__LINE__));
   }
 

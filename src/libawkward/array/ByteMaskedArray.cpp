@@ -1467,21 +1467,21 @@ namespace awkward {
   bool
   ByteMaskedArray::is_unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: ByteMaskedArray::is_unique")
+      std::string("FIXME: operation not yet implemented: ByteMaskedArray::is_unique")
       + FILENAME(__LINE__));
   }
 
   const ContentPtr
   ByteMaskedArray::unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: ByteMaskedArray::unique")
+      std::string("FIXME: operation not yet implemented: ByteMaskedArray::unique")
       + FILENAME(__LINE__));
   }
 
   bool
   ByteMaskedArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: ByteMaskedArray::is_subrange_equal")
+      std::string("FIXME: operation not yet implemented: ByteMaskedArray::is_subrange_equal")
       + FILENAME(__LINE__));
   }
 

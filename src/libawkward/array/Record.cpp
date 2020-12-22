@@ -625,21 +625,21 @@ namespace awkward {
   bool
   Record::is_unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: Record::is_unique")
+      std::string("FIXME: operation not yet implemented: Record::is_unique")
       + FILENAME(__LINE__));
   }
 
   const ContentPtr
   Record::unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: Record::unique")
+      std::string("FIXME: operation not yet implemented: Record::unique")
       + FILENAME(__LINE__));
   }
 
   bool
   Record::is_subrange_equal(const Index64& start, const Index64& stop) const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: Record::is_subrange_equal")
+      std::string("FIXME: operation not yet implemented: Record::is_subrange_equal")
       + FILENAME(__LINE__));
   }
 

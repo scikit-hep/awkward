@@ -391,6 +391,7 @@ namespace awkward {
     bool
       is_unique() const override;
 
+    /// @brief Returns an array where all components are unique
     const ContentPtr
       unique() const override;
 

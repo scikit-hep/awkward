@@ -29,14 +29,14 @@ int partition (T* arr, int64_t low, int64_t high)
 }
 
 template <typename T>
-void quickSort(T* arr, int64_t low, int64_t high)
+void quick_sort(T* arr, int64_t low, int64_t high)
 {
   if (low < high)
   {
     int64_t pi = partition(arr, low, high);
 
-    quickSort(arr, low, pi - 1);
-    quickSort(arr, pi + 1, high);
+    quick_sort(arr, low, pi - 1);
+    quick_sort(arr, pi + 1, high);
   }
 }
 
@@ -49,13 +49,13 @@ ERROR awkward_NumpyArray_subrange_equal(
     bool* toequal) {
 
   for (int64_t i = 0; i < length; i++) {
-    quickSort(fromptr, fromstarts[i], fromstops[i] - 1);
+    quick_sort(fromptr, fromstarts[i], fromstops[i] - 1);
   }
 
   bool differ = true;
   int64_t leftlen;
   int64_t rightlen;
-  // FIXME: sort the ranges before comparisons?
+
   for (int64_t i = 0;  i < length - 1;  i++) {
     leftlen = fromstops[i] - fromstarts[i];
     for (int64_t ii = i + 1; ii < length - 1;  ii++) {

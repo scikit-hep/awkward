@@ -2623,7 +2623,7 @@ namespace awkward {
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::unique() const {
     throw std::runtime_error(
-      std::string("FIXME: unimplemented operation: IndexedArrayOf<T, ISOPTION>::unique")
+      std::string("FIXME: operation not yet implemented: IndexedArrayOf<T, ISOPTION>::unique")
       + FILENAME(__LINE__));
   }
 

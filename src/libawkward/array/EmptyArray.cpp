@@ -705,19 +705,16 @@ namespace awkward {
 
   bool
   EmptyArray::is_unique() const {
-    // FIXME: assume that an EmptyArray is always unique
     return true;
   }
 
   const ContentPtr
   EmptyArray::unique() const {
-    // FIXME: assume that a unique EmptyArray has no Identities nor parameters
-    return std::make_shared<EmptyArray>(Identities::none(), util::Parameters());
+    return shallow_copy();
   }
 
   bool
   EmptyArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
-    // FIXME: assume that any subrange of an EmptyArray is always unique
     return false;
   }
 
