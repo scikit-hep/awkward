@@ -91,8 +91,10 @@ def test_lazy():
 
     container = Verbose(
         {
-            "part0-load_electron_offsets-offsets": np.array([0, 3, 3, 5]),
-            "part0-load_muon_offsets-offsets": np.array([0, 3, 3, 5]),
+            "part0-load_electron_offsets-offsets": np.array(
+                [0, 3, 3, 5], dtype=np.int64
+            ),
+            "part0-load_muon_offsets-offsets": np.array([0, 3, 3, 5], dtype=np.int64),
             "part0-load_electron_charge-data": np.array(
                 [1, 2, 3, 4, 5], dtype=np.int64
             ),
@@ -103,8 +105,10 @@ def test_lazy():
             "part0-load_muon_momentum-data": np.array(
                 [1.1, 2.2, 3.3, 4.4, 5.5], dtype=np.float64
             ),
-            "part1-load_electron_offsets-offsets": np.array([0, 3, 3, 5]),
-            "part1-load_muon_offsets-offsets": np.array([0, 3, 3, 5]),
+            "part1-load_electron_offsets-offsets": np.array(
+                [0, 3, 3, 5], dtype=np.int64
+            ),
+            "part1-load_muon_offsets-offsets": np.array([0, 3, 3, 5], dtype=np.int64),
             "part1-load_electron_charge-data": np.array(
                 [1, 2, 3, 4, 5], dtype=np.int64
             ),
@@ -188,7 +192,7 @@ def test_lazy():
             {"charge": 5, "momentum": 5.5},
             {"charge": 4, "momentum": 4.4},
             {"charge": 5, "momentum": 5.5},
-        ]
+        ],
     ]
     assert two.tolist() == 2 * [
         [
@@ -205,7 +209,7 @@ def test_lazy():
             {"charge": 5, "momentum": 5.5},
             {"charge": 4, "momentum": 4.4},
             {"charge": 5, "momentum": 5.5},
-        ]
+        ],
     ]
     assert three.tolist() == 2 * [
         [
@@ -222,5 +226,5 @@ def test_lazy():
             {"charge": 5, "momentum": 5.5},
             {"charge": 4, "momentum": 4.4},
             {"charge": 5, "momentum": 5.5},
-        ]
+        ],
     ]
