@@ -1065,7 +1065,7 @@ def broadcast_arrays(*arrays, **kwargs):
 
 
 @ak._connect._numpy.implements("concatenate")
-def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
+def concatenate(arrays, axis=0, merge=True, mergebool=True, highlevel=True):
     """
     Args:
         arrays: Arrays to concatenate along any dimension.
@@ -1073,6 +1073,9 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+        merge (bool): If True, combine data into the same buffers wherever
+            possible, eliminating unnecessary #ak.layout.UnionArray8_64 types
+            at the expense of materializing #ak.layout.VirtualArray nodes.
         mergebool (bool): If True, boolean and nummeric data can be combined
             into the same buffer, losing information about False vs `0` and
             True vs `1`; otherwise, they are kept in separate buffers with
@@ -1174,7 +1177,11 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
 
                 partitions.append(
                     concatenate(
-                        newcontents, axis=axis, mergebool=mergebool, highlevel=False
+                        newcontents,
+                        axis=axis,
+                        merge=merge,
+                        mergebool=mergebool,
+                        highlevel=False,
                     )
                 )
                 offsets.append(offsets[-1] + len(partitions[-1]))
@@ -1198,7 +1205,7 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
 
         out = batch[0].mergemany(batch[1:])
         if isinstance(out, ak._util.uniontypes):
-            out = out.simplify(mergebool=mergebool)
+            out = out.simplify(merge=merge, mergebool=mergebool)
 
     else:
 
@@ -1265,7 +1272,7 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
                 inner = ak.layout.UnionArray8_64(tags, index, all_flatten)
 
                 out = ak.layout.ListOffsetArray64(
-                    offsets, inner.simplify(mergebool=mergebool)
+                    offsets, inner.simplify(merge=merge, mergebool=mergebool)
                 )
                 return lambda: (out,)
 

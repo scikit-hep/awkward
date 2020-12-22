@@ -1893,7 +1893,7 @@ namespace awkward {
                                          tags,
                                          index,
                                          contents);
-      return out.get()->simplify_uniontype(true);
+      return out.get()->simplify_uniontype(true, true);
     }
     else {
       return std::make_shared<IndexedArrayOf<T, ISOPTION>>(

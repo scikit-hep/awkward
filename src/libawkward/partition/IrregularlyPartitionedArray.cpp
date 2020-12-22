@@ -112,15 +112,15 @@ namespace awkward {
           }
           if (UnionArray8_32* raw
                   = dynamic_cast<UnionArray8_32*>(dst.get())) {
-            dst = raw->simplify_uniontype(false);
+            dst = raw->simplify_uniontype(true, false);
           }
           else if (UnionArray8_U32* raw
                        = dynamic_cast<UnionArray8_U32*>(dst.get())) {
-            dst = raw->simplify_uniontype(false);
+            dst = raw->simplify_uniontype(true, false);
           }
           else if (UnionArray8_64* raw
                        = dynamic_cast<UnionArray8_64*>(dst.get())) {
-            dst = raw->simplify_uniontype(false);
+            dst = raw->simplify_uniontype(true, false);
           }
         }
       }

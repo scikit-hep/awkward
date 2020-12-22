@@ -9,7 +9,7 @@ import awkward as ak  # noqa: F401
 
 class Verbose(dict):
     def __getitem__(self, key):
-        # print(key)
+        print(key)
         self.touched = True
         if "data" in key:
             self.data_touched = True
@@ -47,7 +47,7 @@ def test_lazy():
                         },
                     },
                     "form_key": "invalid",
-                    "parameters": {},
+                    "parameters": {"__record__": "Electron"},
                 },
                 "form_key": "load_electron_offsets",
                 "offsets": "i64",
@@ -212,6 +212,35 @@ def test_lazy():
         ],
     ]
     assert three.tolist() == 2 * [
+        [
+            {"charge": 1, "momentum": 1.1},
+            {"charge": 2, "momentum": 2.2},
+            {"charge": 3, "momentum": 3.3},
+            {"charge": 1, "momentum": 1.1},
+            {"charge": 2, "momentum": 2.2},
+            {"charge": 3, "momentum": 3.3},
+        ],
+        [],
+        [
+            {"charge": 4, "momentum": 4.4},
+            {"charge": 5, "momentum": 5.5},
+            {"charge": 4, "momentum": 4.4},
+            {"charge": 5, "momentum": 5.5},
+        ],
+    ]
+
+    form["contents"]["Electron"]["content"]["parameters"] = {}
+    form["contents"]["Muon"]["content"]["parameters"] = {}
+
+    container.data_touched = False
+
+    lazy = ak.from_buffers(form, [3, 3], container, lazy=True)
+
+    one = ak.concatenate([lazy.Electron, lazy.Muon], axis=1, merge=False)
+
+    assert not container.data_touched
+
+    assert one.tolist() == 2 * [
         [
             {"charge": 1, "momentum": 1.1},
             {"charge": 2, "momentum": 2.2},

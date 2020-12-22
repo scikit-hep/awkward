@@ -2373,10 +2373,11 @@ make_UnionArrayOf(const py::handle& m, const std::string& name) {
       .def("content", &ak::UnionArrayOf<T, I>::content)
       .def("project", &ak::UnionArrayOf<T, I>::project)
       .def("simplify",
-           [](const ak::UnionArrayOf<T, I>& self, bool mergebool)
+           [](const ak::UnionArrayOf<T, I>& self, bool merge, bool mergebool)
            -> py::object {
-        return box(self.simplify_uniontype(mergebool));
-      }, py::arg("mergebool") = false)
+        return box(self.simplify_uniontype(merge, mergebool));
+      }, py::arg("merge") = true,
+         py::arg("mergebool") = false)
 
   );
 }
