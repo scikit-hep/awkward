@@ -196,9 +196,9 @@ C++ projects can link against the shared libraries `libawkward-cpu-kernels.so` a
 
 # Roadmap
 
-Since [version 0.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/0.4.0), Awkward Array has been compiled with [pybind11 2.6.0](https://github.com/pybind/pybind11/releases/tag/v2.6.0).
+Since [version 0.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/0.4.0), Awkward Array has been compiled with [pybind11 2.6.0](https://github.com/pybind/pybind11/releases/tag/v2.6.0). Any changes will be posted here.
 
-The table below indicates when interface-breaking changes are planned; mitigations each is discussed in pull requests and issues. It doesn't include new additions that don't interfere with old behavior or corrections to bugs (i.e. behaviors that were _never_ intended). Each of these are preceded by `FutureWarnings` that indicate the target removal version/date.
+The table below indicates when interface-breaking changes are planned; each is discussed in pull requests and issues. It doesn't include new additions that don't interfere with old behavior or corrections to bugs (i.e. behaviors that were _never_ intended and fixed immediately). Each of these are preceded by `FutureWarnings` that indicate the target removal version/date.
 
 See [release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) for a detailed changelog of past releases. See [projects](https://github.com/scikit-hep/awkward-1.0/projects) for planning and prioritizing bug-fixes and features.
 
