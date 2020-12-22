@@ -202,9 +202,9 @@ The table below indicates when interface-breaking changes are planned; mitigatio
 
 See [release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) for a detailed changelog of past releases. See [projects](https://github.com/scikit-hep/awkward-1.0/projects) for planning and prioritizing bug-fixes and features.
 
-| Version number | Target date | Deprecated features removed in this version |
+| Version number | Target/actual date | Deprecated features removed in this version |
 |:--------------:|:-----------:|:--------------------------------------------|
-| [1.0.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.0.0) | 2020-12-01 | Broadcasting NumPy ufuncs through records (#457), `lazy_cache="attach"` option in [ak.from_parquet](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_parquet.html) (#576). |
+| [1.0.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.0.0) | 2020-12-05 | Broadcasting NumPy ufuncs through records (#457), `lazy_cache="attach"` option in [ak.from_parquet](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_parquet.html) (#576). |
 | 1.1.0 | 2021-02-01 | Removing [ak.to_arrayset](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_arrayset.html)/[ak.from_arrayset](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_arrayset.html) in favor of [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html)/[ak.from_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_buffers.html) (#592). |
 | 1.2.0 | 2021-04-01 | |
 | 1.3.0 | 2021-06-01 | |
