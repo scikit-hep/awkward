@@ -278,7 +278,7 @@ namespace awkward {
   IndexOf<int64_t> IndexOf<int8_t>::to64() const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr =
-        kernel::malloc<int64_t>(ptr_lib, length_*sizeof(int64_t));
+        kernel::malloc<int64_t>(ptr_lib, length_*(int64_t)sizeof(int64_t));
     if (length_ != 0) {
       struct Error err = kernel::Index_to_Index64<int8_t>(
         ptr_lib,
@@ -294,7 +294,7 @@ namespace awkward {
   IndexOf<int64_t> IndexOf<uint8_t>::to64() const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr =
-        kernel::malloc<int64_t>(ptr_lib, length_*sizeof(int64_t));
+        kernel::malloc<int64_t>(ptr_lib, length_*(int64_t)sizeof(int64_t));
     if (length_ != 0) {
       struct Error err = kernel::Index_to_Index64<uint8_t>(
         ptr_lib,
@@ -310,7 +310,7 @@ namespace awkward {
   IndexOf<int64_t> IndexOf<int32_t>::to64() const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr =
-        kernel::malloc<int64_t>(ptr_lib, length_*sizeof(int64_t));
+        kernel::malloc<int64_t>(ptr_lib, length_*(int64_t)sizeof(int64_t));
     if (length_ != 0) {
       struct Error err = kernel::Index_to_Index64<int32_t>(
         ptr_lib,
@@ -326,7 +326,7 @@ namespace awkward {
   IndexOf<int64_t> IndexOf<uint32_t>::to64() const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr =
-        kernel::malloc<int64_t>(ptr_lib, length_*sizeof(int64_t));
+        kernel::malloc<int64_t>(ptr_lib, length_*(int64_t)sizeof(int64_t));
     if (length_ != 0) {
       struct Error err = kernel::Index_to_Index64<uint32_t>(
         ptr_lib,
@@ -346,7 +346,7 @@ namespace awkward {
   template <typename T>
   const IndexOf<T>
   IndexOf<T>::deep_copy() const {
-    std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib_, length_*sizeof(T));
+    std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib_, length_*(int64_t)sizeof(T));
     if (length_ != 0) {
       // DERIVE Yikes! It's a memcpy! This would would actually crash if on a GPU (FIXME).
       memcpy(ptr.get(),

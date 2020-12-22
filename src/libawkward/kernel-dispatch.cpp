@@ -16290,14 +16290,14 @@ namespace awkward {
     template<>
     ERROR NumpyArray_subrange_equal<bool>(
       kernel::lib ptr_lib,
-      bool* fromptr,
+      bool* tmpptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_bool(
-          fromptr,
+          tmpptr,
           fromstarts,
           fromstops,
           length,
@@ -16318,14 +16318,14 @@ namespace awkward {
     template<>
     ERROR NumpyArray_subrange_equal<uint8_t>(
       kernel::lib ptr_lib,
-      uint8_t* fromptr,
+      uint8_t* tmpptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_uint8(
-          fromptr,
+          tmpptr,
           fromstarts,
           fromstops,
           length,
@@ -16346,14 +16346,14 @@ namespace awkward {
     template<>
     ERROR NumpyArray_subrange_equal<int8_t>(
       kernel::lib ptr_lib,
-      int8_t* fromptr,
+      int8_t* tmpptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_int8(
-          fromptr,
+          tmpptr,
           fromstarts,
           fromstops,
           length,
@@ -16374,14 +16374,14 @@ namespace awkward {
     template<>
     ERROR NumpyArray_subrange_equal<uint16_t>(
       kernel::lib ptr_lib,
-      uint16_t* fromptr,
+      uint16_t* tmpptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_uint16(
-          fromptr,
+          tmpptr,
           fromstarts,
           fromstops,
           length,
@@ -16402,14 +16402,14 @@ namespace awkward {
     template<>
     ERROR NumpyArray_subrange_equal<int16_t>(
       kernel::lib ptr_lib,
-      int16_t* fromptr,
+      int16_t* tmpptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_int16(
-          fromptr,
+          tmpptr,
           fromstarts,
           fromstops,
           length,
@@ -16430,14 +16430,14 @@ namespace awkward {
     template<>
     ERROR NumpyArray_subrange_equal<uint32_t>(
       kernel::lib ptr_lib,
-      uint32_t* fromptr,
+      uint32_t* tmpptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_uint32(
-          fromptr,
+          tmpptr,
           fromstarts,
           fromstops,
           length,
@@ -16458,14 +16458,14 @@ namespace awkward {
     template<>
     ERROR NumpyArray_subrange_equal<int32_t>(
       kernel::lib ptr_lib,
-      int32_t* fromptr,
+      int32_t* tmpptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_int32(
-          fromptr,
+          tmpptr,
           fromstarts,
           fromstops,
           length,
@@ -16486,14 +16486,14 @@ namespace awkward {
     template<>
     ERROR NumpyArray_subrange_equal<uint64_t>(
       kernel::lib ptr_lib,
-      uint64_t* fromptr,
+      uint64_t* tmpptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_uint64(
-          fromptr,
+          tmpptr,
           fromstarts,
           fromstops,
           length,
@@ -16514,14 +16514,14 @@ namespace awkward {
     template<>
     ERROR NumpyArray_subrange_equal<int64_t>(
       kernel::lib ptr_lib,
-      int64_t* fromptr,
+      int64_t* tmpptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_int64(
-          fromptr,
+          tmpptr,
           fromstarts,
           fromstops,
           length,
@@ -16542,14 +16542,14 @@ namespace awkward {
     template<>
     ERROR NumpyArray_subrange_equal<float>(
       kernel::lib ptr_lib,
-      float* fromptr,
+      float* tmpptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_float32(
-          fromptr,
+          tmpptr,
           fromstarts,
           fromstops,
           length,
@@ -16570,14 +16570,14 @@ namespace awkward {
     template<>
     ERROR NumpyArray_subrange_equal<double>(
       kernel::lib ptr_lib,
-      double* fromptr,
+      double* tmpptr,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_float64(
-          fromptr,
+          tmpptr,
           fromstarts,
           fromstops,
           length,

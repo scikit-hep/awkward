@@ -4419,77 +4419,77 @@ kernels:
     specializations:
       - name: awkward_NumpyArray_subrange_equal_bool
         args:
-          - {name: fromptr, type: "List[bool]", dir: in, role: IndexedArray-index}
+          - {name: tmpptr, type: "List[bool]", dir: in, role: IndexedArray-index}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: toequal, type: "bool", dir: out}
       - name: awkward_NumpyArray_subrange_equal_int8
         args:
-          - {name: fromptr, type: "List[int8_t]", dir: in, role: IndexedArray-index}
+          - {name: tmpptr, type: "List[int8_t]", dir: in, role: IndexedArray-index}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: toequal, type: "bool", dir: out}
       - name: awkward_NumpyArray_subrange_equal_int16
         args:
-          - {name: fromptr, type: "List[int16_t]", dir: in, role: IndexedArray-index}
+          - {name: tmpptr, type: "List[int16_t]", dir: in, role: IndexedArray-index}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: toequal, type: "bool", dir: out}
       - name: awkward_NumpyArray_subrange_equal_int32
         args:
-          - {name: fromptr, type: "List[int32_t]", dir: in, role: IndexedArray-index}
+          - {name: tmpptr, type: "List[int32_t]", dir: in, role: IndexedArray-index}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: toequal, type: "bool", dir: out}
       - name: awkward_NumpyArray_subrange_equal_int64
         args:
-          - {name: fromptr, type: "List[int64_t]", dir: in, role: IndexedArray-index}
+          - {name: tmpptr, type: "List[int64_t]", dir: in, role: IndexedArray-index}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: toequal, type: "bool", dir: out}
       - name: awkward_NumpyArray_subrange_equal_uint8
         args:
-          - {name: fromptr, type: "List[uint8_t]", dir: in, role: IndexedArray-index}
+          - {name: tmpptr, type: "List[uint8_t]", dir: in, role: IndexedArray-index}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: toequal, type: "bool", dir: out}
       - name: awkward_NumpyArray_subrange_equal_uint16
         args:
-          - {name: fromptr, type: "List[uint16_t]", dir: in, role: IndexedArray-index}
+          - {name: tmpptr, type: "List[uint16_t]", dir: in, role: IndexedArray-index}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: toequal, type: "bool", dir: out}
       - name: awkward_NumpyArray_subrange_equal_uint32
         args:
-          - {name: fromptr, type: "List[uint32_t]", dir: in, role: IndexedArray-index}
+          - {name: tmpptr, type: "List[uint32_t]", dir: in, role: IndexedArray-index}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: toequal, type: "bool", dir: out}
       - name: awkward_NumpyArray_subrange_equal_uint64
         args:
-          - {name: fromptr, type: "List[uint64_t]", dir: in, role: IndexedArray-index}
+          - {name: tmpptr, type: "List[uint64_t]", dir: in, role: IndexedArray-index}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: toequal, type: "bool", dir: out}
       - name: awkward_NumpyArray_subrange_equal_float32
         args:
-          - {name: fromptr, type: "List[float]", dir: in, role: IndexedArray-index}
+          - {name: tmpptr, type: "List[float]", dir: in, role: IndexedArray-index}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: toequal, type: "bool", dir: out}
       - name: awkward_NumpyArray_subrange_equal_float64
         args:
-          - {name: fromptr, type: "List[double]", dir: in, role: IndexedArray-index}
+          - {name: tmpptr, type: "List[double]", dir: in, role: IndexedArray-index}
           - {name: fromstarts, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
