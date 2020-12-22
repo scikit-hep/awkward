@@ -1,4 +1,4 @@
-![](https://raw.githubusercontent.com/scikit-hep/awkward-1.0/main/docs-img/logo/logo-300px.png)
+[![](https://raw.githubusercontent.com/scikit-hep/awkward-1.0/main/docs-img/logo/logo-300px.png)](https://github.com/scikit-hep/awkward-1.0)
 
 Awkward Array is a library for **nested, variable-sized data**, including arbitrary-length lists, records, mixed types, and missing data, using **NumPy-like idioms**.
 

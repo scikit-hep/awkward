@@ -194,6 +194,25 @@ C++ projects can link against the shared libraries `libawkward-cpu-kernels.so` a
 
    * See the [dependent-project](https://github.com/scikit-hep/awkward-1.0/tree/main/dependent-project) directory for examples.
 
+# Roadmap
+
+Since [version 0.4.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/0.4.0), Awkward Array has been compiled with [pybind11 2.6.0](https://github.com/pybind/pybind11/releases/tag/v2.6.0). Any changes will be posted here.
+
+The table below indicates when interface-breaking changes are planned; each is discussed in pull requests and issues. It doesn't include new additions that don't interfere with old behavior or corrections to bugs (i.e. behaviors that were _never_ intended and fixed immediately). Each deprecated feature is announced by a `FutureWarning` that indicates the target removal version/date.
+
+See [release history](https://awkward-array.readthedocs.io/en/latest/_auto/changelog.html) for a detailed changelog of past releases. See [projects](https://github.com/scikit-hep/awkward-1.0/projects) for planning and prioritizing future fixes and features.
+
+| Version number | Target/actual date | Deprecated features removed in this version |
+|:--------------:|:-----------:|:--------------------------------------------|
+| [1.0.0](https://github.com/scikit-hep/awkward-1.0/releases/tag/1.0.0) | 2020-12-05 | Broadcasting NumPy ufuncs through records ([#457](https://github.com/scikit-hep/awkward-1.0/issues/457)), `lazy_cache="attach"` option in [ak.from_parquet](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_parquet.html) ([#576](https://github.com/scikit-hep/awkward-1.0/pull/576)). |
+| 1.1.0 | 2021-02-01 | Removing [ak.to_arrayset](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_arrayset.html)/[ak.from_arrayset](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_arrayset.html) in favor of [ak.to_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_buffers.html)/[ak.from_buffers](https://awkward-array.readthedocs.io/en/latest/_auto/ak.from_buffers.html) ([#592](https://github.com/scikit-hep/awkward-1.0/pull/592)). |
+| 1.2.0 | 2021-04-01 | |
+| 1.3.0 | 2021-06-01 | |
+| 1.4.0 | 2021-08-01 | |
+| 1.5.0 | 2021-10-01 | |
+| 1.6.0 | 2021-12-01 | |
+| 1.7.0 | 2022-02-01 | |
+
 # Papers and talks about Awkward Array
 
    * [Original motivations document](https://docs.google.com/document/d/1lj8ARTKV1_hqGTh0W_f01S6SsmpzZAXz9qqqWnEB3j4/edit?usp=sharing) from July 2019, now out-of-date.
