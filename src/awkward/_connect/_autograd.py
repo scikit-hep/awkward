@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import types
+
 import awkward as ak
 
 numpy = ak.nplike.Numpy.instance()
@@ -83,4 +85,5 @@ def elementwise_grad(fun, argnum=0, *nary_op_args, **nary_op_kwargs):
     return broadcast
 
 
-elementwise_grad.elementwise_grad = elementwise_grad
+ak.autograd = types.ModuleType("autograd")
+ak.autograd.elementwise_grad = elementwise_grad

@@ -235,6 +235,13 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
+  bool
+  None::referentially_equal(const ContentPtr& other) const {
+    throw std::runtime_error(
+      std::string("undefined operation: None::referentially_equal")
+      + FILENAME(__LINE__));
+  }
+
   const ContentPtr
   None::mergemany(const ContentPtrVec& others) const {
     throw std::runtime_error(

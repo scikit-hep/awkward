@@ -184,6 +184,10 @@ class NumpyLike(Singleton):
 
     ############################ manipulation
 
+    def add(self, *args, **kwargs):
+        # array1, array2[, out=]
+        return self._module.add(*args, **kwargs)
+
     def cumsum(self, *args, **kwargs):
         # arrays[, out=]
         return self._module.cumsum(*args, **kwargs)

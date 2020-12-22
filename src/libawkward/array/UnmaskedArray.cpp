@@ -180,6 +180,15 @@ namespace awkward {
       content_.get()->getitem_field(key));
   }
 
+  const FormPtr
+  UnmaskedForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<UnmaskedForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      content_.get()->getitem_fields(keys));
+  }
+
   ////////// UnmaskedArray
 
   UnmaskedArray::UnmaskedArray(const IdentitiesPtr& identities,
@@ -703,6 +712,28 @@ namespace awkward {
     }
     else {
       return content_.get()->mergeable(other, mergebool);
+    }
+  }
+
+  bool
+  UnmaskedArray::referentially_equal(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
+        return false;
+      }
+    }
+    if (UnmaskedArray* raw = dynamic_cast<UnmaskedArray*>(other.get())) {
+      return parameters_ == raw->parameters()  &&
+             content_.get()->referentially_equal(raw->content());
+    }
+    else {
+      return false;
     }
   }
 

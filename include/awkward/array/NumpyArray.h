@@ -103,6 +103,9 @@ namespace awkward {
     const FormPtr
       getitem_field(const std::string& key) const override;
 
+    const FormPtr
+      getitem_fields(const std::vector<std::string>& keys) const override;
+
   private:
     const std::vector<int64_t> inner_shape_;
     int64_t itemsize_;
@@ -412,6 +415,9 @@ namespace awkward {
 
     bool
       mergeable(const ContentPtr& other, bool mergebool) const override;
+
+    bool
+      referentially_equal(const ContentPtr& other) const override;
 
     const ContentPtr
       mergemany(const ContentPtrVec& others) const override;

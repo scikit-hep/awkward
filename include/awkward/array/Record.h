@@ -183,6 +183,9 @@ namespace awkward {
     bool
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
+    bool
+      referentially_equal(const ContentPtr& other) const override;
+
     /// @exception std::runtime_error is always thrown
     const ContentPtr
       mergemany(const ContentPtrVec& others) const override;

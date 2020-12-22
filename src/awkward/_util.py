@@ -21,6 +21,7 @@ np = ak.nplike.NumpyMetadata.instance()
 py27 = sys.version_info[0] < 3
 py35 = sys.version_info[0] == 3 and sys.version_info[1] <= 5
 win = os.name == "nt"
+bits32 = ak.nplike.numpy.iinfo(np.intp).bits == 32
 
 # to silence flake8 F821 errors
 if py27:
@@ -1332,6 +1333,9 @@ def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
 
 
 def find_caches(layout):
+    # Both of the implementations below find referentially unique mutablemappings,
+    # but the PartitionedArray case is optimized for many unique values (with a set)
+    # and the non-partitioned case is optimized for few (O(n^2) algo, but no hashmap).
     if isinstance(layout, ak.partition.PartitionedArray):
         seen = set()
         mutablemappings = []

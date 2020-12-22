@@ -204,6 +204,16 @@ namespace awkward {
       size_);
   }
 
+  const FormPtr
+  RegularForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<RegularForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      content_.get()->getitem_fields(keys),
+      size_);
+  }
+
   ////////// RegularArray
 
   RegularArray::RegularArray(const IdentitiesPtr& identities,
@@ -835,6 +845,38 @@ namespace awkward {
     else if (ListOffsetArray64* rawother =
              dynamic_cast<ListOffsetArray64*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else {
+      return false;
+    }
+  }
+
+  bool
+  RegularArray::referentially_equal(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
+        return false;
+      }
+    }
+    if (RegularArray* raw = dynamic_cast<RegularArray*>(other.get())) {
+      if (size_ != raw->size()) {
+        return false;
+      }
+
+      if (size_ == 0) {
+        if (length_ != raw->length()) {
+          return false;
+        }
+      }
+
+      return parameters_ == raw->parameters()  &&
+             content_.get()->referentially_equal(raw->content());
     }
     else {
       return false;

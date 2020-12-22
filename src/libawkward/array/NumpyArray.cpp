@@ -286,6 +286,12 @@ namespace awkward {
       + std::string(" does not exist (data are not records)"));
   }
 
+  const FormPtr
+  NumpyForm::getitem_fields(const std::vector<std::string>& keys) const {
+    throw std::invalid_argument(
+      std::string("requested keys do not exist (data are not records)"));
+  }
+
   ////////// NumpyArray
 
   NumpyArray::NumpyArray(const IdentitiesPtr& identities,
@@ -1587,6 +1593,35 @@ namespace awkward {
     }
   }
 
+  bool
+  NumpyArray::referentially_equal(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
+        return false;
+      }
+    }
+    if (NumpyArray* raw = dynamic_cast<NumpyArray*>(other.get())) {
+      return ptr_.get() == raw->ptr().get()  &&
+             ptr_lib_ == raw->ptr_lib()  &&
+             shape_ == raw->shape()  &&
+             strides_ == raw->strides()  &&
+             byteoffset_ == raw->byteoffset()  &&
+             itemsize_ == raw->itemsize()  &&
+             format_ == raw->format()  &&
+             dtype_ == raw->dtype()  &&
+             parameters_ == raw->parameters();
+    }
+    else {
+      return false;
+    }
+  }
+
   const ContentPtr
   NumpyArray::mergemany(const ContentPtrVec& others) const {
     if (isscalar()) {
@@ -1604,6 +1639,10 @@ namespace awkward {
 
     std::vector<NumpyArray> contiguous_arrays;
     for (auto array : head) {
+      if (VirtualArray* raw = dynamic_cast<VirtualArray*>(array.get())) {
+        array = raw->array();
+      }
+
       if (NumpyArray* raw = dynamic_cast<NumpyArray*>(array.get())) {
         contiguous_arrays.push_back(raw->contiguous());
       }

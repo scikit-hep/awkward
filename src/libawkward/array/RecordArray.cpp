@@ -323,6 +323,26 @@ namespace awkward {
     return content(key);
   }
 
+  const FormPtr
+  RecordForm::getitem_fields(const std::vector<std::string>& keys) const {
+    util::RecordLookupPtr recordlookup(nullptr);
+    if (recordlookup_.get() != nullptr) {
+      recordlookup = std::make_shared<util::RecordLookup>();
+    }
+    std::vector<FormPtr> contents;
+    for (auto key : keys) {
+      if (recordlookup_.get() != nullptr) {
+        recordlookup.get()->push_back(key);
+      }
+      contents.push_back(contents_[(size_t)fieldindex(key)]);
+    }
+    return std::make_shared<RecordForm>(has_identities_,
+                                        util::Parameters(),
+                                        FormKey(nullptr),
+                                        recordlookup,
+                                        contents);
+  }
+
   ////////// RecordArray
 
   RecordArray::RecordArray(const IdentitiesPtr& identities,
@@ -842,7 +862,7 @@ namespace awkward {
       }
     }
     return std::make_shared<RecordArray>(identities_,
-                                         parameters_,
+                                         util::Parameters(),
                                          contents,
                                          recordlookup,
                                          length_,
@@ -1075,6 +1095,53 @@ namespace awkward {
     }
   }
 
+  bool
+  RecordArray::referentially_equal(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
+        return false;
+      }
+    }
+    if (RecordArray* raw = dynamic_cast<RecordArray*>(other.get())) {
+      if (length_ != raw->length()  ||
+          parameters_ != raw->parameters()) {
+        return false;
+      }
+
+      if (recordlookup_.get() == nullptr  &&  raw->recordlookup().get() != nullptr) {
+        return false;
+      }
+      if (recordlookup_.get() != nullptr  &&  raw->recordlookup().get() == nullptr) {
+        return false;
+      }
+      if (recordlookup_.get() != nullptr  &&  raw->recordlookup().get() != nullptr) {
+        if (recordlookup_.get() != raw->recordlookup().get()) {
+          return false;
+        }
+      }
+
+      if (numfields() != raw->numfields()) {
+        return false;
+      }
+      for (int64_t i = 0;  i < numfields();  i++) {
+        if (!field(i).get()->referentially_equal(raw->field(i))) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
   const ContentPtr
   RecordArray::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {
@@ -1097,6 +1164,10 @@ namespace awkward {
     if (istuple()) {
       for (auto array : headless) {
         util::merge_parameters(parameters, array.get()->parameters());
+
+        if (VirtualArray* raw = dynamic_cast<VirtualArray*>(array.get())) {
+          array = raw->array();
+        }
 
         if (RecordArray* raw = dynamic_cast<RecordArray*>(array.get())) {
           if (istuple()) {
@@ -1134,6 +1205,10 @@ namespace awkward {
       std::sort(these_keys.begin(), these_keys.end());
 
       for (auto array : headless) {
+        if (VirtualArray* raw = dynamic_cast<VirtualArray*>(array.get())) {
+          array = raw->array();
+        }
+
         if (RecordArray* raw = dynamic_cast<RecordArray*>(array.get())) {
           if (!istuple()) {
             std::vector<std::string> those_keys = raw->keys();

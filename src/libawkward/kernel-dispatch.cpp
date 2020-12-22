@@ -5081,31 +5081,6 @@ namespace awkward {
     }
 
     template<>
-    ERROR ListOffsetArray_merge_offsets_64<int64_t>(
-      kernel::lib ptr_lib,
-      int64_t *tooffsets,
-      const int64_t *fromoffsets,
-      int64_t length) {
-      if (ptr_lib == kernel::lib::cpu) {
-        return awkward_ListOffsetArray64_merge_offsets_64(
-          tooffsets,
-          fromoffsets,
-          length);
-      }
-      else if (ptr_lib == kernel::lib::cuda) {
-        CREATE_KERNEL(awkward_ListOffsetArray64_merge_offsets_64, ptr_lib);
-        return (*awkward_ListOffsetArray64_merge_offsets_64_fcn)(tooffsets,
-          fromoffsets,
-          length);
-      }
-      else {
-        throw std::runtime_error(
-          std::string("unrecognized ptr_lib for ListOffsetArray_merge_offsets_64<int64_t>")
-          + FILENAME(__LINE__));
-      }
-    }
-
-    template<>
     ERROR IndexedArray_flatten_none2empty_64<int32_t>(
       kernel::lib ptr_lib,
       int64_t *outoffsets,
@@ -5269,6 +5244,96 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("unrecognized ptr_lib for UnionArray_flatten_length_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR UnionArray_nestedfill_tags_index_64<int8_t, int32_t>(
+      kernel::lib ptr_lib,
+      int8_t* totags,
+      int32_t* toindex,
+      int64_t* tmpstarts,
+      int8_t tag,
+      const int64_t* fromcounts,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_UnionArray8_32_nestedfill_tags_index_64(
+          totags,
+          toindex,
+          tmpstarts,
+          tag,
+          fromcounts,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for awkward_UnionArray_nestedfill_tags_index_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for awkward_UnionArray_nestedfill_tags_index_64<int8_t, int32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR UnionArray_nestedfill_tags_index_64<int8_t, uint32_t>(
+      kernel::lib ptr_lib,
+      int8_t* totags,
+      uint32_t* toindex,
+      int64_t* tmpstarts,
+      int8_t tag,
+      const int64_t* fromcounts,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_UnionArray8_U32_nestedfill_tags_index_64(
+          totags,
+          toindex,
+          tmpstarts,
+          tag,
+          fromcounts,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for awkward_UnionArray_nestedfill_tags_index_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for awkward_UnionArray_nestedfill_tags_index_64<int8_t, uint32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR UnionArray_nestedfill_tags_index_64<int8_t, int64_t>(
+      kernel::lib ptr_lib,
+      int8_t* totags,
+      int64_t* toindex,
+      int64_t* tmpstarts,
+      int8_t tag,
+      const int64_t* fromcounts,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_UnionArray8_64_nestedfill_tags_index_64(
+          totags,
+          toindex,
+          tmpstarts,
+          tag,
+          fromcounts,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for awkward_UnionArray_nestedfill_tags_index_64<int8_t, int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for awkward_UnionArray_nestedfill_tags_index_64<int8_t, int64_t>")
           + FILENAME(__LINE__));
       }
     }
@@ -5636,26 +5701,6 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("unrecognized ptr_lib for ByteMaskedArray_mask8")
-          + FILENAME(__LINE__));
-      }
-    }
-
-    ERROR zero_mask64(
-      kernel::lib ptr_lib,
-      int64_t *tomask,
-      int64_t length) {
-      if (ptr_lib == kernel::lib::cpu) {
-        return awkward_zero_mask64(tomask, length);
-      }
-      else if (ptr_lib == kernel::lib::cuda) {
-        CREATE_KERNEL(awkward_zero_mask64, ptr_lib);
-        return (*awkward_zero_mask64_fcn)(
-          tomask,
-          length);
-      }
-      else {
-        throw std::runtime_error(
-          std::string("unrecognized ptr_lib for zero_mask64")
           + FILENAME(__LINE__));
       }
     }
@@ -9880,37 +9925,6 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("unrecognized ptr_lib for UnionArray_filltags_to8_from8")
-          + FILENAME(__LINE__));
-      }
-    }
-
-    ERROR UnionArray_mergetags_to8_const(
-      kernel::lib ptr_lib,
-      int8_t *totags,
-      int64_t* toindex,
-      int64_t offset,
-      const int64_t* fromoffsets,
-      int64_t index,
-      int8_t tag,
-      int64_t* nextoffset) {
-      if (ptr_lib == kernel::lib::cpu) {
-        return awkward_UnionArray_mergetags_to8_const(
-          totags,
-          toindex,
-          offset,
-          fromoffsets,
-          index,
-          tag,
-          nextoffset);
-      }
-      else if (ptr_lib == kernel::lib::cuda) {
-        throw std::runtime_error(
-          std::string("not implemented: ptr_lib == cuda_kernels for UnionArray_mergetags_to8_from8")
-          + FILENAME(__LINE__));
-      }
-      else {
-        throw std::runtime_error(
-          std::string("unrecognized ptr_lib for UnionArray_mergetags_to8_from8")
           + FILENAME(__LINE__));
       }
     }

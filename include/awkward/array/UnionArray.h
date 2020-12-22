@@ -95,6 +95,9 @@ namespace awkward {
     const FormPtr
       getitem_field(const std::string& key) const override;
 
+    const FormPtr
+      getitem_fields(const std::vector<std::string>& keys) const override;
+
   private:
     Index::Form tags_;
     Index::Form index_;
@@ -126,6 +129,11 @@ namespace awkward {
     /// @brief Generates an index in which `index[tags == i][i] = i`.
     static const IndexOf<I>
       regular_index(const IndexOf<T>& tags);
+
+    /// @brief Generates tags and index for concatenating arrays with axis != 0.
+    static const std::pair<IndexOf<T>, IndexOf<I>>
+      nested_tags_index(const Index64& offsets,
+                        const std::vector<Index64>& counts);
 
     /// @brief Creates a UnionArrayOf from a full set of parameters.
     ///
@@ -187,8 +195,15 @@ namespace awkward {
     /// into a single-level {@link UnionArrayOf UnionArray}.
     ///
     /// This is a shallow operation: it only checks the content one level deep.
+    ///
+    /// @param merge If true, attempt to merge buffers recursively; otherwise,
+    /// only clean up UnionArray(UnionArray(...)), but leave potentially mergeable
+    /// buffers unmerged. If false, #mergeable isn't even tested (which avoids
+    /// materializing #VirtualArray too soon).
+    /// @param mergebool If true, consider booleans to be an integer type for
+    /// merging.
     const ContentPtr
-      simplify_uniontype(bool mergebool) const;
+      simplify_uniontype(bool merge, bool mergebool) const;
 
     /// @brief User-friendly name of this class: `"UnionArray8_32"`,
     /// `"UnionArray8_U32"`, or `"UnionArray8_64"`.
@@ -304,6 +319,9 @@ namespace awkward {
 
     bool
       mergeable(const ContentPtr& other, bool mergebool) const override;
+
+    bool
+      referentially_equal(const ContentPtr& other) const override;
 
     const ContentPtr
       reverse_merge(const ContentPtr& other) const override;

@@ -380,6 +380,15 @@ namespace awkward {
     }
   }
 
+  template<typename T>
+  bool
+  IndexOf<T>::referentially_equal(const IndexOf<T>& other) const {
+    return ptr_ == other.ptr()  &&
+           ptr_lib_ == other.ptr_lib()  &&
+           offset_ == other.offset()  &&
+           length_ == other.length();
+  }
+
   template class EXPORT_TEMPLATE_INST IndexOf<int8_t>;
   template class EXPORT_TEMPLATE_INST IndexOf<uint8_t>;
   template class EXPORT_TEMPLATE_INST IndexOf<int32_t>;

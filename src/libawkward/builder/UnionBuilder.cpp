@@ -76,7 +76,7 @@ namespace awkward {
                           util::Parameters(),
                           tags,
                           index,
-                          contents).simplify_uniontype(false);
+                          contents).simplify_uniontype(true, false);
   }
 
   bool

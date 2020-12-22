@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import warnings
 import sys
 import distutils.version
+import types
 
 import awkward as ak
 
@@ -153,4 +154,6 @@ def re_evaluate(local_dict=None):
     return ak._util.wrap(out[0], behavior)
 
 
-evaluate.re_evaluate = re_evaluate
+ak.numexpr = types.ModuleType("numexpr")
+ak.numexpr.evaluate = evaluate
+ak.numexpr.re_evaluate = re_evaluate

@@ -322,6 +322,29 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
+  bool
+  Record::referentially_equal(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
+        return false;
+      }
+    }
+    if (Record* raw = dynamic_cast<Record*>(other.get())) {
+      return at_ == raw->at()  &&
+             parameters_ == raw->parameters()  &&
+             array_.get()->referentially_equal(raw->shallow_copy());
+    }
+    else {
+      return false;
+    }
+  }
+
   const ContentPtr
   Record::mergemany(const ContentPtrVec& others) const {
     throw std::invalid_argument(

@@ -162,6 +162,12 @@ namespace awkward {
       + std::string(" does not exist (data might not be records)"));
   }
 
+  const FormPtr
+  EmptyForm::getitem_fields(const std::vector<std::string>& keys) const {
+    throw std::invalid_argument(
+      std::string("requested keys do not exist (data might not be records)"));
+  }
+
   ////////// EmptyArray
 
   EmptyArray::EmptyArray(const IdentitiesPtr& identities,
@@ -445,6 +451,27 @@ namespace awkward {
       return false;
     }
     return true;
+  }
+
+  bool
+  EmptyArray::referentially_equal(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
+        return false;
+      }
+    }
+    if (EmptyArray* raw = dynamic_cast<EmptyArray*>(other.get())) {
+      return parameters_ == raw->parameters();
+    }
+    else {
+      return false;
+    }
   }
 
   const ContentPtr

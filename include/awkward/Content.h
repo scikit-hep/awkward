@@ -230,11 +230,23 @@ namespace awkward {
     void
       form_key_tojson(ToJson& builder, bool verbose) const;
 
-    /// @brief Internal function for extracting record field
+    /// @brief Returns the Form that would result from a range-slice.
+    ///
+    /// Matches the operation of Content#getitem_range.
+    virtual const FormPtr
+      getitem_range() const;
+
+    /// @brief Returns the Form that would result from a field-slice.
     ///
     /// Matches the operation of Content#getitem_field.
     virtual const FormPtr
       getitem_field(const std::string& key) const = 0;
+
+    /// @brief Returns the Form that would result from a fields-slice.
+    ///
+    /// Matches the operation of Content#getitem_fields.
+    virtual const FormPtr
+      getitem_fields(const std::vector<std::string>& keys) const = 0;
 
   protected:
     /// @brief See #has_identities
@@ -651,6 +663,13 @@ namespace awkward {
     /// to integers.
     virtual bool
       mergeable(const ContentPtr& other, bool mergebool) const = 0;
+
+    /// @brief Returns `true` if this array has all the same buffers and
+    /// parameters as `other`; `false` otherwise.
+    ///
+    /// @param other The array to compare this with.
+    virtual bool
+      referentially_equal(const ContentPtr& other) const = 0;
 
     /// @brief Partitions `this` array plus a list of `others` into a `head`
     /// sequence and a `tail` sequence:
@@ -1118,18 +1137,10 @@ namespace awkward {
 
     /// @brief Concatenates this array with `other` by creating a
     /// {@link UnionArrayOf UnionArray} instead of actually merging the data.
+    /// This does not call
+    /// {@link UnionArrayOf#simplify_uniontype UnionArray::simplify_uniontype}.
     const ContentPtr
       merge_as_union(const ContentPtr& other) const;
-
-    /// @brief Concatenates this array with `others` by creating a
-    /// {@link UnionArrayOf UnionArray} instead of actually merging the data.
-    const ContentPtr
-      mergemany_as_union(const ContentPtrVec& others, int64_t axis = 0, int64_t depth = 0) const;
-
-    /// @brief Concatenates this array with `others` by creating a
-    /// {@link UnionArrayOf UnionArray} of flattened contents at `axis`
-    const ContentPtr
-      concatenate_here(const ContentPtrVec& others, int64_t axis, int64_t depth) const;
 
     /// @brief Internal function to handle the `axis = 0` case of #rpad
     /// and #rpad_and_clip.

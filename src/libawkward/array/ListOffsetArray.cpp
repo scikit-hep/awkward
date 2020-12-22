@@ -217,6 +217,16 @@ namespace awkward {
       content_.get()->getitem_field(key));
   }
 
+  const FormPtr
+  ListOffsetForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<ListOffsetForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      offsets_,
+      content_.get()->getitem_fields(keys));
+  }
+
   ////////// ListOffsetArray
 
   template <typename T>
@@ -1017,6 +1027,30 @@ namespace awkward {
     else if (ListOffsetArray64* rawother =
              dynamic_cast<ListOffsetArray64*>(other.get())) {
       return content_.get()->mergeable(rawother->content(), mergebool);
+    }
+    else {
+      return false;
+    }
+  }
+
+  template <typename T>
+  bool
+  ListOffsetArrayOf<T>::referentially_equal(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
+        return false;
+      }
+    }
+    if (ListOffsetArrayOf<T>* raw = dynamic_cast<ListOffsetArrayOf<T>*>(other.get())) {
+      return offsets_.referentially_equal(raw->offsets())  &&
+             parameters_ == raw->parameters()  &&
+             content_.get()->referentially_equal(raw->content());
     }
     else {
       return false;

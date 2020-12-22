@@ -228,6 +228,17 @@ namespace awkward {
       content_.get()->getitem_field(key));
   }
 
+  const FormPtr
+  ListForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<ListForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      starts_,
+      stops_,
+      content_.get()->getitem_fields(keys));
+  }
+
   ////////// ListArray
 
   template <typename T>
@@ -970,6 +981,31 @@ namespace awkward {
   }
 
   template <typename T>
+  bool
+  ListArrayOf<T>::referentially_equal(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
+        return false;
+      }
+    }
+    if (ListArrayOf<T>* raw = dynamic_cast<ListArrayOf<T>*>(other.get())) {
+      return starts_.referentially_equal(raw->starts())  &&
+             stops_.referentially_equal(raw->stops())  &&
+             parameters_ == raw->parameters()  &&
+             content_.get()->referentially_equal(raw->content());
+    }
+    else {
+      return false;
+    }
+  }
+
+  template <typename T>
   const ContentPtr
   ListArrayOf<T>::mergemany(const ContentPtrVec& others) const {
     if (others.empty()) {
@@ -988,6 +1024,10 @@ namespace awkward {
     util::Parameters parameters(parameters_);
     ContentPtrVec contents;
     for (auto array : head) {
+      if (VirtualArray* raw = dynamic_cast<VirtualArray*>(array.get())) {
+        array = raw->array();
+      }
+
       util::merge_parameters(parameters, array.get()->parameters());
 
       if (ListArray32* raw = dynamic_cast<ListArray32*>(array.get())) {

@@ -227,6 +227,16 @@ namespace awkward {
       content_.get()->getitem_field(key));
   }
 
+  const FormPtr
+  IndexedForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<IndexedForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      index_,
+      content_.get()->getitem_fields(keys));
+  }
+
   ////////// IndexedOptionForm
 
   IndexedOptionForm::IndexedOptionForm(bool has_identities,
@@ -405,6 +415,16 @@ namespace awkward {
       FormKey(nullptr),
       index_,
       content_.get()->getitem_field(key));
+  }
+
+  const FormPtr
+  IndexedOptionForm::getitem_fields(const std::vector<std::string>& keys) const {
+    return std::make_shared<IndexedOptionForm>(
+      has_identities_,
+      util::Parameters(),
+      FormKey(nullptr),
+      index_,
+      content_.get()->getitem_fields(keys));
   }
 
   ////////// IndexedArray
@@ -1522,6 +1542,30 @@ namespace awkward {
   }
 
   template <typename T, bool ISOPTION>
+  bool
+  IndexedArrayOf<T, ISOPTION>::referentially_equal(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
+        return false;
+      }
+    }
+    if (IndexedArrayOf<T, ISOPTION>* raw = dynamic_cast<IndexedArrayOf<T, ISOPTION>*>(other.get())) {
+      return index_.referentially_equal(raw->index())  &&
+             parameters_ == raw->parameters()  &&
+             content_.get()->referentially_equal(raw->content());
+    }
+    else {
+      return false;
+    }
+  }
+
+  template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::reverse_merge(const ContentPtr& other) const {
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
@@ -1878,7 +1922,7 @@ namespace awkward {
                                          tags,
                                          index,
                                          contents);
-      return out.get()->simplify_uniontype(true);
+      return out.get()->simplify_uniontype(true, true);
     }
     else {
       return std::make_shared<IndexedArrayOf<T, ISOPTION>>(

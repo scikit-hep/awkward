@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import distutils.version
+import types
 
 import awkward as ak
 
@@ -108,3 +109,7 @@ def castint(context, builder, fromtype, totype, val):
         return builder.trunc(val, context.get_value_type(totype))
     else:
         return val
+
+
+ak.numba = types.ModuleType("numba")
+ak.numba.register = register

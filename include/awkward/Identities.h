@@ -228,6 +228,13 @@ namespace awkward {
     const std::string
       tostring() const;
 
+    /// @brief Returns `true` if this Identities has all the same buffers and
+    /// parameters as `other`; `false` otherwise.
+    ///
+    /// @param other The Identities to compare this with.
+    virtual bool
+      referentially_equal(const IdentitiesPtr& other) const = 0;
+
   protected:
     /// @brief See #ref.
     const Ref ref_;
@@ -392,6 +399,9 @@ namespace awkward {
     /// does not scale with the size of the array.
     const IdentitiesPtr
       getitem_range(int64_t start, int64_t stop) const;
+
+    bool
+      referentially_equal(const IdentitiesPtr& other) const override;
 
   private:
     /// @brief See #ptr.

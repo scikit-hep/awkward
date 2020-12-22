@@ -1687,10 +1687,59 @@ or
         return pyarrow
 
 
-def to_arrow(array):
+def _listarray_to_listoffsetarray(layout):
+    if isinstance(layout, ak.layout.ListArray32):
+        cls, index_cls = ak.layout.ListOffsetArray32, ak.layout.Index32
+    elif isinstance(layout, ak.layout.ListArrayU32):
+        cls, index_cls = ak.layout.ListOffsetArrayU32, ak.layout.IndexU32
+    elif isinstance(layout, ak.layout.ListArray64):
+        cls, index_cls = ak.layout.ListOffsetArray64, ak.layout.Index64
+    else:
+        cls = None
+
+    if cls is not None and layout.starts.ptr_lib == "cpu":
+        if numpy._module.array_equal(layout.starts[1:], layout.stops[:-1]):
+            offsets = index_cls(
+                numpy._module.append(numpy.asarray(layout.starts[1:]), layout.stops[-1])
+            )
+            return cls(offsets, layout.content, layout.identities, layout.parameters)
+
+    return layout
+
+
+def _regulararray_to_listoffsetarray(layout):
+    if isinstance(layout, ak.layout.RegularArray):
+        if layout.size == 0:
+            offsets = numpy.zeros(len(layout), dtype=np.int32)
+            cls, index_cls = ak.layout.ListOffsetArray32, ak.layout.Index32
+        else:
+            last = layout.size * (len(layout) + 1)
+            if last <= np.iinfo(np.int32).max:
+                offsets = numpy.arange(0, last, layout.size, dtype=np.int32)
+                cls, index_cls = ak.layout.ListOffsetArray32, ak.layout.Index32
+            elif last <= np.iinfo(np.uint32).max:
+                offsets = numpy.arange(0, last, layout.size, dtype=np.uint32)
+                cls, index_cls = ak.layout.ListOffsetArrayU32, ak.layout.IndexU32
+            else:
+                offsets = numpy.arange(0, last, layout.size, dtype=np.int64)
+                cls, index_cls = ak.layout.ListOffsetArray64, ak.layout.Index64
+            return cls(
+                index_cls(offsets), layout.content, layout.identities, layout.parameters
+            )
+
+    return layout
+
+
+def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
     """
     Args:
         array: Data to convert to an Apache Arrow array.
+        list_to32 (bool): If True, convert Awkward lists into 32-bit Arrow lists
+            if they're small enough, even if it means an extra conversion. Otherwise,
+            signed 32-bit #ak.layout.ListOffsetArray maps to Arrow `ListType` and
+            all others map to Arrow `LargeListType`.
+        string_to32 (bool): Same as the above for Arrow `string` and `large_string`.
+        bytestring_to32 (bool): Same as the above for Arrow `binary` and `large_binary`.
 
     Converts an Awkward Array into an Apache Arrow array.
 
@@ -1698,13 +1747,20 @@ def to_arrow(array):
     manipulations (using the pyarrow library) to build a `pyarrow.ChunkedArray`,
     a `pyarrow.RecordBatch`, or a `pyarrow.Table`.
 
-    See also #ak.from_arrow.
+    Arrow arrays can maintain the distinction between "option-type but no elements are
+    missing" and "not option-type" at all levels except the top level. Also, there is
+    no distinction between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type. Be
+    aware of these type distinctions when passing data through Arrow or Parquet.
+
+    See also #ak.from_arrow, #ak.to_arrow_table, #ak.to_parquet.
     """
     pyarrow = _import_pyarrow("ak.to_arrow")
 
     layout = to_layout(array, allow_record=False, allow_other=False)
 
-    def recurse(layout, mask=None):
+    def recurse(layout, mask, is_option):
+        layout = _regulararray_to_listoffsetarray(_listarray_to_listoffsetarray(layout))
+
         if isinstance(layout, ak.layout.NumpyArray):
             numpy_arr = numpy.asarray(layout)
             length = len(numpy_arr)
@@ -1784,17 +1840,22 @@ def to_arrow(array):
                     )
                 return arrow_arr
 
-            content_buffer = recurse(layout.content[: offsets[-1]])
+            content_buffer = recurse(layout.content[: offsets[-1]], None, False)
+            content_type = pyarrow.list_(content_buffer.type).value_field.with_nullable(
+                isinstance(
+                    ak.operations.describe.type(layout.content), ak.types.OptionType
+                )
+            )
             if mask is None:
                 arrow_arr = pyarrow.Array.from_buffers(
-                    pyarrow.list_(content_buffer.type),
+                    pyarrow.list_(content_type),
                     len(offsets) - 1,
                     [None, pyarrow.py_buffer(offsets)],
                     children=[content_buffer],
                 )
             else:
                 arrow_arr = pyarrow.Array.from_buffers(
-                    pyarrow.list_(content_buffer.type),
+                    pyarrow.list_(content_type),
                     len(offsets) - 1,
                     [pyarrow.py_buffer(mask), pyarrow.py_buffer(offsets)],
                     children=[content_buffer],
@@ -1804,15 +1865,22 @@ def to_arrow(array):
         elif isinstance(
             layout, (ak.layout.ListOffsetArray64, ak.layout.ListOffsetArrayU32),
         ):
+            if layout.parameter("__array__") == "bytestring":
+                downsize = bytestring_to32
+            elif layout.parameter("__array__") == "string":
+                downsize = string_to32
+            else:
+                downsize = list_to32
+
             offsets = numpy.asarray(layout.offsets)
 
-            if len(offsets) == 0 or numpy.max(offsets) <= np.iinfo(np.int32).max:
+            if downsize and offsets[-1] <= np.iinfo(np.int32).max:
                 small_layout = ak.layout.ListOffsetArray32(
                     ak.layout.Index32(offsets.astype(np.int32)),
                     layout.content,
                     parameters=layout.parameters,
                 )
-                return recurse(small_layout, mask=mask)
+                return recurse(small_layout, mask, is_option)
 
             offsets = numpy.asarray(layout.offsets, dtype=np.int64)
 
@@ -1857,17 +1925,22 @@ def to_arrow(array):
                     )
                 return arrow_arr
 
-            content_buffer = recurse(layout.content[: offsets[-1]])
+            content_buffer = recurse(layout.content[: offsets[-1]], None, False)
+            content_type = pyarrow.list_(content_buffer.type).value_field.with_nullable(
+                isinstance(
+                    ak.operations.describe.type(layout.content), ak.types.OptionType
+                )
+            )
             if mask is None:
                 arrow_arr = pyarrow.Array.from_buffers(
-                    pyarrow.large_list(content_buffer.type),
+                    pyarrow.large_list(content_type),
                     len(offsets) - 1,
                     [None, pyarrow.py_buffer(offsets)],
                     children=[content_buffer],
                 )
             else:
                 arrow_arr = pyarrow.Array.from_buffers(
-                    pyarrow.large_list(content_buffer.type),
+                    pyarrow.large_list(content_type),
                     len(offsets) - 1,
                     [pyarrow.py_buffer(mask), pyarrow.py_buffer(offsets)],
                     children=[content_buffer],
@@ -1876,29 +1949,34 @@ def to_arrow(array):
 
         elif isinstance(layout, ak.layout.RegularArray):
             return recurse(
-                layout.broadcast_tooffsets64(layout.compact_offsets64()), mask
+                layout.broadcast_tooffsets64(layout.compact_offsets64()),
+                mask,
+                is_option,
             )
 
         elif isinstance(
             layout,
             (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64,),
         ):
-            if mask is not None:
-                return recurse(
-                    layout.broadcast_tooffsets64(layout.compact_offsets64()), mask
-                )
-            else:
-                return recurse(layout.broadcast_tooffsets64(layout.compact_offsets64()))
+            return recurse(
+                layout.broadcast_tooffsets64(layout.compact_offsets64()),
+                mask,
+                is_option,
+            )
 
         elif isinstance(layout, ak.layout.RecordArray):
-            values = [recurse(x[: len(layout)]) for x in layout.contents]
+            values = [
+                recurse(x[: len(layout)], mask, is_option) for x in layout.contents
+            ]
 
             min_list_len = min(map(len, values))
 
             types = pyarrow.struct(
                 [
-                    pyarrow.field(layout.key(i), values[i].type)
-                    for i in range(len(values))
+                    pyarrow.field(layout.key(i), values[i].type).with_nullable(
+                        isinstance(ak.operations.describe.type(x), ak.types.OptionType)
+                    )
+                    for i, x in enumerate(layout.contents)
                 ]
             )
 
@@ -1958,10 +2036,16 @@ def to_arrow(array):
                 else:
                     this_mask = None
 
-                values.append(recurse(content, this_mask))
+                values.append(recurse(content, this_mask, is_option))
 
             types = pyarrow.union(
-                [pyarrow.field(str(i), values[i].type) for i in range(len(values))],
+                [
+                    pyarrow.field(str(i), values[i].type).with_nullable(
+                        is_option
+                        or isinstance(layout.content(i).type, ak.types.OptionType)
+                    )
+                    for i in range(len(values))
+                ],
                 "dense",
                 list(range(len(values))),
             )
@@ -1988,7 +2072,7 @@ def to_arrow(array):
             index = numpy.asarray(layout.index)
 
             if layout.parameter("__array__") == "categorical":
-                dictionary = recurse(layout.content)
+                dictionary = recurse(layout.content, None, False)
                 if mask is None:
                     return pyarrow.DictionaryArray.from_arrays(index, dictionary)
                 else:
@@ -2006,7 +2090,7 @@ def to_arrow(array):
                 layout_content = layout.content
 
                 if len(layout_content) == 0:
-                    empty = recurse(layout_content)
+                    empty = recurse(layout_content, None, False)
                     if mask is None:
                         return empty
                     else:
@@ -2014,7 +2098,7 @@ def to_arrow(array):
 
                 elif isinstance(layout_content, ak.layout.RecordArray):
                     values = [
-                        recurse(x[: len(layout_content)][index])
+                        recurse(x[: len(layout_content)][index], mask, is_option)
                         for x in layout_content.contents
                     ]
 
@@ -2022,8 +2106,14 @@ def to_arrow(array):
 
                     types = pyarrow.struct(
                         [
-                            pyarrow.field(layout_content.key(i), values[i].type)
-                            for i in range(len(values))
+                            pyarrow.field(
+                                layout_content.key(i), values[i].type
+                            ).with_nullable(
+                                isinstance(
+                                    ak.operations.describe.type(x), ak.types.OptionType
+                                )
+                            )
+                            for i, x in enumerate(layout_content.contents)
                         ]
                     )
 
@@ -2040,10 +2130,10 @@ def to_arrow(array):
                         )
 
                 else:
-                    return recurse(layout_content[index], mask)
+                    return recurse(layout_content[index], mask, is_option)
 
         elif isinstance(
-            layout, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64,),
+            layout, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64),
         ):
             index = numpy.array(layout.index, copy=True)
             nulls = index < 0
@@ -2071,9 +2161,9 @@ def to_arrow(array):
                 )
 
             if mask is None:
-                return recurse(next, this_bitmask)
+                return recurse(next, this_bitmask, True)
             else:
-                return recurse(next, mask & this_bitmask)
+                return recurse(next, mask & this_bitmask, True)
 
         elif isinstance(layout, ak.layout.BitMaskedArray):
             bitmask = numpy.asarray(layout.mask, dtype=np.uint8)
@@ -2086,7 +2176,7 @@ def to_arrow(array):
             if layout.valid_when is False:
                 bitmask = ~bitmask
 
-            return recurse(layout.content[: len(layout)], bitmask).slice(
+            return recurse(layout.content[: len(layout)], bitmask, True).slice(
                 length=min(len(bitmask) * 8, len(layout.content))
             )
 
@@ -2100,12 +2190,12 @@ def to_arrow(array):
             bytemask[len(mask) :] = 0
             bitmask = numpy.packbits(bytemask.reshape(-1, 8)[:, ::-1].reshape(-1))
 
-            return recurse(layout.content[: len(layout)], bitmask).slice(
+            return recurse(layout.content[: len(layout)], bitmask, True).slice(
                 length=len(mask)
             )
 
         elif isinstance(layout, (ak.layout.UnmaskedArray)):
-            return recurse(layout.content)
+            return recurse(layout.content, None, True)
 
         else:
             raise TypeError(
@@ -2113,7 +2203,73 @@ def to_arrow(array):
                 + ak._util.exception_suffix(__file__)
             )
 
-    return recurse(layout)
+    return recurse(layout, None, False)
+
+
+def to_arrow_table(
+    array,
+    explode_records=False,
+    list_to32=False,
+    string_to32=True,
+    bytestring_to32=True,
+):
+    """
+    Args:
+        array: Data to convert to an Apache Arrow table.
+        explode_records (bool): If True, lists of records are written as
+            records of lists, so that nested fields become top-level fields
+            (which can be zipped when read back).
+        list_to32 (bool): If True, convert Awkward lists into 32-bit Arrow lists
+            if they're small enough, even if it means an extra conversion. Otherwise,
+            signed 32-bit #ak.layout.ListOffsetArray maps to Arrow `ListType` and
+            all others map to Arrow `LargeListType`.
+        string_to32 (bool): Same as the above for Arrow `string` and `large_string`.
+        bytestring_to32 (bool): Same as the above for Arrow `binary` and `large_binary`.
+
+    Converts an Awkward Array into an Apache Arrow table (`pyarrow.Table`).
+
+    If the `array` does not contain records at top-level, the Arrow table will consist
+    of one field whose name is `""`.
+
+    Arrow tables can maintain the distinction between "option-type but no elements are
+    missing" and "not option-type" at all levels, including the top level. However,
+    there is no distinction between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type.
+    Be aware of these type distinctions when passing data through Arrow or Parquet.
+
+    See also #ak.to_arrow, #ak.from_arrow, #ak.to_parquet.
+    """
+    pyarrow = _import_pyarrow("ak.to_arrow_table")
+
+    layout = to_layout(array, allow_record=False, allow_other=False)
+
+    if explode_records or isinstance(
+        ak.operations.describe.type(layout), ak.types.RecordType
+    ):
+        names = layout.keys()
+        contents = [layout[name] for name in names]
+    else:
+        names = [""]
+        contents = [layout]
+
+    pa_arrays = []
+    pa_fields = []
+    for name, content in zip(names, contents):
+        pa_arrays.append(
+            to_arrow(
+                content,
+                list_to32=list_to32,
+                string_to32=string_to32,
+                bytestring_to32=bytestring_to32,
+            )
+        )
+        pa_fields.append(
+            pyarrow.field(name, pa_arrays[-1].type).with_nullable(
+                isinstance(ak.operations.describe.type(content), ak.types.OptionType)
+            )
+        )
+
+    batch = pyarrow.RecordBatch.from_arrays(pa_arrays, schema=pyarrow.schema(pa_fields))
+    return pyarrow.Table.from_batches([batch])
 
 
 def from_arrow(array, highlevel=True, behavior=None):
@@ -2129,8 +2285,18 @@ def from_arrow(array, highlevel=True, behavior=None):
 
     Converts an Apache Arrow array into an Awkward Array.
 
-    See also #ak.to_arrow.
+    Arrow arrays can maintain the distinction between "option-type but no elements are
+    missing" and "not option-type" at all levels except the top level. Arrow tables
+    can maintain the distinction at all levels. However, note that there is no distinction
+    between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type. Be aware of these
+    type distinctions when passing data through Arrow or Parquet.
+
+    See also #ak.to_arrow, #ak.to_arrow_table.
     """
+    return _from_arrow(array, True, highlevel=highlevel, behavior=behavior)
+
+
+def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
     pyarrow = _import_pyarrow("ak.from_arrow")
 
     def popbuffers(array, tpe, buffers, length):
@@ -2142,7 +2308,7 @@ def from_arrow(array, highlevel=True, behavior=None):
                 length,
             )
             if array is not None:
-                content = recurse(array.dictionary)
+                content = handle_arrow(array.dictionary)
             else:
                 raise NotImplementedError(
                     "Arrow dictionary inside of UnionArray"
@@ -2176,14 +2342,26 @@ def from_arrow(array, highlevel=True, behavior=None):
             child_arrays = []
             keys = []
             for i in range(tpe.num_fields):
-                child_arrays.append(
-                    popbuffers(
-                        None if array is None else array.field(tpe[i].name),
-                        tpe[i].type,
-                        buffers,
-                        length,
-                    )
+                content = popbuffers(
+                    None if array is None else array.field(tpe[i].name),
+                    tpe[i].type,
+                    buffers,
+                    length,
                 )
+                if not tpe[i].nullable:
+                    # if isinstance(content, ak.layout.UnmaskedArray):
+                    assert isinstance(
+                        content, (ak.layout.UnmaskedArray, ak.layout.BitMaskedArray)
+                    )
+                    content = content.content
+                    # else:
+                    #     raise ValueError(
+                    #         "Arrow struct field {0} is not nullable but content is\n\n{1}".format(
+                    #             repr(tpe[i].name), content
+                    #         )
+                    #         + ak._util.exception_suffix(__file__)
+                    #     )
+                child_arrays.append(content)
                 keys.append(tpe[i].name)
 
             out = ak.layout.RecordArray(child_arrays, keys)
@@ -2205,6 +2383,19 @@ def from_arrow(array, highlevel=True, behavior=None):
                 buffers,
                 offsets[-1],
             )
+            if not tpe.value_field.nullable:
+                # if isinstance(content, ak.layout.UnmaskedArray):
+                assert isinstance(
+                    content, (ak.layout.UnmaskedArray, ak.layout.BitMaskedArray)
+                )
+                content = content.content
+                # else:
+                #     raise ValueError(
+                #         "Arrow list item is not nullable but content is\n\n{0}".format(
+                #             content
+                #         )
+                #         + ak._util.exception_suffix(__file__)
+                #     )
 
             out = ak.layout.ListOffsetArray32(offsets, content)
             if mask is not None:
@@ -2225,6 +2416,21 @@ def from_arrow(array, highlevel=True, behavior=None):
                 buffers,
                 offsets[-1],
             )
+            # https://issues.apache.org/jira/browse/ARROW-10930
+            # if not tpe.value_field.nullable:
+            if str(tpe).endswith(" not null>"):
+                # if isinstance(content, ak.layout.UnmaskedArray):
+                assert isinstance(
+                    content, (ak.layout.UnmaskedArray, ak.layout.BitMaskedArray)
+                )
+                content = content.content
+                # else:
+                #     raise ValueError(
+                #         "Arrow list item is not nullable but content is\n\n{0}".format(
+                #             content
+                #         )
+                #         + ak._util.exception_suffix(__file__)
+                #     )
 
             out = ak.layout.ListOffsetArray64(offsets, content)
             if mask is not None:
@@ -2282,6 +2488,20 @@ def from_arrow(array, highlevel=True, behavior=None):
                     contents[i] = contents[i][0:0]
                 else:
                     contents[i] = contents[i][: these.max() + 1]
+            for i in range(len(contents)):
+                if not tpe[i].nullable:
+                    # if isinstance(contents[i], ak.layout.UnmaskedArray):
+                    assert isinstance(
+                        contents[i], (ak.layout.UnmaskedArray, ak.layout.BitMaskedArray)
+                    )
+                    contents[i] = contents[i].content
+                    # else:
+                    #     raise ValueError(
+                    #         "Arrow union field {0} is not nullable but content is\n\n{1}".format(
+                    #             i, contents[i]
+                    #         )
+                    #         + ak._util.exception_suffix(__file__)
+                    #     )
 
             tags = ak.layout.Index8(tags)
             index = ak.layout.Index32(index)
@@ -2416,32 +2636,43 @@ def from_arrow(array, highlevel=True, behavior=None):
                 + ak._util.exception_suffix(__file__)
             )
 
-    def recurse(obj):
+    def handle_arrow(obj):
         if isinstance(obj, pyarrow.lib.Array):
             buffers = obj.buffers()
             out = popbuffers(obj, obj.type, buffers, len(obj))
             assert len(buffers) == 0
-            return out
+            if isinstance(out, ak.layout.UnmaskedArray):
+                return out.content
+            else:
+                return out
 
         elif isinstance(obj, pyarrow.lib.ChunkedArray):
-            chunks = [x for x in obj.chunks if len(x) > 0]
-            if len(chunks) == 1:
-                return recurse(chunks[0])
+            layouts = [handle_arrow(x) for x in obj.chunks if len(x) > 0]
+            if all(isinstance(x, ak.layout.UnmaskedArray) for x in layouts):
+                layouts = [x.content for x in layouts]
+            if len(layouts) == 1:
+                return layouts[0]
             else:
-                return ak.operations.structure.concatenate(
-                    [recurse(x) for x in chunks], highlevel=False
-                )
+                return ak.operations.structure.concatenate(layouts, highlevel=False)
 
         elif isinstance(obj, pyarrow.lib.RecordBatch):
-            child_array = [recurse(obj.column(x)) for x in range(obj.num_columns)]
-            keys = obj.schema.names
-            awk_arr = ak.layout.RecordArray(child_array, keys)
-            return awk_arr
+            child_array = []
+            for i in range(obj.num_columns):
+                layout = handle_arrow(obj.column(i))
+                if obj.schema.field(i).nullable and not isinstance(
+                    layout, ak._util.optiontypes
+                ):
+                    layout = ak.layout.UnmaskedArray(layout)
+                child_array.append(layout)
+            if pass_empty_field and list(obj.schema.names) == [""]:
+                return child_array[0]
+            else:
+                return ak.layout.RecordArray(child_array, obj.schema.names)
 
         elif isinstance(obj, pyarrow.lib.Table):
             chunks = []
             for batch in obj.to_batches():
-                chunk = recurse(batch)
+                chunk = handle_arrow(batch)
                 if len(chunk) > 0:
                     chunks.append(chunk)
             if len(chunks) == 1:
@@ -2456,12 +2687,20 @@ def from_arrow(array, highlevel=True, behavior=None):
             )
 
     if highlevel:
-        return ak._util.wrap(recurse(array), behavior)
+        return ak._util.wrap(handle_arrow(array), behavior)
     else:
-        return recurse(array)
+        return handle_arrow(array)
 
 
-def to_parquet(array, where, explode_records=False, **options):
+def to_parquet(
+    array,
+    where,
+    explode_records=False,
+    list_to32=False,
+    string_to32=True,
+    bytestring_to32=True,
+    **options  # NOTE: a comma after **options breaks Python 2
+):
     """
     Args:
         array: Data to write to a Parquet file.
@@ -2469,6 +2708,12 @@ def to_parquet(array, where, explode_records=False, **options):
         explode_records (bool): If True, lists of records are written as
             records of lists, so that nested fields become top-level fields
             (which can be zipped when read back).
+        list_to32 (bool): If True, convert Awkward lists into 32-bit Arrow lists
+            if they're small enough, even if it means an extra conversion. Otherwise,
+            signed 32-bit #ak.layout.ListOffsetArray maps to Arrow `ListType` and
+            all others map to Arrow `LargeListType`.
+        string_to32 (bool): Same as the above for Arrow `string` and `large_string`.
+        bytestring_to32 (bool): Same as the above for Arrow `binary` and `large_binary`.
         options: All other options are passed to pyarrow.parquet.ParquetWriter.
             In particular, if no `schema` is given, a schema is derived from
             the array type.
@@ -2477,6 +2722,14 @@ def to_parquet(array, where, explode_records=False, **options):
 
         >>> array1 = ak.Array([[1, 2, 3], [], [4, 5], [], [], [6, 7, 8, 9]])
         >>> ak.to_parquet(array1, "array1.parquet")
+
+    If the `array` does not contain records at top-level, the Arrow table will consist
+    of one field whose name is `""`.
+
+    Parquet files can maintain the distinction between "option-type but no elements are
+    missing" and "not option-type" at all levels, including the top level. However,
+    there is no distinction between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type.
+    Be aware of these type distinctions when passing data through Arrow or Parquet.
 
     See also #ak.to_arrow, which is used as an intermediate step.
     See also #ak.from_parquet.
@@ -2491,18 +2744,38 @@ def to_parquet(array, where, explode_records=False, **options):
             for partition in layout.partitions:
                 for x in batch_iterator(partition):
                     yield x
-        elif isinstance(layout, ak.layout.RecordArray):
-            names = layout.keys()
-            fields = [to_arrow(layout[name]) for name in names]
-            yield pyarrow.RecordBatch.from_arrays(fields, names)
-        elif explode_records:
-            names = layout.keys()
-            fields = [layout[name] for name in names]
-            layout = ak.layout.RecordArray(fields, names, len(layout))
-            for x in batch_iterator(layout):
-                yield x
+
         else:
-            yield pyarrow.RecordBatch.from_arrays([to_arrow(layout)], [""])
+            if explode_records or isinstance(
+                ak.operations.describe.type(layout), ak.types.RecordType
+            ):
+                names = layout.keys()
+                contents = [layout[name] for name in names]
+            else:
+                names = [""]
+                contents = [layout]
+
+            pa_arrays = []
+            pa_fields = []
+            for name, content in zip(names, contents):
+                pa_arrays.append(
+                    to_arrow(
+                        content,
+                        list_to32=list_to32,
+                        string_to32=string_to32,
+                        bytestring_to32=bytestring_to32,
+                    )
+                )
+                pa_fields.append(
+                    pyarrow.field(name, pa_arrays[-1].type).with_nullable(
+                        isinstance(
+                            ak.operations.describe.type(content), ak.types.OptionType
+                        )
+                    )
+                )
+            yield pyarrow.RecordBatch.from_arrays(
+                pa_arrays, schema=pyarrow.schema(pa_fields)
+            )
 
     layout = to_layout(array, allow_record=False, allow_other=False)
     iterator = batch_iterator(layout)
@@ -2535,7 +2808,7 @@ class _ParquetState(object):
 
     def __call__(self, row_group, column):
         as_arrow = self.file.read_row_group(row_group, [column], self.use_threads)
-        return from_arrow(as_arrow, highlevel=False)[column]
+        return _from_arrow(as_arrow, False, highlevel=False)[column]
 
     def __getstate__(self):
         return {
@@ -2575,7 +2848,7 @@ def from_parquet(
     lazy_cache_key=None,
     highlevel=True,
     behavior=None,
-    **options
+    **options  # NOTE: a comma after **options breaks Python 2
 ):
     """
     Args:
@@ -2693,8 +2966,9 @@ def from_parquet(
             return out
 
     else:
-        out = from_arrow(
+        out = _from_arrow(
             file.read(columns, use_threads=use_threads),
+            False,
             highlevel=highlevel,
             behavior=behavior,
         )
@@ -2711,7 +2985,7 @@ def to_buffers(
     form_key="node{id}",
     key_format="part{partition}-{form_key}-{attribute}",
 ):
-    u"""
+    """
     Args:
         array: Data to decompose into named buffers.
         container (None or MutableMapping): The str \u2192 NumPy arrays (or
@@ -3616,7 +3890,7 @@ def from_buffers(
     highlevel=True,
     behavior=None,
 ):
-    u"""
+    """
     Args:
         form (#ak.forms.Form or str/dict equivalent): The form of the Awkward
             Array to reconstitute from named buffers.
@@ -3785,7 +4059,7 @@ def to_arrayset(
     sep="-",
     partition_first=False,
 ):
-    u"""
+    """
     Args:
         array: Data to decompose into an arrayset.
         container (None or MutableMapping): The str \u2192 NumPy arrays (or
@@ -4013,7 +4287,7 @@ def from_arrayset(
     highlevel=True,
     behavior=None,
 ):
-    u"""
+    """
     Args:
         form (#ak.forms.Form or str/dict equivalent): The form of the Awkward
             Array to reconstitute from a set of NumPy arrays (or binary blobs).
@@ -4340,7 +4614,7 @@ or
             offsets = numpy.asarray(offsets)
             starts, stops = offsets[:-1], offsets[1:]
             counts = stops - starts
-            if ak._util.win:
+            if ak._util.win or ak._util.bits32:
                 counts = counts.astype(np.int32)
             if len(row_arrays) == 0:
                 newrows = [

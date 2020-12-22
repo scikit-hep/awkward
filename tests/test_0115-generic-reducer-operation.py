@@ -1427,28 +1427,32 @@ def test_nonreducers():
         }
     )
 
-    assert ak.to_list(ak.mean(y, axis=-1)) == ak.to_list(
-        np.mean(ak.to_numpy(y), axis=-1)
+    assert ak.to_list(ak.mean(y, axis=-1)) == pytest.approx(
+        ak.to_list(np.mean(ak.to_numpy(y), axis=-1))
     )
-    assert ak.to_list(ak.var(y, axis=-1)) == ak.to_list(np.var(ak.to_numpy(y), axis=-1))
-    assert ak.to_list(ak.var(y, axis=-1, ddof=1)) == ak.to_list(
-        np.var(ak.to_numpy(y), axis=-1, ddof=1)
+    assert ak.to_list(ak.var(y, axis=-1)) == pytest.approx(
+        ak.to_list(np.var(ak.to_numpy(y), axis=-1))
     )
-    assert ak.to_list(ak.std(y, axis=-1)) == ak.to_list(np.std(ak.to_numpy(y), axis=-1))
-    assert ak.to_list(ak.std(y, axis=-1, ddof=1)) == ak.to_list(
-        np.std(ak.to_numpy(y), axis=-1, ddof=1)
+    assert ak.to_list(ak.var(y, axis=-1, ddof=1)) == pytest.approx(
+        ak.to_list(np.var(ak.to_numpy(y), axis=-1, ddof=1))
+    )
+    assert ak.to_list(ak.std(y, axis=-1)) == pytest.approx(
+        ak.to_list(np.std(ak.to_numpy(y), axis=-1))
+    )
+    assert ak.to_list(ak.std(y, axis=-1, ddof=1)) == pytest.approx(
+        ak.to_list(np.std(ak.to_numpy(y), axis=-1, ddof=1))
     )
 
-    assert ak.to_list(ak.moment(y, 1, axis=-1)) == ak.to_list(
-        np.mean(ak.to_numpy(y), axis=-1)
+    assert ak.to_list(ak.moment(y, 1, axis=-1)) == pytest.approx(
+        ak.to_list(np.mean(ak.to_numpy(y), axis=-1))
     )
-    assert ak.to_list(ak.moment(y - ak.mean(y, axis=-1), 2, axis=-1)) == ak.to_list(
-        np.var(ak.to_numpy(y), axis=-1)
+    assert ak.to_list(ak.moment(y - ak.mean(y, axis=-1), 2, axis=-1)) == pytest.approx(
+        ak.to_list(np.var(ak.to_numpy(y), axis=-1))
     )
-    assert ak.to_list(ak.covar(y, y, axis=-1)) == ak.to_list(
-        np.var(ak.to_numpy(y), axis=-1)
+    assert ak.to_list(ak.covar(y, y, axis=-1)) == pytest.approx(
+        ak.to_list(np.var(ak.to_numpy(y), axis=-1))
     )
-    assert ak.to_list(ak.corr(y, y, axis=-1)) == [1.0, 1.0]
+    assert ak.to_list(ak.corr(y, y, axis=-1)) == pytest.approx([1.0, 1.0])
 
     assert ak.to_list(ak.corr(x, y, axis=-1)) == pytest.approx(
         [0.9975103695813371, 0.9964193240901015]
