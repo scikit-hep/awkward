@@ -1357,6 +1357,10 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const std::string
   IndexedArrayOf<T, ISOPTION>::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     struct Error err = kernel::IndexedArray_validity<T>(
       kernel::lib::cpu,   // DERIVE
       index_.data(),
@@ -2622,6 +2626,67 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
 
     return std::pair<Index64, IndexOf<T>>(nextcarry, outindex);
+  }
+
+  template <typename T, bool ISOPTION>
+  bool
+  IndexedArrayOf<T, ISOPTION>::is_unique() const {
+    Index64 start(1);
+    start.setitem_at_nowrap(0, index().offset());
+    Index64 stop(1);
+    stop.setitem_at_nowrap(0, index().length());
+    return is_subrange_equal(start, stop);
+  }
+
+  template <typename T, bool ISOPTION>
+  const ContentPtr
+  IndexedArrayOf<T, ISOPTION>::unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: IndexedArrayOf<T, ISOPTION>::unique")
+      + FILENAME(__LINE__));
+  }
+
+  template <typename T, bool ISOPTION>
+  bool
+  IndexedArrayOf<T, ISOPTION>::is_subrange_equal(const Index64& starts, const Index64& stops) const {
+    if (starts.length() != stops.length()) {
+      throw std::invalid_argument(
+        std::string("IndexedArrayOf<T, ISOPTION> starts length must be equal to stops length")
+        + FILENAME(__LINE__));
+    }
+
+    Index64 nextstarts(starts.length());
+    Index64 nextstops(stops.length());
+
+    int64_t subranges_length = 0;
+    struct Error err1 = kernel::IndexedArray_ranges_next_64<T>(
+      kernel::lib::cpu,   // DERIVE
+      index_.data(),
+      starts.data(),
+      stops.data(),
+      starts.length(),
+      nextstarts.data(),
+      nextstops.data(),
+      &subranges_length);
+    util::handle_error(err1, classname(), identities_.get());
+
+    Index64 nextcarry(subranges_length);
+    struct Error err2 = kernel::IndexedArray_ranges_carry_next_64<T>(
+      kernel::lib::cpu,   // DERIVE
+      index_.data(),
+      starts.data(),
+      stops.data(),
+      starts.length(),
+      nextcarry.data());
+    util::handle_error(err2, classname(), identities_.get());
+
+    ContentPtr next = content_.get()->carry(nextcarry, false);
+    if (nextstarts.length() > 1) {
+      return next.get()->is_subrange_equal(nextstarts, nextstops);
+    }
+    else {
+      return next.get()->is_unique();
+    }
   }
 
   // IndexedArrayOf<int64_t, true> has to be first, or ld on darwin

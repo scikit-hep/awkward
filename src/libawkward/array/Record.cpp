@@ -645,4 +645,25 @@ namespace awkward {
       std::dynamic_pointer_cast<RecordArray>(out), at_);
   }
 
+  bool
+  Record::is_unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: Record::is_unique")
+      + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
+  Record::unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: Record::unique")
+      + FILENAME(__LINE__));
+  }
+
+  bool
+  Record::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: Record::is_subrange_equal")
+      + FILENAME(__LINE__));
+  }
+
 }

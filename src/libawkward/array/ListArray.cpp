@@ -814,6 +814,10 @@ namespace awkward {
   template <typename T>
   const std::string
   ListArrayOf<T>::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     if (stops_.length() < starts_.length()) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string("len(stops) < len(starts)")
@@ -1375,16 +1379,16 @@ namespace awkward {
       for (int64_t j = 0;  j < n;  j++) {
         std::shared_ptr<int64_t> ptr =
             kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                    totallen*sizeof(int64_t));
+                                    totallen*(int64_t)sizeof(int64_t));
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
       std::shared_ptr<int64_t> toindex =
           kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                  n*sizeof(int64_t));
+                                  n*(int64_t)sizeof(int64_t));
       std::shared_ptr<int64_t> fromindex =
           kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                  n*sizeof(int64_t));
+                                  n*(int64_t)sizeof(int64_t));
       struct Error err2 = kernel::ListArray_combinations_64<T>(
         kernel::lib::cpu,   // DERIVE
         tocarryraw.data(),
@@ -1921,6 +1925,24 @@ namespace awkward {
                                             starts,
                                             stops,
                                             content);
+  }
+
+  template <typename T>
+  bool
+  ListArrayOf<T>::is_unique() const {
+    return toListOffsetArray64(true).get()->is_unique();
+  }
+
+  template <typename T>
+  const ContentPtr
+  ListArrayOf<T>::unique() const {
+    return toListOffsetArray64(true).get()->unique();
+  }
+
+  template <typename T>
+  bool
+  ListArrayOf<T>::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    return toListOffsetArray64(true).get()->is_subrange_equal(start, stop);
   }
 
   template class EXPORT_TEMPLATE_INST ListArrayOf<int32_t>;

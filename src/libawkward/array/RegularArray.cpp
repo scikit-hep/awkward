@@ -699,6 +699,10 @@ namespace awkward {
 
   const std::string
   RegularArray::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     if (size_ < 0) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string("size < 0")
@@ -1101,16 +1105,16 @@ namespace awkward {
       for (int64_t j = 0;  j < n;  j++) {
         std::shared_ptr<int64_t> ptr =
             kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                    totallen*sizeof(int64_t));
+                                    totallen*(int64_t)sizeof(int64_t));
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
       std::shared_ptr<int64_t> toindex =
           kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                  size*sizeof(int64_t));
+                                  size*(int64_t)sizeof(int64_t));
       std::shared_ptr<int64_t> fromindex =
           kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                  size*sizeof(int64_t));
+                                  size*(int64_t)sizeof(int64_t));
 
       if (size_ != 0) {
         struct Error err = kernel::RegularArray_combinations_64(
@@ -1500,6 +1504,21 @@ namespace awkward {
                                           content,
                                           size_,
                                           length_);
+  }
+
+  bool
+  RegularArray::is_unique() const {
+    return toListOffsetArray64(true).get()->is_unique();
+  }
+
+  const ContentPtr
+  RegularArray::unique() const {
+    return toListOffsetArray64(true).get()->unique();
+  }
+
+  bool
+  RegularArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    return toListOffsetArray64(true).get()->is_subrange_equal(start, stop);
   }
 
 }

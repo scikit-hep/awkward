@@ -1342,6 +1342,10 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   UnionArrayOf<T, I>::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     if (index_.length() < tags_.length()) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string("len(index) < len(tags)")
@@ -2156,6 +2160,30 @@ namespace awkward {
                                                  slicestops,
                                                  slicecontent,
                                                  tail);
+  }
+
+  template <typename T, typename I>
+  bool
+  UnionArrayOf<T, I>::is_unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: UnionArrayOf<T, I>::is_unique")
+      + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  const ContentPtr
+  UnionArrayOf<T, I>::unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: UnionArrayOf<T, I>::unique")
+      + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  bool
+  UnionArrayOf<T, I>::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: UnionArrayOf<T, I>::is_subrange_equal")
+      + FILENAME(__LINE__));
   }
 
   template class EXPORT_TEMPLATE_INST UnionArrayOf<int8_t, int32_t>;

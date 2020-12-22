@@ -232,7 +232,7 @@ namespace awkward {
   const IdentitiesPtr
   IdentitiesOf<T>::deep_copy() const {
     std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
-                                               length_*sizeof(T));
+                                               length_*(int64_t)sizeof(T));
     if (length_ != 0) {
       // DERIVE Yikes! It's a memcpy!
       memcpy(ptr.get(),

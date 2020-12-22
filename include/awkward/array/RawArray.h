@@ -798,6 +798,10 @@ namespace awkward {
 
     const std::string
       validityerror(const std::string& path) const override {
+      const std::string paramcheck = validityerror_parameters(path);
+      if (paramcheck != std::string("")) {
+        return paramcheck;
+      }
       return std::string();
     }
 
@@ -1272,6 +1276,30 @@ namespace awkward {
       throw std::runtime_error(
         std::string("FIXME: unimplemented operation: RawArray::numbers_to_type")
         + FILENAME(__LINE__));
+    }
+
+    /// @brief Returns 'true' if all components of the array are unique
+    bool
+      is_unique() const override {
+        throw std::runtime_error(
+          std::string("FIXME: unimplemented operation: RawArray::is_unique")
+          + FILENAME(__LINE__));
+    }
+
+  /// @brief Returns an array where all components are unique
+  const ContentPtr
+      unique() const override {
+         throw std::runtime_error(
+           std::string("FIXME: unimplemented operation: RawArray::unique")
+           + FILENAME(__LINE__));
+    }
+
+    /// @brief Returns 'true' if subranges are equal
+    bool
+      is_subrange_equal(const Index64& start, const Index64& stop) const override {
+        throw std::runtime_error(
+          std::string("FIXME: unimplemented operation: RawArray::is_subrange_equal")
+          + FILENAME(__LINE__));
     }
 
   private:

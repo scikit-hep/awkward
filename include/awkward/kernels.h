@@ -790,6 +790,56 @@ extern "C" {
     int64_t length,
     int64_t lencontent,
     bool isoption);
+    EXPORT_SYMBOL ERROR
+
+  awkward_IndexedArray32_ranges_next_64(
+    const int32_t* index,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    int64_t* tostarts,
+    int64_t* tostops,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_IndexedArray64_ranges_next_64(
+    const int64_t* index,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    int64_t* tostarts,
+    int64_t* tostops,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_IndexedArrayU32_ranges_next_64(
+    const uint32_t* index,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    int64_t* tostarts,
+    int64_t* tostops,
+    int64_t* tolength);
+
+  EXPORT_SYMBOL ERROR
+  awkward_IndexedArray32_ranges_carry_next_64(
+    const int32_t* index,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    int64_t* tocarry);
+  EXPORT_SYMBOL ERROR
+  awkward_IndexedArray64_ranges_carry_next_64(
+    const int64_t* index,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    int64_t* tocarry);
+  EXPORT_SYMBOL ERROR
+  awkward_IndexedArrayU32_ranges_carry_next_64(
+    const uint32_t* index,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    int64_t* tocarry);
 
   EXPORT_SYMBOL ERROR
   awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
@@ -2491,6 +2541,14 @@ extern "C" {
     bool stable);
 
   EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_unique_strings_uint8(
+    uint8_t* toptr,
+    const int64_t* offsets,
+    int64_t offsetslength,
+    int64_t* outoffsets,
+    int64_t* tolength);
+
+  EXPORT_SYMBOL ERROR
   awkward_RegularArray_broadcast_tooffsets_64(
     const int64_t* fromoffsets,
     int64_t offsetslength,
@@ -4032,6 +4090,140 @@ extern "C" {
     const int8_t* bytemask,
     const int64_t* missingindex,
     int64_t length);
+
+  EXPORT_SYMBOL ERROR
+  awkward_unique_bool(
+    bool* toptr,
+    int64_t length,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_unique_int8(
+    int8_t* toptr,
+    int64_t length,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_unique_int16(
+    int16_t* toptr,
+    int64_t length,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_unique_int32(
+    int32_t* toptr,
+    int64_t length,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_unique_int64(
+    int64_t* toptr,
+    int64_t length,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_unique_uint8(
+    uint8_t* toptr,
+    int64_t length,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_unique_uint16(
+    uint16_t* toptr,
+    int64_t length,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_unique_uint32(
+    uint32_t* toptr,
+    int64_t length,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_unique_uint64(
+    uint64_t* toptr,
+    int64_t length,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_unique_float32(
+    float* toptr,
+    int64_t length,
+    int64_t* tolength);
+  EXPORT_SYMBOL ERROR
+  awkward_unique_float64(
+    double* toptr,
+    int64_t length,
+    int64_t* tolength);
+
+  EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_subrange_equal_bool(
+    bool* tmpptr,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    bool* toequal);
+  EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_subrange_equal_int8(
+    int8_t* tmpptr,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    bool* toequal);
+  EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_subrange_equal_int16(
+    int16_t* tmpptr,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    bool* toequal);
+  EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_subrange_equal_int32(
+    int32_t* tmpptr,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    bool* toequal);
+  EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_subrange_equal_int64(
+    int64_t* tmpptr,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    bool* toequal);
+  EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_subrange_equal_uint8(
+    uint8_t* tmpptr,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    bool* toequal);
+  EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_subrange_equal_uint16(
+    uint16_t* tmpptr,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    bool* toequal);
+  EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_subrange_equal_uint32(
+    uint32_t* tmpptr,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    bool* toequal);
+  EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_subrange_equal_uint64(
+    uint64_t* tmpptr,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    bool* toequal);
+  EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_subrange_equal_float32(
+    float* tmpptr,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    bool* toequal);
+  EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_subrange_equal_float64(
+    double* tmpptr,
+    const int64_t* fromstarts,
+    const int64_t* fromstops,
+    int64_t length,
+    bool* toequal);
 
   EXPORT_SYMBOL ERROR
   awkward_sort_bool(

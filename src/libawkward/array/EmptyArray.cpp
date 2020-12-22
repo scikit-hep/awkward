@@ -383,6 +383,10 @@ namespace awkward {
 
   const std::string
   EmptyArray::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     return std::string();
   }
 
@@ -703,6 +707,21 @@ namespace awkward {
   EmptyArray::numbers_to_type(const std::string& name) const {
     return std::make_shared<EmptyArray>(identities(),
                                         parameters());
+  }
+
+  bool
+  EmptyArray::is_unique() const {
+    return true;
+  }
+
+  const ContentPtr
+  EmptyArray::unique() const {
+    return shallow_copy();
+  }
+
+  bool
+  EmptyArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    return false;
   }
 
 }

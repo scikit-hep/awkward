@@ -922,6 +922,10 @@ namespace awkward {
 
   const std::string
   RecordArray::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     for (int64_t i = 0;  i < numfields();  i++) {
       if (field(i).get()->length() < length_) {
         return (std::string("at ") + path + std::string(" (") + classname()
@@ -1728,6 +1732,49 @@ namespace awkward {
                                            contents,
                                            recordlookup_);
     }
+  }
+
+  bool
+  RecordArray::is_unique() const {
+    if (contents_.empty()) {
+      return true;
+    }
+    else {
+      int64_t non_unique_count = 0;
+      for (auto content : contents_) {
+        if (!content.get()->is_unique()) {
+          non_unique_count++;
+        }
+        else if (non_unique_count == 0) {
+          return true;
+        }
+      }
+      if (non_unique_count <= 1) {
+        return true;
+      }
+      else {
+        throw std::runtime_error(
+          std::string("FIXME: RecordArray::is_unique operation on a RecordArray ")
+          + std::string("with more than one non-unique content is not implemented yet")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    return false;
+  }
+
+  const ContentPtr
+  RecordArray::unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: RecordArray::unique")
+      + FILENAME(__LINE__));
+  }
+
+  bool
+  RecordArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: RecordArray::is_subrange_equal")
+      + FILENAME(__LINE__));
   }
 
 }

@@ -748,6 +748,10 @@ namespace awkward {
 
   const std::string
   ByteMaskedArray::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     if (content_.get()->length() < mask_.length()) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string("len(content) < len(mask)")
@@ -1497,6 +1501,27 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
 
     return std::pair<Index64, Index64>(nextcarry, outindex);
+  }
+
+  bool
+  ByteMaskedArray::is_unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: ByteMaskedArray::is_unique")
+      + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
+  ByteMaskedArray::unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: ByteMaskedArray::unique")
+      + FILENAME(__LINE__));
+  }
+
+  bool
+  ByteMaskedArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: ByteMaskedArray::is_subrange_equal")
+      + FILENAME(__LINE__));
   }
 
 }

@@ -41,7 +41,7 @@ namespace awkward {
     // This is the only reducer that completely ignores the data.
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_count_64(
       ptr_lib,
       ptr.get(),
@@ -165,7 +165,7 @@ namespace awkward {
                                   int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<bool>(
       ptr_lib,
       ptr.get(),
@@ -183,7 +183,7 @@ namespace awkward {
                                   int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<int8_t>(
       ptr_lib,
       ptr.get(),
@@ -201,7 +201,7 @@ namespace awkward {
                                    int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<uint8_t>(
       ptr_lib,
       ptr.get(),
@@ -219,7 +219,7 @@ namespace awkward {
                                    int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<int16_t>(
       ptr_lib,
       ptr.get(),
@@ -237,7 +237,7 @@ namespace awkward {
                                     int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<uint16_t>(
       ptr_lib,
       ptr.get(),
@@ -255,7 +255,7 @@ namespace awkward {
                                    int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<int32_t>(
       ptr_lib,
       ptr.get(),
@@ -273,7 +273,7 @@ namespace awkward {
                                     int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<uint32_t>(
       ptr_lib,
       ptr.get(),
@@ -291,7 +291,7 @@ namespace awkward {
                                    int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<int64_t>(
       ptr_lib,
       ptr.get(),
@@ -309,7 +309,7 @@ namespace awkward {
                                     int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<uint64_t>(
       ptr_lib,
       ptr.get(),
@@ -327,7 +327,7 @@ namespace awkward {
                                      int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<float>(
       ptr_lib,
       ptr.get(),
@@ -345,7 +345,7 @@ namespace awkward {
                                      int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<double>(
       ptr_lib,
       ptr.get(),
@@ -401,7 +401,7 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
-      ptr_lib, outlength*sizeof(int32_t));
+      ptr_lib, outlength*(int64_t)sizeof(int32_t));
     struct Error err = kernel::reduce_sum_64<int32_t, bool>(
       ptr_lib,
       ptr.get(),
@@ -411,7 +411,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_sum_64<int64_t, bool>(
       ptr_lib,
       ptr.get(),
@@ -431,7 +431,7 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
-      ptr_lib, outlength*sizeof(int32_t));
+      ptr_lib, outlength*(int64_t)sizeof(int32_t));
     struct Error err = kernel::reduce_sum_64<int32_t, int8_t>(
       ptr_lib,
       ptr.get(),
@@ -441,7 +441,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_sum_64<int64_t, int8_t>(
       ptr_lib,
       ptr.get(),
@@ -461,7 +461,7 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
-      ptr_lib, outlength*sizeof(uint32_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint32_t));
     struct Error err = kernel::reduce_sum_64<uint32_t, uint8_t>(
       ptr_lib,
       ptr.get(),
@@ -471,7 +471,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
-      ptr_lib, outlength*sizeof(uint64_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint64_t));
     struct Error err = kernel::reduce_sum_64<uint64_t, uint8_t>(
       ptr_lib,
       ptr.get(),
@@ -491,7 +491,7 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
-      ptr_lib, outlength*sizeof(int32_t));
+      ptr_lib, outlength*(int64_t)sizeof(int32_t));
     struct Error err = kernel::reduce_sum_64<int32_t, int16_t>(
       ptr_lib,
       ptr.get(),
@@ -501,7 +501,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_sum_64<int64_t, int16_t>(
       ptr_lib,
       ptr.get(),
@@ -521,7 +521,7 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
-      ptr_lib, outlength*sizeof(uint32_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint32_t));
     struct Error err = kernel::reduce_sum_64<uint32_t, uint16_t>(
       ptr_lib,
       ptr.get(),
@@ -531,7 +531,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
-      ptr_lib, outlength*sizeof(uint64_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint64_t));
     struct Error err = kernel::reduce_sum_64<uint64_t, uint16_t>(
       ptr_lib,
       ptr.get(),
@@ -551,7 +551,7 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
-      ptr_lib, outlength*sizeof(int32_t));
+      ptr_lib, outlength*(int64_t)sizeof(int32_t));
     struct Error err = kernel::reduce_sum_64<int32_t, int32_t>(
       ptr_lib,
       ptr.get(),
@@ -561,7 +561,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_sum_64<int64_t, int32_t>(
       ptr_lib,
       ptr.get(),
@@ -581,7 +581,7 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
-      ptr_lib, outlength*sizeof(uint32_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint32_t));
     struct Error err = kernel::reduce_sum_64<uint32_t, uint32_t>(
       ptr_lib,
       ptr.get(),
@@ -591,7 +591,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
-      ptr_lib, outlength*sizeof(uint64_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint64_t));
     struct Error err = kernel::reduce_sum_64<uint64_t, uint32_t>(
       ptr_lib,
       ptr.get(),
@@ -610,7 +610,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_sum_64<int64_t, int64_t>(
       ptr_lib,
       ptr.get(),
@@ -628,7 +628,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
-      ptr_lib, outlength*sizeof(uint64_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint64_t));
     struct Error err = kernel::reduce_sum_64<uint64_t, uint64_t>(
       ptr_lib,
       ptr.get(),
@@ -646,7 +646,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<float> ptr = kernel::malloc<float>(
-      ptr_lib, outlength*sizeof(float));
+      ptr_lib, outlength*(int64_t)sizeof(float));
     struct Error err = kernel::reduce_sum_64<float, float>(
       ptr_lib,
       ptr.get(),
@@ -664,7 +664,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<double> ptr = kernel::malloc<double>(
-      ptr_lib, outlength*sizeof(double));
+      ptr_lib, outlength*(int64_t)sizeof(double));
     struct Error err = kernel::reduce_sum_64<double, double>(
       ptr_lib,
       ptr.get(),
@@ -720,7 +720,7 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
-      ptr_lib, outlength*sizeof(int32_t));
+      ptr_lib, outlength*(int64_t)sizeof(int32_t));
     struct Error err = kernel::reduce_prod_64<int32_t, bool>(
       ptr_lib,
       ptr.get(),
@@ -730,7 +730,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_prod_64<int64_t, bool>(
       ptr_lib,
       ptr.get(),
@@ -760,7 +760,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_prod_64<int64_t, int8_t>(
       ptr_lib,
       ptr.get(),
@@ -780,7 +780,7 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
-      ptr_lib, outlength*sizeof(uint32_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint32_t));
     struct Error err = kernel::reduce_prod_64<uint32_t, uint8_t>(
       ptr_lib,
       ptr.get(),
@@ -790,7 +790,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
-      ptr_lib, outlength*sizeof(uint64_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint64_t));
     struct Error err = kernel::reduce_prod_64<uint64_t, uint8_t>(
       ptr_lib,
       ptr.get(),
@@ -810,7 +810,7 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
-      ptr_lib, outlength*sizeof(int32_t));
+      ptr_lib, outlength*(int64_t)sizeof(int32_t));
     struct Error err = kernel::reduce_prod_64<int32_t, int16_t>(
       ptr_lib,
       ptr.get(),
@@ -820,7 +820,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_prod_64<int64_t, int16_t>(
       ptr_lib,
       ptr.get(),
@@ -840,7 +840,7 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
-      ptr_lib, outlength*sizeof(uint32_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint32_t));
     struct Error err = kernel::reduce_prod_64<uint32_t, uint16_t>(
       ptr_lib,
       ptr.get(),
@@ -850,7 +850,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
-      ptr_lib, outlength*sizeof(uint64_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint64_t));
     struct Error err = kernel::reduce_prod_64<uint64_t, uint16_t>(
       ptr_lib,
       ptr.get(),
@@ -870,7 +870,7 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
-      ptr_lib, outlength*sizeof(int32_t));
+      ptr_lib, outlength*(int64_t)sizeof(int32_t));
     struct Error err = kernel::reduce_prod_64<int32_t, int32_t>(
       ptr_lib,
       ptr.get(),
@@ -880,7 +880,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_prod_64<int64_t, int32_t>(
       ptr_lib,
       ptr.get(),
@@ -900,7 +900,7 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
 #if defined _MSC_VER || defined __i386__
     std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
-      ptr_lib, outlength*sizeof(uint32_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint32_t));
     struct Error err = kernel::reduce_prod_64<uint32_t, uint32_t>(
       ptr_lib,
       ptr.get(),
@@ -910,7 +910,7 @@ namespace awkward {
       outlength);
 #else
     std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
-      ptr_lib, outlength*sizeof(uint64_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint64_t));
     struct Error err = kernel::reduce_prod_64<uint64_t, uint32_t>(
       ptr_lib,
       ptr.get(),
@@ -929,7 +929,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_prod_64<int64_t, int64_t>(
       ptr_lib,
       ptr.get(),
@@ -947,7 +947,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
-      ptr_lib, outlength*sizeof(uint64_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint64_t));
     struct Error err = kernel::reduce_prod_64<uint64_t, uint64_t>(
       ptr_lib,
       ptr.get(),
@@ -965,7 +965,7 @@ namespace awkward {
                              int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<float> ptr = kernel::malloc<float>(
-      ptr_lib, outlength*sizeof(float));
+      ptr_lib, outlength*(int64_t)sizeof(float));
     struct Error err = kernel::reduce_prod_64<float, float>(
       ptr_lib,
       ptr.get(),
@@ -983,7 +983,7 @@ namespace awkward {
                              int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<double> ptr = kernel::malloc<double>(
-      ptr_lib, outlength*sizeof(double));
+      ptr_lib, outlength*(int64_t)sizeof(double));
     struct Error err = kernel::reduce_prod_64<double, double>(
       ptr_lib,
       ptr.get(),
@@ -1018,7 +1018,7 @@ namespace awkward {
                          int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<bool>(
       ptr_lib,
       ptr.get(),
@@ -1036,7 +1036,7 @@ namespace awkward {
                          int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<int8_t>(
       ptr_lib,
       ptr.get(),
@@ -1054,7 +1054,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<uint8_t>(
       ptr_lib,
       ptr.get(),
@@ -1072,7 +1072,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<int16_t>(
       ptr_lib,
       ptr.get(),
@@ -1090,7 +1090,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<uint16_t>(
       ptr_lib,
       ptr.get(),
@@ -1108,7 +1108,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<int32_t>(
       ptr_lib,
       ptr.get(),
@@ -1126,7 +1126,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<uint32_t>(
       ptr_lib,
       ptr.get(),
@@ -1144,7 +1144,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<int64_t>(
       ptr_lib,
       ptr.get(),
@@ -1162,7 +1162,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<uint64_t>(
       ptr_lib,
       ptr.get(),
@@ -1180,7 +1180,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<float>(
       ptr_lib,
       ptr.get(),
@@ -1198,7 +1198,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<double>(
       ptr_lib,
       ptr.get(),
@@ -1233,7 +1233,7 @@ namespace awkward {
                          int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<bool>(
       ptr_lib,
       ptr.get(),
@@ -1251,7 +1251,7 @@ namespace awkward {
                          int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<int8_t>(
       ptr_lib,
       ptr.get(),
@@ -1269,7 +1269,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<uint8_t>(
       ptr_lib,
       ptr.get(),
@@ -1287,7 +1287,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<int16_t>(
       ptr_lib,
       ptr.get(),
@@ -1305,7 +1305,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<uint16_t>(
       ptr_lib,
       ptr.get(),
@@ -1323,7 +1323,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<int32_t>(
       ptr_lib,
       ptr.get(),
@@ -1341,7 +1341,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<uint32_t>(
       ptr_lib,
       ptr.get(),
@@ -1359,7 +1359,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<int64_t>(
       ptr_lib,
       ptr.get(),
@@ -1377,7 +1377,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<uint64_t>(
       ptr_lib,
       ptr.get(),
@@ -1395,7 +1395,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<float>(
       ptr_lib,
       ptr.get(),
@@ -1413,7 +1413,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<double>(
       ptr_lib,
       ptr.get(),
@@ -1457,7 +1457,7 @@ namespace awkward {
                          int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<bool>(
       ptr_lib,
       ptr.get(),
@@ -1475,7 +1475,7 @@ namespace awkward {
                          int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int8_t> ptr = kernel::malloc<int8_t>(
-      ptr_lib, outlength*sizeof(int8_t));
+      ptr_lib, outlength*(int64_t)sizeof(int8_t));
     int8_t initial = std::numeric_limits<int8_t>::max();
     if (has_initial_) {
       initial = (int8_t)initial_i64_;
@@ -1498,7 +1498,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<uint8_t> ptr = kernel::malloc<uint8_t>(
-      ptr_lib, outlength*sizeof(uint8_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint8_t));
     uint8_t initial = std::numeric_limits<uint8_t>::max();
     if (has_initial_) {
       initial = (uint8_t)initial_u64_;
@@ -1521,7 +1521,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int16_t> ptr = kernel::malloc<int16_t>(
-      ptr_lib, outlength*sizeof(int16_t));
+      ptr_lib, outlength*(int64_t)sizeof(int16_t));
     int16_t initial = std::numeric_limits<int16_t>::max();
     if (has_initial_) {
       initial = (int16_t)initial_i64_;
@@ -1544,7 +1544,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<uint16_t> ptr = kernel::malloc<uint16_t>(
-      ptr_lib, outlength*sizeof(uint16_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint16_t));
     uint16_t initial = std::numeric_limits<uint16_t>::max();
     if (has_initial_) {
       initial = (uint16_t)initial_u64_;
@@ -1567,7 +1567,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
-      ptr_lib, outlength*sizeof(int32_t));
+      ptr_lib, outlength*(int64_t)sizeof(int32_t));
     int32_t initial = std::numeric_limits<int32_t>::max();
     if (has_initial_) {
       initial = (int32_t)initial_i64_;
@@ -1590,7 +1590,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
-      ptr_lib, outlength*sizeof(uint32_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint32_t));
     uint32_t initial = std::numeric_limits<uint32_t>::max();
     if (has_initial_) {
       initial = (uint32_t)initial_u64_;
@@ -1613,7 +1613,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     int64_t initial = std::numeric_limits<int64_t>::max();
     if (has_initial_) {
       initial = (int64_t)initial_i64_;
@@ -1636,7 +1636,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
-      ptr_lib, outlength*sizeof(uint64_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint64_t));
     uint64_t initial = std::numeric_limits<uint64_t>::max();
     if (has_initial_) {
       initial = (uint64_t)initial_u64_;
@@ -1659,7 +1659,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<float> ptr = kernel::malloc<float>(
-      ptr_lib, outlength*sizeof(float));
+      ptr_lib, outlength*(int64_t)sizeof(float));
     float initial = std::numeric_limits<float>::infinity();
     if (has_initial_) {
       initial = (float)initial_f64_;
@@ -1682,7 +1682,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<double> ptr = kernel::malloc<double>(
-      ptr_lib, outlength*sizeof(double));
+      ptr_lib, outlength*(int64_t)sizeof(double));
     double initial = std::numeric_limits<double>::infinity();
     if (has_initial_) {
       initial = (double)initial_f64_;
@@ -1731,7 +1731,7 @@ namespace awkward {
                          int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
-      ptr_lib, outlength*sizeof(bool));
+      ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_sum_bool_64<bool>(
       ptr_lib,
       ptr.get(),
@@ -1749,7 +1749,7 @@ namespace awkward {
                          int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int8_t> ptr = kernel::malloc<int8_t>(
-      ptr_lib, outlength*sizeof(int8_t));
+      ptr_lib, outlength*(int64_t)sizeof(int8_t));
     int8_t initial = std::numeric_limits<int8_t>::min();
     if (has_initial_) {
       initial = (int8_t)initial_i64_;
@@ -1772,7 +1772,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<uint8_t> ptr = kernel::malloc<uint8_t>(
-      ptr_lib, outlength*sizeof(uint8_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint8_t));
     uint8_t initial = std::numeric_limits<uint8_t>::min();
     if (has_initial_) {
       initial = (uint8_t)initial_u64_;
@@ -1795,7 +1795,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int16_t> ptr = kernel::malloc<int16_t>(
-      ptr_lib, outlength*sizeof(int16_t));
+      ptr_lib, outlength*(int64_t)sizeof(int16_t));
     int16_t initial = std::numeric_limits<int16_t>::min();
     if (has_initial_) {
       initial = (int16_t)initial_i64_;
@@ -1818,7 +1818,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<uint16_t> ptr = kernel::malloc<uint16_t>(
-      ptr_lib, outlength*sizeof(uint16_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint16_t));
     uint16_t initial = std::numeric_limits<uint16_t>::min();
     if (has_initial_) {
       initial = (uint16_t)initial_u64_;
@@ -1841,7 +1841,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int32_t> ptr = kernel::malloc<int32_t>(
-      ptr_lib, outlength*sizeof(int32_t));
+      ptr_lib, outlength*(int64_t)sizeof(int32_t));
     int32_t initial = std::numeric_limits<int32_t>::min();
     if (has_initial_) {
       initial = (int32_t)initial_i64_;
@@ -1864,7 +1864,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<uint32_t> ptr = kernel::malloc<uint32_t>(
-      ptr_lib, outlength*sizeof(uint32_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint32_t));
     uint32_t initial = std::numeric_limits<uint32_t>::min();
     if (has_initial_) {
       initial = (uint32_t)initial_u64_;
@@ -1887,7 +1887,7 @@ namespace awkward {
                           int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     int64_t initial = std::numeric_limits<int64_t>::min();
     if (has_initial_) {
       initial = (int64_t)initial_i64_;
@@ -1910,7 +1910,7 @@ namespace awkward {
                            int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<uint64_t> ptr = kernel::malloc<uint64_t>(
-      ptr_lib, outlength*sizeof(uint64_t));
+      ptr_lib, outlength*(int64_t)sizeof(uint64_t));
     uint64_t initial = std::numeric_limits<uint64_t>::min();
     if (has_initial_) {
       initial = (uint64_t)initial_u64_;
@@ -1933,7 +1933,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<float> ptr = kernel::malloc<float>(
-      ptr_lib, outlength*sizeof(float));
+      ptr_lib, outlength*(int64_t)sizeof(float));
     float initial = -std::numeric_limits<float>::infinity();
     if (has_initial_) {
       initial = (float)initial_f64_;
@@ -1956,7 +1956,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<double> ptr = kernel::malloc<double>(
-      ptr_lib, outlength*sizeof(double));
+      ptr_lib, outlength*(int64_t)sizeof(double));
     double initial = -std::numeric_limits<double>::infinity();
     if (has_initial_) {
       initial = (double)initial_f64_;
@@ -2001,7 +2001,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, bool>(
       ptr_lib,
       ptr.get(),
@@ -2019,7 +2019,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, int8_t>(
       ptr_lib,
       ptr.get(),
@@ -2037,7 +2037,7 @@ namespace awkward {
                              int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, uint8_t>(
       ptr_lib,
       ptr.get(),
@@ -2055,7 +2055,7 @@ namespace awkward {
                              int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, int16_t>(
       ptr_lib,
       ptr.get(),
@@ -2073,7 +2073,7 @@ namespace awkward {
                               int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, uint16_t>(
       ptr_lib,
       ptr.get(),
@@ -2091,7 +2091,7 @@ namespace awkward {
                              int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, int32_t>(
       ptr_lib,
       ptr.get(),
@@ -2109,7 +2109,7 @@ namespace awkward {
                               int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, uint32_t>(
       ptr_lib,
       ptr.get(),
@@ -2127,7 +2127,7 @@ namespace awkward {
                              int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, int64_t>(
       ptr_lib,
       ptr.get(),
@@ -2145,7 +2145,7 @@ namespace awkward {
                               int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, uint64_t>(
       ptr_lib,
       ptr.get(),
@@ -2163,7 +2163,7 @@ namespace awkward {
                                int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, float>(
       ptr_lib,
       ptr.get(),
@@ -2181,7 +2181,7 @@ namespace awkward {
                                int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmin_64<int64_t, double>(
       ptr_lib,
       ptr.get(),
@@ -2221,7 +2221,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, bool>(
       ptr_lib,
       ptr.get(),
@@ -2239,7 +2239,7 @@ namespace awkward {
                             int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, int8_t>(
       ptr_lib,
       ptr.get(),
@@ -2257,7 +2257,7 @@ namespace awkward {
                              int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, uint8_t>(
       ptr_lib,
       ptr.get(),
@@ -2275,7 +2275,7 @@ namespace awkward {
                              int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, int16_t>(
       ptr_lib,
       ptr.get(),
@@ -2293,7 +2293,7 @@ namespace awkward {
                               int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, uint16_t>(
       ptr_lib,
       ptr.get(),
@@ -2311,7 +2311,7 @@ namespace awkward {
                              int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, int32_t>(
       ptr_lib,
       ptr.get(),
@@ -2329,7 +2329,7 @@ namespace awkward {
                               int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, uint32_t>(
       ptr_lib,
       ptr.get(),
@@ -2347,7 +2347,7 @@ namespace awkward {
                              int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, int64_t>(
       ptr_lib,
       ptr.get(),
@@ -2365,7 +2365,7 @@ namespace awkward {
                               int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, uint64_t>(
       ptr_lib,
       ptr.get(),
@@ -2383,7 +2383,7 @@ namespace awkward {
                                int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, float>(
       ptr_lib,
       ptr.get(),
@@ -2401,7 +2401,7 @@ namespace awkward {
                                int64_t outlength) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*sizeof(int64_t));
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, double>(
       ptr_lib,
       ptr.get(),

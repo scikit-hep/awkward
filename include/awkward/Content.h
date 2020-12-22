@@ -1326,7 +1326,25 @@ namespace awkward {
     virtual const ContentPtr
       numbers_to_type(const std::string& name) const = 0;
 
+    /// @brief Returns 'true' if all components of the array are unique
+    virtual bool
+      is_unique() const = 0;
+
+    /// @brief Returns sorted unique values.
+    ///
+    virtual const ContentPtr
+      unique() const = 0;
+
+    /// @brief Returns 'true' if subranges are equal
+    virtual bool
+      is_subrange_equal(const Index64& start, const Index64& stop) const = 0;
+
   protected:
+    /// @brief Internal function to determine if a particular set of parameters
+    /// are allowed on a particular node (centralized by parameter, not by class).
+    const std::string
+      validityerror_parameters(const std::string& path) const;
+
     /// @brief Internal function to wrap putative #getitem output with enough
     /// RegularArray nodes to satisfy a given `shape`.
     ///

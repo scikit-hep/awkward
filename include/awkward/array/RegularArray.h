@@ -382,6 +382,18 @@ namespace awkward {
     const ContentPtr
       numbers_to_type(const std::string& name) const override;
 
+    /// @brief Returns 'true' if all components of the array are unique
+    bool
+      is_unique() const override;
+
+    /// @brief Returns an array where all components are unique
+    const ContentPtr
+      unique() const override;
+
+    /// @brief Returns 'true' if subranges are equal
+    bool
+      is_subrange_equal(const Index64& start, const Index64& stop) const override;
+
   private:
     const ContentPtr content_;
     int64_t size_;

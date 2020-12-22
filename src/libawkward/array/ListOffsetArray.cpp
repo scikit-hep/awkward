@@ -814,6 +814,10 @@ namespace awkward {
   template <typename T>
   const std::string
   ListOffsetArrayOf<T>::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     if (offsets_.length() < 1) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string("len(offsets) < 1")
@@ -1514,16 +1518,16 @@ namespace awkward {
       for (int64_t j = 0;  j < n;  j++) {
         std::shared_ptr<int64_t> ptr =
             kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                    totallen*sizeof(int64_t));
+                                    totallen*(int64_t)sizeof(int64_t));
         tocarry.push_back(ptr);
         tocarryraw.push_back(ptr.get());
       }
       std::shared_ptr<int64_t> toindex =
           kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                  n*sizeof(int64_t));
+                                  n*(int64_t)sizeof(int64_t));
       std::shared_ptr<int64_t> fromindex =
           kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                  n*sizeof(int64_t));
+                                  n*(int64_t)sizeof(int64_t));
       struct Error err2 = kernel::ListArray_combinations_64<T>(
         kernel::lib::cpu,   // DERIVE
         tocarryraw.data(),
@@ -2142,6 +2146,46 @@ namespace awkward {
                                                   parameters_,
                                                   offsets,
                                                   content);
+  }
+
+  template <typename T>
+  bool
+  ListOffsetArrayOf<T>::is_subrange_equal(const Index64& starts, const Index64& stops) const {
+    return toListOffsetArray64(true).get()->is_subrange_equal(starts, stops);
+  }
+
+  template <>
+  bool ListOffsetArrayOf<int64_t>::is_subrange_equal(const Index64& starts, const Index64& stops) const {
+    return content_.get()->is_subrange_equal(starts, stops);
+  }
+
+  template <typename T>
+  bool
+  ListOffsetArrayOf<T>::is_unique() const {
+    return toListOffsetArray64(true).get()->is_unique();
+  }
+
+  template <>
+  bool ListOffsetArrayOf<int64_t>::is_unique() const {
+    if (util::parameter_isstring(parameters_, "__array__")) {
+      if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
+        ContentPtr out = content->sort_asstrings(offsets_,
+                                                 true,
+                                                 true,
+                                                 true);
+        return (out.get()->length() == length());
+      }
+    }
+
+    return is_subrange_equal(util::make_starts(offsets_), util::make_stops(offsets_));
+  }
+
+  template <typename T>
+  const ContentPtr
+  ListOffsetArrayOf<T>::unique() const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: ListOffsetArrayOf<T>::unique")
+      + FILENAME(__LINE__));
   }
 
   template class EXPORT_TEMPLATE_INST ListOffsetArrayOf<int32_t>;

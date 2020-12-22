@@ -711,6 +711,10 @@ namespace awkward {
 
   const std::string
   BitMaskedArray::validityerror(const std::string& path) const {
+    const std::string paramcheck = validityerror_parameters(path);
+    if (paramcheck != std::string("")) {
+      return paramcheck;
+    }
     if (mask_.length() * 8 < length_) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string("len(mask) * 8 < length")
@@ -1018,6 +1022,21 @@ namespace awkward {
   const ContentPtr
   BitMaskedArray::numbers_to_type(const std::string& name) const {
     return toByteMaskedArray().get()->numbers_to_type(name);
+  }
+
+  bool
+  BitMaskedArray::is_unique() const {
+    return toByteMaskedArray().get()->is_unique();
+  }
+
+  const ContentPtr
+  BitMaskedArray::unique() const {
+    return toByteMaskedArray().get()->unique();
+  }
+
+  bool
+  BitMaskedArray::is_subrange_equal(const Index64& start, const Index64& stop) const {
+    return toByteMaskedArray().get()->is_subrange_equal(start, stop);
   }
 
 }

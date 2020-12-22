@@ -1624,6 +1624,42 @@ namespace awkward {
       int64_t parentslength);
 
     template <typename T>
+    ERROR unique(
+      kernel::lib ptr_lib,
+      T* toptr,
+      int64_t length,
+      int64_t* tolength);
+
+    template <typename T>
+    ERROR IndexedArray_ranges_next_64(
+      kernel::lib ptr_lib,
+      const T* index,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t* tostarts,
+      int64_t* tostops,
+      int64_t* tolength);
+
+    template <typename T>
+    ERROR IndexedArray_ranges_carry_next_64(
+      kernel::lib ptr_lib,
+      const T* index,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t* tocarry);
+
+    template <typename T>
+    ERROR NumpyArray_subrange_equal(
+      kernel::lib ptr_lib,
+      T* tmpptr,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      bool* toequal);
+
+    template <typename T>
     ERROR NumpyArray_argsort(
       kernel::lib ptr_lib,
       int64_t* toptr,
@@ -1656,6 +1692,15 @@ namespace awkward {
       int64_t* outoffsets,
       bool ascending,
       bool stable);
+
+    template <typename T>
+    ERROR NumpyArray_unique_strings(
+      kernel::lib ptr_lib,
+      T* toptr,
+      const int64_t* offsets,
+      int64_t offsetslength,
+      int64_t* outoffsets,
+      int64_t* tolength);
 
     ERROR ListOffsetArray_local_preparenext_64(
       kernel::lib ptr_lib,
