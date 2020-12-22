@@ -9,6 +9,9 @@
 namespace awkward {
   ////////// ArrayGenerator
 
+  class ArrayGenerator;
+  using ArrayGeneratorPtr = std::shared_ptr<ArrayGenerator>;
+
   /// @class ArrayGenerator
   ///
   /// @brief Abstract superclass to generat arrays for VirtualArray, definining
@@ -75,13 +78,18 @@ namespace awkward {
     virtual const std::shared_ptr<ArrayGenerator>
       with_length(int64_t length) const = 0;
 
+    /// @brief Returns `true` if this generator has all the same buffers and
+    /// parameters as `other`; `false` otherwise.
+    ///
+    /// @param other The generator to compare this with.
+    virtual bool
+      referentially_equal(const ArrayGeneratorPtr& other) const = 0;
+
   protected:
     const FormPtr form_;
     FormPtr inferred_form_{nullptr};
     int64_t length_;
   };
-
-  using ArrayGeneratorPtr = std::shared_ptr<ArrayGenerator>;
 
   ////////// SliceGenerator
 
@@ -119,6 +127,9 @@ namespace awkward {
 
     const std::shared_ptr<ArrayGenerator>
       with_length(int64_t length) const override;
+
+    virtual bool
+      referentially_equal(const ArrayGeneratorPtr& other) const override;
 
   protected:
     const ContentPtr content_;

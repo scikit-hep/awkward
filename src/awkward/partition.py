@@ -214,6 +214,14 @@ class PartitionedArray(object):
     def purelist_depth(self):
         return first(self).purelist_depth
 
+    @property
+    def branch_depth(self):
+        return first(self).branch_depth
+
+    @property
+    def minmax_depth(self):
+        return first(self).minmax_depth
+
     def getitem_nothing(self, *args, **kwargs):
         return first(self).getitem_nothing(*args, **kwargs)
 
@@ -365,14 +373,20 @@ class PartitionedArray(object):
 
     def toContent(self):
         contents = self._ext.partitions
-        out = contents[0]
+        if len(contents) == 1:
+            return contents[0]
+
+        batch = [contents[0]]
         for x in contents[1:]:
-            if not out.mergeable(x, mergebool=False):
-                out = out.merge_as_union(x)
+            if batch[-1].mergeable(x, mergebool=False):
+                batch.append(x)
             else:
-                out = out.merge(x)
-            if isinstance(out, ak._util.uniontypes):
-                out = out.simplify(mergebool=False)
+                collapsed = batch[0].mergemany(batch[1:])
+                batch = [collapsed.merge_as_union(x)]
+
+        out = batch[0].mergemany(batch[1:])
+        if isinstance(out, ak._util.uniontypes):
+            out = out.simplify(mergebool=False)
         return out
 
     def repartition(self, *args, **kwargs):

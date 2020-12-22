@@ -893,6 +893,31 @@ namespace awkward {
       }
     }
 
+    bool
+      referentially_equal(const ContentPtr& other) const override {
+      if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+        return false;
+      }
+      if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+        return false;
+      }
+      if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+        if (!identities_.get()->referentially_equal(other->identities())) {
+          return false;
+        }
+      }
+      if (RawArrayOf<T>* raw = dynamic_cast<RawArrayOf<T>*>(other.get())) {
+        return ptr_lib_ == raw->ptr_lib()  &&
+               ptr_.get() == raw->ptr().get()  &&
+               offset_ == raw->offset()  &&
+               length_ == raw->length()  &&
+               itemsize_ == raw->itemsize();
+      }
+      else {
+        return false;
+      }
+    }
+
     const ContentPtr
       mergemany(const ContentPtrVec& others) const override {
       throw std::runtime_error(

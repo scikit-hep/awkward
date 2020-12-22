@@ -1333,6 +1333,9 @@ def recursive_walk(layout, apply, args=(), depth=1, materialize=False):
 
 
 def find_caches(layout):
+    # Both of the implementations below find referentially unique mutablemappings,
+    # but the PartitionedArray case is optimized for many unique values (with a set)
+    # and the non-partitioned case is optimized for few (O(n^2) algo, but no hashmap).
     if isinstance(layout, ak.partition.PartitionedArray):
         seen = set()
         mutablemappings = []

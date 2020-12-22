@@ -195,8 +195,15 @@ namespace awkward {
     /// into a single-level {@link UnionArrayOf UnionArray}.
     ///
     /// This is a shallow operation: it only checks the content one level deep.
+    ///
+    /// @param merge If true, attempt to merge buffers recursively; otherwise,
+    /// only clean up UnionArray(UnionArray(...)), but leave potentially mergeable
+    /// buffers unmerged. If false, #mergeable isn't even tested (which avoids
+    /// materializing #VirtualArray too soon).
+    /// @param mergebool If true, consider booleans to be an integer type for
+    /// merging.
     const ContentPtr
-      simplify_uniontype(bool mergebool) const;
+      simplify_uniontype(bool merge, bool mergebool) const;
 
     /// @brief User-friendly name of this class: `"UnionArray8_32"`,
     /// `"UnionArray8_U32"`, or `"UnionArray8_64"`.
@@ -312,6 +319,9 @@ namespace awkward {
 
     bool
       mergeable(const ContentPtr& other, bool mergebool) const override;
+
+    bool
+      referentially_equal(const ContentPtr& other) const override;
 
     const ContentPtr
       reverse_merge(const ContentPtr& other) const override;

@@ -715,6 +715,28 @@ namespace awkward {
     }
   }
 
+  bool
+  UnmaskedArray::referentially_equal(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
+        return false;
+      }
+    }
+    if (UnmaskedArray* raw = dynamic_cast<UnmaskedArray*>(other.get())) {
+      return parameters_ == raw->parameters()  &&
+             content_.get()->referentially_equal(raw->content());
+    }
+    else {
+      return false;
+    }
+  }
+
   const ContentPtr
   UnmaskedArray::reverse_merge(const ContentPtr& other) const {
     return toIndexedOptionArray64().get()->reverse_merge(other);

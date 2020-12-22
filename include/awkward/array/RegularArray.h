@@ -279,6 +279,9 @@ namespace awkward {
     bool
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
+    bool
+      referentially_equal(const ContentPtr& other) const override;
+
     const ContentPtr
       mergemany(const ContentPtrVec& others) const override;
 

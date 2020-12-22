@@ -512,7 +512,7 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
-  UnionArrayOf<T, I>::simplify_uniontype(bool mergebool) const {
+  UnionArrayOf<T, I>::simplify_uniontype(bool merge, bool mergebool) const {
     int64_t len = length();
     if (index_.length() < len) {
       util::handle_error(
@@ -536,7 +536,7 @@ namespace awkward {
         for (size_t j = 0;  j < innercontents.size();  j++) {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
-            if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
+            if (merge  &&  contents[k].get()->mergeable(innercontents[j], mergebool)) {
               struct Error err = kernel::UnionArray_simplify8_32_to8_64<T, I>(
                 kernel::lib::cpu,   // DERIVE
                 tags.data(),
@@ -583,7 +583,7 @@ namespace awkward {
         for (size_t j = 0;  j < innercontents.size();  j++) {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
-            if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
+            if (merge  &&  contents[k].get()->mergeable(innercontents[j], mergebool)) {
               struct Error err = kernel::UnionArray_simplify8_U32_to8_64<T, I>(
                 kernel::lib::cpu,   // DERIVE
                 tags.data(),
@@ -630,7 +630,7 @@ namespace awkward {
         for (size_t j = 0;  j < innercontents.size();  j++) {
           bool unmerged = true;
           for (size_t k = 0;  k < contents.size();  k++) {
-            if (contents[k].get()->mergeable(innercontents[j], mergebool)) {
+            if (merge  &&  contents[k].get()->mergeable(innercontents[j], mergebool)) {
               struct Error err = kernel::UnionArray_simplify8_64_to8_64<T, I>(
                 kernel::lib::cpu,   // DERIVE
                 tags.data(),
@@ -672,7 +672,22 @@ namespace awkward {
       else {
         bool unmerged = true;
         for (size_t k = 0;  k < contents.size();  k++) {
-          if (contents[k].get()->mergeable(contents_[i], mergebool)) {
+          if (contents[k].get()->referentially_equal(contents_[i])) {
+            struct Error err = kernel::UnionArray_simplify_one_to8_64<T, I>(
+              kernel::lib::cpu,   // DERIVE
+              tags.data(),
+              index.data(),
+              tags_.data(),
+              index_.data(),
+              (int64_t)k,
+              (int64_t)i,
+              len,
+              0);
+            util::handle_error(err, classname(), identities_.get());
+            unmerged = false;
+            break;
+          }
+          else if (merge  &&  contents[k].get()->mergeable(contents_[i], mergebool)) {
             struct Error err = kernel::UnionArray_simplify_one_to8_64<T, I>(
               kernel::lib::cpu,   // DERIVE
               tags.data(),
@@ -1195,7 +1210,7 @@ namespace awkward {
                              tags_,
                              outindex,
                              outcontents);
-      return out.simplify_uniontype(false);
+      return out.simplify_uniontype(true, false);
     }
     else if (SliceEllipsis* ellipsis =
              dynamic_cast<SliceEllipsis*>(head.get())) {
@@ -1362,7 +1377,7 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   UnionArrayOf<T, I>::shallow_simplify() const {
-    return simplify_uniontype(false);
+    return simplify_uniontype(true, false);
   }
 
   template <typename T, typename I>
@@ -1384,7 +1399,7 @@ namespace awkward {
                              tags_,
                              index_,
                              contents);
-      return out.simplify_uniontype(false);
+      return out.simplify_uniontype(true, false);
     }
   }
 
@@ -1468,6 +1483,42 @@ namespace awkward {
       return false;
     }
     return true;
+  }
+
+  template <typename T, typename I>
+  bool
+  UnionArrayOf<T, I>::referentially_equal(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
+        return false;
+      }
+    }
+    if (UnionArrayOf<T, I>* raw = dynamic_cast<UnionArrayOf<T, I>*>(other.get())) {
+      if (!tags_.referentially_equal(raw->tags())  ||
+          !index_.referentially_equal(raw->index())) {
+        return false;
+      }
+
+      if (numcontents() != raw->numcontents()) {
+        return false;
+      }
+      for (int64_t i = 0;  i < numcontents();  i++) {
+        if (!content(i).get()->referentially_equal(raw->content(i))) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   template <typename T, typename I>
@@ -1740,7 +1791,7 @@ namespace awkward {
   template <typename T, typename I>
   const SliceItemPtr
   UnionArrayOf<T, I>::asslice() const {
-    ContentPtr simplified = simplify_uniontype(false);
+    ContentPtr simplified = simplify_uniontype(true, false);
     if (UnionArray8_32* raw =
         dynamic_cast<UnionArray8_32*>(simplified.get())) {
       if (raw->numcontents() == 1) {
@@ -1787,7 +1838,7 @@ namespace awkward {
       contents.emplace_back(content.get()->fillna(value));
     }
     UnionArrayOf<T, I> out(identities_, parameters_, tags_, index_, contents);
-    return out.simplify_uniontype(false);
+    return out.simplify_uniontype(true, false);
   }
 
   template <typename T, typename I>
@@ -1807,7 +1858,7 @@ namespace awkward {
                              tags_,
                              index_,
                              contents);
-      return out.simplify_uniontype(false);
+      return out.simplify_uniontype(true, false);
     }
   }
 
@@ -1831,7 +1882,7 @@ namespace awkward {
                              tags_,
                              index_,
                              contents);
-      return out.simplify_uniontype(false);
+      return out.simplify_uniontype(true, false);
     }
   }
 
@@ -1845,7 +1896,7 @@ namespace awkward {
                                   int64_t outlength,
                                   bool mask,
                                   bool keepdims) const {
-    ContentPtr simplified = simplify_uniontype(true);
+    ContentPtr simplified = simplify_uniontype(true, true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {
@@ -1928,7 +1979,7 @@ namespace awkward {
                                 bool ascending,
                                 bool stable,
                                 bool keepdims) const {
-    ContentPtr simplified = simplify_uniontype(true);
+    ContentPtr simplified = simplify_uniontype(true, true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {
@@ -1953,7 +2004,7 @@ namespace awkward {
                                    bool ascending,
                                    bool stable,
                                    bool keepdims) const {
-    ContentPtr simplified = simplify_uniontype(true);
+    ContentPtr simplified = simplify_uniontype(true, true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {
@@ -2093,7 +2144,7 @@ namespace awkward {
                                                   const Index64& slicestops,
                                                   const S& slicecontent,
                                                   const Slice& tail) const {
-    ContentPtr simplified = simplify_uniontype(false);
+    ContentPtr simplified = simplify_uniontype(true, false);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_64*>(simplified.get())) {

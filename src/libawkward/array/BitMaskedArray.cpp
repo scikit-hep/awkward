@@ -795,6 +795,32 @@ namespace awkward {
     }
   }
 
+  bool
+  BitMaskedArray::referentially_equal(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
+        return false;
+      }
+    }
+    if (BitMaskedArray* raw = dynamic_cast<BitMaskedArray*>(other.get())) {
+      return mask_.referentially_equal(raw->mask())  &&
+             valid_when_ == raw->valid_when()  &&
+             length_ == raw->length()  &&
+             lsb_order_ == raw->lsb_order()  &&
+             parameters_ == raw->parameters()  &&
+             content_.get()->referentially_equal(raw->content());
+    }
+    else {
+      return false;
+    }
+  }
+
   const ContentPtr
   BitMaskedArray::reverse_merge(const ContentPtr& other) const {
     return toIndexedOptionArray64().get()->reverse_merge(other);

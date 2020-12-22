@@ -441,6 +441,10 @@ namespace awkward {
 
   void
   VirtualArray::caches(std::vector<ArrayCachePtr>& out) const {
+    if (SliceGenerator* raw = dynamic_cast<SliceGenerator*>(generator_.get())) {
+      raw->content().get()->caches(out);
+    }
+
     if (cache_.get() != nullptr) {
       bool found = false;
       for (auto oldcache : out) {
@@ -732,6 +736,30 @@ namespace awkward {
   bool
   VirtualArray::mergeable(const ContentPtr& other, bool mergebool) const {
     return array().get()->mergeable(other, mergebool);
+  }
+
+  bool
+  VirtualArray::referentially_equal(const ContentPtr& other) const {
+    if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() == nullptr) {
+      return false;
+    }
+    if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
+        return false;
+      }
+    }
+    if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
+      return ptr_lib_ == raw->ptr_lib()  &&
+             cache_key_ == raw->cache_key()  &&
+             generator_.get()->referentially_equal(raw->generator())  &&
+             parameters_ == raw->parameters();
+    }
+    else {
+      return false;
+    }
   }
 
   const ContentPtr

@@ -375,6 +375,23 @@ namespace awkward {
     }
   }
 
+  template <typename T>
+  bool
+  IdentitiesOf<T>::referentially_equal(const IdentitiesPtr& other) const {
+    if (IdentitiesOf<T>* raw = dynamic_cast<IdentitiesOf<T>*>(other.get())) {
+      return ref_ == raw->ref()  &&
+             fieldloc_ == raw->fieldloc()  &&
+             offset_ == raw->offset()  &&
+             width_ == raw->width()  &&
+             length_ == raw->length()  &&
+             ptr_ == raw->ptr()  &&
+             ptr_lib_ == raw->ptr_lib();
+    }
+    else {
+      return false;
+    }
+  }
+
   template class EXPORT_TEMPLATE_INST IdentitiesOf<int32_t>;
   template class EXPORT_TEMPLATE_INST IdentitiesOf<int64_t>;
 }
