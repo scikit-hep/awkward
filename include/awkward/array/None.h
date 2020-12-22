@@ -158,7 +158,7 @@ namespace awkward {
 
     /// @exception std::runtime_error is always thrown
     bool
-      referentially_identical(const ContentPtr& other) const override;
+      referentially_equal(const ContentPtr& other) const override;
 
     /// @exception std::runtime_error is always thrown
     const ContentPtr

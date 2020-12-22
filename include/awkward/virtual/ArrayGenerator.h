@@ -83,7 +83,7 @@ namespace awkward {
     ///
     /// @param other The generator to compare this with.
     virtual bool
-      referentially_identical(const ArrayGeneratorPtr& other) const = 0;
+      referentially_equal(const ArrayGeneratorPtr& other) const = 0;
 
   protected:
     const FormPtr form_;
@@ -129,7 +129,7 @@ namespace awkward {
       with_length(int64_t length) const override;
 
     virtual bool
-      referentially_identical(const ArrayGeneratorPtr& other) const override;
+      referentially_equal(const ArrayGeneratorPtr& other) const override;
 
   protected:
     const ContentPtr content_;

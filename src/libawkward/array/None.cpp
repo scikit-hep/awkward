@@ -236,9 +236,9 @@ namespace awkward {
   }
 
   bool
-  None::referentially_identical(const ContentPtr& other) const {
+  None::referentially_equal(const ContentPtr& other) const {
     throw std::runtime_error(
-      std::string("undefined operation: None::referentially_identical")
+      std::string("undefined operation: None::referentially_equal")
       + FILENAME(__LINE__));
   }
 

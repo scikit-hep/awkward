@@ -233,7 +233,7 @@ namespace awkward {
     ///
     /// @param other The Identities to compare this with.
     virtual bool
-      referentially_identical(const IdentitiesPtr& other) const = 0;
+      referentially_equal(const IdentitiesPtr& other) const = 0;
 
   protected:
     /// @brief See #ref.
@@ -401,7 +401,7 @@ namespace awkward {
       getitem_range(int64_t start, int64_t stop) const;
 
     bool
-      referentially_identical(const IdentitiesPtr& other) const override;
+      referentially_equal(const IdentitiesPtr& other) const override;
 
   private:
     /// @brief See #ptr.

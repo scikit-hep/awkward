@@ -894,7 +894,7 @@ namespace awkward {
     }
 
     bool
-      referentially_identical(const ContentPtr& other) const override {
+      referentially_equal(const ContentPtr& other) const override {
       if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
         return false;
       }
@@ -902,7 +902,7 @@ namespace awkward {
         return false;
       }
       if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
-        if (!identities_.get()->referentially_identical(other->identities())) {
+        if (!identities_.get()->referentially_equal(other->identities())) {
           return false;
         }
       }

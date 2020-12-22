@@ -141,7 +141,7 @@ PyArrayGenerator::with_kwargs(const py::dict& kwargs) const {
 }
 
 bool
-PyArrayGenerator::referentially_identical(const ak::ArrayGeneratorPtr& other) const {
+PyArrayGenerator::referentially_equal(const ak::ArrayGeneratorPtr& other) const {
   if (length_ != other.get()->length()) {
     return false;
   }

@@ -1096,7 +1096,7 @@ namespace awkward {
   }
 
   bool
-  RecordArray::referentially_identical(const ContentPtr& other) const {
+  RecordArray::referentially_equal(const ContentPtr& other) const {
     if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
       return false;
     }
@@ -1104,7 +1104,7 @@ namespace awkward {
       return false;
     }
     if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
-      if (!identities_.get()->referentially_identical(other->identities())) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
         return false;
       }
     }
@@ -1130,7 +1130,7 @@ namespace awkward {
         return false;
       }
       for (int64_t i = 0;  i < numfields();  i++) {
-        if (!field(i).get()->referentially_identical(raw->field(i))) {
+        if (!field(i).get()->referentially_equal(raw->field(i))) {
           return false;
         }
       }

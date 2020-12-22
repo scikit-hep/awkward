@@ -49,7 +49,7 @@ namespace awkward {
     ///
     /// @param other The slice item to compare this with.
     virtual bool
-      referentially_identical(const SliceItemPtr& other) const = 0;
+      referentially_equal(const SliceItemPtr& other) const = 0;
   };
 
   /// @class SliceAt
@@ -80,7 +80,7 @@ namespace awkward {
       preserves_type(const Index64& advanced) const override;
 
     virtual bool
-      referentially_identical(const SliceItemPtr& other) const override;
+      referentially_equal(const SliceItemPtr& other) const override;
 
   private:
     /// @brief See #at.
@@ -152,7 +152,7 @@ namespace awkward {
       preserves_type(const Index64& advanced) const override;
 
     virtual bool
-      referentially_identical(const SliceItemPtr& other) const override;
+      referentially_equal(const SliceItemPtr& other) const override;
 
   private:
     /// @brief See #start.
@@ -185,7 +185,7 @@ namespace awkward {
       preserves_type(const Index64& advanced) const override;
 
     virtual bool
-      referentially_identical(const SliceItemPtr& other) const override;
+      referentially_equal(const SliceItemPtr& other) const override;
   };
 
   /// @class SliceNewAxis
@@ -213,7 +213,7 @@ namespace awkward {
       preserves_type(const Index64& advanced) const override;
 
     virtual bool
-      referentially_identical(const SliceItemPtr& other) const override;
+      referentially_equal(const SliceItemPtr& other) const override;
   };
 
   /// @class SliceArrayOf
@@ -310,7 +310,7 @@ namespace awkward {
       preserves_type(const Index64& advanced) const override;
 
     virtual bool
-      referentially_identical(const SliceItemPtr& other) const override;
+      referentially_equal(const SliceItemPtr& other) const override;
 
     /// @brief Returns a one-dimensional contiguous version of the array,
     /// like NumPy's [ravel](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ravel.html).
@@ -371,7 +371,7 @@ namespace awkward {
       preserves_type(const Index64& advanced) const override;
 
     virtual bool
-      referentially_identical(const SliceItemPtr& other) const override;
+      referentially_equal(const SliceItemPtr& other) const override;
 
   private:
     /// @brief See #key.
@@ -415,7 +415,7 @@ namespace awkward {
       preserves_type(const Index64& advanced) const override;
 
     virtual bool
-      referentially_identical(const SliceItemPtr& other) const override;
+      referentially_equal(const SliceItemPtr& other) const override;
 
   private:
     /// @brief See #keys.
@@ -484,7 +484,7 @@ namespace awkward {
       preserves_type(const Index64& advanced) const override;
 
     virtual bool
-      referentially_identical(const SliceItemPtr& other) const override;
+      referentially_equal(const SliceItemPtr& other) const override;
 
   private:
     /// @brief See #index.
@@ -564,7 +564,7 @@ namespace awkward {
       preserves_type(const Index64& advanced) const override;
 
     virtual bool
-      referentially_identical(const SliceItemPtr& other) const override;
+      referentially_equal(const SliceItemPtr& other) const override;
 
   private:
     /// @brief See #offsets.
@@ -700,7 +700,7 @@ namespace awkward {
     ///
     /// @param other The slice to compare this with.
     bool
-      referentially_identical(const Slice& other) const;
+      referentially_equal(const Slice& other) const;
 
   private:
     /// @brief See #items.

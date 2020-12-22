@@ -527,6 +527,14 @@ namespace awkward {
     Index64 index(len);
     ContentPtrVec contents;
 
+
+    for (int64_t i = 0;  i < len;  i++) {
+      tags.data()[i] = -1;
+      index.data()[i] = -1;
+    }
+
+
+
     for (size_t i = 0;  i < contents_.size();  i++) {
       if (UnionArray8_32* rawcontent =
           dynamic_cast<UnionArray8_32*>(contents_[i].get())) {
@@ -670,32 +678,24 @@ namespace awkward {
         }
       }
       else {
-        std::cout << "step i " << i << std::endl;
-
         bool unmerged = true;
         for (size_t k = 0;  k < contents.size();  k++) {
-          std::cout << contents[k].get()->classname() << " " << contents_[i].get()->classname() << std::endl;
-
-          // if (contents[k].get()->referentially_identical(contents_[i])) {
-          //   std::cout << "k " << k << " is the same VirtualArray" << std::endl;
-
-          //   struct Error err = kernel::UnionArray_simplify_one_to8_64<T, I>(
-          //     kernel::lib::cpu,   // DERIVE
-          //     tags.data(),
-          //     index.data(),
-          //     tags_.data(),
-          //     index_.data(),
-          //     (int64_t)k,
-          //     (int64_t)k,
-          //     len,
-          //     contents[k].get()->length());
-          //   util::handle_error(err, classname(), identities_.get());
-          //   unmerged = false;
-          //   break;
-          // }
-          if (contents[k].get()->mergeable(contents_[i], mergebool)) {
-            std::cout << "k " << k << " is mergeable" << std::endl;
-
+          if (contents[k].get()->referentially_equal(contents_[i])) {
+            struct Error err = kernel::UnionArray_simplify_one_to8_64<T, I>(
+              kernel::lib::cpu,   // DERIVE
+              tags.data(),
+              index.data(),
+              tags_.data(),
+              index_.data(),
+              (int64_t)k,
+              (int64_t)i,
+              len,
+              0);
+            util::handle_error(err, classname(), identities_.get());
+            unmerged = false;
+            break;
+          }
+          else if (contents[k].get()->mergeable(contents_[i], mergebool)) {
             struct Error err = kernel::UnionArray_simplify_one_to8_64<T, I>(
               kernel::lib::cpu,   // DERIVE
               tags.data(),
@@ -713,8 +713,6 @@ namespace awkward {
           }
         }
         if (unmerged) {
-          std::cout << "unmerged" << std::endl;
-
           struct Error err = kernel::UnionArray_simplify_one_to8_64<T, I>(
             kernel::lib::cpu,   // DERIVE
             tags.data(),
@@ -1497,7 +1495,7 @@ namespace awkward {
 
   template <typename T, typename I>
   bool
-  UnionArrayOf<T, I>::referentially_identical(const ContentPtr& other) const {
+  UnionArrayOf<T, I>::referentially_equal(const ContentPtr& other) const {
     if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
       return false;
     }
@@ -1505,13 +1503,13 @@ namespace awkward {
       return false;
     }
     if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
-      if (!identities_.get()->referentially_identical(other->identities())) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
         return false;
       }
     }
     if (UnionArrayOf<T, I>* raw = dynamic_cast<UnionArrayOf<T, I>*>(other.get())) {
-      if (!tags_.referentially_identical(raw->tags())  ||
-          !index_.referentially_identical(raw->index())) {
+      if (!tags_.referentially_equal(raw->tags())  ||
+          !index_.referentially_equal(raw->index())) {
         return false;
       }
 
@@ -1519,7 +1517,7 @@ namespace awkward {
         return false;
       }
       for (int64_t i = 0;  i < numcontents();  i++) {
-        if (!content(i).get()->referentially_identical(raw->content(i))) {
+        if (!content(i).get()->referentially_equal(raw->content(i))) {
           return false;
         }
       }

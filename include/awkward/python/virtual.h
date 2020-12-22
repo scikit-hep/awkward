@@ -57,7 +57,7 @@ public:
     with_kwargs(const py::dict& kwargs) const;
 
   virtual bool
-    referentially_identical(const ak::ArrayGeneratorPtr& other) const override;
+    referentially_equal(const ak::ArrayGeneratorPtr& other) const override;
 
 private:
   const py::object callable_;

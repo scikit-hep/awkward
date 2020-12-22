@@ -377,7 +377,7 @@ namespace awkward {
 
   template <typename T>
   bool
-  IdentitiesOf<T>::referentially_identical(const IdentitiesPtr& other) const {
+  IdentitiesOf<T>::referentially_equal(const IdentitiesPtr& other) const {
     if (IdentitiesOf<T>* raw = dynamic_cast<IdentitiesOf<T>*>(other.get())) {
       return ref_ == raw->ref()  &&
              fieldloc_ == raw->fieldloc()  &&

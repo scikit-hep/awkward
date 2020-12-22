@@ -145,7 +145,7 @@ namespace awkward {
   }
 
   bool
-  SliceGenerator::referentially_identical(const ArrayGeneratorPtr& other) const {
+  SliceGenerator::referentially_equal(const ArrayGeneratorPtr& other) const {
     if (length_ != other.get()->length()) {
       return false;
     }
@@ -171,8 +171,8 @@ namespace awkward {
     }
 
     if (SliceGenerator* raw = dynamic_cast<SliceGenerator*>(other.get())) {
-      return slice_.referentially_identical(raw->slice())  &&
-             content_.get()->referentially_identical(raw->content());
+      return slice_.referentially_equal(raw->slice())  &&
+             content_.get()->referentially_equal(raw->content());
     }
     else {
       return false;

@@ -330,7 +330,7 @@ namespace awkward {
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
     bool
-      referentially_identical(const ContentPtr& other) const override;
+      referentially_equal(const ContentPtr& other) const override;
 
     const ContentPtr
       reverse_merge(const ContentPtr& other) const override;

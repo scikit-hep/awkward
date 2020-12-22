@@ -1264,14 +1264,9 @@ def concatenate(arrays, axis=0, mergebool=True, highlevel=True):
                 )
                 inner = ak.layout.UnionArray8_64(tags, index, all_flatten)
 
-                # print("simplify")
-                # print(inner.simplify(mergebool=mergebool))
-                # raise Exception
-
                 out = ak.layout.ListOffsetArray64(
                     offsets, inner.simplify(mergebool=mergebool)
                 )
-
                 return lambda: (out,)
 
             else:

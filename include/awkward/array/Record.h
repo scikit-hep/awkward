@@ -184,7 +184,7 @@ namespace awkward {
       mergeable(const ContentPtr& other, bool mergebool) const override;
 
     bool
-      referentially_identical(const ContentPtr& other) const override;
+      referentially_equal(const ContentPtr& other) const override;
 
     /// @exception std::runtime_error is always thrown
     const ContentPtr

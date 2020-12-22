@@ -828,7 +828,7 @@ namespace awkward {
   }
 
   bool
-  RegularArray::referentially_identical(const ContentPtr& other) const {
+  RegularArray::referentially_equal(const ContentPtr& other) const {
     if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
       return false;
     }
@@ -836,7 +836,7 @@ namespace awkward {
       return false;
     }
     if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
-      if (!identities_.get()->referentially_identical(other->identities())) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
         return false;
       }
     }
@@ -852,7 +852,7 @@ namespace awkward {
       }
 
       return parameters_ == raw->parameters()  &&
-             content_.get()->referentially_identical(raw->content());
+             content_.get()->referentially_equal(raw->content());
     }
     else {
       return false;

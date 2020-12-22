@@ -43,7 +43,7 @@ namespace awkward {
   }
 
   bool
-  SliceAt::referentially_identical(const SliceItemPtr& other) const {
+  SliceAt::referentially_equal(const SliceItemPtr& other) const {
     if (SliceAt* raw = dynamic_cast<SliceAt*>(other.get())) {
       return at_ == raw->at();
     }
@@ -116,7 +116,7 @@ namespace awkward {
   }
 
   bool
-  SliceRange::referentially_identical(const SliceItemPtr& other) const {
+  SliceRange::referentially_equal(const SliceItemPtr& other) const {
     if (SliceRange* raw = dynamic_cast<SliceRange*>(other.get())) {
       return start_ == raw->start()  &&
              stop_ == raw->stop()  &&
@@ -147,7 +147,7 @@ namespace awkward {
   }
 
   bool
-  SliceEllipsis::referentially_identical(const SliceItemPtr& other) const {
+  SliceEllipsis::referentially_equal(const SliceItemPtr& other) const {
     if (SliceEllipsis* raw = dynamic_cast<SliceEllipsis*>(other.get())) {
       return true;
     }
@@ -176,7 +176,7 @@ namespace awkward {
   }
 
   bool
-  SliceNewAxis::referentially_identical(const SliceItemPtr& other) const {
+  SliceNewAxis::referentially_equal(const SliceItemPtr& other) const {
     if (SliceNewAxis* raw = dynamic_cast<SliceNewAxis*>(other.get())) {
       return true;
     }
@@ -342,11 +342,11 @@ namespace awkward {
 
   template <typename T>
   bool
-  SliceArrayOf<T>::referentially_identical(const SliceItemPtr& other) const {
+  SliceArrayOf<T>::referentially_equal(const SliceItemPtr& other) const {
     if (SliceArrayOf<T>* raw = dynamic_cast<SliceArrayOf<T>*>(other.get())) {
       return shape_ == raw->shape()  &&
              strides_ == raw->strides()  &&
-             index_.referentially_identical(raw->index());
+             index_.referentially_equal(raw->index());
     }
     else {
       return false;
@@ -409,7 +409,7 @@ namespace awkward {
   }
 
   bool
-  SliceField::referentially_identical(const SliceItemPtr& other) const {
+  SliceField::referentially_equal(const SliceItemPtr& other) const {
     if (SliceField* raw = dynamic_cast<SliceField*>(other.get())) {
       return key_ == raw->key();
     }
@@ -453,7 +453,7 @@ namespace awkward {
   }
 
   bool
-  SliceFields::referentially_identical(const SliceItemPtr& other) const {
+  SliceFields::referentially_equal(const SliceItemPtr& other) const {
     if (SliceFields* raw = dynamic_cast<SliceFields*>(other.get())) {
       return keys_ == raw->keys();
     }
@@ -551,10 +551,10 @@ namespace awkward {
 
   template <typename T>
   bool
-  SliceMissingOf<T>::referentially_identical(const SliceItemPtr& other) const {
+  SliceMissingOf<T>::referentially_equal(const SliceItemPtr& other) const {
     if (SliceMissingOf<T>* raw = dynamic_cast<SliceMissingOf<T>*>(other.get())) {
-      return index_.referentially_identical(raw->index())  &&
-             content_.get()->referentially_identical(raw->content());
+      return index_.referentially_equal(raw->index())  &&
+             content_.get()->referentially_equal(raw->content());
     }
     else {
       return false;
@@ -642,10 +642,10 @@ namespace awkward {
 
   template <typename T>
   bool
-  SliceJaggedOf<T>::referentially_identical(const SliceItemPtr& other) const {
+  SliceJaggedOf<T>::referentially_equal(const SliceItemPtr& other) const {
     if (SliceJaggedOf<T>* raw = dynamic_cast<SliceJaggedOf<T>*>(other.get())) {
-      return offsets_.referentially_identical(raw->offsets())  &&
-             content_.get()->referentially_identical(raw->content());
+      return offsets_.referentially_equal(raw->offsets())  &&
+             content_.get()->referentially_equal(raw->content());
     }
     else {
       return false;
@@ -940,7 +940,7 @@ namespace awkward {
   }
 
   bool
-  Slice::referentially_identical(const Slice& other) const {
+  Slice::referentially_equal(const Slice& other) const {
     std::vector<SliceItemPtr> others = other.items();
 
     if (items_.size() != others.size()) {
@@ -948,7 +948,7 @@ namespace awkward {
     }
 
     for (size_t i = 0;  i < items_.size();  i++) {
-      if (!items_[i].get()->referentially_identical(others[i])) {
+      if (!items_[i].get()->referentially_equal(others[i])) {
         return false;
       }
     }

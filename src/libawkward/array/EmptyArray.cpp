@@ -429,7 +429,7 @@ namespace awkward {
   }
 
   bool
-  EmptyArray::referentially_identical(const ContentPtr& other) const {
+  EmptyArray::referentially_equal(const ContentPtr& other) const {
     if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
       return false;
     }
@@ -437,7 +437,7 @@ namespace awkward {
       return false;
     }
     if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
-      if (!identities_.get()->referentially_identical(other->identities())) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
         return false;
       }
     }

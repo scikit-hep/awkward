@@ -669,7 +669,7 @@ namespace awkward {
     ///
     /// @param other The array to compare this with.
     virtual bool
-      referentially_identical(const ContentPtr& other) const = 0;
+      referentially_equal(const ContentPtr& other) const = 0;
 
     /// @brief Partitions `this` array plus a list of `others` into a `head`
     /// sequence and a `tail` sequence:

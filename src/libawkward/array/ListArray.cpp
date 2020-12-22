@@ -958,7 +958,7 @@ namespace awkward {
 
   template <typename T>
   bool
-  ListArrayOf<T>::referentially_identical(const ContentPtr& other) const {
+  ListArrayOf<T>::referentially_equal(const ContentPtr& other) const {
     if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
       return false;
     }
@@ -966,15 +966,15 @@ namespace awkward {
       return false;
     }
     if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
-      if (!identities_.get()->referentially_identical(other->identities())) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
         return false;
       }
     }
     if (ListArrayOf<T>* raw = dynamic_cast<ListArrayOf<T>*>(other.get())) {
-      return starts_.referentially_identical(raw->starts())  &&
-             stops_.referentially_identical(raw->stops())  &&
+      return starts_.referentially_equal(raw->starts())  &&
+             stops_.referentially_equal(raw->stops())  &&
              parameters_ == raw->parameters()  &&
-             content_.get()->referentially_identical(raw->content());
+             content_.get()->referentially_equal(raw->content());
     }
     else {
       return false;

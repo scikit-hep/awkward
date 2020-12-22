@@ -382,7 +382,7 @@ namespace awkward {
 
   template<typename T>
   bool
-  IndexOf<T>::referentially_identical(const IndexOf<T>& other) const {
+  IndexOf<T>::referentially_equal(const IndexOf<T>& other) const {
     return ptr_ == other.ptr()  &&
            ptr_lib_ == other.ptr_lib()  &&
            offset_ == other.offset()  &&

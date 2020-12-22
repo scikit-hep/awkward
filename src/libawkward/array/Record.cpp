@@ -323,7 +323,7 @@ namespace awkward {
   }
 
   bool
-  Record::referentially_identical(const ContentPtr& other) const {
+  Record::referentially_equal(const ContentPtr& other) const {
     if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
       return false;
     }
@@ -331,14 +331,14 @@ namespace awkward {
       return false;
     }
     if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
-      if (!identities_.get()->referentially_identical(other->identities())) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
         return false;
       }
     }
     if (Record* raw = dynamic_cast<Record*>(other.get())) {
       return at_ == raw->at()  &&
              parameters_ == raw->parameters()  &&
-             array_.get()->referentially_identical(raw->shallow_copy());
+             array_.get()->referentially_equal(raw->shallow_copy());
     }
     else {
       return false;

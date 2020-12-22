@@ -9,8 +9,10 @@ import awkward as ak  # noqa: F401
 
 class Verbose(dict):
     def __getitem__(self, key):
-        print(key)
+        # print(key)
         self.touched = True
+        if "data" in key:
+            self.data_touched = True
         return dict.__getitem__(self, key)
 
 
@@ -158,18 +160,67 @@ def test_lazy():
 
     assert container.touched
 
-    # container.touched = False
+    container.data_touched = False
 
-    # # print("one")
-    # # lazy = ak.from_buffers(form, [3, 3], container, lazy=True)
-    # # one = ak.concatenate([lazy.Electron, lazy.Muon], axis=1)
+    lazy = ak.from_buffers(form, [3, 3], container, lazy=True)
+    one = ak.concatenate([lazy.Electron, lazy.Muon], axis=1)
 
-    # print("two")
-    # lazy = ak.from_buffers(form, [3, 3], container, lazy=True)
-    # two = ak.concatenate([lazy.Muon, lazy.Muon], axis=1)
+    lazy = ak.from_buffers(form, [3, 3], container, lazy=True)
+    two = ak.concatenate([lazy.Muon, lazy.Muon], axis=1)
 
-    # # print("three")
-    # # lazy = ak.from_buffers(form, [3, 3], container, lazy=True)
-    # # three = ak.concatenate([lazy.Electron, lazy.Electron], axis=1)
+    lazy = ak.from_buffers(form, [3, 3], container, lazy=True)
+    three = ak.concatenate([lazy.Electron, lazy.Electron], axis=1)
 
-    # raise Exception
+    assert not container.data_touched
+
+    assert one.tolist() == 2 * [
+        [
+            {"charge": 1, "momentum": 1.1},
+            {"charge": 2, "momentum": 2.2},
+            {"charge": 3, "momentum": 3.3},
+            {"charge": 1, "momentum": 1.1},
+            {"charge": 2, "momentum": 2.2},
+            {"charge": 3, "momentum": 3.3},
+        ],
+        [],
+        [
+            {"charge": 4, "momentum": 4.4},
+            {"charge": 5, "momentum": 5.5},
+            {"charge": 4, "momentum": 4.4},
+            {"charge": 5, "momentum": 5.5},
+        ]
+    ]
+    assert two.tolist() == 2 * [
+        [
+            {"charge": 1, "momentum": 1.1},
+            {"charge": 2, "momentum": 2.2},
+            {"charge": 3, "momentum": 3.3},
+            {"charge": 1, "momentum": 1.1},
+            {"charge": 2, "momentum": 2.2},
+            {"charge": 3, "momentum": 3.3},
+        ],
+        [],
+        [
+            {"charge": 4, "momentum": 4.4},
+            {"charge": 5, "momentum": 5.5},
+            {"charge": 4, "momentum": 4.4},
+            {"charge": 5, "momentum": 5.5},
+        ]
+    ]
+    assert three.tolist() == 2 * [
+        [
+            {"charge": 1, "momentum": 1.1},
+            {"charge": 2, "momentum": 2.2},
+            {"charge": 3, "momentum": 3.3},
+            {"charge": 1, "momentum": 1.1},
+            {"charge": 2, "momentum": 2.2},
+            {"charge": 3, "momentum": 3.3},
+        ],
+        [],
+        [
+            {"charge": 4, "momentum": 4.4},
+            {"charge": 5, "momentum": 5.5},
+            {"charge": 4, "momentum": 4.4},
+            {"charge": 5, "momentum": 5.5},
+        ]
+    ]

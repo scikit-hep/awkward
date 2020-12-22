@@ -739,7 +739,7 @@ namespace awkward {
   }
 
   bool
-  VirtualArray::referentially_identical(const ContentPtr& other) const {
+  VirtualArray::referentially_equal(const ContentPtr& other) const {
     if (identities_.get() == nullptr  &&  other.get()->identities().get() != nullptr) {
       return false;
     }
@@ -747,14 +747,14 @@ namespace awkward {
       return false;
     }
     if (identities_.get() != nullptr  &&  other.get()->identities().get() != nullptr) {
-      if (!identities_.get()->referentially_identical(other->identities())) {
+      if (!identities_.get()->referentially_equal(other->identities())) {
         return false;
       }
     }
     if (VirtualArray* raw = dynamic_cast<VirtualArray*>(other.get())) {
       return ptr_lib_ == raw->ptr_lib()  &&
              cache_key_ == raw->cache_key()  &&
-             generator_.get()->referentially_identical(raw->generator())  &&
+             generator_.get()->referentially_equal(raw->generator())  &&
              parameters_ == raw->parameters();
     }
     else {
