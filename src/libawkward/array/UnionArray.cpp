@@ -1173,11 +1173,42 @@ namespace awkward {
 
   template <typename T, typename I>
   const ContentPtr
+  UnionArrayOf<T, I>::getitem_field(const std::string& key,
+                                    const Slice& only_fields) const {
+    ContentPtrVec contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->getitem_field(key, only_fields));
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(identities_,
+                                                util::Parameters(),
+                                                tags_,
+                                                index_,
+                                                contents);
+  }
+
+  template <typename T, typename I>
+  const ContentPtr
   UnionArrayOf<T, I>::getitem_fields(
     const std::vector<std::string>& keys) const {
     ContentPtrVec contents;
     for (auto content : contents_) {
       contents.push_back(content.get()->getitem_fields(keys));
+    }
+    return std::make_shared<UnionArrayOf<T, I>>(identities_,
+                                                util::Parameters(),
+                                                tags_,
+                                                index_,
+                                                contents);
+  }
+
+  template <typename T, typename I>
+  const ContentPtr
+  UnionArrayOf<T, I>::getitem_fields(
+    const std::vector<std::string>& keys,
+    const Slice& only_fields) const {
+    ContentPtrVec contents;
+    for (auto content : contents_) {
+      contents.push_back(content.get()->getitem_fields(keys, only_fields));
     }
     return std::make_shared<UnionArrayOf<T, I>>(identities_,
                                                 util::Parameters(),

@@ -640,11 +640,33 @@ namespace awkward {
   }
 
   const ContentPtr
+  RegularArray::getitem_field(const std::string& key,
+                              const Slice& only_fields) const {
+    return std::make_shared<RegularArray>(
+      identities_,
+      util::Parameters(),
+      content_.get()->getitem_field(key, only_fields),
+      size_,
+      length_);
+  }
+
+  const ContentPtr
   RegularArray::getitem_fields(const std::vector<std::string>& keys) const {
     return std::make_shared<RegularArray>(
       identities_,
       util::Parameters(),
       content_.get()->getitem_fields(keys),
+      size_,
+      length_);
+  }
+
+  const ContentPtr
+  RegularArray::getitem_fields(const std::vector<std::string>& keys,
+                               const Slice& only_fields) const {
+    return std::make_shared<RegularArray>(
+      identities_,
+      util::Parameters(),
+      content_.get()->getitem_fields(keys, only_fields),
       size_,
       length_);
   }

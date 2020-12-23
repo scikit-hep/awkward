@@ -642,6 +642,12 @@ namespace awkward {
   }
 
   const ContentPtr
+  VirtualArray::getitem_field(const std::string& key,
+                              const Slice& only_fields) const {
+    return array().get()->getitem_field(key, only_fields);
+  }
+
+  const ContentPtr
   VirtualArray::getitem_fields(const std::vector<std::string>& keys) const {
     ContentPtr peek = peek_array();
     if (peek.get() != nullptr) {
@@ -664,6 +670,12 @@ namespace awkward {
                                           util::Parameters(),
                                           generator,
                                           cache);
+  }
+
+  const ContentPtr
+  VirtualArray::getitem_fields(const std::vector<std::string>& keys,
+                               const Slice& only_fields) const {
+    return array().get()->getitem_fields(keys, only_fields);
   }
 
   const ContentPtr
@@ -956,7 +968,7 @@ namespace awkward {
 
       else if (SliceFields* fields =
                dynamic_cast<SliceFields*>(head.get())) {
-        return getitem_fields(fields->keys());
+        return getitem_fields(fields->keys(), where.tail().only_fields());
       }
 
       else {

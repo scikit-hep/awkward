@@ -226,8 +226,22 @@ namespace awkward {
   }
 
   const ContentPtr
+  Record::getitem_field(const std::string& key,
+                        const Slice& only_fields) const {
+    ContentPtr recordarray = array_.get()->getitem_field(key, only_fields);
+    return recordarray.get()->getitem_at_nowrap(at_);
+  }
+
+  const ContentPtr
   Record::getitem_fields(const std::vector<std::string>& keys) const {
     ContentPtr recordarray = array_.get()->getitem_fields(keys);
+    return recordarray.get()->getitem_at_nowrap(at_);
+  }
+
+  const ContentPtr
+  Record::getitem_fields(const std::vector<std::string>& keys,
+                         const Slice& only_fields) const {
+    ContentPtr recordarray = array_.get()->getitem_fields(keys, only_fields);
     return recordarray.get()->getitem_at_nowrap(at_);
   }
 

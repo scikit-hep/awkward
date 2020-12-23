@@ -711,7 +711,23 @@ namespace awkward {
     }
 
     const ContentPtr
+      getitem_field(const std::string& key,
+                    const Slice& only_fields) const override {
+      throw std::invalid_argument(
+        std::string("cannot slice ") + classname() + std::string(" by field name")
+        + FILENAME(__LINE__));
+    }
+
+    const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const override {
+      throw std::invalid_argument(
+        std::string("cannot slice ") + classname() + std::string(" by field names")
+        + FILENAME(__LINE__));
+    }
+
+    const ContentPtr
+      getitem_fields(const std::vector<std::string>& keys,
+                     const Slice& only_fields) const override {
       throw std::invalid_argument(
         std::string("cannot slice ") + classname() + std::string(" by field names")
         + FILENAME(__LINE__));

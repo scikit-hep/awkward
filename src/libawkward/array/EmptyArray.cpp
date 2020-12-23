@@ -339,7 +339,23 @@ namespace awkward {
   }
 
   const ContentPtr
+  EmptyArray::getitem_field(const std::string& key,
+                            const Slice& only_fields) const {
+    throw std::invalid_argument(
+      std::string("cannot slice ") + classname()
+      + std::string(" by field name") + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
   EmptyArray::getitem_fields(const std::vector<std::string>& keys) const {
+    throw std::invalid_argument(
+      std::string("cannot slice ") + classname()
+      + std::string(" by field names") + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
+  EmptyArray::getitem_fields(const std::vector<std::string>& keys,
+                             const Slice& only_fields) const {
     throw std::invalid_argument(
       std::string("cannot slice ") + classname()
       + std::string(" by field names") + FILENAME(__LINE__));

@@ -1507,11 +1507,13 @@ namespace awkward {
   Content::getitem_next(const SliceFields& fields,
                         const Slice& tail,
                         const Index64& advanced) const {
-    SliceItemPtr nexthead = tail.head();
-    Slice nexttail = tail.tail();
-    return getitem_fields(fields.keys()).get()->getitem_next(nexthead,
-                                                             nexttail,
-                                                             advanced);
+    Slice only_fields = tail.only_fields();
+    Slice not_fields = tail.not_fields();
+    SliceItemPtr nexthead = not_fields.head();
+    Slice nexttail = not_fields.tail();
+    return getitem_fields(fields.keys(), only_fields).get()->getitem_next(nexthead,
+                                                                          nexttail,
+                                                                          advanced);
   }
 
   const ContentPtr getitem_next_regular_missing(const SliceMissing64& missing,

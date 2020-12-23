@@ -108,7 +108,17 @@ namespace awkward {
 
     /// @exception std::runtime_error is always thrown
     const ContentPtr
+      getitem_field(const std::string& key,
+                    const Slice& only_fields) const override;
+
+    /// @exception std::runtime_error is always thrown
+    const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const override;
+
+    /// @exception std::runtime_error is always thrown
+    const ContentPtr
+      getitem_fields(const std::vector<std::string>& keys,
+                     const Slice& only_fields) const override;
 
     /// @exception std::runtime_error is always thrown
     const ContentPtr

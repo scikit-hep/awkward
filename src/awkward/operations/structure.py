@@ -3085,7 +3085,7 @@ def virtual(
     kwargs={},
     form=None,
     length=None,
-    cache=None,
+    cache="new",
     cache_key=None,
     parameters=None,
     highlevel=True,
@@ -3106,12 +3106,8 @@ def virtual(
             array is unknown until it is generated, which might require it to
             be generated earlier than intended; if a non-negative int, use this
             to predict the length and verify that the generated array complies.
-        cache (None or MutableMapping): If None, arrays are generated every
-            time they are needed; otherwise, generated arrays are stored in the
-            mapping with `__setitem__`, retrieved with `__getitem__`, and only
-            re-generated if `__getitem__` raises a `KeyError`. This mapping may
-            evict elements according to any caching algorithm (LRU, LFR, RR,
-            TTL, etc.).
+        cache (None, "new", or MutableMapping): If "new", a new dict (keep-forever
+            cache) is created. If None, no cache is used.
         cache_key (None or str): If None, a unique string is generated for this
             virtual array for use with the `cache` (unique per Python process);
             otherwise, the explicitly provided key is used (which ought to
@@ -3126,15 +3122,117 @@ def virtual(
 
     Creates a virtual array, an array that is created on demand.
 
-    For example:
+    For example, the following array is only created when we try to look at its
+    values:
 
+        >>> def generate():
+        ...     print("generating")
+        ...     return ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+        ...
+        >>> array = ak.virtual(generate)
+        >>> array
+        generating
+        <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
+
+    However, just about any kind of query about this `array` would cause it to
+    be "materialized."
+
+        >>> array = ak.virtual(generate)
         >>> len(array)
+        generating
         3
+        >>> array = ak.virtual(generate)
         >>> ak.type(array)
+        generating
         3 * var * float64
+        >>> array = ak.virtual(generate)
         >>> array[2]
         generating
         <Array [4.4, 5.5] type='2 * float64'>
+
+    Since this "materialization" is probably some expensive disk-read, we want
+    delay it as much as possible. This can be done by giving the #ak.layout.VirtualArray
+    more information, such as the length. Knowing the length makes it possible to
+    slice a virtual array without materializing it.
+
+        >>> array = ak.virtual(generate)
+        >>> sliced = array[1:]   # don't know the length; have to materialize
+        generating
+        >>> array = ak.virtual(generate, length=3)
+        >>> sliced = array[1:]   # the length is known; no materialization
+        >>> len(sliced)          # even the length of the sliced array is known
+        2
+
+    However, anything that needs more information than just the length will cause
+    the virtual array to be materialized.
+
+        >>> ak.type(sliced)
+        generating
+        2 * var * float64
+
+    To prevent this, we can give it detailed type information, the #ak.forms.Form.
+
+        >>> array = ak.virtual(generate, length=3, form={
+        ...     "class": "ListOffsetArray64",
+        ...     "offsets": "i64",
+        ...     "content": "float64"})
+        >>> sliced = array[1:]
+        >>> ak.type(sliced)
+        2 * var * float64
+
+    Of course, _at some point_ the array has to be materialized if we need any
+    data values.
+
+        >>> selected = sliced[1]
+        generating
+        >>> selected
+        <Array [4.4, 5.5] type='2 * float64'>
+
+    Note that you can make arrays of records (#ak.layout.RecordArray) in which a
+    field is virtual.
+
+        >>> form = {
+        ...     "class": "ListOffsetArray64",
+        ...     "offsets": "i64",
+        ...     "content": "float64"
+        ... }
+        >>> records = ak.Array({
+        ...     "x": ak.virtual(generate, length=3, form=form),
+        ...     "y": [10, 20, 30]})
+
+    You can do simple field slicing without materializing the array.
+
+        >>> x = records.x
+        >>> y = records.y
+
+    But, of course, any operation that looks at values of that field are going to
+    materialize it.
+
+        >>> x
+        generating
+        <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
+        >>> y
+        <Array [10, 20, 30] type='3 * int64'>
+
+    The advantage is that you can make a table of data, most of which resides on
+    disk, and only read the values you're interested in. Like all Awkward Arrays,
+    the table need not be rectangular.
+
+    If you're going to try this trick with #ak.zip, note that you need to set
+    `depth_limit=1` to avoid materializing the array when it's constructed, since
+    #ak.zip (unlike the dict form of the #ak.Array constructor) broadcasts its
+    arguments together (hence the name "zip").
+
+        >>> records = ak.zip({
+        ...     "x": ak.virtual(generate, length=3, form=form),
+        ...     "y": [10, 20, 30]})
+        generating
+        >>> records = ak.zip({
+        ...     "x": ak.virtual(generate, length=3, form=form),
+        ...     "y": [10, 20, 30]}, depth_limit=1)
+
+    Functions with a `lazy` option, such as #ak.from_parquet and #ak.from_buffers,
+    construct #ak.layout.RecordArray of #ak.layout.VirtualArray in this way.
     """
     if isinstance(form, str) and form in (
         "float64",
@@ -3160,9 +3258,12 @@ def virtual(
         form = ak.forms.Form.fromjson(json.dumps(form))
 
     gen = ak.layout.ArrayGenerator(generate, args, kwargs, form=form, length=length)
-    if cache is not None and not isinstance(cache, ak.layout.ArrayCache):
-        maybe_wrapped = ak._util.MappingProxy.maybe_wrap(cache)
-        cache = ak.layout.ArrayCache(maybe_wrapped)
+    if cache == "new":
+        hold_cache = ak._util.MappingProxy({})
+        cache = ak.layout.ArrayCache(hold_cache)
+    elif cache is not None and not isinstance(cache, ak.layout.ArrayCache):
+        hold_cache = ak._util.MappingProxy.maybe_wrap(cache)
+        cache = ak.layout.ArrayCache(hold_cache)
 
     out = ak.layout.VirtualArray(gen, cache, cache_key=cache_key, parameters=parameters)
 
@@ -3181,7 +3282,7 @@ def with_cache(array, cache, highlevel=True):
             mapping with `__setitem__`, retrieved with `__getitem__`, and only
             re-generated if `__getitem__` raises a `KeyError`. This mapping may
             evict elements according to any caching algorithm (LRU, LFR, RR,
-            TTL, etc.).
+            TTL, etc.). If "new", a new dict (keep-forever cache) is created.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
@@ -3213,9 +3314,12 @@ def with_cache(array, cache, highlevel=True):
 
     See #ak.virtual.
     """
-    if cache is not None and not isinstance(cache, ak.layout.ArrayCache):
-        maybe_wrapped = ak._util.MappingProxy.maybe_wrap(cache)
-        cache = ak.layout.ArrayCache(maybe_wrapped)
+    if cache == "new":
+        hold_cache = ak._util.MappingProxy({})
+        cache = ak.layout.ArrayCache(hold_cache)
+    elif cache is not None and not isinstance(cache, ak.layout.ArrayCache):
+        hold_cache = ak._util.MappingProxy.maybe_wrap(cache)
+        cache = ak.layout.ArrayCache(hold_cache)
 
     def getfunction(layout):
         if isinstance(layout, ak.layout.VirtualArray):

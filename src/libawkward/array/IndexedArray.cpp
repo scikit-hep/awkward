@@ -1226,6 +1226,17 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr
+  IndexedArrayOf<T, ISOPTION>::getitem_field(const std::string& key,
+                                             const Slice& only_fields) const {
+    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(
+      identities_,
+      util::Parameters(),
+      index_,
+      content_.get()->getitem_field(key, only_fields));
+  }
+
+  template <typename T, bool ISOPTION>
+  const ContentPtr
   IndexedArrayOf<T, ISOPTION>::getitem_fields(
     const std::vector<std::string>& keys) const {
     return std::make_shared<IndexedArrayOf<T, ISOPTION>>(
@@ -1233,6 +1244,18 @@ namespace awkward {
       util::Parameters(),
       index_,
       content_.get()->getitem_fields(keys));
+  }
+
+  template <typename T, bool ISOPTION>
+  const ContentPtr
+  IndexedArrayOf<T, ISOPTION>::getitem_fields(
+    const std::vector<std::string>& keys,
+    const Slice& only_fields) const {
+    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(
+      identities_,
+      util::Parameters(),
+      index_,
+      content_.get()->getitem_fields(keys, only_fields));
   }
 
   template <typename T, bool ISOPTION>

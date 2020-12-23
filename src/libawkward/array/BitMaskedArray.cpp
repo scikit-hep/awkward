@@ -661,12 +661,38 @@ namespace awkward {
   }
 
   const ContentPtr
+  BitMaskedArray::getitem_field(const std::string& key,
+                                const Slice& only_fields) const {
+    return std::make_shared<BitMaskedArray>(
+      identities_,
+      util::Parameters(),
+      mask_,
+      content_.get()->getitem_field(key, only_fields),
+      valid_when_,
+      length_,
+      lsb_order_);
+  }
+
+  const ContentPtr
   BitMaskedArray::getitem_fields(const std::vector<std::string>& keys) const {
     return std::make_shared<BitMaskedArray>(
       identities_,
       util::Parameters(),
       mask_,
       content_.get()->getitem_fields(keys),
+      valid_when_,
+      length_,
+      lsb_order_);
+  }
+
+  const ContentPtr
+  BitMaskedArray::getitem_fields(const std::vector<std::string>& keys,
+                                 const Slice& only_fields) const {
+    return std::make_shared<BitMaskedArray>(
+      identities_,
+      util::Parameters(),
+      mask_,
+      content_.get()->getitem_fields(keys, only_fields),
       valid_when_,
       length_,
       lsb_order_);

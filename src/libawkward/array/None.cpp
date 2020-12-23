@@ -152,7 +152,23 @@ namespace awkward {
   }
 
   const ContentPtr
+  None::getitem_field(const std::string& key,
+                      const Slice& only_fields) const {
+    throw std::runtime_error(
+      std::string("undefined operation: None::getitem_field")
+      + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
   None::getitem_fields(const std::vector<std::string>& keys) const {
+    throw std::runtime_error(
+      std::string("undefined operation: None::getitem_fields")
+      + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
+  None::getitem_fields(const std::vector<std::string>& keys,
+                       const Slice& only_fields) const {
     throw std::runtime_error(
       std::string("undefined operation: None::getitem_fields")
       + FILENAME(__LINE__));
