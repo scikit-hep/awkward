@@ -467,10 +467,18 @@ namespace awkward {
     virtual const ContentPtr
       getitem_field(const std::string& key) const = 0;
 
+    virtual const ContentPtr
+      getitem_field(const std::string& key,
+                    const Slice& only_fields) const = 0;
+
     /// @brief This array with the first nested RecordArray replaced by
     /// a RecordArray of a given subset of `keys`.
     virtual const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const = 0;
+
+    virtual const ContentPtr
+      getitem_fields(const std::vector<std::string>& keys,
+                     const Slice& only_fields) const = 0;
 
     /// @brief Entry point for general slicing: Slice represents a tuple of
     /// SliceItem nodes applying to each level of nested lists.

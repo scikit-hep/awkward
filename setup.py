@@ -8,6 +8,7 @@ import sys
 import distutils.util
 import multiprocessing
 import shutil
+import codecs
 
 import setuptools
 import setuptools.command.build_ext
@@ -215,7 +216,7 @@ setup(name = "awkward",
       maintainer = "Jim Pivarski",
       maintainer_email = "pivarski@princeton.edu",
       description = "Manipulate JSON-like data with NumPy-like idioms.",
-      long_description = open("README-pypi.md").read(),
+      long_description = codecs.open("README-pypi.md", encoding="utf8").read(),
       long_description_content_type = "text/markdown",
       url = "https://github.com/scikit-hep/awkward-1.0",
       download_url = "https://github.com/scikit-hep/awkward-1.0/releases",

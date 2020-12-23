@@ -369,7 +369,15 @@ namespace awkward {
       getitem_field(const std::string& key) const override;
 
     const ContentPtr
+      getitem_field(const std::string& key,
+                    const Slice& only_fields) const override;
+
+    const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const override;
+
+    const ContentPtr
+      getitem_fields(const std::vector<std::string>& keys,
+                     const Slice& only_fields) const override;
 
     const ContentPtr
       getitem(const Slice& where) const override;

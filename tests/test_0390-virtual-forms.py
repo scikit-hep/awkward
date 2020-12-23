@@ -70,12 +70,13 @@ def test_virtual_slice_numba():
     x1 = ak.Array([1, 2, 3, 4, 5])
     x2 = ak.Array([1, 2, 3, 4, 5])
     x = ak.zip({"x1": x1, "x2": x2}, with_name="xthing")
-    xv = ak.virtual(lambda: gen(x, "x"), length=len(x), form=x.layout.form)
+    xv = ak.virtual(lambda: gen(x, "x"), cache=None, length=len(x), form=x.layout.form)
     y = x1 * 10.0
-    yv = ak.virtual(lambda: gen(y, "y"), length=len(y), form=y.layout.form)
+    yv = ak.virtual(lambda: gen(y, "y"), cache=None, length=len(y), form=y.layout.form)
     array = ak.zip({"x": xv, "y": yv}, with_name="Point", depth_limit=1)
     virtual = ak.virtual(
         lambda: gen(array, "array"),
+        cache=None,
         length=len(array),
         form=ak.forms.Form.fromjson(
             json.dumps(

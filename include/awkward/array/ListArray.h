@@ -284,7 +284,15 @@ namespace awkward {
       getitem_field(const std::string& key) const override;
 
     const ContentPtr
+      getitem_field(const std::string& key,
+                    const Slice& only_fields) const override;
+
+    const ContentPtr
       getitem_fields(const std::vector<std::string>& keys) const override;
+
+    const ContentPtr
+      getitem_fields(const std::vector<std::string>& keys,
+                     const Slice& only_fields) const override;
 
     const ContentPtr
       carry(const Index64& carry, bool allow_lazy) const override;

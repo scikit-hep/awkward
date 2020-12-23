@@ -849,6 +849,22 @@ namespace awkward {
   }
 
   const ContentPtr
+  RecordArray::getitem_field(const std::string& key,
+                             const Slice& only_fields) const {
+    SliceItemPtr nexthead = only_fields.head();
+    Slice nexttail = only_fields.tail();
+
+    ContentPtr next = field(key).get()->getitem_range_nowrap(0, length());
+    if (SliceField* raw = dynamic_cast<SliceField*>(nexthead.get())) {
+      next = next.get()->getitem_field(raw->key(), nexttail);
+    }
+    else if (SliceFields* raw = dynamic_cast<SliceFields*>(nexthead.get())) {
+      next = next.get()->getitem_fields(raw->keys(), nexttail);
+    }
+    return next;
+  }
+
+  const ContentPtr
   RecordArray::getitem_fields(const std::vector<std::string>& keys) const {
     ContentPtrVec contents;
     util::RecordLookupPtr recordlookup(nullptr);
@@ -857,6 +873,38 @@ namespace awkward {
     }
     for (auto key : keys) {
       contents.push_back(field(key));
+      if (recordlookup.get() != nullptr) {
+        recordlookup.get()->push_back(key);
+      }
+    }
+    return std::make_shared<RecordArray>(identities_,
+                                         util::Parameters(),
+                                         contents,
+                                         recordlookup,
+                                         length_,
+                                         caches_);
+  }
+
+  const ContentPtr
+  RecordArray::getitem_fields(const std::vector<std::string>& keys,
+                              const Slice& only_fields) const {
+    SliceItemPtr nexthead = only_fields.head();
+    Slice nexttail = only_fields.tail();
+
+    ContentPtrVec contents;
+    util::RecordLookupPtr recordlookup(nullptr);
+    if (recordlookup_.get() != nullptr) {
+      recordlookup = std::make_shared<util::RecordLookup>();
+    }
+    for (auto key : keys) {
+      ContentPtr next = field(key);
+      if (SliceField* raw = dynamic_cast<SliceField*>(nexthead.get())) {
+        next = next.get()->getitem_field(raw->key(), nexttail);
+      }
+      else if (SliceFields* raw = dynamic_cast<SliceFields*>(nexthead.get())) {
+        next = next.get()->getitem_fields(raw->keys(), nexttail);
+      }
+      contents.push_back(next);
       if (recordlookup.get() != nullptr) {
         recordlookup.get()->push_back(key);
       }
@@ -1546,29 +1594,27 @@ namespace awkward {
   RecordArray::getitem_next(const SliceItemPtr& head,
                             const Slice& tail,
                             const Index64& advanced) const {
-    SliceItemPtr nexthead = tail.head();
-    Slice nexttail = tail.tail();
-    Slice emptytail;
-    emptytail.become_sealed();
-
     if (head.get() == nullptr) {
       return shallow_copy();
     }
     else if (SliceField* field =
              dynamic_cast<SliceField*>(head.get())) {
-      ContentPtr out = getitem_next(*field, emptytail, advanced);
-      return out.get()->getitem_next(nexthead, nexttail, advanced);
+      return Content::getitem_next(*field, tail, advanced);
     }
     else if (SliceFields* fields =
              dynamic_cast<SliceFields*>(head.get())) {
-      ContentPtr out = getitem_next(*fields, emptytail, advanced);
-      return out.get()->getitem_next(nexthead, nexttail, advanced);
+      return Content::getitem_next(*fields, tail, advanced);
     }
     else if (const SliceMissing64* missing =
              dynamic_cast<SliceMissing64*>(head.get())) {
       return Content::getitem_next(*missing, tail, advanced);
     }
     else {
+      SliceItemPtr nexthead = tail.head();
+      Slice nexttail = tail.tail();
+      Slice emptytail;
+      emptytail.become_sealed();
+
       ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->getitem_next(head,
@@ -1626,11 +1672,13 @@ namespace awkward {
   RecordArray::getitem_next(const SliceFields& fields,
                             const Slice& tail,
                             const Index64& advanced) const {
-    SliceItemPtr nexthead = tail.head();
-    Slice nexttail = tail.tail();
-    return getitem_fields(fields.keys()).get()->getitem_next(nexthead,
-                                                             nexttail,
-                                                             advanced);
+    Slice only_fields = tail.only_fields();
+    Slice not_fields = tail.not_fields();
+    SliceItemPtr nexthead = not_fields.head();
+    Slice nexttail = not_fields.tail();
+    return getitem_fields(fields.keys(), only_fields).get()->getitem_next(nexthead,
+                                                                          nexttail,
+                                                                          advanced);
   }
 
   const ContentPtr

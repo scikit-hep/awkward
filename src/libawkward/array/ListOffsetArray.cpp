@@ -726,6 +726,17 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
+  ListOffsetArrayOf<T>::getitem_field(const std::string& key,
+                                      const Slice& only_fields) const {
+    return std::make_shared<ListOffsetArrayOf<T>>(
+             identities_,
+             util::Parameters(),
+             offsets_,
+             content_.get()->getitem_field(key, only_fields));
+  }
+
+  template <typename T>
+  const ContentPtr
   ListOffsetArrayOf<T>::getitem_fields(
     const std::vector<std::string>& keys) const {
     return std::make_shared<ListOffsetArrayOf<T>>(
@@ -733,6 +744,18 @@ namespace awkward {
       util::Parameters(),
       offsets_,
       content_.get()->getitem_fields(keys));
+  }
+
+  template <typename T>
+  const ContentPtr
+  ListOffsetArrayOf<T>::getitem_fields(
+    const std::vector<std::string>& keys,
+    const Slice& only_fields) const {
+    return std::make_shared<ListOffsetArrayOf<T>>(
+      identities_,
+      util::Parameters(),
+      offsets_,
+      content_.get()->getitem_fields(keys, only_fields));
   }
 
   template <typename T>

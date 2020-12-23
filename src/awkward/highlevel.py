@@ -824,6 +824,68 @@ class Array(
         `"y"` before `"y"` is selected, and `"x"` is a one-dimensional
         NumpyArray that can't take more than its share of slices.
 
+        Finally, note that the dot (`__getattr__`) syntax is equivalent to a single
+        string in a slice (`__getitem__`) if the field name is a valid Python
+        identifier and doesn't conflict with #ak.Array methods or properties.
+
+            >>> array.x
+            <Array [[1.1, 2.2], [3.3], [0, 1.1]] type='3 * var * float64'>
+            >>> array.y
+            <Array [[[1], [2, 2]], ... [[], [1, 1, 1]]] type='3 * var * var * int64'>
+
+        Nested Projection
+        *****************
+
+        If records are nested within records, you can use a series of strings in
+        the selector to drill down. For instance, with the following `array`,
+
+            ak.Array([
+                {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}},
+                {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}},
+                {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}}])
+
+        we can go directly to the numerical data by specifying a string for the
+        outer field and a string for the inner field.
+
+            >>> array["a", "x"]
+            <Array [1, 1, 1] type='3 * int64'>
+            >>> array["a", "y"]
+            <Array [2, 2, 2] type='3 * int64'>
+            >>> array["b", "y"]
+            <Array [20, 20, 20] type='3 * int64'>
+            >>> array["c", "y"]
+            <Array [2.2, 2.2, 2.2] type='3 * float64'>
+
+        As with single projections, the dot (`__getattr__`) syntax is equivalent
+        to a single string in a slice (`__getitem__`) if the field name is a valid
+        Python identifier and doesn't conflict with #ak.Array methods or properties.
+
+            >>> array.a.x
+            <Array [1, 1, 1] type='3 * int64'>
+
+        You can even get every field of the same name within an outer record using
+        a list of field names for the outer record. The following selects the `"x"`
+        field of `"a"`, `"b"`, and `"c"` records:
+
+            >>> array[["a", "b", "c"], "x"].tolist()
+            [{'a': 1, 'b': 10, 'c': 1.1},
+             {'a': 1, 'b': 10, 'c': 1.1},
+             {'a': 1, 'b': 10, 'c': 1.1}]
+
+        You don't need to get all fields:
+
+            >>> array[["a", "b"], "x"].tolist()
+            [{'a': 1, 'b': 10},
+             {'a': 1, 'b': 10},
+             {'a': 1, 'b': 10}]
+
+        And you can select lists of field names at all levels:
+
+            >>> array[["a", "b"], ["x", "y"]].tolist()
+            [{'a': {'x': 1, 'y': 2}, 'b': {'x': 10, 'y': 20}},
+             {'a': {'x': 1, 'y': 2}, 'b': {'x': 10, 'y': 20}},
+             {'a': {'x': 1, 'y': 2}, 'b': {'x': 10, 'y': 20}}]
+
         Option indexing
         ***************
 

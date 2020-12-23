@@ -723,6 +723,30 @@ namespace awkward {
     return Slice(items, true);
   }
 
+  const Slice
+  Slice::only_fields() const {
+    std::vector<SliceItemPtr> items;
+    for (auto item : items_) {
+      if (dynamic_cast<SliceField*>(item.get())  ||
+          dynamic_cast<SliceFields*>(item.get())) {
+        items.push_back(item);
+      }
+    }
+    return Slice(items, true);
+  }
+
+  const Slice
+  Slice::not_fields() const {
+    std::vector<SliceItemPtr> items;
+    for (auto item : items_) {
+      if (!dynamic_cast<SliceField*>(item.get())  &&
+          !dynamic_cast<SliceFields*>(item.get())) {
+        items.push_back(item);
+      }
+    }
+    return Slice(items, true);
+  }
+
   const std::string
   Slice::tostring() const {
     std::stringstream out;

@@ -526,11 +526,29 @@ namespace awkward {
   }
 
   const ContentPtr
+  UnmaskedArray::getitem_field(const std::string& key,
+                               const Slice& only_fields) const {
+    return std::make_shared<UnmaskedArray>(
+      identities_,
+      util::Parameters(),
+      content_.get()->getitem_field(key, only_fields));
+  }
+
+  const ContentPtr
   UnmaskedArray::getitem_fields(const std::vector<std::string>& keys) const {
     return std::make_shared<UnmaskedArray>(
       identities_,
       util::Parameters(),
       content_.get()->getitem_fields(keys));
+  }
+
+  const ContentPtr
+  UnmaskedArray::getitem_fields(const std::vector<std::string>& keys,
+                                const Slice& only_fields) const {
+    return std::make_shared<UnmaskedArray>(
+      identities_,
+      util::Parameters(),
+      content_.get()->getitem_fields(keys, only_fields));
   }
 
   const ContentPtr

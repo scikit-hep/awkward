@@ -631,6 +631,14 @@ namespace awkward {
     const Slice
       tail() const;
 
+    /// @brief Returns a Slice containing only SliceField and SliceFields.
+    const Slice
+      only_fields() const;
+
+    /// @brief Returns a Slice without any SliceField or SliceFields.
+    const Slice
+      not_fields() const;
+
     /// @brief Returns a string representation of this slice item (single-line
     /// custom format).
     const std::string
