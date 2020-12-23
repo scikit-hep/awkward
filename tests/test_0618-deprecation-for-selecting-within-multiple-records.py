@@ -20,6 +20,11 @@ def test_flat():
         {"eta": {"up": 5, "down": 6}, "phi": {"up": 7, "down": 8}},
         {"eta": {"up": 9, "down": 10}, "phi": {"up": 11, "down": 12}},
     ]
+    assert array[["eta", "phi"], ["up", "down"]].tolist() == [
+        {"eta": {"up": 1, "down": 2}, "phi": {"up": 3, "down": 4}},
+        {"eta": {"up": 5, "down": 6}, "phi": {"up": 7, "down": 8}},
+        {"eta": {"up": 9, "down": 10}, "phi": {"up": 11, "down": 12}},
+    ]
     assert array[["eta", "phi"], "up"].tolist() == [
         {"eta": 1, "phi": 3},
         {"eta": 5, "phi": 7},
@@ -70,6 +75,13 @@ def test_flat_virtual():
         {"eta": {"up": 9, "down": 10}, "phi": {"up": 11, "down": 12}},
     ]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
+        ["eta", "phi"], ["up", "down"]
+    ].tolist() == [
+        {"eta": {"up": 1, "down": 2}, "phi": {"up": 3, "down": 4}},
+        {"eta": {"up": 5, "down": 6}, "phi": {"up": 7, "down": 8}},
+        {"eta": {"up": 9, "down": 10}, "phi": {"up": 11, "down": 12}},
+    ]
+    assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         ["eta", "phi"], "up"
     ].tolist() == [{"eta": 1, "phi": 3}, {"eta": 5, "phi": 7}, {"eta": 9, "phi": 11}]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
@@ -110,6 +122,14 @@ def test_nested():
         ]
     )
     assert array[["eta", "phi"]].tolist() == [
+        [
+            {"eta": {"up": 1, "down": 2}, "phi": {"up": 3, "down": 4}},
+            {"eta": {"up": 5, "down": 6}, "phi": {"up": 7, "down": 8}},
+        ],
+        [],
+        [{"eta": {"up": 9, "down": 10}, "phi": {"up": 11, "down": 12}}],
+    ]
+    assert array[["eta", "phi"], ["up", "down"]].tolist() == [
         [
             {"eta": {"up": 1, "down": 2}, "phi": {"up": 3, "down": 4}},
             {"eta": {"up": 5, "down": 6}, "phi": {"up": 7, "down": 8}},
@@ -227,6 +247,16 @@ def test_nested_virtual():
     )
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         ["eta", "phi"]
+    ].tolist() == [
+        [
+            {"eta": {"up": 1, "down": 2}, "phi": {"up": 3, "down": 4}},
+            {"eta": {"up": 5, "down": 6}, "phi": {"up": 7, "down": 8}},
+        ],
+        [],
+        [{"eta": {"up": 9, "down": 10}, "phi": {"up": 11, "down": 12}}],
+    ]
+    assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
+        ["eta", "phi"], ["up", "down"]
     ].tolist() == [
         [
             {"eta": {"up": 1, "down": 2}, "phi": {"up": 3, "down": 4}},
