@@ -216,7 +216,7 @@ See [release history](https://awkward-array.readthedocs.io/en/latest/_auto/chang
 
 ## Voting for fixes/features
 
-You can vote for issues by adding a "thumbs up" (👍) using the "smile/pick your reaction" menu on the top-right of the issue.
+You can vote for issues by adding a "thumbs up" (👍) using the "smile/pick your reaction" menu on the top-right of the issue. Issues with the most "thumbs ups" will be prioritized, though this isn't the only consideration determining when an issue gets addressed. (An estimate of how long it will take is also important.)
 
 See the [prioritized list of open issues](https://github.com/scikit-hep/awkward-1.0/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc).
 
