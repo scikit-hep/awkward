@@ -178,10 +178,11 @@ class VirtualMachine:
                     stack.push(stack.pop() + stack.pop())
 
                 else:
-                    for name, value in self.dictionary_names.items():
-                        if value == instruction:
-                            printout(len(which) - 1, name, False)
-                            break
+                    if verbose:
+                        for name, value in self.dictionary_names.items():
+                            if value == instruction:
+                                printout(len(which) - 1, name, False)
+                                break
                     which.append(instruction - self.num_builtin)
                     where.append(0)
 
@@ -201,3 +202,4 @@ vm = VirtualMachine()
 vm.do("3 2 +", verbose=True)
 vm.do(": foo 3 2 + ; foo", verbose=True)
 vm.do(": foo : bar 1 + ; 3 2 + ; foo bar", verbose=True)
+vm.do(": foo + foo ; 1 2 3 4 5 foo", verbose=True)
