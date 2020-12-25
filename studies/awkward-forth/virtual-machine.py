@@ -230,7 +230,6 @@ class VirtualMachine:
         skip = [False]
 
         # The do .. loop stack is a different stack.
-        i, j, step = 0, 0, 1
         do_depth = []
         do_start = []
         do_stop = []
@@ -262,8 +261,6 @@ class VirtualMachine:
                     # Step forward in a DO loop.
                     if verbose:
                         printout(len(which) - 1, "do: {0}".format(do_i[-1]), False)
-                    i = do_i[-1]
-                    do_i[-1] += step
 
                 if skip[-1]:
                     # Skip over the alternate ('else' clause) of an 'if' block.
@@ -308,7 +305,6 @@ class VirtualMachine:
                     do_stop.append(stack.pop())
                     do_step.append(False)
                     do_i.append(do_start[-1])
-                    j = i
 
                 elif instruction == Builtin.DO_STEP.as_integer:
                     do_depth.append(len(which))
@@ -316,13 +312,22 @@ class VirtualMachine:
                     do_stop.append(stack.pop())
                     do_step.append(True)
                     do_i.append(do_start[-1])
-                    j = i
 
                 elif instruction == Builtin.I.as_integer:
-                    stack.push(i)
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    if len(do_i) < 1:
+                        stack.push(0)
+                    else:
+                        stack.push(do_i[-1])
 
                 elif instruction == Builtin.J.as_integer:
-                    stack.push(j)
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    if len(do_i) < 2:
+                        stack.push(0)
+                    else:
+                        stack.push(do_i[-2])
 
                 elif instruction == Builtin.DUP.as_integer:
                     if verbose:
@@ -438,6 +443,12 @@ class VirtualMachine:
             where.pop()
             skip.pop()
 
+            if len(do_depth) > 0 and do_depth[-1] == len(which):
+                if do_step[-1]:
+                    do_i[-1] += stack.pop()
+                else:
+                    do_i[-1] += 1
+
         if verbose:
             print("{0:20s} | {1}".format("", str(stack)))
 
@@ -510,5 +521,5 @@ vm = VirtualMachine()
 # vm.do("0 -1 foo")
 # vm.do("-1 0 foo")
 # vm.do("0 0 foo")
-vm.do("10 5 do 13 10 do i loop loop")
-vm.do("10 5 do 13 10 do j loop loop")
+vm.do("4 1 do i loop")
+vm.do("3 1 do 40 10 do i j + 10 +loop loop")
