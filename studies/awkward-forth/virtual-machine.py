@@ -58,17 +58,25 @@ class Stack:
         return self.buffer[self.pointer]
 
 
-builtin_instruction_names = [
-    "LITERAL",
-    "ADD",
-]
+class Builtin:
+    lookup = {}
+
+    def __init__(self, word=None):
+        self.word = word
+        self.as_integer = len(self.lookup)
+        self.lookup[word] = self
+
+    @staticmethod
+    def word(integer):
+        for word, instruction in Builtin.lookup.items():
+            if integer == instruction.as_integer:
+                return word
+        else:
+            raise KeyError("not found: {0}".format(integer))
+
 
 class VirtualMachine:
     def __init__(self):
-        for i, name in enumerate(builtin_instruction_names):
-            setattr(self, name, i)
-        self.num_builtin = len(builtin_instruction_names)
-
         # The dictionary contains user-defined functions as lists of instructions.
         self.dictionary_names = {}
         self.dictionary = []
@@ -100,7 +108,8 @@ class VirtualMachine:
 
                     # Add the new word to the dictionary before interpreting it
                     # so that recursive functions can be defined.
-                    self.dictionary_names[name] = self.num_builtin + len(self.dictionary)
+                    instruction = len(Builtin.lookup) + len(self.dictionary)
+                    self.dictionary_names[name] = instruction
                     self.dictionary.append([])
 
                     # Now interpret the subroutine and add it to the dictionary.
@@ -108,8 +117,8 @@ class VirtualMachine:
 
                     pointer = substop + 1
 
-                elif word == "+":
-                    instructions.append(self.ADD)
+                elif word in Builtin.lookup:
+                    instructions.append(Builtin.lookup[word].as_integer)
                     pointer += 1
 
                 else:
@@ -124,7 +133,7 @@ class VirtualMachine:
                             instructions.append(instruction)
                             pointer += 1
                     else:
-                        instructions.append(self.LITERAL)
+                        instructions.append(Builtin.LITERAL.as_integer)
                         instructions.append(num)
                         pointer += 1
 
@@ -165,26 +174,76 @@ class VirtualMachine:
                 instruction = dictionary[which[-1]][where[-1]]
                 where[-1] += 1
 
-                if instruction == self.LITERAL:
+                if instruction == Builtin.LITERAL.as_integer:
                     num = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
                     if verbose:
                         printout(len(which) - 1, num, True)
                     stack.push(num)
 
-                elif instruction == self.ADD:
+                elif instruction == Builtin.ADD.as_integer:
                     if verbose:
-                        printout(len(which) - 1, "+", True)
+                        printout(len(which) - 1, Builtin.word(instruction), True)
                     stack.push(stack.pop() + stack.pop())
 
-                else:
+                elif instruction == Builtin.SUB.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(stack.pop() - stack.pop())
+
+                elif instruction == Builtin.MUL.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(stack.pop() * stack.pop())
+
+                elif instruction == Builtin.DUP.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    value = stack.pop()
+                    stack.push(value)
+                    stack.push(value)
+
+                elif instruction == Builtin.DROP.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.pop()
+
+                elif instruction == Builtin.SWAP.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    a, b = stack.pop(), stack.pop()
+                    stack.push(a)
+                    stack.push(b)
+
+                elif instruction == Builtin.OVER.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    a, b = stack.pop(), stack.pop()
+                    stack.push(b)
+                    stack.push(a)
+                    stack.push(b)
+
+                elif instruction == Builtin.ROT.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    a, b, c = stack.pop(), stack.pop(), stack.pop()
+                    stack.push(b)
+                    stack.push(a)
+                    stack.push(c)
+
+                elif instruction >= len(Builtin.lookup):
                     if verbose:
                         for name, value in self.dictionary_names.items():
                             if value == instruction:
                                 printout(len(which) - 1, name, False)
                                 break
-                    which.append(instruction - self.num_builtin)
+                    which.append(instruction - len(Builtin.lookup))
                     where.append(0)
+
+                else:
+                    raise AssertionError(
+                        "unrecognized machine code: {0}".format(instruction)
+                    )
 
             which.pop()
             where.pop()
@@ -194,12 +253,29 @@ class VirtualMachine:
 
         return outputs
 
-    def do(self, source, inputs=[], output_dtypes=[], verbose=False):
+    def do(self, source, inputs=[], output_dtypes=[], verbose=True):
+        if verbose:
+            print("do: {0}".format(repr(source)))
         outputs = self.run(self.compile(source), inputs, output_dtypes, verbose=verbose)
 
 
+Builtin.LITERAL = Builtin()
+Builtin.ADD = Builtin("+")
+Builtin.SUB = Builtin("-")
+Builtin.MUL = Builtin("*")
+Builtin.DUP = Builtin("dup")
+Builtin.DROP = Builtin("drop")
+Builtin.SWAP = Builtin("swap")
+Builtin.OVER = Builtin("over")
+Builtin.ROT = Builtin("rot")
+
+
 vm = VirtualMachine()
-vm.do("3 2 +", verbose=True)
-vm.do(": foo 3 2 + ; foo", verbose=True)
-vm.do(": foo : bar 1 + ; 3 2 + ; foo bar", verbose=True)
-vm.do(": foo + foo ; 1 2 3 4 5 foo", verbose=True)
+vm.do("3 2 + 2 *")
+vm.do(": foo 3 2 + ; foo")
+vm.do(": foo : bar 1 + ; 3 2 + ; foo bar")
+vm.do("1 2 3 dup")
+vm.do("1 2 3 drop")
+vm.do("1 2 3 4 swap")
+vm.do("1 2 3 over")
+vm.do("1 2 3 rot")
