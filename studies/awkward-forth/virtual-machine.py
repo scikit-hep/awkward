@@ -144,6 +144,39 @@ class VirtualMachine:
                         instructions.append(alternate)
                         pointer = substop + 1
 
+                elif word == "do":
+                    substart = pointer + 1
+                    substop = pointer
+                    is_step = False
+                    nesting = 1
+                    while nesting > 0:
+                        substop += 1
+                        if substop >= stop:
+                            raise ValueError("'do' is missing its closing 'loop'")
+                        if tokenized[substop] == "do":
+                            nesting += 1
+                        elif tokenized[substop] == "loop":
+                            nesting -= 1
+                        elif tokenized[substop] == "+loop":
+                            if nesting == 1:
+                                is_step = True
+                            nesting -= 1
+
+                    # Add the loop body to the dictionary so that it can be used
+                    # without special instruction pointer manipulation at runtime.
+                    body = len(Builtin.lookup) + len(self.dictionary)
+
+                    # Now add the loop body to the dictionary.
+                    self.dictionary.append([])
+                    interpret(substart, substop, self.dictionary[-1])
+
+                    if is_step:
+                        instructions.append(Builtin.DO_STEP.as_integer)
+                    else:
+                        instructions.append(Builtin.DO.as_integer)
+                    instructions.append(body)
+                    pointer = substop + 1
+
                 elif word in Builtin.lookup:
                     instructions.append(Builtin.lookup[word].as_integer)
                     pointer += 1
@@ -191,18 +224,49 @@ class VirtualMachine:
                 print("{0:20s} | {1}".format("  " * indent + str(instruction), showstack))
 
         # Create a stack of instruction pointers to avoid native function calls.
+        dictionary = self.dictionary + [instructions]
         which = [len(self.dictionary)]
         where = [0]
         skip = [False]
-        dictionary = self.dictionary + [instructions]
+
+        # The do .. loop stack is a different stack.
+        i, j, step = 0, 0, 1
+        do_depth = []
+        do_start = []
+        do_stop = []
+        do_step = []
+        do_i = []
 
         # Run through the instructions until the first stack layer reaches its end.
         while len(which) > 0:
             while where[-1] < len(dictionary[which[-1]]):
                 instruction = dictionary[which[-1]][where[-1]]
-                where[-1] += 1
+
+                if len(do_depth) == 0 or do_depth[-1] != len(which):
+                    # Normal operation: step forward one instruction.
+                    where[-1] += 1
+
+                elif do_i[-1] >= do_stop[-1]:
+                    # End a 'do' loop.
+                    if verbose:
+                        printout(len(which) - 1, "do: {0} (end)".format(do_i[-1]), False)
+                    do_depth.pop()
+                    do_start.pop()
+                    do_stop.pop()
+                    do_step.pop()
+                    do_i.pop()
+                    where[-1] += 1
+                    continue
+
+                else:
+                    # Step forward in a DO loop.
+                    if verbose:
+                        printout(len(which) - 1, "do: {0}".format(do_i[-1]), False)
+                    i = do_i[-1]
+                    do_i[-1] += step
 
                 if skip[-1]:
+                    # Skip over the alternate ('else' clause) of an 'if' block.
                     where[-1] += 1
                 skip[-1] = False
 
@@ -237,6 +301,28 @@ class VirtualMachine:
                             printout(len(which) - 1, "then", False)
                         # True, so do the next instruction but skip the one after that.
                         skip[-1] = True
+
+                elif instruction == Builtin.DO.as_integer:
+                    do_depth.append(len(which))
+                    do_start.append(stack.pop())
+                    do_stop.append(stack.pop())
+                    do_step.append(False)
+                    do_i.append(do_start[-1])
+                    j = i
+
+                elif instruction == Builtin.DO_STEP.as_integer:
+                    do_depth.append(len(which))
+                    do_start.append(stack.pop())
+                    do_stop.append(stack.pop())
+                    do_step.append(True)
+                    do_i.append(do_start[-1])
+                    j = i
+
+                elif instruction == Builtin.I.as_integer:
+                    stack.push(i)
+
+                elif instruction == Builtin.J.as_integer:
+                    stack.push(j)
 
                 elif instruction == Builtin.DUP.as_integer:
                     if verbose:
@@ -367,6 +453,8 @@ class Builtin:
     lookup = {}
 
     def __init__(self, word=None):
+        if word is None:
+            word = len(self.lookup)   # just make unique values that aren't strings
         self.word = word
         self.as_integer = len(self.lookup)
         self.lookup[word] = self
@@ -380,9 +468,13 @@ class Builtin:
             raise KeyError("not found: {0}".format(integer))
 
 
-Builtin.LITERAL = Builtin(0)
-Builtin.IF = Builtin(1)
-Builtin.IF_ELSE = Builtin(2)
+Builtin.LITERAL = Builtin()
+Builtin.IF = Builtin()
+Builtin.IF_ELSE = Builtin()
+Builtin.DO = Builtin()
+Builtin.DO_STEP = Builtin()
+Builtin.I = Builtin("i")
+Builtin.J = Builtin("j")
 Builtin.DUP = Builtin("dup")
 Builtin.DROP = Builtin("drop")
 Builtin.SWAP = Builtin("swap")
@@ -413,8 +505,10 @@ vm = VirtualMachine()
 # vm.do("1 2 3 rot")
 # vm.do(": foo -1 if 3 2 + else 10 20 * then ; foo 999")
 # vm.do(": foo 0 if 3 2 + else 10 20 * then ; foo 999")
-vm.do(": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ;")
-vm.do("-1 -1 foo")
-vm.do("0 -1 foo")
-vm.do("-1 0 foo")
-vm.do("0 0 foo")
+# vm.do(": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ;")
+# vm.do("-1 -1 foo")
+# vm.do("0 -1 foo")
+# vm.do("-1 0 foo")
+# vm.do("0 0 foo")
+vm.do("10 5 do 13 10 do i loop loop")
+vm.do("10 5 do 13 10 do j loop loop")
