@@ -646,6 +646,38 @@ class VirtualMachine:
                         printout(len(which) - 1, Builtin.word(instruction), True)
                     stack.push(stack.pop() % stack.pop())
 
+                elif instruction == Builtin.LSHIFT.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    a, b = stack.pop(), stack.pop()
+                    stack.push(b << a)
+
+                elif instruction == Builtin.RSHIFT.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    a, b = stack.pop(), stack.pop()
+                    stack.push(b >> a)
+
+                elif instruction == Builtin.ABS.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(abs(stack.pop()))
+
+                elif instruction == Builtin.MIN.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(min(stack.pop(), stack.pop()))
+
+                elif instruction == Builtin.MAX.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(max(stack.pop(), stack.pop()))
+
+                elif instruction == Builtin.NEGATE.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(-stack.pop())
+
                 elif instruction == Builtin.ZEQ.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
@@ -691,10 +723,25 @@ class VirtualMachine:
                         printout(len(which) - 1, Builtin.word(instruction), True)
                     stack.push(stack.pop() | stack.pop())
 
+                elif instruction == Builtin.XOR.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(stack.pop() ^ stack.pop())
+
                 elif instruction == Builtin.INVERT.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
                     stack.push(~stack.pop())
+
+                elif instruction == Builtin.FALSE.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(0)
+
+                elif instruction == Builtin.TRUE.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(-1)
 
                 elif instruction >= len(Builtin.lookup):
                     if verbose:
@@ -802,6 +849,12 @@ Builtin.SUB = Builtin("-")
 Builtin.MUL = Builtin("*")
 Builtin.DIV = Builtin("/")
 Builtin.MOD = Builtin("mod")
+Builtin.LSHIFT = Builtin("lshift")
+Builtin.RSHIFT = Builtin("rshift")
+Builtin.ABS = Builtin("abs")
+Builtin.MIN = Builtin("min")
+Builtin.MAX = Builtin("max")
+Builtin.NEGATE = Builtin("negate")
 Builtin.ZEQ = Builtin("0=")
 Builtin.EQ = Builtin("=")
 Builtin.NE = Builtin("<>")
@@ -811,7 +864,10 @@ Builtin.LT = Builtin("<")
 Builtin.LE = Builtin("<=")
 Builtin.AND = Builtin("and")
 Builtin.OR = Builtin("or")
+Builtin.XOR = Builtin("xor")
 Builtin.INVERT = Builtin("invert")
+Builtin.FALSE = Builtin("false")
+Builtin.TRUE = Builtin("true")
 
 vm = VirtualMachine()
 vm.do("3 ( whatever ) 2 + 2 *")
@@ -843,3 +899,9 @@ vm.do(": foo 10 5 do i dup 8 >= if unloop exit then loop ; foo")
 vm.do(": foo 1 begin dup 1 + dup 5 = if exit then again ; foo")
 vm.do("1 begin dup 1 + dup 5 = if leave then again")
 vm.do("variable x 999 x ! 1 x +! x @")
+vm.do("1 2 lshift")
+vm.do("15 10 max")
+vm.do("15 negate")
+vm.do("true invert")
+vm.do("false invert")
+
