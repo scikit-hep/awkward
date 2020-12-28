@@ -67,15 +67,48 @@ class VirtualMachine:
     def compile(self, source):
         tokenized = source.split()
 
+        def as_integer(word):
+            if word.lstrip().startswith("0x"):
+                try:
+                    return int(word, 16)
+                except ValueError:
+                    return None
+            else:
+                try:
+                    return int(word)
+                except ValueError:
+                    return None
+
         def interpret(start, stop, instructions):
             pointer = start
             while pointer < stop:
                 word = tokenized[pointer]
 
-                if word == ":":
+                if word == "(":
+                    substop = pointer
+                    nesting = 1
+                    while nesting > 0:
+                        substop += 1
+                        if substop >= stop:
+                            raise ValueError("'(' is missing its closing ')'")
+                        if tokenized[substop] == "(":
+                            nesting += 1
+                        elif tokenized[substop] == ")":
+                            nesting -= 1
+
+                    # Simply skip the parenthesized text: it's a comment.
+                    pointer = substop + 1
+
+                elif word == ":":
                     if pointer + 1 >= stop or tokenized[pointer + 1] == ";":
                         raise ValueError("missing name in definition")
                     name = tokenized[pointer + 1]
+
+                    if as_integer(name) is not None or Builtin.reserved(name):
+                        raise ValueError(
+                            "user-defined words should not overshadow a builtin word: "
+                            + repr(name)
+                        )
 
                     substart = pointer + 2
                     substop = pointer + 1
@@ -172,9 +205,69 @@ class VirtualMachine:
 
                     if is_step:
                         instructions.append(Builtin.DO_STEP.as_integer)
+                        instructions.append(body)
                     else:
                         instructions.append(Builtin.DO.as_integer)
-                    instructions.append(body)
+                        instructions.append(body)
+                    pointer = substop + 1
+
+                elif word == "begin":
+                    substart = pointer + 1
+                    substop = pointer
+                    subwhile = -1
+                    nesting = 1
+                    while nesting > 0:
+                        substop += 1
+                        if substop >= stop:
+                            raise ValueError(
+                                "'begin' is missing its closing 'until' or 'while' .. 'repeat'"
+                            )
+                        if tokenized[substop] == "begin":
+                            nesting += 1
+                        elif tokenized[substop] == "until":
+                            nesting -= 1
+                        elif tokenized[substop] == "again":
+                            raise ValueError("Awkward Forth does not support 'begin' .. 'again'")
+                        elif tokenized[substop] == "while":
+                            if nesting == 1:
+                                subwhile = substop
+                            nesting -= 1
+                            subnesting = 1
+                            while subnesting > 0:
+                                substop += 1
+                                if substop >= stop:
+                                    raise ValueError("'while' is missing its closing 'repeat'")
+                                if tokenized[substop] == "while":
+                                    subnesting += 1
+                                elif tokenized[substop] == "repeat":
+                                    subnesting -= 1
+
+                    if subwhile == -1:
+                        # Define the 'begin' .. 'until' statements as an instruction.
+                        body = len(Builtin.lookup) + len(self.dictionary)
+
+                        # Now add it to the dictionary.
+                        self.dictionary.append([])
+                        interpret(substart, substop, self.dictionary[-1])
+
+                        instructions.append(body)
+                        instructions.append(Builtin.UNTIL.as_integer)
+
+                    else:
+                        # Define the 'begin' .. 'repeat' statements.
+                        unconditional = len(Builtin.lookup) + len(self.dictionary)
+                        self.dictionary.append([])
+                        interpret(substart, subwhile, self.dictionary[-1])
+
+                        # Define the 'repeat' .. 'until' statements.
+                        conditional = len(Builtin.lookup) + len(self.dictionary)
+                        self.dictionary.append([])
+                        interpret(subwhile + 1, substop, self.dictionary[-1])
+
+                        instructions.append(unconditional)
+                        instructions.append(Builtin.WHILE.as_integer)
+                        instructions.append(conditional)
+
                     pointer = substop + 1
 
                 elif word in Builtin.lookup:
@@ -182,20 +275,22 @@ class VirtualMachine:
                     pointer += 1
 
                 else:
-                    try:
-                        num = int(word)
-                    except ValueError:
-                        try:
-                            instruction = self.dictionary_names[word]
-                        except KeyError:
-                            raise ValueError("unrecognized word: " + repr(word))
-                        else:
-                            instructions.append(instruction)
-                            pointer += 1
-                    else:
+                    instruction = self.dictionary_names.get(word)
+                    num = as_integer(word)
+
+                    if instruction is not None:
+                        instructions.append(instruction)
+                        pointer += 1
+
+                    elif num is not None:
                         instructions.append(Builtin.LITERAL.as_integer)
                         instructions.append(num)
                         pointer += 1
+
+                    else:
+                        raise ValueError(
+                            "unrecognized or wrong context for word: " + repr(word)
+                        )
 
         instructions = []
         interpret(0, len(tokenized), instructions)
@@ -227,7 +322,7 @@ class VirtualMachine:
         dictionary = self.dictionary + [instructions]
         which = [len(self.dictionary)]
         where = [0]
-        skip = [False]
+        skip = [0]
 
         # The do .. loop stack is a different stack.
         do_depth = []
@@ -262,10 +357,11 @@ class VirtualMachine:
                     if verbose:
                         printout(len(which) - 1, "do: {0}".format(do_i[-1]), False)
 
-                if skip[-1]:
+                if skip[-1] != 0:
                     # Skip over the alternate ('else' clause) of an 'if' block.
-                    where[-1] += 1
-                skip[-1] = False
+                    # Or skip backwards in a 'begin' .. loop.
+                    where[-1] += skip[-1]
+                skip[-1] = 0
 
                 if instruction == Builtin.LITERAL.as_integer:
                     num = dictionary[which[-1]][where[-1]]
@@ -297,7 +393,7 @@ class VirtualMachine:
                         if verbose:
                             printout(len(which) - 1, "then", False)
                         # True, so do the next instruction but skip the one after that.
-                        skip[-1] = True
+                        skip[-1] = 1
 
                 elif instruction == Builtin.DO.as_integer:
                     do_depth.append(len(which))
@@ -312,6 +408,23 @@ class VirtualMachine:
                     do_stop.append(stack.pop())
                     do_step.append(True)
                     do_i.append(do_start[-1])
+
+                elif instruction == Builtin.UNTIL.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, "until", True)
+                    if stack.pop() == 0:
+                        # False, so go back and do the body again.
+                        where[-1] -= 2
+
+                elif instruction == Builtin.WHILE.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, "while", True)
+                    if stack.pop() == 0:
+                        # False, so skip over the conditional body.
+                        where[-1] += 1
+                    else:
+                        # True, so do the next instruction but skip back after that.
+                        skip[-1] = -3
 
                 elif instruction == Builtin.I.as_integer:
                     if verbose:
@@ -372,7 +485,8 @@ class VirtualMachine:
                 elif instruction == Builtin.SUB.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(stack.pop() - stack.pop())
+                    a, b = stack.pop(), stack.pop()
+                    stack.push(b - a)
 
                 elif instruction == Builtin.MUL.as_integer:
                     if verbose:
@@ -407,22 +521,37 @@ class VirtualMachine:
                 elif instruction == Builtin.GT.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(-1 if stack.pop() > stack.pop() else 0)
+                    stack.push(-1 if stack.pop() < stack.pop() else 0)
 
                 elif instruction == Builtin.GE.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(-1 if stack.pop() >= stack.pop() else 0)
+                    stack.push(-1 if stack.pop() <= stack.pop() else 0)
 
                 elif instruction == Builtin.LT.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(-1 if stack.pop() < stack.pop() else 0)
+                    stack.push(-1 if stack.pop() > stack.pop() else 0)
 
                 elif instruction == Builtin.LE.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(-1 if stack.pop() <= stack.pop() else 0)
+                    stack.push(-1 if stack.pop() >= stack.pop() else 0)
+
+                elif instruction == Builtin.AND.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(stack.pop() & stack.pop())
+
+                elif instruction == Builtin.OR.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(stack.pop() | stack.pop())
+
+                elif instruction == Builtin.INVERT.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(~stack.pop())
 
                 elif instruction >= len(Builtin.lookup):
                     if verbose:
@@ -432,7 +561,7 @@ class VirtualMachine:
                                 break
                     which.append(instruction - len(Builtin.lookup))
                     where.append(0)
-                    skip.append(False)
+                    skip.append(0)
 
                 else:
                     raise AssertionError(
@@ -462,7 +591,7 @@ class VirtualMachine:
 
 class Builtin:
     lookup = {}
-
+    
     def __init__(self, word=None):
         if word is None:
             word = len(self.lookup)   # just make unique values that aren't strings
@@ -478,12 +607,22 @@ class Builtin:
         else:
             raise KeyError("not found: {0}".format(integer))
 
+    @staticmethod
+    def reserved(word):
+        return (
+            word in ["(", ")", ":", ";", "if", "then", "else", "do", "loop", "+loop"]
+            or word in ["begin", "again", "while", "repeat"]
+            or word in Builtin.lookup
+        )
+
 
 Builtin.LITERAL = Builtin()
 Builtin.IF = Builtin()
 Builtin.IF_ELSE = Builtin()
 Builtin.DO = Builtin()
 Builtin.DO_STEP = Builtin()
+Builtin.UNTIL = Builtin()
+Builtin.WHILE = Builtin()
 Builtin.I = Builtin("i")
 Builtin.J = Builtin("j")
 Builtin.DUP = Builtin("dup")
@@ -503,23 +642,28 @@ Builtin.GT = Builtin(">")
 Builtin.GE = Builtin(">=")
 Builtin.LT = Builtin("<")
 Builtin.LE = Builtin("<=")
+Builtin.AND = Builtin("and")
+Builtin.OR = Builtin("or")
+Builtin.INVERT = Builtin("invert")
 
 
 vm = VirtualMachine()
-# vm.do("3 2 + 2 *")
-# vm.do(": foo 3 2 + ; foo")
-# vm.do(": foo : bar 1 + ; 3 2 + ; foo bar")
-# vm.do("1 2 3 dup")
-# vm.do("1 2 3 drop")
-# vm.do("1 2 3 4 swap")
-# vm.do("1 2 3 over")
-# vm.do("1 2 3 rot")
-# vm.do(": foo -1 if 3 2 + else 10 20 * then ; foo 999")
-# vm.do(": foo 0 if 3 2 + else 10 20 * then ; foo 999")
-# vm.do(": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ;")
-# vm.do("-1 -1 foo")
-# vm.do("0 -1 foo")
-# vm.do("-1 0 foo")
-# vm.do("0 0 foo")
+vm.do("3 ( whatever ) 2 + 2 *")
+vm.do(": foo 3 2 + ; foo")
+vm.do(": foo : bar 1 + ; 3 2 + ; foo bar")
+vm.do("1 2 3 dup")
+vm.do("1 2 3 drop")
+vm.do("1 2 3 4 swap")
+vm.do("1 2 3 over")
+vm.do("1 2 3 rot")
+vm.do(": foo -1 if 3 2 + else 10 20 * then ; foo 999")
+vm.do(": foo 0 if 3 2 + else 10 20 * then ; foo 999")
+vm.do(": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ;")
+vm.do("-1 -1 foo")
+vm.do("0 -1 foo")
+vm.do("-1 0 foo")
+vm.do("0 0 foo")
 vm.do("4 1 do i loop")
 vm.do("3 1 do 40 10 do i j + 10 +loop loop")
+vm.do("3 begin 1 - dup 0= until 999")
+vm.do("4 begin 1 - dup 0= invert while 123 drop repeat 999")
