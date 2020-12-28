@@ -225,6 +225,7 @@ class VirtualMachine:
                 elif word == "begin":
                     substart = pointer + 1
                     substop = pointer
+                    is_again = False
                     subwhile = -1
                     nesting = 1
                     while nesting > 0:
@@ -238,7 +239,9 @@ class VirtualMachine:
                         elif tokenized[substop] == "until":
                             nesting -= 1
                         elif tokenized[substop] == "again":
-                            raise ValueError("Awkward Forth does not support 'begin' .. 'again'")
+                            if nesting == 1:
+                                is_again = True
+                            nesting -= 1
                         elif tokenized[substop] == "while":
                             if nesting == 1:
                                 subwhile = substop
@@ -253,7 +256,18 @@ class VirtualMachine:
                                 elif tokenized[substop] == "repeat":
                                     subnesting -= 1
 
-                    if subwhile == -1:
+                    if is_again:
+                        # Define the 'begin' .. 'until' statements as an instruction.
+                        body = len(Builtin.lookup) + len(self.dictionary)
+
+                        # Now add it to the dictionary.
+                        self.dictionary.append([])
+                        parse(substart, substop, self.dictionary[-1], exitdepth + 1)
+
+                        instructions.append(body)
+                        instructions.append(Builtin.AGAIN.as_integer)
+
+                    elif subwhile == -1:
                         # Define the 'begin' .. 'until' statements as an instruction.
                         body = len(Builtin.lookup) + len(self.dictionary)
 
@@ -424,6 +438,12 @@ class VirtualMachine:
                     do_stop.append(stack.pop())
                     do_step.append(True)
                     do_i.append(do_start[-1])
+
+                elif instruction == Builtin.AGAIN.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, "again", False)
+                    # Go back and do the body again.
+                    where[-1] -= 2
 
                 elif instruction == Builtin.UNTIL.as_integer:
                     if verbose:
@@ -647,8 +667,9 @@ class Builtin:
     @staticmethod
     def reserved(word):
         return (
-            word in ["(", ")", ":", ";", "if", "then", "else", "do", "loop", "+loop"]
-            or word in ["begin", "again", "while", "repeat", "exit"]
+            word in ["(", ")", "\\", ":", ";", "if", "then", "else"]
+            or word in ["do", "loop", "+loop", "begin", "again", "until", "while", "repeat"]
+            or word in ["exit", "unloop"]
             or word in Builtin.lookup
         )
 
@@ -658,6 +679,7 @@ Builtin.IF = Builtin()
 Builtin.IF_ELSE = Builtin()
 Builtin.DO = Builtin()
 Builtin.DO_STEP = Builtin()
+Builtin.AGAIN = Builtin()
 Builtin.UNTIL = Builtin()
 Builtin.WHILE = Builtin()
 Builtin.EXIT = Builtin()
@@ -686,29 +708,30 @@ Builtin.OR = Builtin("or")
 Builtin.INVERT = Builtin("invert")
 
 vm = VirtualMachine()
-vm.do("3 ( whatever ) 2 + 2 *")
-vm.do("3 ( whatever )\n2 + 2 *")
-vm.do("3 \\ whatever\n2 + 2 *")
-vm.do(": foo 3 2 + ; foo")
-vm.do(": foo : bar 1 + ; 3 2 + ; foo bar")
-vm.do("1 2 3 dup")
-vm.do("1 2 3 drop")
-vm.do("1 2 3 4 swap")
-vm.do("1 2 3 over")
-vm.do("1 2 3 rot")
-vm.do(": foo -1 if 3 2 + else 10 20 * then ; foo 999")
-vm.do(": foo 0 if 3 2 + else 10 20 * then ; foo 999")
-vm.do(": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ;")
-vm.do("-1 -1 foo")
-vm.do("0 -1 foo")
-vm.do("-1 0 foo")
-vm.do("0 0 foo")
-vm.do("4 1 do i loop")
-vm.do("3 1 do 40 10 do i j + 10 +loop loop")
-vm.do("3 begin 1 - dup 0= until 999")
-vm.do("4 begin 1 - dup 0= invert while 123 drop repeat 999")
-vm.do(": foo 1 - if exit then 123 ;")
-vm.do(": bar foo 999 ;")
-vm.do("1 bar")
-vm.do("2 bar")
-vm.do(": foo 10 5 do i dup 8 >= if unloop exit then loop ; foo")
+# vm.do("3 ( whatever ) 2 + 2 *")
+# vm.do("3 ( whatever )\n2 + 2 *")
+# vm.do("3 \\ whatever\n2 + 2 *")
+# vm.do(": foo 3 2 + ; foo")
+# vm.do(": foo : bar 1 + ; 3 2 + ; foo bar")
+# vm.do("1 2 3 dup")
+# vm.do("1 2 3 drop")
+# vm.do("1 2 3 4 swap")
+# vm.do("1 2 3 over")
+# vm.do("1 2 3 rot")
+# vm.do(": foo -1 if 3 2 + else 10 20 * then ; foo 999")
+# vm.do(": foo 0 if 3 2 + else 10 20 * then ; foo 999")
+# vm.do(": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ;")
+# vm.do("-1 -1 foo")
+# vm.do("0 -1 foo")
+# vm.do("-1 0 foo")
+# vm.do("0 0 foo")
+# vm.do("4 1 do i loop")
+# vm.do("3 1 do 40 10 do i j + 10 +loop loop")
+# vm.do("3 begin 1 - dup 0= until 999")
+# vm.do("4 begin 1 - dup 0= invert while 123 drop repeat 999")
+# vm.do(": foo 1 - if exit then 123 ;")
+# vm.do(": bar foo 999 ;")
+# vm.do("1 bar")
+# vm.do("2 bar")
+# vm.do(": foo 10 5 do i dup 8 >= if unloop exit then loop ; foo")
+# vm.do(": foo 1 begin dup 1 + dup 5 = if exit then again ; foo")
