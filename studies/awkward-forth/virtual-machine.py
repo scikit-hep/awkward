@@ -68,6 +68,10 @@ class VirtualMachine:
     def compile(self, source):
         tokenized = re.split("[ \r\t\v\f]", source.replace("\n", " \n "))
 
+        variable_names = []
+        input_names = []
+        output_names = []
+
         def as_integer(word):
             if word.lstrip().startswith("0x"):
                 try:
@@ -112,7 +116,7 @@ class VirtualMachine:
 
                 elif word == ":":
                     if pointer + 1 >= stop or tokenized[pointer + 1] == ";":
-                        raise ValueError("missing name in definition")
+                        raise ValueError("missing name in word definition")
                     name = tokenized[pointer + 1]
 
                     if as_integer(name) is not None or Builtin.reserved(name):
@@ -143,6 +147,35 @@ class VirtualMachine:
                     parse(substart, substop, self.dictionary[-1], 0)
 
                     pointer = substop + 1
+
+                elif word == "variable":
+                    if pointer + 1 >= stop:
+                        raise ValueError("missing name in variable definition")
+                    name = tokenized[pointer + 1]
+                    pointer += 2
+
+                    if as_integer(name) is not None or Builtin.reserved(name):
+                        raise ValueError(
+                            "user-defined variables should not overshadow a builtin word: "
+                            + repr(name)
+                        )
+
+                    if name in variable_names:
+                        raise ValueError("variable name {0} redefined".format(repr(name)))
+
+                    variable_names.append(name)
+
+                elif word in variable_names:
+                    if pointer + 1 >= stop or tokenized[pointer + 1] not in ("!", "+!", "@"):
+                        raise ValueError("missing '!', '+!', or '@' after variable name")
+                    if tokenized[pointer + 1] == "!":
+                        instructions.append(Builtin.PUT.as_integer)
+                    elif tokenized[pointer + 1] == "+!":
+                        instructions.append(Builtin.INC.as_integer)
+                    else:
+                        instructions.append(Builtin.GET.as_integer)
+                    instructions.append(variable_names.index(word))
+                    pointer += 2
 
                 elif word == "if":
                     substart = pointer + 1
@@ -324,9 +357,9 @@ class VirtualMachine:
 
         instructions = []
         parse(0, len(tokenized), instructions, 0)
-        return instructions
+        return instructions, variable_names, input_names, output_names
 
-    def run(self, instructions, inputs, output_dtypes, verbose=False):
+    def run(self, instructions, variables, inputs, output_dtypes, variable_names=None, verbose=False):
         # Create the stack.
         stack = Stack()
 
@@ -399,6 +432,39 @@ class VirtualMachine:
                     if verbose:
                         printout(len(which) - 1, num, True)
                     stack.push(num)
+
+                elif instruction == Builtin.PUT.as_integer:
+                    num = dictionary[which[-1]][where[-1]]
+                    where[-1] += 1
+                    if verbose:
+                        if variable_names is not None:
+                            message = "! " + variable_names[num]
+                        else:
+                            message = "! " + num
+                        printout(len(which) - 1, message, True)
+                    variables[num] = stack.pop()
+
+                elif instruction == Builtin.INC.as_integer:
+                    num = dictionary[which[-1]][where[-1]]
+                    where[-1] += 1
+                    if verbose:
+                        if variable_names is not None:
+                            message = "+! " + variable_names[num]
+                        else:
+                            message = "+! " + num
+                        printout(len(which) - 1, message, True)
+                    variables[num] += stack.pop()
+
+                elif instruction == Builtin.GET.as_integer:
+                    num = dictionary[which[-1]][where[-1]]
+                    where[-1] += 1
+                    if verbose:
+                        if variable_names is not None:
+                            message = "@ " + variable_names[num]
+                        else:
+                            message = "@ " + num
+                        printout(len(which) - 1, message, True)
+                    stack.push(variables[num])
 
                 elif instruction == Builtin.IF.as_integer:
                     if verbose:
@@ -643,7 +709,21 @@ class VirtualMachine:
     def do(self, source, inputs=[], output_dtypes=[], verbose=True):
         if verbose:
             print("do: {0}".format(repr(source)))
-        outputs = self.run(self.compile(source), inputs, output_dtypes, verbose=verbose)
+
+        instructions, variable_names, input_names, output_names = self.compile(source)
+
+        variables = [0 for x in variable_names]
+
+        self.outputs = self.run(
+            instructions,
+            variables,
+            inputs,
+            output_dtypes,
+            variable_names=variable_names,
+            verbose=verbose,
+        )
+
+        self.variables = dict(zip(variable_names, variables))
 
 
 class Builtin:
@@ -667,14 +747,19 @@ class Builtin:
     @staticmethod
     def reserved(word):
         return (
-            word in ["(", ")", "\\", ":", ";", "if", "then", "else"]
-            or word in ["do", "loop", "+loop", "begin", "again", "until", "while", "repeat"]
+            word in ["(", ")", "\\", ":", ";", "variable", "!", "+!", "@"]
+            or word in ["if", "then", "else"]
+            or word in ["do", "loop", "+loop"]
+            or word in ["begin", "again", "until", "while", "repeat"]
             or word in ["exit", "unloop"]
             or word in Builtin.lookup
         )
 
 
 Builtin.LITERAL = Builtin()
+Builtin.PUT = Builtin()
+Builtin.INC = Builtin()
+Builtin.GET = Builtin()
 Builtin.IF = Builtin()
 Builtin.IF_ELSE = Builtin()
 Builtin.DO = Builtin()
@@ -708,30 +793,31 @@ Builtin.OR = Builtin("or")
 Builtin.INVERT = Builtin("invert")
 
 vm = VirtualMachine()
-# vm.do("3 ( whatever ) 2 + 2 *")
-# vm.do("3 ( whatever )\n2 + 2 *")
-# vm.do("3 \\ whatever\n2 + 2 *")
-# vm.do(": foo 3 2 + ; foo")
-# vm.do(": foo : bar 1 + ; 3 2 + ; foo bar")
-# vm.do("1 2 3 dup")
-# vm.do("1 2 3 drop")
-# vm.do("1 2 3 4 swap")
-# vm.do("1 2 3 over")
-# vm.do("1 2 3 rot")
-# vm.do(": foo -1 if 3 2 + else 10 20 * then ; foo 999")
-# vm.do(": foo 0 if 3 2 + else 10 20 * then ; foo 999")
-# vm.do(": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ;")
-# vm.do("-1 -1 foo")
-# vm.do("0 -1 foo")
-# vm.do("-1 0 foo")
-# vm.do("0 0 foo")
-# vm.do("4 1 do i loop")
-# vm.do("3 1 do 40 10 do i j + 10 +loop loop")
-# vm.do("3 begin 1 - dup 0= until 999")
-# vm.do("4 begin 1 - dup 0= invert while 123 drop repeat 999")
-# vm.do(": foo 1 - if exit then 123 ;")
-# vm.do(": bar foo 999 ;")
-# vm.do("1 bar")
-# vm.do("2 bar")
-# vm.do(": foo 10 5 do i dup 8 >= if unloop exit then loop ; foo")
-# vm.do(": foo 1 begin dup 1 + dup 5 = if exit then again ; foo")
+vm.do("3 ( whatever ) 2 + 2 *")
+vm.do("3 ( whatever )\n2 + 2 *")
+vm.do("3 \\ whatever\n2 + 2 *")
+vm.do(": foo 3 2 + ; foo")
+vm.do(": foo : bar 1 + ; 3 2 + ; foo bar")
+vm.do("1 2 3 dup")
+vm.do("1 2 3 drop")
+vm.do("1 2 3 4 swap")
+vm.do("1 2 3 over")
+vm.do("1 2 3 rot")
+vm.do(": foo -1 if 3 2 + else 10 20 * then ; foo 999")
+vm.do(": foo 0 if 3 2 + else 10 20 * then ; foo 999")
+vm.do(": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ;")
+vm.do("-1 -1 foo")
+vm.do("0 -1 foo")
+vm.do("-1 0 foo")
+vm.do("0 0 foo")
+vm.do("4 1 do i loop")
+vm.do("3 1 do 40 10 do i j + 10 +loop loop")
+vm.do("3 begin 1 - dup 0= until 999")
+vm.do("4 begin 1 - dup 0= invert while 123 drop repeat 999")
+vm.do(": foo 1 - if exit then 123 ;")
+vm.do(": bar foo 999 ;")
+vm.do("1 bar")
+vm.do("2 bar")
+vm.do(": foo 10 5 do i dup 8 >= if unloop exit then loop ; foo")
+vm.do(": foo 1 begin dup 1 + dup 5 = if exit then again ; foo")
+vm.do("variable x 999 x ! 1 x +! x @")
