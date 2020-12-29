@@ -2300,32 +2300,22 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
     pyarrow = _import_pyarrow("ak.from_arrow")
 
     def popbuffers(array, tpe, buffers):
-        assert array is not None
-
         if isinstance(tpe, pyarrow.lib.DictionaryType):
             index = popbuffers(array.indices, tpe.index_type, buffers)
             content = handle_arrow(array.dictionary)
 
+            out = ak.layout.IndexedArray32(
+                ak.layout.Index32(index.content),
+                content,
+                parameters={"__array__": "categorical"},
+            ).simplify()
+
             if isinstance(index, ak.layout.BitMaskedArray):
-                if isinstance(content, ak.layout.UnmaskedArray):
-                    content = content.content
                 return ak.layout.BitMaskedArray(
-                    index.mask,
-                    ak.layout.IndexedArray32(
-                        ak.layout.Index32(index.content),
-                        content,
-                        parameters={"__array__": "categorical"},
-                    ),
-                    True,
-                    len(index),
-                    True,
-                )
+                    index.mask, out, True, len(index), True
+                ).simplify()
             else:
-                return ak.layout.IndexedArray32(
-                    ak.layout.Index32(index),
-                    content,
-                    parameters={"__array__": "categorical"},
-                )
+                return out
             # RETURNED because 'index' has already been offset-corrected.
 
         elif isinstance(tpe, pyarrow.lib.StructType):
@@ -2336,18 +2326,7 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             for i in range(tpe.num_fields):
                 content = popbuffers(array.field(tpe[i].name), tpe[i].type, buffers)
                 if not tpe[i].nullable:
-                    # if isinstance(content, ak.layout.UnmaskedArray):
-                    assert isinstance(
-                        content, (ak.layout.UnmaskedArray, ak.layout.BitMaskedArray)
-                    )
                     content = content.content
-                    # else:
-                    #     raise ValueError(
-                    #         "Arrow struct field {0} is not nullable but content is\n\n{1}".format(
-                    #             repr(tpe[i].name), content
-                    #         )
-                    #         + ak._util.exception_suffix(__file__)
-                    #     )
                 child_arrays.append(content)
                 keys.append(tpe[i].name)
 
@@ -2365,25 +2344,9 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             offsets = ak.layout.Index32(numpy.frombuffer(buffers.pop(0), dtype=np.int32))
             content = popbuffers(array.values, tpe.value_type, buffers)
             if not tpe.value_field.nullable:
-                # if isinstance(content, ak.layout.UnmaskedArray):
-                assert isinstance(
-                    content, (ak.layout.UnmaskedArray, ak.layout.BitMaskedArray)
-                )
                 content = content.content
-                # else:
-                #     raise ValueError(
-                #         "Arrow list item is not nullable but content is\n\n{0}".format(
-                #             content
-                #         )
-                #         + ak._util.exception_suffix(__file__)
-                #     )
 
             out = ak.layout.ListOffsetArray32(offsets, content)
-            if mask is not None:
-                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
-            else:
-                out = ak.layout.UnmaskedArray(out)
             # No return yet!
 
         elif isinstance(tpe, pyarrow.lib.LargeListType):
@@ -2394,32 +2357,28 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             # https://issues.apache.org/jira/browse/ARROW-10930
             # if not tpe.value_field.nullable:
             if str(tpe).endswith(" not null>"):
-                # if isinstance(content, ak.layout.UnmaskedArray):
-                assert isinstance(
-                    content, (ak.layout.UnmaskedArray, ak.layout.BitMaskedArray)
-                )
                 content = content.content
-                # else:
-                #     raise ValueError(
-                #         "Arrow list item is not nullable but content is\n\n{0}".format(
-                #             content
-                #         )
-                #         + ak._util.exception_suffix(__file__)
-                #     )
 
             out = ak.layout.ListOffsetArray64(offsets, content)
-            if mask is not None:
-                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
-            else:
-                out = ak.layout.UnmaskedArray(out)
             # No return yet!
 
-        elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "sparse":
-            assert tpe.num_buffers == 2
+        elif isinstance(tpe, pyarrow.lib.UnionType):
+            if tpe.mode == "sparse":
+                assert tpe.num_buffers == 2
+            elif tpe.mode == "dense":
+                assert tpe.num_buffers == 3
+            else:
+                raise TypeError(
+                    "unrecognized Arrow union array mode: {0}".format(repr(tpe.mode))
+                    + ak._util.exception_suffix(__file__)
+                )
+
             mask = buffers.pop(0)
             tags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)
-            index = numpy.arange(len(tags), dtype=np.int32)
+            if tpe.mode == "sparse":
+                index = numpy.arange(len(tags), dtype=np.int32)
+            else:
+                index = numpy.frombuffer(buffers.pop(0), dtype=np.int32)
 
             contents = []
             for i in range(tpe.num_fields):
@@ -2428,59 +2387,17 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
                 these = index[tags == i]
                 if len(these) == 0:
                     contents[i] = contents[i][0:0]
-                else:
+                elif tpe.mode == "sparse":
                     contents[i] = contents[i][: these[-1] + 1]
-
-            tags = ak.layout.Index8(tags)
-            index = ak.layout.Index32(index)
-
-            out = ak.layout.UnionArray8_32(tags, index, contents)
-            if mask is not None:
-                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
-            else:
-                out = ak.layout.UnmaskedArray(out)
-            # No return yet!
-
-        elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "dense":
-            assert tpe.num_buffers == 3
-            mask = buffers.pop(0)
-            tags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)
-            index = numpy.frombuffer(buffers.pop(0), dtype=np.int32)
-
-            contents = []
-            for i in range(tpe.num_fields):
-                contents.append(popbuffers(array.field(i), tpe[i].type, buffers))
-            for i in range(len(contents)):
-                these = index[tags == i]
-                if len(these) == 0:
-                    contents[i] = contents[i][0:0]
                 else:
                     contents[i] = contents[i][: these.max() + 1]
             for i in range(len(contents)):
                 if not tpe[i].nullable:
-                    # if isinstance(contents[i], ak.layout.UnmaskedArray):
-                    assert isinstance(
-                        contents[i], (ak.layout.UnmaskedArray, ak.layout.BitMaskedArray)
-                    )
                     contents[i] = contents[i].content
-                    # else:
-                    #     raise ValueError(
-                    #         "Arrow union field {0} is not nullable but content is\n\n{1}".format(
-                    #             i, contents[i]
-                    #         )
-                    #         + ak._util.exception_suffix(__file__)
-                    #     )
 
             tags = ak.layout.Index8(tags)
             index = ak.layout.Index32(index)
-
             out = ak.layout.UnionArray8_32(tags, index, contents)
-            if mask is not None:
-                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
-            else:
-                out = ak.layout.UnmaskedArray(out)
             # No return yet!
 
         elif tpe == pyarrow.string():
@@ -2489,14 +2406,8 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             offsets = ak.layout.Index32(numpy.frombuffer(buffers.pop(0), dtype=np.int32))
             contents = ak.layout.NumpyArray(numpy.frombuffer(buffers.pop(0), dtype=np.uint8))
             contents.setparameter("__array__", "char")
-
             out = ak.layout.ListOffsetArray32(offsets, contents)
             out.setparameter("__array__", "string")
-            if mask is None:
-                out = ak.layout.UnmaskedArray(out)
-            else:
-                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             # No return yet!
 
         elif tpe == pyarrow.large_string():
@@ -2505,14 +2416,8 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             offsets = ak.layout.Index64(numpy.frombuffer(buffers.pop(0), dtype=np.int64))
             contents = ak.layout.NumpyArray(numpy.frombuffer(buffers.pop(0), dtype=np.uint8))
             contents.setparameter("__array__", "char")
-
             out = ak.layout.ListOffsetArray64(offsets, contents)
             out.setparameter("__array__", "string")
-            if mask is None:
-                out = ak.layout.UnmaskedArray(out)
-            else:
-                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             # No return yet!
 
         elif tpe == pyarrow.binary():
@@ -2521,14 +2426,8 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             offsets = ak.layout.Index32(numpy.frombuffer(buffers.pop(0), dtype=np.int32))
             contents = ak.layout.NumpyArray(numpy.frombuffer(buffers.pop(0), dtype=np.uint8))
             contents.setparameter("__array__", "byte")
-
             out = ak.layout.ListOffsetArray32(offsets, contents)
             out.setparameter("__array__", "bytestring")
-            if mask is None:
-                out = ak.layout.UnmaskedArray(out)
-            else:
-                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             # No return yet!
 
         elif tpe == pyarrow.large_binary():
@@ -2537,14 +2436,8 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             offsets = ak.layout.Index64(numpy.frombuffer(buffers.pop(0), dtype=np.int64))
             contents = ak.layout.NumpyArray(numpy.frombuffer(buffers.pop(0), dtype=np.uint8))
             contents.setparameter("__array__", "byte")
-
             out = ak.layout.ListOffsetArray64(offsets, contents)
             out.setparameter("__array__", "bytestring")
-            if mask is None:
-                out = ak.layout.UnmaskedArray(out)
-            else:
-                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             # No return yet!
 
         elif tpe == pyarrow.bool_():
@@ -2554,28 +2447,16 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             as_bytes = numpy.unpackbits(
                 numpy.frombuffer(data, dtype=np.uint8)
             ).reshape(-1, 8)[:, ::-1].reshape(-1)
-
             out = ak.layout.NumpyArray(as_bytes.view(np.bool_))
-            if mask is not None:
-                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
-            else:
-                out = ak.layout.UnmaskedArray(out)
             # No return yet!
 
         elif isinstance(tpe, pyarrow.lib.DataType):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             data = buffers.pop(0)
-
             out = ak.layout.NumpyArray(
                 numpy.frombuffer(data, dtype=tpe.to_pandas_dtype())
             )
-            if mask is not None:
-                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
-            else:
-                out = ak.layout.UnmaskedArray(out)
             # No return yet!
 
         else:
@@ -2583,6 +2464,14 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
                 "unrecognized Arrow array type: {0}".format(repr(tpe))
                 + ak._util.exception_suffix(__file__)
             )
+
+        # All 'no return yet' cases need to become option-type (even if the UnmaskedArray
+        # is just going to get stripped off in the recursive step that calls this one).
+        if mask is not None:
+            mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
+            out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
+        else:
+            out = ak.layout.UnmaskedArray(out)
 
         # All 'no return yet' cases need to be corrected for pyarrow's 'offset'.
         if array.offset == 0 and len(array) == len(out):
