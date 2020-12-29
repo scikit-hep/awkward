@@ -2139,31 +2139,48 @@ def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
             nulls = index < 0
             index[nulls] = 0
 
-            if len(nulls) % 8 == 0:
-                this_bytemask = (~nulls).view(np.uint8)
+            if layout.parameter("__array__") == "categorical":
+                dictionary = recurse(layout.content, None, False)
+
+                if mask is None:
+                    bytemask = nulls
+                else:
+                    bytemask = (
+                        numpy.unpackbits(~mask)
+                        .reshape(-1, 8)[:, ::-1]
+                        .reshape(-1)
+                        .view(np.bool_)
+                    )[: len(index)]
+                    bytemask[nulls] = True
+
+                return pyarrow.DictionaryArray.from_arrays(index, dictionary, bytemask)
+
             else:
-                length = int(numpy.ceil(len(nulls) / 8.0)) * 8
-                this_bytemask = numpy.empty(length, dtype=np.uint8)
-                this_bytemask[: len(nulls)] = ~nulls
-                this_bytemask[len(nulls) :] = 0
+                if len(nulls) % 8 == 0:
+                    this_bytemask = (~nulls).view(np.uint8)
+                else:
+                    length = int(numpy.ceil(len(nulls) / 8.0)) * 8
+                    this_bytemask = numpy.empty(length, dtype=np.uint8)
+                    this_bytemask[: len(nulls)] = ~nulls
+                    this_bytemask[len(nulls) :] = 0
 
-            this_bitmask = numpy.packbits(
-                this_bytemask.reshape(-1, 8)[:, ::-1].reshape(-1)
-            )
-
-            if isinstance(layout, ak.layout.IndexedOptionArray32):
-                next = ak.layout.IndexedArray32(
-                    ak.layout.Index32(index), layout.content
+                this_bitmask = numpy.packbits(
+                    this_bytemask.reshape(-1, 8)[:, ::-1].reshape(-1)
                 )
-            else:
-                next = ak.layout.IndexedArray64(
-                    ak.layout.Index64(index), layout.content
-                )
 
-            if mask is None:
-                return recurse(next, this_bitmask, True)
-            else:
-                return recurse(next, mask & this_bitmask, True)
+                if isinstance(layout, ak.layout.IndexedOptionArray32):
+                    next = ak.layout.IndexedArray32(
+                        ak.layout.Index32(index), layout.content
+                    )
+                else:
+                    next = ak.layout.IndexedArray64(
+                        ak.layout.Index64(index), layout.content
+                    )
+
+                if mask is None:
+                    return recurse(next, this_bitmask, True)
+                else:
+                    return recurse(next, mask & this_bitmask, True)
 
         elif isinstance(layout, ak.layout.BitMaskedArray):
             bitmask = numpy.asarray(layout.mask, dtype=np.uint8)

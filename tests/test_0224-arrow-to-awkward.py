@@ -1774,3 +1774,11 @@ def test_arrow_coverage100_broken_unions():
 
     a = pyarrow.chunked_array([pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5])])
     assert ak.to_list(ak.from_arrow(a, highlevel=False)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+
+def test_arrow_dictionary_from_indexedoptionarray():
+    assert ak.to_arrow(
+        ak.to_categorical(
+            ak.Array(["one", "one", None, "two", "one", None, "three", "one"])
+        )
+    ).to_pylist() == ["one", "one", None, "two", "one", None, "three", "one"]
