@@ -2299,21 +2299,12 @@ def from_arrow(array, highlevel=True, behavior=None):
 def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
     pyarrow = _import_pyarrow("ak.from_arrow")
 
-    def popbuffers(array, tpe, buffers, length):
+    def popbuffers(array, tpe, buffers):
+        assert array is not None
+
         if isinstance(tpe, pyarrow.lib.DictionaryType):
-            index = popbuffers(
-                None if array is None else array.indices,
-                tpe.index_type,
-                buffers,
-                length,
-            )
-            if array is not None:
-                content = handle_arrow(array.dictionary)
-            else:
-                raise NotImplementedError(
-                    "Arrow dictionary inside of UnionArray"
-                    + ak._util.exception_suffix(__file__)
-                )
+            index = popbuffers(array.indices, tpe.index_type, buffers)
+            content = handle_arrow(array.dictionary)
 
             if isinstance(index, ak.layout.BitMaskedArray):
                 if isinstance(content, ak.layout.UnmaskedArray):
@@ -2326,7 +2317,7 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
                         parameters={"__array__": "categorical"},
                     ),
                     True,
-                    length,
+                    len(index),
                     True,
                 )
             else:
@@ -2342,12 +2333,7 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             child_arrays = []
             keys = []
             for i in range(tpe.num_fields):
-                content = popbuffers(
-                    None if array is None else array.field(tpe[i].name),
-                    tpe[i].type,
-                    buffers,
-                    length,
-                )
+                content = popbuffers(array.field(tpe[i].name), tpe[i].type, buffers)
                 if not tpe[i].nullable:
                     # if isinstance(content, ak.layout.UnmaskedArray):
                     assert isinstance(
@@ -2364,10 +2350,10 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
                 child_arrays.append(content)
                 keys.append(tpe[i].name)
 
-            out = ak.layout.RecordArray(child_arrays, keys)
+            out = ak.layout.RecordArray(child_arrays, keys, length=len(array))
             if mask is not None:
                 mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(mask, out, True, length, True)
+                return ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             else:
                 return ak.layout.UnmaskedArray(out)
 
@@ -2375,13 +2361,12 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             offsets = ak.layout.Index32(
-                numpy.frombuffer(buffers.pop(0), dtype=np.int32)[: length + 1]
+                numpy.frombuffer(buffers.pop(0), dtype=np.int32)[: len(array) + 1]
             )
             content = popbuffers(
-                None if array is None else array.flatten(),
+                array.values,
                 tpe.value_type,
                 buffers,
-                offsets[-1],
             )
             if not tpe.value_field.nullable:
                 # if isinstance(content, ak.layout.UnmaskedArray):
@@ -2400,7 +2385,7 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             out = ak.layout.ListOffsetArray32(offsets, content)
             if mask is not None:
                 mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(mask, out, True, length, True)
+                return ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             else:
                 return ak.layout.UnmaskedArray(out)
 
@@ -2408,13 +2393,12 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             offsets = ak.layout.Index64(
-                numpy.frombuffer(buffers.pop(0), dtype=np.int64)[: length + 1]
+                numpy.frombuffer(buffers.pop(0), dtype=np.int64)[: len(array) + 1]
             )
             content = popbuffers(
-                None if array is None else array.flatten(),
+                array.values,
                 tpe.value_type,
                 buffers,
-                offsets[-1],
             )
             # https://issues.apache.org/jira/browse/ARROW-10930
             # if not tpe.value_field.nullable:
@@ -2435,23 +2419,19 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             out = ak.layout.ListOffsetArray64(offsets, content)
             if mask is not None:
                 mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(mask, out, True, length, True)
+                return ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             else:
                 return ak.layout.UnmaskedArray(out)
 
         elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "sparse":
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
-            tags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)[:length]
+            tags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)[:len(array)]
             index = numpy.arange(len(tags), dtype=np.int32)
 
             contents = []
             for i in range(tpe.num_fields):
-                try:
-                    sublength = index[tags == i][-1] + 1
-                except IndexError:
-                    sublength = 0
-                contents.append(popbuffers(None, tpe[i].type, buffers, sublength))
+                contents.append(popbuffers(array.field(i), tpe[i].type, buffers))
             for i in range(len(contents)):
                 these = index[tags == i]
                 if len(these) == 0:
@@ -2465,23 +2445,19 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
 
             if mask is not None:
                 mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(mask, out, True, length, True)
+                return ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             else:
                 return ak.layout.UnmaskedArray(out)
 
         elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "dense":
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
-            tags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)[:length]
-            index = numpy.frombuffer(buffers.pop(0), dtype=np.int32)[:length]
+            tags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)[:len(array)]
+            index = numpy.frombuffer(buffers.pop(0), dtype=np.int32)[:len(array)]
 
             contents = []
             for i in range(tpe.num_fields):
-                try:
-                    sublength = index[tags == i].max() + 1
-                except ValueError:
-                    sublength = 0
-                contents.append(popbuffers(None, tpe[i].type, buffers, sublength))
+                contents.append(popbuffers(array.field(i), tpe[i].type, buffers))
             for i in range(len(contents)):
                 these = index[tags == i]
                 if len(these) == 0:
@@ -2508,7 +2484,7 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             out = ak.layout.UnionArray8_32(tags, index, contents)
             if mask is not None:
                 mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(mask, out, True, length, True)
+                return ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             else:
                 return ak.layout.UnmaskedArray(out)
 
@@ -2610,11 +2586,11 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             data = buffers.pop(0)
             out = numpy.frombuffer(data, dtype=np.uint8)
             out = numpy.unpackbits(out).reshape(-1, 8)[:, ::-1].reshape(-1)
-            out = ak.layout.NumpyArray(out[:length].view(np.bool_))
+            out = ak.layout.NumpyArray(out[:len(array)].view(np.bool_))
             if mask is not None:
                 awk_mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
                 mask = numpy.frombuffer(mask, dtype=np.uint8)
-                return ak.layout.BitMaskedArray(awk_mask, out, True, length, True)
+                return ak.layout.BitMaskedArray(awk_mask, out, True, len(out), True)
             else:
                 return ak.layout.UnmaskedArray(out)
 
@@ -2622,11 +2598,11 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             out = ak.layout.NumpyArray(
-                numpy.frombuffer(buffers.pop(0), dtype=tpe.to_pandas_dtype())[:length]
+                numpy.frombuffer(buffers.pop(0), dtype=tpe.to_pandas_dtype())[:len(array)]
             )
             if mask is not None:
                 mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(mask, out, True, length, True)
+                return ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             else:
                 return ak.layout.UnmaskedArray(out)
 
@@ -2639,7 +2615,7 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
     def handle_arrow(obj):
         if isinstance(obj, pyarrow.lib.Array):
             buffers = obj.buffers()
-            out = popbuffers(obj, obj.type, buffers, len(obj))
+            out = popbuffers(obj, obj.type, buffers)
             assert len(buffers) == 0
             if isinstance(out, ak.layout.UnmaskedArray):
                 return out.content
