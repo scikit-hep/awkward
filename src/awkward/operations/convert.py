@@ -2341,7 +2341,9 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
         elif isinstance(tpe, pyarrow.lib.ListType):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
-            offsets = ak.layout.Index32(numpy.frombuffer(buffers.pop(0), dtype=np.int32))
+            offsets = ak.layout.Index32(
+                numpy.frombuffer(buffers.pop(0), dtype=np.int32)
+            )
             content = popbuffers(array.values, tpe.value_type, buffers)
             if not tpe.value_field.nullable:
                 content = content.content
@@ -2352,7 +2354,9 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
         elif isinstance(tpe, pyarrow.lib.LargeListType):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
-            offsets = ak.layout.Index64(numpy.frombuffer(buffers.pop(0), dtype=np.int64))
+            offsets = ak.layout.Index64(
+                numpy.frombuffer(buffers.pop(0), dtype=np.int64)
+            )
             content = popbuffers(array.values, tpe.value_type, buffers)
             # https://issues.apache.org/jira/browse/ARROW-10930
             # if not tpe.value_field.nullable:
@@ -2403,8 +2407,12 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
         elif tpe == pyarrow.string():
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
-            offsets = ak.layout.Index32(numpy.frombuffer(buffers.pop(0), dtype=np.int32))
-            contents = ak.layout.NumpyArray(numpy.frombuffer(buffers.pop(0), dtype=np.uint8))
+            offsets = ak.layout.Index32(
+                numpy.frombuffer(buffers.pop(0), dtype=np.int32)
+            )
+            contents = ak.layout.NumpyArray(
+                numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
+            )
             contents.setparameter("__array__", "char")
             out = ak.layout.ListOffsetArray32(offsets, contents)
             out.setparameter("__array__", "string")
@@ -2413,8 +2421,12 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
         elif tpe == pyarrow.large_string():
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
-            offsets = ak.layout.Index64(numpy.frombuffer(buffers.pop(0), dtype=np.int64))
-            contents = ak.layout.NumpyArray(numpy.frombuffer(buffers.pop(0), dtype=np.uint8))
+            offsets = ak.layout.Index64(
+                numpy.frombuffer(buffers.pop(0), dtype=np.int64)
+            )
+            contents = ak.layout.NumpyArray(
+                numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
+            )
             contents.setparameter("__array__", "char")
             out = ak.layout.ListOffsetArray64(offsets, contents)
             out.setparameter("__array__", "string")
@@ -2423,8 +2435,12 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
         elif tpe == pyarrow.binary():
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
-            offsets = ak.layout.Index32(numpy.frombuffer(buffers.pop(0), dtype=np.int32))
-            contents = ak.layout.NumpyArray(numpy.frombuffer(buffers.pop(0), dtype=np.uint8))
+            offsets = ak.layout.Index32(
+                numpy.frombuffer(buffers.pop(0), dtype=np.int32)
+            )
+            contents = ak.layout.NumpyArray(
+                numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
+            )
             contents.setparameter("__array__", "byte")
             out = ak.layout.ListOffsetArray32(offsets, contents)
             out.setparameter("__array__", "bytestring")
@@ -2433,8 +2449,12 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
         elif tpe == pyarrow.large_binary():
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
-            offsets = ak.layout.Index64(numpy.frombuffer(buffers.pop(0), dtype=np.int64))
-            contents = ak.layout.NumpyArray(numpy.frombuffer(buffers.pop(0), dtype=np.uint8))
+            offsets = ak.layout.Index64(
+                numpy.frombuffer(buffers.pop(0), dtype=np.int64)
+            )
+            contents = ak.layout.NumpyArray(
+                numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
+            )
             contents.setparameter("__array__", "byte")
             out = ak.layout.ListOffsetArray64(offsets, contents)
             out.setparameter("__array__", "bytestring")
@@ -2444,9 +2464,11 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             data = buffers.pop(0)
-            as_bytes = numpy.unpackbits(
-                numpy.frombuffer(data, dtype=np.uint8)
-            ).reshape(-1, 8)[:, ::-1].reshape(-1)
+            as_bytes = (
+                numpy.unpackbits(numpy.frombuffer(data, dtype=np.uint8))
+                .reshape(-1, 8)[:, ::-1]
+                .reshape(-1)
+            )
             out = ak.layout.NumpyArray(as_bytes.view(np.bool_))
             # No return yet!
 
