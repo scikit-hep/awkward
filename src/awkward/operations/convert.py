@@ -2326,6 +2326,7 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
                     content,
                     parameters={"__array__": "categorical"},
                 )
+            # RETURNED because 'index' has already been offset-corrected.
 
         elif isinstance(tpe, pyarrow.lib.StructType):
             assert tpe.num_buffers == 1
@@ -2356,18 +2357,13 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
                 return ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             else:
                 return ak.layout.UnmaskedArray(out)
+            # RETURNED because each field has already been offset-corrected.
 
         elif isinstance(tpe, pyarrow.lib.ListType):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
-            offsets = ak.layout.Index32(
-                numpy.frombuffer(buffers.pop(0), dtype=np.int32)[: len(array) + 1]
-            )
-            content = popbuffers(
-                array.values,
-                tpe.value_type,
-                buffers,
-            )
+            offsets = ak.layout.Index32(numpy.frombuffer(buffers.pop(0), dtype=np.int32))
+            content = popbuffers(array.values, tpe.value_type, buffers)
             if not tpe.value_field.nullable:
                 # if isinstance(content, ak.layout.UnmaskedArray):
                 assert isinstance(
@@ -2385,21 +2381,16 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             out = ak.layout.ListOffsetArray32(offsets, content)
             if mask is not None:
                 mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(mask, out, True, len(out), True)
+                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             else:
-                return ak.layout.UnmaskedArray(out)
+                out = ak.layout.UnmaskedArray(out)
+            # No return yet!
 
         elif isinstance(tpe, pyarrow.lib.LargeListType):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
-            offsets = ak.layout.Index64(
-                numpy.frombuffer(buffers.pop(0), dtype=np.int64)[: len(array) + 1]
-            )
-            content = popbuffers(
-                array.values,
-                tpe.value_type,
-                buffers,
-            )
+            offsets = ak.layout.Index64(numpy.frombuffer(buffers.pop(0), dtype=np.int64))
+            content = popbuffers(array.values, tpe.value_type, buffers)
             # https://issues.apache.org/jira/browse/ARROW-10930
             # if not tpe.value_field.nullable:
             if str(tpe).endswith(" not null>"):
@@ -2419,14 +2410,15 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             out = ak.layout.ListOffsetArray64(offsets, content)
             if mask is not None:
                 mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(mask, out, True, len(out), True)
+                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             else:
-                return ak.layout.UnmaskedArray(out)
+                out = ak.layout.UnmaskedArray(out)
+            # No return yet!
 
         elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "sparse":
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
-            tags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)[:len(array)]
+            tags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)
             index = numpy.arange(len(tags), dtype=np.int32)
 
             contents = []
@@ -2441,19 +2433,20 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
 
             tags = ak.layout.Index8(tags)
             index = ak.layout.Index32(index)
-            out = ak.layout.UnionArray8_32(tags, index, contents)
 
+            out = ak.layout.UnionArray8_32(tags, index, contents)
             if mask is not None:
                 mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(mask, out, True, len(out), True)
+                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             else:
-                return ak.layout.UnmaskedArray(out)
+                out = ak.layout.UnmaskedArray(out)
+            # No return yet!
 
         elif isinstance(tpe, pyarrow.lib.UnionType) and tpe.mode == "dense":
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
-            tags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)[:len(array)]
-            index = numpy.frombuffer(buffers.pop(0), dtype=np.int32)[:len(array)]
+            tags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)
+            index = numpy.frombuffer(buffers.pop(0), dtype=np.int32)
 
             contents = []
             for i in range(tpe.num_fields):
@@ -2481,136 +2474,121 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
 
             tags = ak.layout.Index8(tags)
             index = ak.layout.Index32(index)
+
             out = ak.layout.UnionArray8_32(tags, index, contents)
             if mask is not None:
                 mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(mask, out, True, len(out), True)
+                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             else:
-                return ak.layout.UnmaskedArray(out)
+                out = ak.layout.UnmaskedArray(out)
+            # No return yet!
 
         elif tpe == pyarrow.string():
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
-
-            offsets = numpy.frombuffer(buffers.pop(0), dtype=np.int32)
-            contents = numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
-
-            offsets = ak.layout.Index32(offsets)
-
-            contents = ak.layout.NumpyArray(contents)
+            offsets = ak.layout.Index32(numpy.frombuffer(buffers.pop(0), dtype=np.int32))
+            contents = ak.layout.NumpyArray(numpy.frombuffer(buffers.pop(0), dtype=np.uint8))
             contents.setparameter("__array__", "char")
 
-            awk_arr = ak.layout.ListOffsetArray32(offsets, contents)
-            awk_arr.setparameter("__array__", "string")
-
+            out = ak.layout.ListOffsetArray32(offsets, contents)
+            out.setparameter("__array__", "string")
             if mask is None:
-                return ak.layout.UnmaskedArray(awk_arr)
+                out = ak.layout.UnmaskedArray(out)
             else:
-                awk_mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(
-                    awk_mask, awk_arr, True, len(offsets) - 1, True
-                )
+                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
+                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
+            # No return yet!
 
         elif tpe == pyarrow.large_string():
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
-
-            offsets = numpy.frombuffer(buffers.pop(0), dtype=np.int64)
-            contents = numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
-
-            offsets = ak.layout.Index64(offsets)
-
-            contents = ak.layout.NumpyArray(contents)
+            offsets = ak.layout.Index64(numpy.frombuffer(buffers.pop(0), dtype=np.int64))
+            contents = ak.layout.NumpyArray(numpy.frombuffer(buffers.pop(0), dtype=np.uint8))
             contents.setparameter("__array__", "char")
 
-            awk_arr = ak.layout.ListOffsetArray64(offsets, contents)
-            awk_arr.setparameter("__array__", "string")
-
+            out = ak.layout.ListOffsetArray64(offsets, contents)
+            out.setparameter("__array__", "string")
             if mask is None:
-                return ak.layout.UnmaskedArray(awk_arr)
+                out = ak.layout.UnmaskedArray(out)
             else:
-                awk_mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(
-                    awk_mask, awk_arr, True, len(offsets) - 1, True
-                )
+                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
+                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
+            # No return yet!
 
         elif tpe == pyarrow.binary():
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
-
-            offsets = numpy.frombuffer(buffers.pop(0), dtype=np.int32)
-            contents = numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
-
-            offsets = ak.layout.Index32(offsets)
-
-            contents = ak.layout.NumpyArray(contents)
+            offsets = ak.layout.Index32(numpy.frombuffer(buffers.pop(0), dtype=np.int32))
+            contents = ak.layout.NumpyArray(numpy.frombuffer(buffers.pop(0), dtype=np.uint8))
             contents.setparameter("__array__", "byte")
 
-            awk_arr = ak.layout.ListOffsetArray32(offsets, contents)
-            awk_arr.setparameter("__array__", "bytestring")
-
+            out = ak.layout.ListOffsetArray32(offsets, contents)
+            out.setparameter("__array__", "bytestring")
             if mask is None:
-                return ak.layout.UnmaskedArray(awk_arr)
+                out = ak.layout.UnmaskedArray(out)
             else:
-                awk_mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(
-                    awk_mask, awk_arr, True, len(offsets) - 1, True
-                )
+                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
+                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
+            # No return yet!
 
         elif tpe == pyarrow.large_binary():
             assert tpe.num_buffers == 3
             mask = buffers.pop(0)
-
-            offsets = numpy.frombuffer(buffers.pop(0), dtype=np.int64)
-            contents = numpy.frombuffer(buffers.pop(0), dtype=np.uint8)
-
-            offsets = ak.layout.Index64(offsets)
-
-            contents = ak.layout.NumpyArray(contents)
+            offsets = ak.layout.Index64(numpy.frombuffer(buffers.pop(0), dtype=np.int64))
+            contents = ak.layout.NumpyArray(numpy.frombuffer(buffers.pop(0), dtype=np.uint8))
             contents.setparameter("__array__", "byte")
 
-            awk_arr = ak.layout.ListOffsetArray64(offsets, contents)
-            awk_arr.setparameter("__array__", "bytestring")
-
+            out = ak.layout.ListOffsetArray64(offsets, contents)
+            out.setparameter("__array__", "bytestring")
             if mask is None:
-                return ak.layout.UnmaskedArray(awk_arr)
+                out = ak.layout.UnmaskedArray(out)
             else:
-                awk_mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(
-                    awk_mask, awk_arr, True, len(offsets) - 1, True
-                )
+                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
+                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
+            # No return yet!
 
         elif tpe == pyarrow.bool_():
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
             data = buffers.pop(0)
-            out = numpy.frombuffer(data, dtype=np.uint8)
-            out = numpy.unpackbits(out).reshape(-1, 8)[:, ::-1].reshape(-1)
-            out = ak.layout.NumpyArray(out[:len(array)].view(np.bool_))
+            as_bytes = numpy.unpackbits(
+                numpy.frombuffer(data, dtype=np.uint8)
+            ).reshape(-1, 8)[:, ::-1].reshape(-1)
+
+            out = ak.layout.NumpyArray(as_bytes.view(np.bool_))
             if mask is not None:
-                awk_mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                mask = numpy.frombuffer(mask, dtype=np.uint8)
-                return ak.layout.BitMaskedArray(awk_mask, out, True, len(out), True)
+                mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
+                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             else:
-                return ak.layout.UnmaskedArray(out)
+                out = ak.layout.UnmaskedArray(out)
+            # No return yet!
 
         elif isinstance(tpe, pyarrow.lib.DataType):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
+            data = buffers.pop(0)
+
             out = ak.layout.NumpyArray(
-                numpy.frombuffer(buffers.pop(0), dtype=tpe.to_pandas_dtype())[:len(array)]
+                numpy.frombuffer(data, dtype=tpe.to_pandas_dtype())
             )
             if mask is not None:
                 mask = ak.layout.IndexU8(numpy.frombuffer(mask, dtype=np.uint8))
-                return ak.layout.BitMaskedArray(mask, out, True, len(out), True)
+                out = ak.layout.BitMaskedArray(mask, out, True, len(out), True)
             else:
-                return ak.layout.UnmaskedArray(out)
+                out = ak.layout.UnmaskedArray(out)
+            # No return yet!
 
         else:
             raise TypeError(
                 "unrecognized Arrow array type: {0}".format(repr(tpe))
                 + ak._util.exception_suffix(__file__)
             )
+
+        # All 'no return yet' cases need to be corrected for pyarrow's 'offset'.
+        if array.offset == 0 and len(array) == len(out):
+            return out
+        else:
+            return out[array.offset : array.offset + len(array)]
 
     def handle_arrow(obj):
         if isinstance(obj, pyarrow.lib.Array):
