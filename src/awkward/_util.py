@@ -364,13 +364,16 @@ def numba_binops(binop, left, right, behavior):
 
 
 def behaviorof(*arrays, behavior=None):
-    behavior = behavior
+    if behavior is not None:
+        # An explicit 'behavior' always wins.
+        return behavior
+
+    behavior = None
     copied = False
     for x in arrays[::-1]:
         if (
             isinstance(
-                x,
-                (ak.highlevel.Array, ak.highlevel.Record, ak.highlevel.ArrayBuilder),
+                x, (ak.highlevel.Array, ak.highlevel.Record, ak.highlevel.ArrayBuilder),
             )
             and x.behavior is not None
         ):
