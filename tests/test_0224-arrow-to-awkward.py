@@ -1774,3 +1774,508 @@ def test_arrow_coverage100_broken_unions():
 
     a = pyarrow.chunked_array([pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5])])
     assert ak.to_list(ak.from_arrow(a, highlevel=False)) == [1.1, 2.2, 3.3, 4.4, 5.5]
+
+
+def test_arrow_dictionary_from_indexedoptionarray():
+    assert ak.to_arrow(
+        ak.to_categorical(
+            ak.Array(["one", "one", None, "two", "one", None, "three", "one"])
+        )
+    ).to_pylist() == ["one", "one", None, "two", "one", None, "three", "one"]
+
+# NumpyArray in Awkward Arrays translate to their corresponding DataType Arrays in Arrow
+def test_nonzero_offset_fromarrow_NumpyArray_1():
+    boolarray = ak.layout.NumpyArray(
+        np.array([True, True, True, False, False, True, False, True, False, True])
+    )
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(boolarray)[5:], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(boolarray)[5:])
+
+
+def test_nonzero_offset_fromarrow_NumpyArray_2():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(content)[2:], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(content)[2:])
+
+def test_nonzero_offset_fromarrow_NumpyArray_3():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(content)[2:5], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(content)[2:5])
+
+def test_nonzero_offset_fromarrow_NumpyArray_4():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(content)[0:9:2], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(content)[0:9:2])
+
+def test_nonzero_offset_fromarrow_NumpyArray_5():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(content)[-2:10], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(content)[-2:10])
+
+def test_nonzero_offset_fromarrow_NumpyArray_6():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(content)[-3:3:-1], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(content)[-3:3:-1])
+
+# ListOffsetArrays in Awkward Arrays translate to ListArrays in Arrow
+def test_nonzero_offset_fromarrow_ListOffsetArray_1():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(listoffsetarray)[2:], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(listoffsetarray)[2:])
+
+def test_nonzero_offset_fromarrow_ListOffsetArray_2():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(listoffsetarray)[2:5], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(listoffsetarray)[2:5])
+
+def test_nonzero_offset_fromarrow_ListOffsetArray_3():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(listoffsetarray)[0:5:2], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(listoffsetarray)[0:5:2])
+
+def test_nonzero_offset_fromarrow_ListOffsetArray_4():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(listoffsetarray)[-3:3:-1], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(listoffsetarray)[-3:3:-1])
+
+# RegularArrays in Awkward Arrays translate to ListArrays in Arrow
+def test_nonzero_offset_fromarrow_RegularArray_1():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+
+    regulararray = ak.layout.RegularArray(listoffsetarray, 2, zeros_length=0)
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(regulararray)[2:], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(regulararray)[2:])
+
+def test_nonzero_offset_fromarrow_RegularArray_2():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+
+    regulararray = ak.layout.RegularArray(listoffsetarray, 2, zeros_length=0)
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(regulararray)[2:5], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(regulararray)[2:5])
+
+def test_nonzero_offset_fromarrow_RegularArray_3():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+
+    regulararray = ak.layout.RegularArray(listoffsetarray, 2, zeros_length=0)
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(regulararray)[0:5:2], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(regulararray)[0:5:2])
+
+def test_nonzero_offset_fromarrow_RegularArray_4():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+
+    regulararray = ak.layout.RegularArray(listoffsetarray, 2, zeros_length=0)
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(regulararray)[-3:3:-1], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(regulararray)[-3:3:-1])
+
+# RecordArrays in Awkward Arrays translate to Struct Arrays in Arrow
+def test_nonzero_offset_fromarrow_RecordArray_1():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+
+    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content2 = ak.layout.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
+    offsets = ak.layout.Index32(np.array([0, 3, 3, 5, 6, 9]))
+    recordarray = ak.layout.RecordArray(
+        [content1, listoffsetarray, content2, content1],
+        keys=["one", "chonks", "2", "wonky"],
+    )
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(recordarray)[2:], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(recordarray)[2:])
+
+def test_nonzero_offset_fromarrow_RecordArray_2():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+
+    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content2 = ak.layout.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
+    offsets = ak.layout.Index32(np.array([0, 3, 3, 5, 6, 9]))
+    recordarray = ak.layout.RecordArray(
+        [content1, listoffsetarray, content2, content1],
+        keys=["one", "chonks", "2", "wonky"],
+    )
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(recordarray)[2:5], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(recordarray)[2:5])
+
+def test_nonzero_offset_fromarrow_RecordArray_3():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+
+    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content2 = ak.layout.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
+    offsets = ak.layout.Index32(np.array([0, 3, 3, 5, 6, 9]))
+    recordarray = ak.layout.RecordArray(
+        [content1, listoffsetarray, content2, content1],
+        keys=["one", "chonks", "2", "wonky"],
+    )
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(recordarray)[0:5:2], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(recordarray)[0:5:2])
+
+def test_nonzero_offset_fromarrow_RecordArray_4():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+
+    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content2 = ak.layout.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
+    offsets = ak.layout.Index32(np.array([0, 3, 3, 5, 6, 9]))
+    recordarray = ak.layout.RecordArray(
+        [content1, listoffsetarray, content2, content1],
+        keys=["one", "chonks", "2", "wonky"],
+    )
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(recordarray)[-3:3:-1], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(recordarray)[-3:3:-1])
+
+def test_nonzero_offset_fromarrow_RecordArray_4():
+    content = ak.layout.NumpyArray(
+        np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
+    )
+    offsets = ak.layout.Index64(np.array([0, 3, 3, 5, 6, 10, 10]))
+    listoffsetarray = ak.layout.ListOffsetArray64(offsets, content)
+
+    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5]))
+    content2 = ak.layout.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
+    offsets = ak.layout.Index32(np.array([0, 3, 3, 5, 6, 9]))
+    recordarray = ak.layout.RecordArray(
+        [content1, listoffsetarray, content2, content1],
+        keys=["one", "chonks", "2", "wonky"],
+    )
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(recordarray)[-3:3:-1], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(recordarray)[-3:3:-1])
+
+def test_nonzero_offset_fromarrow_UnionArray_1():
+    content0 = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    content = ak.Array(
+        ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+    ).layout
+    tags = ak.layout.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
+    index = ak.layout.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
+    array = ak.layout.UnionArray8_32(tags, index, [content0, content])
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(array)[2:], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(array)[2:])
+
+def test_nonzero_offset_fromarrow_UnionArray_2():
+    content0 = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    content = ak.Array(
+        ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+    ).layout
+    tags = ak.layout.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
+    index = ak.layout.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
+    array = ak.layout.UnionArray8_32(tags, index, [content0, content])
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(array)[2:5], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(array)[2:5])
+
+def test_nonzero_offset_fromarrow_UnionArray_3():
+    content0 = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]).layout
+    content = ak.Array(
+        ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+    ).layout
+    tags = ak.layout.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
+    index = ak.layout.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
+    array = ak.layout.UnionArray8_32(tags, index, [content0, content])
+    assert ak.to_list(
+        ak.from_arrow(ak.to_arrow(array)[0:5:1], highlevel=False)
+    ) == pyarrow.Array.to_pylist(ak.to_arrow(array)[0:5:1])
+
+def test_nonzero_offset_fromarrow_ArrowDictionaryArray_1():
+    a = pyarrow.DictionaryArray.from_arrays(
+        pyarrow.array([0, 0, 2, 2, 1, 0, 2, 1, 1]),
+        pyarrow.array(["one", None, "three"]),
+    )
+    assert ak.to_list(ak.from_arrow(a[2:], highlevel=False)) == [
+        "three",
+        "three",
+        None,
+        "one",
+        "three",
+        None,
+        None,
+    ]
+
+def test_nonzero_offset_fromarrow_ArrowDictionaryArray_2():
+    a = pyarrow.DictionaryArray.from_arrays(
+        pyarrow.array([0, 0, 2, 2, 1, 0, 2, 1, 1]),
+        pyarrow.array(["one", None, "three"]),
+    )
+    assert ak.to_list(ak.from_arrow(a[2:5], highlevel=False)) == [
+        "three",
+        "three",
+        None
+    ]
+
+def test_nonzero_offset_fromarrow_ArrowDictionaryArray_3():
+    a = pyarrow.DictionaryArray.from_arrays(
+        pyarrow.array([0, 0, 2, 2, 1, 0, 2, 1, 1]),
+        pyarrow.array(["one", None, "three"]),
+    )
+    assert ak.to_list(ak.from_arrow(a[0:8:2], highlevel=False)) == [
+        "one",
+        "three",
+        None,
+        "three",
+    ]
+
+def test_nonzero_offset_fromarrow_ArrowDictionaryArray_4():
+    a = pyarrow.DictionaryArray.from_arrays(
+        pyarrow.array([0, 0, 2, 2, 1, 0, 2, 1, 1]),
+        pyarrow.array(["one", None, "three"]),
+    )
+    assert ak.to_list(ak.from_arrow(a[-3:3:-1], highlevel=False)) == [
+        "three",
+        "one",
+        None
+    ]
+
+def test_nonzero_offset_fromarrow_ArrowRecordBatch_1():
+    a = pyarrow.RecordBatch.from_arrays(
+        [
+            pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5]),
+            pyarrow.array([[1, 2, 3], [], [], [4, 5], [6]]),
+        ],
+        ["a", "b"],
+    )
+    assert ak.to_list(ak.from_arrow(a[0], highlevel=False)) == a[0].to_pylist()
+
+def test_nonzero_offset_fromarrow_ArrowRecordBatch_2():
+    a = pyarrow.RecordBatch.from_arrays(
+        [
+            pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5]),
+            pyarrow.array([[1, 2, 3], [], [], [4, 5], [6]]),
+        ],
+        ["a", "b"],
+    )
+    assert ak.to_list(ak.from_arrow(a[2:], highlevel=False)) == [
+        {'a': 3.3, 'b': []}, 
+        {'a': 4.4, 'b': [4, 5]}, 
+        {'a': 5.5, 'b': [6]}
+    ]
+
+def test_nonzero_offset_fromarrow_ArrowRecordBatch_3():
+    a = pyarrow.RecordBatch.from_arrays(
+        [
+            pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5]),
+            pyarrow.array([[1, 2, 3], [], [], [4, 5], [6]]),
+        ],
+        ["a", "b"],
+    )
+    assert ak.to_list(ak.from_arrow(a[2:5], highlevel=False)) == [
+        {'a': 3.3, 'b': []}, 
+        {'a': 4.4, 'b': [4, 5]}, 
+        {'a': 5.5, 'b': [6]}
+    ]
+
+def test_nonzero_offset_fromarrow_ArrowRecordBatch_4():
+    a = pyarrow.RecordBatch.from_arrays(
+        [
+            pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5]),
+            pyarrow.array([[1, 2, 3], [], [], [4, 5], [6]]),
+        ],
+        ["a", "b"],
+    )
+    assert ak.to_list(ak.from_arrow(a[0:5:2], highlevel=False)) == [
+        {'a': 1.1, 'b': [1, 2, 3]}, 
+        {'a': 3.3, 'b': []}, 
+        {'a': 5.5, 'b': [6]}
+    ]
+
+def test_nonzero_offset_fromarrow_ArrowRecordBatch_4():
+    a = pyarrow.RecordBatch.from_arrays(
+        [
+            pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5]),
+            pyarrow.array([[1, 2, 3], [], [], [4, 5], [6]]),
+        ],
+        ["a", "b"],
+    )
+    assert ak.to_list(ak.from_arrow(a[-2:0:-1], highlevel=False)) == [
+        {'a': 4.4, 'b': [4, 5]}, 
+        {'a': 3.3, 'b': []}, 
+        {'a': 2.2, 'b': []}
+    ]
+
+def test_nonzero_offset_fromarrow_ArrowTable_1():
+    a = pyarrow.Table.from_batches(
+        [
+            pyarrow.RecordBatch.from_arrays(
+                [
+                    pyarrow.array([1.1, 2.2, 3.3, None, 5.5]),
+                    pyarrow.array([[1, 2, 3], [], [4, 5], [None], [6]]),
+                    pyarrow.array(
+                        [
+                            {"x": 1, "y": 1.1},
+                            {"x": 2, "y": 2.2},
+                            {"x": 3, "y": 3.3},
+                            {"x": 4, "y": None},
+                            {"x": 5, "y": 5.5},
+                        ]
+                    ),
+                    pyarrow.array(
+                        [
+                            {"x": 1, "y": 1.1},
+                            None,
+                            None,
+                            {"x": 4, "y": None},
+                            {"x": 5, "y": 5.5},
+                        ]
+                    ),
+                    pyarrow.array(
+                        [
+                            [
+                                {"x": 1, "y": 1.1},
+                                {"x": 2, "y": 2.2},
+                                {"x": 3, "y": 3.3},
+                            ],
+                            [],
+                            [{"x": 4, "y": None}, {"x": 5, "y": 5.5}],
+                            [None],
+                            [{"x": 6, "y": 6.6}],
+                        ]
+                    ),
+                ],
+                ["a", "b", "c", "d", "e"],
+            ),
+            pyarrow.RecordBatch.from_arrays(
+                [
+                    pyarrow.array([1.1, 2.2, 3.3, None, 5.5]),
+                    pyarrow.array([[1, 2, 3], [], [4, 5], [None], [6]]),
+                    pyarrow.array(
+                        [
+                            {"x": 1, "y": 1.1},
+                            {"x": 2, "y": 2.2},
+                            {"x": 3, "y": 3.3},
+                            {"x": 4, "y": None},
+                            {"x": 5, "y": 5.5},
+                        ]
+                    ),
+                    pyarrow.array(
+                        [
+                            {"x": 1, "y": 1.1},
+                            None,
+                            None,
+                            {"x": 4, "y": None},
+                            {"x": 5, "y": 5.5},
+                        ]
+                    ),
+                    pyarrow.array(
+                        [
+                            [
+                                {"x": 1, "y": 1.1},
+                                {"x": 2, "y": 2.2},
+                                {"x": 3, "y": 3.3},
+                            ],
+                            [],
+                            [{"x": 4, "y": None}, {"x": 5, "y": 5.5}],
+                            [None],
+                            [{"x": 6, "y": 6.6}],
+                        ]
+                    ),
+                ],
+                ["a", "b", "c", "d", "e"],
+            ),
+        ]
+    )
+    assert ak.to_list(ak.from_arrow(a[0:5:2], highlevel=False)) == [
+        {
+            "a": 1.1,
+            "b": [1, 2, 3],
+            "c": {"x": 1, "y": 1.1},
+            "d": {"x": 1, "y": 1.1},
+            "e": [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
+        },
+        {
+            "a": 3.3,
+            "b": [4, 5],
+            "c": {"x": 3, "y": 3.3},
+            "d": None,
+            "e": [{"x": 4, "y": None}, {"x": 5, "y": 5.5}],
+        },
+        {
+            "a": 5.5,
+            "b": [6],
+            "c": {"x": 5, "y": 5.5},
+            "d": {"x": 5, "y": 5.5},
+            "e": [{"x": 6, "y": 6.6}],
+        },
+    ]
