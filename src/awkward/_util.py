@@ -363,8 +363,8 @@ def numba_binops(binop, left, right, behavior):
                 yield typer, lower
 
 
-def behaviorof(*arrays, behavior=None):
-    if behavior is not None:
+def behaviorof(*arrays, **kwargs):
+    if kwargs.get("behavior") is not None:
         # An explicit 'behavior' always wins.
         return behavior
 
