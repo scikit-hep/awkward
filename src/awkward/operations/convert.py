@@ -622,7 +622,7 @@ def to_kernels(array, kernels, highlevel=True, behavior=None):
     out = arr.copy_to(kernels)
 
     if highlevel:
-        return ak._util.wrap(out, behavior)
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 

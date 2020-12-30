@@ -363,18 +363,25 @@ def numba_binops(binop, left, right, behavior):
                 yield typer, lower
 
 
-def behaviorof(*arrays):
-    behavior = None
+def behaviorof(*arrays, behavior=None):
+    behavior = behavior
+    copied = False
     for x in arrays[::-1]:
         if (
             isinstance(
                 x,
-                (ak.highlevel.Array, ak.highlevel.Record, ak.highlevel.ArrayBuilder,),
+                (ak.highlevel.Array, ak.highlevel.Record, ak.highlevel.ArrayBuilder),
             )
             and x.behavior is not None
         ):
             if behavior is None:
-                behavior = dict(x.behavior)
+                behavior = x.behavior
+            elif behavior is x.behavior:
+                pass
+            elif not copied:
+                behavior = dict(behavior)
+                behavior.update(x.behavior)
+                copied = True
             else:
                 behavior.update(x.behavior)
     return behavior
