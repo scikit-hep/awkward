@@ -3000,7 +3000,9 @@ def partitioned(arrays, highlevel=True, behavior=None):
 
     out = ak.partition.IrregularlyPartitionedArray(partitions, stops)
     if highlevel:
-        return ak._util.wrap(out, behavior=behavior)
+        return ak._util.wrap(
+            out, behavior=ak._util.behaviorof(*arrays, behavior=behavior)
+        )
     else:
         return out
 
