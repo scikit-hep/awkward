@@ -364,11 +364,11 @@ def numba_binops(binop, left, right, behavior):
 
 
 def behaviorof(*arrays, **kwargs):
-    if kwargs.get("behavior") is not None:
+    behavior = kwargs.get("behavior")
+    if behavior is not None:
         # An explicit 'behavior' always wins.
         return behavior
 
-    behavior = None
     copied = False
     for x in arrays[::-1]:
         if (
