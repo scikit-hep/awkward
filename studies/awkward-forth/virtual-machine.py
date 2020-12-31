@@ -570,6 +570,14 @@ class VirtualMachine:
                     else:
                         stack.push(do_i[-2])
 
+                elif instruction == Builtin.K.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    if len(do_i) < 3:
+                        stack.push(0)
+                    else:
+                        stack.push(do_i[-3])
+
                 elif instruction == Builtin.DUP.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
@@ -857,6 +865,7 @@ Builtin.WHILE = Builtin()
 Builtin.EXIT = Builtin()
 Builtin.I = Builtin("i")
 Builtin.J = Builtin("j")
+Builtin.K = Builtin("k")
 Builtin.DUP = Builtin("dup")
 Builtin.DROP = Builtin("drop")
 Builtin.SWAP = Builtin("swap")
@@ -1023,6 +1032,7 @@ testy(": foo 10 5 do 3 0 do 1+ loop loop ; 1 foo")
 testy(": foo 10 5 do 3 0 do i loop loop ; foo")
 testy(": foo 10 5 do 3 0 do j loop loop ; foo")
 testy(": foo 10 5 do 3 0 do i j * loop loop ; foo")
+testy(": foo 10 5 do 8 6 do 3 0 do i j * k * loop loop loop ; foo")
 
 testy(": foo 3 begin dup 1 - dup 0= until ; foo")
 testy(": foo 4 begin dup 1 - dup 0= invert while 123 drop repeat ; foo")
