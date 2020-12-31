@@ -1,6 +1,7 @@
 import math
 import re
 import subprocess
+import sys
 
 import numpy as np
 
@@ -88,7 +89,7 @@ class VirtualMachine:
                 except ValueError:
                     return None
 
-        def parse(start, stop, instructions, exitdepth, againdepth):
+        def parse(defn, start, stop, instructions, exitdepth, againdepth):
             pointer = start
             while pointer < stop:
                 word = tokenized[pointer]
@@ -116,6 +117,10 @@ class VirtualMachine:
 
                 elif word == "\n":
                     # End-of-line needs to be a token to parse the above.
+                    pointer += 1
+
+                elif word == "":
+                    # Remove leading or trailing blanks.
                     pointer += 1
 
                 elif word == ":":
@@ -148,9 +153,15 @@ class VirtualMachine:
 
                     # Now parse the subroutine and add it to the dictionary.
                     self.dictionary.append([])
-                    parse(substart, substop, self.dictionary[-1], 0, 0)
+                    parse(name, substart, substop, self.dictionary[-1], 0, 0)
 
                     pointer = substop + 1
+
+                elif word == "recurse":
+                    if defn is None:
+                        raise ValueError("'recurse' can only be used in a ':' .. ';' definition")
+                    instructions.append(self.dictionary_names[defn])
+                    pointer += 1
 
                 elif word == "variable":
                     if pointer + 1 >= stop:
@@ -206,7 +217,7 @@ class VirtualMachine:
 
                         # Now add the consequent to the dictionary.
                         self.dictionary.append([])
-                        parse(substart, substop, self.dictionary[-1], exitdepth + 1, nextagain)
+                        parse(defn, substart, substop, self.dictionary[-1], exitdepth + 1, nextagain)
 
                         instructions.append(Builtin.IF.as_integer)
                         instructions.append(consequent)
@@ -216,11 +227,11 @@ class VirtualMachine:
                         # Same as above, except that this is an 'if .. else .. then'.
                         consequent = len(Builtin.lookup) + len(self.dictionary)
                         self.dictionary.append([])
-                        parse(substart, subelse, self.dictionary[-1], exitdepth + 1, nextagain)
+                        parse(defn, substart, subelse, self.dictionary[-1], exitdepth + 1, nextagain)
 
                         alternate = len(Builtin.lookup) + len(self.dictionary)
                         self.dictionary.append([])
-                        parse(subelse + 1, substop, self.dictionary[-1], exitdepth + 1, nextagain)
+                        parse(defn, subelse + 1, substop, self.dictionary[-1], exitdepth + 1, nextagain)
 
                         instructions.append(Builtin.IF_ELSE.as_integer)
                         instructions.append(consequent)
@@ -251,7 +262,7 @@ class VirtualMachine:
 
                     # Now add the loop body to the dictionary.
                     self.dictionary.append([])
-                    parse(substart, substop, self.dictionary[-1], exitdepth + 1, 0)
+                    parse(defn, substart, substop, self.dictionary[-1], exitdepth + 1, 0)
 
                     if is_step:
                         instructions.append(Builtin.DO_STEP.as_integer)
@@ -301,7 +312,7 @@ class VirtualMachine:
 
                         # Now add it to the dictionary.
                         self.dictionary.append([])
-                        parse(substart, substop, self.dictionary[-1], exitdepth + 1, 1)
+                        parse(defn, substart, substop, self.dictionary[-1], exitdepth + 1, 1)
 
                         instructions.append(body)
                         instructions.append(Builtin.AGAIN.as_integer)
@@ -312,7 +323,7 @@ class VirtualMachine:
 
                         # Now add it to the dictionary.
                         self.dictionary.append([])
-                        parse(substart, substop, self.dictionary[-1], exitdepth + 1, 0)
+                        parse(defn, substart, substop, self.dictionary[-1], exitdepth + 1, 0)
 
                         instructions.append(body)
                         instructions.append(Builtin.UNTIL.as_integer)
@@ -321,12 +332,12 @@ class VirtualMachine:
                         # Define the 'begin' .. 'repeat' statements.
                         unconditional = len(Builtin.lookup) + len(self.dictionary)
                         self.dictionary.append([])
-                        parse(substart, subwhile, self.dictionary[-1], exitdepth + 1, 0)
+                        parse(defn, substart, subwhile, self.dictionary[-1], exitdepth + 1, 0)
 
                         # Define the 'repeat' .. 'until' statements.
                         conditional = len(Builtin.lookup) + len(self.dictionary)
                         self.dictionary.append([])
-                        parse(subwhile + 1, substop, self.dictionary[-1], exitdepth + 1, 0)
+                        parse(defn, subwhile + 1, substop, self.dictionary[-1], exitdepth + 1, 0)
 
                         instructions.append(unconditional)
                         instructions.append(Builtin.WHILE.as_integer)
@@ -369,7 +380,7 @@ class VirtualMachine:
                         )
 
         instructions = []
-        parse(0, len(tokenized), instructions, 0, 0)
+        parse(None, 0, len(tokenized), instructions, 0, 0)
         return instructions, variable_names, input_names, output_names
 
     def run(self, instructions, variables, inputs, output_dtypes, variable_names=None, verbose=False):
@@ -624,6 +635,20 @@ class VirtualMachine:
                     stack.push(a)
                     stack.push(c)
 
+                elif instruction == Builtin.NIP.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    a, b = stack.pop(), stack.pop()
+                    stack.push(a)
+
+                elif instruction == Builtin.TUCK.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    a, b = stack.pop(), stack.pop()
+                    stack.push(a)
+                    stack.push(b)
+                    stack.push(a)
+
                 elif instruction == Builtin.ADD.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
@@ -692,7 +717,17 @@ class VirtualMachine:
                         printout(len(which) - 1, Builtin.word(instruction), True)
                     stack.push(-stack.pop())
 
-                elif instruction == Builtin.ZEQ.as_integer:
+                elif instruction == Builtin.ADD1.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(stack.pop() + 1)
+
+                elif instruction == Builtin.SUB1.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    stack.push(stack.pop() - 1)
+
+                elif instruction == Builtin.EQ0.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
                     stack.push(-1 if stack.pop() == 0 else 0)
@@ -833,7 +868,7 @@ class Builtin:
             or word in ["if", "then", "else"]
             or word in ["do", "loop", "+loop"]
             or word in ["begin", "again", "until", "while", "repeat"]
-            or word in ["exit", "unloop"]
+            or word in ["leave", "exit", "unloop", "recurse"]
             or word in Builtin.lookup
         )
 
@@ -859,6 +894,8 @@ Builtin.DROP = Builtin("drop")
 Builtin.SWAP = Builtin("swap")
 Builtin.OVER = Builtin("over")
 Builtin.ROT = Builtin("rot")
+Builtin.NIP = Builtin("nip")
+Builtin.TUCK = Builtin("tuck")
 Builtin.ADD = Builtin("+")
 Builtin.SUB = Builtin("-")
 Builtin.MUL = Builtin("*")
@@ -871,7 +908,9 @@ Builtin.ABS = Builtin("abs")
 Builtin.MIN = Builtin("min")
 Builtin.MAX = Builtin("max")
 Builtin.NEGATE = Builtin("negate")
-Builtin.ZEQ = Builtin("0=")
+Builtin.ADD1 = Builtin("1+")
+Builtin.SUB1 = Builtin("1-")
+Builtin.EQ0 = Builtin("0=")
 Builtin.EQ = Builtin("=")
 Builtin.NE = Builtin("<>")
 Builtin.GT = Builtin(">")
@@ -944,12 +983,92 @@ def testy(source):
     assert mine == theirs, f"{source}\n\nmyforth: {mine}\n gforth: {theirs}"
 
 
+testy(": foo 3 + 2 * ; 4 foo foo")
+testy(": foo 3 + 2 * ; : bar 4 foo foo ; bar")
+testy(": factorial dup 2 < if drop 1 exit then dup 1- recurse * ; 5 factorial")
+testy("variable x 10 x ! 5 x +! x @ x @ x @")
+testy("variable x 10 x ! 5 x +! : foo x @ x @ x @ ; foo foo")
+
+testy(": foo if 999 then ; -1 foo")
+testy(": foo if 999 then ; 0 foo")
+testy(": foo if 999 then ; 1 foo")
+testy(": foo if if 999 then then ; -1 -1 foo")
+testy(": foo if if 999 then then ; 0 -1 foo")
+testy(": foo if if 999 then then ; 1 -1 foo")
+testy(": foo if if 999 then then ; -1 0 foo")
+testy(": foo if if 999 then then ; 0 0 foo")
+testy(": foo if if 999 then then ; 1 0 foo")
+testy(": foo if if 999 then then ; -1 1 foo")
+testy(": foo if if 999 then then ; 0 1 foo")
+testy(": foo if if 999 then then ; 1 1 foo")
+testy(": foo if 999 else 123 then ; -1 foo")
+testy(": foo if 999 else 123 then ; 0 foo")
+testy(": foo if 999 else 123 then ; 1 foo")
+testy(": foo if 999 else 123 then ; -1 -1 foo")
+testy(": foo if 999 else 123 then ; 0 -1 foo")
+testy(": foo if 999 else 123 then ; 1 -1 foo")
+testy(": foo if 999 else 123 then ; -1 0 foo")
+testy(": foo if 999 else 123 then ; 0 0 foo")
+testy(": foo if 999 else 123 then ; 1 0 foo")
+testy(": foo if 999 else 123 then ; -1 1 foo")
+testy(": foo if 999 else 123 then ; 0 1 foo")
+testy(": foo if 999 else 123 then ; 1 1 foo")
+testy(": foo if if 999 then else 123 then ; -1 -1 foo")
+testy(": foo if if 999 then else 123 then ; 0 -1 foo")
+testy(": foo if if 999 then else 123 then ; 1 -1 foo")
+testy(": foo if if 999 then else 123 then ; -1 0 foo")
+testy(": foo if if 999 then else 123 then ; 0 0 foo")
+testy(": foo if if 999 then else 123 then ; 1 0 foo")
+testy(": foo if if 999 then else 123 then ; -1 1 foo")
+testy(": foo if if 999 then else 123 then ; 0 1 foo")
+testy(": foo if if 999 then else 123 then ; 1 1 foo")
+testy(": foo if 999 else if 123 then then ; -1 -1 foo")
+testy(": foo if 999 else if 123 then then ; 0 -1 foo")
+testy(": foo if 999 else if 123 then then ; 1 -1 foo")
+testy(": foo if 999 else if 123 then then ; -1 0 foo")
+testy(": foo if 999 else if 123 then then ; 0 0 foo")
+testy(": foo if 999 else if 123 then then ; 1 0 foo")
+testy(": foo if 999 else if 123 then then ; -1 1 foo")
+testy(": foo if 999 else if 123 then then ; 0 1 foo")
+testy(": foo if 999 else if 123 then then ; 1 1 foo")
+testy(": foo if if 999 else 321 then else 123 then ; -1 -1 foo")
+testy(": foo if if 999 else 321 then else 123 then ; 0 -1 foo")
+testy(": foo if if 999 else 321 then else 123 then ; 1 -1 foo")
+testy(": foo if if 999 else 321 then else 123 then ; -1 0 foo")
+testy(": foo if if 999 else 321 then else 123 then ; 0 0 foo")
+testy(": foo if if 999 else 321 then else 123 then ; 1 0 foo")
+testy(": foo if if 999 else 321 then else 123 then ; -1 1 foo")
+testy(": foo if if 999 else 321 then else 123 then ; 0 1 foo")
+testy(": foo if if 999 else 321 then else 123 then ; 1 1 foo")
+testy(": foo if 999 else if 123 else 321 then then ; -1 -1 foo")
+testy(": foo if 999 else if 123 else 321 then then ; 0 -1 foo")
+testy(": foo if 999 else if 123 else 321 then then ; 1 -1 foo")
+testy(": foo if 999 else if 123 else 321 then then ; -1 0 foo")
+testy(": foo if 999 else if 123 else 321 then then ; 0 0 foo")
+testy(": foo if 999 else if 123 else 321 then then ; 1 0 foo")
+testy(": foo if 999 else if 123 else 321 then then ; -1 1 foo")
+testy(": foo if 999 else if 123 else 321 then then ; 0 1 foo")
+testy(": foo if 999 else if 123 else 321 then then ; 1 1 foo")
+
+testy(": foo do i loop ; 10 5 foo")
+testy(": foo do i i +loop ; 100 5 foo")
+
+# Nested loops don't behave the same way as gforth; it doesn't seem to be
+# consuming both limits before iterating.
+
+# testy(": foo 10 0 do 3 0 do i loop loop ; foo")
+
+testy(": foo 3 begin dup 1 - dup 0= until ; foo")
+testy(": foo 4 begin dup 1 - dup 0= invert while 123 drop repeat ; foo")
+testy(": foo 3 begin dup 1 - dup 0= if exit then again ; foo")
+
 testy("1 2 3 4 dup")
 testy("1 2 3 4 drop")
 testy("1 2 3 4 swap")
 testy("1 2 3 4 over")
 testy("1 2 3 4 rot")
-
+testy("1 2 3 4 nip")
+testy("1 2 3 4 tuck")
 
 testy("3 5 +")
 testy("-3 5 +")
@@ -1021,6 +1140,12 @@ testy("-1 negate")
 testy("0 negate")
 testy("1 negate")
 testy("2 negate")
+testy("-1 1+")
+testy("0 1+")
+testy("1 1+")
+testy("-1 1-")
+testy("0 1-")
+testy("1 1-")
 testy("-1 0=")
 testy("0 0=")
 testy("1 0=")
