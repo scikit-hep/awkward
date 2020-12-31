@@ -892,39 +892,40 @@ Builtin.INVERT = Builtin("invert")
 Builtin.FALSE = Builtin("false")
 Builtin.TRUE = Builtin("true")
 
-# vm = VirtualMachine()
-# vm.do("3 ( whatever ) 2 + 2 *")
-# vm.do("3 ( whatever )\n2 + 2 *")
-# vm.do("3 \\ whatever\n2 + 2 *")
-# vm.do(": foo 3 2 + ; foo")
-# vm.do(": foo : bar 1 + ; 3 2 + ; foo bar")
-# vm.do("1 2 3 dup")
-# vm.do("1 2 3 drop")
-# vm.do("1 2 3 4 swap")
-# vm.do("1 2 3 over")
-# vm.do("1 2 3 rot")
-# vm.do(": foo -1 if 3 2 + else 10 20 * then ; foo 999")
-# vm.do(": foo 0 if 3 2 + else 10 20 * then ; foo 999")
-# vm.do(": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ;")
-# vm.do("-1 -1 foo")
-# vm.do("0 -1 foo")
-# vm.do("-1 0 foo")
-# vm.do("0 0 foo")
-# vm.do("4 1 do i loop")
-# vm.do("3 1 do 40 10 do i j + 10 +loop loop")
-# vm.do("3 begin 1 - dup 0= until 999")
-# vm.do("4 begin 1 - dup 0= invert while 123 drop repeat 999")
-# vm.do(": foo 1 - if exit then 123 ;")
-# vm.do(": bar foo 999 ;")
-# vm.do("1 bar")
-# vm.do("2 bar")
-# vm.do(": foo 1 begin dup 1 + dup 5 = if exit then again ; foo")
-# vm.do("variable x 999 x ! 1 x +! x @")
-# vm.do("1 2 lshift")
-# vm.do("15 10 max")
-# vm.do("15 negate")
-# vm.do("true invert")
-# vm.do("false invert")
+
+vm = VirtualMachine()
+vm.do("3 ( whatever ) 2 + 2 *")
+vm.do("3 ( whatever )\n2 + 2 *")
+vm.do("3 \\ whatever\n2 + 2 *")
+vm.do(": foo 3 2 + ; foo")
+vm.do(": foo : bar 1 + ; 3 2 + ; foo bar")
+vm.do("1 2 3 dup")
+vm.do("1 2 3 drop")
+vm.do("1 2 3 4 swap")
+vm.do("1 2 3 over")
+vm.do("1 2 3 rot")
+vm.do(": foo -1 if 3 2 + else 10 20 * then ; foo 999")
+vm.do(": foo 0 if 3 2 + else 10 20 * then ; foo 999")
+vm.do(": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ;")
+vm.do("-1 -1 foo")
+vm.do("0 -1 foo")
+vm.do("-1 0 foo")
+vm.do("0 0 foo")
+vm.do("4 1 do i loop")
+vm.do("3 1 do 40 10 do i j + 10 +loop loop")
+vm.do("3 begin 1 - dup 0= until 999")
+vm.do("4 begin 1 - dup 0= invert while 123 drop repeat 999")
+vm.do(": foo 1 - if exit then 123 ;")
+vm.do(": bar foo 999 ;")
+vm.do("1 bar")
+vm.do("2 bar")
+vm.do(": foo 1 begin dup 1 + dup 5 = if exit then again ; foo")
+vm.do("variable x 999 x ! 1 x +! x @")
+vm.do("1 2 lshift")
+vm.do("15 10 max")
+vm.do("15 negate")
+vm.do("true invert")
+vm.do("false invert")
 
 
 def myforth(source):
@@ -935,7 +936,7 @@ def myforth(source):
 
 def gforth(source):
     result = subprocess.run(
-        'echo "{0} .s" | gforth'.format(source), shell=True, stdout=subprocess.PIPE
+        'echo "100 maxdepth-.s ! {0} .s" | gforth'.format(source), shell=True, stdout=subprocess.PIPE
     ).stdout
     m = re.compile(rb"<[0-9]*>\s*((-?[0-9]+\s+)*)ok\s*$").search(result)
     if m is None:
@@ -1018,11 +1019,10 @@ testy(": foo if 999 else if 123 else 321 then then ; 1 1 foo")
 
 testy(": foo do i loop ; 10 5 foo")
 testy(": foo do i i +loop ; 100 5 foo")
-
-# Nested loops don't behave the same way as gforth; it doesn't seem to be
-# consuming both limits before iterating.
-
-# testy(": foo 10 0 do 3 0 do i loop loop ; foo")
+testy(": foo 10 5 do 3 0 do 1+ loop loop ; 1 foo")
+testy(": foo 10 5 do 3 0 do i loop loop ; foo")
+testy(": foo 10 5 do 3 0 do j loop loop ; foo")
+testy(": foo 10 5 do 3 0 do i j * loop loop ; foo")
 
 testy(": foo 3 begin dup 1 - dup 0= until ; foo")
 testy(": foo 4 begin dup 1 - dup 0= invert while 123 drop repeat ; foo")
