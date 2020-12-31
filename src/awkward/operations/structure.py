@@ -344,6 +344,7 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
         )
 
     if isinstance(arrays, dict):
+        behavior = ak._util.behaviorof(*arrays.values())
         recordlookup = []
         layouts = []
         for n, x in arrays.items():
@@ -355,6 +356,7 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
             )
 
     else:
+        behavior = ak._util.behaviorof(*arrays)
         recordlookup = None
         layouts = []
         for x in arrays:
@@ -390,7 +392,6 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
         else:
             return None
 
-    behavior = ak._util.behaviorof(*arrays)
     out = ak._util.broadcast_and_apply(layouts, getfunction, behavior, pass_depth=True)
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
@@ -2373,11 +2374,10 @@ def cartesian(
     #ak.argcartesian form can be particularly useful as nested indexing in
     #ak.Array.__getitem__.
     """
-    behavior = ak._util.behaviorof(*arrays)
-    nplike = ak.nplike.of(*arrays)
-
     is_partitioned = False
     if isinstance(arrays, dict):
+        behavior = ak._util.behaviorof(*arrays.values())
+        nplike = ak.nplike.of(*arrays.values())
         new_arrays = {}
         for n, x in arrays.items():
             new_arrays[n] = ak.operations.convert.to_layout(
@@ -2386,6 +2386,8 @@ def cartesian(
             if isinstance(new_arrays[n], ak.partition.PartitionedArray):
                 is_partitioned = True
     else:
+        behavior = ak._util.behaviorof(*arrays)
+        nplike = ak.nplike.of(*arrays)
         new_arrays = []
         for x in arrays:
             new_arrays.append(
@@ -2677,6 +2679,7 @@ def argcartesian(
 
     else:
         if isinstance(arrays, dict):
+            behavior = ak._util.behaviorof(*arrays.values())
             layouts = dict(
                 (
                     n,
@@ -2687,6 +2690,7 @@ def argcartesian(
                 for n, x in arrays.items()
             )
         else:
+            behavior = ak._util.behaviorof(*arrays)
             layouts = [
                 ak.operations.convert.to_layout(
                     x, allow_record=False, allow_other=False
@@ -2706,7 +2710,7 @@ def argcartesian(
         )
 
         if highlevel:
-            return ak._util.wrap(result, ak._util.behaviorof(*arrays))
+            return ak._util.wrap(result, behavior)
         else:
             return result
 
