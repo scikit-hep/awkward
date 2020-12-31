@@ -89,7 +89,7 @@ class VirtualMachine:
                 except ValueError:
                     return None
 
-        def parse(defn, start, stop, instructions, exitdepth, againdepth):
+        def parse(defn, start, stop, instructions, exitdepth):
             pointer = start
             while pointer < stop:
                 word = tokenized[pointer]
@@ -153,7 +153,7 @@ class VirtualMachine:
 
                     # Now parse the subroutine and add it to the dictionary.
                     self.dictionary.append([])
-                    parse(name, substart, substop, self.dictionary[-1], 0, 0)
+                    parse(name, substart, substop, self.dictionary[-1], 0)
 
                     pointer = substop + 1
 
@@ -208,8 +208,6 @@ class VirtualMachine:
                         elif tokenized[substop] == "else" and nesting == 1:
                             subelse = substop
 
-                    nextagain = 0 if againdepth == 0 else againdepth + 1
-
                     if subelse == -1:
                         # Add the consequent to the dictionary so that it can be used
                         # without special instruction pointer manipulation at runtime.
@@ -217,7 +215,7 @@ class VirtualMachine:
 
                         # Now add the consequent to the dictionary.
                         self.dictionary.append([])
-                        parse(defn, substart, substop, self.dictionary[-1], exitdepth + 1, nextagain)
+                        parse(defn, substart, substop, self.dictionary[-1], exitdepth + 1)
 
                         instructions.append(Builtin.IF.as_integer)
                         instructions.append(consequent)
@@ -227,11 +225,11 @@ class VirtualMachine:
                         # Same as above, except that this is an 'if .. else .. then'.
                         consequent = len(Builtin.lookup) + len(self.dictionary)
                         self.dictionary.append([])
-                        parse(defn, substart, subelse, self.dictionary[-1], exitdepth + 1, nextagain)
+                        parse(defn, substart, subelse, self.dictionary[-1], exitdepth + 1)
 
                         alternate = len(Builtin.lookup) + len(self.dictionary)
                         self.dictionary.append([])
-                        parse(defn, subelse + 1, substop, self.dictionary[-1], exitdepth + 1, nextagain)
+                        parse(defn, subelse + 1, substop, self.dictionary[-1], exitdepth + 1)
 
                         instructions.append(Builtin.IF_ELSE.as_integer)
                         instructions.append(consequent)
@@ -262,7 +260,7 @@ class VirtualMachine:
 
                     # Now add the loop body to the dictionary.
                     self.dictionary.append([])
-                    parse(defn, substart, substop, self.dictionary[-1], exitdepth + 1, 0)
+                    parse(defn, substart, substop, self.dictionary[-1], exitdepth + 1)
 
                     if is_step:
                         instructions.append(Builtin.DO_STEP.as_integer)
@@ -312,7 +310,7 @@ class VirtualMachine:
 
                         # Now add it to the dictionary.
                         self.dictionary.append([])
-                        parse(defn, substart, substop, self.dictionary[-1], exitdepth + 1, 1)
+                        parse(defn, substart, substop, self.dictionary[-1], exitdepth + 1)
 
                         instructions.append(body)
                         instructions.append(Builtin.AGAIN.as_integer)
@@ -323,7 +321,7 @@ class VirtualMachine:
 
                         # Now add it to the dictionary.
                         self.dictionary.append([])
-                        parse(defn, substart, substop, self.dictionary[-1], exitdepth + 1, 0)
+                        parse(defn, substart, substop, self.dictionary[-1], exitdepth + 1)
 
                         instructions.append(body)
                         instructions.append(Builtin.UNTIL.as_integer)
@@ -332,25 +330,18 @@ class VirtualMachine:
                         # Define the 'begin' .. 'repeat' statements.
                         unconditional = len(Builtin.lookup) + len(self.dictionary)
                         self.dictionary.append([])
-                        parse(defn, substart, subwhile, self.dictionary[-1], exitdepth + 1, 0)
+                        parse(defn, substart, subwhile, self.dictionary[-1], exitdepth + 1)
 
                         # Define the 'repeat' .. 'until' statements.
                         conditional = len(Builtin.lookup) + len(self.dictionary)
                         self.dictionary.append([])
-                        parse(defn, subwhile + 1, substop, self.dictionary[-1], exitdepth + 1, 0)
+                        parse(defn, subwhile + 1, substop, self.dictionary[-1], exitdepth + 1)
 
                         instructions.append(unconditional)
                         instructions.append(Builtin.WHILE.as_integer)
                         instructions.append(conditional)
 
                     pointer = substop + 1
-
-                elif word == "leave":
-                    if againdepth == 0:
-                        raise ValueError("'leave' is only allowed in 'begin' .. 'again' loops")
-                    instructions.append(Builtin.LEAVE.as_integer)
-                    instructions.append(againdepth)
-                    pointer += 1
 
                 elif word == "exit":
                     instructions.append(Builtin.EXIT.as_integer)
@@ -380,7 +371,7 @@ class VirtualMachine:
                         )
 
         instructions = []
-        parse(None, 0, len(tokenized), instructions, 0, 0)
+        parse(None, 0, len(tokenized), instructions, 0)
         return instructions, variable_names, input_names, output_names
 
     def run(self, instructions, variables, inputs, output_dtypes, variable_names=None, verbose=False):
@@ -552,17 +543,6 @@ class VirtualMachine:
                         # True, so do the next instruction but skip back after that.
                         skip[-1] = -3
 
-                elif instruction == Builtin.LEAVE.as_integer:
-                    if verbose:
-                        printout(len(which) - 1, "leave", False)
-                    againdepth = dictionary[which[-1]][where[-1]]
-                    where[-1] += 1
-                    for i in range(againdepth):
-                        which.pop()
-                        where.pop()
-                        skip.pop()
-                    break
-
                 elif instruction == Builtin.EXIT.as_integer:
                     if verbose:
                         printout(len(which) - 1, "exit", False)
@@ -573,16 +553,6 @@ class VirtualMachine:
                         where.pop()
                         skip.pop()
                     break
-
-                elif instruction == Builtin.UNLOOP.as_integer:
-                    if verbose:
-                        printout(len(which) - 1, Builtin.word(instruction), False)
-                    if len(do_depth) > 0:
-                        do_depth.pop()
-                        do_start.pop()
-                        do_stop.pop()
-                        do_step.pop()
-                        do_i.pop()
 
                 elif instruction == Builtin.I.as_integer:
                     if verbose:
@@ -868,7 +838,7 @@ class Builtin:
             or word in ["if", "then", "else"]
             or word in ["do", "loop", "+loop"]
             or word in ["begin", "again", "until", "while", "repeat"]
-            or word in ["leave", "exit", "unloop", "recurse"]
+            or word in ["exit", "recurse"]
             or word in Builtin.lookup
         )
 
@@ -884,9 +854,7 @@ Builtin.DO_STEP = Builtin()
 Builtin.AGAIN = Builtin()
 Builtin.UNTIL = Builtin()
 Builtin.WHILE = Builtin()
-Builtin.LEAVE = Builtin()
 Builtin.EXIT = Builtin()
-Builtin.UNLOOP = Builtin("unloop")
 Builtin.I = Builtin("i")
 Builtin.J = Builtin("j")
 Builtin.DUP = Builtin("dup")
@@ -950,9 +918,7 @@ Builtin.TRUE = Builtin("true")
 # vm.do(": bar foo 999 ;")
 # vm.do("1 bar")
 # vm.do("2 bar")
-# vm.do(": foo 10 5 do i dup 8 >= if unloop exit then loop ; foo")
 # vm.do(": foo 1 begin dup 1 + dup 5 = if exit then again ; foo")
-# vm.do("1 begin dup 1 + dup 5 = if leave then again")
 # vm.do("variable x 999 x ! 1 x +! x @")
 # vm.do("1 2 lshift")
 # vm.do("15 10 max")
