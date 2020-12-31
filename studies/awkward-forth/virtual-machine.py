@@ -1,5 +1,6 @@
 import math
 import re
+import subprocess
 
 import numpy as np
 
@@ -57,6 +58,9 @@ class Stack:
             raise ValueError("stack underflow")
         self.pointer -= 1
         return self.buffer[self.pointer]
+
+    def tolist(self):
+        return self.buffer[:self.pointer].tolist()
 
 
 class VirtualMachine:
@@ -639,12 +643,22 @@ class VirtualMachine:
                 elif instruction == Builtin.DIV.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(stack.pop() // stack.pop())
+                    a, b = stack.pop(), stack.pop()
+                    stack.push(b // a)
 
                 elif instruction == Builtin.MOD.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(stack.pop() % stack.pop())
+                    a, b = stack.pop(), stack.pop()
+                    stack.push(b % a)
+
+                elif instruction == Builtin.DIVMOD.as_integer:
+                    if verbose:
+                        printout(len(which) - 1, Builtin.word(instruction), True)
+                    a, b = stack.pop(), stack.pop()
+                    c, d = divmod(b, a)
+                    stack.push(d)
+                    stack.push(c)
 
                 elif instruction == Builtin.LSHIFT.as_integer:
                     if verbose:
@@ -655,7 +669,7 @@ class VirtualMachine:
                 elif instruction == Builtin.RSHIFT.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    a, b = stack.pop(), stack.pop()
+                    a, b = stack.pop().view(np.uint64), stack.pop().view(np.uint64)
                     stack.push(b >> a)
 
                 elif instruction == Builtin.ABS.as_integer:
@@ -771,9 +785,10 @@ class VirtualMachine:
         if verbose:
             print("{0:20s} | {1}".format("", str(stack)))
 
+        self.stack = stack
         return outputs
 
-    def do(self, source, inputs=[], output_dtypes=[], verbose=True):
+    def do(self, source, inputs=[], output_dtypes=[], verbose=False):
         if verbose:
             print("do: {0}".format(repr(source)))
 
@@ -795,7 +810,7 @@ class VirtualMachine:
 
 class Builtin:
     lookup = {}
-    
+
     def __init__(self, word=None):
         if word is None:
             word = len(self.lookup)   # just make unique values that aren't strings
@@ -849,6 +864,7 @@ Builtin.SUB = Builtin("-")
 Builtin.MUL = Builtin("*")
 Builtin.DIV = Builtin("/")
 Builtin.MOD = Builtin("mod")
+Builtin.DIVMOD = Builtin("/mod")
 Builtin.LSHIFT = Builtin("lshift")
 Builtin.RSHIFT = Builtin("rshift")
 Builtin.ABS = Builtin("abs")
@@ -869,39 +885,198 @@ Builtin.INVERT = Builtin("invert")
 Builtin.FALSE = Builtin("false")
 Builtin.TRUE = Builtin("true")
 
-vm = VirtualMachine()
-vm.do("3 ( whatever ) 2 + 2 *")
-vm.do("3 ( whatever )\n2 + 2 *")
-vm.do("3 \\ whatever\n2 + 2 *")
-vm.do(": foo 3 2 + ; foo")
-vm.do(": foo : bar 1 + ; 3 2 + ; foo bar")
-vm.do("1 2 3 dup")
-vm.do("1 2 3 drop")
-vm.do("1 2 3 4 swap")
-vm.do("1 2 3 over")
-vm.do("1 2 3 rot")
-vm.do(": foo -1 if 3 2 + else 10 20 * then ; foo 999")
-vm.do(": foo 0 if 3 2 + else 10 20 * then ; foo 999")
-vm.do(": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ;")
-vm.do("-1 -1 foo")
-vm.do("0 -1 foo")
-vm.do("-1 0 foo")
-vm.do("0 0 foo")
-vm.do("4 1 do i loop")
-vm.do("3 1 do 40 10 do i j + 10 +loop loop")
-vm.do("3 begin 1 - dup 0= until 999")
-vm.do("4 begin 1 - dup 0= invert while 123 drop repeat 999")
-vm.do(": foo 1 - if exit then 123 ;")
-vm.do(": bar foo 999 ;")
-vm.do("1 bar")
-vm.do("2 bar")
-vm.do(": foo 10 5 do i dup 8 >= if unloop exit then loop ; foo")
-vm.do(": foo 1 begin dup 1 + dup 5 = if exit then again ; foo")
-vm.do("1 begin dup 1 + dup 5 = if leave then again")
-vm.do("variable x 999 x ! 1 x +! x @")
-vm.do("1 2 lshift")
-vm.do("15 10 max")
-vm.do("15 negate")
-vm.do("true invert")
-vm.do("false invert")
+# vm = VirtualMachine()
+# vm.do("3 ( whatever ) 2 + 2 *")
+# vm.do("3 ( whatever )\n2 + 2 *")
+# vm.do("3 \\ whatever\n2 + 2 *")
+# vm.do(": foo 3 2 + ; foo")
+# vm.do(": foo : bar 1 + ; 3 2 + ; foo bar")
+# vm.do("1 2 3 dup")
+# vm.do("1 2 3 drop")
+# vm.do("1 2 3 4 swap")
+# vm.do("1 2 3 over")
+# vm.do("1 2 3 rot")
+# vm.do(": foo -1 if 3 2 + else 10 20 * then ; foo 999")
+# vm.do(": foo 0 if 3 2 + else 10 20 * then ; foo 999")
+# vm.do(": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ;")
+# vm.do("-1 -1 foo")
+# vm.do("0 -1 foo")
+# vm.do("-1 0 foo")
+# vm.do("0 0 foo")
+# vm.do("4 1 do i loop")
+# vm.do("3 1 do 40 10 do i j + 10 +loop loop")
+# vm.do("3 begin 1 - dup 0= until 999")
+# vm.do("4 begin 1 - dup 0= invert while 123 drop repeat 999")
+# vm.do(": foo 1 - if exit then 123 ;")
+# vm.do(": bar foo 999 ;")
+# vm.do("1 bar")
+# vm.do("2 bar")
+# vm.do(": foo 10 5 do i dup 8 >= if unloop exit then loop ; foo")
+# vm.do(": foo 1 begin dup 1 + dup 5 = if exit then again ; foo")
+# vm.do("1 begin dup 1 + dup 5 = if leave then again")
+# vm.do("variable x 999 x ! 1 x +! x @")
+# vm.do("1 2 lshift")
+# vm.do("15 10 max")
+# vm.do("15 negate")
+# vm.do("true invert")
+# vm.do("false invert")
 
+
+def myforth(source):
+    vm = VirtualMachine()
+    vm.do(source)
+    return vm.stack.tolist()
+
+
+def gforth(source):
+    result = subprocess.run(
+        'echo "{0} .s" | gforth'.format(source), shell=True, stdout=subprocess.PIPE
+    ).stdout
+    m = re.compile(rb"<[0-9]*>\s*((-?[0-9]+\s+)*)ok\s*$").search(result)
+    if m is None:
+        print(result.decode())
+    return [int(x) for x in m.group(1).split()]
+
+
+def testy(source):
+    mine = myforth(source)
+    theirs = gforth(source)
+    assert mine == theirs, f"{source}\n\nmyforth: {mine}\n gforth: {theirs}"
+
+
+testy("1 2 3 4 dup")
+testy("1 2 3 4 drop")
+testy("1 2 3 4 swap")
+testy("1 2 3 4 over")
+testy("1 2 3 4 rot")
+
+
+testy("3 5 +")
+testy("-3 5 +")
+testy("3 -5 +")
+testy("-3 -5 +")
+testy("3 5 -")
+testy("-3 5 -")
+testy("3 -5 -")
+testy("-3 -5 -")
+testy("5 3 -")
+testy("5 -3 -")
+testy("-5 3 -")
+testy("-5 -3 -")
+testy("3 5 *")
+testy("-3 5 *")
+testy("3 -5 *")
+testy("-3 -5 *")
+testy("22 7 /")
+testy("-22 7 /")
+testy("22 -7 /")
+testy("-22 -7 /")
+testy("22 7 mod")
+testy("-22 7 mod")
+testy("22 -7 mod")
+testy("-22 -7 mod")
+testy("22 7 /mod")
+testy("-22 7 /mod")
+testy("22 -7 /mod")
+testy("-22 -7 /mod")
+testy("0 1 lshift")
+testy("0 2 lshift")
+testy("0 3 lshift")
+testy("1 1 lshift")
+testy("1 2 lshift")
+testy("1 3 lshift")
+testy("5 1 lshift")
+testy("5 2 lshift")
+testy("5 3 lshift")
+testy("-5 1 lshift")
+testy("-5 2 lshift")
+testy("-5 3 lshift")
+testy("0 1 rshift")
+testy("0 2 rshift")
+testy("0 3 rshift")
+testy("1 1 rshift")
+testy("1 2 rshift")
+testy("1 3 rshift")
+testy("5 1 rshift")
+testy("5 2 rshift")
+testy("5 3 rshift")
+testy("-5 1 rshift")
+testy("-5 2 rshift")
+testy("-5 3 rshift")
+testy("-2 abs")
+testy("-1 abs")
+testy("0 abs")
+testy("1 abs")
+testy("2 abs")
+testy("5 5 min")
+testy("3 -5 min")
+testy("-3 5 min")
+testy("3 5 min")
+testy("5 5 max")
+testy("3 -5 max")
+testy("-3 5 max")
+testy("3 5 max")
+testy("-2 negate")
+testy("-1 negate")
+testy("0 negate")
+testy("1 negate")
+testy("2 negate")
+testy("-1 0=")
+testy("0 0=")
+testy("1 0=")
+testy("5 5 =")
+testy("3 -5 =")
+testy("-3 5 =")
+testy("3 5 =")
+testy("5 5 <>")
+testy("3 -5 <>")
+testy("-3 5 <>")
+testy("3 5 <>")
+testy("5 5 >")
+testy("3 -5 >")
+testy("-3 5 >")
+testy("3 5 >")
+testy("5 5 >=")
+testy("3 -5 >=")
+testy("-3 5 >=")
+testy("3 5 >=")
+testy("5 5 <")
+testy("3 -5 <")
+testy("-3 5 <")
+testy("3 5 <")
+testy("5 5 <=")
+testy("3 -5 <=")
+testy("-3 5 <=")
+testy("3 5 <=")
+testy("-1 -1 and")
+testy("0 -1 and")
+testy("1 -1 and")
+testy("-1 0 and")
+testy("0 0 and")
+testy("1 0 and")
+testy("-1 1 and")
+testy("0 1 and")
+testy("1 1 and")
+testy("-1 -1 or")
+testy("0 -1 or")
+testy("1 -1 or")
+testy("-1 0 or")
+testy("0 0 or")
+testy("1 0 or")
+testy("-1 1 or")
+testy("0 1 or")
+testy("1 1 or")
+testy("-1 -1 xor")
+testy("0 -1 xor")
+testy("1 -1 xor")
+testy("-1 0 xor")
+testy("0 0 xor")
+testy("1 0 xor")
+testy("-1 1 xor")
+testy("0 1 xor")
+testy("1 1 xor")
+testy("-1 invert")
+testy("0 invert")
+testy("1 invert")
+testy("true")
+testy("false")
