@@ -658,24 +658,39 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
             what, allow_record=True, allow_other=True
         )
 
-        def getfunction(inputs):
-            nplike = ak.nplike.of(*inputs)
-            base, what = inputs
-            if isinstance(base, ak.layout.RecordArray):
-                if not isinstance(what, ak.layout.Content):
-                    what = ak.layout.NumpyArray(nplike.repeat(what, len(base)))
-                return lambda: (base.setitem_field(where, what),)
-            else:
-                return None
-
         keys = base.keys()
         if where in base.keys():
             keys.remove(where)
+
         if len(keys) == 0:
             # the only key was removed, so just create new Record
-            out = (ak.layout.RecordArray([what], [where]),)
+            out = (ak.layout.RecordArray([what], [where], parameters=base.parameters),)
+
         else:
-            base = base[keys]
+
+            def getfunction(inputs):
+                nplike = ak.nplike.of(*inputs)
+                base, what = inputs
+                if isinstance(base, ak.layout.RecordArray):
+                    if not isinstance(what, ak.layout.Content):
+                        what = ak.layout.NumpyArray(nplike.repeat(what, len(base)))
+                    if base.istuple and where is None:
+                        recordlookup = None
+                    elif base.istuple:
+                        recordlookup = keys + [where]
+                    elif where is None:
+                        recordlookup = keys + [str(len(keys))]
+                    else:
+                        recordlookup = keys + [where]
+                    out = ak.layout.RecordArray(
+                        [base[k] for k in keys] + [what],
+                        recordlookup,
+                        parameters=base.parameters
+                    )
+                    return lambda: (out,)
+                else:
+                    return None
+
             out = ak._util.broadcast_and_apply(
                 [base, what],
                 getfunction,
@@ -683,6 +698,7 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
                 right_broadcast=right_broadcast,
                 pass_depth=False,
             )
+
         assert isinstance(out, tuple) and len(out) == 1
 
         if highlevel:
