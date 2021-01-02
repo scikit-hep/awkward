@@ -76,6 +76,7 @@ class VirtualMachine:
         variable_names = []
         input_names = []
         output_names = []
+        output_dtypes = []
 
         def as_integer(word):
             if word.lstrip().startswith("0x"):
@@ -180,6 +181,47 @@ class VirtualMachine:
 
                     variable_names.append(name)
 
+                elif word == "input":
+                    if pointer + 1 >= stop:
+                        raise ValueError("missing name in input definition")
+                    name = tokenized[pointer + 1]
+                    pointer += 2
+
+                    if as_integer(name) is not None or Builtin.reserved(name):
+                        raise ValueError(
+                            "user-defined inputs should not overshadow a builtin word: "
+                            + repr(name)
+                        )
+
+                    if name in input_names:
+                        raise ValueError("input name {0} redefined".format(repr(name)))
+
+                    input_names.append(name)
+
+                elif word == "output":
+                    if pointer + 2 >= stop:
+                        raise ValueError("missing name or dtype in output definition")
+                    name = tokenized[pointer + 1]
+                    dtype = tokenized[pointer + 2]
+                    pointer += 3
+
+                    if as_integer(name) is not None or Builtin.reserved(name):
+                        raise ValueError(
+                            "user-defined outputs should not overshadow a builtin word: "
+                            + repr(name)
+                        )
+
+                    if name in output_names:
+                        raise ValueError("output name {0} redefined".format(repr(name)))
+
+                    if dtype not in Builtin.dtypes:
+                        raise ValueError(
+                            "output dtype must be one of: ".format(", ".join(Builtin.dtypes))
+                        )
+
+                    output_names.append(name)
+                    output_dtypes.append(dtype)
+
                 elif word in variable_names:
                     if pointer + 1 >= stop or tokenized[pointer + 1] not in ("!", "+!", "@"):
                         raise ValueError("missing '!', '+!', or '@' after variable name")
@@ -191,6 +233,27 @@ class VirtualMachine:
                         instructions.append(Builtin.GET.as_integer)
                     instructions.append(variable_names.index(word))
                     pointer += 2
+
+                elif word in input_names:
+                    if pointer + 1 >= stop or tokenized[pointer + 1] not in Builtin.ptypes:
+                        raise ValueError(
+                            "missing parser word after input name; must be one of: "
+                            + ", ".join(Builtin.ptypes)
+                        )
+                    ptype = tokenized[pointer + 1]
+                    pointer += 2
+
+                    direct = False
+                    output = None
+                    if pointer + 1 < stop and tokenized[pointer + 1] in output_names:
+                        direct = True
+                        output = tokenized[pointer + 1]
+                        pointer += 1
+
+                    instructions.append(Builtin.as_parser(ptype, direct))
+                    instructions.append(input_names.index(word))
+                    if direct:
+                        instructions.append(output_names.index(output))
 
                 elif word == "if":
                     substart = pointer + 1
@@ -377,11 +440,14 @@ class VirtualMachine:
                             "unrecognized or wrong context for word: " + repr(word)
                         )
 
+            if len(self.dictionary) >= np.iinfo(np.int32).max:
+                raise ValueError("source code defines too many instructions")
+
         instructions = []
         parse(None, 0, len(tokenized), instructions, 0, 0)
-        return instructions, variable_names, input_names, output_names
+        return instructions, variable_names, input_names, output_names, output_dtypes
 
-    def run(self, instructions, variables, inputs, output_dtypes, variable_names=None, verbose=False):
+    def run(self, instructions, variables, inputs, output_dtypes=[], variable_names=[], verbose=False):
         # Create the stack.
         stack = Stack()
 
@@ -404,7 +470,7 @@ class VirtualMachine:
                 print("{0:20s} | {1}".format("  " * indent + str(instruction), showstack))
 
         # Create a stack of instruction pointers to avoid native function calls.
-        dictionary = self.dictionary + [instructions]
+        dictionary = [np.array(x, np.int32) for x in self.dictionary + [instructions]]
         which = [len(self.dictionary)]
         where = [0]
         skip = [0]
@@ -448,7 +514,12 @@ class VirtualMachine:
                     where[-1] += skip[-1]
                 skip[-1] = 0
 
-                if instruction == Builtin.LITERAL.as_integer:
+                if Builtin.is_parser(instruction):
+                    HERE
+
+
+
+                elif instruction == Builtin.LITERAL.as_integer:
                     num = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
                     if verbose:
@@ -459,33 +530,21 @@ class VirtualMachine:
                     num = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
                     if verbose:
-                        if variable_names is not None:
-                            message = "! " + variable_names[num]
-                        else:
-                            message = "! " + num
-                        printout(len(which) - 1, message, True)
+                        printout(len(which) - 1, "! " + num, True)
                     variables[num] = stack.pop()
 
                 elif instruction == Builtin.INC.as_integer:
                     num = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
                     if verbose:
-                        if variable_names is not None:
-                            message = "+! " + variable_names[num]
-                        else:
-                            message = "+! " + num
-                        printout(len(which) - 1, message, True)
+                        printout(len(which) - 1, "+! " + num, True)
                     variables[num] += stack.pop()
 
                 elif instruction == Builtin.GET.as_integer:
                     num = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
                     if verbose:
-                        if variable_names is not None:
-                            message = "@ " + variable_names[num]
-                        else:
-                            message = "@ " + num
-                        printout(len(which) - 1, message, True)
+                        printout(len(which) - 1, "@ " + num, True)
                     stack.push(variables[num])
 
                 elif instruction == Builtin.IF.as_integer:
@@ -814,11 +873,13 @@ class VirtualMachine:
         self.stack = stack
         return outputs
 
-    def do(self, source, inputs=[], output_dtypes=[], verbose=False):
+    def do(self, source, inputs=[], verbose=False):
         if verbose:
             print("do: {0}".format(repr(source)))
 
-        instructions, variable_names, input_names, output_names = self.compile(source)
+        (
+            instructions, variable_names, input_names, output_names, output_dtypes
+        ) = self.compile(source)
 
         variables = [0 for x in variable_names]
 
@@ -826,7 +887,7 @@ class VirtualMachine:
             instructions,
             variables,
             inputs,
-            output_dtypes,
+            output_dtypes=output_dtypes,
             variable_names=variable_names,
             verbose=verbose,
         )
@@ -852,6 +913,18 @@ class Builtin:
         else:
             raise KeyError("not found: {0}".format(integer))
 
+    dtypes = [
+        "bool", "int8", "int16", "int32", "int64"
+    ] + [
+        "uint8", "uint16", "uint32", "uint64", "float32", "float64"
+    ]
+    ptypes = [
+        n + b + t + "->" for n in ("", "#") for b in ("", "!") for t in "?bhiqnBHIQNfd"
+        if not (t == "?" and b == "!")
+        and not (t == "b" and b == "!")
+        and not (t == "B" and b == "!")
+    ]
+
     @staticmethod
     def reserved(word):
         return (
@@ -860,9 +933,82 @@ class Builtin:
             or word in ["do", "loop", "+loop"]
             or word in ["begin", "again", "until", "while", "repeat"]
             or word in ["exit", "recurse"]
+            or word in ["input", "output"]
+            or word in Builtin.dtypes
+            or word in Builtin.ptypes
             or word in Builtin.lookup
         )
 
+    @staticmethod
+    def is_parser(word):
+        return bool(word & 0x80000000)
+
+    @staticmethod
+    def is_direct(word):
+        return bool(word & 0x40000000)
+
+    @staticmethod
+    def is_repeated(word):
+        return bool(word & 0x20000000)
+
+    @staticmethod
+    def is_bigendian(word):
+        return bool(word & 0x10000000)
+
+    PARSER_BOOL = 0
+    PARSER_INT8 = 1
+    PARSER_INT16 = 2
+    PARSER_INT32 = 3
+    PARSER_INT64 = 4
+    PARSER_SSIZE = 5
+    PARSER_UINT8 = 6
+    PARSER_UINT16 = 7
+    PARSER_UINT32 = 8
+    PARSER_UINT64 = 9
+    PARSER_USIZE = 10
+    PARSER_FLOAT32 = 11
+    PARSER_FLOAT64 = 12
+
+    @staticmethod
+    def as_parser(ptype, direct):
+        out = np.int32(0x80000000)
+        if direct:
+            out |= 0x40000000
+        if ptype.startswith("#"):
+            out |= 0x20000000
+            ptype = ptype[1:]
+        if ptype.startswith("!"):
+            out |= 0x10000000
+            ptype = ptype[1:]
+        if ptype[0] == "?":
+            out |= PARSER_BOOL
+        elif ptype[0] == "b":
+            out |= PARSER_INT8
+        elif ptype[0] == "h":
+            out |= PARSER_INT16
+        elif ptype[0] == "i":
+            out |= PARSER_INT32
+        elif ptype[0] == "q":
+            out |= PARSER_INT64
+        elif ptype[0] == "n":
+            out |= PARSER_SSIZE
+        elif ptype[0] == "B":
+            out |= PARSER_UINT8
+        elif ptype[0] == "H":
+            out |= PARSER_UINT16
+        elif ptype[0] == "I":
+            out |= PARSER_UINT32
+        elif ptype[0] == "Q":
+            out |= PARSER_UINT64
+        elif ptype[0] == "N":
+            out |= PARSER_USIZE
+        elif ptype[0] == "f":
+            out |= PARSER_FLOAT32
+        elif ptype[0] == "d":
+            out |= PARSER_FLOAT64
+        else:
+            raise AssertionError(ptype)
+        return out
 
 Builtin.LITERAL = Builtin()
 Builtin.PUT = Builtin()
