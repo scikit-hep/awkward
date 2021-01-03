@@ -19,10 +19,16 @@ class InputBuffer:
             str(self).replace("\n", "\n                ")
         )
 
+    def skip(self, howmany):
+        next = self.pointer + howmany
+        if not 0 <= next <= len(self.buffer):
+            raise ValueError("skipped beyond end of input buffer")
+        self.pointer = next
+
     def read(self, howmany, dtype):
         next = self.pointer + howmany * np.dtype(dtype).itemsize
         if next > len(self.buffer):
-            raise ValueError("scanned beyond end of input buffer")
+            raise ValueError("read beyond end of input buffer")
         out = self.buffer[self.pointer:next].view(dtype)
         self.pointer = next
         return out
@@ -48,6 +54,12 @@ class OutputBuffer:
 
     def tolist(self):
         return self.buffer[:self.length].tolist()
+
+    def rewind(self, howmany):
+        next = self.length - howmany
+        if not 0 <= next:
+            raise ValueError("rewinding before beginning of output")
+        self.length = next
 
     def write(self, values):
         length = len(self.buffer)
@@ -261,27 +273,47 @@ class VirtualMachine:
                     pointer += 2
 
                 elif word in input_names:
-                    if pointer + 1 >= stop or tokenized[pointer + 1] not in Builtin.ptypes:
-                        raise ValueError(
-                            "missing parser word after input name; must be one of: "
-                            + ", ".join(Builtin.ptypes)
-                        )
-                    ptype = tokenized[pointer + 1]
-                    pointer += 1
+                    if pointer + 1 < stop and tokenized[pointer + 1] == "skip":
+                        instructions.append(Builtin.SKIP.as_integer)
+                        instructions.append(input_names.index(word))
+                        pointer += 2
 
-                    direct = False
-                    output = None
-                    if pointer + 1 < stop and tokenized[pointer + 1] in output_names:
-                        direct = True
-                        output = tokenized[pointer + 1]
+                    else:
+                        if pointer + 1 >= stop or tokenized[pointer + 1] not in Builtin.ptypes:
+                            raise ValueError(
+                                "missing parser word after input name; must be one of: "
+                                + ", ".join(repr(x) for x in Builtin.ptypes) + " or 'skip'"
+                            )
+                        ptype = tokenized[pointer + 1]
                         pointer += 1
 
-                    pointer += 1
+                        direct = False
+                        output = None
+                        if pointer + 1 < stop and tokenized[pointer + 1] in output_names:
+                            direct = True
+                            output = tokenized[pointer + 1]
+                            pointer += 1
 
-                    instructions.append(Builtin.as_parser(ptype, direct))
-                    instructions.append(input_names.index(word))
-                    if direct:
-                        instructions.append(output_names.index(output))
+                        pointer += 1
+
+                        instructions.append(Builtin.as_parser(ptype, direct))
+                        instructions.append(input_names.index(word))
+                        if direct:
+                            instructions.append(output_names.index(output))
+
+                elif word in output_names:
+                    if pointer + 1 < stop and tokenized[pointer + 1] == "rewind":
+                        instructions.append(Builtin.REWIND.as_integer)
+                        instructions.append(output_names.index(word))
+                        pointer += 2
+
+                    else:
+                        if pointer + 1 >= stop or tokenized[pointer + 1] != "<-":
+                            raise ValueError("missing '<-' or 'rewind' word after output name")
+                        pointer += 2
+
+                        instructions.append(Builtin.WRITE.as_integer)
+                        instructions.append(output_names.index(word))
 
                 elif word == "if":
                     substart = pointer + 1
@@ -475,7 +507,17 @@ class VirtualMachine:
         parse(None, 0, len(tokenized), instructions, 0, 0)
         return instructions, variable_names, input_names, output_names, output_dtypes
 
-    def run(self, instructions, variables, inputs, output_dtypes=[], variable_names=[], verbose=False):
+    def run(
+        self,
+        instructions,
+        variables,
+        inputs,
+        input_names=[],
+        output_names=[],
+        output_dtypes=[],
+        variable_names=[],
+        verbose=False
+    ):
         # Create the stack.
         stack = Stack()
 
@@ -545,6 +587,13 @@ class VirtualMachine:
                     inputnum = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
 
+                    if verbose:
+                        printout(
+                            len(which) - 1,
+                            input_names[inputnum] + " " + Builtin.from_parser(instruction),
+                            True
+                        )
+
                     howmany = 1
                     if Builtin.is_repeated(instruction):
                         howmany = stack.pop()
@@ -591,6 +640,27 @@ class VirtualMachine:
                     if verbose:
                         printout(len(which) - 1, "@ " + num, True)
                     stack.push(variables[num])
+
+                elif instruction == Builtin.REWIND.as_integer:
+                    outputnum = dictionary[which[-1]][where[-1]]
+                    where[-1] += 1
+                    if verbose:
+                        printout(len(which) - 1, output_names[outputnum] + " rewind", True)
+                    outputs[outputnum].rewind(stack.pop())
+
+                elif instruction == Builtin.WRITE.as_integer:
+                    outputnum = dictionary[which[-1]][where[-1]]
+                    where[-1] += 1
+                    if verbose:
+                        printout(len(which) - 1, output_names[outputnum] + " <-", True)
+                    outputs[outputnum].write([stack.pop()])
+
+                elif instruction == Builtin.SKIP.as_integer:
+                    inputnum = dictionary[which[-1]][where[-1]]
+                    where[-1] += 1
+                    if verbose:
+                        printout(len(which) - 1, input_names[inputnum] + " skip", True)
+                    inputs[inputnum].skip(stack.pop())
 
                 elif instruction == Builtin.IF.as_integer:
                     if verbose:
@@ -928,15 +998,18 @@ class VirtualMachine:
 
         variables = [0 for x in variable_names]
 
-        self.outputs = self.run(
+        outputs = self.run(
             instructions,
             variables,
             inputs,
+            input_names=input_names,
+            output_names=output_names,
             output_dtypes=output_dtypes,
             variable_names=variable_names,
             verbose=verbose,
         )
 
+        self.outputs = dict(zip(output_names, outputs))
         self.variables = dict(zip(variable_names, variables))
 
 
@@ -1087,10 +1160,51 @@ class Builtin:
             raise AssertionError(ptype)
         return out
 
+    @staticmethod
+    def from_parser(instruction):
+        n = ""
+        if Builtin.is_repeated(instruction):
+            n = "#"
+        b = ""
+        if Builtin.is_bigendian(instruction):
+            b = "!"
+        masked = instruction & 0x0fffffff
+        if masked == Builtin.PARSER_BOOL:
+            return n + b + "?"
+        elif masked == Builtin.PARSER_INT8:
+            return n + b + "b"
+        elif masked == Builtin.PARSER_INT16:
+            return n + b + "h"
+        elif masked == Builtin.PARSER_INT32:
+            return n + b + "i"
+        elif masked == Builtin.PARSER_INT64:
+            return n + b + "q"
+        elif masked == Builtin.PARSER_SSIZE:
+            return n + b + "n"
+        elif masked == Builtin.PARSER_UINT8:
+            return n + b + "B"
+        elif masked == Builtin.PARSER_UINT16:
+            return n + b + "H"
+        elif masked == Builtin.PARSER_UINT32:
+            return n + b + "I"
+        elif masked == Builtin.PARSER_UINT64:
+            return n + b + "Q"
+        elif masked == Builtin.PARSER_USIZE:
+            return n + b + "N"
+        elif masked == Builtin.PARSER_FLOAT32:
+            return n + b + "f"
+        elif masked == Builtin.PARSER_FLOAT64:
+            return n + b + "d"
+        else:
+            raise AssertionError(repr(masked))
+
 Builtin.LITERAL = Builtin()
 Builtin.PUT = Builtin()
 Builtin.INC = Builtin()
 Builtin.GET = Builtin()
+Builtin.SKIP = Builtin()
+Builtin.REWIND = Builtin()
+Builtin.WRITE = Builtin()
 Builtin.IF = Builtin()
 Builtin.IF_ELSE = Builtin()
 Builtin.DO = Builtin()
@@ -1139,15 +1253,43 @@ Builtin.TRUE = Builtin("true")
 
 
 vm = VirtualMachine()
+vm.do("""
+output y float32
+4 3 2 1
+y <-
+y <-
+y <-
+y <-
+""")
+assert vm.outputs["y"].dtype == np.dtype(np.float32)
+assert vm.outputs["y"].tolist() == [1, 2, 3, 4]
+
+vm = VirtualMachine()
+vm.do("""
+output y float32
+4 3 2 1
+y <-
+y <-
+1 y rewind
+y <-
+y <-
+""")
+assert vm.outputs["y"].dtype == np.dtype(np.float32)
+assert vm.outputs["y"].tolist() == [1, 3, 4]
+
+vm = VirtualMachine()
 inputs = [np.array([1, 2, 3, 4], np.int32)]
 vm.do("""
 input x
 x i->
 x i->
+-8 x skip
+x i->
+x i->
 x i->
 x i->
 """, inputs)
-assert vm.stack.tolist() == [1, 2, 3, 4]
+assert vm.stack.tolist() == [1, 2, 1, 2, 3, 4]
 
 vm = VirtualMachine()
 inputs = [np.array([1, 2, 3, 4], np.int32)]
@@ -1182,8 +1324,8 @@ x i-> y
 x i-> y
 x i-> y
 """, inputs)
-assert vm.outputs[0].dtype == np.dtype(np.float32)
-assert vm.outputs[0].tolist() == [1, 2, 3, 4]
+assert vm.outputs["y"].dtype == np.dtype(np.float32)
+assert vm.outputs["y"].tolist() == [1, 2, 3, 4]
 
 vm = VirtualMachine()
 inputs = [np.array([1, 2, 3, 4], np.int32)]
@@ -1191,8 +1333,8 @@ vm.do("""
 input x output y float32
 4 x #i-> y
 """, inputs)
-assert vm.outputs[0].dtype == np.dtype(np.float32)
-assert vm.outputs[0].tolist() == [1, 2, 3, 4]
+assert vm.outputs["y"].dtype == np.dtype(np.float32)
+assert vm.outputs["y"].tolist() == [1, 2, 3, 4]
 
 vm = VirtualMachine()
 vm.do("3 ( whatever ) 2 + 2 *")
