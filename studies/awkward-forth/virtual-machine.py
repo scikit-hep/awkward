@@ -6,7 +6,29 @@ import sys
 import numpy as np
 
 
-class GrowableBuffer:
+class InputBuffer:
+    def __init__(self, buffer):
+        self.buffer = np.frombuffer(buffer, dtype=np.uint8)
+        self.pointer = 0
+
+    def __str__(self):
+        return str(self.buffer)
+
+    def __repr__(self):
+        return "<InputBuffer {0}>".format(
+            str(self).replace("\n", "\n                ")
+        )
+
+    def read(self, howmany, dtype):
+        next = self.pointer + howmany * np.dtype(dtype).itemsize
+        if next > len(self.buffer):
+            raise ValueError("scanned beyond end of input buffer")
+        out = self.buffer[self.pointer:next].view(dtype)
+        self.pointer = next
+        return out
+
+
+class OutputBuffer:
     def __init__(self, dtype, initial=1024, resize=1.5):
         self.buffer = np.full(initial, 999, dtype=dtype)
         self.length = 0
@@ -16,11 +38,18 @@ class GrowableBuffer:
         return str(self.buffer[:self.length])
 
     def __repr__(self):
-        return "<GrowableBuffer {0}>".format(
-            str(self).replace("\n", "\n                ")
+        return "<OutputBuffer {0} ({1})>".format(
+            str(self).replace("\n", "\n                "), str(self.buffer.dtype)
         )
 
-    def extend(self, values):
+    @property
+    def dtype(self):
+        return self.buffer.dtype
+
+    def tolist(self):
+        return self.buffer[:self.length].tolist()
+
+    def write(self, values):
         length = len(self.buffer)
         while self.length + len(values) > length:
             length = int(math.ceil(length * self.resize))
@@ -32,9 +61,6 @@ class GrowableBuffer:
 
         self.buffer[self.length : self.length + len(values)] = values
         self.length += len(values)
-
-    def append(self, value):
-        self.extend([value])
 
 
 class Stack:
@@ -216,7 +242,7 @@ class VirtualMachine:
 
                     if dtype not in Builtin.dtypes:
                         raise ValueError(
-                            "output dtype must be one of: ".format(", ".join(Builtin.dtypes))
+                            "output dtype must be one of: " + ", ".join(Builtin.dtypes)
                         )
 
                     output_names.append(name)
@@ -241,7 +267,7 @@ class VirtualMachine:
                             + ", ".join(Builtin.ptypes)
                         )
                     ptype = tokenized[pointer + 1]
-                    pointer += 2
+                    pointer += 1
 
                     direct = False
                     output = None
@@ -249,6 +275,8 @@ class VirtualMachine:
                         direct = True
                         output = tokenized[pointer + 1]
                         pointer += 1
+
+                    pointer += 1
 
                     instructions.append(Builtin.as_parser(ptype, direct))
                     instructions.append(input_names.index(word))
@@ -452,11 +480,10 @@ class VirtualMachine:
         stack = Stack()
 
         # Ensure that the inputs are raw bytes.
-        inputs = [np.frombuffer(x, dtype="u1") for x in inputs]
-        input_pointers = [0 for x in inputs]
+        inputs = [InputBuffer(x) for x in inputs]
 
         # Create the outputs.
-        outputs = [GrowableBuffer(x) for x in output_dtypes]
+        outputs = [OutputBuffer(x) for x in output_dtypes]
 
         if verbose:
             print("{0:20s} | {1}".format("instruction", "stack before instruction"))
@@ -515,9 +542,27 @@ class VirtualMachine:
                 skip[-1] = 0
 
                 if Builtin.is_parser(instruction):
-                    HERE
+                    inputnum = dictionary[which[-1]][where[-1]]
+                    where[-1] += 1
 
+                    howmany = 1
+                    if Builtin.is_repeated(instruction):
+                        howmany = stack.pop()
 
+                    dtype = Builtin.dtype_of(instruction)
+                    values = inputs[inputnum].read(howmany, dtype)
+
+                    if dtype not in (np.bool_, np.int8, np.uint8):
+                        if bool(Builtin.is_bigendian(instruction)) ^ (sys.byteorder == "big"):
+                            values = np.frombuffer(values, np.dtype(dtype).newbyteorder())
+
+                    if Builtin.is_direct(instruction):
+                        outputnum = dictionary[which[-1]][where[-1]]
+                        where[-1] += 1
+                        outputs[outputnum].write(values)
+                    else:
+                        for x in values:
+                            stack.push(x)
 
                 elif instruction == Builtin.LITERAL.as_integer:
                     num = dictionary[which[-1]][where[-1]]
@@ -940,20 +985,52 @@ class Builtin:
         )
 
     @staticmethod
-    def is_parser(word):
-        return bool(word & 0x80000000)
+    def is_parser(instruction):
+        return bool(instruction & 0x80000000)
 
     @staticmethod
-    def is_direct(word):
-        return bool(word & 0x40000000)
+    def is_direct(instruction):
+        return bool(instruction & 0x40000000)
 
     @staticmethod
-    def is_repeated(word):
-        return bool(word & 0x20000000)
+    def is_repeated(instruction):
+        return bool(instruction & 0x20000000)
 
     @staticmethod
-    def is_bigendian(word):
-        return bool(word & 0x10000000)
+    def is_bigendian(instruction):
+        return bool(instruction & 0x10000000)
+
+    @staticmethod
+    def dtype_of(instruction):
+        masked = instruction & 0x0fffffff
+        if masked == Builtin.PARSER_BOOL:
+            return np.bool_
+        elif masked == Builtin.PARSER_INT8:
+            return np.int8
+        elif masked == Builtin.PARSER_INT16:
+            return np.int16
+        elif masked == Builtin.PARSER_INT32:
+            return np.int32
+        elif masked == Builtin.PARSER_INT64:
+            return np.int64
+        elif masked == Builtin.PARSER_SSIZE:
+            return np.intp
+        elif masked == Builtin.PARSER_UINT8:
+            return np.uint8
+        elif masked == Builtin.PARSER_UINT16:
+            return np.uint16
+        elif masked == Builtin.PARSER_UINT32:
+            return np.uint32
+        elif masked == Builtin.PARSER_UINT64:
+            return np.uint64
+        elif masked == Builtin.PARSER_USIZE:
+            return np.uintp
+        elif masked == Builtin.PARSER_FLOAT32:
+            return np.float32
+        elif masked == Builtin.PARSER_FLOAT64:
+            return np.float64
+        else:
+            raise AssertionError(repr(masked))
 
     PARSER_BOOL = 0
     PARSER_INT8 = 1
@@ -981,31 +1058,31 @@ class Builtin:
             out |= 0x10000000
             ptype = ptype[1:]
         if ptype[0] == "?":
-            out |= PARSER_BOOL
+            out |= Builtin.PARSER_BOOL
         elif ptype[0] == "b":
-            out |= PARSER_INT8
+            out |= Builtin.PARSER_INT8
         elif ptype[0] == "h":
-            out |= PARSER_INT16
+            out |= Builtin.PARSER_INT16
         elif ptype[0] == "i":
-            out |= PARSER_INT32
+            out |= Builtin.PARSER_INT32
         elif ptype[0] == "q":
-            out |= PARSER_INT64
+            out |= Builtin.PARSER_INT64
         elif ptype[0] == "n":
-            out |= PARSER_SSIZE
+            out |= Builtin.PARSER_SSIZE
         elif ptype[0] == "B":
-            out |= PARSER_UINT8
+            out |= Builtin.PARSER_UINT8
         elif ptype[0] == "H":
-            out |= PARSER_UINT16
+            out |= Builtin.PARSER_UINT16
         elif ptype[0] == "I":
-            out |= PARSER_UINT32
+            out |= Builtin.PARSER_UINT32
         elif ptype[0] == "Q":
-            out |= PARSER_UINT64
+            out |= Builtin.PARSER_UINT64
         elif ptype[0] == "N":
-            out |= PARSER_USIZE
+            out |= Builtin.PARSER_USIZE
         elif ptype[0] == "f":
-            out |= PARSER_FLOAT32
+            out |= Builtin.PARSER_FLOAT32
         elif ptype[0] == "d":
-            out |= PARSER_FLOAT64
+            out |= Builtin.PARSER_FLOAT64
         else:
             raise AssertionError(ptype)
         return out
@@ -1060,6 +1137,62 @@ Builtin.INVERT = Builtin("invert")
 Builtin.FALSE = Builtin("false")
 Builtin.TRUE = Builtin("true")
 
+
+vm = VirtualMachine()
+inputs = [np.array([1, 2, 3, 4], np.int32)]
+vm.do("""
+input x
+x i->
+x i->
+x i->
+x i->
+""", inputs)
+assert vm.stack.tolist() == [1, 2, 3, 4]
+
+vm = VirtualMachine()
+inputs = [np.array([1, 2, 3, 4], np.int32)]
+vm.do("""
+input x
+4 x #i->
+""", inputs)
+assert vm.stack.tolist() == [1, 2, 3, 4]
+
+vm = VirtualMachine()
+inputs = [np.array([1, 2, 3, 4], np.int32)]
+vm.do("""
+input x
+4 x #!i->
+""", inputs)
+assert vm.stack.tolist() == [16777216, 33554432, 50331648, 67108864]
+
+vm = VirtualMachine()
+inputs = [np.array([1, 2, 3, 4], np.int32)]
+vm.do("""
+input x
+8 x #h->
+""", inputs)
+assert vm.stack.tolist() == [1, 0, 2, 0, 3, 0, 4, 0]
+
+vm = VirtualMachine()
+inputs = [np.array([1, 2, 3, 4], np.int32)]
+vm.do("""
+input x output y float32
+x i-> y
+x i-> y
+x i-> y
+x i-> y
+""", inputs)
+assert vm.outputs[0].dtype == np.dtype(np.float32)
+assert vm.outputs[0].tolist() == [1, 2, 3, 4]
+
+vm = VirtualMachine()
+inputs = [np.array([1, 2, 3, 4], np.int32)]
+vm.do("""
+input x output y float32
+4 x #i-> y
+""", inputs)
+assert vm.outputs[0].dtype == np.dtype(np.float32)
+assert vm.outputs[0].tolist() == [1, 2, 3, 4]
 
 vm = VirtualMachine()
 vm.do("3 ( whatever ) 2 + 2 *")
