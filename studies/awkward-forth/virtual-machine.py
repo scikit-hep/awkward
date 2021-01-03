@@ -5,6 +5,9 @@ import sys
 
 import numpy as np
 
+import uproot
+import skhep_testdata
+
 
 class InputBuffer:
     def __init__(self, buffer):
@@ -18,6 +21,11 @@ class InputBuffer:
         return "<InputBuffer {0}>".format(
             str(self).replace("\n", "\n                ")
         )
+
+    def seek(self, to):
+        if not 0 <= to <= len(self.buffer):
+            raise ValueError("seeked beyond end of input buffer")
+        self.pointer = to
 
     def skip(self, howmany):
         next = self.pointer + howmany
@@ -273,7 +281,12 @@ class VirtualMachine:
                     pointer += 2
 
                 elif word in input_names:
-                    if pointer + 1 < stop and tokenized[pointer + 1] == "skip":
+                    if pointer + 1 < stop and tokenized[pointer + 1] == "seek":
+                        instructions.append(Builtin.SEEK.as_integer)
+                        instructions.append(input_names.index(word))
+                        pointer += 2
+
+                    elif pointer + 1 < stop and tokenized[pointer + 1] == "skip":
                         instructions.append(Builtin.SKIP.as_integer)
                         instructions.append(input_names.index(word))
                         pointer += 2
@@ -282,7 +295,7 @@ class VirtualMachine:
                         if pointer + 1 >= stop or tokenized[pointer + 1] not in Builtin.ptypes:
                             raise ValueError(
                                 "missing parser word after input name; must be one of: "
-                                + ", ".join(repr(x) for x in Builtin.ptypes) + " or 'skip'"
+                                + ", ".join(repr(x) for x in Builtin.ptypes) + " or 'seek'/'skip'"
                             )
                         ptype = tokenized[pointer + 1]
                         pointer += 1
@@ -655,6 +668,13 @@ class VirtualMachine:
                         printout(len(which) - 1, output_names[outputnum] + " <-", True)
                     outputs[outputnum].write([stack.pop()])
 
+                elif instruction == Builtin.SEEK.as_integer:
+                    inputnum = dictionary[which[-1]][where[-1]]
+                    where[-1] += 1
+                    if verbose:
+                        printout(len(which) - 1, input_names[inputnum] + " seek", True)
+                    inputs[inputnum].seek(stack.pop())
+
                 elif instruction == Builtin.SKIP.as_integer:
                     inputnum = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
@@ -988,7 +1008,7 @@ class VirtualMachine:
         self.stack = stack
         return outputs
 
-    def do(self, source, inputs=[], verbose=False):
+    def do(self, source, inputs={}, verbose=False):
         if verbose:
             print("do: {0}".format(repr(source)))
 
@@ -997,6 +1017,8 @@ class VirtualMachine:
         ) = self.compile(source)
 
         variables = [0 for x in variable_names]
+
+        inputs = [inputs[x] for x in input_names]
 
         outputs = self.run(
             instructions,
@@ -1203,6 +1225,7 @@ Builtin.PUT = Builtin()
 Builtin.INC = Builtin()
 Builtin.GET = Builtin()
 Builtin.SKIP = Builtin()
+Builtin.SEEK = Builtin()
 Builtin.REWIND = Builtin()
 Builtin.WRITE = Builtin()
 Builtin.IF = Builtin()
@@ -1252,6 +1275,23 @@ Builtin.FALSE = Builtin("false")
 Builtin.TRUE = Builtin("true")
 
 
+vector_of_vectors = uproot.open(skhep_testdata.data_path("uproot-vectorVectorDouble.root"))["t/x"]
+inputs = {
+    "data": vector_of_vectors.basket(0).data,
+    "byte_offsets": vector_of_vectors.basket(0).byte_offsets,
+}
+vm = VirtualMachine()
+vm.do("""
+input data
+input byte_offsets
+
+byte_offsets i-> 6 + data seek data !i->
+byte_offsets i-> 6 + data seek data !i->
+byte_offsets i-> 6 + data seek data !i->
+byte_offsets i-> 6 + data seek data !i->
+byte_offsets i-> 6 + data seek data !i->
+""", inputs=inputs, verbose=True)
+
 vm = VirtualMachine()
 vm.do("""
 output y float32
@@ -1278,7 +1318,7 @@ assert vm.outputs["y"].dtype == np.dtype(np.float32)
 assert vm.outputs["y"].tolist() == [1, 3, 4]
 
 vm = VirtualMachine()
-inputs = [np.array([1, 2, 3, 4], np.int32)]
+inputs = {"x": np.array([1, 2, 3, 4], np.int32)}
 vm.do("""
 input x
 x i->
@@ -1292,7 +1332,7 @@ x i->
 assert vm.stack.tolist() == [1, 2, 1, 2, 3, 4]
 
 vm = VirtualMachine()
-inputs = [np.array([1, 2, 3, 4], np.int32)]
+inputs = {"x": np.array([1, 2, 3, 4], np.int32)}
 vm.do("""
 input x
 4 x #i->
@@ -1300,7 +1340,7 @@ input x
 assert vm.stack.tolist() == [1, 2, 3, 4]
 
 vm = VirtualMachine()
-inputs = [np.array([1, 2, 3, 4], np.int32)]
+inputs = {"x": np.array([1, 2, 3, 4], np.int32)}
 vm.do("""
 input x
 4 x #!i->
@@ -1308,7 +1348,7 @@ input x
 assert vm.stack.tolist() == [16777216, 33554432, 50331648, 67108864]
 
 vm = VirtualMachine()
-inputs = [np.array([1, 2, 3, 4], np.int32)]
+inputs = {"x": np.array([1, 2, 3, 4], np.int32)}
 vm.do("""
 input x
 8 x #h->
@@ -1316,7 +1356,7 @@ input x
 assert vm.stack.tolist() == [1, 0, 2, 0, 3, 0, 4, 0]
 
 vm = VirtualMachine()
-inputs = [np.array([1, 2, 3, 4], np.int32)]
+inputs = {"x": np.array([1, 2, 3, 4], np.int32)}
 vm.do("""
 input x output y float32
 x i-> y
@@ -1328,7 +1368,7 @@ assert vm.outputs["y"].dtype == np.dtype(np.float32)
 assert vm.outputs["y"].tolist() == [1, 2, 3, 4]
 
 vm = VirtualMachine()
-inputs = [np.array([1, 2, 3, 4], np.int32)]
+inputs = {"x": np.array([1, 2, 3, 4], np.int32)}
 vm.do("""
 input x output y float32
 4 x #i-> y
