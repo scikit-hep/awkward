@@ -2011,9 +2011,12 @@ def fill_none(array, value, highlevel=True):
         )
 
     else:
-        if isinstance(value, Iterable) and not (
-            isinstance(value, (str, bytes))
-            or (ak._util.py27 and isinstance(value, ak._util.unicode))
+        if (
+            isinstance(value, Iterable) and not (
+                isinstance(value, (str, bytes))
+                or (ak._util.py27 and isinstance(value, ak._util.unicode))
+            )
+            or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
         ):
             valuelayout = ak.operations.convert.to_layout(
                 value, allow_record=True, allow_other=False
@@ -2025,9 +2028,10 @@ def fill_none(array, value, highlevel=True):
                 valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
             else:
                 valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout), 1)
+
         else:
             valuelayout = ak.operations.convert.to_layout(
-                [value], allow_record=True, allow_other=False
+                [value], allow_record=False, allow_other=False
             )
 
         out = arraylayout.fillna(valuelayout)
