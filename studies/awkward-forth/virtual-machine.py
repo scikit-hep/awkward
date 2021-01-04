@@ -76,9 +76,6 @@ class OutputBuffer:
     def __array__(self):
         return self.buffer[:self.length]
 
-    def reshape(self, *args, **kwargs):
-        return self.buffer[:self.length].reshape(*args, **kwargs)
-
     def tolist(self):
         return self.buffer[:self.length].tolist()
 

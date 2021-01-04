@@ -3284,6 +3284,13 @@ differs from the first Form:
 _index_form_to_dtype = _index_form_to_index = _form_to_layout_class = None
 
 
+def _asbuf(obj):
+    try:
+        return numpy.asarray(obj).reshape(-1).view(np.uint8)
+    except:
+        return numpy.frombuffer(obj, np.uint8)
+
+
 def _form_to_layout(
     form, container, partnum, key_format, length, lazy_cache, lazy_cache_key,
 ):
@@ -3335,10 +3342,8 @@ def _form_to_layout(
     fk = form.form_key
 
     if isinstance(form, ak.forms.BitMaskedForm):
-        raw_mask = (
+        raw_mask = _asbuf(
             container[key_format(form_key=fk, attribute="mask", partition=partnum)]
-            .reshape(-1)
-            .view("u1")
         )
         mask = _index_form_to_index[form.mask](
             raw_mask.view(_index_form_to_dtype[form.mask])
@@ -3368,10 +3373,8 @@ def _form_to_layout(
         )
 
     elif isinstance(form, ak.forms.ByteMaskedForm):
-        raw_mask = (
+        raw_mask = _asbuf(
             container[key_format(form_key=fk, attribute="mask", partition=partnum)]
-            .reshape(-1)
-            .view("u1")
         )
         mask = _index_form_to_index[form.mask](
             raw_mask.view(_index_form_to_dtype[form.mask])
@@ -3412,10 +3415,8 @@ def _form_to_layout(
         return ak.layout.EmptyArray(identities, parameters)
 
     elif isinstance(form, ak.forms.IndexedForm):
-        raw_index = (
+        raw_index = _asbuf(
             container[key_format(form_key=fk, attribute="index", partition=partnum)]
-            .reshape(-1)
-            .view("u1")
         )
         index = _index_form_to_index[form.index](
             raw_index.view(_index_form_to_dtype[form.index])
@@ -3446,10 +3447,8 @@ def _form_to_layout(
         )
 
     elif isinstance(form, ak.forms.IndexedOptionForm):
-        raw_index = (
+        raw_index = _asbuf(
             container[key_format(form_key=fk, attribute="index", partition=partnum)]
-            .reshape(-1)
-            .view("u1")
         )
         index = _index_form_to_index[form.index](
             raw_index.view(_index_form_to_dtype[form.index])
@@ -3480,18 +3479,14 @@ def _form_to_layout(
         )
 
     elif isinstance(form, ak.forms.ListForm):
-        raw_starts = (
+        raw_starts = _asbuf(
             container[key_format(form_key=fk, attribute="starts", partition=partnum)]
-            .reshape(-1)
-            .view("u1")
         )
         starts = _index_form_to_index[form.starts](
             raw_starts.view(_index_form_to_dtype[form.starts])
         )
-        raw_stops = (
+        raw_stops = _asbuf(
             container[key_format(form_key=fk, attribute="stops", partition=partnum)]
-            .reshape(-1)
-            .view("u1")
         )
         stops = _index_form_to_index[form.stops](
             raw_stops.view(_index_form_to_dtype[form.stops])
@@ -3525,10 +3520,8 @@ def _form_to_layout(
         )
 
     elif isinstance(form, ak.forms.ListOffsetForm):
-        raw_offsets = (
+        raw_offsets = _asbuf(
             container[key_format(form_key=fk, attribute="offsets", partition=partnum)]
-            .reshape(-1)
-            .view("u1")
         )
         offsets = _index_form_to_index[form.offsets](
             raw_offsets.view(_index_form_to_dtype[form.offsets])
@@ -3559,12 +3552,9 @@ def _form_to_layout(
         )
 
     elif isinstance(form, ak.forms.NumpyForm):
-        raw_array = (
+        raw_array = _asbuf(
             container[key_format(form_key=fk, attribute="data", partition=partnum)]
-            .reshape(-1)
-            .view("u1")
         )
-
         dtype_inner_shape = form.to_numpy()
         if dtype_inner_shape.subdtype is None:
             dtype, inner_shape = dtype_inner_shape, ()
@@ -3637,18 +3627,14 @@ def _form_to_layout(
         )
 
     elif isinstance(form, ak.forms.UnionForm):
-        raw_tags = (
+        raw_tags = _asbuf(
             container[key_format(form_key=fk, attribute="tags", partition=partnum)]
-            .reshape(-1)
-            .view("u1")
         )
         tags = _index_form_to_index[form.tags](
             raw_tags.view(_index_form_to_dtype[form.tags])
         )
-        raw_index = (
+        raw_index = _asbuf(
             container[key_format(form_key=fk, attribute="index", partition=partnum)]
-            .reshape(-1)
-            .view("u1")
         )
         index = _index_form_to_index[form.index](
             raw_index.view(_index_form_to_dtype[form.index])
