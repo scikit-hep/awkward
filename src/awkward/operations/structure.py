@@ -344,6 +344,7 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
         )
 
     if isinstance(arrays, dict):
+        behavior = ak._util.behaviorof(*arrays.values())
         recordlookup = []
         layouts = []
         for n, x in arrays.items():
@@ -355,6 +356,7 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
             )
 
     else:
+        behavior = ak._util.behaviorof(*arrays)
         recordlookup = None
         layouts = []
         for x in arrays:
@@ -390,7 +392,6 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
         else:
             return None
 
-    behavior = ak._util.behaviorof(*arrays)
     out = ak._util.broadcast_and_apply(layouts, getfunction, behavior, pass_depth=True)
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
@@ -657,24 +658,39 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
             what, allow_record=True, allow_other=True
         )
 
-        def getfunction(inputs):
-            nplike = ak.nplike.of(*inputs)
-            base, what = inputs
-            if isinstance(base, ak.layout.RecordArray):
-                if not isinstance(what, ak.layout.Content):
-                    what = ak.layout.NumpyArray(nplike.repeat(what, len(base)))
-                return lambda: (base.setitem_field(where, what),)
-            else:
-                return None
-
         keys = base.keys()
         if where in base.keys():
             keys.remove(where)
+
         if len(keys) == 0:
             # the only key was removed, so just create new Record
-            out = (ak.layout.RecordArray([what], [where]),)
+            out = (ak.layout.RecordArray([what], [where], parameters=base.parameters),)
+
         else:
-            base = base[keys]
+
+            def getfunction(inputs):
+                nplike = ak.nplike.of(*inputs)
+                base, what = inputs
+                if isinstance(base, ak.layout.RecordArray):
+                    if not isinstance(what, ak.layout.Content):
+                        what = ak.layout.NumpyArray(nplike.repeat(what, len(base)))
+                    if base.istuple and where is None:
+                        recordlookup = None
+                    elif base.istuple:
+                        recordlookup = keys + [where]
+                    elif where is None:
+                        recordlookup = keys + [str(len(keys))]
+                    else:
+                        recordlookup = keys + [where]
+                    out = ak.layout.RecordArray(
+                        [base[k] for k in keys] + [what],
+                        recordlookup,
+                        parameters=base.parameters,
+                    )
+                    return lambda: (out,)
+                else:
+                    return None
+
             out = ak._util.broadcast_and_apply(
                 [base, what],
                 getfunction,
@@ -682,6 +698,7 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
                 right_broadcast=right_broadcast,
                 pass_depth=False,
             )
+
         assert isinstance(out, tuple) and len(out) == 1
 
         if highlevel:
@@ -1994,9 +2011,13 @@ def fill_none(array, value, highlevel=True):
         )
 
     else:
-        if isinstance(value, Iterable) and not (
-            isinstance(value, (str, bytes))
-            or (ak._util.py27 and isinstance(value, ak._util.unicode))
+        if (
+            isinstance(value, Iterable)
+            and not (
+                isinstance(value, (str, bytes))
+                or (ak._util.py27 and isinstance(value, ak._util.unicode))
+            )
+            or isinstance(value, (ak.highlevel.Record, ak.layout.Record))
         ):
             valuelayout = ak.operations.convert.to_layout(
                 value, allow_record=True, allow_other=False
@@ -2008,9 +2029,10 @@ def fill_none(array, value, highlevel=True):
                 valuelayout = ak.layout.ListOffsetArray64(offsets, valuelayout)
             else:
                 valuelayout = ak.layout.RegularArray(valuelayout, len(valuelayout), 1)
+
         else:
             valuelayout = ak.operations.convert.to_layout(
-                [value], allow_record=True, allow_other=False
+                [value], allow_record=False, allow_other=False
             )
 
         out = arraylayout.fillna(valuelayout)
@@ -2373,11 +2395,10 @@ def cartesian(
     #ak.argcartesian form can be particularly useful as nested indexing in
     #ak.Array.__getitem__.
     """
-    behavior = ak._util.behaviorof(*arrays)
-    nplike = ak.nplike.of(*arrays)
-
     is_partitioned = False
     if isinstance(arrays, dict):
+        behavior = ak._util.behaviorof(*arrays.values())
+        nplike = ak.nplike.of(*arrays.values())
         new_arrays = {}
         for n, x in arrays.items():
             new_arrays[n] = ak.operations.convert.to_layout(
@@ -2386,6 +2407,8 @@ def cartesian(
             if isinstance(new_arrays[n], ak.partition.PartitionedArray):
                 is_partitioned = True
     else:
+        behavior = ak._util.behaviorof(*arrays)
+        nplike = ak.nplike.of(*arrays)
         new_arrays = []
         for x in arrays:
             new_arrays.append(
@@ -2677,6 +2700,7 @@ def argcartesian(
 
     else:
         if isinstance(arrays, dict):
+            behavior = ak._util.behaviorof(*arrays.values())
             layouts = dict(
                 (
                     n,
@@ -2687,6 +2711,7 @@ def argcartesian(
                 for n, x in arrays.items()
             )
         else:
+            behavior = ak._util.behaviorof(*arrays)
             layouts = [
                 ak.operations.convert.to_layout(
                     x, allow_record=False, allow_other=False
@@ -2706,7 +2731,7 @@ def argcartesian(
         )
 
         if highlevel:
-            return ak._util.wrap(result, ak._util.behaviorof(*arrays))
+            return ak._util.wrap(result, behavior)
         else:
             return result
 
@@ -3000,7 +3025,9 @@ def partitioned(arrays, highlevel=True, behavior=None):
 
     out = ak.partition.IrregularlyPartitionedArray(partitions, stops)
     if highlevel:
-        return ak._util.wrap(out, behavior=behavior)
+        return ak._util.wrap(
+            out, behavior=ak._util.behaviorof(*arrays, behavior=behavior)
+        )
     else:
         return out
 
