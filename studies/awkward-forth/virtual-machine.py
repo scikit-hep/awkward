@@ -5,6 +5,7 @@ import sys
 
 import numpy as np
 
+import awkward as ak
 import uproot
 import skhep_testdata
 
@@ -22,6 +23,14 @@ class InputBuffer:
             str(self).replace("\n", "\n                ")
         )
 
+    def read(self, howmany, dtype):
+        next = self.pointer + howmany * np.dtype(dtype).itemsize
+        if next > len(self.buffer):
+            raise ValueError("read beyond end of input buffer")
+        out = self.buffer[self.pointer:next].view(dtype)
+        self.pointer = next
+        return out
+
     def seek(self, to):
         if not 0 <= to <= len(self.buffer):
             raise ValueError("seeked beyond end of input buffer")
@@ -33,13 +42,17 @@ class InputBuffer:
             raise ValueError("skipped beyond end of input buffer")
         self.pointer = next
 
-    def read(self, howmany, dtype):
-        next = self.pointer + howmany * np.dtype(dtype).itemsize
-        if next > len(self.buffer):
-            raise ValueError("read beyond end of input buffer")
-        out = self.buffer[self.pointer:next].view(dtype)
-        self.pointer = next
-        return out
+    @property
+    def end(self):
+        return self.pointer == len(self.buffer)
+
+    @property
+    def position(self):
+        return self.pointer
+
+    @property
+    def length(self):
+        return len(self.buffer)
 
 
 class OutputBuffer:
@@ -60,14 +73,14 @@ class OutputBuffer:
     def dtype(self):
         return self.buffer.dtype
 
+    def __array__(self):
+        return self.buffer[:self.length]
+
+    def reshape(self, *args, **kwargs):
+        return self.buffer[:self.length].reshape(*args, **kwargs)
+
     def tolist(self):
         return self.buffer[:self.length].tolist()
-
-    def rewind(self, howmany):
-        next = self.length - howmany
-        if not 0 <= next:
-            raise ValueError("rewinding before beginning of output")
-        self.length = next
 
     def write(self, values):
         length = len(self.buffer)
@@ -81,6 +94,12 @@ class OutputBuffer:
 
         self.buffer[self.length : self.length + len(values)] = values
         self.length += len(values)
+
+    def rewind(self, howmany):
+        next = self.length - howmany
+        if not 0 <= next:
+            raise ValueError("rewinding before beginning of output")
+        self.length = next
 
 
 class Stack:
@@ -291,11 +310,27 @@ class VirtualMachine:
                         instructions.append(input_names.index(word))
                         pointer += 2
 
+                    elif pointer + 1 < stop and tokenized[pointer + 1] == "end":
+                        instructions.append(Builtin.END.as_integer)
+                        instructions.append(input_names.index(word))
+                        pointer += 2
+
+                    elif pointer + 1 < stop and tokenized[pointer + 1] == "pos":
+                        instructions.append(Builtin.POSITION.as_integer)
+                        instructions.append(input_names.index(word))
+                        pointer += 2
+
+                    elif pointer + 1 < stop and tokenized[pointer + 1] == "len":
+                        instructions.append(Builtin.LENGTH_INPUT.as_integer)
+                        instructions.append(input_names.index(word))
+                        pointer += 2
+
                     else:
                         if pointer + 1 >= stop or tokenized[pointer + 1] not in Builtin.ptypes:
                             raise ValueError(
                                 "missing parser word after input name; must be one of: "
-                                + ", ".join(repr(x) for x in Builtin.ptypes) + " or 'seek'/'skip'"
+                                + ", ".join(repr(x) for x in Builtin.ptypes)
+                                + " or 'seek', 'skip', 'end', 'pos', 'len'"
                             )
                         ptype = tokenized[pointer + 1]
                         pointer += 1
@@ -320,9 +355,16 @@ class VirtualMachine:
                         instructions.append(output_names.index(word))
                         pointer += 2
 
+                    elif pointer + 1 < stop and tokenized[pointer + 1] == "len":
+                        instructions.append(Builtin.LENGTH_OUTPUT.as_integer)
+                        instructions.append(output_names.index(word))
+                        pointer += 2
+
                     else:
                         if pointer + 1 >= stop or tokenized[pointer + 1] != "<-":
-                            raise ValueError("missing '<-' or 'rewind' word after output name")
+                            raise ValueError(
+                                "missing '<-' or 'rewind', 'len' word after output name"
+                            )
                         pointer += 2
 
                         instructions.append(Builtin.WRITE.as_integer)
@@ -532,7 +574,7 @@ class VirtualMachine:
         verbose=False
     ):
         # Create the stack.
-        stack = Stack()
+        self.stack = Stack()
 
         # Ensure that the inputs are raw bytes.
         inputs = [InputBuffer(x) for x in inputs]
@@ -541,15 +583,15 @@ class VirtualMachine:
         outputs = [OutputBuffer(x) for x in output_dtypes]
 
         if verbose:
-            print("{0:20s} | {1}".format("instruction", "stack before instruction"))
-            print("---------------------+-------------------------")
+            print("{0:30.30s} | {1}".format("instruction", "stack before instruction"))
+            print("-------------------------------+-------------------------")
 
             def printout(indent, instruction, showstack):
                 if showstack:
-                    showstack = str(stack)
+                    showstack = str(self.stack)
                 else:
                     showstack = ""
-                print("{0:20s} | {1}".format("  " * indent + str(instruction), showstack))
+                print("{0:30.30s} | {1}".format("  " * indent + str(instruction), showstack))
 
         # Create a stack of instruction pointers to avoid native function calls.
         dictionary = [np.array(x, np.int32) for x in self.dictionary + [instructions]]
@@ -609,10 +651,13 @@ class VirtualMachine:
 
                     howmany = 1
                     if Builtin.is_repeated(instruction):
-                        howmany = stack.pop()
+                        howmany = self.stack.pop()
 
                     dtype = Builtin.dtype_of(instruction)
-                    values = inputs[inputnum].read(howmany, dtype)
+                    try:
+                        values = inputs[inputnum].read(howmany, dtype)
+                    except ValueError as err:
+                        return str(err), outputs
 
                     if dtype not in (np.bool_, np.int8, np.uint8):
                         if bool(Builtin.is_bigendian(instruction)) ^ (sys.byteorder == "big"):
@@ -624,68 +669,105 @@ class VirtualMachine:
                         outputs[outputnum].write(values)
                     else:
                         for x in values:
-                            stack.push(x)
+                            self.stack.push(x)
 
                 elif instruction == Builtin.LITERAL.as_integer:
                     num = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
                     if verbose:
                         printout(len(which) - 1, num, True)
-                    stack.push(num)
+                    self.stack.push(num)
 
                 elif instruction == Builtin.PUT.as_integer:
                     num = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
                     if verbose:
-                        printout(len(which) - 1, "! " + num, True)
-                    variables[num] = stack.pop()
+                        printout(len(which) - 1, "! " + variable_names[num], True)
+                    variables[num] = self.stack.pop()
 
                 elif instruction == Builtin.INC.as_integer:
                     num = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
                     if verbose:
-                        printout(len(which) - 1, "+! " + num, True)
-                    variables[num] += stack.pop()
+                        printout(len(which) - 1, "+! " + variable_names[num], True)
+                    variables[num] += self.stack.pop()
 
                 elif instruction == Builtin.GET.as_integer:
                     num = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
                     if verbose:
-                        printout(len(which) - 1, "@ " + num, True)
-                    stack.push(variables[num])
+                        printout(len(which) - 1, "@ " + variable_names[num], True)
+                    self.stack.push(variables[num])
 
                 elif instruction == Builtin.REWIND.as_integer:
                     outputnum = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
                     if verbose:
                         printout(len(which) - 1, output_names[outputnum] + " rewind", True)
-                    outputs[outputnum].rewind(stack.pop())
+                    try:
+                        outputs[outputnum].rewind(self.stack.pop())
+                    except ValueError as err:
+                        return str(err), outputs
+
+                elif instruction == Builtin.LENGTH_OUTPUT.as_integer:
+                    outputnum = dictionary[which[-1]][where[-1]]
+                    where[-1] += 1
+                    if verbose:
+                        printout(len(which) - 1, output_names[outputnum] + " length", True)
+                    self.stack.push(outputs[outputnum].length)
 
                 elif instruction == Builtin.WRITE.as_integer:
                     outputnum = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
                     if verbose:
                         printout(len(which) - 1, output_names[outputnum] + " <-", True)
-                    outputs[outputnum].write([stack.pop()])
+                    outputs[outputnum].write([self.stack.pop()])
 
                 elif instruction == Builtin.SEEK.as_integer:
                     inputnum = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
                     if verbose:
                         printout(len(which) - 1, input_names[inputnum] + " seek", True)
-                    inputs[inputnum].seek(stack.pop())
+                    try:
+                        inputs[inputnum].seek(self.stack.pop())
+                    except ValueError as err:
+                        return str(err), outputs
 
                 elif instruction == Builtin.SKIP.as_integer:
                     inputnum = dictionary[which[-1]][where[-1]]
                     where[-1] += 1
                     if verbose:
                         printout(len(which) - 1, input_names[inputnum] + " skip", True)
-                    inputs[inputnum].skip(stack.pop())
+                    try:
+                        inputs[inputnum].skip(self.stack.pop())
+                    except ValueError as err:
+                        return str(err), outputs
+
+                elif instruction == Builtin.END.as_integer:
+                    inputnum = dictionary[which[-1]][where[-1]]
+                    where[-1] += 1
+                    if verbose:
+                        printout(len(which) - 1, input_names[inputnum] + " end", True)
+                    self.stack.push(-1 if inputs[inputnum].end() else 0)
+
+                elif instruction == Builtin.POSITION.as_integer:
+                    inputnum = dictionary[which[-1]][where[-1]]
+                    where[-1] += 1
+                    if verbose:
+                        printout(len(which) - 1, input_names[inputnum] + " position", True)
+                    self.stack.push(inputs[inputnum].position)
+
+                elif instruction == Builtin.LENGTH_INPUT.as_integer:
+                    inputnum = dictionary[which[-1]][where[-1]]
+                    where[-1] += 1
+                    if verbose:
+                        printout(len(which) - 1, input_names[inputnum] + " length", True)
+                    self.stack.push(inputs[inputnum].length)
 
                 elif instruction == Builtin.IF.as_integer:
                     if verbose:
                         printout(len(which) - 1, "if", True)
-                    if stack.pop() == 0:
+                    if self.stack.pop() == 0:
                         # False, so then skip over the next instruction.
                         where[-1] += 1
                     else:
@@ -696,7 +778,7 @@ class VirtualMachine:
                 elif instruction == Builtin.IF_ELSE.as_integer:
                     if verbose:
                         printout(len(which) - 1, "if", True)
-                    if stack.pop() == 0:
+                    if self.stack.pop() == 0:
                         if verbose:
                             printout(len(which) - 1, "else", False)
                         # False, so then skip over the next instruction but do the one after that.
@@ -709,15 +791,15 @@ class VirtualMachine:
 
                 elif instruction == Builtin.DO.as_integer:
                     do_depth.append(len(which))
-                    do_start.append(stack.pop())
-                    do_stop.append(stack.pop())
+                    do_start.append(self.stack.pop())
+                    do_stop.append(self.stack.pop())
                     do_step.append(False)
                     do_i.append(do_start[-1])
 
                 elif instruction == Builtin.DO_STEP.as_integer:
                     do_depth.append(len(which))
-                    do_start.append(stack.pop())
-                    do_stop.append(stack.pop())
+                    do_start.append(self.stack.pop())
+                    do_stop.append(self.stack.pop())
                     do_step.append(True)
                     do_i.append(do_start[-1])
 
@@ -730,14 +812,14 @@ class VirtualMachine:
                 elif instruction == Builtin.UNTIL.as_integer:
                     if verbose:
                         printout(len(which) - 1, "until", True)
-                    if stack.pop() == 0:
+                    if self.stack.pop() == 0:
                         # False, so go back and do the body again.
                         where[-1] -= 2
 
                 elif instruction == Builtin.WHILE.as_integer:
                     if verbose:
                         printout(len(which) - 1, "while", True)
-                    if stack.pop() == 0:
+                    if self.stack.pop() == 0:
                         # False, so skip over the conditional body.
                         where[-1] += 1
                     else:
@@ -765,217 +847,217 @@ class VirtualMachine:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
                     if len(do_i) < 1:
-                        stack.push(0)
+                        self.stack.push(0)
                     else:
-                        stack.push(do_i[-1])
+                        self.stack.push(do_i[-1])
 
                 elif instruction == Builtin.J.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
                     if len(do_i) < 2:
-                        stack.push(0)
+                        self.stack.push(0)
                     else:
-                        stack.push(do_i[-2])
+                        self.stack.push(do_i[-2])
 
                 elif instruction == Builtin.K.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
                     if len(do_i) < 3:
-                        stack.push(0)
+                        self.stack.push(0)
                     else:
-                        stack.push(do_i[-3])
+                        self.stack.push(do_i[-3])
 
                 elif instruction == Builtin.DUP.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    value = stack.pop()
-                    stack.push(value)
-                    stack.push(value)
+                    value = self.stack.pop()
+                    self.stack.push(value)
+                    self.stack.push(value)
 
                 elif instruction == Builtin.DROP.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.pop()
+                    self.stack.pop()
 
                 elif instruction == Builtin.SWAP.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    a, b = stack.pop(), stack.pop()
-                    stack.push(a)
-                    stack.push(b)
+                    a, b = self.stack.pop(), self.stack.pop()
+                    self.stack.push(a)
+                    self.stack.push(b)
 
                 elif instruction == Builtin.OVER.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    a, b = stack.pop(), stack.pop()
-                    stack.push(b)
-                    stack.push(a)
-                    stack.push(b)
+                    a, b = self.stack.pop(), self.stack.pop()
+                    self.stack.push(b)
+                    self.stack.push(a)
+                    self.stack.push(b)
 
                 elif instruction == Builtin.ROT.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    a, b, c = stack.pop(), stack.pop(), stack.pop()
-                    stack.push(b)
-                    stack.push(a)
-                    stack.push(c)
+                    a, b, c = self.stack.pop(), self.stack.pop(), self.stack.pop()
+                    self.stack.push(b)
+                    self.stack.push(a)
+                    self.stack.push(c)
 
                 elif instruction == Builtin.NIP.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    a, b = stack.pop(), stack.pop()
-                    stack.push(a)
+                    a, b = self.stack.pop(), self.stack.pop()
+                    self.stack.push(a)
 
                 elif instruction == Builtin.TUCK.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    a, b = stack.pop(), stack.pop()
-                    stack.push(a)
-                    stack.push(b)
-                    stack.push(a)
+                    a, b = self.stack.pop(), self.stack.pop()
+                    self.stack.push(a)
+                    self.stack.push(b)
+                    self.stack.push(a)
 
                 elif instruction == Builtin.ADD.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(stack.pop() + stack.pop())
+                    self.stack.push(self.stack.pop() + self.stack.pop())
 
                 elif instruction == Builtin.SUB.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    a, b = stack.pop(), stack.pop()
-                    stack.push(b - a)
+                    a, b = self.stack.pop(), self.stack.pop()
+                    self.stack.push(b - a)
 
                 elif instruction == Builtin.MUL.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(stack.pop() * stack.pop())
+                    self.stack.push(self.stack.pop() * self.stack.pop())
 
                 elif instruction == Builtin.DIV.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    a, b = stack.pop(), stack.pop()
-                    stack.push(b // a)
+                    a, b = self.stack.pop(), self.stack.pop()
+                    self.stack.push(b // a)
 
                 elif instruction == Builtin.MOD.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    a, b = stack.pop(), stack.pop()
-                    stack.push(b % a)
+                    a, b = self.stack.pop(), self.stack.pop()
+                    self.stack.push(b % a)
 
                 elif instruction == Builtin.DIVMOD.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    a, b = stack.pop(), stack.pop()
+                    a, b = self.stack.pop(), self.stack.pop()
                     c, d = divmod(b, a)
-                    stack.push(d)
-                    stack.push(c)
+                    self.stack.push(d)
+                    self.stack.push(c)
 
                 elif instruction == Builtin.LSHIFT.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    a, b = stack.pop(), stack.pop()
-                    stack.push(b << a)
+                    a, b = self.stack.pop(), self.stack.pop()
+                    self.stack.push(b << a)
 
                 elif instruction == Builtin.RSHIFT.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    a, b = stack.pop().view(np.uint64), stack.pop().view(np.uint64)
-                    stack.push(b >> a)
+                    a, b = self.stack.pop().view(np.uint64), self.stack.pop().view(np.uint64)
+                    self.stack.push(b >> a)
 
                 elif instruction == Builtin.ABS.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(abs(stack.pop()))
+                    self.stack.push(abs(self.stack.pop()))
 
                 elif instruction == Builtin.MIN.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(min(stack.pop(), stack.pop()))
+                    self.stack.push(min(self.stack.pop(), self.stack.pop()))
 
                 elif instruction == Builtin.MAX.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(max(stack.pop(), stack.pop()))
+                    self.stack.push(max(self.stack.pop(), self.stack.pop()))
 
                 elif instruction == Builtin.NEGATE.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(-stack.pop())
+                    self.stack.push(-self.stack.pop())
 
                 elif instruction == Builtin.ADD1.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(stack.pop() + 1)
+                    self.stack.push(self.stack.pop() + 1)
 
                 elif instruction == Builtin.SUB1.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(stack.pop() - 1)
+                    self.stack.push(self.stack.pop() - 1)
 
                 elif instruction == Builtin.EQ0.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(-1 if stack.pop() == 0 else 0)
+                    self.stack.push(-1 if self.stack.pop() == 0 else 0)
 
                 elif instruction == Builtin.EQ.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(-1 if stack.pop() == stack.pop() else 0)
+                    self.stack.push(-1 if self.stack.pop() == self.stack.pop() else 0)
 
                 elif instruction == Builtin.NE.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(-1 if stack.pop() != stack.pop() else 0)
+                    self.stack.push(-1 if self.stack.pop() != self.stack.pop() else 0)
 
                 elif instruction == Builtin.GT.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(-1 if stack.pop() < stack.pop() else 0)
+                    self.stack.push(-1 if self.stack.pop() < self.stack.pop() else 0)
 
                 elif instruction == Builtin.GE.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(-1 if stack.pop() <= stack.pop() else 0)
+                    self.stack.push(-1 if self.stack.pop() <= self.stack.pop() else 0)
 
                 elif instruction == Builtin.LT.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(-1 if stack.pop() > stack.pop() else 0)
+                    self.stack.push(-1 if self.stack.pop() > self.stack.pop() else 0)
 
                 elif instruction == Builtin.LE.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(-1 if stack.pop() >= stack.pop() else 0)
+                    self.stack.push(-1 if self.stack.pop() >= self.stack.pop() else 0)
 
                 elif instruction == Builtin.AND.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(stack.pop() & stack.pop())
+                    self.stack.push(self.stack.pop() & self.stack.pop())
 
                 elif instruction == Builtin.OR.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(stack.pop() | stack.pop())
+                    self.stack.push(self.stack.pop() | self.stack.pop())
 
                 elif instruction == Builtin.XOR.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(stack.pop() ^ stack.pop())
+                    self.stack.push(self.stack.pop() ^ self.stack.pop())
 
                 elif instruction == Builtin.INVERT.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(~stack.pop())
+                    self.stack.push(~self.stack.pop())
 
                 elif instruction == Builtin.FALSE.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(0)
+                    self.stack.push(0)
 
                 elif instruction == Builtin.TRUE.as_integer:
                     if verbose:
                         printout(len(which) - 1, Builtin.word(instruction), True)
-                    stack.push(-1)
+                    self.stack.push(-1)
 
                 elif instruction >= len(Builtin.lookup):
                     if verbose:
@@ -998,17 +1080,16 @@ class VirtualMachine:
 
             if len(do_depth) > 0 and do_depth[-1] == len(which):
                 if do_step[-1]:
-                    do_i[-1] += stack.pop()
+                    do_i[-1] += self.stack.pop()
                 else:
                     do_i[-1] += 1
 
         if verbose:
-            print("{0:20s} | {1}".format("", str(stack)))
+            print("{0:30.30s} | {1}".format("", str(self.stack)))
 
-        self.stack = stack
-        return outputs
+        return None, outputs
 
-    def do(self, source, inputs={}, verbose=False):
+    def do(self, source, inputs={}, exceptions=False, verbose=False):
         if verbose:
             print("do: {0}".format(repr(source)))
 
@@ -1020,7 +1101,7 @@ class VirtualMachine:
 
         inputs = [inputs[x] for x in input_names]
 
-        outputs = self.run(
+        message, outputs = self.run(
             instructions,
             variables,
             inputs,
@@ -1033,6 +1114,24 @@ class VirtualMachine:
 
         self.outputs = dict(zip(output_names, outputs))
         self.variables = dict(zip(variable_names, variables))
+
+        if exceptions and message is not None:
+            raise ValueError(message)
+        else:
+            return message
+
+    def array(
+        self,
+        source,
+        form,
+        inputs={},
+        length="length",
+        key_format="{form_key}-{attribute}",
+        exceptions=False,
+        verbose=False,
+    ):
+        message = self.do(source, inputs=inputs, exceptions=exceptions, verbose=verbose)
+        return ak.from_buffers(form, self.variables["length"], self.outputs, key_format=key_format)
 
 
 class Builtin:
@@ -1076,6 +1175,7 @@ class Builtin:
             or word in ["input", "output"]
             or word in Builtin.dtypes
             or word in Builtin.ptypes
+            or word in ["skip", "seek", "end", "pos", "len", "rewind", "<-"]
             or word in Builtin.lookup
         )
 
@@ -1226,7 +1326,11 @@ Builtin.INC = Builtin()
 Builtin.GET = Builtin()
 Builtin.SKIP = Builtin()
 Builtin.SEEK = Builtin()
+Builtin.END = Builtin()
+Builtin.POSITION = Builtin()
+Builtin.LENGTH_INPUT = Builtin()
 Builtin.REWIND = Builtin()
+Builtin.LENGTH_OUTPUT = Builtin()
 Builtin.WRITE = Builtin()
 Builtin.IF = Builtin()
 Builtin.IF_ELSE = Builtin()
@@ -1281,16 +1385,78 @@ inputs = {
     "byte_offsets": vector_of_vectors.basket(0).byte_offsets,
 }
 vm = VirtualMachine()
+array = vm.array("""
+input data
+input byte_offsets
+output outer-offsets int32
+output inner-offsets int32
+output content-data float64
+variable length
+variable outer-last
+variable inner-last
+
+0 length !
+0 outer-last !
+0 inner-last !
+outer-last @ outer-offsets <-
+inner-last @ inner-offsets <-
+
+begin
+  byte_offsets i->
+  6 + data seek
+  1 length +!
+
+  data !i-> dup outer-last +!
+  outer-last @ outer-offsets <-
+
+  0 do
+    data !i-> dup inner-last +!
+    inner-last @ inner-offsets <-
+
+    data #!d-> content-data
+  loop
+again
+""",
+      form={
+          "class": "ListOffsetArray32",
+          "offsets": "i32",
+          "form_key": "outer",
+          "content": {
+              "class": "ListOffsetArray32",
+              "offsets": "i32",
+              "form_key": "inner",
+              "content": {
+                  "class": "NumpyArray",
+                  "primitive": "float64",
+                  "form_key": "content",
+              },
+          },
+      },
+      inputs=inputs)
+assert array.tolist() == [
+    [],
+    [[], []],
+    [[10.0], [], [10.0, 20.0]],
+    [[20.0, -21.0, -22.0]],
+    [[200.0], [-201.0], [202.0]],
+]
+
+vector_of_vectors = uproot.open(skhep_testdata.data_path("uproot-vectorVectorDouble.root"))["t/x"]
+inputs = {
+    "data": vector_of_vectors.basket(0).data,
+    "byte_offsets": vector_of_vectors.basket(0).byte_offsets,
+}
+vm = VirtualMachine()
 vm.do("""
 input data
 input byte_offsets
-
-byte_offsets i-> 6 + data seek data !i->
-byte_offsets i-> 6 + data seek data !i->
-byte_offsets i-> 6 + data seek data !i->
-byte_offsets i-> 6 + data seek data !i->
-byte_offsets i-> 6 + data seek data !i->
-""", inputs=inputs, verbose=True)
+begin
+  byte_offsets pos byte_offsets len 4 - <
+while
+  byte_offsets i-> 6 + data seek data !i->
+repeat
+""", inputs=inputs)
+assert vm.stack.tolist() == [0, 2, 3, 1, 3]
 
 vm = VirtualMachine()
 vm.do("""
