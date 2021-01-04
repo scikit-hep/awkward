@@ -3286,9 +3286,11 @@ _index_form_to_dtype = _index_form_to_index = _form_to_layout_class = None
 
 def _asbuf(obj):
     try:
-        return numpy.asarray(obj).reshape(-1).view(np.uint8)
-    except:
+        tmp = numpy.asarray(obj)
+    except Exception:
         return numpy.frombuffer(obj, np.uint8)
+    else:
+        return tmp.reshape(-1).view(np.uint8)
 
 
 def _form_to_layout(
