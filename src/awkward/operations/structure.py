@@ -685,7 +685,7 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
                     out = ak.layout.RecordArray(
                         [base[k] for k in keys] + [what],
                         recordlookup,
-                        parameters=base.parameters
+                        parameters=base.parameters,
                     )
                     return lambda: (out,)
                 else:
@@ -2012,7 +2012,8 @@ def fill_none(array, value, highlevel=True):
 
     else:
         if (
-            isinstance(value, Iterable) and not (
+            isinstance(value, Iterable)
+            and not (
                 isinstance(value, (str, bytes))
                 or (ak._util.py27 and isinstance(value, ak._util.unicode))
             )
