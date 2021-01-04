@@ -408,9 +408,23 @@ void
 toslice_part(ak::Slice& slice, py::object obj) {
   int64_t length_before = slice.length();
 
+  if (py::hasattr(obj, "__index__")) {
+    bool success = true;
+    int64_t index;
+    try {
+      py::object py_index = obj.attr("__index__")();
+      index = py_index.cast<int64_t>();
+    }
+    catch (py::error_already_set err) {
+      success = false;
+    }
+    if (success) {
+      slice.append(std::make_shared<ak::SliceAt>(index));
+      return;
+    }
+  }
+
   if (py::isinstance<py::int_>(obj)) {
-    // FIXME: what should happen if you give this a Numpy integer?
-    //        what about a Numpy 0-dimensional array?
     slice.append(std::make_shared<ak::SliceAt>(obj.cast<int64_t>()));
   }
 
