@@ -1318,7 +1318,7 @@ namespace awkward {
     for (int64_t j = 0;  j < n;  j++) {
       std::shared_ptr<int64_t> ptr =
           kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                  combinationslen*sizeof(int64_t));
+                                  combinationslen*(int64_t)sizeof(int64_t));
       tocarry.push_back(ptr);
       tocarryraw.push_back(ptr.get());
     }
