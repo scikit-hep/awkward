@@ -69,6 +69,7 @@ extern "C" {
   const int64_t  kMaxInt64  = 9223372036854775806;   // 2**63 - 2: see below
   const int64_t  kSliceNone = kMaxInt64 + 1;         // for Slice::none()
   // Change kSliceNone in dev/genpython.py if the value is changed here
+  const int64_t  kMaxLevels =                  48;
 
   inline struct Error
     success() {
