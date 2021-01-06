@@ -1,4 +1,4 @@
-// c++ virtual-machine.cpp -O5 -o virtual-machine-test  &&  echo GO  &&  ./virtual-machine-test
+// c++ virtual-machine.cpp -O5 -o virtual-machine-test  &&  echo GO  &&  ./virtual-machine-test  &&  ./virtual-machine-test  &&  ./virtual-machine-test  &&  ./virtual-machine-test  &&  ./virtual-machine-test
 
 #include <memory>
 #include <vector>
@@ -640,13 +640,7 @@ private:
     instructions_offsets_.push_back(instructions_.size());
   }
 
-  int64_t instructions_length(ForthInstructionPointer& pointer) {
-    int64_t start = instructions_offsets_[pointer.which()];
-    int64_t stop = instructions_offsets_[pointer.which() + 1];
-    return stop - start;
-  }
-
-  I get_instruction(ForthInstructionPointer& pointer) {
+  I get_instruction(ForthInstructionPointer& pointer) noexcept {
     int64_t start = instructions_offsets_[pointer.which()];
     return instructions_[start + pointer.where()];
   }
@@ -662,7 +656,8 @@ private:
     pointer.push(0, 0, 0);
 
     while (!pointer.empty()) {
-      while (pointer.where() < instructions_length(pointer)) {
+      while (pointer.where() < (instructions_offsets_[pointer.which() + 1] -
+                                instructions_offsets_[pointer.which()])) {
         I instruction = get_instruction(pointer);
         pointer.where() += 1;
 
