@@ -13,6 +13,9 @@
 #include <iostream>
 
 
+#define TEMPORARY_BATCH_SIZE 10
+
+
 template <typename T>
 class array_deleter {
 public:
@@ -885,7 +888,10 @@ private:
     // instructions_.push_back(-PARSER_INT32);
     // instructions_.push_back(0);
 
-    instructions_.push_back(-PARSER_INT32 | PARSER_DIRECT);
+    instructions_.push_back(LITERAL);
+    instructions_.push_back(TEMPORARY_BATCH_SIZE);
+
+    instructions_.push_back(-PARSER_INT32 | PARSER_DIRECT | PARSER_REPEATED);
     instructions_.push_back(0);
     instructions_.push_back(0);
 
@@ -1414,9 +1420,9 @@ int main() {
     ForthError err = ForthError::none;
 
     auto cpp_begin = std::chrono::high_resolution_clock::now();
-    for (int64_t i = 0;  i < length;  i++) {
+    for (int64_t i = 0;  i < length;  i += TEMPORARY_BATCH_SIZE) {
       int32_t* data = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t), err));
-      outs[0].get()->write_one_int32(*data, false);
+      outs[0].get()->write_int32(TEMPORARY_BATCH_SIZE, data, false);
     }
     auto cpp_end = std::chrono::high_resolution_clock::now();
 
