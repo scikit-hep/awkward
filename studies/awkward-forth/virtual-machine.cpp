@@ -292,6 +292,17 @@ public:
     }
   }
 
+  inline T* pop2(ForthError &err) noexcept {
+    if (length_ < 2) {
+      err = ForthError::stack_underflow;
+      return 0;
+    }
+    else {
+      length_ -= 2;
+      return &buffer_[length_];
+    }
+  }
+
   inline T* peek() const noexcept {
     if (length_ == 0) {
       return nullptr;
@@ -634,6 +645,11 @@ private:
     instructions_.push_back(-PARSER_INT32);
     instructions_.push_back(0);
 
+    instructions_.push_back(LITERAL);
+    instructions_.push_back(10);
+
+    instructions_.push_back(ADD);
+
     instructions_.push_back(WRITE);
     instructions_.push_back(0);
 
@@ -935,6 +951,11 @@ private:
             }
 
             case ADD: {
+              T* pair = stack_.pop2(err);
+              if (err != ForthError::none) {
+                return;
+              }
+              stack_.push(pair[0] + pair[1]);
               break;
             }
 
@@ -1081,11 +1102,12 @@ int main() {
   ForthMachine<int32_t, int32_t, true> vm("");
 
   const int64_t length = 1000000;
+  // const int64_t length = 100;
 
   std::shared_ptr<int32_t> test_input_ptr = std::shared_ptr<int32_t>(
       new int32_t[length], array_deleter<int32_t>());
   for (int64_t i = 0;  i < length;  i++) {
-    test_input_ptr.get()[i] = i % 100;
+    test_input_ptr.get()[i] = i % 10;
   }
 
   std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
@@ -1104,7 +1126,7 @@ int main() {
     int32_t tmp;
     for (int64_t i = 0;  i < length;  i++) {
       int32_t* data = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t), err));
-      tmp = data[0];
+      tmp = data[0] + 10;
       outs[0].get()->write_int32(1, &tmp);
     }
     auto cpp_end = std::chrono::high_resolution_clock::now();
@@ -1132,7 +1154,6 @@ int main() {
     auto forth_end = std::chrono::high_resolution_clock::now();
 
     // std::cout << vm.stack().tostring() << std::endl;
-
     // for (auto pair : outputs) {
     //   std::cout << pair.first;
     //   std::shared_ptr<void> ptr = pair.second.get()->ptr();
