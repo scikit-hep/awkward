@@ -1041,20 +1041,13 @@ private:
 
     instructions_offsets_.push_back(instructions_.size());
 
-    // instructions_.push_back(-PARSER_INT32);
-    // instructions_.push_back(0);
-
-    // instructions_.push_back(LITERAL);
-    // instructions_.push_back(TEMPORARY_BATCH_SIZE);
-
-    instructions_.push_back(~(PARSER_INT32 | PARSER_DIRECT));
-    instructions_.push_back(0);
+    instructions_.push_back(~(PARSER_INT32));   //  | PARSER_BIGENDIAN
     instructions_.push_back(0);
 
-    // instructions_.push_back(LITERAL);
-    // instructions_.push_back(10);
+    instructions_.push_back(LITERAL);
+    instructions_.push_back(10);
 
-    // instructions_.push_back(ADD);
+    instructions_.push_back(ADD);
 
     // instructions_.push_back(INC);
     // instructions_.push_back(0);
@@ -1062,8 +1055,8 @@ private:
     // instructions_.push_back(GET);
     // instructions_.push_back(0);
 
-    // instructions_.push_back(WRITE);
-    // instructions_.push_back(0);
+    instructions_.push_back(WRITE);
+    instructions_.push_back(0);
 
     instructions_offsets_.push_back(instructions_.size());
   }
@@ -1199,7 +1192,11 @@ private:
                   return;
                 }
                 for (int64_t i = 0;  i < num_items;  i++) {
-                  stack_.push(ptr[i]);
+                  int32_t value = ptr[i];
+                  if (byteswap) {
+                    byteswap32(1, &value);
+                  }
+                  stack_.push(value);
                 }
                 break;
               }
@@ -1589,8 +1586,9 @@ int main() {
 
     auto cpp_begin = std::chrono::high_resolution_clock::now();
     for (int64_t i = 0;  i < length;  i++) {
-      int32_t* data = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
-      outs[0].get()->write_one_int32(*data, false);
+      int32_t value = *reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
+      // byteswap32(1, &value);
+      outs[0].get()->write_one_int32(value + 10, false);
     }
     auto cpp_end = std::chrono::high_resolution_clock::now();
 
