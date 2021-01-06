@@ -173,60 +173,60 @@ public:
   }
 
   void write_bool(int64_t num_items, const bool* values) noexcept override {
-    return write(num_items, values);
+    return write_specialized(num_items, values);
   }
 
   void write_int8(int64_t num_items, const int8_t* values) noexcept override {
-    return write(num_items, values);
+    return write_specialized(num_items, values);
   }
 
   void write_int16(int64_t num_items, const int16_t* values) noexcept override {
-    return write(num_items, values);
+    return write_specialized(num_items, values);
   }
 
   void write_int32(int64_t num_items, const int32_t* values) noexcept override {
-    return write(num_items, values);
+    return write_specialized(num_items, values);
   }
 
   void write_int64(int64_t num_items, const int64_t* values) noexcept override {
-    return write(num_items, values);
+    return write_specialized(num_items, values);
   }
 
   void write_intp(int64_t num_items, const ssize_t* values) noexcept override {
-    return write(num_items, values);
+    return write_specialized(num_items, values);
   }
 
   void write_uint8(int64_t num_items, const uint8_t* values) noexcept override {
-    return write(num_items, values);
+    return write_specialized(num_items, values);
   }
 
   void write_uint16(int64_t num_items, const uint16_t* values) noexcept override {
-    return write(num_items, values);
+    return write_specialized(num_items, values);
   }
 
   void write_uint32(int64_t num_items, const uint32_t* values) noexcept override {
-    return write(num_items, values);
+    return write_specialized(num_items, values);
   }
 
   void write_uint64(int64_t num_items, const uint64_t* values) noexcept override {
-    return write(num_items, values);
+    return write_specialized(num_items, values);
   }
 
   void write_uintp(int64_t num_items, const size_t* values) noexcept override {
-    return write(num_items, values);
+    return write_specialized(num_items, values);
   }
 
   void write_float32(int64_t num_items, const float* values) noexcept override {
-    return write(num_items, values);
+    return write_specialized(num_items, values);
   }
 
   void write_float64(int64_t num_items, const double* values) noexcept override {
-    return write(num_items, values);
+    return write_specialized(num_items, values);
   }
 
 private:
   template <typename IN>
-  void write(int64_t num_items, const IN* values) noexcept {
+  void write_specialized(int64_t num_items, const IN* values) noexcept {
     int64_t next = length_ + num_items;
     if (next > reserved_) {
       int64_t reservation = reserved_;
@@ -286,6 +286,15 @@ public:
     else {
       length_--;
       return buffer_[length_];
+    }
+  }
+
+  T* peek() const noexcept {
+    if (length_ == 0) {
+      return nullptr;
+    }
+    else {
+      return &buffer_[length_ - 1];
     }
   }
 
@@ -617,6 +626,22 @@ private:
     instructions_.push_back(4);
     instructions_.push_back(LITERAL);
     instructions_.push_back(5);
+
+    instructions_.push_back(WRITE);
+    instructions_.push_back(0);
+
+    instructions_.push_back(WRITE);
+    instructions_.push_back(0);
+
+    instructions_.push_back(WRITE);
+    instructions_.push_back(0);
+
+    instructions_.push_back(WRITE);
+    instructions_.push_back(0);
+
+    instructions_.push_back(WRITE);
+    instructions_.push_back(0);
+
     instructions_offsets_.push_back(instructions_.size());
   }
 
@@ -630,6 +655,10 @@ private:
     int64_t start = instructions_offsets_[pointer.which()];
     return instructions_[start + pointer.where()];
   }
+
+  void write_from_stack(const std::vector<std::shared_ptr<ForthOutputBuffer>>& outs,
+                        int64_t num,
+                        T* top);
 
   void do_run(const std::vector<std::shared_ptr<ForthInputBuffer>>& ins,
               const std::vector<std::shared_ptr<ForthOutputBuffer>>& outs,
@@ -750,6 +779,14 @@ private:
             }
 
             case WRITE: {
+              I num = get_instruction(pointer);
+              pointer.where() += 1;
+              T* top = stack_.peek();
+              stack_.pop(err);
+              if (err != ForthError::none) {
+                return;
+              }
+              write_from_stack(outs, num, top);
               break;
             }
 
@@ -963,6 +1000,15 @@ private:
 };
 
 
+template <>
+void ForthMachine<int32_t, int32_t, true>::write_from_stack(
+    const std::vector<std::shared_ptr<ForthOutputBuffer>>& outs,
+    int64_t num,
+    int32_t* top) {
+  outs[num].get()->write_int32(1, top);
+}
+
+
 int main() {
   ForthMachine<int32_t, int32_t, true> vm("");
 
@@ -982,7 +1028,7 @@ int main() {
     std::cout << pair.first << std::endl;
     std::shared_ptr<void> ptr = pair.second.get()->ptr();
     for (int64_t i = 0;  i < pair.second.get()->length();  i++) {
-      std::cout << i << std::endl;
+      std::cout << i << " " << reinterpret_cast<int32_t*>(ptr.get())[i] << std::endl;
     }
   }
 
