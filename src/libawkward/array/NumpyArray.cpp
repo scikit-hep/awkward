@@ -4676,8 +4676,7 @@ namespace awkward {
                                                                    kMaxLevels*((int64_t)sizeof(int64_t)));
     std::shared_ptr<int64_t> tmp_end_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
                                                                    kMaxLevels*((int64_t)sizeof(int64_t)));
-
-    struct Error err2 = kernel::NumpyArray_subrange_equal(
+    struct Error err2 = kernel::NumpyArray_quick_sort(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       tmp_beg_ptr.get(),
@@ -4685,9 +4684,17 @@ namespace awkward {
       starts.data(),
       stops.data(),
       starts.length(),
-      kMaxLevels,
-      &is_equal);
+      kMaxLevels);
     util::handle_error(err2, classname(), nullptr);
+
+    struct Error err3 = kernel::NumpyArray_subrange_equal(
+      kernel::lib::cpu,   // DERIVE
+      ptr.get(),
+      starts.data(),
+      stops.data(),
+      starts.length(),
+      &is_equal);
+    util::handle_error(err3, classname(), nullptr);
 
     return !is_equal;
   }

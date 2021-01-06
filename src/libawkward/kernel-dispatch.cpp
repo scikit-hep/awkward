@@ -16305,22 +16305,16 @@ namespace awkward {
     ERROR NumpyArray_subrange_equal<bool>(
       kernel::lib ptr_lib,
       bool* tmpptr,
-      int64_t* tmpbeg,
-      int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
-      int64_t maxlevels,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_bool(
           tmpptr,
-          tmpbeg,
-          tmpend,
           fromstarts,
           fromstops,
           length,
-          maxlevels,
           toequal);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -16339,22 +16333,16 @@ namespace awkward {
     ERROR NumpyArray_subrange_equal<uint8_t>(
       kernel::lib ptr_lib,
       uint8_t* tmpptr,
-      int64_t* tmpbeg,
-      int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
-      int64_t maxlevels,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_uint8(
           tmpptr,
-          tmpbeg,
-          tmpend,
           fromstarts,
           fromstops,
           length,
-          maxlevels,
           toequal);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -16373,22 +16361,16 @@ namespace awkward {
     ERROR NumpyArray_subrange_equal<int8_t>(
       kernel::lib ptr_lib,
       int8_t* tmpptr,
-      int64_t* tmpbeg,
-      int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
-      int64_t maxlevels,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_int8(
           tmpptr,
-          tmpbeg,
-          tmpend,
           fromstarts,
           fromstops,
           length,
-          maxlevels,
           toequal);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -16407,22 +16389,16 @@ namespace awkward {
     ERROR NumpyArray_subrange_equal<uint16_t>(
       kernel::lib ptr_lib,
       uint16_t* tmpptr,
-      int64_t* tmpbeg,
-      int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
-      int64_t maxlevels,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_uint16(
           tmpptr,
-          tmpbeg,
-          tmpend,
           fromstarts,
           fromstops,
           length,
-          maxlevels,
           toequal);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -16441,22 +16417,16 @@ namespace awkward {
     ERROR NumpyArray_subrange_equal<int16_t>(
       kernel::lib ptr_lib,
       int16_t* tmpptr,
-      int64_t* tmpbeg,
-      int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
-      int64_t maxlevels,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_int16(
           tmpptr,
-          tmpbeg,
-          tmpend,
           fromstarts,
           fromstops,
           length,
-          maxlevels,
           toequal);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -16475,22 +16445,16 @@ namespace awkward {
     ERROR NumpyArray_subrange_equal<uint32_t>(
       kernel::lib ptr_lib,
       uint32_t* tmpptr,
-      int64_t* tmpbeg,
-      int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
-      int64_t maxlevels,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_uint32(
           tmpptr,
-          tmpbeg,
-          tmpend,
           fromstarts,
           fromstops,
           length,
-          maxlevels,
           toequal);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -16509,22 +16473,16 @@ namespace awkward {
     ERROR NumpyArray_subrange_equal<int32_t>(
       kernel::lib ptr_lib,
       int32_t* tmpptr,
-      int64_t* tmpbeg,
-      int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
-      int64_t maxlevels,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_int32(
           tmpptr,
-          tmpbeg,
-          tmpend,
           fromstarts,
           fromstops,
           length,
-          maxlevels,
           toequal);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -16543,22 +16501,16 @@ namespace awkward {
     ERROR NumpyArray_subrange_equal<uint64_t>(
       kernel::lib ptr_lib,
       uint64_t* tmpptr,
-      int64_t* tmpbeg,
-      int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
-      int64_t maxlevels,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_uint64(
           tmpptr,
-          tmpbeg,
-          tmpend,
           fromstarts,
           fromstops,
           length,
-          maxlevels,
           toequal);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -16577,22 +16529,16 @@ namespace awkward {
     ERROR NumpyArray_subrange_equal<int64_t>(
       kernel::lib ptr_lib,
       int64_t* tmpptr,
-      int64_t* tmpbeg,
-      int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
-      int64_t maxlevels,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_int64(
           tmpptr,
-          tmpbeg,
-          tmpend,
           fromstarts,
           fromstops,
           length,
-          maxlevels,
           toequal);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -16611,22 +16557,16 @@ namespace awkward {
     ERROR NumpyArray_subrange_equal<float>(
       kernel::lib ptr_lib,
       float* tmpptr,
-      int64_t* tmpbeg,
-      int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
-      int64_t maxlevels,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_float32(
           tmpptr,
-          tmpbeg,
-          tmpend,
           fromstarts,
           fromstops,
           length,
-          maxlevels,
           toequal);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -16645,22 +16585,16 @@ namespace awkward {
     ERROR NumpyArray_subrange_equal<double>(
       kernel::lib ptr_lib,
       double* tmpptr,
-      int64_t* tmpbeg,
-      int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
       int64_t length,
-      int64_t maxlevels,
       bool* toequal) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_NumpyArray_subrange_equal_float64(
           tmpptr,
-          tmpbeg,
-          tmpend,
           fromstarts,
           fromstops,
           length,
-          maxlevels,
           toequal);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -16671,6 +16605,358 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("unrecognized ptr_lib for NumpyArray_subrange_equal<double>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_quick_sort<bool>(
+      kernel::lib ptr_lib,
+      bool* tmpptr,
+      int64_t* tmpbeg,
+      int64_t* tmpend,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t maxlevels) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_quick_sort_bool(
+          tmpptr,
+          tmpbeg,
+          tmpend,
+          fromstarts,
+          fromstops,
+          length,
+          maxlevels);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_quick_sort<bool>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_quick_sort<bool>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_quick_sort<uint8_t>(
+      kernel::lib ptr_lib,
+      uint8_t* tmpptr,
+      int64_t* tmpbeg,
+      int64_t* tmpend,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t maxlevels) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_quick_sort_uint8(
+          tmpptr,
+          tmpbeg,
+          tmpend,
+          fromstarts,
+          fromstops,
+          length,
+          maxlevels);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_quick_sort<uint8_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_quick_sort<uint8_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_quick_sort<int8_t>(
+      kernel::lib ptr_lib,
+      int8_t* tmpptr,
+      int64_t* tmpbeg,
+      int64_t* tmpend,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t maxlevels) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_quick_sort_int8(
+          tmpptr,
+          tmpbeg,
+          tmpend,
+          fromstarts,
+          fromstops,
+          length,
+          maxlevels);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_quick_sort<int8_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_quick_sort<int8_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_quick_sort<uint16_t>(
+      kernel::lib ptr_lib,
+      uint16_t* tmpptr,
+      int64_t* tmpbeg,
+      int64_t* tmpend,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t maxlevels) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_quick_sort_uint16(
+          tmpptr,
+          tmpbeg,
+          tmpend,
+          fromstarts,
+          fromstops,
+          length,
+          maxlevels);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_quick_sort<uint16_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_quick_sort<uint16_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_quick_sort<int16_t>(
+      kernel::lib ptr_lib,
+      int16_t* tmpptr,
+      int64_t* tmpbeg,
+      int64_t* tmpend,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t maxlevels) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_quick_sort_int16(
+          tmpptr,
+          tmpbeg,
+          tmpend,
+          fromstarts,
+          fromstops,
+          length,
+          maxlevels);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_quick_sort<int16_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_quick_sort<int16_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_quick_sort<uint32_t>(
+      kernel::lib ptr_lib,
+      uint32_t* tmpptr,
+      int64_t* tmpbeg,
+      int64_t* tmpend,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t maxlevels) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_quick_sort_uint32(
+          tmpptr,
+          tmpbeg,
+          tmpend,
+          fromstarts,
+          fromstops,
+          length,
+          maxlevels);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_quick_sort<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_quick_sort<uint32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_quick_sort<int32_t>(
+      kernel::lib ptr_lib,
+      int32_t* tmpptr,
+      int64_t* tmpbeg,
+      int64_t* tmpend,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t maxlevels) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_quick_sort_int32(
+          tmpptr,
+          tmpbeg,
+          tmpend,
+          fromstarts,
+          fromstops,
+          length,
+          maxlevels);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_quick_sort<int32_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_quick_sort<int32_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_quick_sort<uint64_t>(
+      kernel::lib ptr_lib,
+      uint64_t* tmpptr,
+      int64_t* tmpbeg,
+      int64_t* tmpend,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t maxlevels) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_quick_sort_uint64(
+          tmpptr,
+          tmpbeg,
+          tmpend,
+          fromstarts,
+          fromstops,
+          length,
+          maxlevels);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_quick_sort<uint64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_quick_sort<uint64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_quick_sort<int64_t>(
+      kernel::lib ptr_lib,
+      int64_t* tmpptr,
+      int64_t* tmpbeg,
+      int64_t* tmpend,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t maxlevels) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_quick_sort_int64(
+          tmpptr,
+          tmpbeg,
+          tmpend,
+          fromstarts,
+          fromstops,
+          length,
+          maxlevels);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_quick_sort<int64_t>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_quick_sort<int64_t>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_quick_sort<float>(
+      kernel::lib ptr_lib,
+      float* tmpptr,
+      int64_t* tmpbeg,
+      int64_t* tmpend,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t maxlevels) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_quick_sort_float32(
+          tmpptr,
+          tmpbeg,
+          tmpend,
+          fromstarts,
+          fromstops,
+          length,
+          maxlevels);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_quick_sort<float>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_quick_sort<float>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR NumpyArray_quick_sort<double>(
+      kernel::lib ptr_lib,
+      double* tmpptr,
+      int64_t* tmpbeg,
+      int64_t* tmpend,
+      const int64_t* fromstarts,
+      const int64_t* fromstops,
+      int64_t length,
+      int64_t maxlevels) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_quick_sort_float64(
+          tmpptr,
+          tmpbeg,
+          tmpend,
+          fromstarts,
+          fromstops,
+          length,
+          maxlevels);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_quick_sort<double>")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_quick_sort<double>")
           + FILENAME(__LINE__));
       }
     }
