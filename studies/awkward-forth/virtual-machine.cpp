@@ -233,28 +233,28 @@ public:
   }
 
   inline void write_one_bool(bool value, bool byteswap) noexcept override {
-    write_one(value, byteswap);
+    write_one(value);
   }
   inline void write_one_int8(int8_t value, bool byteswap) noexcept override {
-    write_one(value, byteswap);
+    write_one(value);
   }
   inline void write_one_int16(int16_t value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap16(1, &value);
     }
-    write_one(value, byteswap);
+    write_one(value);
   }
   inline void write_one_int32(int32_t value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap32(1, &value);
     }
-    write_one(value, byteswap);
+    write_one(value);
   }
   inline void write_one_int64(int64_t value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap64(1, &value);
     }
-    write_one(value, byteswap);
+    write_one(value);
   }
   inline void write_one_intp(ssize_t value, bool byteswap) noexcept override {
     if (byteswap) {
@@ -265,28 +265,28 @@ public:
         byteswap64(1, &value);
       }
     }
-    write_one(value, byteswap);
+    write_one(value);
   }
   inline void write_one_uint8(uint8_t value, bool byteswap) noexcept override {
-    write_one(value, byteswap);
+    write_one(value);
   }
   inline void write_one_uint16(uint16_t value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap16(1, &value);
     }
-    write_one(value, byteswap);
+    write_one(value);
   }
   inline void write_one_uint32(uint32_t value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap32(1, &value);
     }
-    write_one(value, byteswap);
+    write_one(value);
   }
   inline void write_one_uint64(uint64_t value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap64(1, &value);
     }
-    write_one(value, byteswap);
+    write_one(value);
   }
   inline void write_one_uintp(size_t value, bool byteswap) noexcept override {
     if (byteswap) {
@@ -297,19 +297,19 @@ public:
         byteswap64(1, &value);
       }
     }
-    write_one(value, byteswap);
+    write_one(value);
   }
   inline void write_one_float32(float value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap32(1, &value);
     }
-    write_one(value, byteswap);
+    write_one(value);
   }
   inline void write_one_float64(double value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap64(1, &value);
     }
-    write_one(value, byteswap);
+    write_one(value);
   }
 
   inline void write_bool(int64_t num_items, bool* values, bool byteswap) noexcept override;
@@ -342,14 +342,14 @@ private:
   }
 
   template <typename IN>
-  inline void write_one(IN value, bool byteswap) noexcept {
+  inline void write_one(IN value) noexcept {
     length_++;
     maybe_resize(length_);
     ptr_.get()[length_ - 1] = value;
   }
 
   template <typename IN>
-  inline void write_copy(int64_t num_items, const IN* values, bool byteswap) noexcept {
+  inline void write_copy(int64_t num_items, const IN* values) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
     for (int64_t i = 0;  i < num_items;  i++) {
@@ -365,13 +365,13 @@ private:
 template <typename OUT>
 inline void
 ForthOutputBufferOf<OUT>::write_bool(int64_t num_items, bool* values, bool byteswap) noexcept {
-  write_copy(num_items, values, byteswap);
+  write_copy(num_items, values);
 }
 
 template <typename OUT>
 inline void
 ForthOutputBufferOf<OUT>::write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept {
-  write_copy(num_items, values, byteswap);
+  write_copy(num_items, values);
 }
 
 template <typename OUT>
@@ -380,7 +380,7 @@ ForthOutputBufferOf<OUT>::write_int16(int64_t num_items, int16_t* values, bool b
   if (byteswap) {
     byteswap16(num_items, values);
   }
-  write_copy(num_items, values, byteswap);
+  write_copy(num_items, values);
   if (byteswap) {
     byteswap16(num_items, values);
   }
@@ -392,7 +392,7 @@ ForthOutputBufferOf<OUT>::write_int32(int64_t num_items, int32_t* values, bool b
   if (byteswap) {
     byteswap32(num_items, values);
   }
-  write_copy(num_items, values, byteswap);
+  write_copy(num_items, values);
   if (byteswap) {
     byteswap32(num_items, values);
   }
@@ -404,7 +404,7 @@ ForthOutputBufferOf<OUT>::write_int64(int64_t num_items, int64_t* values, bool b
   if (byteswap) {
     byteswap64(num_items, values);
   }
-  write_copy(num_items, values, byteswap);
+  write_copy(num_items, values);
   if (byteswap) {
     byteswap64(num_items, values);
   }
@@ -421,7 +421,7 @@ ForthOutputBufferOf<OUT>::write_intp(int64_t num_items, ssize_t* values, bool by
       byteswap64(num_items, values);
     }
   }
-  write_copy(num_items, values, byteswap);
+  write_copy(num_items, values);
   if (byteswap) {
     if (sizeof(ssize_t) == 4) {
       byteswap32(num_items, values);
@@ -435,7 +435,7 @@ ForthOutputBufferOf<OUT>::write_intp(int64_t num_items, ssize_t* values, bool by
 template <typename OUT>
 inline void
 ForthOutputBufferOf<OUT>::write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept {
-  write_copy(num_items, values, byteswap);
+  write_copy(num_items, values);
 }
 
 template <typename OUT>
@@ -444,7 +444,7 @@ ForthOutputBufferOf<OUT>::write_uint16(int64_t num_items, uint16_t* values, bool
   if (byteswap) {
     byteswap16(num_items, values);
   }
-  write_copy(num_items, values, byteswap);
+  write_copy(num_items, values);
   if (byteswap) {
     byteswap16(num_items, values);
   }
@@ -456,7 +456,7 @@ ForthOutputBufferOf<OUT>::write_uint32(int64_t num_items, uint32_t* values, bool
   if (byteswap) {
     byteswap32(num_items, values);
   }
-  write_copy(num_items, values, byteswap);
+  write_copy(num_items, values);
   if (byteswap) {
     byteswap32(num_items, values);
   }
@@ -468,7 +468,7 @@ ForthOutputBufferOf<OUT>::write_uint64(int64_t num_items, uint64_t* values, bool
   if (byteswap) {
     byteswap64(num_items, values);
   }
-  write_copy(num_items, values, byteswap);
+  write_copy(num_items, values);
   if (byteswap) {
     byteswap64(num_items, values);
   }
@@ -485,7 +485,7 @@ ForthOutputBufferOf<OUT>::write_uintp(int64_t num_items, size_t* values, bool by
       byteswap64(num_items, values);
     }
   }
-  write_copy(num_items, values, byteswap);
+  write_copy(num_items, values);
   if (byteswap) {
     if (sizeof(size_t) == 4) {
       byteswap32(num_items, values);
@@ -502,7 +502,7 @@ ForthOutputBufferOf<OUT>::write_float32(int64_t num_items, float* values, bool b
   if (byteswap) {
     byteswap32(num_items, values);
   }
-  write_copy(num_items, values, byteswap);
+  write_copy(num_items, values);
   if (byteswap) {
     byteswap32(num_items, values);
   }
@@ -514,134 +514,134 @@ ForthOutputBufferOf<OUT>::write_float64(int64_t num_items, double* values, bool 
   if (byteswap) {
     byteswap64(num_items, values);
   }
-  write_copy(num_items, values, byteswap);
+  write_copy(num_items, values);
   if (byteswap) {
     byteswap64(num_items, values);
   }
 }
 
-template <>
-inline void
-ForthOutputBufferOf<bool>::write_bool(int64_t num_items, bool* values, bool byteswap) noexcept {
-  int64_t next = length_ + num_items;
-  maybe_resize(next);
-  std::memcpy(&ptr_.get()[length_], values, sizeof(bool) * num_items);
-  length_ = next;
-}
+// template <>
+// inline void
+// ForthOutputBufferOf<bool>::write_bool(int64_t num_items, bool* values, bool byteswap) noexcept {
+//   int64_t next = length_ + num_items;
+//   maybe_resize(next);
+//   std::memcpy(&ptr_.get()[length_], values, sizeof(bool) * num_items);
+//   length_ = next;
+// }
 
-template <>
-inline void
-ForthOutputBufferOf<int8_t>::write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept {
-  int64_t next = length_ + num_items;
-  maybe_resize(next);
-  std::memcpy(&ptr_.get()[length_], values, sizeof(int8_t) * num_items);
-  length_ = next;
-}
+// template <>
+// inline void
+// ForthOutputBufferOf<int8_t>::write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept {
+//   int64_t next = length_ + num_items;
+//   maybe_resize(next);
+//   std::memcpy(&ptr_.get()[length_], values, sizeof(int8_t) * num_items);
+//   length_ = next;
+// }
 
-template <>
-inline void
-ForthOutputBufferOf<int16_t>::write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept {
-  int64_t next = length_ + num_items;
-  maybe_resize(next);
-  std::memcpy(&ptr_.get()[length_], values, sizeof(int16_t) * num_items);
-  if (byteswap) {
-    byteswap16(num_items, &ptr_.get()[length_]);
-  }
-  length_ = next;
-}
+// template <>
+// inline void
+// ForthOutputBufferOf<int16_t>::write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept {
+//   int64_t next = length_ + num_items;
+//   maybe_resize(next);
+//   std::memcpy(&ptr_.get()[length_], values, sizeof(int16_t) * num_items);
+//   if (byteswap) {
+//     byteswap16(num_items, &ptr_.get()[length_]);
+//   }
+//   length_ = next;
+// }
 
-template <>
-inline void
-ForthOutputBufferOf<int32_t>::write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept {
-  int64_t next = length_ + num_items;
-  maybe_resize(next);
-  std::memcpy(&ptr_.get()[length_], values, sizeof(int32_t) * num_items);
-  if (byteswap) {
-    byteswap32(num_items, &ptr_.get()[length_]);
-  }
-  length_ = next;
-}
+// template <>
+// inline void
+// ForthOutputBufferOf<int32_t>::write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept {
+//   int64_t next = length_ + num_items;
+//   maybe_resize(next);
+//   std::memcpy(&ptr_.get()[length_], values, sizeof(int32_t) * num_items);
+//   if (byteswap) {
+//     byteswap32(num_items, &ptr_.get()[length_]);
+//   }
+//   length_ = next;
+// }
 
-template <>
-inline void
-ForthOutputBufferOf<int64_t>::write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept {
-  int64_t next = length_ + num_items;
-  maybe_resize(next);
-  std::memcpy(&ptr_.get()[length_], values, sizeof(int64_t) * num_items);
-  if (byteswap) {
-    byteswap64(num_items, &ptr_.get()[length_]);
-  }
-  length_ = next;
-}
+// template <>
+// inline void
+// ForthOutputBufferOf<int64_t>::write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept {
+//   int64_t next = length_ + num_items;
+//   maybe_resize(next);
+//   std::memcpy(&ptr_.get()[length_], values, sizeof(int64_t) * num_items);
+//   if (byteswap) {
+//     byteswap64(num_items, &ptr_.get()[length_]);
+//   }
+//   length_ = next;
+// }
 
-template <>
-inline void
-ForthOutputBufferOf<uint8_t>::write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept {
-  int64_t next = length_ + num_items;
-  maybe_resize(next);
-  std::memcpy(&ptr_.get()[length_], values, sizeof(uint8_t) * num_items);
-  length_ = next;
-}
+// template <>
+// inline void
+// ForthOutputBufferOf<uint8_t>::write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept {
+//   int64_t next = length_ + num_items;
+//   maybe_resize(next);
+//   std::memcpy(&ptr_.get()[length_], values, sizeof(uint8_t) * num_items);
+//   length_ = next;
+// }
 
-template <>
-inline void
-ForthOutputBufferOf<uint16_t>::write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept {
-  int64_t next = length_ + num_items;
-  maybe_resize(next);
-  std::memcpy(&ptr_.get()[length_], values, sizeof(uint16_t) * num_items);
-  if (byteswap) {
-    byteswap16(num_items, &ptr_.get()[length_]);
-  }
-  length_ = next;
-}
+// template <>
+// inline void
+// ForthOutputBufferOf<uint16_t>::write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept {
+//   int64_t next = length_ + num_items;
+//   maybe_resize(next);
+//   std::memcpy(&ptr_.get()[length_], values, sizeof(uint16_t) * num_items);
+//   if (byteswap) {
+//     byteswap16(num_items, &ptr_.get()[length_]);
+//   }
+//   length_ = next;
+// }
 
-template <>
-inline void
-ForthOutputBufferOf<uint32_t>::write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept {
-  int64_t next = length_ + num_items;
-  maybe_resize(next);
-  std::memcpy(&ptr_.get()[length_], values, sizeof(uint32_t) * num_items);
-  if (byteswap) {
-    byteswap32(num_items, &ptr_.get()[length_]);
-  }
-  length_ = next;
-}
+// template <>
+// inline void
+// ForthOutputBufferOf<uint32_t>::write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept {
+//   int64_t next = length_ + num_items;
+//   maybe_resize(next);
+//   std::memcpy(&ptr_.get()[length_], values, sizeof(uint32_t) * num_items);
+//   if (byteswap) {
+//     byteswap32(num_items, &ptr_.get()[length_]);
+//   }
+//   length_ = next;
+// }
 
-template <>
-inline void
-ForthOutputBufferOf<uint64_t>::write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept {
-  int64_t next = length_ + num_items;
-  maybe_resize(next);
-  std::memcpy(&ptr_.get()[length_], values, sizeof(uint64_t) * num_items);
-  if (byteswap) {
-    byteswap64(num_items, &ptr_.get()[length_]);
-  }
-  length_ = next;
-}
+// template <>
+// inline void
+// ForthOutputBufferOf<uint64_t>::write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept {
+//   int64_t next = length_ + num_items;
+//   maybe_resize(next);
+//   std::memcpy(&ptr_.get()[length_], values, sizeof(uint64_t) * num_items);
+//   if (byteswap) {
+//     byteswap64(num_items, &ptr_.get()[length_]);
+//   }
+//   length_ = next;
+// }
 
-template <>
-inline void
-ForthOutputBufferOf<float>::write_float32(int64_t num_items, float* values, bool byteswap) noexcept {
-  int64_t next = length_ + num_items;
-  maybe_resize(next);
-  std::memcpy(&ptr_.get()[length_], values, sizeof(float) * num_items);
-  if (byteswap) {
-    byteswap32(num_items, &ptr_.get()[length_]);
-  }
-  length_ = next;
-}
+// template <>
+// inline void
+// ForthOutputBufferOf<float>::write_float32(int64_t num_items, float* values, bool byteswap) noexcept {
+//   int64_t next = length_ + num_items;
+//   maybe_resize(next);
+//   std::memcpy(&ptr_.get()[length_], values, sizeof(float) * num_items);
+//   if (byteswap) {
+//     byteswap32(num_items, &ptr_.get()[length_]);
+//   }
+//   length_ = next;
+// }
 
-template <>
-inline void
-ForthOutputBufferOf<double>::write_float64(int64_t num_items, double* values, bool byteswap) noexcept {
-  int64_t next = length_ + num_items;
-  maybe_resize(next);
-  std::memcpy(&ptr_.get()[length_], values, sizeof(double) * num_items);
-  if (byteswap) {
-    byteswap64(num_items, &ptr_.get()[length_]);
-  }
-  length_ = next;
-}
+// template <>
+// inline void
+// ForthOutputBufferOf<double>::write_float64(int64_t num_items, double* values, bool byteswap) noexcept {
+//   int64_t next = length_ + num_items;
+//   maybe_resize(next);
+//   std::memcpy(&ptr_.get()[length_], values, sizeof(double) * num_items);
+//   if (byteswap) {
+//     byteswap64(num_items, &ptr_.get()[length_]);
+//   }
+//   length_ = next;
+// }
 
 
 template <typename T>
@@ -1570,13 +1570,18 @@ int main() {
   for (int64_t i = 0;  i < length;  i++) {
     test_input_ptr.get()[i] = (i % 9) - 4;
   }
-
   byteswap32(length, test_input_ptr.get());
 
   std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
   inputs["testin"] = std::make_shared<ForthInputBuffer>(test_input_ptr,
                                                         0,
                                                         sizeof(int32_t) * length);
+
+  // std::cout << "input";
+  // for (int64_t i = 0;  i < length;  i++) {
+  //   std::cout << " " << test_input_ptr.get()[i];
+  // }
+  // std::cout << std::endl;
 
   {
     std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
@@ -1587,7 +1592,7 @@ int main() {
 
     auto cpp_begin = std::chrono::high_resolution_clock::now();
     for (int64_t i = 0;  i < length;  i += TEMPORARY_BATCH_SIZE) {
-      int32_t* data = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t), err));
+      int32_t* data = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * TEMPORARY_BATCH_SIZE, err));
       outs[0].get()->write_int32(TEMPORARY_BATCH_SIZE, data, true);
     }
     auto cpp_end = std::chrono::high_resolution_clock::now();
@@ -1604,8 +1609,19 @@ int main() {
               << " us" << std::endl;
   }
 
+  // std::cout << "input";
+  // for (int64_t i = 0;  i < length;  i++) {
+  //   std::cout << " " << test_input_ptr.get()[i];
+  // }
+  // std::cout << std::endl;
+
   ForthError err = ForthError::none;
   inputs["testin"].get()->seek(0, err);
+
+  for (int64_t i = 0;  i < length;  i++) {
+    test_input_ptr.get()[i] = (i % 9) - 4;
+  }
+  byteswap32(length, test_input_ptr.get());
 
   {
     std::set<ForthError> ignore({ ForthError::read_beyond });
@@ -1628,5 +1644,11 @@ int main() {
               << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
               << " us" << std::endl;
   }
+
+  // std::cout << "input";
+  // for (int64_t i = 0;  i < length;  i++) {
+  //   std::cout << " " << test_input_ptr.get()[i];
+  // }
+  // std::cout << std::endl;
 
 }
