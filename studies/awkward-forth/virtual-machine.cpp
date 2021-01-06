@@ -1,4 +1,4 @@
-// c++ virtual-machine.cpp -o virtual-machine-test  &&  ./virtual-machine-test
+// c++ virtual-machine.cpp -O5 -o virtual-machine-test  &&  echo GO  &&  ./virtual-machine-test
 
 #include <memory>
 #include <vector>
@@ -1099,32 +1099,6 @@ int main() {
                                                         sizeof(int32_t) * length);
 
   {
-    std::set<ForthError> ignore({ ForthError::read_beyond });
-
-    auto forth_begin = std::chrono::high_resolution_clock::now();
-    std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
-    auto forth_end = std::chrono::high_resolution_clock::now();
-
-    std::cout << vm.stack().tostring() << std::endl;
-
-    // for (auto pair : outputs) {
-    //   std::cout << pair.first;
-    //   std::shared_ptr<void> ptr = pair.second.get()->ptr();
-    //   for (int64_t i = 0;  i < pair.second.get()->length();  i++) {
-    //     std::cout << " " << reinterpret_cast<int32_t*>(ptr.get())[i];
-    //   }
-    //   std::cout << std::endl;
-    // }
-
-    std::cout << "Forth time: "
-              << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
-              << " microseconds" << std::endl;
-  }
-
-  ForthError err = ForthError::none;
-  inputs["testin"].get()->seek(0, err);
-
-  {
     std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
     std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
         std::make_shared<ForthOutputBufferOf<int32_t>>() });
@@ -1151,4 +1125,31 @@ int main() {
               << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
               << " microseconds" << std::endl;
   }
+
+  ForthError err = ForthError::none;
+  inputs["testin"].get()->seek(0, err);
+
+  {
+    std::set<ForthError> ignore({ ForthError::read_beyond });
+
+    auto forth_begin = std::chrono::high_resolution_clock::now();
+    std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
+    auto forth_end = std::chrono::high_resolution_clock::now();
+
+    // std::cout << vm.stack().tostring() << std::endl;
+
+    // for (auto pair : outputs) {
+    //   std::cout << pair.first;
+    //   std::shared_ptr<void> ptr = pair.second.get()->ptr();
+    //   for (int64_t i = 0;  i < pair.second.get()->length();  i++) {
+    //     std::cout << " " << reinterpret_cast<int32_t*>(ptr.get())[i];
+    //   }
+    //   std::cout << std::endl;
+    // }
+
+    std::cout << "Forth time: "
+              << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
+              << " microseconds" << std::endl;
+  }
+
 }
