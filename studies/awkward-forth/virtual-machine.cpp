@@ -13,9 +13,6 @@
 #include <iostream>
 
 
-#define TEMPORARY_BATCH_SIZE 10
-
-
 template <typename T>
 class array_deleter {
 public:
@@ -1047,10 +1044,10 @@ private:
     // instructions_.push_back(-PARSER_INT32);
     // instructions_.push_back(0);
 
-    instructions_.push_back(LITERAL);
-    instructions_.push_back(TEMPORARY_BATCH_SIZE);
+    // instructions_.push_back(LITERAL);
+    // instructions_.push_back(TEMPORARY_BATCH_SIZE);
 
-    instructions_.push_back(-PARSER_INT32 | PARSER_DIRECT | PARSER_REPEATED | PARSER_BIGENDIAN);
+    instructions_.push_back(~(PARSER_INT32 | PARSER_DIRECT));
     instructions_.push_back(0);
     instructions_.push_back(0);
 
@@ -1095,28 +1092,28 @@ private:
         if (instruction < 0) {
           bool byteswap;
           if (NATIVELY_BIG_ENDIAN) {
-            byteswap = (instruction & PARSER_BIGENDIAN == 0);
+            byteswap = ((~instruction & PARSER_BIGENDIAN) == 0);
           }
           else {
-            byteswap = (instruction & PARSER_BIGENDIAN != 0);
+            byteswap = ((~instruction & PARSER_BIGENDIAN) != 0);
           }
 
           I in_num = get_instruction(pointer);
           pointer.where() += 1;
 
           int64_t num_items = 1;
-          if (instruction & PARSER_REPEATED) {
+          if (~instruction & PARSER_REPEATED) {
             num_items = stack_.pop(err);
             if (err != ForthError::none) {
               return;
             }
           }
 
-          if (instruction & PARSER_DIRECT) {
+          if (~instruction & PARSER_DIRECT) {
             I out_num = get_instruction(pointer);
             pointer.where() += 1;
 
-            switch (-(instruction & PARSER_MASK)) {
+            switch (~instruction & PARSER_MASK) {
               case PARSER_BOOL: {
                 break;
               }
@@ -1182,7 +1179,7 @@ private:
             }
           }
           else {
-            switch (-(instruction & PARSER_MASK)) {
+            switch (~instruction & PARSER_MASK) {
               case PARSER_BOOL: {
                 break;
               }
@@ -1570,7 +1567,7 @@ int main() {
   for (int64_t i = 0;  i < length;  i++) {
     test_input_ptr.get()[i] = (i % 9) - 4;
   }
-  byteswap32(length, test_input_ptr.get());
+  // byteswap32(length, test_input_ptr.get());
 
   std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
   inputs["testin"] = std::make_shared<ForthInputBuffer>(test_input_ptr,
@@ -1591,9 +1588,9 @@ int main() {
     ForthError err = ForthError::none;
 
     auto cpp_begin = std::chrono::high_resolution_clock::now();
-    for (int64_t i = 0;  i < length;  i += TEMPORARY_BATCH_SIZE) {
-      int32_t* data = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * TEMPORARY_BATCH_SIZE, err));
-      outs[0].get()->write_int32(TEMPORARY_BATCH_SIZE, data, true);
+    for (int64_t i = 0;  i < length;  i++) {
+      int32_t* data = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
+      outs[0].get()->write_one_int32(*data, false);
     }
     auto cpp_end = std::chrono::high_resolution_clock::now();
 
@@ -1621,7 +1618,7 @@ int main() {
   for (int64_t i = 0;  i < length;  i++) {
     test_input_ptr.get()[i] = (i % 9) - 4;
   }
-  byteswap32(length, test_input_ptr.get());
+  // byteswap32(length, test_input_ptr.get());
 
   {
     std::set<ForthError> ignore({ ForthError::read_beyond });
