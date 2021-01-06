@@ -2214,6 +2214,9 @@ def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
         elif isinstance(layout, (ak.layout.UnmaskedArray)):
             return recurse(layout.content, None, True)
 
+        elif isinstance(layout, (ak.layout.VirtualArray)):
+            return recurse(layout.array, None, False)
+
         else:
             raise TypeError(
                 "unrecognized array type: {0}".format(repr(layout))
