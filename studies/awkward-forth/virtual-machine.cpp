@@ -281,6 +281,15 @@ public:
     length_++;
   }
 
+  inline void drop(ForthError &err) noexcept {
+    if (length_ == 0) {
+      err = ForthError::stack_underflow;
+    }
+    else {
+      length_--;
+    }
+  }
+
   inline T pop(ForthError &err) noexcept {
     if (length_ == 0) {
       err = ForthError::stack_underflow;
@@ -645,10 +654,16 @@ private:
     instructions_.push_back(-PARSER_INT32);
     instructions_.push_back(0);
 
-    instructions_.push_back(LITERAL);
-    instructions_.push_back(10);
+    // instructions_.push_back(LITERAL);
+    // instructions_.push_back(10);
 
-    instructions_.push_back(ADD);
+    // instructions_.push_back(ADD);
+
+    instructions_.push_back(INC);
+    instructions_.push_back(0);
+
+    instructions_.push_back(GET);
+    instructions_.push_back(0);
 
     instructions_.push_back(WRITE);
     instructions_.push_back(0);
@@ -825,14 +840,31 @@ private:
             }
 
             case PUT: {
+              I num = get_instruction(pointer);
+              pointer.where() += 1;
+              T value = stack_.pop(err);
+              if (err != ForthError::none) {
+                return;
+              }
+              variables_[num] = value;
               break;
             }
 
             case INC: {
+              I num = get_instruction(pointer);
+              pointer.where() += 1;
+              T value = stack_.pop(err);
+              if (err != ForthError::none) {
+                return;
+              }
+              variables_[num] += value;
               break;
             }
 
             case GET: {
+              I num = get_instruction(pointer);
+              pointer.where() += 1;
+              stack_.push(variables_[num]);
               break;
             }
 
@@ -927,6 +959,10 @@ private:
             }
 
             case DROP: {
+              stack_.drop(err);
+              if (err != ForthError::none) {
+                return;
+              }
               break;
             }
 
@@ -1107,7 +1143,7 @@ int main() {
   std::shared_ptr<int32_t> test_input_ptr = std::shared_ptr<int32_t>(
       new int32_t[length], array_deleter<int32_t>());
   for (int64_t i = 0;  i < length;  i++) {
-    test_input_ptr.get()[i] = i % 10;
+    test_input_ptr.get()[i] = (i % 9) - 4;
   }
 
   std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
@@ -1123,11 +1159,11 @@ int main() {
     ForthError err = ForthError::none;
 
     auto cpp_begin = std::chrono::high_resolution_clock::now();
-    int32_t tmp;
+    int32_t cumulative = 0;
     for (int64_t i = 0;  i < length;  i++) {
       int32_t* data = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t), err));
-      tmp = data[0] + 10;
-      outs[0].get()->write_int32(1, &tmp);
+      cumulative += data[0];
+      outs[0].get()->write_int32(1, &cumulative);
     }
     auto cpp_end = std::chrono::high_resolution_clock::now();
 
