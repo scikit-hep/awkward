@@ -2,12 +2,14 @@
 
 #include <memory>
 #include <vector>
+#include <set>
 #include <map>
 #include <string>
 #include <sstream>
 #include <cmath>
 #include <cstring>
 
+#include <chrono>
 #include <iostream>
 
 
@@ -235,8 +237,9 @@ private:
       }
       std::shared_ptr<OUT> new_buffer = std::shared_ptr<OUT>(new OUT[reservation],
                                                              array_deleter<OUT>());
-      std::memcpy(new_buffer.get(), ptr_.get(), sizeof(OUT) * reservation);
+      std::memcpy(new_buffer.get(), ptr_.get(), sizeof(OUT) * reserved_);
       ptr_ = new_buffer;
+      reserved_ = reservation;
     }
     for (int64_t i = 0;  i < num_items;  i++) {
       ptr_.get()[length_ + i] = values[i];
@@ -450,6 +453,7 @@ private:
 #define INVERT 54
 #define FALSE 55
 #define TRUE 56
+#define DICTIONARY 57
 
 
 template <typename T, typename I, bool DEBUG>
@@ -484,7 +488,8 @@ public:
   }
 
   std::map<std::string, std::shared_ptr<ForthOutputBuffer>> run(
-      const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs) {
+      const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs,
+      const std::set<ForthError>& ignore) {
 
     std::vector<std::shared_ptr<ForthInputBuffer>> ins;
     for (auto name : input_names_) {
@@ -579,22 +584,26 @@ public:
     }
 
     ForthError err = ForthError::none;
+
     do_run(ins, outs, err);
-    switch (err) {
-      case ForthError::stack_underflow: {
-        throw std::invalid_argument("Forth stack underflow while filling array");
-      }
-      case ForthError::read_beyond: {
-        throw std::invalid_argument("Forth read beyond end of input while filling array");
-      }
-      case ForthError::seek_beyond: {
-        throw std::invalid_argument("Forth seek beyond input while filling array");
-      }
-      case ForthError::skip_beyond: {
-        throw std::invalid_argument("Forth skip beyond input while filling array");
-      }
-      case ForthError::rewind_beyond: {
-        throw std::invalid_argument("Forth rewind beyond beginning of output while filling array");
+
+    if (ignore.count(err) == 0) {
+      switch (err) {
+        case ForthError::stack_underflow: {
+          throw std::invalid_argument("Forth stack underflow while filling array");
+        }
+        case ForthError::read_beyond: {
+          throw std::invalid_argument("Forth read beyond end of input while filling array");
+        }
+        case ForthError::seek_beyond: {
+          throw std::invalid_argument("Forth seek beyond input while filling array");
+        }
+        case ForthError::skip_beyond: {
+          throw std::invalid_argument("Forth skip beyond input while filling array");
+        }
+        case ForthError::rewind_beyond: {
+          throw std::invalid_argument("Forth rewind beyond beginning of output while filling array");
+        }
       }
     }
 
@@ -616,27 +625,13 @@ private:
     output_dtypes_.push_back(dtype::int32);
 
     instructions_offsets_.push_back(0);
-    instructions_.push_back(LITERAL);
-    instructions_.push_back(1);
-    instructions_.push_back(LITERAL);
-    instructions_.push_back(2);
-    instructions_.push_back(LITERAL);
-    instructions_.push_back(3);
-    instructions_.push_back(LITERAL);
-    instructions_.push_back(4);
-    instructions_.push_back(LITERAL);
-    instructions_.push_back(5);
 
-    instructions_.push_back(WRITE);
-    instructions_.push_back(0);
+    instructions_.push_back(DICTIONARY + 0);
+    instructions_.push_back(AGAIN);
 
-    instructions_.push_back(WRITE);
-    instructions_.push_back(0);
+    instructions_offsets_.push_back(instructions_.size());
 
-    instructions_.push_back(WRITE);
-    instructions_.push_back(0);
-
-    instructions_.push_back(WRITE);
+    instructions_.push_back(-PARSER_INT32);
     instructions_.push_back(0);
 
     instructions_.push_back(WRITE);
@@ -672,60 +667,135 @@ private:
         pointer.where() += 1;
 
         if (instruction < 0) {
-          bool direct = instruction & PARSER_DIRECT;
-          bool repeated = instruction & PARSER_REPEATED;
           bool bigendian = instruction & PARSER_BIGENDIAN;
-          switch (instruction & PARSER_MASK) {
-            case PARSER_BOOL: {
-              break;
-            }
 
-            case PARSER_INT8: {
-              break;
-            }
+          I num = get_instruction(pointer);
+          pointer.where() += 1;
 
-            case PARSER_INT16: {
-              break;
+          int64_t num_items = 1;
+          if (instruction & PARSER_REPEATED) {
+            num_items = stack_.pop(err);
+            if (err != ForthError::none) {
+              return;
             }
+          }
 
-            case PARSER_INT32: {
-              break;
+          if (instruction & PARSER_DIRECT) {
+            switch (-(instruction & PARSER_MASK)) {
+              case PARSER_BOOL: {
+                break;
+              }
+
+              case PARSER_INT8: {
+                break;
+              }
+
+              case PARSER_INT16: {
+                break;
+              }
+
+              case PARSER_INT32: {
+                break;
+              }
+
+              case PARSER_INT64: {
+                break;
+              }
+
+              case PARSER_SSIZE: {
+                break;
+              }
+
+              case PARSER_UINT8: {
+                break;
+              }
+
+              case PARSER_UINT16: {
+                break;
+              }
+
+              case PARSER_UINT32: {
+                break;
+              }
+
+              case PARSER_UINT64: {
+                break;
+              }
+
+              case PARSER_USIZE: {
+                break;
+              }
+
+              case PARSER_FLOAT32: {
+                break;
+              }
+
+              case PARSER_FLOAT64: {
+                break;
+              }
             }
+          }
+          else {
+            switch (-(instruction & PARSER_MASK)) {
+              case PARSER_BOOL: {
+                break;
+              }
 
-            case PARSER_INT64: {
-              break;
-            }
+              case PARSER_INT8: {
+                break;
+              }
 
-            case PARSER_SSIZE: {
-              break;
-            }
+              case PARSER_INT16: {
+                break;
+              }
 
-            case PARSER_UINT8: {
-              break;
-            }
+              case PARSER_INT32: {
+                int32_t* ptr = reinterpret_cast<int32_t*>(
+                    ins[num].get()->read(num_items * sizeof(int32_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                for (int64_t i = 0;  i < num_items;  i++) {
+                  stack_.push(ptr[i]);
+                }
+                break;
+              }
 
-            case PARSER_UINT16: {
-              break;
-            }
+              case PARSER_INT64: {
+                break;
+              }
 
-            case PARSER_UINT32: {
-              break;
-            }
+              case PARSER_SSIZE: {
+                break;
+              }
 
-            case PARSER_UINT64: {
-              break;
-            }
+              case PARSER_UINT8: {
+                break;
+              }
 
-            case PARSER_USIZE: {
-              break;
-            }
+              case PARSER_UINT16: {
+                break;
+              }
 
-            case PARSER_FLOAT32: {
-              break;
-            }
+              case PARSER_UINT32: {
+                break;
+              }
 
-            case PARSER_FLOAT64: {
-              break;
+              case PARSER_UINT64: {
+                break;
+              }
+
+              case PARSER_USIZE: {
+                break;
+              }
+
+              case PARSER_FLOAT32: {
+                break;
+              }
+
+              case PARSER_FLOAT64: {
+                break;
+              }
             }
           }
         }
@@ -807,6 +877,8 @@ private:
             }
 
             case AGAIN: {
+              // Go back and do the body again.
+              pointer.where() -= 2;
               break;
             }
 
@@ -971,15 +1043,16 @@ private:
             }
 
             default: {
+              pointer.push(instruction - DICTIONARY + 1, 0, 0);
               break;
             }
           }
-        }
+        } // end handle one instruction
 
-      }
+      } // end walk over instructions in this segment
 
       pointer.pop();
-    }
+    } // end of all segments
   }
 
   int64_t initial_buffer_;
@@ -1012,24 +1085,70 @@ void ForthMachine<int32_t, int32_t, true>::write_from_stack(
 int main() {
   ForthMachine<int32_t, int32_t, true> vm("");
 
+  const int64_t length = 1000000;
+
   std::shared_ptr<int32_t> test_input_ptr = std::shared_ptr<int32_t>(
-      new int32_t[10], array_deleter<int32_t>());
-  for (int64_t i = 0;  i < 10;  i++) {
+      new int32_t[length], array_deleter<int32_t>());
+  for (int64_t i = 0;  i < length;  i++) {
     test_input_ptr.get()[i] = i % 100;
   }
 
   std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
-  inputs["testin"] = std::make_shared<ForthInputBuffer>(test_input_ptr, 0, 10);
+  inputs["testin"] = std::make_shared<ForthInputBuffer>(test_input_ptr,
+                                                        0,
+                                                        sizeof(int32_t) * length);
 
-  std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs);
-  std::cout << vm.stack().tostring() << std::endl;
+  {
+    std::set<ForthError> ignore({ ForthError::read_beyond });
 
-  for (auto pair : outputs) {
-    std::cout << pair.first << std::endl;
-    std::shared_ptr<void> ptr = pair.second.get()->ptr();
-    for (int64_t i = 0;  i < pair.second.get()->length();  i++) {
-      std::cout << i << " " << reinterpret_cast<int32_t*>(ptr.get())[i] << std::endl;
-    }
+    auto forth_begin = std::chrono::high_resolution_clock::now();
+    std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
+    auto forth_end = std::chrono::high_resolution_clock::now();
+
+    std::cout << vm.stack().tostring() << std::endl;
+
+    // for (auto pair : outputs) {
+    //   std::cout << pair.first;
+    //   std::shared_ptr<void> ptr = pair.second.get()->ptr();
+    //   for (int64_t i = 0;  i < pair.second.get()->length();  i++) {
+    //     std::cout << " " << reinterpret_cast<int32_t*>(ptr.get())[i];
+    //   }
+    //   std::cout << std::endl;
+    // }
+
+    std::cout << "Forth time: "
+              << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
+              << " microseconds" << std::endl;
   }
 
+  ForthError err = ForthError::none;
+  inputs["testin"].get()->seek(0, err);
+
+  {
+    std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
+    std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
+        std::make_shared<ForthOutputBufferOf<int32_t>>() });
+
+    ForthError err = ForthError::none;
+
+    auto cpp_begin = std::chrono::high_resolution_clock::now();
+    int32_t tmp;
+    for (int64_t i = 0;  i < length;  i++) {
+      int32_t* data = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t), err));
+      tmp = data[0];
+      outs[0].get()->write_int32(1, &tmp);
+    }
+    auto cpp_end = std::chrono::high_resolution_clock::now();
+
+    // std::cout << "testout";
+    // std::shared_ptr<void> ptr = outs[0].get()->ptr();
+    // for (int64_t i = 0;  i < outs[0].get()->length();  i++) {
+    //   std::cout << " " << reinterpret_cast<int32_t*>(ptr.get())[i];
+    // }
+    // std::cout << std::endl;
+
+    std::cout << "C++ time:   "
+              << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
+              << " microseconds" << std::endl;
+  }
 }
