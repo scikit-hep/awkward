@@ -142,19 +142,19 @@ public:
 
   virtual std::shared_ptr<void> ptr() const noexcept = 0;
 
-  virtual void write_bool(int64_t num_items, const bool* values) noexcept = 0;
-  virtual void write_int8(int64_t num_items, const int8_t* values) noexcept = 0;
-  virtual void write_int16(int64_t num_items, const int16_t* values) noexcept = 0;
-  virtual void write_int32(int64_t num_items, const int32_t* values) noexcept = 0;
-  virtual void write_int64(int64_t num_items, const int64_t* values) noexcept = 0;
-  virtual void write_intp(int64_t num_items, const ssize_t* values) noexcept = 0;
-  virtual void write_uint8(int64_t num_items, const uint8_t* values) noexcept = 0;
-  virtual void write_uint16(int64_t num_items, const uint16_t* values) noexcept = 0;
-  virtual void write_uint32(int64_t num_items, const uint32_t* values) noexcept = 0;
-  virtual void write_uint64(int64_t num_items, const uint64_t* values) noexcept = 0;
-  virtual void write_uintp(int64_t num_items, const size_t* values) noexcept = 0;
-  virtual void write_float32(int64_t num_items, const float* values) noexcept = 0;
-  virtual void write_float64(int64_t num_items, const double* values) noexcept = 0;
+  virtual inline void write_bool(int64_t num_items, const bool* values) noexcept = 0;
+  virtual inline void write_int8(int64_t num_items, const int8_t* values) noexcept = 0;
+  virtual inline void write_int16(int64_t num_items, const int16_t* values) noexcept = 0;
+  virtual inline void write_int32(int64_t num_items, const int32_t* values) noexcept = 0;
+  virtual inline void write_int64(int64_t num_items, const int64_t* values) noexcept = 0;
+  virtual inline void write_intp(int64_t num_items, const ssize_t* values) noexcept = 0;
+  virtual inline void write_uint8(int64_t num_items, const uint8_t* values) noexcept = 0;
+  virtual inline void write_uint16(int64_t num_items, const uint16_t* values) noexcept = 0;
+  virtual inline void write_uint32(int64_t num_items, const uint32_t* values) noexcept = 0;
+  virtual inline void write_uint64(int64_t num_items, const uint64_t* values) noexcept = 0;
+  virtual inline void write_uintp(int64_t num_items, const size_t* values) noexcept = 0;
+  virtual inline void write_float32(int64_t num_items, const float* values) noexcept = 0;
+  virtual inline void write_float64(int64_t num_items, const double* values) noexcept = 0;
 
 protected:
   int64_t length_;
@@ -174,61 +174,61 @@ public:
     return ptr_;
   }
 
-  void write_bool(int64_t num_items, const bool* values) noexcept override {
+  inline void write_bool(int64_t num_items, const bool* values) noexcept override {
     return write_specialized(num_items, values);
   }
 
-  void write_int8(int64_t num_items, const int8_t* values) noexcept override {
+  inline void write_int8(int64_t num_items, const int8_t* values) noexcept override {
     return write_specialized(num_items, values);
   }
 
-  void write_int16(int64_t num_items, const int16_t* values) noexcept override {
+  inline void write_int16(int64_t num_items, const int16_t* values) noexcept override {
     return write_specialized(num_items, values);
   }
 
-  void write_int32(int64_t num_items, const int32_t* values) noexcept override {
+  inline void write_int32(int64_t num_items, const int32_t* values) noexcept override {
     return write_specialized(num_items, values);
   }
 
-  void write_int64(int64_t num_items, const int64_t* values) noexcept override {
+  inline void write_int64(int64_t num_items, const int64_t* values) noexcept override {
     return write_specialized(num_items, values);
   }
 
-  void write_intp(int64_t num_items, const ssize_t* values) noexcept override {
+  inline void write_intp(int64_t num_items, const ssize_t* values) noexcept override {
     return write_specialized(num_items, values);
   }
 
-  void write_uint8(int64_t num_items, const uint8_t* values) noexcept override {
+  inline void write_uint8(int64_t num_items, const uint8_t* values) noexcept override {
     return write_specialized(num_items, values);
   }
 
-  void write_uint16(int64_t num_items, const uint16_t* values) noexcept override {
+  inline void write_uint16(int64_t num_items, const uint16_t* values) noexcept override {
     return write_specialized(num_items, values);
   }
 
-  void write_uint32(int64_t num_items, const uint32_t* values) noexcept override {
+  inline void write_uint32(int64_t num_items, const uint32_t* values) noexcept override {
     return write_specialized(num_items, values);
   }
 
-  void write_uint64(int64_t num_items, const uint64_t* values) noexcept override {
+  inline void write_uint64(int64_t num_items, const uint64_t* values) noexcept override {
     return write_specialized(num_items, values);
   }
 
-  void write_uintp(int64_t num_items, const size_t* values) noexcept override {
+  inline void write_uintp(int64_t num_items, const size_t* values) noexcept override {
     return write_specialized(num_items, values);
   }
 
-  void write_float32(int64_t num_items, const float* values) noexcept override {
+  inline void write_float32(int64_t num_items, const float* values) noexcept override {
     return write_specialized(num_items, values);
   }
 
-  void write_float64(int64_t num_items, const double* values) noexcept override {
+  inline void write_float64(int64_t num_items, const double* values) noexcept override {
     return write_specialized(num_items, values);
   }
 
 private:
   template <typename IN>
-  void write_specialized(int64_t num_items, const IN* values) noexcept {
+  inline void write_specialized(int64_t num_items, const IN* values) noexcept {
     int64_t next = length_ + num_items;
     if (next > reserved_) {
       int64_t reservation = reserved_;
@@ -268,7 +268,7 @@ public:
     return length_;
   }
 
-  void push(T value) noexcept {
+  inline void push(T value) noexcept {
     if (length_ == reserved_) {
       int64_t reservation = (int64_t)std::ceil(reserved_ * resize_);
       T* new_buffer = new T[reservation];
@@ -281,7 +281,7 @@ public:
     length_++;
   }
 
-  T pop(ForthError &err) noexcept {
+  inline T pop(ForthError &err) noexcept {
     if (length_ == 0) {
       err = ForthError::stack_underflow;
       return 0;
@@ -292,7 +292,7 @@ public:
     }
   }
 
-  T* peek() const noexcept {
+  inline T* peek() const noexcept {
     if (length_ == 0) {
       return nullptr;
     }
@@ -337,11 +337,11 @@ public:
     delete [] skip_;
   }
 
-  bool empty() const noexcept {
+  inline bool empty() const noexcept {
     return length_ == 0;
   }
 
-  bool push(int64_t which, int64_t where, int64_t skip) noexcept {
+  inline bool push(int64_t which, int64_t where, int64_t skip) noexcept {
     if (length_ == reserved_) {
       return false;
     }
@@ -352,19 +352,19 @@ public:
     return true;
   }
 
-  void pop() noexcept {
+  inline void pop() noexcept {
     length_--;
   }
 
-  int64_t& which() noexcept {
+  inline int64_t& which() noexcept {
     return which_[length_ - 1];
   }
 
-  int64_t& where() noexcept {
+  inline int64_t& where() noexcept {
     return where_[length_ - 1];
   }
 
-  int64_t& skip() noexcept {
+  inline int64_t& skip() noexcept {
     return skip_[length_ - 1];
   }
 
@@ -640,14 +640,14 @@ private:
     instructions_offsets_.push_back(instructions_.size());
   }
 
-  I get_instruction(ForthInstructionPointer& pointer) noexcept {
+  inline I get_instruction(ForthInstructionPointer& pointer) noexcept {
     int64_t start = instructions_offsets_[pointer.which()];
     return instructions_[start + pointer.where()];
   }
 
-  void write_from_stack(const std::vector<std::shared_ptr<ForthOutputBuffer>>& outs,
-                        int64_t num,
-                        T* top);
+  inline void write_from_stack(const std::vector<std::shared_ptr<ForthOutputBuffer>>& outs,
+                               int64_t num,
+                               T* top);
 
   void do_run(const std::vector<std::shared_ptr<ForthInputBuffer>>& ins,
               const std::vector<std::shared_ptr<ForthOutputBuffer>>& outs,
@@ -794,6 +794,11 @@ private:
             }
           }
         }
+
+        else if (instruction >= DICTIONARY) {
+          pointer.push((instruction - DICTIONARY) + 1, 0, 0);
+        }
+
         else {
           switch (instruction) {
             case LITERAL: {
@@ -1036,11 +1041,6 @@ private:
             case TRUE: {
               break;
             }
-
-            default: {
-              pointer.push(instruction - DICTIONARY + 1, 0, 0);
-              break;
-            }
           }
         } // end handle one instruction
 
@@ -1116,9 +1116,9 @@ int main() {
     // }
     // std::cout << std::endl;
 
-    std::cout << "C++ time:   "
+    std::cout << "                       C++ time: "
               << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
-              << " microseconds" << std::endl;
+              << " us" << std::endl;
   }
 
   ForthError err = ForthError::none;
@@ -1144,7 +1144,7 @@ int main() {
 
     std::cout << "Forth time: "
               << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
-              << " microseconds" << std::endl;
+              << " us" << std::endl;
   }
 
 }
