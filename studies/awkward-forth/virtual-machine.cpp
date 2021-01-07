@@ -797,12 +797,12 @@ private:
 #define PARSER_INT16 24
 #define PARSER_INT32 32
 #define PARSER_INT64 40
-#define PARSER_SSIZE 48
+#define PARSER_INTP 48
 #define PARSER_UINT8 56
 #define PARSER_UINT16 64
 #define PARSER_UINT32 72
 #define PARSER_UINT64 80
-#define PARSER_USIZE 88
+#define PARSER_UINTP 88
 #define PARSER_FLOAT32 96
 #define PARSER_FLOAT64 104
 
@@ -1041,7 +1041,7 @@ private:
 
     instructions_offsets_.push_back(instructions_.size());
 
-    instructions_.push_back(~(PARSER_INT32));   //  | PARSER_BIGENDIAN
+    instructions_.push_back(~(PARSER_INT16 | PARSER_BIGENDIAN));
     instructions_.push_back(0);
 
     instructions_.push_back(LITERAL);
@@ -1108,14 +1108,47 @@ private:
 
             switch (~instruction & PARSER_MASK) {
               case PARSER_BOOL: {
+                bool* ptr = reinterpret_cast<bool*>(
+                    ins[in_num].get()->read(num_items * sizeof(bool), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                if (num_items == 1) {
+                  outs[out_num].get()->write_one_bool(*ptr, byteswap);
+                }
+                else {
+                  outs[out_num].get()->write_bool(num_items, ptr, byteswap);
+                }
                 break;
               }
 
               case PARSER_INT8: {
+                int8_t* ptr = reinterpret_cast<int8_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(int8_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                if (num_items == 1) {
+                  outs[out_num].get()->write_one_int8(*ptr, byteswap);
+                }
+                else {
+                  outs[out_num].get()->write_int8(num_items, ptr, byteswap);
+                }
                 break;
               }
 
               case PARSER_INT16: {
+                int16_t* ptr = reinterpret_cast<int16_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(int16_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                if (num_items == 1) {
+                  outs[out_num].get()->write_one_int16(*ptr, byteswap);
+                }
+                else {
+                  outs[out_num].get()->write_int16(num_items, ptr, byteswap);
+                }
                 break;
               }
 
@@ -1135,38 +1168,137 @@ private:
               }
 
               case PARSER_INT64: {
+                int64_t* ptr = reinterpret_cast<int64_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(int64_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                if (num_items == 1) {
+                  outs[out_num].get()->write_one_int64(*ptr, byteswap);
+                }
+                else {
+                  outs[out_num].get()->write_int64(num_items, ptr, byteswap);
+                }
                 break;
               }
 
-              case PARSER_SSIZE: {
+              case PARSER_INTP: {
+                ssize_t* ptr = reinterpret_cast<ssize_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(ssize_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                if (num_items == 1) {
+                  outs[out_num].get()->write_one_intp(*ptr, byteswap);
+                }
+                else {
+                  outs[out_num].get()->write_intp(num_items, ptr, byteswap);
+                }
                 break;
               }
 
               case PARSER_UINT8: {
+                uint8_t* ptr = reinterpret_cast<uint8_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(uint8_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                if (num_items == 1) {
+                  outs[out_num].get()->write_one_uint8(*ptr, byteswap);
+                }
+                else {
+                  outs[out_num].get()->write_uint8(num_items, ptr, byteswap);
+                }
                 break;
               }
 
               case PARSER_UINT16: {
+                uint16_t* ptr = reinterpret_cast<uint16_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(uint16_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                if (num_items == 1) {
+                  outs[out_num].get()->write_one_uint16(*ptr, byteswap);
+                }
+                else {
+                  outs[out_num].get()->write_uint16(num_items, ptr, byteswap);
+                }
                 break;
               }
 
               case PARSER_UINT32: {
+                uint32_t* ptr = reinterpret_cast<uint32_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(uint32_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                if (num_items == 1) {
+                  outs[out_num].get()->write_one_uint32(*ptr, byteswap);
+                }
+                else {
+                  outs[out_num].get()->write_uint32(num_items, ptr, byteswap);
+                }
                 break;
               }
 
               case PARSER_UINT64: {
+                uint64_t* ptr = reinterpret_cast<uint64_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(uint64_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                if (num_items == 1) {
+                  outs[out_num].get()->write_one_uint64(*ptr, byteswap);
+                }
+                else {
+                  outs[out_num].get()->write_uint64(num_items, ptr, byteswap);
+                }
                 break;
               }
 
-              case PARSER_USIZE: {
+              case PARSER_UINTP: {
+                size_t* ptr = reinterpret_cast<size_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(size_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                if (num_items == 1) {
+                  outs[out_num].get()->write_one_uintp(*ptr, byteswap);
+                }
+                else {
+                  outs[out_num].get()->write_uintp(num_items, ptr, byteswap);
+                }
                 break;
               }
 
               case PARSER_FLOAT32: {
+                float* ptr = reinterpret_cast<float*>(
+                    ins[in_num].get()->read(num_items * sizeof(float), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                if (num_items == 1) {
+                  outs[out_num].get()->write_one_float32(*ptr, byteswap);
+                }
+                else {
+                  outs[out_num].get()->write_float32(num_items, ptr, byteswap);
+                }
                 break;
               }
 
               case PARSER_FLOAT64: {
+                double* ptr = reinterpret_cast<double*>(
+                    ins[in_num].get()->read(num_items * sizeof(double), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                if (num_items == 1) {
+                  outs[out_num].get()->write_one_float64(*ptr, byteswap);
+                }
+                else {
+                  outs[out_num].get()->write_float64(num_items, ptr, byteswap);
+                }
                 break;
               }
             }
@@ -1174,14 +1306,44 @@ private:
           else {
             switch (~instruction & PARSER_MASK) {
               case PARSER_BOOL: {
+                bool* ptr = reinterpret_cast<bool*>(
+                    ins[in_num].get()->read(num_items * sizeof(bool), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                for (int64_t i = 0;  i < num_items;  i++) {
+                  bool value = ptr[i];
+                  stack_.push(value);
+                }
                 break;
               }
 
               case PARSER_INT8: {
+                int8_t* ptr = reinterpret_cast<int8_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(int8_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                for (int64_t i = 0;  i < num_items;  i++) {
+                  int8_t value = ptr[i];
+                  stack_.push(value);
+                }
                 break;
               }
 
               case PARSER_INT16: {
+                int16_t* ptr = reinterpret_cast<int16_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(int16_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                for (int64_t i = 0;  i < num_items;  i++) {
+                  int16_t value = ptr[i];
+                  if (byteswap) {
+                    byteswap16(1, &value);
+                  }
+                  stack_.push(value);
+                }
                 break;
               }
 
@@ -1202,38 +1364,153 @@ private:
               }
 
               case PARSER_INT64: {
+                int64_t* ptr = reinterpret_cast<int64_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(int64_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                for (int64_t i = 0;  i < num_items;  i++) {
+                  int64_t value = ptr[i];
+                  if (byteswap) {
+                    byteswap64(1, &value);
+                  }
+                  stack_.push(value);
+                }
                 break;
               }
 
-              case PARSER_SSIZE: {
+              case PARSER_INTP: {
+                ssize_t* ptr = reinterpret_cast<ssize_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(ssize_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                for (int64_t i = 0;  i < num_items;  i++) {
+                  ssize_t value = ptr[i];
+                  if (byteswap) {
+                    if (sizeof(ssize_t) == 4) {
+                      byteswap32(1, &value);
+                    }
+                    else {
+                      byteswap64(1, &value);
+                    }
+                  }
+                  stack_.push(value);
+                }
                 break;
               }
 
               case PARSER_UINT8: {
+                uint8_t* ptr = reinterpret_cast<uint8_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(uint8_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                for (int64_t i = 0;  i < num_items;  i++) {
+                  uint8_t value = ptr[i];
+                  stack_.push(value);
+                }
                 break;
               }
 
               case PARSER_UINT16: {
+                uint16_t* ptr = reinterpret_cast<uint16_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(uint16_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                for (int64_t i = 0;  i < num_items;  i++) {
+                  uint16_t value = ptr[i];
+                  if (byteswap) {
+                    byteswap16(1, &value);
+                  }
+                  stack_.push(value);
+                }
                 break;
               }
 
               case PARSER_UINT32: {
+                uint32_t* ptr = reinterpret_cast<uint32_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(uint32_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                for (int64_t i = 0;  i < num_items;  i++) {
+                  uint32_t value = ptr[i];
+                  if (byteswap) {
+                    byteswap32(1, &value);
+                  }
+                  stack_.push(value);
+                }
                 break;
               }
 
               case PARSER_UINT64: {
+                uint64_t* ptr = reinterpret_cast<uint64_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(uint64_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                for (int64_t i = 0;  i < num_items;  i++) {
+                  uint64_t value = ptr[i];
+                  if (byteswap) {
+                    byteswap64(1, &value);
+                  }
+                  stack_.push(value);
+                }
                 break;
               }
 
-              case PARSER_USIZE: {
+              case PARSER_UINTP: {
+                size_t* ptr = reinterpret_cast<size_t*>(
+                    ins[in_num].get()->read(num_items * sizeof(size_t), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                for (int64_t i = 0;  i < num_items;  i++) {
+                  size_t value = ptr[i];
+                  if (byteswap) {
+                    if (sizeof(size_t) == 4) {
+                      byteswap32(1, &value);
+                    }
+                    else {
+                      byteswap64(1, &value);
+                    }
+                  }
+                  stack_.push(value);
+                }
                 break;
               }
 
               case PARSER_FLOAT32: {
+                float* ptr = reinterpret_cast<float*>(
+                    ins[in_num].get()->read(num_items * sizeof(float), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                for (int64_t i = 0;  i < num_items;  i++) {
+                  float value = ptr[i];
+                  if (byteswap) {
+                    byteswap32(1, &value);
+                  }
+                  stack_.push(value);
+                }
                 break;
               }
 
               case PARSER_FLOAT64: {
+                double* ptr = reinterpret_cast<double*>(
+                    ins[in_num].get()->read(num_items * sizeof(double), err));
+                if (err != ForthError::none) {
+                  return;
+                }
+                for (int64_t i = 0;  i < num_items;  i++) {
+                  double value = ptr[i];
+                  if (byteswap) {
+                    byteswap64(1, &value);
+                  }
+                  stack_.push(value);
+                }
                 break;
               }
             }
@@ -1556,26 +1833,26 @@ void ForthMachine<int32_t, int32_t, true>::write_from_stack(
 int main() {
   ForthMachine<int32_t, int32_t, true> vm("");
 
-  const int64_t length = 1000000;
-  // const int64_t length = 100;
+  // const int64_t length = 1000000;
+  const int64_t length = 100;
 
-  std::shared_ptr<int32_t> test_input_ptr = std::shared_ptr<int32_t>(
-      new int32_t[length], array_deleter<int32_t>());
+  std::shared_ptr<int16_t> test_input_ptr = std::shared_ptr<int16_t>(
+      new int16_t[length], array_deleter<int16_t>());
   for (int64_t i = 0;  i < length;  i++) {
     test_input_ptr.get()[i] = (i % 9) - 4;
   }
-  // byteswap32(length, test_input_ptr.get());
+  byteswap16(length, test_input_ptr.get());
 
   std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
   inputs["testin"] = std::make_shared<ForthInputBuffer>(test_input_ptr,
                                                         0,
-                                                        sizeof(int32_t) * length);
+                                                        sizeof(int16_t) * length);
 
-  // std::cout << "input";
-  // for (int64_t i = 0;  i < length;  i++) {
-  //   std::cout << " " << test_input_ptr.get()[i];
-  // }
-  // std::cout << std::endl;
+  std::cout << "input";
+  for (int64_t i = 0;  i < length;  i++) {
+    std::cout << " " << test_input_ptr.get()[i];
+  }
+  std::cout << std::endl;
 
   {
     std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
@@ -1586,29 +1863,29 @@ int main() {
 
     auto cpp_begin = std::chrono::high_resolution_clock::now();
     for (int64_t i = 0;  i < length;  i++) {
-      int32_t value = *reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
-      // byteswap32(1, &value);
+      int16_t value = *reinterpret_cast<int16_t*>(ins[0].get()->read(sizeof(int16_t) * 1, err));
+      byteswap16(1, &value);
       outs[0].get()->write_one_int32(value + 10, false);
     }
     auto cpp_end = std::chrono::high_resolution_clock::now();
 
-    // std::cout << "testout";
-    // std::shared_ptr<void> ptr = outs[0].get()->ptr();
-    // for (int64_t i = 0;  i < outs[0].get()->length();  i++) {
-    //   std::cout << " " << reinterpret_cast<int32_t*>(ptr.get())[i];
-    // }
-    // std::cout << std::endl;
+    std::cout << "testout";
+    std::shared_ptr<void> ptr = outs[0].get()->ptr();
+    for (int64_t i = 0;  i < outs[0].get()->length();  i++) {
+      std::cout << " " << reinterpret_cast<int32_t*>(ptr.get())[i];
+    }
+    std::cout << std::endl;
 
     std::cout << "                       C++ time: "
               << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
               << " us" << std::endl;
   }
 
-  // std::cout << "input";
-  // for (int64_t i = 0;  i < length;  i++) {
-  //   std::cout << " " << test_input_ptr.get()[i];
-  // }
-  // std::cout << std::endl;
+  std::cout << "input";
+  for (int64_t i = 0;  i < length;  i++) {
+    std::cout << " " << test_input_ptr.get()[i];
+  }
+  std::cout << std::endl;
 
   ForthError err = ForthError::none;
   inputs["testin"].get()->seek(0, err);
@@ -1616,7 +1893,7 @@ int main() {
   for (int64_t i = 0;  i < length;  i++) {
     test_input_ptr.get()[i] = (i % 9) - 4;
   }
-  // byteswap32(length, test_input_ptr.get());
+  byteswap16(length, test_input_ptr.get());
 
   {
     std::set<ForthError> ignore({ ForthError::read_beyond });
@@ -1625,25 +1902,25 @@ int main() {
     std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
     auto forth_end = std::chrono::high_resolution_clock::now();
 
-    // std::cout << vm.stack().tostring() << std::endl;
-    // for (auto pair : outputs) {
-    //   std::cout << pair.first;
-    //   std::shared_ptr<void> ptr = pair.second.get()->ptr();
-    //   for (int64_t i = 0;  i < pair.second.get()->length();  i++) {
-    //     std::cout << " " << reinterpret_cast<int32_t*>(ptr.get())[i];
-    //   }
-    //   std::cout << std::endl;
-    // }
+    std::cout << vm.stack().tostring() << std::endl;
+    for (auto pair : outputs) {
+      std::cout << pair.first;
+      std::shared_ptr<void> ptr = pair.second.get()->ptr();
+      for (int64_t i = 0;  i < pair.second.get()->length();  i++) {
+        std::cout << " " << reinterpret_cast<int32_t*>(ptr.get())[i];
+      }
+      std::cout << std::endl;
+    }
 
     std::cout << "Forth time: "
               << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
               << " us" << std::endl;
   }
 
-  // std::cout << "input";
-  // for (int64_t i = 0;  i < length;  i++) {
-  //   std::cout << " " << test_input_ptr.get()[i];
-  // }
-  // std::cout << std::endl;
+  std::cout << "input";
+  for (int64_t i = 0;  i < length;  i++) {
+    std::cout << " " << test_input_ptr.get()[i];
+  }
+  std::cout << std::endl;
 
 }
