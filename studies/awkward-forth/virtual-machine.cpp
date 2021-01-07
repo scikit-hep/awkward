@@ -1324,9 +1324,9 @@ private:
     instructions_.push_back(~(PARSER_INT32));
     instructions_.push_back(0);
 
-    // instructions_.push_back(LITERAL);
-    // instructions_.push_back(10);
-    // instructions_.push_back(ADD);
+    instructions_.push_back(LITERAL);
+    instructions_.push_back(10);
+    instructions_.push_back(ADD);
 
     instructions_.push_back(WRITE);
     instructions_.push_back(0);
@@ -2263,7 +2263,7 @@ int main() {
     auto cpp_begin = std::chrono::high_resolution_clock::now();
     for (int64_t i = 0;  i < length;  i += 1) {
       int32_t* ptr = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
-      outs[0].get()->write_one_int32(*ptr, false);
+      outs[0].get()->write_one_int32((*ptr) + 10, false);
     }
     auto cpp_end = std::chrono::high_resolution_clock::now();
 
