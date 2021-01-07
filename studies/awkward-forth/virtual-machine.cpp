@@ -13,6 +13,9 @@
 #include <iostream>
 
 
+#define TEMPORARY_BATCH_SIZE 10
+
+
 template <typename T>
 class array_deleter {
 public:
@@ -1032,7 +1035,7 @@ private:
 
     input_names_.push_back("testin");
     output_names_.push_back("testout");
-    output_dtypes_.push_back(dtype::int32);
+    output_dtypes_.push_back(dtype::int64);
 
     instructions_offsets_.push_back(0);
 
@@ -1041,13 +1044,17 @@ private:
 
     instructions_offsets_.push_back(instructions_.size());
 
-    instructions_.push_back(~(PARSER_INT16 | PARSER_BIGENDIAN));
+    instructions_.push_back(LITERAL);
+    instructions_.push_back(TEMPORARY_BATCH_SIZE);
+
+    instructions_.push_back(~(PARSER_INT16 | PARSER_DIRECT | PARSER_REPEATED | PARSER_BIGENDIAN));
+    instructions_.push_back(0);
     instructions_.push_back(0);
 
-    instructions_.push_back(LITERAL);
-    instructions_.push_back(10);
+    // instructions_.push_back(LITERAL);
+    // instructions_.push_back(10);
 
-    instructions_.push_back(ADD);
+    // instructions_.push_back(ADD);
 
     // instructions_.push_back(INC);
     // instructions_.push_back(0);
@@ -1055,8 +1062,8 @@ private:
     // instructions_.push_back(GET);
     // instructions_.push_back(0);
 
-    instructions_.push_back(WRITE);
-    instructions_.push_back(0);
+    // instructions_.push_back(WRITE);
+    // instructions_.push_back(0);
 
     instructions_offsets_.push_back(instructions_.size());
   }
@@ -1857,22 +1864,21 @@ int main() {
   {
     std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
     std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
-        std::make_shared<ForthOutputBufferOf<int32_t>>() });
+        std::make_shared<ForthOutputBufferOf<int64_t>>() });
 
     ForthError err = ForthError::none;
 
     auto cpp_begin = std::chrono::high_resolution_clock::now();
-    for (int64_t i = 0;  i < length;  i++) {
-      int16_t value = *reinterpret_cast<int16_t*>(ins[0].get()->read(sizeof(int16_t) * 1, err));
-      byteswap16(1, &value);
-      outs[0].get()->write_one_int32(value + 10, false);
+    for (int64_t i = 0;  i < length;  i += TEMPORARY_BATCH_SIZE) {
+      int16_t* ptr = reinterpret_cast<int16_t*>(ins[0].get()->read(sizeof(int16_t) * TEMPORARY_BATCH_SIZE, err));
+      outs[0].get()->write_int16(TEMPORARY_BATCH_SIZE, ptr, true);
     }
     auto cpp_end = std::chrono::high_resolution_clock::now();
 
     std::cout << "testout";
     std::shared_ptr<void> ptr = outs[0].get()->ptr();
     for (int64_t i = 0;  i < outs[0].get()->length();  i++) {
-      std::cout << " " << reinterpret_cast<int32_t*>(ptr.get())[i];
+      std::cout << " " << reinterpret_cast<int64_t*>(ptr.get())[i];
     }
     std::cout << std::endl;
 
@@ -1907,7 +1913,7 @@ int main() {
       std::cout << pair.first;
       std::shared_ptr<void> ptr = pair.second.get()->ptr();
       for (int64_t i = 0;  i < pair.second.get()->length();  i++) {
-        std::cout << " " << reinterpret_cast<int32_t*>(ptr.get())[i];
+        std::cout << " " << reinterpret_cast<int64_t*>(ptr.get())[i];
       }
       std::cout << std::endl;
     }
