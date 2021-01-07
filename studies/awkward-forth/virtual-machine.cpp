@@ -1321,16 +1321,15 @@ private:
 
     instructions_offsets_.push_back(instructions_.size());
 
-    instructions_.push_back(~(PARSER_INT32 | PARSER_DIRECT));
-    instructions_.push_back(0);
+    instructions_.push_back(~(PARSER_INT32));
     instructions_.push_back(0);
 
     // instructions_.push_back(LITERAL);
     // instructions_.push_back(10);
     // instructions_.push_back(ADD);
 
-    // instructions_.push_back(WRITE);
-    // instructions_.push_back(0);
+    instructions_.push_back(WRITE);
+    instructions_.push_back(0);
 
     instructions_offsets_.push_back(instructions_.size());
 
