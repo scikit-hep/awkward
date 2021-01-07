@@ -14,9 +14,6 @@
 #include <iostream>
 
 
-#define TEMPORARY_BATCH_SIZE 10
-
-
 template <typename T>
 class array_deleter {
 public:
@@ -1324,10 +1321,7 @@ private:
 
     instructions_offsets_.push_back(instructions_.size());
 
-    instructions_.push_back(LITERAL);
-    instructions_.push_back(TEMPORARY_BATCH_SIZE);
-
-    instructions_.push_back(~(PARSER_INT32 | PARSER_REPEATED | PARSER_DIRECT));
+    instructions_.push_back(~(PARSER_INT32 | PARSER_DIRECT));
     instructions_.push_back(0);
     instructions_.push_back(0);
 
@@ -2262,15 +2256,15 @@ int main() {
                                                         0,
                                                         sizeof(int32_t) * length);
 
-  for (int64_t repeat = 0;  repeat < 3;  repeat++) {
+  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
     std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
     std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
         std::make_shared<ForthOutputBufferOf<int64_t>>() });
 
     auto cpp_begin = std::chrono::high_resolution_clock::now();
-    for (int64_t i = 0;  i < length;  i += TEMPORARY_BATCH_SIZE) {
-      int32_t* ptr = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * TEMPORARY_BATCH_SIZE, err));
-      outs[0].get()->write_int32(TEMPORARY_BATCH_SIZE, ptr, false);
+    for (int64_t i = 0;  i < length;  i += 1) {
+      int32_t* ptr = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
+      outs[0].get()->write_one_int32(*ptr, false);
     }
     auto cpp_end = std::chrono::high_resolution_clock::now();
 
@@ -2281,7 +2275,7 @@ int main() {
     inputs["testin"].get()->seek(0, err);
   }
 
-  for (int64_t repeat = 0;  repeat < 3;  repeat++) {
+  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
     std::set<ForthError> ignore({ ForthError::read_beyond });
 
     auto forth_begin = std::chrono::high_resolution_clock::now();
