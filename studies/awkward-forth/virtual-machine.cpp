@@ -808,11 +808,14 @@ private:
 };
 
 
+// Instruction values are preprocessor macros for type-ambiguity.
+
+// parser flags (parsers are combined bitwise and then bit-inverted to be negative)
 #define PARSER_DIRECT 1
 #define PARSER_REPEATED 2
 #define PARSER_BIGENDIAN 4
 #define PARSER_MASK ~(1 + 2 + 4)
-
+// parser sequential values (starting in the fourth bit)
 #define PARSER_BOOL 8
 #define PARSER_INT8 16
 #define PARSER_INT16 24
@@ -827,26 +830,28 @@ private:
 #define PARSER_FLOAT32 96
 #define PARSER_FLOAT64 104
 
+// instructions from special parsing rules
 #define LITERAL 0
-#define PUT 1
-#define INC 2
-#define GET 3
-#define SKIP 4
-#define SEEK 5
-#define END 6
-#define POSITION 7
-#define LENGTH_INPUT 8
-#define REWIND 9
-#define LENGTH_OUTPUT 10
-#define WRITE 11
-#define IF 12
-#define IF_ELSE 13
-#define DO 14
-#define DO_STEP 15
-#define AGAIN 16
-#define UNTIL 17
-#define WHILE 18
-#define EXIT 19
+#define IF 1
+#define IF_ELSE 2
+#define DO 3
+#define DO_STEP 4
+#define AGAIN 5
+#define UNTIL 6
+#define WHILE 7
+#define EXIT 8
+#define PUT 9
+#define INC 10
+#define GET 11
+#define SEEK 12
+#define SKIP 13
+#define END 14
+#define POS 15
+#define LEN_INPUT 16
+#define REWIND 17
+#define LEN_OUTPUT 18
+#define WRITE 19
+// generic builtin instructions
 #define INDEX_I 20
 #define INDEX_J 21
 #define INDEX_K 22
@@ -863,28 +868,83 @@ private:
 #define DIV 33
 #define MOD 34
 #define DIVMOD 35
-#define LSHIFT 36
-#define RSHIFT 37
-#define ABS 38
-#define MIN 39
-#define MAX 40
-#define NEGATE 41
-#define ADD1 42
-#define SUB1 43
-#define EQ0 44
-#define EQ 45
-#define NE 46
-#define GT 47
-#define GE 48
-#define LT 49
-#define LE 50
-#define AND 51
-#define OR 52
-#define XOR 53
-#define INVERT 54
+#define NEGATE 36
+#define ADD1 37
+#define SUB1 38
+#define ABS 39
+#define MIN 40
+#define MAX 41
+#define EQ 42
+#define NE 43
+#define GT 44
+#define GE 45
+#define LT 46
+#define LE 47
+#define EQ0 48
+#define INVERT 49
+#define AND 50
+#define OR 51
+#define XOR 52
+#define LSHIFT 53
+#define RSHIFT 54
 #define FALSE 55
 #define TRUE 56
+// beginning of the user-defined dictionary
 #define DICTIONARY 57
+
+const std::set<std::string> reserved_words_({
+  // comments
+  "(", ")", "\\", "\n", "",
+  // defining functinos
+  ":", ";", "recurse",
+  // declaring globals
+  "variable", "input", "output",
+  // conditionals
+  "if", "then", "else",
+  // loops
+  "do", "loop", "+loop",
+  "begin", "until", "again", "while", "repeat",
+  // nonlocal exits
+  "exit",
+  // variable access
+  "!", "+!", "@",
+  // input actions
+  "seek", "skip", "end", "pos", "len",
+  // output actions
+  "rewind", "len", "<-"
+});
+
+const std::set<std::string> input_parser_words_({
+  "?->", "b->", "h->", "i->", "q->", "n->", "B->", "H->", "I->", "Q->", "N->", "f->", "d->",
+  "!h->", "!i->", "!q->", "!n->", "!H->", "!I->", "!Q->", "!N->", "!f->", "!d->",
+  "#?->", "#b->", "#h->", "#i->", "#q->", "#n->", "#B->", "#H->", "#I->", "#Q->", "#N->", "#f->", "#d->",
+  "#!h->", "#!i->", "#!q->", "#!n->", "#!H->", "#!I->", "#!Q->", "#!N->", "#!f->", "#!d->",
+});
+
+const std::map<std::string, int64_t> output_dtype_words_({
+  {"bool", PARSER_BOOL},
+  {"int8", PARSER_INT8}, {"int16", PARSER_INT16}, {"int32", PARSER_INT32}, {"int64", PARSER_INT64},
+  {"uint8", PARSER_UINT8}, {"uint16", PARSER_UINT16}, {"uint32", PARSER_UINT32}, {"uint64", PARSER_UINT64},
+  {"float32", PARSER_FLOAT32}, {"float64", PARSER_FLOAT64}
+});
+
+const std::map<std::string, int64_t> generic_builtin_words_({
+  // loop variables
+  {"i", INDEX_I}, {"j", INDEX_J}, {"k", INDEX_K},
+  // stack operations
+  {"dup", DUP}, {"drop", DROP}, {"swap", SWAP}, {"over", OVER}, {"rot", ROT},
+  {"nip", NIP}, {"tuck", TUCK},
+  // basic mathematical functions
+  {"+", ADD}, {"-", SUB}, {"*", MUL}, {"/", DIV}, {"mod", MOD}, {"/mod", DIVMOD},
+  {"negate", NEGATE}, {"1+", ADD1}, {"1-", SUB1}, {"abs", ABS}, {"min", MIN}, {"max", MAX},
+  // comparisons
+  {"=", EQ}, {"<>", NE}, {">", GT}, {">=", GE}, {"<", LT}, {"<=", LE}, {"0=", EQ0},
+  // bitwise operations
+  {"invert", INVERT}, {"and", AND}, {"or", OR}, {"xor", XOR},
+  {"lshift", LSHIFT}, {"rshift", RSHIFT},
+  // constants
+  {"false", FALSE}, {"true", TRUE}
+});
 
 
 template <typename T, typename I, bool DEBUG>
@@ -1046,19 +1106,24 @@ public:
     if (ignore.count(err) == 0) {
       switch (err) {
         case ForthError::stack_underflow: {
-          throw std::invalid_argument("Forth stack underflow while filling array");
+          throw std::invalid_argument(
+            "in Awkward Forth runtime, stack underflow while filling array");
         }
         case ForthError::read_beyond: {
-          throw std::invalid_argument("Forth read beyond end of input while filling array");
+          throw std::invalid_argument(
+            "in Awkward Forth runtime, read beyond end of input while filling array");
         }
         case ForthError::seek_beyond: {
-          throw std::invalid_argument("Forth seek beyond input while filling array");
+          throw std::invalid_argument(
+            "in Awkward Forth runtime, seek beyond input while filling array");
         }
         case ForthError::skip_beyond: {
-          throw std::invalid_argument("Forth skip beyond input while filling array");
+          throw std::invalid_argument(
+            "in Awkward Forth runtime, skip beyond input while filling array");
         }
         case ForthError::rewind_beyond: {
-          throw std::invalid_argument("Forth rewind beyond beginning of output while filling array");
+          throw std::invalid_argument(
+            "in Awkward Forth runtime, rewind beyond beginning of output while filling array");
         }
       }
     }
@@ -1105,45 +1170,263 @@ public:
   }
 
 private:
+  bool is_integer(const std::string& word, int64_t& value) {
+    if (word.size() >= 2  &&  word.substr(0, 2) == std::string("0x")) {
+      try {
+        value = std::stoul(word.substr(2, (int64_t)word.size() - 2), nullptr, 16);
+      }
+      catch (std::invalid_argument err) {
+        return false;
+      }
+      return true;
+    }
+    else {
+      try {
+        value = std::stoul(word, nullptr, 10);
+      }
+      catch (std::invalid_argument err) {
+        return false;
+      }
+      return true;
+    }
+  }
+
+  bool is_variable(const std::string& word) {
+    return std::find(variable_names_.begin(),
+                     variable_names_.end(), word) != variable_names_.end();
+  }
+
+  bool is_input(const std::string& word) {
+    return std::find(input_names_.begin(),
+                     input_names_.end(), word) != input_names_.end();
+  }
+
+  bool is_output(const std::string& word) {
+    return std::find(output_names_.begin(),
+                     output_names_.end(), word) != output_names_.end();
+  }
+
+  bool is_reserved(const std::string& word) {
+    return reserved_words_.find(word) != reserved_words_.end()  ||
+           input_parser_words_.find(word) != input_parser_words_.end()  ||
+           output_dtype_words_.find(word) != output_dtype_words_.end()  ||
+           generic_builtin_words_.find(word) != generic_builtin_words_.end();
+  }
+
   void compile(const std::string& source) {
-    std::vector<std::string> dictionary_names;
+    // Convert the source code into a list of tokens.
+    std::vector<std::string> tokenized;
+    std::vector<std::pair<int64_t, int64_t>> linecol;
+    int64_t start = 0;
+    int64_t stop = 0;
+    bool full = false;
+    int64_t line = 1;
+    int64_t colstart = 0;
+    int64_t colstop = 0;
+    while (stop < source.size()) {
+      char current = source[stop];
+      // Whitespace separates tokens and is not included in them.
+      if (current == ' '  ||  current == '\r'  ||  current == '\t'  ||
+          current == '\v'  ||  current == '\f') {
+        if (full) {
+          tokenized.push_back(source.substr(start, stop - start));
+          linecol.emplace_back(line, colstart);
+        }
+        start = stop;
+        full = false;
+        colstart = colstop;
+      }
+      // '\n' is considered a token because it terminates '\\ .. \n' comments.
+      // It has no semantic meaning after the parsing stage.
+      else if (current == '\n') {
+        if (full) {
+          tokenized.push_back(source.substr(start, stop - start));
+          linecol.emplace_back(line, colstart);
+        }
+        tokenized.push_back(source.substr(stop, 1));
+        linecol.emplace_back(line, colstart);
+        start = stop;
+        full = false;
+        line += 1;
+        colstart = 0;
+        colstop = 0;
+      }
+      // Everything else is part of a token (Forth word).
+      else {
+        if (!full) {
+          start = stop;
+          colstart = colstop;
+        }
+        full = true;
+      }
+      stop++;
+      colstop++;
+    }
+    // The source code might end on non-whitespace.
+    if (full) {
+      tokenized.push_back(source.substr(start, stop - start));
+      linecol.emplace_back(line, colstart);
+    }
+
+    std::vector<I> instructions;
+    std::map<std::string, int64_t> dictionary_names;
     std::vector<std::vector<I>> dictionary;
 
-    // ...
-
-    variable_names_.push_back("cumulative");
-    variables_.push_back(0);
-
-    input_names_.push_back("testin");
-    output_names_.push_back("testout");
-    output_dtypes_.push_back(dtype::int64);
+    parse("",
+          tokenized,
+          linecol,
+          0,
+          tokenized.size(),
+          instructions,
+          dictionary_names,
+          dictionary,
+          0,
+          0);
 
     instructions_offsets_.push_back(0);
 
-    instructions_.push_back(DICTIONARY + 0);
-    instructions_.push_back(AGAIN);
-
+    for (auto instruction : instructions) {
+      instructions_.push_back(instruction);
+    }
     instructions_offsets_.push_back(instructions_.size());
 
-    instructions_.push_back(~(PARSER_INT16 | PARSER_DIRECT | PARSER_BIGENDIAN));
-    instructions_.push_back(0);
-    instructions_.push_back(0);
+    for (auto sequence : dictionary) {
+      for (auto instruction : sequence) {
+        instructions_.push_back(instruction);
+      }
+      instructions_offsets_.push_back(instructions_.size());
+    }
 
-    // instructions_.push_back(LITERAL);
-    // instructions_.push_back(10);
+    std::cout << "Instructions offsets:";
+    for (auto x : instructions_offsets_) {
+      std::cout << " " << x;
+    }
+    std::cout << std::endl;
 
-    // instructions_.push_back(ADD);
+    std::cout << "Instructions:";
+    for (auto x : instructions_) {
+      std::cout << " " << x;
+    }
+    std::cout << std::endl;
+  }
 
-    // instructions_.push_back(INC);
-    // instructions_.push_back(0);
+  const std::string err_linecol(
+      const std::vector<std::pair<int64_t, int64_t>>& linecol, int64_t pos) {
+    std::pair<int64_t, int64_t> lc = linecol[pos];
+    std::stringstream out;
+    out << "in Awkward Forth source code, line " << lc.first << " col " << lc.second << ", ";
+    return out.str();
+  }
 
-    // instructions_.push_back(GET);
-    // instructions_.push_back(0);
+  void parse(const std::string& defn,
+             const std::vector<std::string>& tokenized,
+             const std::vector<std::pair<int64_t, int64_t>>& linecol,
+             int64_t start,
+             int64_t stop,
+             std::vector<I>& instructions,
+             std::map<std::string, int64_t>& dictionary_names,
+             std::vector<std::vector<I>>& dictionary,
+             int64_t exitdepth,
+             int64_t dodepth) {
+    int64_t pos = start;
+    while (pos < stop) {
+      std::string word = tokenized[pos];
 
-    // instructions_.push_back(WRITE);
-    // instructions_.push_back(0);
+      if (word == "(") {
+        throw std::runtime_error("not implemented: (");
+      }
 
-    instructions_offsets_.push_back(instructions_.size());
+      else if (word == "\\") {
+        throw std::runtime_error("not implemented: \\");
+      }
+
+      else if (word == "\n") {
+        throw std::runtime_error("not implemented: \n");
+      }
+
+      else if (word == "") {
+        throw std::runtime_error("not implemented: ");
+      }
+
+      else if (word == ":") {
+        throw std::runtime_error("not implemented: :");
+      }
+
+      else if (word == "recurse") {
+        throw std::runtime_error("not implemented: recurse");
+      }
+
+      else if (word == "variable") {
+        throw std::runtime_error("not implemented: variable");
+      }
+
+      else if (word == "input") {
+        throw std::runtime_error("not implemented: input");
+      }
+
+      else if (word == "output") {
+        throw std::runtime_error("not implemented: output");
+      }
+
+      else if (word == "if") {
+        throw std::runtime_error("not implemented: if");
+      }
+
+      else if (word == "do") {
+        throw std::runtime_error("not implemented: do");
+      }
+
+      else if (word == "begin") {
+        throw std::runtime_error("not implemented: begin");
+      }
+
+      else if (word == "exit") {
+        throw std::runtime_error("not implemented: exit");
+      }
+
+      else if (is_variable(word)) {
+        throw std::runtime_error("not implemented: is_variable(word)");
+      }
+
+      else if (is_input(word)) {
+        throw std::runtime_error("not implemented: is_input(word)");
+      }
+
+      else if (is_output(word)) {
+        throw std::runtime_error("not implemented: is_output(word)");
+      }
+
+      else {
+        auto generic_builtin = generic_builtin_words_.find(word);
+        if (generic_builtin != generic_builtin_words_.end()) {
+          throw std::runtime_error("not implemented: is_generic_builtin(word)");
+        }
+
+        else {
+          auto pair = dictionary_names.find(word);
+          if (pair != dictionary_names.end()) {
+            throw std::runtime_error("not implemented: is_user_defined(word)");
+          }
+
+          else {
+            int64_t num;
+            if (is_integer(word, num)) {
+              instructions_.push_back(LITERAL);
+              instructions_.push_back(num);
+              pos++;
+            }
+
+            else {
+              throw std::invalid_argument(
+                err_linecol(linecol, pos) +
+                std::string("unrecognized word or wrong context for word: ") +
+                word
+              );
+            }
+          }
+        }
+      }
+    }
   }
 
   inline I get_instruction(ForthInstructionPointer& pointer) {
@@ -1656,11 +1939,11 @@ private:
               break;
             }
 
-            case POSITION: {
+            case POS: {
               break;
             }
 
-            case LENGTH_INPUT: {
+            case LEN_INPUT: {
               break;
             }
 
@@ -1668,7 +1951,7 @@ private:
               break;
             }
 
-            case LENGTH_OUTPUT: {
+            case LEN_OUTPUT: {
               break;
             }
 
@@ -1916,34 +2199,34 @@ void ForthMachine<int32_t, int32_t, true>::write_from_stack(
 
 
 int main() {
-  ForthMachine<int32_t, int32_t, true> vm("");
+  ForthMachine<int32_t, int32_t, true> vm("1 2 3 4");
 
-  const int64_t length = 1000000;
+  // const int64_t length = 1000000;
   // const int64_t length = 10;
 
-  std::shared_ptr<int16_t> test_input_ptr = std::shared_ptr<int16_t>(
-      new int16_t[length], array_deleter<int16_t>());
-  for (int64_t i = 0;  i < length;  i++) {
-    test_input_ptr.get()[i] = (i % 9) - 4;
-  }
-  byteswap16(length, test_input_ptr.get());
+  // std::shared_ptr<int16_t> test_input_ptr = std::shared_ptr<int16_t>(
+  //     new int16_t[length], array_deleter<int16_t>());
+  // for (int64_t i = 0;  i < length;  i++) {
+  //   test_input_ptr.get()[i] = (i % 9) - 4;
+  // }
+  // byteswap16(length, test_input_ptr.get());
 
-  std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
-  inputs["testin"] = std::make_shared<ForthInputBuffer>(test_input_ptr,
-                                                        0,
-                                                        sizeof(int16_t) * length);
+  // std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
+  // inputs["testin"] = std::make_shared<ForthInputBuffer>(test_input_ptr,
+  //                                                       0,
+  //                                                       sizeof(int16_t) * length);
 
-  ForthError err = ForthError::none;
-  inputs["testin"].get()->seek(0, err);
+  // ForthError err = ForthError::none;
+  // inputs["testin"].get()->seek(0, err);
 
   {
     std::set<ForthError> ignore({ ForthError::read_beyond });
 
     auto forth_begin = std::chrono::high_resolution_clock::now();
-    std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
+    std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run();
     auto forth_end = std::chrono::high_resolution_clock::now();
 
-    // std::cout << vm.tostring(outputs);
+    std::cout << vm.tostring(outputs);
     std::cout << "Forth time: "
               << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
               << " us" << std::endl;
