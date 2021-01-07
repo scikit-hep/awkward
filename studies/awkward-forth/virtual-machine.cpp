@@ -1235,126 +1235,100 @@ private:
   }
 
   void compile(const std::string& source) {
-    // // Convert the source code into a list of tokens.
-    // std::vector<std::string> tokenized;
-    // std::vector<std::pair<int64_t, int64_t>> linecol;
-    // int64_t start = 0;
-    // int64_t stop = 0;
-    // bool full = false;
-    // int64_t line = 1;
-    // int64_t colstart = 0;
-    // int64_t colstop = 0;
-    // while (stop < source.size()) {
-    //   char current = source[stop];
-    //   // Whitespace separates tokens and is not included in them.
-    //   if (current == ' '  ||  current == '\r'  ||  current == '\t'  ||
-    //       current == '\v'  ||  current == '\f') {
-    //     if (full) {
-    //       tokenized.push_back(source.substr(start, stop - start));
-    //       linecol.emplace_back(line, colstart);
-    //     }
-    //     start = stop;
-    //     full = false;
-    //     colstart = colstop;
-    //   }
-    //   // '\n' is considered a token because it terminates '\\ .. \n' comments.
-    //   // It has no semantic meaning after the parsing stage.
-    //   else if (current == '\n') {
-    //     if (full) {
-    //       tokenized.push_back(source.substr(start, stop - start));
-    //       linecol.emplace_back(line, colstart);
-    //     }
-    //     tokenized.push_back(source.substr(stop, 1));
-    //     linecol.emplace_back(line, colstart);
-    //     start = stop;
-    //     full = false;
-    //     line += 1;
-    //     colstart = 0;
-    //     colstop = 0;
-    //   }
-    //   // Everything else is part of a token (Forth word).
-    //   else {
-    //     if (!full) {
-    //       start = stop;
-    //       colstart = colstop;
-    //     }
-    //     full = true;
-    //   }
-    //   stop++;
-    //   colstop++;
-    // }
-    // // The source code might end on non-whitespace.
-    // if (full) {
-    //   tokenized.push_back(source.substr(start, stop - start));
-    //   linecol.emplace_back(line, colstart);
-    // }
+    // Convert the source code into a list of tokens.
+    std::vector<std::string> tokenized;
+    std::vector<std::pair<int64_t, int64_t>> linecol;
+    int64_t start = 0;
+    int64_t stop = 0;
+    bool full = false;
+    int64_t line = 1;
+    int64_t colstart = 0;
+    int64_t colstop = 0;
+    while (stop < source.size()) {
+      char current = source[stop];
+      // Whitespace separates tokens and is not included in them.
+      if (current == ' '  ||  current == '\r'  ||  current == '\t'  ||
+          current == '\v'  ||  current == '\f') {
+        if (full) {
+          tokenized.push_back(source.substr(start, stop - start));
+          linecol.emplace_back(line, colstart);
+        }
+        start = stop;
+        full = false;
+        colstart = colstop;
+      }
+      // '\n' is considered a token because it terminates '\\ .. \n' comments.
+      // It has no semantic meaning after the parsing stage.
+      else if (current == '\n') {
+        if (full) {
+          tokenized.push_back(source.substr(start, stop - start));
+          linecol.emplace_back(line, colstart);
+        }
+        tokenized.push_back(source.substr(stop, 1));
+        linecol.emplace_back(line, colstart);
+        start = stop;
+        full = false;
+        line += 1;
+        colstart = 0;
+        colstop = 0;
+      }
+      // Everything else is part of a token (Forth word).
+      else {
+        if (!full) {
+          start = stop;
+          colstart = colstop;
+        }
+        full = true;
+      }
+      stop++;
+      colstop++;
+    }
+    // The source code might end on non-whitespace.
+    if (full) {
+      tokenized.push_back(source.substr(start, stop - start));
+      linecol.emplace_back(line, colstart);
+    }
 
     std::vector<I> instructions;
     std::map<std::string, int64_t> dictionary_names;
     std::vector<std::vector<I>> dictionary;
 
-    // parse("",
-    //       tokenized,
-    //       linecol,
-    //       0,
-    //       tokenized.size(),
-    //       instructions,
-    //       dictionary_names,
-    //       dictionary,
-    //       0,
-    //       0);
+    parse("",
+          tokenized,
+          linecol,
+          0,
+          tokenized.size(),
+          instructions,
+          dictionary_names,
+          dictionary,
+          0,
+          0);
 
     instructions_offsets_.push_back(0);
 
-    // for (auto instruction : instructions) {
-    //   instructions_.push_back(instruction);
-    // }
-    // instructions_offsets_.push_back(instructions_.size());
-
-    // for (auto sequence : dictionary) {
-    //   for (auto instruction : sequence) {
-    //     instructions_.push_back(instruction);
-    //   }
-    //   instructions_offsets_.push_back(instructions_.size());
-    // }
-
-
-
-    input_names_.push_back("testin");
-    output_names_.push_back("testout");
-    output_dtypes_.push_back(dtype::int32);
-
-    instructions_.push_back(DICTIONARY + 0);
-    instructions_.push_back(AGAIN);
-
+    for (auto instruction : instructions) {
+      instructions_.push_back(instruction);
+    }
     instructions_offsets_.push_back(instructions_.size());
 
-    instructions_.push_back(~(PARSER_INT32));
-    instructions_.push_back(0);
+    for (auto sequence : dictionary) {
+      for (auto instruction : sequence) {
+        instructions_.push_back(instruction);
+      }
+      instructions_offsets_.push_back(instructions_.size());
+    }
 
-    instructions_.push_back(LITERAL);
-    instructions_.push_back(10);
-    instructions_.push_back(ADD);
+    std::cout << "Instructions offsets:";
+    for (auto x : instructions_offsets_) {
+      std::cout << " " << x;
+    }
+    std::cout << std::endl;
 
-    instructions_.push_back(WRITE);
-    instructions_.push_back(0);
-
-    instructions_offsets_.push_back(instructions_.size());
-
-
-
-
-    // std::cout << "Instructions offsets:";
-    // for (auto x : instructions_offsets_) {
-    //   std::cout << " " << x;
-    // }
-    // std::cout << std::endl;
-
-    // std::cout << "Instructions:";
-    // for (auto x : instructions_) {
-    //   std::cout << " " << x;
-    // }
-    // std::cout << std::endl;
+    std::cout << "Instructions:";
+    for (auto x : instructions_) {
+      std::cout << " " << x;
+    }
+    std::cout << std::endl;
   }
 
   const std::string err_linecol(
@@ -2259,10 +2233,10 @@ void ForthMachine<int32_t, int32_t, true>::write_from_stack(int64_t num, int32_t
 
 
 int main() {
-  ForthMachine<int32_t, int32_t, true> vm("");
+  ForthMachine<int32_t, int32_t, true> vm("1 2 3 4");
 
-  const int64_t length = 1000000;
-  // const int64_t length = 20;
+  // const int64_t length = 1000000;
+  const int64_t length = 20;
 
   std::shared_ptr<int32_t> test_input_ptr = std::shared_ptr<int32_t>(
       new int32_t[length], array_deleter<int32_t>());
@@ -2276,33 +2250,33 @@ int main() {
                                                         0,
                                                         sizeof(int32_t) * length);
 
-  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
-    std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
-    std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
-        std::make_shared<ForthOutputBufferOf<int64_t>>() });
+  // for (int64_t repeat = 0;  repeat < 4;  repeat++) {
+  //   std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
+  //   std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
+  //       std::make_shared<ForthOutputBufferOf<int64_t>>() });
 
-    auto cpp_begin = std::chrono::high_resolution_clock::now();
-    for (int64_t i = 0;  i < length;  i += 1) {
-      int32_t* ptr = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
-      outs[0].get()->write_one_int32((*ptr) + 10, false);
-    }
-    auto cpp_end = std::chrono::high_resolution_clock::now();
+  //   auto cpp_begin = std::chrono::high_resolution_clock::now();
+  //   for (int64_t i = 0;  i < length;  i += 1) {
+  //     int32_t* ptr = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
+  //     outs[0].get()->write_one_int32((*ptr) + 10, false);
+  //   }
+  //   auto cpp_end = std::chrono::high_resolution_clock::now();
 
-    std::cout << "                       C++ time: "
-              << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
-              << " us" << std::endl;
+  //   std::cout << "                       C++ time: "
+  //             << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
+  //             << " us" << std::endl;
 
-    inputs["testin"].get()->seek(0, err);
-  }
+  //   inputs["testin"].get()->seek(0, err);
+  // }
 
-  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
+  for (int64_t repeat = 0;  repeat < 1;  repeat++) {
     std::set<ForthError> ignore({ ForthError::read_beyond });
 
     auto forth_begin = std::chrono::high_resolution_clock::now();
     std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
     auto forth_end = std::chrono::high_resolution_clock::now();
 
-    // std::cout << vm.tostring(outputs);
+    std::cout << vm.tostring(outputs);
     std::cout << "Forth time: "
               << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
               << " us" << std::endl;
