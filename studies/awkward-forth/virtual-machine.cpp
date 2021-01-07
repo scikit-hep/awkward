@@ -1,6 +1,7 @@
 // c++ virtual-machine.cpp -O5 -o virtual-machine-test  &&  echo GO  &&  ./virtual-machine-test  &&  ./virtual-machine-test  &&  ./virtual-machine-test  &&  ./virtual-machine-test  &&  ./virtual-machine-test
 
 #include <memory>
+#include <algorithm>
 #include <vector>
 #include <set>
 #include <map>
@@ -717,11 +718,31 @@ public:
 
   const std::string tostring() const noexcept {
     std::stringstream out;
-    for (int64_t i = 0;  i < length_;  i++) {
+    int64_t i = length_ - 20;
+    if (i <= 0) {
+      i = 0;
+    }
+    else {
+      out << "... ";
+    }
+    for (;  i < length_;  i++) {
       out << buffer_[i] << " ";
     }
-    out << "<- top";
+    if (length_ == 0) {
+      out << "(empty)";
+    }
+    else {
+      out << "<- top";
+    }
     return out.str();
+  }
+
+  const std::vector<T> values() const {
+    std::vector<T> out;
+    for (int64_t i = 0;  i < length_;  i++) {
+      out.push_back(buffer_[i]);
+    }
+    return out;
   }
 
 private:
@@ -882,8 +903,21 @@ public:
     compile(source);
   }
 
-  const ForthStack<T>& stack() const {
-    return stack_;
+  const std::map<std::string, T> variables() const {
+    std::map<std::string, T> out;
+    for (int64_t i = 0;  i < variable_names_.size();  i++) {
+      out[variable_names_[i]] = variables_[i];
+    }
+    return out;
+  }
+
+  const std::vector<std::string> variable_names() const {
+    return variable_names_;
+  }
+
+  bool has_variable(const std::string& name) const {
+    return std::find(variable_names_.begin(),
+                     variable_names_.end(), name) != variable_names_.end();
   }
 
   T variable(const std::string& name) const {
@@ -897,7 +931,19 @@ public:
     );
   }
 
-  std::map<std::string, std::shared_ptr<ForthOutputBuffer>> run(
+  const std::map<std::string, std::shared_ptr<ForthOutputBuffer>> run() {
+    std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
+    std::set<ForthError> ignore;
+    return run(inputs, ignore);
+  }
+
+  const std::map<std::string, std::shared_ptr<ForthOutputBuffer>> run(
+      const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs) {
+    std::set<ForthError> ignore;
+    return run(inputs, ignore);
+  }
+
+  const std::map<std::string, std::shared_ptr<ForthOutputBuffer>> run(
       const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs,
       const std::set<ForthError>& ignore) {
 
@@ -1020,6 +1066,32 @@ public:
     return outputs;
   }
 
+  const std::string tostring() {
+    std::stringstream out;
+    out << "Variables:" << std::endl;
+    for (int64_t i = 0;  i < variable_names_.size();  i++) {
+      out << "    " << variable_names_[i] << ": " << variables_[i] << std::endl;
+    }
+    out << "Stack:" << std::endl << "    " << stack_.tostring() << std::endl;
+    return out.str();
+  }
+
+  const std::string tostring(
+        const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>& outputs) {
+    std::stringstream out;
+    out << tostring();
+    out << "Outputs:" << std::endl;
+    for (auto pair : outputs) {
+      out << "    " << pair.first << ":";
+      std::shared_ptr<void> ptr = pair.second.get()->ptr();
+      for (int64_t i = 0;  i < pair.second.get()->length();  i++) {
+        out << " " << reinterpret_cast<int64_t*>(ptr.get())[i];
+      }
+      out << std::endl;
+    }
+    return out.str();
+  }
+
 private:
   void compile(const std::string& source) {
     std::vector<std::string> dictionary_names;
@@ -1027,39 +1099,39 @@ private:
 
     // ...
 
-    variable_names_.push_back("cumulative");
-    variables_.push_back(0);
+    // variable_names_.push_back("cumulative");
+    // variables_.push_back(0);
 
-    input_names_.push_back("testin");
-    output_names_.push_back("testout");
-    output_dtypes_.push_back(dtype::int64);
+    // input_names_.push_back("testin");
+    // output_names_.push_back("testout");
+    // output_dtypes_.push_back(dtype::int64);
 
-    instructions_offsets_.push_back(0);
+    // instructions_offsets_.push_back(0);
 
-    instructions_.push_back(DICTIONARY + 0);
-    instructions_.push_back(AGAIN);
-
-    instructions_offsets_.push_back(instructions_.size());
-
-    instructions_.push_back(~(PARSER_INT16 | PARSER_DIRECT | PARSER_BIGENDIAN));
-    instructions_.push_back(0);
-    instructions_.push_back(0);
-
-    // instructions_.push_back(LITERAL);
-    // instructions_.push_back(10);
-
-    // instructions_.push_back(ADD);
-
-    // instructions_.push_back(INC);
-    // instructions_.push_back(0);
-
-    // instructions_.push_back(GET);
-    // instructions_.push_back(0);
-
-    // instructions_.push_back(WRITE);
-    // instructions_.push_back(0);
+    // instructions_.push_back(DICTIONARY + 0);
+    // instructions_.push_back(AGAIN);
 
     instructions_offsets_.push_back(instructions_.size());
+
+    // instructions_.push_back(~(PARSER_INT16 | PARSER_DIRECT | PARSER_BIGENDIAN));
+    // instructions_.push_back(0);
+    // instructions_.push_back(0);
+
+    // // instructions_.push_back(LITERAL);
+    // // instructions_.push_back(10);
+
+    // // instructions_.push_back(ADD);
+
+    // // instructions_.push_back(INC);
+    // // instructions_.push_back(0);
+
+    // // instructions_.push_back(GET);
+    // // instructions_.push_back(0);
+
+    // // instructions_.push_back(WRITE);
+    // // instructions_.push_back(0);
+
+    // instructions_offsets_.push_back(instructions_.size());
   }
 
   inline I get_instruction(ForthInstructionPointer& pointer) noexcept {
@@ -1837,38 +1909,29 @@ int main() {
   // const int64_t length = 1000000;
   const int64_t length = 10;
 
-  std::shared_ptr<int16_t> test_input_ptr = std::shared_ptr<int16_t>(
-      new int16_t[length], array_deleter<int16_t>());
-  for (int64_t i = 0;  i < length;  i++) {
-    test_input_ptr.get()[i] = (i % 9) - 4;
-  }
-  byteswap16(length, test_input_ptr.get());
+  // std::shared_ptr<int16_t> test_input_ptr = std::shared_ptr<int16_t>(
+  //     new int16_t[length], array_deleter<int16_t>());
+  // for (int64_t i = 0;  i < length;  i++) {
+  //   test_input_ptr.get()[i] = (i % 9) - 4;
+  // }
+  // byteswap16(length, test_input_ptr.get());
 
-  std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
-  inputs["testin"] = std::make_shared<ForthInputBuffer>(test_input_ptr,
-                                                        0,
-                                                        sizeof(int16_t) * length);
+  // std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
+  // inputs["testin"] = std::make_shared<ForthInputBuffer>(test_input_ptr,
+  //                                                       0,
+  //                                                       sizeof(int16_t) * length);
 
-  ForthError err = ForthError::none;
-  inputs["testin"].get()->seek(0, err);
+  // ForthError err = ForthError::none;
+  // inputs["testin"].get()->seek(0, err);
 
   {
-    std::set<ForthError> ignore({ ForthError::read_beyond });
+    // std::set<ForthError> ignore({ ForthError::read_beyond });
 
     auto forth_begin = std::chrono::high_resolution_clock::now();
-    std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
+    std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run();
     auto forth_end = std::chrono::high_resolution_clock::now();
 
-    std::cout << vm.stack().tostring() << std::endl;
-    for (auto pair : outputs) {
-      std::cout << pair.first;
-      std::shared_ptr<void> ptr = pair.second.get()->ptr();
-      for (int64_t i = 0;  i < pair.second.get()->length();  i++) {
-        std::cout << " " << reinterpret_cast<int64_t*>(ptr.get())[i];
-      }
-      std::cout << std::endl;
-    }
-
+    std::cout << vm.tostring(outputs);
     std::cout << "Forth time: "
               << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
               << " us" << std::endl;
