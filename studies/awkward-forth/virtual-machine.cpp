@@ -13,9 +13,6 @@
 #include <iostream>
 
 
-#define TEMPORARY_BATCH_SIZE 10
-
-
 template <typename T>
 class array_deleter {
 public:
@@ -1044,10 +1041,7 @@ private:
 
     instructions_offsets_.push_back(instructions_.size());
 
-    instructions_.push_back(LITERAL);
-    instructions_.push_back(TEMPORARY_BATCH_SIZE);
-
-    instructions_.push_back(~(PARSER_INT16 | PARSER_DIRECT | PARSER_REPEATED | PARSER_BIGENDIAN));
+    instructions_.push_back(~(PARSER_INT16 | PARSER_DIRECT | PARSER_BIGENDIAN));
     instructions_.push_back(0);
     instructions_.push_back(0);
 
@@ -1841,7 +1835,7 @@ int main() {
   ForthMachine<int32_t, int32_t, true> vm("");
 
   // const int64_t length = 1000000;
-  const int64_t length = 100;
+  const int64_t length = 10;
 
   std::shared_ptr<int16_t> test_input_ptr = std::shared_ptr<int16_t>(
       new int16_t[length], array_deleter<int16_t>());
@@ -1855,51 +1849,8 @@ int main() {
                                                         0,
                                                         sizeof(int16_t) * length);
 
-  std::cout << "input";
-  for (int64_t i = 0;  i < length;  i++) {
-    std::cout << " " << test_input_ptr.get()[i];
-  }
-  std::cout << std::endl;
-
-  {
-    std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
-    std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
-        std::make_shared<ForthOutputBufferOf<int64_t>>() });
-
-    ForthError err = ForthError::none;
-
-    auto cpp_begin = std::chrono::high_resolution_clock::now();
-    for (int64_t i = 0;  i < length;  i += TEMPORARY_BATCH_SIZE) {
-      int16_t* ptr = reinterpret_cast<int16_t*>(ins[0].get()->read(sizeof(int16_t) * TEMPORARY_BATCH_SIZE, err));
-      outs[0].get()->write_int16(TEMPORARY_BATCH_SIZE, ptr, true);
-    }
-    auto cpp_end = std::chrono::high_resolution_clock::now();
-
-    std::cout << "testout";
-    std::shared_ptr<void> ptr = outs[0].get()->ptr();
-    for (int64_t i = 0;  i < outs[0].get()->length();  i++) {
-      std::cout << " " << reinterpret_cast<int64_t*>(ptr.get())[i];
-    }
-    std::cout << std::endl;
-
-    std::cout << "                       C++ time: "
-              << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
-              << " us" << std::endl;
-  }
-
-  std::cout << "input";
-  for (int64_t i = 0;  i < length;  i++) {
-    std::cout << " " << test_input_ptr.get()[i];
-  }
-  std::cout << std::endl;
-
   ForthError err = ForthError::none;
   inputs["testin"].get()->seek(0, err);
-
-  for (int64_t i = 0;  i < length;  i++) {
-    test_input_ptr.get()[i] = (i % 9) - 4;
-  }
-  byteswap16(length, test_input_ptr.get());
 
   {
     std::set<ForthError> ignore({ ForthError::read_beyond });
@@ -1922,11 +1873,5 @@ int main() {
               << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
               << " us" << std::endl;
   }
-
-  std::cout << "input";
-  for (int64_t i = 0;  i < length;  i++) {
-    std::cout << " " << test_input_ptr.get()[i];
-  }
-  std::cout << std::endl;
 
 }
