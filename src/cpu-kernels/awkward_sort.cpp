@@ -2,11 +2,129 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_sort.cpp", line)
 
-#include <algorithm>
-#include <numeric>
-#include <vector>
-
 #include "awkward/kernels.h"
+
+template <typename T>
+int quick_sort_ascending(T *arr,
+                         int64_t elements,
+                         int64_t* beg,
+                         int64_t* end,
+                         int64_t maxlevels) {
+  int64_t low = 0;
+  int64_t high = 0;
+  int64_t i = 0;
+  beg[0] = 0;
+  end[0] = elements;
+  while (i >= 0) {
+    low = beg[i];
+    high = end[i];
+    if (high - low > 1) {
+      int64_t mid = low  + ((high - low) >> 1);
+      T pivot = arr[mid];
+      arr[mid] = arr[low];
+
+      if (i == maxlevels - 1) {
+        return -1;
+      }
+      high--;
+      while (low < high) {
+        while (arr[high] >= pivot  &&  low < high) {
+          high--;
+        }
+        if (low < high) {
+          arr[low++] = arr[high];
+        }
+        while (arr[low] <= pivot  &&  low < high) {
+          low++;
+        }
+        if (low < high) {
+          arr[high--] = arr[low];
+        }
+      }
+      arr[low] = pivot;
+      mid = low + 1;
+      while (low > beg[i]  &&  arr[low - 1] == pivot) {
+        low--;
+      }
+      while (mid < end[i]  &&  arr[mid] == pivot) {
+        mid++;
+      }
+      if (low - beg[i] > end[i] - mid) {
+        beg[i + 1] = mid;
+        end[i + 1] = end[i];
+        end[i++] = low;
+      } else {
+        beg[i + 1] = beg[i];
+        end[i + 1] = low;
+        beg[i++] = mid;
+      }
+    } else {
+      i--;
+    }
+  }
+  return 0;
+}
+
+template <typename T>
+int quick_sort_descending(T *arr,
+                          int64_t elements,
+                          int64_t* beg,
+                          int64_t* end,
+                          int64_t maxlevels) {
+  int64_t low = 0;
+  int64_t high = 0;
+  int64_t i = 0;
+  beg[0] = 0;
+  end[0] = elements;
+  while (i >= 0) {
+    low = beg[i];
+    high = end[i];
+    if (high - low > 1) {
+      int64_t mid = low  + ((high - low) >> 1);
+      T pivot = arr[mid];
+      arr[mid] = arr[low];
+
+      if (i == maxlevels - 1) {
+        return -1;
+      }
+      high--;
+      while (low < high) {
+        while (arr[high] <= pivot  &&  low < high) {
+          high--;
+        }
+        if (low < high) {
+          arr[low++] = arr[high];
+        }
+        while (arr[low] >= pivot  &&  low < high) {
+          low++;
+        }
+        if (low < high) {
+          arr[high--] = arr[low];
+        }
+      }
+      arr[low] = pivot;
+      mid = low + 1;
+      while (low > beg[i]  &&  arr[low - 1] == pivot) {
+        low--;
+      }
+      while (mid < end[i]  &&  arr[mid] == pivot) {
+        mid++;
+      }
+      if (low - beg[i] > end[i] - mid) {
+        beg[i + 1] = mid;
+        end[i + 1] = end[i];
+        end[i++] = low;
+      } else {
+        beg[i + 1] = beg[i];
+        end[i + 1] = low;
+        beg[i++] = mid;
+      }
+    } else {
+      i--;
+    }
+  }
+  return 0;
+}
 
 template <typename T>
 ERROR awkward_sort(
@@ -18,38 +136,33 @@ ERROR awkward_sort(
   int64_t parentslength,
   bool ascending,
   bool stable) {
-  std::vector<int64_t> index(length);
-  std::iota(index.begin(), index.end(), 0);
+  // FIXME: sort a copy or do it in place without copying?
+  for (int64_t i = 0; i < length; i++) {
+    toptr[i] = fromptr[i];
+  }
+  // FIXME: these buffers will go out of the kernel
+  int64_t tmpbeg[kMaxLevels], tmpend[kMaxLevels];
 
-  for (int64_t i = 0;  i < offsetslength - 1;  i++) {
-    auto start = std::next(index.begin(), offsets[i]);
-    auto stop = std::next(index.begin(), offsets[i + 1]);
-
-    if (ascending  &&  stable) {
-      std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return fromptr[i1] < fromptr[i2];
-      });
+  int result = 0;
+  if (ascending) {
+    for (int64_t i = 0; i < offsetslength - 1; i++) {
+      int result = quick_sort_ascending(&(toptr[offsets[i]]), offsets[i + 1] - offsets[i],
+                                        tmpbeg, tmpend, kMaxLevels);
+      if (result < 0) {
+        return failure("failed to sort an array", i, offsets[i], FILENAME(__LINE__));
+      }
     }
-    else if (!ascending  &&  stable) {
-      std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return fromptr[i1] > fromptr[i2];
-      });
-    }
-    else if (ascending  &&  !stable) {
-      std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return fromptr[i1] < fromptr[i2];
-      });
-    }
-    else {
-      std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
-        return fromptr[i1] > fromptr[i2];
-      });
+  }
+  else {
+    for (int64_t i = 0; i < offsetslength - 1; i++) {
+      int result = quick_sort_descending(&(toptr[offsets[i]]), offsets[i + 1] - offsets[i],
+                                         tmpbeg, tmpend, kMaxLevels);
+      if (result < 0) {
+        return failure("failed to sort an array", i, offsets[i], FILENAME(__LINE__));
+      }
     }
   }
 
-  for (int64_t i = 0;  i < parentslength;  i++) {
-    toptr[i] = fromptr[index[i]];
-  }
   return success();
 }
 ERROR awkward_sort_bool(
