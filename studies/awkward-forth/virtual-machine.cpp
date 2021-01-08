@@ -877,14 +877,14 @@ private:
 #define PUT 9
 #define INC 10
 #define GET 11
-#define SEEK 12
-#define SKIP 13
+#define LEN_INPUT 12
+#define POS 13
 #define END 14
-#define POS 15
-#define LEN_INPUT 16
-#define REWIND 17
+#define SEEK 15
+#define SKIP 16
+#define WRITE 17
 #define LEN_OUTPUT 18
-#define WRITE 19
+#define REWIND 19
 // generic builtin instructions
 #define INDEX_I 20
 #define INDEX_J 21
@@ -943,9 +943,9 @@ const std::set<std::string> reserved_words_({
   // variable access
   "!", "+!", "@",
   // input actions
-  "seek", "skip", "end", "pos", "len",
+  "len", "pos", "end", "seek", "skip",
   // output actions
-  "rewind", "len", "<-"
+  "<-", "stack", "rewind"
 });
 
 const std::set<std::string> input_parser_words_({
@@ -1337,11 +1337,34 @@ private:
     std::cout << std::endl;
   }
 
-  const std::string err_linecol(
-      const std::vector<std::pair<int64_t, int64_t>>& linecol, int64_t pos) {
-    std::pair<int64_t, int64_t> lc = linecol[pos];
+  const std::string err_linecol(const std::vector<std::pair<int64_t, int64_t>>& linecol,
+                                int64_t startpos,
+                                int64_t stoppos,
+                                const std::string& message) {
+    std::pair<int64_t, int64_t> lc = linecol[startpos];
     std::stringstream out;
-    out << "in Awkward Forth source code, line " << lc.first << " col " << lc.second << ", ";
+    out << "in Awkward Forth source code, line " << lc.first << " col " << lc.second
+        << ", " << message << std::endl << std::endl << "    ";
+    int64_t line = 1;
+    int64_t col = 1;
+    int64_t start = 0;
+    int64_t stop = 0;
+    while (stop < source_.length()) {
+      if (lc.first == line  &&  lc.second == col) {
+        start = stop;
+      }
+      if (stoppos < linecol.size()  &&
+          linecol[stoppos].first == line  &&  linecol[stoppos].second == col) {
+        break;
+      }
+      if (source_[stop] == '\n') {
+        line += 1;
+        col = 0;
+      }
+      col++;
+      stop++;
+    }
+    out << source_.substr(start, stop - start);
     return out.str();
   }
 
@@ -1388,14 +1411,37 @@ private:
       }
 
       else if (word == "input") {
-        throw std::runtime_error("not implemented: input");
+        if (pos + 1 >= stop) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2,
+                        "missing name in input declaration")
+          );
+        }
+        std::string name = tokenized[pos + 1];
+
+        int64_t num;
+        if (is_integer(name, num)  ||  is_reserved(name)) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2,
+                        "input names must not be integers or reserved words")
+          );
+        }
+
+        if (is_input(name)  ||  is_output(name)) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2, "input names must be unique")
+          );
+        }
+
+        input_names_.push_back(name);
+        pos += 2;
       }
 
       else if (word == "output") {
         if (pos + 2 >= stop) {
           throw std::invalid_argument(
-            err_linecol(linecol, pos) +
-            std::string("missing name or dtype in output declaration")
+            err_linecol(linecol, pos, pos + 3,
+                        "missing name or dtype in output declaration")
           );
         }
         std::string name = tokenized[pos + 1];
@@ -1404,24 +1450,21 @@ private:
         int64_t num;
         if (is_integer(name, num)  ||  is_reserved(name)) {
           throw std::invalid_argument(
-            err_linecol(linecol, pos) +
-            std::string("output names must not be integers or reserved words")
+            err_linecol(linecol, pos, pos + 3,
+                        "output names must not be integers or reserved words")
           );
         }
 
-        if (is_output(name)) {
+        if (is_input(name)  ||  is_output(name)) {
           throw std::invalid_argument(
-            err_linecol(linecol, pos) +
-            std::string("output names must be unique; '") + name +
-            std::string("' is declared more than once")
+            err_linecol(linecol, pos, pos + 3, "output names must be unique")
           );
         }
 
         auto it = output_dtype_words_.find(dtype_string);
         if (it == output_dtype_words_.end()) {
           throw std::invalid_argument(
-            err_linecol(linecol, pos) +
-            std::string("output dtype not recognized: '") + name + std::string("'")
+            err_linecol(linecol, pos, pos + 3, "output dtype not recognized")
           );
         }
 
@@ -1451,7 +1494,158 @@ private:
       }
 
       else if (is_input(word)) {
-        throw std::runtime_error("not implemented: is_input(word)");
+        int64_t input_index = -1;
+        for (;  input_index < (int64_t)input_names_.size();  input_index++) {
+          if (input_names_[input_index] == word) {
+            break;
+          }
+        }
+        if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
+          instructions.push_back(LEN_INPUT);
+          instructions.push_back(input_index);
+          pos += 2;
+        }
+        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "pos") {
+          instructions.push_back(POS);
+          instructions.push_back(input_index);
+          pos += 2;
+        }
+        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "end") {
+          instructions.push_back(END);
+          instructions.push_back(input_index);
+          pos += 2;
+        }
+        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "seek") {
+          instructions.push_back(SEEK);
+          instructions.push_back(input_index);
+          pos += 2;
+        }
+        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "skip") {
+          instructions.push_back(SKIP);
+          instructions.push_back(input_index);
+          pos += 2;
+        }
+        else if (pos + 1 < stop) {
+          I instruction = 0;
+
+          std::string parser = tokenized[pos + 1];
+
+          if (parser.length() != 0  &&  parser[0] == '#') {
+            instruction |= PARSER_REPEATED;
+            parser = parser.substr(1, parser.length() - 1);
+          }
+
+          if (parser.length() != 0  &&  parser[0] == '!') {
+            instruction |= PARSER_BIGENDIAN;
+            parser = parser.substr(1, parser.length() - 1);
+          }
+
+          bool good = true;
+          if (parser.length() != 0) {
+            switch (parser[0]) {
+              case '?': {
+                instruction |= PARSER_BOOL;
+                break;
+              }
+              case 'b': {
+                instruction |= PARSER_INT8;
+                break;
+              }
+              case 'h': {
+                instruction |= PARSER_INT16;
+                break;
+              }
+              case 'i': {
+                 instruction |= PARSER_INT32;
+                 break;
+               }
+              case 'q': {
+                 instruction |= PARSER_INT64;
+                 break;
+               }
+              case 'n': {
+                instruction |= PARSER_INTP;
+                break;
+              }
+              case 'B': {
+                instruction |= PARSER_UINT8;
+                break;
+              }
+              case 'H': {
+                instruction |= PARSER_UINT16;
+                break;
+              }
+              case 'I': {
+                instruction |= PARSER_UINT32;
+                break;
+              }
+              case 'Q': {
+                instruction |= PARSER_UINT64;
+                break;
+              }
+              case 'N': {
+                instruction |= PARSER_UINTP;
+                break;
+              }
+              case 'f': {
+                instruction |= PARSER_FLOAT32;
+                break;
+              }
+              case 'd': {
+                instruction |= PARSER_FLOAT64;
+                break;
+              }
+              default: {
+                good = false;
+              }
+            }
+            if (good) {
+              parser = parser.substr(1, parser.length() - 1);
+            }
+          }
+
+          if (!good  ||  parser != "->") {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, pos + 3,
+                          "missing '*-> stack/output', "
+                          "'seek', 'skip', 'end', 'pos', or 'len' after input name")
+            );
+          }
+
+          int64_t output_index = -1;
+          if (pos + 2 < stop  &&  tokenized[pos + 2] == "stack") {
+            // not PARSER_DIRECT
+          }
+          else if (pos + 2 < stop  &&  is_output(tokenized[pos + 2])) {
+            for (;  output_index < (int64_t)output_names_.size();  output_index++) {
+              if (output_names_[output_index] == tokenized[pos + 2]) {
+                break;
+              }
+            }
+            instruction |= PARSER_DIRECT;
+          }
+          else {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, pos + 3,
+                          "missing 'stack' or 'output' after '*->'")
+            );
+          }
+
+          // Parser instructions are bit-flipped to detect them by the sign bit.
+          instructions.push_back(~instruction);
+          instructions.push_back(input_index);
+          if (output_index >= 0) {
+            instructions.push_back(output_index);
+          }
+          pos += 3;
+        }
+        else {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 3,
+                        "missing '*-> stack/output', 'seek', 'skip', 'end', "
+                        "'pos', or 'len' after input name")
+          );
+        }
       }
 
       else if (is_output(word)) {
@@ -1478,8 +1672,8 @@ private:
         }
         else {
           throw std::invalid_argument(
-            err_linecol(linecol, pos) +
-            std::string("missing '<-', 'len', or 'rewind' after output name")
+            err_linecol(linecol, pos, pos + 2, "missing '<- stack', "
+                        "'len', or 'rewind' after output name")
           );
         }
       }
@@ -1489,20 +1683,20 @@ private:
         if (generic_builtin != generic_builtin_words_.end()) {
           if (word == "i"  && dodepth < 1) {
             throw std::invalid_argument(
-              err_linecol(linecol, pos) +
-              std::string("'i' can only be used in a 'do' loop")
+              err_linecol(linecol, pos, pos + 1,
+                          "'i' can only be used in a 'do' loop")
             );
           }
           else if (word == "j"  && dodepth < 2) {
             throw std::invalid_argument(
-              err_linecol(linecol, pos) +
-              std::string("'j' can only be used in a nested 'do' loop")
+              err_linecol(linecol, pos, pos + 1,
+                          "'j' can only be used in a nested 'do' loop")
             );
           }
           else if (word == "k"  && dodepth < 3) {
             throw std::invalid_argument(
-              err_linecol(linecol, pos) +
-              std::string("'i' can only be used in a doubly nested 'do' loop")
+              err_linecol(linecol, pos, pos + 1,
+                          "'i' can only be used in a doubly nested 'do' loop")
             );
           }
           instructions.push_back(generic_builtin->second);
@@ -1525,9 +1719,8 @@ private:
 
             else {
               throw std::invalid_argument(
-                err_linecol(linecol, pos) +
-                std::string("unrecognized word or wrong context for word: ") +
-                word
+                err_linecol(linecol, pos, pos + 1,
+                            "unrecognized word or wrong context for word")
               );
             }
           }
@@ -2321,7 +2514,7 @@ void ForthMachine<int32_t, int32_t, true>::write_from_stack(int64_t num, int32_t
 
 
 int main() {
-  ForthMachine<int32_t, int32_t, true> vm("output testout int32 2 3 + testout <-");
+  ForthMachine<int32_t, int32_t, true> vm("input testin output testout int32 10 testin #i-> testout");
 
   // const int64_t length = 1000000;
   const int64_t length = 20;
