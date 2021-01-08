@@ -2846,17 +2846,17 @@ extern "C" {
     const int64_t* fromcounts,
     int64_t length);
   EXPORT_SYMBOL ERROR
-  awkward_UnionArray8_U32_nestedfill_tags_index_64(
+  awkward_UnionArray8_64_nestedfill_tags_index_64(
     int8_t* totags,
-    uint32_t* toindex,
+    int64_t* toindex,
     int64_t* tmpstarts,
     int8_t tag,
     const int64_t* fromcounts,
     int64_t length);
   EXPORT_SYMBOL ERROR
-  awkward_UnionArray8_64_nestedfill_tags_index_64(
+  awkward_UnionArray8_U32_nestedfill_tags_index_64(
     int8_t* totags,
-    int64_t* toindex,
+    uint32_t* toindex,
     int64_t* tmpstarts,
     int8_t tag,
     const int64_t* fromcounts,

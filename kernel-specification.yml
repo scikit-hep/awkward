@@ -4985,18 +4985,18 @@ kernels:
           - {name: tag, type: "int8_t", dir: in, role: default}
           - {name: fromcounts, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_UnionArray8_U32_nestedfill_tags_index_64
-        args:
-          - {name: totags, type: "List[int8_t]", dir: out}
-          - {name: toindex, type: "List[uint32_t]", dir: out}
-          - {name: tmpstarts, type: "List[int64_t]", dir: out}
-          - {name: tag, type: "int8_t", dir: in, role: default}
-          - {name: fromcounts, type: "Const[List[int64_t]]", dir: in, role: default}
-          - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_UnionArray8_64_nestedfill_tags_index_64
         args:
           - {name: totags, type: "List[int8_t]", dir: out}
           - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: tmpstarts, type: "List[int64_t]", dir: out}
+          - {name: tag, type: "int8_t", dir: in, role: default}
+          - {name: fromcounts, type: "Const[List[int64_t]]", dir: in, role: default}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_UnionArray8_U32_nestedfill_tags_index_64
+        args:
+          - {name: totags, type: "List[int8_t]", dir: out}
+          - {name: toindex, type: "List[uint32_t]", dir: out}
           - {name: tmpstarts, type: "List[int64_t]", dir: out}
           - {name: tag, type: "int8_t", dir: in, role: default}
           - {name: fromcounts, type: "Const[List[int64_t]]", dir: in, role: default}
