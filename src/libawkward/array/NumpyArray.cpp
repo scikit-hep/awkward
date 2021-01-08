@@ -4838,15 +4838,23 @@ namespace awkward {
       parents.length());
     util::handle_error(err2, classname(), nullptr);
 
+    std::shared_ptr<int64_t> tmp_beg_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                                                   kMaxLevels*((int64_t)sizeof(int64_t)));
+    std::shared_ptr<int64_t> tmp_end_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                                                   kMaxLevels*((int64_t)sizeof(int64_t)));
+
     struct Error err3 = kernel::NumpyArray_argsort<T>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
       length,
+      tmp_beg_ptr.get(),
+      tmp_end_ptr.get(),
       outranges.data(),
       ranges_length,
       ascending,
-      stable);
+      stable,
+      kMaxLevels);
     util::handle_error(err3, classname(), nullptr);
 
     return ptr;
@@ -4887,15 +4895,23 @@ namespace awkward {
       parents.length());
     util::handle_error(err2, classname(), nullptr);
 
+    std::shared_ptr<int64_t> tmp_beg_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                                                   kMaxLevels*((int64_t)sizeof(int64_t)));
+    std::shared_ptr<int64_t> tmp_end_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                                                   kMaxLevels*((int64_t)sizeof(int64_t)));
+
     struct Error err3 = kernel::NumpyArray_sort<T>(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       data,
       length,
+      tmp_beg_ptr.get(),
+      tmp_end_ptr.get(),
       outranges.data(),
       ranges_length,
       ascending,
-      stable);
+      stable,
+      kMaxLevels);
     util::handle_error(err3, classname(), nullptr);
 
     if (unique) {

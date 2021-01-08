@@ -1676,10 +1676,13 @@ namespace awkward {
       int64_t* toptr,
       const T* fromptr,
       int64_t length,
+      int64_t* tmpbeg,
+      int64_t* tmpend,
       const int64_t* offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable);
+      bool stable,
+      int64_t maxlevels);
 
     template <typename T>
     ERROR NumpyArray_sort(
@@ -1687,10 +1690,13 @@ namespace awkward {
       T* toptr,
       const T* fromptr,
       int64_t length,
+      int64_t* tmpbeg,
+      int64_t* tmpend,
       const int64_t* offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable);
+      bool stable,
+      int64_t maxlevels);
 
     template <typename T>
     ERROR NumpyArray_sort_asstrings(
