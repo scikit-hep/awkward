@@ -1240,6 +1240,11 @@ private:
            generic_builtin_words_.find(word) != generic_builtin_words_.end();
   }
 
+  bool is_defined(const std::string& word,
+                  const std::map<std::string, I>& dictionary_names) {
+    return dictionary_names.find(word) != dictionary_names.end();
+  }
+
   void compile(const std::string& source) {
     // Convert the source code into a list of tokens.
     std::vector<std::string> tokenized;
@@ -1296,7 +1301,7 @@ private:
     }
 
     std::vector<I> instructions;
-    std::map<std::string, int64_t> dictionary_names;
+    std::map<std::string, I> dictionary_names;
     std::vector<std::vector<I>> dictionary;
 
     parse("",
@@ -1374,7 +1379,7 @@ private:
              int64_t start,
              int64_t stop,
              std::vector<I>& instructions,
-             std::map<std::string, int64_t>& dictionary_names,
+             std::map<std::string, I>& dictionary_names,
              std::vector<std::vector<I>>& dictionary,
              int64_t exitdepth,
              int64_t dodepth) {
@@ -1383,23 +1388,111 @@ private:
       std::string word = tokenized[pos];
 
       if (word == "(") {
-        throw std::runtime_error("not implemented: (");
+        // Simply skip the parenthesized text: it's a comment.
+        int64_t substop = pos;
+        int64_t nesting = 1;
+        while (nesting > 0) {
+          substop++;
+          if (substop >= stop) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, substop,
+                          "'(' is missing its closing ')'")
+            );
+          }
+          // Any parentheses in the comment text itself must be balanced.
+          if (tokenized[substop] == "(") {
+            nesting++;
+          }
+          else if (tokenized[substop] == ")") {
+            nesting--;
+          }
+        }
+        pos + substop + 1;
       }
 
       else if (word == "\\") {
-        throw std::runtime_error("not implemented: \\");
+        // Modern, backslash-to-end-of-line comments. Nothing needs to be balanced.
+        int64_t substop = pos;
+        while (substop < stop  &&  tokenized[substop] != "\n") {
+          substop++;
+        }
+        pos = substop + 1;
       }
 
       else if (word == "\n") {
-        throw std::runtime_error("not implemented: \n");
+        // This is a do-nothing token to delimit backslash-to-end-of-line comments.
+        pos++;
       }
 
       else if (word == "") {
-        throw std::runtime_error("not implemented: ");
+        // Just in case there's a leading or trailing blank in the token stream.
+        pos++;
       }
 
       else if (word == ":") {
-        throw std::runtime_error("not implemented: :");
+        if (pos + 1 >= stop  ||  tokenized[pos + 1] == ";") {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, pos + 2,
+                          "missing name in word definition")
+            );
+        }
+        std::string name = tokenized[pos + 1];
+
+        int64_t num;
+        if (is_integer(name, num)  ||  is_reserved(name)) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2,
+                        "user-defined words must not be integers or reserved words")
+          );
+        }
+
+        if (is_input(name)  ||  is_output(name)  ||  is_defined(name, dictionary_names)) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2,
+                        "input names, output names, and user-defined words must be unique")
+          );
+        }
+
+        int64_t substart = pos + 2;
+        int64_t substop = pos + 1;
+        int64_t nesting = 1;
+        while (nesting > 0) {
+          substop++;
+          if (substop >= stop) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, stop,
+                          "definition is missing its closing ';'")
+            );
+          }
+          if (tokenized[substop] == ":") {
+            nesting++;
+          }
+          else if (tokenized[substop] == ";") {
+            nesting--;
+          }
+        }
+
+        // Add the new word to the dictionary before parsing it so that recursive
+        // functions can be defined.
+        I instruction = dictionary.size() + DICTIONARY;
+        dictionary_names[name] = instruction;
+
+        // Now parse the subroutine and add it to the dictionary.
+        std::vector<I> subinstructions;
+        dictionary.push_back(subinstructions);
+        parse(name,
+              tokenized,
+              linecol,
+              substart,
+              substop,
+              subinstructions,
+              dictionary_names,
+              dictionary,
+              0,
+              0);
+        dictionary[instruction - DICTIONARY] = subinstructions;
+
+        pos = substop + 1;
       }
 
       else if (word == "recurse") {
@@ -1427,9 +1520,10 @@ private:
           );
         }
 
-        if (is_input(name)  ||  is_output(name)) {
+        if (is_input(name)  ||  is_output(name)  ||  is_defined(name, dictionary_names)) {
           throw std::invalid_argument(
-            err_linecol(linecol, pos, pos + 2, "input names must be unique")
+            err_linecol(linecol, pos, pos + 2,
+                        "input names, output names, and user-defined words must be unique")
           );
         }
 
@@ -1455,9 +1549,10 @@ private:
           );
         }
 
-        if (is_input(name)  ||  is_output(name)) {
+        if (is_input(name)  ||  is_output(name)  ||  is_defined(name, dictionary_names)) {
           throw std::invalid_argument(
-            err_linecol(linecol, pos, pos + 3, "output names must be unique")
+            err_linecol(linecol, pos, pos + 2,
+                        "input names, output names, and user-defined words must be unique")
           );
         }
 
@@ -1706,7 +1801,8 @@ private:
         else {
           auto pair = dictionary_names.find(word);
           if (pair != dictionary_names.end()) {
-            throw std::runtime_error("not implemented: is_user_defined(word)");
+            instructions.push_back(pair->second);
+            pos++;
           }
 
           else {
@@ -2514,7 +2610,7 @@ void ForthMachine<int32_t, int32_t, true>::write_from_stack(int64_t num, int32_t
 
 
 int main() {
-  ForthMachine<int32_t, int32_t, true> vm("input testin output testout int32 10 testin #i-> testout");
+  ForthMachine<int32_t, int32_t, true> vm(": foo : bar 10 ; 2 3 + bar ; foo foo");
 
   // const int64_t length = 1000000;
   const int64_t length = 20;
