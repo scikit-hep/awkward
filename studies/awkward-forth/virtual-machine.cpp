@@ -1349,7 +1349,7 @@ private:
     std::pair<int64_t, int64_t> lc = linecol[startpos];
     std::stringstream out;
     out << "in Awkward Forth source code, line " << lc.first << " col " << lc.second
-        << ", " << message << std::endl << std::endl << "    ";
+        << ", " << message << ":" << std::endl << std::endl << "    ";
     int64_t line = 1;
     int64_t col = 1;
     int64_t start = 0;
@@ -1446,10 +1446,14 @@ private:
           );
         }
 
-        if (is_input(name)  ||  is_output(name)  ||  is_defined(name, dictionary_names)) {
+        if (is_input(name)  ||
+            is_output(name)  ||
+            is_variable(name)  ||
+            is_defined(name, dictionary_names)) {
           throw std::invalid_argument(
             err_linecol(linecol, pos, pos + 2,
-                        "input names, output names, and user-defined words must be unique")
+                        "input names, output names, variable names, and "
+                        "user-defined words must be unique")
           );
         }
 
@@ -1496,11 +1500,47 @@ private:
       }
 
       else if (word == "recurse") {
-        throw std::runtime_error("not implemented: recurse");
+        if (defn == "") {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 1,
+                        "only allowed in a ': name ... ;' definition")
+          );
+        }
+        instructions.push_back(dictionary_names[defn]);
+        pos++;
       }
 
       else if (word == "variable") {
-        throw std::runtime_error("not implemented: variable");
+        if (pos + 1 >= stop) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2,
+                        "missing name in variable declaration")
+          );
+        }
+        std::string name = tokenized[pos + 1];
+
+        int64_t num;
+        if (is_integer(name, num)  ||  is_reserved(name)) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2,
+                        "variable names must not be integers or reserved words")
+          );
+        }
+
+        if (is_input(name)  ||
+            is_output(name)  ||
+            is_variable(name)  ||
+            is_defined(name, dictionary_names)) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2,
+                        "input names, output names, variable names, and "
+                        "user-defined words must be unique")
+          );
+        }
+
+        variable_names_.push_back(name);
+        variables_.push_back(0);
+        pos += 2;
       }
 
       else if (word == "input") {
@@ -1520,10 +1560,14 @@ private:
           );
         }
 
-        if (is_input(name)  ||  is_output(name)  ||  is_defined(name, dictionary_names)) {
+        if (is_input(name)  ||
+            is_output(name)  ||
+            is_variable(name)  ||
+            is_defined(name, dictionary_names)) {
           throw std::invalid_argument(
             err_linecol(linecol, pos, pos + 2,
-                        "input names, output names, and user-defined words must be unique")
+                        "input names, output names, variable names, and "
+                        "user-defined words must be unique")
           );
         }
 
@@ -1549,10 +1593,14 @@ private:
           );
         }
 
-        if (is_input(name)  ||  is_output(name)  ||  is_defined(name, dictionary_names)) {
+        if (is_input(name)  ||
+            is_output(name)  ||
+            is_variable(name)  ||
+            is_defined(name, dictionary_names)) {
           throw std::invalid_argument(
             err_linecol(linecol, pos, pos + 2,
-                        "input names, output names, and user-defined words must be unique")
+                        "input names, output names, variable names, and "
+                        "user-defined words must be unique")
           );
         }
 
@@ -1585,7 +1633,33 @@ private:
       }
 
       else if (is_variable(word)) {
-        throw std::runtime_error("not implemented: is_variable(word)");
+        int64_t variable_index = -1;
+        for (;  variable_index < (int64_t)variable_names_.size();  variable_index++) {
+          if (variable_names_[variable_index] == word) {
+            break;
+          }
+        }
+        if (pos + 1 < stop  &&  tokenized[pos + 1] == "!") {
+          instructions.push_back(PUT);
+          instructions.push_back(variable_index);
+          pos += 2;
+        }
+        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "+!") {
+          instructions.push_back(INC);
+          instructions.push_back(variable_index);
+          pos += 2;
+        }
+        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "@") {
+          instructions.push_back(GET);
+          instructions.push_back(variable_index);
+          pos += 2;
+        }
+        else {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2, "missing '!', '+!', or '@' "
+                        "after variable name")
+          );
+        }
       }
 
       else if (is_input(word)) {
@@ -1779,19 +1853,19 @@ private:
           if (word == "i"  && dodepth < 1) {
             throw std::invalid_argument(
               err_linecol(linecol, pos, pos + 1,
-                          "'i' can only be used in a 'do' loop")
+                          "only allowed in a 'do' loop")
             );
           }
           else if (word == "j"  && dodepth < 2) {
             throw std::invalid_argument(
               err_linecol(linecol, pos, pos + 1,
-                          "'j' can only be used in a nested 'do' loop")
+                          "only allowed in a nested 'do' loop")
             );
           }
           else if (word == "k"  && dodepth < 3) {
             throw std::invalid_argument(
               err_linecol(linecol, pos, pos + 1,
-                          "'i' can only be used in a doubly nested 'do' loop")
+                          "only allowed in a doubly nested 'do' loop")
             );
           }
           instructions.push_back(generic_builtin->second);
@@ -2610,7 +2684,7 @@ void ForthMachine<int32_t, int32_t, true>::write_from_stack(int64_t num, int32_t
 
 
 int main() {
-  ForthMachine<int32_t, int32_t, true> vm(": foo : bar 10 ; 2 3 + bar ; foo foo");
+  ForthMachine<int32_t, int32_t, true> vm("variable x 10 x ! 5 x +! x @");
 
   // const int64_t length = 1000000;
   const int64_t length = 20;
