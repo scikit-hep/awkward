@@ -184,33 +184,33 @@ public:
 
   virtual std::shared_ptr<void> ptr() const noexcept = 0;
 
-  virtual inline void write_one_bool(bool value, bool byteswap) noexcept = 0;
-  virtual inline void write_one_int8(int8_t value, bool byteswap) noexcept = 0;
-  virtual inline void write_one_int16(int16_t value, bool byteswap) noexcept = 0;
-  virtual inline void write_one_int32(int32_t value, bool byteswap) noexcept = 0;
-  virtual inline void write_one_int64(int64_t value, bool byteswap) noexcept = 0;
-  virtual inline void write_one_intp(ssize_t value, bool byteswap) noexcept = 0;
-  virtual inline void write_one_uint8(uint8_t value, bool byteswap) noexcept = 0;
-  virtual inline void write_one_uint16(uint16_t value, bool byteswap) noexcept = 0;
-  virtual inline void write_one_uint32(uint32_t value, bool byteswap) noexcept = 0;
-  virtual inline void write_one_uint64(uint64_t value, bool byteswap) noexcept = 0;
-  virtual inline void write_one_uintp(size_t value, bool byteswap) noexcept = 0;
-  virtual inline void write_one_float32(float value, bool byteswap) noexcept = 0;
-  virtual inline void write_one_float64(double value, bool byteswap) noexcept = 0;
+  virtual void write_one_bool(bool value, bool byteswap) noexcept = 0;
+  virtual void write_one_int8(int8_t value, bool byteswap) noexcept = 0;
+  virtual void write_one_int16(int16_t value, bool byteswap) noexcept = 0;
+  virtual void write_one_int32(int32_t value, bool byteswap) noexcept = 0;
+  virtual void write_one_int64(int64_t value, bool byteswap) noexcept = 0;
+  virtual void write_one_intp(ssize_t value, bool byteswap) noexcept = 0;
+  virtual void write_one_uint8(uint8_t value, bool byteswap) noexcept = 0;
+  virtual void write_one_uint16(uint16_t value, bool byteswap) noexcept = 0;
+  virtual void write_one_uint32(uint32_t value, bool byteswap) noexcept = 0;
+  virtual void write_one_uint64(uint64_t value, bool byteswap) noexcept = 0;
+  virtual void write_one_uintp(size_t value, bool byteswap) noexcept = 0;
+  virtual void write_one_float32(float value, bool byteswap) noexcept = 0;
+  virtual void write_one_float64(double value, bool byteswap) noexcept = 0;
 
-  virtual inline void write_bool(int64_t num_items, bool* values, bool byteswap) noexcept = 0;
-  virtual inline void write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept = 0;
-  virtual inline void write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept = 0;
-  virtual inline void write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept = 0;
-  virtual inline void write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept = 0;
-  virtual inline void write_intp(int64_t num_items, ssize_t* values, bool byteswap) noexcept = 0;
-  virtual inline void write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept = 0;
-  virtual inline void write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept = 0;
-  virtual inline void write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept = 0;
-  virtual inline void write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept = 0;
-  virtual inline void write_uintp(int64_t num_items, size_t* values, bool byteswap) noexcept = 0;
-  virtual inline void write_float32(int64_t num_items, float* values, bool byteswap) noexcept = 0;
-  virtual inline void write_float64(int64_t num_items, double* values, bool byteswap) noexcept = 0;
+  virtual void write_bool(int64_t num_items, bool* values, bool byteswap) noexcept = 0;
+  virtual void write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept = 0;
+  virtual void write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept = 0;
+  virtual void write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept = 0;
+  virtual void write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept = 0;
+  virtual void write_intp(int64_t num_items, ssize_t* values, bool byteswap) noexcept = 0;
+  virtual void write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept = 0;
+  virtual void write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept = 0;
+  virtual void write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept = 0;
+  virtual void write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept = 0;
+  virtual void write_uintp(int64_t num_items, size_t* values, bool byteswap) noexcept = 0;
+  virtual void write_float32(int64_t num_items, float* values, bool byteswap) noexcept = 0;
+  virtual void write_float64(int64_t num_items, double* values, bool byteswap) noexcept = 0;
 
   virtual const std::string tostring() const = 0;
 
@@ -232,31 +232,31 @@ public:
     return ptr_;
   }
 
-  inline void write_one_bool(bool value, bool byteswap) noexcept override {
+  void write_one_bool(bool value, bool byteswap) noexcept override {
     write_one(value);
   }
-  inline void write_one_int8(int8_t value, bool byteswap) noexcept override {
+  void write_one_int8(int8_t value, bool byteswap) noexcept override {
     write_one(value);
   }
-  inline void write_one_int16(int16_t value, bool byteswap) noexcept override {
+  void write_one_int16(int16_t value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap16(1, &value);
     }
     write_one(value);
   }
-  inline void write_one_int32(int32_t value, bool byteswap) noexcept override {
+  void write_one_int32(int32_t value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap32(1, &value);
     }
     write_one(value);
   }
-  inline void write_one_int64(int64_t value, bool byteswap) noexcept override {
+  void write_one_int64(int64_t value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap64(1, &value);
     }
     write_one(value);
   }
-  inline void write_one_intp(ssize_t value, bool byteswap) noexcept override {
+  void write_one_intp(ssize_t value, bool byteswap) noexcept override {
     if (byteswap) {
       if (sizeof(ssize_t) == 4) {
         byteswap32(1, &value);
@@ -267,28 +267,28 @@ public:
     }
     write_one(value);
   }
-  inline void write_one_uint8(uint8_t value, bool byteswap) noexcept override {
+  void write_one_uint8(uint8_t value, bool byteswap) noexcept override {
     write_one(value);
   }
-  inline void write_one_uint16(uint16_t value, bool byteswap) noexcept override {
+  void write_one_uint16(uint16_t value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap16(1, &value);
     }
     write_one(value);
   }
-  inline void write_one_uint32(uint32_t value, bool byteswap) noexcept override {
+  void write_one_uint32(uint32_t value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap32(1, &value);
     }
     write_one(value);
   }
-  inline void write_one_uint64(uint64_t value, bool byteswap) noexcept override {
+  void write_one_uint64(uint64_t value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap64(1, &value);
     }
     write_one(value);
   }
-  inline void write_one_uintp(size_t value, bool byteswap) noexcept override {
+  void write_one_uintp(size_t value, bool byteswap) noexcept override {
     if (byteswap) {
       if (sizeof(size_t) == 4) {
         byteswap32(1, &value);
@@ -299,32 +299,32 @@ public:
     }
     write_one(value);
   }
-  inline void write_one_float32(float value, bool byteswap) noexcept override {
+  void write_one_float32(float value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap32(1, &value);
     }
     write_one(value);
   }
-  inline void write_one_float64(double value, bool byteswap) noexcept override {
+  void write_one_float64(double value, bool byteswap) noexcept override {
     if (byteswap) {
       byteswap64(1, &value);
     }
     write_one(value);
   }
 
-  inline void write_bool(int64_t num_items, bool* values, bool byteswap) noexcept override;
-  inline void write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept override;
-  inline void write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept override;
-  inline void write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept override;
-  inline void write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept override;
-  inline void write_intp(int64_t num_items, ssize_t* values, bool byteswap) noexcept override;
-  inline void write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept override;
-  inline void write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept override;
-  inline void write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept override;
-  inline void write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept override;
-  inline void write_uintp(int64_t num_items, size_t* values, bool byteswap) noexcept override;
-  inline void write_float32(int64_t num_items, float* values, bool byteswap) noexcept override;
-  inline void write_float64(int64_t num_items, double* values, bool byteswap) noexcept override;
+  void write_bool(int64_t num_items, bool* values, bool byteswap) noexcept override;
+  void write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept override;
+  void write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept override;
+  void write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept override;
+  void write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept override;
+  void write_intp(int64_t num_items, ssize_t* values, bool byteswap) noexcept override;
+  void write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept override;
+  void write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept override;
+  void write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept override;
+  void write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept override;
+  void write_uintp(int64_t num_items, size_t* values, bool byteswap) noexcept override;
+  void write_float32(int64_t num_items, float* values, bool byteswap) noexcept override;
+  void write_float64(int64_t num_items, double* values, bool byteswap) noexcept override;
 
   const std::string tostring() const override {
     std::stringstream out;
@@ -391,19 +391,19 @@ private:
 
 
 template <typename OUT>
-inline void
+void
 ForthOutputBufferOf<OUT>::write_bool(int64_t num_items, bool* values, bool byteswap) noexcept {
   write_copy(num_items, values);
 }
 
 template <typename OUT>
-inline void
+void
 ForthOutputBufferOf<OUT>::write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept {
   write_copy(num_items, values);
 }
 
 template <typename OUT>
-inline void
+void
 ForthOutputBufferOf<OUT>::write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept {
   if (byteswap) {
     byteswap16(num_items, values);
@@ -415,7 +415,7 @@ ForthOutputBufferOf<OUT>::write_int16(int64_t num_items, int16_t* values, bool b
 }
 
 template <typename OUT>
-inline void
+void
 ForthOutputBufferOf<OUT>::write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept {
   if (byteswap) {
     byteswap32(num_items, values);
@@ -427,7 +427,7 @@ ForthOutputBufferOf<OUT>::write_int32(int64_t num_items, int32_t* values, bool b
 }
 
 template <typename OUT>
-inline void
+void
 ForthOutputBufferOf<OUT>::write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept {
   if (byteswap) {
     byteswap64(num_items, values);
@@ -439,7 +439,7 @@ ForthOutputBufferOf<OUT>::write_int64(int64_t num_items, int64_t* values, bool b
 }
 
 template <typename OUT>
-inline void
+void
 ForthOutputBufferOf<OUT>::write_intp(int64_t num_items, ssize_t* values, bool byteswap) noexcept {
   if (byteswap) {
     if (sizeof(ssize_t) == 4) {
@@ -461,13 +461,13 @@ ForthOutputBufferOf<OUT>::write_intp(int64_t num_items, ssize_t* values, bool by
 }
 
 template <typename OUT>
-inline void
+void
 ForthOutputBufferOf<OUT>::write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept {
   write_copy(num_items, values);
 }
 
 template <typename OUT>
-inline void
+void
 ForthOutputBufferOf<OUT>::write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept {
   if (byteswap) {
     byteswap16(num_items, values);
@@ -479,7 +479,7 @@ ForthOutputBufferOf<OUT>::write_uint16(int64_t num_items, uint16_t* values, bool
 }
 
 template <typename OUT>
-inline void
+void
 ForthOutputBufferOf<OUT>::write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept {
   if (byteswap) {
     byteswap32(num_items, values);
@@ -491,7 +491,7 @@ ForthOutputBufferOf<OUT>::write_uint32(int64_t num_items, uint32_t* values, bool
 }
 
 template <typename OUT>
-inline void
+void
 ForthOutputBufferOf<OUT>::write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept {
   if (byteswap) {
     byteswap64(num_items, values);
@@ -503,7 +503,7 @@ ForthOutputBufferOf<OUT>::write_uint64(int64_t num_items, uint64_t* values, bool
 }
 
 template <typename OUT>
-inline void
+void
 ForthOutputBufferOf<OUT>::write_uintp(int64_t num_items, size_t* values, bool byteswap) noexcept {
   if (byteswap) {
     if (sizeof(size_t) == 4) {
@@ -525,7 +525,7 @@ ForthOutputBufferOf<OUT>::write_uintp(int64_t num_items, size_t* values, bool by
 }
 
 template <typename OUT>
-inline void
+void
 ForthOutputBufferOf<OUT>::write_float32(int64_t num_items, float* values, bool byteswap) noexcept {
   if (byteswap) {
     byteswap32(num_items, values);
@@ -537,7 +537,7 @@ ForthOutputBufferOf<OUT>::write_float32(int64_t num_items, float* values, bool b
 }
 
 template <typename OUT>
-inline void
+void
 ForthOutputBufferOf<OUT>::write_float64(int64_t num_items, double* values, bool byteswap) noexcept {
   if (byteswap) {
     byteswap64(num_items, values);
@@ -549,7 +549,7 @@ ForthOutputBufferOf<OUT>::write_float64(int64_t num_items, double* values, bool 
 }
 
 template <>
-inline void
+void
 ForthOutputBufferOf<bool>::write_bool(int64_t num_items, bool* values, bool byteswap) noexcept {
   int64_t next = length_ + num_items;
   maybe_resize(next);
@@ -558,7 +558,7 @@ ForthOutputBufferOf<bool>::write_bool(int64_t num_items, bool* values, bool byte
 }
 
 template <>
-inline void
+void
 ForthOutputBufferOf<int8_t>::write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept {
   int64_t next = length_ + num_items;
   maybe_resize(next);
@@ -567,7 +567,7 @@ ForthOutputBufferOf<int8_t>::write_int8(int64_t num_items, int8_t* values, bool 
 }
 
 template <>
-inline void
+void
 ForthOutputBufferOf<int16_t>::write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept {
   int64_t next = length_ + num_items;
   maybe_resize(next);
@@ -579,7 +579,7 @@ ForthOutputBufferOf<int16_t>::write_int16(int64_t num_items, int16_t* values, bo
 }
 
 template <>
-inline void
+void
 ForthOutputBufferOf<int32_t>::write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept {
   int64_t next = length_ + num_items;
   maybe_resize(next);
@@ -591,7 +591,7 @@ ForthOutputBufferOf<int32_t>::write_int32(int64_t num_items, int32_t* values, bo
 }
 
 template <>
-inline void
+void
 ForthOutputBufferOf<int64_t>::write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept {
   int64_t next = length_ + num_items;
   maybe_resize(next);
@@ -603,7 +603,7 @@ ForthOutputBufferOf<int64_t>::write_int64(int64_t num_items, int64_t* values, bo
 }
 
 template <>
-inline void
+void
 ForthOutputBufferOf<uint8_t>::write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept {
   int64_t next = length_ + num_items;
   maybe_resize(next);
@@ -612,7 +612,7 @@ ForthOutputBufferOf<uint8_t>::write_uint8(int64_t num_items, uint8_t* values, bo
 }
 
 template <>
-inline void
+void
 ForthOutputBufferOf<uint16_t>::write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept {
   int64_t next = length_ + num_items;
   maybe_resize(next);
@@ -624,7 +624,7 @@ ForthOutputBufferOf<uint16_t>::write_uint16(int64_t num_items, uint16_t* values,
 }
 
 template <>
-inline void
+void
 ForthOutputBufferOf<uint32_t>::write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept {
   int64_t next = length_ + num_items;
   maybe_resize(next);
@@ -636,7 +636,7 @@ ForthOutputBufferOf<uint32_t>::write_uint32(int64_t num_items, uint32_t* values,
 }
 
 template <>
-inline void
+void
 ForthOutputBufferOf<uint64_t>::write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept {
   int64_t next = length_ + num_items;
   maybe_resize(next);
@@ -648,7 +648,7 @@ ForthOutputBufferOf<uint64_t>::write_uint64(int64_t num_items, uint64_t* values,
 }
 
 template <>
-inline void
+void
 ForthOutputBufferOf<float>::write_float32(int64_t num_items, float* values, bool byteswap) noexcept {
   int64_t next = length_ + num_items;
   maybe_resize(next);
@@ -660,7 +660,7 @@ ForthOutputBufferOf<float>::write_float32(int64_t num_items, float* values, bool
 }
 
 template <>
-inline void
+void
 ForthOutputBufferOf<double>::write_float64(int64_t num_items, double* values, bool byteswap) noexcept {
   int64_t next = length_ + num_items;
   maybe_resize(next);
@@ -955,11 +955,11 @@ const std::set<std::string> input_parser_words_({
   "#!h->", "#!i->", "#!q->", "#!n->", "#!H->", "#!I->", "#!Q->", "#!N->", "#!f->", "#!d->",
 });
 
-const std::map<std::string, int64_t> output_dtype_words_({
-  {"bool", PARSER_BOOL},
-  {"int8", PARSER_INT8}, {"int16", PARSER_INT16}, {"int32", PARSER_INT32}, {"int64", PARSER_INT64},
-  {"uint8", PARSER_UINT8}, {"uint16", PARSER_UINT16}, {"uint32", PARSER_UINT32}, {"uint64", PARSER_UINT64},
-  {"float32", PARSER_FLOAT32}, {"float64", PARSER_FLOAT64}
+const std::map<std::string, dtype> output_dtype_words_({
+  {"bool", dtype::boolean},
+  {"int8", dtype::int8}, {"int16", dtype::int16}, {"int32", dtype::int32}, {"int64", dtype::int64},
+  {"uint8", dtype::uint8}, {"uint16", dtype::uint16}, {"uint32", dtype::uint32}, {"uint64", dtype::uint64},
+  {"float32", dtype::float32}, {"float64", dtype::float64}
 });
 
 const std::map<std::string, int64_t> generic_builtin_words_({
@@ -990,7 +990,8 @@ public:
                int64_t initial_stack=1024,
                double resize_stack=1.5,
                int64_t recursion_depth=1024)
-    : initial_buffer_(initial_buffer)
+    : source_(source)
+    , initial_buffer_(initial_buffer)
     , resize_buffer_(resize_buffer)
     , stack_(initial_stack, resize_stack)
     , current_inputs_()
@@ -998,6 +999,10 @@ public:
     , current_instruction_pointer_(recursion_depth)
     , current_error_(ForthError::none) {
     compile(source);
+  }
+
+  const std::string source() const {
+    return source_;
   }
 
   const std::map<std::string, T> variables() const {
@@ -1171,6 +1176,7 @@ public:
 
   const std::string tostring() {
     std::stringstream out;
+    out << "Source: " << source_ << std::endl;
     out << "Variables:" << std::endl;
     for (int64_t i = 0;  i < variable_names_.size();  i++) {
       out << "    " << variable_names_[i] << ": " << variables_[i] << std::endl;
@@ -1251,7 +1257,7 @@ private:
           current == '\v'  ||  current == '\f') {
         if (full) {
           tokenized.push_back(source.substr(start, stop - start));
-          linecol.emplace_back(line, colstart);
+          linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
         }
         start = stop;
         full = false;
@@ -1262,10 +1268,10 @@ private:
       else if (current == '\n') {
         if (full) {
           tokenized.push_back(source.substr(start, stop - start));
-          linecol.emplace_back(line, colstart);
+          linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
         }
         tokenized.push_back(source.substr(stop, 1));
-        linecol.emplace_back(line, colstart);
+        linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
         start = stop;
         full = false;
         line += 1;
@@ -1286,7 +1292,7 @@ private:
     // The source code might end on non-whitespace.
     if (full) {
       tokenized.push_back(source.substr(start, stop - start));
-      linecol.emplace_back(line, colstart);
+      linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
     }
 
     std::vector<I> instructions;
@@ -1386,7 +1392,42 @@ private:
       }
 
       else if (word == "output") {
-        throw std::runtime_error("not implemented: output");
+        if (pos + 2 >= stop) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos) +
+            std::string("missing name or dtype in output declaration")
+          );
+        }
+        std::string name = tokenized[pos + 1];
+        std::string dtype_string = tokenized[pos + 2];
+
+        int64_t num;
+        if (is_integer(name, num)  ||  is_reserved(name)) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos) +
+            std::string("output names must not be integers or reserved words")
+          );
+        }
+
+        if (is_output(name)) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos) +
+            std::string("output names must be unique; '") + name +
+            std::string("' is declared more than once")
+          );
+        }
+
+        auto it = output_dtype_words_.find(dtype_string);
+        if (it == output_dtype_words_.end()) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos) +
+            std::string("output dtype not recognized: '") + name + std::string("'")
+          );
+        }
+
+        output_names_.push_back(name);
+        output_dtypes_.push_back(it->second);
+        pos += 3;
       }
 
       else if (word == "if") {
@@ -1414,13 +1455,58 @@ private:
       }
 
       else if (is_output(word)) {
-        throw std::runtime_error("not implemented: is_output(word)");
+        int64_t output_index = -1;
+        for (;  output_index < (int64_t)output_names_.size();  output_index++) {
+          if (output_names_[output_index] == word) {
+            break;
+          }
+        }
+        if (pos + 1 < stop  &&  tokenized[pos + 1] == "<-") {
+          instructions.push_back(WRITE);
+          instructions.push_back(output_index);
+          pos += 2;
+        }
+        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
+          instructions.push_back(LEN_OUTPUT);
+          instructions.push_back(output_index);
+          pos += 2;
+        }
+        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "rewind") {
+          instructions.push_back(REWIND);
+          instructions.push_back(output_index);
+          pos += 2;
+        }
+        else {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos) +
+            std::string("missing '<-', 'len', or 'rewind' after output name")
+          );
+        }
       }
 
       else {
         auto generic_builtin = generic_builtin_words_.find(word);
         if (generic_builtin != generic_builtin_words_.end()) {
-          throw std::runtime_error("not implemented: is_generic_builtin(word)");
+          if (word == "i"  && dodepth < 1) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos) +
+              std::string("'i' can only be used in a 'do' loop")
+            );
+          }
+          else if (word == "j"  && dodepth < 2) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos) +
+              std::string("'j' can only be used in a nested 'do' loop")
+            );
+          }
+          else if (word == "k"  && dodepth < 3) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos) +
+              std::string("'i' can only be used in a doubly nested 'do' loop")
+            );
+          }
+          instructions.push_back(generic_builtin->second);
+          pos++;
         }
 
         else {
@@ -1432,8 +1518,8 @@ private:
           else {
             int64_t num;
             if (is_integer(word, num)) {
-              instructions_.push_back(LITERAL);
-              instructions_.push_back(num);
+              instructions.push_back(LITERAL);
+              instructions.push_back(num);
               pos++;
             }
 
@@ -2199,6 +2285,8 @@ private:
     } // end of all segments
   }
 
+  std::string source_;
+
   int64_t initial_buffer_;
   double resize_buffer_;
 
@@ -2233,7 +2321,7 @@ void ForthMachine<int32_t, int32_t, true>::write_from_stack(int64_t num, int32_t
 
 
 int main() {
-  ForthMachine<int32_t, int32_t, true> vm("1 2 3 4");
+  ForthMachine<int32_t, int32_t, true> vm("output testout int32 2 3 + testout <-");
 
   // const int64_t length = 1000000;
   const int64_t length = 20;
