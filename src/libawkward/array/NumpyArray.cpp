@@ -4894,7 +4894,6 @@ namespace awkward {
       length,
       outranges.data(),
       ranges_length,
-      parents.length(),
       ascending,
       stable);
     util::handle_error(err3, classname(), nullptr);

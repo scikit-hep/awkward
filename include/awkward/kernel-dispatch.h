@@ -1689,7 +1689,6 @@ namespace awkward {
       int64_t length,
       const int64_t* offsets,
       int64_t offsetslength,
-      int64_t parentslength,
       bool ascending,
       bool stable);
 

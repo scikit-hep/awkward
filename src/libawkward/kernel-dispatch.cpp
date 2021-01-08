@@ -17321,7 +17321,6 @@ namespace awkward {
       int64_t length,
       const int64_t *offsets,
       int64_t offsetslength,
-      int64_t parentslength,
       bool ascending,
       bool stable) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -17331,7 +17330,6 @@ namespace awkward {
           length,
           offsets,
           offsetslength,
-          parentslength,
           ascending,
           stable);
       }
@@ -17355,7 +17353,6 @@ namespace awkward {
       int64_t length,
       const int64_t *offsets,
       int64_t offsetslength,
-      int64_t parentslength,
       bool ascending,
       bool stable) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -17365,7 +17362,6 @@ namespace awkward {
           length,
           offsets,
           offsetslength,
-          parentslength,
           ascending,
           stable);
       }
@@ -17389,7 +17385,6 @@ namespace awkward {
       int64_t length,
       const int64_t *offsets,
       int64_t offsetslength,
-      int64_t parentslength,
       bool ascending,
       bool stable) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -17399,7 +17394,6 @@ namespace awkward {
           length,
           offsets,
           offsetslength,
-          parentslength,
           ascending,
           stable);
       }
@@ -17423,7 +17417,6 @@ namespace awkward {
       int64_t length,
       const int64_t *offsets,
       int64_t offsetslength,
-      int64_t parentslength,
       bool ascending,
       bool stable) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -17433,7 +17426,6 @@ namespace awkward {
           length,
           offsets,
           offsetslength,
-          parentslength,
           ascending,
           stable);
       }
@@ -17457,7 +17449,6 @@ namespace awkward {
       int64_t length,
       const int64_t *offsets,
       int64_t offsetslength,
-      int64_t parentslength,
       bool ascending,
       bool stable) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -17467,7 +17458,6 @@ namespace awkward {
           length,
           offsets,
           offsetslength,
-          parentslength,
           ascending,
           stable);
       }
@@ -17491,7 +17481,6 @@ namespace awkward {
       int64_t length,
       const int64_t *offsets,
       int64_t offsetslength,
-      int64_t parentslength,
       bool ascending,
       bool stable) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -17501,7 +17490,6 @@ namespace awkward {
           length,
           offsets,
           offsetslength,
-          parentslength,
           ascending,
           stable);
       }
@@ -17525,7 +17513,6 @@ namespace awkward {
       int64_t length,
       const int64_t *offsets,
       int64_t offsetslength,
-      int64_t parentslength,
       bool ascending,
       bool stable) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -17535,7 +17522,6 @@ namespace awkward {
           length,
           offsets,
           offsetslength,
-          parentslength,
           ascending,
           stable);
       }
@@ -17559,7 +17545,6 @@ namespace awkward {
       int64_t length,
       const int64_t *offsets,
       int64_t offsetslength,
-      int64_t parentslength,
       bool ascending,
       bool stable) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -17569,7 +17554,6 @@ namespace awkward {
           length,
           offsets,
           offsetslength,
-          parentslength,
           ascending,
           stable);
       }
@@ -17593,7 +17577,6 @@ namespace awkward {
       int64_t length,
       const int64_t *offsets,
       int64_t offsetslength,
-      int64_t parentslength,
       bool ascending,
       bool stable) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -17603,7 +17586,6 @@ namespace awkward {
           length,
           offsets,
           offsetslength,
-          parentslength,
           ascending,
           stable);
       }
@@ -17627,7 +17609,6 @@ namespace awkward {
       int64_t length,
       const int64_t *offsets,
       int64_t offsetslength,
-      int64_t parentslength,
       bool ascending,
       bool stable) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -17637,7 +17618,6 @@ namespace awkward {
           length,
           offsets,
           offsetslength,
-          parentslength,
           ascending,
           stable);
       }
@@ -17661,7 +17641,6 @@ namespace awkward {
       int64_t length,
       const int64_t *offsets,
       int64_t offsetslength,
-      int64_t parentslength,
       bool ascending,
       bool stable) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -17671,7 +17650,6 @@ namespace awkward {
           length,
           offsets,
           offsetslength,
-          parentslength,
           ascending,
           stable);
       }

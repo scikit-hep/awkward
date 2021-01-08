@@ -1031,7 +1031,6 @@ namespace awkward {
         length_,
         offsets.ptr().get(),
         offsets.length(),
-        parents.length(),
         ascending,
         stable);
       util::handle_error(err, classname(), nullptr);
