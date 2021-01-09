@@ -3008,23 +3008,12 @@ int main() {
       "input testin \n"
       "output testout int32 \n"
       "begin \n"
-      "  testin i-> stack \n"
-      "  10 + \n"
-      "  10 + \n"
-      "  10 + \n"
-      "  10 + \n"
-      "  10 + \n"
-      "  10 + \n"
-      "  10 + \n"
-      "  10 + \n"
-      "  10 + \n"
-      "  10 + \n"
-      "  testout <- stack \n"
+      "  testin i-> testout \n"
       "again \n"
   );
 
-  // const int64_t length = 1000000;
-  const int64_t length = 20;
+  const int64_t length = 1000000;
+  // const int64_t length = 20;
 
   std::shared_ptr<int32_t> test_input_ptr = std::shared_ptr<int32_t>(
       new int32_t[length], array_deleter<int32_t>());
@@ -3038,33 +3027,33 @@ int main() {
                                                         0,
                                                         sizeof(int32_t) * length);
 
-  // for (int64_t repeat = 0;  repeat < 4;  repeat++) {
-  //   std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
-  //   std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
-  //       std::make_shared<ForthOutputBufferOf<int64_t>>() });
+  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
+    std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
+    std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
+        std::make_shared<ForthOutputBufferOf<int64_t>>() });
 
-  //   auto cpp_begin = std::chrono::high_resolution_clock::now();
-  //   for (int64_t i = 0;  i < length;  i += 1) {
-  //     int32_t* ptr = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
-  //     outs[0].get()->write_one_int32((*ptr) + 10, false);
-  //   }
-  //   auto cpp_end = std::chrono::high_resolution_clock::now();
+    auto cpp_begin = std::chrono::high_resolution_clock::now();
+    for (int64_t i = 0;  i < length;  i += 1) {
+      int32_t* ptr = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
+      outs[0].get()->write_one_int32(*ptr, false);
+    }
+    auto cpp_end = std::chrono::high_resolution_clock::now();
 
-  //   std::cout << "                       C++ time: "
-  //             << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
-  //             << " us" << std::endl;
+    std::cout << "                       C++ time: "
+              << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
+              << " us" << std::endl;
 
-  //   inputs["testin"].get()->seek(0, err);
-  // }
+    inputs["testin"].get()->seek(0, err);
+  }
 
-  for (int64_t repeat = 0;  repeat < 1;  repeat++) {
+  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
     std::set<ForthError> ignore({ ForthError::read_beyond });
 
     auto forth_begin = std::chrono::high_resolution_clock::now();
     std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
     auto forth_end = std::chrono::high_resolution_clock::now();
 
-    std::cout << vm.tostring(outputs);
+    // std::cout << vm.tostring(outputs);
     std::cout << "Forth time: "
               << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
               << " us" << std::endl;
