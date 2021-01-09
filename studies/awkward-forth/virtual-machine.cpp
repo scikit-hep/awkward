@@ -2124,10 +2124,11 @@ private:
 
           int64_t num_items = 1;
           if (~instruction & PARSER_REPEATED) {
-            num_items = stack_pop();
-            if (current_error_ != ForthError::none) {
+            if (stack_top_ == 0) {
+              current_error_ = ForthError::stack_underflow;
               return;
             }
+            num_items = stack_pop();
           }
 
           if (~instruction & PARSER_DIRECT) {
@@ -2341,10 +2342,11 @@ private:
                 }
                 for (int64_t i = 0;  i < num_items;  i++) {
                   bool value = ptr[i];
-                  stack_push(value);
-                  if (current_error_ != ForthError::none) {
+                  if (stack_top_ == stack_size_) {
+                    current_error_ = ForthError::stack_overflow;
                     return;
                   }
+                  stack_push(value);
                 }
                 break;
               }
@@ -2357,10 +2359,11 @@ private:
                 }
                 for (int64_t i = 0;  i < num_items;  i++) {
                   int8_t value = ptr[i];
-                  stack_push(value);
-                  if (current_error_ != ForthError::none) {
+                  if (stack_top_ == stack_size_) {
+                    current_error_ = ForthError::stack_overflow;
                     return;
                   }
+                  stack_push(value);
                 }
                 break;
               }
@@ -2376,10 +2379,11 @@ private:
                   if (byteswap) {
                     byteswap16(1, &value);
                   }
-                  stack_push(value);
-                  if (current_error_ != ForthError::none) {
+                  if (stack_top_ == stack_size_) {
+                    current_error_ = ForthError::stack_overflow;
                     return;
                   }
+                  stack_push(value);
                 }
                 break;
               }
@@ -2395,10 +2399,11 @@ private:
                   if (byteswap) {
                     byteswap32(1, &value);
                   }
-                  stack_push(value);
-                  if (current_error_ != ForthError::none) {
+                  if (stack_top_ == stack_size_) {
+                    current_error_ = ForthError::stack_overflow;
                     return;
                   }
+                  stack_push(value);
                 }
                 break;
               }
@@ -2414,10 +2419,11 @@ private:
                   if (byteswap) {
                     byteswap64(1, &value);
                   }
-                  stack_push(value);
-                  if (current_error_ != ForthError::none) {
+                  if (stack_top_ == stack_size_) {
+                    current_error_ = ForthError::stack_overflow;
                     return;
                   }
+                  stack_push(value);
                 }
                 break;
               }
@@ -2438,10 +2444,11 @@ private:
                       byteswap64(1, &value);
                     }
                   }
-                  stack_push(value);
-                  if (current_error_ != ForthError::none) {
+                  if (stack_top_ == stack_size_) {
+                    current_error_ = ForthError::stack_overflow;
                     return;
                   }
+                  stack_push(value);
                 }
                 break;
               }
@@ -2454,10 +2461,11 @@ private:
                 }
                 for (int64_t i = 0;  i < num_items;  i++) {
                   uint8_t value = ptr[i];
-                  stack_push(value);
-                  if (current_error_ != ForthError::none) {
+                  if (stack_top_ == stack_size_) {
+                    current_error_ = ForthError::stack_overflow;
                     return;
                   }
+                  stack_push(value);
                 }
                 break;
               }
@@ -2473,10 +2481,11 @@ private:
                   if (byteswap) {
                     byteswap16(1, &value);
                   }
-                  stack_push(value);
-                  if (current_error_ != ForthError::none) {
+                  if (stack_top_ == stack_size_) {
+                    current_error_ = ForthError::stack_overflow;
                     return;
                   }
+                  stack_push(value);
                 }
                 break;
               }
@@ -2492,11 +2501,11 @@ private:
                   if (byteswap) {
                     byteswap32(1, &value);
                   }
-                  stack_push(value);
-                  if (current_error_ != ForthError::none) {
+                  if (stack_top_ == stack_size_) {
+                    current_error_ = ForthError::stack_overflow;
                     return;
                   }
-
+                  stack_push(value);
                 }
                 break;
               }
@@ -2512,10 +2521,11 @@ private:
                   if (byteswap) {
                     byteswap64(1, &value);
                   }
-                  stack_push(value);
-                  if (current_error_ != ForthError::none) {
+                  if (stack_top_ == stack_size_) {
+                    current_error_ = ForthError::stack_overflow;
                     return;
                   }
+                  stack_push(value);
                 }
                 break;
               }
@@ -2536,10 +2546,11 @@ private:
                       byteswap64(1, &value);
                     }
                   }
-                  stack_push(value);
-                  if (current_error_ != ForthError::none) {
+                  if (stack_top_ == stack_size_) {
+                    current_error_ = ForthError::stack_overflow;
                     return;
                   }
+                  stack_push(value);
                 }
                 break;
               }
@@ -2555,10 +2566,11 @@ private:
                   if (byteswap) {
                     byteswap32(1, &value);
                   }
-                  stack_push(value);
-                  if (current_error_ != ForthError::none) {
+                  if (stack_top_ == stack_size_) {
+                    current_error_ = ForthError::stack_overflow;
                     return;
                   }
+                  stack_push(value);
                 }
                 break;
               }
@@ -2574,10 +2586,11 @@ private:
                   if (byteswap) {
                     byteswap64(1, &value);
                   }
-                  stack_push(value);
-                  if (current_error_ != ForthError::none) {
+                  if (stack_top_ == stack_size_) {
+                    current_error_ = ForthError::stack_overflow;
                     return;
                   }
+                  stack_push(value);
                 }
                 break;
               }
@@ -2597,20 +2610,22 @@ private:
             case LITERAL: {
               I num = instruction_get();
               instruction_pointer_where() += 1;
-              stack_push((T)num);
-              if (current_error_ != ForthError::none) {
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
                 return;
               }
+              stack_push((T)num);
               break;
             }
 
             case PUT: {
               I num = instruction_get();
               instruction_pointer_where() += 1;
-              T value = stack_pop();
-              if (current_error_ != ForthError::none) {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
                 return;
               }
+              T value = stack_pop();
               variables_[num] = value;
               break;
             }
@@ -2618,10 +2633,11 @@ private:
             case INC: {
               I num = instruction_get();
               instruction_pointer_where() += 1;
-              T value = stack_pop();
-              if (current_error_ != ForthError::none) {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
                 return;
               }
+              T value = stack_pop();
               variables_[num] += value;
               break;
             }
@@ -2629,10 +2645,11 @@ private:
             case GET: {
               I num = instruction_get();
               instruction_pointer_where() += 1;
-              stack_push(variables_[num]);
-              if (current_error_ != ForthError::none) {
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
                 return;
               }
+              stack_push(variables_[num]);
               break;
             }
 
@@ -2667,11 +2684,12 @@ private:
             case WRITE: {
               I num = instruction_get();
               instruction_pointer_where() += 1;
-              T* top = stack_peek();
-              stack_pop();
-              if (current_error_ != ForthError::none) {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
                 return;
               }
+              T* top = stack_peek();
+              stack_pop();
               write_from_stack(num, top);
               break;
             }
@@ -2727,10 +2745,11 @@ private:
             }
 
             case DROP: {
-              stack_drop();
-              if (current_error_ != ForthError::none) {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
                 return;
               }
+              stack_top_--;
               break;
             }
 
@@ -2755,14 +2774,12 @@ private:
             }
 
             case ADD: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
               T* pair = stack_pop2();
-              if (current_error_ != ForthError::none) {
-                return;
-              }
               stack_push(pair[0] + pair[1]);
-              if (current_error_ != ForthError::none) {
-                return;
-              }
               break;
             }
 
@@ -2885,42 +2902,18 @@ private:
   }
 
   inline void stack_push(T value) noexcept {
-    if (stack_top_ == stack_size_) {
-      current_error_ = ForthError::stack_overflow;
-    }
-    else {
-      stack_buffer_[stack_top_] = value;
-      stack_top_++;
-    }
+    stack_buffer_[stack_top_] = value;
+    stack_top_++;
   }
 
   inline T stack_pop() noexcept {
-    if (stack_top_ == 0) {
-      current_error_ = ForthError::stack_underflow;
-    }
-    else {
-      stack_top_--;
-    }
+    stack_top_--;
     return stack_buffer_[stack_top_];
   }
 
   inline T* stack_pop2() noexcept {
-    if (stack_top_ < 2) {
-      current_error_ = ForthError::stack_underflow;
-    }
-    else {
-      stack_top_ -= 2;
-    }
+    stack_top_ -= 2;
     return &stack_buffer_[stack_top_];
-  }
-
-  inline void stack_drop() noexcept {
-    if (stack_top_ == 0) {
-      current_error_ = ForthError::stack_underflow;
-    }
-    else {
-      stack_top_--;
-    }
   }
 
   inline T* stack_peek() const noexcept {
@@ -3030,8 +3023,8 @@ int main() {
       "again \n"
   );
 
-  const int64_t length = 1000000;
-  // const int64_t length = 20;
+  // const int64_t length = 1000000;
+  const int64_t length = 20;
 
   std::shared_ptr<int32_t> test_input_ptr = std::shared_ptr<int32_t>(
       new int32_t[length], array_deleter<int32_t>());
@@ -3045,33 +3038,33 @@ int main() {
                                                         0,
                                                         sizeof(int32_t) * length);
 
-  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
-    std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
-    std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
-        std::make_shared<ForthOutputBufferOf<int64_t>>() });
+  // for (int64_t repeat = 0;  repeat < 4;  repeat++) {
+  //   std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
+  //   std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
+  //       std::make_shared<ForthOutputBufferOf<int64_t>>() });
 
-    auto cpp_begin = std::chrono::high_resolution_clock::now();
-    for (int64_t i = 0;  i < length;  i += 1) {
-      int32_t* ptr = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
-      outs[0].get()->write_one_int32((*ptr) + 10, false);
-    }
-    auto cpp_end = std::chrono::high_resolution_clock::now();
+  //   auto cpp_begin = std::chrono::high_resolution_clock::now();
+  //   for (int64_t i = 0;  i < length;  i += 1) {
+  //     int32_t* ptr = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
+  //     outs[0].get()->write_one_int32((*ptr) + 10, false);
+  //   }
+  //   auto cpp_end = std::chrono::high_resolution_clock::now();
 
-    std::cout << "                       C++ time: "
-              << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
-              << " us" << std::endl;
+  //   std::cout << "                       C++ time: "
+  //             << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
+  //             << " us" << std::endl;
 
-    inputs["testin"].get()->seek(0, err);
-  }
+  //   inputs["testin"].get()->seek(0, err);
+  // }
 
-  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
+  for (int64_t repeat = 0;  repeat < 1;  repeat++) {
     std::set<ForthError> ignore({ ForthError::read_beyond });
 
     auto forth_begin = std::chrono::high_resolution_clock::now();
     std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
     auto forth_end = std::chrono::high_resolution_clock::now();
 
-    // std::cout << vm.tostring(outputs);
+    std::cout << vm.tostring(outputs);
     std::cout << "Forth time: "
               << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
               << " us" << std::endl;
