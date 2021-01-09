@@ -824,21 +824,34 @@ public:
     : source_(source)
     , output_initial_size_(output_initial_size)
     , output_resize_(output_resize)
+
     , stack_buffer_(new T[stack_size])
     , stack_top_(0)
     , stack_size_(stack_size)
+
     , current_inputs_()
     , current_outputs_()
+
     , current_which_(new int64_t[recursion_depth])
     , current_where_(new int64_t[recursion_depth])
     , current_skip_(new int64_t[recursion_depth])
     , instruction_current_depth_(0)
     , instruction_max_depth_(recursion_depth)
+
+    , do_instruction_depth_(new int64_t[recursion_depth])
+    , do_start_(new int64_t[recursion_depth])
+    , do_stop_(new int64_t[recursion_depth])
+    , do_step_(new int64_t[recursion_depth])
+    , do_i_(new int64_t[recursion_depth])
+    , do_current_depth_(0)
+
     , current_error_(ForthError::none)
+
     , count_instructions_(0)
     , count_reads_(0)
     , count_writes_(0)
-    , count_nanoseconds_(0) {
+    , count_nanoseconds_(0)
+  {
     compile(source);
   }
 
@@ -847,6 +860,11 @@ public:
     delete [] current_which_;
     delete [] current_where_;
     delete [] current_skip_;
+    delete [] do_instruction_depth_;
+    delete [] do_start_;
+    delete [] do_stop_;
+    delete [] do_step_;
+    delete [] do_i_;
   }
 
   const std::string source() const {
@@ -990,7 +1008,8 @@ public:
     }
 
     current_error_ = ForthError::none;
-    instruction_pointer_clear();
+    instruction_current_depth_ = 0;
+    do_current_depth_ = 0;
     instruction_pointer_push(0, 0, 0);
 
     auto begin_time = std::chrono::high_resolution_clock::now();
@@ -2155,7 +2174,17 @@ private:
                  instructions_offsets_[instruction_pointer_which()]
              )) {
         I instruction = instruction_get();
-        instruction_pointer_where() += 1;
+
+        if (do_current_depth_ == 0  ||  do_instruction_depth() != instruction_current_depth_) {
+          // Normal operation: step forward one instruction.
+          instruction_pointer_where() += 1;
+        }
+        else if (do_i() >= do_stop()) {
+          // End a 'do' loop.
+          do_current_depth_--;
+          instruction_pointer_where() += 1;
+          continue;
+        }
 
         if (instruction < 0) {
           bool byteswap;
@@ -3011,8 +3040,32 @@ private:
     return current_skip_[instruction_current_depth_ - 1];
   }
 
-  inline void instruction_pointer_clear() noexcept {
-    instruction_current_depth_ = 0;
+  inline int64_t& do_instruction_depth() noexcept {
+    return do_instruction_depth_[do_current_depth_ - 1];
+  }
+
+  inline int64_t& do_start() noexcept {
+    return do_start_[do_current_depth_ - 1];
+  }
+
+  inline int64_t& do_stop() noexcept {
+    return do_stop_[do_current_depth_ - 1];
+  }
+
+  inline int64_t& do_step() noexcept {
+    return do_step_[do_current_depth_ - 1];
+  }
+
+  inline int64_t& do_i() noexcept {
+    return do_i_[do_current_depth_ - 1];
+  }
+
+  inline int64_t& do_j() noexcept {
+    return do_i_[do_current_depth_ - 2];
+  }
+
+  inline int64_t& do_k() noexcept {
+    return do_i_[do_current_depth_ - 3];
   }
 
   std::string source_;
@@ -3041,6 +3094,13 @@ private:
   int64_t* current_skip_;
   int64_t instruction_current_depth_;
   int64_t instruction_max_depth_;
+
+  int64_t* do_instruction_depth_;
+  int64_t* do_start_;
+  int64_t* do_stop_;
+  int64_t* do_step_;
+  int64_t* do_i_;
+  int64_t do_current_depth_;
 
   ForthError current_error_;
 
