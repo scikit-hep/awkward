@@ -50,6 +50,7 @@ enum class dtype {
 enum class ForthError {
   none,
   stack_underflow,
+  stack_overflow,
   read_beyond,
   seek_beyond,
   skip_beyond,
@@ -672,117 +673,6 @@ ForthOutputBufferOf<double>::write_float64(int64_t num_items, double* values, bo
 }
 
 
-template <typename T>
-class ForthStack {
-public:
-  ForthStack(int64_t initial=1024, double resize=1.5)
-    : buffer_(new T[initial])
-    , length_(0)
-    , reserved_(initial)
-    , resize_(resize) { }
-
-  ~ForthStack() {
-    delete [] buffer_;
-  }
-
-  int64_t length() const noexcept {
-    return length_;
-  }
-
-  inline void push(T value) noexcept {
-    if (length_ == reserved_) {
-      int64_t reservation = (int64_t)std::ceil(reserved_ * resize_);
-      T* new_buffer = new T[reservation];
-      std::memcpy(new_buffer, buffer_, sizeof(T) * reserved_);
-      delete [] buffer_;
-      buffer_ = new_buffer;
-      reserved_ = reservation;
-    }
-    buffer_[length_] = value;
-    length_++;
-  }
-
-  inline void drop(ForthError &err) noexcept {
-    if (length_ == 0) {
-      err = ForthError::stack_underflow;
-    }
-    else {
-      length_--;
-    }
-  }
-
-  inline T pop(ForthError &err) noexcept {
-    if (length_ == 0) {
-      err = ForthError::stack_underflow;
-      return 0;
-    }
-    else {
-      length_--;
-      return buffer_[length_];
-    }
-  }
-
-  inline T* pop2(ForthError &err) noexcept {
-    if (length_ < 2) {
-      err = ForthError::stack_underflow;
-      return 0;
-    }
-    else {
-      length_ -= 2;
-      return &buffer_[length_];
-    }
-  }
-
-  inline T* peek() const noexcept {
-    if (length_ == 0) {
-      return nullptr;
-    }
-    else {
-      return &buffer_[length_ - 1];
-    }
-  }
-
-  void clear() noexcept {
-    length_ = 0;
-  }
-
-  const std::string tostring() const {
-    std::stringstream out;
-    int64_t i = length_ - 20;
-    if (i <= 0) {
-      i = 0;
-    }
-    else {
-      out << "... ";
-    }
-    for (;  i < length_;  i++) {
-      out << buffer_[i] << " ";
-    }
-    if (length_ == 0) {
-      out << "(empty)";
-    }
-    else {
-      out << "<- top";
-    }
-    return out.str();
-  }
-
-  const std::vector<T> values() const {
-    std::vector<T> out;
-    for (int64_t i = 0;  i < length_;  i++) {
-      out.push_back(buffer_[i]);
-    }
-    return out;
-  }
-
-private:
-  T* buffer_;
-  int64_t length_;
-  int64_t reserved_;
-  double resize_;
-};
-
-
 class ForthInstructionPointer {
 public:
   ForthInstructionPointer(int64_t reservation=1024)
@@ -985,20 +875,25 @@ template <typename T, typename I, bool DEBUG>
 class ForthMachine {
 public:
   ForthMachine(const std::string& source,
-               int64_t initial_buffer=1024,
-               double resize_buffer=1.5,
-               int64_t initial_stack=1024,
-               double resize_stack=1.5,
-               int64_t recursion_depth=1024)
+               int64_t stack_size=1024,
+               int64_t recursion_depth=1024,
+               int64_t output_initial_size=1024,
+               double output_resize=1.5)
     : source_(source)
-    , initial_buffer_(initial_buffer)
-    , resize_buffer_(resize_buffer)
-    , stack_(initial_stack, resize_stack)
+    , output_initial_size_(output_initial_size)
+    , output_resize_(output_resize)
+    , stack_buffer_(new T[stack_size])
+    , stack_top_(0)
+    , stack_size_(stack_size)
     , current_inputs_()
     , current_outputs_()
     , current_instruction_pointer_(recursion_depth)
     , current_error_(ForthError::none) {
     compile(source);
+  }
+
+  ~ForthMachine() {
+    delete [] stack_buffer_;
   }
 
   const std::string source() const {
@@ -1068,58 +963,58 @@ public:
       switch (output_dtypes_[i]) {
         case dtype::boolean: {
           out = std::make_shared<ForthOutputBufferOf<bool>>(
-                    initial_buffer_, resize_buffer_);
+                    output_initial_size_, output_resize_);
           break;
         }
         case dtype::int8: {
           out = std::make_shared<ForthOutputBufferOf<int8_t>>(
-                    initial_buffer_, resize_buffer_);
+                    output_initial_size_, output_resize_);
           break;
         }
         case dtype::int16: {
           out = std::make_shared<ForthOutputBufferOf<int16_t>>(
-                    initial_buffer_, resize_buffer_);
+                    output_initial_size_, output_resize_);
           break;
         }
         case dtype::int32: {
           out = std::make_shared<ForthOutputBufferOf<int32_t>>(
-                    initial_buffer_, resize_buffer_);
+                    output_initial_size_, output_resize_);
           break;
         }
         case dtype::int64: {
           out = std::make_shared<ForthOutputBufferOf<int64_t>>(
-                    initial_buffer_, resize_buffer_);
+                    output_initial_size_, output_resize_);
           break;
         }
         case dtype::uint8: {
           out = std::make_shared<ForthOutputBufferOf<uint8_t>>(
-                    initial_buffer_, resize_buffer_);
+                    output_initial_size_, output_resize_);
           break;
         }
         case dtype::uint16: {
           out = std::make_shared<ForthOutputBufferOf<uint16_t>>(
-                    initial_buffer_, resize_buffer_);
+                    output_initial_size_, output_resize_);
           break;
         }
         case dtype::uint32: {
           out = std::make_shared<ForthOutputBufferOf<uint32_t>>(
-                    initial_buffer_, resize_buffer_);
+                    output_initial_size_, output_resize_);
           break;
         }
         case dtype::uint64: {
           out = std::make_shared<ForthOutputBufferOf<uint64_t>>(
-                    initial_buffer_, resize_buffer_);
+                    output_initial_size_, output_resize_);
           break;
         }
         // case dtype::float16: { }
         case dtype::float32: {
           out = std::make_shared<ForthOutputBufferOf<float>>(
-                    initial_buffer_, resize_buffer_);
+                    output_initial_size_, output_resize_);
           break;
         }
         case dtype::float64: {
           out = std::make_shared<ForthOutputBufferOf<double>>(
-                    initial_buffer_, resize_buffer_);
+                    output_initial_size_, output_resize_);
           break;
         }
         // case dtype::float128: { }
@@ -1136,7 +1031,7 @@ public:
       current_outputs_.push_back(out);
     }
 
-    stack_.clear();
+    stack_clear();
     for (int64_t i = 0;  i < variables_.size();  i++) {
       variables_[i] = 0;
     }
@@ -1151,6 +1046,10 @@ public:
         case ForthError::stack_underflow: {
           throw std::invalid_argument(
             "in Awkward Forth runtime, stack underflow while filling array");
+        }
+        case ForthError::stack_overflow: {
+          throw std::invalid_argument(
+            "in Awkward Forth runtime, stack overflow while filling array");
         }
         case ForthError::read_beyond: {
           throw std::invalid_argument(
@@ -1202,7 +1101,24 @@ public:
     for (int64_t i = 0;  i < variable_names_.size();  i++) {
       out << "    " << variable_names_[i] << ": " << variables_[i] << std::endl;
     }
-    out << "Stack:" << std::endl << "    " << stack_.tostring() << std::endl;
+    out << "Stack:" << std::endl << "    ";
+    int64_t i = stack_top_ - 20;
+    if (i <= 0) {
+      i = 0;
+    }
+    else {
+      out << "... ";
+    }
+    for (;  i < stack_top_;  i++) {
+      out << stack_buffer_[i] << " ";
+    }
+    if (stack_top_ == 0) {
+      out << "(empty)";
+    }
+    else {
+      out << "<- top";
+    }
+    out << std::endl;
     return out.str();
   }
 
@@ -2260,7 +2176,7 @@ private:
 
           int64_t num_items = 1;
           if (~instruction & PARSER_REPEATED) {
-            num_items = stack_.pop(current_error_);
+            num_items = stack_pop();
             if (current_error_ != ForthError::none) {
               return;
             }
@@ -2477,7 +2393,10 @@ private:
                 }
                 for (int64_t i = 0;  i < num_items;  i++) {
                   bool value = ptr[i];
-                  stack_.push(value);
+                  stack_push(value);
+                  if (current_error_ != ForthError::none) {
+                    return;
+                  }
                 }
                 break;
               }
@@ -2490,7 +2409,10 @@ private:
                 }
                 for (int64_t i = 0;  i < num_items;  i++) {
                   int8_t value = ptr[i];
-                  stack_.push(value);
+                  stack_push(value);
+                  if (current_error_ != ForthError::none) {
+                    return;
+                  }
                 }
                 break;
               }
@@ -2506,7 +2428,10 @@ private:
                   if (byteswap) {
                     byteswap16(1, &value);
                   }
-                  stack_.push(value);
+                  stack_push(value);
+                  if (current_error_ != ForthError::none) {
+                    return;
+                  }
                 }
                 break;
               }
@@ -2522,7 +2447,10 @@ private:
                   if (byteswap) {
                     byteswap32(1, &value);
                   }
-                  stack_.push(value);
+                  stack_push(value);
+                  if (current_error_ != ForthError::none) {
+                    return;
+                  }
                 }
                 break;
               }
@@ -2538,7 +2466,10 @@ private:
                   if (byteswap) {
                     byteswap64(1, &value);
                   }
-                  stack_.push(value);
+                  stack_push(value);
+                  if (current_error_ != ForthError::none) {
+                    return;
+                  }
                 }
                 break;
               }
@@ -2559,7 +2490,10 @@ private:
                       byteswap64(1, &value);
                     }
                   }
-                  stack_.push(value);
+                  stack_push(value);
+                  if (current_error_ != ForthError::none) {
+                    return;
+                  }
                 }
                 break;
               }
@@ -2572,7 +2506,10 @@ private:
                 }
                 for (int64_t i = 0;  i < num_items;  i++) {
                   uint8_t value = ptr[i];
-                  stack_.push(value);
+                  stack_push(value);
+                  if (current_error_ != ForthError::none) {
+                    return;
+                  }
                 }
                 break;
               }
@@ -2588,7 +2525,10 @@ private:
                   if (byteswap) {
                     byteswap16(1, &value);
                   }
-                  stack_.push(value);
+                  stack_push(value);
+                  if (current_error_ != ForthError::none) {
+                    return;
+                  }
                 }
                 break;
               }
@@ -2604,7 +2544,11 @@ private:
                   if (byteswap) {
                     byteswap32(1, &value);
                   }
-                  stack_.push(value);
+                  stack_push(value);
+                  if (current_error_ != ForthError::none) {
+                    return;
+                  }
+
                 }
                 break;
               }
@@ -2620,7 +2564,10 @@ private:
                   if (byteswap) {
                     byteswap64(1, &value);
                   }
-                  stack_.push(value);
+                  stack_push(value);
+                  if (current_error_ != ForthError::none) {
+                    return;
+                  }
                 }
                 break;
               }
@@ -2641,7 +2588,10 @@ private:
                       byteswap64(1, &value);
                     }
                   }
-                  stack_.push(value);
+                  stack_push(value);
+                  if (current_error_ != ForthError::none) {
+                    return;
+                  }
                 }
                 break;
               }
@@ -2657,7 +2607,10 @@ private:
                   if (byteswap) {
                     byteswap32(1, &value);
                   }
-                  stack_.push(value);
+                  stack_push(value);
+                  if (current_error_ != ForthError::none) {
+                    return;
+                  }
                 }
                 break;
               }
@@ -2673,7 +2626,10 @@ private:
                   if (byteswap) {
                     byteswap64(1, &value);
                   }
-                  stack_.push(value);
+                  stack_push(value);
+                  if (current_error_ != ForthError::none) {
+                    return;
+                  }
                 }
                 break;
               }
@@ -2690,14 +2646,17 @@ private:
             case LITERAL: {
               I num = get_instruction();
               current_instruction_pointer_.where() += 1;
-              stack_.push((T)num);
+              stack_push((T)num);
+              if (current_error_ != ForthError::none) {
+                return;
+              }
               break;
             }
 
             case PUT: {
               I num = get_instruction();
               current_instruction_pointer_.where() += 1;
-              T value = stack_.pop(current_error_);
+              T value = stack_pop();
               if (current_error_ != ForthError::none) {
                 return;
               }
@@ -2708,7 +2667,7 @@ private:
             case INC: {
               I num = get_instruction();
               current_instruction_pointer_.where() += 1;
-              T value = stack_.pop(current_error_);
+              T value = stack_pop();
               if (current_error_ != ForthError::none) {
                 return;
               }
@@ -2719,7 +2678,10 @@ private:
             case GET: {
               I num = get_instruction();
               current_instruction_pointer_.where() += 1;
-              stack_.push(variables_[num]);
+              stack_push(variables_[num]);
+              if (current_error_ != ForthError::none) {
+                return;
+              }
               break;
             }
 
@@ -2754,8 +2716,8 @@ private:
             case WRITE: {
               I num = get_instruction();
               current_instruction_pointer_.where() += 1;
-              T* top = stack_.peek();
-              stack_.pop(current_error_);
+              T* top = stack_peek();
+              stack_pop();
               if (current_error_ != ForthError::none) {
                 return;
               }
@@ -2814,7 +2776,7 @@ private:
             }
 
             case DROP: {
-              stack_.drop(current_error_);
+              stack_drop();
               if (current_error_ != ForthError::none) {
                 return;
               }
@@ -2842,11 +2804,14 @@ private:
             }
 
             case ADD: {
-              T* pair = stack_.pop2(current_error_);
+              T* pair = stack_pop2();
               if (current_error_ != ForthError::none) {
                 return;
               }
-              stack_.push(pair[0] + pair[1]);
+              stack_push(pair[0] + pair[1]);
+              if (current_error_ != ForthError::none) {
+                return;
+              }
               break;
             }
 
@@ -2968,12 +2933,60 @@ private:
     } // end of all segments
   }
 
+  inline void stack_push(T value) noexcept {
+    if (stack_top_ == stack_size_) {
+      current_error_ = ForthError::stack_overflow;
+    }
+    else {
+      stack_buffer_[stack_top_] = value;
+      stack_top_++;
+    }
+  }
+
+  inline T stack_pop() noexcept {
+    if (stack_top_ == 0) {
+      current_error_ = ForthError::stack_underflow;
+    }
+    else {
+      stack_top_--;
+    }
+    return stack_buffer_[stack_top_];
+  }
+
+  inline T* stack_pop2() noexcept {
+    if (stack_top_ < 2) {
+      current_error_ = ForthError::stack_underflow;
+    }
+    else {
+      stack_top_ -= 2;
+    }
+    return &stack_buffer_[stack_top_];
+  }
+
+  inline void stack_drop() noexcept {
+    if (stack_top_ == 0) {
+      current_error_ = ForthError::stack_underflow;
+    }
+    else {
+      stack_top_--;
+    }
+  }
+
+  inline T* stack_peek() const noexcept {
+    return &stack_buffer_[stack_top_ - 1];
+  }
+
+  inline void stack_clear() noexcept {
+    stack_top_ = 0;
+  }
+
   std::string source_;
+  int64_t output_initial_size_;
+  double output_resize_;
 
-  int64_t initial_buffer_;
-  double resize_buffer_;
-
-  ForthStack<T> stack_;
+  T* stack_buffer_;
+  int64_t stack_top_;
+  int64_t stack_size_;
 
   std::vector<std::string> variable_names_;
   std::vector<T> variables_;
@@ -3009,6 +3022,15 @@ int main() {
       "output testout int32 \n"
       "begin \n"
       "  testin i-> stack \n"
+      "  10 + \n"
+      "  10 + \n"
+      "  10 + \n"
+      "  10 + \n"
+      "  10 + \n"
+      "  10 + \n"
+      "  10 + \n"
+      "  10 + \n"
+      "  10 + \n"
       "  10 + \n"
       "  testout <- stack \n"
       "again \n"
