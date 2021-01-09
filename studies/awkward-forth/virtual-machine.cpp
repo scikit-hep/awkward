@@ -1129,7 +1129,7 @@ public:
         // case dtype::datetime64: { }
         // case dtype::timedelta64: { }
         default: {
-          throw std::runtime_error("unimplemented ForthOutputBuffer type");
+          throw std::runtime_error("unhandled ForthOutputBuffer type");
         }
       }
       outputs[name] = out;
@@ -1176,7 +1176,28 @@ public:
 
   const std::string tostring() {
     std::stringstream out;
-    out << "Source: " << source_ << std::endl;
+    bool multiline = false;
+    for (int64_t i = 0;  i < source_.length();  i++) {
+      if (source_[i] == '\n') {
+        multiline = true;
+        break;
+      }
+    }
+    if (multiline) {
+      out << "Source:" << std::endl << "    ";
+      for (int64_t i = 0;  i < source_.length();  i++) {
+        if (source_[i] == '\n') {
+          out << "\n    ";
+        }
+        else {
+          out << source_[i];
+        }
+      }
+      out << std::endl;
+    }
+    else {
+      out << "Source: " << source_ << std::endl;
+    }
     out << "Variables:" << std::endl;
     for (int64_t i = 0;  i < variable_names_.size();  i++) {
       out << "    " << variable_names_[i] << ": " << variables_[i] << std::endl;
@@ -1329,17 +1350,17 @@ private:
       instructions_offsets_.push_back(instructions_.size());
     }
 
-    std::cout << "Instructions offsets:";
-    for (auto x : instructions_offsets_) {
-      std::cout << " " << x;
-    }
-    std::cout << std::endl;
+    // std::cout << "Instructions offsets:";
+    // for (auto x : instructions_offsets_) {
+    //   std::cout << " " << x;
+    // }
+    // std::cout << std::endl;
 
-    std::cout << "Instructions:";
-    for (auto x : instructions_) {
-      std::cout << " " << x;
-    }
-    std::cout << std::endl;
+    // std::cout << "Instructions:";
+    // for (auto x : instructions_) {
+    //   std::cout << " " << x;
+    // }
+    // std::cout << std::endl;
   }
 
   const std::string err_linecol(const std::vector<std::pair<int64_t, int64_t>>& linecol,
@@ -1407,6 +1428,7 @@ private:
             nesting--;
           }
         }
+
         pos + substop + 1;
       }
 
@@ -1416,6 +1438,7 @@ private:
         while (substop < stop  &&  tokenized[substop] != "\n") {
           substop++;
         }
+
         pos = substop + 1;
       }
 
@@ -1507,6 +1530,7 @@ private:
           );
         }
         instructions.push_back(dictionary_names[defn]);
+
         pos++;
       }
 
@@ -1540,6 +1564,7 @@ private:
 
         variable_names_.push_back(name);
         variables_.push_back(0);
+
         pos += 2;
       }
 
@@ -1572,6 +1597,7 @@ private:
         }
 
         input_names_.push_back(name);
+
         pos += 2;
       }
 
@@ -1613,23 +1639,294 @@ private:
 
         output_names_.push_back(name);
         output_dtypes_.push_back(it->second);
+
         pos += 3;
       }
 
       else if (word == "if") {
-        throw std::runtime_error("not implemented: if");
+        int64_t substart = pos + 1;
+        int64_t subelse = -1;
+        int64_t substop = pos;
+        int64_t nesting = 1;
+        while (nesting > 0) {
+          substop++;
+          if (substop >= stop) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, stop,
+                          "'if' is missing its closing 'then'")
+            );
+          }
+          else if (tokenized[substop] == "if") {
+            nesting++;
+          }
+          else if (tokenized[substop] == "then") {
+            nesting--;
+          }
+          else if (tokenized[substop] == "else" and nesting == 1) {
+            subelse = substop;
+          }
+
+          if (subelse == -1) {
+            // Add the consequent to the dictionary so that it can be used
+            // without special instruction pointer manipulation at runtime.
+            I instruction = dictionary.size() + DICTIONARY;
+            std::vector<I> consequent;
+            dictionary.push_back(consequent);
+            parse(defn,
+                  tokenized,
+                  linecol,
+                  substart,
+                  substop,
+                  consequent,
+                  dictionary_names,
+                  dictionary,
+                  exitdepth + 1,
+                  dodepth);
+            dictionary[instruction - DICTIONARY] = consequent;
+
+            instructions.push_back(IF);
+            instructions.push_back(instruction);
+
+            pos = substop + 1;
+          }
+          else {
+            // Same as above, except that two new definitions must be made.
+            I instruction1 = dictionary.size() + DICTIONARY;
+            std::vector<I> consequent;
+            dictionary.push_back(consequent);
+            parse(defn,
+                  tokenized,
+                  linecol,
+                  substart,
+                  substop,
+                  consequent,
+                  dictionary_names,
+                  dictionary,
+                  exitdepth + 1,
+                  dodepth);
+            dictionary[instruction1 - DICTIONARY] = consequent;
+
+            I instruction2 = dictionary.size() + DICTIONARY;
+            std::vector<I> alternate;
+            dictionary.push_back(alternate);
+            parse(defn,
+                  tokenized,
+                  linecol,
+                  substart,
+                  substop,
+                  alternate,
+                  dictionary_names,
+                  dictionary,
+                  exitdepth + 1,
+                  dodepth);
+            dictionary[instruction2 - DICTIONARY] = alternate;
+
+            instructions.push_back(IF_ELSE);
+            instructions.push_back(instruction1);
+            instructions.push_back(instruction2);
+
+            pos = substop + 1;
+          }
+        }
       }
 
       else if (word == "do") {
-        throw std::runtime_error("not implemented: do");
+        int64_t substart = pos + 1;
+        int64_t substop = pos;
+        bool is_step = false;
+        int64_t nesting = 1;
+        while (nesting > 0) {
+          substop++;
+          if (substop >= stop) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, stop,
+                          "'do' is missing its closing 'loop'")
+            );
+          }
+          else if (tokenized[substop] == "do") {
+            nesting++;
+          }
+          else if (tokenized[substop] == "loop") {
+            nesting--;
+          }
+          else if (tokenized[substop] == "+loop") {
+            if (nesting == 1) {
+              is_step = true;
+            }
+            nesting--;
+          }
+        }
+
+        // Add the loop body to the dictionary so that it can be used
+        // without special instruction pointer manipulation at runtime.
+        I instruction = dictionary.size() + DICTIONARY;
+        std::vector<I> body;
+        dictionary.push_back(body);
+        parse(defn,
+              tokenized,
+              linecol,
+              substart,
+              substop,
+              body,
+              dictionary_names,
+              dictionary,
+              exitdepth + 1,
+              dodepth + 1);
+        dictionary[instruction - DICTIONARY] = body;
+
+        if (is_step) {
+          instructions.push_back(DO_STEP);
+          instructions.push_back(instruction);
+        }
+        else {
+          instructions.push_back(DO);
+          instructions.push_back(instruction);
+        }
+
+        pos = substop + 1;
       }
 
       else if (word == "begin") {
-        throw std::runtime_error("not implemented: begin");
+        int64_t substart = pos + 1;
+        int64_t substop = pos;
+        bool is_again = false;
+        int64_t subwhile = -1;
+        int64_t nesting = 1;
+        while (nesting > 0) {
+          substop++;
+          if (substop >= stop) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, stop,
+                          "'begin' is missing its closing 'until' or 'while ... repeat'")
+            );
+          }
+          else if (tokenized[substop] == "begin") {
+            nesting++;
+          }
+          else if (tokenized[substop] == "until") {
+            nesting--;
+          }
+          else if (tokenized[substop] == "again") {
+            if (nesting == 1) {
+              is_again = true;
+            }
+            nesting--;
+          }
+          else if (tokenized[substop] == "while") {
+            if (nesting == 1) {
+              subwhile = substop;
+            }
+            nesting--;
+            int64_t subnesting = 1;
+            while (subnesting > 0) {
+              substop++;
+              if (substop >= stop) {
+                throw std::invalid_argument(
+                  err_linecol(linecol, pos, stop,
+                              "'while' is missing its closing 'repeat'")
+                );
+              }
+              else if (tokenized[substop] == "while") {
+                subnesting++;
+              }
+              else if (tokenized[substop] == "repeat") {
+                subnesting--;
+              }
+            }
+          }
+        }
+
+        if (is_again) {
+          // Add the 'begin ... again' body to the dictionary so that it can be
+          // used without special instruction pointer manipulation at runtime.
+          I instruction = dictionary.size() + DICTIONARY;
+          std::vector<I> body;
+          dictionary.push_back(body);
+          parse(defn,
+                tokenized,
+                linecol,
+                substart,
+                substop,
+                body,
+                dictionary_names,
+                dictionary,
+                exitdepth + 1,
+                dodepth);
+          dictionary[instruction - DICTIONARY] = body;
+
+          instructions.push_back(instruction);
+          instructions.push_back(AGAIN);
+
+          pos = substop + 1;
+        }
+        else if (subwhile == -1) {
+          // Same for the 'begin .. until' body.
+          I instruction = dictionary.size() + DICTIONARY;
+          std::vector<I> body;
+          dictionary.push_back(body);
+          parse(defn,
+                tokenized,
+                linecol,
+                substart,
+                substop,
+                body,
+                dictionary_names,
+                dictionary,
+                exitdepth + 1,
+                dodepth);
+          dictionary[instruction - DICTIONARY] = body;
+
+          instructions.push_back(instruction);
+          instructions.push_back(UNTIL);
+
+          pos = substop + 1;
+        }
+        else {
+          // Same for the 'begin .. repeat' statements.
+          I instruction1 = dictionary.size() + DICTIONARY;
+          std::vector<I> precondition;
+          dictionary.push_back(precondition);
+          parse(defn,
+                tokenized,
+                linecol,
+                substart,
+                substop,
+                precondition,
+                dictionary_names,
+                dictionary,
+                exitdepth + 1,
+                dodepth);
+          dictionary[instruction1 - DICTIONARY] = precondition;
+
+          // Same for the 'repeat .. until' statements.
+          I instruction2 = dictionary.size() + DICTIONARY;
+          std::vector<I> postcondition;
+          dictionary.push_back(postcondition);
+          parse(defn,
+                tokenized,
+                linecol,
+                substart,
+                substop,
+                postcondition,
+                dictionary_names,
+                dictionary,
+                exitdepth + 1,
+                dodepth);
+          dictionary[instruction2 - DICTIONARY] = postcondition;
+
+          instructions.push_back(instruction1);
+          instructions.push_back(WHILE);
+          instructions.push_back(instruction2);
+
+          pos = substop + 1;
+        }
       }
 
       else if (word == "exit") {
-        throw std::runtime_error("not implemented: exit");
+        instructions.push_back(EXIT);
+        instructions.push_back(exitdepth);
+
+        pos++;
       }
 
       else if (is_variable(word)) {
@@ -1642,16 +1939,19 @@ private:
         if (pos + 1 < stop  &&  tokenized[pos + 1] == "!") {
           instructions.push_back(PUT);
           instructions.push_back(variable_index);
+
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "+!") {
           instructions.push_back(INC);
           instructions.push_back(variable_index);
+
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "@") {
           instructions.push_back(GET);
           instructions.push_back(variable_index);
+
           pos += 2;
         }
         else {
@@ -1672,26 +1972,31 @@ private:
         if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
           instructions.push_back(LEN_INPUT);
           instructions.push_back(input_index);
+
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "pos") {
           instructions.push_back(POS);
           instructions.push_back(input_index);
+
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "end") {
           instructions.push_back(END);
           instructions.push_back(input_index);
+
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "seek") {
           instructions.push_back(SEEK);
           instructions.push_back(input_index);
+
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "skip") {
           instructions.push_back(SKIP);
           instructions.push_back(input_index);
+
           pos += 2;
         }
         else if (pos + 1 < stop) {
@@ -1806,6 +2111,7 @@ private:
           if (output_index >= 0) {
             instructions.push_back(output_index);
           }
+
           pos += 3;
         }
         else {
@@ -1825,18 +2131,29 @@ private:
           }
         }
         if (pos + 1 < stop  &&  tokenized[pos + 1] == "<-") {
-          instructions.push_back(WRITE);
-          instructions.push_back(output_index);
-          pos += 2;
+          if (pos + 2 < stop  &&  tokenized[pos + 2] == "stack") {
+            instructions.push_back(WRITE);
+            instructions.push_back(output_index);
+
+            pos += 3;
+          }
+          else {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, pos + 3,
+                          "missing 'stack' after '<-'")
+            );
+          }
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
           instructions.push_back(LEN_OUTPUT);
           instructions.push_back(output_index);
+
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "rewind") {
           instructions.push_back(REWIND);
           instructions.push_back(output_index);
+
           pos += 2;
         }
         else {
@@ -1869,6 +2186,7 @@ private:
             );
           }
           instructions.push_back(generic_builtin->second);
+
           pos++;
         }
 
@@ -1876,6 +2194,7 @@ private:
           auto pair = dictionary_names.find(word);
           if (pair != dictionary_names.end()) {
             instructions.push_back(pair->second);
+
             pos++;
           }
 
@@ -1884,6 +2203,7 @@ private:
             if (is_integer(word, num)) {
               instructions.push_back(LITERAL);
               instructions.push_back(num);
+
               pos++;
             }
 
@@ -2684,10 +3004,18 @@ void ForthMachine<int32_t, int32_t, true>::write_from_stack(int64_t num, int32_t
 
 
 int main() {
-  ForthMachine<int32_t, int32_t, true> vm("variable x 10 x ! 5 x +! x @");
+  ForthMachine<int32_t, int32_t, true> vm(
+      "input testin \n"
+      "output testout int32 \n"
+      "begin \n"
+      "  testin i-> stack \n"
+      "  10 + \n"
+      "  testout <- stack \n"
+      "again \n"
+  );
 
-  // const int64_t length = 1000000;
-  const int64_t length = 20;
+  const int64_t length = 1000000;
+  // const int64_t length = 20;
 
   std::shared_ptr<int32_t> test_input_ptr = std::shared_ptr<int32_t>(
       new int32_t[length], array_deleter<int32_t>());
@@ -2701,33 +3029,33 @@ int main() {
                                                         0,
                                                         sizeof(int32_t) * length);
 
-  // for (int64_t repeat = 0;  repeat < 4;  repeat++) {
-  //   std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
-  //   std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
-  //       std::make_shared<ForthOutputBufferOf<int64_t>>() });
+  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
+    std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
+    std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
+        std::make_shared<ForthOutputBufferOf<int64_t>>() });
 
-  //   auto cpp_begin = std::chrono::high_resolution_clock::now();
-  //   for (int64_t i = 0;  i < length;  i += 1) {
-  //     int32_t* ptr = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
-  //     outs[0].get()->write_one_int32((*ptr) + 10, false);
-  //   }
-  //   auto cpp_end = std::chrono::high_resolution_clock::now();
+    auto cpp_begin = std::chrono::high_resolution_clock::now();
+    for (int64_t i = 0;  i < length;  i += 1) {
+      int32_t* ptr = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
+      outs[0].get()->write_one_int32((*ptr) + 10, false);
+    }
+    auto cpp_end = std::chrono::high_resolution_clock::now();
 
-  //   std::cout << "                       C++ time: "
-  //             << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
-  //             << " us" << std::endl;
+    std::cout << "                       C++ time: "
+              << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
+              << " us" << std::endl;
 
-  //   inputs["testin"].get()->seek(0, err);
-  // }
+    inputs["testin"].get()->seek(0, err);
+  }
 
-  for (int64_t repeat = 0;  repeat < 1;  repeat++) {
+  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
     std::set<ForthError> ignore({ ForthError::read_beyond });
 
     auto forth_begin = std::chrono::high_resolution_clock::now();
     std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
     auto forth_end = std::chrono::high_resolution_clock::now();
 
-    std::cout << vm.tostring(outputs);
+    // std::cout << vm.tostring(outputs);
     std::cout << "Forth time: "
               << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
               << " us" << std::endl;
