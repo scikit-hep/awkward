@@ -49,6 +49,7 @@ enum class dtype {
 
 enum class ForthError {
   none,
+  recursion_depth_exceeded,
   stack_underflow,
   stack_overflow,
   read_beyond,
@@ -673,65 +674,6 @@ ForthOutputBufferOf<double>::write_float64(int64_t num_items, double* values, bo
 }
 
 
-class ForthInstructionPointer {
-public:
-  ForthInstructionPointer(int64_t reservation=1024)
-    : which_(new int64_t[reservation])
-    , where_(new int64_t[reservation])
-    , skip_(new int64_t[reservation])
-    , length_(0)
-    , reserved_(reservation) { }
-
-  ~ForthInstructionPointer() {
-    delete [] which_;
-    delete [] where_;
-    delete [] skip_;
-  }
-
-  inline bool empty() const noexcept {
-    return length_ == 0;
-  }
-
-  inline bool push(int64_t which, int64_t where, int64_t skip) noexcept {
-    if (length_ == reserved_) {
-      return false;
-    }
-    which_[length_] = which;
-    where_[length_] = where;
-    skip_[length_] = skip;
-    length_++;
-    return true;
-  }
-
-  inline void pop() noexcept {
-    length_--;
-  }
-
-  inline int64_t& which() noexcept {
-    return which_[length_ - 1];
-  }
-
-  inline int64_t& where() noexcept {
-    return where_[length_ - 1];
-  }
-
-  inline int64_t& skip() noexcept {
-    return skip_[length_ - 1];
-  }
-
-  void clear() noexcept {
-    length_ = 0;
-  }
-
-private:
-  int64_t* which_;
-  int64_t* where_;
-  int64_t* skip_;
-  int64_t length_;
-  int64_t reserved_;
-};
-
-
 // Instruction values are preprocessor macros for type-ambiguity.
 
 // parser flags (parsers are combined bitwise and then bit-inverted to be negative)
@@ -887,13 +829,20 @@ public:
     , stack_size_(stack_size)
     , current_inputs_()
     , current_outputs_()
-    , current_instruction_pointer_(recursion_depth)
+    , current_which_(new int64_t[recursion_depth])
+    , current_where_(new int64_t[recursion_depth])
+    , current_skip_(new int64_t[recursion_depth])
+    , instruction_current_depth_(0)
+    , instruction_max_depth_(recursion_depth)
     , current_error_(ForthError::none) {
     compile(source);
   }
 
   ~ForthMachine() {
     delete [] stack_buffer_;
+    delete [] current_which_;
+    delete [] current_where_;
+    delete [] current_skip_;
   }
 
   const std::string source() const {
@@ -1037,12 +986,16 @@ public:
     }
 
     current_error_ = ForthError::none;
-    current_instruction_pointer_.clear();
-    current_instruction_pointer_.push(0, 0, 0);
+    instruction_pointer_clear();
+    instruction_pointer_push(0, 0, 0);
     internal_run(false);
 
     if (ignore.count(current_error_) == 0) {
       switch (current_error_) {
+        case ForthError::recursion_depth_exceeded: {
+          throw std::invalid_argument(
+            "in Awkward Forth runtime, max recusion depth exceeded while filling array");
+        }
         case ForthError::stack_underflow: {
           throw std::invalid_argument(
             "in Awkward Forth runtime, stack underflow while filling array");
@@ -2135,32 +2088,27 @@ private:
     }
   }
 
-  inline I get_instruction() noexcept {
-    int64_t start = instructions_offsets_[current_instruction_pointer_.which()];
-    return instructions_[start + current_instruction_pointer_.where()];
-  }
-
   inline void write_from_stack(int64_t num, T* top) noexcept;
 
   inline bool is_done() noexcept {
-    return current_instruction_pointer_.empty();
+    return instruction_current_depth_ == 0;
   }
 
   inline bool is_segment_done() noexcept {
-    return !(current_instruction_pointer_.where() < (
-                 instructions_offsets_[current_instruction_pointer_.which() + 1] -
-                 instructions_offsets_[current_instruction_pointer_.which()]
+    return !(instruction_pointer_where() < (
+                 instructions_offsets_[instruction_pointer_which() + 1] -
+                 instructions_offsets_[instruction_pointer_which()]
              ));
   }
 
   void internal_run(bool only_one_step) noexcept {
-    while (!current_instruction_pointer_.empty()) {
-      while (current_instruction_pointer_.where() < (
-                 instructions_offsets_[current_instruction_pointer_.which() + 1] -
-                 instructions_offsets_[current_instruction_pointer_.which()]
+    while (instruction_current_depth_ != 0) {
+      while (instruction_pointer_where() < (
+                 instructions_offsets_[instruction_pointer_which() + 1] -
+                 instructions_offsets_[instruction_pointer_which()]
              )) {
-        I instruction = get_instruction();
-        current_instruction_pointer_.where() += 1;
+        I instruction = instruction_get();
+        instruction_pointer_where() += 1;
 
         if (instruction < 0) {
           bool byteswap;
@@ -2171,8 +2119,8 @@ private:
             byteswap = ((~instruction & PARSER_BIGENDIAN) != 0);
           }
 
-          I in_num = get_instruction();
-          current_instruction_pointer_.where() += 1;
+          I in_num = instruction_get();
+          instruction_pointer_where() += 1;
 
           int64_t num_items = 1;
           if (~instruction & PARSER_REPEATED) {
@@ -2183,8 +2131,8 @@ private:
           }
 
           if (~instruction & PARSER_DIRECT) {
-            I out_num = get_instruction();
-            current_instruction_pointer_.where() += 1;
+            I out_num = instruction_get();
+            instruction_pointer_where() += 1;
 
             switch (~instruction & PARSER_MASK) {
               case PARSER_BOOL: {
@@ -2638,14 +2586,17 @@ private:
         }
 
         else if (instruction >= DICTIONARY) {
-          current_instruction_pointer_.push((instruction - DICTIONARY) + 1, 0, 0);
+          instruction_pointer_push((instruction - DICTIONARY) + 1, 0, 0);
+          if (current_error_ != ForthError::none) {
+            return;
+          }
         }
 
         else {
           switch (instruction) {
             case LITERAL: {
-              I num = get_instruction();
-              current_instruction_pointer_.where() += 1;
+              I num = instruction_get();
+              instruction_pointer_where() += 1;
               stack_push((T)num);
               if (current_error_ != ForthError::none) {
                 return;
@@ -2654,8 +2605,8 @@ private:
             }
 
             case PUT: {
-              I num = get_instruction();
-              current_instruction_pointer_.where() += 1;
+              I num = instruction_get();
+              instruction_pointer_where() += 1;
               T value = stack_pop();
               if (current_error_ != ForthError::none) {
                 return;
@@ -2665,8 +2616,8 @@ private:
             }
 
             case INC: {
-              I num = get_instruction();
-              current_instruction_pointer_.where() += 1;
+              I num = instruction_get();
+              instruction_pointer_where() += 1;
               T value = stack_pop();
               if (current_error_ != ForthError::none) {
                 return;
@@ -2676,8 +2627,8 @@ private:
             }
 
             case GET: {
-              I num = get_instruction();
-              current_instruction_pointer_.where() += 1;
+              I num = instruction_get();
+              instruction_pointer_where() += 1;
               stack_push(variables_[num]);
               if (current_error_ != ForthError::none) {
                 return;
@@ -2714,8 +2665,8 @@ private:
             }
 
             case WRITE: {
-              I num = get_instruction();
-              current_instruction_pointer_.where() += 1;
+              I num = instruction_get();
+              instruction_pointer_where() += 1;
               T* top = stack_peek();
               stack_pop();
               if (current_error_ != ForthError::none) {
@@ -2743,7 +2694,7 @@ private:
 
             case AGAIN: {
               // Go back and do the body again.
-              current_instruction_pointer_.where() -= 2;
+              instruction_pointer_where() -= 2;
               break;
             }
 
@@ -2922,14 +2873,14 @@ private:
         } // end handle one instruction
         if (only_one_step) {
           if (is_segment_done()) {
-            current_instruction_pointer_.pop();
+            instruction_pointer_pop();
           }
           return;
         }
 
       } // end walk over instructions in this segment
 
-      current_instruction_pointer_.pop();
+      instruction_pointer_pop();
     } // end of all segments
   }
 
@@ -2980,6 +2931,43 @@ private:
     stack_top_ = 0;
   }
 
+  inline I instruction_get() noexcept {
+    int64_t start = instructions_offsets_[instruction_pointer_which()];
+    return instructions_[start + instruction_pointer_where()];
+  }
+
+  inline void instruction_pointer_push(int64_t which, int64_t where, int64_t skip) noexcept {
+    if (instruction_current_depth_ == instruction_max_depth_) {
+      current_error_ = ForthError::recursion_depth_exceeded;
+    }
+    else {
+      current_which_[instruction_current_depth_] = which;
+      current_where_[instruction_current_depth_] = where;
+      current_skip_[instruction_current_depth_] = skip;
+      instruction_current_depth_++;
+    }
+  }
+
+  inline void instruction_pointer_pop() noexcept {
+    instruction_current_depth_--;
+  }
+
+  inline int64_t& instruction_pointer_which() noexcept {
+    return current_which_[instruction_current_depth_ - 1];
+  }
+
+  inline int64_t& instruction_pointer_where() noexcept {
+    return current_where_[instruction_current_depth_ - 1];
+  }
+
+  inline int64_t& instruction_pointer_skip() noexcept {
+    return current_skip_[instruction_current_depth_ - 1];
+  }
+
+  inline void instruction_pointer_clear() noexcept {
+    instruction_current_depth_ = 0;
+  }
+
   std::string source_;
   int64_t output_initial_size_;
   double output_resize_;
@@ -3000,7 +2988,13 @@ private:
 
   std::vector<std::shared_ptr<ForthInputBuffer>> current_inputs_;
   std::vector<std::shared_ptr<ForthOutputBuffer>> current_outputs_;
-  ForthInstructionPointer current_instruction_pointer_;
+
+  int64_t* current_which_;
+  int64_t* current_where_;
+  int64_t* current_skip_;
+  int64_t instruction_current_depth_;
+  int64_t instruction_max_depth_;
+
   ForthError current_error_;
 };
 
