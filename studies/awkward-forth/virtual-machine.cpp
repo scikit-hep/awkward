@@ -834,7 +834,11 @@ public:
     , current_skip_(new int64_t[recursion_depth])
     , instruction_current_depth_(0)
     , instruction_max_depth_(recursion_depth)
-    , current_error_(ForthError::none) {
+    , current_error_(ForthError::none)
+    , count_instructions_(0)
+    , count_reads_(0)
+    , count_writes_(0)
+    , count_nanoseconds_(0) {
     compile(source);
   }
 
@@ -988,7 +992,14 @@ public:
     current_error_ = ForthError::none;
     instruction_pointer_clear();
     instruction_pointer_push(0, 0, 0);
+
+    auto begin_time = std::chrono::high_resolution_clock::now();
     internal_run(false);
+    auto end_time = std::chrono::high_resolution_clock::now();
+
+    count_nanoseconds_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
+        end_time - begin_time
+    ).count();
 
     if (ignore.count(current_error_) == 0) {
       switch (current_error_) {
@@ -1026,7 +1037,10 @@ public:
     return outputs;
   }
 
-  const std::string tostring() {
+  const std::string tostring(
+        const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>& outputs =
+            std::map<std::string, std::shared_ptr<ForthOutputBuffer>>()
+  ) {
     std::stringstream out;
     bool multiline = false;
     for (int64_t i = 0;  i < source_.length();  i++) {
@@ -1038,7 +1052,18 @@ public:
     if (multiline) {
       out << "Source:" << std::endl << "    ";
       for (int64_t i = 0;  i < source_.length();  i++) {
-        if (source_[i] == '\n') {
+        bool rest_is_whitespace = true;
+        for (int64_t j = i;  j < source_.length();  j++) {
+          if (source_[j] != ' '  &&  source_[j] != '\r'  &&  source_[j] != '\t'  &&
+              source_[j] != '\v'  &&  source_[j] != '\f'  &&  source_[j] != '\n') {
+            rest_is_whitespace = false;
+            break;
+          }
+        }
+        if (rest_is_whitespace) {
+          break;
+        }
+        else if (source_[i] == '\n') {
           out << "\n    ";
         }
         else {
@@ -1072,18 +1097,40 @@ public:
       out << "<- top";
     }
     out << std::endl;
+    if (!outputs.empty()) {
+      out << "Outputs:" << std::endl;
+      for (auto pair : outputs) {
+        out << "    " << pair.first << ": " << pair.second.get()->tostring() << std::endl;
+      }
+    }
+    out << "Time (ns): " << count_nanoseconds_
+        << " Instructions: " << count_instructions_
+        << " Reads: " << count_reads_
+        << " Writes: " << count_writes_ << std::endl;
     return out.str();
   }
 
-  const std::string tostring(
-        const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>& outputs) {
-    std::stringstream out;
-    out << tostring();
-    out << "Outputs:" << std::endl;
-    for (auto pair : outputs) {
-      out << "    " << pair.first << ": " << pair.second.get()->tostring() << std::endl;
-    }
-    return out.str();
+  void count_reset() {
+    count_instructions_ = 0;
+    count_reads_ = 0;
+    count_writes_ = 0;
+    count_nanoseconds_ = 0;
+  }
+
+  int64_t count_instructions() const {
+    return count_instructions_;
+  }
+
+  int64_t count_reads() const {
+    return count_reads_;
+  }
+
+  int64_t count_writes() const {
+    return count_writes_;
+  }
+
+  int64_t count_nanoseconds() const {
+    return count_nanoseconds_;
   }
 
 private:
@@ -2331,6 +2378,8 @@ private:
                 break;
               }
             }
+
+            count_writes_++;
           }
           else {
             switch (~instruction & PARSER_MASK) {
@@ -2596,6 +2645,8 @@ private:
               }
             }
           }
+
+          count_reads_++;
         }
 
         else if (instruction >= DICTIONARY) {
@@ -2691,6 +2742,8 @@ private:
               T* top = stack_peek();
               stack_pop();
               write_from_stack(num, top);
+
+              count_writes_++;
               break;
             }
 
@@ -2895,6 +2948,7 @@ private:
           return;
         }
 
+        count_instructions_++;
       } // end walk over instructions in this segment
 
       instruction_pointer_pop();
@@ -2989,6 +3043,11 @@ private:
   int64_t instruction_max_depth_;
 
   ForthError current_error_;
+
+  int64_t count_instructions_;
+  int64_t count_reads_;
+  int64_t count_writes_;
+  int64_t count_nanoseconds_;
 };
 
 
@@ -3008,7 +3067,9 @@ int main() {
       "input testin \n"
       "output testout int32 \n"
       "begin \n"
-      "  testin i-> testout \n"
+      "  testin i-> stack \n"
+      "  10 + \n"
+      "  testout <- stack \n"
       "again \n"
   );
 
@@ -3049,14 +3110,15 @@ int main() {
   for (int64_t repeat = 0;  repeat < 4;  repeat++) {
     std::set<ForthError> ignore({ ForthError::read_beyond });
 
-    auto forth_begin = std::chrono::high_resolution_clock::now();
     std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
-    auto forth_end = std::chrono::high_resolution_clock::now();
 
     // std::cout << vm.tostring(outputs);
-    std::cout << "Forth time: "
-              << std::chrono::duration_cast<std::chrono::microseconds>(forth_end - forth_begin).count()
-              << " us" << std::endl;
+
+    std::cout << "Time (us): " << vm.count_nanoseconds() / 1000
+              << " Instructions: " << vm.count_instructions()
+              << " Reads: " << vm.count_reads()
+              << " Writes: " << vm.count_writes() << std::endl;
+    vm.count_reset();
 
     inputs["testin"].get()->seek(0, err);
   }
