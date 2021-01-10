@@ -597,7 +597,6 @@ class VirtualMachine:
 
         # The do .. loop stack is a different stack.
         do_depth = []
-        do_start = []
         do_stop = []
         do_step = []
         do_i = []
@@ -616,7 +615,6 @@ class VirtualMachine:
                     if verbose:
                         printout(len(which) - 1, "do: {0} (end)".format(do_i[-1]), False)
                     do_depth.pop()
-                    do_start.pop()
                     do_stop.pop()
                     do_step.pop()
                     do_i.pop()
@@ -789,17 +787,17 @@ class VirtualMachine:
 
                 elif instruction == Builtin.DO.as_integer:
                     do_depth.append(len(which))
-                    do_start.append(self.stack.pop())
+                    do_start = self.stack.pop()
                     do_stop.append(self.stack.pop())
                     do_step.append(False)
-                    do_i.append(do_start[-1])
+                    do_i.append(do_start)
 
                 elif instruction == Builtin.DO_STEP.as_integer:
                     do_depth.append(len(which))
-                    do_start.append(self.stack.pop())
+                    do_start = self.stack.pop()
                     do_stop.append(self.stack.pop())
                     do_step.append(True)
-                    do_i.append(do_start[-1])
+                    do_i.append(do_start)
 
                 elif instruction == Builtin.AGAIN.as_integer:
                     if verbose:
@@ -842,7 +840,6 @@ class VirtualMachine:
                         where.pop()
                     while len(do_depth) != 0 and do_depth[-1] >= len(which):
                         do_depth.pop()
-                        do_start.pop()
                         do_stop.pop()
                         do_step.pop()
                         do_i.pop()

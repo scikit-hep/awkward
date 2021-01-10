@@ -838,9 +838,7 @@ public:
     , instruction_max_depth_(recursion_depth)
 
     , do_instruction_depth_(new int64_t[recursion_depth])
-    , do_start_(new int64_t[recursion_depth])
     , do_stop_(new int64_t[recursion_depth])
-    , do_step_(new int64_t[recursion_depth])
     , do_i_(new int64_t[recursion_depth])
     , do_current_depth_(0)
 
@@ -859,9 +857,7 @@ public:
     delete [] current_which_;
     delete [] current_where_;
     delete [] do_instruction_depth_;
-    delete [] do_start_;
     delete [] do_stop_;
-    delete [] do_step_;
     delete [] do_i_;
   }
 
@@ -2173,7 +2169,7 @@ private:
              )) {
         I instruction = instruction_get();
 
-        if (do_current_depth_ == 0  ||  do_instruction_depth() != instruction_current_depth_) {
+        if (do_current_depth_ == 0  ||  do_abs_instruction_depth() != instruction_current_depth_) {
           // Normal operation: step forward one instruction.
           instruction_pointer_where() += 1;
         }
@@ -2183,6 +2179,7 @@ private:
           instruction_pointer_where() += 1;
           continue;
         }
+        // else... don't increase instruction_pointer_where()
 
         if (instruction < 0) {
           bool byteswap;
@@ -2968,6 +2965,8 @@ private:
             }
           }
         } // end handle one instruction
+
+        count_instructions_++;
         if (only_one_step) {
           if (is_segment_done()) {
             instruction_pointer_pop();
@@ -2975,10 +2974,24 @@ private:
           return;
         }
 
-        count_instructions_++;
       } // end walk over instructions in this segment
 
       instruction_pointer_pop();
+
+      if (do_current_depth_ != 0  &&  do_abs_instruction_depth() == instruction_current_depth_) {
+        // End one step of a 'do ... loop' or a 'do ... +loop'.
+        if (do_loop_is_step()) {
+          if (stack_top_ == 0) {
+            current_error_ = ForthError::stack_underflow;
+            return;
+          }
+          do_i() += stack_pop();
+        }
+        else {
+          do_i()++;
+        }
+      }
+
     } // end of all segments
   }
 
@@ -3037,16 +3050,22 @@ private:
     return do_instruction_depth_[do_current_depth_ - 1];
   }
 
-  inline int64_t& do_start() noexcept {
-    return do_start_[do_current_depth_ - 1];
+  inline int64_t do_abs_instruction_depth() noexcept {
+    int64_t out = do_instruction_depth_[do_current_depth_ - 1];
+    if (out < 0) {
+      return ~out;
+    }
+    else {
+      return out;
+    }
+  }
+
+  inline bool do_loop_is_step() noexcept {
+    return do_instruction_depth_[do_current_depth_ - 1] < 0;
   }
 
   inline int64_t& do_stop() noexcept {
     return do_stop_[do_current_depth_ - 1];
-  }
-
-  inline int64_t& do_step() noexcept {
-    return do_step_[do_current_depth_ - 1];
   }
 
   inline int64_t& do_i() noexcept {
@@ -3088,9 +3107,7 @@ private:
   int64_t instruction_max_depth_;
 
   int64_t* do_instruction_depth_;
-  int64_t* do_start_;
   int64_t* do_stop_;
-  int64_t* do_step_;
   int64_t* do_i_;
   int64_t do_current_depth_;
 
