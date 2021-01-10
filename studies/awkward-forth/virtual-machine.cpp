@@ -2674,10 +2674,11 @@ private:
         }
 
         else if (instruction >= DICTIONARY) {
-          instruction_pointer_push((instruction - DICTIONARY) + 1);
-          if (current_error_ != ForthError::none) {
+          if (instruction_current_depth_ == instruction_max_depth_) {
+            current_error_ = ForthError::recursion_depth_exceeded;
             return;
           }
+          instruction_pointer_push((instruction - DICTIONARY) + 1);
         }
 
         else {
@@ -2780,10 +2781,28 @@ private:
             }
 
             case DO: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2();
+              if (do_current_depth_ == instruction_max_depth_) {
+                current_error_ = ForthError::recursion_depth_exceeded;
+              }
+              do_loop_push(pair[1], pair[0]);
               break;
             }
 
             case DO_STEP: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2();
+              if (do_current_depth_ == instruction_max_depth_) {
+                current_error_ = ForthError::recursion_depth_exceeded;
+              }
+              do_steploop_push(pair[1], pair[0]);
               break;
             }
 
@@ -2806,14 +2825,29 @@ private:
             }
 
             case INDEX_I: {
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
+                return;
+              }
+              stack_push(do_i());
               break;
             }
 
             case INDEX_J: {
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
+                return;
+              }
+              stack_push(do_j());
               break;
             }
 
             case INDEX_K: {
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
+                return;
+              }
+              stack_push(do_k());
               break;
             }
 
@@ -3024,14 +3058,9 @@ private:
   }
 
   inline void instruction_pointer_push(int64_t which) noexcept {
-    if (instruction_current_depth_ == instruction_max_depth_) {
-      current_error_ = ForthError::recursion_depth_exceeded;
-    }
-    else {
-      current_which_[instruction_current_depth_] = which;
-      current_where_[instruction_current_depth_] = 0;
-      instruction_current_depth_++;
-    }
+    current_which_[instruction_current_depth_] = which;
+    current_where_[instruction_current_depth_] = 0;
+    instruction_current_depth_++;
   }
 
   inline void instruction_pointer_pop() noexcept {
@@ -3044,6 +3073,20 @@ private:
 
   inline int64_t& instruction_pointer_where() noexcept {
     return current_where_[instruction_current_depth_ - 1];
+  }
+
+  inline void do_loop_push(int64_t start, int64_t stop) {
+    do_instruction_depth_[do_current_depth_] = instruction_current_depth_;
+    do_stop_[do_current_depth_] = stop;
+    do_i_[do_current_depth_] = start;
+    do_current_depth_++;
+  }
+
+  inline void do_steploop_push(int64_t start, int64_t stop) {
+    do_instruction_depth_[do_current_depth_] = ~instruction_current_depth_;
+    do_stop_[do_current_depth_] = stop;
+    do_i_[do_current_depth_] = start;
+    do_current_depth_++;
   }
 
   inline int64_t& do_instruction_depth() noexcept {
@@ -3135,9 +3178,13 @@ int main() {
   ForthMachine<int32_t, int32_t, true> vm(
       "input testin \n"
       "output testout int32 \n"
+      "variable cumulative \n"
       "begin \n"
       "  testin i-> stack \n"
-      "  10 + \n"
+      "  5 0 do \n"
+      "    cumulative +! \n"
+      "    cumulative @ \n"
+      "  loop \n"
       "  testout <- stack \n"
       "again \n"
   );
