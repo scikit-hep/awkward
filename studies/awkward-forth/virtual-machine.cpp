@@ -2788,6 +2788,7 @@ private:
               T* pair = stack_pop2();
               if (do_current_depth_ == instruction_max_depth_) {
                 current_error_ = ForthError::recursion_depth_exceeded;
+                return;
               }
               do_loop_push(pair[1], pair[0]);
               break;
@@ -2801,6 +2802,7 @@ private:
               T* pair = stack_pop2();
               if (do_current_depth_ == instruction_max_depth_) {
                 current_error_ = ForthError::recursion_depth_exceeded;
+                return;
               }
               do_steploop_push(pair[1], pair[0]);
               break;
@@ -3179,7 +3181,11 @@ int main() {
       "input testin \n"
       "output testout int32 \n"
       "begin \n"
-      "  testin i-> testout \n"
+      "  testin i-> stack \n"
+      "  10 0 do \n"
+      "    10 + \n"
+      "  loop \n"
+      "  testout <- stack \n"
       "again \n"
   );
 
