@@ -3178,14 +3178,8 @@ int main() {
   ForthMachine<int32_t, int32_t, true> vm(
       "input testin \n"
       "output testout int32 \n"
-      "variable cumulative \n"
       "begin \n"
-      "  testin i-> stack \n"
-      "  5 0 do \n"
-      "    cumulative +! \n"
-      "    cumulative @ \n"
-      "  loop \n"
-      "  testout <- stack \n"
+      "  testin i-> testout \n"
       "again \n"
   );
 
