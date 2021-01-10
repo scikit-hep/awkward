@@ -834,7 +834,8 @@ public:
 
     , current_which_(new int64_t[recursion_depth])
     , current_where_(new int64_t[recursion_depth])
-    , current_skip_(new int64_t[recursion_depth])
+    , current_skip_plus_1_(new bool[recursion_depth])
+    , current_skip_minus_3_(new bool[recursion_depth])
     , instruction_current_depth_(0)
     , instruction_max_depth_(recursion_depth)
 
@@ -859,7 +860,8 @@ public:
     delete [] stack_buffer_;
     delete [] current_which_;
     delete [] current_where_;
-    delete [] current_skip_;
+    delete [] current_skip_plus_1_;
+    delete [] current_skip_minus_3_;
     delete [] do_instruction_depth_;
     delete [] do_start_;
     delete [] do_stop_;
@@ -1010,7 +1012,7 @@ public:
     current_error_ = ForthError::none;
     instruction_current_depth_ = 0;
     do_current_depth_ = 0;
-    instruction_pointer_push(0, 0, 0);
+    instruction_pointer_push(0);
 
     auto begin_time = std::chrono::high_resolution_clock::now();
     internal_run(false);
@@ -2186,6 +2188,18 @@ private:
           continue;
         }
 
+        if (instruction_pointer_skip_plus_1()) {
+          // Skip +1 over the alternate of an 'if ... else ... then' block.
+          instruction_pointer_where()++;
+          instruction_pointer_skip_plus_1() = false;
+        }
+
+        if (instruction_pointer_skip_minus_3()) {
+          // Skip -3 to the beginning of a 'begin ... where ... repeat' block.
+          instruction_pointer_where() -= 3;
+          instruction_pointer_skip_minus_3() = false;
+        }
+
         if (instruction < 0) {
           bool byteswap;
           if (NATIVELY_BIG_ENDIAN) {
@@ -2679,7 +2693,7 @@ private:
         }
 
         else if (instruction >= DICTIONARY) {
-          instruction_pointer_push((instruction - DICTIONARY) + 1, 0, 0);
+          instruction_pointer_push((instruction - DICTIONARY) + 1);
           if (current_error_ != ForthError::none) {
             return;
           }
@@ -3012,14 +3026,15 @@ private:
     return instructions_[start + instruction_pointer_where()];
   }
 
-  inline void instruction_pointer_push(int64_t which, int64_t where, int64_t skip) noexcept {
+  inline void instruction_pointer_push(int64_t which) noexcept {
     if (instruction_current_depth_ == instruction_max_depth_) {
       current_error_ = ForthError::recursion_depth_exceeded;
     }
     else {
       current_which_[instruction_current_depth_] = which;
-      current_where_[instruction_current_depth_] = where;
-      current_skip_[instruction_current_depth_] = skip;
+      current_where_[instruction_current_depth_] = 0;
+      current_skip_plus_1_[instruction_current_depth_] = false;
+      current_skip_minus_3_[instruction_current_depth_] = false;
       instruction_current_depth_++;
     }
   }
@@ -3036,8 +3051,12 @@ private:
     return current_where_[instruction_current_depth_ - 1];
   }
 
-  inline int64_t& instruction_pointer_skip() noexcept {
-    return current_skip_[instruction_current_depth_ - 1];
+  inline bool& instruction_pointer_skip_plus_1() noexcept {
+    return current_skip_plus_1_[instruction_current_depth_ - 1];
+  }
+
+  inline bool& instruction_pointer_skip_minus_3() noexcept {
+    return current_skip_minus_3_[instruction_current_depth_ - 1];
   }
 
   inline int64_t& do_instruction_depth() noexcept {
@@ -3091,7 +3110,8 @@ private:
 
   int64_t* current_which_;
   int64_t* current_where_;
-  int64_t* current_skip_;
+  bool* current_skip_plus_1_;
+  bool* current_skip_minus_3_;
   int64_t instruction_current_depth_;
   int64_t instruction_max_depth_;
 
