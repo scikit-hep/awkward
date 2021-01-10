@@ -769,7 +769,7 @@ const std::set<std::string> reserved_words_({
   "if", "then", "else",
   // loops
   "do", "loop", "+loop",
-  "begin", "until", "again", "while", "repeat",
+  "begin", "again", "until", "while", "repeat",
   // nonlocal exits
   "exit",
   // variable access
@@ -2694,84 +2694,6 @@ private:
               break;
             }
 
-            case PUT: {
-              I num = instruction_get();
-              instruction_pointer_where() += 1;
-              if (stack_top_ == 0) {
-                current_error_ = ForthError::stack_underflow;
-                return;
-              }
-              T value = stack_pop();
-              variables_[num] = value;
-              break;
-            }
-
-            case INC: {
-              I num = instruction_get();
-              instruction_pointer_where() += 1;
-              if (stack_top_ == 0) {
-                current_error_ = ForthError::stack_underflow;
-                return;
-              }
-              T value = stack_pop();
-              variables_[num] += value;
-              break;
-            }
-
-            case GET: {
-              I num = instruction_get();
-              instruction_pointer_where() += 1;
-              if (stack_top_ == stack_size_) {
-                current_error_ = ForthError::stack_overflow;
-                return;
-              }
-              stack_push(variables_[num]);
-              break;
-            }
-
-            case SKIP: {
-              break;
-            }
-
-            case SEEK: {
-              break;
-            }
-
-            case END: {
-              break;
-            }
-
-            case POS: {
-              break;
-            }
-
-            case LEN_INPUT: {
-              break;
-            }
-
-            case REWIND: {
-              break;
-            }
-
-            case LEN_OUTPUT: {
-              break;
-            }
-
-            case WRITE: {
-              I num = instruction_get();
-              instruction_pointer_where() += 1;
-              if (stack_top_ == 0) {
-                current_error_ = ForthError::stack_underflow;
-                return;
-              }
-              T* top = stack_peek();
-              stack_pop();
-              write_from_stack(num, top);
-
-              count_writes_++;
-              break;
-            }
-
             case IF: {
               break;
             }
@@ -2823,6 +2745,84 @@ private:
             }
 
             case EXIT: {
+              break;
+            }
+
+            case PUT: {
+              I num = instruction_get();
+              instruction_pointer_where() += 1;
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T value = stack_pop();
+              variables_[num] = value;
+              break;
+            }
+
+            case INC: {
+              I num = instruction_get();
+              instruction_pointer_where() += 1;
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T value = stack_pop();
+              variables_[num] += value;
+              break;
+            }
+
+            case GET: {
+              I num = instruction_get();
+              instruction_pointer_where() += 1;
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
+                return;
+              }
+              stack_push(variables_[num]);
+              break;
+            }
+
+            case LEN_INPUT: {
+              break;
+            }
+
+            case POS: {
+              break;
+            }
+
+            case END: {
+              break;
+            }
+
+            case SEEK: {
+              break;
+            }
+
+            case SKIP: {
+              break;
+            }
+
+            case WRITE: {
+              I num = instruction_get();
+              instruction_pointer_where() += 1;
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              stack_pop();
+              write_from_stack(num, top);
+
+              count_writes_++;
+              break;
+            }
+
+            case LEN_OUTPUT: {
+              break;
+            }
+
+            case REWIND: {
               break;
             }
 
@@ -2916,26 +2916,6 @@ private:
               break;
             }
 
-            case LSHIFT: {
-              break;
-            }
-
-            case RSHIFT: {
-              break;
-            }
-
-            case ABS: {
-              break;
-            }
-
-            case MIN: {
-              break;
-            }
-
-            case MAX: {
-              break;
-            }
-
             case NEGATE: {
               break;
             }
@@ -2948,7 +2928,15 @@ private:
               break;
             }
 
-            case EQ0: {
+            case ABS: {
+              break;
+            }
+
+            case MIN: {
+              break;
+            }
+
+            case MAX: {
               break;
             }
 
@@ -2976,6 +2964,14 @@ private:
               break;
             }
 
+            case EQ0: {
+              break;
+            }
+
+            case INVERT: {
+              break;
+            }
+
             case AND: {
               break;
             }
@@ -2988,7 +2984,11 @@ private:
               break;
             }
 
-            case INVERT: {
+            case LSHIFT: {
+              break;
+            }
+
+            case RSHIFT: {
               break;
             }
 
