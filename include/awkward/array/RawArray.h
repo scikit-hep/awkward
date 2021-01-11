@@ -754,6 +754,15 @@ namespace awkward {
 
     const ContentPtr
       carry(const Index64& carry, bool allow_lazy) const override {
+      if (carry.iscontiguous()) {
+        if (carry.length() == length()) {
+          return shallow_copy();
+        }
+        else {
+          return getitem_range_nowrap(0, carry.length());
+        }
+      }
+
       std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
                                                  carry.length()*sizeof(T));
       struct Error err = kernel::NumpyArray_getitem_next_null_64(

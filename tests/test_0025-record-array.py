@@ -418,7 +418,15 @@ def test_setidentities():
     recordarray2.setidentities()
     assert recordarray2["outer"].identities.fieldloc == [(0, "outer")]
 
-    assert recordarray2["outer", 0, "one"].content.identities.fieldloc == [
+    def get(x):
+        if isinstance(x, ak.layout.NumpyArray):
+            return x
+        elif isinstance(x, ak.layout.IndexedArray):
+            return x.content
+        else:
+            raise AssertionError(x)
+
+    assert get(recordarray2["outer", 0, "one"]).identities.fieldloc == [
         (0, "outer"),
         (1, "one"),
     ]

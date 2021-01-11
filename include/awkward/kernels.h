@@ -396,6 +396,32 @@ extern "C" {
     int64_t length);
 
   EXPORT_SYMBOL ERROR
+  awkward_Index8_iscontiguous(
+    bool* result,
+    const int8_t* fromindex,
+    int64_t length);
+  EXPORT_SYMBOL ERROR
+  awkward_IndexU8_iscontiguous(
+    bool* result,
+    const uint8_t* fromindex,
+    int64_t length);
+  EXPORT_SYMBOL ERROR
+  awkward_Index32_iscontiguous(
+    bool* result,
+    const int32_t* fromindex,
+    int64_t length);
+  EXPORT_SYMBOL ERROR
+  awkward_IndexU32_iscontiguous(
+    bool* result,
+    const uint32_t* fromindex,
+    int64_t length);
+  EXPORT_SYMBOL ERROR
+  awkward_Index64_iscontiguous(
+    bool* result,
+    const int64_t* fromindex,
+    int64_t length);
+
+  EXPORT_SYMBOL ERROR
   awkward_Index32_to_Index64(
     int64_t* toptr,
     const int32_t* fromptr,

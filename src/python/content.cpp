@@ -1494,6 +1494,7 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                    std::string("specify 'cpu' or 'cuda'") + FILENAME(__LINE__));
                }
           })
+          .def("carry", &T::carry)
     ;
   }
 

@@ -209,6 +209,13 @@ namespace awkward {
       int64_t length);
 
     template <typename T>
+    ERROR Index_iscontiguous(
+      kernel::lib ptr_lib,
+      bool* result,
+      const T* fromindex,
+      int64_t length);
+
+    template <typename T>
     ERROR Index_to_Index64(
       kernel::lib ptr_lib,
       int64_t* toptr,
