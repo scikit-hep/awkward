@@ -363,7 +363,14 @@ namespace awkward {
 
   const ContentPtr
   EmptyArray::carry(const Index64& carry, bool allow_lazy) const {
-    return shallow_copy();
+    if (carry.length() == 0) {
+      return shallow_copy();
+    }
+    else {
+    throw std::invalid_argument(
+      std::string("cannot extract ") + std::to_string(carry.length()) +
+      std::string(" elements from ") + classname() + FILENAME(__LINE__));
+    }
   }
 
   int64_t

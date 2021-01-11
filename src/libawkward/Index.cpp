@@ -345,13 +345,11 @@ namespace awkward {
 
   template <typename T>
   bool
-  IndexOf<T>::iscontiguous(int64_t low, int64_t high) const {
+  IndexOf<T>::iscontiguous() const {
     bool result;
     struct Error err = kernel::Index_iscontiguous<T>(
       kernel::lib::cpu,   // DERIVE
       &result,
-      low,
-      high,
       data(),
       length_);
     util::handle_error(err);

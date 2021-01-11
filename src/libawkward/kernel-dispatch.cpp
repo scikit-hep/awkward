@@ -400,15 +400,11 @@ namespace awkward {
     ERROR Index_iscontiguous(
       kernel::lib ptr_lib,
       bool* result,
-      int64_t low,
-      int64_t high,
       const int8_t* fromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index8_iscontiguous(
           result,
-          low,
-          high,
           fromindex,
           length);
       }
@@ -416,8 +412,6 @@ namespace awkward {
         CREATE_KERNEL(awkward_Index8_iscontiguous, ptr_lib);
         return (*awkward_Index8_iscontiguous_fcn)(
           result,
-          low,
-          high,
           fromindex,
           length);
       }
@@ -432,15 +426,11 @@ namespace awkward {
     ERROR Index_iscontiguous(
       kernel::lib ptr_lib,
       bool* result,
-      int64_t low,
-      int64_t high,
       const uint8_t* fromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexU8_iscontiguous(
           result,
-          low,
-          high,
           fromindex,
           length);
       }
@@ -448,8 +438,6 @@ namespace awkward {
         CREATE_KERNEL(awkward_IndexU8_iscontiguous, ptr_lib);
         return (*awkward_IndexU8_iscontiguous_fcn)(
           result,
-          low,
-          high,
           fromindex,
           length);
       }
@@ -464,15 +452,11 @@ namespace awkward {
     ERROR Index_iscontiguous(
       kernel::lib ptr_lib,
       bool* result,
-      int64_t low,
-      int64_t high,
       const int32_t* fromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index32_iscontiguous(
           result,
-          low,
-          high,
           fromindex,
           length);
       }
@@ -480,8 +464,6 @@ namespace awkward {
         CREATE_KERNEL(awkward_Index32_iscontiguous, ptr_lib);
         return (*awkward_Index32_iscontiguous_fcn)(
           result,
-          low,
-          high,
           fromindex,
           length);
       }
@@ -496,15 +478,11 @@ namespace awkward {
     ERROR Index_iscontiguous(
       kernel::lib ptr_lib,
       bool* result,
-      int64_t low,
-      int64_t high,
       const uint32_t* fromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_IndexU32_iscontiguous(
           result,
-          low,
-          high,
           fromindex,
           length);
       }
@@ -512,8 +490,6 @@ namespace awkward {
         CREATE_KERNEL(awkward_IndexU32_iscontiguous, ptr_lib);
         return (*awkward_IndexU32_iscontiguous_fcn)(
           result,
-          low,
-          high,
           fromindex,
           length);
       }
@@ -528,15 +504,11 @@ namespace awkward {
     ERROR Index_iscontiguous(
       kernel::lib ptr_lib,
       bool* result,
-      int64_t low,
-      int64_t high,
       const int64_t* fromindex,
       int64_t length) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_Index64_iscontiguous(
           result,
-          low,
-          high,
           fromindex,
           length);
       }
@@ -544,8 +516,6 @@ namespace awkward {
         CREATE_KERNEL(awkward_Index64_iscontiguous, ptr_lib);
         return (*awkward_Index64_iscontiguous_fcn)(
           result,
-          low,
-          high,
           fromindex,
           length);
       }

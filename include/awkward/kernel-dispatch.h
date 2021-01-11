@@ -212,8 +212,6 @@ namespace awkward {
     ERROR Index_iscontiguous(
       kernel::lib ptr_lib,
       bool* result,
-      int64_t low,
-      int64_t high,
       const T* fromindex,
       int64_t length);
 

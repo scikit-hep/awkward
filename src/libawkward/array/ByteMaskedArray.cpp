@@ -723,6 +723,14 @@ namespace awkward {
 
   const ContentPtr
   ByteMaskedArray::carry(const Index64& carry, bool allow_lazy) const {
+    if (carry.iscontiguous()) {
+      if (carry.length() == length()) {
+        return shallow_copy();
+      }
+      else {
+        return getitem_range_nowrap(0, carry.length());
+      }
+    }
     Index8 nextmask(carry.length());
     struct Error err = kernel::ByteMaskedArray_getitem_carry_64(
       kernel::lib::cpu,   // DERIVE
