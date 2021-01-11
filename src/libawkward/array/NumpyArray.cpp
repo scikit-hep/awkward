@@ -1273,6 +1273,14 @@ namespace awkward {
     if (!iscontiguous()) {
       return contiguous().carry(carry, allow_lazy);
     }
+    if (carry.iscontiguous()) {
+      if (carry.length() == length()) {
+        return shallow_copy();
+      }
+      else {
+        return getitem_range_nowrap(0, carry.length());
+      }
+    }
 
     std::shared_ptr<void> ptr(
       kernel::malloc<void>(ptr_lib_, carry.length()*((int64_t)strides_[0])));

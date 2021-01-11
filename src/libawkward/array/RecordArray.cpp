@@ -919,6 +919,15 @@ namespace awkward {
 
   const ContentPtr
   RecordArray::carry(const Index64& carry, bool allow_lazy) const {
+    if (!allow_lazy  &&  carry.iscontiguous()) {
+      if (carry.length() == length()) {
+        return shallow_copy();
+      }
+      else {
+        return getitem_range_nowrap(0, carry.length());
+      }
+    }
+
     IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
       identities = identities_.get()->getitem_carry_64(carry);

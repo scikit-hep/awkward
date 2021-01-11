@@ -55,6 +55,10 @@ namespace awkward {
     /// @brief Converts this Index to an {@link IndexOf Index64}.
     virtual IndexOf<int64_t>
       to64() const = 0;
+
+    /// @brief Returns true if this index is contiguous false otherwise.
+    virtual bool
+      iscontiguous() const = 0;
   };
 
   /// @class IndexOf
@@ -204,6 +208,9 @@ namespace awkward {
 
     IndexOf<int64_t>
       to64() const override;
+
+    bool
+      iscontiguous() const override;
 
     /// @brief Copies this Index node and all the data in its buffer.
     ///

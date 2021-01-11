@@ -707,6 +707,14 @@ namespace awkward {
 
   const ContentPtr
   BitMaskedArray::carry(const Index64& carry, bool allow_lazy) const {
+    if (carry.iscontiguous()) {
+      if (carry.length() == length()) {
+        return shallow_copy();
+      }
+      else {
+        return getitem_range_nowrap(0, carry.length());
+      }
+    }
     return toByteMaskedArray().get()->carry(carry, allow_lazy);
   }
 

@@ -344,6 +344,19 @@ namespace awkward {
   }
 
   template <typename T>
+  bool
+  IndexOf<T>::iscontiguous() const {
+    bool result;
+    struct Error err = kernel::Index_iscontiguous<T>(
+      kernel::lib::cpu,   // DERIVE
+      &result,
+      data(),
+      length_);
+    util::handle_error(err);
+    return result;
+  }
+
+  template <typename T>
   const IndexOf<T>
   IndexOf<T>::deep_copy() const {
     std::shared_ptr<T> ptr = kernel::malloc<T>(ptr_lib_, length_*(int64_t)sizeof(T));

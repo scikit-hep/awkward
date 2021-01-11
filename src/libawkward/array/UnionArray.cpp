@@ -1272,6 +1272,14 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   UnionArrayOf<T, I>::carry(const Index64& carry, bool allow_lazy) const {
+    if (carry.iscontiguous()) {
+      if (carry.length() == length()) {
+        return shallow_copy();
+      }
+      else {
+        return getitem_range_nowrap(0, carry.length());
+      }
+    }
     int64_t lentags = tags_.length();
     if (index_.length() < lentags) {
       util::handle_error(

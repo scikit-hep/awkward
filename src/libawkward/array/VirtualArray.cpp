@@ -693,6 +693,15 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::carry(const Index64& carry, bool allow_lazy) const {
+    if (carry.iscontiguous()) {
+      if (carry.length() == length()) {
+        return shallow_copy();
+      }
+      else {
+        return getitem_range_nowrap(0, carry.length());
+      }
+    }
+
     ContentPtr peek = peek_array();
     if (peek.get() != nullptr) {
       return peek.get()->carry(carry, allow_lazy);
