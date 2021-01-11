@@ -16617,6 +16617,7 @@ namespace awkward {
       int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
+      bool ascending,
       int64_t length,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -16626,6 +16627,7 @@ namespace awkward {
           tmpend,
           fromstarts,
           fromstops,
+          ascending,
           length,
           maxlevels);
       }
@@ -16649,6 +16651,7 @@ namespace awkward {
       int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
+      bool ascending,
       int64_t length,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -16658,6 +16661,7 @@ namespace awkward {
           tmpend,
           fromstarts,
           fromstops,
+          ascending,
           length,
           maxlevels);
       }
@@ -16681,6 +16685,7 @@ namespace awkward {
       int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
+      bool ascending,
       int64_t length,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -16690,6 +16695,7 @@ namespace awkward {
           tmpend,
           fromstarts,
           fromstops,
+          ascending,
           length,
           maxlevels);
       }
@@ -16713,6 +16719,7 @@ namespace awkward {
       int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
+      bool ascending,
       int64_t length,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -16722,6 +16729,7 @@ namespace awkward {
           tmpend,
           fromstarts,
           fromstops,
+          ascending,
           length,
           maxlevels);
       }
@@ -16745,6 +16753,7 @@ namespace awkward {
       int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
+      bool ascending,
       int64_t length,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -16754,6 +16763,7 @@ namespace awkward {
           tmpend,
           fromstarts,
           fromstops,
+          ascending,
           length,
           maxlevels);
       }
@@ -16777,6 +16787,7 @@ namespace awkward {
       int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
+      bool ascending,
       int64_t length,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -16786,6 +16797,7 @@ namespace awkward {
           tmpend,
           fromstarts,
           fromstops,
+          ascending,
           length,
           maxlevels);
       }
@@ -16809,6 +16821,7 @@ namespace awkward {
       int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
+      bool ascending,
       int64_t length,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -16818,6 +16831,7 @@ namespace awkward {
           tmpend,
           fromstarts,
           fromstops,
+          ascending,
           length,
           maxlevels);
       }
@@ -16841,6 +16855,7 @@ namespace awkward {
       int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
+      bool ascending,
       int64_t length,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -16850,6 +16865,7 @@ namespace awkward {
           tmpend,
           fromstarts,
           fromstops,
+          ascending,
           length,
           maxlevels);
       }
@@ -16873,6 +16889,7 @@ namespace awkward {
       int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
+      bool ascending,
       int64_t length,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -16882,6 +16899,7 @@ namespace awkward {
           tmpend,
           fromstarts,
           fromstops,
+          ascending,
           length,
           maxlevels);
       }
@@ -16905,6 +16923,7 @@ namespace awkward {
       int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
+      bool ascending,
       int64_t length,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -16914,6 +16933,7 @@ namespace awkward {
           tmpend,
           fromstarts,
           fromstops,
+          ascending,
           length,
           maxlevels);
       }
@@ -16937,6 +16957,7 @@ namespace awkward {
       int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
+      bool ascending,
       int64_t length,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
@@ -16946,6 +16967,7 @@ namespace awkward {
           tmpend,
           fromstarts,
           fromstops,
+          ascending,
           length,
           maxlevels);
       }
@@ -17390,7 +17412,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_bool(
@@ -17402,7 +17423,6 @@ namespace awkward {
           offsets,
           offsetslength,
           ascending,
-          stable,
           maxlevels);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -17428,7 +17448,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_uint8(
@@ -17440,7 +17459,6 @@ namespace awkward {
           offsets,
           offsetslength,
           ascending,
-          stable,
           maxlevels);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -17466,7 +17484,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_int8(
@@ -17478,7 +17495,6 @@ namespace awkward {
           offsets,
           offsetslength,
           ascending,
-          stable,
           maxlevels);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -17504,7 +17520,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_uint16(
@@ -17516,7 +17531,6 @@ namespace awkward {
           offsets,
           offsetslength,
           ascending,
-          stable,
           maxlevels);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -17542,7 +17556,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_int16(
@@ -17554,7 +17567,6 @@ namespace awkward {
           offsets,
           offsetslength,
           ascending,
-          stable,
           maxlevels);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -17580,7 +17592,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_uint32(
@@ -17592,7 +17603,6 @@ namespace awkward {
           offsets,
           offsetslength,
           ascending,
-          stable,
           maxlevels);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -17618,7 +17628,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_int32(
@@ -17630,7 +17639,6 @@ namespace awkward {
           offsets,
           offsetslength,
           ascending,
-          stable,
           maxlevels);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -17656,7 +17664,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_uint64(
@@ -17668,7 +17675,6 @@ namespace awkward {
           offsets,
           offsetslength,
           ascending,
-          stable,
           maxlevels);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -17694,7 +17700,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_int64(
@@ -17706,7 +17711,6 @@ namespace awkward {
           offsets,
           offsetslength,
           ascending,
-          stable,
           maxlevels);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -17732,7 +17736,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_float32(
@@ -17744,7 +17747,6 @@ namespace awkward {
           offsets,
           offsetslength,
           ascending,
-          stable,
           maxlevels);
       }
       else if (ptr_lib == kernel::lib::cuda) {
@@ -17770,7 +17772,6 @@ namespace awkward {
       const int64_t *offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable,
       int64_t maxlevels) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_sort_float64(
@@ -17782,7 +17783,6 @@ namespace awkward {
           offsets,
           offsetslength,
           ascending,
-          stable,
           maxlevels);
       }
       else if (ptr_lib == kernel::lib::cuda) {

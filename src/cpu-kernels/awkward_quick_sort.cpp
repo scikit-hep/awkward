@@ -5,11 +5,29 @@
 #include "awkward/kernels.h"
 
 template <typename T>
+bool order_ascending(T left, T right)
+{
+  return left <= right;
+}
+
+template <typename T>
+bool order_descending(T left, T right)
+{
+  return left >= right;
+}
+
+template <typename T>
+bool binary_op(T left, T right, bool (*f)(T, T)) {
+  return (*f)(left, right);
+}
+
+template <typename T, typename P>
 int quick_sort(T *arr,
-               int64_t elements,
-               int64_t* beg,
-               int64_t* end,
-               int64_t maxlevels) {
+              int64_t elements,
+              int64_t* beg,
+              int64_t* end,
+              int64_t maxlevels,
+              P& predicate) {
   int64_t low = 0;
   int64_t high = 0;
   int64_t i = 0;
@@ -28,13 +46,13 @@ int quick_sort(T *arr,
       }
       high--;
       while (low < high) {
-        while (arr[high] >= pivot  &&  low < high) {
+        while (binary_op(pivot, arr[high], predicate)  &&  low < high) {
           high--;
         }
         if (low < high) {
           arr[low++] = arr[high];
         }
-        while (arr[low] <= pivot  &&  low < high) {
+        while (binary_op(arr[low], pivot, predicate)  &&  low < high) {
           low++;
         }
         if (low < high) {
@@ -72,14 +90,32 @@ ERROR awkward_quick_sort(
     int64_t* tmpend,
     const int64_t* fromstarts,
     const int64_t* fromstops,
+    bool ascending,
     int64_t length,
     int64_t maxlevels) {
 
-  for (int64_t i = 0; i < length; i++) {
-    int result = quick_sort(&(tmpptr[fromstarts[i]]), fromstops[i] - fromstarts[i],
-                            tmpbeg, tmpend, maxlevels);
-    if (result < 0) {
-      return failure("failed to sort an array", i, fromstarts[i], FILENAME(__LINE__));
+  if (ascending) {
+    for (int64_t i = 0; i < length; i++) {
+      if (quick_sort(&(tmpptr[fromstarts[i]]),
+                     fromstops[i] - fromstarts[i],
+                     tmpbeg,
+                     tmpend,
+                     maxlevels,
+                     order_ascending<T>) < 0) {
+        return failure("failed to sort an array", i, fromstarts[i], FILENAME(__LINE__));
+      }
+    }
+  }
+  else {
+    for (int64_t i = 0; i < length; i++) {
+      if (quick_sort(&(tmpptr[fromstarts[i]]),
+                     fromstops[i] - fromstarts[i],
+                     tmpbeg,
+                     tmpend,
+                     maxlevels,
+                     order_descending<T>) < 0) {
+        return failure("failed to sort an array", i, fromstarts[i], FILENAME(__LINE__));
+      }
     }
   }
 
@@ -92,6 +128,7 @@ ERROR awkward_quick_sort_bool(
   int64_t* tmpend,
   const int64_t* fromstarts,
   const int64_t* fromstops,
+  bool ascending,
   int64_t length,
   int64_t maxlevels) {
     return awkward_quick_sort<bool>(
@@ -100,6 +137,7 @@ ERROR awkward_quick_sort_bool(
       tmpend,
       fromstarts,
       fromstops,
+      ascending,
       length,
       maxlevels);
 }
@@ -109,6 +147,7 @@ ERROR awkward_quick_sort_int8(
   int64_t* tmpend,
   const int64_t* fromstarts,
   const int64_t* fromstops,
+  bool ascending,
   int64_t length,
   int64_t maxlevels) {
     return awkward_quick_sort<int8_t>(
@@ -117,6 +156,7 @@ ERROR awkward_quick_sort_int8(
       tmpend,
       fromstarts,
       fromstops,
+      ascending,
       length,
       maxlevels);
 }
@@ -126,6 +166,7 @@ ERROR awkward_quick_sort_uint8(
   int64_t* tmpend,
   const int64_t* fromstarts,
   const int64_t* fromstops,
+  bool ascending,
   int64_t length,
   int64_t maxlevels) {
     return awkward_quick_sort<uint8_t>(
@@ -134,6 +175,7 @@ ERROR awkward_quick_sort_uint8(
       tmpend,
       fromstarts,
       fromstops,
+      ascending,
       length,
       maxlevels);
 }
@@ -143,6 +185,7 @@ ERROR awkward_quick_sort_int16(
   int64_t* tmpend,
   const int64_t* fromstarts,
   const int64_t* fromstops,
+  bool ascending,
   int64_t length,
   int64_t maxlevels) {
     return awkward_quick_sort<int16_t>(
@@ -151,6 +194,7 @@ ERROR awkward_quick_sort_int16(
       tmpend,
       fromstarts,
       fromstops,
+      ascending,
       length,
       maxlevels);
 }
@@ -160,6 +204,7 @@ ERROR awkward_quick_sort_uint16(
   int64_t* tmpend,
   const int64_t* fromstarts,
   const int64_t* fromstops,
+  bool ascending,
   int64_t length,
   int64_t maxlevels) {
     return awkward_quick_sort<uint16_t>(
@@ -168,6 +213,7 @@ ERROR awkward_quick_sort_uint16(
       tmpend,
       fromstarts,
       fromstops,
+      ascending,
       length,
       maxlevels);
 }
@@ -177,6 +223,7 @@ ERROR awkward_quick_sort_int32(
   int64_t* tmpend,
   const int64_t* fromstarts,
   const int64_t* fromstops,
+  bool ascending,
   int64_t length,
   int64_t maxlevels) {
     return awkward_quick_sort<int32_t>(
@@ -185,6 +232,7 @@ ERROR awkward_quick_sort_int32(
       tmpend,
       fromstarts,
       fromstops,
+      ascending,
       length,
       maxlevels);
 }
@@ -194,6 +242,7 @@ ERROR awkward_quick_sort_uint32(
   int64_t* tmpend,
   const int64_t* fromstarts,
   const int64_t* fromstops,
+  bool ascending,
   int64_t length,
   int64_t maxlevels) {
     return awkward_quick_sort<uint32_t>(
@@ -202,6 +251,7 @@ ERROR awkward_quick_sort_uint32(
       tmpend,
       fromstarts,
       fromstops,
+      ascending,
       length,
       maxlevels);
 }
@@ -211,6 +261,7 @@ ERROR awkward_quick_sort_int64(
   int64_t* tmpend,
   const int64_t* fromstarts,
   const int64_t* fromstops,
+  bool ascending,
   int64_t length,
   int64_t maxlevels) {
     return awkward_quick_sort<int64_t>(
@@ -219,6 +270,7 @@ ERROR awkward_quick_sort_int64(
       tmpend,
       fromstarts,
       fromstops,
+      ascending,
       length,
       maxlevels);
 }
@@ -228,6 +280,7 @@ ERROR awkward_quick_sort_uint64(
   int64_t* tmpend,
   const int64_t* fromstarts,
   const int64_t* fromstops,
+  bool ascending,
   int64_t length,
   int64_t maxlevels) {
     return awkward_quick_sort<uint64_t>(
@@ -236,6 +289,7 @@ ERROR awkward_quick_sort_uint64(
       tmpend,
       fromstarts,
       fromstops,
+      ascending,
       length,
       maxlevels);
 }
@@ -245,6 +299,7 @@ ERROR awkward_quick_sort_float32(
   int64_t* tmpend,
   const int64_t* fromstarts,
   const int64_t* fromstops,
+  bool ascending,
   int64_t length,
   int64_t maxlevels) {
     return awkward_quick_sort<float>(
@@ -253,6 +308,7 @@ ERROR awkward_quick_sort_float32(
       tmpend,
       fromstarts,
       fromstops,
+      ascending,
       length,
       maxlevels);
 }
@@ -262,6 +318,7 @@ ERROR awkward_quick_sort_float64(
   int64_t* tmpend,
   const int64_t* fromstarts,
   const int64_t* fromstops,
+  bool ascending,
   int64_t length,
   int64_t maxlevels) {
     return awkward_quick_sort<double>(
@@ -270,6 +327,7 @@ ERROR awkward_quick_sort_float64(
       tmpend,
       fromstarts,
       fromstops,
+      ascending,
       length,
       maxlevels);
 }

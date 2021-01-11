@@ -4683,6 +4683,7 @@ namespace awkward {
       tmp_end_ptr.get(),
       starts.data(),
       stops.data(),
+      true,
       starts.length(),
       kMaxLevels);
     util::handle_error(err2, classname(), nullptr);
@@ -4910,7 +4911,6 @@ namespace awkward {
       outranges.data(),
       ranges_length,
       ascending,
-      stable,
       kMaxLevels);
     util::handle_error(err3, classname(), nullptr);
 

@@ -1667,6 +1667,7 @@ namespace awkward {
       int64_t* tmpend,
       const int64_t* fromstarts,
       const int64_t* fromstops,
+      bool ascending,
       int64_t length,
       int64_t maxlevels);
 
@@ -1695,7 +1696,6 @@ namespace awkward {
       const int64_t* offsets,
       int64_t offsetslength,
       bool ascending,
-      bool stable,
       int64_t maxlevels);
 
     template <typename T>

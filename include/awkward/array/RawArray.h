@@ -1039,7 +1039,6 @@ namespace awkward {
         offsets.ptr().get(),
         offsets.length(),
         ascending,
-        stable,
         kMaxLevels);
       util::handle_error(err, classname(), nullptr);
 

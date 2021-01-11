@@ -93,9 +93,7 @@ ERROR awkward_sort(
   const int64_t* offsets,
   int64_t offsetslength,
   bool ascending,
-  bool stable,
   int64_t maxlevels) {
-  // FIXME: sort a copy or do it in place without copying?
   for (int64_t i = 0; i < length; i++) {
     toptr[i] = fromptr[i];
   }
@@ -136,7 +134,6 @@ ERROR awkward_sort_bool(
   const int64_t* offsets,
   int64_t offsetslength,
   bool ascending,
-  bool stable,
   int64_t maxlevels) {
   return awkward_sort<bool>(
     toptr,
@@ -147,7 +144,6 @@ ERROR awkward_sort_bool(
     offsets,
     offsetslength,
     ascending,
-    stable,
     maxlevels);
 }
 ERROR awkward_sort_int8(
@@ -159,7 +155,6 @@ ERROR awkward_sort_int8(
   const int64_t* offsets,
   int64_t offsetslength,
   bool ascending,
-  bool stable,
   int64_t maxlevels) {
   return awkward_sort<int8_t>(
     toptr,
@@ -170,7 +165,6 @@ ERROR awkward_sort_int8(
     offsets,
     offsetslength,
     ascending,
-    stable,
     maxlevels);
 }
 ERROR awkward_sort_uint8(
@@ -182,7 +176,6 @@ ERROR awkward_sort_uint8(
   const int64_t* offsets,
   int64_t offsetslength,
   bool ascending,
-  bool stable,
   int64_t maxlevels) {
   return awkward_sort<uint8_t>(
     toptr,
@@ -193,7 +186,6 @@ ERROR awkward_sort_uint8(
     offsets,
     offsetslength,
     ascending,
-    stable,
     maxlevels);
 }
 ERROR awkward_sort_int16(
@@ -205,7 +197,6 @@ ERROR awkward_sort_int16(
   const int64_t* offsets,
   int64_t offsetslength,
   bool ascending,
-  bool stable,
   int64_t maxlevels) {
   return awkward_sort<int16_t>(
     toptr,
@@ -216,7 +207,6 @@ ERROR awkward_sort_int16(
     offsets,
     offsetslength,
     ascending,
-    stable,
     maxlevels);
 }
 ERROR awkward_sort_uint16(
@@ -228,7 +218,6 @@ ERROR awkward_sort_uint16(
   const int64_t* offsets,
   int64_t offsetslength,
   bool ascending,
-  bool stable,
   int64_t maxlevels) {
   return awkward_sort<uint16_t>(
     toptr,
@@ -239,7 +228,6 @@ ERROR awkward_sort_uint16(
     offsets,
     offsetslength,
     ascending,
-    stable,
     maxlevels);
 }
 ERROR awkward_sort_int32(
@@ -251,7 +239,6 @@ ERROR awkward_sort_int32(
   const int64_t* offsets,
   int64_t offsetslength,
   bool ascending,
-  bool stable,
   int64_t maxlevels) {
   return awkward_sort<int32_t>(
     toptr,
@@ -262,7 +249,6 @@ ERROR awkward_sort_int32(
     offsets,
     offsetslength,
     ascending,
-    stable,
     maxlevels);
 }
 ERROR awkward_sort_uint32(
@@ -274,7 +260,6 @@ ERROR awkward_sort_uint32(
   const int64_t* offsets,
   int64_t offsetslength,
   bool ascending,
-  bool stable,
   int64_t maxlevels) {
   return awkward_sort<uint32_t>(
     toptr,
@@ -285,7 +270,6 @@ ERROR awkward_sort_uint32(
     offsets,
     offsetslength,
     ascending,
-    stable,
     maxlevels);
 }
 ERROR awkward_sort_int64(
@@ -297,7 +281,6 @@ ERROR awkward_sort_int64(
   const int64_t* offsets,
   int64_t offsetslength,
   bool ascending,
-  bool stable,
   int64_t maxlevels) {
   return awkward_sort<int64_t>(
     toptr,
@@ -308,7 +291,6 @@ ERROR awkward_sort_int64(
     offsets,
     offsetslength,
     ascending,
-    stable,
     maxlevels);
 }
 ERROR awkward_sort_uint64(
@@ -320,7 +302,6 @@ ERROR awkward_sort_uint64(
   const int64_t* offsets,
   int64_t offsetslength,
   bool ascending,
-  bool stable,
   int64_t maxlevels) {
   return awkward_sort<uint64_t>(
     toptr,
@@ -331,7 +312,6 @@ ERROR awkward_sort_uint64(
     offsets,
     offsetslength,
     ascending,
-    stable,
     maxlevels);
 }
 ERROR awkward_sort_float32(
@@ -343,7 +323,6 @@ ERROR awkward_sort_float32(
   const int64_t* offsets,
   int64_t offsetslength,
   bool ascending,
-  bool stable,
   int64_t maxlevels) {
   return awkward_sort<float>(
     toptr,
@@ -354,7 +333,6 @@ ERROR awkward_sort_float32(
     offsets,
     offsetslength,
     ascending,
-    stable,
     maxlevels);
 }
 ERROR awkward_sort_float64(
@@ -366,7 +344,6 @@ ERROR awkward_sort_float64(
   const int64_t* offsets,
   int64_t offsetslength,
   bool ascending,
-  bool stable,
   int64_t maxlevels) {
   return awkward_sort<double>(
     toptr,
@@ -377,6 +354,5 @@ ERROR awkward_sort_float64(
     offsets,
     offsetslength,
     ascending,
-    stable,
     maxlevels);
 }

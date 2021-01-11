@@ -4193,6 +4193,7 @@ extern "C" {
     int64_t* tmpend,
     const int64_t* fromstarts,
     const int64_t* fromstops,
+    bool ascending,
     int64_t length,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
@@ -4202,6 +4203,7 @@ extern "C" {
     int64_t* tmpend,
     const int64_t* fromstarts,
     const int64_t* fromstops,
+    bool ascending,
     int64_t length,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
@@ -4211,6 +4213,7 @@ extern "C" {
     int64_t* tmpend,
     const int64_t* fromstarts,
     const int64_t* fromstops,
+    bool ascending,
     int64_t length,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
@@ -4220,6 +4223,7 @@ extern "C" {
     int64_t* tmpend,
     const int64_t* fromstarts,
     const int64_t* fromstops,
+    bool ascending,
     int64_t length,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
@@ -4229,6 +4233,7 @@ extern "C" {
     int64_t* tmpend,
     const int64_t* fromstarts,
     const int64_t* fromstops,
+    bool ascending,
     int64_t length,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
@@ -4238,6 +4243,7 @@ extern "C" {
     int64_t* tmpend,
     const int64_t* fromstarts,
     const int64_t* fromstops,
+    bool ascending,
     int64_t length,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
@@ -4247,6 +4253,7 @@ extern "C" {
     int64_t* tmpend,
     const int64_t* fromstarts,
     const int64_t* fromstops,
+    bool ascending,
     int64_t length,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
@@ -4256,6 +4263,7 @@ extern "C" {
     int64_t* tmpend,
     const int64_t* fromstarts,
     const int64_t* fromstops,
+    bool ascending,
     int64_t length,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
@@ -4265,6 +4273,7 @@ extern "C" {
     int64_t* tmpend,
     const int64_t* fromstarts,
     const int64_t* fromstops,
+    bool ascending,
     int64_t length,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
@@ -4274,6 +4283,7 @@ extern "C" {
     int64_t* tmpend,
     const int64_t* fromstarts,
     const int64_t* fromstops,
+    bool ascending,
     int64_t length,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
@@ -4283,6 +4293,7 @@ extern "C" {
     int64_t* tmpend,
     const int64_t* fromstarts,
     const int64_t* fromstops,
+    bool ascending,
     int64_t length,
     int64_t maxlevels);
 
@@ -4296,7 +4307,6 @@ extern "C" {
     const int64_t* offsets,
     int64_t offsetslength,
     bool ascending,
-    bool stable,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
   awkward_sort_int8(
@@ -4308,7 +4318,6 @@ extern "C" {
     const int64_t* offsets,
     int64_t offsetslength,
     bool ascending,
-    bool stable,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
   awkward_sort_int16(
@@ -4320,7 +4329,6 @@ extern "C" {
     const int64_t* offsets,
     int64_t offsetslength,
     bool ascending,
-    bool stable,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
   awkward_sort_int32(
@@ -4332,7 +4340,6 @@ extern "C" {
     const int64_t* offsets,
     int64_t offsetslength,
     bool ascending,
-    bool stable,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
   awkward_sort_int64(
@@ -4344,7 +4351,6 @@ extern "C" {
     const int64_t* offsets,
     int64_t offsetslength,
     bool ascending,
-    bool stable,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
   awkward_sort_uint8(
@@ -4356,7 +4362,6 @@ extern "C" {
     const int64_t* offsets,
     int64_t offsetslength,
     bool ascending,
-    bool stable,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
   awkward_sort_uint16(
@@ -4368,7 +4373,6 @@ extern "C" {
     const int64_t* offsets,
     int64_t offsetslength,
     bool ascending,
-    bool stable,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
   awkward_sort_uint32(
@@ -4380,7 +4384,6 @@ extern "C" {
     const int64_t* offsets,
     int64_t offsetslength,
     bool ascending,
-    bool stable,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
   awkward_sort_uint64(
@@ -4392,7 +4395,6 @@ extern "C" {
     const int64_t* offsets,
     int64_t offsetslength,
     bool ascending,
-    bool stable,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
   awkward_sort_float32(
@@ -4404,7 +4406,6 @@ extern "C" {
     const int64_t* offsets,
     int64_t offsetslength,
     bool ascending,
-    bool stable,
     int64_t maxlevels);
   EXPORT_SYMBOL ERROR
   awkward_sort_float64(
@@ -4416,7 +4417,6 @@ extern "C" {
     const int64_t* offsets,
     int64_t offsetslength,
     bool ascending,
-    bool stable,
     int64_t maxlevels);
 
   EXPORT_SYMBOL ERROR
