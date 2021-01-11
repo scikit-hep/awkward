@@ -508,11 +508,14 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::shallow_copy() const {
-    return std::make_shared<VirtualArray>(identities_,
-                                          parameters_,
-                                          generator_,
-                                          cache_,
-                                          cache_key_);
+    std::shared_ptr<VirtualArray> out = std::make_shared<VirtualArray>(
+                                              identities_,
+                                              parameters_,
+                                              generator_,
+                                              cache_,
+                                              cache_key_);
+    out.get()->set_cache_depths_from(this);
+    return out;
   }
 
   const ContentPtr
@@ -597,10 +600,14 @@ namespace awkward {
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  sliceform, stop - start, shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
-    return std::make_shared<VirtualArray>(Identities::none(),
-                                          parameters_,
-                                          generator,
-                                          cache);
+
+    std::shared_ptr<VirtualArray> out = std::make_shared<VirtualArray>(
+                                              Identities::none(),
+                                              parameters_,
+                                              generator,
+                                              cache);
+    out.get()->set_cache_depths_from(this);
+    return out;
   }
 
   const ContentPtr
@@ -635,10 +642,13 @@ namespace awkward {
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  sliceform, generator_.get()->length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
-    return std::make_shared<VirtualArray>(Identities::none(),
-                                          params,
-                                          generator,
-                                          cache);
+    std::shared_ptr<VirtualArray> out = std::make_shared<VirtualArray>(
+                                              Identities::none(),
+                                              params,
+                                              generator,
+                                              cache);
+    out.get()->set_cache_depths_from(this);
+    return out;
   }
 
   const ContentPtr
@@ -666,10 +676,13 @@ namespace awkward {
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  sliceform, generator_.get()->length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
-    return std::make_shared<VirtualArray>(Identities::none(),
-                                          util::Parameters(),
-                                          generator,
-                                          cache);
+    std::shared_ptr<VirtualArray> out = std::make_shared<VirtualArray>(
+                                              Identities::none(),
+                                              util::Parameters(),
+                                              generator,
+                                              cache);
+    out.get()->set_cache_depths_from(this);
+    return out;
   }
 
   const ContentPtr
@@ -703,10 +716,43 @@ namespace awkward {
     ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                  form, carry.length(), shallow_copy(), slice);
     ArrayCachePtr cache(nullptr);
-    return std::make_shared<VirtualArray>(Identities::none(),
-                                          forward_parameters(),
-                                          generator,
-                                          cache);
+    std::shared_ptr<VirtualArray> out = std::make_shared<VirtualArray>(
+                                               Identities::none(),
+                                               forward_parameters(),
+                                               generator,
+                                               cache);
+    out.get()->set_cache_depths_from(this);
+    return out;
+  }
+
+  int64_t
+  VirtualArray::purelist_depth() const {
+    if (cache_depths_.empty()) {
+      return form(true).get()->purelist_depth();
+    }
+    else {
+      return cache_depths_[0];
+    }
+  }
+
+  const std::pair<int64_t, int64_t>
+  VirtualArray::minmax_depth() const {
+    if (cache_depths_.empty()) {
+      return form(true).get()->minmax_depth();
+    }
+    else {
+      return std::pair<int64_t, int64_t>(cache_depths_[1], cache_depths_[2]);
+    }
+  }
+
+  const std::pair<bool, int64_t>
+  VirtualArray::branch_depth() const {
+    if (cache_depths_.empty()) {
+      return form(true).get()->branch_depth();
+    }
+    else {
+      return std::pair<bool, int64_t>(cache_depths_[3], cache_depths_[4]);
+    }
   }
 
   int64_t
@@ -924,10 +970,13 @@ namespace awkward {
           ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, length, shallow_copy(), where);
           ArrayCachePtr cache(nullptr);
-          return std::make_shared<VirtualArray>(Identities::none(),
-                                                forward_parameters(),
-                                                generator,
-                                                cache);
+          std::shared_ptr<VirtualArray> out = std::make_shared<VirtualArray>(
+                                                    Identities::none(),
+                                                    forward_parameters(),
+                                                    generator,
+                                                    cache);
+          out.get()->set_cache_depths_from(this);
+          return out;
         }
         else {
           return array().get()->getitem(where);
@@ -940,10 +989,13 @@ namespace awkward {
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, generator_.get()->length(), shallow_copy(), where);
         ArrayCachePtr cache(nullptr);
-        return std::make_shared<VirtualArray>(Identities::none(),
-                                              forward_parameters(),
-                                              generator,
-                                              cache);
+        std::shared_ptr<VirtualArray> out = std::make_shared<VirtualArray>(
+                                                  Identities::none(),
+                                                  forward_parameters(),
+                                                  generator,
+                                                  cache);
+        out.get()->set_cache_depths_from(this);
+        return out;
       }
 
       else if (SliceNewAxis* newaxis =
@@ -952,10 +1004,14 @@ namespace awkward {
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, 1, shallow_copy(), where);
         ArrayCachePtr cache(nullptr);
-        return std::make_shared<VirtualArray>(Identities::none(),
-                                              forward_parameters(),
-                                              generator,
-                                              cache);
+        std::shared_ptr<VirtualArray> out = std::make_shared<VirtualArray>(
+                                                  Identities::none(),
+                                                  forward_parameters(),
+                                                  generator,
+                                                  cache);
+        out.get()->set_cache_depths_from(this);
+        out.get()->add_to_cache_depths(1);
+        return out;
       }
 
       else if (SliceArray64* slicearray =
@@ -964,10 +1020,13 @@ namespace awkward {
         ArrayGeneratorPtr generator = std::make_shared<SliceGenerator>(
                      form, slicearray->length(), shallow_copy(), where);
         ArrayCachePtr cache(nullptr);
-        return std::make_shared<VirtualArray>(Identities::none(),
-                                              forward_parameters(),
-                                              generator,
-                                              cache);
+        std::shared_ptr<VirtualArray> out = std::make_shared<VirtualArray>(
+                                                  Identities::none(),
+                                                  forward_parameters(),
+                                                  generator,
+                                                  cache);
+        out.get()->set_cache_depths_from(this);
+        return out;
       }
 
       else if (SliceField* field =
@@ -1099,16 +1158,19 @@ namespace awkward {
 
   const ContentPtr
   VirtualArray::copy_to(kernel::lib ptr_lib) const {
-      IdentitiesPtr identities(nullptr);
-      if (identities_.get() != nullptr) {
-        identities = identities_.get()->copy_to(ptr_lib);
-      }
-      return std::make_shared<VirtualArray>(identities,
-                                            parameters_,
-                                            generator_,
-                                            cache_,
-                                            cache_key_,
-                                            ptr_lib);
+    IdentitiesPtr identities(nullptr);
+    if (identities_.get() != nullptr) {
+      identities = identities_.get()->copy_to(ptr_lib);
+    }
+    std::shared_ptr<VirtualArray> out = std::make_shared<VirtualArray>(
+                                              identities,
+                                              parameters_,
+                                              generator_,
+                                              cache_,
+                                              cache_key_,
+                                              ptr_lib);
+    out.get()->set_cache_depths_from(this);
+    return out;
   }
 
   const ContentPtr
@@ -1154,4 +1216,41 @@ namespace awkward {
     }
     return params;
   }
+
+  void
+  VirtualArray::set_cache_depths_from(const VirtualArray* original) {
+    FormPtr form = original->generator().get()->form();
+    if (form.get() != nullptr) {
+      cache_depths_.clear();
+
+      cache_depths_.push_back(form.get()->purelist_depth());
+
+      const std::pair<int64_t, int64_t> minmax = form.get()->minmax_depth();
+      cache_depths_.push_back(minmax.first);
+      cache_depths_.push_back(minmax.second);
+
+      const std::pair<bool, int64_t> branch = form.get()->branch_depth();
+      cache_depths_.push_back(branch.first);
+      cache_depths_.push_back(branch.second);
+    }
+
+    else if (!original->cache_depths_.empty()) {
+      cache_depths_.clear();
+      cache_depths_.insert(cache_depths_.end(),
+                           original->cache_depths_.begin(),
+                           original->cache_depths_.end());
+    }
+  }
+
+  void
+  VirtualArray::add_to_cache_depths(int64_t delta) {
+    if (!cache_depths_.empty()) {
+      cache_depths_[0] += delta;
+      cache_depths_[1] += delta;
+      cache_depths_[2] += delta;
+      // cache_depths_[3];
+      cache_depths_[4] += delta;
+    }
+  }
+
 }

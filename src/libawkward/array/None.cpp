@@ -182,37 +182,58 @@ namespace awkward {
   }
 
   int64_t
+  None::purelist_depth() const {
+    throw std::runtime_error(
+      std::string("undefined operation: None::purelist_depth")
+      + FILENAME(__LINE__));
+  }
+
+  const std::pair<int64_t, int64_t>
+  None::minmax_depth() const {
+    throw std::runtime_error(
+      std::string("undefined operation: None::minmax_depth")
+      + FILENAME(__LINE__));
+  }
+
+  const std::pair<bool, int64_t>
+  None::branch_depth() const {
+    throw std::runtime_error(
+      std::string("undefined operation: None::branch_depth")
+      + FILENAME(__LINE__));
+  }
+
+  int64_t
   None::numfields() const {
     throw std::runtime_error(
-      std::string("undefined operatino: None::numfields")
+      std::string("undefined operation: None::numfields")
       + FILENAME(__LINE__));
   }
 
   int64_t
   None::fieldindex(const std::string& key) const {
     throw std::runtime_error(
-      std::string("undefined operatino: None::fieldindex")
+      std::string("undefined operation: None::fieldindex")
       + FILENAME(__LINE__));
   }
 
   const std::string
   None::key(int64_t fieldindex) const {
     throw std::runtime_error(
-      std::string("undefined operatino: None::key")
+      std::string("undefined operation: None::key")
       + FILENAME(__LINE__));
   }
 
   bool
   None::haskey(const std::string& key) const {
     throw std::runtime_error(
-      std::string("undefined operatino: None::haskey")
+      std::string("undefined operation: None::haskey")
       + FILENAME(__LINE__));
   }
 
   const std::vector<std::string>
   None::keys() const {
     throw std::runtime_error(
-      std::string("undefined operatino: None::keys")
+      std::string("undefined operation: None::keys")
       + FILENAME(__LINE__));
   }
 

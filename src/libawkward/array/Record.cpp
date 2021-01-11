@@ -251,14 +251,14 @@ namespace awkward {
       std::string("undefined operation: Record::carry") + FILENAME(__LINE__));
   }
 
-  int64_t
-  Record::purelist_depth() const {
-    return 0;
-  }
-
   bool
   Record::dimension_optiontype() const {
     return false;
+  }
+
+  int64_t
+  Record::purelist_depth() const {
+    return 0;
   }
 
   const std::pair<int64_t, int64_t>

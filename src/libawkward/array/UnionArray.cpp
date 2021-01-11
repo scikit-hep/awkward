@@ -1321,6 +1321,63 @@ namespace awkward {
 
   template <typename T, typename I>
   int64_t
+  UnionArrayOf<T, I>::purelist_depth() const {
+    bool first = true;
+    int64_t out = -1;
+    for (auto content : contents_) {
+      if (first) {
+        first = false;
+        out = content.get()->purelist_depth();
+      }
+      else if (out != content.get()->purelist_depth()) {
+        return -1;
+      }
+    }
+    return out;
+  }
+
+  template <typename T, typename I>
+  const std::pair<int64_t, int64_t>
+  UnionArrayOf<T, I>::minmax_depth() const {
+    if (contents_.empty()) {
+      return std::pair<int64_t, int64_t>(0, 0);
+    }
+    int64_t min = kMaxInt64;
+    int64_t max = 0;
+    for (auto content : contents_) {
+      std::pair<int64_t, int64_t> minmax = content.get()->minmax_depth();
+      if (minmax.first < min) {
+        min = minmax.first;
+      }
+      if (minmax.second > max) {
+        max = minmax.second;
+      }
+    }
+    return std::pair<int64_t, int64_t>(min, max);
+  }
+
+  template <typename T, typename I>
+  const std::pair<bool, int64_t>
+  UnionArrayOf<T, I>::branch_depth() const {
+    bool anybranch = false;
+    int64_t mindepth = -1;
+    for (auto content : contents_) {
+      std::pair<bool, int64_t> content_depth = content.get()->branch_depth();
+      if (mindepth == -1) {
+        mindepth = content_depth.second;
+      }
+      if (content_depth.first  ||  mindepth != content_depth.second) {
+        anybranch = true;
+      }
+      if (mindepth > content_depth.second) {
+        mindepth = content_depth.second;
+      }
+    }
+    return std::pair<bool, int64_t>(anybranch, mindepth);
+  }
+
+  template <typename T, typename I>
+  int64_t
   UnionArrayOf<T, I>::numfields() const {
     return (int64_t)keys().size();
   }

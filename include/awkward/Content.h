@@ -556,6 +556,11 @@ namespace awkward {
     bool
       purelist_isregular() const;
 
+    /// @brief Returns `true` if this dimension has option-type; `false`
+    /// otherwise.
+    virtual bool
+      dimension_optiontype() const;
+
     /// @brief The list-depth of this array, not counting any contained
     /// within a RecordArray.
     ///
@@ -565,19 +570,14 @@ namespace awkward {
     /// If this array contains a {@link UnionArrayOf UnionArray} with
     /// different depths, the return value is `-1`.
     virtual int64_t
-      purelist_depth() const;
-
-    /// @brief Returns `true` if this dimension has option-type; `false`
-    /// otherwise.
-    virtual bool
-      dimension_optiontype() const;
+      purelist_depth() const = 0;
 
     /// @brief Returns (a) the minimum list-depth and (b) the maximum
     /// list-depth of the array, which can differ if this array "branches"
     /// (differs when followed through different fields of a RecordArray or
     /// {@link UnionArrayOf UnionArray}).
     virtual const std::pair<int64_t, int64_t>
-      minmax_depth() const;
+      minmax_depth() const = 0;
 
     /// @brief Returns (a) whether the list-depth of this array "branches,"
     /// or differs when followed through different fields of a RecordArray or
@@ -586,7 +586,7 @@ namespace awkward {
     /// If the array does not contain any records or heterogeneous data, the
     /// `first` element is always `true` and the `second` is simply the depth.
     virtual const std::pair<bool, int64_t>
-      branch_depth() const;
+      branch_depth() const = 0;
 
     /// @brief The number of fields in the first nested tuple or
     /// records or `-1` if this array does not contain a RecordArray.

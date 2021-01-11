@@ -254,6 +254,15 @@ namespace awkward {
       carry(const Index64& carry, bool allow_lazy) const override;
 
     int64_t
+      purelist_depth() const override;
+
+    const std::pair<int64_t, int64_t>
+      minmax_depth() const override;
+
+    const std::pair<bool, int64_t>
+      branch_depth() const override;
+
+    int64_t
       numfields() const override;
 
     int64_t
@@ -414,6 +423,18 @@ namespace awkward {
       is_subrange_equal(const Index64& start, const Index64& stop) const override;
 
   private:
+    /// @brief Forward selected purelist_parameters when making lazy slices
+    const util::Parameters
+      forward_parameters() const;
+
+    /// @brief Set the copy of depth parameters to avoid materializing an array
+    /// that can't have a Form but can know its depth (lazy slices, mostly).
+    void
+      set_cache_depths_from(const VirtualArray* original);
+
+    void
+      add_to_cache_depths(int64_t delta);
+
     /// @brief See #generator.
     const ArrayGeneratorPtr generator_;
     /// @brief See #cache.
@@ -423,9 +444,9 @@ namespace awkward {
     /// @brief See#ptr_lib
     const kernel::lib ptr_lib_;
 
-    /// @brief Forward selected purelist_parameters when making lazy slices
-    const util::Parameters
-      forward_parameters() const;
+    /// @brief Keep a copy of depth parameters to avoid materializing an array
+    /// that can't have a Form but can know its depth (lazy slices, mostly).
+    std::vector<int64_t> cache_depths_;
   };
 
 }

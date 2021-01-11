@@ -752,6 +752,21 @@ namespace awkward {
   }
 
   int64_t
+  ByteMaskedArray::purelist_depth() const {
+    return content_.get()->purelist_depth();
+  }
+
+  const std::pair<int64_t, int64_t>
+  ByteMaskedArray::minmax_depth() const {
+    return content_.get()->minmax_depth();
+  }
+
+  const std::pair<bool, int64_t>
+  ByteMaskedArray::branch_depth() const {
+    return content_.get()->branch_depth();
+  }
+
+  int64_t
   ByteMaskedArray::numfields() const {
     return content_.get()->numfields();
   }

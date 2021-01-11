@@ -126,6 +126,18 @@ namespace awkward {
 
     /// @exception std::runtime_error is always thrown
     int64_t
+      purelist_depth() const override;
+
+    /// @exception std::runtime_error is always thrown
+    const std::pair<int64_t, int64_t>
+      minmax_depth() const override;
+
+    /// @exception std::runtime_error is always thrown
+    const std::pair<bool, int64_t>
+      branch_depth() const override;
+
+    /// @exception std::runtime_error is always thrown
+    int64_t
       numfields() const override;
 
     /// @exception std::runtime_error is always thrown
