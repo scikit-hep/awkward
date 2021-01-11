@@ -4839,25 +4839,38 @@ namespace awkward {
       parents.length());
     util::handle_error(err2, classname(), nullptr);
 
-    std::shared_ptr<int64_t> tmp_beg_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                                                   kMaxLevels*((int64_t)sizeof(int64_t)));
-    std::shared_ptr<int64_t> tmp_end_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                                                   kMaxLevels*((int64_t)sizeof(int64_t)));
+    if (stable) {
+      struct Error err3 = kernel::NumpyArray_argsort<T>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        data,
+        length,
+        offsets.data(),
+        offsets_length,
+        ascending,
+        stable);
+      util::handle_error(err3, classname(), nullptr);
+    }
+    else {
+      std::shared_ptr<int64_t> tmp_beg_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                                                     kMaxLevels*((int64_t)sizeof(int64_t)));
+      std::shared_ptr<int64_t> tmp_end_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                                                     kMaxLevels*((int64_t)sizeof(int64_t)));
 
-    struct Error err3 = kernel::NumpyArray_argsort<T>(
-      kernel::lib::cpu,   // DERIVE
-      ptr.get(),
-      data,
-      length,
-      tmp_beg_ptr.get(),
-      tmp_end_ptr.get(),
-      offsets.data(),
-      offsets_length,
-      ascending,
-      stable,
-      kMaxLevels);
-    util::handle_error(err3, classname(), nullptr);
-
+      struct Error err3 = kernel::NumpyArray_quick_argsort<T>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        data,
+        length,
+        tmp_beg_ptr.get(),
+        tmp_end_ptr.get(),
+        offsets.data(),
+        offsets_length,
+        ascending,
+        stable,
+        kMaxLevels);
+      util::handle_error(err3, classname(), nullptr);
+    }
     return ptr;
   }
 

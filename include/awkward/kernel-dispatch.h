@@ -1672,7 +1672,7 @@ namespace awkward {
       int64_t maxlevels);
 
     template <typename T>
-    ERROR NumpyArray_argsort(
+    ERROR NumpyArray_quick_argsort(
       kernel::lib ptr_lib,
       int64_t* toptr,
       const T* fromptr,
@@ -1684,6 +1684,17 @@ namespace awkward {
       bool ascending,
       bool stable,
       int64_t maxlevels);
+
+    template <typename T>
+    ERROR NumpyArray_argsort(
+      kernel::lib ptr_lib,
+      int64_t* toptr,
+      const T* fromptr,
+      int64_t length,
+      const int64_t* offsets,
+      int64_t offsetslength,
+      bool ascending,
+      bool stable);
 
     template <typename T>
     ERROR NumpyArray_sort(
