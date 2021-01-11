@@ -145,11 +145,11 @@ namespace awkward {
     const ContentPtr
       carry(const Index64& carry, bool allow_lazy) const override;
 
-    int64_t
-      purelist_depth() const override;
-
     bool
       dimension_optiontype() const override;
+
+    int64_t
+      purelist_depth() const override;
 
     const std::pair<int64_t, int64_t>
       minmax_depth() const override;

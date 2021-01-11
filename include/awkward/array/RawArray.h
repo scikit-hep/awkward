@@ -781,6 +781,21 @@ namespace awkward {
     // operations
 
     int64_t
+      purelist_depth() const override {
+      return 1;
+    }
+
+    const std::pair<int64_t, int64_t>
+      minmax_depth() const override {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
+
+    const std::pair<bool, int64_t>
+      branch_depth() const override {
+      return std::pair<bool, int64_t>(false, 1);
+    }
+
+    int64_t
       numfields() const override {
       return -1;
     }

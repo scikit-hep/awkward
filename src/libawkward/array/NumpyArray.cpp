@@ -1305,6 +1305,22 @@ namespace awkward {
   }
 
   int64_t
+  NumpyArray::purelist_depth() const {
+    return (int64_t)shape_.size();
+  }
+
+  const std::pair<int64_t, int64_t>
+  NumpyArray::minmax_depth() const {
+    return std::pair<int64_t, int64_t>((int64_t)shape_.size(),
+                                       (int64_t)shape_.size());
+  }
+
+  const std::pair<bool, int64_t>
+  NumpyArray::branch_depth() const {
+    return std::pair<bool, int64_t>(false, (int64_t)shape_.size());
+  }
+
+  int64_t
   NumpyArray::numfields() const {
     return -1;
   }

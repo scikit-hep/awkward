@@ -605,6 +605,21 @@ namespace awkward {
   }
 
   int64_t
+  UnmaskedArray::purelist_depth() const {
+    return content_.get()->purelist_depth();
+  }
+
+  const std::pair<int64_t, int64_t>
+  UnmaskedArray::minmax_depth() const {
+    return content_.get()->minmax_depth();
+  }
+
+  const std::pair<bool, int64_t>
+  UnmaskedArray::branch_depth() const {
+    return content_.get()->branch_depth();
+  }
+
+  int64_t
   UnmaskedArray::numfields() const {
     return content_.get()->numfields();
   }

@@ -391,6 +391,15 @@ namespace awkward {
       carry(const Index64& carry, bool allow_lazy) const override;
 
     int64_t
+      purelist_depth() const override;
+
+    const std::pair<int64_t, int64_t>
+      minmax_depth() const override;
+
+    const std::pair<bool, int64_t>
+      branch_depth() const override;
+
+    int64_t
       numfields() const override;
 
     int64_t
