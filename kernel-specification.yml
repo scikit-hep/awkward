@@ -849,6 +849,56 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_Index_iscontiguous
+    specializations:
+      - name: awkward_Index8_iscontiguous
+        args:
+          - {name: result, type: "List[bool]", dir: out}
+          - {name: low, type: "int64_t", dir: in}
+          - {name: high, type: "int64_t", dir: in}
+          - {name: fromindex, type: "Const[int8_t]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+      - name: awkward_IndexU8_iscontiguous
+        args:
+          - {name: result, type: "List[bool]", dir: out}
+          - {name: low, type: "int64_t", dir: in}
+          - {name: high, type: "int64_t", dir: in}
+          - {name: fromindex, type: "Const[uint8_t]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+      - name: awkward_Index32_iscontiguous
+        args:
+          - {name: result, type: "List[bool]", dir: out}
+          - {name: low, type: "int64_t", dir: in}
+          - {name: high, type: "int64_t", dir: in}
+          - {name: fromindex, type: "Const[int32_t]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+      - name: awkward_IndexU32_iscontiguous
+        args:
+          - {name: result, type: "List[bool]", dir: out}
+          - {name: low, type: "int64_t", dir: in}
+          - {name: high, type: "int64_t", dir: in}
+          - {name: fromindex, type: "Const[uint32_t]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+      - name: awkward_Index64_iscontiguous
+        args:
+          - {name: result, type: "List[bool]", dir: out}
+          - {name: low, type: "int64_t", dir: in}
+          - {name: high, type: "int64_t", dir: in}
+          - {name: fromindex, type: "Const[int64_t]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+    description: null
+    definition: |
+      def awkward_Index_iscontiguous(result, low, high, fromindex, length):
+          result[0] = True
+          expecting = low
+          for i in range(length):
+              if fromindex[i] != expecting:
+                  result[0] = False
+                  return
+              expecting += 1
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_Index_to_Index64
     specializations:
       - name: awkward_Index32_to_Index64
