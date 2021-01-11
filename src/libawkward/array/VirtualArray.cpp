@@ -1010,6 +1010,7 @@ namespace awkward {
                                                   generator,
                                                   cache);
         out.get()->set_cache_depths_from(this);
+        out.get()->add_to_cache_depths(1);
         return out;
       }
 
@@ -1240,4 +1241,16 @@ namespace awkward {
                            original->cache_depths_.end());
     }
   }
+
+  void
+  VirtualArray::add_to_cache_depths(int64_t delta) {
+    if (!cache_depths_.empty()) {
+      cache_depths_[0] += delta;
+      cache_depths_[1] += delta;
+      cache_depths_[2] += delta;
+      // cache_depths_[3];
+      cache_depths_[4] += delta;
+    }
+  }
+
 }

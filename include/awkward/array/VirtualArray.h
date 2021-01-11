@@ -432,6 +432,9 @@ namespace awkward {
     void
       set_cache_depths_from(const VirtualArray* original);
 
+    void
+      add_to_cache_depths(int64_t delta);
+
     /// @brief See #generator.
     const ArrayGeneratorPtr generator_;
     /// @brief See #cache.
