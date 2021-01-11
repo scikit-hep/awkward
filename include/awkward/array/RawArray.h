@@ -1024,22 +1024,16 @@ namespace awkward {
       offsets.setitem_at_nowrap(0, 0);
       offsets.setitem_at_nowrap(1, length_);
 
-      std::shared_ptr<int64_t> tmp_beg_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                                                     kMaxLevels*((int64_t)sizeof(int64_t)));
-      std::shared_ptr<int64_t> tmp_end_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                                                     kMaxLevels*((int64_t)sizeof(int64_t)));
-
       struct Error err = kernel::NumpyArray_sort<T>(
         kernel::lib::cpu,   // DERIVE
         ptr.get(),
         ptr_.get(),
         length_,
-        tmp_beg_ptr.get(),
-        tmp_end_ptr.get(),
         offsets.ptr().get(),
         offsets.length(),
+        parents.length(),
         ascending,
-        kMaxLevels);
+        stable);
       util::handle_error(err, classname(), nullptr);
 
       ContentPtr out = std::make_shared<RawArrayOf<T>>(Identities::none(),

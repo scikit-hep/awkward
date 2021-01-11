@@ -1691,12 +1691,11 @@ namespace awkward {
       T* toptr,
       const T* fromptr,
       int64_t length,
-      int64_t* tmpbeg,
-      int64_t* tmpend,
       const int64_t* offsets,
       int64_t offsetslength,
+      int64_t parentslength,
       bool ascending,
-      int64_t maxlevels);
+      bool stable);
 
     template <typename T>
     ERROR NumpyArray_sort_asstrings(
