@@ -4,6 +4,11 @@ trigger:
     include:
       - "*"
 
+pr:
+  branches:
+    exclude:
+      - "*"
+
 jobs:
   - job: Sphinx
 
