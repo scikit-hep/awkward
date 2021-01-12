@@ -1308,25 +1308,41 @@ def linear_fit(x, y, weight=None, axis=None, keepdims=False, mask_identity=True)
         scalar = False
         if not isinstance(
             intercept,
-            (ak.layout.Content, ak.layout.Record, ak.partition.PartitionedArray,),
+            (
+                ak.layout.Content,
+                ak.layout.Record,
+                ak.partition.PartitionedArray,
+            ),
         ):
             intercept = ak.layout.NumpyArray(nplike.array([intercept]))
             scalar = True
         if not isinstance(
             slope,
-            (ak.layout.Content, ak.layout.Record, ak.partition.PartitionedArray,),
+            (
+                ak.layout.Content,
+                ak.layout.Record,
+                ak.partition.PartitionedArray,
+            ),
         ):
             slope = ak.layout.NumpyArray(nplike.array([slope]))
             scalar = True
         if not isinstance(
             intercept_error,
-            (ak.layout.Content, ak.layout.Record, ak.partition.PartitionedArray,),
+            (
+                ak.layout.Content,
+                ak.layout.Record,
+                ak.partition.PartitionedArray,
+            ),
         ):
             intercept_error = ak.layout.NumpyArray(nplike.array([intercept_error]))
             scalar = True
         if not isinstance(
             slope_error,
-            (ak.layout.Content, ak.layout.Record, ak.partition.PartitionedArray,),
+            (
+                ak.layout.Content,
+                ak.layout.Record,
+                ak.partition.PartitionedArray,
+            ),
         ):
             slope_error = ak.layout.NumpyArray(nplike.array([slope_error]))
             scalar = True

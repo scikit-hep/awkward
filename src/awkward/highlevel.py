@@ -29,7 +29,9 @@ def _suffix(array):
 
 
 class Array(
-    ak._connect._numpy.NDArrayOperatorsMixin, Iterable, Sized,
+    ak._connect._numpy.NDArrayOperatorsMixin,
+    Iterable,
+    Sized,
 ):
     u"""
     Args:

@@ -316,37 +316,79 @@ def test_nested_virtual():
     ]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         1:, :, ["eta", "phi"], "down"
-    ].tolist() == [[], [{"eta": 10, "phi": 12}],]
+    ].tolist() == [
+        [],
+        [{"eta": 10, "phi": 12}],
+    ]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         1:, ["eta", "phi"], :, "down"
-    ].tolist() == [[], [{"eta": 10, "phi": 12}],]
+    ].tolist() == [
+        [],
+        [{"eta": 10, "phi": 12}],
+    ]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         1:, ["eta", "phi"], "down", :
-    ].tolist() == [[], [{"eta": 10, "phi": 12}],]
+    ].tolist() == [
+        [],
+        [{"eta": 10, "phi": 12}],
+    ]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         ["eta", "phi"], 1:, :, "down"
-    ].tolist() == [[], [{"eta": 10, "phi": 12}],]
+    ].tolist() == [
+        [],
+        [{"eta": 10, "phi": 12}],
+    ]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         ["eta", "phi"], 1:, "down", :
-    ].tolist() == [[], [{"eta": 10, "phi": 12}],]
+    ].tolist() == [
+        [],
+        [{"eta": 10, "phi": 12}],
+    ]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         ["eta", "phi"], "down", 1:, :
-    ].tolist() == [[], [{"eta": 10, "phi": 12}],]
+    ].tolist() == [
+        [],
+        [{"eta": 10, "phi": 12}],
+    ]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         :, 1:, ["eta", "phi"], "down"
-    ].tolist() == [[{"eta": 6, "phi": 8}], [], [],]
+    ].tolist() == [
+        [{"eta": 6, "phi": 8}],
+        [],
+        [],
+    ]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         :, ["eta", "phi"], 1:, "down"
-    ].tolist() == [[{"eta": 6, "phi": 8}], [], [],]
+    ].tolist() == [
+        [{"eta": 6, "phi": 8}],
+        [],
+        [],
+    ]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         :, ["eta", "phi"], "down", 1:
-    ].tolist() == [[{"eta": 6, "phi": 8}], [], [],]
+    ].tolist() == [
+        [{"eta": 6, "phi": 8}],
+        [],
+        [],
+    ]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         ["eta", "phi"], :, 1:, "down"
-    ].tolist() == [[{"eta": 6, "phi": 8}], [], [],]
+    ].tolist() == [
+        [{"eta": 6, "phi": 8}],
+        [],
+        [],
+    ]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         ["eta", "phi"], :, "down", 1:
-    ].tolist() == [[{"eta": 6, "phi": 8}], [], [],]
+    ].tolist() == [
+        [{"eta": 6, "phi": 8}],
+        [],
+        [],
+    ]
     assert ak.virtual(lambda: array, length=3, form=array.layout.form)[
         ["eta", "phi"], "down", :, 1:
-    ].tolist() == [[{"eta": 6, "phi": 8}], [], [],]
+    ].tolist() == [
+        [{"eta": 6, "phi": 8}],
+        [],
+        [],
+    ]

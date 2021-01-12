@@ -24,7 +24,8 @@ def test_make_mixins():
         @ak.mixin_class_method(np.add, {"Point"})
         def point_add(self, other):
             return ak.zip(
-                {"x": self.x + other.x, "y": self.y + other.y}, with_name="Point",
+                {"x": self.x + other.x, "y": self.y + other.y},
+                with_name="Point",
             )
 
     @ak.mixin_class(ak.behavior)

@@ -136,7 +136,8 @@ def tolookup(layout, positions, sharedptrs, arrays):
         )
 
     elif isinstance(
-        layout, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64),
+        layout,
+        (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64),
     ):
         return ak._connect._numba.layout.IndexedOptionArrayType.tolookup(
             layout, positions, sharedptrs, arrays
@@ -390,7 +391,9 @@ class ArrayViewType(numba.types.IterableType, numba.types.Sized):
     def __init__(self, type, behavior, fields):
         super(ArrayViewType, self).__init__(
             name="ak.ArrayView({0}, {1}, {2})".format(
-                type.name, ak._connect._numba.repr_behavior(behavior), repr(fields),
+                type.name,
+                ak._connect._numba.repr_behavior(behavior),
+                repr(fields),
             )
         )
         self.type = type
@@ -1221,7 +1224,9 @@ def lower_asarray(context, builder, sig, args):
         (builder.sub(viewproxy.stop, viewproxy.start),),
     )
     strides = context.make_tuple(
-        builder, numba.types.UniTuple(numba.types.intp, 1), (itemsize,),
+        builder,
+        numba.types.UniTuple(numba.types.intp, 1),
+        (itemsize,),
     )
 
     out = numba.np.arrayobj.make_array(rettype)(context, builder)
@@ -1298,7 +1303,9 @@ class PartitionedViewType(numba.types.Type):
     def __init__(self, type, behavior, fields):
         super(PartitionedViewType, self).__init__(
             name="ak.PartitionedView({0}, {1}, {2})".format(
-                type.name, ak._connect._numba.repr_behavior(behavior), repr(fields),
+                type.name,
+                ak._connect._numba.repr_behavior(behavior),
+                repr(fields),
             )
         )
         self.type = type

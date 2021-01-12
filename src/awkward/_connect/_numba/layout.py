@@ -80,7 +80,11 @@ def typeof(obj):
         return typeof_IndexedArray(obj)
 
     elif isinstance(
-        obj, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64,)
+        obj,
+        (
+            ak.layout.IndexedOptionArray32,
+            ak.layout.IndexedOptionArray64,
+        ),
     ):
         return typeof_IndexedOptionArray(obj)
 
@@ -109,7 +113,13 @@ def typeof(obj):
     elif isinstance(obj, ak.layout.VirtualArray):
         return typeof_VirtualArray(obj)
 
-    elif isinstance(obj, (ak.layout.Identities32, ak.layout.Identities64,)):
+    elif isinstance(
+        obj,
+        (
+            ak.layout.Identities32,
+            ak.layout.Identities64,
+        ),
+    ):
         raise NotImplementedError(
             "Awkward Identities are not yet supported for functions compiled by Numba"
         )
@@ -135,13 +145,18 @@ def typeof(obj):
 def typeof_NumpyArray(obj):
     t = numba.typeof(ak.nplike.of(obj).asarray(obj))
     return NumpyArrayType(
-        numba.types.Array(t.dtype, t.ndim, "A"), typeof(obj.identities), obj.parameters,
+        numba.types.Array(t.dtype, t.ndim, "A"),
+        typeof(obj.identities),
+        obj.parameters,
     )
 
 
 def typeof_RegularArray(obj):
     return RegularArrayType(
-        typeof(obj.content), obj.size, typeof(obj.identities), obj.parameters,
+        typeof(obj.content),
+        obj.size,
+        typeof(obj.identities),
+        obj.parameters,
     )
 
 
@@ -444,7 +459,11 @@ def getat(context, builder, baseptr, offset, rettype=None):
         numba.core.cgutils.pointer_add(builder, baseptr, byteoffset, ptrtype)
     )
     if rettype is not None and isinstance(rettype, numba.types.Boolean):
-        return builder.icmp_signed("!=", out, context.get_constant(numba.int8, 0),)
+        return builder.icmp_signed(
+            "!=",
+            out,
+            context.get_constant(numba.int8, 0),
+        )
     else:
         return out
 
@@ -754,7 +773,11 @@ class ListArrayType(ContentType):
     def tolookup(cls, layout, positions, sharedptrs, arrays):
         if isinstance(
             layout,
-            (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64,),
+            (
+                ak.layout.ListArray32,
+                ak.layout.ListArrayU32,
+                ak.layout.ListArray64,
+            ),
         ):
             starts = ak.nplike.of(layout.starts).asarray(layout.starts)
             stops = ak.nplike.of(layout.stops).asarray(layout.stops)
@@ -836,7 +859,11 @@ class ListArrayType(ContentType):
 
         if isinstance(
             layout,
-            (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64,),
+            (
+                ak.layout.ListArray32,
+                ak.layout.ListArrayU32,
+                ak.layout.ListArray64,
+            ),
         ):
             starts = ak.nplike.of(layout.starts).asarray(layout.starts)
             stops = ak.nplike.of(layout.stops).asarray(layout.stops)
@@ -2579,7 +2606,11 @@ class VirtualArrayType(ContentType):
 
             elif isinstance(
                 form,
-                (ak.forms.RegularForm, ak.forms.ListForm, ak.forms.ListOffsetForm,),
+                (
+                    ak.forms.RegularForm,
+                    ak.forms.ListForm,
+                    ak.forms.ListOffsetForm,
+                ),
             ):
                 return form.content
 
@@ -2687,7 +2718,12 @@ class VirtualArrayType(ContentType):
 
             # add the materialized array to our Lookup
             pyapi.call_function_objargs(
-                fill_obj, (arraypos_obj, array_obj, lookup_obj,)
+                fill_obj,
+                (
+                    arraypos_obj,
+                    array_obj,
+                    lookup_obj,
+                ),
             )
 
             # FIXME: memory leak? what about putting this exception after the decrefs?

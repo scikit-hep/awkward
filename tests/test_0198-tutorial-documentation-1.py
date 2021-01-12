@@ -40,22 +40,30 @@ def test_firsts():
             ak.singletons(ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])), axis=1
         )
     ) == [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]
-    assert ak.to_list(
-        ak.firsts(
-            ak.singletons(
-                ak.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]])
-            ),
-            axis=2,
+    assert (
+        ak.to_list(
+            ak.firsts(
+                ak.singletons(
+                    ak.Array([[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]])
+                ),
+                axis=2,
+            )
         )
-    ) == [[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]]
-    assert ak.to_list(
-        ak.firsts(
-            ak.singletons(
-                ak.Array([[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]])
-            ),
-            axis=3,
+        == [[1.1, 2.2, None], [3.3, None], [None], [4.4, 5.5]]
+    )
+    assert (
+        ak.to_list(
+            ak.firsts(
+                ak.singletons(
+                    ak.Array(
+                        [[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]]
+                    )
+                ),
+                axis=3,
+            )
         )
-    ) == [[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]]
+        == [[[1.1, 2.2, None]], [[3.3, None]], [[None]], [[4.4, 5.5]]]
+    )
 
 
 def test_allow_missing():

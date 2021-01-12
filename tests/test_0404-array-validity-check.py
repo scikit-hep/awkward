@@ -19,6 +19,7 @@ def test_NumpyArray():
     array2 = ak.layout.NumpyArray(np.array([5, 6, 1, 3, 4, 5]))
     assert array2.is_unique() == False
 
+
 def test_ListOffsetArray():
     array = ak.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
     assert ak.to_list(array.sort(0, True, True)) == [

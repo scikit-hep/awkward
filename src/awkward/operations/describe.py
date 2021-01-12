@@ -52,7 +52,12 @@ def validity_error(array, exception=False):
         return validity_error(array.snapshot().layout, exception=exception)
 
     elif isinstance(
-        array, (ak.layout.Content, ak.layout.Record, ak.partition.PartitionedArray,),
+        array,
+        (
+            ak.layout.Content,
+            ak.layout.Record,
+            ak.partition.PartitionedArray,
+        ),
     ):
         out = array.validityerror()
         if out is not None and exception:
@@ -217,7 +222,12 @@ def parameters(array):
         return array.layout.parameters
 
     elif isinstance(
-        array, (ak.layout.Content, ak.layout.Record, ak.partition.PartitionedArray,),
+        array,
+        (
+            ak.layout.Content,
+            ak.layout.Record,
+            ak.partition.PartitionedArray,
+        ),
     ):
         return array.parameters
 
