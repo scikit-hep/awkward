@@ -71,17 +71,26 @@ jobs:
         displayName: "Install Pip"
 
       - script: |
+          python -m pip install numpy
+        displayName: "Install NumPy"
+
+      - script: |
           python -m pip install -U jupyter-book
-        displayName: "Install requirements"
+        displayName: "Install JupyterBook"
+
+      - script: |
+          python -m pip install -v .
+        displayName: "Build Awkward Array"
 
       - script: |
           jupyter-book build docs-src
-        displayName: "Generate documentation"
+        displayName: "Run notebooks"
 
       - script: |
           for x in `ls docs-src/_build/html/reports/*.log 2> /dev/null`; do
-              echo '=========================================================';
+              echo '===================================================================';
               echo $x;
+              echo '===================================================================';
               cat $x;
           done
           [ ! -d "docs-src/_build/html/reports" ]
