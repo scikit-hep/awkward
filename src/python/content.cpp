@@ -1463,14 +1463,14 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                   int64_t axis,
                   bool ascending,
                   bool stable) -> py::object {
-               return box(self.sort(axis, ascending, false));
+               return box(self.sort(axis, ascending, stable));
           })
           .def("argsort",
                [](const T& self,
                   int64_t axis,
                   bool ascending,
                   bool stable) -> py::object {
-               return box(self.argsort(axis, ascending, false));
+               return box(self.argsort(axis, ascending, stable));
           })
           .def("numbers_to_type",
                [](const T& self,

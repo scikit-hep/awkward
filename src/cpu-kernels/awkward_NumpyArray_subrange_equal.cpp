@@ -5,52 +5,12 @@
 #include "awkward/kernels.h"
 
 template <typename T>
-void swap(T* a, T* b)
-{
-  T t = *a;
-  *a = *b;
-  *b = t;
-}
-
-template <typename T>
-int partition (T* arr, int64_t low, int64_t high)
-{
-  int64_t pivot = arr[high];
-  int64_t i = (low - 1);
-
-  for (int64_t j = low; j <= high - 1; j++) {
-    if (arr[j] < pivot) {
-      i++;
-      swap(&arr[i], &arr[j]);
-    }
-  }
-  swap(&arr[i + 1], &arr[high]);
-  return (i + 1);
-}
-
-template <typename T>
-void quick_sort(T* arr, int64_t low, int64_t high)
-{
-  if (low < high)
-  {
-    int64_t pi = partition(arr, low, high);
-
-    quick_sort(arr, low, pi - 1);
-    quick_sort(arr, pi + 1, high);
-  }
-}
-
-template <typename T>
 ERROR awkward_NumpyArray_subrange_equal(
     T* tmpptr,
     const int64_t* fromstarts,
     const int64_t* fromstops,
     int64_t length,
     bool* toequal) {
-
-  for (int64_t i = 0; i < length; i++) {
-    quick_sort(tmpptr, fromstarts[i], fromstops[i] - 1);
-  }
 
   bool differ = true;
   int64_t leftlen;

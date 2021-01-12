@@ -20,39 +20,59 @@ ERROR awkward_argsort(
   std::vector<int64_t> result(length);
   std::iota(result.begin(), result.end(), 0);
 
-  for (int64_t i = 0;  i < offsetslength - 1;  i++) {
-    auto start = std::next(result.begin(), offsets[i]);
-    auto stop = std::next(result.begin(), offsets[i + 1]);
-
-    if (ascending  &&  stable) {
+  if (ascending  &&  stable) {
+    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
+      auto start = std::next(result.begin(), offsets[i]);
+      auto stop = std::next(result.begin(), offsets[i + 1]);
       std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
         return fromptr[i1] < fromptr[i2];
       });
+      std::transform(start, stop, start, [&](int64_t j) -> int64_t {
+        return j - offsets[i];
+      });
     }
-    else if (!ascending  &&  stable) {
+  }
+  else if (!ascending  &&  stable) {
+    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
+      auto start = std::next(result.begin(), offsets[i]);
+      auto stop = std::next(result.begin(), offsets[i + 1]);
       std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
         return fromptr[i1] > fromptr[i2];
       });
+      std::transform(start, stop, start, [&](int64_t j) -> int64_t {
+        return j - offsets[i];
+      });
     }
-    else if (ascending  &&  !stable) {
+  }
+  else if (ascending  &&  !stable) {
+    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
+      auto start = std::next(result.begin(), offsets[i]);
+      auto stop = std::next(result.begin(), offsets[i + 1]);
       std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
         return fromptr[i1] < fromptr[i2];
       });
+      std::transform(start, stop, start, [&](int64_t j) -> int64_t {
+        return j - offsets[i];
+      });
     }
-    else {
+  }
+  else {
+    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
+      auto start = std::next(result.begin(), offsets[i]);
+      auto stop = std::next(result.begin(), offsets[i + 1]);
       std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
         return fromptr[i1] > fromptr[i2];
       });
+      std::transform(start, stop, start, [&](int64_t j) -> int64_t {
+        return j - offsets[i];
+      });
     }
-
-    std::transform(start, stop, start, [&](int64_t j) -> int64_t {
-      return j - offsets[i];
-    });
   }
 
   for (int64_t i = 0;  i < length;  i++) {
     toptr[i] = result[i];
   }
+
   return success();
 }
 

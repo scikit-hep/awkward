@@ -2,11 +2,11 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_sort.cpp", line)
 
+#include "awkward/kernels.h"
+
 #include <algorithm>
 #include <numeric>
 #include <vector>
-
-#include "awkward/kernels.h"
 
 template <typename T>
 ERROR awkward_sort(
@@ -21,26 +21,37 @@ ERROR awkward_sort(
   std::vector<int64_t> index(length);
   std::iota(index.begin(), index.end(), 0);
 
-  for (int64_t i = 0;  i < offsetslength - 1;  i++) {
-    auto start = std::next(index.begin(), offsets[i]);
-    auto stop = std::next(index.begin(), offsets[i + 1]);
-
-    if (ascending  &&  stable) {
+  if (ascending  &&  stable) {
+    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
+      auto start = std::next(index.begin(), offsets[i]);
+      auto stop = std::next(index.begin(), offsets[i + 1]);
       std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
         return fromptr[i1] < fromptr[i2];
       });
     }
-    else if (!ascending  &&  stable) {
+  }
+  else if (!ascending  &&  stable) {
+    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
+      auto start = std::next(index.begin(), offsets[i]);
+      auto stop = std::next(index.begin(), offsets[i + 1]);
       std::stable_sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
         return fromptr[i1] > fromptr[i2];
       });
     }
-    else if (ascending  &&  !stable) {
+  }
+  else if (ascending  &&  !stable) {
+    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
+      auto start = std::next(index.begin(), offsets[i]);
+      auto stop = std::next(index.begin(), offsets[i + 1]);
       std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
         return fromptr[i1] < fromptr[i2];
       });
     }
-    else {
+  }
+  else {
+    for (int64_t i = 0;  i < offsetslength - 1;  i++) {
+      auto start = std::next(index.begin(), offsets[i]);
+      auto stop = std::next(index.begin(), offsets[i + 1]);
       std::sort(start, stop, [&fromptr](int64_t i1, int64_t i2) {
         return fromptr[i1] > fromptr[i2];
       });
@@ -50,6 +61,7 @@ ERROR awkward_sort(
   for (int64_t i = 0;  i < parentslength;  i++) {
     toptr[i] = fromptr[index[i]];
   }
+
   return success();
 }
 ERROR awkward_sort_bool(
