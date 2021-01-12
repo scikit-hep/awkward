@@ -61,7 +61,9 @@ def copy(array):
     a mutable third-party library, so this function allows you to make a true copy.
     """
     layout = ak.operations.convert.to_layout(
-        array, allow_record=True, allow_other=False,
+        array,
+        allow_record=True,
+        allow_other=False,
     )
     return ak._util.wrap(layout.deep_copy(), ak._util.behaviorof(array))
 
@@ -933,11 +935,15 @@ def full_like(array, fill_value, highlevel=True):
             original = nplike.asarray(layout)
             if fill_value == 0 or fill_value is _ZEROS:
                 return lambda: ak.layout.NumpyArray(
-                    nplike.zeros_like(original), layout.identities, layout.parameters,
+                    nplike.zeros_like(original),
+                    layout.identities,
+                    layout.parameters,
                 )
             elif fill_value == 1:
                 return lambda: ak.layout.NumpyArray(
-                    nplike.ones_like(original), layout.identities, layout.parameters,
+                    nplike.ones_like(original),
+                    layout.identities,
+                    layout.parameters,
                 )
             else:
                 return lambda: ak.layout.NumpyArray(
@@ -1284,7 +1290,8 @@ def concatenate(arrays, axis=0, merge=True, mergebool=True, highlevel=True):
 
                 offsets = ak.layout.Index64(offsets)
                 tags, index = ak.layout.UnionArray8_64.nested_tags_index(
-                    offsets, [ak.layout.Index64(x) for x in all_counts],
+                    offsets,
+                    [ak.layout.Index64(x) for x in all_counts],
                 )
                 inner = ak.layout.UnionArray8_64(tags, index, all_flatten)
 
@@ -2068,7 +2075,11 @@ def is_none(array, axis=0, highlevel=True):
                 )
             elif isinstance(
                 layout,
-                (ak._util.unknowntypes, ak._util.listtypes, ak._util.recordtypes,),
+                (
+                    ak._util.unknowntypes,
+                    ak._util.listtypes,
+                    ak._util.recordtypes,
+                ),
             ):
                 return lambda: ak.layout.NumpyArray(
                     nplike.zeros(len(layout), dtype=np.bool_)

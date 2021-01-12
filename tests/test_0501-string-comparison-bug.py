@@ -37,23 +37,26 @@ def test():
         False,
     ]
     assert ak.to_list(one == np.array(["UNO", "dos", "tres"])) == [False, True, True]
-    assert ak.to_list(
-        merged
-        == np.array(
-            [
-                "UNO",
-                "dos",
-                "tres",
-                "one",
-                "two",
-                "three",
-                "quatre",
-                "onay",
-                "two",
-                "three",
-            ]
+    assert (
+        ak.to_list(
+            merged
+            == np.array(
+                [
+                    "UNO",
+                    "dos",
+                    "tres",
+                    "one",
+                    "two",
+                    "three",
+                    "quatre",
+                    "onay",
+                    "two",
+                    "three",
+                ]
+            )
         )
-    ) == [False, True, True, False, False, False, True, True, False, False]
+        == [False, True, True, False, False, False, True, True, False, False]
+    )
 
 
 def test_fromnumpy():

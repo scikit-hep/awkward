@@ -21,6 +21,14 @@ def test():
     ak.to_numpy(empty1).dtype.type is np.float64
 
     ak.to_list(array[empty1]) == []
-    ak.to_list(array[empty1,]) == []
+    ak.to_list(
+        array[
+            empty1,
+        ]
+    ) == []
     ak.to_list(array[empty2]) == [[], [], []]
-    ak.to_list(array[empty2,]) == [[], [], []]
+    ak.to_list(
+        array[
+            empty2,
+        ]
+    ) == [[], [], []]

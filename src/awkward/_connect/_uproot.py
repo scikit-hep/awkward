@@ -36,5 +36,7 @@ def basket_array(form, data, byte_offsets, extra):
     # FIXME: uproot4_issue_90 is just a placeholder, to show how it would be done
 
     return ak._io.uproot_issue_90(
-        form, ak.layout.NumpyArray(data), ak.layout.Index32(byte_offsets),
+        form,
+        ak.layout.NumpyArray(data),
+        ak.layout.Index32(byte_offsets),
     )

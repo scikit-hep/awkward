@@ -373,7 +373,8 @@ def behaviorof(*arrays, **kwargs):
     for x in arrays[::-1]:
         if (
             isinstance(
-                x, (ak.highlevel.Array, ak.highlevel.Record, ak.highlevel.ArrayBuilder),
+                x,
+                (ak.highlevel.Array, ak.highlevel.Record, ak.highlevel.ArrayBuilder),
             )
             and x.behavior is not None
         ):
@@ -525,7 +526,11 @@ def broadcast_and_apply(  # noqa: C901
                     return False
             elif isinstance(
                 x,
-                (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64,),
+                (
+                    ak.layout.ListArray32,
+                    ak.layout.ListArrayU32,
+                    ak.layout.ListArray64,
+                ),
             ):
                 starts = nplike.asarray(x.starts)
                 stops = nplike.asarray(x.stops)
@@ -1233,7 +1238,10 @@ def recursively_apply(
             )
 
         elif isinstance(layout, ak.layout.Record):
-            return ak.layout.Record(apply(layout.array, depth, user), layout.at,)
+            return ak.layout.Record(
+                apply(layout.array, depth, user),
+                layout.at,
+            )
 
         elif isinstance(layout, ak.layout.UnionArray8_32):
             return ak.layout.UnionArray8_32(
