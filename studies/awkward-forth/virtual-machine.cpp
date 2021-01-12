@@ -2765,10 +2765,37 @@ private:
             }
 
             case UNTIL: {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              if (stack_pop() == 0) {
+                // Predicate is false, so go back and do the body again.
+                instruction_pointer_where() -= 2;
+              }
               break;
             }
 
             case WHILE: {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              if (stack_pop() == 0) {
+                // Predicate is false, so skip over the conditional body.
+                instruction_pointer_where()++;
+              }
+              else {
+                // Predicate is true, so do the next instruction (we know it's
+                // in the dictionary), but skip back after that.
+                I posttest = instruction_get();
+                instruction_pointer_where() -= 2;
+                if (instruction_current_depth_ == instruction_max_depth_) {
+                  current_error_ = ForthError::recursion_depth_exceeded;
+                  return;
+                }
+                instruction_pointer_push((posttest - DICTIONARY) + 1);
+              }
               break;
             }
 
@@ -2839,8 +2866,8 @@ private:
                 return;
               }
               T* top = stack_peek();
-              stack_pop();
               write_from_stack(num, top);
+              stack_top_--;
 
               count_writes_++;
               break;
@@ -2882,6 +2909,16 @@ private:
             }
 
             case DUP: {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
+                return;
+              }
+              stack_buffer_[stack_top_] = stack_buffer_[stack_top_ - 1];
+              stack_top_++;
               break;
             }
 
@@ -2925,6 +2962,12 @@ private:
             }
 
             case SUB: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2();
+              stack_push(pair[0] - pair[1]);
               break;
             }
 
@@ -2999,10 +3042,22 @@ private:
             }
 
             case EQ0: {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              *top = *top == 0 ? -1 : 0;
               break;
             }
 
             case INVERT: {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              *top = ~(*top);
               break;
             }
 
@@ -3222,7 +3277,7 @@ int main() {
   // "again \n"
 
   ForthMachine<int32_t, int32_t, true> vm(
-      ": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ; 0 0 foo"
+      "4 begin 1 - dup 0= invert while 123 drop repeat 999"
   );
 
   // const int64_t length = 1000000;
