@@ -3,23 +3,9 @@ trigger:
   branches:
     include:
       - "*"
-  paths:
-    exclude:
-      - README.md
-      - VERSION_INFO
-      - .ci/azure-deploy-awkward.yml
-      - .ci/linux-build.sh
-      - .readthedocs.yml
-      - docs-src/*
-      - docs-img/*
-      - docs-jupyter/*
-      - docs-doxygen/*
-      - docs-sphinx/*
-      - docs/*
-      - studies/*
 
 jobs:
-  - job: Linux
+  - job: Sphinx
 
     pool:
       vmImage: "ubuntu-16.04"
@@ -53,3 +39,45 @@ jobs:
       - script: |
           sphinx-build docs-sphinx/ docs-sphinx/_build/
         displayName: "Generate documentation"
+
+  - job: JupyterBook
+
+    pool:
+      vmImage: "ubuntu-16.04"
+
+    strategy:
+      matrix:
+        "py38-np*":
+          python.version: "3.8"
+          python.architecture: "x64"
+
+    steps:
+      - checkout: self
+        submodules: recursive
+
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+          architecture: '$(python.architecture)'
+        displayName: 'Python $(python.version)'
+
+      - script: |
+          python -m pip install --upgrade pip
+        displayName: "Install Pip"
+
+      - script: |
+          python -m pip install -U jupyter-book
+        displayName: "Install requirements"
+
+      - script: |
+          jupyter-book build docs-src
+        displayName: "Generate documentation"
+
+      - script: |
+          for x in `ls docs-src/_build/html/reports/*.log 2> /dev/null`; do
+              echo '=========================================================';
+              echo $x;
+              cat $x;
+          done
+          [ ! -d "docs-src/_build/html/reports" ]
+        displayName: "Check reports"
