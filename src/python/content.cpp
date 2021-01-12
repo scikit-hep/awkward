@@ -1845,10 +1845,123 @@ make_ListOffsetArrayOf(const py::handle& m, const std::string& name);
 ////////// NumpyArray
 
 const ak::NumpyArray
+NumpyArray_from_cuda_array_interface(const std::string& name,
+                                     const py::object& array,
+                                     const py::object& identities,
+                                     const py::object& parameters) {
+  py::dict cuda_array_interface = array.attr("__cuda_array_interface__");
+  
+  const std::vector<ssize_t> shape = cuda_array_interface["shape"].cast<std::vector<ssize_t>>();
+  std::string typestr = cuda_array_interface["typestr"].cast<std::string>();
+  const uint8_t dtype_size = std::stoi(typestr.substr(2));
+
+  if(shape.empty()) {
+    throw std::invalid_argument(
+        std::string("Array must not be scalar; try array.reshape(1)")
+        + FILENAME(__LINE__));
+  }
+  
+  std::vector<ssize_t> form_strides;
+  try {
+    // None can't be cast to std::vector, catch the exception and form strides from shape
+    form_strides = cuda_array_interface["strides"].cast<std::vector<ssize_t>>();
+  }
+  catch (py::cast_error err) {
+    form_strides = cuda_array_interface["shape"].cast<std::vector<ssize_t>>();
+    form_strides[0] = 1;
+    std::transform(form_strides.begin(), form_strides.end(), form_strides.begin(), 
+      [dtype_size](ssize_t& form_strides_ele) -> ssize_t { return form_strides_ele * dtype_size; });
+    std::reverse(form_strides.begin(), form_strides.end());
+  } 
+  const std::vector<ssize_t> strides = form_strides;
+
+  const char dtype_code = typestr[1];
+  ak::util::dtype array_dtype;
+  switch(dtype_code) {
+    case 'b': array_dtype = ak::util::dtype::boolean;
+              break; 
+    case 'i': if(dtype_size == 1) {
+                array_dtype = ak::util::dtype::int8;
+              } 
+              else if (dtype_size == 2) {
+                array_dtype = ak::util::dtype::int16;
+              } 
+              else if (dtype_size == 4) {
+                array_dtype = ak::util::dtype::int32;
+              }
+              else if (dtype_size == 8) {
+                array_dtype = ak::util::dtype::int64;
+              }
+              break;
+    case 'u': if(dtype_size == 1) {
+                array_dtype = ak::util::dtype::uint8;
+              } 
+              else if (dtype_size == 2) {
+                array_dtype = ak::util::dtype::uint16;
+              } 
+              else if (dtype_size == 4) {
+                array_dtype = ak::util::dtype::uint32;
+              }
+              else if (dtype_size == 8) {
+                array_dtype = ak::util::dtype::uint64;
+              }
+              break;
+
+    case 'f': if (dtype_size == 2) {
+                array_dtype = ak::util::dtype::float16;
+              } 
+              else if (dtype_size == 4) {
+                array_dtype = ak::util::dtype::float32;
+              }
+              else if (dtype_size == 8) {
+                array_dtype = ak::util::dtype::float64;
+              }
+              else if(dtype_size == 16) {
+                array_dtype = ak::util::dtype::float128;
+              }
+              break;
+
+    case 'c': if(dtype_size == 8) {
+                array_dtype = ak::util::dtype::complex64;
+              } 
+              else if (dtype_size == 16) {
+                array_dtype = ak::util::dtype::complex128;
+              } 
+              else if (dtype_size == 32) {
+                array_dtype = ak::util::dtype::complex256;
+              }
+              break;
+
+    default:  throw std::invalid_argument(std::string("Can't accept array of the given data type" + FILENAME(__LINE__)));
+  }
+  
+  void* ptr = reinterpret_cast<void*>(cuda_array_interface["data"].cast<std::vector<ssize_t>>()[0]);
+
+  return ak::NumpyArray(
+    unbox_identities_none(identities),
+    dict2parameters(parameters),
+    std::shared_ptr<void>(ptr, pyobject_deleter<void>(array.ptr())),
+    shape,
+    strides,
+    0,
+    dtype_size,
+    ak::util::dtype_to_format(array_dtype),
+    array_dtype,
+    ak::kernel::lib::cuda);
+}
+
+
+const ak::NumpyArray
 NumpyArray_from_cupy(const std::string& name,
                      const py::object& array,
                      const py::object& identities,
                      const py::object& parameters) {
+  if(py::hasattr(array, "__cuda_array_interface__")) {
+    return NumpyArray_from_cuda_array_interface(name,
+                                                array,
+                                                identities,
+                                                parameters);
+  }
   if (py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
     const std::vector<ssize_t> shape = array.attr("shape").cast<std::vector<ssize_t>>();
     const std::vector<ssize_t> strides = array.attr("strides").cast<std::vector<ssize_t>>();
@@ -1911,7 +2024,9 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
         std::string module = anyarray.get_type().attr("__module__").cast<std::string>();
         if (module.rfind("cupy.", 0) == 0) {
           return NumpyArray_from_cupy(name, anyarray, identities, parameters);
-        }
+        }// else if (module.rfind("jax.", 0) == 0) {
+         // return NumpyArray_from_jax(name, anyarray, identities, parameters);
+         // }
 
         py::array array = anyarray.cast<py::array>();
 
