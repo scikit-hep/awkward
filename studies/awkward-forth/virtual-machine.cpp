@@ -1279,17 +1279,17 @@ private:
       instructions_offsets_.push_back(instructions_.size());
     }
 
-    // std::cout << "Instructions offsets:";
-    // for (auto x : instructions_offsets_) {
-    //   std::cout << " " << x;
-    // }
-    // std::cout << std::endl;
+    std::cout << "Instructions offsets:";
+    for (auto x : instructions_offsets_) {
+      std::cout << " " << x;
+    }
+    std::cout << std::endl;
 
-    // std::cout << "Instructions:";
-    // for (auto x : instructions_) {
-    //   std::cout << " " << x;
-    // }
-    // std::cout << std::endl;
+    std::cout << "Instructions:";
+    for (auto x : instructions_) {
+      std::cout << " " << x;
+    }
+    std::cout << std::endl;
   }
 
   const std::string err_linecol(const std::vector<std::pair<int64_t, int64_t>>& linecol,
@@ -1594,68 +1594,68 @@ private:
           else if (tokenized[substop] == "else" and nesting == 1) {
             subelse = substop;
           }
+        }
 
-          if (subelse == -1) {
-            // Add the consequent to the dictionary so that it can be used
-            // without special instruction pointer manipulation at runtime.
-            I instruction = dictionary.size() + DICTIONARY;
-            std::vector<I> consequent;
-            dictionary.push_back(consequent);
-            parse(defn,
-                  tokenized,
-                  linecol,
-                  substart,
-                  substop,
-                  consequent,
-                  dictionary_names,
-                  dictionary,
-                  exitdepth + 1,
-                  dodepth);
-            dictionary[instruction - DICTIONARY] = consequent;
+        if (subelse == -1) {
+          // Add the consequent to the dictionary so that it can be used
+          // without special instruction pointer manipulation at runtime.
+          I instruction = dictionary.size() + DICTIONARY;
+          std::vector<I> consequent;
+          dictionary.push_back(consequent);
+          parse(defn,
+                tokenized,
+                linecol,
+                substart,
+                substop,
+                consequent,
+                dictionary_names,
+                dictionary,
+                exitdepth + 1,
+                dodepth);
+          dictionary[instruction - DICTIONARY] = consequent;
 
-            instructions.push_back(IF);
-            instructions.push_back(instruction);
+          instructions.push_back(IF);
+          instructions.push_back(instruction);
 
-            pos = substop + 1;
-          }
-          else {
-            // Same as above, except that two new definitions must be made.
-            I instruction1 = dictionary.size() + DICTIONARY;
-            std::vector<I> consequent;
-            dictionary.push_back(consequent);
-            parse(defn,
-                  tokenized,
-                  linecol,
-                  substart,
-                  substop,
-                  consequent,
-                  dictionary_names,
-                  dictionary,
-                  exitdepth + 1,
-                  dodepth);
-            dictionary[instruction1 - DICTIONARY] = consequent;
+          pos = substop + 1;
+        }
+        else {
+          // Same as above, except that two new definitions must be made.
+          I instruction1 = dictionary.size() + DICTIONARY;
+          std::vector<I> consequent;
+          dictionary.push_back(consequent);
+          parse(defn,
+                tokenized,
+                linecol,
+                substart,
+                subelse,
+                consequent,
+                dictionary_names,
+                dictionary,
+                exitdepth + 1,
+                dodepth);
+          dictionary[instruction1 - DICTIONARY] = consequent;
 
-            I instruction2 = dictionary.size() + DICTIONARY;
-            std::vector<I> alternate;
-            dictionary.push_back(alternate);
-            parse(defn,
-                  tokenized,
-                  linecol,
-                  substart,
-                  substop,
-                  alternate,
-                  dictionary_names,
-                  dictionary,
-                  exitdepth + 1,
-                  dodepth);
-            dictionary[instruction2 - DICTIONARY] = alternate;
+          I instruction2 = dictionary.size() + DICTIONARY;
+          std::vector<I> alternate;
+          dictionary.push_back(alternate);
+          parse(defn,
+                tokenized,
+                linecol,
+                subelse + 1,
+                substop,
+                alternate,
+                dictionary_names,
+                dictionary,
+                exitdepth + 1,
+                dodepth);
+          dictionary[instruction2 - DICTIONARY] = alternate;
 
-            instructions.push_back(IF_ELSE);
-            instructions.push_back(instruction1);
-            instructions.push_back(instruction2);
+          instructions.push_back(IF_ELSE);
+          instructions.push_back(instruction1);
+          instructions.push_back(instruction2);
 
-            pos = substop + 1;
-          }
+          pos = substop + 1;
         }
       }
 
@@ -1819,7 +1819,7 @@ private:
                 tokenized,
                 linecol,
                 substart,
-                substop,
+                subwhile,
                 precondition,
                 dictionary_names,
                 dictionary,
@@ -1834,7 +1834,7 @@ private:
           parse(defn,
                 tokenized,
                 linecol,
-                substart,
+                subwhile + 1,
                 substop,
                 postcondition,
                 dictionary_names,
@@ -2695,10 +2695,38 @@ private:
             }
 
             case IF: {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              if (stack_pop() == 0) {
+                // Predicate is false, so skip over the next instruction.
+                instruction_pointer_where()++;
+              }
               break;
             }
 
             case IF_ELSE: {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              if (stack_pop() == 0) {
+                // Predicate is false, so skip over the next instruction
+                // but do the one after that.
+                instruction_pointer_where()++;
+              }
+              else {
+                // Predicate is true, so do the next instruction (we know it's
+                // in the dictionary), but skip the one after that.
+                I consequent = instruction_get();
+                instruction_pointer_where() += 2;
+                if (instruction_current_depth_ == instruction_max_depth_) {
+                  current_error_ = ForthError::recursion_depth_exceeded;
+                  return;
+                }
+                instruction_pointer_push((consequent - DICTIONARY) + 1);
+              }
               break;
             }
 
@@ -2901,6 +2929,12 @@ private:
             }
 
             case MUL: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2();
+              stack_push(pair[0] * pair[1]);
               break;
             }
 
@@ -3177,20 +3211,22 @@ void ForthMachine<int32_t, int32_t, true>::write_from_stack(int64_t num, int32_t
 
 
 int main() {
+  // "input testin \n"
+  // "output testout int32 \n"
+  // "begin \n"
+  // "  testin i-> stack \n"
+  // "  10 0 do \n"
+  // "    10 + \n"
+  // "  loop \n"
+  // "  testout <- stack \n"
+  // "again \n"
+
   ForthMachine<int32_t, int32_t, true> vm(
-      "input testin \n"
-      "output testout int32 \n"
-      "begin \n"
-      "  testin i-> stack \n"
-      "  10 0 do \n"
-      "    10 + \n"
-      "  loop \n"
-      "  testout <- stack \n"
-      "again \n"
+      ": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ; 0 0 foo"
   );
 
-  const int64_t length = 1000000;
-  // const int64_t length = 20;
+  // const int64_t length = 1000000;
+  const int64_t length = 20;
 
   std::shared_ptr<int32_t> test_input_ptr = std::shared_ptr<int32_t>(
       new int32_t[length], array_deleter<int32_t>());
@@ -3204,7 +3240,7 @@ int main() {
                                                         0,
                                                         sizeof(int32_t) * length);
 
-  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
+  for (int64_t repeat = 0;  repeat < 0;  repeat++) {
     std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
     std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
         std::make_shared<ForthOutputBufferOf<int64_t>>() });
@@ -3223,12 +3259,12 @@ int main() {
     inputs["testin"].get()->seek(0, err);
   }
 
-  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
+  for (int64_t repeat = 0;  repeat < 1;  repeat++) {
     std::set<ForthError> ignore({ ForthError::read_beyond });
 
     std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
 
-    // std::cout << vm.tostring(outputs);
+    std::cout << vm.tostring(outputs);
 
     std::cout << "Time (us): " << vm.count_nanoseconds() / 1000
               << " Instructions: " << vm.count_instructions()
