@@ -376,17 +376,17 @@ def test_RecordArray():
         [],
     ]
 
-    # assert ak.to_list(array.y.layout.argsort(1, True, True)) == [
-    #     [],
-    #     [0],
-    #     [0, 1],
-    #     [0, 1, 2],
-    #     [0, 1, 2, 3],
-    #     [0, 1, 2],
-    #     [0, 1],
-    #     [0],
-    #     [],
-    # ]
+    assert ak.to_list(array.y.layout.argsort(1, True, True)) == [
+        [],
+        [0],
+        [0, 1],
+        [0, 1, 2],
+        [0, 1, 2, 3],
+        [0, 1, 2],
+        [0, 1],
+        [0],
+        [],
+    ]
 
 
 def test_ByteMaskedArray():

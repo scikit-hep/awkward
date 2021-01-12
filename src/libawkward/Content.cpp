@@ -1044,7 +1044,6 @@ namespace awkward {
     std::pair<bool, int64_t> branchdepth = branch_depth();
     bool branch = branchdepth.first;
     int64_t depth = branchdepth.second;
-
     if (branch) {
       if (negaxis <= 0) {
         throw std::invalid_argument(
