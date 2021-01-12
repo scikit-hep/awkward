@@ -594,11 +594,9 @@ class VirtualMachine:
         dictionary = [np.array(x, np.int32) for x in self.dictionary + [instructions]]
         which = [len(self.dictionary)]
         where = [0]
-        skip = [0]
 
         # The do .. loop stack is a different stack.
         do_depth = []
-        do_start = []
         do_stop = []
         do_step = []
         do_i = []
@@ -617,7 +615,6 @@ class VirtualMachine:
                     if verbose:
                         printout(len(which) - 1, "do: {0} (end)".format(do_i[-1]), False)
                     do_depth.pop()
-                    do_start.pop()
                     do_stop.pop()
                     do_step.pop()
                     do_i.pop()
@@ -628,12 +625,6 @@ class VirtualMachine:
                     # Step forward in a DO loop.
                     if verbose:
                         printout(len(which) - 1, "do: {0}".format(do_i[-1]), False)
-
-                if skip[-1] != 0:
-                    # Skip over the alternate ('else' clause) of an 'if' block.
-                    # Or skip backwards in a 'begin' .. loop.
-                    where[-1] += skip[-1]
-                skip[-1] = 0
 
                 if Builtin.is_parser(instruction):
                     inputnum = dictionary[which[-1]][where[-1]]
@@ -784,21 +775,29 @@ class VirtualMachine:
                         if verbose:
                             printout(len(which) - 1, "then", False)
                         # True, so do the next instruction but skip the one after that.
-                        skip[-1] = 1
+                        consequent = dictionary[which[-1]][where[-1]]
+                        where[-1] += 2
+                        if verbose:
+                            for name, value in self.dictionary_names.items():
+                                if value == consequent:
+                                    printout(len(which) - 1, name, False)
+                                    break
+                        which.append(consequent - len(Builtin.lookup))
+                        where.append(0)
 
                 elif instruction == Builtin.DO.as_integer:
                     do_depth.append(len(which))
-                    do_start.append(self.stack.pop())
+                    do_start = self.stack.pop()
                     do_stop.append(self.stack.pop())
                     do_step.append(False)
-                    do_i.append(do_start[-1])
+                    do_i.append(do_start)
 
                 elif instruction == Builtin.DO_STEP.as_integer:
                     do_depth.append(len(which))
-                    do_start.append(self.stack.pop())
+                    do_start = self.stack.pop()
                     do_stop.append(self.stack.pop())
                     do_step.append(True)
-                    do_i.append(do_start[-1])
+                    do_i.append(do_start)
 
                 elif instruction == Builtin.AGAIN.as_integer:
                     if verbose:
@@ -821,7 +820,15 @@ class VirtualMachine:
                         where[-1] += 1
                     else:
                         # True, so do the next instruction but skip back after that.
-                        skip[-1] = -3
+                        pretest = dictionary[which[-1]][where[-1]]
+                        where[-1] -= 2
+                        if verbose:
+                            for name, value in self.dictionary_names.items():
+                                if value == pretest:
+                                    printout(len(which) - 1, name, False)
+                                    break
+                        which.append(pretest - len(Builtin.lookup))
+                        where.append(0)
 
                 elif instruction == Builtin.EXIT.as_integer:
                     if verbose:
@@ -831,10 +838,8 @@ class VirtualMachine:
                     for i in range(exitdepth):
                         which.pop()
                         where.pop()
-                        skip.pop()
                     while len(do_depth) != 0 and do_depth[-1] >= len(which):
                         do_depth.pop()
-                        do_start.pop()
                         do_stop.pop()
                         do_step.pop()
                         do_i.pop()
@@ -1064,7 +1069,6 @@ class VirtualMachine:
                                 break
                     which.append(instruction - len(Builtin.lookup))
                     where.append(0)
-                    skip.append(0)
 
                 else:
                     raise AssertionError(
@@ -1073,7 +1077,6 @@ class VirtualMachine:
 
             which.pop()
             where.pop()
-            skip.pop()
 
             if len(do_depth) > 0 and do_depth[-1] == len(which):
                 if do_step[-1]:
@@ -1545,11 +1548,13 @@ vm.do("3 ( whatever )\n2 + 2 *")
 vm.do("3 \\ whatever\n2 + 2 *")
 vm.do(": foo 3 2 + ; foo")
 vm.do(": foo : bar 1 + ; 3 2 + ; foo bar")
-vm.do("1 2 3 dup")
-vm.do("1 2 3 drop")
+vm.do("1 2 3 4 dup")
+vm.do("1 2 3 4 drop")
 vm.do("1 2 3 4 swap")
-vm.do("1 2 3 over")
-vm.do("1 2 3 rot")
+vm.do("1 2 3 4 over")
+vm.do("1 2 3 4 rot")
+vm.do("1 2 3 4 nip")
+vm.do("1 2 3 4 tuck")
 vm.do(": foo -1 if 3 2 + else 10 20 * then ; foo 999")
 vm.do(": foo 0 if 3 2 + else 10 20 * then ; foo 999")
 vm.do(": foo if if 1 2 + else 3 4 + then else if 5 6 + else 7 8 + then then ;")
