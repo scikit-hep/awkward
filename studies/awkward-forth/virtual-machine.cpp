@@ -3020,22 +3020,64 @@ private:
             }
 
             case SWAP: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              int64_t tmp = stack_buffer_[stack_top_ - 2];
+              stack_buffer_[stack_top_ - 2] = stack_buffer_[stack_top_ - 1];
+              stack_buffer_[stack_top_ - 1] = tmp;
               break;
             }
 
             case OVER: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
+                return;
+              }
+              stack_push(stack_buffer_[stack_top_ - 2]);
               break;
             }
 
             case ROT: {
+              if (stack_top_ < 3) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              int64_t tmp1 = stack_buffer_[stack_top_ - 3];
+              stack_buffer_[stack_top_ - 3] = stack_buffer_[stack_top_ - 2];
+              stack_buffer_[stack_top_ - 2] = stack_buffer_[stack_top_ - 1];
+              stack_buffer_[stack_top_ - 1] = tmp1;
               break;
             }
 
             case NIP: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              stack_buffer_[stack_top_ - 2] = stack_buffer_[stack_top_ - 1];
+              stack_top_--;
               break;
             }
 
             case TUCK: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
+                return;
+              }
+              int64_t tmp = stack_buffer_[stack_top_ - 1];
+              stack_buffer_[stack_top_ - 1] = stack_buffer_[stack_top_ - 2];
+              stack_buffer_[stack_top_ - 2] = tmp;
+              stack_push(tmp);
               break;
             }
 
@@ -3377,12 +3419,7 @@ int main() {
   // "again \n"
 
   ForthMachine<int32_t, int32_t, true> vm(
-      "output testout int32 \n"
-      "testout len \n"
-      "testout <- stack \n"
-      "testout len \n"
-      "testout rewind \n"
-      "testout len \n"
+    "1 2 3 4 tuck"
   );
 
   // const int64_t length = 1000000;
