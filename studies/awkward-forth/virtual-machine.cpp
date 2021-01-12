@@ -1279,15 +1279,19 @@ private:
       instructions_offsets_.push_back(instructions_.size());
     }
 
-    std::cout << "Instructions offsets:";
-    for (auto x : instructions_offsets_) {
-      std::cout << " " << x;
-    }
-    std::cout << std::endl;
-
-    std::cout << "Instructions:";
-    for (auto x : instructions_) {
-      std::cout << " " << x;
+    std::cout << "Instructions: ";
+    for (int64_t i = 0;  i < (int64_t)instructions_offsets_.size() - 1;  i++) {
+      if (i != 0) {
+        std::cout << ", ";
+      }
+      std::cout << "[";
+      for (int64_t j = instructions_offsets_[i];  j < instructions_offsets_[i + 1];  j++) {
+        if (j != instructions_offsets_[i]) {
+          std::cout << ", ";
+        }
+        std::cout << instructions_[j];
+      }
+      std::cout << "]";
     }
     std::cout << std::endl;
   }
@@ -2800,7 +2804,27 @@ private:
             }
 
             case EXIT: {
-              break;
+              I exitdepth = instruction_get();
+              instruction_pointer_where() += 1;
+              instruction_current_depth_ -= exitdepth;
+              while (do_current_depth_ != 0  &&  do_abs_instruction_depth() != instruction_current_depth_) {
+                do_current_depth_--;
+              }
+
+              count_instructions_++;
+              if (only_one_step) {
+                if (is_segment_done()) {
+                  instruction_pointer_pop();
+                }
+                return;
+              }
+
+              // StackOverflow said I could: https://stackoverflow.com/a/1257776/1623645
+              //
+              // (I need to 'break' out of a loop, but we're in a switch statement,
+              // so 'break' won't apply to the looping structure. I think this is the
+              // first 'goto' I've written since I was writing in BASIC (c. 1985).
+              goto after_end_of_segment;
             }
 
             case PUT: {
@@ -2956,8 +2980,8 @@ private:
                 current_error_ = ForthError::stack_underflow;
                 return;
               }
-              T* pair = stack_pop2();
-              stack_push(pair[0] + pair[1]);
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] + pair[1];
               break;
             }
 
@@ -2966,8 +2990,8 @@ private:
                 current_error_ = ForthError::stack_underflow;
                 return;
               }
-              T* pair = stack_pop2();
-              stack_push(pair[0] - pair[1]);
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] - pair[1];
               break;
             }
 
@@ -2976,8 +3000,8 @@ private:
                 current_error_ = ForthError::stack_underflow;
                 return;
               }
-              T* pair = stack_pop2();
-              stack_push(pair[0] * pair[1]);
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] * pair[1];
               break;
             }
 
@@ -3018,6 +3042,12 @@ private:
             }
 
             case EQ: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] == pair[1] ? -1 : 0;
               break;
             }
 
@@ -3101,6 +3131,7 @@ private:
 
       } // end walk over instructions in this segment
 
+    after_end_of_segment:
       instruction_pointer_pop();
 
       if (do_current_depth_ != 0  &&  do_abs_instruction_depth() == instruction_current_depth_) {
@@ -3133,6 +3164,11 @@ private:
   inline T* stack_pop2() noexcept {
     stack_top_ -= 2;
     return &stack_buffer_[stack_top_];
+  }
+
+  inline T* stack_pop2_before_pushing1() noexcept {
+    stack_top_--;
+    return &stack_buffer_[stack_top_ - 1];
   }
 
   inline T* stack_peek() const noexcept {
@@ -3277,7 +3313,7 @@ int main() {
   // "again \n"
 
   ForthMachine<int32_t, int32_t, true> vm(
-      "4 begin 1 - dup 0= invert while 123 drop repeat 999"
+      ": foo 10 5 do i exit loop ; 123 foo 456 789"
   );
 
   // const int64_t length = 1000000;
