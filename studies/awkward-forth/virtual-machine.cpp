@@ -170,7 +170,7 @@ public:
     , reserved_(initial)
     , resize_(resize) { }
 
-  int64_t length() const {
+  int64_t len() const {
     return length_;
   }
 
@@ -2730,6 +2730,9 @@ private:
                   return;
                 }
                 instruction_pointer_push((consequent - DICTIONARY) + 1);
+
+                // Ordinarily, a redirection like the above would count as one.
+                count_instructions_++;
               }
               break;
             }
@@ -2799,6 +2802,9 @@ private:
                   return;
                 }
                 instruction_pointer_push((posttest - DICTIONARY) + 1);
+
+                // Ordinarily, a redirection like the above would count as one.
+                count_instructions_++;
               }
               break;
             }
@@ -2863,34 +2869,75 @@ private:
             }
 
             case LEN_INPUT: {
+              I in_num = instruction_get();
+              instruction_pointer_where() += 1;
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
+                return;
+              }
+              stack_push(current_inputs_[in_num].get()->len());
               break;
             }
 
             case POS: {
+              I in_num = instruction_get();
+              instruction_pointer_where() += 1;
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
+                return;
+              }
+              stack_push(current_inputs_[in_num].get()->pos());
               break;
             }
 
             case END: {
+              I in_num = instruction_get();
+              instruction_pointer_where() += 1;
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
+                return;
+              }
+              stack_push(current_inputs_[in_num].get()->end() ? -1 : 0);
               break;
             }
 
             case SEEK: {
+              I in_num = instruction_get();
+              instruction_pointer_where() += 1;
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              current_inputs_[in_num].get()->seek(stack_pop(), current_error_);
+              if (current_error_ != ForthError::none) {
+                return;
+              }
               break;
             }
 
             case SKIP: {
+              I in_num = instruction_get();
+              instruction_pointer_where() += 1;
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              current_inputs_[in_num].get()->skip(stack_pop(), current_error_);
+              if (current_error_ != ForthError::none) {
+                return;
+              }
               break;
             }
 
             case WRITE: {
-              I num = instruction_get();
+              I out_num = instruction_get();
               instruction_pointer_where() += 1;
               if (stack_top_ == 0) {
                 current_error_ = ForthError::stack_underflow;
                 return;
               }
               T* top = stack_peek();
-              write_from_stack(num, top);
+              write_from_stack(out_num, top);
               stack_top_--;
 
               count_writes_++;
@@ -2898,10 +2945,27 @@ private:
             }
 
             case LEN_OUTPUT: {
+              I out_num = instruction_get();
+              instruction_pointer_where() += 1;
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
+                return;
+              }
+              stack_push(current_outputs_[out_num].get()->len());
               break;
             }
 
             case REWIND: {
+              I out_num = instruction_get();
+              instruction_pointer_where() += 1;
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              current_outputs_[out_num].get()->rewind(stack_pop(), current_error_);
+              if (current_error_ != ForthError::none) {
+                return;
+              }
               break;
             }
 
@@ -3313,7 +3377,12 @@ int main() {
   // "again \n"
 
   ForthMachine<int32_t, int32_t, true> vm(
-      ": foo 10 5 do i exit loop ; 123 foo 456 789"
+      "output testout int32 \n"
+      "testout len \n"
+      "testout <- stack \n"
+      "testout len \n"
+      "testout rewind \n"
+      "testout len \n"
   );
 
   // const int64_t length = 1000000;
