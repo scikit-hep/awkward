@@ -3112,38 +3112,94 @@ private:
             }
 
             case DIV: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] / pair[1];
               break;
             }
 
             case MOD: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] % pair[1];
               break;
             }
 
             case DIVMOD: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T div = stack_buffer_[stack_top_ - 2] / stack_buffer_[stack_top_ - 1];
+              T mod = stack_buffer_[stack_top_ - 2] % stack_buffer_[stack_top_ - 1];
+              stack_buffer_[stack_top_ - 2] = mod;
+              stack_buffer_[stack_top_ - 1] = div;
               break;
             }
 
             case NEGATE: {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              *top = -(*top);
               break;
             }
 
             case ADD1: {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              (*top)++;
               break;
             }
 
             case SUB1: {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              (*top)--;
               break;
             }
 
             case ABS: {
+              if (stack_top_ == 0) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              *top = abs(*top);
               break;
             }
 
             case MIN: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = std::min(pair[0], pair[1]);
               break;
             }
 
             case MAX: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = std::max(pair[0], pair[1]);
               break;
             }
 
@@ -3158,22 +3214,52 @@ private:
             }
 
             case NE: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] != pair[1] ? -1 : 0;
               break;
             }
 
             case GT: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] > pair[1] ? -1 : 0;
               break;
             }
 
             case GE: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] >= pair[1] ? -1 : 0;
               break;
             }
 
             case LT: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] < pair[1] ? -1 : 0;
               break;
             }
 
             case LE: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] <= pair[1] ? -1 : 0;
               break;
             }
 
@@ -3198,30 +3284,70 @@ private:
             }
 
             case AND: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] & pair[1];
               break;
             }
 
             case OR: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] | pair[1];
               break;
             }
 
             case XOR: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] ^ pair[1];
               break;
             }
 
             case LSHIFT: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] << pair[1];
               break;
             }
 
             case RSHIFT: {
+              if (stack_top_ < 2) {
+                current_error_ = ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] >> pair[1];
               break;
             }
 
             case FALSE: {
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
+                return;
+              }
+              stack_push(0);
               break;
             }
 
             case TRUE: {
+              if (stack_top_ == stack_size_) {
+                current_error_ = ForthError::stack_overflow;
+                return;
+              }
+              stack_push(-1);
               break;
             }
           }
@@ -3408,22 +3534,20 @@ void ForthMachine<int32_t, int32_t, true>::write_from_stack(int64_t num, int32_t
 
 
 int main() {
-  // "input testin \n"
-  // "output testout int32 \n"
-  // "begin \n"
-  // "  testin i-> stack \n"
-  // "  10 0 do \n"
-  // "    10 + \n"
-  // "  loop \n"
-  // "  testout <- stack \n"
-  // "again \n"
-
   ForthMachine<int32_t, int32_t, true> vm(
-    "1 2 3 4 tuck"
+      "input testin \n"
+      "output testout int32 \n"
+      "begin \n"
+      "  testin i-> stack \n"
+      "  10 0 do \n"
+      "    10 + \n"
+      "  loop \n"
+      "  testout <- stack \n"
+      "again \n"
   );
 
-  // const int64_t length = 1000000;
-  const int64_t length = 20;
+  const int64_t length = 1000000;
+  // const int64_t length = 20;
 
   std::shared_ptr<int32_t> test_input_ptr = std::shared_ptr<int32_t>(
       new int32_t[length], array_deleter<int32_t>());
@@ -3437,7 +3561,7 @@ int main() {
                                                         0,
                                                         sizeof(int32_t) * length);
 
-  for (int64_t repeat = 0;  repeat < 0;  repeat++) {
+  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
     std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
     std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
         std::make_shared<ForthOutputBufferOf<int64_t>>() });
@@ -3456,12 +3580,12 @@ int main() {
     inputs["testin"].get()->seek(0, err);
   }
 
-  for (int64_t repeat = 0;  repeat < 1;  repeat++) {
+  for (int64_t repeat = 0;  repeat < 4;  repeat++) {
     std::set<ForthError> ignore({ ForthError::read_beyond });
 
     std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
 
-    std::cout << vm.tostring(outputs);
+    // std::cout << vm.tostring(outputs);
 
     std::cout << "Time (us): " << vm.count_nanoseconds() / 1000
               << " Instructions: " << vm.count_instructions()
