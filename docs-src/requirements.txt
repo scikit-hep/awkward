@@ -1,0 +1,12 @@
+setuptools
+numpy>=1.13.1
+numba>=0.50.0
+pandas>=0.24.0
+numexpr
+autograd
+pyarrow>=2.0.0
+h5py
+matplotlib
+uproot
+uproot3
+jupyter-book

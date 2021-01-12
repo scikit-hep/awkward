@@ -71,12 +71,8 @@ jobs:
         displayName: "Install Pip"
 
       - script: |
-          python -m pip install numpy
-        displayName: "Install NumPy"
-
-      - script: |
-          python -m pip install -U jupyter-book
-        displayName: "Install JupyterBook"
+          python -m pip install -r docs-src/requirements.txt
+        displayName: "Install dependencies"
 
       - script: |
           python -m pip install -v .
