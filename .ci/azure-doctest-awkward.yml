@@ -13,7 +13,7 @@ jobs:
   - job: Sphinx
 
     pool:
-      vmImage: "ubuntu-16.04"
+      vmImage: "ubuntu-18.04"
 
     strategy:
       matrix:
@@ -48,7 +48,7 @@ jobs:
   - job: JupyterBook
 
     pool:
-      vmImage: "ubuntu-16.04"
+      vmImage: "ubuntu-18.04"
 
     strategy:
       matrix:
