@@ -99,11 +99,10 @@ Index_from_cuda_array_interface(const std::string& name,
   }
 
   std::vector<ssize_t> form_strides;
-  try {
-    // None can't be cast to std::vector, catch the exception and form strides from shape
+  if(cuda_array_interface.contains("strides") && !cuda_array_interface["strides"].is_none()) {
     form_strides = cuda_array_interface["strides"].cast<std::vector<ssize_t>>();
   }
-  catch (py::cast_error err) {
+  else {
     form_strides = cuda_array_interface["shape"].cast<std::vector<ssize_t>>();
     form_strides[0] = 1;
     std::transform(form_strides.begin(), form_strides.end(), form_strides.begin(), 
@@ -173,6 +172,19 @@ Index_from_cupy(const std::string& name, const py::object& array) {
 }
 
 template <typename T>
+ak::IndexOf<T>
+Index_from_jaxgpu(const std::string& name, const py::object& array) {
+  if(py::hasattr(array, "__cuda_array_interface__")) {
+    return Index_from_cuda_array_interface<T>(name, array);
+  }
+  else {
+    throw std::invalid_argument(
+      name + std::string(".from_jaxgpu() needs a __cuda_array_interface__ dict of the given array, to accept JAX GPU buffers")
+      + FILENAME(__LINE__));
+  }
+}
+
+template <typename T>
 py::class_<ak::IndexOf<T>>
 make_IndexOf(const py::handle& m, const std::string& name) {
   return (py::class_<ak::IndexOf<T>>(m, name.c_str(), py::buffer_protocol())
@@ -191,6 +203,17 @@ make_IndexOf(const py::handle& m, const std::string& name) {
         std::string module = anyarray.get_type().attr("__module__").cast<std::string>();
         if (module.rfind("cupy.", 0) == 0) {
           return Index_from_cupy<T>(name, anyarray);
+        }
+        else if(module.rfind("jax.", 0) == 0) {
+          const std::string device = anyarray.attr("device_buffer").attr("device")().attr("platform").cast<std::string>();
+          
+          if(device.compare("gpu") == 0) {
+            return Index_from_jaxgpu<T>(name, anyarray);
+          } 
+          else if(device.compare("cpu") != 0) {
+            throw std::invalid_argument(
+                std::string("Awkward Arrays don't support ") + device + FILENAME(__LINE__));
+          }
         }
 
         py::array_t<T> array = anyarray.cast<py::array_t<T, py::array::c_style | py::array::forcecast>>();

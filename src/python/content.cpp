@@ -1855,18 +1855,17 @@ NumpyArray_from_cuda_array_interface(const std::string& name,
   std::string typestr = cuda_array_interface["typestr"].cast<std::string>();
   const uint8_t dtype_size = std::stoi(typestr.substr(2));
 
-  if(shape.empty()) {
+  if (shape.empty()) {
     throw std::invalid_argument(
         std::string("Array must not be scalar; try array.reshape(1)")
         + FILENAME(__LINE__));
   }
   
   std::vector<ssize_t> form_strides;
-  try {
-    // None can't be cast to std::vector, catch the exception and form strides from shape
+  if (cuda_array_interface.contains("strides") && !cuda_array_interface["strides"].is_none()) {
     form_strides = cuda_array_interface["strides"].cast<std::vector<ssize_t>>();
   }
-  catch (py::cast_error err) {
+  else {
     form_strides = cuda_array_interface["shape"].cast<std::vector<ssize_t>>();
     form_strides[0] = 1;
     std::transform(form_strides.begin(), form_strides.end(), form_strides.begin(), 
@@ -1880,7 +1879,7 @@ NumpyArray_from_cuda_array_interface(const std::string& name,
   switch(dtype_code) {
     case 'b': array_dtype = ak::util::dtype::boolean;
               break; 
-    case 'i': if(dtype_size == 1) {
+    case 'i': if (dtype_size == 1) {
                 array_dtype = ak::util::dtype::int8;
               } 
               else if (dtype_size == 2) {
@@ -1893,7 +1892,7 @@ NumpyArray_from_cuda_array_interface(const std::string& name,
                 array_dtype = ak::util::dtype::int64;
               }
               break;
-    case 'u': if(dtype_size == 1) {
+    case 'u': if (dtype_size == 1) {
                 array_dtype = ak::util::dtype::uint8;
               } 
               else if (dtype_size == 2) {
@@ -1916,12 +1915,12 @@ NumpyArray_from_cuda_array_interface(const std::string& name,
               else if (dtype_size == 8) {
                 array_dtype = ak::util::dtype::float64;
               }
-              else if(dtype_size == 16) {
+              else if (dtype_size == 16) {
                 array_dtype = ak::util::dtype::float128;
               }
               break;
 
-    case 'c': if(dtype_size == 8) {
+    case 'c': if (dtype_size == 8) {
                 array_dtype = ak::util::dtype::complex64;
               } 
               else if (dtype_size == 16) {
@@ -1950,13 +1949,12 @@ NumpyArray_from_cuda_array_interface(const std::string& name,
     ak::kernel::lib::cuda);
 }
 
-
 const ak::NumpyArray
 NumpyArray_from_cupy(const std::string& name,
                      const py::object& array,
                      const py::object& identities,
                      const py::object& parameters) {
-  if(py::hasattr(array, "__cuda_array_interface__")) {
+  if (py::hasattr(array, "__cuda_array_interface__")) {
     return NumpyArray_from_cuda_array_interface(name,
                                                 array,
                                                 identities,
@@ -2003,6 +2001,24 @@ NumpyArray_from_cupy(const std::string& name,
   }
 }
 
+const ak::NumpyArray
+NumpyArray_from_jaxgpu(const std::string& name,
+                       const py::object& array,
+                       const py::object& identities,
+                       const py::object& parameters) {
+  if (py::hasattr(array, "__cuda_array_interface__")) {
+    return NumpyArray_from_cuda_array_interface(name,
+                                                array,
+                                                identities,
+                                                parameters);
+  }
+  else {
+    throw std::invalid_argument(
+      name + std::string(".from_jax() needs a __cuda_array_interface__ dict of the given array, to accept JAX GPU buffers")
+      + FILENAME(__LINE__));
+  }
+}
+
 py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content>
 make_NumpyArray(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::NumpyArray,
@@ -2024,9 +2040,18 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
         std::string module = anyarray.get_type().attr("__module__").cast<std::string>();
         if (module.rfind("cupy.", 0) == 0) {
           return NumpyArray_from_cupy(name, anyarray, identities, parameters);
-        }// else if (module.rfind("jax.", 0) == 0) {
-         // return NumpyArray_from_jax(name, anyarray, identities, parameters);
-         // }
+        } 
+        else if (module.rfind("jax.", 0) == 0) {
+          const std::string device = anyarray.attr("device_buffer").attr("device")().attr("platform").cast<std::string>();
+          
+          if (device.compare("gpu") == 0) {
+            return NumpyArray_from_jaxgpu(name, anyarray, identities, parameters);
+          } 
+          else if (device.compare("cpu") != 0) {
+            throw std::invalid_argument(
+                std::string("Awkward Arrays don't support ") + device + FILENAME(__LINE__));
+          }
+        }
 
         py::array array = anyarray.cast<py::array>();
 
