@@ -15,12 +15,13 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                            int64_t stack_size,
                            int64_t recursion_depth,
                            int64_t output_initial_size,
-                           double output_resize_factor) -> ak::ForthMachineOf<T, I> {
-            return ak::ForthMachineOf<T, I>(source,
-                                            stack_size,
-                                            recursion_depth,
-                                            output_initial_size,
-                                            output_resize_factor);
+                           double output_resize_factor)
+                        -> std::shared_ptr<ak::ForthMachineOf<T, I>> {
+            return std::make_shared<ak::ForthMachineOf<T, I>>(source,
+                                                              stack_size,
+                                                              recursion_depth,
+                                                              output_initial_size,
+                                                              output_resize_factor);
           }),
                py::arg("source"),
                py::arg("stack_size") = 1024,

@@ -697,66 +697,66 @@ ForthOutputBufferOf<double>::write_float64(int64_t num_items, double* values, bo
 #define PARSER_FLOAT64 104
 
 // instructions from special parsing rules
-#define LITERAL 0
-#define IF 1
-#define IF_ELSE 2
-#define DO 3
-#define DO_STEP 4
-#define AGAIN 5
-#define UNTIL 6
-#define WHILE 7
-#define EXIT 8
-#define PUT 9
-#define INC 10
-#define GET 11
-#define LEN_INPUT 12
-#define POS 13
-#define END 14
-#define SEEK 15
-#define SKIP 16
-#define WRITE 17
-#define LEN_OUTPUT 18
-#define REWIND 19
+#define INSTR_LITERAL 0
+#define INSTR_IF 1
+#define INSTR_IF_ELSE 2
+#define INSTR_DO 3
+#define INSTR_DO_STEP 4
+#define INSTR_AGAIN 5
+#define INSTR_UNTIL 6
+#define INSTR_WHILE 7
+#define INSTR_EXIT 8
+#define INSTR_PUT 9
+#define INSTR_INC 10
+#define INSTR_GET 11
+#define INSTR_LEN_INPUT 12
+#define INSTR_POS 13
+#define INSTR_END 14
+#define INSTR_SEEK 15
+#define INSTR_SKIP 16
+#define INSTR_WRITE 17
+#define INSTR_LEN_OUTPUT 18
+#define INSTR_REWIND 19
 // generic builtin instructions
-#define INDEX_I 20
-#define INDEX_J 21
-#define INDEX_K 22
-#define DUP 23
-#define DROP 24
-#define SWAP 25
-#define OVER 26
-#define ROT 27
-#define NIP 28
-#define TUCK 29
-#define ADD 30
-#define SUB 31
-#define MUL 32
-#define DIV 33
-#define MOD 34
-#define DIVMOD 35
-#define NEGATE 36
-#define ADD1 37
-#define SUB1 38
-#define ABS 39
-#define MIN 40
-#define MAX 41
-#define EQ 42
-#define NE 43
-#define GT 44
-#define GE 45
-#define LT 46
-#define LE 47
-#define EQ0 48
-#define INVERT 49
-#define AND 50
-#define OR 51
-#define XOR 52
-#define LSHIFT 53
-#define RSHIFT 54
-#define FALSE 55
-#define TRUE 56
+#define INSTR_INDEX_I 20
+#define INSTR_INDEX_J 21
+#define INSTR_INDEX_K 22
+#define INSTR_DUP 23
+#define INSTR_DROP 24
+#define INSTR_SWAP 25
+#define INSTR_OVER 26
+#define INSTR_ROT 27
+#define INSTR_NIP 28
+#define INSTR_TUCK 29
+#define INSTR_ADD 30
+#define INSTR_SUB 31
+#define INSTR_MUL 32
+#define INSTR_DIV 33
+#define INSTR_MOD 34
+#define INSTR_DIVMOD 35
+#define INSTR_NEGATE 36
+#define INSTR_ADD1 37
+#define INSTR_SUB1 38
+#define INSTR_ABS 39
+#define INSTR_MIN 40
+#define INSTR_MAX 41
+#define INSTR_EQ 42
+#define INSTR_NE 43
+#define INSTR_GT 44
+#define INSTR_GE 45
+#define INSTR_LT 46
+#define INSTR_LE 47
+#define INSTR_EQ0 48
+#define INSTR_INVERT 49
+#define INSTR_AND 50
+#define INSTR_OR 51
+#define INSTR_XOR 52
+#define INSTR_LSHIFT 53
+#define INSTR_RSHIFT 54
+#define INSTR_FALSE 55
+#define INSTR_TRUE 56
 // beginning of the user-defined dictionary
-#define DICTIONARY 57
+#define BOUND_DICTIONARY 57
 
 const std::set<std::string> reserved_words_({
   // comments
@@ -796,20 +796,24 @@ const std::map<std::string, dtype> output_dtype_words_({
 
 const std::map<std::string, int64_t> generic_builtin_words_({
   // loop variables
-  {"i", INDEX_I}, {"j", INDEX_J}, {"k", INDEX_K},
+  {"i", INSTR_INDEX_I}, {"j", INSTR_INDEX_J}, {"k", INSTR_INDEX_K},
   // stack operations
-  {"dup", DUP}, {"drop", DROP}, {"swap", SWAP}, {"over", OVER}, {"rot", ROT},
-  {"nip", NIP}, {"tuck", TUCK},
+  {"dup", INSTR_DUP}, {"drop", INSTR_DROP}, {"swap", INSTR_SWAP},
+  {"over", INSTR_OVER}, {"rot", INSTR_ROT}, {"nip", INSTR_NIP}, {"tuck", INSTR_TUCK},
   // basic mathematical functions
-  {"+", ADD}, {"-", SUB}, {"*", MUL}, {"/", DIV}, {"mod", MOD}, {"/mod", DIVMOD},
-  {"negate", NEGATE}, {"1+", ADD1}, {"1-", SUB1}, {"abs", ABS}, {"min", MIN}, {"max", MAX},
+  {"+", INSTR_ADD}, {"-", INSTR_SUB}, {"*", INSTR_MUL}, {"/", INSTR_DIV},
+  {"mod", INSTR_MOD}, {"/mod", INSTR_DIVMOD},
+  {"negate", INSTR_NEGATE}, {"1+", INSTR_ADD1}, {"1-", INSTR_SUB1},
+  {"abs", INSTR_ABS}, {"min", INSTR_MIN}, {"max", INSTR_MAX},
   // comparisons
-  {"=", EQ}, {"<>", NE}, {">", GT}, {">=", GE}, {"<", LT}, {"<=", LE}, {"0=", EQ0},
+  {"=", INSTR_EQ}, {"<>", INSTR_NE},
+  {">", INSTR_GT}, {">=", INSTR_GE}, {"<", INSTR_LT}, {"<=", INSTR_LE},
+  {"0=", INSTR_EQ0},
   // bitwise operations
-  {"invert", INVERT}, {"and", AND}, {"or", OR}, {"xor", XOR},
-  {"lshift", LSHIFT}, {"rshift", RSHIFT},
+  {"invert", INSTR_INVERT}, {"and", INSTR_AND}, {"or", INSTR_OR}, {"xor", INSTR_XOR},
+  {"lshift", INSTR_LSHIFT}, {"rshift", INSTR_RSHIFT},
   // constants
-  {"false", FALSE}, {"true", TRUE}
+  {"false", INSTR_FALSE}, {"true", INSTR_TRUE}
 });
 
 
@@ -1434,7 +1438,7 @@ private:
 
         // Add the new word to the dictionary before parsing it so that recursive
         // functions can be defined.
-        I instruction = dictionary.size() + DICTIONARY;
+        I instruction = dictionary.size() + BOUND_DICTIONARY;
         dictionary_names[name] = instruction;
 
         // Now parse the subroutine and add it to the dictionary.
@@ -1450,7 +1454,7 @@ private:
               dictionary,
               0,
               0);
-        dictionary[instruction - DICTIONARY] = subinstructions;
+        dictionary[instruction - BOUND_DICTIONARY] = subinstructions;
 
         pos = substop + 1;
       }
@@ -1603,7 +1607,7 @@ private:
         if (subelse == -1) {
           // Add the consequent to the dictionary so that it can be used
           // without special instruction pointer manipulation at runtime.
-          I instruction = dictionary.size() + DICTIONARY;
+          I instruction = dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> consequent;
           dictionary.push_back(consequent);
           parse(defn,
@@ -1616,16 +1620,16 @@ private:
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[instruction - DICTIONARY] = consequent;
+          dictionary[instruction - BOUND_DICTIONARY] = consequent;
 
-          instructions.push_back(IF);
+          instructions.push_back(INSTR_IF);
           instructions.push_back(instruction);
 
           pos = substop + 1;
         }
         else {
           // Same as above, except that two new definitions must be made.
-          I instruction1 = dictionary.size() + DICTIONARY;
+          I instruction1 = dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> consequent;
           dictionary.push_back(consequent);
           parse(defn,
@@ -1638,9 +1642,9 @@ private:
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[instruction1 - DICTIONARY] = consequent;
+          dictionary[instruction1 - BOUND_DICTIONARY] = consequent;
 
-          I instruction2 = dictionary.size() + DICTIONARY;
+          I instruction2 = dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> alternate;
           dictionary.push_back(alternate);
           parse(defn,
@@ -1653,9 +1657,9 @@ private:
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[instruction2 - DICTIONARY] = alternate;
+          dictionary[instruction2 - BOUND_DICTIONARY] = alternate;
 
-          instructions.push_back(IF_ELSE);
+          instructions.push_back(INSTR_IF_ELSE);
           instructions.push_back(instruction1);
           instructions.push_back(instruction2);
 
@@ -1692,7 +1696,7 @@ private:
 
         // Add the loop body to the dictionary so that it can be used
         // without special instruction pointer manipulation at runtime.
-        I instruction = dictionary.size() + DICTIONARY;
+        I instruction = dictionary.size() + BOUND_DICTIONARY;
         std::vector<I> body;
         dictionary.push_back(body);
         parse(defn,
@@ -1705,14 +1709,14 @@ private:
               dictionary,
               exitdepth + 1,
               dodepth + 1);
-        dictionary[instruction - DICTIONARY] = body;
+        dictionary[instruction - BOUND_DICTIONARY] = body;
 
         if (is_step) {
-          instructions.push_back(DO_STEP);
+          instructions.push_back(INSTR_DO_STEP);
           instructions.push_back(instruction);
         }
         else {
-          instructions.push_back(DO);
+          instructions.push_back(INSTR_DO);
           instructions.push_back(instruction);
         }
 
@@ -1772,7 +1776,7 @@ private:
         if (is_again) {
           // Add the 'begin ... again' body to the dictionary so that it can be
           // used without special instruction pointer manipulation at runtime.
-          I instruction = dictionary.size() + DICTIONARY;
+          I instruction = dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> body;
           dictionary.push_back(body);
           parse(defn,
@@ -1785,16 +1789,16 @@ private:
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[instruction - DICTIONARY] = body;
+          dictionary[instruction - BOUND_DICTIONARY] = body;
 
           instructions.push_back(instruction);
-          instructions.push_back(AGAIN);
+          instructions.push_back(INSTR_AGAIN);
 
           pos = substop + 1;
         }
         else if (subwhile == -1) {
           // Same for the 'begin .. until' body.
-          I instruction = dictionary.size() + DICTIONARY;
+          I instruction = dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> body;
           dictionary.push_back(body);
           parse(defn,
@@ -1807,16 +1811,16 @@ private:
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[instruction - DICTIONARY] = body;
+          dictionary[instruction - BOUND_DICTIONARY] = body;
 
           instructions.push_back(instruction);
-          instructions.push_back(UNTIL);
+          instructions.push_back(INSTR_UNTIL);
 
           pos = substop + 1;
         }
         else {
           // Same for the 'begin .. repeat' statements.
-          I instruction1 = dictionary.size() + DICTIONARY;
+          I instruction1 = dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> precondition;
           dictionary.push_back(precondition);
           parse(defn,
@@ -1829,10 +1833,10 @@ private:
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[instruction1 - DICTIONARY] = precondition;
+          dictionary[instruction1 - BOUND_DICTIONARY] = precondition;
 
           // Same for the 'repeat .. until' statements.
-          I instruction2 = dictionary.size() + DICTIONARY;
+          I instruction2 = dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> postcondition;
           dictionary.push_back(postcondition);
           parse(defn,
@@ -1845,10 +1849,10 @@ private:
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[instruction2 - DICTIONARY] = postcondition;
+          dictionary[instruction2 - BOUND_DICTIONARY] = postcondition;
 
           instructions.push_back(instruction1);
-          instructions.push_back(WHILE);
+          instructions.push_back(INSTR_WHILE);
           instructions.push_back(instruction2);
 
           pos = substop + 1;
@@ -1856,7 +1860,7 @@ private:
       }
 
       else if (word == "exit") {
-        instructions.push_back(EXIT);
+        instructions.push_back(INSTR_EXIT);
         instructions.push_back(exitdepth);
 
         pos++;
@@ -1870,19 +1874,19 @@ private:
           }
         }
         if (pos + 1 < stop  &&  tokenized[pos + 1] == "!") {
-          instructions.push_back(PUT);
+          instructions.push_back(INSTR_PUT);
           instructions.push_back(variable_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "+!") {
-          instructions.push_back(INC);
+          instructions.push_back(INSTR_INC);
           instructions.push_back(variable_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "@") {
-          instructions.push_back(GET);
+          instructions.push_back(INSTR_GET);
           instructions.push_back(variable_index);
 
           pos += 2;
@@ -1903,31 +1907,31 @@ private:
           }
         }
         if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
-          instructions.push_back(LEN_INPUT);
+          instructions.push_back(INSTR_LEN_INPUT);
           instructions.push_back(input_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "pos") {
-          instructions.push_back(POS);
+          instructions.push_back(INSTR_POS);
           instructions.push_back(input_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "end") {
-          instructions.push_back(END);
+          instructions.push_back(INSTR_END);
           instructions.push_back(input_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "seek") {
-          instructions.push_back(SEEK);
+          instructions.push_back(INSTR_SEEK);
           instructions.push_back(input_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "skip") {
-          instructions.push_back(SKIP);
+          instructions.push_back(INSTR_SKIP);
           instructions.push_back(input_index);
 
           pos += 2;
@@ -2065,7 +2069,7 @@ private:
         }
         if (pos + 1 < stop  &&  tokenized[pos + 1] == "<-") {
           if (pos + 2 < stop  &&  tokenized[pos + 2] == "stack") {
-            instructions.push_back(WRITE);
+            instructions.push_back(INSTR_WRITE);
             instructions.push_back(output_index);
 
             pos += 3;
@@ -2078,13 +2082,13 @@ private:
           }
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
-          instructions.push_back(LEN_OUTPUT);
+          instructions.push_back(INSTR_LEN_OUTPUT);
           instructions.push_back(output_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "rewind") {
-          instructions.push_back(REWIND);
+          instructions.push_back(INSTR_REWIND);
           instructions.push_back(output_index);
 
           pos += 2;
@@ -2134,7 +2138,7 @@ private:
           else {
             int64_t num;
             if (is_integer(word, num)) {
-              instructions.push_back(LITERAL);
+              instructions.push_back(INSTR_LITERAL);
               instructions.push_back(num);
 
               pos++;
@@ -2677,17 +2681,17 @@ private:
           count_reads_++;
         }
 
-        else if (instruction >= DICTIONARY) {
+        else if (instruction >= BOUND_DICTIONARY) {
           if (instruction_current_depth_ == instruction_max_depth_) {
             current_error_ = ForthError::recursion_depth_exceeded;
             return;
           }
-          instruction_pointer_push((instruction - DICTIONARY) + 1);
+          instruction_pointer_push((instruction - BOUND_DICTIONARY) + 1);
         }
 
         else {
           switch (instruction) {
-            case LITERAL: {
+            case INSTR_LITERAL: {
               I num = instruction_get();
               instruction_pointer_where() += 1;
               if (stack_top_ == stack_size_) {
@@ -2698,7 +2702,7 @@ private:
               break;
             }
 
-            case IF: {
+            case INSTR_IF: {
               if (stack_top_ == 0) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -2710,7 +2714,7 @@ private:
               break;
             }
 
-            case IF_ELSE: {
+            case INSTR_IF_ELSE: {
               if (stack_top_ == 0) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -2729,7 +2733,7 @@ private:
                   current_error_ = ForthError::recursion_depth_exceeded;
                   return;
                 }
-                instruction_pointer_push((consequent - DICTIONARY) + 1);
+                instruction_pointer_push((consequent - BOUND_DICTIONARY) + 1);
 
                 // Ordinarily, a redirection like the above would count as one.
                 count_instructions_++;
@@ -2737,7 +2741,7 @@ private:
               break;
             }
 
-            case DO: {
+            case INSTR_DO: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -2751,7 +2755,7 @@ private:
               break;
             }
 
-            case DO_STEP: {
+            case INSTR_DO_STEP: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -2765,13 +2769,13 @@ private:
               break;
             }
 
-            case AGAIN: {
+            case INSTR_AGAIN: {
               // Go back and do the body again.
               instruction_pointer_where() -= 2;
               break;
             }
 
-            case UNTIL: {
+            case INSTR_UNTIL: {
               if (stack_top_ == 0) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -2783,7 +2787,7 @@ private:
               break;
             }
 
-            case WHILE: {
+            case INSTR_WHILE: {
               if (stack_top_ == 0) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -2801,7 +2805,7 @@ private:
                   current_error_ = ForthError::recursion_depth_exceeded;
                   return;
                 }
-                instruction_pointer_push((posttest - DICTIONARY) + 1);
+                instruction_pointer_push((posttest - BOUND_DICTIONARY) + 1);
 
                 // Ordinarily, a redirection like the above would count as one.
                 count_instructions_++;
@@ -2809,7 +2813,7 @@ private:
               break;
             }
 
-            case EXIT: {
+            case INSTR_EXIT: {
               I exitdepth = instruction_get();
               instruction_pointer_where() += 1;
               instruction_current_depth_ -= exitdepth;
@@ -2833,7 +2837,7 @@ private:
               goto after_end_of_segment;
             }
 
-            case PUT: {
+            case INSTR_PUT: {
               I num = instruction_get();
               instruction_pointer_where() += 1;
               if (stack_top_ == 0) {
@@ -2845,7 +2849,7 @@ private:
               break;
             }
 
-            case INC: {
+            case INSTR_INC: {
               I num = instruction_get();
               instruction_pointer_where() += 1;
               if (stack_top_ == 0) {
@@ -2857,7 +2861,7 @@ private:
               break;
             }
 
-            case GET: {
+            case INSTR_GET: {
               I num = instruction_get();
               instruction_pointer_where() += 1;
               if (stack_top_ == stack_size_) {
@@ -2868,7 +2872,7 @@ private:
               break;
             }
 
-            case LEN_INPUT: {
+            case INSTR_LEN_INPUT: {
               I in_num = instruction_get();
               instruction_pointer_where() += 1;
               if (stack_top_ == stack_size_) {
@@ -2879,7 +2883,7 @@ private:
               break;
             }
 
-            case POS: {
+            case INSTR_POS: {
               I in_num = instruction_get();
               instruction_pointer_where() += 1;
               if (stack_top_ == stack_size_) {
@@ -2890,7 +2894,7 @@ private:
               break;
             }
 
-            case END: {
+            case INSTR_END: {
               I in_num = instruction_get();
               instruction_pointer_where() += 1;
               if (stack_top_ == stack_size_) {
@@ -2901,7 +2905,7 @@ private:
               break;
             }
 
-            case SEEK: {
+            case INSTR_SEEK: {
               I in_num = instruction_get();
               instruction_pointer_where() += 1;
               if (stack_top_ == 0) {
@@ -2915,7 +2919,7 @@ private:
               break;
             }
 
-            case SKIP: {
+            case INSTR_SKIP: {
               I in_num = instruction_get();
               instruction_pointer_where() += 1;
               if (stack_top_ == 0) {
@@ -2929,7 +2933,7 @@ private:
               break;
             }
 
-            case WRITE: {
+            case INSTR_WRITE: {
               I out_num = instruction_get();
               instruction_pointer_where() += 1;
               if (stack_top_ == 0) {
@@ -2944,7 +2948,7 @@ private:
               break;
             }
 
-            case LEN_OUTPUT: {
+            case INSTR_LEN_OUTPUT: {
               I out_num = instruction_get();
               instruction_pointer_where() += 1;
               if (stack_top_ == stack_size_) {
@@ -2955,7 +2959,7 @@ private:
               break;
             }
 
-            case REWIND: {
+            case INSTR_REWIND: {
               I out_num = instruction_get();
               instruction_pointer_where() += 1;
               if (stack_top_ == 0) {
@@ -2969,7 +2973,7 @@ private:
               break;
             }
 
-            case INDEX_I: {
+            case INSTR_INDEX_I: {
               if (stack_top_ == stack_size_) {
                 current_error_ = ForthError::stack_overflow;
                 return;
@@ -2978,7 +2982,7 @@ private:
               break;
             }
 
-            case INDEX_J: {
+            case INSTR_INDEX_J: {
               if (stack_top_ == stack_size_) {
                 current_error_ = ForthError::stack_overflow;
                 return;
@@ -2987,7 +2991,7 @@ private:
               break;
             }
 
-            case INDEX_K: {
+            case INSTR_INDEX_K: {
               if (stack_top_ == stack_size_) {
                 current_error_ = ForthError::stack_overflow;
                 return;
@@ -2996,7 +3000,7 @@ private:
               break;
             }
 
-            case DUP: {
+            case INSTR_DUP: {
               if (stack_top_ == 0) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3010,7 +3014,7 @@ private:
               break;
             }
 
-            case DROP: {
+            case INSTR_DROP: {
               if (stack_top_ == 0) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3019,7 +3023,7 @@ private:
               break;
             }
 
-            case SWAP: {
+            case INSTR_SWAP: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3030,7 +3034,7 @@ private:
               break;
             }
 
-            case OVER: {
+            case INSTR_OVER: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3043,7 +3047,7 @@ private:
               break;
             }
 
-            case ROT: {
+            case INSTR_ROT: {
               if (stack_top_ < 3) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3055,7 +3059,7 @@ private:
               break;
             }
 
-            case NIP: {
+            case INSTR_NIP: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3065,7 +3069,7 @@ private:
               break;
             }
 
-            case TUCK: {
+            case INSTR_TUCK: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3081,7 +3085,7 @@ private:
               break;
             }
 
-            case ADD: {
+            case INSTR_ADD: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3091,7 +3095,7 @@ private:
               break;
             }
 
-            case SUB: {
+            case INSTR_SUB: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3101,7 +3105,7 @@ private:
               break;
             }
 
-            case MUL: {
+            case INSTR_MUL: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3111,7 +3115,7 @@ private:
               break;
             }
 
-            case DIV: {
+            case INSTR_DIV: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3121,7 +3125,7 @@ private:
               break;
             }
 
-            case MOD: {
+            case INSTR_MOD: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3131,7 +3135,7 @@ private:
               break;
             }
 
-            case DIVMOD: {
+            case INSTR_DIVMOD: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3143,7 +3147,7 @@ private:
               break;
             }
 
-            case NEGATE: {
+            case INSTR_NEGATE: {
               if (stack_top_ == 0) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3153,7 +3157,7 @@ private:
               break;
             }
 
-            case ADD1: {
+            case INSTR_ADD1: {
               if (stack_top_ == 0) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3163,7 +3167,7 @@ private:
               break;
             }
 
-            case SUB1: {
+            case INSTR_SUB1: {
               if (stack_top_ == 0) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3173,7 +3177,7 @@ private:
               break;
             }
 
-            case ABS: {
+            case INSTR_ABS: {
               if (stack_top_ == 0) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3183,7 +3187,7 @@ private:
               break;
             }
 
-            case MIN: {
+            case INSTR_MIN: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3193,7 +3197,7 @@ private:
               break;
             }
 
-            case MAX: {
+            case INSTR_MAX: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3203,7 +3207,7 @@ private:
               break;
             }
 
-            case EQ: {
+            case INSTR_EQ: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3213,7 +3217,7 @@ private:
               break;
             }
 
-            case NE: {
+            case INSTR_NE: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3223,7 +3227,7 @@ private:
               break;
             }
 
-            case GT: {
+            case INSTR_GT: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3233,7 +3237,7 @@ private:
               break;
             }
 
-            case GE: {
+            case INSTR_GE: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3243,7 +3247,7 @@ private:
               break;
             }
 
-            case LT: {
+            case INSTR_LT: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3253,7 +3257,7 @@ private:
               break;
             }
 
-            case LE: {
+            case INSTR_LE: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3263,7 +3267,7 @@ private:
               break;
             }
 
-            case EQ0: {
+            case INSTR_EQ0: {
               if (stack_top_ == 0) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3273,7 +3277,7 @@ private:
               break;
             }
 
-            case INVERT: {
+            case INSTR_INVERT: {
               if (stack_top_ == 0) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3283,7 +3287,7 @@ private:
               break;
             }
 
-            case AND: {
+            case INSTR_AND: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3293,7 +3297,7 @@ private:
               break;
             }
 
-            case OR: {
+            case INSTR_OR: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3303,7 +3307,7 @@ private:
               break;
             }
 
-            case XOR: {
+            case INSTR_XOR: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3313,7 +3317,7 @@ private:
               break;
             }
 
-            case LSHIFT: {
+            case INSTR_LSHIFT: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3323,7 +3327,7 @@ private:
               break;
             }
 
-            case RSHIFT: {
+            case INSTR_RSHIFT: {
               if (stack_top_ < 2) {
                 current_error_ = ForthError::stack_underflow;
                 return;
@@ -3333,7 +3337,7 @@ private:
               break;
             }
 
-            case FALSE: {
+            case INSTR_FALSE: {
               if (stack_top_ == stack_size_) {
                 current_error_ = ForthError::stack_overflow;
                 return;
@@ -3342,7 +3346,7 @@ private:
               break;
             }
 
-            case TRUE: {
+            case INSTR_TRUE: {
               if (stack_top_ == stack_size_) {
                 current_error_ = ForthError::stack_overflow;
                 return;

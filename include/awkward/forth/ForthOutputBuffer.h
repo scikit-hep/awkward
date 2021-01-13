@@ -133,7 +133,7 @@ namespace awkward {
     virtual void
       write_float64(int64_t num_items, double* values, bool byteswap) = 0;  // noexcept
 
-  private:
+  protected:
     int64_t length_;
     int64_t reserved_;
     double resize_;

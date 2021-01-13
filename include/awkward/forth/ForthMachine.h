@@ -25,6 +25,36 @@ namespace awkward {
                    int64_t output_initial_size=1024,
                    double output_resize_factor=1.5);
 
+    ~ForthMachineOf();
+
+    /// @brief HERE
+    const std::string
+      source() const;
+
+    /// @brief HERE
+    int64_t
+      stack_size() const;
+
+    /// @brief HERE
+    int64_t
+      recursion_depth() const;
+
+    /// @brief HERE
+    int64_t
+      output_initial_size() const;
+
+    /// @brief HERE
+    int64_t
+      output_resize_factor() const;
+
+
+
+
+
+
+
+
+
   private:
     void compile();
 
