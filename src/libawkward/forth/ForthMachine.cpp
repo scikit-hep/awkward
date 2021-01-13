@@ -367,8 +367,213 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  void ForthMachineOf<T, I>::compile() {
+  bool
+  ForthMachineOf<T, I>::is_integer(const std::string& word, int64_t& value) const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
 
+  template <typename T, typename I>
+  bool
+  ForthMachineOf<T, I>::is_variable(const std::string& word) const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  bool
+  ForthMachineOf<T, I>::is_input(const std::string& word) const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  bool
+  ForthMachineOf<T, I>::is_output(const std::string& word) const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  bool
+  ForthMachineOf<T, I>::is_reserved(const std::string& word) const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  bool
+  ForthMachineOf<T, I>::is_defined(const std::string& word,
+                                   const std::map<std::string, I>& dictionary_names) const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void ForthMachineOf<T, I>::compile() {
+    // not implemented
+  }
+
+  template <typename T, typename I>
+  const std::string
+  ForthMachineOf<T, I>::err_linecol(const std::vector<std::pair<int64_t, int64_t>>& linecol,
+                                    int64_t startpos,
+                                    int64_t stoppos,
+                                    const std::string& message) const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::parse(const std::string& defn,
+                              const std::vector<std::string>& tokenized,
+                              const std::vector<std::pair<int64_t, int64_t>>& linecol,
+                              int64_t start,
+                              int64_t stop,
+                              std::vector<I>& instructions,
+                              std::map<std::string, I>& dictionary_names,
+                              std::vector<std::vector<I>>& dictionary,
+                              int64_t exitdepth,
+                              int64_t dodepth) const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::write_from_stack(int64_t num, T* top) { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  bool
+  ForthMachineOf<T, I>::is_done() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  bool
+  ForthMachineOf<T, I>::is_segment_done() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::internal_run(bool only_one_step) { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::stack_push(T value) { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  T
+  ForthMachineOf<T, I>::stack_pop() { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  T*
+  ForthMachineOf<T, I>::stack_pop2() { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  T*
+  ForthMachineOf<T, I>::stack_pop2_before_pushing1() { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  T*
+  ForthMachineOf<T, I>::stack_peek() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::stack_clear() { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  I
+  ForthMachineOf<T, I>::instruction_get() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::instruction_pointer_push(int64_t which) { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::instruction_pointer_pop() { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t&
+  ForthMachineOf<T, I>::instruction_pointer_which() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t&
+  ForthMachineOf<T, I>::instruction_pointer_where() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::do_loop_push(int64_t start, int64_t stop) { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::do_steploop_push(int64_t start, int64_t stop) { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t&
+  ForthMachineOf<T, I>::do_instruction_depth() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::do_abs_instruction_depth() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  bool
+  ForthMachineOf<T, I>::do_loop_is_step() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t&
+  ForthMachineOf<T, I>::do_stop() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t&
+  ForthMachineOf<T, I>::do_i() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t&
+  ForthMachineOf<T, I>::do_j() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t&
+  ForthMachineOf<T, I>::do_k() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
   template class EXPORT_TEMPLATE_INST ForthMachineOf<int32_t, int32_t>;
