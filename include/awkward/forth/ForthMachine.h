@@ -30,11 +30,15 @@ namespace awkward {
 
     /// @brief HERE
     const std::string
-      source() const;
+      source() const noexcept;
 
     /// @brief HERE
     const std::vector<I>
-      bytecodes() const;
+      bytecodes() const noexcept;
+
+    /// @brief HERE
+    const std::vector<int64_t>
+      bytecodes_offsets() const noexcept;
 
     /// @brief HERE
     const std::string
@@ -46,19 +50,19 @@ namespace awkward {
 
     /// @brief HERE
     int64_t
-      stack_max_depth() const;
+      stack_max_depth() const noexcept;
 
     /// @brief HERE
     int64_t
-      recursion_max_depth() const;
+      recursion_max_depth() const noexcept;
 
     /// @brief HERE
     int64_t
-      output_initial_size() const;
+      output_initial_size() const noexcept;
 
     /// @brief HERE
     int64_t
-      output_resize_factor() const;
+      output_resize_factor() const noexcept;
 
     /// @brief HERE
     const std::vector<T>
@@ -66,31 +70,31 @@ namespace awkward {
 
     /// @brief HERE
     T
-      stack_at(int64_t from_top) const;
+      stack_at(int64_t from_top) const noexcept;
 
     /// @brief HERE
     int64_t
-      stack_depth() const;
+      stack_depth() const noexcept;
 
     /// @brief HERE
     bool
-      stack_can_push() const; // noexcept
+      stack_can_push() const noexcept;
 
     /// @brief HERE
     bool
-      stack_can_pop() const; // noexcept
+      stack_can_pop() const noexcept;
 
     /// @brief HERE
     inline void
-      stack_push(T value); // noexcept
+      stack_push(T value) noexcept;
 
     /// @brief HERE
     inline T
-      stack_pop(); // noexcept
+      stack_pop() noexcept;
 
     /// @brief HERE
-    inline void
-      stack_clear(); // noexcept
+    void
+      stack_clear() noexcept;
 
     /// @brief HERE
     const std::map<std::string, T>
@@ -106,7 +110,7 @@ namespace awkward {
 
     /// @brief HERE
     T
-      variable_at(int64_t index) const;
+      variable_at(int64_t index) const noexcept;
 
     /// @brief HERE
     const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>
@@ -114,7 +118,7 @@ namespace awkward {
 
     /// @brief HERE
     const std::vector<std::string>
-      output_index() const;
+      output_index() const noexcept;
 
     /// @brief HERE
     const std::shared_ptr<ForthOutputBuffer>
@@ -122,11 +126,11 @@ namespace awkward {
 
     /// @brief HERE
     const std::shared_ptr<ForthOutputBuffer>
-      output_at(int64_t index) const;
+      output_at(int64_t index) const noexcept;
 
     /// @brief HERE
     void
-      outputs_clear();
+      reset();
 
     /// @brief HERE
     void
@@ -167,31 +171,35 @@ namespace awkward {
 
     /// @brief HERE
     int64_t
-      breakpoint_depth() const;
+      breakpoint_depth() const noexcept;
 
     /// @brief HERE
     int64_t
-      current_instruction() const;
+      current_bytecode() const noexcept;
+
+    /// @brief HERE
+    int64_t
+      current_instruction() const noexcept;
 
     /// @brief HERE
     void
-      count_reset();
+      count_reset() noexcept;
 
     /// @brief HERE
     int64_t
-      count_instructions() const;
+      count_instructions() const noexcept;
 
     /// @brief HERE
     int64_t
-      count_reads() const;
+      count_reads() const noexcept;
 
     /// @brief HERE
     int64_t
-      count_writes() const;
+      count_writes() const noexcept;
 
     /// @brief HERE
     int64_t
-      count_nanoseconds() const;
+      count_nanoseconds() const noexcept;
 
   private:
 
@@ -243,15 +251,15 @@ namespace awkward {
 
     /// @brief HERE
     inline void
-      write_from_stack(int64_t num, T* top); // noexcept
+      write_from_stack(int64_t num, T* top) noexcept;
 
     /// @brief HERE
     inline bool
-      is_done() const; // noexcept
+      is_done() const noexcept;
 
     /// @brief HERE
     inline bool
-      is_segment_done() const; // noexcept
+      is_segment_done() const noexcept;
 
     /// @brief HERE
     void
@@ -259,78 +267,78 @@ namespace awkward {
 
     /// @brief HERE
     inline T*
-      stack_pop2(); // noexcept
+      stack_pop2() noexcept;
 
     /// @brief HERE
     inline T*
-      stack_pop2_before_pushing1(); // noexcept
+      stack_pop2_before_pushing1() noexcept;
 
     /// @brief HERE
     inline T*
-      stack_peek() const; // noexcept
+      stack_peek() const noexcept;
 
     /// @brief HERE
     inline I
-      instruction_get() const; // noexcept
+      instruction_get() const noexcept;
 
     /// @brief HERE
     inline void
-      instruction_pointer_push(int64_t which); // noexcept
+      bytecodes_pointer_push(int64_t which) noexcept;
 
     /// @brief HERE
     inline void
-      instruction_pointer_pop(); // noexcept
+      bytecodes_pointer_pop() noexcept;
 
     /// @brief HERE
     inline int64_t&
-      instruction_pointer_which() const; // noexcept
+      bytecodes_pointer_which() const noexcept;
 
     /// @brief HERE
     inline int64_t&
-      instruction_pointer_where() const; // noexcept
+      bytecodes_pointer_where() const noexcept;
 
     /// @brief HERE
     inline void
-      do_loop_push(int64_t start, int64_t stop); // noexcept
+      do_loop_push(int64_t start, int64_t stop) noexcept;
 
     /// @brief HERE
     inline void
-      do_steploop_push(int64_t start, int64_t stop); // noexcept
+      do_steploop_push(int64_t start, int64_t stop) noexcept;
 
     /// @brief HERE
     inline int64_t&
-      do_instruction_depth() const; // noexcept
+      do_recursion_depth() const noexcept;
 
     /// @brief HERE
     inline int64_t
-      do_abs_instruction_depth() const; // noexcept
+      do_abs_recursion_depth() const noexcept;
 
     /// @brief HERE
     inline bool
-      do_loop_is_step() const; // noexcept
+      do_loop_is_step() const noexcept;
 
     /// @brief HERE
     inline int64_t&
-      do_stop() const; // noexcept
+      do_stop() const noexcept;
 
     /// @brief HERE
     inline int64_t&
-      do_i() const; // noexcept
+      do_i() const noexcept;
 
     /// @brief HERE
     inline int64_t&
-      do_j() const; // noexcept
+      do_j() const noexcept;
 
     /// @brief HERE
     inline int64_t&
-      do_k() const; // noexcept
+      do_k() const noexcept;
 
     std::string source_;
     int64_t output_initial_size_;
     double output_resize_factor_;
 
     T* stack_buffer_;
-    int64_t stack_top_;
+    int64_t stack_depth_;
     int64_t stack_max_depth_;
 
     std::vector<std::string> variable_names_;
@@ -344,6 +352,7 @@ namespace awkward {
     std::vector<std::vector<I>> dictionary_;
     std::vector<int64_t> bytecodes_offsets_;
     std::vector<I> bytecodes_;
+    std::vector<int64_t> bytecode_to_instruction_;
 
     std::vector<std::shared_ptr<ForthInputBuffer>> current_inputs_;
     std::vector<std::shared_ptr<ForthOutputBuffer>> current_outputs_;
@@ -352,10 +361,10 @@ namespace awkward {
 
     int64_t* current_which_;
     int64_t* current_where_;
-    int64_t instruction_current_depth_;
-    int64_t instruction_max_depth_;
+    int64_t recursion_current_depth_;
+    int64_t recursion_max_depth_;
 
-    int64_t* do_instruction_depth_;
+    int64_t* do_recursion_depth_;
     int64_t* do_stop_;
     int64_t* do_i_;
     int64_t do_current_depth_;
