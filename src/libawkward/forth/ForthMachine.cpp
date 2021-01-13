@@ -326,6 +326,12 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::stack_clear() { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
   const std::map<std::string, T>
   ForthMachineOf<T, I>::variables() const {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
@@ -370,6 +376,12 @@ namespace awkward {
   template <typename T, typename I>
   const std::shared_ptr<ForthOutputBuffer>
   ForthMachineOf<T, I>::output_at(int64_t index) const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::outputs_clear() {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
@@ -575,12 +587,6 @@ namespace awkward {
   template <typename T, typename I>
   T*
   ForthMachineOf<T, I>::stack_peek() const { // noexcept
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
-  }
-
-  template <typename T, typename I>
-  void
-  ForthMachineOf<T, I>::stack_clear() { // noexcept
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 

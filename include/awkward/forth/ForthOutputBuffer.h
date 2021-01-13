@@ -8,6 +8,17 @@
 #include "awkward/common.h"
 
 namespace awkward {
+  #define NATIVELY_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
+
+  /// @brief HERE
+  void byteswap16(int64_t num_items, void* ptr);
+
+  /// @brief HERE
+  void byteswap32(int64_t num_items, void* ptr);
+
+  /// @brief HERE
+  void byteswap64(int64_t num_items, void* ptr);
+
   /// @class ForthOutputBuffer
   ///
   /// @brief HERE
@@ -24,11 +35,11 @@ namespace awkward {
 
     /// @brief HERE
     int64_t
-      len() const;  // noexcept
+      len() const noexcept;
 
     /// @brief HERE
     void
-      rewind(int64_t num_bytes, util::ForthError& err);  // noexcept
+      rewind(int64_t num_items, util::ForthError& err) noexcept;
 
     /// @brief HERE
     virtual const std::shared_ptr<void>
@@ -36,107 +47,107 @@ namespace awkward {
 
     /// @brief HERE
     virtual void
-      write_one_bool(bool value, bool byteswap) = 0;  // noexcept
+      write_one_bool(bool value, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_one_int8(int8_t value, bool byteswap) = 0;  // noexcept
+      write_one_int8(int8_t value, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_one_int16(int16_t value, bool byteswap) = 0;  // noexcept
+      write_one_int16(int16_t value, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_one_int32(int32_t value, bool byteswap) = 0;  // noexcept
+      write_one_int32(int32_t value, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_one_int64(int64_t value, bool byteswap) = 0;  // noexcept
+      write_one_int64(int64_t value, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_one_intp(ssize_t value, bool byteswap) = 0;  // noexcept
+      write_one_intp(ssize_t value, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_one_uint8(uint8_t value, bool byteswap) = 0;  // noexcept
+      write_one_uint8(uint8_t value, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_one_uint16(uint16_t value, bool byteswap) = 0;  // noexcept
+      write_one_uint16(uint16_t value, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_one_uint32(uint32_t value, bool byteswap) = 0;  // noexcept
+      write_one_uint32(uint32_t value, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_one_uint64(uint64_t value, bool byteswap) = 0;  // noexcept
+      write_one_uint64(uint64_t value, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_one_uintp(size_t value, bool byteswap) = 0;  // noexcept
+      write_one_uintp(size_t value, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_one_float32(float value, bool byteswap) = 0;  // noexcept
+      write_one_float32(float value, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_one_float64(double value, bool byteswap) = 0;  // noexcept
+      write_one_float64(double value, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_bool(int64_t num_items, bool* values, bool byteswap) = 0;  // noexcept
+      write_bool(int64_t num_items, bool* values, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_int8(int64_t num_items, int8_t* values, bool byteswap) = 0;  // noexcept
+      write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_int16(int64_t num_items, int16_t* values, bool byteswap) = 0;  // noexcept
+      write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_int32(int64_t num_items, int32_t* values, bool byteswap) = 0;  // noexcept
+      write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_int64(int64_t num_items, int64_t* values, bool byteswap) = 0;  // noexcept
+      write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_intp(int64_t num_items, ssize_t* values, bool byteswap) = 0;  // noexcept
+      write_intp(int64_t num_items, ssize_t* values, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_uint8(int64_t num_items, uint8_t* values, bool byteswap) = 0;  // noexcept
+      write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_uint16(int64_t num_items, uint16_t* values, bool byteswap) = 0;  // noexcept
+      write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_uint32(int64_t num_items, uint32_t* values, bool byteswap) = 0;  // noexcept
+      write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_uint64(int64_t num_items, uint64_t* values, bool byteswap) = 0;  // noexcept
+      write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_uintp(int64_t num_items, size_t* values, bool byteswap) = 0;  // noexcept
+      write_uintp(int64_t num_items, size_t* values, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_float32(int64_t num_items, float* values, bool byteswap) = 0;  // noexcept
+      write_float32(int64_t num_items, float* values, bool byteswap) noexcept = 0;
 
     /// @brief HERE
     virtual void
-      write_float64(int64_t num_items, double* values, bool byteswap) = 0;  // noexcept
+      write_float64(int64_t num_items, double* values, bool byteswap) noexcept = 0;
 
   protected:
     int64_t length_;
@@ -153,82 +164,82 @@ namespace awkward {
       ptr() const noexcept override;
 
     void
-      write_one_bool(bool value, bool byteswap) override;  // noexcept
+      write_one_bool(bool value, bool byteswap) noexcept override;
 
     void
-      write_one_int8(int8_t value, bool byteswap) override;  // noexcept
+      write_one_int8(int8_t value, bool byteswap) noexcept override;
 
     void
-      write_one_int16(int16_t value, bool byteswap) override;  // noexcept
+      write_one_int16(int16_t value, bool byteswap) noexcept override;
 
     void
-      write_one_int32(int32_t value, bool byteswap) override;  // noexcept
+      write_one_int32(int32_t value, bool byteswap) noexcept override;
 
     void
-      write_one_int64(int64_t value, bool byteswap) override;  // noexcept
+      write_one_int64(int64_t value, bool byteswap) noexcept override;
 
     void
-      write_one_intp(ssize_t value, bool byteswap) override;  // noexcept
+      write_one_intp(ssize_t value, bool byteswap) noexcept override;
 
     void
-      write_one_uint8(uint8_t value, bool byteswap) override;  // noexcept
+      write_one_uint8(uint8_t value, bool byteswap) noexcept override;
 
     void
-      write_one_uint16(uint16_t value, bool byteswap) override;  // noexcept
+      write_one_uint16(uint16_t value, bool byteswap) noexcept override;
 
     void
-      write_one_uint32(uint32_t value, bool byteswap) override;  // noexcept
+      write_one_uint32(uint32_t value, bool byteswap) noexcept override;
 
     void
-      write_one_uint64(uint64_t value, bool byteswap) override;  // noexcept
+      write_one_uint64(uint64_t value, bool byteswap) noexcept override;
 
     void
-      write_one_uintp(size_t value, bool byteswap) override;  // noexcept
+      write_one_uintp(size_t value, bool byteswap) noexcept override;
 
     void
-      write_one_float32(float value, bool byteswap) override;  // noexcept
+      write_one_float32(float value, bool byteswap) noexcept override;
 
     void
-      write_one_float64(double value, bool byteswap) override;  // noexcept
+      write_one_float64(double value, bool byteswap) noexcept override;
 
     void
-      write_bool(int64_t num_items, bool* values, bool byteswap) override;  // noexcept
+      write_bool(int64_t num_items, bool* values, bool byteswap) noexcept override;
 
     void
-      write_int8(int64_t num_items, int8_t* values, bool byteswap) override;  // noexcept
+      write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept override;
 
     void
-      write_int16(int64_t num_items, int16_t* values, bool byteswap) override;  // noexcept
+      write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept override;
 
     void
-      write_int32(int64_t num_items, int32_t* values, bool byteswap) override;  // noexcept
+      write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept override;
 
     void
-      write_int64(int64_t num_items, int64_t* values, bool byteswap) override;  // noexcept
+      write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept override;
 
     void
-      write_intp(int64_t num_items, ssize_t* values, bool byteswap) override;  // noexcept
+      write_intp(int64_t num_items, ssize_t* values, bool byteswap) noexcept override;
 
     void
-      write_uint8(int64_t num_items, uint8_t* values, bool byteswap) override;  // noexcept
+      write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept override;
 
     void
-      write_uint16(int64_t num_items, uint16_t* values, bool byteswap) override;  // noexcept
+      write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept override;
 
     void
-      write_uint32(int64_t num_items, uint32_t* values, bool byteswap) override;  // noexcept
+      write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept override;
 
     void
-      write_uint64(int64_t num_items, uint64_t* values, bool byteswap) override;  // noexcept
+      write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept override;
 
     void
-      write_uintp(int64_t num_items, size_t* values, bool byteswap) override;  // noexcept
+      write_uintp(int64_t num_items, size_t* values, bool byteswap) noexcept override;
 
     void
-      write_float32(int64_t num_items, float* values, bool byteswap) override;  // noexcept
+      write_float32(int64_t num_items, float* values, bool byteswap) noexcept override;
 
     void
-      write_float64(int64_t num_items, double* values, bool byteswap) override;  // noexcept
+      write_float64(int64_t num_items, double* values, bool byteswap) noexcept override;
 
   public:
 
@@ -238,7 +249,7 @@ namespace awkward {
 
     /// @brief HERE
     template <typename IN>
-    inline void write_one(IN value) { // noexcept
+    inline void write_one(IN value) noexcept {
       length_++;
       maybe_resize(length_);
       ptr_.get()[length_ - 1] = value;
@@ -246,7 +257,7 @@ namespace awkward {
 
     /// @brief HERE
     template <typename IN>
-    inline void write_copy(int64_t num_items, const IN* values) {  // noexcept
+    inline void write_copy(int64_t num_items, const IN* values) noexcept {
       int64_t next = length_ + num_items;
       maybe_resize(next);
       for (int64_t i = 0;  i < num_items;  i++) {

@@ -23,27 +23,27 @@ namespace awkward {
 
     /// @brief HERE
     void*
-      read(int64_t num_bytes, util::ForthError& err);  // noexcept
+      read(int64_t num_bytes, util::ForthError& err) noexcept;
 
     /// @brief HERE
     void
-      seek(int64_t to, util::ForthError& err);  // noexcept
+      seek(int64_t to, util::ForthError& err) noexcept;
 
     /// @brief HERE
     void
-      skip(int64_t num_bytes, util::ForthError& err);  // noexcept
+      skip(int64_t num_bytes, util::ForthError& err) noexcept;
 
     /// @brief HERE
     bool
-      end() const;  // noexcept
+      end() const noexcept;
 
     /// @brief HERE
     int64_t
-      pos() const;  // noexcept
+      pos() const noexcept;
 
     /// @brief HERE
     int64_t
-      len() const;  // noexcept
+      len() const noexcept;
 
   private:
     std::shared_ptr<void> ptr_;

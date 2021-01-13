@@ -14,33 +14,53 @@ namespace awkward {
     , pos_(0) { }
 
   void*
-  ForthInputBuffer::read(int64_t num_bytes, util::ForthError& err) {  // noexcept
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  ForthInputBuffer::read(int64_t num_bytes, util::ForthError& err) noexcept {
+    int64_t next = pos_ + num_bytes;
+    if (next > length_) {
+      err = util::ForthError::read_beyond;
+      return nullptr;
+    }
+    void* out = reinterpret_cast<void*>(
+        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_ + (size_t)pos_
+    );
+    pos_ = next;
+    return out;
   }
 
   void
-  ForthInputBuffer::seek(int64_t to, util::ForthError& err) {  // noexcept
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  ForthInputBuffer::seek(int64_t to, util::ForthError& err) noexcept {
+    if (to < 0  ||  to > length_) {
+      err = util::ForthError::seek_beyond;
+    }
+    else {
+      pos_ = to;
+    }
   }
 
   void
-  ForthInputBuffer::skip(int64_t num_bytes, util::ForthError& err) {  // noexcept
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  ForthInputBuffer::skip(int64_t num_bytes, util::ForthError& err) noexcept {
+    int64_t next = pos_ + num_bytes;
+    if (next < 0  ||  next > length_) {
+      err = util::ForthError::skip_beyond;
+    }
+    else {
+      pos_ = next;
+    }
   }
 
   bool
-  ForthInputBuffer::end() const {  // noexcept
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  ForthInputBuffer::end() const noexcept {
+    return pos_ == length_;
   }
 
   int64_t
-  ForthInputBuffer::pos() const {  // noexcept
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  ForthInputBuffer::pos() const noexcept {
+    return pos_;
   }
 
   int64_t
-  ForthInputBuffer::len() const {  // noexcept
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  ForthInputBuffer::len() const noexcept {
+    return length_;
   }
 
 }
