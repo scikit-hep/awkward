@@ -3,6 +3,7 @@
 #ifndef AWKWARD_IO_JSON_H_
 #define AWKWARD_IO_JSON_H_
 
+#include <complex>
 #include <cstdio>
 #include <string>
 
@@ -35,6 +36,9 @@ namespace awkward {
     /// @brief Append a real value `x`.
     virtual void
       real(double x) = 0;
+    /// @brief Append a complex value `x`.
+    virtual void
+      complex(std::complex<double> x) = 0;
     /// @brief Append a string value `x`.
     virtual void
       string(const char* x, int64_t length) = 0;
@@ -94,6 +98,8 @@ namespace awkward {
     void
       real(double x) override;
     void
+      complex(std::complex<double> x) override;
+    void
       string(const char* x, int64_t length) override;
     void
       beginlist() override;
@@ -147,6 +153,8 @@ namespace awkward {
       integer(int64_t x) override;
     void
       real(double x) override;
+    void
+      complex(std::complex<double> x) override;
     void
       string(const char* x, int64_t length) override;
     void
@@ -206,6 +214,8 @@ namespace awkward {
     void
       real(double x) override;
     void
+      complex(std::complex<double> x) override;
+    void
       string(const char* x, int64_t length) override;
     void
       beginlist() override;
@@ -260,6 +270,8 @@ namespace awkward {
       integer(int64_t x) override;
     void
       real(double x) override;
+    void
+      complex(std::complex<double> x) override;
     void
       string(const char* x, int64_t length) override;
     void

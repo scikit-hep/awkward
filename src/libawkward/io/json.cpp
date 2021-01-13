@@ -81,6 +81,14 @@ namespace awkward {
     void boolean(bool x) { writer_.Bool(x); }
     void integer(int64_t x) { writer_.Int64(x); }
     void real(double x) { writer_.Double(x); }
+    void complex(std::complex<double> x) {
+      beginrecord();
+      field("real");
+      real(x.real());
+      field("imag");
+      real(x.imag());
+      endrecord();
+    }
     void string(const char* x, int64_t length) {
       writer_.String(x, (rj::SizeType)length); }
     void beginlist() { writer_.StartArray(); }
@@ -144,6 +152,11 @@ namespace awkward {
   }
 
   void
+  ToJsonString::complex(std::complex<double> x) {
+    impl_->complex(x);
+  }
+
+  void
   ToJsonString::string(const char* x, int64_t length) {
     impl_->string(x, length);
   }
@@ -195,6 +208,14 @@ namespace awkward {
     void boolean(bool x) { writer_.Bool(x); }
     void integer(int64_t x) { writer_.Int64(x); }
     void real(double x) { writer_.Double(x); }
+    void complex(std::complex<double> x) {
+      beginrecord();
+      field("real");
+      real(x.real());
+      field("imag");
+      real(x.imag());
+      endrecord();
+    }
     void string(const char* x, int64_t length) {
       writer_.String(x, (rj::SizeType)length); }
     void beginlist() { writer_.StartArray(); }
@@ -258,6 +279,11 @@ namespace awkward {
   }
 
   void
+  ToJsonPrettyString::complex(std::complex<double> x) {
+    impl_->complex(x);
+  }
+
+  void
   ToJsonPrettyString::string(const char* x, int64_t length) {
     impl_->string(x, length);
   }
@@ -313,6 +339,14 @@ namespace awkward {
     void boolean(bool x) { writer_.Bool(x); }
     void integer(int64_t x) { writer_.Int64(x); }
     void real(double x) { writer_.Double(x); }
+    void complex(std::complex<double> x) {
+      beginrecord();
+      field("real");
+      real(x.real());
+      field("imag");
+      real(x.imag());
+      endrecord();
+    }
     void string(const char* x, int64_t length) {
       writer_.String(x, (rj::SizeType)length); }
     void beginlist() { writer_.StartArray(); }
@@ -376,6 +410,11 @@ namespace awkward {
   }
 
   void
+  ToJsonFile::complex(std::complex<double> x) {
+    impl_->complex(x);
+  }
+
+  void
   ToJsonFile::string(const char* x, int64_t length) {
     impl_->string(x, length);
   }
@@ -426,6 +465,14 @@ namespace awkward {
     void boolean(bool x) { writer_.Bool(x); }
     void integer(int64_t x) { writer_.Int64(x); }
     void real(double x) { writer_.Double(x); }
+    void complex(std::complex<double> x) {
+      beginrecord();
+      field("real");
+      real(x.real());
+      field("imag");
+      real(x.imag());
+      endrecord();
+    }
     void string(const char* x, int64_t length) {
       writer_.String(x, (rj::SizeType)length); }
     void beginlist() { writer_.StartArray(); }
@@ -488,6 +535,11 @@ namespace awkward {
     else {
       impl_->real(x);
     }
+  }
+
+  void
+  ToJsonPrettyFile::complex(std::complex<double> x) {
+    impl_->complex(x);
   }
 
   void

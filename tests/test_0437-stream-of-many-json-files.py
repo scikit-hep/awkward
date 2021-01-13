@@ -7,6 +7,14 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
+def test_complex_numbers():
+    array = ak.layout.NumpyArray(np.array([(1.+2.j), (3.+4.j)],dtype=np.complex_))
+    assert ak.to_list(array) == [(1.+2.j), (3.+4.j)]
+    assert (
+        ak.to_json(array)
+        == '[{"real":1.0,"imag":2.0},{"real":3.0,"imag":4.0}]'
+    )
+
 def test_unfinished_fragment_exception():
     # read unfinished json fragments
     strs0 = """{"one": 1, "two": 2.2,"""

@@ -4,6 +4,7 @@
 #define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/array/NumpyArray.cpp", line)
 
 #include <algorithm>
+#include <complex>
 #include <iomanip>
 #include <numeric>
 #include <sstream>
@@ -892,15 +893,17 @@ namespace awkward {
         case util::dtype::float128:
           throw std::runtime_error(
             std::string("FIXME: float128 to JSON") + FILENAME(__LINE__));
+          break;
         case util::dtype::complex64:
-          throw std::runtime_error(
-            std::string("FIXME: complex64 to JSON") + FILENAME(__LINE__));
+          tojson_complex<std::complex<float>>(builder, include_beginendlist);
+          break;
         case util::dtype::complex128:
-          throw std::runtime_error(
-            std::string("FIXME: complex128 to JSON") + FILENAME(__LINE__));
+          tojson_complex<std::complex<double>>(builder, include_beginendlist);
+          break;
         case util::dtype::complex256:
           throw std::runtime_error(
             std::string("FIXME: complex256 to JSON") + FILENAME(__LINE__));
+          break;
         default:
           throw std::invalid_argument(
             std::string("cannot convert Numpy format \"") + format_
@@ -4468,6 +4471,49 @@ namespace awkward {
                          dtype_,
                          ptr_lib_);
         numpy.tojson_real<T>(builder, true);
+      }
+      builder.endlist();
+    }
+  }
+
+  template <typename T>
+  void
+  NumpyArray::tojson_complex(ToJson& builder,
+                             bool include_beginendlist) const {
+    if (ndim() == 0) {
+      T* array = reinterpret_cast<T*>(data());
+      builder.complex(array[0]);
+    }
+    else if (ndim() == 1) {
+      T* array = reinterpret_cast<T*>(data());
+      int64_t stride = strides_[0] / (int64_t)(sizeof(T));
+      if (include_beginendlist) {
+        builder.beginlist();
+      }
+      for (int64_t i = 0;  i < length();  i++) {
+        builder.complex(array[i*stride]);
+      }
+      if (include_beginendlist) {
+        builder.endlist();
+      }
+    }
+    else {
+      const std::vector<ssize_t> shape(std::next(shape_.begin()), shape_.end());
+      const std::vector<ssize_t> strides(std::next(strides_.begin()), strides_.end());
+      builder.beginlist();
+      for (int64_t i = 0;  i < length();  i++) {
+        ssize_t byteoffset = byteoffset_ + strides_[0]*((ssize_t)i);
+        NumpyArray numpy(Identities::none(),
+                         util::Parameters(),
+                         ptr_,
+                         shape,
+                         strides,
+                         byteoffset,
+                         itemsize_,
+                         format_,
+                         dtype_,
+                         ptr_lib_);
+        numpy.tojson_complex<T>(builder, true);
       }
       builder.endlist();
     }
