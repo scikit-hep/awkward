@@ -9,5 +9,6 @@ import awkward as ak  # noqa: F401
 
 def test():
     import awkward.forth
+
     awkward.forth.ForthMachine32("")
     awkward.forth.ForthMachine64("")

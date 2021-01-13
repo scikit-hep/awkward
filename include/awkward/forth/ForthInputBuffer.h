@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "awkward/common.h"
+#include "awkward/util.h"
 
 namespace awkward {
   /// @class ForthInputBuffer
@@ -15,9 +16,34 @@ namespace awkward {
   /// THERE
   class LIBAWKWARD_EXPORT_SYMBOL ForthInputBuffer {
   public:
+    /// @brief HERE
     ForthInputBuffer(const std::shared_ptr<void> ptr,
                      int64_t offset,
                      int64_t length);
+
+    /// @brief HERE
+    void*
+      read(int64_t num_bytes, util::ForthError& err);  // noexcept
+
+    /// @brief HERE
+    void
+      seek(int64_t to, util::ForthError& err);  // noexcept
+
+    /// @brief HERE
+    void
+      skip(int64_t num_bytes, util::ForthError& err);  // noexcept
+
+    /// @brief HERE
+    bool
+      end() const;  // noexcept
+
+    /// @brief HERE
+    int64_t
+      pos() const;  // noexcept
+
+    /// @brief HERE
+    int64_t
+      len() const;  // noexcept
 
   private:
     std::shared_ptr<void> ptr_;
