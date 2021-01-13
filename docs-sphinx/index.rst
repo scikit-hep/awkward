@@ -157,7 +157,7 @@ Navigation
    * :doc:`ak.layout.RegularArray`: splits its nested content into equal-length lists.
    * :doc:`ak.layout.ListArray`: splits its nested content into variable-length lists with full generality (may use its content non-contiguously, overlapping, or out-of-order).
    * :doc:`ak.layout.ListOffsetArray`: splits its nested content into variable-length lists, assuming contiguous, non-overlapping, in-order content.
-   * :doc:`ak.layout.RecordArray`: represents an array of records in "struct of arrays" form.
+   * :doc:`ak.layout.RecordArray`: represents a logical array of records with a "struct of arrays" layout in memory.
    * :doc:`ak.layout.Record`: represents a single record (not a subclass of :doc:`ak.layout.Content` in Python).
    * :doc:`ak.layout.IndexedArray`: rearranges and/or duplicates its content by lazily applying an integer index.
    * :doc:`ak.layout.IndexedOptionArray`: same as :doc:`ak.layout.IndexedArray` with missing values as negative indexes.
