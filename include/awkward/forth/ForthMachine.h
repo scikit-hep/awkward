@@ -21,8 +21,8 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL ForthMachineOf {
   public:
     ForthMachineOf(const std::string& source,
-                   int64_t stack_size=1024,
-                   int64_t recursion_depth=1024,
+                   int64_t stack_max_depth=1024,
+                   int64_t recursion_max_depth=1024,
                    int64_t output_initial_size=1024,
                    double output_resize_factor=1.5);
 
@@ -41,12 +41,16 @@ namespace awkward {
       assembly_instructions() const;
 
     /// @brief HERE
-    int64_t
-      stack_size() const;
+    const std::vector<std::string>
+      dictionary() const;
 
     /// @brief HERE
     int64_t
-      recursion_depth() const;
+      stack_max_depth() const;
+
+    /// @brief HERE
+    int64_t
+      recursion_max_depth() const;
 
     /// @brief HERE
     int64_t
@@ -61,8 +65,56 @@ namespace awkward {
       stack() const;
 
     /// @brief HERE
+    T
+      stack_at(int64_t from_top) const;
+
+    /// @brief HERE
+    int64_t
+      stack_depth() const;
+
+    /// @brief HERE
+    bool stack_can_push() const; // noexcept
+
+    /// @brief HERE
+    bool stack_can_pop() const; // noexcept
+
+    /// @brief HERE
+    inline void stack_push(T value); // noexcept
+
+    /// @brief HERE
+    inline T stack_pop(); // noexcept
+
+    /// @brief HERE
     const std::map<std::string, T>
       variables() const;
+
+    /// @brief HERE
+    const std::vector<std::string>
+      variable_index() const;
+
+    /// @brief HERE
+    T
+      variable_at(const std::string& name) const;
+
+    /// @brief HERE
+    T
+      variable_at(int64_t index) const;
+
+    /// @brief HERE
+    const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>
+      outputs() const;
+
+    /// @brief HERE
+    const std::vector<std::string>
+      output_index() const;
+
+    /// @brief HERE
+    const std::shared_ptr<ForthOutputBuffer>
+      output_at(const std::string& name) const;
+
+    /// @brief HERE
+    const std::shared_ptr<ForthOutputBuffer>
+      output_at(int64_t index) const;
 
     /// @brief HERE
     void
@@ -73,29 +125,41 @@ namespace awkward {
       begin();
 
     /// @brief HERE
-    const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>
+    util::ForthError
       step();
 
     /// @brief HERE
-    int64_t
-      current_instruction() const;
-
-    /// @brief HERE
-    void
-      end();
-
-    /// @brief HERE
-    void
+    util::ForthError
       run(const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs,
           const std::set<util::ForthError>& ignore);
 
     /// @brief HERE
-    void
+    util::ForthError
       run(const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs);
 
     /// @brief HERE
-    void
+    util::ForthError
       run();
+
+    /// @brief HERE
+    util::ForthError
+      resume();
+
+    /// @brief HERE
+    util::ForthError
+      call(const std::string& name);
+
+    /// @brief HERE
+    util::ForthError
+      call(int64_t index);
+
+    /// @brief HERE
+    int64_t
+      breakpoint_depth() const;
+
+    /// @brief HERE
+    int64_t
+      current_instruction() const;
 
     /// @brief HERE
     void
@@ -135,8 +199,7 @@ namespace awkward {
     bool is_reserved(const std::string& word) const;
 
     /// @brief HERE
-    bool is_defined(const std::string& word,
-                    const std::map<std::string, I>& dictionary_names) const;
+    bool is_defined(const std::string& word) const;
 
     /// @brief HERE
     void compile();
@@ -153,9 +216,7 @@ namespace awkward {
                const std::vector<std::pair<int64_t, int64_t>>& linecol,
                int64_t start,
                int64_t stop,
-               std::vector<I>& instructions,
-               std::map<std::string, I>& dictionary_names,
-               std::vector<std::vector<I>>& dictionary,
+               std::vector<I>& bytecodes,
                int64_t exitdepth,
                int64_t dodepth) const;
 
@@ -169,13 +230,7 @@ namespace awkward {
     inline bool is_segment_done() const; // noexcept
 
     /// @brief HERE
-    void internal_run(bool only_one_step); // noexcept
-
-    /// @brief HERE
-    inline void stack_push(T value); // noexcept
-
-    /// @brief HERE
-    inline T stack_pop(); // noexcept
+    void internal_run(bool keep_going); // noexcept
 
     /// @brief HERE
     inline T* stack_pop2(); // noexcept
@@ -237,7 +292,7 @@ namespace awkward {
 
     T* stack_buffer_;
     int64_t stack_top_;
-    int64_t stack_size_;
+    int64_t stack_max_depth_;
 
     std::vector<std::string> variable_names_;
     std::vector<T> variables_;
@@ -246,11 +301,15 @@ namespace awkward {
     std::vector<std::string> output_names_;
     std::vector<util::dtype> output_dtypes_;
 
-    std::vector<int64_t> instructions_offsets_;
-    std::vector<I> instructions_;
+    std::map<std::string, I> dictionary_names_;
+    std::vector<std::vector<I>> dictionary_;
+    std::vector<int64_t> bytecodes_offsets_;
+    std::vector<I> bytecodes_;
 
     std::vector<std::shared_ptr<ForthInputBuffer>> current_inputs_;
     std::vector<std::shared_ptr<ForthOutputBuffer>> current_outputs_;
+
+    int64_t current_breakpoint_depth_;
 
     int64_t* current_which_;
     int64_t* current_where_;

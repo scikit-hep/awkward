@@ -12,83 +12,84 @@ namespace awkward {
   #define PARSER_DIRECT 1
   #define PARSER_REPEATED 2
   #define PARSER_BIGENDIAN 4
-  #define PARSER_MASK ~(1 + 2 + 4)
   // parser sequential values (starting in the fourth bit)
-  #define PARSER_BOOL 8
-  #define PARSER_INT8 16
-  #define PARSER_INT16 24
-  #define PARSER_INT32 32
-  #define PARSER_INT64 40
-  #define PARSER_INTP 48
-  #define PARSER_UINT8 56
-  #define PARSER_UINT16 64
-  #define PARSER_UINT32 72
-  #define PARSER_UINT64 80
-  #define PARSER_UINTP 88
-  #define PARSER_FLOAT32 96
-  #define PARSER_FLOAT64 104
+  #define PARSER_MASK (~(-0x80) & (-0x8))
+  #define PARSER_BOOL (0x8 * 1)
+  #define PARSER_INT8 (0x8 * 2)
+  #define PARSER_INT16 (0x8 * 3)
+  #define PARSER_INT32 (0x8 * 4)
+  #define PARSER_INT64 (0x8 * 5)
+  #define PARSER_INTP (0x8 * 6)
+  #define PARSER_UINT8 (0x8 * 7)
+  #define PARSER_UINT16 (0x8 * 8)
+  #define PARSER_UINT32 (0x8 * 9)
+  #define PARSER_UINT64 (0x8 * 10)
+  #define PARSER_UINTP (0x8 * 11)
+  #define PARSER_FLOAT32 (0x8 * 12)
+  #define PARSER_FLOAT64 (0x8 * 13)
 
   // instructions from special parsing rules
   #define INSTR_LITERAL 0
-  #define INSTR_IF 1
-  #define INSTR_IF_ELSE 2
-  #define INSTR_DO 3
-  #define INSTR_DO_STEP 4
-  #define INSTR_AGAIN 5
-  #define INSTR_UNTIL 6
-  #define INSTR_WHILE 7
-  #define INSTR_EXIT 8
-  #define INSTR_PUT 9
-  #define INSTR_INC 10
-  #define INSTR_GET 11
-  #define INSTR_LEN_INPUT 12
-  #define INSTR_POS 13
-  #define INSTR_END 14
-  #define INSTR_SEEK 15
-  #define INSTR_SKIP 16
-  #define INSTR_WRITE 17
-  #define INSTR_LEN_OUTPUT 18
-  #define INSTR_REWIND 19
+  #define INSTR_BREAKPOINT 1
+  #define INSTR_IF 2
+  #define INSTR_IF_ELSE 3
+  #define INSTR_DO 4
+  #define INSTR_DO_STEP 5
+  #define INSTR_AGAIN 6
+  #define INSTR_UNTIL 7
+  #define INSTR_WHILE 8
+  #define INSTR_EXIT 9
+  #define INSTR_PUT 10
+  #define INSTR_INC 11
+  #define INSTR_GET 12
+  #define INSTR_LEN_INPUT 13
+  #define INSTR_POS 14
+  #define INSTR_END 15
+  #define INSTR_SEEK 16
+  #define INSTR_SKIP 17
+  #define INSTR_WRITE 18
+  #define INSTR_LEN_OUTPUT 19
+  #define INSTR_REWIND 20
   // generic builtin instructions
-  #define INSTR_INDEX_I 20
-  #define INSTR_INDEX_J 21
-  #define INSTR_INDEX_K 22
-  #define INSTR_DUP 23
-  #define INSTR_DROP 24
-  #define INSTR_SWAP 25
-  #define INSTR_OVER 26
-  #define INSTR_ROT 27
-  #define INSTR_NIP 28
-  #define INSTR_TUCK 29
-  #define INSTR_ADD 30
-  #define INSTR_SUB 31
-  #define INSTR_MUL 32
-  #define INSTR_DIV 33
-  #define INSTR_MOD 34
-  #define INSTR_DIVMOD 35
-  #define INSTR_NEGATE 36
-  #define INSTR_ADD1 37
-  #define INSTR_SUB1 38
-  #define INSTR_ABS 39
-  #define INSTR_MIN 40
-  #define INSTR_MAX 41
-  #define INSTR_EQ 42
-  #define INSTR_NE 43
-  #define INSTR_GT 44
-  #define INSTR_GE 45
-  #define INSTR_LT 46
-  #define INSTR_LE 47
-  #define INSTR_EQ0 48
-  #define INSTR_INVERT 49
-  #define INSTR_AND 50
-  #define INSTR_OR 51
-  #define INSTR_XOR 52
-  #define INSTR_LSHIFT 53
-  #define INSTR_RSHIFT 54
-  #define INSTR_FALSE 55
-  #define INSTR_TRUE 56
+  #define INSTR_I 21
+  #define INSTR_J 22
+  #define INSTR_K 23
+  #define INSTR_DUP 24
+  #define INSTR_DROP 25
+  #define INSTR_SWAP 26
+  #define INSTR_OVER 27
+  #define INSTR_ROT 28
+  #define INSTR_NIP 29
+  #define INSTR_TUCK 30
+  #define INSTR_ADD 31
+  #define INSTR_SUB 32
+  #define INSTR_MUL 33
+  #define INSTR_DIV 34
+  #define INSTR_MOD 35
+  #define INSTR_DIVMOD 36
+  #define INSTR_NEGATE 37
+  #define INSTR_ADD1 38
+  #define INSTR_SUB1 39
+  #define INSTR_ABS 40
+  #define INSTR_MIN 41
+  #define INSTR_MAX 42
+  #define INSTR_EQ 43
+  #define INSTR_NE 44
+  #define INSTR_GT 45
+  #define INSTR_GE 46
+  #define INSTR_LT 47
+  #define INSTR_LE 48
+  #define INSTR_EQ0 49
+  #define INSTR_INVERT 50
+  #define INSTR_AND 51
+  #define INSTR_OR 52
+  #define INSTR_XOR 53
+  #define INSTR_LSHIFT 54
+  #define INSTR_RSHIFT 55
+  #define INSTR_FALSE 56
+  #define INSTR_TRUE 57
   // beginning of the user-defined dictionary
-  #define BOUND_DICTIONARY 57
+  #define BOUND_DICTIONARY 58
 
   const std::set<std::string> reserved_words_({
     // comments
@@ -97,6 +98,8 @@ namespace awkward {
     ":", ";", "recurse",
     // declaring globals
     "variable", "input", "output",
+    // resumable control flow
+    "breakpoint",
     // conditionals
     "if", "then", "else",
     // loops
@@ -139,9 +142,9 @@ namespace awkward {
 
   const std::map<std::string, int64_t> generic_builtin_words_({
     // loop variables
-    {"i", INSTR_INDEX_I},
-    {"j", INSTR_INDEX_J},
-    {"k", INSTR_INDEX_K},
+    {"i", INSTR_I},
+    {"j", INSTR_J},
+    {"k", INSTR_K},
     // stack operations
     {"dup", INSTR_DUP},
     {"drop", INSTR_DROP},
@@ -185,29 +188,31 @@ namespace awkward {
 
   template <typename T, typename I>
   ForthMachineOf<T, I>::ForthMachineOf(const std::string& source,
-                                       int64_t stack_size,
-                                       int64_t recursion_depth,
+                                       int64_t stack_max_depth,
+                                       int64_t recursion_max_depth,
                                        int64_t output_initial_size,
                                        double output_resize_factor)
     : source_(source)
     , output_initial_size_(output_initial_size)
     , output_resize_factor_(output_resize_factor)
 
-    , stack_buffer_(new T[stack_size])
+    , stack_buffer_(new T[stack_max_depth])
     , stack_top_(0)
-    , stack_size_(stack_size)
+    , stack_max_depth_(stack_max_depth)
 
     , current_inputs_()
     , current_outputs_()
 
-    , current_which_(new int64_t[recursion_depth])
-    , current_where_(new int64_t[recursion_depth])
-    , instruction_current_depth_(0)
-    , instruction_max_depth_(recursion_depth)
+    , current_breakpoint_depth_(0)
 
-    , do_instruction_depth_(new int64_t[recursion_depth])
-    , do_stop_(new int64_t[recursion_depth])
-    , do_i_(new int64_t[recursion_depth])
+    , current_which_(new int64_t[recursion_max_depth])
+    , current_where_(new int64_t[recursion_max_depth])
+    , instruction_current_depth_(0)
+    , instruction_max_depth_(recursion_max_depth)
+
+    , do_instruction_depth_(new int64_t[recursion_max_depth])
+    , do_stop_(new int64_t[recursion_max_depth])
+    , do_i_(new int64_t[recursion_max_depth])
     , do_current_depth_(0)
 
     , current_error_(util::ForthError::none)
@@ -249,14 +254,20 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  int64_t
-  ForthMachineOf<T, I>::stack_size() const {
+  const std::vector<std::string>
+  ForthMachineOf<T, I>::dictionary() const {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
   template <typename T, typename I>
   int64_t
-  ForthMachineOf<T, I>::recursion_depth() const {
+  ForthMachineOf<T, I>::stack_max_depth() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::recursion_max_depth() const {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
@@ -279,8 +290,86 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  T
+  ForthMachineOf<T, I>::stack_at(int64_t from_top) const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::stack_depth() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  bool
+  ForthMachineOf<T, I>::stack_can_push() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  bool
+  ForthMachineOf<T, I>::stack_can_pop() const { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::stack_push(T value) { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  T
+  ForthMachineOf<T, I>::stack_pop() { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
   const std::map<std::string, T>
   ForthMachineOf<T, I>::variables() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  const std::vector<std::string>
+  ForthMachineOf<T, I>::variable_index() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  T
+  ForthMachineOf<T, I>::variable_at(const std::string& name) const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  T
+  ForthMachineOf<T, I>::variable_at(int64_t index) const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>
+  ForthMachineOf<T, I>::outputs() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  const std::vector<std::string>
+  ForthMachineOf<T, I>::output_index() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<ForthOutputBuffer>
+  ForthMachineOf<T, I>::output_at(const std::string& name) const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  const std::shared_ptr<ForthOutputBuffer>
+  ForthMachineOf<T, I>::output_at(int64_t index) const {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
@@ -298,25 +387,13 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>
+  util::ForthError
   ForthMachineOf<T, I>::step() {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
   template <typename T, typename I>
-  int64_t
-  ForthMachineOf<T, I>::current_instruction() const {
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
-  }
-
-  template <typename T, typename I>
-  void
-  ForthMachineOf<T, I>::end() {
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
-  }
-
-  template <typename T, typename I>
-  void
+  util::ForthError
   ForthMachineOf<T, I>::run(
       const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs,
       const std::set<util::ForthError>& ignore) {
@@ -324,15 +401,45 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  void
+  util::ForthError
   ForthMachineOf<T, I>::run(
       const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs) {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
   template <typename T, typename I>
-  void
+  util::ForthError
   ForthMachineOf<T, I>::run() {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  util::ForthError
+  ForthMachineOf<T, I>::resume() {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  util::ForthError
+  ForthMachineOf<T, I>::call(const std::string& name) {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  util::ForthError
+  ForthMachineOf<T, I>::call(int64_t index) {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::breakpoint_depth() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::current_instruction() const {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
@@ -398,8 +505,7 @@ namespace awkward {
 
   template <typename T, typename I>
   bool
-  ForthMachineOf<T, I>::is_defined(const std::string& word,
-                                   const std::map<std::string, I>& dictionary_names) const {
+  ForthMachineOf<T, I>::is_defined(const std::string& word) const {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
@@ -424,9 +530,7 @@ namespace awkward {
                               const std::vector<std::pair<int64_t, int64_t>>& linecol,
                               int64_t start,
                               int64_t stop,
-                              std::vector<I>& instructions,
-                              std::map<std::string, I>& dictionary_names,
-                              std::vector<std::vector<I>>& dictionary,
+                              std::vector<I>& bytecodes,
                               int64_t exitdepth,
                               int64_t dodepth) const {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
@@ -452,19 +556,7 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  ForthMachineOf<T, I>::internal_run(bool only_one_step) { // noexcept
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
-  }
-
-  template <typename T, typename I>
-  void
-  ForthMachineOf<T, I>::stack_push(T value) { // noexcept
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
-  }
-
-  template <typename T, typename I>
-  T
-  ForthMachineOf<T, I>::stack_pop() { // noexcept
+  ForthMachineOf<T, I>::internal_run(bool keep_going) { // noexcept
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
