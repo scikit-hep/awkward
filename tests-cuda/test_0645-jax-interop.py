@@ -8,14 +8,15 @@ import jax.numpy as jnp  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-def test_cupy_interop():
-    c = jnp.arange(10)
-    n = np.arange(10)
-    jax_index_arr = ak.layout.Index32(c)
-    np_index_arr = ak.layout.Index64(n)
+def test_jax_interop():
+    j = jnp.arange(10, dtype='i4')
+    print(j.__cuda_array_interface__)
+    n = np.arange(10, dtype=np.int32)
+    jax_index_arr = ak.layout.Index32.from_jax(j)
+    np_index_arr = ak.layout.Index32(n)
 
     # GPU->CPU
-    assert ak.to_list(np.asarray(cupy_index_arr.copy_to("cpu"))) == ak.to_list(
+    assert ak.to_list(np.asarray(jax_index_arr.copy_to("cpu"))) == ak.to_list(
         np.asarray(np_index_arr)
     )
     # CPU->CPU

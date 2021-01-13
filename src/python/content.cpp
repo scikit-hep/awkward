@@ -2002,20 +2002,58 @@ NumpyArray_from_cupy(const std::string& name,
 }
 
 const ak::NumpyArray
-NumpyArray_from_jaxgpu(const std::string& name,
-                       const py::object& array,
-                       const py::object& identities,
-                       const py::object& parameters) {
-  if (py::hasattr(array, "__cuda_array_interface__")) {
-    return NumpyArray_from_cuda_array_interface(name,
-                                                array,
-                                                identities,
-                                                parameters);
+NumpyArray_from_jax(const std::string& name,
+                    const py::object& array,
+                    const py::object& identities,
+                    const py::object& parameters) {
+  
+  const std::string device = array.attr("device_buffer").attr("device")().attr("platform").cast<std::string>();
+  
+  if (device.compare("cpu") == 0) {
+    py::array jax_array = array.cast<py::array>();
+
+    py::buffer_info info = jax_array.request();
+    if (info.ndim == 0) {
+      throw std::invalid_argument(
+        std::string("JaxNumpyArray must not be scalar; try array.reshape(1)")
+        + FILENAME(__LINE__));
+    }
+    if (info.shape.size() != info.ndim  ||
+        info.strides.size() != info.ndim) {
+      throw std::invalid_argument(
+        std::string("JaxNumpyArray len(shape) != ndim or len(strides) != ndim")
+        + FILENAME(__LINE__));
+    }
+
+    return ak::NumpyArray(
+      unbox_identities_none(identities),
+      dict2parameters(parameters),
+      std::shared_ptr<void>(reinterpret_cast<void*>(info.ptr),
+                            pyobject_deleter<void>(jax_array.ptr())),
+      info.shape,
+      info.strides,
+      0,
+      info.itemsize,
+      info.format,
+      ak::util::format_to_dtype(info.format, (int64_t)info.itemsize),
+      ak::kernel::lib::cpu);
+  }
+  else if (device.compare("gpu") == 0) {
+    if (py::hasattr(array, "__cuda_array_interface__")) {
+      return NumpyArray_from_cuda_array_interface(name,
+                                                  array,
+                                                  identities,
+                                                  parameters);
+    }
+    else {
+      throw std::invalid_argument(
+        name + std::string(".from_jax() needs a __cuda_array_interface__ dict of the given array, to accept JAX GPU buffers")
+        + FILENAME(__LINE__));
+    }
   }
   else {
     throw std::invalid_argument(
-      name + std::string(".from_jax() needs a __cuda_array_interface__ dict of the given array, to accept JAX GPU buffers")
-      + FILENAME(__LINE__));
+        std::string("Awkward Arrays don't support ") + device + FILENAME(__LINE__));
   }
 }
 
@@ -2042,15 +2080,7 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
           return NumpyArray_from_cupy(name, anyarray, identities, parameters);
         } 
         else if (module.rfind("jax.", 0) == 0) {
-          const std::string device = anyarray.attr("device_buffer").attr("device")().attr("platform").cast<std::string>();
-          
-          if (device.compare("gpu") == 0) {
-            return NumpyArray_from_jaxgpu(name, anyarray, identities, parameters);
-          } 
-          else if (device.compare("cpu") != 0) {
-            throw std::invalid_argument(
-                std::string("Awkward Arrays don't support ") + device + FILENAME(__LINE__));
-          }
+          return NumpyArray_from_jax(name, anyarray, identities, parameters);
         }
 
         py::array array = anyarray.cast<py::array>();
@@ -2116,6 +2146,14 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
                                       const py::object& identities,
                                       const py::object& parameters) -> py::object {
         return box(NumpyArray_from_cupy(name, array, identities, parameters).shallow_copy());
+      },
+        py::arg("array"),
+        py::arg("identities") = py::none(),
+        py::arg("parameters") = py::none())
+      .def_static("from_jax", [name](const py::object& array,
+                                     const py::object& identities,
+                                     const py::object& parameters) -> py::object {
+        return box(NumpyArray_from_jax(name, array, identities, parameters).shallow_copy());
       },
         py::arg("array"),
         py::arg("identities") = py::none(),

@@ -173,14 +173,44 @@ Index_from_cupy(const std::string& name, const py::object& array) {
 
 template <typename T>
 ak::IndexOf<T>
-Index_from_jaxgpu(const std::string& name, const py::object& array) {
-  if(py::hasattr(array, "__cuda_array_interface__")) {
-    return Index_from_cuda_array_interface<T>(name, array);
+Index_from_jax(const std::string& name, const py::object& array) {
+  const std::string device = array.attr("device_buffer").attr("device")().attr("platform").cast<std::string>();
+
+  if (device.compare("cpu") == 0) {
+    py::array_t<T> jax_array = array.cast<py::array_t<T, py::array::c_style | py::array::forcecast>>();
+
+    py::buffer_info info = jax_array.request();
+    if (info.ndim != 1) {
+      throw std::invalid_argument(
+        name + std::string(" must be built from a one-dimensional array; "
+                           "try array.ravel()") + FILENAME(__LINE__));
+    }
+    if (info.strides[0] != sizeof(T)) {
+      throw std::invalid_argument(
+        name + std::string(" must be built from a contiguous array "
+                           "(array.strides == (array.itemsize,)); "
+                           "try array.copy()") + FILENAME(__LINE__));
+    }
+    return ak::IndexOf<T>(
+      std::shared_ptr<T>(reinterpret_cast<T*>(info.ptr),
+                         pyobject_deleter<T>(jax_array.ptr())),
+      0,
+      (int64_t)info.shape[0],
+      ak::kernel::lib::cpu);
+  }
+  else if (device.compare("gpu") == 0) {
+    if(py::hasattr(array, "__cuda_array_interface__")) {
+      return Index_from_cuda_array_interface<T>(name, array);
+    }
+    else {
+      throw std::invalid_argument(
+        name + std::string(".from_jaxgpu() needs a __cuda_array_interface__ dict of the given array, to accept JAX GPU buffers")
+        + FILENAME(__LINE__));
+    }
   }
   else {
     throw std::invalid_argument(
-      name + std::string(".from_jaxgpu() needs a __cuda_array_interface__ dict of the given array, to accept JAX GPU buffers")
-      + FILENAME(__LINE__));
+        std::string("Awkward Arrays don't support ") + device + FILENAME(__LINE__));
   }
 }
 
@@ -205,15 +235,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
           return Index_from_cupy<T>(name, anyarray);
         }
         else if(module.rfind("jax.", 0) == 0) {
-          const std::string device = anyarray.attr("device_buffer").attr("device")().attr("platform").cast<std::string>();
-          
-          if(device.compare("gpu") == 0) {
-            return Index_from_jaxgpu<T>(name, anyarray);
-          } 
-          else if(device.compare("cpu") != 0) {
-            throw std::invalid_argument(
-                std::string("Awkward Arrays don't support ") + device + FILENAME(__LINE__));
-          }
+          return Index_from_jax<T>(name, anyarray);
         }
 
         py::array_t<T> array = anyarray.cast<py::array_t<T, py::array::c_style | py::array::forcecast>>();
@@ -288,6 +310,9 @@ make_IndexOf(const py::handle& m, const std::string& name) {
       })
       .def_static("from_cupy", [name](const py::object& array) -> py::object {
         return py::cast(Index_from_cupy<T>(name, array));
+      })
+      .def_static("from_jax", [name](const py::object& array) -> py::object {
+        return py::cast(Index_from_jax<T>(name, array));
       })
       .def("copy_to", [name](const ak::IndexOf<T>& self, std::string& ptr_lib) -> py::object {
         if (ptr_lib == "cuda") {
