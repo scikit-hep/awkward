@@ -38,7 +38,7 @@ namespace awkward {
 
     /// @brief HERE
     const std::string
-      assembly() const;
+      assembly_instructions() const;
 
     /// @brief HERE
     int64_t
@@ -65,33 +65,57 @@ namespace awkward {
       variables() const;
 
     /// @brief HERE
+    void
+      begin(const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs);
+
+    /// @brief HERE
+    void
+      begin();
+
+    /// @brief HERE
     const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>
-      outputs() const;
+      step();
 
     /// @brief HERE
     int64_t
-      current_step() const;
+      current_instruction() const;
 
     /// @brief HERE
     void
-      start_stepping(const std::map<std::string,
-                     std::shared_ptr<ForthInputBuffer>>& inputs);
+      end();
 
     /// @brief HERE
     void
-      start_stepping();
+      run(const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs,
+          const std::set<util::ForthError>& ignore);
 
     /// @brief HERE
     void
-      step();
+      run(const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs);
 
+    /// @brief HERE
+    void
+      run();
 
+    /// @brief HERE
+    void
+      count_reset();
 
+    /// @brief HERE
+    int64_t
+      count_instructions() const;
 
+    /// @brief HERE
+    int64_t
+      count_reads() const;
 
+    /// @brief HERE
+    int64_t
+      count_writes() const;
 
-
-
+    /// @brief HERE
+    int64_t
+      count_nanoseconds() const;
 
   private:
     void compile();

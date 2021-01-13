@@ -244,7 +244,7 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string
-  ForthMachineOf<T, I>::assembly() const {
+  ForthMachineOf<T, I>::assembly_instructions() const {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
@@ -278,11 +278,93 @@ namespace awkward {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
+  template <typename T, typename I>
+  const std::map<std::string, T>
+  ForthMachineOf<T, I>::variables() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
 
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::begin(
+      const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs) {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
 
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::begin() {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
 
+  template <typename T, typename I>
+  const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>
+  ForthMachineOf<T, I>::step() {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
 
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::current_instruction() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
 
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::end() {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::run(
+      const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs,
+      const std::set<util::ForthError>& ignore) {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::run(
+      const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs) {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::run() {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::count_reset() {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::count_instructions() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::count_reads() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::count_writes() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::count_nanoseconds() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
 
   template <typename T, typename I>
   void ForthMachineOf<T, I>::compile() {

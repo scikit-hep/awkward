@@ -14,7 +14,7 @@ namespace awkward {
     , reserved_(initial)
     , resize_(resize) { }
 
-  ForthOutputBuffer::~ForthOutputBuffer() { }
+  ForthOutputBuffer::~ForthOutputBuffer() = default;
 
   int64_t
   ForthOutputBuffer::len() const {  // noexcept
