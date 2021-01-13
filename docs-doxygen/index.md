@@ -37,7 +37,7 @@ Awkward Arrays are a tree of layout nodes nested within each other, some of whic
    * [ak::RegularArray](classawkward_1_1RegularArray.html): splits its nested content into equal-length lists.
    * [ak::ListArrayOf<T>](classawkward_1_1ListArrayOf.html): splits its nested content into variable-length lists with full generality (may use its content non-contiguously, overlapping, or out-of-order).
    * [ak::ListOffsetArrayOf<T>](classawkward_1_1ListOffsetArrayOf.html): splits its nested content into variable-length lists, assuming contiguous, non-overlapping, in-order content.
-   * [ak::RecordArray](classawkward_1_1RecordArray.html): represents an array of records in "struct of arrays" form.
+   * [ak::RecordArray](classawkward_1_1RecordArray.html): represents a logical array of records with a "struct of arrays" layout in memory.
    * [ak::Record](classawkward_1_1Record.html): represents a single record (a subclass of [ak::Content](classawkward_1_1Content.html) in C++, but not Python).
    * [ak::IndexedArrayOf<T, ISOPTION>](classawkward_1_1IndexedArrayOf.html): rearranges and/or duplicates its content by lazily applying an integer index.
    * [ak::ByteMaskedArray](classawkward_1_1ByteMaskedArray.html): represents its content with missing values with an 8-bit boolean mask.
