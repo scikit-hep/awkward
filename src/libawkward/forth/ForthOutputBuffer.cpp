@@ -7,24 +7,31 @@
 #include "awkward/forth/ForthOutputBuffer.h"
 
 namespace awkward {
-  template <typename OUT>
-  ForthOutputBufferOf<OUT>::ForthOutputBufferOf(int64_t initial, double resize)
+  ////////// abstract
+
+  ForthOutputBuffer::ForthOutputBuffer(int64_t initial, double resize)
     : length_(0)
     , reserved_(initial)
-    , resize_(resize)
-    , ptr_(new OUT[initial], kernel::array_deleter<OUT>()) { }
+    , resize_(resize) { }
 
-  template <typename OUT>
+  ForthOutputBuffer::~ForthOutputBuffer() = default;
+
   int64_t
-  ForthOutputBufferOf<OUT>::len() const {  // noexcept
+  ForthOutputBuffer::len() const {  // noexcept
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
-  template <typename OUT>
   void
-  ForthOutputBufferOf<OUT>::rewind(int64_t num_bytes, util::ForthError& err) {  // noexcept
+  ForthOutputBuffer::rewind(int64_t num_bytes, util::ForthError& err) {  // noexcept
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
+
+  ////////// specialized
+
+  template <typename OUT>
+  ForthOutputBufferOf<OUT>::ForthOutputBufferOf(int64_t initial, double resize)
+    : ForthOutputBuffer(initial, resize)
+    , ptr_(new OUT[initial], kernel::array_deleter<OUT>()) { }
 
   template <typename OUT>
   const std::shared_ptr<void>

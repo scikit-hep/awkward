@@ -15,13 +15,20 @@ namespace awkward {
   /// THERE
   class LIBAWKWARD_EXPORT_SYMBOL ForthOutputBuffer {
   public:
-    /// @brief HERE
-    virtual int64_t
-      len() const = 0;  // noexcept
+    ForthOutputBuffer(int64_t initial, double resize);
+
+    /// @brief Virtual destructor acts as a first non-inline virtual function
+    /// that determines a specific translation unit in which vtable shall be
+    /// emitted.
+    virtual ~ForthOutputBuffer();
 
     /// @brief HERE
-    virtual void
-      rewind(int64_t num_bytes, util::ForthError& err) = 0;  // noexcept
+    int64_t
+      len() const;  // noexcept
+
+    /// @brief HERE
+    void
+      rewind(int64_t num_bytes, util::ForthError& err);  // noexcept
 
     /// @brief HERE
     virtual const std::shared_ptr<void>
@@ -130,18 +137,17 @@ namespace awkward {
     /// @brief HERE
     virtual void
       write_float64(int64_t num_items, double* values, bool byteswap) = 0;  // noexcept
+
+  protected:
+    int64_t length_;
+    int64_t reserved_;
+    double resize_;
   };
 
   template <typename OUT>
   class LIBAWKWARD_EXPORT_SYMBOL ForthOutputBufferOf : public ForthOutputBuffer {
   public:
     ForthOutputBufferOf(int64_t initial, double resize);
-
-    int64_t
-      len() const override;  // noexcept
-
-    void
-      rewind(int64_t num_bytes, util::ForthError& err) override;  // noexcept
 
     const std::shared_ptr<void>
       ptr() const noexcept override;
@@ -249,9 +255,6 @@ namespace awkward {
       length_ = next;
     }
 
-    int64_t length_;
-    int64_t reserved_;
-    double resize_;
     std::shared_ptr<OUT> ptr_;
   };
 
