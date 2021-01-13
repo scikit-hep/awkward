@@ -14,6 +14,8 @@ namespace awkward {
     , reserved_(initial)
     , resize_(resize) { }
 
+  ForthOutputBuffer::~ForthOutputBuffer() { }
+
   int64_t
   ForthOutputBuffer::len() const {  // noexcept
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));

@@ -2,8 +2,6 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/ForthMachine.cpp", line)
 
-#include <set>
-
 #include "awkward/forth/ForthMachine.h"
 
 namespace awkward {
@@ -235,6 +233,18 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   ForthMachineOf<T, I>::source() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  const std::vector<I>
+  ForthMachineOf<T, I>::bytecodes() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  const std::string
+  ForthMachineOf<T, I>::assembly() const {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 

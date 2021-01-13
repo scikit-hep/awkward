@@ -13,9 +13,11 @@ namespace awkward {
   /// @brief HERE
   ///
   /// THERE
-  class ForthOutputBuffer {
+  class LIBAWKWARD_EXPORT_SYMBOL ForthOutputBuffer {
   public:
     ForthOutputBuffer(int64_t initial, double resize);
+
+    ~ForthOutputBuffer();
 
     /// @brief HERE
     int64_t

@@ -3,7 +3,8 @@
 #ifndef AWKWARD_FORTHMACHINE_H_
 #define AWKWARD_FORTHMACHINE_H_
 
-// #include <cstring>
+#include <set>
+#include <map>
 
 #include "awkward/common.h"
 #include "awkward/util.h"
@@ -32,6 +33,14 @@ namespace awkward {
       source() const;
 
     /// @brief HERE
+    const std::vector<I>
+      bytecodes() const;
+
+    /// @brief HERE
+    const std::string
+      assembly() const;
+
+    /// @brief HERE
     int64_t
       stack_size() const;
 
@@ -50,6 +59,34 @@ namespace awkward {
     /// @brief HERE
     const std::vector<T>
       stack() const;
+
+    /// @brief HERE
+    const std::map<std::string, T>
+      variables() const;
+
+    /// @brief HERE
+    const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>
+      outputs() const;
+
+    /// @brief HERE
+    int64_t
+      current_step() const;
+
+    /// @brief HERE
+    void
+      start_stepping(const std::map<std::string,
+                     std::shared_ptr<ForthInputBuffer>>& inputs);
+
+    /// @brief HERE
+    void
+      start_stepping();
+
+    /// @brief HERE
+    void
+      step();
+
+
+
 
 
 
