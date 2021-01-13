@@ -47,8 +47,9 @@ namespace awkward {
     int64_t
       output_resize_factor() const;
 
-
-
+    /// @brief HERE
+    const std::vector<T>
+      stack() const;
 
 
 

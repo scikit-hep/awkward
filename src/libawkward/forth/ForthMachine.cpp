@@ -262,6 +262,12 @@ namespace awkward {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
+  template <typename T, typename I>
+  const std::vector<T>
+  ForthMachineOf<T, I>::stack() const {
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
 
 
 
