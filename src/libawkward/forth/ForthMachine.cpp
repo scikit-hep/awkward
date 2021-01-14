@@ -12,86 +12,86 @@ namespace awkward {
   // 64-bit instruction sets.
 
   // parser flags (parsers are combined bitwise and then bit-inverted to be negative)
-  #define PARSER_DIRECT 1
-  #define PARSER_REPEATED 2
-  #define PARSER_BIGENDIAN 4
+  #define READ_DIRECT 1
+  #define READ_REPEATED 2
+  #define READ_BIGENDIAN 4
   // parser sequential values (starting in the fourth bit)
-  #define PARSER_MASK (~(-0x80) & (-0x8))
-  #define PARSER_BOOL (0x8 * 1)
-  #define PARSER_INT8 (0x8 * 2)
-  #define PARSER_INT16 (0x8 * 3)
-  #define PARSER_INT32 (0x8 * 4)
-  #define PARSER_INT64 (0x8 * 5)
-  #define PARSER_INTP (0x8 * 6)
-  #define PARSER_UINT8 (0x8 * 7)
-  #define PARSER_UINT16 (0x8 * 8)
-  #define PARSER_UINT32 (0x8 * 9)
-  #define PARSER_UINT64 (0x8 * 10)
-  #define PARSER_UINTP (0x8 * 11)
-  #define PARSER_FLOAT32 (0x8 * 12)
-  #define PARSER_FLOAT64 (0x8 * 13)
+  #define READ_MASK (~(-0x80) & (-0x8))
+  #define READ_BOOL (0x8 * 1)
+  #define READ_INT8 (0x8 * 2)
+  #define READ_INT16 (0x8 * 3)
+  #define READ_INT32 (0x8 * 4)
+  #define READ_INT64 (0x8 * 5)
+  #define READ_INTP (0x8 * 6)
+  #define READ_UINT8 (0x8 * 7)
+  #define READ_UINT16 (0x8 * 8)
+  #define READ_UINT32 (0x8 * 9)
+  #define READ_UINT64 (0x8 * 10)
+  #define READ_UINTP (0x8 * 11)
+  #define READ_FLOAT32 (0x8 * 12)
+  #define READ_FLOAT64 (0x8 * 13)
 
   // instructions from special parsing rules
-  #define INSTR_LITERAL 0
-  #define INSTR_HALT 1
-  #define INSTR_PAUSE 2
-  #define INSTR_IF 3
-  #define INSTR_IF_ELSE 4
-  #define INSTR_DO 5
-  #define INSTR_DO_STEP 6
-  #define INSTR_AGAIN 7
-  #define INSTR_UNTIL 8
-  #define INSTR_WHILE 9
-  #define INSTR_EXIT 10
-  #define INSTR_PUT 11
-  #define INSTR_INC 12
-  #define INSTR_GET 13
-  #define INSTR_LEN_INPUT 14
-  #define INSTR_POS 15
-  #define INSTR_END 16
-  #define INSTR_SEEK 17
-  #define INSTR_SKIP 18
-  #define INSTR_WRITE 19
-  #define INSTR_LEN_OUTPUT 20
-  #define INSTR_REWIND 21
+  #define CODE_LITERAL 0
+  #define CODE_HALT 1
+  #define CODE_PAUSE 2
+  #define CODE_IF 3
+  #define CODE_IF_ELSE 4
+  #define CODE_DO 5
+  #define CODE_DO_STEP 6
+  #define CODE_AGAIN 7
+  #define CODE_UNTIL 8
+  #define CODE_WHILE 9
+  #define CODE_EXIT 10
+  #define CODE_PUT 11
+  #define CODE_INC 12
+  #define CODE_GET 13
+  #define CODE_LEN_INPUT 14
+  #define CODE_POS 15
+  #define CODE_END 16
+  #define CODE_SEEK 17
+  #define CODE_SKIP 18
+  #define CODE_WRITE 19
+  #define CODE_LEN_OUTPUT 20
+  #define CODE_REWIND 21
   // generic builtin instructions
-  #define INSTR_I 22
-  #define INSTR_J 23
-  #define INSTR_K 24
-  #define INSTR_DUP 25
-  #define INSTR_DROP 26
-  #define INSTR_SWAP 27
-  #define INSTR_OVER 28
-  #define INSTR_ROT 29
-  #define INSTR_NIP 30
-  #define INSTR_TUCK 31
-  #define INSTR_ADD 32
-  #define INSTR_SUB 33
-  #define INSTR_MUL 34
-  #define INSTR_DIV 35
-  #define INSTR_MOD 36
-  #define INSTR_DIVMOD 37
-  #define INSTR_NEGATE 38
-  #define INSTR_ADD1 39
-  #define INSTR_SUB1 40
-  #define INSTR_ABS 41
-  #define INSTR_MIN 42
-  #define INSTR_MAX 43
-  #define INSTR_EQ 44
-  #define INSTR_NE 45
-  #define INSTR_GT 46
-  #define INSTR_GE 47
-  #define INSTR_LT 48
-  #define INSTR_LE 49
-  #define INSTR_EQ0 50
-  #define INSTR_INVERT 51
-  #define INSTR_AND 52
-  #define INSTR_OR 53
-  #define INSTR_XOR 54
-  #define INSTR_LSHIFT 55
-  #define INSTR_RSHIFT 56
-  #define INSTR_FALSE 57
-  #define INSTR_TRUE 58
+  #define CODE_I 22
+  #define CODE_J 23
+  #define CODE_K 24
+  #define CODE_DUP 25
+  #define CODE_DROP 26
+  #define CODE_SWAP 27
+  #define CODE_OVER 28
+  #define CODE_ROT 29
+  #define CODE_NIP 30
+  #define CODE_TUCK 31
+  #define CODE_ADD 32
+  #define CODE_SUB 33
+  #define CODE_MUL 34
+  #define CODE_DIV 35
+  #define CODE_MOD 36
+  #define CODE_DIVMOD 37
+  #define CODE_NEGATE 38
+  #define CODE_ADD1 39
+  #define CODE_SUB1 40
+  #define CODE_ABS 41
+  #define CODE_MIN 42
+  #define CODE_MAX 43
+  #define CODE_EQ 44
+  #define CODE_NE 45
+  #define CODE_GT 46
+  #define CODE_GE 47
+  #define CODE_LT 48
+  #define CODE_LE 49
+  #define CODE_EQ0 50
+  #define CODE_INVERT 51
+  #define CODE_AND 52
+  #define CODE_OR 53
+  #define CODE_XOR 54
+  #define CODE_LSHIFT 55
+  #define CODE_RSHIFT 56
+  #define CODE_FALSE 57
+  #define CODE_TRUE 58
   // beginning of the user-defined dictionary
   #define BOUND_DICTIONARY 59
 
@@ -146,48 +146,48 @@ namespace awkward {
 
   const std::map<std::string, int64_t> generic_builtin_words_({
     // loop variables
-    {"i", INSTR_I},
-    {"j", INSTR_J},
-    {"k", INSTR_K},
+    {"i", CODE_I},
+    {"j", CODE_J},
+    {"k", CODE_K},
     // stack operations
-    {"dup", INSTR_DUP},
-    {"drop", INSTR_DROP},
-    {"swap", INSTR_SWAP},
-    {"over", INSTR_OVER},
-    {"rot", INSTR_ROT},
-    {"nip", INSTR_NIP},
-    {"tuck", INSTR_TUCK},
+    {"dup", CODE_DUP},
+    {"drop", CODE_DROP},
+    {"swap", CODE_SWAP},
+    {"over", CODE_OVER},
+    {"rot", CODE_ROT},
+    {"nip", CODE_NIP},
+    {"tuck", CODE_TUCK},
     // basic mathematical functions
-    {"+", INSTR_ADD},
-    {"-", INSTR_SUB},
-    {"*", INSTR_MUL},
-    {"/", INSTR_DIV},
-    {"mod", INSTR_MOD},
-    {"/mod", INSTR_DIVMOD},
-    {"negate", INSTR_NEGATE},
-    {"1+", INSTR_ADD1},
-    {"1-", INSTR_SUB1},
-    {"abs", INSTR_ABS},
-    {"min", INSTR_MIN},
-    {"max", INSTR_MAX},
+    {"+", CODE_ADD},
+    {"-", CODE_SUB},
+    {"*", CODE_MUL},
+    {"/", CODE_DIV},
+    {"mod", CODE_MOD},
+    {"/mod", CODE_DIVMOD},
+    {"negate", CODE_NEGATE},
+    {"1+", CODE_ADD1},
+    {"1-", CODE_SUB1},
+    {"abs", CODE_ABS},
+    {"min", CODE_MIN},
+    {"max", CODE_MAX},
     // comparisons
-    {"=", INSTR_EQ},
-    {"<>", INSTR_NE},
-    {">", INSTR_GT},
-    {">=", INSTR_GE},
-    {"<", INSTR_LT},
-    {"<=", INSTR_LE},
-    {"0=", INSTR_EQ0},
+    {"=", CODE_EQ},
+    {"<>", CODE_NE},
+    {">", CODE_GT},
+    {">=", CODE_GE},
+    {"<", CODE_LT},
+    {"<=", CODE_LE},
+    {"0=", CODE_EQ0},
     // bitwise operations
-    {"invert", INSTR_INVERT},
-    {"and", INSTR_AND},
-    {"or", INSTR_OR},
-    {"xor", INSTR_XOR},
-    {"lshift", INSTR_LSHIFT},
-    {"rshift", INSTR_RSHIFT},
+    {"invert", CODE_INVERT},
+    {"and", CODE_AND},
+    {"or", CODE_OR},
+    {"xor", CODE_XOR},
+    {"lshift", CODE_LSHIFT},
+    {"rshift", CODE_RSHIFT},
     // constants
-    {"false", INSTR_FALSE},
-    {"true", INSTR_TRUE}
+    {"false", CODE_FALSE},
+    {"true", CODE_TRUE}
   });
 
   template <typename T, typename I>
@@ -270,22 +270,36 @@ namespace awkward {
   ForthMachineOf<T, I>::decompiled() const {
     bool first = true;
     std::stringstream out;
+
+    for (auto name : variable_names_) {
+      first = false;
+      out << "variable " << name << std::endl;
+    }
+
+    for (auto name : input_names_) {
+      first = false;
+      out << "input " << name << std::endl;
+    }
+
+    for (int64_t i = 0;  i < output_names_.size();  i++) {
+      first = false;
+      out << "output " << output_names_[i] << " "
+          << util::dtype_to_name(output_dtypes_[i]) << std::endl;
+    }
+
     for (auto pair : dictionary_names_) {
       if (!first) {
         out << std::endl;
       }
-      int64_t segment_position = pair.second - BOUND_DICTIONARY;
-      if (bytecodes_offsets_[segment_position] == bytecodes_offsets_[segment_position + 1]) {
-        out << ": " << pair.first << std::endl << ";" << std::endl;
-      }
-      else {
-        out << ": " << pair.first << std::endl
-            << "  " << decompiled_segment(segment_position, "  ")
-            << ";" << std::endl;
-      }
       first = false;
+      int64_t segment_position = pair.second - BOUND_DICTIONARY;
+      out << ": " << pair.first << std::endl
+          << (segment_nonempty(segment_position) ? "  " : "")
+          << decompiled_segment(segment_position, "  ")
+          << ";" << std::endl;
     }
-    if (!first  &&  bytecodes_offsets_[0] != 0) {
+
+    if (!first  &&  bytecodes_offsets_[1] != 0) {
       out << std::endl;
     }
     out << decompiled_segment(0);
@@ -297,7 +311,9 @@ namespace awkward {
   ForthMachineOf<T, I>::decompiled_segment(int64_t segment_position,
                                            const std::string& indent) const {
     if (segment_position < 0  ||  segment_position + 1 >= bytecodes_offsets_.size()) {
-      return "";
+      throw std::runtime_error(
+        std::string("segment ") + std::to_string(segment_position)
+        + std::string(" does not exist in the bytecode") + FILENAME(__LINE__));
     }
     std::stringstream out;
     int64_t bytecode_position = bytecodes_offsets_[segment_position];
@@ -317,67 +333,101 @@ namespace awkward {
   ForthMachineOf<T, I>::decompiled_at(int64_t bytecode_position,
                                       const std::string& indent) const {
     if (bytecode_position < 0  ||  bytecode_position >= bytecodes_.size()) {
-      return "";
+      throw std::runtime_error(
+        std::string("absolute position ") + std::to_string(bytecode_position)
+        + std::string(" does not exist in the bytecode") + FILENAME(__LINE__));
     }
 
     I bytecode = bytecodes_[bytecode_position];
+    I next_bytecode = 0;
+    if (bytecode_position + 1 < bytecodes_.size()) {
+      next_bytecode = bytecodes_[bytecode_position + 1];
+    }
 
     if (bytecode < 0) {
       I in_num = bytecodes_[bytecode_position + 1];
       std::string in_name = input_names_[in_num];
 
-      std::string rep = (~bytecode & PARSER_REPEATED) ? "#" : "";
-      std::string big = ((~bytecode & PARSER_BIGENDIAN) != 0) ? "!" : "";
+      std::string rep = (~bytecode & READ_REPEATED) ? "#" : "";
+      std::string big = ((~bytecode & READ_BIGENDIAN) != 0) ? "!" : "";
       std::string rest;
-      switch (~bytecode & PARSER_MASK) {
-        case PARSER_BOOL:
+      switch (~bytecode & READ_MASK) {
+        case READ_BOOL:
           rest = "?->";
           break;
-        case PARSER_INT8:
+        case READ_INT8:
           rest = "b->";
           break;
-        case PARSER_INT16:
+        case READ_INT16:
           rest = "h->";
           break;
-        case PARSER_INT32:
+        case READ_INT32:
           rest = "i->";
           break;
-        case PARSER_INT64:
+        case READ_INT64:
           rest = "q->";
           break;
-        case PARSER_INTP:
+        case READ_INTP:
           rest = "n->";
           break;
-        case PARSER_UINT8:
+        case READ_UINT8:
           rest = "B->";
           break;
-        case PARSER_UINT16:
+        case READ_UINT16:
           rest = "H->";
           break;
-        case PARSER_UINT32:
+        case READ_UINT32:
           rest = "I->";
           break;
-        case PARSER_UINT64:
+        case READ_UINT64:
           rest = "Q->";
           break;
-        case PARSER_UINTP:
+        case READ_UINTP:
           rest = "N->";
           break;
-        case PARSER_FLOAT32:
+        case READ_FLOAT32:
           rest = "f->";
           break;
-        case PARSER_FLOAT64:
+        case READ_FLOAT64:
           rest = "d->";
           break;
       }
       std::string arrow = rep + big + rest;
 
       std::string out_name = "stack";
-      if (~bytecode & PARSER_REPEATED) {
-        I out_num = bytecodes_[bytecode_position + 1];
+      if (~bytecode & READ_DIRECT) {
+        I out_num = bytecodes_[bytecode_position + 2];
         out_name = output_names_[out_num];
       }
       return in_name + std::string(" ") + arrow + std::string(" ") + out_name;
+    }
+
+    else if (next_bytecode == CODE_AGAIN) {
+      int64_t body = bytecode - BOUND_DICTIONARY;
+      return std::string("begin\n")
+             + (segment_nonempty(body) ? indent + "  " : "")
+             + decompiled_segment(body, indent + "  ")
+             + indent + "again";
+    }
+
+    else if (next_bytecode == CODE_UNTIL) {
+      int64_t body = bytecode - BOUND_DICTIONARY;
+      return std::string("begin\n")
+             + (segment_nonempty(body) ? indent + "  " : "")
+             + decompiled_segment(body, indent + "  ")
+             + indent + "until";
+    }
+
+    else if (next_bytecode == CODE_WHILE) {
+      int64_t precondition = bytecode - BOUND_DICTIONARY;
+      int64_t postcondition = bytecodes_[bytecode_position + 2] - BOUND_DICTIONARY;
+      return std::string("begin\n")
+             + (segment_nonempty(precondition) ? indent + "  " : "")
+             + decompiled_segment(precondition, indent + "  ")
+             + indent + "while\n"
+             + (segment_nonempty(postcondition) ? indent + "  " : "")
+             + decompiled_segment(postcondition, indent + "  ")
+             + indent + "repeat";
     }
 
     else if (bytecode >= BOUND_DICTIONARY) {
@@ -391,223 +441,203 @@ namespace awkward {
 
     else {
       switch (bytecode) {
-        case INSTR_LITERAL: {
+        case CODE_LITERAL: {
           return std::to_string(bytecodes_[bytecode_position + 1]);
         }
-        case INSTR_HALT: {
+        case CODE_HALT: {
           return "halt";
         }
-        case INSTR_PAUSE: {
+        case CODE_PAUSE: {
           return "pause";
         }
-        case INSTR_IF: {
+        case CODE_IF: {
           int64_t consequent = bytecodes_[bytecode_position + 1] - BOUND_DICTIONARY;
           return std::string("if\n")
-                 + indent + "  "
+                 + (segment_nonempty(consequent) ? indent + "  " : "")
                  + decompiled_segment(consequent, indent + "  ")
                  + indent + "then";
         }
-        case INSTR_IF_ELSE: {
+        case CODE_IF_ELSE: {
           int64_t consequent = bytecodes_[bytecode_position + 1] - BOUND_DICTIONARY;
           int64_t alternate = bytecodes_[bytecode_position + 2] - BOUND_DICTIONARY;
           return std::string("if\n")
-                 + indent + "  "
+                 + (segment_nonempty(consequent) ? indent + "  " : "")
                  + decompiled_segment(consequent, indent + "  ")
-                 + indent + "else"
+                 + indent + "else\n"
+                 + (segment_nonempty(alternate) ? indent + "  " : "")
                  + decompiled_segment(alternate, indent + "  ")
                  + indent + "then";
         }
-        case INSTR_DO: {
+        case CODE_DO: {
           int64_t body = bytecodes_[bytecode_position + 1] - BOUND_DICTIONARY;
           return std::string("do\n")
-                 + indent + "  "
+                 + (segment_nonempty(body) ? indent + "  " : "")
                  + decompiled_segment(body, indent + "  ")
                  + indent + "loop";
         }
-        case INSTR_DO_STEP: {
+        case CODE_DO_STEP: {
           int64_t body = bytecodes_[bytecode_position + 1] - BOUND_DICTIONARY;
           return std::string("do\n")
-                 + indent + "  "
+                 + (segment_nonempty(body) ? indent + "  " : "")
                  + decompiled_segment(body, indent + "  ")
                  + indent + "+loop";
         }
-        case INSTR_AGAIN: {
-          return std::string("begin\n")
-                 + indent + "  "
-                 + decompiled_segment(bytecode, indent + "  ")
-                 + indent + "again";
-        }
-        case INSTR_UNTIL: {
-          return std::string("begin\n")
-                 + indent + "  "
-                 + decompiled_segment(bytecode, indent + "  ")
-                 + indent + "until";
-        }
-        case INSTR_WHILE: {
-          int64_t body = bytecodes_[bytecode_position + 1] - BOUND_DICTIONARY;
-          return std::string("begin\n")
-                 + indent + "  "
-                 + decompiled_segment(bytecode, indent + "  ")
-                 + indent + "while"
-                 + decompiled_segment(body, indent + "  ")
-                 + indent + "repeat";
-        }
-        case INSTR_EXIT: {
+        case CODE_EXIT: {
           return std::string("exit");
         }
-        case INSTR_PUT: {
+        case CODE_PUT: {
           int64_t var_num = bytecodes_[bytecode_position + 1];
           return variable_names_[var_num] + " !";
         }
-        case INSTR_INC: {
+        case CODE_INC: {
           int64_t var_num = bytecodes_[bytecode_position + 1];
           return variable_names_[var_num] + " +!";
         }
-        case INSTR_GET: {
+        case CODE_GET: {
           int64_t var_num = bytecodes_[bytecode_position + 1];
           return variable_names_[var_num] + " @";
         }
-        case INSTR_LEN_INPUT: {
+        case CODE_LEN_INPUT: {
           int64_t in_num = bytecodes_[bytecode_position + 1];
           return input_names_[in_num] + " len";
         }
-        case INSTR_POS: {
+        case CODE_POS: {
           int64_t in_num = bytecodes_[bytecode_position + 1];
           return input_names_[in_num] + " pos";
         }
-        case INSTR_END: {
+        case CODE_END: {
           int64_t in_num = bytecodes_[bytecode_position + 1];
           return input_names_[in_num] + " end";
         }
-        case INSTR_SEEK: {
+        case CODE_SEEK: {
           int64_t in_num = bytecodes_[bytecode_position + 1];
           return input_names_[in_num] + " seek";
         }
-        case INSTR_SKIP: {
+        case CODE_SKIP: {
           int64_t in_num = bytecodes_[bytecode_position + 1];
           return input_names_[in_num] + " skip";
         }
-        case INSTR_WRITE: {
+        case CODE_WRITE: {
           int64_t out_num = bytecodes_[bytecode_position + 1];
           return output_names_[out_num] + " <- stack";
         }
-        case INSTR_LEN_OUTPUT: {
+        case CODE_LEN_OUTPUT: {
           int64_t out_num = bytecodes_[bytecode_position + 1];
           return output_names_[out_num] + " len";
         }
-        case INSTR_REWIND: {
+        case CODE_REWIND: {
           int64_t out_num = bytecodes_[bytecode_position + 1];
           return output_names_[out_num] + " rewind";
         }
-        case INSTR_I: {
+        case CODE_I: {
           return "i";
         }
-        case INSTR_J: {
+        case CODE_J: {
           return "j";
         }
-        case INSTR_K: {
+        case CODE_K: {
           return "k";
         }
-        case INSTR_DUP: {
+        case CODE_DUP: {
           return "dup";
         }
-        case INSTR_DROP: {
+        case CODE_DROP: {
           return "drop";
         }
-        case INSTR_SWAP: {
+        case CODE_SWAP: {
           return "swap";
         }
-        case INSTR_OVER: {
+        case CODE_OVER: {
           return "over";
         }
-        case INSTR_ROT: {
+        case CODE_ROT: {
           return "rot";
         }
-        case INSTR_NIP: {
+        case CODE_NIP: {
           return "nip";
         }
-        case INSTR_TUCK: {
+        case CODE_TUCK: {
           return "tuck";
         }
-        case INSTR_ADD: {
+        case CODE_ADD: {
           return "+";
         }
-        case INSTR_SUB: {
+        case CODE_SUB: {
           return "-";
         }
-        case INSTR_MUL: {
+        case CODE_MUL: {
           return "*";
         }
-        case INSTR_DIV: {
+        case CODE_DIV: {
           return "/";
         }
-        case INSTR_MOD: {
+        case CODE_MOD: {
           return "mod";
         }
-        case INSTR_DIVMOD: {
+        case CODE_DIVMOD: {
           return "/mod";
         }
-        case INSTR_NEGATE: {
+        case CODE_NEGATE: {
           return "negate";
         }
-        case INSTR_ADD1: {
+        case CODE_ADD1: {
           return "1+";
         }
-        case INSTR_SUB1: {
+        case CODE_SUB1: {
           return "1-";
         }
-        case INSTR_ABS: {
+        case CODE_ABS: {
           return "abs";
         }
-        case INSTR_MIN: {
+        case CODE_MIN: {
           return "min";
         }
-        case INSTR_MAX: {
+        case CODE_MAX: {
           return "max";
         }
-        case INSTR_EQ: {
+        case CODE_EQ: {
           return "=";
         }
-        case INSTR_NE: {
+        case CODE_NE: {
           return "<>";
         }
-        case INSTR_GT: {
+        case CODE_GT: {
           return ">";
         }
-        case INSTR_GE: {
+        case CODE_GE: {
           return ">=";
         }
-        case INSTR_LT: {
+        case CODE_LT: {
           return "<";
         }
-        case INSTR_LE: {
+        case CODE_LE: {
           return "<=";
         }
-        case INSTR_EQ0: {
+        case CODE_EQ0: {
           return "0=";
         }
-        case INSTR_INVERT: {
+        case CODE_INVERT: {
           return "invert";
         }
-        case INSTR_AND: {
+        case CODE_AND: {
           return "and";
         }
-        case INSTR_OR: {
+        case CODE_OR: {
           return "or";
         }
-        case INSTR_XOR: {
+        case CODE_XOR: {
           return "xor";
         }
-        case INSTR_LSHIFT: {
+        case CODE_LSHIFT: {
           return "lshift";
         }
-        case INSTR_RSHIFT: {
+        case CODE_RSHIFT: {
           return "rshift";
         }
-        case INSTR_FALSE: {
+        case CODE_FALSE: {
           return "false";
         }
-        case INSTR_TRUE: {
+        case CODE_TRUE: {
           return "true";
         }
       }
@@ -1076,6 +1106,12 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  bool
+  ForthMachineOf<T, I>::segment_nonempty(int64_t segment_position) const {
+    return bytecodes_offsets_[segment_position] != bytecodes_offsets_[segment_position + 1];
+  }
+
+  template <typename T, typename I>
   int64_t
   ForthMachineOf<T, I>::bytecodes_per_instruction(int64_t bytecode_position) const {
     I bytecode = bytecodes_[bytecode_position];
@@ -1085,39 +1121,39 @@ namespace awkward {
     }
 
     if (bytecode < 0) {
-      if (~bytecode & PARSER_DIRECT) {
+      if (~bytecode & READ_DIRECT) {
         return 3;
       }
       else {
         return 2;
       }
     }
-    else if (next_bytecode == INSTR_AGAIN  ||  next_bytecode == INSTR_UNTIL) {
+    else if (next_bytecode == CODE_AGAIN  ||  next_bytecode == CODE_UNTIL) {
       return 2;
     }
-    else if (next_bytecode == INSTR_WHILE) {
+    else if (next_bytecode == CODE_WHILE) {
       return 3;
     }
     else {
       switch (bytecode) {
-        case INSTR_IF_ELSE:
+        case CODE_IF_ELSE:
           return 3;
-        case INSTR_LITERAL:
-        case INSTR_IF:
-        case INSTR_DO:
-        case INSTR_DO_STEP:
-        case INSTR_EXIT:
-        case INSTR_PUT:
-        case INSTR_INC:
-        case INSTR_GET:
-        case INSTR_LEN_INPUT:
-        case INSTR_POS:
-        case INSTR_END:
-        case INSTR_SEEK:
-        case INSTR_SKIP:
-        case INSTR_WRITE:
-        case INSTR_LEN_OUTPUT:
-        case INSTR_REWIND:
+        case CODE_LITERAL:
+        case CODE_IF:
+        case CODE_DO:
+        case CODE_DO_STEP:
+        case CODE_EXIT:
+        case CODE_PUT:
+        case CODE_INC:
+        case CODE_GET:
+        case CODE_LEN_INPUT:
+        case CODE_POS:
+        case CODE_END:
+        case CODE_SEEK:
+        case CODE_SKIP:
+        case CODE_WRITE:
+        case CODE_LEN_OUTPUT:
+        case CODE_REWIND:
           return 2;
         default:
           return 1;
@@ -1470,13 +1506,13 @@ namespace awkward {
       }
 
       else if (word == "halt") {
-        bytecodes.push_back(INSTR_HALT);
+        bytecodes.push_back(CODE_HALT);
 
         pos++;
       }
 
       else if (word == "pause") {
-        bytecodes.push_back(INSTR_PAUSE);
+        bytecodes.push_back(CODE_PAUSE);
 
         pos++;
       }
@@ -1522,7 +1558,7 @@ namespace awkward {
                 dodepth);
           dictionary[bytecode - BOUND_DICTIONARY] = consequent;
 
-          bytecodes.push_back(INSTR_IF);
+          bytecodes.push_back(CODE_IF);
           bytecodes.push_back(bytecode);
 
           pos = substop + 1;
@@ -1557,7 +1593,7 @@ namespace awkward {
                 dodepth);
           dictionary[bytecode2 - BOUND_DICTIONARY] = alternate;
 
-          bytecodes.push_back(INSTR_IF_ELSE);
+          bytecodes.push_back(CODE_IF_ELSE);
           bytecodes.push_back(bytecode1);
           bytecodes.push_back(bytecode2);
 
@@ -1610,11 +1646,11 @@ namespace awkward {
         dictionary[bytecode - BOUND_DICTIONARY] = body;
 
         if (is_step) {
-          bytecodes.push_back(INSTR_DO_STEP);
+          bytecodes.push_back(CODE_DO_STEP);
           bytecodes.push_back(bytecode);
         }
         else {
-          bytecodes.push_back(INSTR_DO);
+          bytecodes.push_back(CODE_DO);
           bytecodes.push_back(bytecode);
         }
 
@@ -1691,7 +1727,7 @@ namespace awkward {
           dictionary[bytecode - BOUND_DICTIONARY] = body;
 
           bytecodes.push_back(bytecode);
-          bytecodes.push_back(INSTR_AGAIN);
+          bytecodes.push_back(CODE_AGAIN);
 
           pos = substop + 1;
         }
@@ -1712,7 +1748,7 @@ namespace awkward {
           dictionary[bytecode - BOUND_DICTIONARY] = body;
 
           bytecodes.push_back(bytecode);
-          bytecodes.push_back(INSTR_UNTIL);
+          bytecodes.push_back(CODE_UNTIL);
 
           pos = substop + 1;
         }
@@ -1748,7 +1784,7 @@ namespace awkward {
           dictionary[bytecode2 - BOUND_DICTIONARY] = postcondition;
 
           bytecodes.push_back(bytecode1);
-          bytecodes.push_back(INSTR_WHILE);
+          bytecodes.push_back(CODE_WHILE);
           bytecodes.push_back(bytecode2);
 
           pos = substop + 1;
@@ -1756,7 +1792,7 @@ namespace awkward {
       }
 
       else if (word == "exit") {
-        bytecodes.push_back(INSTR_EXIT);
+        bytecodes.push_back(CODE_EXIT);
         bytecodes.push_back(exitdepth);
 
         pos++;
@@ -1770,19 +1806,19 @@ namespace awkward {
           }
         }
         if (pos + 1 < stop  &&  tokenized[pos + 1] == "!") {
-          bytecodes.push_back(INSTR_PUT);
+          bytecodes.push_back(CODE_PUT);
           bytecodes.push_back(variable_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "+!") {
-          bytecodes.push_back(INSTR_INC);
+          bytecodes.push_back(CODE_INC);
           bytecodes.push_back(variable_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "@") {
-          bytecodes.push_back(INSTR_GET);
+          bytecodes.push_back(CODE_GET);
           bytecodes.push_back(variable_index);
 
           pos += 2;
@@ -1803,31 +1839,31 @@ namespace awkward {
           }
         }
         if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
-          bytecodes.push_back(INSTR_LEN_INPUT);
+          bytecodes.push_back(CODE_LEN_INPUT);
           bytecodes.push_back(input_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "pos") {
-          bytecodes.push_back(INSTR_POS);
+          bytecodes.push_back(CODE_POS);
           bytecodes.push_back(input_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "end") {
-          bytecodes.push_back(INSTR_END);
+          bytecodes.push_back(CODE_END);
           bytecodes.push_back(input_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "seek") {
-          bytecodes.push_back(INSTR_SEEK);
+          bytecodes.push_back(CODE_SEEK);
           bytecodes.push_back(input_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "skip") {
-          bytecodes.push_back(INSTR_SKIP);
+          bytecodes.push_back(CODE_SKIP);
           bytecodes.push_back(input_index);
 
           pos += 2;
@@ -1838,12 +1874,12 @@ namespace awkward {
           std::string parser = tokenized[pos + 1];
 
           if (parser.length() != 0  &&  parser[0] == '#') {
-            bytecode |= PARSER_REPEATED;
+            bytecode |= READ_REPEATED;
             parser = parser.substr(1, parser.length() - 1);
           }
 
           if (parser.length() != 0  &&  parser[0] == '!') {
-            bytecode |= PARSER_BIGENDIAN;
+            bytecode |= READ_BIGENDIAN;
             parser = parser.substr(1, parser.length() - 1);
           }
 
@@ -1851,55 +1887,55 @@ namespace awkward {
           if (parser.length() != 0) {
             switch (parser[0]) {
               case '?': {
-                bytecode |= PARSER_BOOL;
+                bytecode |= READ_BOOL;
                 break;
               }
               case 'b': {
-                bytecode |= PARSER_INT8;
+                bytecode |= READ_INT8;
                 break;
               }
               case 'h': {
-                bytecode |= PARSER_INT16;
+                bytecode |= READ_INT16;
                 break;
               }
               case 'i': {
-                 bytecode |= PARSER_INT32;
+                 bytecode |= READ_INT32;
                  break;
                }
               case 'q': {
-                 bytecode |= PARSER_INT64;
+                 bytecode |= READ_INT64;
                  break;
                }
               case 'n': {
-                bytecode |= PARSER_INTP;
+                bytecode |= READ_INTP;
                 break;
               }
               case 'B': {
-                bytecode |= PARSER_UINT8;
+                bytecode |= READ_UINT8;
                 break;
               }
               case 'H': {
-                bytecode |= PARSER_UINT16;
+                bytecode |= READ_UINT16;
                 break;
               }
               case 'I': {
-                bytecode |= PARSER_UINT32;
+                bytecode |= READ_UINT32;
                 break;
               }
               case 'Q': {
-                bytecode |= PARSER_UINT64;
+                bytecode |= READ_UINT64;
                 break;
               }
               case 'N': {
-                bytecode |= PARSER_UINTP;
+                bytecode |= READ_UINTP;
                 break;
               }
               case 'f': {
-                bytecode |= PARSER_FLOAT32;
+                bytecode |= READ_FLOAT32;
                 break;
               }
               case 'd': {
-                bytecode |= PARSER_FLOAT64;
+                bytecode |= READ_FLOAT64;
                 break;
               }
               default: {
@@ -1922,7 +1958,7 @@ namespace awkward {
 
           int64_t output_index = -1;
           if (pos + 2 < stop  &&  tokenized[pos + 2] == "stack") {
-            // not PARSER_DIRECT
+            // not READ_DIRECT
           }
           else if (pos + 2 < stop  &&  is_output(tokenized[pos + 2])) {
             for (;  output_index < (int64_t)output_names_.size();  output_index++) {
@@ -1930,7 +1966,7 @@ namespace awkward {
                 break;
               }
             }
-            bytecode |= PARSER_DIRECT;
+            bytecode |= READ_DIRECT;
           }
           else {
             throw std::invalid_argument(
@@ -1968,7 +2004,7 @@ namespace awkward {
         }
         if (pos + 1 < stop  &&  tokenized[pos + 1] == "<-") {
           if (pos + 2 < stop  &&  tokenized[pos + 2] == "stack") {
-            bytecodes.push_back(INSTR_WRITE);
+            bytecodes.push_back(CODE_WRITE);
             bytecodes.push_back(output_index);
 
             pos += 3;
@@ -1981,13 +2017,13 @@ namespace awkward {
           }
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
-          bytecodes.push_back(INSTR_LEN_OUTPUT);
+          bytecodes.push_back(CODE_LEN_OUTPUT);
           bytecodes.push_back(output_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[pos + 1] == "rewind") {
-          bytecodes.push_back(INSTR_REWIND);
+          bytecodes.push_back(CODE_REWIND);
           bytecodes.push_back(output_index);
 
           pos += 2;
@@ -2044,7 +2080,7 @@ namespace awkward {
           if (!found_in_dictionary) {
             int64_t num;
             if (is_integer(word, num)) {
-              bytecodes.push_back(INSTR_LITERAL);
+              bytecodes.push_back(CODE_LITERAL);
               bytecodes.push_back(num);
 
               pos++;
@@ -2098,7 +2134,7 @@ namespace awkward {
 
         else {
           switch (bytecode) {
-            case INSTR_LITERAL: {
+            case CODE_LITERAL: {
               I num = bytecode_get();
               bytecodes_pointer_where()++;
               if (!stack_can_push()) {
@@ -2109,292 +2145,292 @@ namespace awkward {
               break;
             }
 
-            case INSTR_HALT: {
+            case CODE_HALT: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_PAUSE: {
+            case CODE_PAUSE: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_IF: {
+            case CODE_IF: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_IF_ELSE: {
+            case CODE_IF_ELSE: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_DO: {
+            case CODE_DO: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_DO_STEP: {
+            case CODE_DO_STEP: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_AGAIN: {
+            case CODE_AGAIN: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_UNTIL: {
+            case CODE_UNTIL: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_WHILE: {
+            case CODE_WHILE: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_EXIT: {
+            case CODE_EXIT: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_PUT: {
+            case CODE_PUT: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_INC: {
+            case CODE_INC: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_GET: {
+            case CODE_GET: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_LEN_INPUT: {
+            case CODE_LEN_INPUT: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_POS: {
+            case CODE_POS: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_END: {
+            case CODE_END: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_SEEK: {
+            case CODE_SEEK: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_SKIP: {
+            case CODE_SKIP: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_WRITE: {
+            case CODE_WRITE: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_LEN_OUTPUT: {
+            case CODE_LEN_OUTPUT: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_REWIND: {
+            case CODE_REWIND: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_I: {
+            case CODE_I: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_J: {
+            case CODE_J: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_K: {
+            case CODE_K: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_DUP: {
+            case CODE_DUP: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_DROP: {
+            case CODE_DROP: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_SWAP: {
+            case CODE_SWAP: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_OVER: {
+            case CODE_OVER: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_ROT: {
+            case CODE_ROT: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_NIP: {
+            case CODE_NIP: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_TUCK: {
+            case CODE_TUCK: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_ADD: {
+            case CODE_ADD: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_SUB: {
+            case CODE_SUB: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_MUL: {
+            case CODE_MUL: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_DIV: {
+            case CODE_DIV: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_MOD: {
+            case CODE_MOD: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_DIVMOD: {
+            case CODE_DIVMOD: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_NEGATE: {
+            case CODE_NEGATE: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_ADD1: {
+            case CODE_ADD1: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_SUB1: {
+            case CODE_SUB1: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_ABS: {
+            case CODE_ABS: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_MIN: {
+            case CODE_MIN: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_MAX: {
+            case CODE_MAX: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_EQ: {
+            case CODE_EQ: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_NE: {
+            case CODE_NE: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_GT: {
+            case CODE_GT: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_GE: {
+            case CODE_GE: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_LT: {
+            case CODE_LT: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_LE: {
+            case CODE_LE: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_EQ0: {
+            case CODE_EQ0: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_INVERT: {
+            case CODE_INVERT: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_AND: {
+            case CODE_AND: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_OR: {
+            case CODE_OR: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_XOR: {
+            case CODE_XOR: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_LSHIFT: {
+            case CODE_LSHIFT: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_RSHIFT: {
+            case CODE_RSHIFT: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_FALSE: {
+            case CODE_FALSE: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }
 
-            case INSTR_TRUE: {
+            case CODE_TRUE: {
               throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
               break;
             }

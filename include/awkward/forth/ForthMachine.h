@@ -307,6 +307,9 @@ namespace awkward {
     }
 
   private:
+    /// @brief HERE
+    bool
+    segment_nonempty(int64_t segment_position) const;
 
     /// @brief HERE
     int64_t
