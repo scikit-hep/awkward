@@ -382,7 +382,7 @@ namespace awkward {
 
     else if (bytecode >= BOUND_DICTIONARY) {
       for (auto pair : dictionary_names_) {
-        if (pair.second == bytecode - BOUND_DICTIONARY) {
+        if (pair.second == bytecode) {
           return pair.first;
         }
       }
