@@ -119,7 +119,7 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
             }
             else {
                 throw std::invalid_argument(
-                    std::string("unrecognized Awkward Forth variable/output/dictionary word: ")
+                    std::string("unrecognized AwkwardForth variable/output/dictionary word: ")
                     + key + FILENAME(__LINE__));
             }
           })
@@ -143,14 +143,14 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               &ak::ForthMachineOf<T, I>::stack)
           .def("stack_push", [](ak::ForthMachineOf<T, I>& self, T value) -> void {
               if (!self.stack_can_push()) {
-                throw std::invalid_argument(std::string("Awkward Forth stack overflow")
+                throw std::invalid_argument(std::string("AwkwardForth stack overflow")
                                             + FILENAME(__LINE__));
               }
               self.stack_push(value);
           })
           .def("stack_pop", [](ak::ForthMachineOf<T, I>& self) -> T {
               if (!self.stack_can_pop()) {
-                throw std::invalid_argument(std::string("Awkward Forth stack underflow")
+                throw std::invalid_argument(std::string("AwkwardForth stack underflow")
                                             + FILENAME(__LINE__));
               }
               return self.stack_pop();
@@ -195,12 +195,12 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                           bool raise_rewind_beyond) -> void {
               if (!self.is_ready()) {
                 throw std::invalid_argument(
-                   std::string("Awkward Forth machine is not ready; call 'begin' first")
+                   std::string("AwkwardForth machine is not ready; call 'begin' first")
                    + FILENAME(__LINE__));
               }
               else if (self.is_done()) {
                 throw std::invalid_argument(
-                   std::string("Awkward Forth machine has reached the end of its program")
+                   std::string("AwkwardForth machine has reached the end of its program")
                    + FILENAME(__LINE__));
               }
               else {
@@ -279,12 +279,12 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                           bool raise_rewind_beyond) -> void {
               if (!self.is_ready()) {
                 throw std::invalid_argument(
-                   std::string("Awkward Forth machine is not ready; call 'begin' first")
+                   std::string("AwkwardForth machine is not ready; call 'begin' first")
                    + FILENAME(__LINE__));
               }
               else if (self.is_done()) {
                 throw std::invalid_argument(
-                   std::string("Awkward Forth machine has reached the end of its program")
+                   std::string("AwkwardForth machine has reached the end of its program")
                    + FILENAME(__LINE__));
               }
               else {
@@ -320,7 +320,7 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                           bool raise_rewind_beyond) -> void {
               if (!self.is_ready()) {
                 throw std::invalid_argument(
-                   std::string("Awkward Forth machine is not ready; call 'begin' first")
+                   std::string("AwkwardForth machine is not ready; call 'begin' first")
                    + FILENAME(__LINE__));
               }
               else {
@@ -350,8 +350,6 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               &ak::ForthMachineOf<T, I>::pause_depth)
           .def_property_readonly("current_bytecode",
               &ak::ForthMachineOf<T, I>::current_bytecode)
-          .def_property_readonly("current_instruction",
-              &ak::ForthMachineOf<T, I>::current_instruction)
           .def("count_reset",
               &ak::ForthMachineOf<T, I>::count_reset)
           .def_property_readonly("count_instructions",

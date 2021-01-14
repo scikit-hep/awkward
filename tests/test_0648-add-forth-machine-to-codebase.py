@@ -47,7 +47,8 @@ def test_minimal():
     assert vm64.outputs == {}
 
 
-# def test_literal():
-#     vm32 = awkward.forth.ForthMachine32("1 2 3 4")
-#     print(ak.Array(vm32.bytecodes))
-#     raise Exception
+def test_literal():
+    vm32 = awkward.forth.ForthMachine32("-1 if 3 5 + then")
+    print(ak.Array(vm32.bytecodes))
+    print(vm32.assembly_instructions)
+    # raise Exception

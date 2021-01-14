@@ -3,6 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/ForthMachine.cpp", line)
 
 #include <sstream>
+#include <stdexcept>
 
 #include "awkward/forth/ForthMachine.h"
 
@@ -267,7 +268,410 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   ForthMachineOf<T, I>::assembly_instructions() const {
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+    std::stringstream out;
+    for (auto pair : dictionary_names_) {
+      int64_t segment_position = bytecodes_offsets_[pair.second - BOUND_DICTIONARY + 1];
+      out << ": " << pair.first << std::endl
+          << assembly_instruction_segment(segment_position, "  ")
+          << ";" << std::endl << std::endl;
+    }
+    out << assembly_instruction_segment(0);
+    return out.str();
+  }
+
+  template <typename T, typename I>
+  const std::string
+  ForthMachineOf<T, I>::assembly_instruction_segment(int64_t segment_position,
+                                                     const std::string& indent) const {
+    if (segment_position < 0  ||  segment_position + 1 >= bytecodes_offsets_.size()) {
+      return "";
+    }
+    std::stringstream out;
+    int64_t bytecode_position = bytecodes_offsets_[segment_position];
+    int64_t instruction_number = 0;
+    while (bytecode_position < bytecodes_offsets_[segment_position + 1]) {
+      if (bytecode_position != bytecodes_offsets_[segment_position]) {
+        out << indent;
+      }
+      out << assembly_instruction_at(bytecode_position, indent) << std::endl;
+      bytecode_position += bytecodes_per_instruction(bytecode_position);
+    }
+    return out.str();
+  }
+
+  template <typename T, typename I>
+  const std::string
+  ForthMachineOf<T, I>::assembly_instruction_at(int64_t bytecode_position,
+                                                const std::string& indent) const {
+    if (bytecode_position < 0  ||  bytecode_position >= bytecodes_.size()) {
+      return "";
+    }
+
+    I bytecode = bytecodes_[bytecode_position];
+
+    if (bytecode < 0) {
+      I in_num = bytecodes_[bytecode_position + 1];
+      std::string in_name = input_names_[in_num];
+
+      std::string rep = (~bytecode & PARSER_REPEATED) ? "#" : "";
+      std::string big = ((~bytecode & PARSER_BIGENDIAN) != 0) ? "!" : "";
+      std::string rest;
+      switch (~bytecode & PARSER_MASK) {
+        case PARSER_BOOL:
+          rest = "?->";
+          break;
+        case PARSER_INT8:
+          rest = "b->";
+          break;
+        case PARSER_INT16:
+          rest = "h->";
+          break;
+        case PARSER_INT32:
+          rest = "i->";
+          break;
+        case PARSER_INT64:
+          rest = "q->";
+          break;
+        case PARSER_INTP:
+          rest = "n->";
+          break;
+        case PARSER_UINT8:
+          rest = "B->";
+          break;
+        case PARSER_UINT16:
+          rest = "H->";
+          break;
+        case PARSER_UINT32:
+          rest = "I->";
+          break;
+        case PARSER_UINT64:
+          rest = "Q->";
+          break;
+        case PARSER_UINTP:
+          rest = "N->";
+          break;
+        case PARSER_FLOAT32:
+          rest = "f->";
+          break;
+        case PARSER_FLOAT64:
+          rest = "d->";
+          break;
+      }
+      std::string arrow = rep + big + rest;
+
+      std::string out_name = "stack";
+      if (~bytecode & PARSER_REPEATED) {
+        I out_num = bytecodes_[bytecode_position + 1];
+        out_name = output_names_[out_num];
+      }
+      return in_name + std::string(" ") + arrow + std::string(" ") + out_name;
+    }
+
+    else if (bytecode >= BOUND_DICTIONARY) {
+      for (auto pair : dictionary_names_) {
+        if (pair.second == bytecode - BOUND_DICTIONARY) {
+          return pair.first;
+        }
+      }
+      return "(anonymous segment at " + std::to_string(bytecode - BOUND_DICTIONARY) + ")";
+    }
+
+    else {
+      switch (bytecode) {
+        case INSTR_LITERAL: {
+          return std::to_string(bytecodes_[bytecode_position + 1]);
+        }
+        case INSTR_HALT: {
+          return "halt";
+        }
+        case INSTR_PAUSE: {
+          return "pause";
+        }
+        case INSTR_IF: {
+          int64_t consequent = bytecodes_[bytecode_position + 1] - BOUND_DICTIONARY;
+          return std::string("if\n")
+                 + indent + "  "
+                 + assembly_instruction_segment(consequent, indent + "  ")
+                 + "then";
+        }
+
+        case INSTR_IF_ELSE: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_DO: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_DO_STEP: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_AGAIN: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_UNTIL: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_WHILE: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_EXIT: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_PUT: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_INC: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_GET: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_LEN_INPUT: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_POS: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_END: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_SEEK: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_SKIP: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_WRITE: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_LEN_OUTPUT: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_REWIND: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_I: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_J: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_K: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_DUP: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_DROP: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_SWAP: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_OVER: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_ROT: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_NIP: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_TUCK: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_ADD: {
+          return "+";
+        }
+
+        case INSTR_SUB: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_MUL: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_DIV: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_MOD: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_DIVMOD: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_NEGATE: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_ADD1: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_SUB1: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_ABS: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_MIN: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_MAX: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_EQ: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_NE: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_GT: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_GE: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_LT: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_LE: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_EQ0: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_INVERT: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_AND: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_OR: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_XOR: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_LSHIFT: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_RSHIFT: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_FALSE: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+
+        case INSTR_TRUE: {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          break;
+        }
+      }
+
+      return std::string("(unrecognized bytecode ") + std::to_string(bytecode) + ")";
+    }
   }
 
   template <typename T, typename I>
@@ -386,7 +790,7 @@ namespace awkward {
   template <typename T, typename I>
   const std::shared_ptr<ForthOutputBuffer>
   ForthMachineOf<T, I>::output_at(const std::string& name) const {
-    if (output_names_.size() != current_outputs_.size()) {
+    if (!is_ready()) {
       throw std::invalid_argument(
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
@@ -410,7 +814,7 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   ForthMachineOf<T, I>::output_NumpyArray_at(const std::string& name) const {
-    if (output_names_.size() != current_outputs_.size()) {
+    if (!is_ready()) {
       throw std::invalid_argument(
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
@@ -434,7 +838,7 @@ namespace awkward {
   template <typename T, typename I>
   const Index8
   ForthMachineOf<T, I>::output_Index8_at(const std::string& name) const {
-    if (output_names_.size() != current_outputs_.size()) {
+    if (!is_ready()) {
       throw std::invalid_argument(
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
@@ -458,7 +862,7 @@ namespace awkward {
   template <typename T, typename I>
   const IndexU8
   ForthMachineOf<T, I>::output_IndexU8_at(const std::string& name) const {
-    if (output_names_.size() != current_outputs_.size()) {
+    if (!is_ready()) {
       throw std::invalid_argument(
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
@@ -482,7 +886,7 @@ namespace awkward {
   template <typename T, typename I>
   const Index32
   ForthMachineOf<T, I>::output_Index32_at(const std::string& name) const {
-    if (output_names_.size() != current_outputs_.size()) {
+    if (!is_ready()) {
       throw std::invalid_argument(
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
@@ -506,7 +910,7 @@ namespace awkward {
   template <typename T, typename I>
   const IndexU32
   ForthMachineOf<T, I>::output_IndexU32_at(const std::string& name) const {
-    if (output_names_.size() != current_outputs_.size()) {
+    if (!is_ready()) {
       throw std::invalid_argument(
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
@@ -530,7 +934,7 @@ namespace awkward {
   template <typename T, typename I>
   const Index64
   ForthMachineOf<T, I>::output_Index64_at(const std::string& name) const {
-    if (output_names_.size() != current_outputs_.size()) {
+    if (!is_ready()) {
       throw std::invalid_argument(
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
@@ -554,6 +958,7 @@ namespace awkward {
   template <typename T, typename I>
   void
   ForthMachineOf<T, I>::reset() {
+    stack_depth_ = 0;
     current_inputs_.clear();
     current_outputs_.clear();
     ready_ = false;
@@ -634,18 +1039,6 @@ namespace awkward {
     }
     else {
       return current_where_[recursion_current_depth_ - 1];
-    }
-  }
-
-  template <typename T, typename I>
-  int64_t
-  ForthMachineOf<T, I>::current_instruction() const noexcept {
-    int64_t bytecode_pos = current_bytecode();
-    if (bytecode_pos == -1) {
-      return bytecode_pos;
-    }
-    else {
-      return bytecode_to_instruction_[bytecode_pos];
     }
   }
 
@@ -742,6 +1135,56 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::bytecodes_per_instruction(int64_t bytecode_position) const {
+    I bytecode = bytecodes_[bytecode_position];
+    I next_bytecode = 0;
+    if (bytecode_position + 1 < bytecodes_.size()) {
+      next_bytecode = bytecodes_[bytecode_position + 1];
+    }
+
+    if (bytecode < 0) {
+      if (~bytecode & PARSER_DIRECT) {
+        return 3;
+      }
+      else {
+        return 2;
+      }
+    }
+    else if (next_bytecode == INSTR_AGAIN  ||  next_bytecode == INSTR_UNTIL) {
+      return 2;
+    }
+    else if (next_bytecode == INSTR_WHILE) {
+      return 3;
+    }
+    else {
+      switch (bytecode) {
+        case INSTR_IF_ELSE:
+          return 3;
+        case INSTR_LITERAL:
+        case INSTR_IF:
+        case INSTR_DO:
+        case INSTR_DO_STEP:
+        case INSTR_EXIT:
+        case INSTR_PUT:
+        case INSTR_INC:
+        case INSTR_GET:
+        case INSTR_LEN_INPUT:
+        case INSTR_POS:
+        case INSTR_END:
+        case INSTR_SEEK:
+        case INSTR_SKIP:
+        case INSTR_WRITE:
+        case INSTR_LEN_OUTPUT:
+        case INSTR_REWIND:
+          return 2;
+        default:
+          return 1;
+      }
+    }
+  }
+
+  template <typename T, typename I>
   const std::string
   ForthMachineOf<T, I>::err_linecol(const std::vector<std::pair<int64_t, int64_t>>& linecol,
                                     int64_t startpos,
@@ -749,7 +1192,7 @@ namespace awkward {
                                     const std::string& message) const {
     std::pair<int64_t, int64_t> lc = linecol[startpos];
     std::stringstream out;
-    out << "in Awkward Forth source code, line " << lc.first << " col " << lc.second
+    out << "in AwkwardForth source code, line " << lc.first << " col " << lc.second
         << ", " << message << ":" << std::endl << std::endl << "    ";
     int64_t line = 1;
     int64_t col = 1;
@@ -910,7 +1353,86 @@ namespace awkward {
       }
 
       else if (word == "if") {
-        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+        int64_t substart = pos + 1;
+        int64_t subelse = -1;
+        int64_t substop = pos;
+        int64_t nesting = 1;
+        while (nesting > 0) {
+          substop++;
+          if (substop >= stop) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, stop, "'if' is missing its closing 'then'")
+            );
+          }
+          else if (tokenized[substop] == "if") {
+            nesting++;
+          }
+          else if (tokenized[substop] == "then") {
+            nesting--;
+          }
+          else if (tokenized[substop] == "else" and nesting == 1) {
+            subelse = substop;
+          }
+        }
+
+        if (subelse == -1) {
+          // Add the consequent to the dictionary so that it can be used
+          // without special instruction pointer manipulation at runtime.
+          I bytecode = dictionary.size() + BOUND_DICTIONARY;
+          std::vector<I> consequent;
+          dictionary.push_back(consequent);
+          parse(defn,
+                tokenized,
+                linecol,
+                substart,
+                substop,
+                consequent,
+                dictionary,
+                exitdepth + 1,
+                dodepth);
+          dictionary[bytecode - BOUND_DICTIONARY] = consequent;
+
+          bytecodes.push_back(INSTR_IF);
+          bytecodes.push_back(bytecode);
+
+          pos = substop + 1;
+        }
+        else {
+          // Same as above, except that two new definitions must be made.
+          I bytecode1 = dictionary.size() + BOUND_DICTIONARY;
+          std::vector<I> consequent;
+          dictionary.push_back(consequent);
+          parse(defn,
+                tokenized,
+                linecol,
+                substart,
+                subelse,
+                consequent,
+                dictionary,
+                exitdepth + 1,
+                dodepth);
+          dictionary[bytecode1 - BOUND_DICTIONARY] = consequent;
+
+          I bytecode2 = dictionary.size() + BOUND_DICTIONARY;
+          std::vector<I> alternate;
+          dictionary.push_back(alternate);
+          parse(defn,
+                tokenized,
+                linecol,
+                subelse + 1,
+                substop,
+                alternate,
+                dictionary,
+                exitdepth + 1,
+                dodepth);
+          dictionary[bytecode2 - BOUND_DICTIONARY] = alternate;
+
+          bytecodes.push_back(INSTR_IF_ELSE);
+          bytecodes.push_back(bytecode1);
+          bytecodes.push_back(bytecode2);
+
+          pos = substop + 1;
+        }
       }
 
       else if (word == "do") {
@@ -940,7 +1462,24 @@ namespace awkward {
       else {
         auto generic_builtin = generic_builtin_words_.find(word);
         if (generic_builtin != generic_builtin_words_.end()) {
-          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          if (word == "i"  &&  dodepth < 1) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, pos + 1, "only allowed in a 'do' loop")
+            );
+          }
+          if (word == "j"  &&  dodepth < 2) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, pos + 1, "only allowed in a nested 'do' loop")
+            );
+          }
+          if (word == "k"  &&  dodepth < 3) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, pos + 1, "only allowed in a doubly nested 'do' loop")
+            );
+          }
+          bytecodes.push_back(generic_builtin->second);
+
+          pos++;
         }
 
         else {
@@ -950,11 +1489,24 @@ namespace awkward {
           }
 
           else {
-            throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
-          }
-        }
-      }
-    }
+            int64_t num;
+            if (is_integer(word, num)) {
+              bytecodes.push_back(INSTR_LITERAL);
+              bytecodes.push_back(num);
+
+              pos++;
+            }
+
+            else {
+              throw std::invalid_argument(
+                err_linecol(linecol, pos, pos + 1,
+                            "unrecognized word or wrong context for word")
+              );
+            }
+          } // check is_integer
+        } // check is_defined
+      } // check is_generic_builtin
+    } // end loop over segment
   }
 
   template <typename T, typename I>
@@ -994,7 +1546,13 @@ namespace awkward {
         else {
           switch (bytecode) {
             case INSTR_LITERAL: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              I num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (!stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push((T)num);
               break;
             }
 

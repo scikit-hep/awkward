@@ -44,6 +44,14 @@ namespace awkward {
       assembly_instructions() const;
 
     /// @brief HERE
+    const std::string
+      assembly_instruction_segment(int64_t segment_positino, const std::string& indent="") const;
+
+    /// @brief HERE
+    const std::string
+      assembly_instruction_at(int64_t bytecode_position, const std::string& indent="") const;
+
+    /// @brief HERE
     const std::vector<std::string>
       dictionary() const;
 
@@ -234,10 +242,6 @@ namespace awkward {
       current_bytecode() const noexcept;
 
     /// @brief HERE
-    int64_t
-      current_instruction() const noexcept;
-
-    /// @brief HERE
     void
       count_reset() noexcept;
 
@@ -303,6 +307,10 @@ namespace awkward {
     }
 
   private:
+
+    /// @brief HERE
+    int64_t
+    bytecodes_per_instruction(int64_t bytecode_position) const;
 
     /// @brief HERE
     const std::string
@@ -478,7 +486,6 @@ namespace awkward {
     std::map<std::string, I> dictionary_names_;
     std::vector<int64_t> bytecodes_offsets_;
     std::vector<I> bytecodes_;
-    std::vector<int64_t> bytecode_to_instruction_;
 
     std::vector<std::shared_ptr<ForthInputBuffer>> current_inputs_;
     std::vector<std::shared_ptr<ForthOutputBuffer>> current_outputs_;
