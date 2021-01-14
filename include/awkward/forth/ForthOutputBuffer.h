@@ -6,6 +6,8 @@
 // #include <cstring>
 
 #include "awkward/common.h"
+#include "awkward/Content.h"
+#include "awkward/Index.h"
 
 namespace awkward {
   #define NATIVELY_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
@@ -44,6 +46,30 @@ namespace awkward {
     /// @brief HERE
     virtual const std::shared_ptr<void>
       ptr() const noexcept = 0;
+
+    /// @brief HERE
+    virtual const ContentPtr
+      toNumpyArray() const = 0;
+
+    /// @brief HERE
+    virtual const Index8
+      toIndex8() const = 0;
+
+    /// @brief HERE
+    virtual const IndexU8
+      toIndexU8() const = 0;
+
+    /// @brief HERE
+    virtual const Index32
+      toIndex32() const = 0;
+
+    /// @brief HERE
+    virtual const IndexU32
+      toIndexU32() const = 0;
+
+    /// @brief HERE
+    virtual const Index64
+      toIndex64() const = 0;
 
     /// @brief HERE
     virtual void
@@ -162,6 +188,24 @@ namespace awkward {
 
     const std::shared_ptr<void>
       ptr() const noexcept override;
+
+    const ContentPtr
+      toNumpyArray() const override;
+
+    const Index8
+      toIndex8() const override;
+
+    const IndexU8
+      toIndexU8() const override;
+
+    const Index32
+      toIndex32() const override;
+
+    const IndexU32
+      toIndexU32() const override;
+
+    const Index64
+      toIndex64() const override;
 
     void
       write_one_bool(bool value, bool byteswap) noexcept override;

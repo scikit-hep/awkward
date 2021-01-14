@@ -32,66 +32,67 @@ namespace awkward {
 
   // instructions from special parsing rules
   #define INSTR_LITERAL 0
-  #define INSTR_BREAKPOINT 1
-  #define INSTR_IF 2
-  #define INSTR_IF_ELSE 3
-  #define INSTR_DO 4
-  #define INSTR_DO_STEP 5
-  #define INSTR_AGAIN 6
-  #define INSTR_UNTIL 7
-  #define INSTR_WHILE 8
-  #define INSTR_EXIT 9
-  #define INSTR_PUT 10
-  #define INSTR_INC 11
-  #define INSTR_GET 12
-  #define INSTR_LEN_INPUT 13
-  #define INSTR_POS 14
-  #define INSTR_END 15
-  #define INSTR_SEEK 16
-  #define INSTR_SKIP 17
-  #define INSTR_WRITE 18
-  #define INSTR_LEN_OUTPUT 19
-  #define INSTR_REWIND 20
+  #define INSTR_HALT 1
+  #define INSTR_PAUSE 2
+  #define INSTR_IF 3
+  #define INSTR_IF_ELSE 4
+  #define INSTR_DO 5
+  #define INSTR_DO_STEP 6
+  #define INSTR_AGAIN 7
+  #define INSTR_UNTIL 8
+  #define INSTR_WHILE 9
+  #define INSTR_EXIT 10
+  #define INSTR_PUT 11
+  #define INSTR_INC 12
+  #define INSTR_GET 13
+  #define INSTR_LEN_INPUT 14
+  #define INSTR_POS 15
+  #define INSTR_END 16
+  #define INSTR_SEEK 17
+  #define INSTR_SKIP 18
+  #define INSTR_WRITE 19
+  #define INSTR_LEN_OUTPUT 20
+  #define INSTR_REWIND 21
   // generic builtin instructions
-  #define INSTR_I 21
-  #define INSTR_J 22
-  #define INSTR_K 23
-  #define INSTR_DUP 24
-  #define INSTR_DROP 25
-  #define INSTR_SWAP 26
-  #define INSTR_OVER 27
-  #define INSTR_ROT 28
-  #define INSTR_NIP 29
-  #define INSTR_TUCK 30
-  #define INSTR_ADD 31
-  #define INSTR_SUB 32
-  #define INSTR_MUL 33
-  #define INSTR_DIV 34
-  #define INSTR_MOD 35
-  #define INSTR_DIVMOD 36
-  #define INSTR_NEGATE 37
-  #define INSTR_ADD1 38
-  #define INSTR_SUB1 39
-  #define INSTR_ABS 40
-  #define INSTR_MIN 41
-  #define INSTR_MAX 42
-  #define INSTR_EQ 43
-  #define INSTR_NE 44
-  #define INSTR_GT 45
-  #define INSTR_GE 46
-  #define INSTR_LT 47
-  #define INSTR_LE 48
-  #define INSTR_EQ0 49
-  #define INSTR_INVERT 50
-  #define INSTR_AND 51
-  #define INSTR_OR 52
-  #define INSTR_XOR 53
-  #define INSTR_LSHIFT 54
-  #define INSTR_RSHIFT 55
-  #define INSTR_FALSE 56
-  #define INSTR_TRUE 57
+  #define INSTR_I 22
+  #define INSTR_J 23
+  #define INSTR_K 24
+  #define INSTR_DUP 25
+  #define INSTR_DROP 26
+  #define INSTR_SWAP 27
+  #define INSTR_OVER 28
+  #define INSTR_ROT 29
+  #define INSTR_NIP 30
+  #define INSTR_TUCK 31
+  #define INSTR_ADD 32
+  #define INSTR_SUB 33
+  #define INSTR_MUL 34
+  #define INSTR_DIV 35
+  #define INSTR_MOD 36
+  #define INSTR_DIVMOD 37
+  #define INSTR_NEGATE 38
+  #define INSTR_ADD1 39
+  #define INSTR_SUB1 40
+  #define INSTR_ABS 41
+  #define INSTR_MIN 42
+  #define INSTR_MAX 43
+  #define INSTR_EQ 44
+  #define INSTR_NE 45
+  #define INSTR_GT 46
+  #define INSTR_GE 47
+  #define INSTR_LT 48
+  #define INSTR_LE 49
+  #define INSTR_EQ0 50
+  #define INSTR_INVERT 51
+  #define INSTR_AND 52
+  #define INSTR_OR 53
+  #define INSTR_XOR 54
+  #define INSTR_LSHIFT 55
+  #define INSTR_RSHIFT 56
+  #define INSTR_FALSE 57
+  #define INSTR_TRUE 58
   // beginning of the user-defined dictionary
-  #define BOUND_DICTIONARY 58
+  #define BOUND_DICTIONARY 59
 
   const std::set<std::string> reserved_words_({
     // comments
@@ -100,8 +101,8 @@ namespace awkward {
     ":", ";", "recurse",
     // declaring globals
     "variable", "input", "output",
-    // resumable control flow
-    "breakpoint",
+    // manipulate control flow externally
+    "halt", "pause",
     // conditionals
     "if", "then", "else",
     // loops
@@ -206,7 +207,7 @@ namespace awkward {
     , current_outputs_()
     , ready_(false)
 
-    , current_breakpoint_depth_(0)
+    , current_pause_depth_(0)
 
     , current_which_(new int64_t[recursion_max_depth])
     , current_where_(new int64_t[recursion_max_depth])
@@ -404,12 +405,156 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  const ContentPtr
+  ForthMachineOf<T, I>::output_NumpyArray_at(const std::string& name) const {
+    if (output_names_.size() != current_outputs_.size()) {
+      throw std::invalid_argument(
+        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
+      );
+    }
+    for (int64_t i = 0;  i < output_names_.size();  i++) {
+      if (output_names_[i] == name) {
+        return current_outputs_[i].get()->toNumpyArray();
+      }
+    }
+    throw std::invalid_argument(
+      std::string("output not found: ") + name + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename T, typename I>
+  const ContentPtr
+  ForthMachineOf<T, I>::output_NumpyArray_at(int64_t index) const {
+    return current_outputs_[index].get()->toNumpyArray();
+  }
+
+  template <typename T, typename I>
+  const Index8
+  ForthMachineOf<T, I>::output_Index8_at(const std::string& name) const {
+    if (output_names_.size() != current_outputs_.size()) {
+      throw std::invalid_argument(
+        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
+      );
+    }
+    for (int64_t i = 0;  i < output_names_.size();  i++) {
+      if (output_names_[i] == name) {
+        return current_outputs_[i].get()->toIndex8();
+      }
+    }
+    throw std::invalid_argument(
+      std::string("output not found: ") + name + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename T, typename I>
+  const Index8
+  ForthMachineOf<T, I>::output_Index8_at(int64_t index) const {
+    return current_outputs_[index].get()->toIndex8();
+  }
+
+  template <typename T, typename I>
+  const IndexU8
+  ForthMachineOf<T, I>::output_IndexU8_at(const std::string& name) const {
+    if (output_names_.size() != current_outputs_.size()) {
+      throw std::invalid_argument(
+        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
+      );
+    }
+    for (int64_t i = 0;  i < output_names_.size();  i++) {
+      if (output_names_[i] == name) {
+        return current_outputs_[i].get()->toIndexU8();
+      }
+    }
+    throw std::invalid_argument(
+      std::string("output not found: ") + name + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename T, typename I>
+  const IndexU8
+  ForthMachineOf<T, I>::output_IndexU8_at(int64_t index) const {
+    return current_outputs_[index].get()->toIndexU8();
+  }
+
+  template <typename T, typename I>
+  const Index32
+  ForthMachineOf<T, I>::output_Index32_at(const std::string& name) const {
+    if (output_names_.size() != current_outputs_.size()) {
+      throw std::invalid_argument(
+        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
+      );
+    }
+    for (int64_t i = 0;  i < output_names_.size();  i++) {
+      if (output_names_[i] == name) {
+        return current_outputs_[i].get()->toIndex32();
+      }
+    }
+    throw std::invalid_argument(
+      std::string("output not found: ") + name + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename T, typename I>
+  const Index32
+  ForthMachineOf<T, I>::output_Index32_at(int64_t index) const {
+    return current_outputs_[index].get()->toIndex32();
+  }
+
+  template <typename T, typename I>
+  const IndexU32
+  ForthMachineOf<T, I>::output_IndexU32_at(const std::string& name) const {
+    if (output_names_.size() != current_outputs_.size()) {
+      throw std::invalid_argument(
+        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
+      );
+    }
+    for (int64_t i = 0;  i < output_names_.size();  i++) {
+      if (output_names_[i] == name) {
+        return current_outputs_[i].get()->toIndexU32();
+      }
+    }
+    throw std::invalid_argument(
+      std::string("output not found: ") + name + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename T, typename I>
+  const IndexU32
+  ForthMachineOf<T, I>::output_IndexU32_at(int64_t index) const {
+    return current_outputs_[index].get()->toIndexU32();
+  }
+
+  template <typename T, typename I>
+  const Index64
+  ForthMachineOf<T, I>::output_Index64_at(const std::string& name) const {
+    if (output_names_.size() != current_outputs_.size()) {
+      throw std::invalid_argument(
+        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
+      );
+    }
+    for (int64_t i = 0;  i < output_names_.size();  i++) {
+      if (output_names_[i] == name) {
+        return current_outputs_[i].get()->toIndex64();
+      }
+    }
+    throw std::invalid_argument(
+      std::string("output not found: ") + name + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename T, typename I>
+  const Index64
+  ForthMachineOf<T, I>::output_Index64_at(int64_t index) const {
+    return current_outputs_[index].get()->toIndex64();
+  }
+
+  template <typename T, typename I>
   void
   ForthMachineOf<T, I>::reset() {
     current_inputs_.clear();
     current_outputs_.clear();
     ready_ = false;
-    current_breakpoint_depth_ = 0;
+    current_pause_depth_ = 0;
     recursion_current_depth_ = 0;
     do_current_depth_ = 0;
     current_error_ = util::ForthError::none;
@@ -437,7 +582,7 @@ namespace awkward {
   template <typename T, typename I>
   void
   ForthMachineOf<T, I>::maybe_throw(util::ForthError err,
-                                    const std::set<util::ForthError>& ignore) {
+                                    const std::set<util::ForthError>& ignore) const {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
@@ -474,8 +619,8 @@ namespace awkward {
 
   template <typename T, typename I>
   int64_t
-  ForthMachineOf<T, I>::breakpoint_depth() const noexcept {
-    return current_breakpoint_depth_;
+  ForthMachineOf<T, I>::pause_depth() const noexcept {
+    return current_pause_depth_;
   }
 
   template <typename T, typename I>

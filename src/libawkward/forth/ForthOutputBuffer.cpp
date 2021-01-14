@@ -6,6 +6,7 @@
 
 #include "awkward/kernel-dispatch.h"
 
+#include "awkward/array/NumpyArray.h"
 #include "awkward/forth/ForthOutputBuffer.h"
 
 namespace awkward {
@@ -85,6 +86,136 @@ namespace awkward {
   const std::shared_ptr<void>
   ForthOutputBufferOf<OUT>::ptr() const noexcept {
     return ptr_;
+  }
+
+  template <typename OUT>
+  const ContentPtr
+  ForthOutputBufferOf<OUT>::toNumpyArray() const {
+    util::dtype dtype;
+    if (std::is_same<OUT, bool>::value) {
+      dtype = util::dtype::boolean;
+    }
+    else if (std::is_same<OUT, int8_t>::value) {
+      dtype = util::dtype::int8;
+    }
+    else if (std::is_same<OUT, int16_t>::value) {
+      dtype = util::dtype::int16;
+    }
+    else if (std::is_same<OUT, int32_t>::value) {
+      dtype = util::dtype::int32;
+    }
+    else if (std::is_same<OUT, int64_t>::value) {
+      dtype = util::dtype::int64;
+    }
+    else if (std::is_same<OUT, uint8_t>::value) {
+      dtype = util::dtype::uint8;
+    }
+    else if (std::is_same<OUT, uint16_t>::value) {
+      dtype = util::dtype::uint16;
+    }
+    else if (std::is_same<OUT, uint32_t>::value) {
+      dtype = util::dtype::uint32;
+    }
+    else if (std::is_same<OUT, uint64_t>::value) {
+      dtype = util::dtype::uint64;
+    }
+    else if (std::is_same<OUT, float>::value) {
+      dtype = util::dtype::float32;
+    }
+    else if (std::is_same<OUT, double>::value) {
+      dtype = util::dtype::float64;
+    }
+    else {
+      throw std::runtime_error(
+        std::string("unrecognized ForthOutputBuffer specialization: ")
+        + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+      );
+    }
+    return std::make_shared<NumpyArray>(Identities::none(),
+                                        util::Parameters(),
+                                        ptr_,
+                                        std::vector<ssize_t>({ (ssize_t)length_ }),
+                                        std::vector<ssize_t>({ (ssize_t)sizeof(OUT) }),
+                                        0,
+                                        (ssize_t)sizeof(OUT),
+                                        util::dtype_to_format(dtype),
+                                        dtype,
+                                        kernel::lib::cpu);
+  }
+
+  template <typename OUT>
+  const Index8
+  ForthOutputBufferOf<OUT>::toIndex8() const {
+    throw std::runtime_error(
+      std::string("ForthOutputBuffer type is incompatible with Index8: ")
+      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename OUT>
+  const IndexU8
+  ForthOutputBufferOf<OUT>::toIndexU8() const {
+    throw std::runtime_error(
+      std::string("ForthOutputBuffer type is incompatible with IndexU8: ")
+      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename OUT>
+  const Index32
+  ForthOutputBufferOf<OUT>::toIndex32() const {
+    throw std::runtime_error(
+      std::string("ForthOutputBuffer type is incompatible with Index32: ")
+      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename OUT>
+  const IndexU32
+  ForthOutputBufferOf<OUT>::toIndexU32() const {
+    throw std::runtime_error(
+      std::string("ForthOutputBuffer type is incompatible with IndexU32: ")
+      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename OUT>
+  const Index64
+  ForthOutputBufferOf<OUT>::toIndex64() const {
+    throw std::runtime_error(
+      std::string("ForthOutputBuffer type is incompatible with Index64: ")
+      + std::string(typeid(OUT).name()) + FILENAME(__LINE__)
+    );
+  }
+
+  template <>
+  const Index8
+  ForthOutputBufferOf<int8_t>::toIndex8() const {
+    return Index8(ptr_, 0, length_, kernel::lib::cpu);
+  }
+
+  template <>
+  const IndexU8
+  ForthOutputBufferOf<uint8_t>::toIndexU8() const {
+    return IndexU8(ptr_, 0, length_, kernel::lib::cpu);
+  }
+
+  template <>
+  const Index32
+  ForthOutputBufferOf<int32_t>::toIndex32() const {
+    return Index32(ptr_, 0, length_, kernel::lib::cpu);
+  }
+
+  template <>
+  const IndexU32
+  ForthOutputBufferOf<uint32_t>::toIndexU32() const {
+    return IndexU32(ptr_, 0, length_, kernel::lib::cpu);
+  }
+
+  template <>
+  const Index64
+  ForthOutputBufferOf<int64_t>::toIndex64() const {
+    return Index64(ptr_, 0, length_, kernel::lib::cpu);
   }
 
   template <typename OUT>

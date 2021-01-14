@@ -138,6 +138,54 @@ namespace awkward {
       output_at(int64_t index) const noexcept;
 
     /// @brief HERE
+    const ContentPtr
+      output_NumpyArray_at(const std::string& name) const;
+
+    /// @brief HERE
+    const ContentPtr
+      output_NumpyArray_at(int64_t index) const;
+
+    /// @brief HERE
+    const Index8
+      output_Index8_at(const std::string& name) const;
+
+    /// @brief HERE
+    const Index8
+      output_Index8_at(int64_t index) const;
+
+    /// @brief HERE
+    const IndexU8
+      output_IndexU8_at(const std::string& name) const;
+
+    /// @brief HERE
+    const IndexU8
+      output_IndexU8_at(int64_t index) const;
+
+    /// @brief HERE
+    const Index32
+      output_Index32_at(const std::string& name) const;
+
+    /// @brief HERE
+    const Index32
+      output_Index32_at(int64_t index) const;
+
+    /// @brief HERE
+    const IndexU32
+      output_IndexU32_at(const std::string& name) const;
+
+    /// @brief HERE
+    const IndexU32
+      output_IndexU32_at(int64_t index) const;
+
+    /// @brief HERE
+    const Index64
+      output_Index64_at(const std::string& name) const;
+
+    /// @brief HERE
+    const Index64
+      output_Index64_at(int64_t index) const;
+
+    /// @brief HERE
     void
       reset();
 
@@ -155,7 +203,7 @@ namespace awkward {
 
     /// @brief HERE
     void
-      maybe_throw(util::ForthError err, const std::set<util::ForthError>& ignore);
+      maybe_throw(util::ForthError err, const std::set<util::ForthError>& ignore) const;
 
     /// @brief HERE
     util::ForthError
@@ -179,7 +227,7 @@ namespace awkward {
 
     /// @brief HERE
     int64_t
-      breakpoint_depth() const noexcept;
+      pause_depth() const noexcept;
 
     /// @brief HERE
     int64_t
@@ -430,7 +478,7 @@ namespace awkward {
     std::vector<std::shared_ptr<ForthOutputBuffer>> current_outputs_;
     bool ready_;
 
-    int64_t current_breakpoint_depth_;
+    int64_t current_pause_depth_;
 
     int64_t* current_which_;
     int64_t* current_where_;
