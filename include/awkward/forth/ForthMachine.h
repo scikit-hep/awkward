@@ -8,6 +8,9 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
+#include "awkward/Content.h"
+#include "awkward/array/NumpyArray.h"
+#include "awkward/array/ListOffsetArray.h"
 #include "awkward/forth/ForthInputBuffer.h"
 #include "awkward/forth/ForthOutputBuffer.h"
 
@@ -33,12 +36,8 @@ namespace awkward {
       source() const noexcept;
 
     /// @brief HERE
-    const std::vector<I>
-      bytecodes() const noexcept;
-
-    /// @brief HERE
-    const std::vector<int64_t>
-      bytecodes_offsets() const noexcept;
+    const ContentPtr
+      bytecodes() const;
 
     /// @brief HERE
     const std::string
@@ -61,7 +60,7 @@ namespace awkward {
       output_initial_size() const noexcept;
 
     /// @brief HERE
-    int64_t
+    double
       output_resize_factor() const noexcept;
 
     /// @brief HERE
@@ -77,20 +76,30 @@ namespace awkward {
       stack_depth() const noexcept;
 
     /// @brief HERE
-    bool
-      stack_can_push() const noexcept;
+    inline bool
+      stack_can_push() const noexcept {
+      return stack_depth_ < stack_max_depth_;
+    }
 
     /// @brief HERE
-    bool
-      stack_can_pop() const noexcept;
+    inline bool
+      stack_can_pop() const noexcept {
+      return stack_depth_ > 0;
+    }
 
     /// @brief HERE
     inline void
-      stack_push(T value) noexcept;
+      stack_push(T value) noexcept {
+      stack_buffer_[stack_depth_] = value;
+      stack_depth_++;
+    }
 
     /// @brief HERE
     inline T
-      stack_pop() noexcept;
+      stack_pop() noexcept {
+      stack_depth_--;
+      return stack_buffer_[stack_depth_];
+    }
 
     /// @brief HERE
     void
@@ -201,8 +210,6 @@ namespace awkward {
     int64_t
       count_nanoseconds() const noexcept;
 
-  private:
-
     /// @brief HERE
     bool
       is_integer(const std::string& word, int64_t& value) const;
@@ -227,9 +234,7 @@ namespace awkward {
     bool
       is_defined(const std::string& word) const;
 
-    /// @brief HERE
-    void
-      compile();
+  private:
 
     /// @brief HERE
     const std::string
@@ -237,6 +242,10 @@ namespace awkward {
                   int64_t startpos,
                   int64_t stoppos,
                   const std::string& message) const;
+
+    /// @brief HERE
+    void
+      compile();
 
     /// @brief HERE
     void
@@ -250,88 +259,146 @@ namespace awkward {
             int64_t dodepth) const;
 
     /// @brief HERE
-    inline void
-      write_from_stack(int64_t num, T* top) noexcept;
-
-    /// @brief HERE
-    inline bool
-      is_done() const noexcept;
-
-    /// @brief HERE
-    inline bool
-      is_segment_done() const noexcept;
-
-    /// @brief HERE
     void
       internal_run(bool keep_going); // noexcept
 
     /// @brief HERE
-    inline T*
-      stack_pop2() noexcept;
-
-    /// @brief HERE
-    inline T*
-      stack_pop2_before_pushing1() noexcept;
-
-    /// @brief HERE
-    inline T*
-      stack_peek() const noexcept;
-
-    /// @brief HERE
-    inline I
-      instruction_get() const noexcept;
-
-    /// @brief HERE
-    inline void
-      bytecodes_pointer_push(int64_t which) noexcept;
-
-    /// @brief HERE
-    inline void
-      bytecodes_pointer_pop() noexcept;
-
-    /// @brief HERE
-    inline int64_t&
-      bytecodes_pointer_which() const noexcept;
-
-    /// @brief HERE
-    inline int64_t&
-      bytecodes_pointer_where() const noexcept;
-
-    /// @brief HERE
-    inline void
-      do_loop_push(int64_t start, int64_t stop) noexcept;
-
-    /// @brief HERE
-    inline void
-      do_steploop_push(int64_t start, int64_t stop) noexcept;
-
-    /// @brief HERE
-    inline int64_t&
-      do_recursion_depth() const noexcept;
-
-    /// @brief HERE
-    inline int64_t
-      do_abs_recursion_depth() const noexcept;
+    void
+      write_from_stack(int64_t num, T* top) noexcept;
 
     /// @brief HERE
     inline bool
-      do_loop_is_step() const noexcept;
+      is_done() const noexcept {
+      return recursion_current_depth_ == 0;
+    }
+
+    /// @brief HERE
+    inline bool
+      is_segment_done() const noexcept {
+      return !(bytecodes_pointer_where() < (
+                   bytecodes_offsets_[bytecodes_pointer_which() + 1] -
+                   bytecodes_offsets_[bytecodes_pointer_which()]
+               ));
+    }
+
+    /// @brief HERE
+    inline T*
+      stack_pop2() noexcept {
+      stack_depth_ -= 2;
+      return &stack_buffer_[stack_depth_];
+    }
+
+    /// @brief HERE
+    inline T*
+      stack_pop2_before_pushing1() noexcept {
+      stack_depth_--;
+      return &stack_buffer_[stack_depth_ - 1];
+    }
+
+    /// @brief HERE
+    inline T*
+      stack_peek() const noexcept {
+      return &stack_buffer_[stack_depth_ - 1];
+    }
+
+    /// @brief HERE
+    inline I
+      instruction_get() const noexcept {
+      int64_t start = bytecodes_offsets_[bytecodes_pointer_which()];
+      return bytecodes_[start + bytecodes_pointer_where()];
+    }
+
+    /// @brief HERE
+    inline void
+      bytecodes_pointer_push(int64_t which) noexcept {
+      current_which_[recursion_current_depth_] = which;
+      current_where_[recursion_current_depth_] = 0;
+      recursion_current_depth_++;
+    }
+
+    /// @brief HERE
+    inline void
+      bytecodes_pointer_pop() noexcept {
+      recursion_current_depth_--;
+    }
 
     /// @brief HERE
     inline int64_t&
-      do_stop() const noexcept;
+      bytecodes_pointer_which() const noexcept {
+      return current_which_[recursion_current_depth_ - 1];
+    }
 
     /// @brief HERE
     inline int64_t&
-      do_i() const noexcept;
+      bytecodes_pointer_where() const noexcept {
+      return current_where_[recursion_current_depth_ - 1];
+    }
+
+    /// @brief HERE
+    inline void
+      do_loop_push(int64_t start, int64_t stop) noexcept {
+      do_recursion_depth_[do_current_depth_] = recursion_current_depth_;
+      do_stop_[do_current_depth_] = stop;
+      do_i_[do_current_depth_] = start;
+      do_current_depth_++;
+    }
+
+    /// @brief HERE
+    inline void
+      do_steploop_push(int64_t start, int64_t stop) noexcept {
+      do_recursion_depth_[do_current_depth_] = ~recursion_current_depth_;
+      do_stop_[do_current_depth_] = stop;
+      do_i_[do_current_depth_] = start;
+      do_current_depth_++;
+    }
 
     /// @brief HERE
     inline int64_t&
-      do_j() const noexcept;
+      do_recursion_depth() const noexcept {
+      return do_recursion_depth_[do_current_depth_ - 1];
+    }
+
+    /// @brief HERE
+    inline int64_t
+    do_abs_recursion_depth() const noexcept {
+      int64_t out = do_recursion_depth_[do_current_depth_ - 1];
+      if (out < 0) {
+        return ~out;
+      }
+      else {
+        return out;
+      }
+    }
+
+    /// @brief HERE
+    inline bool
+      do_loop_is_step() const noexcept {
+      return do_recursion_depth_[do_current_depth_ - 1] < 0;
+    }
 
     /// @brief HERE
     inline int64_t&
-      do_k() const noexcept;
+      do_stop() const noexcept {
+      return do_stop_[do_current_depth_ - 1];
+    }
+
+    /// @brief HERE
+    inline int64_t&
+      do_i() const noexcept {
+      return do_i_[do_current_depth_ - 1];
+    }
+
+    /// @brief HERE
+    inline int64_t&
+      do_j() const noexcept {
+      return do_i_[do_current_depth_ - 2];
+    }
+
+    /// @brief HERE
+    inline int64_t&
+      do_k() const noexcept {
+      return do_i_[do_current_depth_ - 3];
+    }
 
     std::string source_;
     int64_t output_initial_size_;

@@ -244,15 +244,19 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::vector<I>
-  ForthMachineOf<T, I>::bytecodes() const noexcept {
-    return bytecodes_;
-  }
+  const ContentPtr
+  ForthMachineOf<T, I>::bytecodes() const {
+    IndexOf<I> content(bytecodes_.size(), kernel::lib::cpu);
+    std::memcpy(content.data(), bytecodes_.data(), bytecodes_.size() * sizeof(I));
 
-  template <typename T, typename I>
-  const std::vector<int64_t>
-  ForthMachineOf<T, I>::bytecodes_offsets() const noexcept {
-    return bytecodes_offsets_;
+    IndexOf<int64_t> offsets(bytecodes_offsets_.size(), kernel::lib::cpu);
+    std::memcpy(offsets.data(), bytecodes_offsets_.data(), bytecodes_offsets_.size() * sizeof(int64_t));
+
+    return std::make_shared<ListOffsetArrayOf<int64_t>>(Identities::none(),
+                                                        util::Parameters(),
+                                                        offsets,
+                                                        std::make_shared<NumpyArray>(content),
+                                                        false);
   }
 
   template <typename T, typename I>
@@ -290,7 +294,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  int64_t
+  double
   ForthMachineOf<T, I>::output_resize_factor() const noexcept {
     return output_resize_factor_;
   }
@@ -315,32 +319,6 @@ namespace awkward {
   int64_t
   ForthMachineOf<T, I>::stack_depth() const noexcept {
     return stack_depth_;
-  }
-
-  template <typename T, typename I>
-  bool
-  ForthMachineOf<T, I>::stack_can_push() const noexcept {
-    return stack_depth_ < stack_max_depth_;
-  }
-
-  template <typename T, typename I>
-  bool
-  ForthMachineOf<T, I>::stack_can_pop() const noexcept {
-    return stack_depth_ > 0;
-  }
-
-  template <typename T, typename I>
-  inline void
-  ForthMachineOf<T, I>::stack_push(T value) noexcept {
-    stack_buffer_[stack_depth_] = value;
-    stack_depth_++;
-  }
-
-  template <typename T, typename I>
-  inline T
-  ForthMachineOf<T, I>::stack_pop() noexcept {
-    stack_depth_--;
-    return stack_buffer_[stack_depth_];
   }
 
   template <typename T, typename I>
@@ -615,11 +593,6 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  void ForthMachineOf<T, I>::compile() {
-    // not implemented
-  }
-
-  template <typename T, typename I>
   const std::string
   ForthMachineOf<T, I>::err_linecol(const std::vector<std::pair<int64_t, int64_t>>& linecol,
                                     int64_t startpos,
@@ -653,6 +626,13 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  void ForthMachineOf<T, I>::compile() {
+    // not implemented
+
+    bytecodes_offsets_.push_back(0);
+  }
+
+  template <typename T, typename I>
   void
   ForthMachineOf<T, I>::parse(const std::string& defn,
                               const std::vector<std::string>& tokenized,
@@ -665,8 +645,14 @@ namespace awkward {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
+  template <typename T, typename I>
+  void
+  ForthMachineOf<T, I>::internal_run(bool keep_going) { // noexcept
+    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+  }
+
   template <>
-  inline void
+  void
   ForthMachineOf<int32_t, int32_t>::write_from_stack(int64_t num, int32_t* top) noexcept {
     if (num == 1) {
       current_outputs_[num].get()->write_one_int32(*top, false);
@@ -677,7 +663,7 @@ namespace awkward {
   }
 
   template <>
-  inline void
+  void
   ForthMachineOf<int64_t, int32_t>::write_from_stack(int64_t num, int64_t* top) noexcept {
     if (num == 1) {
       current_outputs_[num].get()->write_one_int64(*top, false);
@@ -685,147 +671,6 @@ namespace awkward {
     else {
       current_outputs_[num].get()->write_int64(1, top, false);
     }
-  }
-
-  template <typename T, typename I>
-  inline bool
-  ForthMachineOf<T, I>::is_done() const noexcept {
-    return recursion_current_depth_ == 0;
-  }
-
-  template <typename T, typename I>
-  inline bool
-  ForthMachineOf<T, I>::is_segment_done() const noexcept {
-    return !(bytecodes_pointer_where() < (
-                 bytecodes_offsets_[bytecodes_pointer_which() + 1] -
-                 bytecodes_offsets_[bytecodes_pointer_which()]
-             ));
-  }
-
-  template <typename T, typename I>
-  void
-  ForthMachineOf<T, I>::internal_run(bool keep_going) { // noexcept
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
-  }
-
-  template <typename T, typename I>
-  inline T*
-  ForthMachineOf<T, I>::stack_pop2() noexcept {
-    stack_depth_ -= 2;
-    return &stack_buffer_[stack_depth_];
-  }
-
-  template <typename T, typename I>
-  inline T*
-  ForthMachineOf<T, I>::stack_pop2_before_pushing1() noexcept {
-    stack_depth_--;
-    return &stack_buffer_[stack_depth_ - 1];
-  }
-
-  template <typename T, typename I>
-  inline T*
-  ForthMachineOf<T, I>::stack_peek() const noexcept {
-    return &stack_buffer_[stack_depth_ - 1];
-  }
-
-  template <typename T, typename I>
-  inline I
-  ForthMachineOf<T, I>::instruction_get() const noexcept {
-    int64_t start = bytecodes_offsets_[bytecodes_pointer_which()];
-    return bytecodes_[start + bytecodes_pointer_where()];
-  }
-
-  template <typename T, typename I>
-  inline void
-  ForthMachineOf<T, I>::bytecodes_pointer_push(int64_t which) noexcept {
-    current_which_[recursion_current_depth_] = which;
-    current_where_[recursion_current_depth_] = 0;
-    recursion_current_depth_++;
-  }
-
-  template <typename T, typename I>
-  inline void
-  ForthMachineOf<T, I>::bytecodes_pointer_pop() noexcept {
-    recursion_current_depth_--;
-  }
-
-  template <typename T, typename I>
-  inline int64_t&
-  ForthMachineOf<T, I>::bytecodes_pointer_which() const noexcept {
-    return current_which_[recursion_current_depth_ - 1];
-
-  }
-
-  template <typename T, typename I>
-  inline int64_t&
-  ForthMachineOf<T, I>::bytecodes_pointer_where() const noexcept {
-    return current_where_[recursion_current_depth_ - 1];
-  }
-
-  template <typename T, typename I>
-  inline void
-  ForthMachineOf<T, I>::do_loop_push(int64_t start, int64_t stop) noexcept {
-    do_recursion_depth_[do_current_depth_] = recursion_current_depth_;
-    do_stop_[do_current_depth_] = stop;
-    do_i_[do_current_depth_] = start;
-    do_current_depth_++;
-  }
-
-  template <typename T, typename I>
-  inline void
-  ForthMachineOf<T, I>::do_steploop_push(int64_t start, int64_t stop) noexcept {
-    do_recursion_depth_[do_current_depth_] = ~recursion_current_depth_;
-    do_stop_[do_current_depth_] = stop;
-    do_i_[do_current_depth_] = start;
-    do_current_depth_++;
-  }
-
-  template <typename T, typename I>
-  inline int64_t&
-  ForthMachineOf<T, I>::do_recursion_depth() const noexcept {
-    return do_recursion_depth_[do_current_depth_ - 1];
-  }
-
-  template <typename T, typename I>
-  inline int64_t
-  ForthMachineOf<T, I>::do_abs_recursion_depth() const noexcept {
-    int64_t out = do_recursion_depth_[do_current_depth_ - 1];
-    if (out < 0) {
-      return ~out;
-    }
-    else {
-      return out;
-    }
-  }
-
-  template <typename T, typename I>
-  inline bool
-  ForthMachineOf<T, I>::do_loop_is_step() const noexcept {
-    return do_recursion_depth_[do_current_depth_ - 1] < 0;
-  }
-
-  template <typename T, typename I>
-  inline int64_t&
-  ForthMachineOf<T, I>::do_stop() const noexcept {
-    return do_stop_[do_current_depth_ - 1];
-  }
-
-  template <typename T, typename I>
-  inline int64_t&
-  ForthMachineOf<T, I>::do_i() const noexcept {
-    return do_i_[do_current_depth_ - 1];
-  }
-
-  template <typename T, typename I>
-  inline int64_t&
-  ForthMachineOf<T, I>::do_j() const noexcept {
-    return do_i_[do_current_depth_ - 2];
-  }
-
-  template <typename T, typename I>
-  inline int64_t&
-  ForthMachineOf<T, I>::do_k() const noexcept {
-    return do_i_[do_current_depth_ - 3];
   }
 
   template class EXPORT_TEMPLATE_INST ForthMachineOf<int32_t, int32_t>;
