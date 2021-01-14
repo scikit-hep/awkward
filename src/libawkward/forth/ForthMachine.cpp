@@ -226,7 +226,10 @@ namespace awkward {
     , count_writes_(0)
     , count_nanoseconds_(0)
   {
-    compile();
+    std::vector<std::string> tokenized;
+    std::vector<std::pair<int64_t, int64_t>> linecol;
+    tokenize(tokenized, linecol);
+    compile(tokenized, linecol);
   }
 
   template <typename T, typename I>
@@ -772,10 +775,87 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  void ForthMachineOf<T, I>::compile() {
-    // not implemented
+  void ForthMachineOf<T, I>::tokenize(std::vector<std::string>& tokenized,
+                                      std::vector<std::pair<int64_t, int64_t>>& linecol) {
+    int64_t start = 0;
+    int64_t stop = 0;
+    bool full = false;
+    int64_t line = 1;
+    int64_t colstart = 0;
+    int64_t colstop = 0;
+    while (stop < source_.size()) {
+      char current = source_[stop];
+      // Whitespace separates tokens and is not included in them.
+      if (current == ' '  ||  current == '\r'  ||  current == '\t'  ||
+          current == '\v'  ||  current == '\f') {
+        if (full) {
+          tokenized.push_back(source_.substr(start, stop - start));
+          linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
+        }
+        start = stop;
+        full = false;
+        colstart = colstop;
+      }
+      // '\n' is considered a token because it terminates '\\ .. \n' comments.
+      // It has no semantic meaning after the parsing stage.
+      else if (current == '\n') {
+        if (full) {
+          tokenized.push_back(source_.substr(start, stop - start));
+          linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
+        }
+        tokenized.push_back(source_.substr(stop, 1));
+        linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
+        start = stop;
+        full = false;
+        line += 1;
+        colstart = 0;
+        colstop = 0;
+      }
+      // Everything else is part of a token (Forth word).
+      else {
+        if (!full) {
+          start = stop;
+          colstart = colstop;
+        }
+        full = true;
+      }
+      stop++;
+      colstop++;
+    }
+    // The source code might end on non-whitespace.
+    if (full) {
+      tokenized.push_back(source_.substr(start, stop - start));
+      linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
+    }
+  }
 
+  template <typename T, typename I>
+  void ForthMachineOf<T, I>::compile(const std::vector<std::string>& tokenized,
+                                     const std::vector<std::pair<int64_t, int64_t>>& linecol) {
+    std::vector<std::vector<I>> dictionary;
+
+    // Start recursive parsing.
+    std::vector<I> bytecodes;
+    dictionary.push_back(bytecodes);
+    parse("",
+          tokenized,
+          linecol,
+          0,
+          tokenized.size(),
+          bytecodes,
+          dictionary,
+          0,
+          0);
+    dictionary[0] = bytecodes;
+
+    // Copy std::vector<std::vector<I>> to flattened contents and offsets.
     bytecodes_offsets_.push_back(0);
+    for (auto segment : dictionary) {
+      for (auto bytecode : segment) {
+        bytecodes_.push_back(bytecode);
+      }
+      bytecodes_offsets_.push_back(bytecodes_.size());
+    }
   }
 
   template <typename T, typename I>
@@ -786,15 +866,458 @@ namespace awkward {
                               int64_t start,
                               int64_t stop,
                               std::vector<I>& bytecodes,
+                              std::vector<std::vector<I>>& dictionary,
                               int64_t exitdepth,
                               int64_t dodepth) const {
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+    int64_t pos = start;
+    while (pos < stop) {
+      std::string word = tokenized[pos];
+
+      if (word == "(") {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (word == "\\") {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (word == "\n") {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (word == "") {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (word == ":") {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (word == "recurse") {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (word == "variable") {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (word == "input") {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (word == "output") {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (word == "if") {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (word == "do") {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (word == "begin") {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (word == "exit") {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (is_variable(word)) {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (is_input(word)) {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else if (is_output(word)) {
+        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+      }
+
+      else {
+        auto generic_builtin = generic_builtin_words_.find(word);
+        if (generic_builtin != generic_builtin_words_.end()) {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+        }
+
+        else {
+          auto pair = dictionary_names_.find(word);
+          if (pair != dictionary_names_.end()) {
+            throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          }
+
+          else {
+            throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+          }
+        }
+      }
+    }
   }
 
   template <typename T, typename I>
   void
   ForthMachineOf<T, I>::internal_run(bool keep_going) { // noexcept
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+    while (recursion_current_depth_ != 0) {
+      while (bytecodes_pointer_where() < (
+                 bytecodes_offsets_[bytecodes_pointer_which() + 1] -
+                 bytecodes_offsets_[bytecodes_pointer_which()]
+             )) {
+        I bytecode = bytecode_get();
+
+        if (do_current_depth_ == 0  ||  do_abs_recursion_depth() != recursion_current_depth_) {
+          // Normal operation: step forward one bytecode.
+          bytecodes_pointer_where() += 1;
+        }
+        else if (do_i() >= do_stop()) {
+          // End a 'do' loop.
+          do_current_depth_--;
+          bytecodes_pointer_where() += 1;
+          continue;
+        }
+        // else... don't increase bytecode_pointer_where()
+
+        if (bytecode < 0) {
+          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+        }
+
+        else if (bytecode >= BOUND_DICTIONARY) {
+          if (recursion_current_depth_ == recursion_max_depth_) {
+            current_error_ = util::ForthError::recursion_depth_exceeded;
+            return;
+          }
+          bytecodes_pointer_push((bytecode - BOUND_DICTIONARY) + 1);
+        }
+
+        else {
+          switch (bytecode) {
+            case INSTR_LITERAL: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_HALT: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_PAUSE: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_IF: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_IF_ELSE: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_DO: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_DO_STEP: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_AGAIN: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_UNTIL: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_WHILE: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_EXIT: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_PUT: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_INC: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_GET: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_LEN_INPUT: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_POS: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_END: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_SEEK: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_SKIP: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_WRITE: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_LEN_OUTPUT: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_REWIND: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_I: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_J: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_K: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_DUP: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_DROP: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_SWAP: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_OVER: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_ROT: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_NIP: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_TUCK: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_ADD: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_SUB: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_MUL: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_DIV: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_MOD: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_DIVMOD: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_NEGATE: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_ADD1: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_SUB1: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_ABS: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_MIN: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_MAX: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_EQ: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_NE: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_GT: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_GE: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_LT: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_LE: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_EQ0: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_INVERT: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_AND: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_OR: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_XOR: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_LSHIFT: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_RSHIFT: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_FALSE: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+
+            case INSTR_TRUE: {
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              break;
+            }
+          }
+        } // end handle one instruction
+
+        count_instructions_++;
+        if (!keep_going) {
+          if (is_segment_done()) {
+            bytecodes_pointer_pop();
+          }
+          return;
+        }
+
+      } // end walk over instructions in this segment
+
+    after_end_of_segment:
+      bytecodes_pointer_pop();
+
+      if (do_current_depth_ != 0  &&  do_abs_recursion_depth() == recursion_current_depth_) {
+        // End one step of a 'do ... loop' or a 'do ... +loop'.
+        if (do_loop_is_step()) {
+          if (!stack_can_pop()) {
+            current_error_ = util::ForthError::stack_underflow;
+            return;
+          }
+          do_i() += stack_pop();
+        }
+        else {
+          do_i()++;
+        }
+      }
+
+    } // end of all segments
   }
 
   template <>

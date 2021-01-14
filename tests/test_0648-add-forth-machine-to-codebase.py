@@ -6,15 +6,13 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+import awkward.forth
 
-def test():
-    import awkward.forth
 
+def test_minimal():
     vm32 = awkward.forth.ForthMachine32("")
     vm64 = awkward.forth.ForthMachine64("")
 
-    assert ak.to_list(vm32.bytecodes) == []
-    assert ak.to_list(vm64.bytecodes) == []
     assert str(ak.type(vm32.bytecodes)) == "var * int32"
     assert str(ak.type(vm64.bytecodes)) == "var * int32"
     assert vm32.dictionary == []
@@ -47,3 +45,9 @@ def test():
     assert vm64.variables == {}
     assert vm32.outputs == {}
     assert vm64.outputs == {}
+
+
+# def test_literal():
+#     vm32 = awkward.forth.ForthMachine32("1 2 3 4")
+#     print(ak.Array(vm32.bytecodes))
+#     raise Exception

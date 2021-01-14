@@ -313,7 +313,13 @@ namespace awkward {
 
     /// @brief HERE
     void
-      compile();
+      tokenize(std::vector<std::string>& tokenized,
+               std::vector<std::pair<int64_t, int64_t>>& linecol);
+
+    /// @brief HERE
+    void
+      compile(const std::vector<std::string>& tokenized,
+              const std::vector<std::pair<int64_t, int64_t>>& linecol);
 
     /// @brief HERE
     void
@@ -323,6 +329,7 @@ namespace awkward {
             int64_t start,
             int64_t stop,
             std::vector<I>& bytecodes,
+            std::vector<std::vector<I>>& dictionary,
             int64_t exitdepth,
             int64_t dodepth) const;
 
@@ -356,7 +363,7 @@ namespace awkward {
 
     /// @brief HERE
     inline I
-      instruction_get() const noexcept {
+      bytecode_get() const noexcept {
       int64_t start = bytecodes_offsets_[bytecodes_pointer_which()];
       return bytecodes_[start + bytecodes_pointer_where()];
     }
@@ -469,7 +476,6 @@ namespace awkward {
     std::vector<util::dtype> output_dtypes_;
 
     std::map<std::string, I> dictionary_names_;
-    std::vector<std::vector<I>> dictionary_;
     std::vector<int64_t> bytecodes_offsets_;
     std::vector<I> bytecodes_;
     std::vector<int64_t> bytecode_to_instruction_;
