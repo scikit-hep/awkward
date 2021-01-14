@@ -83,6 +83,8 @@ namespace awkward {
     void real(double x) { writer_.Double(x); }
     void complex(std::complex<double> x) {
       beginrecord();
+      field("__complex__");
+      boolean(true);
       field("real");
       real(x.real());
       field("imag");
@@ -210,6 +212,8 @@ namespace awkward {
     void real(double x) { writer_.Double(x); }
     void complex(std::complex<double> x) {
       beginrecord();
+      field("__complex__");
+      boolean(true);
       field("real");
       real(x.real());
       field("imag");
@@ -341,6 +345,8 @@ namespace awkward {
     void real(double x) { writer_.Double(x); }
     void complex(std::complex<double> x) {
       beginrecord();
+      field("__complex__");
+      boolean(true);
       field("real");
       real(x.real());
       field("imag");
@@ -467,6 +473,8 @@ namespace awkward {
     void real(double x) { writer_.Double(x); }
     void complex(std::complex<double> x) {
       beginrecord();
+      field("__complex__");
+      boolean(true);
       field("real");
       real(x.real());
       field("imag");
@@ -586,6 +594,7 @@ namespace awkward {
             const char* infinity_string,
             const char* minus_infinity_string)
         : builder_(options)
+        , record_started_(false)
         , moved_(false)
         , nan_string_(nan_string)
         , infinity_string_(infinity_string)
@@ -609,7 +618,9 @@ namespace awkward {
 
     bool Bool(bool x) {
       moved_ = true;
-      builder_.boolean(x);
+      if (state_ != kExpectComplexStart) {
+        builder_.boolean(x);
+      }
       return true;
     }
 
@@ -681,21 +692,44 @@ namespace awkward {
     bool
     StartObject() {
       moved_ = true;
-      builder_.beginrecord();
+      record_started_ = false;
+      switch (state_) {
+        case kExpectComplexStart:
+          state_ = kExpectNameOrObjectEnd;
+          return true;
+        default:
+          break;
+      }
       return true;
     }
 
     bool
     EndObject(rj::SizeType numfields) {
       moved_ = true;
-      builder_.endrecord();
+      if (record_started_) {
+        builder_.endrecord();
+      }
+      record_started_ = false;
       return true;
     }
 
     bool
     Key(const char* str, rj::SizeType length, bool copy) {
       moved_ = true;
-      builder_.field_check(str);
+      if (strcmp(str, "__complex__") == 0) {
+        state_ = kExpectComplexStart;
+      }
+      else if (strcmp(str, "real") == 0) {
+        state_ = kExpectValue;
+      } else  if (strcmp(str, "imag") == 0) {
+        state_ = kExpectValue;
+      } else {
+        if (!record_started_) {
+          builder_.beginrecord();
+          record_started_ = true;
+        }
+        builder_.field_check(str);
+      }
       return true;
     }
 
@@ -705,6 +739,14 @@ namespace awkward {
 
   private:
     ArrayBuilder builder_;
+
+    enum State {
+      kExpectComplexStart,
+      kExpectNameOrObjectEnd,
+      kExpectValue,
+    } state_;
+
+    bool record_started_;
     bool moved_;
     const char* nan_string_;
     const char* infinity_string_;
