@@ -1377,21 +1377,13 @@ namespace awkward {
         std::string name = tokenized[pos + 1];
 
         int64_t num;
-        if (is_integer(name, num)  ||  is_reserved(name)) {
+        if (is_input(name)  ||  is_output(name)  ||  is_variable(name)  ||
+            is_defined(name)  ||  is_reserved(name)  ||  is_integer(name, num)) {
           throw std::invalid_argument(
             err_linecol(linecol, pos, pos + 2,
-                        "user-defined words must not be integers or reserved words")
-              + FILENAME(__LINE__)
-          );
-        }
-
-        if (is_input(name)  ||  is_output(name)  ||
-            is_variable(name)  ||  is_defined(name)) {
-          throw std::invalid_argument(
-            err_linecol(linecol, pos, pos + 2,
-                        "input names, output names, variable names, and "
-                        "user-defined words must be unique")
-              + FILENAME(__LINE__)
+                        "input names, output names, variable names, and user-defined"
+                        "words must all be unique and not reserved words or integers")
+            + FILENAME(__LINE__)
           );
         }
 
@@ -1438,19 +1430,109 @@ namespace awkward {
       }
 
       else if (word == "recurse") {
-        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+        if (defn == "") {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 1,
+                        "only allowed in a ': name ... ;' definition")
+              + FILENAME(__LINE__)
+          );
+        }
+        bytecodes.push_back(dictionary_names_[defn]);
+
+        pos++;
       }
 
       else if (word == "variable") {
-        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+        if (pos + 1 >= stop) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2,
+                        "missing name in variable declaration")
+            + FILENAME(__LINE__)
+          );
+        }
+        std::string name = tokenized[pos + 1];
+
+        int64_t num;
+        if (is_input(name)  ||  is_output(name)  ||  is_variable(name)  ||
+            is_defined(name)  ||  is_reserved(name)  ||  is_integer(name, num)) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2,
+                        "input names, output names, variable names, and user-defined"
+                        "words must all be unique and not reserved words or integers")
+            + FILENAME(__LINE__)
+          );
+        }
+
+        variable_names_.push_back(name);
+        variables_.push_back(0);
+
+        pos += 2;
       }
 
       else if (word == "input") {
-        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+        if (pos + 1 >= stop) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2, "missing name in input declaration")
+            + FILENAME(__LINE__)
+          );
+        }
+        std::string name = tokenized[pos + 1];
+
+        int64_t num;
+        if (is_input(name)  ||  is_output(name)  ||  is_variable(name)  ||
+            is_defined(name)  ||  is_reserved(name)  ||  is_integer(name, num)) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2,
+                        "input names, output names, variable names, and user-defined"
+                        "words must all be unique and not reserved words or integers")
+            + FILENAME(__LINE__)
+          );
+        }
+
+        input_names_.push_back(name);
+
+        pos += 2;
       }
 
       else if (word == "output") {
-        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+        if (pos + 2 >= stop) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 3,
+                        "missing name or dtype in output declaration")
+            + FILENAME(__LINE__)
+          );
+        }
+        std::string name = tokenized[pos + 1];
+        std::string dtype_string = tokenized[pos + 2];
+
+        int64_t num;
+        if (is_input(name)  ||  is_output(name)  ||  is_variable(name)  ||
+            is_defined(name)  ||  is_reserved(name)  ||  is_integer(name, num)) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2,
+                        "input names, output names, variable names, and user-defined"
+                        "words must all be unique and not reserved words or integers")
+            + FILENAME(__LINE__)
+          );
+        }
+
+        bool found_dtype = false;
+        for (auto pair : output_dtype_words_) {
+          if (pair.first == dtype_string) {
+            output_names_.push_back(name);
+            output_dtypes_.push_back(pair.second);
+            found_dtype = true;
+            break;
+          }
+        }
+        if (!found_dtype) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 3, "output dtype not recognized")
+            + FILENAME(__LINE__)
+          );
+        }
+
+        pos += 3;
       }
 
       else if (word == "if") {
@@ -1472,7 +1554,7 @@ namespace awkward {
           else if (tokenized[substop] == "then") {
             nesting--;
           }
-          else if (tokenized[substop] == "else" and nesting == 1) {
+          else if (tokenized[substop] == "else"  &&  nesting == 1) {
             subelse = substop;
           }
         }
