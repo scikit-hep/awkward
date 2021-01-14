@@ -520,6 +520,7 @@ def to_cupy(array):
             + ak._util.exception_suffix(__file__)
         )
 
+
 def from_jax(array, regulararray=False, highlevel=True, behavior=None):
     """
     Args:
@@ -567,6 +568,7 @@ def from_jax(array, regulararray=False, highlevel=True, behavior=None):
     else:
         return layout
 
+
 def kernels(*arrays):
     """
     Returns the names of the kernels library used by `arrays`. May be
@@ -599,7 +601,9 @@ def kernels(*arrays):
     libs = set()
     for array in arrays:
         layout = ak.operations.convert.to_layout(
-            array, allow_record=True, allow_other=True,
+            array,
+            allow_record=True,
+            allow_other=True,
         )
 
         if isinstance(
@@ -1909,7 +1913,8 @@ def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
             return arrow_arr
 
         elif isinstance(
-            layout, (ak.layout.ListOffsetArray64, ak.layout.ListOffsetArrayU32),
+            layout,
+            (ak.layout.ListOffsetArray64, ak.layout.ListOffsetArrayU32),
         ):
             if layout.parameter("__array__") == "bytestring":
                 downsize = bytestring_to32
@@ -2002,7 +2007,11 @@ def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
 
         elif isinstance(
             layout,
-            (ak.layout.ListArray32, ak.layout.ListArrayU32, ak.layout.ListArray64,),
+            (
+                ak.layout.ListArray32,
+                ak.layout.ListArrayU32,
+                ak.layout.ListArray64,
+            ),
         ):
             return recurse(
                 layout.broadcast_tooffsets64(layout.compact_offsets64()),
@@ -2179,7 +2188,8 @@ def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
                     return recurse(layout_content[index], mask, is_option)
 
         elif isinstance(
-            layout, (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64),
+            layout,
+            (ak.layout.IndexedOptionArray32, ak.layout.IndexedOptionArray64),
         ):
             index = numpy.array(layout.index, copy=True)
             nulls = index < 0
@@ -3343,7 +3353,13 @@ def _asbuf(obj):
 
 
 def _form_to_layout(
-    form, container, partnum, key_format, length, lazy_cache, lazy_cache_key,
+    form,
+    container,
+    partnum,
+    key_format,
+    length,
+    lazy_cache,
+    lazy_cache_key,
 ):
     global _index_form_to_dtype, _index_form_to_index, _form_to_layout_class
 
@@ -3656,7 +3672,11 @@ def _form_to_layout(
             )
 
         return ak.layout.RecordArray(
-            contents, None if form.istuple else keys, length, identities, parameters,
+            contents,
+            None if form.istuple else keys,
+            length,
+            identities,
+            parameters,
         )
 
     elif isinstance(form, ak.forms.RegularForm):
@@ -3744,7 +3764,10 @@ def _form_to_layout(
             lazy_cache_key,
         )
         generator = ak.layout.ArrayGenerator(
-            _form_to_layout, args, form=form.form, length=length,
+            _form_to_layout,
+            args,
+            form=form.form,
+            length=length,
         )
         node_cache_key = key_format(
             form_key=form.form.form_key, attribute="virtual", partition=partnum

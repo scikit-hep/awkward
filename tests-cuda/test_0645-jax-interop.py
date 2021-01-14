@@ -9,8 +9,7 @@ import awkward as ak  # noqa: F401
 
 
 def test_jax_interop():
-    j = jnp.arange(10, dtype='i4')
-    print(j.__cuda_array_interface__)
+    j = jnp.arange(10, dtype="i4")
     n = np.arange(10, dtype=np.int32)
     jax_index_arr = ak.layout.Index32.from_jax(j)
     np_index_arr = ak.layout.Index32(n)
