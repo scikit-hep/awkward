@@ -103,6 +103,20 @@ def test_def():
 ;
 """
 
+    vm32 = awkward.forth.ForthMachine32(": empty ;")
+    assert ak.to_list(vm32.bytecodes) == [[], []]
+
+    print(">" + vm32.decompiled + "<")
+
+    assert vm32.decompiled == """: empty
+;
+"""
+
+    # vm32 = awkward.forth.ForthMachine32(": infinite recurse ;")
+    # print(ak.to_list(vm32.bytecodes))
+    # print(vm32.decompiled)
+    # raise Exception
+
 
 # def test_if():
 #     vm32 = awkward.forth.ForthMachine32("-1 if 3 5 + then")
