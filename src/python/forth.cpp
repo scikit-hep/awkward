@@ -127,8 +127,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               &ak::ForthMachineOf<T, I>::source)
           .def_property_readonly("bytecodes",
               &ak::ForthMachineOf<T, I>::bytecodes)
-          .def_property_readonly("assembly_instructions",
-              &ak::ForthMachineOf<T, I>::assembly_instructions)
+          .def_property_readonly("decompiled",
+              &ak::ForthMachineOf<T, I>::decompiled)
           .def_property_readonly("dictionary",
               &ak::ForthMachineOf<T, I>::dictionary)
           .def_property_readonly("stack_max_depth",

@@ -41,15 +41,15 @@ namespace awkward {
 
     /// @brief HERE
     const std::string
-      assembly_instructions() const;
+      decompiled() const;
 
     /// @brief HERE
     const std::string
-      assembly_instruction_segment(int64_t segment_positino, const std::string& indent="") const;
+      decompiled_segment(int64_t segment_position, const std::string& indent="") const;
 
     /// @brief HERE
     const std::string
-      assembly_instruction_at(int64_t bytecode_position, const std::string& indent="") const;
+      decompiled_at(int64_t bytecode_position, const std::string& indent="") const;
 
     /// @brief HERE
     const std::vector<std::string>
@@ -339,7 +339,7 @@ namespace awkward {
             std::vector<I>& bytecodes,
             std::vector<std::vector<I>>& dictionary,
             int64_t exitdepth,
-            int64_t dodepth) const;
+            int64_t dodepth);
 
     /// @brief HERE
     void

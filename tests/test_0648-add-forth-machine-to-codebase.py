@@ -47,8 +47,65 @@ def test_minimal():
     assert vm64.outputs == {}
 
 
+def test_comments():
+    vm32 = awkward.forth.ForthMachine32("")
+    assert ak.to_list(vm32.bytecodes) == [[]]
+    assert vm32.decompiled == ""
+
+    vm32 = awkward.forth.ForthMachine32("( comment )")
+    assert ak.to_list(vm32.bytecodes) == [[]]
+
+    vm32 = awkward.forth.ForthMachine32("\\ comment")
+    assert ak.to_list(vm32.bytecodes) == [[]]
+
+    vm32 = awkward.forth.ForthMachine32("\\ comment\n")
+    assert ak.to_list(vm32.bytecodes) == [[]]
+
+    vm32 = awkward.forth.ForthMachine32("1 2 ( comment ) 3 4")
+    assert ak.to_list(vm32.bytecodes) == [[0, 1, 0, 2, 0, 3, 0, 4]]
+
+    vm32 = awkward.forth.ForthMachine32("1 2 \\ comment \n 3 4")
+    assert ak.to_list(vm32.bytecodes) == [[0, 1, 0, 2, 0, 3, 0, 4]]
+
+
 def test_literal():
-    vm32 = awkward.forth.ForthMachine32("-1 if 3 5 + then")
-    print(ak.Array(vm32.bytecodes))
-    print(vm32.assembly_instructions)
-    # raise Exception
+    vm32 = awkward.forth.ForthMachine32("1 2 3 4")
+    assert ak.to_list(vm32.bytecodes) == [[0, 1, 0, 2, 0, 3, 0, 4]]
+    assert vm32.decompiled == """1
+2
+3
+4
+"""
+
+
+def test_def():
+    vm32 = awkward.forth.ForthMachine32(": stuff 1 2 3 4 ;")
+    assert ak.to_list(vm32.bytecodes) == [[], [0, 1, 0, 2, 0, 3, 0, 4]]
+    assert vm32.decompiled == """: stuff
+  1
+  2
+  3
+  4
+;
+"""
+
+    vm32 = awkward.forth.ForthMachine32(": foo 123 : bar 1 2 3 ; 321 ;")
+    assert ak.to_list(vm32.bytecodes) == [[], [0, 123, 0, 321], [0, 1, 0, 2, 0, 3]]
+    assert vm32.decompiled == """: bar
+  1
+  2
+  3
+;
+
+: foo
+  123
+  321
+;
+"""
+
+
+# def test_if():
+#     vm32 = awkward.forth.ForthMachine32("-1 if 3 5 + then")
+#     print(ak.Array(vm32.bytecodes))
+#     print(vm32.decompiled)
+#     raise Exception

@@ -1366,7 +1366,7 @@ private:
           }
         }
 
-        pos + substop + 1;
+        pos = substop + 1;
       }
 
       else if (word == "\\") {

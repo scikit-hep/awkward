@@ -267,22 +267,29 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string
-  ForthMachineOf<T, I>::assembly_instructions() const {
+  ForthMachineOf<T, I>::decompiled() const {
+    bool first = true;
     std::stringstream out;
     for (auto pair : dictionary_names_) {
-      int64_t segment_position = bytecodes_offsets_[pair.second - BOUND_DICTIONARY + 1];
+      if (!first) {
+        out << std::endl;
+      }
       out << ": " << pair.first << std::endl
-          << assembly_instruction_segment(segment_position, "  ")
-          << ";" << std::endl << std::endl;
+          << "  " << decompiled_segment(pair.second - BOUND_DICTIONARY, "  ")
+          << ";" << std::endl;
+      first = false;
     }
-    out << assembly_instruction_segment(0);
+    if (!first  &&  bytecodes_offsets_[0] != 0) {
+      out << std::endl;
+    }
+    out << decompiled_segment(0);
     return out.str();
   }
 
   template <typename T, typename I>
   const std::string
-  ForthMachineOf<T, I>::assembly_instruction_segment(int64_t segment_position,
-                                                     const std::string& indent) const {
+  ForthMachineOf<T, I>::decompiled_segment(int64_t segment_position,
+                                           const std::string& indent) const {
     if (segment_position < 0  ||  segment_position + 1 >= bytecodes_offsets_.size()) {
       return "";
     }
@@ -293,7 +300,7 @@ namespace awkward {
       if (bytecode_position != bytecodes_offsets_[segment_position]) {
         out << indent;
       }
-      out << assembly_instruction_at(bytecode_position, indent) << std::endl;
+      out << decompiled_at(bytecode_position, indent) << std::endl;
       bytecode_position += bytecodes_per_instruction(bytecode_position);
     }
     return out.str();
@@ -301,8 +308,8 @@ namespace awkward {
 
   template <typename T, typename I>
   const std::string
-  ForthMachineOf<T, I>::assembly_instruction_at(int64_t bytecode_position,
-                                                const std::string& indent) const {
+  ForthMachineOf<T, I>::decompiled_at(int64_t bytecode_position,
+                                      const std::string& indent) const {
     if (bytecode_position < 0  ||  bytecode_position >= bytecodes_.size()) {
       return "";
     }
@@ -391,8 +398,8 @@ namespace awkward {
           int64_t consequent = bytecodes_[bytecode_position + 1] - BOUND_DICTIONARY;
           return std::string("if\n")
                  + indent + "  "
-                 + assembly_instruction_segment(consequent, indent + "  ")
-                 + "then";
+                 + decompiled_segment(consequent, indent + "  ")
+                 + indent + "then";
         }
 
         case INSTR_IF_ELSE: {
@@ -1311,29 +1318,123 @@ namespace awkward {
                               std::vector<I>& bytecodes,
                               std::vector<std::vector<I>>& dictionary,
                               int64_t exitdepth,
-                              int64_t dodepth) const {
+                              int64_t dodepth) {
     int64_t pos = start;
     while (pos < stop) {
       std::string word = tokenized[pos];
 
       if (word == "(") {
-        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+        // Simply skip the parenthesized text: it's a comment.
+        int64_t substop = pos;
+        int64_t nesting = 1;
+        while (nesting > 0) {
+          substop++;
+          if (substop >= stop) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, substop, "'(' is missing its closing ')'")
+              + FILENAME(__LINE__)
+            );
+          }
+          // Any parentheses in the comment text itself must be balanced.
+          if (tokenized[substop] == "(") {
+            nesting++;
+          }
+          else if (tokenized[substop] == ")") {
+            nesting--;
+          }
+        }
+
+        pos = substop + 1;
       }
 
       else if (word == "\\") {
-        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+        // Modern, backslash-to-end-of-line comments. Nothing needs to be balanced.
+        int64_t substop = pos;
+        while (substop < stop  &&  tokenized[substop] != "\n") {
+          substop++;
+        }
+
+        pos = substop + 1;
       }
 
       else if (word == "\n") {
-        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+        // This is a do-nothing token to delimit backslash-to-end-of-line comments.
+        pos++;
       }
 
       else if (word == "") {
-        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+        // Just in case there's a leading or trailing blank in the token stream.
+        pos++;
       }
 
       else if (word == ":") {
-        throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+        if (pos + 1 >= stop  ||  tokenized[pos + 1] == ";") {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, pos + 2, "missing name in word definition")
+              + FILENAME(__LINE__)
+            );
+        }
+        std::string name = tokenized[pos + 1];
+
+        int64_t num;
+        if (is_integer(name, num)  ||  is_reserved(name)) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2,
+                        "user-defined words must not be integers or reserved words")
+              + FILENAME(__LINE__)
+          );
+        }
+
+        if (is_input(name)  ||  is_output(name)  ||
+            is_variable(name)  ||  is_defined(name)) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2,
+                        "input names, output names, variable names, and "
+                        "user-defined words must be unique")
+              + FILENAME(__LINE__)
+          );
+        }
+
+        int64_t substart = pos + 2;
+        int64_t substop = pos + 1;
+        int64_t nesting = 1;
+        while (nesting > 0) {
+          substop++;
+          if (substop >= stop) {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, stop,
+                          "definition is missing its closing ';'")
+              + FILENAME(__LINE__)
+            );
+          }
+          if (tokenized[substop] == ":") {
+            nesting++;
+          }
+          else if (tokenized[substop] == ";") {
+            nesting--;
+          }
+        }
+
+        // Add the new word to the dictionary before parsing it so that recursive
+        // functions can be defined.
+        I bytecode = dictionary.size() + BOUND_DICTIONARY;
+        dictionary_names_[name] = bytecode;
+
+        // Now parse the subroutine and add it to the dictionary.
+        std::vector<I> body;
+        dictionary.push_back(body);
+        parse(name,
+              tokenized,
+              linecol,
+              substart,
+              substop,
+              body,
+              dictionary,
+              0,
+              0);
+        dictionary[bytecode - BOUND_DICTIONARY] = body;
+
+        pos = substop + 1;
       }
 
       else if (word == "recurse") {
@@ -1362,6 +1463,7 @@ namespace awkward {
           if (substop >= stop) {
             throw std::invalid_argument(
               err_linecol(linecol, pos, stop, "'if' is missing its closing 'then'")
+              + FILENAME(__LINE__)
             );
           }
           else if (tokenized[substop] == "if") {
@@ -1460,35 +1562,44 @@ namespace awkward {
       }
 
       else {
-        auto generic_builtin = generic_builtin_words_.find(word);
-        if (generic_builtin != generic_builtin_words_.end()) {
-          if (word == "i"  &&  dodepth < 1) {
-            throw std::invalid_argument(
-              err_linecol(linecol, pos, pos + 1, "only allowed in a 'do' loop")
-            );
-          }
-          if (word == "j"  &&  dodepth < 2) {
-            throw std::invalid_argument(
-              err_linecol(linecol, pos, pos + 1, "only allowed in a nested 'do' loop")
-            );
-          }
-          if (word == "k"  &&  dodepth < 3) {
-            throw std::invalid_argument(
-              err_linecol(linecol, pos, pos + 1, "only allowed in a doubly nested 'do' loop")
-            );
-          }
-          bytecodes.push_back(generic_builtin->second);
+        bool found_in_builtins = false;
+        for (auto pair : generic_builtin_words_) {
+          if (pair.first == word) {
+            found_in_builtins = true;
+            if (word == "i"  &&  dodepth < 1) {
+              throw std::invalid_argument(
+                err_linecol(linecol, pos, pos + 1, "only allowed in a 'do' loop")
+                + FILENAME(__LINE__)
+              );
+            }
+            if (word == "j"  &&  dodepth < 2) {
+              throw std::invalid_argument(
+                err_linecol(linecol, pos, pos + 1, "only allowed in a nested 'do' loop")
+                + FILENAME(__LINE__)
+              );
+            }
+            if (word == "k"  &&  dodepth < 3) {
+              throw std::invalid_argument(
+                err_linecol(linecol, pos, pos + 1, "only allowed in a doubly nested 'do' loop")
+                + FILENAME(__LINE__)
+              );
+            }
+            bytecodes.push_back(pair.second);
 
-          pos++;
+            pos++;
+          }
         }
 
-        else {
-          auto pair = dictionary_names_.find(word);
-          if (pair != dictionary_names_.end()) {
-            throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+        if (!found_in_builtins) {
+          bool found_in_dictionary = false;
+          for (auto pair : dictionary_names_) {
+            if (pair.first == word) {
+              found_in_dictionary = true;
+              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+            }
           }
 
-          else {
+          if (!found_in_dictionary) {
             int64_t num;
             if (is_integer(word, num)) {
               bytecodes.push_back(INSTR_LITERAL);
@@ -1499,8 +1610,8 @@ namespace awkward {
 
             else {
               throw std::invalid_argument(
-                err_linecol(linecol, pos, pos + 1,
-                            "unrecognized word or wrong context for word")
+                err_linecol(linecol, pos, pos + 1, "unrecognized word or wrong context for word")
+                + FILENAME(__LINE__)
               );
             }
           } // check is_integer
