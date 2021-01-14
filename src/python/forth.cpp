@@ -6,6 +6,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 
+#include "awkward/python/util.h"
 #include "awkward/python/content.h"
 #include "awkward/python/forth.h"
 
@@ -220,7 +221,258 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               return out;
           })
           .def("reset", &ak::ForthMachineOf<T, I>::reset)
+          .def("begin", [](ak::ForthMachineOf<T, I>& self,
+                           const py::dict& inputs) -> void {
+              std::map<std::string, std::shared_ptr<ak::ForthInputBuffer>> ins;
+              for (auto pair : inputs) {
+                std::string name = pair.first.cast<std::string>();
+                py::buffer obj = pair.second.cast<py::buffer>();
+                py::buffer_info info = obj.request(true);
+                int64_t length = 1;
+                for (auto x : info.shape) {
+                  length *= x;
+                }
+                std::shared_ptr<void> ptr = std::shared_ptr<uint8_t>(
+                    reinterpret_cast<uint8_t*>(info.ptr), pyobject_deleter<uint8_t>(obj.ptr()));
+                ins[name] = std::make_shared<ak::ForthInputBuffer>(ptr, 0, length);
+              }
+              self.begin(ins);
+          }, py::arg("inputs") = py::dict())
+          .def("step", [](ak::ForthMachineOf<T, I>& self,
+                          bool ignore_recursion_depth_exceeded,
+                          bool ignore_stack_underflow,
+                          bool ignore_stack_overflow,
+                          bool ignore_read_beyond,
+                          bool ignore_seek_beyond,
+                          bool ignore_skip_beyond,
+                          bool ignore_rewind_beyond) -> void {
+              if (!self.is_ready()) {
+                throw std::invalid_argument(
+                   std::string("Awkward Forth machine is not ready; call 'begin' first")
+                   + FILENAME(__LINE__));
+              }
+              else if (self.is_done()) {
+                throw std::invalid_argument(
+                   std::string("Awkward Forth machine has reached the end of its program")
+                   + FILENAME(__LINE__));
+              }
+              else {
+                ak::util::ForthError err = self.step();
+                std::set<ak::util::ForthError> ignore;
+                if (ignore_recursion_depth_exceeded) {
+                  ignore.insert(ak::util::ForthError::recursion_depth_exceeded);
+                }
+                if (ignore_stack_underflow) {
+                  ignore.insert(ak::util::ForthError::stack_underflow);
+                }
+                if (ignore_stack_overflow) {
+                  ignore.insert(ak::util::ForthError::stack_overflow);
+                }
+                if (ignore_read_beyond) {
+                  ignore.insert(ak::util::ForthError::read_beyond);
+                }
+                if (ignore_seek_beyond) {
+                  ignore.insert(ak::util::ForthError::seek_beyond);
+                }
+                if (ignore_skip_beyond) {
+                  ignore.insert(ak::util::ForthError::skip_beyond);
+                }
+                if (ignore_rewind_beyond) {
+                  ignore.insert(ak::util::ForthError::rewind_beyond);
+                }
+                self.maybe_throw(err, ignore);
+              }
 
+          }, py::arg("ignore_recursion_depth_exceeded") = false
+           , py::arg("ignore_stack_underflow") = false
+           , py::arg("ignore_stack_overflow") = false
+           , py::arg("ignore_read_beyond") = false
+           , py::arg("ignore_seek_beyond") = false
+           , py::arg("ignore_skip_beyond") = false
+           , py::arg("ignore_rewind_beyond") = false)
+          .def("run", [](ak::ForthMachineOf<T, I>& self,
+                         const py::dict& inputs,
+                         bool ignore_recursion_depth_exceeded,
+                         bool ignore_stack_underflow,
+                         bool ignore_stack_overflow,
+                         bool ignore_read_beyond,
+                         bool ignore_seek_beyond,
+                         bool ignore_skip_beyond,
+                         bool ignore_rewind_beyond) -> void {
+              std::map<std::string, std::shared_ptr<ak::ForthInputBuffer>> ins;
+              for (auto pair : inputs) {
+                std::string name = pair.first.cast<std::string>();
+                py::buffer obj = pair.second.cast<py::buffer>();
+                py::buffer_info info = obj.request(true);
+                int64_t length = 1;
+                for (auto x : info.shape) {
+                  length *= x;
+                }
+                std::shared_ptr<void> ptr = std::shared_ptr<uint8_t>(
+                    reinterpret_cast<uint8_t*>(info.ptr), pyobject_deleter<uint8_t>(obj.ptr()));
+                ins[name] = std::make_shared<ak::ForthInputBuffer>(ptr, 0, length);
+              }
+              ak::util::ForthError err = self.run(ins);
+              std::set<ak::util::ForthError> ignore;
+              if (ignore_recursion_depth_exceeded) {
+                ignore.insert(ak::util::ForthError::recursion_depth_exceeded);
+              }
+              if (ignore_stack_underflow) {
+                ignore.insert(ak::util::ForthError::stack_underflow);
+              }
+              if (ignore_stack_overflow) {
+                ignore.insert(ak::util::ForthError::stack_overflow);
+              }
+              if (ignore_read_beyond) {
+                ignore.insert(ak::util::ForthError::read_beyond);
+              }
+              if (ignore_seek_beyond) {
+                ignore.insert(ak::util::ForthError::seek_beyond);
+              }
+              if (ignore_skip_beyond) {
+                ignore.insert(ak::util::ForthError::skip_beyond);
+              }
+              if (ignore_rewind_beyond) {
+                ignore.insert(ak::util::ForthError::rewind_beyond);
+              }
+              self.maybe_throw(err, ignore);
+          }, py::arg("inputs") = py::dict()
+           , py::arg("ignore_recursion_depth_exceeded") = false
+           , py::arg("ignore_stack_underflow") = false
+           , py::arg("ignore_stack_overflow") = false
+           , py::arg("ignore_read_beyond") = false
+           , py::arg("ignore_seek_beyond") = false
+           , py::arg("ignore_skip_beyond") = false
+           , py::arg("ignore_rewind_beyond") = false)
+          .def("resume", [](ak::ForthMachineOf<T, I>& self,
+                          bool ignore_recursion_depth_exceeded,
+                          bool ignore_stack_underflow,
+                          bool ignore_stack_overflow,
+                          bool ignore_read_beyond,
+                          bool ignore_seek_beyond,
+                          bool ignore_skip_beyond,
+                          bool ignore_rewind_beyond) -> void {
+              if (!self.is_ready()) {
+                throw std::invalid_argument(
+                   std::string("Awkward Forth machine is not ready; call 'begin' first")
+                   + FILENAME(__LINE__));
+              }
+              else if (self.is_done()) {
+                throw std::invalid_argument(
+                   std::string("Awkward Forth machine has reached the end of its program")
+                   + FILENAME(__LINE__));
+              }
+              else {
+                ak::util::ForthError err = self.resume();
+                std::set<ak::util::ForthError> ignore;
+                if (ignore_recursion_depth_exceeded) {
+                  ignore.insert(ak::util::ForthError::recursion_depth_exceeded);
+                }
+                if (ignore_stack_underflow) {
+                  ignore.insert(ak::util::ForthError::stack_underflow);
+                }
+                if (ignore_stack_overflow) {
+                  ignore.insert(ak::util::ForthError::stack_overflow);
+                }
+                if (ignore_read_beyond) {
+                  ignore.insert(ak::util::ForthError::read_beyond);
+                }
+                if (ignore_seek_beyond) {
+                  ignore.insert(ak::util::ForthError::seek_beyond);
+                }
+                if (ignore_skip_beyond) {
+                  ignore.insert(ak::util::ForthError::skip_beyond);
+                }
+                if (ignore_rewind_beyond) {
+                  ignore.insert(ak::util::ForthError::rewind_beyond);
+                }
+                self.maybe_throw(err, ignore);
+              }
+          }, py::arg("ignore_recursion_depth_exceeded") = false
+           , py::arg("ignore_stack_underflow") = false
+           , py::arg("ignore_stack_overflow") = false
+           , py::arg("ignore_read_beyond") = false
+           , py::arg("ignore_seek_beyond") = false
+           , py::arg("ignore_skip_beyond") = false
+           , py::arg("ignore_rewind_beyond") = false)
+          .def("call", [](ak::ForthMachineOf<T, I>& self,
+                          const std::string& name,
+                          bool ignore_recursion_depth_exceeded,
+                          bool ignore_stack_underflow,
+                          bool ignore_stack_overflow,
+                          bool ignore_read_beyond,
+                          bool ignore_seek_beyond,
+                          bool ignore_skip_beyond,
+                          bool ignore_rewind_beyond) -> void {
+              if (!self.is_ready()) {
+                throw std::invalid_argument(
+                   std::string("Awkward Forth machine is not ready; call 'begin' first")
+                   + FILENAME(__LINE__));
+              }
+              else {
+                ak::util::ForthError err = self.call(name);
+                std::set<ak::util::ForthError> ignore;
+                if (ignore_recursion_depth_exceeded) {
+                  ignore.insert(ak::util::ForthError::recursion_depth_exceeded);
+                }
+                if (ignore_stack_underflow) {
+                  ignore.insert(ak::util::ForthError::stack_underflow);
+                }
+                if (ignore_stack_overflow) {
+                  ignore.insert(ak::util::ForthError::stack_overflow);
+                }
+                if (ignore_read_beyond) {
+                  ignore.insert(ak::util::ForthError::read_beyond);
+                }
+                if (ignore_seek_beyond) {
+                  ignore.insert(ak::util::ForthError::seek_beyond);
+                }
+                if (ignore_skip_beyond) {
+                  ignore.insert(ak::util::ForthError::skip_beyond);
+                }
+                if (ignore_rewind_beyond) {
+                  ignore.insert(ak::util::ForthError::rewind_beyond);
+                }
+                self.maybe_throw(err, ignore);
+              }
+          }, py::arg("name")
+           , py::arg("ignore_recursion_depth_exceeded") = false
+           , py::arg("ignore_stack_underflow") = false
+           , py::arg("ignore_stack_overflow") = false
+           , py::arg("ignore_read_beyond") = false
+           , py::arg("ignore_seek_beyond") = false
+           , py::arg("ignore_skip_beyond") = false
+           , py::arg("ignore_rewind_beyond") = false)
+          .def_property_readonly("breakpoint_depth",
+              &ak::ForthMachineOf<T, I>::breakpoint_depth)
+          .def_property_readonly("current_bytecode",
+              &ak::ForthMachineOf<T, I>::current_bytecode)
+          .def_property_readonly("current_instruction",
+              &ak::ForthMachineOf<T, I>::current_instruction)
+          .def("count_reset",
+              &ak::ForthMachineOf<T, I>::count_reset)
+          .def_property_readonly("count_instructions",
+              &ak::ForthMachineOf<T, I>::count_instructions)
+          .def_property_readonly("count_reads",
+              &ak::ForthMachineOf<T, I>::count_reads)
+          .def_property_readonly("count_writes",
+              &ak::ForthMachineOf<T, I>::count_writes)
+          .def_property_readonly("count_nanoseconds",
+              &ak::ForthMachineOf<T, I>::count_nanoseconds)
+          .def("is_variable",
+              &ak::ForthMachineOf<T, I>::is_variable)
+          .def("is_input",
+              &ak::ForthMachineOf<T, I>::is_input)
+          .def("is_output",
+              &ak::ForthMachineOf<T, I>::is_output)
+          .def("is_defined",
+              &ak::ForthMachineOf<T, I>::is_defined)
+          .def_property_readonly("is_ready",
+              &ak::ForthMachineOf<T, I>::is_ready)
+          .def_property_readonly("is_done",
+              &ak::ForthMachineOf<T, I>::is_done)
+          .def_property_readonly("is_segment_done",
+              &ak::ForthMachineOf<T, I>::is_segment_done)
 
          );
 }

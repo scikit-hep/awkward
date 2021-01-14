@@ -154,9 +154,8 @@ namespace awkward {
       step();
 
     /// @brief HERE
-    util::ForthError
-      run(const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs,
-          const std::set<util::ForthError>& ignore);
+    void
+      maybe_throw(util::ForthError err, const std::set<util::ForthError>& ignore);
 
     /// @brief HERE
     util::ForthError
@@ -234,6 +233,27 @@ namespace awkward {
     bool
       is_defined(const std::string& word) const;
 
+    /// @brief HERE
+    inline bool
+      is_ready() const noexcept {
+      return ready_;
+    }
+
+    /// @brief HERE
+    inline bool
+      is_done() const noexcept {
+      return recursion_current_depth_ == 0;
+    }
+
+    /// @brief HERE
+    inline bool
+      is_segment_done() const noexcept {
+      return !(bytecodes_pointer_where() < (
+                   bytecodes_offsets_[bytecodes_pointer_which() + 1] -
+                   bytecodes_offsets_[bytecodes_pointer_which()]
+               ));
+    }
+
   private:
 
     /// @brief HERE
@@ -265,21 +285,6 @@ namespace awkward {
     /// @brief HERE
     void
       write_from_stack(int64_t num, T* top) noexcept;
-
-    /// @brief HERE
-    inline bool
-      is_done() const noexcept {
-      return recursion_current_depth_ == 0;
-    }
-
-    /// @brief HERE
-    inline bool
-      is_segment_done() const noexcept {
-      return !(bytecodes_pointer_where() < (
-                   bytecodes_offsets_[bytecodes_pointer_which() + 1] -
-                   bytecodes_offsets_[bytecodes_pointer_which()]
-               ));
-    }
 
     /// @brief HERE
     inline T*
@@ -423,6 +428,7 @@ namespace awkward {
 
     std::vector<std::shared_ptr<ForthInputBuffer>> current_inputs_;
     std::vector<std::shared_ptr<ForthOutputBuffer>> current_outputs_;
+    bool ready_;
 
     int64_t current_breakpoint_depth_;
 

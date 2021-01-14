@@ -204,6 +204,7 @@ namespace awkward {
 
     , current_inputs_()
     , current_outputs_()
+    , ready_(false)
 
     , current_breakpoint_depth_(0)
 
@@ -407,6 +408,7 @@ namespace awkward {
   ForthMachineOf<T, I>::reset() {
     current_inputs_.clear();
     current_outputs_.clear();
+    ready_ = false;
     current_breakpoint_depth_ = 0;
     recursion_current_depth_ = 0;
     do_current_depth_ = 0;
@@ -433,10 +435,9 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  util::ForthError
-  ForthMachineOf<T, I>::run(
-      const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs,
-      const std::set<util::ForthError>& ignore) {
+  void
+  ForthMachineOf<T, I>::maybe_throw(util::ForthError err,
+                                    const std::set<util::ForthError>& ignore) {
     throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
   }
 
