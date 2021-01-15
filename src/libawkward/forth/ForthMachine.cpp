@@ -1204,8 +1204,15 @@ namespace awkward {
   template <typename T, typename I>
   bool
   ForthMachineOf<T, I>::is_input(const std::string& word) const {
-    return std::find(input_names_.begin(),
-                     input_names_.end(), word) != input_names_.end();
+    for (int64_t i = 0;  i < input_names_.size();  i++) {
+      if (input_names_[i] == word) {
+        return true;
+      }
+    }
+    return false;
+
+    // return std::find(input_names_.begin(),
+    //                  input_names_.end(), word) != input_names_.end();
   }
 
   template <typename T, typename I>
