@@ -578,6 +578,362 @@ def test_read_compilation_10():
     test_read_compilation()
 
 
+def test_read_compilation_11():
+    test_read_compilation()
+
+
+def test_read_compilation_12():
+    test_read_compilation()
+
+
+def test_read_compilation_13():
+    test_read_compilation()
+
+
+def test_read_compilation_14():
+    test_read_compilation()
+
+
+def test_read_compilation_15():
+    test_read_compilation()
+
+
+def test_read_compilation_16():
+    test_read_compilation()
+
+
+def test_read_compilation_17():
+    test_read_compilation()
+
+
+def test_read_compilation_18():
+    test_read_compilation()
+
+
+def test_read_compilation_19():
+    test_read_compilation()
+
+
+def test_read_compilation_20():
+    test_read_compilation()
+
+
+def test_read_compilation_21():
+    test_read_compilation()
+
+
+def test_read_compilation_22():
+    test_read_compilation()
+
+
+def test_read_compilation_23():
+    test_read_compilation()
+
+
+def test_read_compilation_24():
+    test_read_compilation()
+
+
+def test_read_compilation_25():
+    test_read_compilation()
+
+
+def test_read_compilation_26():
+    test_read_compilation()
+
+
+def test_read_compilation_27():
+    test_read_compilation()
+
+
+def test_read_compilation_28():
+    test_read_compilation()
+
+
+def test_read_compilation_29():
+    test_read_compilation()
+
+
+def test_read_compilation_30():
+    test_read_compilation()
+
+
+def test_read_compilation_31():
+    test_read_compilation()
+
+
+def test_read_compilation_32():
+    test_read_compilation()
+
+
+def test_read_compilation_33():
+    test_read_compilation()
+
+
+def test_read_compilation_34():
+    test_read_compilation()
+
+
+def test_read_compilation_35():
+    test_read_compilation()
+
+
+def test_read_compilation_36():
+    test_read_compilation()
+
+
+def test_read_compilation_37():
+    test_read_compilation()
+
+
+def test_read_compilation_38():
+    test_read_compilation()
+
+
+def test_read_compilation_39():
+    test_read_compilation()
+
+
+def test_read_compilation_40():
+    test_read_compilation()
+
+
+def test_read_compilation_41():
+    test_read_compilation()
+
+
+def test_read_compilation_42():
+    test_read_compilation()
+
+
+def test_read_compilation_43():
+    test_read_compilation()
+
+
+def test_read_compilation_44():
+    test_read_compilation()
+
+
+def test_read_compilation_45():
+    test_read_compilation()
+
+
+def test_read_compilation_46():
+    test_read_compilation()
+
+
+def test_read_compilation_47():
+    test_read_compilation()
+
+
+def test_read_compilation_48():
+    test_read_compilation()
+
+
+def test_read_compilation_49():
+    test_read_compilation()
+
+
+def test_read_compilation_50():
+    test_read_compilation()
+
+
+def test_read_compilation_51():
+    test_read_compilation()
+
+
+def test_read_compilation_52():
+    test_read_compilation()
+
+
+def test_read_compilation_53():
+    test_read_compilation()
+
+
+def test_read_compilation_54():
+    test_read_compilation()
+
+
+def test_read_compilation_55():
+    test_read_compilation()
+
+
+def test_read_compilation_56():
+    test_read_compilation()
+
+
+def test_read_compilation_57():
+    test_read_compilation()
+
+
+def test_read_compilation_58():
+    test_read_compilation()
+
+
+def test_read_compilation_59():
+    test_read_compilation()
+
+
+def test_read_compilation_60():
+    test_read_compilation()
+
+
+def test_read_compilation_61():
+    test_read_compilation()
+
+
+def test_read_compilation_62():
+    test_read_compilation()
+
+
+def test_read_compilation_63():
+    test_read_compilation()
+
+
+def test_read_compilation_64():
+    test_read_compilation()
+
+
+def test_read_compilation_65():
+    test_read_compilation()
+
+
+def test_read_compilation_66():
+    test_read_compilation()
+
+
+def test_read_compilation_67():
+    test_read_compilation()
+
+
+def test_read_compilation_68():
+    test_read_compilation()
+
+
+def test_read_compilation_69():
+    test_read_compilation()
+
+
+def test_read_compilation_70():
+    test_read_compilation()
+
+
+def test_read_compilation_71():
+    test_read_compilation()
+
+
+def test_read_compilation_72():
+    test_read_compilation()
+
+
+def test_read_compilation_73():
+    test_read_compilation()
+
+
+def test_read_compilation_74():
+    test_read_compilation()
+
+
+def test_read_compilation_75():
+    test_read_compilation()
+
+
+def test_read_compilation_76():
+    test_read_compilation()
+
+
+def test_read_compilation_77():
+    test_read_compilation()
+
+
+def test_read_compilation_78():
+    test_read_compilation()
+
+
+def test_read_compilation_79():
+    test_read_compilation()
+
+
+def test_read_compilation_80():
+    test_read_compilation()
+
+
+def test_read_compilation_81():
+    test_read_compilation()
+
+
+def test_read_compilation_82():
+    test_read_compilation()
+
+
+def test_read_compilation_83():
+    test_read_compilation()
+
+
+def test_read_compilation_84():
+    test_read_compilation()
+
+
+def test_read_compilation_85():
+    test_read_compilation()
+
+
+def test_read_compilation_86():
+    test_read_compilation()
+
+
+def test_read_compilation_87():
+    test_read_compilation()
+
+
+def test_read_compilation_88():
+    test_read_compilation()
+
+
+def test_read_compilation_89():
+    test_read_compilation()
+
+
+def test_read_compilation_90():
+    test_read_compilation()
+
+
+def test_read_compilation_91():
+    test_read_compilation()
+
+
+def test_read_compilation_92():
+    test_read_compilation()
+
+
+def test_read_compilation_93():
+    test_read_compilation()
+
+
+def test_read_compilation_94():
+    test_read_compilation()
+
+
+def test_read_compilation_95():
+    test_read_compilation()
+
+
+def test_read_compilation_96():
+    test_read_compilation()
+
+
+def test_read_compilation_97():
+    test_read_compilation()
+
+
+def test_read_compilation_98():
+    test_read_compilation()
+
+
+def test_read_compilation_99():
+    test_read_compilation()
+
+
 def test_everything_else_compilation():
     source = (
         "\n".join(
