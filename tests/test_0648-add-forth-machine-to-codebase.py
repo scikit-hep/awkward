@@ -539,6 +539,7 @@ x {0} y
                     )
                     vm32 = awkward.forth.ForthMachine32(source)
                     assert vm32.decompiled == source
+                    del vm32
 
 
 def test_everything_else_compilation():
@@ -585,3 +586,25 @@ def test_everything_else_compilation():
     )
     vm32 = awkward.forth.ForthMachine32(source)
     assert vm32.decompiled == source
+
+
+def test_input_output():
+    vm32 = awkward.forth.ForthMachine32("input x output y int32")
+    vm32.begin({"x": np.array([1, 2, 3])})
+    assert isinstance(vm32["y"], ak.layout.NumpyArray)
+
+
+def test_stepping():
+    vm32 = awkward.forth.ForthMachine32("1 2 3 4")
+    vm32.begin()
+    assert vm32.stack == []
+    vm32.step()
+    assert vm32.stack == [1]
+    vm32.step()
+    assert vm32.stack == [1, 2]
+    vm32.step()
+    assert vm32.stack == [1, 2, 3]
+    vm32.step()
+    assert vm32.stack == [1, 2, 3, 4]
+    with pytest.raises(ValueError):
+        vm32.step()

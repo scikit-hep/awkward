@@ -200,7 +200,7 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               }
               else if (self.is_done()) {
                 throw std::invalid_argument(
-                   std::string("AwkwardForth machine has reached the end of its program")
+                   std::string("AwkwardForth machine is at the end of its program; cannot 'step' again")
                    + FILENAME(__LINE__));
               }
               else {

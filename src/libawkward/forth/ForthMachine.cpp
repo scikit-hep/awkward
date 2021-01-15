@@ -4,6 +4,7 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <chrono>
 
 #include "awkward/forth/ForthMachine.h"
 
@@ -127,7 +128,7 @@ namespace awkward {
     // multiple little-endian
     "#?->", "#b->", "#h->", "#i->", "#q->", "#n->", "#B->", "#H->", "#I->", "#Q->", "#N->", "#f->", "#d->",
     // multiple big-endian
-    "#!h->", "#!i->", "#!q->", "#!n->", "#!H->", "#!I->", "#!Q->", "#!N->", "#!f->", "#!d->",
+    "#!h->", "#!i->", "#!q->", "#!n->", "#!H->", "#!I->", "#!Q->", "#!N->", "#!f->", "#!d->"
   });
 
   const std::map<std::string, util::dtype> output_dtype_words_({
@@ -926,6 +927,9 @@ namespace awkward {
   void
   ForthMachineOf<T, I>::reset() {
     stack_depth_ = 0;
+    for (int64_t i = 0;  i < variables_.size();  i++) {
+      variables_[i] = 0;
+    }
     current_inputs_.clear();
     current_outputs_.clear();
     ready_ = false;
@@ -939,7 +943,87 @@ namespace awkward {
   void
   ForthMachineOf<T, I>::begin(
       const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs) {
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+
+    reset();
+
+    current_inputs_ = std::vector<std::shared_ptr<ForthInputBuffer>>();
+    for (auto name : input_names_) {
+      bool found = false;
+      for (auto pair : inputs) {
+        if (pair.first == name) {
+          current_inputs_.push_back(pair.second);
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        throw std::invalid_argument(
+          std::string("AwkwardForth source code defines an input that was not provided: ")
+          + name + FILENAME(__LINE__)
+        );
+      }
+    }
+
+    current_outputs_ = std::vector<std::shared_ptr<ForthOutputBuffer>>();
+    int64_t init = output_initial_size_;
+    double resize = output_resize_factor_;
+    for (int64_t i = 0;  i < output_names_.size();  i++) {
+      std::shared_ptr<ForthOutputBuffer> out;
+      switch (output_dtypes_[i]) {
+        case util::dtype::boolean: {
+          out = std::make_shared<ForthOutputBufferOf<bool>>(init, resize);
+          break;
+        }
+        case util::dtype::int8: {
+          out = std::make_shared<ForthOutputBufferOf<int8_t>>(init, resize);
+          break;
+        }
+        case util::dtype::int16: {
+          out = std::make_shared<ForthOutputBufferOf<int16_t>>(init, resize);
+          break;
+        }
+        case util::dtype::int32: {
+          out = std::make_shared<ForthOutputBufferOf<int32_t>>(init, resize);
+          break;
+        }
+        case util::dtype::int64: {
+          out = std::make_shared<ForthOutputBufferOf<int64_t>>(init, resize);
+          break;
+        }
+        case util::dtype::uint8: {
+          out = std::make_shared<ForthOutputBufferOf<uint8_t>>(init, resize);
+          break;
+        }
+        case util::dtype::uint16: {
+          out = std::make_shared<ForthOutputBufferOf<uint16_t>>(init, resize);
+          break;
+        }
+        case util::dtype::uint32: {
+          out = std::make_shared<ForthOutputBufferOf<uint32_t>>(init, resize);
+          break;
+        }
+        case util::dtype::uint64: {
+          out = std::make_shared<ForthOutputBufferOf<uint64_t>>(init, resize);
+          break;
+        }
+        case util::dtype::float32: {
+          out = std::make_shared<ForthOutputBufferOf<float>>(init, resize);
+          break;
+        }
+        case util::dtype::float64: {
+          out = std::make_shared<ForthOutputBufferOf<double>>(init, resize);
+          break;
+        }
+        default: {
+          throw std::runtime_error(std::string("unhandled ForthOutputBuffer type")
+                                   + FILENAME(__LINE__));
+        }
+      }
+      current_outputs_.push_back(out);
+    }
+
+    bytecodes_pointer_push(0);
+    ready_ = true;
   }
 
   template <typename T, typename I>
@@ -952,14 +1036,57 @@ namespace awkward {
   template <typename T, typename I>
   util::ForthError
   ForthMachineOf<T, I>::step() {
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+    auto begin_time = std::chrono::high_resolution_clock::now();
+    internal_run(false);
+    auto end_time = std::chrono::high_resolution_clock::now();
+
+    count_nanoseconds_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
+        end_time - begin_time
+    ).count();
+
+    return current_error_;
   }
 
   template <typename T, typename I>
   void
   ForthMachineOf<T, I>::maybe_throw(util::ForthError err,
                                     const std::set<util::ForthError>& ignore) const {
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+    if (ignore.count(current_error_) == 0) {
+      switch (current_error_) {
+        case util::ForthError::user_halt: {
+          throw std::invalid_argument(
+            "'user halt' in AwkwardForth runtime: user-defined error or stopping condition");
+        }
+        case util::ForthError::recursion_depth_exceeded: {
+          throw std::invalid_argument(
+            "'recursion depth exceeded' in AwkwardForth runtime: too many words calling words or a recursive word is looping endlessly");
+        }
+        case util::ForthError::stack_underflow: {
+          throw std::invalid_argument(
+            "'stack underflow' in AwkwardForth runtime: tried to pop an empty stack");
+        }
+        case util::ForthError::stack_overflow: {
+          throw std::invalid_argument(
+            "'stack overflow' in AwkwardForth runtime: tried to push beyond the predefined maximum stack depth");
+        }
+        case util::ForthError::read_beyond: {
+          throw std::invalid_argument(
+            "'read beyond' in AwkwardForth runtime: tried to read beyond the end of an input");
+        }
+        case util::ForthError::seek_beyond: {
+          throw std::invalid_argument(
+            "'seek beyond' in AwkwardForth runtime: tried to seek beyond the bounds of an input (0 or length)");
+        }
+        case util::ForthError::skip_beyond: {
+          throw std::invalid_argument(
+            "'skip beyond' in AwkwardForth runtime: tried to skip beyond the bounds of an input (0 or length)");
+        }
+        case util::ForthError::rewind_beyond: {
+          throw std::invalid_argument(
+            "'rewind beyond' in AwkwardForth runtime: tried to rewind beyond the beginning of an output");
+        }
+      }
+    }
   }
 
   template <typename T, typename I>
