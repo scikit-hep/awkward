@@ -542,6 +542,42 @@ x {0} y
                     del vm32
 
 
+def test_read_compilation_2():
+    test_read_compilation()
+
+
+def test_read_compilation_3():
+    test_read_compilation()
+
+
+def test_read_compilation_4():
+    test_read_compilation()
+
+
+def test_read_compilation_5():
+    test_read_compilation()
+
+
+def test_read_compilation_6():
+    test_read_compilation()
+
+
+def test_read_compilation_7():
+    test_read_compilation()
+
+
+def test_read_compilation_8():
+    test_read_compilation()
+
+
+def test_read_compilation_9():
+    test_read_compilation()
+
+
+def test_read_compilation_10():
+    test_read_compilation()
+
+
 def test_everything_else_compilation():
     source = (
         "\n".join(
