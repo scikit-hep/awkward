@@ -482,7 +482,7 @@ import awkward.forth
 #     )
 
 
-def test_read_compilation():
+# def test_read_compilation():
 #     vm32 = awkward.forth.ForthMachine32("input x x i-> stack")
 #     assert (
 #         vm32.decompiled
@@ -504,31 +504,31 @@ def test_read_compilation():
 # """
 #     )
 
-    for rep in ["", "#"]:
-        for big in ["", "!"]:
-            for tpe in [
-                "?",
-                "b",
-                "h",
-                "i",
-                "q",
-                "n",
-                "B",
-                "H",
-                "I",
-                "Q",
-                "N",
-                "f",
-                "d",
-            ]:
-                if not (big == "!" and tpe in ("?", "b", "B")):
-                    source = """input x
+#     for rep in ["", "#"]:
+#         for big in ["", "!"]:
+#             for tpe in [
+#                 "?",
+#                 "b",
+#                 "h",
+#                 "i",
+#                 "q",
+#                 "n",
+#                 "B",
+#                 "H",
+#                 "I",
+#                 "Q",
+#                 "N",
+#                 "f",
+#                 "d",
+#             ]:
+#                 if not (big == "!" and tpe in ("?", "b", "B")):
+#                     source = """input x
 
-x {0} stack
-""".format(
-                        rep + big + tpe + "->"
-                    )
-                    vm32 = awkward.forth.ForthMachine32(source)
+# x {0} stack
+# """.format(
+#                         rep + big + tpe + "->"
+#                     )
+#                     vm32 = awkward.forth.ForthMachine32(source)
 #                     assert vm32.decompiled == source
 #                     source = """input x
 # output y int32
@@ -541,6 +541,10 @@ x {0} stack
 #                     assert vm32.decompiled == source
 #                     del vm32
 
+
+def test_read_compilation():
+    for i in range(100):
+        vm32 = awkward.forth.ForthMachine32("")
 
 def test_read_compilation_2():
     test_read_compilation()
