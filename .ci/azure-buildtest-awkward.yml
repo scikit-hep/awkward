@@ -376,7 +376,7 @@ jobs:
       #   displayName: "Test"
 
       - script: |
-          python -m pytest -vv -rs tests/test_0648-add-forth-machine-to-codebase.py
+          python -m pytest -vv -rs tests
         displayName: "Test minimal"
 
       # - script: |
