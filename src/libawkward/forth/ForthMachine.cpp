@@ -236,12 +236,12 @@ namespace awkward {
 
   template <typename T, typename I>
   ForthMachineOf<T, I>::~ForthMachineOf() {
-    delete [] stack_buffer_;
-    delete [] current_which_;
-    delete [] current_where_;
-    delete [] do_recursion_depth_;
-    delete [] do_stop_;
-    delete [] do_i_;
+    // delete [] stack_buffer_;
+    // delete [] current_which_;
+    // delete [] current_where_;
+    // delete [] do_recursion_depth_;
+    // delete [] do_stop_;
+    // delete [] do_i_;
   }
 
   template <typename T, typename I>
