@@ -596,6 +596,9 @@ def test_input_output():
 
 def test_stepping():
     vm32 = awkward.forth.ForthMachine32("1 2 3 4")
+    with pytest.raises(ValueError):
+        vm32.step()
+
     vm32.begin()
     assert vm32.stack == []
     vm32.step()
@@ -605,6 +608,38 @@ def test_stepping():
     vm32.step()
     assert vm32.stack == [1, 2, 3]
     vm32.step()
+    assert vm32.stack == [1, 2, 3, 4]
+    with pytest.raises(ValueError):
+        vm32.step()
+
+    vm32.reset()
+    with pytest.raises(ValueError):
+        vm32.step()
+
+    vm32.begin()
+    assert vm32.stack == []
+    vm32.step()
+    assert vm32.stack == [1]
+    vm32.step()
+    assert vm32.stack == [1, 2]
+    vm32.step()
+    assert vm32.stack == [1, 2, 3]
+    vm32.step()
+    assert vm32.stack == [1, 2, 3, 4]
+    with pytest.raises(ValueError):
+        vm32.step()
+
+
+def test_running():
+    vm32 = awkward.forth.ForthMachine32("1 2 3 4")
+    vm32.run()
+
+    assert vm32.stack == [1, 2, 3, 4]
+    with pytest.raises(ValueError):
+        vm32.step()
+
+    vm32.run()
+
     assert vm32.stack == [1, 2, 3, 4]
     with pytest.raises(ValueError):
         vm32.step()

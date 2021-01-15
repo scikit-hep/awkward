@@ -207,9 +207,7 @@ namespace awkward {
 
     , current_inputs_()
     , current_outputs_()
-    , ready_(false)
-
-    , current_pause_depth_(0)
+    , is_ready_(false)
 
     , current_which_(new int64_t[recursion_max_depth])
     , current_where_(new int64_t[recursion_max_depth])
@@ -932,9 +930,11 @@ namespace awkward {
     }
     current_inputs_.clear();
     current_outputs_.clear();
-    ready_ = false;
-    current_pause_depth_ = 0;
+    is_ready_ = false;
     recursion_current_depth_ = 0;
+    while (!recursion_target_depth_.empty()) {
+      recursion_target_depth_.pop();
+    }
     do_current_depth_ = 0;
     current_error_ = util::ForthError::none;
   }
@@ -1022,8 +1022,9 @@ namespace awkward {
       current_outputs_.push_back(out);
     }
 
+    recursion_target_depth_.push(0);
     bytecodes_pointer_push(0);
-    ready_ = true;
+    is_ready_ = true;
   }
 
   template <typename T, typename I>
@@ -1036,6 +1037,39 @@ namespace awkward {
   template <typename T, typename I>
   util::ForthError
   ForthMachineOf<T, I>::step() {
+    if (!is_ready()) {
+      current_error_ = util::ForthError::not_ready;
+      return current_error_;
+    }
+    if (is_done()) {
+      current_error_ = util::ForthError::is_done;
+      return current_error_;
+    }
+    if (current_error_ != util::ForthError::none) {
+      return current_error_;
+    }
+
+    auto begin_time = std::chrono::high_resolution_clock::now();
+    internal_run(true);
+    auto end_time = std::chrono::high_resolution_clock::now();
+
+    count_nanoseconds_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
+        end_time - begin_time
+    ).count();
+
+    if (recursion_current_depth_ == recursion_target_depth_.top()) {
+      recursion_target_depth_.pop();
+    }
+
+    return current_error_;
+  }
+
+  template <typename T, typename I>
+  util::ForthError
+  ForthMachineOf<T, I>::run(
+      const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs) {
+    begin(inputs);
+
     auto begin_time = std::chrono::high_resolution_clock::now();
     internal_run(false);
     auto end_time = std::chrono::high_resolution_clock::now();
@@ -1044,56 +1078,11 @@ namespace awkward {
         end_time - begin_time
     ).count();
 
-    return current_error_;
-  }
-
-  template <typename T, typename I>
-  void
-  ForthMachineOf<T, I>::maybe_throw(util::ForthError err,
-                                    const std::set<util::ForthError>& ignore) const {
-    if (ignore.count(current_error_) == 0) {
-      switch (current_error_) {
-        case util::ForthError::user_halt: {
-          throw std::invalid_argument(
-            "'user halt' in AwkwardForth runtime: user-defined error or stopping condition");
-        }
-        case util::ForthError::recursion_depth_exceeded: {
-          throw std::invalid_argument(
-            "'recursion depth exceeded' in AwkwardForth runtime: too many words calling words or a recursive word is looping endlessly");
-        }
-        case util::ForthError::stack_underflow: {
-          throw std::invalid_argument(
-            "'stack underflow' in AwkwardForth runtime: tried to pop an empty stack");
-        }
-        case util::ForthError::stack_overflow: {
-          throw std::invalid_argument(
-            "'stack overflow' in AwkwardForth runtime: tried to push beyond the predefined maximum stack depth");
-        }
-        case util::ForthError::read_beyond: {
-          throw std::invalid_argument(
-            "'read beyond' in AwkwardForth runtime: tried to read beyond the end of an input");
-        }
-        case util::ForthError::seek_beyond: {
-          throw std::invalid_argument(
-            "'seek beyond' in AwkwardForth runtime: tried to seek beyond the bounds of an input (0 or length)");
-        }
-        case util::ForthError::skip_beyond: {
-          throw std::invalid_argument(
-            "'skip beyond' in AwkwardForth runtime: tried to skip beyond the bounds of an input (0 or length)");
-        }
-        case util::ForthError::rewind_beyond: {
-          throw std::invalid_argument(
-            "'rewind beyond' in AwkwardForth runtime: tried to rewind beyond the beginning of an output");
-        }
-      }
+    if (recursion_current_depth_ == recursion_target_depth_.top()) {
+      recursion_target_depth_.pop();
     }
-  }
 
-  template <typename T, typename I>
-  util::ForthError
-  ForthMachineOf<T, I>::run(
-      const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs) {
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+    return current_error_;
   }
 
   template <typename T, typename I>
@@ -1106,25 +1095,132 @@ namespace awkward {
   template <typename T, typename I>
   util::ForthError
   ForthMachineOf<T, I>::resume() {
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+    if (!is_ready()) {
+      current_error_ = util::ForthError::not_ready;
+      return current_error_;
+    }
+    if (is_done()) {
+      current_error_ = util::ForthError::is_done;
+      return current_error_;
+    }
+    if (current_error_ != util::ForthError::none) {
+      return current_error_;
+    }
+
+    auto begin_time = std::chrono::high_resolution_clock::now();
+    internal_run(false);
+    auto end_time = std::chrono::high_resolution_clock::now();
+
+    count_nanoseconds_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
+        end_time - begin_time
+    ).count();
+
+    if (recursion_current_depth_ == recursion_target_depth_.top()) {
+      recursion_target_depth_.pop();
+    }
+
+    return current_error_;
   }
 
   template <typename T, typename I>
   util::ForthError
   ForthMachineOf<T, I>::call(const std::string& name) {
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+    for (int64_t i = 0;  i < dictionary_names_.size();  i++) {
+      if (dictionary_names_[i] == name) {
+        return call(i);
+      }
+    }
+    throw std::runtime_error(
+      std::string("AwkwardForth unrecognized word: ") + name + FILENAME(__LINE__)
+    );
   }
 
   template <typename T, typename I>
   util::ForthError
   ForthMachineOf<T, I>::call(int64_t index) {
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+    if (!is_ready()) {
+      current_error_ = util::ForthError::not_ready;
+      return current_error_;
+    }
+    if (current_error_ != util::ForthError::none) {
+      return current_error_;
+    }
+
+    recursion_target_depth_.push(recursion_current_depth_);
+    bytecodes_pointer_push((dictionary_bytecodes_[index] - BOUND_DICTIONARY) + 1);
+
+    auto begin_time = std::chrono::high_resolution_clock::now();
+    internal_run(false);
+    auto end_time = std::chrono::high_resolution_clock::now();
+
+    count_nanoseconds_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
+        end_time - begin_time
+    ).count();
+
+    if (recursion_current_depth_ == recursion_target_depth_.top()) {
+      recursion_target_depth_.pop();
+    }
+
+    return current_error_;
   }
 
   template <typename T, typename I>
-  int64_t
-  ForthMachineOf<T, I>::pause_depth() const noexcept {
-    return current_pause_depth_;
+  void
+  ForthMachineOf<T, I>::maybe_throw(util::ForthError err,
+                                    const std::set<util::ForthError>& ignore) const {
+    if (ignore.count(current_error_) == 0) {
+      switch (current_error_) {
+        case util::ForthError::not_ready: {
+          throw std::invalid_argument(
+            "'not ready' in AwkwardForth runtime: call 'begin' before 'step' or "
+            "'resume' (note: check 'is_ready')");
+        }
+        case util::ForthError::is_done: {
+          throw std::invalid_argument(
+            "'is done' in AwkwardForth runtime: reached the end of the program; "
+            "call 'begin' to 'step' again (note: check 'is_done')");
+        }
+        case util::ForthError::user_halt: {
+          throw std::invalid_argument(
+            "'user halt' in AwkwardForth runtime: user-defined error or stopping "
+            "condition");
+        }
+        case util::ForthError::recursion_depth_exceeded: {
+          throw std::invalid_argument(
+            "'recursion depth exceeded' in AwkwardForth runtime: too many words "
+            "calling words or a recursive word is looping endlessly");
+        }
+        case util::ForthError::stack_underflow: {
+          throw std::invalid_argument(
+            "'stack underflow' in AwkwardForth runtime: tried to pop an empty stack");
+        }
+        case util::ForthError::stack_overflow: {
+          throw std::invalid_argument(
+            "'stack overflow' in AwkwardForth runtime: tried to push beyond the "
+            "predefined maximum stack depth");
+        }
+        case util::ForthError::read_beyond: {
+          throw std::invalid_argument(
+            "'read beyond' in AwkwardForth runtime: tried to read beyond the end "
+            "of an input");
+        }
+        case util::ForthError::seek_beyond: {
+          throw std::invalid_argument(
+            "'seek beyond' in AwkwardForth runtime: tried to seek beyond the bounds "
+            "of an input (0 or length)");
+        }
+        case util::ForthError::skip_beyond: {
+          throw std::invalid_argument(
+            "'skip beyond' in AwkwardForth runtime: tried to skip beyond the bounds "
+            "of an input (0 or length)");
+        }
+        case util::ForthError::rewind_beyond: {
+          throw std::invalid_argument(
+            "'rewind beyond' in AwkwardForth runtime: tried to rewind beyond the "
+            "beginning of an output");
+        }
+      }
+    }
   }
 
   template <typename T, typename I>
@@ -2238,15 +2334,16 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  ForthMachineOf<T, I>::internal_run(bool keep_going) { // noexcept
-    while (recursion_current_depth_ != 0) {
+  ForthMachineOf<T, I>::internal_run(bool single_step) { // noexcept
+    while (recursion_current_depth_ != recursion_target_depth_.top()) {
       while (bytecodes_pointer_where() < (
                  bytecodes_offsets_[bytecodes_pointer_which() + 1] -
                  bytecodes_offsets_[bytecodes_pointer_which()]
              )) {
         I bytecode = bytecode_get();
 
-        if (do_current_depth_ == 0  ||  do_abs_recursion_depth() != recursion_current_depth_) {
+        if (do_current_depth_ == 0  ||
+            do_abs_recursion_depth() != recursion_current_depth_) {
           // Normal operation: step forward one bytecode.
           bytecodes_pointer_where() += 1;
         }
@@ -2284,13 +2381,41 @@ namespace awkward {
             }
 
             case CODE_HALT: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
-              break;
+              count_instructions_++;
+
+              is_ready_ = false;
+              recursion_current_depth_ = 0;
+              while (!recursion_target_depth_.empty()) {
+                recursion_target_depth_.pop();
+              }
+              do_current_depth_ = 0;
+              current_error_ = util::ForthError::user_halt;
+              return;
             }
 
             case CODE_PAUSE: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
-              break;
+              count_instructions_++;
+
+              if (is_segment_done()) {
+                bytecodes_pointer_pop();
+
+                if (do_current_depth_ != 0  &&
+                    do_abs_recursion_depth() == recursion_current_depth_) {
+                  // End one step of a 'do ... loop' or a 'do ... +loop'.
+                  if (do_loop_is_step()) {
+                    if (!stack_can_pop()) {
+                      current_error_ = util::ForthError::stack_underflow;
+                      return;
+                    }
+                    do_i() += stack_pop();
+                  }
+                  else {
+                    do_i()++;
+                  }
+                }
+              }
+
+              return;
             }
 
             case CODE_IF: {
@@ -2576,7 +2701,7 @@ namespace awkward {
         } // end handle one instruction
 
         count_instructions_++;
-        if (!keep_going) {
+        if (single_step) {
           if (is_segment_done()) {
             bytecodes_pointer_pop();
           }
@@ -2588,7 +2713,8 @@ namespace awkward {
     after_end_of_segment:
       bytecodes_pointer_pop();
 
-      if (do_current_depth_ != 0  &&  do_abs_recursion_depth() == recursion_current_depth_) {
+      if (do_current_depth_ != 0  &&
+          do_abs_recursion_depth() == recursion_current_depth_) {
         // End one step of a 'do ... loop' or a 'do ... +loop'.
         if (do_loop_is_step()) {
           if (!stack_can_pop()) {

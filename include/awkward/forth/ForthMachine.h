@@ -5,6 +5,7 @@
 
 #include <set>
 #include <map>
+#include <stack>
 
 #include "awkward/common.h"
 #include "awkward/util.h"
@@ -210,10 +211,6 @@ namespace awkward {
       step();
 
     /// @brief HERE
-    void
-      maybe_throw(util::ForthError err, const std::set<util::ForthError>& ignore) const;
-
-    /// @brief HERE
     util::ForthError
       run(const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs);
 
@@ -234,8 +231,8 @@ namespace awkward {
       call(int64_t index);
 
     /// @brief HERE
-    int64_t
-      pause_depth() const noexcept;
+    void
+      maybe_throw(util::ForthError err, const std::set<util::ForthError>& ignore) const;
 
     /// @brief HERE
     int64_t
@@ -288,13 +285,13 @@ namespace awkward {
     /// @brief HERE
     inline bool
       is_ready() const noexcept {
-      return ready_;
+      return is_ready_;
     }
 
     /// @brief HERE
     inline bool
       is_done() const noexcept {
-      return recursion_current_depth_ == 0;
+      return recursion_target_depth_.empty();
     }
 
     /// @brief HERE
@@ -346,7 +343,7 @@ namespace awkward {
 
     /// @brief HERE
     void
-      internal_run(bool keep_going); // noexcept
+      internal_run(bool single_step); // noexcept
 
     /// @brief HERE
     void
@@ -493,13 +490,12 @@ namespace awkward {
 
     std::vector<std::shared_ptr<ForthInputBuffer>> current_inputs_;
     std::vector<std::shared_ptr<ForthOutputBuffer>> current_outputs_;
-    bool ready_;
-
-    int64_t current_pause_depth_;
+    bool is_ready_;
 
     int64_t* current_which_;
     int64_t* current_where_;
     int64_t recursion_current_depth_;
+    std::stack<int64_t> recursion_target_depth_;
     int64_t recursion_max_depth_;
 
     int64_t* do_recursion_depth_;

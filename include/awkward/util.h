@@ -217,7 +217,12 @@ namespace awkward {
 
     /// @brief Exhaustive list of runtime errors possible in the ForthMachine.
     enum class ForthError {
+        // execution can continue
         none,
+
+        // execution cannot continue
+        not_ready,
+        is_done,
         user_halt,
         recursion_depth_exceeded,
         stack_underflow,
@@ -226,6 +231,7 @@ namespace awkward {
         seek_beyond,
         skip_beyond,
         rewind_beyond,
+
         size
     };
 
