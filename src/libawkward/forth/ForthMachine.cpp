@@ -1432,7 +1432,14 @@ namespace awkward {
     while (pos < stop) {
       std::string word = tokenized[pos];
 
-      if (word == "(") {
+      if (true) {
+        bytecodes.push_back(CODE_LEN_INPUT);
+        bytecodes.push_back(0);
+
+        pos += 2;
+      }
+
+      else if (word == "(") {
         // Simply skip the parenthesized text: it's a comment.
         int64_t substop = pos;
         int64_t nesting = 1;
@@ -1981,11 +1988,6 @@ namespace awkward {
           if (input_names_[input_index] == word) {
             break;
           }
-        }
-
-        if (input_index == -1) {
-          std::cout << "YIKES " << word << std::endl;
-          throw std::runtime_error("STOP NOW");
         }
 
         if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
