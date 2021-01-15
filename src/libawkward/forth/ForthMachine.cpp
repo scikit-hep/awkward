@@ -1432,7 +1432,7 @@ namespace awkward {
     while (pos < stop) {
       std::string word = tokenized[pos];
 
-      if (true) {
+      if (is_input(word)) {
         bytecodes.push_back(CODE_LEN_INPUT);
         bytecodes.push_back(0);
 
