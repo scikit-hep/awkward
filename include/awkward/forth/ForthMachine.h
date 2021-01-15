@@ -343,7 +343,7 @@ namespace awkward {
 
     /// @brief HERE
     void
-      internal_run(bool single_step); // noexcept
+      internal_run(bool single_step, int64_t recursion_target_depth_top); // noexcept
 
     /// @brief HERE
     void

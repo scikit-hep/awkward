@@ -1049,8 +1049,10 @@ namespace awkward {
       return current_error_;
     }
 
+    int64_t recursion_target_depth_top = recursion_target_depth_.top();
+
     auto begin_time = std::chrono::high_resolution_clock::now();
-    internal_run(true);
+    internal_run(true, recursion_target_depth_top);
     auto end_time = std::chrono::high_resolution_clock::now();
 
     count_nanoseconds_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -1070,8 +1072,10 @@ namespace awkward {
       const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs) {
     begin(inputs);
 
+    int64_t recursion_target_depth_top = recursion_target_depth_.top();
+
     auto begin_time = std::chrono::high_resolution_clock::now();
-    internal_run(false);
+    internal_run(false, recursion_target_depth_top);
     auto end_time = std::chrono::high_resolution_clock::now();
 
     count_nanoseconds_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -1107,8 +1111,10 @@ namespace awkward {
       return current_error_;
     }
 
+    int64_t recursion_target_depth_top = recursion_target_depth_.top();
+
     auto begin_time = std::chrono::high_resolution_clock::now();
-    internal_run(false);
+    internal_run(false, recursion_target_depth_top);
     auto end_time = std::chrono::high_resolution_clock::now();
 
     count_nanoseconds_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -1149,8 +1155,10 @@ namespace awkward {
     recursion_target_depth_.push(recursion_current_depth_);
     bytecodes_pointer_push(dictionary_bytecodes_[index] - BOUND_DICTIONARY);
 
+    int64_t recursion_target_depth_top = recursion_target_depth_.top();
+
     auto begin_time = std::chrono::high_resolution_clock::now();
-    internal_run(false);
+    internal_run(false, recursion_target_depth_top);
     auto end_time = std::chrono::high_resolution_clock::now();
 
     count_nanoseconds_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -1410,7 +1418,7 @@ namespace awkward {
         break;
       }
       if (source_[stop] == '\n') {
-        line += 1;
+        line++;
         col = 0;
       }
       col++;
@@ -1453,7 +1461,7 @@ namespace awkward {
         linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
         start = stop;
         full = false;
-        line += 1;
+        line++;
         colstart = 0;
         colstop = 0;
       }
@@ -2334,8 +2342,8 @@ namespace awkward {
 
   template <typename T, typename I>
   void
-  ForthMachineOf<T, I>::internal_run(bool single_step) { // noexcept
-    while (recursion_current_depth_ != recursion_target_depth_.top()) {
+  ForthMachineOf<T, I>::internal_run(bool single_step, int64_t recursion_target_depth_top) { // noexcept
+    while (recursion_current_depth_ != recursion_target_depth_top) {
       while (bytecodes_pointer_where() < (
                  bytecodes_offsets_[bytecodes_pointer_which() + 1] -
                  bytecodes_offsets_[bytecodes_pointer_which()]
@@ -2345,19 +2353,119 @@ namespace awkward {
         if (do_current_depth_ == 0  ||
             do_abs_recursion_depth() != recursion_current_depth_) {
           // Normal operation: step forward one bytecode.
-          bytecodes_pointer_where() += 1;
+          bytecodes_pointer_where()++;
         }
         else if (do_i() >= do_stop()) {
           // End a 'do' loop.
           do_current_depth_--;
-          bytecodes_pointer_where() += 1;
+          bytecodes_pointer_where()++;
           continue;
         }
         // else... don't increase bytecode_pointer_where()
 
         if (bytecode < 0) {
-          throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
-        }
+          bool byteswap;
+          if (NATIVELY_BIG_ENDIAN) {
+            byteswap = ((~bytecode & READ_BIGENDIAN) == 0);
+          }
+          else {
+            byteswap = ((~bytecode & READ_BIGENDIAN) != 0);
+          }
+
+          I in_num = bytecode_get();
+          bytecodes_pointer_where()++;
+
+          int64_t num_items = 1;
+          if (~bytecode & READ_REPEATED) {
+            if (stack_can_pop()) {
+              current_error_ = util::ForthError::stack_underflow;
+              return;
+            }
+            num_items = stack_pop();
+          }
+
+          if (~bytecode & READ_DIRECT) {
+            I out_num = bytecode_get();
+            bytecodes_pointer_where()++;
+
+            #define WRITE_DIRECTLY(TYPE, SUFFIX) {                             \
+                TYPE* ptr = reinterpret_cast<TYPE*>(                           \
+                    current_inputs_[in_num].get()->read(                       \
+                      num_items * sizeof(TYPE), current_error_));              \
+                if (current_error_ != util::ForthError::none) {                \
+                  return;                                                      \
+                }                                                              \
+                if (num_items == 1) {                                          \
+                  current_outputs_[out_num].get()->write_one_##SUFFIX(         \
+                      *ptr, byteswap);                                         \
+                }                                                              \
+                else {                                                         \
+                  current_outputs_[out_num].get()->write_##SUFFIX(             \
+                      num_items, ptr, byteswap);                               \
+                }                                                              \
+                break;                                                         \
+              }
+
+            switch (~bytecode & READ_MASK) {
+              case READ_BOOL:    WRITE_DIRECTLY(bool, bool)
+              case READ_INT8:    WRITE_DIRECTLY(int8_t, int8)
+              case READ_INT16:   WRITE_DIRECTLY(int16_t, int16)
+              case READ_INT32:   WRITE_DIRECTLY(int32_t, int32)
+              case READ_INT64:   WRITE_DIRECTLY(int64_t, int64)
+              case READ_INTP:    WRITE_DIRECTLY(ssize_t, intp)
+              case READ_UINT8:   WRITE_DIRECTLY(uint8_t, uint8)
+              case READ_UINT16:  WRITE_DIRECTLY(uint16_t, uint16)
+              case READ_UINT32:  WRITE_DIRECTLY(uint32_t, uint32)
+              case READ_UINT64:  WRITE_DIRECTLY(uint64_t, uint64)
+              case READ_UINTP:   WRITE_DIRECTLY(size_t, uintp)
+              case READ_FLOAT32: WRITE_DIRECTLY(float, float32)
+              case READ_FLOAT64: WRITE_DIRECTLY(double, float64)
+            }
+
+            count_writes_++;
+
+          } // end if READ_DIRECT
+
+          else {
+              # define WRITE_TO_STACK(TYPE) {                                  \
+                TYPE* ptr = reinterpret_cast<TYPE*>(                           \
+                    current_inputs_[in_num].get()->read(                       \
+                        num_items * sizeof(TYPE), current_error_));            \
+                if (current_error_ != util::ForthError::none) {                \
+                  return;                                                      \
+                }                                                              \
+                for (int64_t i = 0;  i < num_items;  i++) {                    \
+                  TYPE value = ptr[i];                                         \
+                  if (stack_can_push()) {                                      \
+                    current_error_ = util::ForthError::stack_overflow;         \
+                    return;                                                    \
+                  }                                                            \
+                  stack_push(value);                                           \
+                }                                                              \
+                break;                                                         \
+              }
+
+            switch (~bytecode & READ_MASK) {
+              case READ_BOOL:    WRITE_TO_STACK(bool)
+              case READ_INT8:    WRITE_TO_STACK(int8_t)
+              case READ_INT16:   WRITE_TO_STACK(int16_t)
+              case READ_INT32:   WRITE_TO_STACK(int32_t)
+              case READ_INT64:   WRITE_TO_STACK(int64_t)
+              case READ_INTP:    WRITE_TO_STACK(ssize_t)
+              case READ_UINT8:   WRITE_TO_STACK(uint8_t)
+              case READ_UINT16:  WRITE_TO_STACK(uint16_t)
+              case READ_UINT32:  WRITE_TO_STACK(uint32_t)
+              case READ_UINT64:  WRITE_TO_STACK(uint64_t)
+              case READ_UINTP:   WRITE_TO_STACK(size_t)
+              case READ_FLOAT32: WRITE_TO_STACK(float)
+              case READ_FLOAT64: WRITE_TO_STACK(double)
+            }
+
+          } // end if not READ_DIRECT (i.e. read to stack)
+
+          count_reads_++;
+
+        } // end if bytecode < 0
 
         else if (bytecode >= BOUND_DICTIONARY) {
           if (recursion_current_depth_ == recursion_max_depth_) {
@@ -2381,8 +2489,6 @@ namespace awkward {
             }
 
             case CODE_HALT: {
-              count_instructions_++;
-
               is_ready_ = false;
               recursion_current_depth_ = 0;
               while (recursion_target_depth_.size() > 1) {
@@ -2390,12 +2496,14 @@ namespace awkward {
               }
               do_current_depth_ = 0;
               current_error_ = util::ForthError::user_halt;
+
+              // HALT counts as an instruction.
+              count_instructions_++;
               return;
             }
 
             case CODE_PAUSE: {
-              count_instructions_++;
-
+              // In case of 'do ... pause loop/+loop', update the do-stack.
               if (is_segment_done()) {
                 bytecodes_pointer_pop();
 
@@ -2415,286 +2523,663 @@ namespace awkward {
                 }
               }
 
+              // PAUSE counts as an instruction.
+              count_instructions_++;
               return;
             }
 
             case CODE_IF: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (!stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              if (stack_pop() == 0) {
+                // Predicate is false, so skip over the next instruction.
+                bytecodes_pointer_where()++;
+              }
               break;
             }
 
             case CODE_IF_ELSE: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (!stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              if (stack_pop() == 0) {
+                // Predicate is false, so skip over the next instruction
+                // but do the one after that.
+                bytecodes_pointer_where()++;
+              }
+              else {
+                // Predicate is true, so do the next instruction (we know it's
+                // in the dictionary), but skip the one after that.
+                I consequent = bytecode_get();
+                bytecodes_pointer_where() += 2;
+                if (recursion_current_depth_ == recursion_max_depth_) {
+                  current_error_ = util::ForthError::recursion_depth_exceeded;
+                  return;
+                }
+                bytecodes_pointer_push(consequent - BOUND_DICTIONARY);
+
+                // Ordinarily, a redirection like the above would count as one.
+                count_instructions_++;
+              }
               break;
             }
 
             case CODE_DO: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2();
+              if (do_current_depth_ == recursion_max_depth_) {
+                current_error_ = util::ForthError::recursion_depth_exceeded;
+                return;
+              }
+              do_loop_push(pair[1], pair[0]);
+
               break;
             }
 
             case CODE_DO_STEP: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2();
+              if (do_current_depth_ == recursion_max_depth_) {
+                current_error_ = util::ForthError::recursion_depth_exceeded;
+                return;
+              }
+              do_steploop_push(pair[1], pair[0]);
               break;
             }
 
             case CODE_AGAIN: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              // Go back and do the body again.
+              bytecodes_pointer_where() -= 2;
               break;
             }
 
             case CODE_UNTIL: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              if (stack_pop() == 0) {
+                // Predicate is false, so go back and do the body again.
+                bytecodes_pointer_where() -= 2;
+              }
               break;
             }
 
             case CODE_WHILE: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              if (stack_pop() == 0) {
+                // Predicate is false, so skip over the conditional body.
+                bytecodes_pointer_where()++;
+              }
+              else {
+                // Predicate is true, so do the next instruction (we know it's
+                // in the dictionary), but skip back after that.
+                I posttest = bytecode_get();
+                bytecodes_pointer_where() -= 2;
+                if (recursion_current_depth_ == recursion_max_depth_) {
+                  current_error_ = util::ForthError::recursion_depth_exceeded;
+                  return;
+                }
+                bytecodes_pointer_push(posttest - BOUND_DICTIONARY);
+
+                // Ordinarily, a redirection like the above would count as one.
+                count_instructions_++;
+              }
               break;
             }
 
             case CODE_EXIT: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
-              break;
+              I exitdepth = bytecode_get();
+              bytecodes_pointer_where()++;
+              recursion_current_depth_ -= exitdepth;
+              while (do_current_depth_ != 0  &&
+                     do_abs_recursion_depth() != recursion_current_depth_) {
+                do_current_depth_--;
+              }
+
+              count_instructions_++;
+              if (single_step) {
+                if (is_segment_done()) {
+                  bytecodes_pointer_pop();
+                }
+                return;
+              }
+
+              // StackOverflow said I could: https://stackoverflow.com/a/1257776/1623645
+              //
+              // (I need to 'break' out of a loop, but we're in a switch statement,
+              // so 'break' won't apply to the looping structure. I think this is the
+              // first 'goto' I've written since I was writing in BASIC (c. 1985).
+              goto after_end_of_segment;
             }
 
             case CODE_PUT: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              I num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T value = stack_pop();
+              variables_[num] = value;
               break;
             }
 
             case CODE_INC: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              I num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T value = stack_pop();
+              variables_[num] += value;
               break;
             }
 
             case CODE_GET: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              I num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(variables_[num]);
               break;
             }
 
             case CODE_LEN_INPUT: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              I in_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(current_inputs_[in_num].get()->len());
               break;
             }
 
             case CODE_POS: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              I in_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(current_inputs_[in_num].get()->pos());
               break;
             }
 
             case CODE_END: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              I in_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(current_inputs_[in_num].get()->end() ? -1 : 0);
               break;
             }
 
             case CODE_SEEK: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              I in_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              current_inputs_[in_num].get()->seek(stack_pop(), current_error_);
+              if (current_error_ != util::ForthError::none) {
+                return;
+              }
               break;
             }
 
             case CODE_SKIP: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              I in_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              current_inputs_[in_num].get()->skip(stack_pop(), current_error_);
+              if (current_error_ != util::ForthError::none) {
+                return;
+              }
               break;
             }
 
             case CODE_WRITE: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              I out_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              write_from_stack(out_num, top);
+              stack_depth_--;
+
+              count_writes_++;
               break;
             }
 
             case CODE_LEN_OUTPUT: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              I out_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(current_outputs_[out_num].get()->len());
               break;
             }
 
             case CODE_REWIND: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              I out_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              current_outputs_[out_num].get()->rewind(stack_pop(), current_error_);
+              if (current_error_ != util::ForthError::none) {
+                return;
+              }
               break;
             }
 
             case CODE_I: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(do_i());
               break;
             }
 
             case CODE_J: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(do_j());
               break;
             }
 
             case CODE_K: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(do_k());
               break;
             }
 
             case CODE_DUP: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              if (stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_buffer_[stack_depth_] = stack_buffer_[stack_depth_ - 1];
+              stack_depth_++;
               break;
             }
 
             case CODE_DROP: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              stack_depth_--;
               break;
             }
 
             case CODE_SWAP: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              int64_t tmp = stack_buffer_[stack_depth_ - 2];
+              stack_buffer_[stack_depth_ - 2] = stack_buffer_[stack_depth_ - 1];
+              stack_buffer_[stack_depth_ - 1] = tmp;
               break;
             }
 
             case CODE_OVER: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              if (stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(stack_buffer_[stack_depth_ - 2]);
               break;
             }
 
             case CODE_ROT: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 3) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              int64_t tmp1 = stack_buffer_[stack_depth_ - 3];
+              stack_buffer_[stack_depth_ - 3] = stack_buffer_[stack_depth_ - 2];
+              stack_buffer_[stack_depth_ - 2] = stack_buffer_[stack_depth_ - 1];
+              stack_buffer_[stack_depth_ - 1] = tmp1;
               break;
             }
 
             case CODE_NIP: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              stack_buffer_[stack_depth_ - 2] = stack_buffer_[stack_depth_ - 1];
+              stack_depth_--;
               break;
             }
 
             case CODE_TUCK: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              if (stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              int64_t tmp = stack_buffer_[stack_depth_ - 1];
+              stack_buffer_[stack_depth_ - 1] = stack_buffer_[stack_depth_ - 2];
+              stack_buffer_[stack_depth_ - 2] = tmp;
+              stack_push(tmp);
               break;
             }
 
             case CODE_ADD: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] + pair[1];
               break;
             }
 
             case CODE_SUB: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] - pair[1];
               break;
             }
 
             case CODE_MUL: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] * pair[1];
               break;
             }
 
             case CODE_DIV: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] / pair[1];
               break;
             }
 
             case CODE_MOD: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] % pair[1];
               break;
             }
 
             case CODE_DIVMOD: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T div = stack_buffer_[stack_depth_ - 2] / stack_buffer_[stack_depth_ - 1];
+              T mod = stack_buffer_[stack_depth_ - 2] % stack_buffer_[stack_depth_ - 1];
+              stack_buffer_[stack_depth_ - 2] = mod;
+              stack_buffer_[stack_depth_ - 1] = div;
               break;
             }
 
             case CODE_NEGATE: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              *top = -(*top);
               break;
             }
 
             case CODE_ADD1: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              (*top)++;
               break;
             }
 
             case CODE_SUB1: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              (*top)--;
               break;
             }
 
             case CODE_ABS: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              *top = abs(*top);
               break;
             }
 
             case CODE_MIN: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = std::min(pair[0], pair[1]);
               break;
             }
 
             case CODE_MAX: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = std::max(pair[0], pair[1]);
               break;
             }
 
             case CODE_EQ: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] == pair[1] ? -1 : 0;
               break;
             }
 
             case CODE_NE: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] != pair[1] ? -1 : 0;
               break;
             }
 
             case CODE_GT: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] > pair[1] ? -1 : 0;
               break;
             }
 
             case CODE_GE: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] >= pair[1] ? -1 : 0;
               break;
             }
 
             case CODE_LT: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] < pair[1] ? -1 : 0;
               break;
             }
 
             case CODE_LE: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] <= pair[1] ? -1 : 0;
               break;
             }
 
             case CODE_EQ0: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              *top = *top == 0 ? -1 : 0;
               break;
             }
 
             case CODE_INVERT: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              *top = ~(*top);
               break;
             }
 
             case CODE_AND: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] & pair[1];
               break;
             }
 
             case CODE_OR: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] | pair[1];
               break;
             }
 
             case CODE_XOR: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] ^ pair[1];
               break;
             }
 
             case CODE_LSHIFT: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] << pair[1];
               break;
             }
 
             case CODE_RSHIFT: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_depth_ < 2) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* pair = stack_pop2_before_pushing1();
+              pair[0] = pair[0] >> pair[1];
               break;
             }
 
             case CODE_FALSE: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(0);
               break;
             }
 
             case CODE_TRUE: {
-              throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+              if (stack_can_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(-1);
               break;
             }
           }
