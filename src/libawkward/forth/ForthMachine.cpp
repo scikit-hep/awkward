@@ -1440,15 +1440,15 @@ namespace awkward {
           }
         }
 
-        if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
+        // if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
           bytecodes.push_back(CODE_LEN_INPUT);
           bytecodes.push_back(input_index);
 
           pos += 2;
-        }
-        else {
-          throw std::runtime_error("YUCK");
-        }
+        // }
+        // else {
+        //   throw std::runtime_error("YUCK");
+        // }
       }
 
       else if (word == "(") {
