@@ -598,8 +598,12 @@ def test_stepping():
     vm32 = awkward.forth.ForthMachine32("1 2 3 4")
     with pytest.raises(ValueError):
         vm32.step()
+    assert not vm32.is_ready
+    assert vm32.is_done
 
     vm32.begin()
+    assert vm32.is_ready
+    assert not vm32.is_done
     assert vm32.stack == []
     vm32.step()
     assert vm32.stack == [1]
@@ -609,6 +613,8 @@ def test_stepping():
     assert vm32.stack == [1, 2, 3]
     vm32.step()
     assert vm32.stack == [1, 2, 3, 4]
+    assert vm32.is_ready
+    assert vm32.is_done
     with pytest.raises(ValueError):
         vm32.step()
 
@@ -633,6 +639,8 @@ def test_stepping():
 def test_running():
     vm32 = awkward.forth.ForthMachine32("1 2 3 4")
     vm32.run()
+    assert vm32.is_ready
+    assert vm32.is_done
 
     assert vm32.stack == [1, 2, 3, 4]
     with pytest.raises(ValueError):
@@ -643,3 +651,151 @@ def test_running():
     assert vm32.stack == [1, 2, 3, 4]
     with pytest.raises(ValueError):
         vm32.step()
+
+
+def test_pausing():
+    vm32 = awkward.forth.ForthMachine32("1 2 pause 3 4 5")
+
+    vm32.run()
+    assert vm32.is_ready
+    assert not vm32.is_done
+    assert vm32.stack == [1, 2]
+    vm32.step()
+    assert vm32.is_ready
+    assert not vm32.is_done
+    assert vm32.stack == [1, 2, 3]
+    vm32.resume()
+    assert vm32.is_ready
+    assert vm32.is_done
+    assert vm32.stack == [1, 2, 3, 4, 5]
+
+
+def test_calling():
+    vm32 = awkward.forth.ForthMachine32(": foo 999 ; 1 2 3 pause 4 5")
+
+    vm32.begin()
+    assert vm32.stack == []
+    assert not vm32.is_done
+
+    vm32.call("foo")
+    assert vm32.stack == [999]
+    assert not vm32.is_done
+
+    vm32.step()
+    assert vm32.stack == [999, 1]
+    assert not vm32.is_done
+
+    vm32.call("foo")
+    assert vm32.stack == [999, 1, 999]
+    assert not vm32.is_done
+
+    vm32.resume()
+    assert vm32.stack == [999, 1, 999, 2, 3]
+    assert not vm32.is_done
+
+    vm32.resume()
+    assert vm32.stack == [999, 1, 999, 2, 3, 4, 5]
+    assert vm32.is_done
+
+    vm32.run()
+    assert vm32.stack == [1, 2, 3]
+    assert not vm32.is_done
+
+    vm32.call("foo")
+    assert vm32.stack == [1, 2, 3, 999]
+    assert not vm32.is_done
+
+    vm32.call("foo")
+    assert vm32.stack == [1, 2, 3, 999, 999]
+    assert not vm32.is_done
+
+    vm32.step()
+    assert vm32.stack == [1, 2, 3, 999, 999, 4]
+    assert not vm32.is_done
+
+    vm32.step()
+    assert vm32.stack == [1, 2, 3, 999, 999, 4, 5]
+    assert vm32.is_done
+
+
+def test_calling2():
+    vm32 = awkward.forth.ForthMachine32("""
+: bar 999 ;
+: foo bar pause bar ;
+1 2 3 pause 4 5""")
+
+    vm32.run()
+    assert vm32.stack == [1, 2, 3]
+    assert not vm32.is_done
+
+    vm32.call("foo")
+    assert vm32.stack == [1, 2, 3, 999]
+    assert not vm32.is_done
+
+    vm32.resume()
+    assert vm32.stack == [1, 2, 3, 999, 999]
+    assert not vm32.is_done
+
+    vm32.resume()
+    assert vm32.stack == [1, 2, 3, 999, 999, 4, 5]
+    assert vm32.is_done
+
+    vm32.call("foo")
+    assert vm32.stack == [1, 2, 3, 999, 999, 4, 5, 999]
+    assert not vm32.is_done
+
+    vm32.resume()
+    assert vm32.stack == [1, 2, 3, 999, 999, 4, 5, 999, 999]
+    assert vm32.is_done
+
+
+def test_calling3():
+    vm32 = awkward.forth.ForthMachine32("""
+: bar 999 ;
+: foo bar pause bar ;""")
+
+    vm32.run()
+    assert vm32.stack == []
+    assert vm32.is_done
+
+    vm32.call("foo")
+    assert vm32.stack == [999]
+    assert not vm32.is_done
+
+    vm32.resume()
+    assert vm32.stack == [999, 999]
+    assert vm32.is_done
+
+
+def test_halt():
+    vm32 = awkward.forth.ForthMachine32("1 2 3 halt 4 5")
+
+    vm32.run(raise_user_halt=False)
+    assert vm32.stack == [1, 2, 3]
+    assert vm32.is_done
+
+
+def test_halt2():
+    vm32 = awkward.forth.ForthMachine32("""
+: bar 999 ;
+: foo bar halt bar ;
+1 2 3 pause 4 5""")
+
+    vm32.run()
+    assert vm32.stack == [1, 2, 3]
+    assert not vm32.is_done
+
+    vm32.call("foo", raise_user_halt=False)
+    assert vm32.stack == [1, 2, 3, 999]
+    assert vm32.is_done
+
+    with pytest.raises(ValueError):
+        vm32.step()
+
+    vm32.run()
+    assert vm32.stack == [1, 2, 3]
+    assert not vm32.is_done
+
+    vm32.resume()
+    assert vm32.stack == [1, 2, 3, 4, 5]
+    assert vm32.is_done

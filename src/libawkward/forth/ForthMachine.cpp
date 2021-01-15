@@ -1147,7 +1147,7 @@ namespace awkward {
     }
 
     recursion_target_depth_.push(recursion_current_depth_);
-    bytecodes_pointer_push((dictionary_bytecodes_[index] - BOUND_DICTIONARY) + 1);
+    bytecodes_pointer_push(dictionary_bytecodes_[index] - BOUND_DICTIONARY);
 
     auto begin_time = std::chrono::high_resolution_clock::now();
     internal_run(false);
@@ -2364,7 +2364,7 @@ namespace awkward {
             current_error_ = util::ForthError::recursion_depth_exceeded;
             return;
           }
-          bytecodes_pointer_push((bytecode - BOUND_DICTIONARY) + 1);
+          bytecodes_pointer_push(bytecode - BOUND_DICTIONARY);
         }
 
         else {
@@ -2385,7 +2385,7 @@ namespace awkward {
 
               is_ready_ = false;
               recursion_current_depth_ = 0;
-              while (!recursion_target_depth_.empty()) {
+              while (recursion_target_depth_.size() > 1) {
                 recursion_target_depth_.pop();
               }
               do_current_depth_ = 0;
