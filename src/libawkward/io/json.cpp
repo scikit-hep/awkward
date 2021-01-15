@@ -2,6 +2,8 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/io/json.cpp", line)
 
+#include <complex>
+
 #include "rapidjson/document.h"
 #include "rapidjson/reader.h"
 #include "rapidjson/writer.h"
@@ -649,8 +651,20 @@ namespace awkward {
     }
 
     bool Double(double x) {
-      moved_ = true;
+      if (state_ == kExpectRealValue) {
+        complex_number_ = std::complex<double>(x);
+      }
+      else if (state_ == kExpectImaginaryValue) {
+        complex_number_ = {complex_number_.real(), x};
+        std::cout << "Complex " << complex_number_ << "\n";
+        state_ = kExpectComplexEnd;
+      }
+      else {
+        std::cout << "Double " << x << "\n";
+        //builder_.real(x);
+      }
       builder_.real(x);
+      moved_ = true;
       return true;
     }
 
@@ -692,24 +706,42 @@ namespace awkward {
     bool
     StartObject() {
       moved_ = true;
-      record_started_ = false;
-      switch (state_) {
-        case kExpectComplexStart:
-          state_ = kExpectNameOrObjectEnd;
-          return true;
-        default:
-          break;
-      }
+      // record_started_ = false;
+      // switch (state_) {
+      //   case kExpectComplexStart:
+      //     std::cout << "kExpectComplexStart " << complex_number_.real() << "+" << complex_number_.imag() << "j\n";
+      //     state_ = kExpectRealValue;
+      //     break;
+      //   case kExpectRealValue:
+      //     state_ = kExpectImaginaryValue;
+      //     std::cout << "kExpectRealValue " << complex_number_.real() << "+" << complex_number_.imag() << "j\n";
+      //     break;
+      //   case kExpectImaginaryValue:
+      //     state_ = kExpectComplexEnd;
+      //     std::cout << "kExpectImaginaryValue " << complex_number_.real() << "+" << complex_number_.imag() << "j\n";
+      //     break;
+      //   default:
+      //     break;
+      // }
+      builder_.beginrecord();
+  //    record_started_ = true;
+
       return true;
     }
 
     bool
     EndObject(rj::SizeType numfields) {
       moved_ = true;
-      if (record_started_) {
-        builder_.endrecord();
+      if (state_ ==  kExpectComplexEnd) {
+        std::cout << "Complex: " << complex_number_.real() << "+"
+          << complex_number_.imag() << "j\n";
+          // builder_.real(complex_number_.real());
+          // builder_.real(complex_number_.imag());
       }
-      record_started_ = false;
+//      if (record_started_) {
+        builder_.endrecord();
+//      }
+//      record_started_ = false;
       return true;
     }
 
@@ -720,16 +752,16 @@ namespace awkward {
         state_ = kExpectComplexStart;
       }
       else if (strcmp(str, "real") == 0) {
-        state_ = kExpectValue;
+        state_ = kExpectRealValue;
       } else  if (strcmp(str, "imag") == 0) {
-        state_ = kExpectValue;
-      } else {
-        if (!record_started_) {
-          builder_.beginrecord();
-          record_started_ = true;
-        }
+        state_ = kExpectImaginaryValue;
+      } //else {
+        // if (!record_started_) {
+        //   builder_.beginrecord();
+        //   record_started_ = true;
+        // }
         builder_.field_check(str);
-      }
+      //}
       return true;
     }
 
@@ -742,8 +774,9 @@ namespace awkward {
 
     enum State {
       kExpectComplexStart,
-      kExpectNameOrObjectEnd,
-      kExpectValue,
+      kExpectRealValue,
+      kExpectImaginaryValue,
+      kExpectComplexEnd
     } state_;
 
     bool record_started_;
@@ -751,6 +784,7 @@ namespace awkward {
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
+    std::complex<double> complex_number_;
   };
 
   template<typename HANDLER, typename STREAM>

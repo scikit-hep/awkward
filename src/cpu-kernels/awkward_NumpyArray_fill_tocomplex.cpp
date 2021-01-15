@@ -30,18 +30,18 @@ awkward_NumpyArray_fill_tocomplex(std::complex<TO>* toptr,
 }
 template <typename FROM, typename TO>
 ERROR
-awkward_NumpyArray_fill_tocomplex(std::complex<TO>* toptr,
+awkward_NumpyArray_fill_tocomplex(TO* toptr,
                                   int64_t tooffset,
                                   const FROM* fromptr,
                                   int64_t length) {
   for (int64_t i = 0; i < length; i++) {
-    reinterpret_cast<TO*>(toptr)[tooffset + 2*i] = (TO)fromptr[i];
-    reinterpret_cast<TO*>(toptr)[tooffset + 2*i + 1] = (TO)0;
+    toptr[tooffset + 2*i] = (TO)fromptr[i];
+    toptr[tooffset + 2*i + 1] = (TO)0;
   }
   return success();
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex64_fromint8(std::complex<float>* toptr,
+awkward_NumpyArray_fill_tocomplex64_fromint8(float* toptr,
                                              int64_t tooffset,
                                              const int8_t* fromptr,
                                              int64_t length) {
@@ -49,7 +49,7 @@ awkward_NumpyArray_fill_tocomplex64_fromint8(std::complex<float>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex64_fromint16(std::complex<float>* toptr,
+awkward_NumpyArray_fill_tocomplex64_fromint16(float* toptr,
                                               int64_t tooffset,
                                               const int16_t* fromptr,
                                               int64_t length) {
@@ -57,7 +57,7 @@ awkward_NumpyArray_fill_tocomplex64_fromint16(std::complex<float>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex64_fromint32(std::complex<float>* toptr,
+awkward_NumpyArray_fill_tocomplex64_fromint32(float* toptr,
                                               int64_t tooffset,
                                               const int32_t* fromptr,
                                               int64_t length) {
@@ -65,7 +65,7 @@ awkward_NumpyArray_fill_tocomplex64_fromint32(std::complex<float>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex64_fromint64(std::complex<float>* toptr,
+awkward_NumpyArray_fill_tocomplex64_fromint64(float* toptr,
                                               int64_t tooffset,
                                               const int64_t* fromptr,
                                               int64_t length) {
@@ -73,7 +73,7 @@ awkward_NumpyArray_fill_tocomplex64_fromint64(std::complex<float>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex64_fromuint8(std::complex<float>* toptr,
+awkward_NumpyArray_fill_tocomplex64_fromuint8(float* toptr,
                                               int64_t tooffset,
                                               const uint8_t* fromptr,
                                               int64_t length) {
@@ -81,7 +81,7 @@ awkward_NumpyArray_fill_tocomplex64_fromuint8(std::complex<float>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex64_fromuint16(std::complex<float>* toptr,
+awkward_NumpyArray_fill_tocomplex64_fromuint16(float* toptr,
                                                int64_t tooffset,
                                                const uint16_t* fromptr,
                                                int64_t length) {
@@ -89,7 +89,7 @@ awkward_NumpyArray_fill_tocomplex64_fromuint16(std::complex<float>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex64_fromuint32(std::complex<float>* toptr,
+awkward_NumpyArray_fill_tocomplex64_fromuint32(float* toptr,
                                                int64_t tooffset,
                                                const uint32_t* fromptr,
                                                int64_t length) {
@@ -97,7 +97,7 @@ awkward_NumpyArray_fill_tocomplex64_fromuint32(std::complex<float>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex64_fromuint64(std::complex<float>* toptr,
+awkward_NumpyArray_fill_tocomplex64_fromuint64(float* toptr,
                                                int64_t tooffset,
                                                const uint64_t* fromptr,
                                                int64_t length) {
@@ -105,7 +105,7 @@ awkward_NumpyArray_fill_tocomplex64_fromuint64(std::complex<float>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex64_fromfloat32(std::complex<float>* toptr,
+awkward_NumpyArray_fill_tocomplex64_fromfloat32(float* toptr,
                                                 int64_t tooffset,
                                                 const float* fromptr,
                                                 int64_t length) {
@@ -113,7 +113,7 @@ awkward_NumpyArray_fill_tocomplex64_fromfloat32(std::complex<float>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex64_fromfloat64(std::complex<float>* toptr,
+awkward_NumpyArray_fill_tocomplex64_fromfloat64(float* toptr,
                                                 int64_t tooffset,
                                                 const double* fromptr,
                                                 int64_t length) {
@@ -121,16 +121,16 @@ awkward_NumpyArray_fill_tocomplex64_fromfloat64(std::complex<float>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex64_fromcomplex128(std::complex<float>* toptr,
+awkward_NumpyArray_fill_tocomplex64_fromcomplex128(float* toptr,
                                                    int64_t tooffset,
-                                                   const std::complex<double>* fromptr,
+                                                   const double* fromptr,
                                                    int64_t length) {
-  return awkward_NumpyArray_fill_tocomplex<double, float>(
+  return awkward_NumpyArray_fill<double, float>(
     toptr, tooffset, fromptr, length);
   return success();
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex128_fromint8(std::complex<double>* toptr,
+awkward_NumpyArray_fill_tocomplex128_fromint8(double* toptr,
                                               int64_t tooffset,
                                               const int8_t* fromptr,
                                               int64_t length) {
@@ -138,7 +138,7 @@ awkward_NumpyArray_fill_tocomplex128_fromint8(std::complex<double>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex128_fromint16(std::complex<double>* toptr,
+awkward_NumpyArray_fill_tocomplex128_fromint16(double* toptr,
                                                int64_t tooffset,
                                                const int16_t* fromptr,
                                                int64_t length) {
@@ -146,7 +146,7 @@ awkward_NumpyArray_fill_tocomplex128_fromint16(std::complex<double>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex128_fromint32(std::complex<double>* toptr,
+awkward_NumpyArray_fill_tocomplex128_fromint32(double* toptr,
                                                int64_t tooffset,
                                                const int32_t* fromptr,
                                                int64_t length) {
@@ -154,7 +154,7 @@ awkward_NumpyArray_fill_tocomplex128_fromint32(std::complex<double>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex128_fromint64(std::complex<double>* toptr,
+awkward_NumpyArray_fill_tocomplex128_fromint64(double* toptr,
                                                int64_t tooffset,
                                                const int64_t* fromptr,
                                                int64_t length) {
@@ -162,7 +162,7 @@ awkward_NumpyArray_fill_tocomplex128_fromint64(std::complex<double>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex128_fromuint8(std::complex<double>* toptr,
+awkward_NumpyArray_fill_tocomplex128_fromuint8(double* toptr,
                                                int64_t tooffset,
                                                const uint8_t* fromptr,
                                                int64_t length) {
@@ -170,7 +170,7 @@ awkward_NumpyArray_fill_tocomplex128_fromuint8(std::complex<double>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex128_fromuint16(std::complex<double>* toptr,
+awkward_NumpyArray_fill_tocomplex128_fromuint16(double* toptr,
                                                 int64_t tooffset,
                                                 const uint16_t* fromptr,
                                                 int64_t length) {
@@ -178,7 +178,7 @@ awkward_NumpyArray_fill_tocomplex128_fromuint16(std::complex<double>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex128_fromuint32(std::complex<double>* toptr,
+awkward_NumpyArray_fill_tocomplex128_fromuint32(double* toptr,
                                                 int64_t tooffset,
                                                 const uint32_t* fromptr,
                                                 int64_t length) {
@@ -186,7 +186,7 @@ awkward_NumpyArray_fill_tocomplex128_fromuint32(std::complex<double>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex128_fromuint64(std::complex<double>* toptr,
+awkward_NumpyArray_fill_tocomplex128_fromuint64(double* toptr,
                                                 int64_t tooffset,
                                                 const uint64_t* fromptr,
                                                 int64_t length) {
@@ -194,7 +194,7 @@ awkward_NumpyArray_fill_tocomplex128_fromuint64(std::complex<double>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex128_fromfloat32(std::complex<double>* toptr,
+awkward_NumpyArray_fill_tocomplex128_fromfloat32(double* toptr,
                                                  int64_t tooffset,
                                                  const float* fromptr,
                                                  int64_t length) {
@@ -202,7 +202,7 @@ awkward_NumpyArray_fill_tocomplex128_fromfloat32(std::complex<double>* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex128_fromfloat64(std::complex<double>* toptr,
+awkward_NumpyArray_fill_tocomplex128_fromfloat64(double* toptr,
                                                  int64_t tooffset,
                                                  const double* fromptr,
                                                  int64_t length) {

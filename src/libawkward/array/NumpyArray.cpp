@@ -2495,16 +2495,210 @@ namespace awkward {
 
       // to complex64
       case util::dtype::complex64:
-        throw std::runtime_error(
-          std::string("FIXME: merge to complex64 not implemented")
-          + FILENAME(__LINE__));
+        switch (contiguous_array.dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_tocomplex_frombool<float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<bool*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int8:
+          err = kernel::NumpyArray_fill_tocomplex<int8_t, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int16:
+          err = kernel::NumpyArray_fill_tocomplex<int16_t, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int32:
+          err = kernel::NumpyArray_fill_tocomplex<int32_t, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int32_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int64:
+          err = kernel::NumpyArray_fill_tocomplex<int64_t, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int64_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill_tocomplex<uint8_t, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint16:
+          err = kernel::NumpyArray_fill_tocomplex<uint16_t, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint32:
+          err = kernel::NumpyArray_fill_tocomplex<uint32_t, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint32_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint64:
+          err = kernel::NumpyArray_fill_tocomplex<uint64_t, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint64_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::float16:
+          throw std::runtime_error(
+            std::string("FIXME: merge from float16 not implemented")
+            + FILENAME(__LINE__));
+          break;
+        case util::dtype::float32:
+          err = kernel::NumpyArray_fill_tocomplex<float, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<float*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::float64:
+          err = kernel::NumpyArray_fill_tocomplex<double, float>(
+            ptr_lib,
+            reinterpret_cast<float*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<double*>(contiguous_array.data()),
+            flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {boolean, int8, int16, int32, int64, "
+                        "uint8, uint16, uint32, uint64, float16, float32, float64}")
+            + FILENAME(__LINE__));
+        }
         break;
 
       // to complex128
       case util::dtype::complex128:
-        throw std::runtime_error(
-          std::string("FIXME: merge to complex128 not implemented")
-          + FILENAME(__LINE__));
+        switch (contiguous_array.dtype()) {
+        case util::dtype::boolean:
+          err = kernel::NumpyArray_fill_tocomplex_frombool<double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<bool*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int8:
+          err = kernel::NumpyArray_fill_tocomplex<int8_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int16:
+          err = kernel::NumpyArray_fill_tocomplex<int16_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int32:
+          err = kernel::NumpyArray_fill_tocomplex<int32_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int32_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::int64:
+          err = kernel::NumpyArray_fill_tocomplex<int64_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<int64_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint8:
+          err = kernel::NumpyArray_fill_tocomplex<uint8_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint8_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint16:
+          err = kernel::NumpyArray_fill_tocomplex<uint16_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint16_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint32:
+          err = kernel::NumpyArray_fill_tocomplex<uint32_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint32_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::uint64:
+          err = kernel::NumpyArray_fill_tocomplex<uint64_t, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<uint64_t*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::float16:
+          throw std::runtime_error(
+            std::string("FIXME: merge from float16 not implemented")
+            + FILENAME(__LINE__));
+          break;
+        case util::dtype::float32:
+          err = kernel::NumpyArray_fill_tocomplex<float, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<float*>(contiguous_array.data()),
+            flatlength);
+          break;
+        case util::dtype::float64:
+          err = kernel::NumpyArray_fill_tocomplex<double, double>(
+            ptr_lib,
+            reinterpret_cast<double*>(ptr.get()),
+            flatlength_so_far,
+            reinterpret_cast<double*>(contiguous_array.data()),
+            flatlength);
+          break;
+        default:
+          throw std::runtime_error(
+            std::string("dtype not in {boolean, int8, int16, int32, int64, "
+                        "uint8, uint16, uint32, uint64, float16, float32, float64}")
+            + FILENAME(__LINE__));
+        }
         break;
 
       // to complex256
@@ -2821,11 +3015,15 @@ namespace awkward {
         throw std::runtime_error(
           std::string("FIXME: reducers on float128") + FILENAME(__LINE__));
       case util::dtype::complex64:
-        throw std::runtime_error(
-          std::string("FIXME: reducers on complex64") + FILENAME(__LINE__));
+        ptr = reducer.apply_complex64(reinterpret_cast<float*>(data()),
+                                      parents,
+                                      outlength);
+        break;
       case util::dtype::complex128:
-        throw std::runtime_error(
-          std::string("FIXME: reducers on complex128") + FILENAME(__LINE__));
+        ptr = reducer.apply_complex128(reinterpret_cast<double*>(data()),
+                                       parents,
+                                       outlength);
+        break;
       case util::dtype::complex256:
         throw std::runtime_error(
           std::string("FIXME: reducers on complex256") + FILENAME(__LINE__));
@@ -3088,11 +3286,23 @@ namespace awkward {
         throw std::runtime_error(
           std::string("FIXME: sort for float128 not implemented") + FILENAME(__LINE__));
       case util::dtype::complex64:
-        throw std::runtime_error(
-          std::string("FIXME: sort for complex64 not implemented") + FILENAME(__LINE__));
+        std::tie(ptr, ptr_length) = array_sort<std::complex<float>>(reinterpret_cast<std::complex<float>*>(data()),
+                                 length(),
+                                 starts,
+                                 parents,
+                                 outlength,
+                                 ascending,
+                                 stable);
+        break;
       case util::dtype::complex128:
-        throw std::runtime_error(
-          std::string("FIXME: sort for complex128 not implemented") + FILENAME(__LINE__));
+        std::tie(ptr, ptr_length) = array_sort<std::complex<double>>(reinterpret_cast<std::complex<double>*>(data()),
+                                 length(),
+                                 starts,
+                                 parents,
+                                 outlength,
+                                 ascending,
+                                 stable);
+        break;
       case util::dtype::complex256:
         throw std::runtime_error(
           std::string("FIXME: sort for complex256 not implemented") + FILENAME(__LINE__));
@@ -3260,13 +3470,23 @@ namespace awkward {
           std::string("FIXME: argsort for float128 not implemented")
           + FILENAME(__LINE__));
       case util::dtype::complex64:
-        throw std::runtime_error(
-          std::string("FIXME: argsort for complex64 not implemented")
-          + FILENAME(__LINE__));
+        ptr = index_sort<std::complex<float>>(reinterpret_cast<std::complex<float>*>(data()),
+                                              length(),
+                                              starts,
+                                              parents,
+                                              outlength,
+                                              ascending,
+                                              stable);
+        break;
       case util::dtype::complex128:
-        throw std::runtime_error(
-          std::string("FIXME: argsort for complex128 not implemented")
-          + FILENAME(__LINE__));
+        ptr = index_sort<std::complex<double>>(reinterpret_cast<std::complex<double>*>(data()),
+                                               length(),
+                                               starts,
+                                               parents,
+                                               outlength,
+                                               ascending,
+                                               stable);
+        break;
       case util::dtype::complex256:
         throw std::runtime_error(
           std::string("FIXME: argsort for complex256 not implemented")
@@ -4673,13 +4893,15 @@ namespace awkward {
           std::string("FIXME: numbers_to_type for float128 not implemented")
           + FILENAME(__LINE__));
       case util::dtype::complex64:
-        throw std::runtime_error(
-          std::string("FIXME: values_astype for complex64 not implemented")
-          + FILENAME(__LINE__));
+        ptr = as_type<std::complex<float>>(reinterpret_cast<std::complex<float>*>(contiguous_self.ptr().get()),
+                                           contiguous_self.length(),
+                                           dtype);
+        break;
       case util::dtype::complex128:
-        throw std::runtime_error(
-          std::string("FIXME: numbers_to_type for complex128 not implemented")
-          + FILENAME(__LINE__));
+        ptr = as_type<std::complex<double>>(reinterpret_cast<std::complex<double>*>(contiguous_self.ptr().get()),
+                                            contiguous_self.length(),
+                                            dtype);
+        break;
       case util::dtype::complex256:
         throw std::runtime_error(
           std::string("FIXME: numbers_to_type for complex256 not implemented")
@@ -4857,13 +5079,17 @@ namespace awkward {
         std::string("FIXME: numbers_to_type for float128 not implemented")
         + FILENAME(__LINE__));
     case util::dtype::complex64:
-      throw std::runtime_error(
-        std::string("FIXME: values_astype for complex64 not implemented")
-        + FILENAME(__LINE__));
+      is_equal = subranges_equal<std::complex<float>>(reinterpret_cast<std::complex<float>*>(ptr_.get()),
+                                                      length(),
+                                                      starts,
+                                                      stops);
+      break;
     case util::dtype::complex128:
-      throw std::runtime_error(
-        std::string("FIXME: numbers_to_type for complex128 not implemented")
-        + FILENAME(__LINE__));
+      is_equal = subranges_equal<std::complex<double>>(reinterpret_cast<std::complex<double>*>(ptr_.get()),
+                                                       length(),
+                                                       starts,
+                                                       stops);
+      break;
     case util::dtype::complex256:
       throw std::runtime_error(
         std::string("FIXME: numbers_to_type for complex256 not implemented")
@@ -5127,13 +5353,11 @@ namespace awkward {
         std::string("FIXME: as_type for float128 not implemented")
         + FILENAME(__LINE__));
     case util::dtype::complex64:
-      throw std::runtime_error(
-        std::string("FIXME: as_type for complex64 not implemented")
-        + FILENAME(__LINE__));
+      ptr = cast_to_complex_type<float>(data, length);
+      break;
     case util::dtype::complex128:
-      throw std::runtime_error(
-        std::string("FIXME: as_type for complex128 not implemented")
-        + FILENAME(__LINE__));
+      ptr = cast_to_complex_type<double>(data, length);
+      break;
     case util::dtype::complex256:
       throw std::runtime_error(
         std::string("FIXME: as_type for complex256 not implemented")
@@ -5153,6 +5377,22 @@ namespace awkward {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<TO> toptr = kernel::malloc<TO>(ptr_lib, length*(int64_t)sizeof(TO));
     struct Error err = kernel::NumpyArray_fill<FROM, TO>(
+      ptr_lib,
+      toptr.get(),
+      0,
+      fromptr,
+      length);
+    util::handle_error(err, classname(), nullptr);
+
+    return toptr;
+  }
+
+  template<typename TO, typename FROM>
+  const std::shared_ptr<void>
+  NumpyArray::cast_to_complex_type(const FROM* fromptr, int64_t length) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<TO> toptr = kernel::malloc<TO>(ptr_lib, 2*length*(int64_t)sizeof(TO));
+    struct Error err = kernel::NumpyArray_fill_tocomplex<FROM, TO>(
       ptr_lib,
       toptr.get(),
       0,
@@ -5303,11 +5543,25 @@ namespace awkward {
       throw std::runtime_error(
         std::string("FIXME: sort for float128 not implemented") + FILENAME(__LINE__));
     case util::dtype::complex64:
-      throw std::runtime_error(
-        std::string("FIXME: sort for complex64 not implemented") + FILENAME(__LINE__));
+      std::tie(ptr, ptr_length) = array_sort<std::complex<float>>(reinterpret_cast<std::complex<float>*>(data()),
+                                                                  length(),
+                                                                  starts,
+                                                                  parents,
+                                                                  outlength,
+                                                                  ascending,
+                                                                  stable,
+                                                                  unique);
+      break;
     case util::dtype::complex128:
-      throw std::runtime_error(
-        std::string("FIXME: sort for complex128 not implemented") + FILENAME(__LINE__));
+      std::tie(ptr, ptr_length) = array_sort<std::complex<double>>(reinterpret_cast<std::complex<double>*>(data()),
+                                                                   length(),
+                                                                   starts,
+                                                                   parents,
+                                                                   outlength,
+                                                                   ascending,
+                                                                   stable,
+                                                                   unique);
+      break;
     case util::dtype::complex256:
       throw std::runtime_error(
         std::string("FIXME: sort for complex256 not implemented") + FILENAME(__LINE__));

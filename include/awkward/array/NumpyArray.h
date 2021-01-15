@@ -831,6 +831,10 @@ namespace awkward {
     const std::shared_ptr<void> cast_to_type(const FROM* data,
                                              int64_t length) const;
 
+   template<typename TO, typename FROM>
+   const std::shared_ptr<void> cast_to_complex_type(const FROM* data,
+                                                    int64_t length) const;
+
     const ContentPtr
     sort_data(bool ascending = true,
               bool stable = true,

@@ -4038,6 +4038,148 @@ kernels:
     automatic-tests: false
     manual-tests: []
 
+  - name: awkward_NumpyArray_fill_tocomplex
+    specializations:
+      - name: awkward_NumpyArray_fill_tocomplex64_fromint8
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex64_fromint16
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex64_fromint32
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex64_fromint64
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex64_fromuint8
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex64_fromuint16
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex64_fromuint32
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex64_fromuint64
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex64_fromfloat32
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex64_fromfloat64
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex64_fromcomplex128
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex128_fromint8
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex128_fromint16
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex128_fromint32
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex128_fromint64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex128_fromuint8
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex128_fromuint16
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex128_fromuint32
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex128_fromuint64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex128_fromfloat32
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex128_fromfloat64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tocomplex128_fromcomplex64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_NumpyArray_fill_tocomplex(toptr, tooffset, fromptr, length):
+          for i in range(length):
+              toptr[tooffset + i] = float(fromptr[i])
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_NumpyArray_fill_frombool
     specializations:
       - name: awkward_NumpyArray_fill_tobool_frombool

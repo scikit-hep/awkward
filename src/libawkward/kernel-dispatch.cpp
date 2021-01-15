@@ -2,6 +2,8 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/kernel-dispatch.cpp", line)
 
+#include <complex>
+
 #include "awkward/common.h"
 #include "awkward/util.h"
 #include "awkward/kernels.h"
@@ -14599,7 +14601,7 @@ namespace awkward {
     }
 
     template<>
-    ERROR reduce_max_64(
+    ERROR reduce_max_complex_64(
       kernel::lib ptr_lib,
       double *toptr,
       const double *fromptr,
@@ -14608,7 +14610,7 @@ namespace awkward {
       int64_t outlength,
       double identity) {
       if (ptr_lib == kernel::lib::cpu) {
-        return awkward_reduce_max_float64_float64_64(
+        return awkward_reduce_max_complex128_complex128_64(
           toptr,
           fromptr,
           parents,
