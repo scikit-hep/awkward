@@ -99,15 +99,15 @@ def test_userdef_compilation():
     assert ak.to_list(vm32.bytecodes) == [[], [0, 123, 0, 321], [0, 1, 0, 2, 0, 3]]
     assert (
         vm32.decompiled
-        == """: bar
+        == """: foo
+  123
+  321
+;
+
+: bar
   1
   2
   3
-;
-
-: foo
-  123
-  321
 ;
 """
     )

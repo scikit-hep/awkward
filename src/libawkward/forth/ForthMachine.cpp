@@ -287,13 +287,13 @@ namespace awkward {
           << util::dtype_to_name(output_dtypes_[i]) << std::endl;
     }
 
-    for (auto pair : dictionary_names_) {
+    for (int64_t i = 0;  i < dictionary_names_.size();  i++) {
       if (!first) {
         out << std::endl;
       }
       first = false;
-      int64_t segment_position = pair.second - BOUND_DICTIONARY;
-      out << ": " << pair.first << std::endl
+      int64_t segment_position = dictionary_bytecodes_[i] - BOUND_DICTIONARY;
+      out << ": " << dictionary_names_[i] << std::endl
           << (segment_nonempty(segment_position) ? "  " : "")
           << decompiled_segment(segment_position, "  ")
           << ";" << std::endl;
@@ -431,9 +431,9 @@ namespace awkward {
     }
 
     else if (bytecode >= BOUND_DICTIONARY) {
-      for (auto pair : dictionary_names_) {
-        if (pair.second == bytecode) {
-          return pair.first;
+      for (int64_t i = 0;  i < dictionary_names_.size();  i++) {
+        if (dictionary_bytecodes_[i] == bytecode) {
+          return dictionary_names_[i];
         }
       }
       return "(anonymous segment at " + std::to_string(bytecode - BOUND_DICTIONARY) + ")";
@@ -648,11 +648,7 @@ namespace awkward {
   template <typename T, typename I>
   const std::vector<std::string>
   ForthMachineOf<T, I>::dictionary() const {
-    std::vector<std::string> out;
-    for (auto pair : dictionary_names_) {
-      out.push_back(pair.first);
-    }
-    return out;
+    return dictionary_names_;
   }
 
   template <typename T, typename I>
@@ -949,7 +945,8 @@ namespace awkward {
   template <typename T, typename I>
   void
   ForthMachineOf<T, I>::begin() {
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+    const std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
+    begin(inputs);
   }
 
   template <typename T, typename I>
@@ -975,7 +972,8 @@ namespace awkward {
   template <typename T, typename I>
   util::ForthError
   ForthMachineOf<T, I>::run() {
-    throw std::runtime_error(std::string("not implemented") + FILENAME(__LINE__));
+    const std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
+    return run(inputs);
   }
 
   template <typename T, typename I>
@@ -1102,7 +1100,12 @@ namespace awkward {
   template <typename T, typename I>
   bool
   ForthMachineOf<T, I>::is_defined(const std::string& word) const {
-    return dictionary_names_.find(word) != dictionary_names_.end();
+    for (auto name : dictionary_names_) {
+      if (name == word) {
+        return true;
+      }
+    }
+    return false;
   }
 
   template <typename T, typename I>
@@ -1380,7 +1383,8 @@ namespace awkward {
         // Add the new word to the dictionary before parsing it so that recursive
         // functions can be defined.
         I bytecode = dictionary.size() + BOUND_DICTIONARY;
-        dictionary_names_[name] = bytecode;
+        dictionary_names_.push_back(name);
+        dictionary_bytecodes_.push_back(bytecode);
 
         // Now parse the subroutine and add it to the dictionary.
         std::vector<I> body;
@@ -1407,7 +1411,11 @@ namespace awkward {
               + FILENAME(__LINE__)
           );
         }
-        bytecodes.push_back(dictionary_names_[defn]);
+        for (int64_t i = 0;  i < dictionary_names_.size();  i++) {
+          if (dictionary_names_[i] == defn) {
+            bytecodes.push_back(dictionary_bytecodes_[i]);
+          }
+        }
 
         pos++;
       }
@@ -2068,10 +2076,10 @@ namespace awkward {
 
         if (!found_in_builtins) {
           bool found_in_dictionary = false;
-          for (auto pair : dictionary_names_) {
-            if (pair.first == word) {
+          for (int64_t i = 0;  i < dictionary_names_.size();  i++) {
+            if (dictionary_names_[i] == word) {
               found_in_dictionary = true;
-              bytecodes.push_back(pair.second);
+              bytecodes.push_back(dictionary_bytecodes_[i]);
 
               pos++;
             }

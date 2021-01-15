@@ -486,7 +486,8 @@ namespace awkward {
     std::vector<std::string> output_names_;
     std::vector<util::dtype> output_dtypes_;
 
-    std::map<std::string, I> dictionary_names_;
+    std::vector<std::string> dictionary_names_;
+    std::vector<I> dictionary_bytecodes_;
     std::vector<int64_t> bytecodes_offsets_;
     std::vector<I> bytecodes_;
 
