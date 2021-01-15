@@ -544,7 +544,7 @@ import awkward.forth
 
 def test_read_compilation():
     for i in range(100):
-        vm32 = awkward.forth.ForthMachine32("1 2 3 4")
+        vm32 = awkward.forth.ForthMachine32("input x output y int32 x i-> y")
 
 def test_read_compilation_2():
     test_read_compilation()
