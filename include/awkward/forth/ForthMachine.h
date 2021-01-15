@@ -239,7 +239,7 @@ namespace awkward {
 
     /// @brief HERE
     int64_t
-      current_bytecode() const noexcept;
+      current_bytecode_position() const noexcept;
 
     /// @brief HERE
     void

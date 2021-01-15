@@ -236,12 +236,12 @@ namespace awkward {
 
   template <typename T, typename I>
   ForthMachineOf<T, I>::~ForthMachineOf() {
-    // delete [] stack_buffer_;
-    // delete [] current_which_;
-    // delete [] current_where_;
-    // delete [] do_recursion_depth_;
-    // delete [] do_stop_;
-    // delete [] do_i_;
+    delete [] stack_buffer_;
+    delete [] current_which_;
+    delete [] current_where_;
+    delete [] do_recursion_depth_;
+    delete [] do_stop_;
+    delete [] do_i_;
   }
 
   template <typename T, typename I>
@@ -1129,7 +1129,7 @@ namespace awkward {
 
   template <typename T, typename I>
   int64_t
-  ForthMachineOf<T, I>::current_bytecode() const noexcept {
+  ForthMachineOf<T, I>::current_bytecode_position() const noexcept {
     if (recursion_current_depth_ == 0) {
       return -1;
     }
@@ -1204,15 +1204,8 @@ namespace awkward {
   template <typename T, typename I>
   bool
   ForthMachineOf<T, I>::is_input(const std::string& word) const {
-    for (int64_t i = 0;  i < input_names_.size();  i++) {
-      if (input_names_[i] == word) {
-        return true;
-      }
-    }
-    return false;
-
-    // return std::find(input_names_.begin(),
-    //                  input_names_.end(), word) != input_names_.end();
+    return std::find(input_names_.begin(),
+                     input_names_.end(), word) != input_names_.end();
   }
 
   template <typename T, typename I>
@@ -1391,8 +1384,6 @@ namespace awkward {
                                      const std::vector<std::pair<int64_t, int64_t>>& linecol) {
     std::vector<std::vector<I>> dictionary;
 
-    input_names_.push_back("x");
-
     // Start recursive parsing.
     std::vector<I> bytecodes;
     dictionary.push_back(bytecodes);
@@ -1432,26 +1423,7 @@ namespace awkward {
     while (pos < stop) {
       std::string word = tokenized[pos];
 
-      if (is_input(word)) {
-        int64_t input_index = -1;
-        for (;  input_index < (int64_t)input_names_.size();  input_index++) {
-          if (input_names_[input_index] == word) {
-            break;
-          }
-        }
-
-        // if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
-          bytecodes.push_back(CODE_LEN_INPUT);
-          bytecodes.push_back(input_index);
-
-          pos += 2;
-        // }
-        // else {
-        //   throw std::runtime_error("YUCK");
-        // }
-      }
-
-      else if (word == "(") {
+      if (word == "(") {
         // Simply skip the parenthesized text: it's a comment.
         int64_t substop = pos;
         int64_t nesting = 1;
@@ -1962,7 +1934,7 @@ namespace awkward {
       }
 
       else if (is_variable(word)) {
-        int64_t variable_index = -1;
+        int64_t variable_index = 0;
         for (;  variable_index < (int64_t)variable_names_.size();  variable_index++) {
           if (variable_names_[variable_index] == word) {
             break;
@@ -1995,7 +1967,7 @@ namespace awkward {
       }
 
       else if (is_input(word)) {
-        int64_t input_index = -1;
+        int64_t input_index = 0;
         for (;  input_index < (int64_t)input_names_.size();  input_index++) {
           if (input_names_[input_index] == word) {
             break;
@@ -2120,13 +2092,15 @@ namespace awkward {
             );
           }
 
-          int64_t output_index = -1;
+          bool found_output = false;
+          int64_t output_index = 0;
           if (pos + 2 < stop  &&  tokenized[pos + 2] == "stack") {
             // not READ_DIRECT
           }
           else if (pos + 2 < stop  &&  is_output(tokenized[pos + 2])) {
             for (;  output_index < (int64_t)output_names_.size();  output_index++) {
               if (output_names_[output_index] == tokenized[pos + 2]) {
+                found_output = true;
                 break;
               }
             }
@@ -2143,7 +2117,7 @@ namespace awkward {
           // Parser instructions are bit-flipped to detect them by the sign bit.
           bytecodes.push_back(~bytecode);
           bytecodes.push_back(input_index);
-          if (output_index >= 0) {
+          if (found_output) {
             bytecodes.push_back(output_index);
           }
 
@@ -2160,7 +2134,7 @@ namespace awkward {
       }
 
       else if (is_output(word)) {
-        int64_t output_index = -1;
+        int64_t output_index = 0;
         for (;  output_index < (int64_t)output_names_.size();  output_index++) {
           if (output_names_[output_index] == word) {
             break;

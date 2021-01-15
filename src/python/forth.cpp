@@ -348,8 +348,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
            , py::arg("raise_rewind_beyond") = true)
           .def_property_readonly("pause_depth",
               &ak::ForthMachineOf<T, I>::pause_depth)
-          .def_property_readonly("current_bytecode",
-              &ak::ForthMachineOf<T, I>::current_bytecode)
+          .def_property_readonly("current_bytecode_position",
+              &ak::ForthMachineOf<T, I>::current_bytecode_position)
           .def("count_reset",
               &ak::ForthMachineOf<T, I>::count_reset)
           .def_property_readonly("count_instructions",
