@@ -349,7 +349,7 @@ jobs:
 
       - script: |
           python -m pip install -v .[test]
-        displayName: "Build minimal
+        displayName: "Build minimal"
 
       # - script: |
       #     python dev/kernel-diagnostics.py --check-spec-sorted
