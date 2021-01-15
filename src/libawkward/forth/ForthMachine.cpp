@@ -1973,6 +1973,12 @@ namespace awkward {
             break;
           }
         }
+
+        if (input_index == -1) {
+          std::cout << "YIKES " << word << std::endl;
+          throw std::runtime_error("STOP NOW");
+        }
+
         if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
           bytecodes.push_back(CODE_LEN_INPUT);
           bytecodes.push_back(input_index);
