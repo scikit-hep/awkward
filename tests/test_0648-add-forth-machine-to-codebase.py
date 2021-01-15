@@ -544,7 +544,7 @@ import awkward.forth
 
 def test_read_compilation():
     for i in range(100):
-        vm32 = awkward.forth.ForthMachine32("input x x len")
+        vm32 = awkward.forth.ForthMachine32("x len")
 
 def test_read_compilation_2():
     test_read_compilation()
@@ -4538,50 +4538,50 @@ def test_read_compilation_999():
     test_read_compilation()
 
 
-def test_everything_else_compilation():
-    source = (
-        "\n".join(
-            [
-                "dup",
-                "drop",
-                "swap",
-                "over",
-                "rot",
-                "nip",
-                "tuck",
-                "+",
-                "-",
-                "*",
-                "/",
-                "mod",
-                "/mod",
-                "negate",
-                "1+",
-                "1-",
-                "abs",
-                "min",
-                "max",
-                "=",
-                "<>",
-                ">",
-                ">=",
-                "<",
-                "<=",
-                "0=",
-                "invert",
-                "and",
-                "or",
-                "xor",
-                "lshift",
-                "rshift",
-                "false",
-                "true",
-            ]
-        )
-        + "\n"
-    )
-    vm32 = awkward.forth.ForthMachine32(source)
-    assert vm32.decompiled == source
+# def test_everything_else_compilation():
+#     source = (
+#         "\n".join(
+#             [
+#                 "dup",
+#                 "drop",
+#                 "swap",
+#                 "over",
+#                 "rot",
+#                 "nip",
+#                 "tuck",
+#                 "+",
+#                 "-",
+#                 "*",
+#                 "/",
+#                 "mod",
+#                 "/mod",
+#                 "negate",
+#                 "1+",
+#                 "1-",
+#                 "abs",
+#                 "min",
+#                 "max",
+#                 "=",
+#                 "<>",
+#                 ">",
+#                 ">=",
+#                 "<",
+#                 "<=",
+#                 "0=",
+#                 "invert",
+#                 "and",
+#                 "or",
+#                 "xor",
+#                 "lshift",
+#                 "rshift",
+#                 "false",
+#                 "true",
+#             ]
+#         )
+#         + "\n"
+#     )
+#     vm32 = awkward.forth.ForthMachine32(source)
+#     assert vm32.decompiled == source
 
 
 # def test_input_output():

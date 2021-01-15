@@ -1391,6 +1391,8 @@ namespace awkward {
                                      const std::vector<std::pair<int64_t, int64_t>>& linecol) {
     std::vector<std::vector<I>> dictionary;
 
+    input_names_.push_back("x");
+
     // Start recursive parsing.
     std::vector<I> bytecodes;
     dictionary.push_back(bytecodes);
