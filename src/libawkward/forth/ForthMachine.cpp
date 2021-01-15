@@ -1433,6 +1433,13 @@ namespace awkward {
       std::string word = tokenized[pos];
 
       if (is_input(word)) {
+        int64_t input_index = -1;
+        for (;  input_index < (int64_t)input_names_.size();  input_index++) {
+          if (input_names_[input_index] == word) {
+            break;
+          }
+        }
+
         bytecodes.push_back(CODE_LEN_INPUT);
         bytecodes.push_back(0);
 
