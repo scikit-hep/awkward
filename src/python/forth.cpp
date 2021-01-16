@@ -167,6 +167,10 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
           })
           .def("stack_clear", &ak::ForthMachineOf<T, I>::stack_clear)
           .def_property_readonly("variables", &ak::ForthMachineOf<T, I>::variables)
+          .def("input_position", [](ak::ForthMachineOf<T, I>& self,
+                                    const std::string& name) -> int64_t {
+              return self.input_position_at(name);
+          })
           .def_property_readonly("outputs",
             [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self) -> py::dict {
               py::dict out;
@@ -184,7 +188,7 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                 std::string name = pair.first.cast<std::string>();
                 py::buffer obj = pair.second.cast<py::buffer>();
                 py::buffer_info info = obj.request(true);
-                int64_t length = 1;
+                int64_t length = info.itemsize;
                 for (auto x : info.shape) {
                   length *= x;
                 }
@@ -241,7 +245,7 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                 std::string name = pair.first.cast<std::string>();
                 py::buffer obj = pair.second.cast<py::buffer>();
                 py::buffer_info info = obj.request(true);
-                int64_t length = 1;
+                int64_t length = info.itemsize;
                 for (auto x : info.shape) {
                   length *= x;
                 }
@@ -337,6 +341,10 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
            , py::arg("raise_division_by_zero") = true)
           .def_property_readonly("current_bytecode_position",
               &ak::ForthMachineOf<T, I>::current_bytecode_position)
+          .def_property_readonly("current_recursion_depth",
+              &ak::ForthMachineOf<T, I>::current_recursion_depth)
+          .def_property_readonly("current_instruction",
+              &ak::ForthMachineOf<T, I>::current_instruction)
           .def("count_reset",
               &ak::ForthMachineOf<T, I>::count_reset)
           .def_property_readonly("count_instructions",

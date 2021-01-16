@@ -738,8 +738,42 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::input_position_at(const std::string& name) const {
+    if (!is_ready()) {
+      throw std::invalid_argument(
+        std::string("need to 'begin' or 'run' to assign inputs") + FILENAME(__LINE__)
+      );
+    }
+    for (int64_t i = 0;  i < input_names_.size();  i++) {
+      if (input_names_[i] == name) {
+        return current_inputs_[i].get()->pos();
+      }
+    }
+    throw std::invalid_argument(
+      std::string("variable not found: ") + name + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::input_position_at(int64_t index) const noexcept {
+    if (!is_ready()) {
+      return -1;
+    }
+    else {
+      return current_inputs_[index].get()->pos();
+    }
+  }
+
+  template <typename T, typename I>
   const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>
   ForthMachineOf<T, I>::outputs() const {
+    if (!is_ready()) {
+      throw std::invalid_argument(
+        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
+      );
+    }
     std::map<std::string, std::shared_ptr<ForthOutputBuffer>> out;
     for (int64_t i = 0;  i < output_names_.size();  i++) {
       out[output_names_[i]] = current_outputs_[i];
@@ -1244,6 +1278,33 @@ namespace awkward {
     }
     else {
       return current_where_[recursion_current_depth_ - 1];
+    }
+  }
+
+  template <typename T, typename I>
+  int64_t
+  ForthMachineOf<T, I>::current_recursion_depth() const noexcept {
+    if (recursion_target_depth_.empty()) {
+      return -1;
+    }
+    else {
+      return recursion_current_depth_ - recursion_target_depth_.top();
+    }
+  }
+
+  template <typename T, typename I>
+  const std::string
+  ForthMachineOf<T, I>::current_instruction() const {
+    if (recursion_current_depth_ == 0) {
+      throw std::invalid_argument(
+        "'is done' in AwkwardForth runtime: reached the end of the program; "
+        "call 'begin' to 'step' again (note: check 'is_done')"
+        + FILENAME(__LINE__)
+      );
+    }
+    else {
+      int64_t bytecode_position = current_where_[recursion_current_depth_ - 1];
+      return decompiled_at(bytecode_position, "");
     }
   }
 
@@ -2450,20 +2511,67 @@ namespace awkward {
                 break;                                                         \
               }
 
+              # define WRITE_TO_STACK_SWAP(TYPE, SWAP) {                       \
+                TYPE* ptr = reinterpret_cast<TYPE*>(                           \
+                    current_inputs_[in_num].get()->read(                       \
+                        num_items * sizeof(TYPE), current_error_));            \
+                if (current_error_ != util::ForthError::none) {                \
+                  return;                                                      \
+                }                                                              \
+                for (int64_t i = 0;  i < num_items;  i++) {                    \
+                  TYPE value = ptr[i];                                         \
+                  if (byteswap) {                                              \
+                    SWAP(1, &value);                                           \
+                  }                                                            \
+                  if (stack_cannot_push()) {                                   \
+                    current_error_ = util::ForthError::stack_overflow;         \
+                    return;                                                    \
+                  }                                                            \
+                  stack_push(value);                                           \
+                }                                                              \
+                break;                                                         \
+              }
+
+              # define WRITE_TO_STACK_SWAP_INTP(TYPE) {                        \
+                TYPE* ptr = reinterpret_cast<TYPE*>(                           \
+                    current_inputs_[in_num].get()->read(                       \
+                        num_items * sizeof(TYPE), current_error_));            \
+                if (current_error_ != util::ForthError::none) {                \
+                  return;                                                      \
+                }                                                              \
+                for (int64_t i = 0;  i < num_items;  i++) {                    \
+                  TYPE value = ptr[i];                                         \
+                  if (byteswap) {                                              \
+                    if (sizeof(ssize_t) == 4) {                                \
+                      byteswap32(1, &value);                                   \
+                    }                                                          \
+                    else {                                                     \
+                      byteswap64(1, &value);                                   \
+                    }                                                          \
+                  }                                                            \
+                  if (stack_cannot_push()) {                                   \
+                    current_error_ = util::ForthError::stack_overflow;         \
+                    return;                                                    \
+                  }                                                            \
+                  stack_push(value);                                           \
+                }                                                              \
+                break;                                                         \
+              }
+
             switch (~bytecode & READ_MASK) {
               case READ_BOOL:    WRITE_TO_STACK(bool)
               case READ_INT8:    WRITE_TO_STACK(int8_t)
-              case READ_INT16:   WRITE_TO_STACK(int16_t)
-              case READ_INT32:   WRITE_TO_STACK(int32_t)
-              case READ_INT64:   WRITE_TO_STACK(int64_t)
-              case READ_INTP:    WRITE_TO_STACK(ssize_t)
+              case READ_INT16:   WRITE_TO_STACK_SWAP(int16_t, byteswap16)
+              case READ_INT32:   WRITE_TO_STACK_SWAP(int32_t, byteswap32)
+              case READ_INT64:   WRITE_TO_STACK_SWAP(int64_t, byteswap64)
+              case READ_INTP:    WRITE_TO_STACK_SWAP_INTP(ssize_t)
               case READ_UINT8:   WRITE_TO_STACK(uint8_t)
-              case READ_UINT16:  WRITE_TO_STACK(uint16_t)
-              case READ_UINT32:  WRITE_TO_STACK(uint32_t)
-              case READ_UINT64:  WRITE_TO_STACK(uint64_t)
-              case READ_UINTP:   WRITE_TO_STACK(size_t)
-              case READ_FLOAT32: WRITE_TO_STACK(float)
-              case READ_FLOAT64: WRITE_TO_STACK(double)
+              case READ_UINT16:  WRITE_TO_STACK_SWAP(uint16_t, byteswap16)
+              case READ_UINT32:  WRITE_TO_STACK_SWAP(uint32_t, byteswap32)
+              case READ_UINT64:  WRITE_TO_STACK_SWAP(uint64_t, byteswap64)
+              case READ_UINTP:   WRITE_TO_STACK_SWAP_INTP(size_t)
+              case READ_FLOAT32: WRITE_TO_STACK_SWAP(float, byteswap32)
+              case READ_FLOAT64: WRITE_TO_STACK_SWAP(double, byteswap64)
             }
 
           } // end if not READ_DIRECT (i.e. read to stack)

@@ -588,7 +588,7 @@ def test_everything_else_compilation():
     assert vm32.decompiled == source
 
 
-def test_input_output():
+def test_input_output_type():
     vm32 = awkward.forth.ForthMachine32("input x output y int32")
     vm32.begin({"x": np.array([1, 2, 3])})
     assert isinstance(vm32["y"], ak.layout.NumpyArray)
@@ -1905,3 +1905,160 @@ def test_gforth_lshift_rshift():
     vm32.run()
     # assert vm32.stack == [2305843009213693951]
     assert vm32.stack == [-1]
+
+
+def test_input_output():
+    vm32 = awkward.forth.ForthMachine32(
+        """
+output y float32
+4 3 2 1
+y <- stack
+y <- stack
+y <- stack
+y <- stack
+"""
+    )
+    vm32.run()
+    assert vm32.stack == []
+    assert ak.to_list(vm32["y"]) == [1, 2, 3, 4]
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+output y float32
+4 3 2 1
+y <- stack
+y <- stack
+1 y rewind
+y <- stack
+y <- stack
+"""
+    )
+    vm32.run()
+    assert ak.to_list(vm32["y"]) == [1, 3, 4]
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x
+x i-> stack
+x i-> stack
+-8 x skip
+x i-> stack
+x i-> stack
+x i-> stack
+x i-> stack
+"""
+    )
+    vm32.run({"x": np.array([1, 2, 3, 4], np.int32)})
+    assert vm32.stack == [1, 2, 1, 2, 3, 4]
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x
+4 x #i-> stack
+"""
+    )
+    vm32.run({"x": np.array([1, 2, 3, 4], np.int32)})
+    assert vm32.stack == [1, 2, 3, 4]
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x
+4 x #!i-> stack
+"""
+    )
+    vm32.run({"x": np.array([1, 2, 3, 4], np.int32)})
+    assert vm32.stack == [16777216, 33554432, 50331648, 67108864]
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x
+8 x #h-> stack
+"""
+    )
+    vm32.run({"x": np.array([1, 2, 3, 4], np.int32)})
+    assert vm32.stack == [1, 0, 2, 0, 3, 0, 4, 0]
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x output y float32
+x i-> y
+x i-> y
+x i-> y
+x i-> y
+"""
+    )
+    vm32.run({"x": np.array([1, 2, 3, 4], np.int32)})
+    assert vm32.stack == []
+    assert ak.to_list(vm32["y"]) == [1, 2, 3, 4]
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x output y float32
+4 x #i-> y
+"""
+    )
+    vm32.run({"x": np.array([1, 2, 3, 4], np.int32)})
+    assert vm32.stack == []
+    assert ak.to_list(vm32["y"]) == [1, 2, 3, 4]
+
+
+def test_uproot():
+    uproot = pytest.importorskip("uproot")
+    skhep_testdata = pytest.importorskip("skhep_testdata")
+
+    vector_of_vectors = uproot.open(
+        skhep_testdata.data_path("uproot-vectorVectorDouble.root")
+    )["t/x"]
+    inputs = {
+        "data": np.array(vector_of_vectors.basket(0).data),
+        "byte_offsets": vector_of_vectors.basket(0).byte_offsets,
+    }
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input data
+input byte_offsets
+output outer-offsets int32
+output inner-offsets int32
+output content-data float64
+variable length
+variable outer-last
+variable inner-last
+
+0 length !
+0 outer-last !
+0 inner-last !
+outer-last @ outer-offsets <- stack
+inner-last @ inner-offsets <- stack
+
+begin
+  byte_offsets i-> stack
+  6 + data seek
+  1 length +!
+
+  data !i-> stack dup outer-last +!
+  outer-last @ outer-offsets <- stack
+
+  0 do
+    data !i-> stack dup inner-last +!
+    inner-last @ inner-offsets <- stack
+
+    data #!d-> content-data
+  loop
+again
+"""
+    )
+    vm32.run(inputs, raise_read_beyond=False, raise_seek_beyond=False)
+    assert ak.to_list(vm32["outer-offsets"]) == [0, 0, 2, 5, 6, 9]
+    assert ak.to_list(vm32["inner-offsets"]) == [0, 0, 0, 1, 1, 3, 6, 7, 8, 9]
+    assert ak.to_list(vm32["content-data"]) == [
+        10,
+        10,
+        20,
+        20,
+        -21,
+        -22,
+        200,
+        -201,
+        202,
+    ]

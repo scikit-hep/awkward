@@ -131,6 +131,14 @@ namespace awkward {
       variable_at(int64_t index) const noexcept;
 
     /// @brief HERE
+    int64_t
+      input_position_at(const std::string& name) const;
+
+    /// @brief HERE
+    int64_t
+      input_position_at(int64_t index) const noexcept;
+
+    /// @brief HERE
     const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>
       outputs() const;
 
@@ -237,6 +245,14 @@ namespace awkward {
     /// @brief HERE
     int64_t
       current_bytecode_position() const noexcept;
+
+    /// @brief HERE
+    int64_t
+      current_recursion_depth() const noexcept;
+
+    /// @brief HERE
+    const std::string
+      current_instruction() const;
 
     /// @brief HERE
     void
