@@ -12,8 +12,9 @@
 #include "awkward/python/types.h"
 #include "awkward/python/forms.h"
 #include "awkward/python/virtual.h"
-#include "awkward/python/io.h"
 #include "awkward/python/partition.h"
+#include "awkward/python/io.h"
+#include "awkward/python/forth.h"
 
 namespace py = pybind11;
 PYBIND11_MODULE(_ext, m) {
@@ -123,15 +124,20 @@ PYBIND11_MODULE(_ext, m) {
   make_SliceGenerator(m, "SliceGenerator");
   make_PyArrayCache(m, "ArrayCache");
 
+  ////////// partition.h
+
+  make_PartitionedArray(m, "PartitionedArray");
+  make_IrregularlyPartitionedArray(m, "IrregularlyPartitionedArray");
+
   ////////// io.h
 
   make_fromjson(m, "fromjson");
   make_fromjsonfile(m, "fromjsonfile");
   make_uproot_issue_90(m);
 
-  ////////// partition.h
+  ////////// forth.h
 
-  make_PartitionedArray(m, "PartitionedArray");
-  make_IrregularlyPartitionedArray(m, "IrregularlyPartitionedArray");
+  make_ForthMachineOf<int32_t, int32_t>(m, "ForthMachine32");
+  make_ForthMachineOf<int64_t, int32_t>(m, "ForthMachine64");
 
 }

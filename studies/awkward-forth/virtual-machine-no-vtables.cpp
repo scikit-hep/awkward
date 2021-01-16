@@ -111,6 +111,12 @@ public:
     , length_(length)
     , pos_(0) { }
 
+  // ForthInputBuffer(const ForthInputBuffer& other)
+  //   : ptr_(other.ptr_)
+  //   , offset_(other.offset_)
+  //   , length_(other.length_)
+  //   , pos_(other.pos_) { }
+
   void* read(int64_t num_bytes, ForthError& err) noexcept {
     int64_t next = pos_ + num_bytes;
     if (next > length_) {
@@ -163,12 +169,14 @@ private:
 };
 
 
-class ForthOutputBuffer {
+template <typename OUT>
+class ForthOutputBufferOf {
 public:
-  ForthOutputBuffer(int64_t initial=1024, double resize=1.5)
+  ForthOutputBufferOf(int64_t initial=1024, double resize=1.5)
     : length_(0)
     , reserved_(initial)
-    , resize_(resize) { }
+    , resize_(resize)
+    , ptr_(new OUT[initial], array_deleter<OUT>()) { }
 
   int64_t len() const {
     return length_;
@@ -184,81 +192,35 @@ public:
     }
   }
 
-  virtual std::shared_ptr<void> ptr() const noexcept = 0;
-
-  virtual void write_one_bool(bool value, bool byteswap) noexcept = 0;
-  virtual void write_one_int8(int8_t value, bool byteswap) noexcept = 0;
-  virtual void write_one_int16(int16_t value, bool byteswap) noexcept = 0;
-  virtual void write_one_int32(int32_t value, bool byteswap) noexcept = 0;
-  virtual void write_one_int64(int64_t value, bool byteswap) noexcept = 0;
-  virtual void write_one_intp(ssize_t value, bool byteswap) noexcept = 0;
-  virtual void write_one_uint8(uint8_t value, bool byteswap) noexcept = 0;
-  virtual void write_one_uint16(uint16_t value, bool byteswap) noexcept = 0;
-  virtual void write_one_uint32(uint32_t value, bool byteswap) noexcept = 0;
-  virtual void write_one_uint64(uint64_t value, bool byteswap) noexcept = 0;
-  virtual void write_one_uintp(size_t value, bool byteswap) noexcept = 0;
-  virtual void write_one_float32(float value, bool byteswap) noexcept = 0;
-  virtual void write_one_float64(double value, bool byteswap) noexcept = 0;
-
-  virtual void write_bool(int64_t num_items, bool* values, bool byteswap) noexcept = 0;
-  virtual void write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept = 0;
-  virtual void write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept = 0;
-  virtual void write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept = 0;
-  virtual void write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept = 0;
-  virtual void write_intp(int64_t num_items, ssize_t* values, bool byteswap) noexcept = 0;
-  virtual void write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept = 0;
-  virtual void write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept = 0;
-  virtual void write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept = 0;
-  virtual void write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept = 0;
-  virtual void write_uintp(int64_t num_items, size_t* values, bool byteswap) noexcept = 0;
-  virtual void write_float32(int64_t num_items, float* values, bool byteswap) noexcept = 0;
-  virtual void write_float64(int64_t num_items, double* values, bool byteswap) noexcept = 0;
-
-  virtual const std::string tostring() const = 0;
-
-protected:
-  int64_t length_;
-  int64_t reserved_;
-  double resize_;
-};
-
-
-template <typename OUT>
-class ForthOutputBufferOf : public ForthOutputBuffer {
-public:
-  ForthOutputBufferOf(int64_t initial=1024, double resize=1.5)
-    : ForthOutputBuffer(initial, resize)
-    , ptr_(new OUT[initial], array_deleter<OUT>()) { }
-
-  std::shared_ptr<void> ptr() const noexcept override {
+  std::shared_ptr<void> ptr() const noexcept {
     return ptr_;
   }
 
-  void write_one_bool(bool value, bool byteswap) noexcept override {
+  void write_one_bool(bool value, bool byteswap) noexcept {
     write_one(value);
   }
-  void write_one_int8(int8_t value, bool byteswap) noexcept override {
+  void write_one_int8(int8_t value, bool byteswap) noexcept {
     write_one(value);
   }
-  void write_one_int16(int16_t value, bool byteswap) noexcept override {
+  void write_one_int16(int16_t value, bool byteswap) noexcept {
     if (byteswap) {
       byteswap16(1, &value);
     }
     write_one(value);
   }
-  void write_one_int32(int32_t value, bool byteswap) noexcept override {
+  void write_one_int32(int32_t value, bool byteswap) noexcept {
     if (byteswap) {
       byteswap32(1, &value);
     }
     write_one(value);
   }
-  void write_one_int64(int64_t value, bool byteswap) noexcept override {
+  void write_one_int64(int64_t value, bool byteswap) noexcept {
     if (byteswap) {
       byteswap64(1, &value);
     }
     write_one(value);
   }
-  void write_one_intp(ssize_t value, bool byteswap) noexcept override {
+  void write_one_intp(ssize_t value, bool byteswap) noexcept {
     if (byteswap) {
       if (sizeof(ssize_t) == 4) {
         byteswap32(1, &value);
@@ -269,28 +231,28 @@ public:
     }
     write_one(value);
   }
-  void write_one_uint8(uint8_t value, bool byteswap) noexcept override {
+  void write_one_uint8(uint8_t value, bool byteswap) noexcept {
     write_one(value);
   }
-  void write_one_uint16(uint16_t value, bool byteswap) noexcept override {
+  void write_one_uint16(uint16_t value, bool byteswap) noexcept {
     if (byteswap) {
       byteswap16(1, &value);
     }
     write_one(value);
   }
-  void write_one_uint32(uint32_t value, bool byteswap) noexcept override {
+  void write_one_uint32(uint32_t value, bool byteswap) noexcept {
     if (byteswap) {
       byteswap32(1, &value);
     }
     write_one(value);
   }
-  void write_one_uint64(uint64_t value, bool byteswap) noexcept override {
+  void write_one_uint64(uint64_t value, bool byteswap) noexcept {
     if (byteswap) {
       byteswap64(1, &value);
     }
     write_one(value);
   }
-  void write_one_uintp(size_t value, bool byteswap) noexcept override {
+  void write_one_uintp(size_t value, bool byteswap) noexcept {
     if (byteswap) {
       if (sizeof(size_t) == 4) {
         byteswap32(1, &value);
@@ -301,34 +263,34 @@ public:
     }
     write_one(value);
   }
-  void write_one_float32(float value, bool byteswap) noexcept override {
+  void write_one_float32(float value, bool byteswap) noexcept {
     if (byteswap) {
       byteswap32(1, &value);
     }
     write_one(value);
   }
-  void write_one_float64(double value, bool byteswap) noexcept override {
+  void write_one_float64(double value, bool byteswap) noexcept {
     if (byteswap) {
       byteswap64(1, &value);
     }
     write_one(value);
   }
 
-  void write_bool(int64_t num_items, bool* values, bool byteswap) noexcept override;
-  void write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept override;
-  void write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept override;
-  void write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept override;
-  void write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept override;
-  void write_intp(int64_t num_items, ssize_t* values, bool byteswap) noexcept override;
-  void write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept override;
-  void write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept override;
-  void write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept override;
-  void write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept override;
-  void write_uintp(int64_t num_items, size_t* values, bool byteswap) noexcept override;
-  void write_float32(int64_t num_items, float* values, bool byteswap) noexcept override;
-  void write_float64(int64_t num_items, double* values, bool byteswap) noexcept override;
+  void write_bool(int64_t num_items, bool* values, bool byteswap) noexcept;
+  void write_int8(int64_t num_items, int8_t* values, bool byteswap) noexcept;
+  void write_int16(int64_t num_items, int16_t* values, bool byteswap) noexcept;
+  void write_int32(int64_t num_items, int32_t* values, bool byteswap) noexcept;
+  void write_int64(int64_t num_items, int64_t* values, bool byteswap) noexcept;
+  void write_intp(int64_t num_items, ssize_t* values, bool byteswap) noexcept;
+  void write_uint8(int64_t num_items, uint8_t* values, bool byteswap) noexcept;
+  void write_uint16(int64_t num_items, uint16_t* values, bool byteswap) noexcept;
+  void write_uint32(int64_t num_items, uint32_t* values, bool byteswap) noexcept;
+  void write_uint64(int64_t num_items, uint64_t* values, bool byteswap) noexcept;
+  void write_uintp(int64_t num_items, size_t* values, bool byteswap) noexcept;
+  void write_float32(int64_t num_items, float* values, bool byteswap) noexcept;
+  void write_float64(int64_t num_items, double* values, bool byteswap) noexcept;
 
-  const std::string tostring() const override {
+  const std::string tostring() const {
     std::stringstream out;
     if (length_ <= 20) {
       for (int64_t i = 0;  i < length_;  i++) {
@@ -388,6 +350,9 @@ private:
     length_ = next;
   }
 
+  int64_t length_;
+  int64_t reserved_;
+  double resize_;
   std::shared_ptr<OUT> ptr_;
 };
 
@@ -680,21 +645,36 @@ ForthOutputBufferOf<double>::write_float64(int64_t num_items, double* values, bo
 #define PARSER_DIRECT 1
 #define PARSER_REPEATED 2
 #define PARSER_BIGENDIAN 4
-#define PARSER_MASK ~(1 + 2 + 4)
 // parser sequential values (starting in the fourth bit)
-#define PARSER_BOOL 8
-#define PARSER_INT8 16
-#define PARSER_INT16 24
-#define PARSER_INT32 32
-#define PARSER_INT64 40
-#define PARSER_INTP 48
-#define PARSER_UINT8 56
-#define PARSER_UINT16 64
-#define PARSER_UINT32 72
-#define PARSER_UINT64 80
-#define PARSER_UINTP 88
-#define PARSER_FLOAT32 96
-#define PARSER_FLOAT64 104
+#define PARSER_MASK (~(-0x80) & (-0x8))
+#define PARSER_BOOL (0x8 * 1)
+#define PARSER_INT8 (0x8 * 2)
+#define PARSER_INT16 (0x8 * 3)
+#define PARSER_INT32 (0x8 * 4)
+#define PARSER_INT64 (0x8 * 5)
+#define PARSER_INTP (0x8 * 6)
+#define PARSER_UINT8 (0x8 * 7)
+#define PARSER_UINT16 (0x8 * 8)
+#define PARSER_UINT32 (0x8 * 9)
+#define PARSER_UINT64 (0x8 * 10)
+#define PARSER_UINTP (0x8 * 11)
+#define PARSER_FLOAT32 (0x8 * 12)
+#define PARSER_FLOAT64 (0x8 * 13)
+// writer sequential values (starting in the eighth bit)
+#define WRITER_MASK (-0x80)
+#define WRITER_BOOL (0x80 * 1)
+#define WRITER_INT8 (0x80 * 2)
+#define WRITER_INT16 (0x80 * 3)
+#define WRITER_INT32 (0x80 * 4)
+#define WRITER_INT64 (0x80 * 5)
+#define WRITER_INTP (0x80 * 6)
+#define WRITER_UINT8 (0x80 * 7)
+#define WRITER_UINT16 (0x80 * 8)
+#define WRITER_UINT32 (0x80 * 9)
+#define WRITER_UINT64 (0x80 * 10)
+#define WRITER_UINTP (0x80 * 11)
+#define WRITER_FLOAT32 (0x80 * 12)
+#define WRITER_FLOAT64 (0x80 * 13)
 
 // instructions from special parsing rules
 #define INSTR_LITERAL 0
@@ -834,7 +814,17 @@ public:
     , stack_size_(stack_size)
 
     , current_inputs_()
-    , current_outputs_()
+    , current_outputs_bool_()
+    , current_outputs_int8_()
+    , current_outputs_int16_()
+    , current_outputs_int32_()
+    , current_outputs_int64_()
+    , current_outputs_uint8_()
+    , current_outputs_uint16_()
+    , current_outputs_uint32_()
+    , current_outputs_uint64_()
+    , current_outputs_float32_()
+    , current_outputs_float64_()
 
     , current_which_(new int64_t[recursion_depth])
     , current_where_(new int64_t[recursion_depth])
@@ -897,23 +887,23 @@ public:
     );
   }
 
-  const std::map<std::string, std::shared_ptr<ForthOutputBuffer>> run() {
-    std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
+  const std::map<std::string, ForthOutputBufferOf<int32_t>> run() {
+    std::map<std::string, ForthInputBuffer> inputs;
     std::set<ForthError> ignore;
     return run(inputs, ignore);
   }
 
-  const std::map<std::string, std::shared_ptr<ForthOutputBuffer>> run(
-      const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs) {
+  const std::map<std::string, ForthOutputBufferOf<int32_t>> run(
+      const std::map<std::string, ForthInputBuffer>& inputs) {
     std::set<ForthError> ignore;
     return run(inputs, ignore);
   }
 
-  const std::map<std::string, std::shared_ptr<ForthOutputBuffer>> run(
-      const std::map<std::string, std::shared_ptr<ForthInputBuffer>>& inputs,
+  const std::map<std::string, ForthOutputBufferOf<int32_t>> run(
+      const std::map<std::string, ForthInputBuffer>& inputs,
       const std::set<ForthError>& ignore) {
 
-    current_inputs_ = std::vector<std::shared_ptr<ForthInputBuffer>>();
+    current_inputs_ = std::vector<ForthInputBuffer>();
     for (auto name : input_names_) {
       auto it = inputs.find(name);
       if (it == inputs.end()) {
@@ -924,67 +914,44 @@ public:
       current_inputs_.push_back(it->second);
     }
 
-    std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs;
-    current_outputs_ = std::vector<std::shared_ptr<ForthOutputBuffer>>();
+    current_outputs_int32_ = std::vector<ForthOutputBufferOf<int32_t>>();
     for (int64_t i = 0;  i < output_names_.size();  i++) {
       std::string name = output_names_[i];
-      std::shared_ptr<ForthOutputBuffer> out;
       switch (output_dtypes_[i]) {
         case dtype::boolean: {
-          out = std::make_shared<ForthOutputBufferOf<bool>>(
-                    output_initial_size_, output_resize_);
-          break;
+          throw std::runtime_error("unhandled ForthOutputBuffer type");
         }
         case dtype::int8: {
-          out = std::make_shared<ForthOutputBufferOf<int8_t>>(
-                    output_initial_size_, output_resize_);
-          break;
+          throw std::runtime_error("unhandled ForthOutputBuffer type");
         }
         case dtype::int16: {
-          out = std::make_shared<ForthOutputBufferOf<int16_t>>(
-                    output_initial_size_, output_resize_);
-          break;
+          throw std::runtime_error("unhandled ForthOutputBuffer type");
         }
         case dtype::int32: {
-          out = std::make_shared<ForthOutputBufferOf<int32_t>>(
-                    output_initial_size_, output_resize_);
+          current_outputs_int32_.push_back(ForthOutputBufferOf<int32_t>(output_initial_size_, output_resize_));
           break;
         }
         case dtype::int64: {
-          out = std::make_shared<ForthOutputBufferOf<int64_t>>(
-                    output_initial_size_, output_resize_);
-          break;
+          throw std::runtime_error("unhandled ForthOutputBuffer type");
         }
         case dtype::uint8: {
-          out = std::make_shared<ForthOutputBufferOf<uint8_t>>(
-                    output_initial_size_, output_resize_);
-          break;
+          throw std::runtime_error("unhandled ForthOutputBuffer type");
         }
         case dtype::uint16: {
-          out = std::make_shared<ForthOutputBufferOf<uint16_t>>(
-                    output_initial_size_, output_resize_);
-          break;
+          throw std::runtime_error("unhandled ForthOutputBuffer type");
         }
         case dtype::uint32: {
-          out = std::make_shared<ForthOutputBufferOf<uint32_t>>(
-                    output_initial_size_, output_resize_);
-          break;
+          throw std::runtime_error("unhandled ForthOutputBuffer type");
         }
         case dtype::uint64: {
-          out = std::make_shared<ForthOutputBufferOf<uint64_t>>(
-                    output_initial_size_, output_resize_);
-          break;
+          throw std::runtime_error("unhandled ForthOutputBuffer type");
         }
         // case dtype::float16: { }
         case dtype::float32: {
-          out = std::make_shared<ForthOutputBufferOf<float>>(
-                    output_initial_size_, output_resize_);
-          break;
+          throw std::runtime_error("unhandled ForthOutputBuffer type");
         }
         case dtype::float64: {
-          out = std::make_shared<ForthOutputBufferOf<double>>(
-                    output_initial_size_, output_resize_);
-          break;
+          throw std::runtime_error("unhandled ForthOutputBuffer type");
         }
         // case dtype::float128: { }
         // case dtype::complex64: { }
@@ -996,8 +963,6 @@ public:
           throw std::runtime_error("unhandled ForthOutputBuffer type");
         }
       }
-      outputs[name] = out;
-      current_outputs_.push_back(out);
     }
 
     stack_clear();
@@ -1051,12 +1016,18 @@ public:
       }
     }
 
+    std::map<std::string, ForthOutputBufferOf<int32_t>> outputs;
+    for (int64_t i = 0;  i < output_names_.size();  i++) {
+      std::string name = output_names_[i];
+      outputs[name] = current_outputs_int32_[i];
+    }
+
     return outputs;
   }
 
   const std::string tostring(
-        const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>& outputs =
-            std::map<std::string, std::shared_ptr<ForthOutputBuffer>>()
+        const std::map<std::string, ForthOutputBufferOf<int32_t>>& outputs =
+            std::map<std::string, ForthOutputBufferOf<int32_t>>()
   ) {
     std::stringstream out;
     bool multiline = false;
@@ -1117,7 +1088,7 @@ public:
     if (!outputs.empty()) {
       out << "Outputs:" << std::endl;
       for (auto pair : outputs) {
-        out << "    " << pair.first << ": " << pair.second.get()->tostring() << std::endl;
+        out << "    " << pair.first << ": " << pair.second.tostring() << std::endl;
       }
     }
     out << "Time (ns): " << count_nanoseconds_
@@ -1283,7 +1254,7 @@ private:
       instructions_offsets_.push_back(instructions_.size());
     }
 
-    std::cout << "(vtables version) Instructions: ";
+    std::cout << "(no vtables) Instructions: ";
     for (int64_t i = 0;  i < (int64_t)instructions_offsets_.size() - 1;  i++) {
       if (i != 0) {
         std::cout << ", ";
@@ -1366,7 +1337,7 @@ private:
           }
         }
 
-        pos = substop + 1;
+        pos + substop + 1;
       }
 
       else if (word == "\\") {
@@ -2011,6 +1982,7 @@ private:
               }
             }
             if (good) {
+              instruction |= WRITER_INT32;
               parser = parser.substr(1, parser.length() - 1);
             }
           }
@@ -2215,198 +2187,171 @@ private:
             instruction_pointer_where() += 1;
 
             switch (~instruction & PARSER_MASK) {
+              #define WRITE_DIRECTLY(TYPE, SUFFIX)                                                        \
+                TYPE* ptr = reinterpret_cast<TYPE*>(                                                      \
+                    current_inputs_[in_num].read(num_items * sizeof(TYPE), current_error_));       \
+                if (current_error_ != ForthError::none) {                                                 \
+                  return;                                                                                 \
+                }                                                                                         \
+                if (num_items == 1) {                                                                     \
+                  switch (~instruction & WRITER_MASK) {                                                   \
+                    case WRITER_BOOL: {                                                                   \
+                      current_outputs_bool_[out_num].write_one_##SUFFIX(*ptr, byteswap);           \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_INT8: {                                                                   \
+                      current_outputs_int8_[out_num].write_one_##SUFFIX(*ptr, byteswap);           \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_INT16: {                                                                  \
+                      current_outputs_int16_[out_num].write_one_##SUFFIX(*ptr, byteswap);          \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_INT32: {                                                                  \
+                      current_outputs_int32_[out_num].write_one_##SUFFIX(*ptr, byteswap);          \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_INT64: {                                                                  \
+                      current_outputs_int64_[out_num].write_one_##SUFFIX(*ptr, byteswap);          \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_UINT8: {                                                                  \
+                      current_outputs_uint8_[out_num].write_one_##SUFFIX(*ptr, byteswap);          \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_UINT16: {                                                                 \
+                      current_outputs_uint16_[out_num].write_one_##SUFFIX(*ptr, byteswap);         \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_UINT32: {                                                                 \
+                      current_outputs_uint32_[out_num].write_one_##SUFFIX(*ptr, byteswap);         \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_UINT64: {                                                                 \
+                      current_outputs_uint64_[out_num].write_one_##SUFFIX(*ptr, byteswap);         \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_FLOAT32: {                                                                \
+                      current_outputs_float32_[out_num].write_one_##SUFFIX(*ptr, byteswap);        \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_FLOAT64: {                                                                \
+                      current_outputs_float64_[out_num].write_one_##SUFFIX(*ptr, byteswap);        \
+                      break;                                                                              \
+                    }                                                                                     \
+                  }                                                                                       \
+                }                                                                                         \
+                else {                                                                                    \
+                  switch (~instruction & WRITER_MASK) {                                                   \
+                    case WRITER_BOOL: {                                                                   \
+                      current_outputs_bool_[out_num].write_##SUFFIX(num_items, ptr, byteswap);     \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_INT8: {                                                                   \
+                      current_outputs_int8_[out_num].write_##SUFFIX(num_items, ptr, byteswap);     \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_INT16: {                                                                  \
+                      current_outputs_int16_[out_num].write_##SUFFIX(num_items, ptr, byteswap);    \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_INT32: {                                                                  \
+                      current_outputs_int32_[out_num].write_##SUFFIX(num_items, ptr, byteswap);    \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_INT64: {                                                                  \
+                      current_outputs_int64_[out_num].write_##SUFFIX(num_items, ptr, byteswap);    \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_UINT8: {                                                                  \
+                      current_outputs_uint8_[out_num].write_##SUFFIX(num_items, ptr, byteswap);    \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_UINT16: {                                                                 \
+                      current_outputs_uint16_[out_num].write_##SUFFIX(num_items, ptr, byteswap);   \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_UINT32: {                                                                 \
+                      current_outputs_uint32_[out_num].write_##SUFFIX(num_items, ptr, byteswap);   \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_UINT64: {                                                                 \
+                      current_outputs_uint64_[out_num].write_##SUFFIX(num_items, ptr, byteswap);   \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_FLOAT32: {                                                                \
+                      current_outputs_float32_[out_num].write_##SUFFIX(num_items, ptr, byteswap);  \
+                      break;                                                                              \
+                    }                                                                                     \
+                    case WRITER_FLOAT64: {                                                                \
+                      current_outputs_float64_[out_num].write_##SUFFIX(num_items, ptr, byteswap);  \
+                      break;                                                                              \
+                    }                                                                                     \
+                  }                                                                                       \
+                }
+
               case PARSER_BOOL: {
-                bool* ptr = reinterpret_cast<bool*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(bool), current_error_));
-                if (current_error_ != ForthError::none) {
-                  return;
-                }
-                if (num_items == 1) {
-                  current_outputs_[out_num].get()->write_one_bool(*ptr, byteswap);
-                }
-                else {
-                  current_outputs_[out_num].get()->write_bool(num_items, ptr, byteswap);
-                }
+                WRITE_DIRECTLY(bool, bool)
                 break;
               }
 
               case PARSER_INT8: {
-                int8_t* ptr = reinterpret_cast<int8_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(int8_t), current_error_));
-                if (current_error_ != ForthError::none) {
-                  return;
-                }
-                if (num_items == 1) {
-                  current_outputs_[out_num].get()->write_one_int8(*ptr, byteswap);
-                }
-                else {
-                  current_outputs_[out_num].get()->write_int8(num_items, ptr, byteswap);
-                }
+                WRITE_DIRECTLY(int8_t, int8)
                 break;
               }
 
               case PARSER_INT16: {
-                int16_t* ptr = reinterpret_cast<int16_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(int16_t), current_error_));
-                if (current_error_ != ForthError::none) {
-                  return;
-                }
-                if (num_items == 1) {
-                  current_outputs_[out_num].get()->write_one_int16(*ptr, byteswap);
-                }
-                else {
-                  current_outputs_[out_num].get()->write_int16(num_items, ptr, byteswap);
-                }
+                WRITE_DIRECTLY(int16_t, int16)
                 break;
               }
 
               case PARSER_INT32: {
-                int32_t* ptr = reinterpret_cast<int32_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(int32_t), current_error_));
-                if (current_error_ != ForthError::none) {
-                  return;
-                }
-                if (num_items == 1) {
-                  current_outputs_[out_num].get()->write_one_int32(*ptr, byteswap);
-                }
-                else {
-                  current_outputs_[out_num].get()->write_int32(num_items, ptr, byteswap);
-                }
+                WRITE_DIRECTLY(int32_t, int32)
                 break;
               }
 
               case PARSER_INT64: {
-                int64_t* ptr = reinterpret_cast<int64_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(int64_t), current_error_));
-                if (current_error_ != ForthError::none) {
-                  return;
-                }
-                if (num_items == 1) {
-                  current_outputs_[out_num].get()->write_one_int64(*ptr, byteswap);
-                }
-                else {
-                  current_outputs_[out_num].get()->write_int64(num_items, ptr, byteswap);
-                }
+                WRITE_DIRECTLY(int64_t, int64)
                 break;
               }
 
               case PARSER_INTP: {
-                ssize_t* ptr = reinterpret_cast<ssize_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(ssize_t), current_error_));
-                if (current_error_ != ForthError::none) {
-                  return;
-                }
-                if (num_items == 1) {
-                  current_outputs_[out_num].get()->write_one_intp(*ptr, byteswap);
-                }
-                else {
-                  current_outputs_[out_num].get()->write_intp(num_items, ptr, byteswap);
-                }
+                WRITE_DIRECTLY(ssize_t, intp)
                 break;
               }
 
               case PARSER_UINT8: {
-                uint8_t* ptr = reinterpret_cast<uint8_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(uint8_t), current_error_));
-                if (current_error_ != ForthError::none) {
-                  return;
-                }
-                if (num_items == 1) {
-                  current_outputs_[out_num].get()->write_one_uint8(*ptr, byteswap);
-                }
-                else {
-                  current_outputs_[out_num].get()->write_uint8(num_items, ptr, byteswap);
-                }
+                WRITE_DIRECTLY(uint8_t, uint8)
                 break;
               }
 
               case PARSER_UINT16: {
-                uint16_t* ptr = reinterpret_cast<uint16_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(uint16_t), current_error_));
-                if (current_error_ != ForthError::none) {
-                  return;
-                }
-                if (num_items == 1) {
-                  current_outputs_[out_num].get()->write_one_uint16(*ptr, byteswap);
-                }
-                else {
-                  current_outputs_[out_num].get()->write_uint16(num_items, ptr, byteswap);
-                }
+                WRITE_DIRECTLY(uint16_t, uint16)
                 break;
               }
 
               case PARSER_UINT32: {
-                uint32_t* ptr = reinterpret_cast<uint32_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(uint32_t), current_error_));
-                if (current_error_ != ForthError::none) {
-                  return;
-                }
-                if (num_items == 1) {
-                  current_outputs_[out_num].get()->write_one_uint32(*ptr, byteswap);
-                }
-                else {
-                  current_outputs_[out_num].get()->write_uint32(num_items, ptr, byteswap);
-                }
+                WRITE_DIRECTLY(uint32_t, uint32)
                 break;
               }
 
               case PARSER_UINT64: {
-                uint64_t* ptr = reinterpret_cast<uint64_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(uint64_t), current_error_));
-                if (current_error_ != ForthError::none) {
-                  return;
-                }
-                if (num_items == 1) {
-                  current_outputs_[out_num].get()->write_one_uint64(*ptr, byteswap);
-                }
-                else {
-                  current_outputs_[out_num].get()->write_uint64(num_items, ptr, byteswap);
-                }
+                WRITE_DIRECTLY(uint64_t, uint64)
                 break;
               }
 
               case PARSER_UINTP: {
-                size_t* ptr = reinterpret_cast<size_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(size_t), current_error_));
-                if (current_error_ != ForthError::none) {
-                  return;
-                }
-                if (num_items == 1) {
-                  current_outputs_[out_num].get()->write_one_uintp(*ptr, byteswap);
-                }
-                else {
-                  current_outputs_[out_num].get()->write_uintp(num_items, ptr, byteswap);
-                }
+                WRITE_DIRECTLY(size_t, uintp)
                 break;
               }
 
               case PARSER_FLOAT32: {
-                float* ptr = reinterpret_cast<float*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(float), current_error_));
-                if (current_error_ != ForthError::none) {
-                  return;
-                }
-                if (num_items == 1) {
-                  current_outputs_[out_num].get()->write_one_float32(*ptr, byteswap);
-                }
-                else {
-                  current_outputs_[out_num].get()->write_float32(num_items, ptr, byteswap);
-                }
+                WRITE_DIRECTLY(float, float32)
                 break;
               }
 
               case PARSER_FLOAT64: {
-                double* ptr = reinterpret_cast<double*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(double), current_error_));
-                if (current_error_ != ForthError::none) {
-                  return;
-                }
-                if (num_items == 1) {
-                  current_outputs_[out_num].get()->write_one_float64(*ptr, byteswap);
-                }
-                else {
-                  current_outputs_[out_num].get()->write_float64(num_items, ptr, byteswap);
-                }
+                WRITE_DIRECTLY(double, float64)
                 break;
               }
             }
@@ -2417,7 +2362,7 @@ private:
             switch (~instruction & PARSER_MASK) {
               case PARSER_BOOL: {
                 bool* ptr = reinterpret_cast<bool*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(bool), current_error_));
+                    current_inputs_[in_num].read(num_items * sizeof(bool), current_error_));
                 if (current_error_ != ForthError::none) {
                   return;
                 }
@@ -2434,7 +2379,7 @@ private:
 
               case PARSER_INT8: {
                 int8_t* ptr = reinterpret_cast<int8_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(int8_t), current_error_));
+                    current_inputs_[in_num].read(num_items * sizeof(int8_t), current_error_));
                 if (current_error_ != ForthError::none) {
                   return;
                 }
@@ -2451,7 +2396,7 @@ private:
 
               case PARSER_INT16: {
                 int16_t* ptr = reinterpret_cast<int16_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(int16_t), current_error_));
+                    current_inputs_[in_num].read(num_items * sizeof(int16_t), current_error_));
                 if (current_error_ != ForthError::none) {
                   return;
                 }
@@ -2471,7 +2416,7 @@ private:
 
               case PARSER_INT32: {
                 int32_t* ptr = reinterpret_cast<int32_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(int32_t), current_error_));
+                    current_inputs_[in_num].read(num_items * sizeof(int32_t), current_error_));
                 if (current_error_ != ForthError::none) {
                   return;
                 }
@@ -2491,7 +2436,7 @@ private:
 
               case PARSER_INT64: {
                 int64_t* ptr = reinterpret_cast<int64_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(int64_t), current_error_));
+                    current_inputs_[in_num].read(num_items * sizeof(int64_t), current_error_));
                 if (current_error_ != ForthError::none) {
                   return;
                 }
@@ -2511,7 +2456,7 @@ private:
 
               case PARSER_INTP: {
                 ssize_t* ptr = reinterpret_cast<ssize_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(ssize_t), current_error_));
+                    current_inputs_[in_num].read(num_items * sizeof(ssize_t), current_error_));
                 if (current_error_ != ForthError::none) {
                   return;
                 }
@@ -2536,7 +2481,7 @@ private:
 
               case PARSER_UINT8: {
                 uint8_t* ptr = reinterpret_cast<uint8_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(uint8_t), current_error_));
+                    current_inputs_[in_num].read(num_items * sizeof(uint8_t), current_error_));
                 if (current_error_ != ForthError::none) {
                   return;
                 }
@@ -2553,7 +2498,7 @@ private:
 
               case PARSER_UINT16: {
                 uint16_t* ptr = reinterpret_cast<uint16_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(uint16_t), current_error_));
+                    current_inputs_[in_num].read(num_items * sizeof(uint16_t), current_error_));
                 if (current_error_ != ForthError::none) {
                   return;
                 }
@@ -2573,7 +2518,7 @@ private:
 
               case PARSER_UINT32: {
                 uint32_t* ptr = reinterpret_cast<uint32_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(uint32_t), current_error_));
+                    current_inputs_[in_num].read(num_items * sizeof(uint32_t), current_error_));
                 if (current_error_ != ForthError::none) {
                   return;
                 }
@@ -2593,7 +2538,7 @@ private:
 
               case PARSER_UINT64: {
                 uint64_t* ptr = reinterpret_cast<uint64_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(uint64_t), current_error_));
+                    current_inputs_[in_num].read(num_items * sizeof(uint64_t), current_error_));
                 if (current_error_ != ForthError::none) {
                   return;
                 }
@@ -2613,7 +2558,7 @@ private:
 
               case PARSER_UINTP: {
                 size_t* ptr = reinterpret_cast<size_t*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(size_t), current_error_));
+                    current_inputs_[in_num].read(num_items * sizeof(size_t), current_error_));
                 if (current_error_ != ForthError::none) {
                   return;
                 }
@@ -2638,7 +2583,7 @@ private:
 
               case PARSER_FLOAT32: {
                 float* ptr = reinterpret_cast<float*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(float), current_error_));
+                    current_inputs_[in_num].read(num_items * sizeof(float), current_error_));
                 if (current_error_ != ForthError::none) {
                   return;
                 }
@@ -2658,7 +2603,7 @@ private:
 
               case PARSER_FLOAT64: {
                 double* ptr = reinterpret_cast<double*>(
-                    current_inputs_[in_num].get()->read(num_items * sizeof(double), current_error_));
+                    current_inputs_[in_num].read(num_items * sizeof(double), current_error_));
                 if (current_error_ != ForthError::none) {
                   return;
                 }
@@ -2675,6 +2620,7 @@ private:
                 }
                 break;
               }
+
             }
           }
 
@@ -2879,7 +2825,7 @@ private:
                 current_error_ = ForthError::stack_overflow;
                 return;
               }
-              stack_push(current_inputs_[in_num].get()->len());
+              stack_push(current_inputs_[in_num].len());
               break;
             }
 
@@ -2890,7 +2836,7 @@ private:
                 current_error_ = ForthError::stack_overflow;
                 return;
               }
-              stack_push(current_inputs_[in_num].get()->pos());
+              stack_push(current_inputs_[in_num].pos());
               break;
             }
 
@@ -2901,7 +2847,7 @@ private:
                 current_error_ = ForthError::stack_overflow;
                 return;
               }
-              stack_push(current_inputs_[in_num].get()->end() ? -1 : 0);
+              stack_push(current_inputs_[in_num].end() ? -1 : 0);
               break;
             }
 
@@ -2912,7 +2858,7 @@ private:
                 current_error_ = ForthError::stack_underflow;
                 return;
               }
-              current_inputs_[in_num].get()->seek(stack_pop(), current_error_);
+              current_inputs_[in_num].seek(stack_pop(), current_error_);
               if (current_error_ != ForthError::none) {
                 return;
               }
@@ -2926,7 +2872,7 @@ private:
                 current_error_ = ForthError::stack_underflow;
                 return;
               }
-              current_inputs_[in_num].get()->skip(stack_pop(), current_error_);
+              current_inputs_[in_num].skip(stack_pop(), current_error_);
               if (current_error_ != ForthError::none) {
                 return;
               }
@@ -2955,7 +2901,7 @@ private:
                 current_error_ = ForthError::stack_overflow;
                 return;
               }
-              stack_push(current_outputs_[out_num].get()->len());
+              stack_push(current_outputs_int32_[out_num].len());
               break;
             }
 
@@ -2966,7 +2912,7 @@ private:
                 current_error_ = ForthError::stack_underflow;
                 return;
               }
-              current_outputs_[out_num].get()->rewind(stack_pop(), current_error_);
+              current_outputs_int32_[out_num].rewind(stack_pop(), current_error_);
               if (current_error_ != ForthError::none) {
                 return;
               }
@@ -3504,8 +3450,18 @@ private:
   std::vector<int64_t> instructions_offsets_;
   std::vector<I> instructions_;
 
-  std::vector<std::shared_ptr<ForthInputBuffer>> current_inputs_;
-  std::vector<std::shared_ptr<ForthOutputBuffer>> current_outputs_;
+  std::vector<ForthInputBuffer> current_inputs_;
+  std::vector<ForthOutputBufferOf<bool>> current_outputs_bool_;
+  std::vector<ForthOutputBufferOf<int8_t>> current_outputs_int8_;
+  std::vector<ForthOutputBufferOf<int16_t>> current_outputs_int16_;
+  std::vector<ForthOutputBufferOf<int32_t>> current_outputs_int32_;
+  std::vector<ForthOutputBufferOf<int64_t>> current_outputs_int64_;
+  std::vector<ForthOutputBufferOf<uint8_t>> current_outputs_uint8_;
+  std::vector<ForthOutputBufferOf<uint16_t>> current_outputs_uint16_;
+  std::vector<ForthOutputBufferOf<uint32_t>> current_outputs_uint32_;
+  std::vector<ForthOutputBufferOf<uint64_t>> current_outputs_uint64_;
+  std::vector<ForthOutputBufferOf<float>> current_outputs_float32_;
+  std::vector<ForthOutputBufferOf<double>> current_outputs_float64_;
 
   int64_t* current_which_;
   int64_t* current_where_;
@@ -3529,10 +3485,10 @@ private:
 template <>
 void ForthMachine<int32_t, int32_t, true>::write_from_stack(int64_t num, int32_t* top) noexcept {
   if (num == 1) {
-    current_outputs_[num].get()->write_one_int32(*top, false);
+    current_outputs_int32_[num].write_one_int32(*top, false);
   }
   else {
-    current_outputs_[num].get()->write_int32(1, top, false);
+    current_outputs_int32_[num].write_int32(1, top, false);
   }
 }
 
@@ -3556,20 +3512,19 @@ int main() {
   }
 
   ForthError err = ForthError::none;
-  std::map<std::string, std::shared_ptr<ForthInputBuffer>> inputs;
-  inputs["testin"] = std::make_shared<ForthInputBuffer>(test_input_ptr,
-                                                        0,
-                                                        sizeof(int32_t) * length);
+  std::map<std::string, ForthInputBuffer> inputs;
+  inputs.insert(std::pair<std::string, ForthInputBuffer>(
+    "testin", ForthInputBuffer(test_input_ptr, 0, sizeof(int32_t) * length)
+  ));
 
-  // for (int64_t repeat = 0;  repeat < 4;  repeat++) {
-  //   std::vector<std::shared_ptr<ForthInputBuffer>> ins({ inputs["testin"] });
-  //   std::vector<std::shared_ptr<ForthOutputBuffer>> outs({
-  //       std::make_shared<ForthOutputBufferOf<int64_t>>() });
+  // for (int64_t repeat = 0;  repeat < 0;  repeat++) {
+  //   std::vector<ForthInputBuffer> ins({ inputs["testin"] });
+  //   std::vector<ForthOutputBufferOf<int32_t>> outs({ ForthOutputBufferOf<int32_t>() });
 
   //   auto cpp_begin = std::chrono::high_resolution_clock::now();
   //   for (int64_t i = 0;  i < length;  i += 1) {
-  //     int32_t* ptr = reinterpret_cast<int32_t*>(ins[0].get()->read(sizeof(int32_t) * 1, err));
-  //     outs[0].get()->write_one_int32(*ptr, false);
+  //     int32_t* ptr = reinterpret_cast<int32_t*>(ins[0].read(sizeof(int32_t) * 1, err));
+  //     outs[0].write_one_int32(*ptr, false);
   //   }
   //   auto cpp_end = std::chrono::high_resolution_clock::now();
 
@@ -3577,13 +3532,13 @@ int main() {
   //             << std::chrono::duration_cast<std::chrono::microseconds>(cpp_end - cpp_begin).count()
   //             << " us" << std::endl;
 
-  //   inputs["testin"].get()->seek(0, err);
+  //   inputs["testin"].seek(0, err);
   // }
 
   for (int64_t repeat = 0;  repeat < 8;  repeat++) {
     std::set<ForthError> ignore({ ForthError::read_beyond });
 
-    std::map<std::string, std::shared_ptr<ForthOutputBuffer>> outputs = vm.run(inputs, ignore);
+    std::map<std::string, ForthOutputBufferOf<int32_t>> outputs = vm.run(inputs, ignore);
 
     // std::cout << vm.tostring(outputs);
 
@@ -3593,7 +3548,7 @@ int main() {
               << " Writes: " << vm.count_writes() << std::endl;
     vm.count_reset();
 
-    inputs["testin"].get()->seek(0, err);
+    inputs.begin()->second.seek(0, err);
   }
 
 }
