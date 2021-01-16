@@ -1277,7 +1277,14 @@ namespace awkward {
       return -1;
     }
     else {
-      return current_where_[recursion_current_depth_ - 1];
+      int64_t which = current_which_[recursion_current_depth_ - 1];
+      int64_t where = current_where_[recursion_current_depth_ - 1];
+      if (where < bytecodes_offsets_[which + 1] - bytecodes_offsets_[which]) {
+        return bytecodes_offsets_[which] + where;
+      }
+      else {
+        return -1;
+      }
     }
   }
 
@@ -1295,15 +1302,15 @@ namespace awkward {
   template <typename T, typename I>
   const std::string
   ForthMachineOf<T, I>::current_instruction() const {
-    if (recursion_current_depth_ == 0) {
+    int64_t bytecode_position = current_bytecode_position();
+    if (bytecode_position == -1) {
       throw std::invalid_argument(
-        "'is done' in AwkwardForth runtime: reached the end of the program; "
+        "'is done' in AwkwardForth runtime: reached the end of the program or segment; "
         "call 'begin' to 'step' again (note: check 'is_done')"
         + FILENAME(__LINE__)
       );
     }
     else {
-      int64_t bytecode_position = current_where_[recursion_current_depth_ - 1];
       return decompiled_at(bytecode_position, "");
     }
   }
