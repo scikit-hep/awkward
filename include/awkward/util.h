@@ -231,6 +231,7 @@ namespace awkward {
         seek_beyond,
         skip_beyond,
         rewind_beyond,
+        division_by_zero,
 
         size
     };

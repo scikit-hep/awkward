@@ -719,10 +719,12 @@ def test_calling():
 
 
 def test_calling2():
-    vm32 = awkward.forth.ForthMachine32("""
+    vm32 = awkward.forth.ForthMachine32(
+        """
 : bar 999 ;
 : foo bar pause bar ;
-1 2 3 pause 4 5""")
+1 2 3 pause 4 5"""
+    )
 
     vm32.run()
     assert vm32.stack == [1, 2, 3]
@@ -750,9 +752,11 @@ def test_calling2():
 
 
 def test_calling3():
-    vm32 = awkward.forth.ForthMachine32("""
+    vm32 = awkward.forth.ForthMachine32(
+        """
 : bar 999 ;
-: foo bar pause bar ;""")
+: foo bar pause bar ;"""
+    )
 
     vm32.run()
     assert vm32.stack == []
@@ -776,10 +780,12 @@ def test_halt():
 
 
 def test_halt2():
-    vm32 = awkward.forth.ForthMachine32("""
+    vm32 = awkward.forth.ForthMachine32(
+        """
 : bar 999 ;
 : foo bar halt bar ;
-1 2 3 pause 4 5""")
+1 2 3 pause 4 5"""
+    )
 
     vm32.run()
     assert vm32.stack == [1, 2, 3]
@@ -799,3 +805,1103 @@ def test_halt2():
     vm32.resume()
     assert vm32.stack == [1, 2, 3, 4, 5]
     assert vm32.is_done
+
+
+def test_do():
+    vm32 = awkward.forth.ForthMachine32("5 0 do i loop")
+    vm32.run()
+    assert vm32.stack == [0, 1, 2, 3, 4]
+
+    vm32 = awkward.forth.ForthMachine32("5 0 do i pause loop")
+    vm32.run()
+    assert vm32.stack == [0]
+    vm32.resume()
+    assert vm32.stack == [0, 1]
+    vm32.resume()
+    assert vm32.stack == [0, 1, 2]
+    vm32.resume()
+    assert vm32.stack == [0, 1, 2, 3]
+    vm32.resume()
+    assert vm32.stack == [0, 1, 2, 3, 4]
+
+    vm32 = awkward.forth.ForthMachine32(": foo 123 pause ; 5 0 do i foo loop")
+    vm32.run()
+    assert vm32.stack == [0, 123]
+    vm32.resume()
+    assert vm32.stack == [0, 123, 1, 123]
+    vm32.resume()
+    assert vm32.stack == [0, 123, 1, 123, 2, 123]
+    vm32.resume()
+    assert vm32.stack == [0, 123, 1, 123, 2, 123, 3, 123]
+    vm32.resume()
+    assert vm32.stack == [0, 123, 1, 123, 2, 123, 3, 123, 4, 123]
+
+    vm32 = awkward.forth.ForthMachine32(": foo 123 pause ; 5 0 do i foo loop")
+    vm32.run()
+    assert vm32.stack == [0, 123]
+    vm32.call("foo")
+    assert vm32.stack == [0, 123, 123]
+    vm32.resume()
+    assert vm32.stack == [0, 123, 123, 1, 123]
+
+
+def test_errors():
+    # util::ForthError::not_ready
+    vm32 = awkward.forth.ForthMachine32("1 2 3")
+    with pytest.raises(ValueError):
+        vm32.resume()
+    with pytest.raises(ValueError):
+        vm32.step()
+
+    # util::ForthError::is_done
+    vm32 = awkward.forth.ForthMachine32("1 2 3")
+    vm32.run()
+    with pytest.raises(ValueError):
+        vm32.resume()
+    with pytest.raises(ValueError):
+        vm32.step()
+
+    # util::ForthError::user_halt
+    vm32 = awkward.forth.ForthMachine32("halt")
+    with pytest.raises(ValueError):
+        vm32.run()
+    vm32.run(raise_user_halt=False)
+
+    # util::ForthError::recursion_depth_exceeded
+    vm32 = awkward.forth.ForthMachine32(": infinite infinite ; infinite")
+    with pytest.raises(ValueError):
+        vm32.run()
+    vm32.run(raise_recursion_depth_exceeded=False)
+
+    # util::ForthError::stack_underflow
+    vm32 = awkward.forth.ForthMachine32("1 +")
+    with pytest.raises(ValueError):
+        vm32.run()
+    vm32.run(raise_stack_underflow=False)
+
+    # util::ForthError::stack_overflow
+    vm32 = awkward.forth.ForthMachine32("1025 0 do i loop")
+    with pytest.raises(ValueError):
+        vm32.run()
+    vm32.run(raise_stack_overflow=False)
+
+    # util::ForthError::read_beyond
+    vm32 = awkward.forth.ForthMachine32("input x x b-> stack")
+    with pytest.raises(ValueError):
+        vm32.run({"x": np.array([])})
+    vm32.run({"x": np.array([])}, raise_read_beyond=False)
+
+    # util::ForthError::seek_beyond
+    vm32 = awkward.forth.ForthMachine32("input x 1 x seek")
+    with pytest.raises(ValueError):
+        vm32.run({"x": np.array([])})
+    vm32.run({"x": np.array([])}, raise_seek_beyond=False)
+
+    # util::ForthError::skip_beyond
+    vm32 = awkward.forth.ForthMachine32("input x 1 x skip")
+    with pytest.raises(ValueError):
+        vm32.run({"x": np.array([])})
+    vm32.run({"x": np.array([])}, raise_skip_beyond=False)
+
+    # util::ForthError::rewind_beyond
+    vm32 = awkward.forth.ForthMachine32("output x int32 1 x rewind")
+    with pytest.raises(ValueError):
+        vm32.run()
+    vm32.run(raise_rewind_beyond=False)
+
+    # util::ForthError::division_by_zero
+    vm32 = awkward.forth.ForthMachine32("123 0 /")
+    with pytest.raises(ValueError):
+        vm32.run()
+    vm32.run(raise_division_by_zero=False)
+
+    vm32 = awkward.forth.ForthMachine32("-123 0 /")
+    with pytest.raises(ValueError):
+        vm32.run()
+    vm32.run(raise_division_by_zero=False)
+
+    vm32 = awkward.forth.ForthMachine32("123 0 mod")
+    with pytest.raises(ValueError):
+        vm32.run()
+    vm32.run(raise_division_by_zero=False)
+
+    vm32 = awkward.forth.ForthMachine32("-123 0 mod")
+    with pytest.raises(ValueError):
+        vm32.run()
+    vm32.run(raise_division_by_zero=False)
+
+    vm32 = awkward.forth.ForthMachine32("123 0 /mod")
+    with pytest.raises(ValueError):
+        vm32.run()
+    vm32.run(raise_division_by_zero=False)
+
+    vm32 = awkward.forth.ForthMachine32("-123 0 /mod")
+    with pytest.raises(ValueError):
+        vm32.run()
+    vm32.run(raise_division_by_zero=False)
+
+
+def test_gforth():
+    # Expected outputs were all generated by running gforth:
+    #
+    #     echo "100 maxdepth-.s ! {0} .s" | gforth
+    #
+    # and parsing the stack output (none of the stacks are larger than 100).
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 then ; -1 foo")
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 then ; 0 foo")
+    vm32.run()
+    assert vm32.stack == []
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 then ; 1 foo")
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then then ; -1 -1 foo")
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then then ; 0 -1 foo")
+    vm32.run()
+    assert vm32.stack == []
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then then ; 1 -1 foo")
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then then ; -1 0 foo")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then then ; 0 0 foo")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then then ; 1 0 foo")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then then ; -1 1 foo")
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then then ; 0 1 foo")
+    vm32.run()
+    assert vm32.stack == []
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then then ; 1 1 foo")
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else 123 then ; -1 foo")
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else 123 then ; 0 foo")
+    vm32.run()
+    assert vm32.stack == [123]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else 123 then ; 1 foo")
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else 123 then ; -1 -1 foo")
+    vm32.run()
+    assert vm32.stack == [-1, 999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else 123 then ; 0 -1 foo")
+    vm32.run()
+    assert vm32.stack == [0, 999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else 123 then ; 1 -1 foo")
+    vm32.run()
+    assert vm32.stack == [1, 999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else 123 then ; -1 0 foo")
+    vm32.run()
+    assert vm32.stack == [-1, 123]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else 123 then ; 0 0 foo")
+    vm32.run()
+    assert vm32.stack == [0, 123]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else 123 then ; 1 0 foo")
+    vm32.run()
+    assert vm32.stack == [1, 123]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else 123 then ; -1 1 foo")
+    vm32.run()
+    assert vm32.stack == [-1, 999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else 123 then ; 0 1 foo")
+    vm32.run()
+    assert vm32.stack == [0, 999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else 123 then ; 1 1 foo")
+    vm32.run()
+    assert vm32.stack == [1, 999]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if if 999 then else 123 then ; -1 -1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then else 123 then ; 0 -1 foo")
+    vm32.run()
+    assert vm32.stack == []
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then else 123 then ; 1 -1 foo")
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then else 123 then ; -1 0 foo")
+    vm32.run()
+    assert vm32.stack == [-1, 123]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then else 123 then ; 0 0 foo")
+    vm32.run()
+    assert vm32.stack == [0, 123]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then else 123 then ; 1 0 foo")
+    vm32.run()
+    assert vm32.stack == [1, 123]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then else 123 then ; -1 1 foo")
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then else 123 then ; 0 1 foo")
+    vm32.run()
+    assert vm32.stack == []
+
+    vm32 = awkward.forth.ForthMachine32(": foo if if 999 then else 123 then ; 1 1 foo")
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if 999 else if 123 then then ; -1 -1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [-1, 999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else if 123 then then ; 0 -1 foo")
+    vm32.run()
+    assert vm32.stack == [0, 999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else if 123 then then ; 1 -1 foo")
+    vm32.run()
+    assert vm32.stack == [1, 999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else if 123 then then ; -1 0 foo")
+    vm32.run()
+    assert vm32.stack == [123]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else if 123 then then ; 0 0 foo")
+    vm32.run()
+    assert vm32.stack == []
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else if 123 then then ; 1 0 foo")
+    vm32.run()
+    assert vm32.stack == [123]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else if 123 then then ; -1 1 foo")
+    vm32.run()
+    assert vm32.stack == [-1, 999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else if 123 then then ; 0 1 foo")
+    vm32.run()
+    assert vm32.stack == [0, 999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo if 999 else if 123 then then ; 1 1 foo")
+    vm32.run()
+    assert vm32.stack == [1, 999]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if if 999 else 321 then else 123 then ; -1 -1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if if 999 else 321 then else 123 then ; 0 -1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [321]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if if 999 else 321 then else 123 then ; 1 -1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if if 999 else 321 then else 123 then ; -1 0 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [-1, 123]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if if 999 else 321 then else 123 then ; 0 0 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [0, 123]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if if 999 else 321 then else 123 then ; 1 0 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [1, 123]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if if 999 else 321 then else 123 then ; -1 1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if if 999 else 321 then else 123 then ; 0 1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [321]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if if 999 else 321 then else 123 then ; 1 1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [999]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if 999 else if 123 else 321 then then ; -1 -1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [-1, 999]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if 999 else if 123 else 321 then then ; 0 -1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [0, 999]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if 999 else if 123 else 321 then then ; 1 -1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [1, 999]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if 999 else if 123 else 321 then then ; -1 0 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [123]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if 999 else if 123 else 321 then then ; 0 0 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [321]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if 999 else if 123 else 321 then then ; 1 0 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [123]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if 999 else if 123 else 321 then then ; -1 1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [-1, 999]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if 999 else if 123 else 321 then then ; 0 1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [0, 999]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo if 999 else if 123 else 321 then then ; 1 1 foo"
+    )
+    vm32.run()
+    assert vm32.stack == [1, 999]
+
+    vm32 = awkward.forth.ForthMachine32(": foo do i loop ; 10 5 foo")
+    vm32.run()
+    assert vm32.stack == [5, 6, 7, 8, 9]
+
+    vm32 = awkward.forth.ForthMachine32(": foo do i i +loop ; 100 5 foo")
+    vm32.run()
+    assert vm32.stack == [5, 10, 20, 40, 80]
+
+    vm32 = awkward.forth.ForthMachine32(": foo 10 5 do 3 0 do 1+ loop loop ; 1 foo")
+    vm32.run()
+    assert vm32.stack == [16]
+
+    vm32 = awkward.forth.ForthMachine32(": foo 10 5 do 3 0 do i loop loop ; foo")
+    vm32.run()
+    assert vm32.stack == [0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2]
+
+    vm32 = awkward.forth.ForthMachine32(": foo 10 5 do 3 0 do j loop loop ; foo")
+    vm32.run()
+    assert vm32.stack == [5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9]
+
+    vm32 = awkward.forth.ForthMachine32(": foo 10 5 do 3 0 do i j * loop loop ; foo")
+    vm32.run()
+    assert vm32.stack == [0, 5, 10, 0, 6, 12, 0, 7, 14, 0, 8, 16, 0, 9, 18]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo 10 5 do 8 6 do 3 0 do i j * k * loop loop loop ; foo"
+    )
+    vm32.run()
+    assert vm32.stack == [
+        0,
+        30,
+        60,
+        0,
+        35,
+        70,
+        0,
+        36,
+        72,
+        0,
+        42,
+        84,
+        0,
+        42,
+        84,
+        0,
+        49,
+        98,
+        0,
+        48,
+        96,
+        0,
+        56,
+        112,
+        0,
+        54,
+        108,
+        0,
+        63,
+        126,
+    ]
+
+    vm32 = awkward.forth.ForthMachine32(": foo 3 begin dup 1 - dup 0= until ; foo")
+    vm32.run()
+    assert vm32.stack == [3, 2, 1, 0]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo 4 begin dup 1 - dup 0= invert while 123 drop repeat ; foo"
+    )
+    vm32.run()
+    assert vm32.stack == [4, 3, 2, 1, 0]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": foo 3 begin dup 1 - dup 0= if exit then again ; foo"
+    )
+    vm32.run()
+    assert vm32.stack == [3, 2, 1, 0]
+
+    vm32 = awkward.forth.ForthMachine32("1 2 3 4 dup")
+    vm32.run()
+    assert vm32.stack == [1, 2, 3, 4, 4]
+
+    vm32 = awkward.forth.ForthMachine32("1 2 3 4 drop")
+    vm32.run()
+    assert vm32.stack == [1, 2, 3]
+
+    vm32 = awkward.forth.ForthMachine32("1 2 3 4 swap")
+    vm32.run()
+    assert vm32.stack == [1, 2, 4, 3]
+
+    vm32 = awkward.forth.ForthMachine32("1 2 3 4 over")
+    vm32.run()
+    assert vm32.stack == [1, 2, 3, 4, 3]
+
+    vm32 = awkward.forth.ForthMachine32("1 2 3 4 rot")
+    vm32.run()
+    assert vm32.stack == [1, 3, 4, 2]
+
+    vm32 = awkward.forth.ForthMachine32("1 2 3 4 nip")
+    vm32.run()
+    assert vm32.stack == [1, 2, 4]
+
+    vm32 = awkward.forth.ForthMachine32("1 2 3 4 tuck")
+    vm32.run()
+    assert vm32.stack == [1, 2, 4, 3, 4]
+
+    vm32 = awkward.forth.ForthMachine32("3 5 +")
+    vm32.run()
+    assert vm32.stack == [8]
+
+    vm32 = awkward.forth.ForthMachine32("-3 5 +")
+    vm32.run()
+    assert vm32.stack == [2]
+
+    vm32 = awkward.forth.ForthMachine32("3 -5 +")
+    vm32.run()
+    assert vm32.stack == [-2]
+
+    vm32 = awkward.forth.ForthMachine32("-3 -5 +")
+    vm32.run()
+    assert vm32.stack == [-8]
+
+    vm32 = awkward.forth.ForthMachine32("3 5 -")
+    vm32.run()
+    assert vm32.stack == [-2]
+
+    vm32 = awkward.forth.ForthMachine32("-3 5 -")
+    vm32.run()
+    assert vm32.stack == [-8]
+
+    vm32 = awkward.forth.ForthMachine32("3 -5 -")
+    vm32.run()
+    assert vm32.stack == [8]
+
+    vm32 = awkward.forth.ForthMachine32("-3 -5 -")
+    vm32.run()
+    assert vm32.stack == [2]
+
+    vm32 = awkward.forth.ForthMachine32("5 3 -")
+    vm32.run()
+    assert vm32.stack == [2]
+
+    vm32 = awkward.forth.ForthMachine32("5 -3 -")
+    vm32.run()
+    assert vm32.stack == [8]
+
+    vm32 = awkward.forth.ForthMachine32("-5 3 -")
+    vm32.run()
+    assert vm32.stack == [-8]
+
+    vm32 = awkward.forth.ForthMachine32("-5 -3 -")
+    vm32.run()
+    assert vm32.stack == [-2]
+
+    vm32 = awkward.forth.ForthMachine32("3 5 *")
+    vm32.run()
+    assert vm32.stack == [15]
+
+    vm32 = awkward.forth.ForthMachine32("-3 5 *")
+    vm32.run()
+    assert vm32.stack == [-15]
+
+    vm32 = awkward.forth.ForthMachine32("3 -5 *")
+    vm32.run()
+    assert vm32.stack == [-15]
+
+    vm32 = awkward.forth.ForthMachine32("-3 -5 *")
+    vm32.run()
+    assert vm32.stack == [15]
+
+    vm32 = awkward.forth.ForthMachine32("22 7 /")
+    vm32.run()
+    assert vm32.stack == [3]
+
+    vm32 = awkward.forth.ForthMachine32("-22 7 /")
+    vm32.run()
+    assert vm32.stack == [-4]
+
+    vm32 = awkward.forth.ForthMachine32("22 -7 /")
+    vm32.run()
+    assert vm32.stack == [-4]
+
+    vm32 = awkward.forth.ForthMachine32("-22 -7 /")
+    vm32.run()
+    assert vm32.stack == [3]
+
+    vm32 = awkward.forth.ForthMachine32("22 7 mod")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("-22 7 mod")
+    vm32.run()
+    assert vm32.stack == [6]
+
+    vm32 = awkward.forth.ForthMachine32("22 -7 mod")
+    vm32.run()
+    assert vm32.stack == [-6]
+
+    vm32 = awkward.forth.ForthMachine32("-22 -7 mod")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("22 7 /mod")
+    vm32.run()
+    assert vm32.stack == [1, 3]
+
+    vm32 = awkward.forth.ForthMachine32("-22 7 /mod")
+    vm32.run()
+    assert vm32.stack == [6, -4]
+
+    vm32 = awkward.forth.ForthMachine32("22 -7 /mod")
+    vm32.run()
+    assert vm32.stack == [-6, -4]
+
+    vm32 = awkward.forth.ForthMachine32("-22 -7 /mod")
+    vm32.run()
+    assert vm32.stack == [-1, 3]
+
+    vm32 = awkward.forth.ForthMachine32("-2 abs")
+    vm32.run()
+    assert vm32.stack == [2]
+
+    vm32 = awkward.forth.ForthMachine32("-1 abs")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("0 abs")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("1 abs")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("2 abs")
+    vm32.run()
+    assert vm32.stack == [2]
+
+    vm32 = awkward.forth.ForthMachine32("5 5 min")
+    vm32.run()
+    assert vm32.stack == [5]
+
+    vm32 = awkward.forth.ForthMachine32("3 -5 min")
+    vm32.run()
+    assert vm32.stack == [-5]
+
+    vm32 = awkward.forth.ForthMachine32("-3 5 min")
+    vm32.run()
+    assert vm32.stack == [-3]
+
+    vm32 = awkward.forth.ForthMachine32("3 5 min")
+    vm32.run()
+    assert vm32.stack == [3]
+
+    vm32 = awkward.forth.ForthMachine32("5 5 max")
+    vm32.run()
+    assert vm32.stack == [5]
+
+    vm32 = awkward.forth.ForthMachine32("3 -5 max")
+    vm32.run()
+    assert vm32.stack == [3]
+
+    vm32 = awkward.forth.ForthMachine32("-3 5 max")
+    vm32.run()
+    assert vm32.stack == [5]
+
+    vm32 = awkward.forth.ForthMachine32("3 5 max")
+    vm32.run()
+    assert vm32.stack == [5]
+
+    vm32 = awkward.forth.ForthMachine32("-2 negate")
+    vm32.run()
+    assert vm32.stack == [2]
+
+    vm32 = awkward.forth.ForthMachine32("-1 negate")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("0 negate")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("1 negate")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("2 negate")
+    vm32.run()
+    assert vm32.stack == [-2]
+
+    vm32 = awkward.forth.ForthMachine32("-1 1+")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("0 1+")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("1 1+")
+    vm32.run()
+    assert vm32.stack == [2]
+
+    vm32 = awkward.forth.ForthMachine32("-1 1-")
+    vm32.run()
+    assert vm32.stack == [-2]
+
+    vm32 = awkward.forth.ForthMachine32("0 1-")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("1 1-")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("-1 0=")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("0 0=")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("1 0=")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("5 5 =")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("3 -5 =")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("-3 5 =")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("3 5 =")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("5 5 <>")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("3 -5 <>")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("-3 5 <>")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("3 5 <>")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("5 5 >")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("3 -5 >")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("-3 5 >")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("3 5 >")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("5 5 >=")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("3 -5 >=")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("-3 5 >=")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("3 5 >=")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("5 5 <")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("3 -5 <")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("-3 5 <")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("3 5 <")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("5 5 <=")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("3 -5 <=")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("-3 5 <=")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("3 5 <=")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("-1 -1 and")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("0 -1 and")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("1 -1 and")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("-1 0 and")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("0 0 and")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("1 0 and")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("-1 1 and")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("0 1 and")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("1 1 and")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("-1 -1 or")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("0 -1 or")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("1 -1 or")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("-1 0 or")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("0 0 or")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("1 0 or")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("-1 1 or")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("0 1 or")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("1 1 or")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("-1 -1 xor")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("0 -1 xor")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("1 -1 xor")
+    vm32.run()
+    assert vm32.stack == [-2]
+
+    vm32 = awkward.forth.ForthMachine32("-1 0 xor")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("0 0 xor")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("1 0 xor")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("-1 1 xor")
+    vm32.run()
+    assert vm32.stack == [-2]
+
+    vm32 = awkward.forth.ForthMachine32("0 1 xor")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("1 1 xor")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("-1 invert")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("0 invert")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("1 invert")
+    vm32.run()
+    assert vm32.stack == [-2]
+
+    vm32 = awkward.forth.ForthMachine32("true")
+    vm32.run()
+    assert vm32.stack == [-1]
+
+    vm32 = awkward.forth.ForthMachine32("false")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32(": foo 3 + 2 * ; 4 foo foo")
+    vm32.run()
+    assert vm32.stack == [34]
+
+    vm32 = awkward.forth.ForthMachine32(": foo 3 + 2 * ; : bar 4 foo foo ; bar")
+    vm32.run()
+    assert vm32.stack == [34]
+
+    vm32 = awkward.forth.ForthMachine32(
+        ": factorial dup 2 < if drop 1 exit then dup 1- recurse * ; 5 factorial"
+    )
+    vm32.run()
+    assert vm32.stack == [120]
+
+    vm32 = awkward.forth.ForthMachine32("variable x 10 x ! 5 x +! x @ x @ x @")
+    vm32.run()
+    assert vm32.stack == [15, 15, 15]
+
+    vm32 = awkward.forth.ForthMachine32(
+        "variable x 10 x ! 5 x +! : foo x @ x @ x @ ; foo foo"
+    )
+    vm32.run()
+    assert vm32.stack == [15, 15, 15, 15, 15, 15]
+
+
+def test_gforth_lshift_rshift():
+    vm32 = awkward.forth.ForthMachine32("0 1 lshift")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("0 2 lshift")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("0 3 lshift")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("1 1 lshift")
+    vm32.run()
+    assert vm32.stack == [2]
+
+    vm32 = awkward.forth.ForthMachine32("1 2 lshift")
+    vm32.run()
+    assert vm32.stack == [4]
+
+    vm32 = awkward.forth.ForthMachine32("1 3 lshift")
+    vm32.run()
+    assert vm32.stack == [8]
+
+    vm32 = awkward.forth.ForthMachine32("5 1 lshift")
+    vm32.run()
+    assert vm32.stack == [10]
+
+    vm32 = awkward.forth.ForthMachine32("5 2 lshift")
+    vm32.run()
+    assert vm32.stack == [20]
+
+    vm32 = awkward.forth.ForthMachine32("5 3 lshift")
+    vm32.run()
+    assert vm32.stack == [40]
+
+    vm32 = awkward.forth.ForthMachine32("-5 1 lshift")
+    vm32.run()
+    assert vm32.stack == [-10]
+
+    vm32 = awkward.forth.ForthMachine32("-5 2 lshift")
+    vm32.run()
+    assert vm32.stack == [-20]
+
+    vm32 = awkward.forth.ForthMachine32("-5 3 lshift")
+    vm32.run()
+    assert vm32.stack == [-40]
+
+    vm32 = awkward.forth.ForthMachine32("0 1 rshift")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("0 2 rshift")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("0 3 rshift")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("1 1 rshift")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("1 2 rshift")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("1 3 rshift")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    vm32 = awkward.forth.ForthMachine32("5 1 rshift")
+    vm32.run()
+    assert vm32.stack == [2]
+
+    vm32 = awkward.forth.ForthMachine32("5 2 rshift")
+    vm32.run()
+    assert vm32.stack == [1]
+
+    vm32 = awkward.forth.ForthMachine32("5 3 rshift")
+    vm32.run()
+    assert vm32.stack == [0]
+
+    # I don't understand what gforth's rshift is doing with negative numbers.
+    # These can't be brought into agreement even with 64-bit machines.
+    # Maybe gforth is just wrong: I would expect the results WE get, not THEIRS.
+
+    vm32 = awkward.forth.ForthMachine32("-5 1 rshift")
+    vm32.run()
+    # assert vm32.stack == [9223372036854775805]
+    assert vm32.stack == [-3]
+
+    vm32 = awkward.forth.ForthMachine32("-5 2 rshift")
+    vm32.run()
+    # assert vm32.stack == [4611686018427387902]
+    assert vm32.stack == [-2]
+
+    vm32 = awkward.forth.ForthMachine32("-5 3 rshift")
+    vm32.run()
+    # assert vm32.stack == [2305843009213693951]
+    assert vm32.stack == [-1]

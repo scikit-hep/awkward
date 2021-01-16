@@ -350,6 +350,30 @@ namespace awkward {
       write_from_stack(int64_t num, T* top) noexcept;
 
     /// @brief HERE
+    inline bool
+      stack_cannot_push() const noexcept {
+      return stack_depth_ == stack_max_depth_;
+    }
+
+    /// @brief HERE
+    inline bool
+      stack_cannot_pop() const noexcept {
+      return stack_depth_ == 0;
+    }
+
+    /// @brief HERE
+    inline bool
+      stack_cannot_pop2() const noexcept {
+      return stack_depth_ < 2;
+    }
+
+    /// @brief HERE
+    inline bool
+      stack_cannot_pop3() const noexcept {
+      return stack_depth_ < 3;
+    }
+
+    /// @brief HERE
     inline T*
       stack_pop2() noexcept {
       stack_depth_ -= 2;

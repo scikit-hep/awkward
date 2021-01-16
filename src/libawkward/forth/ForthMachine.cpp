@@ -1200,7 +1200,8 @@ namespace awkward {
         }
         case util::ForthError::stack_underflow: {
           throw std::invalid_argument(
-            "'stack underflow' in AwkwardForth runtime: tried to pop an empty stack");
+            "'stack underflow' in AwkwardForth runtime: tried to pop from an empty "
+            "stack");
         }
         case util::ForthError::stack_overflow: {
           throw std::invalid_argument(
@@ -1226,6 +1227,10 @@ namespace awkward {
           throw std::invalid_argument(
             "'rewind beyond' in AwkwardForth runtime: tried to rewind beyond the "
             "beginning of an output");
+        }
+        case util::ForthError::division_by_zero: {
+          throw std::invalid_argument(
+            "'division by zero' in AwkwardForth runtime: tried to divide by zero");
         }
       }
     }
@@ -2377,7 +2382,7 @@ namespace awkward {
 
           int64_t num_items = 1;
           if (~bytecode & READ_REPEATED) {
-            if (stack_can_pop()) {
+            if (stack_cannot_pop()) {
               current_error_ = util::ForthError::stack_underflow;
               return;
             }
@@ -2436,7 +2441,7 @@ namespace awkward {
                 }                                                              \
                 for (int64_t i = 0;  i < num_items;  i++) {                    \
                   TYPE value = ptr[i];                                         \
-                  if (stack_can_push()) {                                      \
+                  if (stack_cannot_push()) {                                   \
                     current_error_ = util::ForthError::stack_overflow;         \
                     return;                                                    \
                   }                                                            \
@@ -2480,7 +2485,7 @@ namespace awkward {
             case CODE_LITERAL: {
               I num = bytecode_get();
               bytecodes_pointer_where()++;
-              if (!stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -2511,7 +2516,7 @@ namespace awkward {
                     do_abs_recursion_depth() == recursion_current_depth_) {
                   // End one step of a 'do ... loop' or a 'do ... +loop'.
                   if (do_loop_is_step()) {
-                    if (!stack_can_pop()) {
+                    if (stack_cannot_pop()) {
                       current_error_ = util::ForthError::stack_underflow;
                       return;
                     }
@@ -2529,7 +2534,7 @@ namespace awkward {
             }
 
             case CODE_IF: {
-              if (!stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2541,7 +2546,7 @@ namespace awkward {
             }
 
             case CODE_IF_ELSE: {
-              if (!stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2568,7 +2573,7 @@ namespace awkward {
             }
 
             case CODE_DO: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2583,7 +2588,7 @@ namespace awkward {
             }
 
             case CODE_DO_STEP: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2603,7 +2608,7 @@ namespace awkward {
             }
 
             case CODE_UNTIL: {
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2615,7 +2620,7 @@ namespace awkward {
             }
 
             case CODE_WHILE: {
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2668,7 +2673,7 @@ namespace awkward {
             case CODE_PUT: {
               I num = bytecode_get();
               bytecodes_pointer_where()++;
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2680,7 +2685,7 @@ namespace awkward {
             case CODE_INC: {
               I num = bytecode_get();
               bytecodes_pointer_where()++;
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2692,7 +2697,7 @@ namespace awkward {
             case CODE_GET: {
               I num = bytecode_get();
               bytecodes_pointer_where()++;
-              if (stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -2703,7 +2708,7 @@ namespace awkward {
             case CODE_LEN_INPUT: {
               I in_num = bytecode_get();
               bytecodes_pointer_where()++;
-              if (stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -2714,7 +2719,7 @@ namespace awkward {
             case CODE_POS: {
               I in_num = bytecode_get();
               bytecodes_pointer_where()++;
-              if (stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -2725,7 +2730,7 @@ namespace awkward {
             case CODE_END: {
               I in_num = bytecode_get();
               bytecodes_pointer_where()++;
-              if (stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -2736,7 +2741,7 @@ namespace awkward {
             case CODE_SEEK: {
               I in_num = bytecode_get();
               bytecodes_pointer_where()++;
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2750,7 +2755,7 @@ namespace awkward {
             case CODE_SKIP: {
               I in_num = bytecode_get();
               bytecodes_pointer_where()++;
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2764,7 +2769,7 @@ namespace awkward {
             case CODE_WRITE: {
               I out_num = bytecode_get();
               bytecodes_pointer_where()++;
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2779,7 +2784,7 @@ namespace awkward {
             case CODE_LEN_OUTPUT: {
               I out_num = bytecode_get();
               bytecodes_pointer_where()++;
-              if (stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -2790,7 +2795,7 @@ namespace awkward {
             case CODE_REWIND: {
               I out_num = bytecode_get();
               bytecodes_pointer_where()++;
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2802,7 +2807,7 @@ namespace awkward {
             }
 
             case CODE_I: {
-              if (stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -2811,7 +2816,7 @@ namespace awkward {
             }
 
             case CODE_J: {
-              if (stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -2820,7 +2825,7 @@ namespace awkward {
             }
 
             case CODE_K: {
-              if (stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -2829,11 +2834,11 @@ namespace awkward {
             }
 
             case CODE_DUP: {
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
-              if (stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -2843,7 +2848,7 @@ namespace awkward {
             }
 
             case CODE_DROP: {
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2852,7 +2857,7 @@ namespace awkward {
             }
 
             case CODE_SWAP: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2863,11 +2868,11 @@ namespace awkward {
             }
 
             case CODE_OVER: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
-              if (stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -2876,7 +2881,7 @@ namespace awkward {
             }
 
             case CODE_ROT: {
-              if (stack_depth_ < 3) {
+              if (stack_cannot_pop3()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2888,7 +2893,7 @@ namespace awkward {
             }
 
             case CODE_NIP: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2898,11 +2903,11 @@ namespace awkward {
             }
 
             case CODE_TUCK: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
-              if (stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -2914,7 +2919,7 @@ namespace awkward {
             }
 
             case CODE_ADD: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2924,7 +2929,7 @@ namespace awkward {
             }
 
             case CODE_SUB: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2934,7 +2939,7 @@ namespace awkward {
             }
 
             case CODE_MUL: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2944,39 +2949,60 @@ namespace awkward {
             }
 
             case CODE_DIV: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
               T* pair = stack_pop2_before_pushing1();
-              pair[0] = pair[0] / pair[1];
+              if (pair[1] == 0) {
+                current_error_ = util::ForthError::division_by_zero;
+                return;
+              }
+              // Forth (gforth, at least) does floor division; C++ does integer division.
+              // This makes a difference for negative numerator or denominator.
+              T tmp = pair[0] / pair[1];
+              pair[0] = tmp * pair[1] == pair[0] ? tmp : tmp - ((pair[0] < 0) ^ (pair[1] < 0));
               break;
             }
 
             case CODE_MOD: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
               T* pair = stack_pop2_before_pushing1();
-              pair[0] = pair[0] % pair[1];
+              if (pair[1] == 0) {
+                current_error_ = util::ForthError::division_by_zero;
+                return;
+              }
+              // Forth (gforth, at least) does modulo; C++ does remainder.
+              // This makes a difference for negative numerator or denominator.
+              pair[0] = (pair[1] + (pair[0] % pair[1])) % pair[1];
               break;
             }
 
             case CODE_DIVMOD: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
-              T div = stack_buffer_[stack_depth_ - 2] / stack_buffer_[stack_depth_ - 1];
-              T mod = stack_buffer_[stack_depth_ - 2] % stack_buffer_[stack_depth_ - 1];
-              stack_buffer_[stack_depth_ - 2] = mod;
-              stack_buffer_[stack_depth_ - 1] = div;
+              T one = stack_buffer_[stack_depth_ - 2];
+              T two = stack_buffer_[stack_depth_ - 1];
+              if (two == 0) {
+                current_error_ = util::ForthError::division_by_zero;
+                return;
+              }
+              // See notes on division and modulo/remainder above.
+              T tmp = one / two;
+              stack_buffer_[stack_depth_ - 1] =
+                  tmp * two == one ? tmp : tmp - ((one < 0) ^ (two < 0));
+              stack_buffer_[stack_depth_ - 2] =
+                  (two + (one % two)) % two;
               break;
             }
 
             case CODE_NEGATE: {
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2986,7 +3012,7 @@ namespace awkward {
             }
 
             case CODE_ADD1: {
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -2996,7 +3022,7 @@ namespace awkward {
             }
 
             case CODE_SUB1: {
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3006,7 +3032,7 @@ namespace awkward {
             }
 
             case CODE_ABS: {
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3016,7 +3042,7 @@ namespace awkward {
             }
 
             case CODE_MIN: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3026,7 +3052,7 @@ namespace awkward {
             }
 
             case CODE_MAX: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3036,7 +3062,7 @@ namespace awkward {
             }
 
             case CODE_EQ: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3046,7 +3072,7 @@ namespace awkward {
             }
 
             case CODE_NE: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3056,7 +3082,7 @@ namespace awkward {
             }
 
             case CODE_GT: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3066,7 +3092,7 @@ namespace awkward {
             }
 
             case CODE_GE: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3076,7 +3102,7 @@ namespace awkward {
             }
 
             case CODE_LT: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3086,7 +3112,7 @@ namespace awkward {
             }
 
             case CODE_LE: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3096,7 +3122,7 @@ namespace awkward {
             }
 
             case CODE_EQ0: {
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3106,7 +3132,7 @@ namespace awkward {
             }
 
             case CODE_INVERT: {
-              if (stack_can_pop()) {
+              if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3116,7 +3142,7 @@ namespace awkward {
             }
 
             case CODE_AND: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3126,7 +3152,7 @@ namespace awkward {
             }
 
             case CODE_OR: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3136,7 +3162,7 @@ namespace awkward {
             }
 
             case CODE_XOR: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3146,7 +3172,7 @@ namespace awkward {
             }
 
             case CODE_LSHIFT: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3156,7 +3182,7 @@ namespace awkward {
             }
 
             case CODE_RSHIFT: {
-              if (stack_depth_ < 2) {
+              if (stack_cannot_pop2()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
@@ -3166,7 +3192,7 @@ namespace awkward {
             }
 
             case CODE_FALSE: {
-              if (stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -3175,7 +3201,7 @@ namespace awkward {
             }
 
             case CODE_TRUE: {
-              if (stack_can_push()) {
+              if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
@@ -3202,7 +3228,7 @@ namespace awkward {
           do_abs_recursion_depth() == recursion_current_depth_) {
         // End one step of a 'do ... loop' or a 'do ... +loop'.
         if (do_loop_is_step()) {
-          if (!stack_can_pop()) {
+          if (stack_cannot_pop()) {
             current_error_ = util::ForthError::stack_underflow;
             return;
           }
