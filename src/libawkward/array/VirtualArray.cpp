@@ -1131,9 +1131,10 @@ namespace awkward {
                                     const Index64& slicestops,
                                     const SliceArray64& slicecontent,
                                     const Slice& tail) const {
-    throw std::runtime_error(
-      std::string("undefined operation: VirtualArray::getitem_next_jagged(array)")
-      + FILENAME(__LINE__));
+    return array().get()->getitem_next_jagged(slicestarts,
+                                              slicestops,
+                                              slicecontent,
+                                              tail);
   }
 
   const ContentPtr
@@ -1141,9 +1142,10 @@ namespace awkward {
                                     const Index64& slicestops,
                                     const SliceMissing64& slicecontent,
                                     const Slice& tail) const {
-    throw std::runtime_error(
-      std::string("undefined operation: VirtualArray::getitem_next_jagged(missing)")
-      + FILENAME(__LINE__));
+    return array().get()->getitem_next_jagged(slicestarts,
+                                              slicestops,
+                                              slicecontent,
+                                              tail);
   }
 
   const ContentPtr
@@ -1151,9 +1153,10 @@ namespace awkward {
                                     const Index64& slicestops,
                                     const SliceJagged64& slicecontent,
                                     const Slice& tail) const {
-    throw std::runtime_error(
-      std::string("undefined operation: VirtualArray::getitem_next_jagged(jagged)")
-      + FILENAME(__LINE__));
+    return array().get()->getitem_next_jagged(slicestarts,
+                                              slicestops,
+                                              slicecontent,
+                                              tail);
   }
 
   const ContentPtr
