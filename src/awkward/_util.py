@@ -496,6 +496,7 @@ def broadcast_and_apply(  # noqa: C901
     left_broadcast=True,
     right_broadcast=True,
     numpy_to_regular=False,
+    regular_to_jagged=False,
 ):
     def checklength(inputs):
         length = len(inputs[0])
@@ -564,6 +565,12 @@ def broadcast_and_apply(  # noqa: C901
         if numpy_to_regular:
             inputs = [
                 x.toRegularArray() if isinstance(x, ak.layout.NumpyArray) else x
+                for x in inputs
+            ]
+
+        if regular_to_jagged:
+            inputs = [
+                x.toListOffsetArray64(False) if isinstance(x, ak.layout.RegularArray) else x
                 for x in inputs
             ]
 

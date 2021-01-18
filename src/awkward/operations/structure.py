@@ -394,7 +394,9 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
         else:
             return None
 
-    out = ak._util.broadcast_and_apply(layouts, getfunction, behavior, pass_depth=True)
+    out = ak._util.broadcast_and_apply(
+        layouts, getfunction, behavior, pass_depth=True, regular_to_jagged=True
+    )
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
         return ak._util.wrap(out[0], behavior)
