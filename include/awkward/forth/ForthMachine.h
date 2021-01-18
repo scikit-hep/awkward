@@ -23,6 +23,9 @@ namespace awkward {
   /// THERE
   template <typename T, typename I>
   class LIBAWKWARD_EXPORT_SYMBOL ForthMachineOf {
+
+    template <typename TYPE> using IndexTypeOf = typename std::vector<TYPE>::size_type;
+
   public:
     ForthMachineOf(const std::string& source,
                    int64_t stack_max_depth=1024,
@@ -314,8 +317,8 @@ namespace awkward {
     inline bool
       is_segment_done() const noexcept {
       return !(bytecodes_pointer_where() < (
-                   bytecodes_offsets_[bytecodes_pointer_which() + 1] -
-                   bytecodes_offsets_[bytecodes_pointer_which()]
+                   bytecodes_offsets_[(IndexTypeOf<int64_t>)bytecodes_pointer_which() + 1] -
+                   bytecodes_offsets_[(IndexTypeOf<int64_t>)bytecodes_pointer_which()]
                ));
     }
 
@@ -412,8 +415,8 @@ namespace awkward {
     /// @brief HERE
     inline I
       bytecode_get() const noexcept {
-      int64_t start = bytecodes_offsets_[bytecodes_pointer_which()];
-      return bytecodes_[start + bytecodes_pointer_where()];
+      int64_t start = bytecodes_offsets_[(IndexTypeOf<int64_t>)bytecodes_pointer_which()];
+      return bytecodes_[(IndexTypeOf<I>)(start + bytecodes_pointer_where())];
     }
 
     /// @brief HERE
