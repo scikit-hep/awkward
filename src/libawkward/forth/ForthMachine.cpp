@@ -251,10 +251,10 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   ForthMachineOf<T, I>::bytecodes() const {
-    IndexOf<I> content(bytecodes_.size(), kernel::lib::cpu);
+    IndexOf<I> content((int64_t)bytecodes_.size(), kernel::lib::cpu);
     std::memcpy(content.data(), bytecodes_.data(), bytecodes_.size() * sizeof(I));
 
-    IndexOf<int64_t> offsets(bytecodes_offsets_.size(), kernel::lib::cpu);
+    IndexOf<int64_t> offsets((int64_t)bytecodes_offsets_.size(), kernel::lib::cpu);
     std::memcpy(offsets.data(), bytecodes_offsets_.data(), bytecodes_offsets_.size() * sizeof(int64_t));
 
     return std::make_shared<ListOffsetArrayOf<int64_t>>(Identities::none(),
@@ -270,23 +270,23 @@ namespace awkward {
     bool first = true;
     std::stringstream out;
 
-    for (auto name : variable_names_) {
+    for (auto const& name : variable_names_) {
       first = false;
       out << "variable " << name << std::endl;
     }
 
-    for (auto name : input_names_) {
+    for (auto const& name : input_names_) {
       first = false;
       out << "input " << name << std::endl;
     }
 
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
+    for (IntIndex i = 0;  i < output_names_.size();  i++) {
       first = false;
       out << "output " << output_names_[i] << " "
           << util::dtype_to_name(output_dtypes_[i]) << std::endl;
     }
 
-    for (int64_t i = 0;  i < dictionary_names_.size();  i++) {
+    for (IntIndex i = 0;  i < dictionary_names_.size();  i++) {
       if (!first) {
         out << std::endl;
       }
@@ -309,16 +309,17 @@ namespace awkward {
   const std::string
   ForthMachineOf<T, I>::decompiled_segment(int64_t segment_position,
                                            const std::string& indent) const {
-    if (segment_position < 0  ||  segment_position + 1 >= bytecodes_offsets_.size()) {
+    if ((IntIndex)segment_position < 0  ||  (IntIndex)segment_position + 1 >= bytecodes_offsets_.size()) {
       throw std::runtime_error(
         std::string("segment ") + std::to_string(segment_position)
         + std::string(" does not exist in the bytecode") + FILENAME(__LINE__));
     }
     std::stringstream out;
-    int64_t bytecode_position = bytecodes_offsets_[segment_position];
-    int64_t instruction_number = 0;
-    while (bytecode_position < bytecodes_offsets_[segment_position + 1]) {
-      if (bytecode_position != bytecodes_offsets_[segment_position]) {
+    int64_t bytecode_position = bytecodes_offsets_[(IntIndex)segment_position];
+    // FIXME: unused variable
+    // int64_t instruction_number = 0;
+    while (bytecode_position < bytecodes_offsets_[(IntIndex)segment_position + 1]) {
+      if (bytecode_position != bytecodes_offsets_[(IntIndex)segment_position]) {
         out << indent;
       }
       out << decompiled_at(bytecode_position, indent) << std::endl;
@@ -331,21 +332,21 @@ namespace awkward {
   const std::string
   ForthMachineOf<T, I>::decompiled_at(int64_t bytecode_position,
                                       const std::string& indent) const {
-    if (bytecode_position < 0  ||  bytecode_position >= bytecodes_.size()) {
+    if (bytecode_position < 0  ||  (IntIndex)bytecode_position >= bytecodes_.size()) {
       throw std::runtime_error(
         std::string("absolute position ") + std::to_string(bytecode_position)
         + std::string(" does not exist in the bytecode") + FILENAME(__LINE__));
     }
 
-    I bytecode = bytecodes_[bytecode_position];
+    I bytecode = bytecodes_[(IntIndex)bytecode_position];
     I next_bytecode = 0;
-    if (bytecode_position + 1 < bytecodes_.size()) {
-      next_bytecode = bytecodes_[bytecode_position + 1];
+    if ((IntIndex)bytecode_position + 1 < bytecodes_.size()) {
+      next_bytecode = bytecodes_[(IntIndex)bytecode_position + 1];
     }
 
     if (bytecode < 0) {
-      I in_num = bytecodes_[bytecode_position + 1];
-      std::string in_name = input_names_[in_num];
+      I in_num = bytecodes_[(IntIndex)bytecode_position + 1];
+      std::string in_name = input_names_[(IntIndex)in_num];
 
       std::string rep = (~bytecode & READ_REPEATED) ? "#" : "";
       std::string big = ((~bytecode & READ_BIGENDIAN) != 0) ? "!" : "";
@@ -395,8 +396,8 @@ namespace awkward {
 
       std::string out_name = "stack";
       if (~bytecode & READ_DIRECT) {
-        I out_num = bytecodes_[bytecode_position + 2];
-        out_name = output_names_[out_num];
+        I out_num = bytecodes_[(IntIndex)bytecode_position + 2];
+        out_name = output_names_[(IntIndex)out_num];
       }
       return in_name + std::string(" ") + arrow + std::string(" ") + out_name;
     }
@@ -419,7 +420,7 @@ namespace awkward {
 
     else if (next_bytecode == CODE_WHILE) {
       int64_t precondition = bytecode - BOUND_DICTIONARY;
-      int64_t postcondition = bytecodes_[bytecode_position + 2] - BOUND_DICTIONARY;
+      int64_t postcondition = bytecodes_[(IntIndex)bytecode_position + 2] - BOUND_DICTIONARY;
       return std::string("begin\n")
              + (segment_nonempty(precondition) ? indent + "  " : "")
              + decompiled_segment(precondition, indent + "  ")
@@ -430,7 +431,7 @@ namespace awkward {
     }
 
     else if (bytecode >= BOUND_DICTIONARY) {
-      for (int64_t i = 0;  i < dictionary_names_.size();  i++) {
+      for (IntIndex i = 0;  i < dictionary_names_.size();  i++) {
         if (dictionary_bytecodes_[i] == bytecode) {
           return dictionary_names_[i];
         }
@@ -441,7 +442,7 @@ namespace awkward {
     else {
       switch (bytecode) {
         case CODE_LITERAL: {
-          return std::to_string(bytecodes_[bytecode_position + 1]);
+          return std::to_string(bytecodes_[(IntIndex)bytecode_position + 1]);
         }
         case CODE_HALT: {
           return "halt";
@@ -450,15 +451,15 @@ namespace awkward {
           return "pause";
         }
         case CODE_IF: {
-          int64_t consequent = bytecodes_[bytecode_position + 1] - BOUND_DICTIONARY;
+          int64_t consequent = bytecodes_[(IntIndex)bytecode_position + 1] - BOUND_DICTIONARY;
           return std::string("if\n")
                  + (segment_nonempty(consequent) ? indent + "  " : "")
                  + decompiled_segment(consequent, indent + "  ")
                  + indent + "then";
         }
         case CODE_IF_ELSE: {
-          int64_t consequent = bytecodes_[bytecode_position + 1] - BOUND_DICTIONARY;
-          int64_t alternate = bytecodes_[bytecode_position + 2] - BOUND_DICTIONARY;
+          int64_t consequent = bytecodes_[(IntIndex)bytecode_position + 1] - BOUND_DICTIONARY;
+          int64_t alternate = bytecodes_[(IntIndex)bytecode_position + 2] - BOUND_DICTIONARY;
           return std::string("if\n")
                  + (segment_nonempty(consequent) ? indent + "  " : "")
                  + decompiled_segment(consequent, indent + "  ")
@@ -468,14 +469,14 @@ namespace awkward {
                  + indent + "then";
         }
         case CODE_DO: {
-          int64_t body = bytecodes_[bytecode_position + 1] - BOUND_DICTIONARY;
+          int64_t body = bytecodes_[(IntIndex)bytecode_position + 1] - BOUND_DICTIONARY;
           return std::string("do\n")
                  + (segment_nonempty(body) ? indent + "  " : "")
                  + decompiled_segment(body, indent + "  ")
                  + indent + "loop";
         }
         case CODE_DO_STEP: {
-          int64_t body = bytecodes_[bytecode_position + 1] - BOUND_DICTIONARY;
+          int64_t body = bytecodes_[(IntIndex)bytecode_position + 1] - BOUND_DICTIONARY;
           return std::string("do\n")
                  + (segment_nonempty(body) ? indent + "  " : "")
                  + decompiled_segment(body, indent + "  ")
@@ -485,48 +486,48 @@ namespace awkward {
           return std::string("exit");
         }
         case CODE_PUT: {
-          int64_t var_num = bytecodes_[bytecode_position + 1];
-          return variable_names_[var_num] + " !";
+          int64_t var_num = bytecodes_[(IntIndex)bytecode_position + 1];
+          return variable_names_[(IntIndex)var_num] + " !";
         }
         case CODE_INC: {
-          int64_t var_num = bytecodes_[bytecode_position + 1];
-          return variable_names_[var_num] + " +!";
+          int64_t var_num = bytecodes_[(IntIndex)bytecode_position + 1];
+          return variable_names_[(IntIndex)var_num] + " +!";
         }
         case CODE_GET: {
-          int64_t var_num = bytecodes_[bytecode_position + 1];
-          return variable_names_[var_num] + " @";
+          int64_t var_num = bytecodes_[(IntIndex)bytecode_position + 1];
+          return variable_names_[(IntIndex)var_num] + " @";
         }
         case CODE_LEN_INPUT: {
-          int64_t in_num = bytecodes_[bytecode_position + 1];
-          return input_names_[in_num] + " len";
+          int64_t in_num = bytecodes_[(IntIndex)bytecode_position + 1];
+          return input_names_[(IntIndex)in_num] + " len";
         }
         case CODE_POS: {
-          int64_t in_num = bytecodes_[bytecode_position + 1];
-          return input_names_[in_num] + " pos";
+          int64_t in_num = bytecodes_[(IntIndex)bytecode_position + 1];
+          return input_names_[(IntIndex)in_num] + " pos";
         }
         case CODE_END: {
-          int64_t in_num = bytecodes_[bytecode_position + 1];
-          return input_names_[in_num] + " end";
+          int64_t in_num = bytecodes_[(IntIndex)bytecode_position + 1];
+          return input_names_[(IntIndex)in_num] + " end";
         }
         case CODE_SEEK: {
-          int64_t in_num = bytecodes_[bytecode_position + 1];
-          return input_names_[in_num] + " seek";
+          int64_t in_num = bytecodes_[(IntIndex)bytecode_position + 1];
+          return input_names_[(IntIndex)in_num] + " seek";
         }
         case CODE_SKIP: {
-          int64_t in_num = bytecodes_[bytecode_position + 1];
-          return input_names_[in_num] + " skip";
+          int64_t in_num = bytecodes_[(IntIndex)bytecode_position + 1];
+          return input_names_[(IntIndex)in_num] + " skip";
         }
         case CODE_WRITE: {
-          int64_t out_num = bytecodes_[bytecode_position + 1];
-          return output_names_[out_num] + " <- stack";
+          int64_t out_num = bytecodes_[(IntIndex)bytecode_position + 1];
+          return output_names_[(IntIndex)out_num] + " <- stack";
         }
         case CODE_LEN_OUTPUT: {
-          int64_t out_num = bytecodes_[bytecode_position + 1];
-          return output_names_[out_num] + " len";
+          int64_t out_num = bytecodes_[(IntIndex)bytecode_position + 1];
+          return output_names_[(IntIndex)out_num] + " len";
         }
         case CODE_REWIND: {
-          int64_t out_num = bytecodes_[bytecode_position + 1];
-          return output_names_[out_num] + " rewind";
+          int64_t out_num = bytecodes_[(IntIndex)bytecode_position + 1];
+          return output_names_[(IntIndex)out_num] + " rewind";
         }
         case CODE_I: {
           return "i";
@@ -706,7 +707,7 @@ namespace awkward {
   const std::map<std::string, T>
   ForthMachineOf<T, I>::variables() const {
     std::map<std::string, T> out;
-    for (int64_t i = 0;  i < variable_names_.size();  i++) {
+    for (IntIndex i = 0;  i < variable_names_.size();  i++) {
       out[variable_names_[i]] = variables_[i];
     }
     return out;
@@ -721,7 +722,7 @@ namespace awkward {
   template <typename T, typename I>
   T
   ForthMachineOf<T, I>::variable_at(const std::string& name) const {
-    for (int64_t i = 0;  i < variable_names_.size();  i++) {
+    for (IntIndex i = 0;  i < variable_names_.size();  i++) {
       if (variable_names_[i] == name) {
         return variables_[i];
       }
@@ -734,7 +735,7 @@ namespace awkward {
   template <typename T, typename I>
   T
   ForthMachineOf<T, I>::variable_at(int64_t index) const noexcept {
-    return variables_[index];
+    return variables_[(IntIndex)index];
   }
 
   template <typename T, typename I>
@@ -745,7 +746,7 @@ namespace awkward {
         std::string("need to 'begin' or 'run' to assign inputs") + FILENAME(__LINE__)
       );
     }
-    for (int64_t i = 0;  i < input_names_.size();  i++) {
+    for (IntIndex i = 0;  i < input_names_.size();  i++) {
       if (input_names_[i] == name) {
         return current_inputs_[i].get()->pos();
       }
@@ -762,7 +763,7 @@ namespace awkward {
       return -1;
     }
     else {
-      return current_inputs_[index].get()->pos();
+      return current_inputs_[(IntIndex)index].get()->pos();
     }
   }
 
@@ -775,7 +776,7 @@ namespace awkward {
       );
     }
     std::map<std::string, std::shared_ptr<ForthOutputBuffer>> out;
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
+    for (IntIndex i = 0;  i < output_names_.size();  i++) {
       out[output_names_[i]] = current_outputs_[i];
     }
     return out;
@@ -795,7 +796,7 @@ namespace awkward {
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
     }
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
+    for (IntIndex i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i];
       }
@@ -808,7 +809,7 @@ namespace awkward {
   template <typename T, typename I>
   const std::shared_ptr<ForthOutputBuffer>
   ForthMachineOf<T, I>::output_at(int64_t index) const noexcept {
-    return current_outputs_[index];
+    return current_outputs_[(IntIndex)index];
   }
 
   template <typename T, typename I>
@@ -819,7 +820,7 @@ namespace awkward {
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
     }
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
+    for (IntIndex i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toNumpyArray();
       }
@@ -832,7 +833,7 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   ForthMachineOf<T, I>::output_NumpyArray_at(int64_t index) const {
-    return current_outputs_[index].get()->toNumpyArray();
+    return current_outputs_[(IntIndex)index].get()->toNumpyArray();
   }
 
   template <typename T, typename I>
@@ -843,7 +844,7 @@ namespace awkward {
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
     }
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
+    for (IntIndex i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndex8();
       }
@@ -856,7 +857,7 @@ namespace awkward {
   template <typename T, typename I>
   const Index8
   ForthMachineOf<T, I>::output_Index8_at(int64_t index) const {
-    return current_outputs_[index].get()->toIndex8();
+    return current_outputs_[(IntIndex)index].get()->toIndex8();
   }
 
   template <typename T, typename I>
@@ -867,7 +868,7 @@ namespace awkward {
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
     }
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
+    for (IntIndex i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndexU8();
       }
@@ -880,7 +881,7 @@ namespace awkward {
   template <typename T, typename I>
   const IndexU8
   ForthMachineOf<T, I>::output_IndexU8_at(int64_t index) const {
-    return current_outputs_[index].get()->toIndexU8();
+    return current_outputs_[(IntIndex)index].get()->toIndexU8();
   }
 
   template <typename T, typename I>
@@ -891,7 +892,7 @@ namespace awkward {
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
     }
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
+    for (IntIndex i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndex32();
       }
@@ -904,7 +905,7 @@ namespace awkward {
   template <typename T, typename I>
   const Index32
   ForthMachineOf<T, I>::output_Index32_at(int64_t index) const {
-    return current_outputs_[index].get()->toIndex32();
+    return current_outputs_[(IntIndex)index].get()->toIndex32();
   }
 
   template <typename T, typename I>
@@ -915,7 +916,7 @@ namespace awkward {
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
     }
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
+    for (IntIndex i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndexU32();
       }
@@ -928,7 +929,7 @@ namespace awkward {
   template <typename T, typename I>
   const IndexU32
   ForthMachineOf<T, I>::output_IndexU32_at(int64_t index) const {
-    return current_outputs_[index].get()->toIndexU32();
+    return current_outputs_[(IntIndex)index].get()->toIndexU32();
   }
 
   template <typename T, typename I>
@@ -939,7 +940,7 @@ namespace awkward {
         std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
       );
     }
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
+    for (IntIndex i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndex64();
       }
@@ -952,14 +953,14 @@ namespace awkward {
   template <typename T, typename I>
   const Index64
   ForthMachineOf<T, I>::output_Index64_at(int64_t index) const {
-    return current_outputs_[index].get()->toIndex64();
+    return current_outputs_[(IntIndex)index].get()->toIndex64();
   }
 
   template <typename T, typename I>
   void
   ForthMachineOf<T, I>::reset() {
     stack_depth_ = 0;
-    for (int64_t i = 0;  i < variables_.size();  i++) {
+    for (IntIndex i = 0;  i < variables_.size();  i++) {
       variables_[i] = 0;
     }
     current_inputs_.clear();
@@ -1001,7 +1002,7 @@ namespace awkward {
     current_outputs_ = std::vector<std::shared_ptr<ForthOutputBuffer>>();
     int64_t init = output_initial_size_;
     double resize = output_resize_factor_;
-    for (int64_t i = 0;  i < output_names_.size();  i++) {
+    for (IntIndex i = 0;  i < output_names_.size();  i++) {
       std::shared_ptr<ForthOutputBuffer> out;
       switch (output_dtypes_[i]) {
         case util::dtype::boolean: {
@@ -1165,9 +1166,9 @@ namespace awkward {
   template <typename T, typename I>
   util::ForthError
   ForthMachineOf<T, I>::call(const std::string& name) {
-    for (int64_t i = 0;  i < dictionary_names_.size();  i++) {
+    for (IntIndex i = 0;  i < dictionary_names_.size();  i++) {
       if (dictionary_names_[i] == name) {
-        return call(i);
+        return call((int64_t)i);
       }
     }
     throw std::runtime_error(
@@ -1187,7 +1188,7 @@ namespace awkward {
     }
 
     recursion_target_depth_.push(recursion_current_depth_);
-    bytecodes_pointer_push(dictionary_bytecodes_[index] - BOUND_DICTIONARY);
+    bytecodes_pointer_push(dictionary_bytecodes_[(IntIndex)index] - BOUND_DICTIONARY);
 
     int64_t recursion_target_depth_top = recursion_target_depth_.top();
 
@@ -1266,6 +1267,8 @@ namespace awkward {
           throw std::invalid_argument(
             "'division by zero' in AwkwardForth runtime: tried to divide by zero");
         }
+        default:
+          break;
       }
     }
   }
@@ -1346,7 +1349,7 @@ namespace awkward {
   ForthMachineOf<T, I>::is_integer(const std::string& word, int64_t& value) const {
     if (word.size() >= 2  &&  word.substr(0, 2) == std::string("0x")) {
       try {
-        value = std::stoul(word.substr(2, (int64_t)word.size() - 2), nullptr, 16);
+        value = (int64_t)std::stoul(word.substr(2, word.size() - 2), nullptr, 16);
       }
       catch (std::invalid_argument err) {
         return false;
@@ -1355,7 +1358,7 @@ namespace awkward {
     }
     else {
       try {
-        value = std::stoul(word, nullptr, 10);
+        value = (int64_t)std::stoul(word, nullptr, 10);
       }
       catch (std::invalid_argument err) {
         return false;
@@ -1408,16 +1411,16 @@ namespace awkward {
   template <typename T, typename I>
   bool
   ForthMachineOf<T, I>::segment_nonempty(int64_t segment_position) const {
-    return bytecodes_offsets_[segment_position] != bytecodes_offsets_[segment_position + 1];
+    return bytecodes_offsets_[(IntIndex)segment_position] != bytecodes_offsets_[(IntIndex)segment_position + 1];
   }
 
   template <typename T, typename I>
   int64_t
   ForthMachineOf<T, I>::bytecodes_per_instruction(int64_t bytecode_position) const {
-    I bytecode = bytecodes_[bytecode_position];
+    I bytecode = bytecodes_[(IntIndex)bytecode_position];
     I next_bytecode = 0;
-    if (bytecode_position + 1 < bytecodes_.size()) {
-      next_bytecode = bytecodes_[bytecode_position + 1];
+    if ((IntIndex)bytecode_position + 1 < bytecodes_.size()) {
+      next_bytecode = bytecodes_[(IntIndex)bytecode_position + 1];
     }
 
     if (bytecode < 0) {
@@ -1467,20 +1470,20 @@ namespace awkward {
                                     int64_t startpos,
                                     int64_t stoppos,
                                     const std::string& message) const {
-    std::pair<int64_t, int64_t> lc = linecol[startpos];
+    std::pair<int64_t, int64_t> lc = linecol[(IntIndex)startpos];
     std::stringstream out;
     out << "in AwkwardForth source code, line " << lc.first << " col " << lc.second
         << ", " << message << ":" << std::endl << std::endl << "    ";
     int64_t line = 1;
     int64_t col = 1;
-    int64_t start = 0;
-    int64_t stop = 0;
+    IntIndex start = 0;
+    IntIndex stop = 0;
     while (stop < source_.length()) {
       if (lc.first == line  &&  lc.second == col) {
         start = stop;
       }
-      if (stoppos < linecol.size()  &&
-          linecol[stoppos].first == line  &&  linecol[stoppos].second == col) {
+      if ((IntIndex)stoppos < linecol.size()  &&
+          linecol[(IntIndex)stoppos].first == line  &&  linecol[(IntIndex)stoppos].second == col) {
         break;
       }
       if (source_[stop] == '\n') {
@@ -1497,8 +1500,8 @@ namespace awkward {
   template <typename T, typename I>
   void ForthMachineOf<T, I>::tokenize(std::vector<std::string>& tokenized,
                                       std::vector<std::pair<int64_t, int64_t>>& linecol) {
-    int64_t start = 0;
-    int64_t stop = 0;
+    IntIndex start = 0;
+    IntIndex stop = 0;
     bool full = false;
     int64_t line = 1;
     int64_t colstart = 0;
@@ -1561,7 +1564,7 @@ namespace awkward {
           tokenized,
           linecol,
           0,
-          tokenized.size(),
+          (int64_t)tokenized.size(),
           bytecodes,
           dictionary,
           0,
@@ -1574,7 +1577,7 @@ namespace awkward {
       for (auto bytecode : segment) {
         bytecodes_.push_back(bytecode);
       }
-      bytecodes_offsets_.push_back(bytecodes_.size());
+      bytecodes_offsets_.push_back((int64_t)bytecodes_.size());
     }
   }
 
@@ -1591,7 +1594,7 @@ namespace awkward {
                               int64_t dodepth) {
     int64_t pos = start;
     while (pos < stop) {
-      std::string word = tokenized[pos];
+      std::string word = tokenized[(StringIndex)pos];
 
       if (word == "(") {
         // Simply skip the parenthesized text: it's a comment.
@@ -1606,10 +1609,10 @@ namespace awkward {
             );
           }
           // Any parentheses in the comment text itself must be balanced.
-          if (tokenized[substop] == "(") {
+          if (tokenized[(StringIndex)substop] == "(") {
             nesting++;
           }
-          else if (tokenized[substop] == ")") {
+          else if (tokenized[(StringIndex)substop] == ")") {
             nesting--;
           }
         }
@@ -1620,7 +1623,7 @@ namespace awkward {
       else if (word == "\\") {
         // Modern, backslash-to-end-of-line comments. Nothing needs to be balanced.
         int64_t substop = pos;
-        while (substop < stop  &&  tokenized[substop] != "\n") {
+        while (substop < stop  &&  tokenized[(StringIndex)substop] != "\n") {
           substop++;
         }
 
@@ -1638,13 +1641,13 @@ namespace awkward {
       }
 
       else if (word == ":") {
-        if (pos + 1 >= stop  ||  tokenized[pos + 1] == ";") {
+        if (pos + 1 >= stop  ||  tokenized[(StringIndex)pos + 1] == ";") {
             throw std::invalid_argument(
               err_linecol(linecol, pos, pos + 2, "missing name in word definition")
               + FILENAME(__LINE__)
             );
         }
-        std::string name = tokenized[pos + 1];
+        std::string name = tokenized[(StringIndex)pos + 1];
 
         int64_t num;
         if (is_input(name)  ||  is_output(name)  ||  is_variable(name)  ||
@@ -1669,17 +1672,17 @@ namespace awkward {
               + FILENAME(__LINE__)
             );
           }
-          if (tokenized[substop] == ":") {
+          if (tokenized[(StringIndex)substop] == ":") {
             nesting++;
           }
-          else if (tokenized[substop] == ";") {
+          else if (tokenized[(StringIndex)substop] == ";") {
             nesting--;
           }
         }
 
         // Add the new word to the dictionary before parsing it so that recursive
         // functions can be defined.
-        I bytecode = dictionary.size() + BOUND_DICTIONARY;
+        I bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
         dictionary_names_.push_back(name);
         dictionary_bytecodes_.push_back(bytecode);
 
@@ -1695,7 +1698,7 @@ namespace awkward {
               dictionary,
               0,
               0);
-        dictionary[bytecode - BOUND_DICTIONARY] = body;
+        dictionary[(InstrIndex)bytecode - BOUND_DICTIONARY] = body;
 
         pos = substop + 1;
       }
@@ -1708,7 +1711,7 @@ namespace awkward {
               + FILENAME(__LINE__)
           );
         }
-        for (int64_t i = 0;  i < dictionary_names_.size();  i++) {
+        for (InstrIndex i = 0;  i < dictionary_names_.size();  i++) {
           if (dictionary_names_[i] == defn) {
             bytecodes.push_back(dictionary_bytecodes_[i]);
           }
@@ -1725,7 +1728,7 @@ namespace awkward {
             + FILENAME(__LINE__)
           );
         }
-        std::string name = tokenized[pos + 1];
+        std::string name = tokenized[(StringIndex)pos + 1];
 
         int64_t num;
         if (is_input(name)  ||  is_output(name)  ||  is_variable(name)  ||
@@ -1751,7 +1754,7 @@ namespace awkward {
             + FILENAME(__LINE__)
           );
         }
-        std::string name = tokenized[pos + 1];
+        std::string name = tokenized[(StringIndex)pos + 1];
 
         int64_t num;
         if (is_input(name)  ||  is_output(name)  ||  is_variable(name)  ||
@@ -1777,8 +1780,8 @@ namespace awkward {
             + FILENAME(__LINE__)
           );
         }
-        std::string name = tokenized[pos + 1];
-        std::string dtype_string = tokenized[pos + 2];
+        std::string name = tokenized[(StringIndex)pos + 1];
+        std::string dtype_string = tokenized[(StringIndex)pos + 2];
 
         int64_t num;
         if (is_input(name)  ||  is_output(name)  ||  is_variable(name)  ||
@@ -1835,13 +1838,13 @@ namespace awkward {
               + FILENAME(__LINE__)
             );
           }
-          else if (tokenized[substop] == "if") {
+          else if (tokenized[(StringIndex)substop] == "if") {
             nesting++;
           }
-          else if (tokenized[substop] == "then") {
+          else if (tokenized[(StringIndex)substop] == "then") {
             nesting--;
           }
-          else if (tokenized[substop] == "else"  &&  nesting == 1) {
+          else if (tokenized[(StringIndex)substop] == "else"  &&  nesting == 1) {
             subelse = substop;
           }
         }
@@ -1849,7 +1852,7 @@ namespace awkward {
         if (subelse == -1) {
           // Add the consequent to the dictionary so that it can be used
           // without special instruction pointer manipulation at runtime.
-          I bytecode = dictionary.size() + BOUND_DICTIONARY;
+          I bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> consequent;
           dictionary.push_back(consequent);
           parse(defn,
@@ -1861,7 +1864,7 @@ namespace awkward {
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[bytecode - BOUND_DICTIONARY] = consequent;
+          dictionary[(IntIndex)bytecode - BOUND_DICTIONARY] = consequent;
 
           bytecodes.push_back(CODE_IF);
           bytecodes.push_back(bytecode);
@@ -1870,7 +1873,7 @@ namespace awkward {
         }
         else {
           // Same as above, except that two new definitions must be made.
-          I bytecode1 = dictionary.size() + BOUND_DICTIONARY;
+          I bytecode1 = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> consequent;
           dictionary.push_back(consequent);
           parse(defn,
@@ -1882,9 +1885,9 @@ namespace awkward {
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[bytecode1 - BOUND_DICTIONARY] = consequent;
+          dictionary[(IntIndex)bytecode1 - BOUND_DICTIONARY] = consequent;
 
-          I bytecode2 = dictionary.size() + BOUND_DICTIONARY;
+          I bytecode2 = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> alternate;
           dictionary.push_back(alternate);
           parse(defn,
@@ -1896,7 +1899,7 @@ namespace awkward {
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[bytecode2 - BOUND_DICTIONARY] = alternate;
+          dictionary[(IntIndex)bytecode2 - BOUND_DICTIONARY] = alternate;
 
           bytecodes.push_back(CODE_IF_ELSE);
           bytecodes.push_back(bytecode1);
@@ -1920,13 +1923,13 @@ namespace awkward {
               + FILENAME(__LINE__)
             );
           }
-          else if (tokenized[substop] == "do") {
+          else if (tokenized[(StringIndex)substop] == "do") {
             nesting++;
           }
-          else if (tokenized[substop] == "loop") {
+          else if (tokenized[(StringIndex)substop] == "loop") {
             nesting--;
           }
-          else if (tokenized[substop] == "+loop") {
+          else if (tokenized[(StringIndex)substop] == "+loop") {
             if (nesting == 1) {
               is_step = true;
             }
@@ -1936,7 +1939,7 @@ namespace awkward {
 
         // Add the loop body to the dictionary so that it can be used
         // without special instruction pointer manipulation at runtime.
-        I bytecode = dictionary.size() + BOUND_DICTIONARY;
+        I bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
         std::vector<I> body;
         dictionary.push_back(body);
         parse(defn,
@@ -1948,7 +1951,7 @@ namespace awkward {
               dictionary,
               exitdepth + 1,
               dodepth + 1);
-        dictionary[bytecode - BOUND_DICTIONARY] = body;
+        dictionary[(IntIndex)bytecode - BOUND_DICTIONARY] = body;
 
         if (is_step) {
           bytecodes.push_back(CODE_DO_STEP);
@@ -1977,19 +1980,19 @@ namespace awkward {
               + FILENAME(__LINE__)
             );
           }
-          else if (tokenized[substop] == "begin") {
+          else if (tokenized[(StringIndex)substop] == "begin") {
             nesting++;
           }
-          else if (tokenized[substop] == "until") {
+          else if (tokenized[(StringIndex)substop] == "until") {
             nesting--;
           }
-          else if (tokenized[substop] == "again") {
+          else if (tokenized[(StringIndex)substop] == "again") {
             if (nesting == 1) {
               is_again = true;
             }
             nesting--;
           }
-          else if (tokenized[substop] == "while") {
+          else if (tokenized[(StringIndex)substop] == "while") {
             if (nesting == 1) {
               subwhile = substop;
             }
@@ -2004,10 +2007,10 @@ namespace awkward {
                   + FILENAME(__LINE__)
                 );
               }
-              else if (tokenized[substop] == "while") {
+              else if (tokenized[(StringIndex)substop] == "while") {
                 subnesting++;
               }
-              else if (tokenized[substop] == "repeat") {
+              else if (tokenized[(StringIndex)substop] == "repeat") {
                 subnesting--;
               }
             }
@@ -2017,7 +2020,7 @@ namespace awkward {
         if (is_again) {
           // Add the 'begin ... again' body to the dictionary so that it can be
           // used without special instruction pointer manipulation at runtime.
-          I bytecode = dictionary.size() + BOUND_DICTIONARY;
+          I bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> body;
           dictionary.push_back(body);
           parse(defn,
@@ -2029,7 +2032,7 @@ namespace awkward {
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[bytecode - BOUND_DICTIONARY] = body;
+          dictionary[(IntIndex)bytecode - BOUND_DICTIONARY] = body;
 
           bytecodes.push_back(bytecode);
           bytecodes.push_back(CODE_AGAIN);
@@ -2038,7 +2041,7 @@ namespace awkward {
         }
         else if (subwhile == -1) {
           // Same for the 'begin .. until' body.
-          I bytecode = dictionary.size() + BOUND_DICTIONARY;
+          I bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> body;
           dictionary.push_back(body);
           parse(defn,
@@ -2050,7 +2053,7 @@ namespace awkward {
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[bytecode - BOUND_DICTIONARY] = body;
+          dictionary[(IntIndex)bytecode - BOUND_DICTIONARY] = body;
 
           bytecodes.push_back(bytecode);
           bytecodes.push_back(CODE_UNTIL);
@@ -2059,7 +2062,7 @@ namespace awkward {
         }
         else {
           // Same for the 'begin .. repeat' statements.
-          I bytecode1 = dictionary.size() + BOUND_DICTIONARY;
+          I bytecode1 = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> precondition;
           dictionary.push_back(precondition);
           parse(defn,
@@ -2071,10 +2074,10 @@ namespace awkward {
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[bytecode1 - BOUND_DICTIONARY] = precondition;
+          dictionary[(IntIndex)bytecode1 - BOUND_DICTIONARY] = precondition;
 
           // Same for the 'repeat .. until' statements.
-          I bytecode2 = dictionary.size() + BOUND_DICTIONARY;
+          I bytecode2 = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> postcondition;
           dictionary.push_back(postcondition);
           parse(defn,
@@ -2086,7 +2089,7 @@ namespace awkward {
                 dictionary,
                 exitdepth + 1,
                 dodepth);
-          dictionary[bytecode2 - BOUND_DICTIONARY] = postcondition;
+          dictionary[(IntIndex)bytecode2 - BOUND_DICTIONARY] = postcondition;
 
           bytecodes.push_back(bytecode1);
           bytecodes.push_back(CODE_WHILE);
@@ -2098,33 +2101,33 @@ namespace awkward {
 
       else if (word == "exit") {
         bytecodes.push_back(CODE_EXIT);
-        bytecodes.push_back(exitdepth);
+        bytecodes.push_back((int32_t)exitdepth);
 
         pos++;
       }
 
       else if (is_variable(word)) {
-        int64_t variable_index = 0;
-        for (;  variable_index < (int64_t)variable_names_.size();  variable_index++) {
+        IntIndex variable_index = 0;
+        for (;  variable_index < variable_names_.size();  variable_index++) {
           if (variable_names_[variable_index] == word) {
             break;
           }
         }
-        if (pos + 1 < stop  &&  tokenized[pos + 1] == "!") {
+        if (pos + 1 < stop  &&  tokenized[(StringIndex)pos + 1] == "!") {
           bytecodes.push_back(CODE_PUT);
-          bytecodes.push_back(variable_index);
+          bytecodes.push_back((int32_t)variable_index);
 
           pos += 2;
         }
-        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "+!") {
+        else if (pos + 1 < stop  &&  tokenized[(StringIndex)pos + 1] == "+!") {
           bytecodes.push_back(CODE_INC);
-          bytecodes.push_back(variable_index);
+          bytecodes.push_back((int32_t)variable_index);
 
           pos += 2;
         }
-        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "@") {
+        else if (pos + 1 < stop  &&  tokenized[(StringIndex)pos + 1] == "@") {
           bytecodes.push_back(CODE_GET);
-          bytecodes.push_back(variable_index);
+          bytecodes.push_back((int32_t)variable_index);
 
           pos += 2;
         }
@@ -2137,47 +2140,47 @@ namespace awkward {
       }
 
       else if (is_input(word)) {
-        int64_t input_index = 0;
-        for (;  input_index < (int64_t)input_names_.size();  input_index++) {
+        InstrIndex input_index = 0;
+        for (;  input_index < input_names_.size();  input_index++) {
           if (input_names_[input_index] == word) {
             break;
           }
         }
 
-        if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
+        if (pos + 1 < stop  &&  tokenized[(StringIndex)pos + 1] == "len") {
           bytecodes.push_back(CODE_LEN_INPUT);
-          bytecodes.push_back(input_index);
+          bytecodes.push_back((int32_t)input_index);
 
           pos += 2;
         }
-        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "pos") {
+        else if (pos + 1 < stop  &&  tokenized[(StringIndex)pos + 1] == "pos") {
           bytecodes.push_back(CODE_POS);
-          bytecodes.push_back(input_index);
+          bytecodes.push_back((int32_t)input_index);
 
           pos += 2;
         }
-        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "end") {
+        else if (pos + 1 < stop  &&  tokenized[(StringIndex)pos + 1] == "end") {
           bytecodes.push_back(CODE_END);
-          bytecodes.push_back(input_index);
+          bytecodes.push_back((int32_t)input_index);
 
           pos += 2;
         }
-        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "seek") {
+        else if (pos + 1 < stop  &&  tokenized[(StringIndex)pos + 1] == "seek") {
           bytecodes.push_back(CODE_SEEK);
-          bytecodes.push_back(input_index);
+          bytecodes.push_back((int32_t)input_index);
 
           pos += 2;
         }
-        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "skip") {
+        else if (pos + 1 < stop  &&  tokenized[(StringIndex)pos + 1] == "skip") {
           bytecodes.push_back(CODE_SKIP);
-          bytecodes.push_back(input_index);
+          bytecodes.push_back((int32_t)input_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop) {
           I bytecode = 0;
 
-          std::string parser = tokenized[pos + 1];
+          std::string parser = tokenized[(StringIndex)pos + 1];
 
           if (parser.length() != 0  &&  parser[0] == '#') {
             bytecode |= READ_REPEATED;
@@ -2263,13 +2266,13 @@ namespace awkward {
           }
 
           bool found_output = false;
-          int64_t output_index = 0;
-          if (pos + 2 < stop  &&  tokenized[pos + 2] == "stack") {
+          InstrIndex output_index = 0;
+          if (pos + 2 < stop  &&  tokenized[(StringIndex)pos + 2] == "stack") {
             // not READ_DIRECT
           }
-          else if (pos + 2 < stop  &&  is_output(tokenized[pos + 2])) {
-            for (;  output_index < (int64_t)output_names_.size();  output_index++) {
-              if (output_names_[output_index] == tokenized[pos + 2]) {
+          else if (pos + 2 < stop  &&  is_output(tokenized[(StringIndex)pos + 2])) {
+            for (;  output_index < output_names_.size();  output_index++) {
+              if (output_names_[output_index] == tokenized[(StringIndex)pos + 2]) {
                 found_output = true;
                 break;
               }
@@ -2286,9 +2289,9 @@ namespace awkward {
 
           // Parser instructions are bit-flipped to detect them by the sign bit.
           bytecodes.push_back(~bytecode);
-          bytecodes.push_back(input_index);
+          bytecodes.push_back((int32_t)input_index);
           if (found_output) {
-            bytecodes.push_back(output_index);
+            bytecodes.push_back((int32_t)output_index);
           }
 
           pos += 3;
@@ -2304,16 +2307,16 @@ namespace awkward {
       }
 
       else if (is_output(word)) {
-        int64_t output_index = 0;
-        for (;  output_index < (int64_t)output_names_.size();  output_index++) {
+        InstrIndex output_index = 0;
+        for (;  output_index < output_names_.size();  output_index++) {
           if (output_names_[output_index] == word) {
             break;
           }
         }
-        if (pos + 1 < stop  &&  tokenized[pos + 1] == "<-") {
-          if (pos + 2 < stop  &&  tokenized[pos + 2] == "stack") {
+        if (pos + 1 < stop  &&  tokenized[(StringIndex)pos + 1] == "<-") {
+          if (pos + 2 < stop  &&  tokenized[(StringIndex)pos + 2] == "stack") {
             bytecodes.push_back(CODE_WRITE);
-            bytecodes.push_back(output_index);
+            bytecodes.push_back((int32_t)output_index);
 
             pos += 3;
           }
@@ -2324,15 +2327,15 @@ namespace awkward {
             );
           }
         }
-        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "len") {
+        else if (pos + 1 < stop  &&  tokenized[(StringIndex)pos + 1] == "len") {
           bytecodes.push_back(CODE_LEN_OUTPUT);
-          bytecodes.push_back(output_index);
+          bytecodes.push_back((int32_t)output_index);
 
           pos += 2;
         }
-        else if (pos + 1 < stop  &&  tokenized[pos + 1] == "rewind") {
+        else if (pos + 1 < stop  &&  tokenized[(StringIndex)pos + 1] == "rewind") {
           bytecodes.push_back(CODE_REWIND);
-          bytecodes.push_back(output_index);
+          bytecodes.push_back((int32_t)output_index);
 
           pos += 2;
         }
@@ -2368,7 +2371,7 @@ namespace awkward {
                 + FILENAME(__LINE__)
               );
             }
-            bytecodes.push_back(pair.second);
+            bytecodes.push_back((int32_t)pair.second);
 
             pos++;
           }
@@ -2376,10 +2379,10 @@ namespace awkward {
 
         if (!found_in_builtins) {
           bool found_in_dictionary = false;
-          for (int64_t i = 0;  i < dictionary_names_.size();  i++) {
+          for (StringIndex i = 0;  i < dictionary_names_.size();  i++) {
             if (dictionary_names_[i] == word) {
               found_in_dictionary = true;
-              bytecodes.push_back(dictionary_bytecodes_[i]);
+              bytecodes.push_back((int32_t)dictionary_bytecodes_[i]);
 
               pos++;
             }
@@ -2389,7 +2392,7 @@ namespace awkward {
             int64_t num;
             if (is_integer(word, num)) {
               bytecodes.push_back(CODE_LITERAL);
-              bytecodes.push_back(num);
+              bytecodes.push_back((int32_t)num);
 
               pos++;
             }
@@ -2411,8 +2414,8 @@ namespace awkward {
   ForthMachineOf<T, I>::internal_run(bool single_step, int64_t recursion_target_depth_top) { // noexcept
     while (recursion_current_depth_ != recursion_target_depth_top) {
       while (bytecodes_pointer_where() < (
-                 bytecodes_offsets_[bytecodes_pointer_which() + 1] -
-                 bytecodes_offsets_[bytecodes_pointer_which()]
+                 bytecodes_offsets_[(IntIndex)bytecodes_pointer_which() + 1] -
+                 bytecodes_offsets_[(IntIndex)bytecodes_pointer_which()]
              )) {
         I bytecode = bytecode_get();
 
@@ -2456,17 +2459,17 @@ namespace awkward {
 
             #define WRITE_DIRECTLY(TYPE, SUFFIX) {                             \
                 TYPE* ptr = reinterpret_cast<TYPE*>(                           \
-                    current_inputs_[in_num].get()->read(                       \
-                      num_items * sizeof(TYPE), current_error_));              \
+                    current_inputs_[(IntIndex)in_num].get()->read(             \
+                      num_items * (int64_t)sizeof(TYPE), current_error_));    \
                 if (current_error_ != util::ForthError::none) {                \
                   return;                                                      \
                 }                                                              \
                 if (num_items == 1) {                                          \
-                  current_outputs_[out_num].get()->write_one_##SUFFIX(         \
+                  current_outputs_[(IntIndex)out_num].get()->write_one_##SUFFIX(\
                       *ptr, byteswap);                                         \
                 }                                                              \
                 else {                                                         \
-                  current_outputs_[out_num].get()->write_##SUFFIX(             \
+                  current_outputs_[(IntIndex)out_num].get()->write_##SUFFIX(   \
                       num_items, ptr, byteswap);                               \
                 }                                                              \
                 break;                                                         \
@@ -2495,8 +2498,8 @@ namespace awkward {
           else {
               # define WRITE_TO_STACK(TYPE) {                                  \
                 TYPE* ptr = reinterpret_cast<TYPE*>(                           \
-                    current_inputs_[in_num].get()->read(                       \
-                        num_items * sizeof(TYPE), current_error_));            \
+                    current_inputs_[(IntIndex)in_num].get()->read(             \
+                        num_items * (int64_t)sizeof(TYPE), current_error_));   \
                 if (current_error_ != util::ForthError::none) {                \
                   return;                                                      \
                 }                                                              \
@@ -2513,8 +2516,8 @@ namespace awkward {
 
               # define WRITE_TO_STACK_SWAP(TYPE, SWAP) {                       \
                 TYPE* ptr = reinterpret_cast<TYPE*>(                           \
-                    current_inputs_[in_num].get()->read(                       \
-                        num_items * sizeof(TYPE), current_error_));            \
+                    current_inputs_[(IntIndex)in_num].get()->read(             \
+                        num_items * (int64_t)sizeof(TYPE), current_error_));   \
                 if (current_error_ != util::ForthError::none) {                \
                   return;                                                      \
                 }                                                              \
@@ -2527,15 +2530,15 @@ namespace awkward {
                     current_error_ = util::ForthError::stack_overflow;         \
                     return;                                                    \
                   }                                                            \
-                  stack_push(value);                                           \
+                  stack_push((index_type)value);                               \
                 }                                                              \
                 break;                                                         \
               }
 
               # define WRITE_TO_STACK_SWAP_INTP(TYPE) {                        \
                 TYPE* ptr = reinterpret_cast<TYPE*>(                           \
-                    current_inputs_[in_num].get()->read(                       \
-                        num_items * sizeof(TYPE), current_error_));            \
+                    current_inputs_[(IntIndex)in_num].get()->read(             \
+                        num_items * (int64_t)sizeof(TYPE), current_error_));   \
                 if (current_error_ != util::ForthError::none) {                \
                   return;                                                      \
                 }                                                              \
@@ -2553,7 +2556,7 @@ namespace awkward {
                     current_error_ = util::ForthError::stack_overflow;         \
                     return;                                                    \
                   }                                                            \
-                  stack_push(value);                                           \
+                  stack_push((index_type)value);                               \
                 }                                                              \
                 break;                                                         \
               }
@@ -2786,7 +2789,7 @@ namespace awkward {
                 return;
               }
               T value = stack_pop();
-              variables_[num] = value;
+              variables_[(TypeIndex)num] = value;
               break;
             }
 
@@ -2798,7 +2801,7 @@ namespace awkward {
                 return;
               }
               T value = stack_pop();
-              variables_[num] += value;
+              variables_[(TypeIndex)num] += value;
               break;
             }
 
@@ -2809,7 +2812,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push(variables_[num]);
+              stack_push(variables_[(TypeIndex)num]);
               break;
             }
 
@@ -2820,7 +2823,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push(current_inputs_[in_num].get()->len());
+              stack_push((index_type)current_inputs_[(IntIndex)in_num].get()->len());
               break;
             }
 
@@ -2831,7 +2834,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push(current_inputs_[in_num].get()->pos());
+              stack_push((index_type)current_inputs_[(IntIndex)in_num].get()->pos());
               break;
             }
 
@@ -2842,7 +2845,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push(current_inputs_[in_num].get()->end() ? -1 : 0);
+              stack_push(current_inputs_[(IntIndex)in_num].get()->end() ? -1 : 0);
               break;
             }
 
@@ -2853,7 +2856,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
-              current_inputs_[in_num].get()->seek(stack_pop(), current_error_);
+              current_inputs_[(IntIndex)in_num].get()->seek(stack_pop(), current_error_);
               if (current_error_ != util::ForthError::none) {
                 return;
               }
@@ -2867,7 +2870,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
-              current_inputs_[in_num].get()->skip(stack_pop(), current_error_);
+              current_inputs_[(IntIndex)in_num].get()->skip(stack_pop(), current_error_);
               if (current_error_ != util::ForthError::none) {
                 return;
               }
@@ -2896,7 +2899,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push(current_outputs_[out_num].get()->len());
+              stack_push((index_type)current_outputs_[(IntIndex)out_num].get()->len());
               break;
             }
 
@@ -2907,7 +2910,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
-              current_outputs_[out_num].get()->rewind(stack_pop(), current_error_);
+              current_outputs_[(IntIndex)out_num].get()->rewind(stack_pop(), current_error_);
               if (current_error_ != util::ForthError::none) {
                 return;
               }
@@ -2919,7 +2922,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push(do_i());
+              stack_push((index_type)do_i());
               break;
             }
 
@@ -2928,7 +2931,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push(do_j());
+              stack_push((index_type)do_j());
               break;
             }
 
@@ -2937,7 +2940,7 @@ namespace awkward {
                 current_error_ = util::ForthError::stack_overflow;
                 return;
               }
-              stack_push(do_k());
+              stack_push((index_type)do_k());
               break;
             }
 
@@ -2971,7 +2974,7 @@ namespace awkward {
               }
               int64_t tmp = stack_buffer_[stack_depth_ - 2];
               stack_buffer_[stack_depth_ - 2] = stack_buffer_[stack_depth_ - 1];
-              stack_buffer_[stack_depth_ - 1] = tmp;
+              stack_buffer_[stack_depth_ - 1] = (value_type)tmp;
               break;
             }
 
@@ -2996,7 +2999,7 @@ namespace awkward {
               int64_t tmp1 = stack_buffer_[stack_depth_ - 3];
               stack_buffer_[stack_depth_ - 3] = stack_buffer_[stack_depth_ - 2];
               stack_buffer_[stack_depth_ - 2] = stack_buffer_[stack_depth_ - 1];
-              stack_buffer_[stack_depth_ - 1] = tmp1;
+              stack_buffer_[stack_depth_ - 1] = (value_type)tmp1;
               break;
             }
 
@@ -3021,8 +3024,8 @@ namespace awkward {
               }
               int64_t tmp = stack_buffer_[stack_depth_ - 1];
               stack_buffer_[stack_depth_ - 1] = stack_buffer_[stack_depth_ - 2];
-              stack_buffer_[stack_depth_ - 2] = tmp;
-              stack_push(tmp);
+              stack_buffer_[stack_depth_ - 2] = (value_type)tmp;
+              stack_push((value_type)tmp);
               break;
             }
 
@@ -3354,10 +3357,10 @@ namespace awkward {
   void
   ForthMachineOf<int32_t, int32_t>::write_from_stack(int64_t num, int32_t* top) noexcept {
     if (num == 1) {
-      current_outputs_[num].get()->write_one_int32(*top, false);
+      current_outputs_[(IntIndex)num].get()->write_one_int32(*top, false);
     }
     else {
-      current_outputs_[num].get()->write_int32(1, top, false);
+      current_outputs_[(IntIndex)num].get()->write_int32(1, top, false);
     }
   }
 
@@ -3365,10 +3368,10 @@ namespace awkward {
   void
   ForthMachineOf<int64_t, int32_t>::write_from_stack(int64_t num, int64_t* top) noexcept {
     if (num == 1) {
-      current_outputs_[num].get()->write_one_int64(*top, false);
+      current_outputs_[(IntIndex)num].get()->write_one_int64(*top, false);
     }
     else {
-      current_outputs_[num].get()->write_int64(1, top, false);
+      current_outputs_[(IntIndex)num].get()->write_int64(1, top, false);
     }
   }
 
