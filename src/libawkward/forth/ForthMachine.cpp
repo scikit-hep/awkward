@@ -646,7 +646,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::vector<std::string>&
+  const std::vector<std::string>
   ForthMachineOf<T, I>::dictionary() const {
     return dictionary_names_;
   }
@@ -714,7 +714,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::vector<std::string>&
+  const std::vector<std::string>
   ForthMachineOf<T, I>::variable_index() const {
     return variable_names_;
   }
@@ -783,7 +783,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  const std::vector<std::string>&
+  const std::vector<std::string>
   ForthMachineOf<T, I>::output_index() const noexcept {
     return output_names_;
   }
@@ -1505,8 +1505,9 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  void ForthMachineOf<T, I>::tokenize(std::vector<std::string>& tokenized,
-                                      std::vector<std::pair<int64_t, int64_t>>& linecol) {
+  void
+  ForthMachineOf<T, I>::tokenize(std::vector<std::string>& tokenized,
+                                 std::vector<std::pair<int64_t, int64_t>>& linecol) {
     IndexTypeOf<int64_t> start = 0;
     IndexTypeOf<int64_t> stop = 0;
     bool full = false;
@@ -1560,8 +1561,9 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  void ForthMachineOf<T, I>::compile(const std::vector<std::string>& tokenized,
-                                     const std::vector<std::pair<int64_t, int64_t>>& linecol) {
+  void
+  ForthMachineOf<T, I>::compile(const std::vector<std::string>& tokenized,
+                                const std::vector<std::pair<int64_t, int64_t>>& linecol) {
     std::vector<std::vector<I>> dictionary;
 
     // Start recursive parsing.
