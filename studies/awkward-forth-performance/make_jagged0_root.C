@@ -6,17 +6,18 @@
 #include "TTree.h"
 #include "TBranch.h"
 
-void make_jagged0_root() {
+void make_jagged0_root(int64_t level) {
   int64_t events_per_basket = 64 * 1024 * 1024 / sizeof(float);
 
-  auto f = new TFile("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib9-jagged0.root", "RECREATE");
+  std::string name = std::string("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib") + std::to_string(level) + "-jagged0.root";
+  auto f = new TFile(name.c_str(), "RECREATE");
   f->SetCompressionAlgorithm(1);
-  f->SetCompressionLevel(9);
+  f->SetCompressionLevel(level);
 
   auto t = new TTree("tree", "");
 
   float data0;
-  t->Branch("branch", &data0, 300*1024*1024);
+  t->Branch("branch", &data0, 64*1024*1024);
   t->SetAutoFlush(0);
   t->SetAutoSave(0);
 
@@ -26,9 +27,9 @@ void make_jagged0_root() {
   while (fread(&data0, sizeof(float), 1, content) != 0) {
     t->Fill();
     count++;
-    if (count % events_per_basket == 0) {
-      t->Write();
-    }
+    // if (count % events_per_basket == 0) {
+    //   t->Write();
+    // }
     // if (count % 10000 == 0) {
     //   std::cout << ((double)count / (3.0 * (double)events_per_basket)) << std::endl;
     // }

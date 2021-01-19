@@ -7,19 +7,20 @@
 #include "TBranch.h"
 #include "TInterpreter.h"
 
-void make_jagged3_root() {
+void make_jagged3_root(int64_t level) {
   int64_t events_per_basket = 64 * 1024 * 1024 / sizeof(float) / 8 / 8 / 8;
 
   gInterpreter->GenerateDictionary("vector<vector<vector<float> > >", "vector");
 
-  auto f = new TFile("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib0-jagged3.root", "RECREATE");
+  std::string name = std::string("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib") + std::to_string(level) + "-jagged3.root";
+  auto f = new TFile(name.c_str(), "RECREATE");
   f->SetCompressionAlgorithm(1);
-  f->SetCompressionLevel(0);
+  f->SetCompressionLevel(level);
 
   auto t = new TTree("tree", "");
 
   std::vector<std::vector<std::vector<float>>> data3;
-  t->Branch("branch", &data3, 300*1024*1024);
+  t->Branch("branch", &data3, 64*1024*1024);
   t->SetAutoFlush(0);
   t->SetAutoSave(0);
 
@@ -78,9 +79,9 @@ void make_jagged3_root() {
 
     t->Fill();
     count++;
-    if (count % events_per_basket == 0) {
-      t->Write();
-    }
+    // if (count % events_per_basket == 0) {
+    //   t->Write();
+    // }
   }
 
   t->Write();
