@@ -56,7 +56,7 @@ namespace awkward {
       decompiled_at(int64_t bytecode_position, const std::string& indent="") const;
 
     /// @brief HERE
-    const std::vector<std::string>
+    const std::vector<std::string>&
       dictionary() const;
 
     /// @brief HERE
@@ -122,7 +122,7 @@ namespace awkward {
       variables() const;
 
     /// @brief HERE
-    const std::vector<std::string>
+    const std::vector<std::string>&
       variable_index() const;
 
     /// @brief HERE
@@ -146,7 +146,7 @@ namespace awkward {
       outputs() const;
 
     /// @brief HERE
-    const std::vector<std::string>
+    const std::vector<std::string>&
       output_index() const noexcept;
 
     /// @brief HERE
