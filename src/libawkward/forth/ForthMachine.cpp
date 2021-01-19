@@ -302,7 +302,7 @@ namespace awkward {
       out << std::endl;
     }
     out << decompiled_segment(0);
-    return out.str();
+    return std::move(out.str());
   }
 
   template <typename T, typename I>
@@ -325,7 +325,7 @@ namespace awkward {
       out << decompiled_at(bytecode_position, indent) << std::endl;
       bytecode_position += bytecodes_per_instruction(bytecode_position);
     }
-    return out.str();
+    return std::move(out.str());
   }
 
   template <typename T, typename I>
@@ -404,30 +404,30 @@ namespace awkward {
 
     else if (next_bytecode == CODE_AGAIN) {
       int64_t body = bytecode - BOUND_DICTIONARY;
-      return std::string("begin\n")
+      return std::move(std::string("begin\n")
              + (segment_nonempty(body) ? indent + "  " : "")
              + decompiled_segment(body, indent + "  ")
-             + indent + "again";
+             + indent + "again");
     }
 
     else if (next_bytecode == CODE_UNTIL) {
       int64_t body = bytecode - BOUND_DICTIONARY;
-      return std::string("begin\n")
+      return std::move(std::string("begin\n")
              + (segment_nonempty(body) ? indent + "  " : "")
              + decompiled_segment(body, indent + "  ")
-             + indent + "until";
+             + indent + "until");
     }
 
     else if (next_bytecode == CODE_WHILE) {
       int64_t precondition = bytecode - BOUND_DICTIONARY;
       int64_t postcondition = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 2] - BOUND_DICTIONARY;
-      return std::string("begin\n")
+      return std::move(std::string("begin\n")
              + (segment_nonempty(precondition) ? indent + "  " : "")
              + decompiled_segment(precondition, indent + "  ")
              + indent + "while\n"
              + (segment_nonempty(postcondition) ? indent + "  " : "")
              + decompiled_segment(postcondition, indent + "  ")
-             + indent + "repeat";
+             + indent + "repeat");
     }
 
     else if (bytecode >= BOUND_DICTIONARY) {
@@ -452,38 +452,38 @@ namespace awkward {
         }
         case CODE_IF: {
           int64_t consequent = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1] - BOUND_DICTIONARY;
-          return std::string("if\n")
+          return std::move(std::string("if\n")
                  + (segment_nonempty(consequent) ? indent + "  " : "")
                  + decompiled_segment(consequent, indent + "  ")
-                 + indent + "then";
+                 + indent + "then");
         }
         case CODE_IF_ELSE: {
           int64_t consequent = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1] - BOUND_DICTIONARY;
           int64_t alternate = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 2] - BOUND_DICTIONARY;
-          return std::string("if\n")
+          return std::move(std::string("if\n")
                  + (segment_nonempty(consequent) ? indent + "  " : "")
                  + decompiled_segment(consequent, indent + "  ")
                  + indent + "else\n"
                  + (segment_nonempty(alternate) ? indent + "  " : "")
                  + decompiled_segment(alternate, indent + "  ")
-                 + indent + "then";
+                 + indent + "then");
         }
         case CODE_DO: {
           int64_t body = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1] - BOUND_DICTIONARY;
-          return std::string("do\n")
+          return std::move(std::string("do\n")
                  + (segment_nonempty(body) ? indent + "  " : "")
                  + decompiled_segment(body, indent + "  ")
-                 + indent + "loop";
+                 + indent + "loop");
         }
         case CODE_DO_STEP: {
           int64_t body = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1] - BOUND_DICTIONARY;
-          return std::string("do\n")
+          return std::move(std::string("do\n")
                  + (segment_nonempty(body) ? indent + "  " : "")
                  + decompiled_segment(body, indent + "  ")
-                 + indent + "+loop";
+                 + indent + "+loop");
         }
         case CODE_EXIT: {
-          return std::string("exit");
+          return std::move(std::string("exit"));
         }
         case CODE_PUT: {
           int64_t var_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
@@ -641,7 +641,7 @@ namespace awkward {
           return "true";
         }
       }
-      return std::string("(unrecognized bytecode ") + std::to_string(bytecode) + ")";
+      return std::move(std::string("(unrecognized bytecode ") + std::to_string(bytecode) + ")");
     }
   }
 
@@ -1282,8 +1282,8 @@ namespace awkward {
     else {
       int64_t which = current_which_[recursion_current_depth_ - 1];
       int64_t where = current_where_[recursion_current_depth_ - 1];
-      if (where < bytecodes_offsets_[which + 1] - bytecodes_offsets_[which]) {
-        return bytecodes_offsets_[which] + where;
+      if (where < bytecodes_offsets_[(IndexTypeOf<int64_t>)which + 1] - bytecodes_offsets_[(IndexTypeOf<int64_t>)which]) {
+        return bytecodes_offsets_[(IndexTypeOf<int64_t>)which] + where;
       }
       else {
         return -1;
@@ -1358,7 +1358,7 @@ namespace awkward {
       try {
         value = (int64_t)std::stoul(word.substr(2, word.size() - 2), nullptr, 16);
       }
-      catch (std::invalid_argument err) {
+      catch (std::invalid_argument& err) {
         return false;
       }
       return true;
@@ -1367,7 +1367,7 @@ namespace awkward {
       try {
         value = (int64_t)std::stoul(word, nullptr, 10);
       }
-      catch (std::invalid_argument err) {
+      catch (std::invalid_argument& err) {
         return false;
       }
       return true;
@@ -1501,12 +1501,13 @@ namespace awkward {
       stop++;
     }
     out << source_.substr(start, stop - start);
-    return out.str();
+    return std::move(out.str());
   }
 
   template <typename T, typename I>
-  void ForthMachineOf<T, I>::tokenize(std::vector<std::string>& tokenized,
-                                      std::vector<std::pair<int64_t, int64_t>>& linecol) {
+  void
+  ForthMachineOf<T, I>::tokenize(std::vector<std::string>& tokenized,
+                                 std::vector<std::pair<int64_t, int64_t>>& linecol) {
     IndexTypeOf<int64_t> start = 0;
     IndexTypeOf<int64_t> stop = 0;
     bool full = false;
@@ -1560,8 +1561,9 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  void ForthMachineOf<T, I>::compile(const std::vector<std::string>& tokenized,
-                                     const std::vector<std::pair<int64_t, int64_t>>& linecol) {
+  void
+  ForthMachineOf<T, I>::compile(const std::vector<std::string>& tokenized,
+                                const std::vector<std::pair<int64_t, int64_t>>& linecol) {
     std::vector<std::vector<I>> dictionary;
 
     // Start recursive parsing.

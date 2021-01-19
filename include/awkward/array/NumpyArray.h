@@ -174,7 +174,7 @@ namespace awkward {
                const std::vector<ssize_t>& strides,
                ssize_t byteoffset,
                ssize_t itemsize,
-               const std::string format,
+               const std::string& format,
                util::dtype dtype,
                const kernel::lib ptr_lib);
 
