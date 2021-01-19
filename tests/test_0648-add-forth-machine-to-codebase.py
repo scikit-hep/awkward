@@ -2062,3 +2062,83 @@ again
         -201,
         202,
     ]
+
+
+def test_varint():
+    # https://lucene.apache.org/core/3_5_0/fileformats.html#VInt
+    data = np.array([
+        0, 1, 2, 127, 128, 1, 129, 1, 130, 1, 255, 127, 128, 128, 1, 129, 128, 1
+    ], np.uint8)
+
+    vm32 = awkward.forth.ForthMachine32("""
+input x
+10 0 do
+  x varint-> stack
+loop
+""")
+    vm32.run({"x": data})
+    assert vm32.stack == [0, 1, 2, 127, 128, 129, 130, 16383, 16384, 16385]
+
+    vm32 = awkward.forth.ForthMachine32("""
+input x
+10 x #varint-> stack
+""")
+    vm32.run({"x": data})
+    assert vm32.stack == [0, 1, 2, 127, 128, 129, 130, 16383, 16384, 16385]
+
+    vm32 = awkward.forth.ForthMachine32("""
+input x
+output y int32
+10 0 do
+  x varint-> y
+loop
+""")
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == [0, 1, 2, 127, 128, 129, 130, 16383, 16384, 16385]
+
+    vm32 = awkward.forth.ForthMachine32("""
+input x
+output y int32
+10 x #varint-> y
+""")
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == [0, 1, 2, 127, 128, 129, 130, 16383, 16384, 16385]
+
+
+def test_zigzag():
+    # https://developers.google.com/protocol-buffers/docs/encoding?csw=1#types
+    data = np.array([0, 1, 2, 3, 254, 255, 255, 255, 15, 255, 255, 255, 255, 15], np.uint8)
+
+    vm32 = awkward.forth.ForthMachine32("""
+input x
+6 0 do
+  x zigzag-> stack
+loop
+""")
+    vm32.run({"x": data})
+    assert vm32.stack == [0, -1, 1, -2, 2147483647, -2147483648]
+
+    vm32 = awkward.forth.ForthMachine32("""
+input x
+6 x #zigzag-> stack
+""")
+    vm32.run({"x": data})
+    assert vm32.stack == [0, -1, 1, -2, 2147483647, -2147483648]
+
+    vm32 = awkward.forth.ForthMachine32("""
+input x
+output y int32
+6 0 do
+  x zigzag-> y
+loop
+""")
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == [0, -1, 1, -2, 2147483647, -2147483648]
+
+    vm32 = awkward.forth.ForthMachine32("""
+input x
+output y int32
+6 x #zigzag-> y
+""")
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == [0, -1, 1, -2, 2147483647, -2147483648]

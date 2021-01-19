@@ -180,6 +180,36 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               }
               return out;
           })
+          .def("output_NumpyArray",
+            [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
+               const std::string& name) -> py::object {
+              return box(self.get()->output_NumpyArray_at(name));
+          })
+          .def("output_Index8",
+            [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
+               const std::string& name) -> ak::Index8 {
+              return self.get()->output_Index8_at(name);
+          })
+          .def("output_IndexU8",
+            [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
+               const std::string& name) -> ak::IndexU8 {
+              return self.get()->output_IndexU8_at(name);
+          })
+          .def("output_Index32",
+            [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
+               const std::string& name) -> ak::Index32 {
+              return self.get()->output_Index32_at(name);
+          })
+          .def("output_IndexU32",
+            [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
+               const std::string& name) -> ak::IndexU32 {
+              return self.get()->output_IndexU32_at(name);
+          })
+          .def("output_Index64",
+            [](const std::shared_ptr<ak::ForthMachineOf<T, I>> self,
+               const std::string& name) -> ak::Index64 {
+              return self.get()->output_Index64_at(name);
+          })
           .def("reset", &ak::ForthMachineOf<T, I>::reset)
           .def("begin", [](ak::ForthMachineOf<T, I>& self,
                            const py::dict& inputs) -> void {
@@ -187,7 +217,7 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               for (auto pair : inputs) {
                 std::string name = pair.first.cast<std::string>();
                 py::buffer obj = pair.second.cast<py::buffer>();
-                py::buffer_info info = obj.request(true);
+                py::buffer_info info = obj.request(self.input_must_be_writable(name));
                 int64_t length = info.itemsize;
                 for (auto x : info.shape) {
                   length *= x;
@@ -244,7 +274,7 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               for (auto pair : inputs) {
                 std::string name = pair.first.cast<std::string>();
                 py::buffer obj = pair.second.cast<py::buffer>();
-                py::buffer_info info = obj.request(true);
+                py::buffer_info info = obj.request(self.input_must_be_writable(name));
                 int64_t length = info.itemsize;
                 for (auto x : info.shape) {
                   length *= x;

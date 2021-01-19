@@ -17,7 +17,7 @@ namespace awkward {
   #define READ_REPEATED 2
   #define READ_BIGENDIAN 4
   // parser sequential values (starting in the fourth bit)
-  #define READ_MASK (~(-0x80) & (-0x8))
+  #define READ_MASK (~(-0x100) & (-0x8))
   #define READ_BOOL (0x8 * 1)
   #define READ_INT8 (0x8 * 2)
   #define READ_INT16 (0x8 * 3)
@@ -29,8 +29,10 @@ namespace awkward {
   #define READ_UINT32 (0x8 * 9)
   #define READ_UINT64 (0x8 * 10)
   #define READ_UINTP (0x8 * 11)
-  #define READ_FLOAT32 (0x8 * 12)
-  #define READ_FLOAT64 (0x8 * 13)
+  #define READ_VARINT (0x8 * 12)
+  #define READ_ZIGZAG (0x8 * 13)
+  #define READ_FLOAT32 (0x8 * 14)
+  #define READ_FLOAT64 (0x8 * 15)
 
   // instructions from special parsing rules
   #define CODE_LITERAL 0
@@ -122,13 +124,17 @@ namespace awkward {
 
   const std::set<std::string> input_parser_words_({
     // single little-endian
-    "?->", "b->", "h->", "i->", "q->", "n->", "B->", "H->", "I->", "Q->", "N->", "f->", "d->",
+    "?->", "b->", "h->", "i->", "q->", "n->", "B->", "H->", "I->", "Q->", "N->",
+    "varint->", "zigzag->", "f->", "d->",
     // single big-endian
-    "!h->", "!i->", "!q->", "!n->", "!H->", "!I->", "!Q->", "!N->", "!f->", "!d->",
+    "!h->", "!i->", "!q->", "!n->", "!H->", "!I->", "!Q->", "!N->",
+    "!f->", "!d->",
     // multiple little-endian
-    "#?->", "#b->", "#h->", "#i->", "#q->", "#n->", "#B->", "#H->", "#I->", "#Q->", "#N->", "#f->", "#d->",
+    "#?->", "#b->", "#h->", "#i->", "#q->", "#n->", "#B->", "#H->", "#I->", "#Q->", "#N->",
+    "#varint->", "#zigzag->", "#f->", "#d->",
     // multiple big-endian
-    "#!h->", "#!i->", "#!q->", "#!n->", "#!H->", "#!I->", "#!Q->", "#!N->", "#!f->", "#!d->"
+    "#!h->", "#!i->", "#!q->", "#!n->", "#!H->", "#!I->", "#!Q->", "#!N->",
+    "#!f->", "#!d->"
   });
 
   const std::map<std::string, util::dtype> output_dtype_words_({
@@ -384,6 +390,12 @@ namespace awkward {
           break;
         case READ_UINTP:
           rest = "N->";
+          break;
+        case READ_VARINT:
+          rest = "varint->";
+          break;
+        case READ_ZIGZAG:
+          rest = "zigzag->";
           break;
         case READ_FLOAT32:
           rest = "f->";
@@ -739,6 +751,19 @@ namespace awkward {
   }
 
   template <typename T, typename I>
+  bool
+  ForthMachineOf<T, I>::input_must_be_writable(const std::string& name) const {
+    for (IndexTypeOf<int64_t> i = 0;  i < input_names_.size();  i++) {
+      if (input_names_[i] == name) {
+        return input_must_be_writable_[i];
+      }
+    }
+    throw std::invalid_argument(
+      std::string("input not found: ") + name + FILENAME(__LINE__)
+    );
+  }
+
+  template <typename T, typename I>
   int64_t
   ForthMachineOf<T, I>::input_position_at(const std::string& name) const {
     if (!is_ready()) {
@@ -752,7 +777,7 @@ namespace awkward {
       }
     }
     throw std::invalid_argument(
-      std::string("variable not found: ") + name + FILENAME(__LINE__)
+      std::string("input not found: ") + name + FILENAME(__LINE__)
     );
   }
 
@@ -1775,6 +1800,7 @@ namespace awkward {
         }
 
         input_names_.push_back(name);
+        input_must_be_writable_.push_back(true);
 
         pos += 2;
       }
@@ -2199,67 +2225,86 @@ namespace awkward {
             parser = parser.substr(1, parser.length() - 1);
           }
 
+          bool must_be_writable = ((bytecode & READ_REPEATED) != 0);
+          if (NATIVELY_BIG_ENDIAN) {
+            must_be_writable &= ((bytecode & READ_BIGENDIAN) == 0);
+          }
+          else {
+            must_be_writable &= ((bytecode & READ_BIGENDIAN) != 0);
+          }
+          input_must_be_writable_[input_index] = must_be_writable;
+
           bool good = true;
           if (parser.length() != 0) {
-            switch (parser[0]) {
-              case '?': {
-                bytecode |= READ_BOOL;
-                break;
-              }
-              case 'b': {
-                bytecode |= READ_INT8;
-                break;
-              }
-              case 'h': {
-                bytecode |= READ_INT16;
-                break;
-              }
-              case 'i': {
-                 bytecode |= READ_INT32;
-                 break;
-               }
-              case 'q': {
-                 bytecode |= READ_INT64;
-                 break;
-               }
-              case 'n': {
-                bytecode |= READ_INTP;
-                break;
-              }
-              case 'B': {
-                bytecode |= READ_UINT8;
-                break;
-              }
-              case 'H': {
-                bytecode |= READ_UINT16;
-                break;
-              }
-              case 'I': {
-                bytecode |= READ_UINT32;
-                break;
-              }
-              case 'Q': {
-                bytecode |= READ_UINT64;
-                break;
-              }
-              case 'N': {
-                bytecode |= READ_UINTP;
-                break;
-              }
-              case 'f': {
-                bytecode |= READ_FLOAT32;
-                break;
-              }
-              case 'd': {
-                bytecode |= READ_FLOAT64;
-                break;
-              }
-              default: {
-                good = false;
-              }
+            if (parser == "varint->") {
+              bytecode |= READ_VARINT;
+              parser = parser.substr(6, parser.length() - 6);
             }
-            if (good) {
-              parser = parser.substr(1, parser.length() - 1);
+            else if (parser == "zigzag->") {
+              bytecode |= READ_ZIGZAG;
+              parser = parser.substr(6, parser.length() - 6);
+            }
+            else {
+              switch (parser[0]) {
+                case '?': {
+                  bytecode |= READ_BOOL;
+                  break;
+                }
+                case 'b': {
+                  bytecode |= READ_INT8;
+                  break;
+                }
+                case 'h': {
+                  bytecode |= READ_INT16;
+                  break;
+                }
+                case 'i': {
+                   bytecode |= READ_INT32;
+                   break;
+                 }
+                case 'q': {
+                   bytecode |= READ_INT64;
+                   break;
+                 }
+                case 'n': {
+                  bytecode |= READ_INTP;
+                  break;
+                }
+                case 'B': {
+                  bytecode |= READ_UINT8;
+                  break;
+                }
+                case 'H': {
+                  bytecode |= READ_UINT16;
+                  break;
+                }
+                case 'I': {
+                  bytecode |= READ_UINT32;
+                  break;
+                }
+                case 'Q': {
+                  bytecode |= READ_UINT64;
+                  break;
+                }
+                case 'N': {
+                  bytecode |= READ_UINTP;
+                  break;
+                }
+                case 'f': {
+                  bytecode |= READ_FLOAT32;
+                  break;
+                }
+                case 'd': {
+                  bytecode |= READ_FLOAT64;
+                  break;
+                }
+                default: {
+                  good = false;
+                }
+              }
+              if (good) {
+                parser = parser.substr(1, parser.length() - 1);
+              }
             }
           }
 
@@ -2460,7 +2505,84 @@ namespace awkward {
             num_items = stack_pop();
           }
 
-          if (~bytecode & READ_DIRECT) {
+          I format = ~bytecode & READ_MASK;
+
+          if (format == READ_VARINT) {
+            ForthInputBuffer* input = current_inputs_[(IndexTypeOf<int64_t>)in_num].get();
+            ForthOutputBuffer* output = nullptr;
+            if (~bytecode & READ_DIRECT) {
+              I out_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
+            }
+            uint64_t shift;
+            uint64_t result;
+            uint8_t* byte;
+            for (int64_t count = 0;  count < num_items;  count++) {
+              shift = 0;
+              result = 0;
+              do {
+                byte = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
+                if (current_error_ != util::ForthError::none) {
+                  return;
+                }
+                result |= (uint64_t)(*byte & 0x7f) << shift;
+                shift += 7;
+              } while (*byte & 0x80);
+
+              if (output == nullptr) {
+                if (stack_cannot_push()) {
+                  current_error_ = util::ForthError::stack_overflow;
+                  return;
+                }
+                stack_push((T)result);   // note: pushing result
+              }
+              else {
+                output->write_one_uint64(result, false);   // note: writing result as unsigned
+              }
+            }
+          }
+
+          else if (format == READ_ZIGZAG) {
+            ForthInputBuffer* input = current_inputs_[(IndexTypeOf<int64_t>)in_num].get();
+            ForthOutputBuffer* output = nullptr;
+            if (~bytecode & READ_DIRECT) {
+              I out_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
+            }
+            uint64_t shift;
+            uint64_t result;
+            uint8_t* byte;
+            int64_t value;
+            for (int64_t count = 0;  count < num_items;  count++) {
+              shift = 0;
+              result = 0;
+              do {
+                byte = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
+                if (current_error_ != util::ForthError::none) {
+                  return;
+                }
+                result |= (uint64_t)(*byte & 0x7f) << shift;
+                shift += 7;
+              } while (*byte & 0x80);
+
+              // This is the difference between VARINT and ZIGZAG: conversion to signed.
+              value = (result >> 1) ^ (-(result & 1));
+              if (output == nullptr) {
+                if (stack_cannot_push()) {
+                  current_error_ = util::ForthError::stack_overflow;
+                  return;
+                }
+                stack_push((T)value);   // note: pushing value
+              }
+              else {
+                output->write_one_int64(value, false);   // note: writing value as signed
+              }
+            }
+          }
+
+          else if (~bytecode & READ_DIRECT) {
             I out_num = bytecode_get();
             bytecodes_pointer_where()++;
 
@@ -2482,7 +2604,7 @@ namespace awkward {
                 break;                                                         \
               }
 
-            switch (~bytecode & READ_MASK) {
+            switch (format) {
               case READ_BOOL:    WRITE_DIRECTLY(bool, bool)
               case READ_INT8:    WRITE_DIRECTLY(int8_t, int8)
               case READ_INT16:   WRITE_DIRECTLY(int16_t, int16)
@@ -2568,7 +2690,7 @@ namespace awkward {
                 break;                                                         \
               }
 
-            switch (~bytecode & READ_MASK) {
+            switch (format) {
               case READ_BOOL:    WRITE_TO_STACK(bool)
               case READ_INT8:    WRITE_TO_STACK(int8_t)
               case READ_INT16:   WRITE_TO_STACK_SWAP(int16_t, byteswap16)

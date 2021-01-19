@@ -134,6 +134,10 @@ namespace awkward {
       variable_at(int64_t index) const noexcept;
 
     /// @brief HERE
+    bool
+      input_must_be_writable(const std::string& name) const;
+
+    /// @brief HERE
     int64_t
       input_position_at(const std::string& name) const;
 
@@ -523,6 +527,7 @@ namespace awkward {
     std::vector<T> variables_;
 
     std::vector<std::string> input_names_;
+    std::vector<bool> input_must_be_writable_;
     std::vector<std::string> output_names_;
     std::vector<util::dtype> output_dtypes_;
 
