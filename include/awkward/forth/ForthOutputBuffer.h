@@ -175,6 +175,14 @@ namespace awkward {
     virtual void
       write_float64(int64_t num_items, double* values, bool byteswap) noexcept = 0;
 
+    /// @brief HERE
+    virtual void
+      write_add_int32(int32_t value) noexcept = 0;
+
+    /// @brief HERE
+    virtual void
+      write_add_int64(int64_t value) noexcept = 0;
+
   protected:
     int64_t length_;
     int64_t reserved_;
@@ -285,7 +293,13 @@ namespace awkward {
     void
       write_float64(int64_t num_items, double* values, bool byteswap) noexcept override;
 
-  public:
+    void
+      write_add_int32(int32_t value) noexcept override;
+
+    void
+      write_add_int64(int64_t value) noexcept override;
+
+  private:
 
     /// @brief HERE
     void

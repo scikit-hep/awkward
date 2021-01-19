@@ -55,48 +55,49 @@ namespace awkward {
   #define CODE_SEEK 17
   #define CODE_SKIP 18
   #define CODE_WRITE 19
-  #define CODE_LEN_OUTPUT 20
-  #define CODE_REWIND 21
+  #define CODE_WRITE_ADD 20
+  #define CODE_LEN_OUTPUT 21
+  #define CODE_REWIND 22
   // generic builtin instructions
-  #define CODE_I 22
-  #define CODE_J 23
-  #define CODE_K 24
-  #define CODE_DUP 25
-  #define CODE_DROP 26
-  #define CODE_SWAP 27
-  #define CODE_OVER 28
-  #define CODE_ROT 29
-  #define CODE_NIP 30
-  #define CODE_TUCK 31
-  #define CODE_ADD 32
-  #define CODE_SUB 33
-  #define CODE_MUL 34
-  #define CODE_DIV 35
-  #define CODE_MOD 36
-  #define CODE_DIVMOD 37
-  #define CODE_NEGATE 38
-  #define CODE_ADD1 39
-  #define CODE_SUB1 40
-  #define CODE_ABS 41
-  #define CODE_MIN 42
-  #define CODE_MAX 43
-  #define CODE_EQ 44
-  #define CODE_NE 45
-  #define CODE_GT 46
-  #define CODE_GE 47
-  #define CODE_LT 48
-  #define CODE_LE 49
-  #define CODE_EQ0 50
-  #define CODE_INVERT 51
-  #define CODE_AND 52
-  #define CODE_OR 53
-  #define CODE_XOR 54
-  #define CODE_LSHIFT 55
-  #define CODE_RSHIFT 56
-  #define CODE_FALSE 57
-  #define CODE_TRUE 58
+  #define CODE_I 23
+  #define CODE_J 24
+  #define CODE_K 25
+  #define CODE_DUP 26
+  #define CODE_DROP 27
+  #define CODE_SWAP 28
+  #define CODE_OVER 29
+  #define CODE_ROT 30
+  #define CODE_NIP 31
+  #define CODE_TUCK 32
+  #define CODE_ADD 33
+  #define CODE_SUB 34
+  #define CODE_MUL 35
+  #define CODE_DIV 36
+  #define CODE_MOD 37
+  #define CODE_DIVMOD 38
+  #define CODE_NEGATE 39
+  #define CODE_ADD1 40
+  #define CODE_SUB1 41
+  #define CODE_ABS 42
+  #define CODE_MIN 43
+  #define CODE_MAX 44
+  #define CODE_EQ 45
+  #define CODE_NE 46
+  #define CODE_GT 47
+  #define CODE_GE 48
+  #define CODE_LT 49
+  #define CODE_LE 50
+  #define CODE_EQ0 51
+  #define CODE_INVERT 52
+  #define CODE_AND 53
+  #define CODE_OR 54
+  #define CODE_XOR 55
+  #define CODE_LSHIFT 56
+  #define CODE_RSHIFT 57
+  #define CODE_FALSE 58
+  #define CODE_TRUE 59
   // beginning of the user-defined dictionary
-  #define BOUND_DICTIONARY 59
+  #define BOUND_DICTIONARY 60
 
   const std::set<std::string> reserved_words_({
     // comments
@@ -119,7 +120,7 @@ namespace awkward {
     // input actions
     "len", "pos", "end", "seek", "skip",
     // output actions
-    "<-", "stack", "rewind"
+    "<-", "+<-", "stack", "rewind"
   });
 
   const std::set<std::string> input_parser_words_({
@@ -532,6 +533,10 @@ namespace awkward {
         case CODE_WRITE: {
           int64_t out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
           return output_names_[(IndexTypeOf<int64_t>)out_num] + " <- stack";
+        }
+        case CODE_WRITE_ADD: {
+          int64_t out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
+          return output_names_[(IndexTypeOf<int64_t>)out_num] + " +<- stack";
         }
         case CODE_LEN_OUTPUT: {
           int64_t out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
@@ -1487,6 +1492,7 @@ namespace awkward {
         case CODE_SEEK:
         case CODE_SKIP:
         case CODE_WRITE:
+        case CODE_WRITE_ADD:
         case CODE_LEN_OUTPUT:
         case CODE_REWIND:
           return 2;
@@ -2379,6 +2385,20 @@ namespace awkward {
             );
           }
         }
+        else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "+<-") {
+          if (pos + 2 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 2] == "stack") {
+            bytecodes.push_back(CODE_WRITE_ADD);
+            bytecodes.push_back((int32_t)output_index);
+
+            pos += 3;
+          }
+          else {
+            throw std::invalid_argument(
+              err_linecol(linecol, pos, pos + 3, "missing 'stack' after '+<-'")
+              + FILENAME(__LINE__)
+            );
+          }
+        }
         else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "len") {
           bytecodes.push_back(CODE_LEN_OUTPUT);
           bytecodes.push_back((int32_t)output_index);
@@ -2393,7 +2413,7 @@ namespace awkward {
         }
         else {
           throw std::invalid_argument(
-            err_linecol(linecol, pos, pos + 2, "missing '<- stack', "
+            err_linecol(linecol, pos, pos + 2, "missing '<- stack', '+<- stack', "
                         "'len', or 'rewind' after output name")
             + FILENAME(__LINE__)
           );
@@ -3021,6 +3041,21 @@ namespace awkward {
               break;
             }
 
+            case CODE_WRITE_ADD: {
+              I out_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_cannot_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              T* top = stack_peek();
+              write_add_from_stack(out_num, top);
+              stack_depth_--;
+
+              count_writes_++;
+              break;
+            }
+
             case CODE_LEN_OUTPUT: {
               I out_num = bytecode_get();
               bytecodes_pointer_where()++;
@@ -3485,23 +3520,25 @@ namespace awkward {
   template <>
   void
   ForthMachineOf<int32_t, int32_t>::write_from_stack(int64_t num, int32_t* top) noexcept {
-    if (num == 1) {
-      current_outputs_[(IndexTypeOf<int64_t>)num].get()->write_one_int32(*top, false);
-    }
-    else {
-      current_outputs_[(IndexTypeOf<int64_t>)num].get()->write_int32(1, top, false);
-    }
+    current_outputs_[(IndexTypeOf<int64_t>)num].get()->write_one_int32(*top, false);
   }
 
   template <>
   void
   ForthMachineOf<int64_t, int32_t>::write_from_stack(int64_t num, int64_t* top) noexcept {
-    if (num == 1) {
-      current_outputs_[(IndexTypeOf<int64_t>)num].get()->write_one_int64(*top, false);
-    }
-    else {
-      current_outputs_[(IndexTypeOf<int64_t>)num].get()->write_int64(1, top, false);
-    }
+    current_outputs_[(IndexTypeOf<int64_t>)num].get()->write_one_int64(*top, false);
+  }
+
+  template <>
+  void
+  ForthMachineOf<int32_t, int32_t>::write_add_from_stack(int64_t num, int32_t* top) noexcept {
+    current_outputs_[(IndexTypeOf<int64_t>)num].get()->write_add_int32(*top);
+  }
+
+  template <>
+  void
+  ForthMachineOf<int64_t, int32_t>::write_add_from_stack(int64_t num, int64_t* top) noexcept {
+    current_outputs_[(IndexTypeOf<int64_t>)num].get()->write_add_int64(*top);
   }
 
   template class EXPORT_TEMPLATE_INST ForthMachineOf<int32_t, int32_t>;

@@ -24,30 +24,24 @@ def decode_zigzag(n):
 
 deserializer = awkward.forth.ForthMachine32("""
 input stream
-variable current0
-variable current1
-variable current2
 output offset0 int32
 output offset1 int32
 output offset2 int32
 output content float64
 
-current0 @ offset0 <- stack
-current1 @ offset1 <- stack
-current2 @ offset2 <- stack
+0 offset0 <- stack
+0 offset1 <- stack
+0 offset2 <- stack
 
 0 do
   stream zigzag-> stack
-  dup current0 +!
-  current0 @ offset0 <- stack
+  dup offset0 +<- stack
   0 do
     stream zigzag-> stack
-    dup current1 +!
-    current1 @ offset1 <- stack
+    dup offset1 +<- stack
     0 do
       stream zigzag-> stack
-      dup current2 +!
-      current2 @ offset2 <- stack
+      dup offset2 +<- stack
       stream #d-> content
       stream b-> stack drop
     loop
@@ -79,7 +73,7 @@ with open("/home/jpivarski/storage/data/chep-2019-jagged-jagged-jagged/sample-ja
         deserializer.begin({"stream": uncompressed})
         deserializer.stack_push(num_items)
         deserializer.resume()
-        deserializer.stack
+        assert deserializer.stack == []
 
         array = ak.Array(
             ak.layout.ListOffsetArray32(

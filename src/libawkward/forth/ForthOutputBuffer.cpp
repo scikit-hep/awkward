@@ -667,6 +667,30 @@ namespace awkward {
 
   template <typename OUT>
   void
+  ForthOutputBufferOf<OUT>::write_add_int32(int32_t value) noexcept {
+    OUT previous = 0;
+    if (length_ != 0) {
+      previous = ptr_.get()[length_ - 1];
+    }
+    length_++;
+    maybe_resize(length_);
+    ptr_.get()[length_ - 1] = previous + value;
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferOf<OUT>::write_add_int64(int64_t value) noexcept {
+    OUT previous = 0;
+    if (length_ != 0) {
+      previous = ptr_.get()[length_ - 1];
+    }
+    length_++;
+    maybe_resize(length_);
+    ptr_.get()[length_ - 1] = previous + value;
+  }
+
+  template <typename OUT>
+  void
   ForthOutputBufferOf<OUT>::maybe_resize(int64_t next) {
     if (next > reserved_) {
       int64_t reservation = reserved_;
