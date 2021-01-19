@@ -12,9 +12,9 @@ void make_jagged3_root() {
 
   gInterpreter->GenerateDictionary("vector<vector<vector<float> > >", "vector");
 
-  auto f = new TFile("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib9-jagged3.root", "RECREATE");
+  auto f = new TFile("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib0-jagged3.root", "RECREATE");
   f->SetCompressionAlgorithm(1);
-  f->SetCompressionLevel(9);
+  f->SetCompressionLevel(0);
 
   auto t = new TTree("tree", "");
 
