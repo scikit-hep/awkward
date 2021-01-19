@@ -1282,8 +1282,8 @@ namespace awkward {
     else {
       int64_t which = current_which_[recursion_current_depth_ - 1];
       int64_t where = current_where_[recursion_current_depth_ - 1];
-      if (where < bytecodes_offsets_[which + 1] - bytecodes_offsets_[which]) {
-        return bytecodes_offsets_[which] + where;
+      if (where < bytecodes_offsets_[(IndexTypeOf<int64_t>)which + 1] - bytecodes_offsets_[(IndexTypeOf<int64_t>)which]) {
+        return bytecodes_offsets_[(IndexTypeOf<int64_t>)which] + where;
       }
       else {
         return -1;
