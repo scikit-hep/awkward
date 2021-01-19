@@ -310,7 +310,7 @@ namespace awkward {
     inline void write_one(IN value) noexcept {
       length_++;
       maybe_resize(length_);
-      ptr_.get()[length_ - 1] = value;
+      ptr_.get()[length_ - 1] = (OUT)value;
     }
 
     /// @brief HERE
@@ -319,7 +319,7 @@ namespace awkward {
       int64_t next = length_ + num_items;
       maybe_resize(next);
       for (int64_t i = 0;  i < num_items;  i++) {
-        ptr_.get()[length_ + i] = values[i];
+        ptr_.get()[length_ + i] = (OUT)values[i];
       }
       length_ = next;
     }

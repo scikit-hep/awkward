@@ -527,7 +527,7 @@ namespace awkward {
                                         bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(bool) * num_items);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(bool) * (size_t)num_items);
     length_ = next;
   }
 
@@ -538,7 +538,7 @@ namespace awkward {
                                           bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(int8_t) * num_items);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(int8_t) * (size_t)num_items);
     length_ = next;
   }
 
@@ -549,7 +549,7 @@ namespace awkward {
                                             bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(int16_t) * num_items);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(int16_t) * (size_t)num_items);
     if (byteswap) {
       byteswap16(num_items, &ptr_.get()[length_]);
     }
@@ -563,7 +563,7 @@ namespace awkward {
                                             bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(int32_t) * num_items);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(int32_t) * (size_t)num_items);
     if (byteswap) {
       byteswap32(num_items, &ptr_.get()[length_]);
     }
@@ -577,7 +577,7 @@ namespace awkward {
                                             bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(int64_t) * num_items);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(int64_t) * (size_t)num_items);
     if (byteswap) {
       byteswap64(num_items, &ptr_.get()[length_]);
     }
@@ -591,7 +591,7 @@ namespace awkward {
                                             bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(uint8_t) * num_items);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(uint8_t) * (size_t)num_items);
     length_ = next;
   }
 
@@ -602,7 +602,7 @@ namespace awkward {
                                               bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(uint16_t) * num_items);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(uint16_t) * (size_t)num_items);
     if (byteswap) {
       byteswap16(num_items, &ptr_.get()[length_]);
     }
@@ -616,7 +616,7 @@ namespace awkward {
                                               bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(uint32_t) * num_items);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(uint32_t) * (size_t)num_items);
     if (byteswap) {
       byteswap32(num_items, &ptr_.get()[length_]);
     }
@@ -630,7 +630,7 @@ namespace awkward {
                                               bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(uint64_t) * num_items);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(uint64_t) * (size_t)num_items);
     if (byteswap) {
       byteswap64(num_items, &ptr_.get()[length_]);
     }
@@ -644,7 +644,7 @@ namespace awkward {
                                             bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(float) * num_items);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(float) * (size_t)num_items);
     if (byteswap) {
       byteswap32(num_items, &ptr_.get()[length_]);
     }
@@ -658,7 +658,7 @@ namespace awkward {
                                              bool byteswap) noexcept {
     int64_t next = length_ + num_items;
     maybe_resize(next);
-    std::memcpy(&ptr_.get()[length_], values, sizeof(double) * num_items);
+    std::memcpy(&ptr_.get()[length_], values, sizeof(double) * (size_t)num_items);
     if (byteswap) {
       byteswap64(num_items, &ptr_.get()[length_]);
     }
@@ -699,7 +699,7 @@ namespace awkward {
       }
       std::shared_ptr<OUT> new_buffer = std::shared_ptr<OUT>(new OUT[reservation],
                                                              kernel::array_deleter<OUT>());
-      std::memcpy(new_buffer.get(), ptr_.get(), sizeof(OUT) * reserved_);
+      std::memcpy(new_buffer.get(), ptr_.get(), sizeof(OUT) * (size_t)reserved_);
       ptr_ = new_buffer;
       reserved_ = reservation;
     }
