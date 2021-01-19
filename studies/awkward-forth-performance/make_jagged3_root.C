@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <iostream>
 #include <vector>
 
 #include "TFile.h"
@@ -76,7 +77,8 @@ void make_jagged3_root() {
     last3 = o3;
 
     t->Fill();
-    if ((count + 1) % events_per_basket == 0) {
+    count++;
+    if (count % events_per_basket == 0) {
       t->Write();
     }
   }
