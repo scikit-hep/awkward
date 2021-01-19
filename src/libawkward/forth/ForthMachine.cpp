@@ -680,7 +680,7 @@ namespace awkward {
   ForthMachineOf<T, I>::stack() const {
     std::vector<T> out;
     for (int64_t i = 0;  i < stack_depth_;  i++) {
-      out.emplace_back(stack_buffer_[i]);
+      out.push_back(stack_buffer_[i]);
     }
     return out;
   }
@@ -986,7 +986,7 @@ namespace awkward {
       bool found = false;
       for (auto pair : inputs) {
         if (pair.first == name) {
-          current_inputs_.emplace_back(pair.second);
+          current_inputs_.push_back(pair.second);
           found = true;
           break;
         }
@@ -1054,7 +1054,7 @@ namespace awkward {
                                    + FILENAME(__LINE__));
         }
       }
-      current_outputs_.emplace_back(out);
+      current_outputs_.push_back(out);
     }
 
     recursion_target_depth_.push(0);
@@ -1519,8 +1519,8 @@ namespace awkward {
       if (current == ' '  ||  current == '\r'  ||  current == '\t'  ||
           current == '\v'  ||  current == '\f') {
         if (full) {
-          tokenized.emplace_back(source_.substr(start, stop - start));
-          linecol.emplace_back(std::pair<int64_t, int64_t>(line, colstart));
+          tokenized.push_back(source_.substr(start, stop - start));
+          linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
         }
         start = stop;
         full = false;
@@ -1530,11 +1530,11 @@ namespace awkward {
       // It has no semantic meaning after the parsing stage.
       else if (current == '\n') {
         if (full) {
-          tokenized.emplace_back(source_.substr(start, stop - start));
-          linecol.emplace_back(std::pair<int64_t, int64_t>(line, colstart));
+          tokenized.push_back(source_.substr(start, stop - start));
+          linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
         }
-        tokenized.emplace_back(source_.substr(stop, 1));
-        linecol.emplace_back(std::pair<int64_t, int64_t>(line, colstart));
+        tokenized.push_back(source_.substr(stop, 1));
+        linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
         start = stop;
         full = false;
         line++;
@@ -1554,8 +1554,8 @@ namespace awkward {
     }
     // The source code might end on non-whitespace.
     if (full) {
-      tokenized.emplace_back(source_.substr(start, stop - start));
-      linecol.emplace_back(std::pair<int64_t, int64_t>(line, colstart));
+      tokenized.push_back(source_.substr(start, stop - start));
+      linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
     }
   }
 
@@ -1566,7 +1566,7 @@ namespace awkward {
 
     // Start recursive parsing.
     std::vector<I> bytecodes;
-    dictionary.emplace_back(bytecodes);
+    dictionary.push_back(bytecodes);
     parse("",
           tokenized,
           linecol,
@@ -1579,12 +1579,12 @@ namespace awkward {
     dictionary[0] = bytecodes;
 
     // Copy std::vector<std::vector<I>> to flattened contents and offsets.
-    bytecodes_offsets_.emplace_back(0);
+    bytecodes_offsets_.push_back(0);
     for (auto segment : dictionary) {
       for (auto bytecode : segment) {
-        bytecodes_.emplace_back(bytecode);
+        bytecodes_.push_back(bytecode);
       }
-      bytecodes_offsets_.emplace_back((int64_t)bytecodes_.size());
+      bytecodes_offsets_.push_back((int64_t)bytecodes_.size());
     }
   }
 
@@ -1690,12 +1690,12 @@ namespace awkward {
         // Add the new word to the dictionary before parsing it so that recursive
         // functions can be defined.
         I bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
-        dictionary_names_.emplace_back(name);
-        dictionary_bytecodes_.emplace_back(bytecode);
+        dictionary_names_.push_back(name);
+        dictionary_bytecodes_.push_back(bytecode);
 
         // Now parse the subroutine and add it to the dictionary.
         std::vector<I> body;
-        dictionary.emplace_back(body);
+        dictionary.push_back(body);
         parse(name,
               tokenized,
               linecol,
@@ -1720,7 +1720,7 @@ namespace awkward {
         }
         for (IndexTypeOf<I> i = 0;  i < dictionary_names_.size();  i++) {
           if (dictionary_names_[i] == defn) {
-            bytecodes.emplace_back(dictionary_bytecodes_[i]);
+            bytecodes.push_back(dictionary_bytecodes_[i]);
           }
         }
 
@@ -1748,8 +1748,8 @@ namespace awkward {
           );
         }
 
-        variable_names_.emplace_back(name);
-        variables_.emplace_back(0);
+        variable_names_.push_back(name);
+        variables_.push_back(0);
 
         pos += 2;
       }
@@ -1774,7 +1774,7 @@ namespace awkward {
           );
         }
 
-        input_names_.emplace_back(name);
+        input_names_.push_back(name);
 
         pos += 2;
       }
@@ -1804,8 +1804,8 @@ namespace awkward {
         bool found_dtype = false;
         for (auto pair : output_dtype_words_) {
           if (pair.first == dtype_string) {
-            output_names_.emplace_back(name);
-            output_dtypes_.emplace_back(pair.second);
+            output_names_.push_back(name);
+            output_dtypes_.push_back(pair.second);
             found_dtype = true;
             break;
           }
@@ -1821,13 +1821,13 @@ namespace awkward {
       }
 
       else if (word == "halt") {
-        bytecodes.emplace_back(CODE_HALT);
+        bytecodes.push_back(CODE_HALT);
 
         pos++;
       }
 
       else if (word == "pause") {
-        bytecodes.emplace_back(CODE_PAUSE);
+        bytecodes.push_back(CODE_PAUSE);
 
         pos++;
       }
@@ -1861,7 +1861,7 @@ namespace awkward {
           // without special instruction pointer manipulation at runtime.
           I bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> consequent;
-          dictionary.emplace_back(consequent);
+          dictionary.push_back(consequent);
           parse(defn,
                 tokenized,
                 linecol,
@@ -1873,8 +1873,8 @@ namespace awkward {
                 dodepth);
           dictionary[(IndexTypeOf<int64_t>)bytecode - BOUND_DICTIONARY] = consequent;
 
-          bytecodes.emplace_back(CODE_IF);
-          bytecodes.emplace_back(bytecode);
+          bytecodes.push_back(CODE_IF);
+          bytecodes.push_back(bytecode);
 
           pos = substop + 1;
         }
@@ -1882,7 +1882,7 @@ namespace awkward {
           // Same as above, except that two new definitions must be made.
           I bytecode1 = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> consequent;
-          dictionary.emplace_back(consequent);
+          dictionary.push_back(consequent);
           parse(defn,
                 tokenized,
                 linecol,
@@ -1896,7 +1896,7 @@ namespace awkward {
 
           I bytecode2 = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> alternate;
-          dictionary.emplace_back(alternate);
+          dictionary.push_back(alternate);
           parse(defn,
                 tokenized,
                 linecol,
@@ -1908,9 +1908,9 @@ namespace awkward {
                 dodepth);
           dictionary[(IndexTypeOf<int64_t>)bytecode2 - BOUND_DICTIONARY] = alternate;
 
-          bytecodes.emplace_back(CODE_IF_ELSE);
-          bytecodes.emplace_back(bytecode1);
-          bytecodes.emplace_back(bytecode2);
+          bytecodes.push_back(CODE_IF_ELSE);
+          bytecodes.push_back(bytecode1);
+          bytecodes.push_back(bytecode2);
 
           pos = substop + 1;
         }
@@ -1948,7 +1948,7 @@ namespace awkward {
         // without special instruction pointer manipulation at runtime.
         I bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
         std::vector<I> body;
-        dictionary.emplace_back(body);
+        dictionary.push_back(body);
         parse(defn,
               tokenized,
               linecol,
@@ -1961,12 +1961,12 @@ namespace awkward {
         dictionary[(IndexTypeOf<int64_t>)bytecode - BOUND_DICTIONARY] = body;
 
         if (is_step) {
-          bytecodes.emplace_back(CODE_DO_STEP);
-          bytecodes.emplace_back(bytecode);
+          bytecodes.push_back(CODE_DO_STEP);
+          bytecodes.push_back(bytecode);
         }
         else {
-          bytecodes.emplace_back(CODE_DO);
-          bytecodes.emplace_back(bytecode);
+          bytecodes.push_back(CODE_DO);
+          bytecodes.push_back(bytecode);
         }
 
         pos = substop + 1;
@@ -2029,7 +2029,7 @@ namespace awkward {
           // used without special instruction pointer manipulation at runtime.
           I bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> body;
-          dictionary.emplace_back(body);
+          dictionary.push_back(body);
           parse(defn,
                 tokenized,
                 linecol,
@@ -2041,8 +2041,8 @@ namespace awkward {
                 dodepth);
           dictionary[(IndexTypeOf<int64_t>)bytecode - BOUND_DICTIONARY] = body;
 
-          bytecodes.emplace_back(bytecode);
-          bytecodes.emplace_back(CODE_AGAIN);
+          bytecodes.push_back(bytecode);
+          bytecodes.push_back(CODE_AGAIN);
 
           pos = substop + 1;
         }
@@ -2050,7 +2050,7 @@ namespace awkward {
           // Same for the 'begin .. until' body.
           I bytecode = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> body;
-          dictionary.emplace_back(body);
+          dictionary.push_back(body);
           parse(defn,
                 tokenized,
                 linecol,
@@ -2062,8 +2062,8 @@ namespace awkward {
                 dodepth);
           dictionary[(IndexTypeOf<int64_t>)bytecode - BOUND_DICTIONARY] = body;
 
-          bytecodes.emplace_back(bytecode);
-          bytecodes.emplace_back(CODE_UNTIL);
+          bytecodes.push_back(bytecode);
+          bytecodes.push_back(CODE_UNTIL);
 
           pos = substop + 1;
         }
@@ -2071,7 +2071,7 @@ namespace awkward {
           // Same for the 'begin .. repeat' statements.
           I bytecode1 = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> precondition;
-          dictionary.emplace_back(precondition);
+          dictionary.push_back(precondition);
           parse(defn,
                 tokenized,
                 linecol,
@@ -2086,7 +2086,7 @@ namespace awkward {
           // Same for the 'repeat .. until' statements.
           I bytecode2 = (I)dictionary.size() + BOUND_DICTIONARY;
           std::vector<I> postcondition;
-          dictionary.emplace_back(postcondition);
+          dictionary.push_back(postcondition);
           parse(defn,
                 tokenized,
                 linecol,
@@ -2098,17 +2098,17 @@ namespace awkward {
                 dodepth);
           dictionary[(IndexTypeOf<int64_t>)bytecode2 - BOUND_DICTIONARY] = postcondition;
 
-          bytecodes.emplace_back(bytecode1);
-          bytecodes.emplace_back(CODE_WHILE);
-          bytecodes.emplace_back(bytecode2);
+          bytecodes.push_back(bytecode1);
+          bytecodes.push_back(CODE_WHILE);
+          bytecodes.push_back(bytecode2);
 
           pos = substop + 1;
         }
       }
 
       else if (word == "exit") {
-        bytecodes.emplace_back(CODE_EXIT);
-        bytecodes.emplace_back((int32_t)exitdepth);
+        bytecodes.push_back(CODE_EXIT);
+        bytecodes.push_back((int32_t)exitdepth);
 
         pos++;
       }
@@ -2121,20 +2121,20 @@ namespace awkward {
           }
         }
         if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "!") {
-          bytecodes.emplace_back(CODE_PUT);
-          bytecodes.emplace_back((int32_t)variable_index);
+          bytecodes.push_back(CODE_PUT);
+          bytecodes.push_back((int32_t)variable_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "+!") {
-          bytecodes.emplace_back(CODE_INC);
-          bytecodes.emplace_back((int32_t)variable_index);
+          bytecodes.push_back(CODE_INC);
+          bytecodes.push_back((int32_t)variable_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "@") {
-          bytecodes.emplace_back(CODE_GET);
-          bytecodes.emplace_back((int32_t)variable_index);
+          bytecodes.push_back(CODE_GET);
+          bytecodes.push_back((int32_t)variable_index);
 
           pos += 2;
         }
@@ -2155,32 +2155,32 @@ namespace awkward {
         }
 
         if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "len") {
-          bytecodes.emplace_back(CODE_LEN_INPUT);
-          bytecodes.emplace_back((int32_t)input_index);
+          bytecodes.push_back(CODE_LEN_INPUT);
+          bytecodes.push_back((int32_t)input_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "pos") {
-          bytecodes.emplace_back(CODE_POS);
-          bytecodes.emplace_back((int32_t)input_index);
+          bytecodes.push_back(CODE_POS);
+          bytecodes.push_back((int32_t)input_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "end") {
-          bytecodes.emplace_back(CODE_END);
-          bytecodes.emplace_back((int32_t)input_index);
+          bytecodes.push_back(CODE_END);
+          bytecodes.push_back((int32_t)input_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "seek") {
-          bytecodes.emplace_back(CODE_SEEK);
-          bytecodes.emplace_back((int32_t)input_index);
+          bytecodes.push_back(CODE_SEEK);
+          bytecodes.push_back((int32_t)input_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "skip") {
-          bytecodes.emplace_back(CODE_SKIP);
-          bytecodes.emplace_back((int32_t)input_index);
+          bytecodes.push_back(CODE_SKIP);
+          bytecodes.push_back((int32_t)input_index);
 
           pos += 2;
         }
@@ -2295,10 +2295,10 @@ namespace awkward {
           }
 
           // Parser instructions are bit-flipped to detect them by the sign bit.
-          bytecodes.emplace_back(~bytecode);
-          bytecodes.emplace_back((int32_t)input_index);
+          bytecodes.push_back(~bytecode);
+          bytecodes.push_back((int32_t)input_index);
           if (found_output) {
-            bytecodes.emplace_back((int32_t)output_index);
+            bytecodes.push_back((int32_t)output_index);
           }
 
           pos += 3;
@@ -2322,8 +2322,8 @@ namespace awkward {
         }
         if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "<-") {
           if (pos + 2 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 2] == "stack") {
-            bytecodes.emplace_back(CODE_WRITE);
-            bytecodes.emplace_back((int32_t)output_index);
+            bytecodes.push_back(CODE_WRITE);
+            bytecodes.push_back((int32_t)output_index);
 
             pos += 3;
           }
@@ -2335,14 +2335,14 @@ namespace awkward {
           }
         }
         else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "len") {
-          bytecodes.emplace_back(CODE_LEN_OUTPUT);
-          bytecodes.emplace_back((int32_t)output_index);
+          bytecodes.push_back(CODE_LEN_OUTPUT);
+          bytecodes.push_back((int32_t)output_index);
 
           pos += 2;
         }
         else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "rewind") {
-          bytecodes.emplace_back(CODE_REWIND);
-          bytecodes.emplace_back((int32_t)output_index);
+          bytecodes.push_back(CODE_REWIND);
+          bytecodes.push_back((int32_t)output_index);
 
           pos += 2;
         }
@@ -2378,7 +2378,7 @@ namespace awkward {
                 + FILENAME(__LINE__)
               );
             }
-            bytecodes.emplace_back((int32_t)pair.second);
+            bytecodes.push_back((int32_t)pair.second);
 
             pos++;
           }
@@ -2389,7 +2389,7 @@ namespace awkward {
           for (IndexTypeOf<std::string> i = 0;  i < dictionary_names_.size();  i++) {
             if (dictionary_names_[i] == word) {
               found_in_dictionary = true;
-              bytecodes.emplace_back((int32_t)dictionary_bytecodes_[i]);
+              bytecodes.push_back((int32_t)dictionary_bytecodes_[i]);
 
               pos++;
             }
@@ -2398,8 +2398,8 @@ namespace awkward {
           if (!found_in_dictionary) {
             int64_t num;
             if (is_integer(word, num)) {
-              bytecodes.emplace_back(CODE_LITERAL);
-              bytecodes.emplace_back((int32_t)num);
+              bytecodes.push_back(CODE_LITERAL);
+              bytecodes.push_back((int32_t)num);
 
               pos++;
             }
