@@ -46,20 +46,33 @@ def read_bitpacked(file_obj, header, width, o):  # pragma: no cover
     bits_wnd_l = 8
     bits_wnd_r = 0
     total = byte_count * 8
+
+    wrote = []
+
+    print(f"{width=} {mask=}")
+
     while total >= width:
+        print(f"{total=} {current_byte=} {bits_wnd_l=} {bits_wnd_r=} {data=}")
         # NOTE zero-padding could produce extra zero-values
         if bits_wnd_r >= 8:
+            print("bits_wnd_r >= 8")
             bits_wnd_r -= 8
             bits_wnd_l -= 8
             data >>= 8
         elif bits_wnd_l - bits_wnd_r >= width:
+            print("bits_wnd_l - bits_wnd_r >= width")
+            wrote.append((data >> bits_wnd_r) & mask)
+            print("WROTE BYTE ", (data >> bits_wnd_r) & mask)
             o.write_byte((data >> bits_wnd_r) & mask)
             total -= width
             bits_wnd_r += width
         elif current_byte + 1 < byte_count:
+            print("current_byte + 1 < byte_count")
             current_byte += 1
             data |= (raw_bytes[current_byte] << bits_wnd_l)
             bits_wnd_l += 8
+
+    raise Exception
 
 def read_rle_bit_packed_hybrid(io_obj, width, length=None, o=None):  # pragma: no cover
     if length is None:
@@ -99,7 +112,7 @@ def read_data(fobj, coding, count, bit_width):
         raise NotImplementedError('Encoding %s' % coding)
     return out
 
-file = open("/home/jpivarski/storage/data/chep-2019-jagged-jagged-jagged/sample-jagged3-nodict.parquet", "rb")
+file = open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib1-split-jagged3.parquet", "rb")
 parquetfile = fastparquet.ParquetFile(file)
 
 for rg in parquetfile.filter_row_groups([]):
@@ -108,7 +121,15 @@ for rg in parquetfile.filter_row_groups([]):
     ph = fastparquet.thrift_structures.read_thrift(file, fastparquet.thrift_structures.parquet_thrift.PageHeader)
 
     raw_bytes = np.frombuffer(fastparquet.core._read_page(file, ph, col.meta_data), np.uint8)
-    values = raw_bytes[-(ph.data_page_header.num_values * 8):].view(np.float64)
+
+    data = raw_bytes[-(ph.data_page_header.num_values * 4):]
+    values = np.empty(len(data), np.uint8)
+    quarter = len(data) // 4
+    values[::4]  = data[:quarter]
+    values[1::4] = data[quarter:2*quarter]
+    values[2::4] = data[2*quarter:3*quarter]
+    values[3::4] = data[3*quarter:]
+    values = values.view(np.float32)
 
     max_repetition_level = col.meta_data.path_in_schema.count("list")
     bit_width = bit_width_of(max_repetition_level)
@@ -123,3 +144,4 @@ for rg in parquetfile.filter_row_groups([]):
 
     print(repetition_levels)
     print(values)
+    break

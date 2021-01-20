@@ -29,10 +29,11 @@ namespace awkward {
   #define READ_UINT32 (0x8 * 9)
   #define READ_UINT64 (0x8 * 10)
   #define READ_UINTP (0x8 * 11)
-  #define READ_VARINT (0x8 * 12)
-  #define READ_ZIGZAG (0x8 * 13)
-  #define READ_FLOAT32 (0x8 * 14)
-  #define READ_FLOAT64 (0x8 * 15)
+  #define READ_FLOAT32 (0x8 * 12)
+  #define READ_FLOAT64 (0x8 * 13)
+  #define READ_VARINT (0x8 * 14)
+  #define READ_ZIGZAG (0x8 * 15)
+  #define READ_NBIT (0x8 * 16)
 
   // instructions from special parsing rules
   #define CODE_LITERAL 0
@@ -126,13 +127,13 @@ namespace awkward {
   const std::set<std::string> input_parser_words_({
     // single little-endian
     "?->", "b->", "h->", "i->", "q->", "n->", "B->", "H->", "I->", "Q->", "N->",
-    "varint->", "zigzag->", "f->", "d->",
+    "f->", "d->", "varint->", "zigzag->",
     // single big-endian
     "!h->", "!i->", "!q->", "!n->", "!H->", "!I->", "!Q->", "!N->",
     "!f->", "!d->",
     // multiple little-endian
     "#?->", "#b->", "#h->", "#i->", "#q->", "#n->", "#B->", "#H->", "#I->", "#Q->", "#N->",
-    "#varint->", "#zigzag->", "#f->", "#d->",
+    "#f->", "#d->", "#varint->", "#zigzag->",
     // multiple big-endian
     "#!h->", "#!i->", "#!q->", "#!n->", "#!H->", "#!I->", "#!Q->", "#!N->",
     "#!f->", "#!d->"
@@ -358,6 +359,8 @@ namespace awkward {
       std::string rep = (~bytecode & READ_REPEATED) ? "#" : "";
       std::string big = ((~bytecode & READ_BIGENDIAN) != 0) ? "!" : "";
       std::string rest;
+      int64_t next_pos = 2;
+      I nbits = 0;
       switch (~bytecode & READ_MASK) {
         case READ_BOOL:
           rest = "?->";
@@ -392,24 +395,29 @@ namespace awkward {
         case READ_UINTP:
           rest = "N->";
           break;
-        case READ_VARINT:
-          rest = "varint->";
-          break;
-        case READ_ZIGZAG:
-          rest = "zigzag->";
-          break;
         case READ_FLOAT32:
           rest = "f->";
           break;
         case READ_FLOAT64:
           rest = "d->";
           break;
+        case READ_VARINT:
+          rest = "varint->";
+          break;
+        case READ_ZIGZAG:
+          rest = "zigzag->";
+          break;
+        case READ_NBIT:
+          nbits = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + next_pos];
+          next_pos++;
+          rest = std::to_string(nbits) + "bit->";
+          break;
       }
       std::string arrow = rep + big + rest;
 
       std::string out_name = "stack";
       if (~bytecode & READ_DIRECT) {
-        I out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 2];
+        I out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + next_pos];
         out_name = output_names_[(IndexTypeOf<int64_t>)out_num];
       }
       return in_name + std::string(" ") + arrow + std::string(" ") + out_name;
@@ -1427,11 +1435,48 @@ namespace awkward {
 
   template <typename T, typename I>
   bool
+  ForthMachineOf<T, I>::is_nbit(const std::string& word, I& value) const {
+    std::string parser = word;
+    if (parser.length() != 0  &&  parser[0] == '#') {
+      parser = parser.substr(1, parser.length() - 1);
+    }
+    if (parser.length() != 0  &&  parser[0] == '!') {
+      parser = parser.substr(1, parser.length() - 1);
+    }
+    if (parser.length() > 5  &&  parser.substr(parser.length() - 5, 5) == "bit->") {
+      std::string number = parser.substr(0, parser.length() - 5);
+      try {
+        value = (int64_t)std::stoul(number, nullptr, 10);
+      }
+      catch (std::invalid_argument& err) {
+        return false;
+      }
+      if (0 < value  &&  value <= 64) {
+        return true;
+      }
+      else {
+        value = 0;
+        return false;
+      }
+    }
+    else {
+      return false;
+    }
+  }
+
+  template <typename T, typename I>
+  bool
   ForthMachineOf<T, I>::is_reserved(const std::string& word) const {
-    return reserved_words_.find(word) != reserved_words_.end()  ||
-           input_parser_words_.find(word) != input_parser_words_.end()  ||
-           output_dtype_words_.find(word) != output_dtype_words_.end()  ||
-           generic_builtin_words_.find(word) != generic_builtin_words_.end();
+    I num;
+    if (is_nbit(word, num)) {
+      return true;
+    }
+    else {
+      return reserved_words_.find(word) != reserved_words_.end()  ||
+             input_parser_words_.find(word) != input_parser_words_.end()  ||
+             output_dtype_words_.find(word) != output_dtype_words_.end()  ||
+             generic_builtin_words_.find(word) != generic_builtin_words_.end();
+    }
   }
 
   template <typename T, typename I>
@@ -2243,14 +2288,19 @@ namespace awkward {
           input_must_be_writable_[input_index] = must_be_writable;
 
           bool good = true;
+          I nbits = 0;
           if (parser.length() != 0) {
             if (parser == "varint->") {
               bytecode |= READ_VARINT;
-              parser = parser.substr(6, parser.length() - 6);
+              parser = parser.substr(parser.length() - 2, 2);
             }
             else if (parser == "zigzag->") {
               bytecode |= READ_ZIGZAG;
-              parser = parser.substr(6, parser.length() - 6);
+              parser = parser.substr(parser.length() - 2, 2);
+            }
+            else if (is_nbit(parser, nbits)) {
+              bytecode |= READ_NBIT;
+              parser = parser.substr(parser.length() - 2, 2);
             }
             else {
               switch (parser[0]) {
@@ -2350,6 +2400,9 @@ namespace awkward {
           // Parser instructions are bit-flipped to detect them by the sign bit.
           bytecodes.push_back(~bytecode);
           bytecodes.push_back((int32_t)input_index);
+          if (nbits > 0) {
+            bytecodes.push_back((int32_t)nbits);
+          }
           if (found_output) {
             bytecodes.push_back((int32_t)output_index);
           }
@@ -2600,6 +2653,62 @@ namespace awkward {
               }
               else {
                 output->write_one_int64(value, false);   // note: writing value as signed
+              }
+            }
+          }
+
+          else if (format == READ_NBIT) {
+            I bit_width = bytecode_get();
+            bytecodes_pointer_where()++;
+
+            ForthInputBuffer* input = current_inputs_[(IndexTypeOf<int64_t>)in_num].get();
+            ForthOutputBuffer* output = nullptr;
+            if (~bytecode & READ_DIRECT) {
+              I out_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
+            }
+
+            uint64_t mask = (1 << bit_width) - 1;
+            uint64_t bits_wnd_l = 8;
+            uint64_t bits_wnd_r = 0;
+            int64_t items_remaining = num_items;
+            uint64_t data;
+            uint64_t tmp;
+            if (items_remaining != 0) {
+              data = (uint64_t)(*reinterpret_cast<uint8_t*>(input->read(1, current_error_)));
+              if (current_error_ != util::ForthError::none) {
+                return;
+              }
+            }
+            while (items_remaining != 0) {
+              if (bits_wnd_r >= 8) {
+                bits_wnd_r -= 8;
+                bits_wnd_l -= 8;
+                data >>= 8;
+              }
+              else if (bits_wnd_l - bits_wnd_r >= bit_width) {
+                tmp = (data >> bits_wnd_r) & mask;
+                if (output == nullptr) {
+                  if (stack_cannot_push()) {
+                    current_error_ = util::ForthError::stack_overflow;
+                    return;
+                  }
+                  stack_push((T)tmp);
+                }
+                else {
+                  output->write_one_int64(tmp, false);
+                }
+                items_remaining--;
+                bits_wnd_r += bit_width;
+              }
+              else {
+                tmp = (uint64_t)(*reinterpret_cast<uint8_t*>(input->read(1, current_error_)));
+                if (current_error_ != util::ForthError::none) {
+                  return;
+                }
+                data |= tmp << bits_wnd_l;
+                bits_wnd_l += 8;
               }
             }
           }

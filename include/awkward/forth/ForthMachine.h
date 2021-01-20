@@ -299,6 +299,10 @@ namespace awkward {
 
     /// @brief HERE
     bool
+      is_nbit(const std::string& word, I& value) const;
+
+    /// @brief HERE
+    bool
       is_reserved(const std::string& word) const;
 
     /// @brief HERE
