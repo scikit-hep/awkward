@@ -39,7 +39,7 @@ file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 include_directories(include)
 
 # C++ dependencies (header-only): RapidJSON and pybind11.
-include_directories(rapidjson/include)
+include_directories(rapidjson/include dlpack/include)
 
 # Macro to add C++ tests (part of CMake build, distinct from pytests in Python).
 include(CTest)
