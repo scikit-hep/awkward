@@ -60,45 +60,46 @@ namespace awkward {
   #define CODE_LEN_OUTPUT 21
   #define CODE_REWIND 22
   // generic builtin instructions
-  #define CODE_I 23
-  #define CODE_J 24
-  #define CODE_K 25
-  #define CODE_DUP 26
-  #define CODE_DROP 27
-  #define CODE_SWAP 28
-  #define CODE_OVER 29
-  #define CODE_ROT 30
-  #define CODE_NIP 31
-  #define CODE_TUCK 32
-  #define CODE_ADD 33
-  #define CODE_SUB 34
-  #define CODE_MUL 35
-  #define CODE_DIV 36
-  #define CODE_MOD 37
-  #define CODE_DIVMOD 38
-  #define CODE_NEGATE 39
-  #define CODE_ADD1 40
-  #define CODE_SUB1 41
-  #define CODE_ABS 42
-  #define CODE_MIN 43
-  #define CODE_MAX 44
-  #define CODE_EQ 45
-  #define CODE_NE 46
-  #define CODE_GT 47
-  #define CODE_GE 48
-  #define CODE_LT 49
-  #define CODE_LE 50
-  #define CODE_EQ0 51
-  #define CODE_INVERT 52
-  #define CODE_AND 53
-  #define CODE_OR 54
-  #define CODE_XOR 55
-  #define CODE_LSHIFT 56
-  #define CODE_RSHIFT 57
-  #define CODE_FALSE 58
-  #define CODE_TRUE 59
+  #define CODE_PRINT 23
+  #define CODE_I 24
+  #define CODE_J 25
+  #define CODE_K 26
+  #define CODE_DUP 27
+  #define CODE_DROP 28
+  #define CODE_SWAP 29
+  #define CODE_OVER 30
+  #define CODE_ROT 31
+  #define CODE_NIP 32
+  #define CODE_TUCK 33
+  #define CODE_ADD 34
+  #define CODE_SUB 35
+  #define CODE_MUL 36
+  #define CODE_DIV 37
+  #define CODE_MOD 38
+  #define CODE_DIVMOD 39
+  #define CODE_NEGATE 40
+  #define CODE_ADD1 41
+  #define CODE_SUB1 42
+  #define CODE_ABS 43
+  #define CODE_MIN 44
+  #define CODE_MAX 45
+  #define CODE_EQ 46
+  #define CODE_NE 47
+  #define CODE_GT 48
+  #define CODE_GE 49
+  #define CODE_LT 50
+  #define CODE_LE 51
+  #define CODE_EQ0 52
+  #define CODE_INVERT 53
+  #define CODE_AND 54
+  #define CODE_OR 55
+  #define CODE_XOR 56
+  #define CODE_LSHIFT 57
+  #define CODE_RSHIFT 58
+  #define CODE_FALSE 59
+  #define CODE_TRUE 60
   // beginning of the user-defined dictionary
-  #define BOUND_DICTIONARY 60
+  #define BOUND_DICTIONARY 61
 
   const std::set<std::string> reserved_words_({
     // comments
@@ -154,6 +155,8 @@ namespace awkward {
   });
 
   const std::map<std::string, int64_t> generic_builtin_words_({
+    // print
+    {".", CODE_PRINT},
     // loop variables
     {"i", CODE_I},
     {"j", CODE_J},
@@ -554,6 +557,9 @@ namespace awkward {
           int64_t out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
           return output_names_[(IndexTypeOf<int64_t>)out_num] + " rewind";
         }
+        case CODE_PRINT: {
+          return ".";
+        }
         case CODE_I: {
           return "i";
         }
@@ -779,11 +785,6 @@ namespace awkward {
   template <typename T, typename I>
   int64_t
   ForthMachineOf<T, I>::input_position_at(const std::string& name) const {
-    if (!is_ready()) {
-      throw std::invalid_argument(
-        std::string("need to 'begin' or 'run' to assign inputs") + FILENAME(__LINE__)
-      );
-    }
     for (IndexTypeOf<int64_t> i = 0;  i < input_names_.size();  i++) {
       if (input_names_[i] == name) {
         return current_inputs_[i].get()->pos();
@@ -797,22 +798,12 @@ namespace awkward {
   template <typename T, typename I>
   int64_t
   ForthMachineOf<T, I>::input_position_at(int64_t index) const noexcept {
-    if (!is_ready()) {
-      return -1;
-    }
-    else {
-      return current_inputs_[(IndexTypeOf<int64_t>)index].get()->pos();
-    }
+    return current_inputs_[(IndexTypeOf<int64_t>)index].get()->pos();
   }
 
   template <typename T, typename I>
   const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>
   ForthMachineOf<T, I>::outputs() const {
-    if (!is_ready()) {
-      throw std::invalid_argument(
-        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
-      );
-    }
     std::map<std::string, std::shared_ptr<ForthOutputBuffer>> out;
     for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
       out[output_names_[i]] = current_outputs_[i];
@@ -829,11 +820,6 @@ namespace awkward {
   template <typename T, typename I>
   const std::shared_ptr<ForthOutputBuffer>
   ForthMachineOf<T, I>::output_at(const std::string& name) const {
-    if (!is_ready()) {
-      throw std::invalid_argument(
-        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
-      );
-    }
     for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i];
@@ -853,11 +839,6 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   ForthMachineOf<T, I>::output_NumpyArray_at(const std::string& name) const {
-    if (!is_ready()) {
-      throw std::invalid_argument(
-        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
-      );
-    }
     for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toNumpyArray();
@@ -877,11 +858,6 @@ namespace awkward {
   template <typename T, typename I>
   const Index8
   ForthMachineOf<T, I>::output_Index8_at(const std::string& name) const {
-    if (!is_ready()) {
-      throw std::invalid_argument(
-        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
-      );
-    }
     for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndex8();
@@ -901,11 +877,6 @@ namespace awkward {
   template <typename T, typename I>
   const IndexU8
   ForthMachineOf<T, I>::output_IndexU8_at(const std::string& name) const {
-    if (!is_ready()) {
-      throw std::invalid_argument(
-        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
-      );
-    }
     for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndexU8();
@@ -925,11 +896,6 @@ namespace awkward {
   template <typename T, typename I>
   const Index32
   ForthMachineOf<T, I>::output_Index32_at(const std::string& name) const {
-    if (!is_ready()) {
-      throw std::invalid_argument(
-        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
-      );
-    }
     for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndex32();
@@ -949,11 +915,6 @@ namespace awkward {
   template <typename T, typename I>
   const IndexU32
   ForthMachineOf<T, I>::output_IndexU32_at(const std::string& name) const {
-    if (!is_ready()) {
-      throw std::invalid_argument(
-        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
-      );
-    }
     for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndexU32();
@@ -973,11 +934,6 @@ namespace awkward {
   template <typename T, typename I>
   const Index64
   ForthMachineOf<T, I>::output_Index64_at(const std::string& name) const {
-    if (!is_ready()) {
-      throw std::invalid_argument(
-        std::string("need to 'begin' or 'run' to create outputs") + FILENAME(__LINE__)
-      );
-    }
     for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndex64();
@@ -3208,6 +3164,15 @@ namespace awkward {
               break;
             }
 
+            case CODE_PRINT: {
+              if (stack_cannot_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              print_number(stack_pop());
+              break;
+            }
+
             case CODE_I: {
               if (stack_cannot_push()) {
                 current_error_ = util::ForthError::stack_overflow;
@@ -3666,6 +3631,18 @@ namespace awkward {
   void
   ForthMachineOf<int64_t, int32_t>::write_add_from_stack(int64_t num, int64_t* top) noexcept {
     current_outputs_[(IndexTypeOf<int64_t>)num].get()->write_add_int64(*top);
+  }
+
+  template <>
+  void
+  ForthMachineOf<int32_t, int32_t>::print_number(int32_t num) noexcept {
+    printf("%d\n", num);
+  }
+
+  template <>
+  void
+  ForthMachineOf<int64_t, int32_t>::print_number(int64_t num) noexcept {
+    printf("%ld\n", num);
   }
 
   template class EXPORT_TEMPLATE_INST ForthMachineOf<int32_t, int32_t>;

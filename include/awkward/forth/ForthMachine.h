@@ -381,6 +381,10 @@ namespace awkward {
       write_add_from_stack(int64_t num, T* top) noexcept;
 
     /// @brief HERE
+    void
+      print_number(T num) noexcept;
+
+    /// @brief HERE
     inline bool
       stack_cannot_push() const noexcept {
       return stack_depth_ == stack_max_depth_;

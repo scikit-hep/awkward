@@ -122,7 +122,7 @@ def test_userdef_compilation():
     )
 
     vm32 = awkward.forth.ForthMachine32(": infinite recurse ;")
-    assert ak.to_list(vm32.bytecodes) == [[], [61]]
+    assert ak.to_list(vm32.bytecodes) == [[], [62]]
     assert (
         vm32.decompiled
         == """: infinite
