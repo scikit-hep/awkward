@@ -214,6 +214,28 @@ namespace awkward {
     std::string
       gettypestr(const Parameters& parameters,
                  const TypeStrs& typestrs);
+
+    /// @brief Exhaustive list of runtime errors possible in the ForthMachine.
+    enum class ForthError {
+        // execution can continue
+        none,
+
+        // execution cannot continue
+        not_ready,
+        is_done,
+        user_halt,
+        recursion_depth_exceeded,
+        stack_underflow,
+        stack_overflow,
+        read_beyond,
+        seek_beyond,
+        skip_beyond,
+        rewind_beyond,
+        division_by_zero,
+
+        size
+    };
+
   }
 }
 

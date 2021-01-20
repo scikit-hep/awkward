@@ -130,7 +130,10 @@ def lower_len(context, builder, sig, args):
         builder, context.get_value_type(numba.int64)
     )
     call(
-        context, builder, ak._libawkward.ArrayBuilder_length, (proxyin.rawptr, result),
+        context,
+        builder,
+        ak._libawkward.ArrayBuilder_length,
+        (proxyin.rawptr, result),
     )
     return ak._connect._numba.castint(
         context, builder, numba.int64, numba.intp, builder.load(result)
@@ -483,7 +486,10 @@ def lower_index(context, builder, sig, args):
         context, builder, indextype, numba.int64, indexval
     )
     call(
-        context, builder, ak._libawkward.ArrayBuilder_index, (proxyin.rawptr, index),
+        context,
+        builder,
+        ak._libawkward.ArrayBuilder_index,
+        (proxyin.rawptr, index),
     )
     return arraybuilderval
 
@@ -503,7 +509,10 @@ def lower_beginrecord(context, builder, sig, args):
     (arraybuilderval,) = args
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     call(
-        context, builder, ak._libawkward.ArrayBuilder_beginrecord, (proxyin.rawptr,),
+        context,
+        builder,
+        ak._libawkward.ArrayBuilder_beginrecord,
+        (proxyin.rawptr,),
     )
     return context.get_dummy_value()
 
@@ -532,7 +541,10 @@ def lower_field(context, builder, sig, args):
     proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
     key = globalstring(context, builder, keytype.literal_value)
     call(
-        context, builder, ak._libawkward.ArrayBuilder_field_fast, (proxyin.rawptr, key),
+        context,
+        builder,
+        ak._libawkward.ArrayBuilder_field_fast,
+        (proxyin.rawptr, key),
     )
     return arraybuilderval
 
@@ -686,7 +698,9 @@ def lower_append_optional(context, builder, sig, args):
             lower_null(
                 context,
                 builder,
-                numba.types.none(arraybuildertype,),
+                numba.types.none(
+                    arraybuildertype,
+                ),
                 (arraybuilderval,),
             )
 

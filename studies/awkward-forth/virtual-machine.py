@@ -1600,13 +1600,11 @@ def testy(source):
     mine = myforth(source)
     theirs = gforth(source)
     assert mine == theirs, f"{source}\n\nmyforth: {mine}\n gforth: {theirs}"
+    print("""    vm32 = awkward.forth.ForthMachine32("{0}")
+    vm32.run()
+    assert vm32.stack == {1}
+""".format(source, theirs))
 
-
-testy(": foo 3 + 2 * ; 4 foo foo")
-testy(": foo 3 + 2 * ; : bar 4 foo foo ; bar")
-testy(": factorial dup 2 < if drop 1 exit then dup 1- recurse * ; 5 factorial")
-testy("variable x 10 x ! 5 x +! x @ x @ x @")
-testy("variable x 10 x ! 5 x +! : foo x @ x @ x @ ; foo foo")
 
 testy(": foo if 999 then ; -1 foo")
 testy(": foo if 999 then ; 0 foo")
@@ -1824,3 +1822,9 @@ testy("0 invert")
 testy("1 invert")
 testy("true")
 testy("false")
+
+testy(": foo 3 + 2 * ; 4 foo foo")
+testy(": foo 3 + 2 * ; : bar 4 foo foo ; bar")
+testy(": factorial dup 2 < if drop 1 exit then dup 1- recurse * ; 5 factorial")
+testy("variable x 10 x ! 5 x +! x @ x @ x @")
+testy("variable x 10 x ! 5 x +! : foo x @ x @ x @ ; foo foo")

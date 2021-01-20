@@ -3,11 +3,26 @@ author: "Jim Pivarski"
 copyright: "2020 Jim Pivarski"
 logo: img/logo-300px.png
 
-html:
-  favicon: img/favicon.ico
+repository:
+  url: https://github.com/scikit-hep/awkward-1.0
 
 launch_buttons:
   binderhub_url: ""
 
-repository:
-  url: https://github.com/scikit-hep/awkward-1.0
+execute:
+  allow_errors: false
+
+sphinx:
+  config:
+    html_favicon: img/favicon.ico
+    html_theme_options:
+      home_page_in_toc: true
+      repository_url: https://github.com/scikit-hep/awkward-1.0
+      repository_branch: main
+      path_to_docs: docs-src
+      use_edit_page_button: true
+      use_issues_button: true
+      search_bar_text: Search...
+      google_analytics_id: ""
+      extra_navbar: ""
+      show_navbar_depth: 2

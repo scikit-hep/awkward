@@ -379,18 +379,21 @@ def test_views():
         ).toarray()
     ) == [1.1, 2.2, None, 3.3, None, 4.4, 5.5]
 
-    assert ak.to_list(
-        ak_numba_arrayview.ArrayView.fromarray(
-            ak.Array(
-                [
-                    {"x": 0.0, "y": []},
-                    {"x": 1.1, "y": [1, 1]},
-                    {"x": 2.2, "y": [2, 2, 2]},
-                ],
-                check_valid=True,
-            )
-        ).toarray()
-    ) == [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1, 1]}, {"x": 2.2, "y": [2, 2, 2]}]
+    assert (
+        ak.to_list(
+            ak_numba_arrayview.ArrayView.fromarray(
+                ak.Array(
+                    [
+                        {"x": 0.0, "y": []},
+                        {"x": 1.1, "y": [1, 1]},
+                        {"x": 2.2, "y": [2, 2, 2]},
+                    ],
+                    check_valid=True,
+                )
+            ).toarray()
+        )
+        == [{"x": 0.0, "y": []}, {"x": 1.1, "y": [1, 1]}, {"x": 2.2, "y": [2, 2, 2]}]
+    )
 
     assert ak.to_list(
         ak_numba_arrayview.ArrayView.fromarray(

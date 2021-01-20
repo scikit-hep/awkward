@@ -66,30 +66,36 @@ def test_numba():
         True,
         False,
     )
-    assert f1(
-        ak.Array(
-            [
-                [],
-                [{"x": 0, "y": 999}],
-                [{"x": 1, "y": 999}, {"x": 2, "y": 999}, {"x": 3, "y": 999}],
-            ]
+    assert (
+        f1(
+            ak.Array(
+                [
+                    [],
+                    [{"x": 0, "y": 999}],
+                    [{"x": 1, "y": 999}, {"x": 2, "y": 999}, {"x": 3, "y": 999}],
+                ]
+            )
         )
-    ) == (True, True, False)
+        == (True, True, False)
+    )
     assert f2(ak.Array([[], [{"x": 0}], [{"x": 1}, {"x": 2}, {"x": 3}]])) == (
         False,
         False,
         True,
         True,
     )
-    assert f2(
-        ak.Array(
-            [
-                [],
-                [{"x": 0, "y": 999}],
-                [{"x": 1, "y": 999}, {"x": 2, "y": 999}, {"x": 3, "y": 999}],
-            ]
+    assert (
+        f2(
+            ak.Array(
+                [
+                    [],
+                    [{"x": 0, "y": 999}],
+                    [{"x": 1, "y": 999}, {"x": 2, "y": 999}, {"x": 3, "y": 999}],
+                ]
+            )
         )
-    ) == (False, False, True, True)
+        == (False, False, True, True)
+    )
 
     assert f1(ak.Array([[], [{"x": [0]}], [{"x": []}, {"x": [2]}, {"x": [3]}]])) == (
         True,

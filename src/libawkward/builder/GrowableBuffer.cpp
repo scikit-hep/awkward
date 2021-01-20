@@ -17,7 +17,7 @@ namespace awkward {
     if (actual < (size_t)minreserve) {
       actual = (size_t)minreserve;
     }
-    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu, actual*sizeof(T));
+    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu, (int64_t)(actual*sizeof(T)));
     return GrowableBuffer(options, ptr, 0, (int64_t)actual);
   }
 
@@ -42,7 +42,7 @@ namespace awkward {
     if (actual < (size_t)length) {
       actual = (size_t)length;
     }
-    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu, actual*sizeof(T));
+    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu, (int64_t)(actual*sizeof(T)));
     T* rawptr = ptr.get();
     for (int64_t i = 0;  i < length;  i++) {
       rawptr[i] = (T)i;
@@ -63,7 +63,7 @@ namespace awkward {
   template <typename T>
   GrowableBuffer<T>::GrowableBuffer(const ArrayBuilderOptions& options)
       : GrowableBuffer(options,
-                       kernel::malloc<T>(kernel::lib::cpu, options.initial()*sizeof(T)),
+                       kernel::malloc<T>(kernel::lib::cpu, options.initial()*(int64_t)sizeof(T)),
                        0,
                        options.initial()) { }
 
@@ -98,7 +98,7 @@ namespace awkward {
   void
   GrowableBuffer<T>::set_reserved(int64_t minreserved) {
     if (minreserved > reserved_) {
-      std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu, minreserved*sizeof(T));
+      std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu, minreserved*(int64_t)sizeof(T));
       memcpy(ptr.get(), ptr_.get(), (size_t)length_ * sizeof(T));
       ptr_ = ptr;
       reserved_ = minreserved;
@@ -110,7 +110,7 @@ namespace awkward {
   GrowableBuffer<T>::clear() {
     length_ = 0;
     reserved_ = options_.initial();
-    ptr_ = kernel::malloc<T>(kernel::lib::cpu, options_.initial()*sizeof(T));
+    ptr_ = kernel::malloc<T>(kernel::lib::cpu, options_.initial()*(int64_t)sizeof(T));
   }
 
   template <typename T>

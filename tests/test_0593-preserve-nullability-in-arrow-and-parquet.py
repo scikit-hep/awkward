@@ -38,7 +38,12 @@ def test_record_to_arrow():
 
     ak_array = ak.Array(
         ak.layout.RecordArray(
-            [x_content, ak.layout.UnmaskedArray(x_content), z_content,], ["x", "y", "z"]
+            [
+                x_content,
+                ak.layout.UnmaskedArray(x_content),
+                z_content,
+            ],
+            ["x", "y", "z"],
         )
     )
     pa_array = ak.to_arrow(ak_array)
@@ -112,7 +117,12 @@ def test_record_from_arrow():
 
     original = ak.Array(
         ak.layout.RecordArray(
-            [x_content, ak.layout.UnmaskedArray(x_content), z_content,], ["x", "y", "z"]
+            [
+                x_content,
+                ak.layout.UnmaskedArray(x_content),
+                z_content,
+            ],
+            ["x", "y", "z"],
         )
     )
     pa_array = ak.to_arrow(original)

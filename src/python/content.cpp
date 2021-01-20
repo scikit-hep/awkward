@@ -6,12 +6,16 @@
 
 #include "awkward/kernel-utils.h"
 
+#include "awkward/util.h"
+
 #include "awkward/python/identities.h"
 #include "awkward/python/util.h"
 
 #include "awkward/python/virtual.h"
 
 #include "awkward/python/content.h"
+
+#include "awkward/dlpack/util.h"
 
 ////////// boxing
 
@@ -1463,14 +1467,14 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                   int64_t axis,
                   bool ascending,
                   bool stable) -> py::object {
-               return box(self.sort(axis, ascending, false));
+               return box(self.sort(axis, ascending, stable));
           })
           .def("argsort",
                [](const T& self,
                   int64_t axis,
                   bool ascending,
                   bool stable) -> py::object {
-               return box(self.argsort(axis, ascending, false));
+               return box(self.argsort(axis, ascending, stable));
           })
           .def("numbers_to_type",
                [](const T& self,
@@ -1844,6 +1848,12 @@ make_ListOffsetArrayOf(const py::handle& m, const std::string& name);
 
 ////////// NumpyArray
 
+const std::shared_ptr<DLManagedTensor>
+NumpyArray_toDlpack(const ak::NumpyArray array) {
+
+}
+
+
 const ak::NumpyArray
 NumpyArray_from_cuda_array_interface(const std::string& name,
                                      const py::object& array,
@@ -2057,6 +2067,22 @@ NumpyArray_from_jax(const std::string& name,
   }
 }
 
+void deleter(DLManagedTensor* tensor) {
+  if(tensor->manager_ctx == nullptr) 
+    return;
+  Py_DECREF(reinterpret_cast<PyObject*>(tensor->manager_ctx));
+  tensor->manager_ctx = nullptr;
+}
+
+void pycapsule_deleter(PyObject* dltensor) {
+  DLManagedTensor* dlm_tensor;
+  if(PyCapsule_IsValid(dltensor, "dltensor")) {
+    dlm_tensor = static_cast<DLManagedTensor*>(PyCapsule_GetPointer(
+          dltensor, "dltensor"));
+    dlm_tensor->deleter(dlm_tensor);
+  }
+}
+
 py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content>
 make_NumpyArray(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::NumpyArray,
@@ -2183,8 +2209,43 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
                 cupy_memoryptr,
                 pybind11::make_tuple(py::cast<ssize_t>(self.itemsize())));
     })
+    .def("to_dlpack", [name](const ak::NumpyArray& self) -> py::capsule {
+      DLManagedTensor* dlm_tensor = new DLManagedTensor;
+      ssize_t ndim = self.ndim();
 
-  );
+      dlm_tensor->dl_tensor.data = self.ptr().get();
+      dlm_tensor->dl_tensor.ndim = self.ndim();
+      dlm_tensor->dl_tensor.dtype = data_type_dispatch(self.dtype());
+      
+      int64_t* dup_shape = new int64_t[self.shape().size()];
+      int64_t* dup_strides = new int64_t[self.strides().size()];
+
+      for(int64_t i = 0; i < self.shape().size(); i++) {
+        dup_shape[i] = static_cast<int64_t>(self.shape()[i]);
+      }
+
+      int64_t dtype_size = ak::util::dtype_to_itemsize(self.dtype());
+      for(int64_t i = 0; i < self.strides().size(); i++) {
+        dup_strides[i] = static_cast<int64_t>(self.strides()[i]) / dtype_size;
+      }
+
+      dlm_tensor->dl_tensor.shape = dup_shape;
+      dlm_tensor->dl_tensor.strides = dup_strides;
+      dlm_tensor->dl_tensor.byte_offset = self.byteoffset();
+      if(self.ptr_lib() == ak::kernel::lib::cpu) {
+        dlm_tensor->dl_tensor.ctx = DLContext{DLDeviceType::kDLCPU, 0};
+      } 
+      else if (self.ptr_lib() == ak::kernel::lib::cuda) {
+        dlm_tensor->dl_tensor.ctx = DLContext{DLDeviceType::kDLGPU, 0};
+      }
+      
+      py::object array = py::cast(self);
+      dlm_tensor->manager_ctx = reinterpret_cast<void*>(array.ptr());
+      Py_INCREF(array.ptr());
+      dlm_tensor->deleter = deleter;
+
+      return py::capsule(dlm_tensor, "dltensor", pycapsule_deleter);
+    }));
 }
 
 ////////// RecordArray

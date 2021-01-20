@@ -93,12 +93,15 @@ def test_array_slice():
         np.array([[0.0, 1.1, 2.2, 3.3, 4.4], [5.5, 6.6, 7.7, 8.8, 9.9]]),
         check_valid=True,
     )
-    assert ak.to_list(
-        array[
-            ak.layout.NumpyArray(np.array([[0, 1], [1, 0]])),
-            ak.layout.NumpyArray(np.array([[2, 4], [3, 3]])),
-        ]
-    ) == [[2.2, 9.9], [8.8, 3.3]]
+    assert (
+        ak.to_list(
+            array[
+                ak.layout.NumpyArray(np.array([[0, 1], [1, 0]])),
+                ak.layout.NumpyArray(np.array([[2, 4], [3, 3]])),
+            ]
+        )
+        == [[2.2, 9.9], [8.8, 3.3]]
+    )
     assert ak.to_list(array[ak.layout.NumpyArray(np.array([[0, 1], [1, 0]]))]) == [
         [[0.0, 1.1, 2.2, 3.3, 4.4], [5.5, 6.6, 7.7, 8.8, 9.9]],
         [[5.5, 6.6, 7.7, 8.8, 9.9], [0.0, 1.1, 2.2, 3.3, 4.4]],
@@ -225,12 +228,17 @@ def test_missing():
         [6.6, 5.5, 5.5, None, 7.7],
         [10.0, 9.9, 9.9, None, 11.1],
     ]
-    assert ak.to_list(
-        regulararray[
-            1:,
-            np.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False]),
-        ]
-    ) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+    assert (
+        ak.to_list(
+            regulararray[
+                1:,
+                np.ma.MaskedArray(
+                    [2, 1, 1, 999, -1], [False, False, False, True, False]
+                ),
+            ]
+        )
+        == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+    )
 
     content = ak.layout.NumpyArray(
         np.array([[0.0, 1.1, 2.2, 3.3], [4.4, 5.5, 6.6, 7.7], [8.8, 9.9, 10.0, 11.1]])
@@ -272,12 +280,17 @@ def test_missing():
         [6.6, 5.5, 5.5, None, 7.7],
         [10.0, 9.9, 9.9, None, 11.1],
     ]
-    assert ak.to_list(
-        content[
-            1:,
-            np.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False]),
-        ]
-    ) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+    assert (
+        ak.to_list(
+            content[
+                1:,
+                np.ma.MaskedArray(
+                    [2, 1, 1, 999, -1], [False, False, False, True, False]
+                ),
+            ]
+        )
+        == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+    )
 
     content = ak.layout.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.0, 11.1, 999])
@@ -309,12 +322,17 @@ def test_missing():
         [6.6, 5.5, 5.5, None, 7.7],
         [10.0, 9.9, 9.9, None, 11.1],
     ]
-    assert ak.to_list(
-        listoffsetarray[
-            1:,
-            np.ma.MaskedArray([2, 1, 1, 999, -1], [False, False, False, True, False]),
-        ]
-    ) == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+    assert (
+        ak.to_list(
+            listoffsetarray[
+                1:,
+                np.ma.MaskedArray(
+                    [2, 1, 1, 999, -1], [False, False, False, True, False]
+                ),
+            ]
+        )
+        == [[6.6, 5.5, 5.5, None, 7.7], [10.0, 9.9, 9.9, None, 11.1]]
+    )
 
 
 def test_bool_missing():
@@ -534,23 +552,29 @@ def test_regular_regular():
     regulararray1 = ak.layout.RegularArray(content, 5, zeros_length=0)
     regulararray2 = ak.layout.RegularArray(regulararray1, 3, zeros_length=0)
 
-    assert ak.to_list(
-        regulararray2[
-            ak.Array(
-                [[[2], [1, -2], [-1, 2, 0]], [[-3], [-4, 3], [-5, -3, 4]]],
-                check_valid=True,
-            )
-        ]
-    ) == [[[2], [6, 8], [14, 12, 10]], [[17], [21, 23], [25, 27, 29]]]
+    assert (
+        ak.to_list(
+            regulararray2[
+                ak.Array(
+                    [[[2], [1, -2], [-1, 2, 0]], [[-3], [-4, 3], [-5, -3, 4]]],
+                    check_valid=True,
+                )
+            ]
+        )
+        == [[[2], [6, 8], [14, 12, 10]], [[17], [21, 23], [25, 27, 29]]]
+    )
 
-    assert ak.to_list(
-        regulararray2[
-            ak.Array(
-                [[[2], [1, -2], [-1, None, 0]], [[-3], [-4, 3], [-5, None, 4]]],
-                check_valid=True,
-            )
-        ]
-    ) == [[[2], [6, 8], [14, None, 10]], [[17], [21, 23], [25, None, 29]]]
+    assert (
+        ak.to_list(
+            regulararray2[
+                ak.Array(
+                    [[[2], [1, -2], [-1, None, 0]], [[-3], [-4, 3], [-5, None, 4]]],
+                    check_valid=True,
+                )
+            ]
+        )
+        == [[[2], [6, 8], [14, None, 10]], [[17], [21, 23], [25, None, 29]]]
+    )
 
 
 def test_masked_of_jagged_of_whatever():
@@ -566,14 +590,17 @@ def test_masked_of_jagged_of_whatever():
         ]
     ) == [[[2], None, [14, 12, 10]], [[17], None, [25, 27, 29]]]
 
-    assert ak.to_list(
-        regulararray2[
-            ak.Array(
-                [[[2], None, [-1, None, 0]], [[-3], None, [-5, None, 4]]],
-                check_valid=True,
-            )
-        ]
-    ) == [[[2], None, [14, None, 10]], [[17], None, [25, None, 29]]]
+    assert (
+        ak.to_list(
+            regulararray2[
+                ak.Array(
+                    [[[2], None, [-1, None, 0]], [[-3], None, [-5, None, 4]]],
+                    check_valid=True,
+                )
+            ]
+        )
+        == [[[2], None, [14, None, 10]], [[17], None, [25, None, 29]]]
+    )
 
 
 def test_emptyarray():

@@ -111,7 +111,11 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                 node = node.content
             nparray = ak.nplike.of(node).asarray(node)
             nparray = nparray.reshape(tuple(shape) + nparray.shape[1:])
-            return ak.layout.NumpyArray(nparray, node.identities, node.parameters,)
+            return ak.layout.NumpyArray(
+                nparray,
+                node.identities,
+                node.parameters,
+            )
 
     def getfunction(inputs):
         signature = [ufunc]
@@ -185,7 +189,8 @@ def array_ufunc(ufunc, method, inputs, kwargs):
                     custom_types.append(type(x).__name__)
             raise ValueError(
                 "no overloads for custom types: {0}({1})".format(
-                    ufunc.__name__, ", ".join(custom_types),
+                    ufunc.__name__,
+                    ", ".join(custom_types),
                 )
                 + ak._util.exception_suffix(__file__)
             )
@@ -301,7 +306,8 @@ def getfunction_matmul(inputs):
             ak.layout.ListOffsetArray64(
                 ak.layout.Index64(outer),
                 ak.layout.ListOffsetArray64(
-                    ak.layout.Index64(inner), ak.layout.NumpyArray(content),
+                    ak.layout.Index64(inner),
+                    ak.layout.NumpyArray(content),
                 ),
             ),
         )

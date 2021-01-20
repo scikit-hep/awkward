@@ -4663,7 +4663,10 @@ namespace awkward {
       return (out.get()->length() == length());
     }
     else {
-      return toRegularArray().get()->is_unique();
+      throw std::runtime_error(
+        std::string("FIXME: operation not yet implemented: NumpyArray::is_unique for ")
+        + std::to_string(ndim()) + std::string(" dimentional array")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -4693,14 +4696,30 @@ namespace awkward {
       length);
     util::handle_error(err1, classname(), nullptr);
 
-    struct Error err2 = kernel::NumpyArray_subrange_equal(
+    std::shared_ptr<int64_t> tmp_beg_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                                                   kMaxLevels*((int64_t)sizeof(int64_t)));
+    std::shared_ptr<int64_t> tmp_end_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                                                   kMaxLevels*((int64_t)sizeof(int64_t)));
+    struct Error err2 = kernel::NumpyArray_quick_sort(
+      kernel::lib::cpu,   // DERIVE
+      ptr.get(),
+      tmp_beg_ptr.get(),
+      tmp_end_ptr.get(),
+      starts.data(),
+      stops.data(),
+      true,
+      starts.length(),
+      kMaxLevels);
+    util::handle_error(err2, classname(), nullptr);
+
+    struct Error err3 = kernel::NumpyArray_subrange_equal(
       kernel::lib::cpu,   // DERIVE
       ptr.get(),
       starts.data(),
       stops.data(),
       starts.length(),
       &is_equal);
-    util::handle_error(err2, classname(), nullptr);
+    util::handle_error(err3, classname(), nullptr);
 
     return !is_equal;
   }
@@ -4827,34 +4846,55 @@ namespace awkward {
       return ptr;
     }
 
-    int64_t ranges_length = 0;
+    int64_t offsets_length = 0;
     struct Error err1 = kernel::sorting_ranges_length(
       kernel::lib::cpu,   // DERIVE
-      &ranges_length,
+      &offsets_length,
       parents.data(),
       parents.length());
     util::handle_error(err1, classname(), nullptr);
 
-    Index64 outranges(ranges_length);
+    Index64 offsets(offsets_length);
     struct Error err2 = kernel::sorting_ranges(
       kernel::lib::cpu,   // DERIVE
-      outranges.data(),
-      ranges_length,
+      offsets.data(),
+      offsets_length,
       parents.data(),
       parents.length());
     util::handle_error(err2, classname(), nullptr);
 
-    struct Error err3 = kernel::NumpyArray_argsort<T>(
-      kernel::lib::cpu,   // DERIVE
-      ptr.get(),
-      data,
-      length,
-      outranges.data(),
-      ranges_length,
-      ascending,
-      stable);
-    util::handle_error(err3, classname(), nullptr);
+    if (stable) {
+      struct Error err3 = kernel::NumpyArray_argsort<T>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        data,
+        length,
+        offsets.data(),
+        offsets_length,
+        ascending,
+        stable);
+      util::handle_error(err3, classname(), nullptr);
+    }
+    else {
+      std::shared_ptr<int64_t> tmp_beg_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                                                     kMaxLevels*((int64_t)sizeof(int64_t)));
+      std::shared_ptr<int64_t> tmp_end_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                                                     kMaxLevels*((int64_t)sizeof(int64_t)));
 
+      struct Error err3 = kernel::NumpyArray_quick_argsort<T>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        data,
+        length,
+        tmp_beg_ptr.get(),
+        tmp_end_ptr.get(),
+        offsets.data(),
+        offsets_length,
+        ascending,
+        stable,
+        kMaxLevels);
+      util::handle_error(err3, classname(), nullptr);
+    }
     return ptr;
   }
 
@@ -4876,43 +4916,74 @@ namespace awkward {
       return std::tie(ptr, ptr_length);
     }
 
-    int64_t ranges_length = 0;
+    int64_t offsets_length = 0;
     struct Error err1 = kernel::sorting_ranges_length(
       kernel::lib::cpu,   // DERIVE
-      &ranges_length,
+      &offsets_length,
       parents.data(),
       parents.length());
     util::handle_error(err1, classname(), nullptr);
 
-    Index64 outranges(ranges_length);
+    Index64 offsets(offsets_length);
     struct Error err2 = kernel::sorting_ranges(
       kernel::lib::cpu,   // DERIVE
-      outranges.data(),
-      ranges_length,
+      offsets.data(),
+      offsets_length,
       parents.data(),
       parents.length());
     util::handle_error(err2, classname(), nullptr);
 
-    struct Error err3 = kernel::NumpyArray_sort<T>(
-      kernel::lib::cpu,   // DERIVE
-      ptr.get(),
-      data,
-      length,
-      outranges.data(),
-      ranges_length,
-      parents.length(),
-      ascending,
-      stable);
-    util::handle_error(err3, classname(), nullptr);
+    if (stable) {
+      struct Error err3 = kernel::NumpyArray_sort<T>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        data,
+        length,
+        offsets.data(),
+        offsets_length,
+        parents.length(),
+        ascending,
+        stable);
+      util::handle_error(err3, classname(), nullptr);
+    }
+    else {
+      std::shared_ptr<int64_t> tmp_beg_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                                                     kMaxLevels*((int64_t)sizeof(int64_t)));
+      std::shared_ptr<int64_t> tmp_end_ptr = kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                                                     kMaxLevels*((int64_t)sizeof(int64_t)));
+
+      struct Error err3 = kernel::NumpyArray_fill(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        0,
+        data,
+        length);
+      util::handle_error(err3, classname(), nullptr);
+
+      Index64 sort_starts = util::make_starts(offsets);
+      Index64 sort_stops = util::make_stops(offsets);
+
+      struct Error err4 = kernel::NumpyArray_quick_sort<T>(
+        kernel::lib::cpu,   // DERIVE
+        ptr.get(),
+        tmp_beg_ptr.get(),
+        tmp_end_ptr.get(),
+        sort_starts.data(),
+        sort_stops.data(),
+        ascending,
+        sort_starts.length(),
+        kMaxLevels);
+      util::handle_error(err4, classname(), nullptr);
+    }
 
     if (unique) {
-      struct Error err4 = kernel::unique<T>(
+      struct Error err5 = kernel::unique<T>(
         kernel::lib::cpu,   // DERIVE
         ptr.get(),
         length,
         &ptr_length
       );
-      util::handle_error(err4, classname(), nullptr);
+      util::handle_error(err5, classname(), nullptr);
     }
 
     return std::tie(ptr, ptr_length);

@@ -6,7 +6,6 @@
 
 - file: how-to-convert
   title: "Converting arrays"
-  expand_sections: true
   sections:
     - file: how-to-convert-numpy
       title: "NumPy"
@@ -25,7 +24,6 @@
 
 - file: how-to-create
   title: "Creating new arrays"
-  expand_sections: true
   sections:
     - file: how-to-create-arraybuilder
       title: "ArrayBuilder (easy & general)"
@@ -46,7 +44,6 @@
 
 - file: how-to-examine
   title: "Examining arrays"
-  expand_sections: true
   sections:
     - file: how-to-examine-type
       title: "Data type"
@@ -61,7 +58,6 @@
 
 - file: how-to-math
   title: "Numerical math"
-  expand_sections: true
   sections:
     - file: how-to-math-numpy
       title: "NumPy functions"
@@ -78,7 +74,6 @@
 
 - file: how-to-filter
   title: "Filtering data"
-  expand_sections: true
   sections:
     - file: how-to-filter-num
       title: "By number of items"
@@ -91,7 +86,6 @@
 
 - file: how-to-restructure
   title: "Restructuring data"
-  expand_sections: true
   sections:
     - file: how-to-restructure-zip-project
       title: "Zip/unzip and project"
@@ -110,7 +104,6 @@
 
 - file: how-to-combinatorics
   title: "Combinatorics"
-  expand_sections: true
   sections:
     - file: how-to-combinatorics-cartesian-combinations
       title: 'Cartesian product and "n choose k"'
@@ -119,7 +112,6 @@
 
 - file: how-to-use-in-numba
   title: "Using arrays in Numba"
-  expand_sections: true
   sections:
     - file: how-to-use-in-numba-features
       title: "Supported features"
@@ -128,7 +120,6 @@
 
 - file: how-to-specialize
   title: "Specialized behavior"
-  expand_sections: true
   sections:
     - file: how-to-specialize-subclass
       title: "Subclassing Array/Record"

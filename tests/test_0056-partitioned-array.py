@@ -371,14 +371,42 @@ def test_getitem_first_dimension_int():
     two = ak.from_iter([[6.6], [], [], [], [7.7, 8.8, 9.9]], highlevel=False)
     array = ak.partition.IrregularlyPartitionedArray([one, two])
 
-    assert ak.to_list(array[0,]) == [1.1, 2.2, 3.3]
-    assert ak.to_list(array[-8,]) == [1.1, 2.2, 3.3]
+    assert (
+        ak.to_list(
+            array[
+                0,
+            ]
+        )
+        == [1.1, 2.2, 3.3]
+    )
+    assert (
+        ak.to_list(
+            array[
+                -8,
+            ]
+        )
+        == [1.1, 2.2, 3.3]
+    )
     assert array[0, 1] == 2.2
     assert array[-8, 1] == 2.2
     assert ak.to_list(array[0, [-1, 0]]) == [3.3, 1.1]
     assert ak.to_list(array[0, [False, True, True]]) == [2.2, 3.3]
-    assert ak.to_list(array[7,]) == [7.7, 8.8, 9.9]
-    assert ak.to_list(array[-1,]) == [7.7, 8.8, 9.9]
+    assert (
+        ak.to_list(
+            array[
+                7,
+            ]
+        )
+        == [7.7, 8.8, 9.9]
+    )
+    assert (
+        ak.to_list(
+            array[
+                -1,
+            ]
+        )
+        == [7.7, 8.8, 9.9]
+    )
     assert array[7, 1] == 8.8
     assert array[-1, 1] == 8.8
     assert ak.to_list(array[7, [-1, 0]]) == [9.9, 7.7]
@@ -390,9 +418,16 @@ def test_getitem_first_dimension_slice():
     two = ak.from_iter([[6.6], [], [], [], [7.7, 8.8, 9.9]], highlevel=False)
     array = ak.partition.IrregularlyPartitionedArray([one, two])
 
-    assert array[2:6,].tojson() == "[[4.4,5.5],[6.6],[],[]]"
     assert (
-        array[::-1,].tojson()
+        array[
+            2:6,
+        ].tojson()
+        == "[[4.4,5.5],[6.6],[],[]]"
+    )
+    assert (
+        array[
+            ::-1,
+        ].tojson()
         == "[[7.7,8.8,9.9],[],[],[],[6.6],[4.4,5.5],[],[1.1,2.2,3.3]]"
     )
     assert (

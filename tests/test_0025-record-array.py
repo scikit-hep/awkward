@@ -148,14 +148,17 @@ def test_type():
         == "(int32, float64)"
     )
 
-    assert str(
-        ak.types.RecordType(
-            {
-                "one": ak.types.PrimitiveType("int32"),
-                "two": ak.types.PrimitiveType("float64"),
-            }
+    assert (
+        str(
+            ak.types.RecordType(
+                {
+                    "one": ak.types.PrimitiveType("int32"),
+                    "two": ak.types.PrimitiveType("float64"),
+                }
+            )
         )
-    ) in ('{"one": int32, "two": float64}', '{"two": float64, "one": int32}')
+        in ('{"one": int32, "two": float64}', '{"two": float64, "one": int32}')
+    )
 
     assert ak.type(recordarray) == ak.types.RecordType(
         {
