@@ -20,14 +20,39 @@ while start0 < len(content):
 
     start0 = stop0
 
-for level in 9, 1, 0:
+# for level in [9, 1]:
+#     print("level", level)
+#     ak.to_parquet(
+#         ak.partitioned(partitions),
+#         "/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib" + str(level) + "-jagged0.parquet",
+#         list_to32=True,
+#         compression="GZIP",
+#         compression_level=level,
+#         use_dictionary=False,
+#         write_statistics=False,
+#         data_page_size=100*1024**2,
+#     )
+#     print("level", level, "split")
+#     ak.to_parquet(
+#         ak.partitioned(partitions),
+#         "/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib" + str(level) + "-split-jagged0.parquet",
+#         list_to32=True,
+#         compression="GZIP",
+#         compression_level=level,
+#         use_dictionary=False,
+#         write_statistics=False,
+#         data_page_size=100*1024**2,
+#         use_byte_stream_split=True,
+#     )
+
+for level in [0]:
     print("level", level)
     ak.to_parquet(
         ak.partitioned(partitions),
         "/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib" + str(level) + "-jagged0.parquet",
         list_to32=True,
-        compression="GZIP",
-        compression_level=level,
+        compression="NONE",
+        compression_level=None,
         use_dictionary=False,
         write_statistics=False,
         data_page_size=100*1024**2,
@@ -37,8 +62,8 @@ for level in 9, 1, 0:
         ak.partitioned(partitions),
         "/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib" + str(level) + "-split-jagged0.parquet",
         list_to32=True,
-        compression="GZIP",
-        compression_level=level,
+        compression="NONE",
+        compression_level=None,
         use_dictionary=False,
         write_statistics=False,
         data_page_size=100*1024**2,
