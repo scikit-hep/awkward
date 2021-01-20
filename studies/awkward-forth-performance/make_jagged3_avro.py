@@ -31,10 +31,15 @@ schema = fastavro.parse_schema({
 })
 
 def generate():
-    for x in array:
+    next = 10
+    for i, x in enumerate(array):
         yield [[list(z) for z in y] for y in x]
+        if 100 * i / len(array) >= next:
+            print(round(100 * i / len(array)), "percent")
+            next += 10
 
 for level in 9, 1, 0:
+    print("level", level)
     with open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib" + str(level) + "-jagged3.avro", "wb") as out:
         fastavro.writer(
             out,

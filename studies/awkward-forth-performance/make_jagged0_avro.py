@@ -16,6 +16,7 @@ schema = fastavro.parse_schema({
 })
 
 for level in 9, 1, 0:
+    print("level", level)
     with open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib" + str(level) + "-jagged0.avro", "wb") as out:
         fastavro.writer(
             out,
