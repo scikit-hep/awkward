@@ -2163,8 +2163,8 @@ output y int32
     assert ak.to_list(vm32["y"]) == [0, -1, 1, -2, 2147483647, -2147483648]
 
 
-def test_nbit():
-    little = np.array(
+def test_nbit_little():
+    data = np.array(
         [252, 255, 191, 255, 251, 255, 255, 239, 251, 255, 191, 255], np.uint8
     )
     expectation = (
@@ -2175,51 +2175,113 @@ def test_nbit():
     )
 
     vm32 = awkward.forth.ForthMachine32("input x 48 x #2bit-> stack")
-    vm32.run({"x": little})
+    vm32.run({"x": data})
     assert vm32.stack == expectation
     assert vm32.input_position("x") == 12
 
     vm32 = awkward.forth.ForthMachine32("input x 47 x #2bit-> stack")
-    vm32.run({"x": little})
+    vm32.run({"x": data})
     assert vm32.stack == expectation[:47]
     assert vm32.input_position("x") == 12
 
     vm32 = awkward.forth.ForthMachine32("input x 45 x #2bit-> stack")
-    vm32.run({"x": little})
+    vm32.run({"x": data})
     assert vm32.stack == expectation[:45]
     assert vm32.input_position("x") == 12
 
     vm32 = awkward.forth.ForthMachine32("input x 44 x #2bit-> stack")
-    vm32.run({"x": little})
+    vm32.run({"x": data})
     assert vm32.stack == expectation[:44]
     assert vm32.input_position("x") == 11
 
     vm32 = awkward.forth.ForthMachine32("input x 43 x #2bit-> stack")
-    vm32.run({"x": little})
+    vm32.run({"x": data})
     assert vm32.stack == expectation[:43]
     assert vm32.input_position("x") == 11
 
     vm32 = awkward.forth.ForthMachine32("input x 1 x #2bit-> stack")
-    vm32.run({"x": little})
+    vm32.run({"x": data})
     assert vm32.stack == expectation[:1]
     assert vm32.input_position("x") == 1
 
     vm32 = awkward.forth.ForthMachine32("input x x 2bit-> stack")
-    vm32.run({"x": little})
+    vm32.run({"x": data})
     assert vm32.stack == expectation[:1]
     assert vm32.input_position("x") == 1
 
     vm32 = awkward.forth.ForthMachine32("input x 0 x #2bit-> stack")
-    vm32.run({"x": little})
+    vm32.run({"x": data})
     assert vm32.stack == []
     assert vm32.input_position("x") == 0
 
     vm32 = awkward.forth.ForthMachine32("input x output y int32 48 x #2bit-> y")
-    vm32.run({"x": little})
+    vm32.run({"x": data})
     assert ak.to_list(vm32["y"]) == expectation
     assert vm32.input_position("x") == 12
 
     vm32 = awkward.forth.ForthMachine32("input x output y int32 x 2bit-> y")
-    vm32.run({"x": little})
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == expectation[:1]
+    assert vm32.input_position("x") == 1
+
+
+def test_nbit_big():
+    data = np.array(
+        [63, 255, 253, 255, 223, 255, 255, 247, 223, 255, 253, 255], np.uint8
+    )
+    expectation = (
+        [0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2]
+        + [3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3]
+        + [3, 3, 3, 3, 3, 3, 2, 3, 3, 2, 3, 3]
+        + [3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3]
+    )
+
+    vm32 = awkward.forth.ForthMachine32("input x 48 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation
+    assert vm32.input_position("x") == 12
+
+    vm32 = awkward.forth.ForthMachine32("input x 47 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:47]
+    assert vm32.input_position("x") == 12
+
+    vm32 = awkward.forth.ForthMachine32("input x 45 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:45]
+    assert vm32.input_position("x") == 12
+
+    vm32 = awkward.forth.ForthMachine32("input x 44 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:44]
+    assert vm32.input_position("x") == 11
+
+    vm32 = awkward.forth.ForthMachine32("input x 43 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:43]
+    assert vm32.input_position("x") == 11
+
+    vm32 = awkward.forth.ForthMachine32("input x 1 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:1]
+    assert vm32.input_position("x") == 1
+
+    vm32 = awkward.forth.ForthMachine32("input x x !2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:1]
+    assert vm32.input_position("x") == 1
+
+    vm32 = awkward.forth.ForthMachine32("input x 0 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == []
+    assert vm32.input_position("x") == 0
+
+    vm32 = awkward.forth.ForthMachine32("input x output y int32 48 x #!2bit-> y")
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == expectation
+    assert vm32.input_position("x") == 12
+
+    vm32 = awkward.forth.ForthMachine32("input x output y int32 x !2bit-> y")
+    vm32.run({"x": data})
     assert ak.to_list(vm32["y"]) == expectation[:1]
     assert vm32.input_position("x") == 1

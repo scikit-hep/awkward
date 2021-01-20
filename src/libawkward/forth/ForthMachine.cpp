@@ -2536,6 +2536,10 @@ namespace awkward {
     } // end loop over segment
   }
 
+  // For bit-flipping: https://stackoverflow.com/a/2603254/1623645
+  static uint8_t bitswap_lookup[16] = {0x0, 0x8, 0x4, 0xc, 0x2, 0xa, 0x6, 0xe,
+                                       0x1, 0x9, 0x5, 0xd, 0x3, 0xb, 0x7, 0xf};
+
   template <typename T, typename I>
   void
   ForthMachineOf<T, I>::internal_run(bool single_step, int64_t recursion_target_depth_top) { // noexcept
@@ -2658,6 +2662,9 @@ namespace awkward {
           }
 
           else if (format == READ_NBIT) {
+            // For bit-flipping: https://stackoverflow.com/a/2603254/1623645
+            bool flip = (~bytecode & READ_BIGENDIAN) != 0;
+
             I bit_width = bytecode_get();
             bytecodes_pointer_where()++;
 
@@ -2676,10 +2683,15 @@ namespace awkward {
             uint64_t data;
             uint64_t tmp;
             if (items_remaining != 0) {
-              data = (uint64_t)(*reinterpret_cast<uint8_t*>(input->read(1, current_error_)));
+              tmp = (uint64_t)(*reinterpret_cast<uint8_t*>(input->read(1, current_error_)));
               if (current_error_ != util::ForthError::none) {
                 return;
               }
+              if (flip) {
+                // For bit-flipping: https://stackoverflow.com/a/2603254/1623645
+                tmp = (bitswap_lookup[tmp & 0b1111] << 4) | bitswap_lookup[tmp >> 4];
+              }
+              data = tmp;
             }
             while (items_remaining != 0) {
               if (bits_wnd_r >= 8) {
@@ -2706,6 +2718,10 @@ namespace awkward {
                 tmp = (uint64_t)(*reinterpret_cast<uint8_t*>(input->read(1, current_error_)));
                 if (current_error_ != util::ForthError::none) {
                   return;
+                }
+                if (flip) {
+                  // For bit-flipping: https://stackoverflow.com/a/2603254/1623645
+                  tmp = (bitswap_lookup[tmp & 0b1111] << 4) | bitswap_lookup[tmp >> 4];
                 }
                 data |= tmp << bits_wnd_l;
                 bits_wnd_l += 8;
