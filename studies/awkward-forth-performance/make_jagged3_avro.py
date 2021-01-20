@@ -43,14 +43,14 @@ def generate():
               time.asctime(time.localtime()))
         start = stop
 
-for level in 9, 1, 0:
+for level in [9, 1]:  # 9, 1, 0:
     print("level", level)
-    with open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib" + str(level) + "-jagged3.avro", "wb") as out:
+    with open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/lzfour" + str(level) + "-jagged3.avro", "wb") as out:
         fastavro.writer(
             out,
             schema,
             generate(),
-            codec="deflate",
+            codec="lz4",  # "deflate",
             codec_compression_level=level,
             sync_interval=62545335,
         )

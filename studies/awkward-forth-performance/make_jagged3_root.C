@@ -12,9 +12,9 @@ void make_jagged3_root(int64_t level) {
 
   gInterpreter->GenerateDictionary("vector<vector<vector<float> > >", "vector");
 
-  std::string name = std::string("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib") + std::to_string(level) + "-jagged3.root";
+  std::string name = std::string("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/lzfour") + std::to_string(level) + "-jagged3.root";
   auto f = new TFile(name.c_str(), "RECREATE");
-  f->SetCompressionAlgorithm(1);
+  f->SetCompressionAlgorithm(ROOT::kLZ4);
   f->SetCompressionLevel(level);
 
   auto t = new TTree("tree", "");
