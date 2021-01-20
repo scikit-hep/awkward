@@ -22,36 +22,36 @@ def decode_zigzag(n):
     return (n >> 1) ^ (-(n & 1))
 
 
-deserializer = awkward.forth.ForthMachine32("""
-input stream
-output offset0 int32
-output offset1 int32
-output offset2 int32
-output content float64
+# deserializer = awkward.forth.ForthMachine32("""
+# input stream
+# output offset0 int32
+# output offset1 int32
+# output offset2 int32
+# output content float64
 
-0 offset0 <- stack
-0 offset1 <- stack
-0 offset2 <- stack
+# 0 offset0 <- stack
+# 0 offset1 <- stack
+# 0 offset2 <- stack
 
-0 do
-  stream zigzag-> stack
-  dup offset0 +<- stack
-  0 do
-    stream zigzag-> stack
-    dup offset1 +<- stack
-    0 do
-      stream zigzag-> stack
-      dup offset2 +<- stack
-      stream #d-> content
-      stream b-> stack drop
-    loop
-    stream b-> stack drop
-  loop
-  stream b-> stack drop
-loop
-""")
+# 0 do
+#   stream zigzag-> stack
+#   dup offset0 +<- stack
+#   0 do
+#     stream zigzag-> stack
+#     dup offset1 +<- stack
+#     0 do
+#       stream zigzag-> stack
+#       dup offset2 +<- stack
+#       stream #d-> content
+#       stream b-> stack drop
+#     loop
+#     stream b-> stack drop
+#   loop
+#   stream b-> stack drop
+# loop
+# """)
 
-with open("/home/jpivarski/storage/data/chep-2019-jagged-jagged-jagged/sample-jagged3.avro", "rb") as file:
+with open("sample-jagged1.avro", "rb") as file:
     data = file.read()
     pos = data.index(0) + 1
 
@@ -70,21 +70,21 @@ with open("/home/jpivarski/storage/data/chep-2019-jagged-jagged-jagged/sample-ja
         uncompressed += decompressor.flush()
         pos += num_bytes
 
-        deserializer.begin({"stream": uncompressed})
-        deserializer.stack_push(num_items)
-        deserializer.resume()
-        assert deserializer.stack == []
+        # deserializer.begin({"stream": uncompressed})
+        # deserializer.stack_push(num_items)
+        # deserializer.resume()
+        # assert deserializer.stack == []
 
-        array = ak.Array(
-            ak.layout.ListOffsetArray32(
-                deserializer.output_Index32("offset0"),
-                ak.layout.ListOffsetArray32(
-                    deserializer.output_Index32("offset1"),
-                    ak.layout.ListOffsetArray32(
-                        deserializer.output_Index32("offset2"),
-                        deserializer.output_NumpyArray("content")
-                    )
-                )
-            ), check_valid=True
-        )
-        print(array)
+        # array = ak.Array(
+        #     ak.layout.ListOffsetArray32(
+        #         deserializer.output_Index32("offset0"),
+        #         ak.layout.ListOffsetArray32(
+        #             deserializer.output_Index32("offset1"),
+        #             ak.layout.ListOffsetArray32(
+        #                 deserializer.output_Index32("offset2"),
+        #                 deserializer.output_NumpyArray("content")
+        #             )
+        #         )
+        #     ), check_valid=True
+        # )
+        # print(array)
