@@ -854,27 +854,27 @@ kernels:
       - name: awkward_Index32_iscontiguous
         args:
           - {name: result, type: "List[bool]", dir: out}
-          - {name: fromindex, type: "Const[int32_t]", dir: in}
+          - {name: fromindex, type: "Const[List[int32_t]]", dir: in}
           - {name: length, type: "int64_t", dir: in}
       - name: awkward_Index64_iscontiguous
         args:
           - {name: result, type: "List[bool]", dir: out}
-          - {name: fromindex, type: "Const[int64_t]", dir: in}
+          - {name: fromindex, type: "Const[List[int64_t]]", dir: in}
           - {name: length, type: "int64_t", dir: in}
       - name: awkward_Index8_iscontiguous
         args:
           - {name: result, type: "List[bool]", dir: out}
-          - {name: fromindex, type: "Const[int8_t]", dir: in}
+          - {name: fromindex, type: "Const[List[int8_t]]", dir: in}
           - {name: length, type: "int64_t", dir: in}
       - name: awkward_IndexU32_iscontiguous
         args:
           - {name: result, type: "List[bool]", dir: out}
-          - {name: fromindex, type: "Const[uint32_t]", dir: in}
+          - {name: fromindex, type: "Const[List[uint32_t]]", dir: in}
           - {name: length, type: "int64_t", dir: in}
       - name: awkward_IndexU8_iscontiguous
         args:
           - {name: result, type: "List[bool]", dir: out}
-          - {name: fromindex, type: "Const[uint8_t]", dir: in}
+          - {name: fromindex, type: "Const[List[uint8_t]]", dir: in}
           - {name: length, type: "int64_t", dir: in}
     description: null
     definition: |
@@ -4040,6 +4040,12 @@ kernels:
 
   - name: awkward_NumpyArray_fill_tocomplex
     specializations:
+      - name: awkward_NumpyArray_fill_tocomplex64_frombool
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_NumpyArray_fill_tocomplex64_fromint8
         args:
           - {name: toptr, type: "List[float]", dir: out}
@@ -4100,11 +4106,11 @@ kernels:
           - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
           - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tocomplex64_fromcomplex128
+      - name: awkward_NumpyArray_fill_tocomplex128_frombool
         args:
-          - {name: toptr, type: "List[float]", dir: out}
+          - {name: toptr, type: "List[double]", dir: out}
           - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
-          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: NumpyArray-ptr}
           - {name: length, type: "int64_t", dir: in, role: default}
       - name: awkward_NumpyArray_fill_tocomplex128_fromint8
         args:
@@ -4166,17 +4172,150 @@ kernels:
           - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
           - {name: length, type: "int64_t", dir: in, role: default}
-      - name: awkward_NumpyArray_fill_tocomplex128_fromcomplex64
+    description: null
+    definition: |
+    automatic-tests: false
+    manual-tests: []
+
+  - name: awkward_NumpyArray_fill_fromcomplex
+    specializations:
+      - name: awkward_NumpyArray_fill_tobool_fromcomplex64
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_toint8_fromcomplex64
+        args:
+          - {name: toptr, type: "List[int8_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_toint16_fromcomplex64
+        args:
+          - {name: toptr, type: "List[int16_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_toint32_fromcomplex64
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_toint64_fromcomplex64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_touint8_fromcomplex64
+        args:
+          - {name: toptr, type: "List[uint8_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_touint16_fromcomplex64
+        args:
+          - {name: toptr, type: "List[uint16_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_touint32_fromcomplex64
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_touint64_fromcomplex64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tofloat32_fromcomplex64
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tofloat64_fromcomplex64
         args:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: NumpyArray-ptr}
           - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tobool_fromcomplex128
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_toint8_fromcomplex128
+        args:
+          - {name: toptr, type: "List[int8_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_toint16_fromcomplex128
+        args:
+          - {name: toptr, type: "List[int16_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_toint32_fromcomplex128
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_toint64_fromcomplex128
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_touint8_fromcomplex128
+        args:
+          - {name: toptr, type: "List[uint8_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_touint16_fromcomplex128
+        args:
+          - {name: toptr, type: "List[uint16_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_touint32_fromcomplex128
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_touint64_fromcomplex128
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tofloat32_fromcomplex128
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
+      - name: awkward_NumpyArray_fill_tofloat64_fromcomplex128
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: tooffset, type: "int64_t", dir: in, role: IndexedArray-index-offset}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: NumpyArray-ptr}
+          - {name: length, type: "int64_t", dir: in, role: default}
     description: null
     definition: |
-      def awkward_NumpyArray_fill_tocomplex(toptr, tooffset, fromptr, length):
+      def awkward_NumpyArray_fill_fromcomplex(toptr, tooffset, fromptr, length):
           for i in range(length):
-              toptr[tooffset + i] = float(fromptr[i])
+              toptr[tooffset + i] = fromptr[i*2]
     automatic-tests: false
     manual-tests: []
 
@@ -6078,6 +6217,27 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_reduce_argmax_complex
+    specializations:
+      - name: awkward_reduce_argmax_complex64_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_argmax_complex128_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+    description: null
+    definition: |
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_reduce_argmax_bool_64
     specializations:
       - name: awkward_reduce_argmax_bool_64
@@ -6204,6 +6364,27 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_reduce_argmin_complex
+    specializations:
+      - name: awkward_reduce_argmin_complex64_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_argmin_complex128_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+    description: null
+    definition: |
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_reduce_count_64
     specializations:
       - name: awkward_reduce_count_64
@@ -6311,6 +6492,27 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_reduce_countnonzero_complex
+    specializations:
+      - name: awkward_reduce_countnonzero_complex64_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_countnonzero_complex128_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+    description: null
+    definition: |
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_reduce_max
     specializations:
       - name: awkward_reduce_max_int8_int8_64
@@ -6404,6 +6606,29 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_reduce_max_complex
+    specializations:
+      - name: awkward_reduce_max_complex64_complex64_64
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "float", dir: in, role: reducer-identity}
+      - name: awkward_reduce_max_complex128_complex128_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "double", dir: in, role: reducer-identity}
+    description: null
+    definition: |
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_reduce_min
     specializations:
       - name: awkward_reduce_min_int8_int8_64
@@ -6495,6 +6720,29 @@ kernels:
               x = fromptr[i]
               toptr[parents[i]] = x if x < toptr[parents[i]] else toptr[parents[i]]
     automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_reduce_min_complex
+    specializations:
+      - name: awkward_reduce_min_complex64_complex64_64
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "float", dir: in, role: reducer-identity}
+      - name: awkward_reduce_min_complex128_complex128_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "double", dir: in, role: reducer-identity}
+    description: null
+    definition: |
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_reduce_prod
@@ -6621,6 +6869,27 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_reduce_prod_complex
+    specializations:
+      - name: awkward_reduce_prod_complex64_complex64_64
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_prod_complex128_complex128_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+    description: null
+    definition: |
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_reduce_prod_bool
     specializations:
       - name: awkward_reduce_prod_bool_bool_64
@@ -6708,6 +6977,27 @@ kernels:
           for i in range(lenparents):
               toptr[parents[i]] &= fromptr[i] != 0
     automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_reduce_prod_bool_complex
+    specializations:
+      - name: awkward_reduce_prod_bool_complex64_64
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_prod_bool_complex128_64
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+    description: null
+    definition: |
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_reduce_prod_int32_bool_64
@@ -6872,6 +7162,27 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_reduce_sum_complex
+    specializations:
+      - name: awkward_reduce_sum_complex64_complex64_64
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_complex128_complex128_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+    description: null
+    definition: |
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_reduce_sum_bool
     specializations:
       - name: awkward_reduce_sum_bool_bool_64
@@ -6959,6 +7270,27 @@ kernels:
           for i in range(lenparents):
               toptr[parents[i]] |= fromptr[i] != 0
     automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_reduce_sum_bool_complex
+    specializations:
+      - name: awkward_reduce_sum_bool_complex64_64
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_bool_complex128_64
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+    description: null
+    definition: |
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_reduce_sum_int32_bool_64

@@ -596,7 +596,6 @@ namespace awkward {
             const char* infinity_string,
             const char* minus_infinity_string)
         : builder_(options)
-        , record_started_(false)
         , moved_(false)
         , nan_string_(nan_string)
         , infinity_string_(infinity_string)
@@ -656,12 +655,7 @@ namespace awkward {
       }
       else if (state_ == kExpectImaginaryValue) {
         complex_number_ = {complex_number_.real(), x};
-        std::cout << "Complex " << complex_number_ << "\n";
         state_ = kExpectComplexEnd;
-      }
-      else {
-        std::cout << "Double " << x << "\n";
-        //builder_.real(x);
       }
       builder_.real(x);
       moved_ = true;
@@ -706,25 +700,7 @@ namespace awkward {
     bool
     StartObject() {
       moved_ = true;
-      // record_started_ = false;
-      // switch (state_) {
-      //   case kExpectComplexStart:
-      //     std::cout << "kExpectComplexStart " << complex_number_.real() << "+" << complex_number_.imag() << "j\n";
-      //     state_ = kExpectRealValue;
-      //     break;
-      //   case kExpectRealValue:
-      //     state_ = kExpectImaginaryValue;
-      //     std::cout << "kExpectRealValue " << complex_number_.real() << "+" << complex_number_.imag() << "j\n";
-      //     break;
-      //   case kExpectImaginaryValue:
-      //     state_ = kExpectComplexEnd;
-      //     std::cout << "kExpectImaginaryValue " << complex_number_.real() << "+" << complex_number_.imag() << "j\n";
-      //     break;
-      //   default:
-      //     break;
-      // }
       builder_.beginrecord();
-  //    record_started_ = true;
 
       return true;
     }
@@ -732,16 +708,7 @@ namespace awkward {
     bool
     EndObject(rj::SizeType numfields) {
       moved_ = true;
-      if (state_ ==  kExpectComplexEnd) {
-        std::cout << "Complex: " << complex_number_.real() << "+"
-          << complex_number_.imag() << "j\n";
-          // builder_.real(complex_number_.real());
-          // builder_.real(complex_number_.imag());
-      }
-//      if (record_started_) {
-        builder_.endrecord();
-//      }
-//      record_started_ = false;
+      builder_.endrecord();
       return true;
     }
 
@@ -755,13 +722,8 @@ namespace awkward {
         state_ = kExpectRealValue;
       } else  if (strcmp(str, "imag") == 0) {
         state_ = kExpectImaginaryValue;
-      } //else {
-        // if (!record_started_) {
-        //   builder_.beginrecord();
-        //   record_started_ = true;
-        // }
-        builder_.field_check(str);
-      //}
+      }
+      builder_.field_check(str);
       return true;
     }
 
@@ -779,7 +741,7 @@ namespace awkward {
       kExpectComplexEnd
     } state_;
 
-    bool record_started_;
+    // bool record_started_;
     bool moved_;
     const char* nan_string_;
     const char* infinity_string_;

@@ -2,43 +2,27 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_NumpyArray_fill_tocomplex.cpp", line)
 
-#include <complex>
-
 #include "awkward/kernels.h"
 
-// For any object z of type complex<T>,
-// reinterpret_cast<T(&)[2]>(z)[0] is the real part of z and
-// reinterpret_cast<T(&)[2]>(z)[1] is the imaginary part of z.
-// For any pointer to an element of an array of complex<T> named p and
-// any valid array index i,
-// reinterpret_cast<T*>(p)[2*i] is the real part of the complex number p[i], and
-// reinterpret_cast<T*>(p)[2*i + 1] is the imaginary part of the complex number p[i]
-// The intent of this requirement is to preserve binary compatibility between
-// the C++ library complex number types and the C language complex number types
-// (and arrays thereof), which have an identical object representation requirement.
-
-template <typename FROM, typename TO>
-ERROR
-awkward_NumpyArray_fill_tocomplex(std::complex<TO>* toptr,
-                                  int64_t tooffset,
-                                  const std::complex<FROM>* fromptr,
-                                  int64_t length) {
-  for (int64_t i = 0; i < length; i++) {
-    toptr[tooffset + i] = {(TO)fromptr[i].real(), (TO) fromptr[i].imag()};
-  }
-  return success();
-}
 template <typename FROM, typename TO>
 ERROR
 awkward_NumpyArray_fill_tocomplex(TO* toptr,
                                   int64_t tooffset,
                                   const FROM* fromptr,
                                   int64_t length) {
-  for (int64_t i = 0; i < length; i++) {
+  for (int64_t i = 0; i < 0.5*length; i++) {
     toptr[tooffset + 2*i] = (TO)fromptr[i];
     toptr[tooffset + 2*i + 1] = (TO)0;
   }
   return success();
+}
+ERROR
+awkward_NumpyArray_fill_tocomplex64_frombool(float* toptr,
+                                             int64_t tooffset,
+                                             const bool* fromptr,
+                                             int64_t length) {
+  return awkward_NumpyArray_fill_tocomplex<bool, float>(
+      toptr, tooffset, fromptr, length);
 }
 ERROR
 awkward_NumpyArray_fill_tocomplex64_fromint8(float* toptr,
@@ -121,13 +105,12 @@ awkward_NumpyArray_fill_tocomplex64_fromfloat64(float* toptr,
       toptr, tooffset, fromptr, length);
 }
 ERROR
-awkward_NumpyArray_fill_tocomplex64_fromcomplex128(float* toptr,
-                                                   int64_t tooffset,
-                                                   const double* fromptr,
-                                                   int64_t length) {
-  return awkward_NumpyArray_fill<double, float>(
-    toptr, tooffset, fromptr, length);
-  return success();
+awkward_NumpyArray_fill_tocomplex128_frombool(double* toptr,
+                                              int64_t tooffset,
+                                              const bool* fromptr,
+                                              int64_t length) {
+  return awkward_NumpyArray_fill_tocomplex<bool, double>(
+      toptr, tooffset, fromptr, length);
 }
 ERROR
 awkward_NumpyArray_fill_tocomplex128_fromint8(double* toptr,

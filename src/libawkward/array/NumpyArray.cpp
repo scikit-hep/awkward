@@ -1451,7 +1451,7 @@ namespace awkward {
   }
 
   const std::vector<ssize_t>
-  flatten_shape(const std::vector<ssize_t> shape) {
+  flatten_shape(const std::vector<ssize_t>& shape) {
     if (shape.size() == 1) {
       return std::vector<ssize_t>();
     }
@@ -1463,7 +1463,7 @@ namespace awkward {
   }
 
   const std::vector<ssize_t>
-  flatten_strides(const std::vector<ssize_t> strides) {
+  flatten_strides(const std::vector<ssize_t>& strides) {
     if (strides.size() == 1) {
       return std::vector<ssize_t>();
     }
@@ -1578,7 +1578,7 @@ namespace awkward {
             dtype_ == util::dtype::complex64  ||
             dtype_ == util::dtype::complex128  ||
             dtype_ == util::dtype::complex256  ||
-            dtype_ == util::dtype::boolean  ||
+            rawother->dtype() == util::dtype::boolean  ||
             rawother->dtype() == util::dtype::int8  ||
             rawother->dtype() == util::dtype::int16  ||
             rawother->dtype() == util::dtype::int32  ||
@@ -2497,73 +2497,73 @@ namespace awkward {
       case util::dtype::complex64:
         switch (contiguous_array.dtype()) {
         case util::dtype::boolean:
-          err = kernel::NumpyArray_fill_tocomplex_frombool<float>(
+          err = kernel::NumpyArray_fill_frombool<std::complex<float>>(
             ptr_lib,
-            reinterpret_cast<float*>(ptr.get()),
+            reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<bool*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::int8:
-          err = kernel::NumpyArray_fill_tocomplex<int8_t, float>(
+          err = kernel::NumpyArray_fill<int8_t, std::complex<float>>(
             ptr_lib,
-            reinterpret_cast<float*>(ptr.get()),
+            reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int8_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::int16:
-          err = kernel::NumpyArray_fill_tocomplex<int16_t, float>(
+          err = kernel::NumpyArray_fill<int16_t, std::complex<float>>(
             ptr_lib,
-            reinterpret_cast<float*>(ptr.get()),
+            reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int16_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::int32:
-          err = kernel::NumpyArray_fill_tocomplex<int32_t, float>(
+          err = kernel::NumpyArray_fill<int32_t, std::complex<float>>(
             ptr_lib,
-            reinterpret_cast<float*>(ptr.get()),
+            reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int32_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::int64:
-          err = kernel::NumpyArray_fill_tocomplex<int64_t, float>(
+          err = kernel::NumpyArray_fill<int64_t, std::complex<float>>(
             ptr_lib,
-            reinterpret_cast<float*>(ptr.get()),
+            reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int64_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::uint8:
-          err = kernel::NumpyArray_fill_tocomplex<uint8_t, float>(
+          err = kernel::NumpyArray_fill<uint8_t, std::complex<float>>(
             ptr_lib,
-            reinterpret_cast<float*>(ptr.get()),
+            reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint8_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::uint16:
-          err = kernel::NumpyArray_fill_tocomplex<uint16_t, float>(
+          err = kernel::NumpyArray_fill<uint16_t, std::complex<float>>(
             ptr_lib,
-            reinterpret_cast<float*>(ptr.get()),
+            reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint16_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::uint32:
-          err = kernel::NumpyArray_fill_tocomplex<uint32_t, float>(
+          err = kernel::NumpyArray_fill<uint32_t, std::complex<float>>(
             ptr_lib,
-            reinterpret_cast<float*>(ptr.get()),
+            reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint32_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::uint64:
-          err = kernel::NumpyArray_fill_tocomplex<uint64_t, float>(
+          err = kernel::NumpyArray_fill<uint64_t, std::complex<float>>(
             ptr_lib,
-            reinterpret_cast<float*>(ptr.get()),
+            reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint64_t*>(contiguous_array.data()),
             flatlength);
@@ -2574,17 +2574,17 @@ namespace awkward {
             + FILENAME(__LINE__));
           break;
         case util::dtype::float32:
-          err = kernel::NumpyArray_fill_tocomplex<float, float>(
+          err = kernel::NumpyArray_fill<float, std::complex<float>>(
             ptr_lib,
-            reinterpret_cast<float*>(ptr.get()),
+            reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<float*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::float64:
-          err = kernel::NumpyArray_fill_tocomplex<double, float>(
+          err = kernel::NumpyArray_fill<double, std::complex<float>>(
             ptr_lib,
-            reinterpret_cast<float*>(ptr.get()),
+            reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<double*>(contiguous_array.data()),
             flatlength);
@@ -2601,73 +2601,73 @@ namespace awkward {
       case util::dtype::complex128:
         switch (contiguous_array.dtype()) {
         case util::dtype::boolean:
-          err = kernel::NumpyArray_fill_tocomplex_frombool<double>(
+          err = kernel::NumpyArray_fill_frombool<std::complex<double>>(
             ptr_lib,
-            reinterpret_cast<double*>(ptr.get()),
+            reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<bool*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::int8:
-          err = kernel::NumpyArray_fill_tocomplex<int8_t, double>(
+          err = kernel::NumpyArray_fill<int8_t, std::complex<double>>(
             ptr_lib,
-            reinterpret_cast<double*>(ptr.get()),
+            reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int8_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::int16:
-          err = kernel::NumpyArray_fill_tocomplex<int16_t, double>(
+          err = kernel::NumpyArray_fill<int16_t, std::complex<double>>(
             ptr_lib,
-            reinterpret_cast<double*>(ptr.get()),
+            reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int16_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::int32:
-          err = kernel::NumpyArray_fill_tocomplex<int32_t, double>(
+          err = kernel::NumpyArray_fill<int32_t, std::complex<double>>(
             ptr_lib,
-            reinterpret_cast<double*>(ptr.get()),
+            reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int32_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::int64:
-          err = kernel::NumpyArray_fill_tocomplex<int64_t, double>(
+          err = kernel::NumpyArray_fill<int64_t, std::complex<double>>(
             ptr_lib,
-            reinterpret_cast<double*>(ptr.get()),
+            reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int64_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::uint8:
-          err = kernel::NumpyArray_fill_tocomplex<uint8_t, double>(
+          err = kernel::NumpyArray_fill<uint8_t, std::complex<double>>(
             ptr_lib,
-            reinterpret_cast<double*>(ptr.get()),
+            reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint8_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::uint16:
-          err = kernel::NumpyArray_fill_tocomplex<uint16_t, double>(
+          err = kernel::NumpyArray_fill<uint16_t, std::complex<double>>(
             ptr_lib,
-            reinterpret_cast<double*>(ptr.get()),
+            reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint16_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::uint32:
-          err = kernel::NumpyArray_fill_tocomplex<uint32_t, double>(
+          err = kernel::NumpyArray_fill<uint32_t, std::complex<double>>(
             ptr_lib,
-            reinterpret_cast<double*>(ptr.get()),
+            reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint32_t*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::uint64:
-          err = kernel::NumpyArray_fill_tocomplex<uint64_t, double>(
+          err = kernel::NumpyArray_fill<uint64_t, std::complex<double>>(
             ptr_lib,
-            reinterpret_cast<double*>(ptr.get()),
+            reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint64_t*>(contiguous_array.data()),
             flatlength);
@@ -2678,17 +2678,17 @@ namespace awkward {
             + FILENAME(__LINE__));
           break;
         case util::dtype::float32:
-          err = kernel::NumpyArray_fill_tocomplex<float, double>(
+          err = kernel::NumpyArray_fill<float, std::complex<double>>(
             ptr_lib,
-            reinterpret_cast<double*>(ptr.get()),
+            reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<float*>(contiguous_array.data()),
             flatlength);
           break;
         case util::dtype::float64:
-          err = kernel::NumpyArray_fill_tocomplex<double, double>(
+          err = kernel::NumpyArray_fill<double, std::complex<double>>(
             ptr_lib,
-            reinterpret_cast<double*>(ptr.get()),
+            reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<double*>(contiguous_array.data()),
             flatlength);
@@ -3014,19 +3014,21 @@ namespace awkward {
       case util::dtype::float128:
         throw std::runtime_error(
           std::string("FIXME: reducers on float128") + FILENAME(__LINE__));
+        break;
       case util::dtype::complex64:
-        ptr = reducer.apply_complex64(reinterpret_cast<float*>(data()),
+        ptr = reducer.apply_complex64(reinterpret_cast<std::complex<float>*>(data()),
                                       parents,
                                       outlength);
         break;
       case util::dtype::complex128:
-        ptr = reducer.apply_complex128(reinterpret_cast<double*>(data()),
+        ptr = reducer.apply_complex128(reinterpret_cast<std::complex<double>*>(data()),
                                        parents,
                                        outlength);
         break;
       case util::dtype::complex256:
         throw std::runtime_error(
           std::string("FIXME: reducers on complex256") + FILENAME(__LINE__));
+        break;
       // case util::dtype::datetime64:
       //   throw std::runtime_error(
       //     std::string("FIXME: reducers on datetime64") + FILENAME(__LINE__));
@@ -3079,17 +3081,17 @@ namespace awkward {
                                                     ptr_lib_);
 
       if (mask) {
-        Index8 mask(outlength);
+        Index8 outmask(outlength);
         struct Error err = kernel::NumpyArray_reduce_mask_ByteMaskedArray_64(
           kernel::lib::cpu,   // DERIVE
-          mask.data(),
+          outmask.data(),
           parents.data(),
           parents.length(),
           outlength);
         util::handle_error(err, classname(), nullptr);
         out = std::make_shared<ByteMaskedArray>(Identities::none(),
                                                 util::Parameters(),
-                                                mask,
+                                                outmask,
                                                 out,
                                                 false);
       }
@@ -3177,11 +3179,10 @@ namespace awkward {
     else {
       std::shared_ptr<Content> out;
       std::shared_ptr<void> ptr;
-      int64_t ptr_length = length();
 
       switch (dtype_) {
       case util::dtype::boolean:
-        std::tie(ptr, ptr_length) = array_sort<bool>(reinterpret_cast<bool*>(data()),
+        ptr = array_sort<bool>(reinterpret_cast<bool*>(data()),
                                length(),
                                starts,
                                parents,
@@ -3190,7 +3191,7 @@ namespace awkward {
                                stable);
         break;
       case util::dtype::int8:
-        std::tie(ptr, ptr_length) = array_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
+        ptr = array_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
                                  length(),
                                  starts,
                                  parents,
@@ -3199,7 +3200,7 @@ namespace awkward {
                                  stable);
         break;
       case util::dtype::int16:
-        std::tie(ptr, ptr_length) = array_sort<int16_t>(reinterpret_cast<int16_t*>(data()),
+        ptr = array_sort<int16_t>(reinterpret_cast<int16_t*>(data()),
                                   length(),
                                   starts,
                                   parents,
@@ -3208,7 +3209,7 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::int32:
-        std::tie(ptr, ptr_length) = array_sort<int32_t>(reinterpret_cast<int32_t*>(data()),
+        ptr = array_sort<int32_t>(reinterpret_cast<int32_t*>(data()),
                                   length(),
                                   starts,
                                   parents,
@@ -3217,7 +3218,7 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::int64:
-        std::tie(ptr, ptr_length) = array_sort<int64_t>(reinterpret_cast<int64_t*>(data()),
+        ptr = array_sort<int64_t>(reinterpret_cast<int64_t*>(data()),
                                   length(),
                                   starts,
                                   parents,
@@ -3226,7 +3227,7 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::uint8:
-        std::tie(ptr, ptr_length) = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
+        ptr = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
                                   length(),
                                   starts,
                                   parents,
@@ -3235,7 +3236,7 @@ namespace awkward {
                                   stable);
         break;
       case util::dtype::uint16:
-        std::tie(ptr, ptr_length) = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(data()),
+        ptr = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(data()),
                                    length(),
                                    starts,
                                    parents,
@@ -3244,7 +3245,7 @@ namespace awkward {
                                    stable);
         break;
       case util::dtype::uint32:
-        std::tie(ptr, ptr_length) = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(data()),
+        ptr = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(data()),
                                    length(),
                                    starts,
                                    parents,
@@ -3253,7 +3254,7 @@ namespace awkward {
                                    stable);
         break;
       case util::dtype::uint64:
-        std::tie(ptr, ptr_length) = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(data()),
+        ptr = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(data()),
                                    length(),
                                    starts,
                                    parents,
@@ -3265,7 +3266,7 @@ namespace awkward {
         throw std::runtime_error(
           std::string("FIXME: sort for float16 not implemented") + FILENAME(__LINE__));
       case util::dtype::float32:
-        std::tie(ptr, ptr_length) = array_sort<float>(reinterpret_cast<float*>(data()),
+        ptr = array_sort<float>(reinterpret_cast<float*>(data()),
                                 length(),
                                 starts,
                                 parents,
@@ -3274,7 +3275,7 @@ namespace awkward {
                                 stable);
         break;
       case util::dtype::float64:
-        std::tie(ptr, ptr_length) = array_sort<double>(reinterpret_cast<double*>(data()),
+        ptr = array_sort<double>(reinterpret_cast<double*>(data()),
                                  length(),
                                  starts,
                                  parents,
@@ -3285,27 +3286,19 @@ namespace awkward {
       case util::dtype::float128:
         throw std::runtime_error(
           std::string("FIXME: sort for float128 not implemented") + FILENAME(__LINE__));
+        break;
       case util::dtype::complex64:
-        std::tie(ptr, ptr_length) = array_sort<std::complex<float>>(reinterpret_cast<std::complex<float>*>(data()),
-                                 length(),
-                                 starts,
-                                 parents,
-                                 outlength,
-                                 ascending,
-                                 stable);
+        throw std::runtime_error(
+          std::string("FIXME: sort for complex64 not implemented") + FILENAME(__LINE__));
         break;
       case util::dtype::complex128:
-        std::tie(ptr, ptr_length) = array_sort<std::complex<double>>(reinterpret_cast<std::complex<double>*>(data()),
-                                 length(),
-                                 starts,
-                                 parents,
-                                 outlength,
-                                 ascending,
-                                 stable);
+        throw std::runtime_error(
+          std::string("FIXME: sort for complex128 not implemented") + FILENAME(__LINE__));
         break;
       case util::dtype::complex256:
         throw std::runtime_error(
           std::string("FIXME: sort for complex256 not implemented") + FILENAME(__LINE__));
+        break;
       default:
         throw std::invalid_argument(
           std::string("cannot sort NumpyArray with format \"")
@@ -3469,28 +3462,22 @@ namespace awkward {
         throw std::runtime_error(
           std::string("FIXME: argsort for float128 not implemented")
           + FILENAME(__LINE__));
+        break;
       case util::dtype::complex64:
-        ptr = index_sort<std::complex<float>>(reinterpret_cast<std::complex<float>*>(data()),
-                                              length(),
-                                              starts,
-                                              parents,
-                                              outlength,
-                                              ascending,
-                                              stable);
+        throw std::runtime_error(
+          std::string("FIXME: argsort for complex64 not implemented")
+          + FILENAME(__LINE__));
         break;
       case util::dtype::complex128:
-        ptr = index_sort<std::complex<double>>(reinterpret_cast<std::complex<double>*>(data()),
-                                               length(),
-                                               starts,
-                                               parents,
-                                               outlength,
-                                               ascending,
-                                               stable);
+        throw std::runtime_error(
+          std::string("FIXME: argsort for complex128 not implemented")
+          + FILENAME(__LINE__));
         break;
       case util::dtype::complex256:
         throw std::runtime_error(
           std::string("FIXME: argsort for complex256 not implemented")
           + FILENAME(__LINE__));
+        break;
       default:
         throw std::invalid_argument(
           std::string("cannot sort NumpyArray with format \"")
@@ -3527,8 +3514,7 @@ namespace awkward {
   const ContentPtr
   NumpyArray::sort_asstrings(const Index64& offsets,
                              bool ascending,
-                             bool stable,
-                             bool unique) const {
+                             bool stable) const {
     std::shared_ptr<Content> out;
     std::shared_ptr<void> ptr;
     int64_t offsets_length = offsets.length();
@@ -3536,13 +3522,12 @@ namespace awkward {
     Index64 outoffsets(offsets_length);
 
     if (dtype_ == util::dtype::uint8) {
-      std::tie(ptr, offsets_length) = string_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
+      ptr = string_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
                                  length(),
                                  offsets,
                                  outoffsets,
                                  ascending,
-                                 stable,
-                                 unique);
+                                 stable);
     } else {
       throw std::invalid_argument(
         std::string("cannot sort NumpyArray as strings with format \"")
@@ -3559,19 +3544,48 @@ namespace awkward {
                                        format_,
                                        dtype_,
                                        ptr_lib_);
-    if (unique) {
-      out = std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                util::Parameters(),
-                                                outoffsets.getitem_range(0, offsets_length),
-                                                out);
+
+    return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                               util::Parameters(),
+                                               outoffsets,
+                                               out);
+  }
+
+  const ContentPtr
+  NumpyArray::as_unique_strings(const Index64& offsets) const {
+    std::shared_ptr<Content> out;
+    std::shared_ptr<void> ptr;
+    int64_t offsets_length = offsets.length();
+
+    Index64 outoffsets(offsets_length);
+
+    if (dtype_ == util::dtype::uint8) {
+      ptr = string_unique<uint8_t>(reinterpret_cast<uint8_t*>(data()),
+                                   length(),
+                                   offsets,
+                                   outoffsets,
+                                   offsets_length);
+    } else {
+      throw std::invalid_argument(
+        std::string("cannot sort NumpyArray as strings with format \"")
+        + format_ + std::string("\"") + FILENAME(__LINE__));
     }
-    else {
-      out = std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                util::Parameters(),
-                                                outoffsets,
-                                                out);
-    }
-    return out;
+
+    out = std::make_shared<NumpyArray>(identities_,
+                                       parameters_,
+                                       ptr,
+                                       shape_,
+                                       strides_,
+                                       0,
+                                       itemsize_,
+                                       format_,
+                                       dtype_,
+                                       ptr_lib_);
+
+    return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                               util::Parameters(),
+                                               outoffsets.getitem_range(0, offsets_length),
+                                               out);
   }
 
   const ContentPtr
@@ -4475,17 +4489,17 @@ namespace awkward {
     Slice nexttail = tail.tail();
 
     Index64 flathead = array.ravel();
-    struct Error err = kernel::regularize_arrayslice_64(
+    struct Error err1 = kernel::regularize_arrayslice_64(
       kernel::lib::cpu,   // DERIVE
       flathead.data(),
       flathead.length(),
       shape_[1]);
-    util::handle_error(err, classname(), identities_.get());
+    util::handle_error(err1, classname(), identities_.get());
 
     if (advanced.length() == 0) {
       Index64 nextcarry(carry.length()*flathead.length());
       Index64 nextadvanced(carry.length()*flathead.length());
-      struct Error err = kernel::NumpyArray_getitem_next_array_64(
+      struct Error err2 = kernel::NumpyArray_getitem_next_array_64(
         kernel::lib::cpu,   // DERIVE
         nextcarry.data(),
         nextadvanced.data(),
@@ -4494,7 +4508,7 @@ namespace awkward {
         carry.length(),
         flathead.length(),
         shape_[1]);   // because this is contiguous
-      util::handle_error(err, classname(), identities_.get());
+      util::handle_error(err2, classname(), identities_.get());
 
       NumpyArray out = next.getitem_next(nexthead,
                                          nexttail,
@@ -4878,6 +4892,7 @@ namespace awkward {
         throw std::runtime_error(
           std::string("FIXME: numbers_to_type for float16 not implemented")
           + FILENAME(__LINE__));
+        break;
       case util::dtype::float32:
         ptr = as_type<float>(reinterpret_cast<float*>(contiguous_self.ptr().get()),
                              contiguous_self.length(),
@@ -4892,7 +4907,9 @@ namespace awkward {
         throw std::runtime_error(
           std::string("FIXME: numbers_to_type for float128 not implemented")
           + FILENAME(__LINE__));
+        break;
       case util::dtype::complex64:
+        std::cout << "numbers_as_type complex64\n";
         ptr = as_type<std::complex<float>>(reinterpret_cast<std::complex<float>*>(contiguous_self.ptr().get()),
                                            contiguous_self.length(),
                                            dtype);
@@ -4906,6 +4923,7 @@ namespace awkward {
         throw std::runtime_error(
           std::string("FIXME: numbers_to_type for complex256 not implemented")
           + FILENAME(__LINE__));
+        break;
       default:
         throw std::invalid_argument(
           std::string("cannot recast NumpyArray with format \"")
@@ -4928,7 +4946,7 @@ namespace awkward {
   bool
   NumpyArray::is_unique() const {
     if (ndim() == 1) {
-      const ContentPtr out = sort_data(true, true, true);
+      const ContentPtr out = unique_data();
       return (out.get()->length() == length());
     }
     else {
@@ -4942,7 +4960,7 @@ namespace awkward {
 
   const ContentPtr
   NumpyArray::unique() const {
-    return sort_data(true, true, true);
+    return unique_data();
   }
 
   template<typename T>
@@ -5060,7 +5078,7 @@ namespace awkward {
       break;
     case util::dtype::float16:
       throw std::runtime_error(
-        std::string("FIXME: numbers_to_type for float16 not implemented")
+        std::string("FIXME: is_subrange_equal for float16 not implemented")
         + FILENAME(__LINE__));
     case util::dtype::float32:
       is_equal = subranges_equal<float>(reinterpret_cast<float*>(ptr_.get()),
@@ -5076,24 +5094,24 @@ namespace awkward {
       break;
     case util::dtype::float128:
       throw std::runtime_error(
-        std::string("FIXME: numbers_to_type for float128 not implemented")
+        std::string("FIXME: is_subrange_equal for float128 not implemented")
         + FILENAME(__LINE__));
+      break;
     case util::dtype::complex64:
-      is_equal = subranges_equal<std::complex<float>>(reinterpret_cast<std::complex<float>*>(ptr_.get()),
-                                                      length(),
-                                                      starts,
-                                                      stops);
+      throw std::runtime_error(
+        std::string("FIXME: is_subrange_equal for complex64 not implemented")
+        + FILENAME(__LINE__));
       break;
     case util::dtype::complex128:
-      is_equal = subranges_equal<std::complex<double>>(reinterpret_cast<std::complex<double>*>(ptr_.get()),
-                                                       length(),
-                                                       starts,
-                                                       stops);
+     throw std::runtime_error(
+       std::string("FIXME: is_subrange_equal for complex128 not implemented")
+       + FILENAME(__LINE__));
       break;
     case util::dtype::complex256:
       throw std::runtime_error(
-        std::string("FIXME: numbers_to_type for complex256 not implemented")
+        std::string("FIXME: is_subrange_equal for complex256 not implemented")
         + FILENAME(__LINE__));
+      break;
     default:
       throw std::invalid_argument(
         std::string("cannot check NumpyArray::is_subrange_equal with format \"")
@@ -5172,21 +5190,19 @@ namespace awkward {
   }
 
   template<typename T>
-  std::tuple<const std::shared_ptr<void>, const int64_t>
+  const std::shared_ptr<void>
   NumpyArray::array_sort(const T* data,
                          int64_t length,
                          const Index64& starts,
                          const Index64& parents,
                          int64_t outlength,
                          bool ascending,
-                         bool stable,
-                         bool unique) const {
+                         bool stable) const {
     std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
                                                length*((int64_t)sizeof(T)));
-    int64_t ptr_length = length;
 
     if (length == 0) {
-      return std::tie(ptr, ptr_length);
+      return ptr;
     }
 
     int64_t offsets_length = 0;
@@ -5249,34 +5265,76 @@ namespace awkward {
       util::handle_error(err4, classname(), nullptr);
     }
 
-    if (unique) {
-      struct Error err5 = kernel::unique<T>(
-        kernel::lib::cpu,   // DERIVE
-        ptr.get(),
-        length,
-        &ptr_length
-      );
-      util::handle_error(err5, classname(), nullptr);
-    }
-
-    return std::tie(ptr, ptr_length);
+    return ptr;
   }
 
   template<typename T>
-  std::tuple<const std::shared_ptr<void>, const int64_t>
+  const std::shared_ptr<void>
+  NumpyArray::array_unique(const T* data,
+                           int64_t length,
+                           const Index64& starts,
+                           const Index64& parents,
+                           int64_t& outlength) const {
+    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
+                                               length*((int64_t)sizeof(T)));
+
+    if (length == 0) {
+      return ptr;
+    }
+
+    int64_t offsets_length = 0;
+    struct Error err1 = kernel::sorting_ranges_length(
+      kernel::lib::cpu,   // DERIVE
+      &offsets_length,
+      parents.data(),
+      parents.length());
+    util::handle_error(err1, classname(), nullptr);
+
+    Index64 offsets(offsets_length);
+    struct Error err2 = kernel::sorting_ranges(
+      kernel::lib::cpu,   // DERIVE
+      offsets.data(),
+      offsets_length,
+      parents.data(),
+      parents.length());
+    util::handle_error(err2, classname(), nullptr);
+
+    struct Error err3 = kernel::NumpyArray_sort<T>(
+      kernel::lib::cpu,   // DERIVE
+      ptr.get(),
+      data,
+      length,
+      offsets.data(),
+      offsets_length,
+      parents.length(),
+      true,   // ascending
+      true);  // stable
+    util::handle_error(err3, classname(), nullptr);
+
+    struct Error err5 = kernel::unique<T>(
+      kernel::lib::cpu,   // DERIVE
+      ptr.get(),
+      length,
+      &outlength
+    );
+    util::handle_error(err5, classname(), nullptr);
+
+    return ptr;
+  }
+
+  template<typename T>
+  const std::shared_ptr<void>
   NumpyArray::string_sort(const T* data,
                           int64_t length,
                           const Index64& offsets,
                           Index64& outoffsets,
                           bool ascending,
-                          bool stable,
-                          bool unique) const {
+                          bool stable) const {
     std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
                                                length*((int64_t)sizeof(T)));
-    int64_t ptr_length = length;
 
     if (length == 0) {
-      return std::tie(ptr, ptr_length);
+      return ptr;
     }
 
     struct Error err1 = kernel::NumpyArray_sort_asstrings(
@@ -5290,18 +5348,43 @@ namespace awkward {
       stable);
     util::handle_error(err1, classname(), nullptr);
 
-    if (unique) {
-      struct Error err2 = kernel::NumpyArray_unique_strings(
-        kernel::lib::cpu,   // DERIVE
-        ptr.get(),
-        outoffsets.data(),
-        outoffsets.length(),
-        outoffsets.data(),
-        &ptr_length);
-      util::handle_error(err2, classname(), nullptr);
+    return ptr;
+  }
+
+  template<typename T>
+  const std::shared_ptr<void>
+  NumpyArray::string_unique(const T* data,
+                            int64_t length,
+                            const Index64& offsets,
+                            Index64& outoffsets,
+                            int64_t& outlength) const {
+    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
+                                               length*((int64_t)sizeof(T)));
+    if (length == 0) {
+      return ptr;
     }
 
-    return std::tie(ptr, ptr_length);
+    struct Error err1 = kernel::NumpyArray_sort_asstrings(
+      kernel::lib::cpu,   // DERIVE
+      ptr.get(),
+      data,
+      offsets.data(),
+      offsets.length(),
+      outoffsets.data(),
+      true,  // ascending
+      true); // stable
+    util::handle_error(err1, classname(), nullptr);
+
+    struct Error err2 = kernel::NumpyArray_unique_strings(
+      kernel::lib::cpu,   // DERIVE
+      ptr.get(),
+      outoffsets.data(),
+      outoffsets.length(),
+      outoffsets.data(),
+      &outlength);
+    util::handle_error(err2, classname(), nullptr);
+
+    return ptr;
   }
 
   template<typename T>
@@ -5342,6 +5425,7 @@ namespace awkward {
       throw std::runtime_error(
         std::string("FIXME: as_type for float16 not implemented")
         + FILENAME(__LINE__));
+      break;
     case util::dtype::float32:
       ptr = cast_to_type<float>(data, length);
       break;
@@ -5352,16 +5436,18 @@ namespace awkward {
       throw std::runtime_error(
         std::string("FIXME: as_type for float128 not implemented")
         + FILENAME(__LINE__));
+      break;
     case util::dtype::complex64:
-      ptr = cast_to_complex_type<float>(data, length);
+      ptr = cast_to_type<std::complex<float>>(data, 2*length);
       break;
     case util::dtype::complex128:
-      ptr = cast_to_complex_type<double>(data, length);
+      ptr = cast_to_type<std::complex<double>>(data, 2*length);
       break;
     case util::dtype::complex256:
       throw std::runtime_error(
         std::string("FIXME: as_type for complex256 not implemented")
         + FILENAME(__LINE__));
+      break;
     default:
       throw std::invalid_argument(
         std::string("cannot recast NumpyArray with format \"")
@@ -5373,30 +5459,14 @@ namespace awkward {
 
   template<typename TO, typename FROM>
   const std::shared_ptr<void>
-  NumpyArray::cast_to_type(const FROM* fromptr, int64_t length) const {
+  NumpyArray::cast_to_type(const FROM* data, int64_t length) const {
     kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
     std::shared_ptr<TO> toptr = kernel::malloc<TO>(ptr_lib, length*(int64_t)sizeof(TO));
     struct Error err = kernel::NumpyArray_fill<FROM, TO>(
       ptr_lib,
       toptr.get(),
       0,
-      fromptr,
-      length);
-    util::handle_error(err, classname(), nullptr);
-
-    return toptr;
-  }
-
-  template<typename TO, typename FROM>
-  const std::shared_ptr<void>
-  NumpyArray::cast_to_complex_type(const FROM* fromptr, int64_t length) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<TO> toptr = kernel::malloc<TO>(ptr_lib, 2*length*(int64_t)sizeof(TO));
-    struct Error err = kernel::NumpyArray_fill_tocomplex<FROM, TO>(
-      ptr_lib,
-      toptr.get(),
-      0,
-      fromptr,
+      data,
       length);
     util::handle_error(err, classname(), nullptr);
 
@@ -5405,8 +5475,7 @@ namespace awkward {
 
   const ContentPtr
   NumpyArray::sort_data(bool ascending,
-                        bool stable,
-                        bool unique) const {
+                        bool stable) const {
     Index64 starts(1);
     starts.setitem_at_nowrap(0, 0);
 
@@ -5421,150 +5490,127 @@ namespace awkward {
 
     std::shared_ptr<Content> out;
     std::shared_ptr<void> ptr;
-    int64_t ptr_length = 0;
 
     switch (dtype_) {
     case util::dtype::boolean:
-      std::tie(ptr, ptr_length) =
-        array_sort<bool>(reinterpret_cast<bool*>(data()),
-                         length(),
-                         starts,
-                         parents,
-                         outlength,
-                         ascending,
-                         stable,
-                         unique);
+      ptr = array_sort<bool>(reinterpret_cast<bool*>(data()),
+                             length(),
+                             starts,
+                             parents,
+                             outlength,
+                             ascending,
+                             stable);
       break;
     case util::dtype::int8:
-      std::tie(ptr, ptr_length) =
-        array_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
+      ptr = array_sort<int8_t>(reinterpret_cast<int8_t*>(data()),
                                length(),
                                starts,
                                parents,
                                outlength,
                                ascending,
-                               stable,
-                               unique);
+                               stable);
       break;
     case util::dtype::int16:
-      std::tie(ptr, ptr_length) = array_sort<int16_t>(reinterpret_cast<int16_t*>(data()),
+      ptr = array_sort<int16_t>(reinterpret_cast<int16_t*>(data()),
                                 length(),
                                 starts,
                                 parents,
                                 outlength,
                                 ascending,
-                                stable,
-                                unique);
+                                stable);
       break;
     case util::dtype::int32:
-      std::tie(ptr, ptr_length) = array_sort<int32_t>(reinterpret_cast<int32_t*>(data()),
+      ptr = array_sort<int32_t>(reinterpret_cast<int32_t*>(data()),
                                 length(),
                                 starts,
                                 parents,
                                 outlength,
                                 ascending,
-                                stable,
-                                unique);
+                                stable);
       break;
     case util::dtype::int64:
-      std::tie(ptr, ptr_length) = array_sort<int64_t>(reinterpret_cast<int64_t*>(data()),
+      ptr = array_sort<int64_t>(reinterpret_cast<int64_t*>(data()),
                                 length(),
                                 starts,
                                 parents,
                                 outlength,
                                 ascending,
-                                stable,
-                                unique);
+                                stable);
       break;
     case util::dtype::uint8:
-      std::tie(ptr, ptr_length) = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
+      ptr = array_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
                                 length(),
                                 starts,
                                 parents,
                                 outlength,
                                 ascending,
-                                stable,
-                                unique);
+                                stable);
       break;
     case util::dtype::uint16:
-      std::tie(ptr, ptr_length) = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(data()),
+      ptr = array_sort<uint16_t>(reinterpret_cast<uint16_t*>(data()),
                                  length(),
                                  starts,
                                  parents,
                                  outlength,
                                  ascending,
-                                 stable,
-                                 unique);
+                                 stable);
       break;
     case util::dtype::uint32:
-      std::tie(ptr, ptr_length) = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(data()),
+      ptr = array_sort<uint32_t>(reinterpret_cast<uint32_t*>(data()),
                                  length(),
                                  starts,
                                  parents,
                                  outlength,
                                  ascending,
-                                 stable,
-                                 unique);
+                                 stable);
       break;
     case util::dtype::uint64:
-      std::tie(ptr, ptr_length) = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(data()),
+      ptr = array_sort<uint64_t>(reinterpret_cast<uint64_t*>(data()),
                                  length(),
                                  starts,
                                  parents,
                                  outlength,
                                  ascending,
-                                 stable,
-                                 unique);
+                                 stable);
       break;
     case util::dtype::float16:
       throw std::runtime_error(
         std::string("FIXME: sort for float16 not implemented") + FILENAME(__LINE__));
+      break;
     case util::dtype::float32:
-      std::tie(ptr, ptr_length) = array_sort<float>(reinterpret_cast<float*>(data()),
+      ptr = array_sort<float>(reinterpret_cast<float*>(data()),
                               length(),
                               starts,
                               parents,
                               outlength,
                               ascending,
-                              stable,
-                              unique);
+                              stable);
       break;
     case util::dtype::float64:
-      std::tie(ptr, ptr_length) = array_sort<double>(reinterpret_cast<double*>(data()),
+      ptr = array_sort<double>(reinterpret_cast<double*>(data()),
                                length(),
                                starts,
                                parents,
                                outlength,
                                ascending,
-                               stable,
-                               unique);
+                               stable);
       break;
     case util::dtype::float128:
       throw std::runtime_error(
         std::string("FIXME: sort for float128 not implemented") + FILENAME(__LINE__));
+      break;
     case util::dtype::complex64:
-      std::tie(ptr, ptr_length) = array_sort<std::complex<float>>(reinterpret_cast<std::complex<float>*>(data()),
-                                                                  length(),
-                                                                  starts,
-                                                                  parents,
-                                                                  outlength,
-                                                                  ascending,
-                                                                  stable,
-                                                                  unique);
+      throw std::runtime_error(
+        std::string("FIXME: sort for complex64 not implemented") + FILENAME(__LINE__));
       break;
     case util::dtype::complex128:
-      std::tie(ptr, ptr_length) = array_sort<std::complex<double>>(reinterpret_cast<std::complex<double>*>(data()),
-                                                                   length(),
-                                                                   starts,
-                                                                   parents,
-                                                                   outlength,
-                                                                   ascending,
-                                                                   stable,
-                                                                   unique);
+      throw std::runtime_error(
+        std::string("FIXME: sort for complex128 not implemented") + FILENAME(__LINE__));
       break;
     case util::dtype::complex256:
       throw std::runtime_error(
         std::string("FIXME: sort for complex256 not implemented") + FILENAME(__LINE__));
+      break;
     default:
       throw std::invalid_argument(
         std::string("cannot sort NumpyArray with format \"")
@@ -5574,7 +5620,141 @@ namespace awkward {
     out = std::make_shared<NumpyArray>(Identities::none(),
                                        parameters_,
                                        ptr,
-                                       std::vector<ssize_t>({ (ssize_t) ptr_length }),//shape_,
+                                       shape_,
+                                       strides_,
+                                       0,
+                                       itemsize_,
+                                       format_,
+                                       dtype_,
+                                       ptr_lib_);
+    return out;
+  }
+
+  const ContentPtr
+  NumpyArray::unique_data() const {
+    Index64 starts(1);
+    starts.setitem_at_nowrap(0, 0);
+
+    Index64 parents(length());
+    struct Error err = kernel::content_reduce_zeroparents_64(
+      kernel::lib::cpu,   // DERIVE
+      parents.data(),
+      length());
+    util::handle_error(err, classname(), identities_.get());
+
+    int64_t outlength = 0;
+
+    std::shared_ptr<Content> out;
+    std::shared_ptr<void> ptr;
+
+    switch (dtype_) {
+    case util::dtype::boolean:
+      ptr = array_unique<bool>(reinterpret_cast<bool*>(data()),
+                               length(),
+                               starts,
+                               parents,
+                               outlength);
+      break;
+    case util::dtype::int8:
+      ptr = array_unique<int8_t>(reinterpret_cast<int8_t*>(data()),
+                                 length(),
+                                 starts,
+                                 parents,
+                                 outlength);
+      break;
+    case util::dtype::int16:
+      ptr = array_unique<int16_t>(reinterpret_cast<int16_t*>(data()),
+                                  length(),
+                                  starts,
+                                  parents,
+                                  outlength);
+      break;
+    case util::dtype::int32:
+      ptr = array_unique<int32_t>(reinterpret_cast<int32_t*>(data()),
+                                  length(),
+                                  starts,
+                                  parents,
+                                  outlength);
+      break;
+    case util::dtype::int64:
+      ptr = array_unique<int64_t>(reinterpret_cast<int64_t*>(data()),
+                                  length(),
+                                  starts,
+                                  parents,
+                                  outlength);
+      break;
+    case util::dtype::uint8:
+      ptr = array_unique<uint8_t>(reinterpret_cast<uint8_t*>(data()),
+                                  length(),
+                                  starts,
+                                  parents,
+                                  outlength);
+      break;
+    case util::dtype::uint16:
+      ptr = array_unique<uint16_t>(reinterpret_cast<uint16_t*>(data()),
+                                   length(),
+                                   starts,
+                                   parents,
+                                   outlength);
+      break;
+    case util::dtype::uint32:
+      ptr = array_unique<uint32_t>(reinterpret_cast<uint32_t*>(data()),
+                                   length(),
+                                   starts,
+                                   parents,
+                                   outlength);
+      break;
+    case util::dtype::uint64:
+      ptr = array_unique<uint64_t>(reinterpret_cast<uint64_t*>(data()),
+                                   length(),
+                                   starts,
+                                   parents,
+                                   outlength);
+      break;
+    case util::dtype::float16:
+      throw std::runtime_error(
+        std::string("FIXME: sort for float16 not implemented") + FILENAME(__LINE__));
+      break;
+    case util::dtype::float32:
+      ptr = array_unique<float>(reinterpret_cast<float*>(data()),
+                                length(),
+                                starts,
+                                parents,
+                                outlength);
+      break;
+    case util::dtype::float64:
+      ptr = array_unique<double>(reinterpret_cast<double*>(data()),
+                                 length(),
+                                 starts,
+                                 parents,
+                                 outlength);
+      break;
+    case util::dtype::float128:
+      throw std::runtime_error(
+        std::string("FIXME: sort for float128 not implemented") + FILENAME(__LINE__));
+      break;
+    case util::dtype::complex64:
+      throw std::runtime_error(
+        std::string("FIXME: sort for complex64 not implemented") + FILENAME(__LINE__));
+      break;
+    case util::dtype::complex128:
+      throw std::runtime_error(
+        std::string("FIXME: sort for complex128 not implemented") + FILENAME(__LINE__));
+      break;
+    case util::dtype::complex256:
+      throw std::runtime_error(
+        std::string("FIXME: sort for complex256 not implemented") + FILENAME(__LINE__));
+      break;
+    default:
+      throw std::invalid_argument(
+        std::string("cannot sort NumpyArray with format \"")
+        + format_ + std::string("\"") + FILENAME(__LINE__));
+    }
+
+    out = std::make_shared<NumpyArray>(Identities::none(),
+                                       parameters_,
+                                       ptr,
+                                       std::vector<ssize_t>({ (ssize_t) outlength }),
                                        strides_,
                                        0,
                                        itemsize_,

@@ -2223,10 +2223,7 @@ namespace awkward {
   bool ListOffsetArrayOf<int64_t>::is_unique() const {
     if (util::parameter_isstring(parameters_, "__array__")) {
       if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
-        ContentPtr out = content->sort_asstrings(offsets_,
-                                                 true,
-                                                 true,
-                                                 true);
+        ContentPtr out = content->as_unique_strings(offsets_);
         return (out.get()->length() == length());
       }
     }
