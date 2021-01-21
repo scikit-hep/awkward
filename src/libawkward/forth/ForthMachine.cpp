@@ -57,49 +57,50 @@ namespace awkward {
   #define CODE_SKIP 18
   #define CODE_WRITE 19
   #define CODE_WRITE_ADD 20
-  #define CODE_LEN_OUTPUT 21
-  #define CODE_REWIND 22
+  #define CODE_WRITE_DUP 21
+  #define CODE_LEN_OUTPUT 22
+  #define CODE_REWIND 23
   // generic builtin instructions
-  #define CODE_PRINT 23
-  #define CODE_I 24
-  #define CODE_J 25
-  #define CODE_K 26
-  #define CODE_DUP 27
-  #define CODE_DROP 28
-  #define CODE_SWAP 29
-  #define CODE_OVER 30
-  #define CODE_ROT 31
-  #define CODE_NIP 32
-  #define CODE_TUCK 33
-  #define CODE_ADD 34
-  #define CODE_SUB 35
-  #define CODE_MUL 36
-  #define CODE_DIV 37
-  #define CODE_MOD 38
-  #define CODE_DIVMOD 39
-  #define CODE_NEGATE 40
-  #define CODE_ADD1 41
-  #define CODE_SUB1 42
-  #define CODE_ABS 43
-  #define CODE_MIN 44
-  #define CODE_MAX 45
-  #define CODE_EQ 46
-  #define CODE_NE 47
-  #define CODE_GT 48
-  #define CODE_GE 49
-  #define CODE_LT 50
-  #define CODE_LE 51
-  #define CODE_EQ0 52
-  #define CODE_INVERT 53
-  #define CODE_AND 54
-  #define CODE_OR 55
-  #define CODE_XOR 56
-  #define CODE_LSHIFT 57
-  #define CODE_RSHIFT 58
-  #define CODE_FALSE 59
-  #define CODE_TRUE 60
+  #define CODE_PRINT 24
+  #define CODE_I 25
+  #define CODE_J 26
+  #define CODE_K 27
+  #define CODE_DUP 28
+  #define CODE_DROP 29
+  #define CODE_SWAP 30
+  #define CODE_OVER 31
+  #define CODE_ROT 32
+  #define CODE_NIP 33
+  #define CODE_TUCK 34
+  #define CODE_ADD 35
+  #define CODE_SUB 36
+  #define CODE_MUL 37
+  #define CODE_DIV 38
+  #define CODE_MOD 39
+  #define CODE_DIVMOD 40
+  #define CODE_NEGATE 41
+  #define CODE_ADD1 42
+  #define CODE_SUB1 43
+  #define CODE_ABS 44
+  #define CODE_MIN 45
+  #define CODE_MAX 46
+  #define CODE_EQ 47
+  #define CODE_NE 48
+  #define CODE_GT 49
+  #define CODE_GE 50
+  #define CODE_LT 51
+  #define CODE_LE 52
+  #define CODE_EQ0 53
+  #define CODE_INVERT 54
+  #define CODE_AND 55
+  #define CODE_OR 56
+  #define CODE_XOR 57
+  #define CODE_LSHIFT 58
+  #define CODE_RSHIFT 59
+  #define CODE_FALSE 60
+  #define CODE_TRUE 61
   // beginning of the user-defined dictionary
-  #define BOUND_DICTIONARY 61
+  #define BOUND_DICTIONARY 62
 
   const std::set<std::string> reserved_words_({
     // comments
@@ -327,8 +328,6 @@ namespace awkward {
     }
     std::stringstream out;
     int64_t bytecode_position = bytecodes_offsets_[(IndexTypeOf<int64_t>)segment_position];
-    // FIXME: unused variable
-    // int64_t instruction_number = 0;
     while (bytecode_position < bytecodes_offsets_[(IndexTypeOf<int64_t>)segment_position + 1]) {
       if (bytecode_position != bytecodes_offsets_[(IndexTypeOf<int64_t>)segment_position]) {
         out << indent;
@@ -350,7 +349,7 @@ namespace awkward {
     }
 
     I bytecode = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position];
-    I next_bytecode = 0;
+    I next_bytecode = -1;
     if ((IndexTypeOf<int64_t>)bytecode_position + 1 < bytecodes_.size()) {
       next_bytecode = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
     }
@@ -426,7 +425,7 @@ namespace awkward {
       return in_name + std::string(" ") + arrow + std::string(" ") + out_name;
     }
 
-    else if (next_bytecode == CODE_AGAIN) {
+    else if (bytecode >= BOUND_DICTIONARY  &&  next_bytecode == CODE_AGAIN) {
       int64_t body = bytecode - BOUND_DICTIONARY;
       return std::move(std::string("begin\n")
              + (segment_nonempty(body) ? indent + "  " : "")
@@ -434,7 +433,7 @@ namespace awkward {
              + indent + "again");
     }
 
-    else if (next_bytecode == CODE_UNTIL) {
+    else if (bytecode >= BOUND_DICTIONARY  &&  next_bytecode == CODE_UNTIL) {
       int64_t body = bytecode - BOUND_DICTIONARY;
       return std::move(std::string("begin\n")
              + (segment_nonempty(body) ? indent + "  " : "")
@@ -442,7 +441,7 @@ namespace awkward {
              + indent + "until");
     }
 
-    else if (next_bytecode == CODE_WHILE) {
+    else if (bytecode >= BOUND_DICTIONARY  &&  next_bytecode == CODE_WHILE) {
       int64_t precondition = bytecode - BOUND_DICTIONARY;
       int64_t postcondition = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 2] - BOUND_DICTIONARY;
       return std::move(std::string("begin\n")
@@ -548,6 +547,10 @@ namespace awkward {
         case CODE_WRITE_ADD: {
           int64_t out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
           return output_names_[(IndexTypeOf<int64_t>)out_num] + " +<- stack";
+        }
+        case CODE_WRITE_DUP: {
+          int64_t out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
+          return output_names_[(IndexTypeOf<int64_t>)out_num] + " dup";
         }
         case CODE_LEN_OUTPUT: {
           int64_t out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
@@ -1456,23 +1459,27 @@ namespace awkward {
   int64_t
   ForthMachineOf<T, I>::bytecodes_per_instruction(int64_t bytecode_position) const {
     I bytecode = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position];
-    I next_bytecode = 0;
+    I next_bytecode = -1;
     if ((IndexTypeOf<int64_t>)bytecode_position + 1 < bytecodes_.size()) {
       next_bytecode = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
     }
 
     if (bytecode < 0) {
+      int64_t total = 2;
+      if ((~bytecode & READ_MASK) == READ_NBIT) {
+        total++;
+      }
       if (~bytecode & READ_DIRECT) {
-        return 3;
+        total++;
       }
-      else {
-        return 2;
-      }
+      return total;
     }
-    else if (next_bytecode == CODE_AGAIN  ||  next_bytecode == CODE_UNTIL) {
+    else if (bytecode >= BOUND_DICTIONARY  &&
+             (next_bytecode == CODE_AGAIN  ||  next_bytecode == CODE_UNTIL)) {
       return 2;
     }
-    else if (next_bytecode == CODE_WHILE) {
+    else if (bytecode >= BOUND_DICTIONARY  &&
+             (next_bytecode == CODE_WHILE)) {
       return 3;
     }
     else {
@@ -1494,6 +1501,7 @@ namespace awkward {
         case CODE_SKIP:
         case CODE_WRITE:
         case CODE_WRITE_ADD:
+        case CODE_WRITE_DUP:
         case CODE_LEN_OUTPUT:
         case CODE_REWIND:
           return 2;
@@ -2410,6 +2418,12 @@ namespace awkward {
             );
           }
         }
+        else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "dup") {
+          bytecodes.push_back(CODE_WRITE_DUP);
+          bytecodes.push_back((int32_t)output_index);
+
+          pos += 2;
+        }
         else if (pos + 1 < stop  &&  tokenized[(IndexTypeOf<std::string>)pos + 1] == "len") {
           bytecodes.push_back(CODE_LEN_OUTPUT);
           bytecodes.push_back((int32_t)output_index);
@@ -2425,7 +2439,7 @@ namespace awkward {
         else {
           throw std::invalid_argument(
             err_linecol(linecol, pos, pos + 2, "missing '<- stack', '+<- stack', "
-                        "'len', or 'rewind' after output name")
+                        "'dup', 'len', or 'rewind' after output name")
             + FILENAME(__LINE__)
           );
         }
@@ -3134,6 +3148,22 @@ namespace awkward {
               T* top = stack_peek();
               write_add_from_stack(out_num, top);
               stack_depth_--;
+
+              count_writes_++;
+              break;
+            }
+
+            case CODE_WRITE_DUP: {
+              I out_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_cannot_pop()) {
+                current_error_ = util::ForthError::stack_underflow;
+                return;
+              }
+              current_outputs_[(IndexTypeOf<int64_t>)out_num].get()->dup(stack_pop(), current_error_);
+              if (current_error_ != util::ForthError::none) {
+                return;
+              }
 
               count_writes_++;
               break;

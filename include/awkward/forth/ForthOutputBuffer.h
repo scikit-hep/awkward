@@ -44,6 +44,10 @@ namespace awkward {
       rewind(int64_t num_items, util::ForthError& err) noexcept;
 
     /// @brief HERE
+    virtual void
+      dup(int64_t num_times, util::ForthError& err) noexcept = 0;
+
+    /// @brief HERE
     virtual const std::shared_ptr<void>
       ptr() const noexcept = 0;
 
@@ -193,6 +197,9 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL ForthOutputBufferOf : public ForthOutputBuffer {
   public:
     ForthOutputBufferOf(int64_t initial, double resize);
+
+    void
+      dup(int64_t num_times, util::ForthError& err) noexcept override;
 
     const std::shared_ptr<void>
       ptr() const noexcept override;

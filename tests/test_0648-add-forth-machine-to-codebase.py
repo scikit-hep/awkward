@@ -122,7 +122,6 @@ def test_userdef_compilation():
     )
 
     vm32 = awkward.forth.ForthMachine32(": infinite recurse ;")
-    assert ak.to_list(vm32.bytecodes) == [[], [62]]
     assert (
         vm32.decompiled
         == """: infinite
@@ -2285,3 +2284,68 @@ def test_nbit_big():
     vm32.run({"x": data})
     assert ak.to_list(vm32["y"]) == expectation[:1]
     assert vm32.input_position("x") == 1
+
+
+def test_output_dup():
+    vm = awkward.forth.ForthMachine32("""
+output stuff int32
+1 2 3 4
+stuff <- stack
+10 stuff dup
+""")
+    vm.run()
+    assert ak.to_list(vm["stuff"]) == [4] * 11
+    assert vm.stack == [1, 2, 3]
+
+
+def test_decompile_complex():
+    read_repetition_levels = awkward.forth.ForthMachine32("""
+input stream
+output replevels uint8
+
+stream I-> stack
+begin
+  stream varint-> stack
+  dup 1 and 0= if
+    ( run-length encoding )
+    stream {rle_format}-> replevels
+    1 rshift 1-
+    replevels dup
+  else
+    ( bit-packed )
+    1 rshift 8 *
+    stream #{bit_width}bit-> replevels
+  then
+  dup stream pos 4 - <=
+until
+""".format(bit_width=2, rle_byte_width=1, rle_format="B"))
+    assert read_repetition_levels.decompiled == """input stream
+output replevels uint8
+
+stream I-> stack
+begin
+  stream varint-> stack
+  dup
+  1
+  and
+  0=
+  if
+    stream B-> replevels
+    1
+    rshift
+    1-
+    replevels dup
+  else
+    1
+    rshift
+    8
+    *
+    stream #2bit-> replevels
+  then
+  dup
+  stream pos
+  4
+  -
+  <=
+until
+"""
