@@ -34,14 +34,18 @@ begin
 again
 """)
 
-branch = uproot.open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib1-jagged3.root:tree/branch")
+branch = uproot.open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib0-jagged3.root:tree/branch")
+
+num_entries = 85522  # first 3 baskets
+
+begintime = time.time()
 
 for basketid in range(branch.num_baskets):
     print(basketid)
     basket = branch.basket(basketid)
     start, stop = branch.basket_entry_start_stop(basketid)
 
-    beforetime = time.time()
+    # begintime = time.time()
     jagged3.run(
         {"data": basket.data, "byte_offsets": basket.byte_offsets},
         raise_read_beyond=False,
@@ -59,13 +63,16 @@ for basketid in range(branch.num_baskets):
             )
         )
     )
-    endtime = time.time()
-    print("AwkwardForth", endtime - beforetime)
+    # endtime = time.time()
+    # print("AwkwardForth", endtime - begintime)
 
-    beforetime = time.time()
-    array1 = branch.array(entry_start=start, entry_stop=stop, library="np")
-    endtime = time.time()
-    print("Python", endtime - beforetime)
+    # begintime = time.time()
+    # array1 = branch.array(entry_start=start, entry_stop=stop, library="np")
+    # endtime = time.time()
+    # print("Python", endtime - begintime)
 
-    if basketid == 2:
+    if stop == num_entries:
         break
+
+endtime = time.time()
+print("time:", endtime - begintime, "seconds")
