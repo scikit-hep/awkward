@@ -8,13 +8,13 @@
 #include "TBranch.h"
 #include "TInterpreter.h"
 
-void read_jagged3_root() {
-  gInterpreter->GenerateDictionary("vector<vector<vector<float> > >", "vector");
+void read_jagged2_root() {
+  gInterpreter->GenerateDictionary("vector<vector<float> >", "vector");
 
-  std::vector<std::vector<std::vector<float>>>* data;
+  std::vector<std::vector<float>>* data;
   data = nullptr;
 
-  TFile* f = new TFile("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib0-jagged3.root");
+  TFile* f = new TFile("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib0-jagged2.root");
   TTree* t;
   f->GetObject("tree", t);
 
@@ -34,30 +34,24 @@ void read_jagged3_root() {
       stop = basket_starts[basketid + 1];
     }
 
-    std::vector<int32_t> offsets2;
     std::vector<int32_t> offsets1;
     std::vector<int32_t> offsets0;
     std::vector<float> content;
 
-    offsets2.reserve(1024);
     offsets1.reserve(1024);
     offsets0.reserve(1024);
     content.reserve(1024);
 
-    offsets2.push_back(0);
     offsets1.push_back(0);
     offsets0.push_back(0);
 
     for (int64_t i = start;  i < stop;  i++) {
       b->GetEntry(i);
 
-      offsets2.push_back(offsets2.back() + data->size());
-      for (auto x : *data) {
-        offsets1.push_back(offsets1.back() + x.size());
-        for (auto y : x) {
-          offsets0.push_back(offsets0.back() + y.size());
-          std::copy(y.begin(), y.end(), std::back_inserter(content));
-        }
+      offsets1.push_back(offsets1.back() + data->size());
+      for (auto y : *data) {
+        offsets0.push_back(offsets0.back() + y.size());
+        std::copy(y.begin(), y.end(), std::back_inserter(content));
       }
     }
   }
@@ -68,5 +62,5 @@ void read_jagged3_root() {
       end_time - begin_time
   ).count();
 
-  std::cout << "ROOT zlib0-jagged3.root " << (count_nanoseconds / 1e9) << " seconds" << std::endl;
+  std::cout << "ROOT zlib0-jagged2.root " << (count_nanoseconds / 1e9) << " seconds" << std::endl;
 }
