@@ -68,5 +68,5 @@ void read_jagged3_root() {
       end_time - begin_time
   ).count();
 
-  std::cout << "ROOT zlib0-jagged3.root " << (count_nanoseconds / 1e9) << " seconds" << std::endl;
+  std::cout << "ROOT zlib0-jagged3.root " << num_entries << " entries " << (count_nanoseconds / 1e9) << " seconds" << std::endl;
 }

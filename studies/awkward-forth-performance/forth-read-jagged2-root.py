@@ -52,4 +52,4 @@ for basketid in range(branch.num_baskets):
     )
 
 endtime = time.time()
-print("AwkwardForth zlib0-jagged2", endtime - begintime, "seconds")
+print("AwkwardForth zlib0-jagged2", stop, "entries", endtime - begintime, "seconds")

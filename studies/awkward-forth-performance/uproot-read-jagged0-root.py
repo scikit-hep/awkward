@@ -1,9 +1,6 @@
 import time
 
 import uproot
-import awkward.forth
-import awkward as ak
-import numpy as np
 
 branch = uproot.open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib0-jagged0.root:tree/branch")
 
@@ -13,9 +10,7 @@ for basketid in range(branch.num_baskets):
     basket = branch.basket(basketid)
     start, stop = branch.basket_entry_start_stop(basketid)
 
-    array2 = ak.Array(
-        ak.layout.NumpyArray(basket.data.astype(np.float32))
-    )
+    array1 = branch.array(entry_start=start, entry_stop=stop, library="np")
 
 endtime = time.time()
-print("AwkwardForth zlib0-jagged0", stop, "entries", endtime - begintime, "seconds")
+print("Uproot zlib0-jagged0", stop, "entries", endtime - begintime, "seconds")
