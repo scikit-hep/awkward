@@ -5,7 +5,7 @@ import awkward.forth
 import awkward as ak
 import numpy as np
 
-branch = uproot.open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib0-jagged0.root:tree/branch")
+branch = uproot.open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib1-jagged0.root:tree/branch")
 
 begintime = time.time()
 
@@ -18,4 +18,4 @@ for basketid in range(branch.num_baskets):
     )
 
 endtime = time.time()
-print("AwkwardForth zlib0-jagged0", stop, "entries", endtime - begintime, "seconds")
+print("AwkwardForth zlib1-jagged0", stop, "entries", endtime - begintime, "seconds")

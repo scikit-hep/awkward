@@ -14,7 +14,7 @@ void read_jagged1_root() {
   std::vector<float>* data;
   data = nullptr;
 
-  TFile* f = new TFile("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib0-jagged1.root");
+  TFile* f = new TFile("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib1-jagged1.root");
   TTree* t;
   f->GetObject("tree", t);
 
@@ -56,5 +56,5 @@ void read_jagged1_root() {
       end_time - begin_time
   ).count();
 
-  std::cout << "ROOT zlib0-jagged1.root " << num_entries << " entries " << (count_nanoseconds / 1e9) << " seconds" << std::endl;
+  std::cout << "ROOT zlib1-jagged1.root " << num_entries << " entries " << (count_nanoseconds / 1e9) << " seconds" << std::endl;
 }

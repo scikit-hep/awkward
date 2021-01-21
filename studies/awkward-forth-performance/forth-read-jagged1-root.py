@@ -22,7 +22,7 @@ begin
 again
 """)
 
-branch = uproot.open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib0-jagged1.root:tree/branch")
+branch = uproot.open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib1-jagged1.root:tree/branch")
 
 begintime = time.time()
 
@@ -31,7 +31,7 @@ for basketid in range(branch.num_baskets):
     start, stop = branch.basket_entry_start_stop(basketid)
 
     jagged1.run(
-        {"data": basket.data, "byte_offsets": basket.byte_offsets},
+        {"data": np.copy(basket.data), "byte_offsets": basket.byte_offsets},
         raise_read_beyond=False,
         raise_seek_beyond=False,
     )
@@ -43,4 +43,4 @@ for basketid in range(branch.num_baskets):
     )
 
 endtime = time.time()
-print("AwkwardForth zlib0-jagged1", stop, "entries", endtime - begintime, "seconds")
+print("AwkwardForth zlib1-jagged1", stop, "entries", endtime - begintime, "seconds")
