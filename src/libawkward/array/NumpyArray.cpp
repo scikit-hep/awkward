@@ -2502,7 +2502,7 @@ namespace awkward {
             reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<bool*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::int8:
           err = kernel::NumpyArray_fill<int8_t, std::complex<float>>(
@@ -2510,7 +2510,7 @@ namespace awkward {
             reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int8_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::int16:
           err = kernel::NumpyArray_fill<int16_t, std::complex<float>>(
@@ -2518,7 +2518,7 @@ namespace awkward {
             reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int16_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::int32:
           err = kernel::NumpyArray_fill<int32_t, std::complex<float>>(
@@ -2526,7 +2526,7 @@ namespace awkward {
             reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int32_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::int64:
           err = kernel::NumpyArray_fill<int64_t, std::complex<float>>(
@@ -2534,7 +2534,7 @@ namespace awkward {
             reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int64_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::uint8:
           err = kernel::NumpyArray_fill<uint8_t, std::complex<float>>(
@@ -2542,7 +2542,7 @@ namespace awkward {
             reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint8_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::uint16:
           err = kernel::NumpyArray_fill<uint16_t, std::complex<float>>(
@@ -2550,7 +2550,7 @@ namespace awkward {
             reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint16_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::uint32:
           err = kernel::NumpyArray_fill<uint32_t, std::complex<float>>(
@@ -2558,7 +2558,7 @@ namespace awkward {
             reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint32_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::uint64:
           err = kernel::NumpyArray_fill<uint64_t, std::complex<float>>(
@@ -2566,7 +2566,7 @@ namespace awkward {
             reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint64_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::float16:
           throw std::runtime_error(
@@ -2587,7 +2587,7 @@ namespace awkward {
             reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<double*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         default:
           throw std::runtime_error(
@@ -2606,7 +2606,7 @@ namespace awkward {
             reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<bool*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::int8:
           err = kernel::NumpyArray_fill<int8_t, std::complex<double>>(
@@ -2614,7 +2614,7 @@ namespace awkward {
             reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int8_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::int16:
           err = kernel::NumpyArray_fill<int16_t, std::complex<double>>(
@@ -2622,7 +2622,7 @@ namespace awkward {
             reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int16_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::int32:
           err = kernel::NumpyArray_fill<int32_t, std::complex<double>>(
@@ -2630,7 +2630,7 @@ namespace awkward {
             reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int32_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::int64:
           err = kernel::NumpyArray_fill<int64_t, std::complex<double>>(
@@ -2638,7 +2638,7 @@ namespace awkward {
             reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<int64_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::uint8:
           err = kernel::NumpyArray_fill<uint8_t, std::complex<double>>(
@@ -2646,7 +2646,7 @@ namespace awkward {
             reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint8_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::uint16:
           err = kernel::NumpyArray_fill<uint16_t, std::complex<double>>(
@@ -2654,7 +2654,7 @@ namespace awkward {
             reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint16_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::uint32:
           err = kernel::NumpyArray_fill<uint32_t, std::complex<double>>(
@@ -2662,7 +2662,7 @@ namespace awkward {
             reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint32_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::uint64:
           err = kernel::NumpyArray_fill<uint64_t, std::complex<double>>(
@@ -2670,7 +2670,7 @@ namespace awkward {
             reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<uint64_t*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::float16:
           throw std::runtime_error(
@@ -2683,7 +2683,7 @@ namespace awkward {
             reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<float*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::float64:
           err = kernel::NumpyArray_fill<double, std::complex<double>>(
@@ -2691,7 +2691,7 @@ namespace awkward {
             reinterpret_cast<std::complex<double>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<double*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         default:
           throw std::runtime_error(

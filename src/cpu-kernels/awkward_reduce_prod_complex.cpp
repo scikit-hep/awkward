@@ -20,7 +20,7 @@ ERROR awkward_reduce_prod_complex(
   for (int64_t i = 0;  i < lenparents;  i++) {
     toptr[parents[i] * 2] = toptr[parents[i] * 2] * (OUT)fromptr[i * 2]
                           - toptr[parents[i] * 2 + 1] * (OUT)fromptr[i * 2 + 1];
-    toptr[parents[i] * 2 + 1] = toptr[parents[i] *2 ] * (OUT)fromptr[i * 2 + 1]
+    toptr[parents[i] * 2 + 1] = toptr[parents[i] * 2 ] * (OUT)fromptr[i * 2 + 1]
                               + toptr[parents[i] * 2 + 1] * (OUT)fromptr[i * 2];
   }
   return success();

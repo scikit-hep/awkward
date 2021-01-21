@@ -11,7 +11,7 @@ awkward_NumpyArray_fill_fromcomplex(TO* toptr,
                                     const FROM* fromptr,
                                     int64_t length) {
   for (int64_t i = 0; i < length; i++) {
-    toptr[tooffset + i] = (TO)fromptr[i*2];
+    toptr[tooffset + i] = (TO)fromptr[i * 2];
   }
   return success();
 }

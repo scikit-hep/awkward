@@ -15,7 +15,7 @@ ERROR awkward_reduce_countnonzero_complex(
     toptr[i] = 0;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[i]] += (fromptr[i*2] != 0  ||  fromptr[i*2 + 1] != 0);
+    toptr[parents[i]] += (fromptr[i * 2] != 0  ||  fromptr[i * 2 + 1] != 0);
   }
   return success();
 }
