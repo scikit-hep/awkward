@@ -6,7 +6,7 @@ import numpy as np
 import awkward as ak
 import awkward.forth
 
-data = np.memmap("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib1-jagged0.avro", np.uint8)
+data = np.memmap("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib0-jagged0.avro", np.uint8)
 
 def decompress(data, pos):
     decompressor = zlib.decompressobj(-zlib.MAX_WBITS)
@@ -66,4 +66,4 @@ while pos + 16 < len(data):
 
 endtime = time.time()
 
-print("AwkwardForth zlib1-jagged0", endtime - begintime, "seconds")
+print("AwkwardForth zlib0-jagged0", endtime - begintime, "seconds")
