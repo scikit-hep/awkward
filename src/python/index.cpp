@@ -9,6 +9,8 @@
 
 #include "awkward/python/index.h"
 
+#include "awkward/python/dlpack_util.h"
+
 template <typename T>
 const ak::IndexOf<T>
 Index_from_cuda_array_interface(const std::string& name,
@@ -33,62 +35,77 @@ Index_from_cuda_array_interface(const std::string& name,
   const uint8_t dtype_size = std::stoi(typestr.substr(2));
   const char dtype_code = typestr[1];
   ak::util::dtype array_dtype;
-  switch(dtype_code) {
-    case 'b': array_dtype = ak::util::dtype::boolean;
-              break; 
-    case 'i': if(dtype_size == 1) {
-                array_dtype = ak::util::dtype::int8;
-              } 
-              else if (dtype_size == 2) {
-                array_dtype = ak::util::dtype::int16;
-              } 
-              else if (dtype_size == 4) {
-                array_dtype = ak::util::dtype::int32;
-              }
-              else if (dtype_size == 8) {
-                array_dtype = ak::util::dtype::int64;
-              }
-              break;
-    case 'u': if(dtype_size == 1) {
-                array_dtype = ak::util::dtype::uint8;
-              } 
-              else if (dtype_size == 2) {
-                array_dtype = ak::util::dtype::uint16;
-              } 
-              else if (dtype_size == 4) {
-                array_dtype = ak::util::dtype::uint32;
-              }
-              else if (dtype_size == 8) {
-                array_dtype = ak::util::dtype::uint64;
-              }
-              break;
 
-    case 'f': if (dtype_size == 2) {
-                array_dtype = ak::util::dtype::float16;
-              } 
-              else if (dtype_size == 4) {
-                array_dtype = ak::util::dtype::float32;
-              }
-              else if (dtype_size == 8) {
-                array_dtype = ak::util::dtype::float64;
-              }
-              else if(dtype_size == 16) {
-                array_dtype = ak::util::dtype::float128;
-              }
-              break;
+  if (typestr.length() >= 3) {
+    int32_t test = 1;
+    bool little_endian = (*(int8_t*)&test == 1);
+    std::string endianness = typestr.substr(0, 1);
+    if ((endianness == ">"  &&  !little_endian)  ||
+        (endianness == "<"  &&  little_endian)  ||
+        (endianness == "=")) {
+      
+      switch(dtype_code) {
+        case 'b': array_dtype = ak::util::dtype::boolean;
+                  break; 
+        case 'i': if (dtype_size == 1) {
+                    array_dtype = ak::util::dtype::int8;
+                  } 
+                  else if (dtype_size == 2) {
+                    array_dtype = ak::util::dtype::int16;
+                  } 
+                  else if (dtype_size == 4) {
+                    array_dtype = ak::util::dtype::int32;
+                  }
+                  else if (dtype_size == 8) {
+                    array_dtype = ak::util::dtype::int64;
+                  }
+                  break;
+        case 'u': if (dtype_size == 1) {
+                    array_dtype = ak::util::dtype::uint8;
+                  } 
+                  else if (dtype_size == 2) {
+                    array_dtype = ak::util::dtype::uint16;
+                  } 
+                  else if (dtype_size == 4) {
+                    array_dtype = ak::util::dtype::uint32;
+                  }
+                  else if (dtype_size == 8) {
+                    array_dtype = ak::util::dtype::uint64;
+                  }
+                  break;
 
-    case 'c': if(dtype_size == 8) {
-                array_dtype = ak::util::dtype::complex64;
-              } 
-              else if (dtype_size == 16) {
-                array_dtype = ak::util::dtype::complex128;
-              } 
-              else if (dtype_size == 32) {
-                array_dtype = ak::util::dtype::complex256;
-              }
-              break;
+        case 'f': if (dtype_size == 2) {
+                    array_dtype = ak::util::dtype::float16;
+                  } 
+                  else if (dtype_size == 4) {
+                    array_dtype = ak::util::dtype::float32;
+                  }
+                  else if (dtype_size == 8) {
+                    array_dtype = ak::util::dtype::float64;
+                  }
+                  else if (dtype_size == 16) {
+                    array_dtype = ak::util::dtype::float128;
+                  }
+                  break;
 
-    default:  throw std::invalid_argument(std::string("Can't accept array of the given data type" + FILENAME(__LINE__)));
+        case 'c': if (dtype_size == 8) {
+                    array_dtype = ak::util::dtype::complex64;
+                  } 
+                  else if (dtype_size == 16) {
+                    array_dtype = ak::util::dtype::complex128;
+                  } 
+                  else if (dtype_size == 32) {
+                    array_dtype = ak::util::dtype::complex256;
+                  }
+                  break;
+
+        default: std::invalid_argument(std::string("Couldn't find a compatible ak::dtype for given typestr: ") + typestr + FILENAME(__LINE__));
+      }
+    }
+    else if ((endianness == ">"  &&  little_endian)  ||
+             (endianness == "<"  &&  !little_endian)) {
+      throw std::invalid_argument(std::string("Input Array has a different endianess than the System") + FILENAME(__LINE__));
+    }
   }
   
   if (array_dtype != ak::util::name_to_dtype(py::cast<std::string>(py::str(py::dtype::of<T>())))) {
@@ -356,6 +373,33 @@ make_IndexOf(const py::handle& m, const std::string& name) {
                 cupy_memoryptr,
                 pybind11::make_tuple(py::cast<ssize_t>(sizeof(T))));
         })
+      .def("to_dlpack", [name](const ak::IndexOf<T>& self) -> py::capsule {
+        DLManagedTensor* dlm_tensor = new DLManagedTensor;
+
+        dlm_tensor->dl_tensor.data = reinterpret_cast<void*>(self.ptr().get());
+        dlm_tensor->dl_tensor.ndim = 1;
+        dlm_tensor->dl_tensor.dtype = ak::dlpack::data_type_dispatch(ak::util::name_to_dtype(
+          py::cast<std::string>(py::str(py::dtype::of<T>()))));
+        
+        int64_t* dup_shape = new int64_t[1];
+        int64_t* dup_strides = new int64_t[1];
+
+        dup_shape[0] = self.length();
+        dup_strides[0] = 1;
+
+        dlm_tensor->dl_tensor.shape = dup_shape;
+        dlm_tensor->dl_tensor.strides = dup_strides;
+        dlm_tensor->dl_tensor.byte_offset = 0;
+        dlm_tensor->dl_tensor.ctx = ak::dlpack::device_context_dispatch(self.ptr_lib(), self.ptr().get());
+        
+        py::object array = py::cast(self);
+        dlm_tensor->manager_ctx = reinterpret_cast<void*>(array.ptr());
+
+        Py_INCREF(array.ptr());
+        dlm_tensor->deleter = ak::dlpack::deleter;
+
+        return py::capsule(dlm_tensor, "dltensor", ak::dlpack::pycapsule_deleter);
+      })
   );
 }
 

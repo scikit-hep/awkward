@@ -88,6 +88,26 @@ namespace awkward {
       return symbol_ptr;
     }
 
+    const int32_t
+    lib_device_num(
+      kernel::lib ptr_lib,
+      void* ptr) {
+      if(ptr_lib == kernel::lib::cuda) {
+        int64_t num;
+        {
+          CREATE_KERNEL(awkward_cuda_ptr_device_num, ptr_lib);
+          struct Error err1 = (*awkward_cuda_ptr_device_num_fcn)(&num, ptr);
+          util::handle_error(err1);
+        }
+        return num;
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib in kernel::lib_device_num")
+          + FILENAME(__LINE__));
+      }
+    }
+
     const std::string
     lib_tostring(
       kernel::lib ptr_lib,
@@ -100,12 +120,7 @@ namespace awkward {
       }
 
       else if (ptr_lib == kernel::lib::cuda) {
-        int64_t num;
-        {
-          CREATE_KERNEL(awkward_cuda_ptr_device_num, ptr_lib);
-          struct Error err1 = (*awkward_cuda_ptr_device_num_fcn)(&num, ptr);
-          util::handle_error(err1);
-        }
+        const int64_t num = lib_device_num(ptr_lib, ptr);
 
         char name[256];
         CREATE_KERNEL(awkward_cuda_ptr_device_name, ptr_lib);

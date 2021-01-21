@@ -15,7 +15,7 @@
 
 #include "awkward/python/content.h"
 
-#include "awkward/dlpack/util.h"
+#include "awkward/python/dlpack_util.h"
 
 ////////// boxing
 
@@ -1853,7 +1853,6 @@ NumpyArray_toDlpack(const ak::NumpyArray array) {
 
 }
 
-
 const ak::NumpyArray
 NumpyArray_from_cuda_array_interface(const std::string& name,
                                      const py::object& array,
@@ -1863,12 +1862,87 @@ NumpyArray_from_cuda_array_interface(const std::string& name,
   
   const std::vector<ssize_t> shape = cuda_array_interface["shape"].cast<std::vector<ssize_t>>();
   std::string typestr = cuda_array_interface["typestr"].cast<std::string>();
-  const uint8_t dtype_size = std::stoi(typestr.substr(2));
 
   if (shape.empty()) {
     throw std::invalid_argument(
         std::string("Array must not be scalar; try array.reshape(1)")
         + FILENAME(__LINE__));
+  }
+  const char dtype_code = typestr[1];
+  const uint8_t dtype_size = std::stoi(typestr.substr(2));
+  
+  ak::util::dtype array_dtype;
+  
+  if (typestr.length() >= 3) {
+    int32_t test = 1;
+    bool little_endian = (*(int8_t*)&test == 1);
+    std::string endianness = typestr.substr(0, 1);
+    if ((endianness == ">"  &&  !little_endian)  ||
+        (endianness == "<"  &&  little_endian)  ||
+        (endianness == "=")) {
+      
+      switch(dtype_code) {
+        case 'b': array_dtype = ak::util::dtype::boolean;
+                  break; 
+        case 'i': if (dtype_size == 1) {
+                    array_dtype = ak::util::dtype::int8;
+                  } 
+                  else if (dtype_size == 2) {
+                    array_dtype = ak::util::dtype::int16;
+                  } 
+                  else if (dtype_size == 4) {
+                    array_dtype = ak::util::dtype::int32;
+                  }
+                  else if (dtype_size == 8) {
+                    array_dtype = ak::util::dtype::int64;
+                  }
+                  break;
+        case 'u': if (dtype_size == 1) {
+                    array_dtype = ak::util::dtype::uint8;
+                  } 
+                  else if (dtype_size == 2) {
+                    array_dtype = ak::util::dtype::uint16;
+                  } 
+                  else if (dtype_size == 4) {
+                    array_dtype = ak::util::dtype::uint32;
+                  }
+                  else if (dtype_size == 8) {
+                    array_dtype = ak::util::dtype::uint64;
+                  }
+                  break;
+
+        case 'f': if (dtype_size == 2) {
+                    array_dtype = ak::util::dtype::float16;
+                  } 
+                  else if (dtype_size == 4) {
+                    array_dtype = ak::util::dtype::float32;
+                  }
+                  else if (dtype_size == 8) {
+                    array_dtype = ak::util::dtype::float64;
+                  }
+                  else if (dtype_size == 16) {
+                    array_dtype = ak::util::dtype::float128;
+                  }
+                  break;
+
+        case 'c': if (dtype_size == 8) {
+                    array_dtype = ak::util::dtype::complex64;
+                  } 
+                  else if (dtype_size == 16) {
+                    array_dtype = ak::util::dtype::complex128;
+                  } 
+                  else if (dtype_size == 32) {
+                    array_dtype = ak::util::dtype::complex256;
+                  }
+                  break;
+
+        default: std::invalid_argument(std::string("Couldn't find a compatible ak::dtype for given typestr: ") + typestr + FILENAME(__LINE__));
+      }
+    }
+    else if ((endianness == ">"  &&  little_endian)  ||
+             (endianness == "<"  &&  !little_endian)) {
+      throw std::invalid_argument(std::string("Input Array has a different endianess than the System") + FILENAME(__LINE__));
+    }
   }
   
   std::vector<ssize_t> form_strides;
@@ -1884,66 +1958,6 @@ NumpyArray_from_cuda_array_interface(const std::string& name,
   } 
   const std::vector<ssize_t> strides = form_strides;
 
-  const char dtype_code = typestr[1];
-  ak::util::dtype array_dtype;
-  switch(dtype_code) {
-    case 'b': array_dtype = ak::util::dtype::boolean;
-              break; 
-    case 'i': if (dtype_size == 1) {
-                array_dtype = ak::util::dtype::int8;
-              } 
-              else if (dtype_size == 2) {
-                array_dtype = ak::util::dtype::int16;
-              } 
-              else if (dtype_size == 4) {
-                array_dtype = ak::util::dtype::int32;
-              }
-              else if (dtype_size == 8) {
-                array_dtype = ak::util::dtype::int64;
-              }
-              break;
-    case 'u': if (dtype_size == 1) {
-                array_dtype = ak::util::dtype::uint8;
-              } 
-              else if (dtype_size == 2) {
-                array_dtype = ak::util::dtype::uint16;
-              } 
-              else if (dtype_size == 4) {
-                array_dtype = ak::util::dtype::uint32;
-              }
-              else if (dtype_size == 8) {
-                array_dtype = ak::util::dtype::uint64;
-              }
-              break;
-
-    case 'f': if (dtype_size == 2) {
-                array_dtype = ak::util::dtype::float16;
-              } 
-              else if (dtype_size == 4) {
-                array_dtype = ak::util::dtype::float32;
-              }
-              else if (dtype_size == 8) {
-                array_dtype = ak::util::dtype::float64;
-              }
-              else if (dtype_size == 16) {
-                array_dtype = ak::util::dtype::float128;
-              }
-              break;
-
-    case 'c': if (dtype_size == 8) {
-                array_dtype = ak::util::dtype::complex64;
-              } 
-              else if (dtype_size == 16) {
-                array_dtype = ak::util::dtype::complex128;
-              } 
-              else if (dtype_size == 32) {
-                array_dtype = ak::util::dtype::complex256;
-              }
-              break;
-
-    default:  throw std::invalid_argument(std::string("Can't accept array of the given data type" + FILENAME(__LINE__)));
-  }
-  
   void* ptr = reinterpret_cast<void*>(cuda_array_interface["data"].cast<std::vector<ssize_t>>()[0]);
 
   return ak::NumpyArray(
@@ -2064,22 +2078,6 @@ NumpyArray_from_jax(const std::string& name,
   else {
     throw std::invalid_argument(
         std::string("Awkward Arrays don't support ") + device + FILENAME(__LINE__));
-  }
-}
-
-void deleter(DLManagedTensor* tensor) {
-  if(tensor->manager_ctx == nullptr) 
-    return;
-  Py_DECREF(reinterpret_cast<PyObject*>(tensor->manager_ctx));
-  tensor->manager_ctx = nullptr;
-}
-
-void pycapsule_deleter(PyObject* dltensor) {
-  DLManagedTensor* dlm_tensor;
-  if(PyCapsule_IsValid(dltensor, "dltensor")) {
-    dlm_tensor = static_cast<DLManagedTensor*>(PyCapsule_GetPointer(
-          dltensor, "dltensor"));
-    dlm_tensor->deleter(dlm_tensor);
   }
 }
 
@@ -2211,11 +2209,10 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
     })
     .def("to_dlpack", [name](const ak::NumpyArray& self) -> py::capsule {
       DLManagedTensor* dlm_tensor = new DLManagedTensor;
-      ssize_t ndim = self.ndim();
 
       dlm_tensor->dl_tensor.data = self.ptr().get();
       dlm_tensor->dl_tensor.ndim = self.ndim();
-      dlm_tensor->dl_tensor.dtype = data_type_dispatch(self.dtype());
+      dlm_tensor->dl_tensor.dtype = ak::dlpack::data_type_dispatch(self.dtype());
       
       int64_t* dup_shape = new int64_t[self.shape().size()];
       int64_t* dup_strides = new int64_t[self.strides().size()];
@@ -2232,19 +2229,15 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
       dlm_tensor->dl_tensor.shape = dup_shape;
       dlm_tensor->dl_tensor.strides = dup_strides;
       dlm_tensor->dl_tensor.byte_offset = self.byteoffset();
-      if(self.ptr_lib() == ak::kernel::lib::cpu) {
-        dlm_tensor->dl_tensor.ctx = DLContext{DLDeviceType::kDLCPU, 0};
-      } 
-      else if (self.ptr_lib() == ak::kernel::lib::cuda) {
-        dlm_tensor->dl_tensor.ctx = DLContext{DLDeviceType::kDLGPU, 0};
-      }
+      dlm_tensor->dl_tensor.ctx = ak::dlpack::device_context_dispatch(self.ptr_lib(), self.ptr().get());
       
       py::object array = py::cast(self);
       dlm_tensor->manager_ctx = reinterpret_cast<void*>(array.ptr());
-      Py_INCREF(array.ptr());
-      dlm_tensor->deleter = deleter;
 
-      return py::capsule(dlm_tensor, "dltensor", pycapsule_deleter);
+      Py_INCREF(array.ptr());
+      dlm_tensor->deleter = ak::dlpack::deleter;
+
+      return py::capsule(dlm_tensor, "dltensor", ak::dlpack::pycapsule_deleter);
     }));
 }
 
