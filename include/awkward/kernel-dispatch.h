@@ -130,6 +130,12 @@ namespace awkward {
         void operator()(T const *ptr) { }
     };
 
+    /// @brief Returns the number of the device associated with the pointer
+    const int32_t
+    lib_device_num(
+      kernel::lib ptr_lib,
+      void* ptr);
+
     /// @brief Produces a <Lib/> element for 'tostring' to indicate the kernel
     /// library.
     const std::string lib_tostring(

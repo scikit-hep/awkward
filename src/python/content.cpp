@@ -6,12 +6,16 @@
 
 #include "awkward/kernel-utils.h"
 
+#include "awkward/util.h"
+
 #include "awkward/python/identities.h"
 #include "awkward/python/util.h"
 
 #include "awkward/python/virtual.h"
 
 #include "awkward/python/content.h"
+
+#include "awkward/python/dlpack_util.h"
 
 ////////// boxing
 
@@ -1844,11 +1848,142 @@ make_ListOffsetArrayOf(const py::handle& m, const std::string& name);
 
 ////////// NumpyArray
 
+const std::shared_ptr<DLManagedTensor>
+NumpyArray_toDlpack(const ak::NumpyArray array) {
+
+}
+
+const ak::NumpyArray
+NumpyArray_from_cuda_array_interface(const std::string& name,
+                                     const py::object& array,
+                                     const py::object& identities,
+                                     const py::object& parameters) {
+  py::dict cuda_array_interface = array.attr("__cuda_array_interface__");
+  
+  const std::vector<ssize_t> shape = cuda_array_interface["shape"].cast<std::vector<ssize_t>>();
+  std::string typestr = cuda_array_interface["typestr"].cast<std::string>();
+
+  if (shape.empty()) {
+    throw std::invalid_argument(
+        std::string("Array must not be scalar; try array.reshape(1)")
+        + FILENAME(__LINE__));
+  }
+  const char dtype_code = typestr[1];
+  const uint8_t dtype_size = std::stoi(typestr.substr(2));
+  
+  ak::util::dtype array_dtype;
+  
+  if (typestr.length() >= 3) {
+    int32_t test = 1;
+    bool little_endian = (*(int8_t*)&test == 1);
+    std::string endianness = typestr.substr(0, 1);
+    if ((endianness == ">"  &&  !little_endian)  ||
+        (endianness == "<"  &&  little_endian)  ||
+        (endianness == "=")) {
+      
+      switch(dtype_code) {
+        case 'b': array_dtype = ak::util::dtype::boolean;
+                  break; 
+        case 'i': if (dtype_size == 1) {
+                    array_dtype = ak::util::dtype::int8;
+                  } 
+                  else if (dtype_size == 2) {
+                    array_dtype = ak::util::dtype::int16;
+                  } 
+                  else if (dtype_size == 4) {
+                    array_dtype = ak::util::dtype::int32;
+                  }
+                  else if (dtype_size == 8) {
+                    array_dtype = ak::util::dtype::int64;
+                  }
+                  break;
+        case 'u': if (dtype_size == 1) {
+                    array_dtype = ak::util::dtype::uint8;
+                  } 
+                  else if (dtype_size == 2) {
+                    array_dtype = ak::util::dtype::uint16;
+                  } 
+                  else if (dtype_size == 4) {
+                    array_dtype = ak::util::dtype::uint32;
+                  }
+                  else if (dtype_size == 8) {
+                    array_dtype = ak::util::dtype::uint64;
+                  }
+                  break;
+
+        case 'f': if (dtype_size == 2) {
+                    array_dtype = ak::util::dtype::float16;
+                  } 
+                  else if (dtype_size == 4) {
+                    array_dtype = ak::util::dtype::float32;
+                  }
+                  else if (dtype_size == 8) {
+                    array_dtype = ak::util::dtype::float64;
+                  }
+                  else if (dtype_size == 16) {
+                    array_dtype = ak::util::dtype::float128;
+                  }
+                  break;
+
+        case 'c': if (dtype_size == 8) {
+                    array_dtype = ak::util::dtype::complex64;
+                  } 
+                  else if (dtype_size == 16) {
+                    array_dtype = ak::util::dtype::complex128;
+                  } 
+                  else if (dtype_size == 32) {
+                    array_dtype = ak::util::dtype::complex256;
+                  }
+                  break;
+
+        default: std::invalid_argument(std::string("Couldn't find a compatible ak::dtype for given typestr: ") + typestr + FILENAME(__LINE__));
+      }
+    }
+    else if ((endianness == ">"  &&  little_endian)  ||
+             (endianness == "<"  &&  !little_endian)) {
+      throw std::invalid_argument(std::string("Input Array has a different endianess than the System") + FILENAME(__LINE__));
+    }
+  }
+  
+  std::vector<ssize_t> form_strides;
+  if (cuda_array_interface.contains("strides") && !cuda_array_interface["strides"].is_none()) {
+    form_strides = cuda_array_interface["strides"].cast<std::vector<ssize_t>>();
+  }
+  else {
+    form_strides = cuda_array_interface["shape"].cast<std::vector<ssize_t>>();
+    form_strides[0] = 1;
+    std::transform(form_strides.begin(), form_strides.end(), form_strides.begin(), 
+      [dtype_size](ssize_t& form_strides_ele) -> ssize_t { return form_strides_ele * dtype_size; });
+    std::reverse(form_strides.begin(), form_strides.end());
+  } 
+  const std::vector<ssize_t> strides = form_strides;
+
+  void* ptr = reinterpret_cast<void*>(cuda_array_interface["data"].cast<std::vector<ssize_t>>()[0]);
+
+  return ak::NumpyArray(
+    unbox_identities_none(identities),
+    dict2parameters(parameters),
+    std::shared_ptr<void>(ptr, pyobject_deleter<void>(array.ptr())),
+    shape,
+    strides,
+    0,
+    dtype_size,
+    ak::util::dtype_to_format(array_dtype),
+    array_dtype,
+    ak::kernel::lib::cuda);
+}
+
 const ak::NumpyArray
 NumpyArray_from_cupy(const std::string& name,
                      const py::object& array,
                      const py::object& identities,
                      const py::object& parameters) {
+  if (py::hasattr(array, "__cuda_array_interface__")) {
+    return NumpyArray_from_cuda_array_interface(name,
+                                                array,
+                                                identities,
+                                                parameters);
+  }
   if (py::isinstance(array, py::module::import("cupy").attr("ndarray"))) {
     const std::vector<ssize_t> shape = array.attr("shape").cast<std::vector<ssize_t>>();
     const std::vector<ssize_t> strides = array.attr("strides").cast<std::vector<ssize_t>>();
@@ -1890,6 +2025,62 @@ NumpyArray_from_cupy(const std::string& name,
   }
 }
 
+const ak::NumpyArray
+NumpyArray_from_jax(const std::string& name,
+                    const py::object& array,
+                    const py::object& identities,
+                    const py::object& parameters) {
+  
+  const std::string device = array.attr("device_buffer").attr("device")().attr("platform").cast<std::string>();
+  
+  if (device.compare("cpu") == 0) {
+    py::array jax_array = array.cast<py::array>();
+
+    py::buffer_info info = jax_array.request();
+    if (info.ndim == 0) {
+      throw std::invalid_argument(
+        std::string("JaxNumpyArray must not be scalar; try array.reshape(1)")
+        + FILENAME(__LINE__));
+    }
+    if (info.shape.size() != info.ndim  ||
+        info.strides.size() != info.ndim) {
+      throw std::invalid_argument(
+        std::string("JaxNumpyArray len(shape) != ndim or len(strides) != ndim")
+        + FILENAME(__LINE__));
+    }
+
+    return ak::NumpyArray(
+      unbox_identities_none(identities),
+      dict2parameters(parameters),
+      std::shared_ptr<void>(reinterpret_cast<void*>(info.ptr),
+                            pyobject_deleter<void>(array.ptr())),
+      info.shape,
+      info.strides,
+      0,
+      info.itemsize,
+      info.format,
+      ak::util::format_to_dtype(info.format, (int64_t)info.itemsize),
+      ak::kernel::lib::cpu);
+  }
+  else if (device.compare("gpu") == 0) {
+    if (py::hasattr(array, "__cuda_array_interface__")) {
+      return NumpyArray_from_cuda_array_interface(name,
+                                                  array,
+                                                  identities,
+                                                  parameters);
+    }
+    else {
+      throw std::invalid_argument(
+        name + std::string(".from_jax() needs a __cuda_array_interface__ dict of the given array, to accept JAX GPU buffers")
+        + FILENAME(__LINE__));
+    }
+  }
+  else {
+    throw std::invalid_argument(
+        std::string("Awkward Arrays don't support ") + device + FILENAME(__LINE__));
+  }
+}
+
 py::class_<ak::NumpyArray, std::shared_ptr<ak::NumpyArray>, ak::Content>
 make_NumpyArray(const py::handle& m, const std::string& name) {
   return content_methods(py::class_<ak::NumpyArray,
@@ -1911,6 +2102,9 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
         std::string module = anyarray.get_type().attr("__module__").cast<std::string>();
         if (module.rfind("cupy.", 0) == 0) {
           return NumpyArray_from_cupy(name, anyarray, identities, parameters);
+        } 
+        else if (module.rfind("jax.", 0) == 0) {
+          return NumpyArray_from_jax(name, anyarray, identities, parameters);
         }
 
         py::array array = anyarray.cast<py::array>();
@@ -1980,6 +2174,14 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
         py::arg("array"),
         py::arg("identities") = py::none(),
         py::arg("parameters") = py::none())
+      .def_static("from_jax", [name](const py::object& array,
+                                     const py::object& identities,
+                                     const py::object& parameters) -> py::object {
+        return box(NumpyArray_from_jax(name, array, identities, parameters).shallow_copy());
+      },
+        py::arg("array"),
+        py::arg("identities") = py::none(),
+        py::arg("parameters") = py::none())
       .def("to_cupy", [name](const ak::NumpyArray& self) -> py::object {
         if (self.ptr_lib() != ak::kernel::lib::cuda) {
           throw std::invalid_argument(
@@ -2005,8 +2207,39 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
                 cupy_memoryptr,
                 pybind11::make_tuple(py::cast<ssize_t>(self.itemsize())));
     })
+    .def("to_jax", [name](const ak::NumpyArray& self) -> py::object {
+      DLManagedTensor* dlm_tensor = new DLManagedTensor;
 
-  );
+      dlm_tensor->dl_tensor.data = self.ptr().get();
+      dlm_tensor->dl_tensor.ndim = self.ndim();
+      dlm_tensor->dl_tensor.dtype = ak::dlpack::data_type_dispatch(self.dtype());
+      
+      int64_t* dup_shape = new int64_t[self.shape().size()];
+      int64_t* dup_strides = new int64_t[self.strides().size()];
+
+      for(int64_t i = 0; i < self.shape().size(); i++) {
+        dup_shape[i] = static_cast<int64_t>(self.shape()[i]);
+      }
+
+      int64_t dtype_size = ak::util::dtype_to_itemsize(self.dtype());
+      for(int64_t i = 0; i < self.strides().size(); i++) {
+        dup_strides[i] = static_cast<int64_t>(self.strides()[i]) / dtype_size;
+      }
+
+      dlm_tensor->dl_tensor.shape = dup_shape;
+      dlm_tensor->dl_tensor.strides = dup_strides;
+      dlm_tensor->dl_tensor.byte_offset = self.byteoffset();
+      dlm_tensor->dl_tensor.ctx = ak::dlpack::device_context_dispatch(self.ptr_lib(), self.ptr().get());
+      
+      py::object array = py::cast(self);
+      dlm_tensor->manager_ctx = reinterpret_cast<void*>(array.ptr());
+
+      Py_INCREF(array.ptr());
+      dlm_tensor->deleter = ak::dlpack::deleter;
+
+      return py::module::import("jax.dlpack").attr("from_dlpack")
+                        (py::capsule(dlm_tensor, "dltensor", ak::dlpack::pycapsule_deleter));
+    }));
 }
 
 ////////// RecordArray
