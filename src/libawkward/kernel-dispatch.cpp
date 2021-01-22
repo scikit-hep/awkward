@@ -10437,7 +10437,6 @@ namespace awkward {
       }
     }
 
-    // fromcomplex
     template <>
     ERROR NumpyArray_fill<std::complex<float>, bool>(
       kernel::lib ptr_lib,
@@ -15865,66 +15864,6 @@ namespace awkward {
     }
 
     template<>
-    ERROR reduce_min_64(
-      kernel::lib ptr_lib,
-      std::complex<float> *toptr,
-      const std::complex<float> *fromptr,
-      const int64_t *parents,
-      int64_t lenparents,
-      int64_t outlength,
-      std::complex<float> identity) {
-      if (ptr_lib == kernel::lib::cpu) {
-        return awkward_reduce_min_complex64_complex64_64(
-          reinterpret_cast<float*>(toptr),
-          reinterpret_cast<const float*>(fromptr),
-          parents,
-          lenparents,
-          outlength,
-          identity.real());
-      }
-      else if (ptr_lib == kernel::lib::cuda) {
-        throw std::runtime_error(
-          std::string("not implemented: ptr_lib == cuda_kernels for reduce_min_64")
-          + FILENAME(__LINE__));
-      }
-      else {
-        throw std::runtime_error(
-          std::string("unrecognized ptr_lib for reduce_min_64")
-          + FILENAME(__LINE__));
-      }
-    }
-
-    template<>
-    ERROR reduce_min_64(
-      kernel::lib ptr_lib,
-      std::complex<double> *toptr,
-      const std::complex<double> *fromptr,
-      const int64_t *parents,
-      int64_t lenparents,
-      int64_t outlength,
-      std::complex<double> identity) {
-      if (ptr_lib == kernel::lib::cpu) {
-        return awkward_reduce_min_complex128_complex128_64(
-          reinterpret_cast<double*>(toptr),
-          reinterpret_cast<const double*>(fromptr),
-          parents,
-          lenparents,
-          outlength,
-          identity.real());
-      }
-      else if (ptr_lib == kernel::lib::cuda) {
-        throw std::runtime_error(
-          std::string("not implemented: ptr_lib == cuda_kernels for reduce_min_64")
-          + FILENAME(__LINE__));
-      }
-      else {
-        throw std::runtime_error(
-          std::string("unrecognized ptr_lib for reduce_min_64")
-          + FILENAME(__LINE__));
-      }
-    }
-
-    template<>
     ERROR reduce_max_64(
       kernel::lib ptr_lib,
       int8_t *toptr,
@@ -16211,66 +16150,6 @@ namespace awkward {
           lenparents,
           outlength,
           identity);
-      }
-      else if (ptr_lib == kernel::lib::cuda) {
-        throw std::runtime_error(
-          std::string("not implemented: ptr_lib == cuda_kernels for reduce_max_64")
-          + FILENAME(__LINE__));
-      }
-      else {
-        throw std::runtime_error(
-          std::string("unrecognized ptr_lib for reduce_max_64")
-          + FILENAME(__LINE__));
-      }
-    }
-
-    template<>
-    ERROR reduce_max_64(
-      kernel::lib ptr_lib,
-      std::complex<float> *toptr,
-      const std::complex<float> *fromptr,
-      const int64_t *parents,
-      int64_t lenparents,
-      int64_t outlength,
-      std::complex<float> identity) {
-      if (ptr_lib == kernel::lib::cpu) {
-        return awkward_reduce_max_complex64_complex64_64(
-          reinterpret_cast<float*>(toptr),
-          reinterpret_cast<const float*>(fromptr),
-          parents,
-          lenparents,
-          outlength,
-          identity.real());
-      }
-      else if (ptr_lib == kernel::lib::cuda) {
-        throw std::runtime_error(
-          std::string("not implemented: ptr_lib == cuda_kernels for reduce_max_64")
-          + FILENAME(__LINE__));
-      }
-      else {
-        throw std::runtime_error(
-          std::string("unrecognized ptr_lib for reduce_max_64")
-          + FILENAME(__LINE__));
-      }
-    }
-
-    template<>
-    ERROR reduce_max_64(
-      kernel::lib ptr_lib,
-      std::complex<double> *toptr,
-      const std::complex<double> *fromptr,
-      const int64_t *parents,
-      int64_t lenparents,
-      int64_t outlength,
-      std::complex<double> identity) {
-      if (ptr_lib == kernel::lib::cpu) {
-        return awkward_reduce_max_complex128_complex128_64(
-          reinterpret_cast<double*>(toptr),
-          reinterpret_cast<const double*>(fromptr),
-          parents,
-          lenparents,
-          outlength,
-          identity.real());
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(
@@ -16593,62 +16472,6 @@ namespace awkward {
     }
 
     template<>
-    ERROR reduce_argmin_64(
-      kernel::lib ptr_lib,
-      int64_t *toptr,
-      const std::complex<float> *fromptr,
-      const int64_t *parents,
-      int64_t lenparents,
-      int64_t outlength) {
-      if (ptr_lib == kernel::lib::cpu) {
-        return awkward_reduce_argmin_complex64_64(
-          toptr,
-          reinterpret_cast<const float*>(fromptr),
-          parents,
-          lenparents,
-          outlength);
-      }
-      else if (ptr_lib == kernel::lib::cuda) {
-        throw std::runtime_error(
-          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmin_64")
-          + FILENAME(__LINE__));
-      }
-      else {
-        throw std::runtime_error(
-          std::string("unrecognized ptr_lib for reduce_argmin_64")
-          + FILENAME(__LINE__));
-      }
-    }
-
-    template<>
-    ERROR reduce_argmin_64(
-      kernel::lib ptr_lib,
-      int64_t *toptr,
-      const std::complex<double> *fromptr,
-      const int64_t *parents,
-      int64_t lenparents,
-      int64_t outlength) {
-      if (ptr_lib == kernel::lib::cpu) {
-        return awkward_reduce_argmin_complex128_64(
-          toptr,
-          reinterpret_cast<const double*>(fromptr),
-          parents,
-          lenparents,
-          outlength);
-      }
-      else if (ptr_lib == kernel::lib::cuda) {
-        throw std::runtime_error(
-          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmin_64")
-          + FILENAME(__LINE__));
-      }
-      else {
-        throw std::runtime_error(
-          std::string("unrecognized ptr_lib for reduce_argmin_64")
-          + FILENAME(__LINE__));
-      }
-    }
-
-    template<>
     ERROR reduce_argmax_64(
       kernel::lib ptr_lib,
       int64_t *toptr,
@@ -16940,62 +16763,6 @@ namespace awkward {
         return awkward_reduce_argmax_float64_64(
           toptr,
           fromptr,
-          parents,
-          lenparents,
-          outlength);
-      }
-      else if (ptr_lib == kernel::lib::cuda) {
-        throw std::runtime_error(
-          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmax_64")
-          + FILENAME(__LINE__));
-      }
-      else {
-        throw std::runtime_error(
-          std::string("unrecognized ptr_lib for reduce_argmax_64")
-          + FILENAME(__LINE__));
-      }
-    }
-
-    template<>
-    ERROR reduce_argmax_64(
-      kernel::lib ptr_lib,
-      int64_t *toptr,
-      const std::complex<float> *fromptr,
-      const int64_t *parents,
-      int64_t lenparents,
-      int64_t outlength) {
-      if (ptr_lib == kernel::lib::cpu) {
-        return awkward_reduce_argmax_complex64_64(
-          toptr,
-          reinterpret_cast<const float*>(fromptr),
-          parents,
-          lenparents,
-          outlength);
-      }
-      else if (ptr_lib == kernel::lib::cuda) {
-        throw std::runtime_error(
-          std::string("not implemented: ptr_lib == cuda_kernels for reduce_argmax_64")
-          + FILENAME(__LINE__));
-      }
-      else {
-        throw std::runtime_error(
-          std::string("unrecognized ptr_lib for reduce_argmax_64")
-          + FILENAME(__LINE__));
-      }
-    }
-
-    template<>
-    ERROR reduce_argmax_64(
-      kernel::lib ptr_lib,
-      int64_t *toptr,
-      const std::complex<double> *fromptr,
-      const int64_t *parents,
-      int64_t lenparents,
-      int64_t outlength) {
-      if (ptr_lib == kernel::lib::cpu) {
-        return awkward_reduce_argmax_complex128_64(
-          toptr,
-          reinterpret_cast<const double*>(fromptr),
           parents,
           lenparents,
           outlength);
