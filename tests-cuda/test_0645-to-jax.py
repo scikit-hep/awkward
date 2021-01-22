@@ -28,14 +28,16 @@ def test_from_jax_1():
             assert jax_array_2d[i][j] == ak_array_2d[i][j]
 
 
-# No CUDA Kernel for test
-# def test_from_jax_2():
-#     content0 = ak.Array(np.array([1, 2, 3], dtype=np.int64)).layout
-#     content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int32))
-#     tags = ak.layout.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
-#     index = ak.layout.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
-#     unionarray = ak.layout.UnionArray8_32(tags, index, [content0, content1])
+@pytest.mark.skip(
+    reason="merging GPU arrays not yet implemented on GPUs (NumpyArray_fill)"
+)
+def test_from_jax_2():
+    content0 = ak.Array(np.array([1, 2, 3], dtype=np.int64)).layout
+    content1 = ak.layout.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int32))
+    tags = ak.layout.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
+    index = ak.layout.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
+    unionarray = ak.layout.UnionArray8_32(tags, index, [content0, content1])
 
-#     unionarray_cuda = unionarray.copy_to("cuda")
+    unionarray_cuda = unionarray.copy_to("cuda")
 
-#     jax_array = ak.to_jax(unionarray_cuda)
+    ak.to_jax(unionarray_cuda)
