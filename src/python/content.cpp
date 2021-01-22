@@ -818,6 +818,7 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   else if (py::isinstance<py::float_>(obj)) {
     self.real(obj.cast<double>());
   }
+  // FIXME: should be something like py::isinstance<py::complex_>(obj)
   else if (obj.attr("__class__").attr("__name__").cast<std::string>() == "complex") {
     self.complex(obj.cast<std::complex<double>>());
   }
@@ -948,7 +949,6 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
         self.extend(array);
       })
       .def("fromiter", &builder_fromiter)
-      //.def("fromiter", [](py::array_t<std::complex<double>, py::array::c_style> x) { return py::vectorize(square<std::complex<double>>)(x); });
   );
 }
 
