@@ -6,6 +6,24 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
+def test_count_complex():
+    content2 = ak.layout.NumpyArray(
+        np.array([(1.1+0.1j), 2.2, 3.3, 0.0, 2.2, 0.0, 0.0, 2.2, 0.0, 4.4])
+    )
+    offsets3 = ak.layout.Index64(np.array([0, 3, 6, 10], dtype=np.int64))
+    depth1 = ak.layout.ListOffsetArray64(offsets3, content2)
+    assert ak.to_list(depth1) == [
+        [(1.1+0.1j), (2.2+0j), (3.3+0j)],
+        [0j, (2.2+0j), 0j],
+        [0j, (2.2+0j), 0j, (4.4+0j)]
+    ]
+
+    assert ak.to_list(depth1.count(-1)) == [3, 3, 4]
+    assert ak.to_list(depth1.count(1)) == [3, 3, 4]
+
+    assert ak.to_list(depth1.count(-2)) == [3, 3, 3, 1]
+    assert ak.to_list(depth1.count(0)) == [3, 3, 3, 1]
+
 
 def test_UnmaskedArray():
     content_float64 = ak.layout.NumpyArray(

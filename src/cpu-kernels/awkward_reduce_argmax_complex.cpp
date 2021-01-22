@@ -19,8 +19,8 @@ ERROR awkward_reduce_argmax_complex(
     if (toptr[parent] == -1  ||
       (fromptr[i * 2] * fromptr[i * 2]
         + fromptr[i * 2 + 1] * fromptr[i * 2 + 1]) >
-      (toptr[parents[i] * 2] * toptr[parent * 2]
-        + toptr[parent * 2 + 1] * toptr[parent * 2 + 1])) {
+        (fromptr[toptr[parent]] * fromptr[toptr[parent]]
+          + fromptr[toptr[parent] + 1] * fromptr[toptr[parent] + 1])) {
       toptr[parent] = i;
     }
   }
