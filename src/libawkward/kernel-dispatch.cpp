@@ -88,7 +88,7 @@ namespace awkward {
       return symbol_ptr;
     }
 
-    const int32_t
+    const int64_t
     lib_device_num(
       kernel::lib ptr_lib,
       void* ptr) {

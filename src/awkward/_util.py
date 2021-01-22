@@ -570,7 +570,9 @@ def broadcast_and_apply(  # noqa: C901
 
         if regular_to_jagged:
             inputs = [
-                x.toListOffsetArray64(False) if isinstance(x, ak.layout.RegularArray) else x
+                x.toListOffsetArray64(False)
+                if isinstance(x, ak.layout.RegularArray)
+                else x
                 for x in inputs
             ]
 

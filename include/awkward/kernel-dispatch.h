@@ -131,7 +131,7 @@ namespace awkward {
     };
 
     /// @brief Returns the number of the device associated with the pointer
-    const int32_t
+    const int64_t
     lib_device_num(
       kernel::lib ptr_lib,
       void* ptr);
