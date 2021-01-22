@@ -1,5 +1,7 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/Reducer.cpp", line)
+
 #include <limits>
 
 #include "awkward/kernels.h"
@@ -1901,46 +1903,18 @@ namespace awkward {
   ReducerMin::apply_complex64(const std::complex<float>* data,
                               const Index64& parents,
                               int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<std::complex<float>> ptr = kernel::malloc<std::complex<float>>(
-      ptr_lib, outlength*(int64_t)sizeof(std::complex<float>));
-    float initial = std::numeric_limits<float>::infinity();
-    if (has_initial_) {
-      initial = (float)initial_f64_;
-    }
-    struct Error err = kernel::reduce_min_64<std::complex<float>, std::complex<float>>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength,
-      initial);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    throw std::invalid_argument(
+      std::string("ReducerMin is not applicable to std::complex<float>* data")
+      + FILENAME(__LINE__));
   }
 
   const std::shared_ptr<void>
   ReducerMin::apply_complex128(const std::complex<double>* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<std::complex<double>> ptr = kernel::malloc<std::complex<double>>(
-      ptr_lib, outlength*(int64_t)sizeof(std::complex<double>));
-    double initial = std::numeric_limits<double>::infinity();
-    if (has_initial_) {
-      initial = (double)initial_f64_;
-    }
-    struct Error err = kernel::reduce_min_64<std::complex<double>, std::complex<double>>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength,
-      initial);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    throw std::invalid_argument(
+      std::string("ReducerMin is not applicable to std::complex<double>* data")
+      + FILENAME(__LINE__));
   }
 
   ////////// max (maximum, in which -infinity is the identity)
@@ -2221,46 +2195,18 @@ namespace awkward {
   ReducerMax::apply_complex64(const std::complex<float>* data,
                               const Index64& parents,
                               int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<std::complex<float>> ptr = kernel::malloc<std::complex<float>>(
-      ptr_lib, outlength*(int64_t)sizeof(std::complex<float>));
-    float initial = 0;
-    if (has_initial_) {
-      initial = (float)initial_f64_;
-    }
-    struct Error err = kernel::reduce_max_64<std::complex<float>, std::complex<float>>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength,
-      initial);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    throw std::invalid_argument(
+      std::string("ReducerMax is not applicable to std::complex<float>* data")
+      + FILENAME(__LINE__));
   }
 
   const std::shared_ptr<void>
   ReducerMax::apply_complex128(const std::complex<double>* data,
                                const Index64& parents,
                                int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<std::complex<double>> ptr = kernel::malloc<std::complex<double>>(
-      ptr_lib, outlength*(int64_t)sizeof(std::complex<double>));
-    double initial = 0;
-    if (has_initial_) {
-      initial = (double)initial_f64_;
-    }
-    struct Error err = kernel::reduce_max_64<std::complex<double>, std::complex<double>>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength,
-      initial);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    throw std::invalid_argument(
+      std::string("ReducerMax is not applicable to std::complex<double>* data")
+      + FILENAME(__LINE__));
   }
 
   ////////// argmin (argument minimum, in which -1 is the identity)
@@ -2487,36 +2433,18 @@ namespace awkward {
   ReducerArgmin::apply_complex64(const std::complex<float>* data,
                                 const Index64& parents,
                                 int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*(int64_t)sizeof(int64_t));
-    struct Error err = kernel::reduce_argmin_64<int64_t, std::complex<float>>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    throw std::invalid_argument(
+      std::string("ReducerArgmin is not applicable to std::complex<float>* data")
+      + FILENAME(__LINE__));
   }
 
   const std::shared_ptr<void>
   ReducerArgmin::apply_complex128(const std::complex<double>* data,
                                   const Index64& parents,
                                   int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*(int64_t)sizeof(int64_t));
-    struct Error err = kernel::reduce_argmin_64<int64_t, std::complex<double>>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    throw std::invalid_argument(
+      std::string("ReducerArgmin is not applicable to std::complex<double>* data")
+      + FILENAME(__LINE__));
   }
 
   ////////// argmax (argument maximum, in which -1 is the identity)
@@ -2743,35 +2671,17 @@ namespace awkward {
   ReducerArgmax::apply_complex64(const std::complex<float>* data,
                                  const Index64& parents,
                                  int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*(int64_t)sizeof(int64_t));
-    struct Error err = kernel::reduce_argmax_64<int64_t, std::complex<float>>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    throw std::invalid_argument(
+      std::string("ReducerArgax is not applicable to std::complex<float>* data")
+      + FILENAME(__LINE__));
   }
 
   const std::shared_ptr<void>
   ReducerArgmax::apply_complex128(const std::complex<double>* data,
                                   const Index64& parents,
                                   int64_t outlength) const {
-    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
-    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
-      ptr_lib, outlength*(int64_t)sizeof(int64_t));
-    struct Error err = kernel::reduce_argmax_64<int64_t, std::complex<double>>(
-      ptr_lib,
-      ptr.get(),
-      data,
-      parents.data(),
-      parents.length(),
-      outlength);
-    util::handle_error(err, util::quote(name()), nullptr);
-    return ptr;
+    throw std::invalid_argument(
+      std::string("ReducerArgax is not applicable to std::complex<double>* data")
+      + FILENAME(__LINE__));
   }
 }
