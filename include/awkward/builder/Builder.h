@@ -73,6 +73,10 @@ namespace awkward {
     virtual const BuilderPtr
       real(double x) = 0;
 
+    /// @brief Adds a complex value `x` to the accumulated data.
+    virtual const BuilderPtr
+      complex(std::complex<double> x) = 0;
+
     /// @brief Adds a string value `x` with a given `length` and `encoding`
     /// to the accumulated data.
     ///

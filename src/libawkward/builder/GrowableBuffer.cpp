@@ -4,6 +4,8 @@
 
 #include "awkward/builder/GrowableBuffer.h"
 
+#include <complex>
+
 namespace awkward {
   template <typename T>
   GrowableBuffer<T>
@@ -142,4 +144,7 @@ namespace awkward {
   template class EXPORT_TEMPLATE_INST GrowableBuffer<uint64_t>;
   template class EXPORT_TEMPLATE_INST GrowableBuffer<float>;
   template class EXPORT_TEMPLATE_INST GrowableBuffer<double>;
+  template class EXPORT_TEMPLATE_INST GrowableBuffer<std::complex<float>>;
+  template class EXPORT_TEMPLATE_INST GrowableBuffer<std::complex<double>>;
+
 }

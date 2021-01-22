@@ -3,6 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/content.cpp", line)
 
 #include <pybind11/numpy.h>
+#include <pybind11/complex.h>
 
 #include "awkward/type/Type.h"
 #include "awkward/Reducer.h"
@@ -817,6 +818,9 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   else if (py::isinstance<py::float_>(obj)) {
     self.real(obj.cast<double>());
   }
+  else if (obj.attr("__class__").attr("__name__").cast<std::string>() == "complex") {
+    self.complex(obj.cast<std::complex<double>>());
+  }
   else if (py::isinstance<py::bytes>(obj)) {
     self.bytestring(obj.cast<std::string>());
   }
@@ -944,6 +948,7 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
         self.extend(array);
       })
       .def("fromiter", &builder_fromiter)
+      //.def("fromiter", [](py::array_t<std::complex<double>, py::array::c_style> x) { return py::vectorize(square<std::complex<double>>)(x); });
   );
 }
 

@@ -196,6 +196,49 @@ namespace awkward {
   }
 
   const BuilderPtr
+  UnionBuilder::complex(std::complex<double> x) {
+    if (current_ == -1) {
+      BuilderPtr tofill(nullptr);
+      int8_t i = 0;
+      for (auto content : contents_) {
+        if (dynamic_cast<Float64Builder*>(content.get()) != nullptr) {
+          tofill = content;
+          break;
+        }
+        i++;
+      }
+      if (tofill.get() == nullptr) {
+        i = 0;
+        for (auto content : contents_) {
+          if (dynamic_cast<Int64Builder*>(content.get()) != nullptr) {
+            tofill = content;
+            break;
+          }
+          i++;
+        }
+        if (tofill.get() != nullptr) {
+          tofill = Float64Builder::fromint64(
+            options_,
+            dynamic_cast<Int64Builder*>(tofill.get())->buffer());
+          contents_[(size_t)i] = tofill;
+        }
+        else {
+          tofill = Float64Builder::fromempty(options_);
+          contents_.push_back(tofill);
+        }
+      }
+      int64_t length = tofill.get()->length();
+      tofill.get()->complex(x);
+      tags_.append(i);
+      index_.append(length);
+    }
+    else {
+      contents_[(size_t)current_].get()->complex(x);
+    }
+    return shared_from_this();
+  }
+
+  const BuilderPtr
   UnionBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (current_ == -1) {
       BuilderPtr tofill(nullptr);

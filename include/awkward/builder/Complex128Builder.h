@@ -1,39 +1,44 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#ifndef AWKWARD_INT64BUILDER_H_
-#define AWKWARD_INT64BUILDER_H_
+#ifndef AWKWARD_COMPLEX128BUILDER_H_
+#define AWKWARD_COMPLEX128BUILDER_H_
 
 #include "awkward/common.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
-namespace awkward {
-  class ArrayBuilderOptions;
+#include <complex>
 
-  /// @class Int64Builder
+namespace awkward {
+  /// @class Complex128Builder
   ///
-  /// @brief Builder node that accumulates integers (`int64_t`).
-  class LIBAWKWARD_EXPORT_SYMBOL Int64Builder: public Builder {
+  /// @brief Builder node that accumulates real numbers (`double`).
+  class LIBAWKWARD_EXPORT_SYMBOL Complex128Builder: public Builder {
   public:
-    /// @brief Create an empty Int64Builder.
+    /// @brief Create an empty Complex128Builder.
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
     static const BuilderPtr
       fromempty(const ArrayBuilderOptions& options);
 
-    /// @brief Create an Int64Builder from a full set of parameters.
+    /// @brief Create a Complex128Builder from an existing Int64Builder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param old The Int64Builder's buffer.
+    static const BuilderPtr
+      fromint64(const ArrayBuilderOptions& options,
+                const GrowableBuffer<int64_t>& old);
+
+    /// @brief Create a Complex128Builder from a full set of parameters.
     ///
     /// @param options Configuration options for building an array;
     /// these are passed to every Builder's constructor.
-    /// @param buffer Contains the accumulated integers.
-    Int64Builder(const ArrayBuilderOptions& options,
-                 const GrowableBuffer<int64_t>& buffer);
+    /// @param buffer Contains the accumulated real numbers.
+    Complex128Builder(const ArrayBuilderOptions& options,
+                      const GrowableBuffer<std::complex<double>>& buffer);
 
-    /// @brief Contains the accumulated integers.
-    const GrowableBuffer<int64_t>
-      buffer() const;
-
-    /// @brief User-friendly name of this class: `"Int64Builder"`.
+    /// @brief User-friendly name of this class: `"Complex128Builder"`.
     const std::string
       classname() const override;
 
@@ -48,7 +53,7 @@ namespace awkward {
 
     /// @copydoc Builder::active()
     ///
-    /// A Int64Builder is never active.
+    /// A Complex128Builder is never active.
     bool
       active() const override;
 
@@ -99,8 +104,9 @@ namespace awkward {
 
   private:
     const ArrayBuilderOptions options_;
-    GrowableBuffer<int64_t> buffer_;
+    GrowableBuffer<std::complex<double>> buffer_;
   };
+
 }
 
-#endif // AWKWARD_INT64BUILDER_H_
+#endif // AWKWARD_COMPLEX128BUILDER_H_

@@ -123,6 +123,19 @@ namespace awkward {
   }
 
   const BuilderPtr
+  OptionBuilder::complex(std::complex<double> x) {
+    if (!content_.get()->active()) {
+      int64_t length = content_.get()->length();
+      maybeupdate(content_.get()->complex(x));
+      index_.append(length);
+    }
+    else {
+      content_.get()->complex(x);
+    }
+    return shared_from_this();
+  }
+
+  const BuilderPtr
   OptionBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!content_.get()->active()) {
       int64_t len = content_.get()->length();

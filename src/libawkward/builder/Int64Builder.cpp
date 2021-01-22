@@ -94,6 +94,13 @@ namespace awkward {
   }
 
   const BuilderPtr
+  Int64Builder::complex(std::complex<double> x) {
+    BuilderPtr out = Float64Builder::fromint64(options_, buffer_);
+    out.get()->complex(x);
+    return out;
+  }
+
+  const BuilderPtr
   Int64Builder::string(const char* x, int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);

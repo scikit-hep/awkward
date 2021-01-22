@@ -9,6 +9,8 @@
 #include "awkward/common.h"
 #include "awkward/util.h"
 
+#include <complex>
+
 namespace awkward {
   class Content;
   using ContentPtr    = std::shared_ptr<Content>;
@@ -114,6 +116,10 @@ namespace awkward {
     /// @brief Adds a real value `x` to the accumulated data.
     void
       real(double x);
+
+    /// @brief Adds a complex value `x` to the accumulated data.
+    void
+      complex(std::complex<double> x);
 
     /// @brief Adds an unencoded, null-terminated bytestring value `x` to the
     /// accumulated data.
