@@ -83,13 +83,13 @@ namespace awkward {
     void boolean(bool x) { writer_.Bool(x); }
     void integer(int64_t x) { writer_.Int64(x); }
     void real(double x) { writer_.Double(x); }
-    void complex(std::complex<double> x) {
+    void complex(std::complex<double> x,
+                 const char* complex_real_string,
+                 const char* complex_imag_string) {
       beginrecord();
-      field("__complex__");
-      boolean(true);
-      field("real");
+      field(complex_real_string);
       real(x.real());
-      field("imag");
+      field(complex_imag_string);
       real(x.imag());
       endrecord();
     }
@@ -116,11 +116,15 @@ namespace awkward {
   ToJsonString::ToJsonString(int64_t maxdecimals,
                              const char* nan_string,
                              const char* infinity_string,
-                             const char* minus_infinity_string)
+                             const char* minus_infinity_string,
+                             const char* complex_real_string,
+                             const char* complex_imag_string)
       : impl_(new ToJsonString::Impl(maxdecimals))
       , nan_string_(nan_string)
       , infinity_string_(infinity_string)
-      , minus_infinity_string_(minus_infinity_string) { }
+      , minus_infinity_string_(minus_infinity_string)
+      , complex_real_string_(complex_real_string)
+      , complex_imag_string_(complex_imag_string) { }
 
   ToJsonString::~ToJsonString() {
     delete impl_;
@@ -157,7 +161,15 @@ namespace awkward {
 
   void
   ToJsonString::complex(std::complex<double> x) {
-    impl_->complex(x);
+    if (complex_real_string_ != nullptr  &&  complex_imag_string_ != nullptr) {
+      impl_->complex(x, complex_real_string_, complex_imag_string_);
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("ToJson needs both \'complex_real_string\' and \'complex_imag_string\' "
+          " to serialize a complex number")
+        + FILENAME(__LINE__));
+    }
   }
 
   void
@@ -212,13 +224,13 @@ namespace awkward {
     void boolean(bool x) { writer_.Bool(x); }
     void integer(int64_t x) { writer_.Int64(x); }
     void real(double x) { writer_.Double(x); }
-    void complex(std::complex<double> x) {
+    void complex(std::complex<double> x,
+                 const char* complex_real_string,
+                 const char* complex_imag_string) {
       beginrecord();
-      field("__complex__");
-      boolean(true);
-      field("real");
+      field(complex_real_string);
       real(x.real());
-      field("imag");
+      field(complex_imag_string);
       real(x.imag());
       endrecord();
     }
@@ -245,11 +257,15 @@ namespace awkward {
   ToJsonPrettyString::ToJsonPrettyString(int64_t maxdecimals,
                                          const char* nan_string,
                                          const char* infinity_string,
-                                         const char* minus_infinity_string)
+                                         const char* minus_infinity_string,
+                                         const char* complex_real_string,
+                                         const char* complex_imag_string)
       : impl_(new ToJsonPrettyString::Impl(maxdecimals))
       , nan_string_(nan_string)
       , infinity_string_(infinity_string)
-      , minus_infinity_string_(minus_infinity_string) { }
+      , minus_infinity_string_(minus_infinity_string)
+      , complex_real_string_(complex_real_string)
+      , complex_imag_string_(complex_imag_string) { }
 
   ToJsonPrettyString::~ToJsonPrettyString() {
     delete impl_;
@@ -286,7 +302,15 @@ namespace awkward {
 
   void
   ToJsonPrettyString::complex(std::complex<double> x) {
-    impl_->complex(x);
+    if (complex_real_string_ != nullptr  &&  complex_imag_string_ != nullptr) {
+      impl_->complex(x, complex_real_string_, complex_imag_string_);
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("ToJson needs both \'complex_real_string\' and \'complex_imag_string\' "
+          " to serialize a complex number")
+        + FILENAME(__LINE__));
+    }
   }
 
   void
@@ -345,13 +369,13 @@ namespace awkward {
     void boolean(bool x) { writer_.Bool(x); }
     void integer(int64_t x) { writer_.Int64(x); }
     void real(double x) { writer_.Double(x); }
-    void complex(std::complex<double> x) {
+    void complex(std::complex<double> x,
+                 const char* complex_real_string,
+                 const char* complex_imag_string) {
       beginrecord();
-      field("__complex__");
-      boolean(true);
-      field("real");
+      field(complex_real_string);
       real(x.real());
-      field("imag");
+      field(complex_imag_string);
       real(x.imag());
       endrecord();
     }
@@ -378,11 +402,15 @@ namespace awkward {
                          int64_t buffersize,
                          const char* nan_string,
                          const char* infinity_string,
-                         const char* minus_infinity_string)
+                         const char* minus_infinity_string,
+                         const char* complex_real_string,
+                         const char* complex_imag_string)
       : impl_(new ToJsonFile::Impl(destination, maxdecimals, buffersize))
       , nan_string_(nan_string)
       , infinity_string_(infinity_string)
-      , minus_infinity_string_(minus_infinity_string) { }
+      , minus_infinity_string_(minus_infinity_string)
+      , complex_real_string_(complex_real_string)
+      , complex_imag_string_(complex_imag_string) { }
 
   ToJsonFile::~ToJsonFile() {
     delete impl_;
@@ -419,7 +447,15 @@ namespace awkward {
 
   void
   ToJsonFile::complex(std::complex<double> x) {
-    impl_->complex(x);
+    if (complex_real_string_ != nullptr  &&  complex_imag_string_ != nullptr) {
+      impl_->complex(x, complex_real_string_, complex_imag_string_);
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("ToJson needs both \'complex_real_string\' and \'complex_imag_string\' "
+          " to serialize a complex number")
+        + FILENAME(__LINE__));
+    }
   }
 
   void
@@ -473,13 +509,13 @@ namespace awkward {
     void boolean(bool x) { writer_.Bool(x); }
     void integer(int64_t x) { writer_.Int64(x); }
     void real(double x) { writer_.Double(x); }
-    void complex(std::complex<double> x) {
+    void complex(std::complex<double> x,
+                 const char* complex_real_string,
+                 const char* complex_imag_string) {
       beginrecord();
-      field("__complex__");
-      boolean(true);
-      field("real");
+      field(complex_real_string);
       real(x.real());
-      field("imag");
+      field(complex_imag_string);
       real(x.imag());
       endrecord();
     }
@@ -506,13 +542,17 @@ namespace awkward {
                                      int64_t buffersize,
                                      const char* nan_string,
                                      const char* infinity_string,
-                                     const char* minus_infinity_string)
+                                     const char* minus_infinity_string,
+                                     const char* complex_real_string,
+                                     const char* complex_imag_string)
       : impl_(new ToJsonPrettyFile::Impl(destination,
                                          maxdecimals,
                                          buffersize))
       , nan_string_(nan_string)
       , infinity_string_(infinity_string)
-      , minus_infinity_string_(minus_infinity_string) { }
+      , minus_infinity_string_(minus_infinity_string)
+      , complex_real_string_(complex_real_string)
+      , complex_imag_string_(complex_imag_string) { }
 
   ToJsonPrettyFile::~ToJsonPrettyFile() {
     delete impl_;
@@ -549,7 +589,15 @@ namespace awkward {
 
   void
   ToJsonPrettyFile::complex(std::complex<double> x) {
-    impl_->complex(x);
+    if (complex_real_string_ != nullptr  &&  complex_imag_string_ != nullptr) {
+      impl_->complex(x, complex_real_string_, complex_imag_string_);
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("ToJson needs both \'complex_real_string\' and \'complex_imag_string\' "
+          " to serialize a complex number")
+        + FILENAME(__LINE__));
+    }
   }
 
   void
@@ -594,12 +642,16 @@ namespace awkward {
     Handler(const ArrayBuilderOptions& options,
             const char* nan_string,
             const char* infinity_string,
-            const char* minus_infinity_string)
+            const char* minus_infinity_string,
+            const char* complex_real_string,
+            const char* complex_imag_string)
         : builder_(options)
         , moved_(false)
         , nan_string_(nan_string)
         , infinity_string_(infinity_string)
-        , minus_infinity_string_(minus_infinity_string) { }
+        , minus_infinity_string_(minus_infinity_string)
+        , complex_real_string_(complex_real_string)
+        , complex_imag_string_(complex_imag_string) { }
 
     void
     reset_moved() {
@@ -619,9 +671,7 @@ namespace awkward {
 
     bool Bool(bool x) {
       moved_ = true;
-      if (state_ != kExpectComplexStart) {
-        builder_.boolean(x);
-      }
+      builder_.boolean(x);
       return true;
     }
 
@@ -650,13 +700,6 @@ namespace awkward {
     }
 
     bool Double(double x) {
-      if (state_ == kExpectRealValue) {
-        complex_number_ = std::complex<double>(x);
-      }
-      else if (state_ == kExpectImaginaryValue) {
-        complex_number_ = {complex_number_.real(), x};
-        state_ = kExpectComplexEnd;
-      }
       builder_.real(x);
       moved_ = true;
       return true;
@@ -715,14 +758,6 @@ namespace awkward {
     bool
     Key(const char* str, rj::SizeType length, bool copy) {
       moved_ = true;
-      if (strcmp(str, "__complex__") == 0) {
-        state_ = kExpectComplexStart;
-      }
-      else if (strcmp(str, "real") == 0) {
-        state_ = kExpectRealValue;
-      } else  if (strcmp(str, "imag") == 0) {
-        state_ = kExpectImaginaryValue;
-      }
       builder_.field_check(str);
       return true;
     }
@@ -733,20 +768,12 @@ namespace awkward {
 
   private:
     ArrayBuilder builder_;
-
-    enum State {
-      kExpectComplexStart,
-      kExpectRealValue,
-      kExpectImaginaryValue,
-      kExpectComplexEnd
-    } state_;
-
-    // bool record_started_;
     bool moved_;
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
-    std::complex<double> complex_number_;
+    const char* complex_real_string_;
+    const char* complex_imag_string_;
   };
 
   template<typename HANDLER, typename STREAM>
@@ -798,10 +825,17 @@ namespace awkward {
                  const ArrayBuilderOptions& options,
                  const char* nan_string,
                  const char* infinity_string,
-                 const char* minus_infinity_string) {
+                 const char* minus_infinity_string,
+                 const char* complex_real_string,
+                 const char* complex_imag_string) {
     rj::Reader reader;
     rj::StringStream stream(source);
-    Handler handler(options, nan_string, infinity_string, minus_infinity_string);
+    Handler handler(options,
+                    nan_string,
+                    infinity_string,
+                    minus_infinity_string,
+                    complex_real_string,
+                    complex_imag_string);
     return do_parse(handler, reader, stream);
   }
 
@@ -811,13 +845,20 @@ namespace awkward {
                int64_t buffersize,
                const char* nan_string,
                const char* infinity_string,
-               const char* minus_infinity_string) {
+               const char* minus_infinity_string,
+               const char* complex_real_string,
+               const char* complex_imag_string) {
     rj::Reader reader;
     std::shared_ptr<char> buffer = kernel::malloc<char>(kernel::lib::cpu, buffersize);
     rj::FileReadStream stream(source,
                               buffer.get(),
                               ((size_t)buffersize)*sizeof(char));
-    Handler handler(options, nan_string, infinity_string, minus_infinity_string);
+    Handler handler(options,
+                    nan_string,
+                    infinity_string,
+                    minus_infinity_string,
+                    complex_real_string,
+                    complex_imag_string);
     return do_parse(handler, reader, stream);
   }
 }

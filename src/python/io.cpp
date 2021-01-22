@@ -25,6 +25,8 @@ make_fromjson(py::module& m, const std::string& name) {
            const char* nan_string,
            const char* infinity_string,
            const char* minus_infinity_string,
+           const char* complex_real_string,
+           const char* complex_imag_string,
            int64_t initial,
            double resize,
            int64_t buffersize) -> py::object {
@@ -32,12 +34,16 @@ make_fromjson(py::module& m, const std::string& name) {
                                             ak::ArrayBuilderOptions(initial, resize),
                                             nan_string,
                                             infinity_string,
-                                            minus_infinity_string);
+                                            minus_infinity_string,
+                                            complex_real_string,
+                                            complex_imag_string);
     return box(out);
   }, py::arg("source"),
      py::arg("nan_string") = nullptr,
      py::arg("infinity_string") = nullptr,
      py::arg("minus_infinity_string") = nullptr,
+     py::arg("complex_real_string") = nullptr,
+     py::arg("complex_imag_string") = nullptr,
      py::arg("initial") = 1024,
      py::arg("resize") = 1.5,
      py::arg("buffersize") = 65536);
@@ -50,6 +56,8 @@ make_fromjsonfile(py::module& m, const std::string& name) {
            const char* nan_string,
            const char* infinity_string,
            const char* minus_infinity_string,
+           const char* complex_real_string,
+           const char* complex_imag_string,
            int64_t initial,
            double resize,
            int64_t buffersize) -> py::object {
@@ -72,7 +80,9 @@ make_fromjsonfile(py::module& m, const std::string& name) {
                            buffersize,
                            nan_string,
                            infinity_string,
-                           minus_infinity_string);
+                           minus_infinity_string,
+                           complex_real_string,
+                           complex_imag_string);
       }
       catch (...) {
         fclose(file);
@@ -84,6 +94,8 @@ make_fromjsonfile(py::module& m, const std::string& name) {
      py::arg("nan_string") = nullptr,
      py::arg("infinity_string") = nullptr,
      py::arg("minus_infinity_string") = nullptr,
+     py::arg("complex_real_string") = nullptr,
+     py::arg("complex_imag_string") = nullptr,
      py::arg("initial") = 1024,
      py::arg("resize") = 1.5,
      py::arg("buffersize") = 65536);

@@ -822,12 +822,16 @@ namespace awkward {
   Content::tojson(bool pretty, int64_t maxdecimals,
     const char* nan_string,
     const char* infinity_string,
-    const char* minus_infinity_string) const {
+    const char* minus_infinity_string,
+    const char* complex_real_string,
+    const char* complex_imag_string) const {
     if (pretty) {
       ToJsonPrettyString builder(maxdecimals,
                                  nan_string,
                                  infinity_string,
-                                 minus_infinity_string);
+                                 minus_infinity_string,
+                                 complex_real_string,
+                                 complex_imag_string);
       tojson_part(builder, true);
       return builder.tostring();
     }
@@ -835,7 +839,9 @@ namespace awkward {
       ToJsonString builder(maxdecimals,
                            nan_string,
                            infinity_string,
-                           minus_infinity_string);
+                           minus_infinity_string,
+                           complex_real_string,
+                           complex_imag_string);
       tojson_part(builder, true);
       return builder.tostring();
     }
@@ -848,14 +854,18 @@ namespace awkward {
                   int64_t buffersize,
                   const char* nan_string,
                   const char* infinity_string,
-                  const char* minus_infinity_string) const {
+                  const char* minus_infinity_string,
+                  const char* complex_real_string,
+                  const char* complex_imag_string) const {
     if (pretty) {
       ToJsonPrettyFile builder(destination,
                                maxdecimals,
                                buffersize,
                                nan_string,
                                infinity_string,
-                               minus_infinity_string);
+                               minus_infinity_string,
+                               complex_real_string,
+                               complex_imag_string);
       builder.beginlist();
       tojson_part(builder, true);
       builder.endlist();
@@ -866,7 +876,9 @@ namespace awkward {
                          buffersize,
                          nan_string,
                          infinity_string,
-                         minus_infinity_string);
+                         minus_infinity_string,
+                         complex_real_string,
+                         complex_imag_string);
       builder.beginlist();
       tojson_part(builder, true);
       builder.endlist();

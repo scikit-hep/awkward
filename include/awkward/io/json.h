@@ -86,7 +86,9 @@ namespace awkward {
     ToJsonString(int64_t maxdecimals,
                  const char* nan_string = nullptr,
                  const char* infinity_string = nullptr,
-                 const char* minus_infinity_string = nullptr);
+                 const char* minus_infinity_string = nullptr,
+                 const char* complex_real_string = nullptr,
+                 const char* complex_imag_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonString();
     void
@@ -122,6 +124,8 @@ namespace awkward {
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
+    const char* complex_real_string_;
+    const char* complex_imag_string_;
   };
 
   /// @class ToJsonPrettyString
@@ -142,7 +146,9 @@ namespace awkward {
     ToJsonPrettyString(int64_t maxdecimals,
                        const char* nan_string = nullptr,
                        const char* infinity_string = nullptr,
-                       const char* minus_infinity_string = nullptr);
+                       const char* minus_infinity_string = nullptr,
+                       const char* complex_real_string = nullptr,
+                       const char* complex_imag_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonPrettyString();
     void
@@ -178,6 +184,8 @@ namespace awkward {
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
+    const char* complex_real_string_;
+    const char* complex_imag_string_;
   };
 
   /// @class ToJsonFile
@@ -202,7 +210,9 @@ namespace awkward {
                int64_t buffersize,
                const char* nan_string = nullptr,
                const char* infinity_string = nullptr,
-               const char* minus_infinity_string = nullptr);
+               const char* minus_infinity_string = nullptr,
+               const char* complex_real_string = nullptr,
+               const char* complex_imag_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonFile();
     void
@@ -235,6 +245,8 @@ namespace awkward {
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
+    const char* complex_real_string_;
+    const char* complex_imag_string_;
   };
 
   /// @class ToJsonPrettyFile
@@ -259,7 +271,9 @@ namespace awkward {
                      int64_t buffersize,
                      const char* nan_string = nullptr,
                      const char* infinity_string = nullptr,
-                     const char* minus_infinity_string = nullptr);
+                     const char* minus_infinity_string = nullptr,
+                     const char* complex_real_string = nullptr,
+                     const char* complex_imag_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonPrettyFile();
     void
@@ -292,6 +306,8 @@ namespace awkward {
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
+    const char* complex_real_string_;
+    const char* complex_imag_string_;
   };
 
   /// @brief Convert a JSON-encoded string into a Content array using an
@@ -311,7 +327,9 @@ namespace awkward {
                    const ArrayBuilderOptions& options,
                    const char* nan_string = nullptr,
                    const char* infinity_string = nullptr,
-                   const char* minus_infinity_string = nullptr);
+                   const char* minus_infinity_string = nullptr,
+                   const char* complex_real_string = nullptr,
+                   const char* complex_imag_string = nullptr);
 
   /// @brief Convert a JSON-encoded file into a Content array using an
   /// ArrayBuilder.
@@ -332,7 +350,9 @@ namespace awkward {
                  int64_t buffersize,
                  const char* nan_string = nullptr,
                  const char* infinity_string = nullptr,
-                 const char* minus_infinity_string = nullptr);
+                 const char* minus_infinity_string = nullptr,
+                 const char* complex_real_string = nullptr,
+                 const char* complex_imag_string = nullptr);
 
 }
 

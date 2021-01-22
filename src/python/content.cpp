@@ -709,12 +709,16 @@ tojson_string(const T& self,
               const py::object& maxdecimals,
               const char* nan_string,
               const char* infinity_string,
-              const char* minus_infinity_string) {
+              const char* minus_infinity_string,
+              const char* complex_real_string,
+              const char* complex_imag_string) {
   return self.tojson(pretty,
                      check_maxdecimals(maxdecimals),
                      nan_string,
                      infinity_string,
-                     minus_infinity_string);
+                     minus_infinity_string,
+                     complex_real_string,
+                     complex_imag_string);
 }
 
 template <typename T>
@@ -726,7 +730,9 @@ tojson_file(const T& self,
             int64_t buffersize,
             const char* nan_string,
             const char* infinity_string,
-            const char* minus_infinity_string) {
+            const char* minus_infinity_string,
+            const char* complex_real_string,
+            const char* complex_imag_string) {
 #ifdef _MSC_VER
   FILE* file;
   if (fopen_s(&file, destination.c_str(), "wb") != 0) {
@@ -746,7 +752,9 @@ tojson_file(const T& self,
                 buffersize,
                 nan_string,
                 infinity_string,
-                minus_infinity_string);
+                minus_infinity_string,
+                complex_real_string,
+                complex_imag_string);
   }
   catch (...) {
     fclose(file);
@@ -1217,7 +1225,9 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                py::arg("maxdecimals") = py::none(),
                py::arg("nan_string") = nullptr,
                py::arg("infinity_string") = nullptr,
-               py::arg("minus_infinity_string") = nullptr)
+               py::arg("minus_infinity_string") = nullptr,
+               py::arg("complex_real_string") = nullptr,
+               py::arg("complex_imag_string") = nullptr)
           .def("tojson",
                &tojson_file<T>,
                py::arg("destination"),
@@ -1226,7 +1236,9 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                py::arg("buffersize") = 65536,
                py::arg("nan_string") = nullptr,
                py::arg("infinity_string") = nullptr,
-               py::arg("minus_infinity_string") = nullptr)
+               py::arg("minus_infinity_string") = nullptr,
+               py::arg("complex_real_string") = nullptr,
+               py::arg("complex_imag_string") = nullptr)
           .def_property_readonly("nbytes", &T::nbytes)
           .def("deep_copy",
                &T::deep_copy,
@@ -2300,7 +2312,9 @@ make_Record(const py::handle& m, const std::string& name) {
            py::arg("maxdecimals") = py::none(),
            py::arg("nan_string") = nullptr,
            py::arg("infinity_string") = nullptr,
-           py::arg("minus_infinity_string") = nullptr)
+           py::arg("minus_infinity_string") = nullptr,
+           py::arg("complex_real_string") = nullptr,
+           py::arg("complex_imag_string") = nullptr)
       .def("tojson",
            &tojson_file<ak::Record>,
            py::arg("destination"),
@@ -2309,7 +2323,9 @@ make_Record(const py::handle& m, const std::string& name) {
            py::arg("buffersize") = 65536,
            py::arg("nan_string") = nullptr,
            py::arg("infinity_string") = nullptr,
-           py::arg("minus_infinity_string") = nullptr)
+           py::arg("minus_infinity_string") = nullptr,
+           py::arg("complex_real_string") = nullptr,
+           py::arg("complex_imag_string") = nullptr)
 
       .def_property_readonly("array",
                              [](const ak::Record& self)

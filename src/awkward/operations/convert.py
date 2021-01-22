@@ -960,6 +960,8 @@ def from_json(
     nan_string=None,
     infinity_string=None,
     minus_infinity_string=None,
+    complex_real_string=None,
+    complex_imag_string=None,
     highlevel=True,
     behavior=None,
     initial=1024,
@@ -975,6 +977,10 @@ def from_json(
             be interpreted as floating-point positive infinity values.
         minus_infinity_string (None or str): If not None, strings with this value
             will be interpreted as floating-point negative infinity values.
+        complex_real_string (None or str): If not None, defines the key for
+            a real part of a complex number.
+        complex_imag_string (None or str): If not None, defines the key for
+            an imaginary part of a complex number.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -1003,6 +1009,8 @@ def from_json(
             nan_string=nan_string,
             infinity_string=infinity_string,
             minus_infinity_string=minus_infinity_string,
+            complex_real_string=complex_real_string,
+            complex_imag_string=complex_imag_string,
             initial=initial,
             resize=resize,
             buffersize=buffersize,
@@ -1013,6 +1021,8 @@ def from_json(
             nan_string=nan_string,
             infinity_string=infinity_string,
             minus_infinity_string=minus_infinity_string,
+            complex_real_string=complex_real_string,
+            complex_imag_string=complex_imag_string,
             initial=initial,
             resize=resize,
             buffersize=buffersize,
@@ -1032,6 +1042,8 @@ def to_json(
     nan_string=None,
     infinity_string=None,
     minus_infinity_string=None,
+    complex_real_string=None,
+    complex_imag_string=None,
     buffersize=65536,
 ):
     """
@@ -1051,6 +1063,10 @@ def to_json(
         minus_infinity_string (None or str): If not None, floating-point negative
             infinity values will be replaced with this string instead of a JSON
             number.
+        complex_real_string (None or str): If not None, defines the key for
+            a real part of a complex number.
+        complex_imag_string (None or str): If not None, defines the key for
+            an imaginary part of a complex number.
         buffersize (int): Size (in bytes) of the buffer used by the JSON
             parser.
 
@@ -1116,6 +1132,8 @@ def to_json(
             nan_string=nan_string,
             infinity_string=infinity_string,
             minus_infinity_string=minus_infinity_string,
+            complex_real_string=complex_real_string,
+            complex_imag_string=complex_imag_string,
         )
     else:
         return out.tojson(
@@ -1126,6 +1144,8 @@ def to_json(
             nan_string=nan_string,
             infinity_string=infinity_string,
             minus_infinity_string=minus_infinity_string,
+            complex_real_string=complex_real_string,
+            complex_imag_string=complex_imag_string,
         )
 
 
