@@ -210,7 +210,7 @@ Index_from_jax(const std::string& name, const py::object& array) {
     }
     return ak::IndexOf<T>(
       std::shared_ptr<T>(reinterpret_cast<T*>(info.ptr),
-                         pyobject_deleter<T>(jax_array.ptr())),
+                         pyobject_deleter<T>(array.ptr())),
       0,
       (int64_t)info.shape[0],
       ak::kernel::lib::cpu);
@@ -373,7 +373,7 @@ make_IndexOf(const py::handle& m, const std::string& name) {
                 cupy_memoryptr,
                 pybind11::make_tuple(py::cast<ssize_t>(sizeof(T))));
         })
-      .def("to_dlpack", [name](const ak::IndexOf<T>& self) -> py::capsule {
+      .def("to_jax", [name](const ak::IndexOf<T>& self) -> py::object {
         DLManagedTensor* dlm_tensor = new DLManagedTensor;
 
         dlm_tensor->dl_tensor.data = reinterpret_cast<void*>(self.ptr().get());
@@ -398,7 +398,8 @@ make_IndexOf(const py::handle& m, const std::string& name) {
         Py_INCREF(array.ptr());
         dlm_tensor->deleter = ak::dlpack::deleter;
 
-        return py::capsule(dlm_tensor, "dltensor", ak::dlpack::pycapsule_deleter);
+        return py::module::import("jax.dlpack").attr("from_dlpack")
+                        (py::capsule(dlm_tensor, "dltensor", ak::dlpack::pycapsule_deleter));
       })
   );
 }

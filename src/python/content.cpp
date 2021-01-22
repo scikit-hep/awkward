@@ -2053,7 +2053,7 @@ NumpyArray_from_jax(const std::string& name,
       unbox_identities_none(identities),
       dict2parameters(parameters),
       std::shared_ptr<void>(reinterpret_cast<void*>(info.ptr),
-                            pyobject_deleter<void>(jax_array.ptr())),
+                            pyobject_deleter<void>(array.ptr())),
       info.shape,
       info.strides,
       0,
@@ -2207,7 +2207,7 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
                 cupy_memoryptr,
                 pybind11::make_tuple(py::cast<ssize_t>(self.itemsize())));
     })
-    .def("to_dlpack", [name](const ak::NumpyArray& self) -> py::capsule {
+    .def("to_jax", [name](const ak::NumpyArray& self) -> py::object {
       DLManagedTensor* dlm_tensor = new DLManagedTensor;
 
       dlm_tensor->dl_tensor.data = self.ptr().get();
@@ -2237,7 +2237,8 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
       Py_INCREF(array.ptr());
       dlm_tensor->deleter = ak::dlpack::deleter;
 
-      return py::capsule(dlm_tensor, "dltensor", ak::dlpack::pycapsule_deleter);
+      return py::module::import("jax.dlpack").attr("from_dlpack")
+                        (py::capsule(dlm_tensor, "dltensor", ak::dlpack::pycapsule_deleter));
     }));
 }
 

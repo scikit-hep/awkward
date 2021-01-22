@@ -7,7 +7,7 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 jax = pytest.importorskip("jax")
-jax.config.update("jax_platform_name", "gpu")
+jax.config.update("jax_platform_name", "cpu")
 jax.config.update("jax_enable_x64", True)
 
 
