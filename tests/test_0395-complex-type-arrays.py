@@ -11,6 +11,9 @@ def test_UnmaskedArray():
     content_float64 = ak.layout.NumpyArray(
         np.array([0.25, 0.5, 3.5, 4.5, 5.5], dtype=np.float64)
     )
+    assert content_float64.argmin() == 0
+    assert content_float64.argmax() == 4
+
     array_float64 = ak.layout.UnmaskedArray(content_float64)
     assert ak.to_list(array_float64) == [0.25, 0.5, 3.5, 4.5, 5.5]
     assert str(ak.type(content_float64)) == "float64"
