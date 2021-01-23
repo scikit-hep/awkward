@@ -10,22 +10,26 @@ import fastparquet
 import fastparquet.core
 import fastparquet.thrift_structures
 
-N = 1   # int(sys.argv[1])
+compress = sys.argv[1]
+N = int(sys.argv[2])
+is_split = sys.argv[3] == "split"
 
-file = open(f"/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib1-jagged{N}.parquet", "rb")
+s = "-split" if is_split else ""
+file = open(f"/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/{compress}{s}-jagged{N}.parquet", "rb")
 parquetfile = fastparquet.ParquetFile(file)
 
-# def unsplit(data):
-#     values = np.empty(len(data), np.uint8)
-#     quarter = len(data) // 4
-#     values[::4]  = data[:quarter]
-#     values[1::4] = data[quarter:2*quarter]
-#     values[2::4] = data[2*quarter:3*quarter]
-#     values[3::4] = data[3*quarter:]
-#     return values.view(np.float32)
-
-def unsplit(data):
-    return data.view(np.float32)
+if is_split:
+    def unsplit(data):
+        values = np.empty(len(data), np.uint8)
+        quarter = len(data) // 4
+        values[::4]  = data[:quarter]
+        values[1::4] = data[quarter:2*quarter]
+        values[2::4] = data[2*quarter:3*quarter]
+        values[3::4] = data[3*quarter:]
+        return values.view(np.float32)
+else:
+    def unsplit(data):
+        return data.view(np.float32)
 
 def bit_width_of(value):
     for i in range(0, 64):
@@ -33,22 +37,16 @@ def bit_width_of(value):
             return i
         value >>= 1
 
-bit_width = bit_width_of(3)
+bit_width = bit_width_of(N)
 
-read_repetition_levels = awkward.forth.ForthMachine32("""
+if N > 0:
+    read_repetition_levels = awkward.forth.ForthMachine32("""
 input stream
 output reps uint8
 
 stream I-> stack
 begin
-
-  ." start" cr
-  .s cr
-
   stream varint-> stack
-
-  .s cr
-
   dup 1 and 0= if
     ( run-length encoding )
     stream {rle_format}-> reps
@@ -157,7 +155,8 @@ count1 @ offsets1 +<- stack
 count0 @ offsets0 +<- stack
 """)
 
-for i, rg in enumerate(parquetfile.filter_row_groups([])):
+begintime = time.time()
+for rg in parquetfile.filter_row_groups([]):
     col = rg.columns[0]
     file.seek(col.meta_data.data_page_offset)
     ph = fastparquet.thrift_structures.read_thrift(file, fastparquet.thrift_structures.parquet_thrift.PageHeader)
@@ -175,7 +174,7 @@ for i, rg in enumerate(parquetfile.filter_row_groups([])):
     if N != 0:
         read_repetition_levels.run({"stream": raw_bytes})
         repetition_levels = np.asarray(read_repetition_levels["reps"])[:len(values)]
-
+        
     if N == 0:
         array = ak.layout.NumpyArray(values)
     elif N == 1:
@@ -205,4 +204,8 @@ for i, rg in enumerate(parquetfile.filter_row_groups([])):
                 )
             )
         )
-    print(ak.Array(array, check_valid=True))
+    tmp = ak.Array(array)
+
+endtime = time.time()
+
+print(f"AwkwardForth {compress}{s}-jagged{N}", endtime - begintime, "seconds")
