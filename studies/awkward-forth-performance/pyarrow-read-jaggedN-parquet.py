@@ -1,5 +1,6 @@
 import sys
 import time
+import subprocess
 
 import awkward as ak
 
@@ -9,6 +10,9 @@ is_split = sys.argv[3] == "split"
 
 s = "-split" if is_split else ""
 filename = f"/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/{compress}{s}-jagged{N}.parquet"
+
+subprocess.call(f"vmtouch -t {filename} > /dev/null", shell=True)
+subprocess.call(f"vmtouch {filename} | fgrep Pages", shell=True)
 
 array = ak.from_parquet(filename, lazy=True)
 

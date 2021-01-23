@@ -1,0 +1,99 @@
+  Resident Pages: 1048579/1048579  4G/4G  100%
+pyarrow zlib0-jagged0 2.354276180267334 seconds
+  Resident Pages: 1048579/1048579  4G/4G  100%
+pyarrow zlib0-jagged0 2.354440689086914 seconds
+  Resident Pages: 1048579/1048579  4G/4G  100%
+AwkwardForth zlib0-jagged0 1.4986679553985596 seconds
+  Resident Pages: 1048579/1048579  4G/4G  100%
+AwkwardForth zlib0-jagged0 1.4664413928985596 seconds
+  Resident Pages: 1048579/1048579  4G/4G  100%
+pyarrow zlib0-jagged0 2.3724851608276367 seconds
+  Resident Pages: 1048579/1048579  4G/4G  100%
+AwkwardForth zlib0-jagged0 1.4517807960510254 seconds
+  Resident Pages: 1048579/1048579  4G/4G  100%
+pyarrow zlib0-split-jagged0 32.12971520423889 seconds
+  Resident Pages: 1048579/1048579  4G/4G  100%
+pyarrow zlib0-split-jagged0 2.003561496734619 seconds
+  Resident Pages: 1048579/1048579  4G/4G  100%
+AwkwardForth zlib0-split-jagged0 3.4122660160064697 seconds
+  Resident Pages: 1048579/1048579  4G/4G  100%
+AwkwardForth zlib0-split-jagged0 3.370635986328125 seconds
+  Resident Pages: 1048579/1048579  4G/4G  100%
+pyarrow zlib0-split-jagged0 2.066380500793457 seconds
+  Resident Pages: 1048579/1048579  4G/4G  100%
+AwkwardForth zlib0-split-jagged0 3.390061140060425 seconds
+  Resident Pages: 1087524/1087524  4G/4G  100%
+pyarrow zlib0-jagged1 22.69263529777527 seconds
+  Resident Pages: 1087524/1087524  4G/4G  100%
+pyarrow zlib0-jagged1 12.147205114364624 seconds
+  Resident Pages: 1087524/1087524  4G/4G  100%
+AwkwardForth zlib0-jagged1 79.10311031341553 seconds
+  Resident Pages: 1087524/1087524  4G/4G  100%
+AwkwardForth zlib0-jagged1 79.00379300117493 seconds
+  Resident Pages: 1087524/1087524  4G/4G  100%
+pyarrow zlib0-jagged1 12.132625341415405 seconds
+  Resident Pages: 1087524/1087524  4G/4G  100%
+AwkwardForth zlib0-jagged1 79.08024573326111 seconds
+  Resident Pages: 1087524/1087524  4G/4G  100%
+pyarrow zlib0-split-jagged1 29.08091378211975 seconds
+  Resident Pages: 1087524/1087524  4G/4G  100%
+pyarrow zlib0-split-jagged1 11.744213581085205 seconds
+  Resident Pages: 1087524/1087524  4G/4G  100%
+AwkwardForth zlib0-split-jagged1 80.76318621635437 seconds
+  Resident Pages: 1087524/1087524  4G/4G  100%
+AwkwardForth zlib0-split-jagged1 81.27028608322144 seconds
+  Resident Pages: 1087524/1087524  4G/4G  100%
+pyarrow zlib0-split-jagged1 11.804870843887329 seconds
+  Resident Pages: 1087524/1087524  4G/4G  100%
+AwkwardForth zlib0-split-jagged1 81.1258237361908 seconds
+  Resident Pages: 1117383/1117383  4G/4G  100%
+pyarrow zlib0-jagged2 29.611886501312256 seconds
+  Resident Pages: 1117383/1117383  4G/4G  100%
+pyarrow zlib0-jagged2 13.573397874832153 seconds
+  Resident Pages: 1117383/1117383  4G/4G  100%
+AwkwardForth zlib0-jagged2 99.58867621421814 seconds
+  Resident Pages: 1117383/1117383  4G/4G  100%
+AwkwardForth zlib0-jagged2 100.18804860115051 seconds
+  Resident Pages: 1117383/1117383  4G/4G  100%
+pyarrow zlib0-jagged2 13.696115970611572 seconds
+  Resident Pages: 1117383/1117383  4G/4G  100%
+AwkwardForth zlib0-jagged2 99.97504234313965 seconds
+  Resident Pages: 1117383/1117383  4G/4G  100%
+pyarrow zlib0-split-jagged2 36.53763675689697 seconds
+  Resident Pages: 1117383/1117383  4G/4G  100%
+pyarrow zlib0-split-jagged2 13.262761354446411 seconds
+  Resident Pages: 1117383/1117383  4G/4G  100%
+AwkwardForth zlib0-split-jagged2 101.59921336174011 seconds
+  Resident Pages: 1117383/1117383  4G/4G  100%
+AwkwardForth zlib0-split-jagged2 101.44777488708496 seconds
+  Resident Pages: 1117383/1117383  4G/4G  100%
+pyarrow zlib0-split-jagged2 13.446828365325928 seconds
+  Resident Pages: 1117383/1117383  4G/4G  100%
+AwkwardForth zlib0-split-jagged2 101.33358001708984 seconds
+  Resident Pages: 1117161/1117161  4G/4G  100%
+pyarrow zlib0-jagged3 37.135802030563354 seconds
+  Resident Pages: 1117161/1117161  4G/4G  100%
+pyarrow zlib0-jagged3 14.453836441040039 seconds
+  Resident Pages: 1117161/1117161  4G/4G  100%
+AwkwardForth zlib0-jagged3 119.74739098548889 seconds
+  Resident Pages: 1117161/1117161  4G/4G  100%
+AwkwardForth zlib0-jagged3 119.67976713180542 seconds
+  Resident Pages: 1117161/1117161  4G/4G  100%
+pyarrow zlib0-jagged3 14.697208404541016 seconds
+  Resident Pages: 1117161/1117161  4G/4G  100%
+AwkwardForth zlib0-jagged3 120.03740167617798 seconds
+  Resident Pages: 1117161/1117161  4G/4G  100%
+pyarrow zlib0-split-jagged3 32.26884889602661 seconds
+  Resident Pages: 1117161/1117161  4G/4G  100%
+pyarrow zlib0-split-jagged3 14.195062398910522 seconds
+  Resident Pages: 1117161/1117161  4G/4G  100%
+AwkwardForth zlib0-split-jagged3 121.86883187294006 seconds
+  Resident Pages: 1117161/1117161  4G/4G  100%
+AwkwardForth zlib0-split-jagged3 121.57731938362122 seconds
+  Resident Pages: 1117161/1117161  4G/4G  100%
+pyarrow zlib0-split-jagged3 14.141507863998413 seconds
+  Resident Pages: 1117161/1117161  4G/4G  100%
+AwkwardForth zlib0-split-jagged3 121.57730102539062 seconds
+  Resident Pages: 1089624/1089624  4G/4G  100%
+pyarrow zlib1-jagged0 25.358911991119385 seconds
+  Resident Pages: 1089624/1089624  4G/4G  100%

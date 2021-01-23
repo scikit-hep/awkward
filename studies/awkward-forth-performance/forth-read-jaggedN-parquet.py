@@ -1,5 +1,6 @@
 import time
 import sys
+import subprocess
 
 import numba as nb
 import numpy as np
@@ -15,7 +16,12 @@ N = int(sys.argv[2])
 is_split = sys.argv[3] == "split"
 
 s = "-split" if is_split else ""
-file = open(f"/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/{compress}{s}-jagged{N}.parquet", "rb")
+filename = f"/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/{compress}{s}-jagged{N}.parquet"
+
+subprocess.call(f"vmtouch -t {filename} > /dev/null", shell=True)
+subprocess.call(f"vmtouch {filename} | fgrep Pages", shell=True)
+
+file = open(filename, "rb")
 parquetfile = fastparquet.ParquetFile(file)
 
 if is_split:
