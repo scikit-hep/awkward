@@ -41,7 +41,12 @@ output reps uint8
 
 stream I-> stack
 begin
+  dup .
+
   stream varint-> stack
+
+  dup .
+
   dup 1 and 0= if
     ( run-length encoding )
     stream {rle_format}-> reps

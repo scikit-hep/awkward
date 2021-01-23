@@ -2349,3 +2349,11 @@ begin
   <=
 until
 """
+
+
+def test_parse_strings():
+    vm32 = awkward.forth.ForthMachine32("""
+." hello there      long space"
+""")
+    assert vm32.decompiled == """." hello there      long space"
+"""

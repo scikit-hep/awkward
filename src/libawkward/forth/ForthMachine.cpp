@@ -61,46 +61,49 @@ namespace awkward {
   #define CODE_LEN_OUTPUT 22
   #define CODE_REWIND 23
   // generic builtin instructions
-  #define CODE_PRINT 24
-  #define CODE_I 25
-  #define CODE_J 26
-  #define CODE_K 27
-  #define CODE_DUP 28
-  #define CODE_DROP 29
-  #define CODE_SWAP 30
-  #define CODE_OVER 31
-  #define CODE_ROT 32
-  #define CODE_NIP 33
-  #define CODE_TUCK 34
-  #define CODE_ADD 35
-  #define CODE_SUB 36
-  #define CODE_MUL 37
-  #define CODE_DIV 38
-  #define CODE_MOD 39
-  #define CODE_DIVMOD 40
-  #define CODE_NEGATE 41
-  #define CODE_ADD1 42
-  #define CODE_SUB1 43
-  #define CODE_ABS 44
-  #define CODE_MIN 45
-  #define CODE_MAX 46
-  #define CODE_EQ 47
-  #define CODE_NE 48
-  #define CODE_GT 49
-  #define CODE_GE 50
-  #define CODE_LT 51
-  #define CODE_LE 52
-  #define CODE_EQ0 53
-  #define CODE_INVERT 54
-  #define CODE_AND 55
-  #define CODE_OR 56
-  #define CODE_XOR 57
-  #define CODE_LSHIFT 58
-  #define CODE_RSHIFT 59
-  #define CODE_FALSE 60
-  #define CODE_TRUE 61
+  #define CODE_PRINT_STRING 24
+  #define CODE_PRINT 25
+  #define CODE_PRINT_CR 26
+  #define CODE_PRINT_STACK 27
+  #define CODE_I 28
+  #define CODE_J 29
+  #define CODE_K 30
+  #define CODE_DUP 31
+  #define CODE_DROP 32
+  #define CODE_SWAP 33
+  #define CODE_OVER 34
+  #define CODE_ROT 35
+  #define CODE_NIP 36
+  #define CODE_TUCK 37
+  #define CODE_ADD 38
+  #define CODE_SUB 39
+  #define CODE_MUL 40
+  #define CODE_DIV 41
+  #define CODE_MOD 42
+  #define CODE_DIVMOD 43
+  #define CODE_NEGATE 44
+  #define CODE_ADD1 45
+  #define CODE_SUB1 46
+  #define CODE_ABS 47
+  #define CODE_MIN 48
+  #define CODE_MAX 49
+  #define CODE_EQ 50
+  #define CODE_NE 51
+  #define CODE_GT 52
+  #define CODE_GE 53
+  #define CODE_LT 54
+  #define CODE_LE 55
+  #define CODE_EQ0 56
+  #define CODE_INVERT 57
+  #define CODE_AND 58
+  #define CODE_OR 59
+  #define CODE_XOR 60
+  #define CODE_LSHIFT 61
+  #define CODE_RSHIFT 62
+  #define CODE_FALSE 63
+  #define CODE_TRUE 64
   // beginning of the user-defined dictionary
-  #define BOUND_DICTIONARY 62
+  #define BOUND_DICTIONARY 65
 
   const std::set<std::string> reserved_words_({
     // comments
@@ -123,7 +126,9 @@ namespace awkward {
     // input actions
     "len", "pos", "end", "seek", "skip",
     // output actions
-    "<-", "+<-", "stack", "rewind"
+    "<-", "+<-", "stack", "rewind",
+    // print (for debugging)
+    ".\""
   });
 
   const std::set<std::string> input_parser_words_({
@@ -156,8 +161,10 @@ namespace awkward {
   });
 
   const std::map<std::string, int64_t> generic_builtin_words_({
-    // print
+    // print (for debugging)
     {".", CODE_PRINT},
+    {"cr", CODE_PRINT_CR},
+    {".s", CODE_PRINT_STACK},
     // loop variables
     {"i", CODE_I},
     {"j", CODE_J},
@@ -560,8 +567,18 @@ namespace awkward {
           int64_t out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
           return output_names_[(IndexTypeOf<int64_t>)out_num] + " rewind";
         }
+        case CODE_PRINT_STRING: {
+          int64_t string_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
+          return ".\" " + strings_[(IndexTypeOf<int64_t>)string_num] + "\"";
+        }
         case CODE_PRINT: {
           return ".";
+        }
+        case CODE_PRINT_CR: {
+          return "cr";
+        }
+        case CODE_PRINT_STACK: {
+          return ".s";
         }
         case CODE_I: {
           return "i";
@@ -1504,6 +1521,7 @@ namespace awkward {
         case CODE_WRITE_DUP:
         case CODE_LEN_OUTPUT:
         case CODE_REWIND:
+        case CODE_PRINT_STRING:
           return 2;
         default:
           return 1;
@@ -1592,6 +1610,54 @@ namespace awkward {
       }
       stop++;
       colstop++;
+
+      if (!tokenized.empty()  &&  tokenized[tokenized.size() - 1] == ".\"") {
+        // Strings are tokenized differently.
+        if (stop == source_.size()) {
+          throw std::invalid_argument(
+            std::string("unclosed string after .\" word") + FILENAME(__LINE__));
+        }
+        int64_t nextline = line;
+        current = source_[stop];
+        while (current == ' '  ||  current == '\r'  ||  current == '\t'  ||
+               current == '\v'  ||  current == '\f'  ||  current == '\n') {
+          if (current == '\n') {
+            nextline++;
+            colstart = 0;
+            colstop = 0;
+          }
+          stop++;
+          colstop++;
+          if (stop == source_.size()) {
+            throw std::invalid_argument(
+              std::string("unclosed string after .\" word") + FILENAME(__LINE__));
+          }
+          current = source_[stop];
+        }
+        start = stop;
+        colstart = colstop;
+        while (current != '\"'  &&  source_[stop - 1] != '\\') {
+          if (current == '\n') {
+            nextline++;
+            colstart = 0;
+            colstop = 0;
+          }
+          stop++;
+          colstop++;
+          if (stop == source_.size()) {
+            throw std::invalid_argument(
+              std::string("unclosed string after .\" word") + FILENAME(__LINE__));
+          }
+          current = source_[stop];
+        }
+        stop++;
+        colstop++;
+        tokenized.push_back(source_.substr(start, stop - start - 1));
+        linecol.push_back(std::pair<int64_t, int64_t>(line, colstart));
+        start = stop;
+        full = false;
+        colstart = colstop;
+      }
     }
     // The source code might end on non-whitespace.
     if (full) {
@@ -2445,6 +2511,21 @@ namespace awkward {
         }
       }
 
+      else if (word == ".\"") {
+        bytecodes.push_back(CODE_PRINT_STRING);
+        bytecodes.push_back((int32_t)strings_.size());
+
+        if (pos + 1 >= stop) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2, "unclosed string after .\" word")
+            + FILENAME(__LINE__)
+          );
+        }
+        strings_.push_back(tokenized[(IndexTypeOf<std::string>)pos + 1]);
+
+        pos += 2;
+      }
+
       else {
         bool found_in_builtins = false;
         for (auto pair : generic_builtin_words_) {
@@ -3194,12 +3275,33 @@ namespace awkward {
               break;
             }
 
+            case CODE_PRINT_STRING: {
+              I string_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              printf(strings_[string_num].c_str());
+              break;
+            }
+
             case CODE_PRINT: {
               if (stack_cannot_pop()) {
                 current_error_ = util::ForthError::stack_underflow;
                 return;
               }
               print_number(stack_pop());
+              break;
+            }
+
+            case CODE_PRINT_CR: {
+              printf("\n");
+              break;
+            }
+
+            case CODE_PRINT_STACK: {
+              printf("<%ld> ", stack_depth_);
+              for (int64_t i = 0;  i < stack_depth_;  i++) {
+                print_number(stack_buffer_[i]);
+              }
+              printf("<- top ");
               break;
             }
 
@@ -3666,13 +3768,13 @@ namespace awkward {
   template <>
   void
   ForthMachineOf<int32_t, int32_t>::print_number(int32_t num) noexcept {
-    printf("%d\n", num);
+    printf("%d ", num);
   }
 
   template <>
   void
   ForthMachineOf<int64_t, int32_t>::print_number(int64_t num) noexcept {
-    printf("%ld\n", num);
+    printf("%ld ", num);
   }
 
   template class EXPORT_TEMPLATE_INST ForthMachineOf<int32_t, int32_t>;
