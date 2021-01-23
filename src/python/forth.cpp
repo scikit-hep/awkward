@@ -21,7 +21,8 @@ py::object maybe_throw(const ak::ForthMachineOf<T, I>& self,
                        bool raise_seek_beyond,
                        bool raise_skip_beyond,
                        bool raise_rewind_beyond,
-                       bool raise_division_by_zero) {
+                       bool raise_division_by_zero,
+                       bool raise_varint_too_big) {
   std::set<ak::util::ForthError> ignore;
   if (!raise_user_halt) {
     ignore.insert(ak::util::ForthError::user_halt);
@@ -50,6 +51,9 @@ py::object maybe_throw(const ak::ForthMachineOf<T, I>& self,
   if (!raise_division_by_zero) {
     ignore.insert(ak::util::ForthError::division_by_zero);
   }
+  if (!raise_varint_too_big) {
+    ignore.insert(ak::util::ForthError::varint_too_big);
+  }
   self.maybe_throw(err, ignore);
 
   switch (err) {
@@ -77,6 +81,8 @@ py::object maybe_throw(const ak::ForthMachineOf<T, I>& self,
       return py::str("rewind beyond");
     case ak::util::ForthError::division_by_zero:
       return py::str("division by zero");
+    case ak::util::ForthError::varint_too_big:
+      return py::str("varint too big");
     default:
       throw std::invalid_argument(
           std::string("unrecognized ForthError: ")
@@ -237,7 +243,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                           bool raise_seek_beyond,
                           bool raise_skip_beyond,
                           bool raise_rewind_beyond,
-                          bool raise_division_by_zero) -> py::object {
+                          bool raise_division_by_zero,
+                          bool raise_varint_too_big) -> py::object {
               ak::util::ForthError err = self.step();
               return maybe_throw<T, I>(self,
                                        err,
@@ -249,7 +256,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                                        raise_seek_beyond,
                                        raise_skip_beyond,
                                        raise_rewind_beyond,
-                                       raise_division_by_zero);
+                                       raise_division_by_zero,
+                                       raise_varint_too_big);
           }, py::arg("raise_user_halt") = true
            , py::arg("raise_recursion_depth_exceeded") = true
            , py::arg("raise_stack_underflow") = true
@@ -258,7 +266,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
            , py::arg("raise_seek_beyond") = true
            , py::arg("raise_skip_beyond") = true
            , py::arg("raise_rewind_beyond") = true
-           , py::arg("raise_division_by_zero") = true)
+           , py::arg("raise_division_by_zero") = true
+           , py::arg("raise_varint_too_big") = true)
           .def("run", [](ak::ForthMachineOf<T, I>& self,
                          const py::dict& inputs,
                          bool raise_user_halt,
@@ -269,7 +278,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                          bool raise_seek_beyond,
                          bool raise_skip_beyond,
                          bool raise_rewind_beyond,
-                         bool raise_division_by_zero) -> py::object {
+                         bool raise_division_by_zero,
+                         bool raise_varint_too_big) -> py::object {
               std::map<std::string, std::shared_ptr<ak::ForthInputBuffer>> ins;
               for (auto pair : inputs) {
                 std::string name = pair.first.cast<std::string>();
@@ -294,7 +304,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                                        raise_seek_beyond,
                                        raise_skip_beyond,
                                        raise_rewind_beyond,
-                                       raise_division_by_zero);
+                                       raise_division_by_zero,
+                                       raise_varint_too_big);
           }, py::arg("inputs") = py::dict()
            , py::arg("raise_user_halt") = true
            , py::arg("raise_recursion_depth_exceeded") = true
@@ -304,7 +315,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
            , py::arg("raise_seek_beyond") = true
            , py::arg("raise_skip_beyond") = true
            , py::arg("raise_rewind_beyond") = true
-           , py::arg("raise_division_by_zero") = true)
+           , py::arg("raise_division_by_zero") = true
+           , py::arg("raise_varint_too_big") = true)
           .def("resume", [](ak::ForthMachineOf<T, I>& self,
                           bool raise_user_halt,
                           bool raise_recursion_depth_exceeded,
@@ -314,7 +326,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                           bool raise_seek_beyond,
                           bool raise_skip_beyond,
                           bool raise_rewind_beyond,
-                          bool raise_division_by_zero) -> py::object {
+                          bool raise_division_by_zero,
+                          bool raise_varint_too_big) -> py::object {
               ak::util::ForthError err = self.resume();
               return maybe_throw<T, I>(self,
                                        err,
@@ -326,7 +339,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                                        raise_seek_beyond,
                                        raise_skip_beyond,
                                        raise_rewind_beyond,
-                                       raise_division_by_zero);
+                                       raise_division_by_zero,
+                                       raise_varint_too_big);
           }, py::arg("raise_user_halt") = true
            , py::arg("raise_recursion_depth_exceeded") = true
            , py::arg("raise_stack_underflow") = true
@@ -335,7 +349,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
            , py::arg("raise_seek_beyond") = true
            , py::arg("raise_skip_beyond") = true
            , py::arg("raise_rewind_beyond") = true
-           , py::arg("raise_division_by_zero") = true)
+           , py::arg("raise_division_by_zero") = true
+           , py::arg("raise_varint_too_big") = true)
           .def("call", [](ak::ForthMachineOf<T, I>& self,
                           const std::string& name,
                           bool raise_user_halt,
@@ -346,7 +361,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                           bool raise_seek_beyond,
                           bool raise_skip_beyond,
                           bool raise_rewind_beyond,
-                          bool raise_division_by_zero) -> py::object {
+                          bool raise_division_by_zero,
+                          bool raise_varint_too_big) -> py::object {
               ak::util::ForthError err = self.call(name);
               return maybe_throw<T, I>(self,
                                        err,
@@ -358,7 +374,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                                        raise_seek_beyond,
                                        raise_skip_beyond,
                                        raise_rewind_beyond,
-                                       raise_division_by_zero);
+                                       raise_division_by_zero,
+                                       raise_varint_too_big);
           }, py::arg("name")
            , py::arg("raise_user_halt") = true
            , py::arg("raise_recursion_depth_exceeded") = true
@@ -368,7 +385,8 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
            , py::arg("raise_seek_beyond") = true
            , py::arg("raise_skip_beyond") = true
            , py::arg("raise_rewind_beyond") = true
-           , py::arg("raise_division_by_zero") = true)
+           , py::arg("raise_division_by_zero") = true
+           , py::arg("raise_varint_too_big") = true)
           .def_property_readonly("current_bytecode_position",
               &ak::ForthMachineOf<T, I>::current_bytecode_position)
           .def_property_readonly("current_recursion_depth",

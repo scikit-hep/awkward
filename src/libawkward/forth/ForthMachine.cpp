@@ -1281,6 +1281,11 @@ namespace awkward {
           throw std::invalid_argument(
             "'division by zero' in AwkwardForth runtime: tried to divide by zero");
         }
+        case util::ForthError::varint_too_big: {
+          throw std::invalid_argument(
+            "'varint too big' in AwkwardForth runtime: variable-length integer is "
+            "greater than 2**63");
+        }
         default:
           break;
       }
@@ -2645,8 +2650,8 @@ namespace awkward {
               bytecodes_pointer_where()++;
               output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
             }
-            uint64_t shift;
-            uint64_t result;
+            int64_t shift;
+            int64_t result;
             uint8_t* byte;
             for (int64_t count = 0;  count < num_items;  count++) {
               shift = 0;
@@ -2656,7 +2661,11 @@ namespace awkward {
                 if (current_error_ != util::ForthError::none) {
                   return;
                 }
-                result |= (uint64_t)(*byte & 0x7f) << shift;
+                if (shift == 7 * 9) {
+                  current_error_ = util::ForthError::varint_too_big;
+                  return;
+                }
+                result |= (int64_t)(*byte & 0x7f) << shift;
                 shift += 7;
               } while (*byte & 0x80);
 
@@ -2681,8 +2690,8 @@ namespace awkward {
               bytecodes_pointer_where()++;
               output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
             }
-            uint64_t shift;
-            uint64_t result;
+            int64_t shift;
+            int64_t result;
             uint8_t* byte;
             int64_t value;
             for (int64_t count = 0;  count < num_items;  count++) {
@@ -2693,7 +2702,11 @@ namespace awkward {
                 if (current_error_ != util::ForthError::none) {
                   return;
                 }
-                result |= (uint64_t)(*byte & 0x7f) << shift;
+                if (shift == 7 * 9) {
+                  current_error_ = util::ForthError::varint_too_big;
+                  return;
+                }
+                result |= (int64_t)(*byte & 0x7f) << shift;
                 shift += 7;
               } while (*byte & 0x80);
 
@@ -2733,11 +2746,14 @@ namespace awkward {
             int64_t items_remaining = num_items;
             uint64_t data;
             uint64_t tmp;
+            uint8_t* tmpptr;
+
             if (items_remaining != 0) {
-              tmp = (uint64_t)(*reinterpret_cast<uint8_t*>(input->read(1, current_error_)));
+              tmpptr = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
               if (current_error_ != util::ForthError::none) {
                 return;
               }
+              tmp = (uint64_t)(*tmpptr);
               if (flip) {
                 // For bit-flipping: https://stackoverflow.com/a/2603254/1623645
                 tmp = (bitswap_lookup[tmp & 0b1111] << 4) | bitswap_lookup[tmp >> 4];
@@ -2766,10 +2782,11 @@ namespace awkward {
                 bits_wnd_r += bit_width;
               }
               else {
-                tmp = (uint64_t)(*reinterpret_cast<uint8_t*>(input->read(1, current_error_)));
+                tmpptr = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
                 if (current_error_ != util::ForthError::none) {
                   return;
                 }
+                tmp = (uint64_t)(*tmpptr);
                 if (flip) {
                   // For bit-flipping: https://stackoverflow.com/a/2603254/1623645
                   tmp = (bitswap_lookup[tmp & 0b1111] << 4) | bitswap_lookup[tmp >> 4];

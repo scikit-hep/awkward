@@ -232,6 +232,7 @@ namespace awkward {
         skip_beyond,
         rewind_beyond,
         division_by_zero,
+        varint_too_big,
 
         size
     };

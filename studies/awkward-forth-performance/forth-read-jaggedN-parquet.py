@@ -10,7 +10,7 @@ import fastparquet
 import fastparquet.core
 import fastparquet.thrift_structures
 
-N = int(sys.argv[1])
+N = 1   # int(sys.argv[1])
 
 file = open(f"/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib1-jagged{N}.parquet", "rb")
 parquetfile = fastparquet.ParquetFile(file)
@@ -41,11 +41,13 @@ output reps uint8
 
 stream I-> stack
 begin
-  dup .
+
+  ." start" cr
+  .s cr
 
   stream varint-> stack
 
-  dup .
+  .s cr
 
   dup 1 and 0= if
     ( run-length encoding )
