@@ -89,6 +89,23 @@ namespace awkward {
   }
 
   template <typename OUT>
+  void
+  ForthOutputBufferOf<OUT>::dup(int64_t num_times, util::ForthError& err) noexcept {
+    if (length_ == 0) {
+      err = util::ForthError::rewind_beyond;
+    }
+    else if (num_times > 0) {
+      int64_t next = length_ + num_times;
+      maybe_resize(next);
+      OUT value = ptr_.get()[length_ - 1];
+      for (int64_t i = 0;  i < num_times;  i++) {
+        ptr_.get()[length_ + i] = value;
+      }
+      length_ = next;
+    }
+  }
+
+  template <typename OUT>
   const ContentPtr
   ForthOutputBufferOf<OUT>::toNumpyArray() const {
     util::dtype dtype;
@@ -663,6 +680,30 @@ namespace awkward {
       byteswap64(num_items, &ptr_.get()[length_]);
     }
     length_ = next;
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferOf<OUT>::write_add_int32(int32_t value) noexcept {
+    OUT previous = 0;
+    if (length_ != 0) {
+      previous = ptr_.get()[length_ - 1];
+    }
+    length_++;
+    maybe_resize(length_);
+    ptr_.get()[length_ - 1] = previous + value;
+  }
+
+  template <typename OUT>
+  void
+  ForthOutputBufferOf<OUT>::write_add_int64(int64_t value) noexcept {
+    OUT previous = 0;
+    if (length_ != 0) {
+      previous = ptr_.get()[length_ - 1];
+    }
+    length_++;
+    maybe_resize(length_);
+    ptr_.get()[length_ - 1] = previous + value;
   }
 
   template <typename OUT>

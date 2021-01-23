@@ -122,7 +122,6 @@ def test_userdef_compilation():
     )
 
     vm32 = awkward.forth.ForthMachine32(": infinite recurse ;")
-    assert ak.to_list(vm32.bytecodes) == [[], [60]]
     assert (
         vm32.decompiled
         == """: infinite
@@ -2062,3 +2061,299 @@ again
         -201,
         202,
     ]
+
+
+def test_varint():
+    # https://lucene.apache.org/core/3_5_0/fileformats.html#VInt
+    data = np.array(
+        [0, 1, 2, 127, 128, 1, 129, 1, 130, 1, 255, 127, 128, 128, 1, 129, 128, 1],
+        np.uint8,
+    )
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x
+10 0 do
+  x varint-> stack
+loop
+"""
+    )
+    vm32.run({"x": data})
+    assert vm32.stack == [0, 1, 2, 127, 128, 129, 130, 16383, 16384, 16385]
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x
+10 x #varint-> stack
+"""
+    )
+    vm32.run({"x": data})
+    assert vm32.stack == [0, 1, 2, 127, 128, 129, 130, 16383, 16384, 16385]
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x
+output y int32
+10 0 do
+  x varint-> y
+loop
+"""
+    )
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == [0, 1, 2, 127, 128, 129, 130, 16383, 16384, 16385]
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x
+output y int32
+10 x #varint-> y
+"""
+    )
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == [0, 1, 2, 127, 128, 129, 130, 16383, 16384, 16385]
+
+
+def test_zigzag():
+    # https://developers.google.com/protocol-buffers/docs/encoding?csw=1#types
+    data = np.array(
+        [0, 1, 2, 3, 254, 255, 255, 255, 15, 255, 255, 255, 255, 15], np.uint8
+    )
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x
+6 0 do
+  x zigzag-> stack
+loop
+"""
+    )
+    vm32.run({"x": data})
+    assert vm32.stack == [0, -1, 1, -2, 2147483647, -2147483648]
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x
+6 x #zigzag-> stack
+"""
+    )
+    vm32.run({"x": data})
+    assert vm32.stack == [0, -1, 1, -2, 2147483647, -2147483648]
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x
+output y int32
+6 0 do
+  x zigzag-> y
+loop
+"""
+    )
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == [0, -1, 1, -2, 2147483647, -2147483648]
+
+    vm32 = awkward.forth.ForthMachine32(
+        """
+input x
+output y int32
+6 x #zigzag-> y
+"""
+    )
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == [0, -1, 1, -2, 2147483647, -2147483648]
+
+
+def test_nbit_little():
+    data = np.array(
+        [252, 255, 191, 255, 251, 255, 255, 239, 251, 255, 191, 255], np.uint8
+    )
+    expectation = (
+        [0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2]
+        + [3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3]
+        + [3, 3, 3, 3, 3, 3, 2, 3, 3, 2, 3, 3]
+        + [3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3]
+    )
+
+    vm32 = awkward.forth.ForthMachine32("input x 48 x #2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation
+    assert vm32.input_position("x") == 12
+
+    vm32 = awkward.forth.ForthMachine32("input x 47 x #2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:47]
+    assert vm32.input_position("x") == 12
+
+    vm32 = awkward.forth.ForthMachine32("input x 45 x #2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:45]
+    assert vm32.input_position("x") == 12
+
+    vm32 = awkward.forth.ForthMachine32("input x 44 x #2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:44]
+    assert vm32.input_position("x") == 11
+
+    vm32 = awkward.forth.ForthMachine32("input x 43 x #2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:43]
+    assert vm32.input_position("x") == 11
+
+    vm32 = awkward.forth.ForthMachine32("input x 1 x #2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:1]
+    assert vm32.input_position("x") == 1
+
+    vm32 = awkward.forth.ForthMachine32("input x x 2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:1]
+    assert vm32.input_position("x") == 1
+
+    vm32 = awkward.forth.ForthMachine32("input x 0 x #2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == []
+    assert vm32.input_position("x") == 0
+
+    vm32 = awkward.forth.ForthMachine32("input x output y int32 48 x #2bit-> y")
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == expectation
+    assert vm32.input_position("x") == 12
+
+    vm32 = awkward.forth.ForthMachine32("input x output y int32 x 2bit-> y")
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == expectation[:1]
+    assert vm32.input_position("x") == 1
+
+
+def test_nbit_big():
+    data = np.array(
+        [63, 255, 253, 255, 223, 255, 255, 247, 223, 255, 253, 255], np.uint8
+    )
+    expectation = (
+        [0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2]
+        + [3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 3]
+        + [3, 3, 3, 3, 3, 3, 2, 3, 3, 2, 3, 3]
+        + [3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3]
+    )
+
+    vm32 = awkward.forth.ForthMachine32("input x 48 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation
+    assert vm32.input_position("x") == 12
+
+    vm32 = awkward.forth.ForthMachine32("input x 47 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:47]
+    assert vm32.input_position("x") == 12
+
+    vm32 = awkward.forth.ForthMachine32("input x 45 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:45]
+    assert vm32.input_position("x") == 12
+
+    vm32 = awkward.forth.ForthMachine32("input x 44 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:44]
+    assert vm32.input_position("x") == 11
+
+    vm32 = awkward.forth.ForthMachine32("input x 43 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:43]
+    assert vm32.input_position("x") == 11
+
+    vm32 = awkward.forth.ForthMachine32("input x 1 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:1]
+    assert vm32.input_position("x") == 1
+
+    vm32 = awkward.forth.ForthMachine32("input x x !2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == expectation[:1]
+    assert vm32.input_position("x") == 1
+
+    vm32 = awkward.forth.ForthMachine32("input x 0 x #!2bit-> stack")
+    vm32.run({"x": data})
+    assert vm32.stack == []
+    assert vm32.input_position("x") == 0
+
+    vm32 = awkward.forth.ForthMachine32("input x output y int32 48 x #!2bit-> y")
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == expectation
+    assert vm32.input_position("x") == 12
+
+    vm32 = awkward.forth.ForthMachine32("input x output y int32 x !2bit-> y")
+    vm32.run({"x": data})
+    assert ak.to_list(vm32["y"]) == expectation[:1]
+    assert vm32.input_position("x") == 1
+
+
+def test_output_dup():
+    vm = awkward.forth.ForthMachine32("""
+output stuff int32
+1 2 3 4
+stuff <- stack
+10 stuff dup
+""")
+    vm.run()
+    assert ak.to_list(vm["stuff"]) == [4] * 11
+    assert vm.stack == [1, 2, 3]
+
+
+def test_decompile_complex():
+    read_repetition_levels = awkward.forth.ForthMachine32("""
+input stream
+output replevels uint8
+
+stream I-> stack
+begin
+  stream varint-> stack
+  dup 1 and 0= if
+    ( run-length encoding )
+    stream {rle_format}-> replevels
+    1 rshift 1-
+    replevels dup
+  else
+    ( bit-packed )
+    1 rshift 8 *
+    stream #{bit_width}bit-> replevels
+  then
+  dup stream pos 4 - <=
+until
+""".format(bit_width=2, rle_byte_width=1, rle_format="B"))
+    assert read_repetition_levels.decompiled == """input stream
+output replevels uint8
+
+stream I-> stack
+begin
+  stream varint-> stack
+  dup
+  1
+  and
+  0=
+  if
+    stream B-> replevels
+    1
+    rshift
+    1-
+    replevels dup
+  else
+    1
+    rshift
+    8
+    *
+    stream #2bit-> replevels
+  then
+  dup
+  stream pos
+  4
+  -
+  <=
+until
+"""
+
+
+def test_parse_strings():
+    vm32 = awkward.forth.ForthMachine32("""
+." hello there      long space"
+""")
+    assert vm32.decompiled == """." hello there      long space"
+"""

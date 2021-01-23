@@ -1,0 +1,160 @@
+   ------------------------------------------------------------------
+  | Welcome to ROOT 6.22/06                        https://root.cern |
+  | (c) 1995-2020, The ROOT Team; conception: R. Brun, F. Rademakers |
+  | Built for linuxx8664gcc on Dec 06 2020, 17:28:00                 |
+  | From tag , 27 November 2020                                      |
+  | Try '.help', '.demo', '.license', '.credits', '.quit'/'.q'       |
+   ------------------------------------------------------------------
+
+lzfour1-jagged0 1073741824 entries 4294979786 bytes
+  Resident Pages: 1048580/1048580  4G/4G  100%
+read_jagged0_root.C
+ROOT lzfour1-jagged0.root 1073741824 entries 18.0051 seconds
+  Resident Pages: 1048580/1048580  4G/4G  100%
+read_jagged0_root.C
+ROOT lzfour1-jagged0.root 1073741824 entries 16.571 seconds
+  Resident Pages: 1048580/1048580  4G/4G  100%
+forth-read-jagged0-root.py
+AwkwardForth lzfour1-jagged0 1073741824 entries 7.369855642318726 seconds
+  Resident Pages: 1048580/1048580  4G/4G  100%
+forth-read-jagged0-root.py
+AwkwardForth lzfour1-jagged0 1073741824 entries 3.2876510620117188 seconds
+  Resident Pages: 1048580/1048580  4G/4G  100%
+uproot-read-jagged0-root.py
+Uproot lzfour1-jagged0 1073741824 entries 6.333441734313965 seconds
+  Resident Pages: 1048580/1048580  4G/4G  100%
+uproot-read-jagged0-root.py
+Uproot lzfour1-jagged0 1073741824 entries 4.681862831115723 seconds
+  Resident Pages: 1048580/1048580  4G/4G  100%
+read_jagged0_root.C
+ROOT lzfour1-jagged0.root 1073741824 entries 16.5553 seconds
+  Resident Pages: 1048580/1048580  4G/4G  100%
+read_jagged0_root.C
+ROOT lzfour1-jagged0.root 1073741824 entries 16.5479 seconds
+  Resident Pages: 1048580/1048580  4G/4G  100%
+forth-read-jagged0-root.py
+AwkwardForth lzfour1-jagged0 1073741824 entries 2.801143169403076 seconds
+  Resident Pages: 1048580/1048580  4G/4G  100%
+forth-read-jagged0-root.py
+AwkwardForth lzfour1-jagged0 1073741824 entries 2.80806827545166 seconds
+  Resident Pages: 1048580/1048580  4G/4G  100%
+uproot-read-jagged0-root.py
+Uproot lzfour1-jagged0 1073741824 entries 4.328446626663208 seconds
+  Resident Pages: 1048580/1048580  4G/4G  100%
+uproot-read-jagged0-root.py
+Uproot lzfour1-jagged0 1073741824 entries 4.25742244720459 seconds
+  Resident Pages: 1048580/1048580  4G/4G  100%
+lzfour1-jagged1 134217728 entries 5353156037 bytes
+  Resident Pages: 1306923/1306923  4G/4G  100%
+read_jagged1_root.C
+ROOT lzfour1-jagged1.root 134217728 entries 14.3961 seconds
+  Resident Pages: 1306923/1306923  4G/4G  100%
+read_jagged1_root.C
+ROOT lzfour1-jagged1.root 134217728 entries 14.6048 seconds
+  Resident Pages: 1306923/1306923  4G/4G  100%
+forth-read-jagged1-root.py
+AwkwardForth lzfour1-jagged1 134217728 entries 20.244632244110107 seconds
+  Resident Pages: 1306923/1306923  4G/4G  100%
+forth-read-jagged1-root.py
+AwkwardForth lzfour1-jagged1 134217728 entries 18.42044162750244 seconds
+  Resident Pages: 1306923/1306923  4G/4G  100%
+uproot-read-jagged1-root.py
+Uproot lzfour1-jagged1 26843515 entries 18.319397926330566 seconds
+  Resident Pages: 1306923/1306923  4G/4G  100%
+uproot-read-jagged1-root.py
+Uproot lzfour1-jagged1 26843515 entries 18.555934190750122 seconds
+  Resident Pages: 1306923/1306923  4G/4G  100%
+read_jagged1_root.C
+ROOT lzfour1-jagged1.root 134217728 entries 14.8502 seconds
+  Resident Pages: 1306923/1306923  4G/4G  100%
+read_jagged1_root.C
+ROOT lzfour1-jagged1.root 134217728 entries 14.3708 seconds
+  Resident Pages: 1306923/1306923  4G/4G  100%
+forth-read-jagged1-root.py
+AwkwardForth lzfour1-jagged1 134217728 entries 17.93360137939453 seconds
+  Resident Pages: 1306923/1306923  4G/4G  100%
+forth-read-jagged1-root.py
+AwkwardForth lzfour1-jagged1 134217728 entries 17.90909242630005 seconds
+  Resident Pages: 1306923/1306923  4G/4G  100%
+uproot-read-jagged1-root.py
+Uproot lzfour1-jagged1 26843515 entries 18.269043445587158 seconds
+  Resident Pages: 1306923/1306923  4G/4G  100%
+uproot-read-jagged1-root.py
+Uproot lzfour1-jagged1 26843515 entries 18.25790810585022 seconds
+  Resident Pages: 1306923/1306923  4G/4G  100%
+lzfour1-jagged2 16777216 entries 4975047490 bytes
+  Resident Pages: 1214612/1214612  4G/4G  100%
+read_jagged2_root.C
+ROOT lzfour1-jagged2.root 16777216 entries 16.4087 seconds
+  Resident Pages: 1214612/1214612  4G/4G  100%
+read_jagged2_root.C
+ROOT lzfour1-jagged2.root 16777216 entries 16.22 seconds
+  Resident Pages: 1214612/1214612  4G/4G  100%
+forth-read-jagged2-root.py
+AwkwardForth lzfour1-jagged2 16777216 entries 18.498287677764893 seconds
+  Resident Pages: 1214612/1214612  4G/4G  100%
+forth-read-jagged2-root.py
+AwkwardForth lzfour1-jagged2 16777216 entries 17.452474117279053 seconds
+  Resident Pages: 1214612/1214612  4G/4G  100%
+uproot-read-jagged2-root.py
+Uproot lzfour1-jagged2 438618 entries 59.89519023895264 seconds
+  Resident Pages: 1214612/1214612  4G/4G  100%
+uproot-read-jagged2-root.py
+Uproot lzfour1-jagged2 438618 entries 60.63793063163757 seconds
+  Resident Pages: 1214612/1214612  4G/4G  100%
+read_jagged2_root.C
+ROOT lzfour1-jagged2.root 16777216 entries 16.3439 seconds
+  Resident Pages: 1214612/1214612  4G/4G  100%
+read_jagged2_root.C
+ROOT lzfour1-jagged2.root 16777216 entries 16.2191 seconds
+  Resident Pages: 1214612/1214612  4G/4G  100%
+forth-read-jagged2-root.py
+AwkwardForth lzfour1-jagged2 16777216 entries 17.0250141620636 seconds
+  Resident Pages: 1214612/1214612  4G/4G  100%
+forth-read-jagged2-root.py
+AwkwardForth lzfour1-jagged2 16777216 entries 17.1002197265625 seconds
+  Resident Pages: 1214612/1214612  4G/4G  100%
+uproot-read-jagged2-root.py
+Uproot lzfour1-jagged2 438618 entries 60.25092077255249 seconds
+  Resident Pages: 1214612/1214612  4G/4G  100%
+uproot-read-jagged2-root.py
+Uproot lzfour1-jagged2 438618 entries 60.239267110824585 seconds
+  Resident Pages: 1214612/1214612  4G/4G  100%
+lzfour1-jagged3 2097152 entries 4866170017 bytes
+  Resident Pages: 1188030/1188030  4G/4G  100%
+read_jagged3_root.C
+ROOT lzfour1-jagged3.root 2097152 entries 20.0244 seconds
+  Resident Pages: 1188030/1188030  4G/4G  100%
+read_jagged3_root.C
+ROOT lzfour1-jagged3.root 2097152 entries 20.0562 seconds
+  Resident Pages: 1188030/1188030  4G/4G  100%
+forth-read-jagged3-root.py
+AwkwardForth lzfour1-jagged3 2097152 entries 18.13448429107666 seconds
+  Resident Pages: 1188030/1188030  4G/4G  100%
+forth-read-jagged3-root.py
+AwkwardForth lzfour1-jagged3 2097152 entries 16.98054528236389 seconds
+  Resident Pages: 1188030/1188030  4G/4G  100%
+uproot-read-jagged3-root.py
+Uproot lzfour1-jagged3 57014 entries 44.34288430213928 seconds
+  Resident Pages: 1188030/1188030  4G/4G  100%
+uproot-read-jagged3-root.py
+Uproot lzfour1-jagged3 57014 entries 44.19278025627136 seconds
+  Resident Pages: 1188030/1188030  4G/4G  100%
+read_jagged3_root.C
+ROOT lzfour1-jagged3.root 2097152 entries 19.8881 seconds
+  Resident Pages: 1188030/1188030  4G/4G  100%
+read_jagged3_root.C
+ROOT lzfour1-jagged3.root 2097152 entries 19.9174 seconds
+  Resident Pages: 1188030/1188030  4G/4G  100%
+forth-read-jagged3-root.py
+AwkwardForth lzfour1-jagged3 2097152 entries 16.03161311149597 seconds
+  Resident Pages: 1188030/1188030  4G/4G  100%
+forth-read-jagged3-root.py
+AwkwardForth lzfour1-jagged3 2097152 entries 16.21748924255371 seconds
+  Resident Pages: 1188030/1188030  4G/4G  100%
+uproot-read-jagged3-root.py
+Uproot lzfour1-jagged3 57014 entries 42.69524312019348 seconds
+  Resident Pages: 1188030/1188030  4G/4G  100%
+uproot-read-jagged3-root.py
+Uproot lzfour1-jagged3 57014 entries 43.55217123031616 seconds
+  Resident Pages: 1188030/1188030  4G/4G  100%

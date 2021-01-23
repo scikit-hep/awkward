@@ -134,6 +134,10 @@ namespace awkward {
       variable_at(int64_t index) const noexcept;
 
     /// @brief HERE
+    bool
+      input_must_be_writable(const std::string& name) const;
+
+    /// @brief HERE
     int64_t
       input_position_at(const std::string& name) const;
 
@@ -295,6 +299,10 @@ namespace awkward {
 
     /// @brief HERE
     bool
+      is_nbit(const std::string& word, I& value) const;
+
+    /// @brief HERE
+    bool
       is_reserved(const std::string& word) const;
 
     /// @brief HERE
@@ -367,6 +375,14 @@ namespace awkward {
     /// @brief HERE
     void
       write_from_stack(int64_t num, T* top) noexcept;
+
+    /// @brief HERE
+    void
+      write_add_from_stack(int64_t num, T* top) noexcept;
+
+    /// @brief HERE
+    void
+      print_number(T num) noexcept;
 
     /// @brief HERE
     inline bool
@@ -523,9 +539,11 @@ namespace awkward {
     std::vector<T> variables_;
 
     std::vector<std::string> input_names_;
+    std::vector<bool> input_must_be_writable_;
     std::vector<std::string> output_names_;
     std::vector<util::dtype> output_dtypes_;
 
+    std::vector<std::string> strings_;
     std::vector<std::string> dictionary_names_;
     std::vector<I> dictionary_bytecodes_;
     std::vector<int64_t> bytecodes_offsets_;
