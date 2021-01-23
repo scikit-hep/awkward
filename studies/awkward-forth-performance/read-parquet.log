@@ -94,6 +94,53 @@ AwkwardForth zlib0-split-jagged3 121.57731938362122 seconds
 pyarrow zlib0-split-jagged3 14.141507863998413 seconds
   Resident Pages: 1117161/1117161  4G/4G  100%
 AwkwardForth zlib0-split-jagged3 121.57730102539062 seconds
+
+
   Resident Pages: 1089624/1089624  4G/4G  100%
-pyarrow zlib1-jagged0 25.358911991119385 seconds
+pyarrow zlib1-jagged0 6.903817415237427 seconds
   Resident Pages: 1089624/1089624  4G/4G  100%
+pyarrow zlib1-jagged0 6.946056127548218 seconds
+  Resident Pages: 1089624/1089624  4G/4G  100%
+AwkwardForth zlib1-jagged0 9.287684202194214 seconds
+  Resident Pages: 1089624/1089624  4G/4G  100%
+AwkwardForth zlib1-jagged0 9.258960247039795 seconds
+  Resident Pages: 1089624/1089624  4G/4G  100%
+pyarrow zlib1-jagged0 6.925256252288818 seconds
+  Resident Pages: 1089624/1089624  4G/4G  100%
+AwkwardForth zlib1-jagged0 9.18290376663208 seconds
+  Resident Pages: 1111598/1111598  4G/4G  100%
+pyarrow zlib1-jagged1 46.62404751777649 seconds
+  Resident Pages: 1111598/1111598  4G/4G  100%
+pyarrow zlib1-jagged1 18.1207537651062 seconds
+  Resident Pages: 1111598/1111598  4G/4G  100%
+AwkwardForth zlib1-jagged1 87.61511588096619 seconds
+  Resident Pages: 1111598/1111598  4G/4G  100%
+AwkwardForth zlib1-jagged1 87.85066270828247 seconds
+  Resident Pages: 1111598/1111598  4G/4G  100%
+pyarrow zlib1-jagged1 18.069061040878296 seconds
+  Resident Pages: 1111598/1111598  4G/4G  100%
+AwkwardForth zlib1-jagged1 87.6123743057251 seconds
+  Resident Pages: 1119012/1119012  4G/4G  100%
+pyarrow zlib1-jagged2 39.33548617362976 seconds
+  Resident Pages: 1119012/1119012  4G/4G  100%
+pyarrow zlib1-jagged2 20.24872398376465 seconds
+  Resident Pages: 1119012/1119012  4G/4G  100%
+AwkwardForth zlib1-jagged2 110.34052753448486 seconds
+  Resident Pages: 1119012/1119012  4G/4G  100%
+AwkwardForth zlib1-jagged2 109.6797685623169 seconds
+  Resident Pages: 1119012/1119012  4G/4G  100%
+pyarrow zlib1-jagged2 20.527597427368164 seconds
+  Resident Pages: 1119012/1119012  4G/4G  100%
+AwkwardForth zlib1-jagged2 109.66651916503906 seconds
+  Resident Pages: 1119433/1119433  4G/4G  100%
+pyarrow zlib1-jagged3 55.96869158744812 seconds
+  Resident Pages: 1119433/1119433  4G/4G  100%
+pyarrow zlib1-jagged3 21.25445294380188 seconds
+  Resident Pages: 1119433/1119433  4G/4G  100%
+AwkwardForth zlib1-jagged3 128.44623160362244 seconds
+  Resident Pages: 1119433/1119433  4G/4G  100%
+AwkwardForth zlib1-jagged3 128.64432764053345 seconds
+  Resident Pages: 1119433/1119433  4G/4G  100%
+pyarrow zlib1-jagged3 21.33734107017517 seconds
+  Resident Pages: 1119433/1119433  4G/4G  100%
+AwkwardForth zlib1-jagged3 129.09536290168762 seconds
