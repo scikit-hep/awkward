@@ -42,11 +42,13 @@ class pyobject_deleter {
 public:
   /// @brief Creates a pyobject_deleter and calls `Py_INCREF(ptr)`.
   pyobject_deleter(PyObject *pyobj): pyobj_(pyobj) {
+    // std::cout << "pyobject INCREF of " << pyobj_ << std::endl;
     Py_INCREF(pyobj_);
   }
   /// @brief Called by `std::shared_ptr` when its reference count reaches
   /// zero.
   void operator()(T const *p) {
+    // std::cout << "pyobject DECREF of " << pyobj_ << std::endl;
     Py_DECREF(pyobj_);
   }
 private:

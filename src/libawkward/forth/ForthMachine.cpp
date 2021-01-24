@@ -805,7 +805,9 @@ namespace awkward {
   template <typename T, typename I>
   int64_t
   ForthMachineOf<T, I>::input_position_at(const std::string& name) const {
-    for (IndexTypeOf<int64_t> i = 0;  i < input_names_.size();  i++) {
+    for (IndexTypeOf<int64_t> i = 0;
+         i < input_names_.size()  &&  i < current_inputs_.size();
+         i++) {
       if (input_names_[i] == name) {
         return current_inputs_[i].get()->pos();
       }
@@ -825,7 +827,9 @@ namespace awkward {
   const std::map<std::string, std::shared_ptr<ForthOutputBuffer>>
   ForthMachineOf<T, I>::outputs() const {
     std::map<std::string, std::shared_ptr<ForthOutputBuffer>> out;
-    for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
+    for (IndexTypeOf<int64_t> i = 0;
+         i < output_names_.size()  &&  i < current_outputs_.size();
+         i++) {
       out[output_names_[i]] = current_outputs_[i];
     }
     return out;
@@ -840,7 +844,9 @@ namespace awkward {
   template <typename T, typename I>
   const std::shared_ptr<ForthOutputBuffer>
   ForthMachineOf<T, I>::output_at(const std::string& name) const {
-    for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
+    for (IndexTypeOf<int64_t> i = 0;
+         i < output_names_.size()  &&  i < current_outputs_.size();
+         i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i];
       }
@@ -859,7 +865,9 @@ namespace awkward {
   template <typename T, typename I>
   const ContentPtr
   ForthMachineOf<T, I>::output_NumpyArray_at(const std::string& name) const {
-    for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
+    for (IndexTypeOf<int64_t> i = 0;
+         i < output_names_.size()  &&  i < current_outputs_.size();
+         i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toNumpyArray();
       }
@@ -878,7 +886,9 @@ namespace awkward {
   template <typename T, typename I>
   const Index8
   ForthMachineOf<T, I>::output_Index8_at(const std::string& name) const {
-    for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
+    for (IndexTypeOf<int64_t> i = 0;
+         i < output_names_.size()  &&  i < current_outputs_.size();
+         i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndex8();
       }
@@ -897,7 +907,9 @@ namespace awkward {
   template <typename T, typename I>
   const IndexU8
   ForthMachineOf<T, I>::output_IndexU8_at(const std::string& name) const {
-    for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
+    for (IndexTypeOf<int64_t> i = 0;
+         i < output_names_.size()  &&  i < current_outputs_.size();
+         i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndexU8();
       }
@@ -916,7 +928,9 @@ namespace awkward {
   template <typename T, typename I>
   const Index32
   ForthMachineOf<T, I>::output_Index32_at(const std::string& name) const {
-    for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
+    for (IndexTypeOf<int64_t> i = 0;
+         i < output_names_.size()  &&  i < current_outputs_.size();
+         i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndex32();
       }
@@ -935,7 +949,9 @@ namespace awkward {
   template <typename T, typename I>
   const IndexU32
   ForthMachineOf<T, I>::output_IndexU32_at(const std::string& name) const {
-    for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
+    for (IndexTypeOf<int64_t> i = 0;
+         i < output_names_.size()  &&  i < current_outputs_.size();
+         i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndexU32();
       }
@@ -954,7 +970,9 @@ namespace awkward {
   template <typename T, typename I>
   const Index64
   ForthMachineOf<T, I>::output_Index64_at(const std::string& name) const {
-    for (IndexTypeOf<int64_t> i = 0;  i < output_names_.size();  i++) {
+    for (IndexTypeOf<int64_t> i = 0;
+         i < output_names_.size()  &&  i < current_outputs_.size();
+         i++) {
       if (output_names_[i] == name) {
         return current_outputs_[i].get()->toIndex64();
       }

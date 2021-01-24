@@ -293,7 +293,10 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                     reinterpret_cast<uint8_t*>(info.ptr), pyobject_deleter<uint8_t>(obj.ptr()));
                 ins[name] = std::make_shared<ak::ForthInputBuffer>(ptr, 0, length);
               }
-              ak::util::ForthError err = self.run(ins);
+              self.begin(ins);
+              py::gil_scoped_release release;
+              ak::util::ForthError err = self.resume();
+              py::gil_scoped_acquire acquire;
               return maybe_throw<T, I>(self,
                                        err,
                                        raise_user_halt,
@@ -328,7 +331,9 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                           bool raise_rewind_beyond,
                           bool raise_division_by_zero,
                           bool raise_varint_too_big) -> py::object {
+              py::gil_scoped_release release;
               ak::util::ForthError err = self.resume();
+              py::gil_scoped_acquire acquire;
               return maybe_throw<T, I>(self,
                                        err,
                                        raise_user_halt,
@@ -363,7 +368,9 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
                           bool raise_rewind_beyond,
                           bool raise_division_by_zero,
                           bool raise_varint_too_big) -> py::object {
+              py::gil_scoped_release release;
               ak::util::ForthError err = self.call(name);
+              py::gil_scoped_acquire acquire;
               return maybe_throw<T, I>(self,
                                        err,
                                        raise_user_halt,
