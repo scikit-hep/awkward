@@ -700,7 +700,17 @@ namespace awkward {
     }
 
     bool Double(double x) {
-      builder_.real(x);
+      if (state_ == kExpectRealValue) {
+        complex_number_ = std::complex<double>(x);
+      }
+      else if (state_ == kExpectImaginaryValue) {
+        complex_number_ = {complex_number_.real(), x};
+        state_ = kExpectComplexStart;
+        builder_.complex(complex_number_);
+      }
+      else {
+        builder_.real(x);
+      }
       moved_ = true;
       return true;
     }
@@ -743,8 +753,13 @@ namespace awkward {
     bool
     StartObject() {
       moved_ = true;
-      builder_.beginrecord();
-
+      if (complex_real_string_ != nullptr  &&
+        complex_imag_string_ != nullptr) {
+          state_ = kMaybeBeginRecord;
+      }
+      else {
+        builder_.beginrecord();
+      }
       return true;
     }
 
@@ -758,7 +773,21 @@ namespace awkward {
     bool
     Key(const char* str, rj::SizeType length, bool copy) {
       moved_ = true;
-      builder_.field_check(str);
+      if (complex_real_string_ != nullptr  &&
+        strcmp(str, complex_real_string_) == 0) {
+        state_ = kExpectRealValue;
+      }
+      else if (complex_imag_string_ != nullptr  &&
+        strcmp(str, complex_imag_string_) == 0) {
+        state_ = kExpectImaginaryValue;
+      }
+      else {
+        if (state_ == kMaybeBeginRecord) {
+          builder_.beginrecord();
+          state_ = kContinue;
+        }
+        builder_.field_check(str);
+      }
       return true;
     }
 
@@ -768,12 +797,22 @@ namespace awkward {
 
   private:
     ArrayBuilder builder_;
+
+    enum State {
+       kContinue,
+       kMaybeBeginRecord,
+       kExpectComplexStart,
+       kExpectRealValue,
+       kExpectImaginaryValue
+    } state_;
+
     bool moved_;
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
     const char* complex_real_string_;
     const char* complex_imag_string_;
+    std::complex<double> complex_number_;
   };
 
   template<typename HANDLER, typename STREAM>

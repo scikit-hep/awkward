@@ -6217,6 +6217,27 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_reduce_argmax_complex
+    specializations:
+      - name: awkward_reduce_argmax_complex64_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_argmax_complex128_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+    description: null
+    definition: |
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_reduce_argmax_bool_64
     specializations:
       - name: awkward_reduce_argmax_bool_64
@@ -6341,6 +6362,27 @@ kernels:
               if (toptr[parent] == -1) or ((fromptr[i] != 0) < (fromptr[toptr[parent]] != 0)):
                   toptr[parent] = i
     automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_reduce_argmin_complex
+    specializations:
+      - name: awkward_reduce_argmin_complex64_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_argmin_complex128_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+    description: null
+    definition: |
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_reduce_count_64
@@ -6564,6 +6606,29 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_reduce_max_complex
+    specializations:
+      - name: awkward_reduce_max_complex64_complex64_64
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "float", dir: in, role: reducer-identity}
+      - name: awkward_reduce_max_complex128_complex128_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "double", dir: in, role: reducer-identity}
+    description: null
+    definition: |
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_reduce_min
     specializations:
       - name: awkward_reduce_min_int8_int8_64
@@ -6655,6 +6720,29 @@ kernels:
               x = fromptr[i]
               toptr[parents[i]] = x if x < toptr[parents[i]] else toptr[parents[i]]
     automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_reduce_min_complex
+    specializations:
+      - name: awkward_reduce_min_complex64_complex64_64
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "float", dir: in, role: reducer-identity}
+      - name: awkward_reduce_min_complex128_complex128_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
+          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "double", dir: in, role: reducer-identity}
+    description: null
+    definition: |
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_reduce_prod

@@ -162,9 +162,7 @@ namespace awkward {
 
   const BuilderPtr
   Complex128Builder::endrecord() {
-    throw std::invalid_argument(
-      std::string("called 'end_record' without 'begin_record' at the same level before it")
-      + FILENAME(__LINE__));
+    return shared_from_this();
   }
 
   const BuilderPtr

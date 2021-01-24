@@ -3810,6 +3810,21 @@ extern "C" {
     int64_t outlength);
 
   EXPORT_SYMBOL ERROR
+  awkward_reduce_argmax_complex64_64(
+    int64_t* toptr,
+    const float* fromptr,
+    const int64_t* parents,
+    int64_t lenparents,
+    int64_t outlength);
+  EXPORT_SYMBOL ERROR
+  awkward_reduce_argmax_complex128_64(
+    int64_t* toptr,
+    const double* fromptr,
+    const int64_t* parents,
+    int64_t lenparents,
+    int64_t outlength);
+
+  EXPORT_SYMBOL ERROR
   awkward_reduce_argmax_bool_64(
     int64_t* toptr,
     const bool* fromptr,
@@ -3892,6 +3907,21 @@ extern "C" {
   awkward_reduce_argmin_bool_64(
     int64_t* toptr,
     const bool* fromptr,
+    const int64_t* parents,
+    int64_t lenparents,
+    int64_t outlength);
+
+  EXPORT_SYMBOL ERROR
+  awkward_reduce_argmin_complex64_64(
+    int64_t* toptr,
+    const float* fromptr,
+    const int64_t* parents,
+    int64_t lenparents,
+    int64_t outlength);
+  EXPORT_SYMBOL ERROR
+  awkward_reduce_argmin_complex128_64(
+    int64_t* toptr,
+    const double* fromptr,
     const int64_t* parents,
     int64_t lenparents,
     int64_t outlength);
@@ -4078,6 +4108,23 @@ extern "C" {
     double identity);
 
   EXPORT_SYMBOL ERROR
+  awkward_reduce_max_complex64_complex64_64(
+    float* toptr,
+    const float* fromptr,
+    const int64_t* parents,
+    int64_t lenparents,
+    int64_t outlength,
+    float identity);
+  EXPORT_SYMBOL ERROR
+  awkward_reduce_max_complex128_complex128_64(
+    double* toptr,
+    const double* fromptr,
+    const int64_t* parents,
+    int64_t lenparents,
+    int64_t outlength,
+    double identity);
+
+  EXPORT_SYMBOL ERROR
   awkward_reduce_min_int8_int8_64(
     int8_t* toptr,
     const int8_t* fromptr,
@@ -4151,6 +4198,23 @@ extern "C" {
     float identity);
   EXPORT_SYMBOL ERROR
   awkward_reduce_min_float64_float64_64(
+    double* toptr,
+    const double* fromptr,
+    const int64_t* parents,
+    int64_t lenparents,
+    int64_t outlength,
+    double identity);
+
+  EXPORT_SYMBOL ERROR
+  awkward_reduce_min_complex64_complex64_64(
+    float* toptr,
+    const float* fromptr,
+    const int64_t* parents,
+    int64_t lenparents,
+    int64_t outlength,
+    float identity);
+  EXPORT_SYMBOL ERROR
+  awkward_reduce_min_complex128_complex128_64(
     double* toptr,
     const double* fromptr,
     const int64_t* parents,

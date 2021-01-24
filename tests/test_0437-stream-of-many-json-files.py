@@ -17,7 +17,7 @@ def test_complex_numbers():
 
     str = '[{"real":1.0,"imag":2.0},{"real":3.0,"imag":4.0}]'
     array2 = ak.from_json(str, complex_real_string="real", complex_imag_string="imag")
-    assert ak.to_list(array2) == [{'real': 1.0, 'imag': 2.0}, {'real': 3.0, 'imag': 4.0}]
+    assert ak.to_list(array2) == [(1+2j), (3+4j)]
 
 def test_unfinished_fragment_exception():
     # read unfinished json fragments
