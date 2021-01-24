@@ -37,3 +37,65 @@ Forth 36 workers 8.28911566734314 seconds
 Forth 48 workers 8.285134077072144 seconds
 Forth 60 workers 9.091292142868042 seconds
 Forth 72 workers 7.536222219467163 seconds
+
+Doing the same thing a few more times:
+
+Forth 1 workers 166.67164707183838 seconds
+Forth 2 workers 76.41639614105225 seconds
+Forth 3 workers 58.488378047943115 seconds
+Forth 4 workers 43.71523976325989 seconds
+Forth 5 workers 33.28856563568115 seconds
+Forth 6 workers 33.49880313873291 seconds
+Forth 7 workers 28.15760350227356 seconds
+Forth 8 workers 22.32053828239441 seconds
+Forth 9 workers 21.652956008911133 seconds
+Forth 10 workers 19.691213130950928 seconds
+Forth 11 workers 17.993410348892212 seconds
+Forth 12 workers 16.32911229133606 seconds
+Forth 16 workers 14.555362462997437 seconds
+Forth 20 workers 12.161463499069214 seconds
+Forth 24 workers 13.629037141799927 seconds
+Forth 36 workers 8.774104118347168 seconds
+Forth 48 workers 9.080953121185303 seconds
+Forth 60 workers 9.876107692718506 seconds
+Forth 72 workers 8.034755229949951 seconds
+
+Forth 1 workers 143.58407044410706 seconds
+Forth 2 workers 76.53130960464478 seconds
+Forth 3 workers 58.68600058555603 seconds
+Forth 4 workers 41.352006673812866 seconds
+Forth 5 workers 35.17764353752136 seconds
+Forth 6 workers 26.995579957962036 seconds
+Forth 7 workers 24.947298288345337 seconds
+Forth 8 workers 22.62899875640869 seconds
+Forth 9 workers 19.94755744934082 seconds
+Forth 10 workers 18.845850706100464 seconds
+Forth 11 workers 18.09461259841919 seconds
+Forth 12 workers 15.155261754989624 seconds
+Forth 16 workers 12.250515460968018 seconds
+Forth 20 workers 15.199743032455444 seconds
+Forth 24 workers 10.489633083343506 seconds
+Forth 36 workers 8.847702503204346 seconds
+Forth 48 workers 8.059797286987305 seconds
+Forth 60 workers 10.18899655342102 seconds
+Forth 72 workers 7.851130485534668 seconds
+
+Forth 1 workers 164.77360486984253 seconds
+Forth 2 workers 79.5792248249054 seconds
+Forth 3 workers 51.904799699783325 seconds
+Forth 4 workers 38.01700711250305 seconds
+Forth 5 workers 35.39278435707092 seconds
+Forth 6 workers 28.524214506149292 seconds
+Forth 7 workers 25.13274049758911 seconds
+Forth 8 workers 20.860453367233276 seconds
+Forth 9 workers 19.622976779937744 seconds
+Forth 10 workers 19.517585515975952 seconds
+Forth 11 workers 17.934651851654053 seconds
+Forth 12 workers 15.805314540863037 seconds
+Forth 16 workers 14.611515998840332 seconds
+Forth 20 workers 11.121246337890625 seconds
+Forth 24 workers 13.855790853500366 seconds
+Forth 36 workers 8.620692491531372 seconds
+Forth 48 workers 8.087448120117188 seconds
+Forth 60 workers 10.157726287841797 seconds
+Forth 72 workers 7.922816038131714 seconds
