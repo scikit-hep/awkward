@@ -3,6 +3,7 @@
 #ifndef AWKWARD_RECORD_H_
 #define AWKWARD_RECORD_H_
 
+#include "awkward/common.h"
 #include "awkward/array/RecordArray.h"
 
 namespace awkward {

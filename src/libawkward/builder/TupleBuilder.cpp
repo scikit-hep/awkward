@@ -10,8 +10,10 @@
 #include "awkward/array/EmptyArray.h"
 #include "awkward/type/RecordType.h"
 #include "awkward/type/UnknownType.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
+#include "awkward/builder/UnknownBuilder.h"
 
 #include "awkward/builder/TupleBuilder.h"
 

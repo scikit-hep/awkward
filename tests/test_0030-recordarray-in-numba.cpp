@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 
+#include "awkward/Content.h"
 #include "awkward/Slice.h"
 #include "awkward/builder/ArrayBuilder.h"
 #include "awkward/builder/ArrayBuilderOptions.h"

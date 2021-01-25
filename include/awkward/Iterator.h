@@ -4,9 +4,11 @@
 #define AWKWARD_ITERATOR_H_
 
 #include "awkward/common.h"
-#include "awkward/Content.h"
 
 namespace awkward {
+  class Content;
+  using ContentPtr    = std::shared_ptr<Content>;
+
   /// @class Iterator
   ///
   /// @brief Represents the current state of iteration over a Content array.

@@ -6,11 +6,12 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  class ArrayBuilderOptions;
+
   /// @class OptionBuilder
   ///
   /// @brief Builder node that accumulates data with missing values (`None`).

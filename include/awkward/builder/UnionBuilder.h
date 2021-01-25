@@ -6,11 +6,11 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  class ArrayBuilderOptions;
   class TupleBuilder;
   class RecordBuilder;
 

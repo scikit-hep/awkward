@@ -7,10 +7,11 @@
 #include <cstring>
 
 #include "awkward/common.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/Index.h"
 
 namespace awkward {
+  class ArrayBuilderOptions;
+
   /// @class GrowableBuffer
   ///
   /// @brief Contiguous, one-dimensional array that can grow indefinitely

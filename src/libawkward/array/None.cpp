@@ -7,7 +7,8 @@
 #include <stdexcept>
 
 #include "awkward/type/UnknownType.h"
-#include "awkward/type/ArrayType.h"
+#include "awkward/Reducer.h"
+#include "awkward/io/json.h"
 
 #include "awkward/array/None.h"
 

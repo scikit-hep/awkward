@@ -3,16 +3,12 @@
 #ifndef AWKWARD_CONTENT_H_
 #define AWKWARD_CONTENT_H_
 
-#include <cstdio>
 #include <map>
 
 #include "awkward/common.h"
 #include "awkward/Identities.h"
 #include "awkward/Slice.h"
-#include "awkward/io/json.h"
-#include "awkward/type/Type.h"
 #include "awkward/Index.h"
-#include "awkward/Reducer.h"
 
 namespace awkward {
   class Content;
@@ -23,6 +19,14 @@ namespace awkward {
   using FormKey       = std::shared_ptr<std::string>;
   class ArrayCache;
   using ArrayCachePtr = std::shared_ptr<ArrayCache>;
+  class Type;
+  using TypePtr = std::shared_ptr<Type>;
+  class Reducer;
+  class ToJson;
+  class ToJsonPrettyString;
+  class ToJsonString;
+  class ToJsonPrettyFile;
+  class ToJsonFile;
 
   /// @class Form
   ///

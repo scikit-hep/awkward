@@ -7,8 +7,7 @@
 #include <vector>
 #include <memory>
 
-#include "awkward/kernels.h"
-#include "awkward/type/Type.h"
+#include "awkward/common.h"
 #include "awkward/Index.h"
 
 namespace awkward {

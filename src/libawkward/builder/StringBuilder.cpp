@@ -7,6 +7,7 @@
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/type/ListType.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
 

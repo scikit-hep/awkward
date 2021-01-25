@@ -5,6 +5,7 @@
 
 #include <memory>
 
+#include "awkward/common.h"
 #include "awkward/Index.h"
 
 namespace awkward {

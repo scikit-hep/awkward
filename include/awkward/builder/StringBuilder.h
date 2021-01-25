@@ -4,11 +4,12 @@
 #define AWKWARD_STRINGBUILDER_H_
 
 #include "awkward/common.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  class ArrayBuilderOptions;
+
   /// @class StringBuilder
   ///
   /// @brief Builder node that accumulates strings.

@@ -7,6 +7,7 @@
 #include "awkward/Identities.h"
 #include "awkward/Index.h"
 #include "awkward/type/UnionType.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/BoolBuilder.h"
 #include "awkward/builder/Int64Builder.h"

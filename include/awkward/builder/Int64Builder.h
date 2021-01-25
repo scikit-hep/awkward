@@ -4,11 +4,12 @@
 #define AWKWARD_INT64BUILDER_H_
 
 #include "awkward/common.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  class ArrayBuilderOptions;
+
   /// @class Int64Builder
   ///
   /// @brief Builder node that accumulates integers (`int64_t`).

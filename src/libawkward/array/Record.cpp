@@ -8,9 +8,9 @@
 
 #include "awkward/kernels.h"
 #include "awkward/type/RecordType.h"
-#include "awkward/type/ArrayType.h"
-
+#include "awkward/Reducer.h"
 #include "awkward/array/Record.h"
+#include "awkward/io/json.h"
 
 namespace awkward {
   Record::Record(const std::shared_ptr<const RecordArray> array, int64_t at)

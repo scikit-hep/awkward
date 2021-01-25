@@ -23,6 +23,7 @@
 #include "awkward/kernel-utils.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/util.h"
+#include "awkward/io/json.h"
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
 #include "awkward/array/EmptyArray.h"

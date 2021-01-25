@@ -5,6 +5,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include "awkward/type/Type.h"
 #include "awkward/python/content.h"
 
 #include "awkward/python/forms.h"

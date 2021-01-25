@@ -6,12 +6,12 @@
 #include <cstdio>
 #include <string>
 
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/common.h"
-#include "awkward/util.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 
 namespace awkward {
   class Content;
+  using ContentPtr    = std::shared_ptr<Content>;
 
   /// @class ToJson
   ///

@@ -4,9 +4,9 @@
 
 #include <pybind11/numpy.h>
 
-#include "awkward/kernel-utils.h"
-
-#include "awkward/util.h"
+#include "awkward/type/Type.h"
+#include "awkward/Reducer.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 
 #include "awkward/python/identities.h"
 #include "awkward/python/util.h"

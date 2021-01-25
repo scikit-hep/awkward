@@ -3,14 +3,22 @@
 #ifndef AWKWARD_ARRAYBUILDER_H_
 #define AWKWARD_ARRAYBUILDER_H_
 
+#include <string>
+#include <vector>
+
 #include "awkward/common.h"
-#include "awkward/Content.h"
-#include "awkward/type/Type.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
-#include "awkward/builder/Builder.h"
-#include "awkward/builder/UnknownBuilder.h"
+#include "awkward/util.h"
 
 namespace awkward {
+  class Content;
+  using ContentPtr    = std::shared_ptr<Content>;
+  class ArrayBuilderOptions;
+  class Builder;
+  using BuilderPtr = std::shared_ptr<Builder>;
+  class Slice;
+  class Type;
+  using TypePtr = std::shared_ptr<Type>;
+
   /// @class ArrayBuilder
   ///
   /// @brief User interface to the Builder system: the ArrayBuilder is a

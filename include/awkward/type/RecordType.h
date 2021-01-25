@@ -5,10 +5,9 @@
 
 #include <vector>
 #include <string>
-#include <unordered_map>
 
+#include "awkward/common.h"
 #include "awkward/util.h"
-
 #include "awkward/type/Type.h"
 
 namespace awkward {

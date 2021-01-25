@@ -7,8 +7,9 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "awkward/kernel-utils.h"
-
+#include "awkward/common.h"
+#include "awkward/Reducer.h"
+#include "awkward/io/json.h"
 #include "awkward/array/RegularArray.h"
 
 #include "awkward/array/VirtualArray.h"
