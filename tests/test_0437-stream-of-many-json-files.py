@@ -11,12 +11,12 @@ def test_complex_numbers():
     array = ak.layout.NumpyArray(np.array([(1.+2.j), (3.+4.j)],dtype=np.complex64))
     assert ak.to_list(array) == [(1.+2.j), (3.+4.j)]
     assert (
-        ak.to_json(array, complex_real_string="real", complex_imag_string="imag")
+        ak.to_json(array, complex_record_fields=("real", "imag"))
         == '[{"real":1.0,"imag":2.0},{"real":3.0,"imag":4.0}]'
     )
 
     str = '[{"real":1.0,"imag":2.0},{"real":3.0,"imag":4.0}]'
-    array2 = ak.from_json(str, complex_real_string="real", complex_imag_string="imag")
+    array2 = ak.from_json(str, complex_record_fields=("real", "imag"))
     assert ak.to_list(array2) == [(1+2j), (3+4j)]
 
 def test_unfinished_fragment_exception():

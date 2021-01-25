@@ -960,8 +960,7 @@ def from_json(
     nan_string=None,
     infinity_string=None,
     minus_infinity_string=None,
-    complex_real_string=None,
-    complex_imag_string=None,
+    complex_record_fields=None,
     highlevel=True,
     behavior=None,
     initial=1024,
@@ -977,10 +976,8 @@ def from_json(
             be interpreted as floating-point positive infinity values.
         minus_infinity_string (None or str): If not None, strings with this value
             will be interpreted as floating-point negative infinity values.
-        complex_real_string (None or str): If not None, defines the key for
-            a real part of a complex number.
-        complex_imag_string (None or str): If not None, defines the key for
-            an imaginary part of a complex number.
+        complex_record_fields (None or (str, str)): If not None, defines a pair of
+            field names to interpret records as complex numbers.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -1003,6 +1000,17 @@ def from_json(
 
     See also #ak.to_json.
     """
+    if complex_record_fields is None:
+        complex_real_string = None
+        complex_imag_string = None
+    elif (
+        isinstance(complex_record_fields, tuple) and
+        len(complex_record_fields) == 2 and
+        isinstance(complex_record_fields[0], str) and
+        isinstance(complex_record_fields[1], str)
+    ):
+        complex_real_string, complex_imag_string = complex_record_fields
+
     if os.path.isfile(source):
         layout = ak._ext.fromjsonfile(
             source,
@@ -1042,8 +1050,7 @@ def to_json(
     nan_string=None,
     infinity_string=None,
     minus_infinity_string=None,
-    complex_real_string=None,
-    complex_imag_string=None,
+    complex_record_fields=None,
     buffersize=65536,
 ):
     """
@@ -1063,10 +1070,8 @@ def to_json(
         minus_infinity_string (None or str): If not None, floating-point negative
             infinity values will be replaced with this string instead of a JSON
             number.
-        complex_real_string (None or str): If not None, defines the key for
-            a real part of a complex number.
-        complex_imag_string (None or str): If not None, defines the key for
-            an imaginary part of a complex number.
+        complex_record_fields (None or (str, str)): If not None, defines a pair of
+            field names to interpret records as complex numbers.
         buffersize (int): Size (in bytes) of the buffer used by the JSON
             parser.
 
@@ -1124,6 +1129,17 @@ def to_json(
             "unrecognized array type: {0}".format(repr(array))
             + ak._util.exception_suffix(__file__)
         )
+
+    if complex_record_fields is None:
+        complex_real_string = None
+        complex_imag_string = None
+    elif (
+        isinstance(complex_record_fields, tuple) and
+        len(complex_record_fields) == 2 and
+        isinstance(complex_record_fields[0], str) and
+        isinstance(complex_record_fields[1], str)
+    ):
+        complex_real_string, complex_imag_string = complex_record_fields
 
     if destination is None:
         return out.tojson(
