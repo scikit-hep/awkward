@@ -229,20 +229,6 @@ We don't, however, use automated formatters like clang-format or black. Automate
 
 We don't currently use linters like clang-tidy or flake8, but I'm open to it.
 
-#### Contributing to files in src/cpu-kernels/
-
-Avoid using [Python keywords](https://docs.python.org/3/reference/lexical_analysis.html#keywords) in files residing inside `src/cpu-kernels/`
-
-#### Contributing to files in include/awkward/cpu-kernels/
-
-Make sure to prepend each function definition with -
-```
-/// @param param1 inparam/outparam (optional role: rolename)
-/// @param param2 inparam/outparam (optional role: rolename)
-/// @param param3 inparam/outparam (optional role: rolename)
-....
-```
-
 ### Fully qualified names
 
 We don't import names in C++ (`using`) or Python (`import from`) so that it's easy to see where objects come from and find all instances with a text search. This is sometimes in tension with the 80-character limit.
@@ -304,6 +290,10 @@ This is motivated by performance: if bounds checking is performed when an elemen
 Most objects are defined by a small set of named fields (such as `starts`, `stops`, and `content` for a ListArray). In both C++ and Python, constructors take the full set of fields, the fields are stored as private members, and there are public accessors to those attributes, all with the same names. This ensures that the fields are immutable and resembles Scala's "case class" pattern for functional programming.
 
 Within the narrow scope of a function, there is no attempt to maintain immutability.
+
+### Adding a new kernel
+
+When adding a new kernel to the codebase, it's specification must be added to the `kernel-specification.yml` file. The new kernel specification must be added in the correct place as the `kernel-specification.yml` file is ordered by kernel and specialization name (use `dev/kernel-diagnostics.py` to check for discrepancies).
 
 ------------
 
