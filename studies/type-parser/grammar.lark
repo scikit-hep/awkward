@@ -1,7 +1,6 @@
 start: input
 
-input: UNKNOWNTYPE
-     | TYPE [options]
+input: TYPE [options]
 
 options: "[" primitiveoption "]"
 
@@ -9,8 +8,7 @@ primitiveoption: "parameters" "=" dict_obj
 
 TYPE: "int64"
     | "int32"
-
-UNKNOWNTYPE: "unknown"
+    | "unknown"
 
 ?json: dict_obj
     | list_obj

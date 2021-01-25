@@ -37,11 +37,11 @@ class TreeToJson(Transformer):
 
 def toast(ptnode, infocls):
     if ptnode.__class__.__name__ == "Token":
-        if ptnode.type == "TYPE":
+        if ptnode.value == "unknown":
+            infocls.arraytype = "Unknown"
+        else:
             setattr(infocls, "typename", ptnode.value)
             infocls.arraytype = "Primitive"
-        elif ptnode.type == "UNKNOWNTYPE":
-            infocls.arraytype = "Unknown"
     elif ptnode.data == "start":
         toast(ptnode.children[0], infocls)
     elif ptnode.data == "input":
