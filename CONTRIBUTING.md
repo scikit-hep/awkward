@@ -291,6 +291,10 @@ Most objects are defined by a small set of named fields (such as `starts`, `stop
 
 Within the narrow scope of a function, there is no attempt to maintain immutability.
 
+### Adding a new kernel
+
+When adding a new kernel to the codebase, it's specification must be added to the `kernel-specification.yml` file. The new kernel specification must be added in the correct place as the `kernel-specification.yml` file is ordered by kernel and specialization name (use `dev/kernel-diagnostics.py` to check for discrepancies).
+
 ------------
 
 Thanks again for contributing to Awkward Array. We all look forward to what you have to add.
