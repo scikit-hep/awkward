@@ -13,17 +13,17 @@ ERROR awkward_reduce_min_complex(
   int64_t outlength,
   OUT identity) {
   for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i * 2] = identity;
-    toptr[i * 2 + 1] = 0;
+   toptr[i * 2] = identity;
+   toptr[i * 2 + 1] = 0;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[i];
-    if ((fromptr[i * 2] * fromptr[i * 2]
-      + fromptr[i * 2 + 1] * fromptr[i * 2 + 1]) <
-      (toptr[parent * 2] * toptr[parent * 2]
-        + toptr[parent * 2 + 1] * toptr[parent * 2 + 1])) {
-      toptr[parent * 2] = fromptr[i * 2];
-      toptr[parent * 2 + 1] = fromptr[i * 2 + 1];
+    IN x = fromptr[i * 2];
+    IN y = fromptr[i * 2 + 1];
+    if (x < toptr[parent * 2]  ||
+      (x == toptr[parent * 2]  &&  y < toptr[parent * 2 + 1])) {
+      toptr[parent * 2] = x;
+      toptr[parent * 2 + 1] = y;
     }
   }
   return success();

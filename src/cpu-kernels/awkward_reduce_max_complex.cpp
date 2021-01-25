@@ -18,12 +18,12 @@ ERROR awkward_reduce_max_complex(
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
     int64_t parent = parents[i];
-    if ((fromptr[i * 2] * fromptr[i * 2]
-      + fromptr[i * 2 + 1] * fromptr[i * 2 + 1]) >
-      (toptr[parent * 2] * toptr[parent * 2]
-        + toptr[parent * 2 + 1] * toptr[parent * 2 + 1])) {
-      toptr[parent * 2] = fromptr[i * 2];
-      toptr[parent * 2 + 1] = fromptr[i * 2 + 1];
+    IN x = fromptr[i * 2];
+    IN y = fromptr[i * 2 + 1];
+    if (x > toptr[parent * 2]  ||
+      (x == toptr[parent * 2]  &&  y > toptr[parent * 2 + 1])) {
+      toptr[parent * 2] = x;
+      toptr[parent * 2 + 1] = y;
     }
   }
   return success();
