@@ -26,9 +26,9 @@ class TreeToJson(Transformer):
         (n,) = n
         return float(n)
 
-    list = list
+    list_obj = list
     pair = tuple
-    dict = dict
+    dict_obj = dict
 
     null = lambda self, _: None
     true = lambda self, _: True

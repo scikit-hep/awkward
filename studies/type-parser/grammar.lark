@@ -5,23 +5,23 @@ input: UNKNOWNTYPE
 
 options: "[" primitiveoption "]"
 
-primitiveoption: "parameters" "=" dict
+primitiveoption: "parameters" "=" dict_obj
 
 TYPE: "int64"
     | "int32"
 
 UNKNOWNTYPE: "unknown"
 
-?json: dict
-    | list
+?json: dict_obj
+    | list_obj
     | string
     | SIGNED_NUMBER      -> number
     | "true"             -> true
     | "false"            -> false
     | "null"             -> null
 
-list   : "[" [json ("," json)*] "]"
-dict   : "{" [pair ("," pair)*] "}"
+list_obj  : "[" [json ("," json)*] "]"
+dict_obj   : "{" [pair ("," pair)*] "}"
 pair   : string ":" json
 
 string : ESCAPED_STRING
