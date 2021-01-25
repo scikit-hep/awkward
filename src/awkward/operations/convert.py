@@ -1004,10 +1004,10 @@ def from_json(
         complex_real_string = None
         complex_imag_string = None
     elif (
-        isinstance(complex_record_fields, tuple) and
-        len(complex_record_fields) == 2 and
-        isinstance(complex_record_fields[0], str) and
-        isinstance(complex_record_fields[1], str)
+        isinstance(complex_record_fields, tuple)
+        and len(complex_record_fields) == 2
+        and isinstance(complex_record_fields[0], str)
+        and isinstance(complex_record_fields[1], str)
     ):
         complex_real_string, complex_imag_string = complex_record_fields
 
@@ -1134,10 +1134,10 @@ def to_json(
         complex_real_string = None
         complex_imag_string = None
     elif (
-        isinstance(complex_record_fields, tuple) and
-        len(complex_record_fields) == 2 and
-        isinstance(complex_record_fields[0], str) and
-        isinstance(complex_record_fields[1], str)
+        isinstance(complex_record_fields, tuple)
+        and len(complex_record_fields) == 2
+        and isinstance(complex_record_fields[0], str)
+        and isinstance(complex_record_fields[1], str)
     ):
         complex_real_string, complex_imag_string = complex_record_fields
 
