@@ -4,6 +4,13 @@
 
 #include <sstream>
 
+#include "awkward/common.h"
+#include "awkward/Content.h"
+#include "awkward/type/Type.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
+#include "awkward/builder/Builder.h"
+#include "awkward/builder/UnknownBuilder.h"
+
 #include "awkward/builder/ArrayBuilder.h"
 
 namespace awkward {

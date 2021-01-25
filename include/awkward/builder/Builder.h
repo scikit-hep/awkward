@@ -11,6 +11,8 @@
 #include "awkward/type/Type.h"
 
 namespace awkward {
+  class Content;
+  using ContentPtr = std::shared_ptr<Content>;
   class Builder;
   using BuilderPtr = std::shared_ptr<Builder>;
 

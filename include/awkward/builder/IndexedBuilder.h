@@ -7,11 +7,12 @@
 
 #include "awkward/common.h"
 #include "awkward/array/IndexedArray.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  class ArrayBuilderOptions;
+
   /// @class IndexedBuilder
   ///
   /// @brief Builder node for accumulated data that come from an existing

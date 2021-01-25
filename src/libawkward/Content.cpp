@@ -8,6 +8,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/prettywriter.h"
+#include "awkward/io/json.h"
 
 #include "awkward/kernels.h"
 #include "awkward/array/RegularArray.h"
@@ -22,7 +23,6 @@
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/UnmaskedArray.h"
 #include "awkward/array/VirtualArray.h"
-#include "awkward/type/ArrayType.h"
 
 #include "awkward/Content.h"
 

@@ -6,10 +6,11 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  class ArrayBuilderOptions;
+
   /// @class UnknownBuilder
   ///
   /// @brief Builder node for accumulated data whose type is not yet known.

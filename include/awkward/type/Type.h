@@ -4,6 +4,7 @@
 #define AWKWARD_TYPE_H_
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "awkward/common.h"

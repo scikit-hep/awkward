@@ -4,6 +4,7 @@
 #define FILENAME_C(line) FILENAME_FOR_EXCEPTIONS_C("src/libawkward/partition/PartitionedArray.cpp", line)
 
 #include "awkward/kernel-utils.h"
+#include "awkward/io/json.h"
 
 #include "awkward/partition/IrregularlyPartitionedArray.h"
 

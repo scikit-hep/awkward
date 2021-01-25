@@ -6,12 +6,12 @@
 #include <vector>
 
 #include "awkward/common.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
-#include "awkward/builder/UnknownBuilder.h"
 
 namespace awkward {
+  class ArrayBuilderOptions;
+
   /// @class ListBuilder
   ///
   /// @brief Builder node that accumulates lists.

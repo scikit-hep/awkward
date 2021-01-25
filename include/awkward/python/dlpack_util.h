@@ -3,7 +3,12 @@
 #ifndef AWKWARDPY_DLPACK_UTIL_H_
 #define AWKWARDPY_DLPACK_UTIL_H_
 
+#include "awkward/util.h"
+
 #include "dlpack/dlpack.h"
+
+namespace py = pybind11;
+namespace ak = awkward;
 
 namespace awkward {
   namespace dlpack {

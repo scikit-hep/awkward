@@ -6,19 +6,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
-#include "awkward/Content.h"
-#include "awkward/builder/ArrayBuilder.h"
-#include "awkward/array/NumpyArray.h"
-#include "awkward/array/EmptyArray.h"
-#include "awkward/array/RegularArray.h"
-#include "awkward/array/IndexedArray.h"
-#include "awkward/array/UnionArray.h"
-
-#include "awkward/util.h"
-
-namespace py = pybind11;
-namespace ak = awkward;
-
 /// @class pyobject_deleter
 ///
 /// @brief Used as a `std::shared_ptr` deleter (second argument) to

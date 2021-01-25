@@ -3,12 +3,15 @@
 #ifndef AWKWARD_FLOAT64BUILDER_H_
 #define AWKWARD_FLOAT64BUILDER_H_
 
+#include <string>
+
 #include "awkward/common.h"
-#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/GrowableBuffer.h"
 #include "awkward/builder/Builder.h"
 
 namespace awkward {
+  class ArrayBuilderOptions;
+
   /// @class Float64Builder
   ///
   /// @brief Builder node that accumulates real numbers (`double`).

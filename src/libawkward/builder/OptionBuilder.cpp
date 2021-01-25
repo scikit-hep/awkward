@@ -8,6 +8,7 @@
 #include "awkward/Index.h"
 #include "awkward/array/IndexedArray.h"
 #include "awkward/type/OptionType.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 
 #include "awkward/builder/OptionBuilder.h"
 

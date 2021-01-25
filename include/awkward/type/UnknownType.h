@@ -3,6 +3,8 @@
 #ifndef AWKWARD_UNKNOWNTYPE_H_
 #define AWKWARD_UNKNOWNTYPE_H_
 
+#include "awkward/common.h"
+#include "awkward/util.h"
 #include "awkward/type/Type.h"
 
 namespace awkward {

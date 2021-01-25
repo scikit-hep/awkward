@@ -2,6 +2,7 @@
 
 #include <sstream>
 
+#include "awkward/Content.h"
 #include "awkward/array/VirtualArray.h"
 
 #include "awkward/Iterator.h"
