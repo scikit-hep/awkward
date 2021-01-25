@@ -1,0 +1,34 @@
+start: input
+
+input: UNKNOWNTYPE
+     | TYPE [options]
+
+options: "[" primitiveoption "]"
+
+primitiveoption: "parameters" "=" dict
+
+TYPE: "int64"
+    | "int32"
+
+UNKNOWNTYPE: "unknown"
+
+?json: dict
+    | list
+    | string
+    | SIGNED_NUMBER      -> number
+    | "true"             -> true
+    | "false"            -> false
+    | "null"             -> null
+
+list   : "[" [json ("," json)*] "]"
+dict   : "{" [pair ("," pair)*] "}"
+pair   : string ":" json
+
+string : ESCAPED_STRING
+
+%import common.ESCAPED_STRING
+%import common.SIGNED_NUMBER
+%import common.WS
+
+%ignore WS
+
