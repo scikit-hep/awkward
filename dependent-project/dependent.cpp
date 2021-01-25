@@ -4,6 +4,7 @@
 
 #include <pybind11/pybind11.h>
 
+#include "awkward/Content.h"
 #include "awkward/builder/ArrayBuilder.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/kernels.h"
