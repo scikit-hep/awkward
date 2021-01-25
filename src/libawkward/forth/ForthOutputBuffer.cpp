@@ -112,28 +112,28 @@ namespace awkward {
     if (std::is_same<OUT, bool>::value) {
       dtype = util::dtype::boolean;
     }
-    else if (std::is_same<OUT, int8_t>::value) {
+    else if (std::is_same<OUT, std::int8_t>::value) {
       dtype = util::dtype::int8;
     }
-    else if (std::is_same<OUT, int16_t>::value) {
+    else if (std::is_same<OUT, std::int16_t>::value) {
       dtype = util::dtype::int16;
     }
-    else if (std::is_same<OUT, int32_t>::value) {
+    else if (std::is_same<OUT, std::int32_t>::value) {
       dtype = util::dtype::int32;
     }
-    else if (std::is_same<OUT, int64_t>::value) {
+    else if (std::is_same<OUT, std::int64_t>::value) {
       dtype = util::dtype::int64;
     }
-    else if (std::is_same<OUT, uint8_t>::value) {
+    else if (std::is_same<OUT, std::uint8_t>::value) {
       dtype = util::dtype::uint8;
     }
-    else if (std::is_same<OUT, uint16_t>::value) {
+    else if (std::is_same<OUT, std::uint16_t>::value) {
       dtype = util::dtype::uint16;
     }
-    else if (std::is_same<OUT, uint32_t>::value) {
+    else if (std::is_same<OUT, std::uint32_t>::value) {
       dtype = util::dtype::uint32;
     }
-    else if (std::is_same<OUT, uint64_t>::value) {
+    else if (std::is_same<OUT, std::uint64_t>::value) {
       dtype = util::dtype::uint64;
     }
     else if (std::is_same<OUT, float>::value) {
@@ -691,7 +691,7 @@ namespace awkward {
     }
     length_++;
     maybe_resize(length_);
-    ptr_.get()[length_ - 1] = previous + value;
+    ptr_.get()[length_ - 1] = previous + (OUT)value;
   }
 
   template <typename OUT>
@@ -703,7 +703,7 @@ namespace awkward {
     }
     length_++;
     maybe_resize(length_);
-    ptr_.get()[length_ - 1] = previous + value;
+    ptr_.get()[length_ - 1] = previous + (OUT)value;
   }
 
   template <typename OUT>

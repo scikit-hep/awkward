@@ -417,7 +417,7 @@ namespace awkward {
           rest = "zigzag->";
           break;
         case READ_NBIT:
-          nbits = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + next_pos];
+          nbits = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + (IndexTypeOf<int64_t>)next_pos];
           next_pos++;
           rest = std::to_string(nbits) + "bit->";
           break;
@@ -426,7 +426,7 @@ namespace awkward {
 
       std::string out_name = "stack";
       if (~bytecode & READ_DIRECT) {
-        I out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + next_pos];
+        I out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + (IndexTypeOf<int64_t>)next_pos];
         out_name = output_names_[(IndexTypeOf<int64_t>)out_num];
       }
       return in_name + std::string(" ") + arrow + std::string(" ") + out_name;
@@ -1445,7 +1445,7 @@ namespace awkward {
     if (parser.length() > 5  &&  parser.substr(parser.length() - 5, 5) == "bit->") {
       std::string number = parser.substr(0, parser.length() - 5);
       try {
-        value = (int64_t)std::stoul(number, nullptr, 10);
+        value = std::stoi(number, nullptr, 10);
       }
       catch (std::invalid_argument& err) {
         return false;
@@ -2695,7 +2695,7 @@ namespace awkward {
                 stack_push((T)result);   // note: pushing result
               }
               else {
-                output->write_one_uint64(result, false);   // note: writing result as unsigned
+                output->write_one_uint64((uint64_t)result, false);   // note: writing result as unsigned
               }
             }
           }
@@ -2738,7 +2738,7 @@ namespace awkward {
                 stack_push((T)value);   // note: pushing value
               }
               else {
-                output->write_one_int64(value, false);   // note: writing value as signed
+                output->write_one_int64((T)value, false);   // note: writing value as signed
               }
             }
           }
@@ -2774,7 +2774,7 @@ namespace awkward {
               tmp = (uint64_t)(*tmpptr);
               if (flip) {
                 // For bit-flipping: https://stackoverflow.com/a/2603254/1623645
-                tmp = (bitswap_lookup[tmp & 0b1111] << 4) | bitswap_lookup[tmp >> 4];
+                tmp = (uint64_t)(bitswap_lookup[tmp & 0b1111] << 4) | bitswap_lookup[tmp >> 4];
               }
               data = tmp;
             }
@@ -2784,7 +2784,7 @@ namespace awkward {
                 bits_wnd_l -= 8;
                 data >>= 8;
               }
-              else if (bits_wnd_l - bits_wnd_r >= bit_width) {
+              else if (bits_wnd_l - bits_wnd_r >= (uint64_t)bit_width) {
                 tmp = (data >> bits_wnd_r) & mask;
                 if (output == nullptr) {
                   if (stack_cannot_push()) {
@@ -2794,10 +2794,10 @@ namespace awkward {
                   stack_push((T)tmp);
                 }
                 else {
-                  output->write_one_int64(tmp, false);
+                  output->write_one_int64((T)tmp, false);
                 }
                 items_remaining--;
-                bits_wnd_r += bit_width;
+                bits_wnd_r += (uint64_t)bit_width;
               }
               else {
                 tmpptr = reinterpret_cast<uint8_t*>(input->read(1, current_error_));
@@ -2807,7 +2807,7 @@ namespace awkward {
                 tmp = (uint64_t)(*tmpptr);
                 if (flip) {
                   // For bit-flipping: https://stackoverflow.com/a/2603254/1623645
-                  tmp = (bitswap_lookup[tmp & 0b1111] << 4) | bitswap_lookup[tmp >> 4];
+                  tmp = (uint64_t)(bitswap_lookup[tmp & 0b1111] << 4) | bitswap_lookup[tmp >> 4];
                 }
                 data |= tmp << bits_wnd_l;
                 bits_wnd_l += 8;
@@ -3313,7 +3313,7 @@ namespace awkward {
             case CODE_PRINT_STRING: {
               I string_num = bytecode_get();
               bytecodes_pointer_where()++;
-              printf(strings_[string_num].c_str());
+              printf("%s", strings_[(IndexTypeOf<int64_t>)string_num].c_str());
               break;
             }
 
@@ -3332,7 +3332,7 @@ namespace awkward {
             }
 
             case CODE_PRINT_STACK: {
-              printf("<%ld> ", stack_depth_);
+              printf("<%lld> ", stack_depth_);
               for (int64_t i = 0;  i < stack_depth_;  i++) {
                 print_number(stack_buffer_[i]);
               }
@@ -3809,7 +3809,7 @@ namespace awkward {
   template <>
   void
   ForthMachineOf<int64_t, int32_t>::print_number(int64_t num) noexcept {
-    printf("%ld ", num);
+    printf("%lld ", num);
   }
 
   template class EXPORT_TEMPLATE_INST ForthMachineOf<int32_t, int32_t>;
