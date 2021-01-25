@@ -638,6 +638,15 @@ namespace awkward {
   ////////// reading from JSON
 
   class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
+    enum class State {
+      kUndefined,
+      kContinue,
+      kMaybeBeginRecord,
+      kExpectComplexEnd,
+      kExpectRealValue,
+      kExpectImaginaryValue
+    };
+
   public:
     Handler(const ArrayBuilderOptions& options,
             const char* nan_string,
@@ -646,6 +655,7 @@ namespace awkward {
             const char* complex_real_string,
             const char* complex_imag_string)
         : builder_(options)
+        , state_(State::kUndefined)
         , moved_(false)
         , nan_string_(nan_string)
         , infinity_string_(infinity_string)
@@ -700,13 +710,13 @@ namespace awkward {
     }
 
     bool Double(double x) {
-      if (state_ == kExpectRealValue) {
-        complex_number_ = std::complex<double>(x);
+      if (state_ == State::kExpectRealValue) {
+        complex_number_ = {x, complex_number_.imag()};
+        state_ = State::kExpectComplexEnd;
       }
-      else if (state_ == kExpectImaginaryValue) {
+      else if (state_ == State::kExpectImaginaryValue) {
         complex_number_ = {complex_number_.real(), x};
-        state_ = kExpectComplexStart;
-        builder_.complex(complex_number_);
+        state_ = State::kExpectComplexEnd;
       }
       else {
         builder_.real(x);
@@ -755,7 +765,7 @@ namespace awkward {
       moved_ = true;
       if (complex_real_string_ != nullptr  &&
         complex_imag_string_ != nullptr) {
-          state_ = kMaybeBeginRecord;
+          state_ = State::kMaybeBeginRecord;
       }
       else {
         builder_.beginrecord();
@@ -766,7 +776,15 @@ namespace awkward {
     bool
     EndObject(rj::SizeType numfields) {
       moved_ = true;
-      builder_.endrecord();
+      if (complex_real_string_ != nullptr  &&
+        complex_imag_string_ != nullptr  &&
+        state_ == State::kExpectComplexEnd) {
+          builder_.complex(complex_number_);
+          state_ = State::kContinue;
+      }
+      else {
+        builder_.endrecord();
+      }
       return true;
     }
 
@@ -775,16 +793,16 @@ namespace awkward {
       moved_ = true;
       if (complex_real_string_ != nullptr  &&
         strcmp(str, complex_real_string_) == 0) {
-        state_ = kExpectRealValue;
+        state_ = State::kExpectRealValue;
       }
       else if (complex_imag_string_ != nullptr  &&
         strcmp(str, complex_imag_string_) == 0) {
-        state_ = kExpectImaginaryValue;
+        state_ = State::kExpectImaginaryValue;
       }
       else {
-        if (state_ == kMaybeBeginRecord) {
+        if (state_ == State::kMaybeBeginRecord) {
           builder_.beginrecord();
-          state_ = kContinue;
+          state_ = State::kContinue;
         }
         builder_.field_check(str);
       }
@@ -797,15 +815,7 @@ namespace awkward {
 
   private:
     ArrayBuilder builder_;
-
-    enum State {
-       kContinue,
-       kMaybeBeginRecord,
-       kExpectComplexStart,
-       kExpectRealValue,
-       kExpectImaginaryValue
-    } state_;
-
+    State state_;
     bool moved_;
     const char* nan_string_;
     const char* infinity_string_;
