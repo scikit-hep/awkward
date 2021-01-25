@@ -534,7 +534,7 @@ def gettemplatestring(templateargs):
     return templatestring
 
 
-def getdecl(name, args, templatestring, parent=False, solo=False):
+def getdecl(name, args, templatestring, parent=False):
     code = ""
     if templatestring != "":
         code += "template <" + templatestring + ">\n"
@@ -592,7 +592,6 @@ def getcode(indspec):
         args,
         templatestring,
         parent=True,
-        solo="specializations" in indspec.keys(),
     )
     code += """  int64_t threadx_dim = blockIdx.x * blockDim.x + threadIdx.x;
 int64_t thready_dim = blockIdx.y * blockDim.y + threadIdx.y;
