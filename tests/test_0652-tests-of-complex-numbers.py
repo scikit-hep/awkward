@@ -59,8 +59,8 @@ def test_from_json():
         ak.from_json(
             '[{"r": [], "i": 1}, {"r": [1, 2], "i": 2}]',
             complex_record_fields=("r", "i"),
-        )
-    assert "at the same level" not in str(err)
+        ) == []
+    assert "Complex number fields must be numbers" in str(err)
 
     # These shouldn't be recognized as complex number records because they have
     # only one of the two fields.
@@ -119,7 +119,7 @@ def test_to_json():
 def test_reducers():
     # axis=None reducers are implemented in NumPy.
     assert ak.sum(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]])) == 6 + 6j
-    assert ak.prod(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]])) == 1 + 11j
+    assert ak.prod(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]])) == -12 + 12j
 
     # axis != None reducers are implemented in libawkward; this should be ReducerSum.
     assert ak.sum(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1).tolist() == [
@@ -129,7 +129,7 @@ def test_reducers():
     ]
     # And this is in ReducerProd.
     assert ak.prod(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1).tolist() == [
-        1 + 4j,
+        0 + 4j,
         1 + 0j,
         3 + 3j,
     ]

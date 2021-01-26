@@ -24,8 +24,22 @@ namespace awkward {
       GrowableBuffer<std::complex<double>>::empty(options, old.reserved());
     int64_t* oldraw = old.ptr().get();
     std::complex<double>* newraw = buffer.ptr().get();
+    for (int64_t i = 0;  i < 2*old.length();  i++) {
+      newraw[i] = {static_cast<double>(oldraw[i]), 0};
+    }
+    buffer.set_length(old.length());
+    return std::make_shared<Complex128Builder>(options, buffer);
+  }
+
+  const BuilderPtr
+  Complex128Builder::fromfloat64(const ArrayBuilderOptions& options,
+                                 const GrowableBuffer<double>& old) {
+    GrowableBuffer<std::complex<double>> buffer =
+      GrowableBuffer<std::complex<double>>::empty(options, old.reserved());
+    double* oldraw = old.ptr().get();
+    std::complex<double>* newraw = buffer.ptr().get();
     for (int64_t i = 0;  i < old.length();  i++) {
-      newraw[i] = oldraw[i];
+      newraw[i] = {oldraw[i], 0};
     }
     buffer.set_length(old.length());
     return std::make_shared<Complex128Builder>(options, buffer);

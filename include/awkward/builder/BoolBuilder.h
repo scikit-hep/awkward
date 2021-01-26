@@ -3,6 +3,7 @@
 #ifndef AWKWARD_BOOLBUILDER_H_
 #define AWKWARD_BOOLBUILDER_H_
 
+#include <complex>
 #include <string>
 
 #include "awkward/common.h"

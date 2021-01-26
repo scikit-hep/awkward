@@ -3,13 +3,12 @@
 #ifndef AWKWARD_ARRAYBUILDER_H_
 #define AWKWARD_ARRAYBUILDER_H_
 
+#include <complex>
 #include <string>
 #include <vector>
 
 #include "awkward/common.h"
 #include "awkward/util.h"
-
-#include <complex>
 
 namespace awkward {
   class Content;

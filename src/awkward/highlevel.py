@@ -2147,6 +2147,7 @@ class ArrayBuilder(Iterable, Sized):
        * #boolean: appends True or False.
        * #integer: appends an integer.
        * #real: appends a floating-point value.
+       * #complex: appends a complex value.
        * #bytestring: appends an unencoded string (raw bytes).
        * #string: appends a UTF-8 encoded string.
        * #begin_list: begins filling a list; must be closed with #end_list.
@@ -2437,6 +2438,13 @@ class ArrayBuilder(Iterable, Sized):
         accumulated array.
         """
         self._layout.real(x)
+
+    def complex(self, x):
+        """
+        Appends a floating point number `x` at the current position in the
+        accumulated array.
+        """
+        self._layout.complex(x)
 
     def bytestring(self, x):
         """

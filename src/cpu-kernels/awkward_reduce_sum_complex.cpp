@@ -12,10 +12,13 @@ ERROR awkward_reduce_sum_complex(
   int64_t lenparents,
   int64_t outlength) {
   for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = (OUT)0;
+    toptr[i * 2] = (OUT)0;
+    toptr[i * 2 + 1] = (OUT)0;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[i]] += (OUT)fromptr[i];
+    int64_t parent = parents[i];
+    toptr[parent * 2] += fromptr[i * 2];
+    toptr[parent * 2 + 1] += fromptr[i * 2 + 1];
   }
   return success();
 }

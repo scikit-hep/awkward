@@ -3,6 +3,7 @@
 #ifndef AWKWARD_FILLABLE_H_
 #define AWKWARD_FILLABLE_H_
 
+#include <complex>
 #include <string>
 #include <vector>
 

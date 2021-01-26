@@ -6,6 +6,7 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
+#include "awkward/builder/Complex128Builder.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
 
@@ -101,10 +102,9 @@ namespace awkward {
 
   const BuilderPtr
   Float64Builder::complex(std::complex<double> x) {
-    // buffer_.append(x);
-    buffer_.append(x.real());
-    buffer_.append(x.imag());
-    return shared_from_this();
+    BuilderPtr out = Complex128Builder::fromfloat64(options_, buffer_);
+    out.get()->complex(x);
+    return out;
   }
 
   const BuilderPtr

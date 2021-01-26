@@ -17,6 +17,7 @@
 #include "awkward/builder/TupleBuilder.h"
 #include "awkward/builder/RecordBuilder.h"
 #include "awkward/builder/IndexedBuilder.h"
+#include "awkward/builder/Complex128Builder.h"
 #include "awkward/array/UnionArray.h"
 
 #include "awkward/builder/UnionBuilder.h"
@@ -201,7 +202,7 @@ namespace awkward {
       BuilderPtr tofill(nullptr);
       int8_t i = 0;
       for (auto content : contents_) {
-        if (dynamic_cast<Float64Builder*>(content.get()) != nullptr) {
+        if (dynamic_cast<Complex128Builder*>(content.get()) != nullptr) {
           tofill = content;
           break;
         }
@@ -217,13 +218,13 @@ namespace awkward {
           i++;
         }
         if (tofill.get() != nullptr) {
-          tofill = Float64Builder::fromint64(
+          tofill = Complex128Builder::fromint64(
             options_,
             dynamic_cast<Int64Builder*>(tofill.get())->buffer());
           contents_[(size_t)i] = tofill;
         }
         else {
-          tofill = Float64Builder::fromempty(options_);
+          tofill = Complex128Builder::fromempty(options_);
           contents_.push_back(tofill);
         }
       }

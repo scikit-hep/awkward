@@ -6,9 +6,10 @@
 #include "awkward/array/NumpyArray.h"
 #include "awkward/type/PrimitiveType.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
+#include "awkward/builder/Complex128Builder.h"
+#include "awkward/builder/Float64Builder.h"
 #include "awkward/builder/OptionBuilder.h"
 #include "awkward/builder/UnionBuilder.h"
-#include "awkward/builder/Float64Builder.h"
 
 #include "awkward/builder/Int64Builder.h"
 
@@ -95,7 +96,7 @@ namespace awkward {
 
   const BuilderPtr
   Int64Builder::complex(std::complex<double> x) {
-    BuilderPtr out = Float64Builder::fromint64(options_, buffer_);
+    BuilderPtr out = Complex128Builder::fromint64(options_, buffer_);
     out.get()->complex(x);
     return out;
   }

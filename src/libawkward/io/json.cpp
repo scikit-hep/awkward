@@ -166,8 +166,8 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        std::string("ToJson needs both \'complex_real_string\' and \'complex_imag_string\' "
-          " to serialize a complex number")
+        std::string("Complex numbers can't be converted to JSON without"
+          " setting \'complex_record_fields\' ")
         + FILENAME(__LINE__));
     }
   }
@@ -307,8 +307,8 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        std::string("ToJson needs both \'complex_real_string\' and \'complex_imag_string\' "
-          " to serialize a complex number")
+        std::string("Complex numbers can't be converted to JSON without"
+          " setting \'complex_record_fields\' ")
         + FILENAME(__LINE__));
     }
   }
@@ -452,8 +452,8 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        std::string("ToJson needs both \'complex_real_string\' and \'complex_imag_string\' "
-          " to serialize a complex number")
+        std::string("Complex numbers can't be converted to JSON without"
+          " setting \'complex_record_fields\' ")
         + FILENAME(__LINE__));
     }
   }
@@ -594,8 +594,8 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        std::string("ToJson needs both \'complex_real_string\' and \'complex_imag_string\' "
-          " to serialize a complex number")
+        std::string("Complex numbers can't be converted to JSON without"
+          " setting \'complex_record_fields\' ")
         + FILENAME(__LINE__));
     }
   }
@@ -638,30 +638,16 @@ namespace awkward {
   ////////// reading from JSON
 
   class Handler: public rj::BaseReaderHandler<rj::UTF8<>, Handler> {
-    enum class State {
-      kUndefined,
-      kContinue,
-      kMaybeBeginRecord,
-      kExpectComplexEnd,
-      kExpectRealValue,
-      kExpectImaginaryValue
-    };
-
   public:
     Handler(const ArrayBuilderOptions& options,
             const char* nan_string,
             const char* infinity_string,
-            const char* minus_infinity_string,
-            const char* complex_real_string,
-            const char* complex_imag_string)
+            const char* minus_infinity_string)
         : builder_(options)
-        , state_(State::kUndefined)
         , moved_(false)
         , nan_string_(nan_string)
         , infinity_string_(infinity_string)
-        , minus_infinity_string_(minus_infinity_string)
-        , complex_real_string_(complex_real_string)
-        , complex_imag_string_(complex_imag_string) { }
+        , minus_infinity_string_(minus_infinity_string) { }
 
     void
     reset_moved() {
@@ -710,17 +696,7 @@ namespace awkward {
     }
 
     bool Double(double x) {
-      if (state_ == State::kExpectRealValue) {
-        complex_number_ = {x, complex_number_.imag()};
-        state_ = State::kExpectComplexEnd;
-      }
-      else if (state_ == State::kExpectImaginaryValue) {
-        complex_number_ = {complex_number_.real(), x};
-        state_ = State::kExpectComplexEnd;
-      }
-      else {
-        builder_.real(x);
-      }
+      builder_.real(x);
       moved_ = true;
       return true;
     }
@@ -763,49 +739,21 @@ namespace awkward {
     bool
     StartObject() {
       moved_ = true;
-      if (complex_real_string_ != nullptr  &&
-        complex_imag_string_ != nullptr) {
-          state_ = State::kMaybeBeginRecord;
-      }
-      else {
-        builder_.beginrecord();
-      }
+      builder_.beginrecord();
       return true;
     }
 
     bool
     EndObject(rj::SizeType numfields) {
       moved_ = true;
-      if (complex_real_string_ != nullptr  &&
-        complex_imag_string_ != nullptr  &&
-        state_ == State::kExpectComplexEnd) {
-          builder_.complex(complex_number_);
-          state_ = State::kContinue;
-      }
-      else {
-        builder_.endrecord();
-      }
+      builder_.endrecord();
       return true;
     }
 
     bool
     Key(const char* str, rj::SizeType length, bool copy) {
       moved_ = true;
-      if (complex_real_string_ != nullptr  &&
-        strcmp(str, complex_real_string_) == 0) {
-        state_ = State::kExpectRealValue;
-      }
-      else if (complex_imag_string_ != nullptr  &&
-        strcmp(str, complex_imag_string_) == 0) {
-        state_ = State::kExpectImaginaryValue;
-      }
-      else {
-        if (state_ == State::kMaybeBeginRecord) {
-          builder_.beginrecord();
-          state_ = State::kContinue;
-        }
-        builder_.field_check(str);
-      }
+      builder_.field_check(str);
       return true;
     }
 
@@ -815,14 +763,10 @@ namespace awkward {
 
   private:
     ArrayBuilder builder_;
-    State state_;
     bool moved_;
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
-    const char* complex_real_string_;
-    const char* complex_imag_string_;
-    std::complex<double> complex_number_;
   };
 
   template<typename HANDLER, typename STREAM>
@@ -882,9 +826,7 @@ namespace awkward {
     Handler handler(options,
                     nan_string,
                     infinity_string,
-                    minus_infinity_string,
-                    complex_real_string,
-                    complex_imag_string);
+                    minus_infinity_string);
     return do_parse(handler, reader, stream);
   }
 
@@ -905,9 +847,7 @@ namespace awkward {
     Handler handler(options,
                     nan_string,
                     infinity_string,
-                    minus_infinity_string,
-                    complex_real_string,
-                    complex_imag_string);
+                    minus_infinity_string);
     return do_parse(handler, reader, stream);
   }
 }

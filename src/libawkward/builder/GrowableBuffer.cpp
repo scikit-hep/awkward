@@ -5,6 +5,8 @@
 #include "awkward/builder/GrowableBuffer.h"
 
 #include <complex>
+#include <cmath>
+#include <cstring>
 
 namespace awkward {
   template <typename T>

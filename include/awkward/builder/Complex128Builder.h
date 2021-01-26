@@ -30,6 +30,14 @@ namespace awkward {
       fromint64(const ArrayBuilderOptions& options,
                 const GrowableBuffer<int64_t>& old);
 
+    /// @brief Create a Complex128Builder from an existing Float64Builder.
+    /// @param options Configuration options for building an array;
+    /// these are passed to every Builder's constructor.
+    /// @param old The Float64Builder's buffer.
+    static const BuilderPtr
+      fromfloat64(const ArrayBuilderOptions& options,
+                  const GrowableBuffer<double>& old);
+
     /// @brief Create a Complex128Builder from a full set of parameters.
     ///
     /// @param options Configuration options for building an array;

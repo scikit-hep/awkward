@@ -919,6 +919,7 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
       .def("boolean", &ak::ArrayBuilder::boolean)
       .def("integer", &ak::ArrayBuilder::integer)
       .def("real", &ak::ArrayBuilder::real)
+      .def("complex", &ak::ArrayBuilder::complex)
       .def("bytestring",
            [](ak::ArrayBuilder& self, const py::bytes& x) -> void {
         self.bytestring(x.cast<std::string>());

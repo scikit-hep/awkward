@@ -4,8 +4,8 @@
 
 #include "awkward/kernels.h"
 
-// Let 'z1 = p + iq' and 'z2 = r + is' be two complex numbers (p, q, r and s are real),
-// then their product 'z1*z2' is defined as 'z1*z2 = (pr - qs) + i(ps + qr)'.
+#include <complex>
+
 template <typename OUT, typename IN>
 ERROR awkward_reduce_prod_complex(
   OUT* toptr,
@@ -18,11 +18,15 @@ ERROR awkward_reduce_prod_complex(
     toptr[i * 2 + 1] = (OUT)0;
   }
   for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[i] * 2] = toptr[parents[i] * 2] * (OUT)fromptr[i * 2]
-                          - toptr[parents[i] * 2 + 1] * (OUT)fromptr[i * 2 + 1];
-    toptr[parents[i] * 2 + 1] = toptr[parents[i] * 2 ] * (OUT)fromptr[i * 2 + 1]
-                              + toptr[parents[i] * 2 + 1] * (OUT)fromptr[i * 2];
+    int64_t parent = parents[i];
+    std::complex<OUT> z =
+      std::complex<OUT>(toptr[parent * 2], toptr[parent * 2 + 1])
+      * std::complex<OUT>((OUT)fromptr[i * 2], (OUT)fromptr[i * 2 + 1]);
+
+    toptr[parent * 2] = z.real();
+    toptr[parent * 2 + 1] = z.imag();
   }
+
   return success();
 }
 ERROR awkward_reduce_prod_complex64_complex64_64(

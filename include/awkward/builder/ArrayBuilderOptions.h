@@ -3,9 +3,6 @@
 #ifndef AWKWARD_ARRAYBUILDEROPTIONS_H_
 #define AWKWARD_ARRAYBUILDEROPTIONS_H_
 
-#include <cmath>
-#include <cstring>
-
 #include "awkward/common.h"
 
 namespace awkward {
