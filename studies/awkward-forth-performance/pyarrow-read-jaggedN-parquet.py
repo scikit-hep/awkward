@@ -23,3 +23,23 @@ for partition in array.layout.partitions:
 endtime = time.time()
 
 print(f"pyarrow {compress}{s}-jagged{N}", endtime - begintime, "seconds")
+
+array = ak.from_parquet(filename, lazy=True)
+
+begintime = time.time()
+for partition in array.layout.partitions:
+    tmp = partition.array
+
+endtime = time.time()
+
+print(f"pyarrow {compress}{s}-jagged{N}", endtime - begintime, "seconds")
+
+array = ak.from_parquet(filename, lazy=True)
+
+begintime = time.time()
+for partition in array.layout.partitions:
+    tmp = partition.array
+
+endtime = time.time()
+
+print(f"pyarrow {compress}{s}-jagged{N}", endtime - begintime, "seconds")

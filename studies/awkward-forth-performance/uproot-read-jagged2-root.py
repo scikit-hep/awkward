@@ -2,7 +2,7 @@ import time
 
 import uproot
 
-branch = uproot.open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/lzfour1-jagged2.root:tree/branch")
+branch = uproot.open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib9-jagged2.root:tree/branch")
 
 begintime = time.time()
 
@@ -15,4 +15,4 @@ for basketid in range(branch.num_baskets):
     array1 = branch.array(entry_start=start, entry_stop=stop, library="np")
 
 endtime = time.time()
-print("Uproot lzfour1-jagged2", stop, "entries", endtime - begintime, "seconds")
+print("Uproot zlib9-jagged2", stop, "entries", endtime - begintime, "seconds")
