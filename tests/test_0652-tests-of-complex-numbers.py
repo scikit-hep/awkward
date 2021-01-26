@@ -9,34 +9,34 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-# def test_from_iter():
-#     assert ak.from_iter([1 + 1j, 2 + 2j, 3 + 3j]).tolist() == [1 + 1j, 2 + 2j, 3 + 3j]
-#     assert ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]).tolist() == [
-#         [1 + 1j, 2 + 2j],
-#         [],
-#         [3 + 3j],
-#     ]
-#
-#     # First encounter of a complex number should promote previous integers and
-#     # reals into complex numbers:
-#     assert ak.from_iter([1, 2.2, 3 + 3j]).tolist() == [1.0 + 0j, 2.2 + 0j, 3.0 + 3j]
-#     assert ak.from_iter([1, 3 + 3j]).tolist() == [1.0 + 0j, 3.0 + 3j]
-#
-#     # Just as the first encounter of a real number promotes previous integers
-#     # into reals:
-#     assert str(ak.from_iter([1, 2.2]).type) == "2 * float64"
-#     assert ak.from_iter([1, 2.2]).tolist() == [1.0, 2.2]
-#     builder = ak.ArrayBuilder()
-#     str(ak.type(builder)) == "0 * unknown"
-#     builder.integer(1)
-#     str(ak.type(builder)) == "1 * int64"
-#     builder.real(2.2)
-#     str(ak.type(builder)) == "2 * float64"
-#
-#     # For that matter, ArrayBuilder is missing a high-level interface to complex:
-#     builder.complex(3 + 3j)
-#     str(ak.type(builder)) == "3 * complex128"
-#
+def test_from_iter():
+    assert ak.from_iter([1 + 1j, 2 + 2j, 3 + 3j]).tolist() == [1 + 1j, 2 + 2j, 3 + 3j]
+    assert ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]).tolist() == [
+        [1 + 1j, 2 + 2j],
+        [],
+        [3 + 3j],
+    ]
+
+    # First encounter of a complex number should promote previous integers and
+    # reals into complex numbers:
+    assert ak.from_iter([1, 2.2, 3 + 3j]).tolist() == [1.0 + 0j, 2.2 + 0j, 3.0 + 3j]
+    assert ak.from_iter([1, 3 + 3j]).tolist() == [1.0 + 0j, 3.0 + 3j]
+
+    # Just as the first encounter of a real number promotes previous integers
+    # into reals:
+    assert str(ak.from_iter([1, 2.2]).type) == "2 * float64"
+    assert ak.from_iter([1, 2.2]).tolist() == [1.0, 2.2]
+    builder = ak.ArrayBuilder()
+    str(ak.type(builder)) == "0 * unknown"
+    builder.integer(1)
+    str(ak.type(builder)) == "1 * int64"
+    builder.real(2.2)
+    str(ak.type(builder)) == "2 * float64"
+
+    # For that matter, ArrayBuilder is missing a high-level interface to complex:
+    builder.complex(3 + 3j)
+    str(ak.type(builder)) == "3 * complex128"
+
 
 def test_from_json():
     array = ak.from_json('[{"r": 1.1, "i": 1.0}, {"r": 2.2, "i": 2.0}]')
@@ -91,124 +91,124 @@ def test_from_json():
 
 
 
-# def test_to_json():
-#     # Complex numbers can't be converted to JSON without setting 'complex_record_fields',
-#     # but the error messages should refer to that name now. (I changed the name at
-#     # high-level, but not in the error messages emitted by C++ code.)
-#     with pytest.raises(ValueError) as err:
-#         ak.to_json(ak.from_iter([1 + 1j, 2 + 2j, 3 + 3j]))
-#     assert "needs both" not in str(err)
-#
-#     expectation = [{"r": 1.0, "i": 1.0}, {"r": 2.0, "i": 2.0}, {"r": 3.0, "i": 3.0}]
-#     assert expectation == json.loads(
-#         ak.to_json(
-#             ak.from_iter([1 + 1j, 2 + 2j, 3 + 3j]), complex_record_fields=("r", "i")
-#         )
-#     )
-#     expectation = [
-#         [{"r": 1.0, "i": 1.0}, {"r": 2.0, "i": 2.0}],
-#         [],
-#         [{"r": 3.0, "i": 3.0}],
-#     ]
-#     assert expectation == json.loads(
-#         ak.to_json(
-#             ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]),
-#             complex_record_fields=("r", "i"),
-#         )
-#     )
-#
-#
-# def test_reducers():
-#     # axis=None reducers are implemented in NumPy.
-#     assert ak.sum(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]])) == 6 + 6j
-#     assert ak.prod(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]])) == -12 + 12j
-#
-#     # axis != None reducers are implemented in libawkward; this should be ReducerSum.
-#     assert ak.sum(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1).tolist() == [
-#         3 + 3j,
-#         0 + 0j,
-#         3 + 3j,
-#     ]
-#     # And this is in ReducerProd.
-#     assert ak.prod(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1).tolist() == [
-#         0 + 4j,
-#         1 + 0j,
-#         3 + 3j,
-#     ]
-#
-#     # ReducerCount, ReducerCountNonzero, ReducerAny, and ReducerAll work.
-#     assert ak.count(
-#         ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1
-#     ).tolist() == [2, 0, 1]
-#     assert ak.count_nonzero(
-#         ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1
-#     ).tolist() == [2, 0, 1]
-#     assert ak.any(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1).tolist() == [
-#         True,
-#         False,
-#         True,
-#     ]
-#     assert ak.all(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1).tolist() == [
-#         True,
-#         True,
-#         True,
-#     ]
-#     assert ak.any(
-#         ak.from_iter([[1 + 1j, 2 + 2j, 0 + 0j], [], [3 + 3j]]), axis=1
-#     ).tolist() == [True, False, True]
-#     assert ak.all(
-#         ak.from_iter([[1 + 1j, 2 + 2j, 0 + 0j], [], [3 + 3j]]), axis=1
-#     ).tolist() == [False, True, True]
-#
-#
-# def test_minmax():
-#     assert ak.min(ak.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]])) == 1 + 5j
-#     assert ak.max(ak.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]])) == 3 + 3j
-#
-#     assert ak.min(ak.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]]), axis=1).tolist() == [
-#         1 + 5j,
-#         None,
-#         3 + 3j,
-#     ]
-#     assert ak.max(ak.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]]), axis=1).tolist() == [
-#         2 + 4j,
-#         None,
-#         3 + 3j,
-#     ]
-#
-#     assert ak.argmin(
-#         ak.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]]), axis=1
-#     ).tolist() == [0, None, 0]
-#     assert ak.argmax(
-#         ak.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]]), axis=1
-#     ).tolist() == [1, None, 0]
-#
-#
-# @pytest.mark.skip(reason="Remember to implement sorting for complex numbers.")
-# def test_sort():
-#     assert ak.sort(ak.from_iter([[2 + 4j, 1 + 5j], [], [3 + 3j]])).tolist() == [
-#         [1 + 5j, 2 + 4j],
-#         [],
-#         [3 + 3j],
-#     ]
-#     assert ak.argsort(ak.from_iter([[2 + 4j, 1 + 5j], [], [3 + 3j]])).tolist() == [
-#         [1, 0],
-#         [],
-#         [0],
-#     ]
-#
-#
-# def test_numpy():
-#     # This all is fine.
-#     assert np.array_equal(
-#         ak.to_numpy(ak.from_iter([[1 + 1j, 2 + 2j], [3 + 3j, 4 + 4j]])),
-#         np.array([[1 + 1j, 2 + 2j], [3 + 3j, 4 + 4j]]),
-#     )
-#     assert (
-#         str(ak.to_numpy(ak.from_iter([[1 + 1j, 2 + 2j], [3 + 3j, 4 + 4j]])).dtype)
-#         == "complex128"
-#     )
-#     assert ak.Array(np.array([[1 + 1j, 2 + 2j], [3 + 3j, 4 + 4j]])).tolist() == [
-#         [(1 + 1j), (2 + 2j)],
-#         [(3 + 3j), (4 + 4j)],
-#     ]
+def test_to_json():
+    # Complex numbers can't be converted to JSON without setting 'complex_record_fields',
+    # but the error messages should refer to that name now. (I changed the name at
+    # high-level, but not in the error messages emitted by C++ code.)
+    with pytest.raises(ValueError) as err:
+        ak.to_json(ak.from_iter([1 + 1j, 2 + 2j, 3 + 3j]))
+    assert "needs both" not in str(err)
+
+    expectation = [{"r": 1.0, "i": 1.0}, {"r": 2.0, "i": 2.0}, {"r": 3.0, "i": 3.0}]
+    assert expectation == json.loads(
+        ak.to_json(
+            ak.from_iter([1 + 1j, 2 + 2j, 3 + 3j]), complex_record_fields=("r", "i")
+        )
+    )
+    expectation = [
+        [{"r": 1.0, "i": 1.0}, {"r": 2.0, "i": 2.0}],
+        [],
+        [{"r": 3.0, "i": 3.0}],
+    ]
+    assert expectation == json.loads(
+        ak.to_json(
+            ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]),
+            complex_record_fields=("r", "i"),
+        )
+    )
+
+
+def test_reducers():
+    # axis=None reducers are implemented in NumPy.
+    assert ak.sum(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]])) == 6 + 6j
+    assert ak.prod(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]])) == -12 + 12j
+
+    # axis != None reducers are implemented in libawkward; this should be ReducerSum.
+    assert ak.sum(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1).tolist() == [
+        3 + 3j,
+        0 + 0j,
+        3 + 3j,
+    ]
+    # And this is in ReducerProd.
+    assert ak.prod(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1).tolist() == [
+        0 + 4j,
+        1 + 0j,
+        3 + 3j,
+    ]
+
+    # ReducerCount, ReducerCountNonzero, ReducerAny, and ReducerAll work.
+    assert ak.count(
+        ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1
+    ).tolist() == [2, 0, 1]
+    assert ak.count_nonzero(
+        ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1
+    ).tolist() == [2, 0, 1]
+    assert ak.any(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1).tolist() == [
+        True,
+        False,
+        True,
+    ]
+    assert ak.all(ak.from_iter([[1 + 1j, 2 + 2j], [], [3 + 3j]]), axis=1).tolist() == [
+        True,
+        True,
+        True,
+    ]
+    assert ak.any(
+        ak.from_iter([[1 + 1j, 2 + 2j, 0 + 0j], [], [3 + 3j]]), axis=1
+    ).tolist() == [True, False, True]
+    assert ak.all(
+        ak.from_iter([[1 + 1j, 2 + 2j, 0 + 0j], [], [3 + 3j]]), axis=1
+    ).tolist() == [False, True, True]
+
+
+def test_minmax():
+    assert ak.min(ak.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]])) == 1 + 5j
+    assert ak.max(ak.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]])) == 3 + 3j
+
+    assert ak.min(ak.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]]), axis=1).tolist() == [
+        1 + 5j,
+        None,
+        3 + 3j,
+    ]
+    assert ak.max(ak.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]]), axis=1).tolist() == [
+        2 + 4j,
+        None,
+        3 + 3j,
+    ]
+
+    assert ak.argmin(
+        ak.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]]), axis=1
+    ).tolist() == [0, None, 0]
+    assert ak.argmax(
+        ak.from_iter([[1 + 5j, 2 + 4j], [], [3 + 3j]]), axis=1
+    ).tolist() == [1, None, 0]
+
+
+@pytest.mark.skip(reason="Remember to implement sorting for complex numbers.")
+def test_sort():
+    assert ak.sort(ak.from_iter([[2 + 4j, 1 + 5j], [], [3 + 3j]])).tolist() == [
+        [1 + 5j, 2 + 4j],
+        [],
+        [3 + 3j],
+    ]
+    assert ak.argsort(ak.from_iter([[2 + 4j, 1 + 5j], [], [3 + 3j]])).tolist() == [
+        [1, 0],
+        [],
+        [0],
+    ]
+
+
+def test_numpy():
+    # This all is fine.
+    assert np.array_equal(
+        ak.to_numpy(ak.from_iter([[1 + 1j, 2 + 2j], [3 + 3j, 4 + 4j]])),
+        np.array([[1 + 1j, 2 + 2j], [3 + 3j, 4 + 4j]]),
+    )
+    assert (
+        str(ak.to_numpy(ak.from_iter([[1 + 1j, 2 + 2j], [3 + 3j, 4 + 4j]])).dtype)
+        == "complex128"
+    )
+    assert ak.Array(np.array([[1 + 1j, 2 + 2j], [3 + 3j, 4 + 4j]])).tolist() == [
+        [(1 + 1j), (2 + 2j)],
+        [(3 + 3j), (4 + 4j)],
+    ]
