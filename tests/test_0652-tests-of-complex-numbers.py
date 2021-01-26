@@ -47,24 +47,24 @@ def test_from_json():
     array = ak.from_json(
         '[{"r": 1.1, "i": 1.0}, {"r": 2.2, "i": 2.0}]', complex_record_fields=("r", "i")
     )
-    assert (array["r"] + array["i"]*1j).tolist() == [(1.1 + 1j), (2.2 + 2j)]
+    assert array.tolist() == [(1.1 + 1j), (2.2 + 2j)]
 
     # Somewhere in from_json, a handler that turns integer record fields into
     # parts of a complex number is missing.
     array = ak.from_json(
         '[{"r": 1, "i": 1}, {"r": 2, "i": 2}]', complex_record_fields=("r", "i")
     )
-    assert (array["r"] + array["i"]*1j).tolist() == [(1 + 1j), (2 + 2j)]
+    assert array.tolist() == [(1 + 1j), (2 + 2j)]
 
-    # # This should fail with some message like "complex number fields must be numbers,"
-    # # not "called 'end_record' without 'begin_record' at the same level before it."
-    # with pytest.raises(ValueError) as err:
-    #     array = ak.from_json(
-    #         '[{"r": [], "i": 1}, {"r": [1, 2], "i": 2}]',
-    #         complex_record_fields=("r", "i"),
-    #     )
-    #     assert array["r"].type == array["i"].type
-    # assert "Complex number fields must be numbers" in str(err)
+    # This should fail with some message like "complex number fields must be numbers,"
+    # not "called 'end_record' without 'begin_record' at the same level before it."
+    with pytest.raises(ValueError) as err:
+        array = ak.from_json(
+            '[{"r": [], "i": 1}, {"r": [1, 2], "i": 2}]',
+            complex_record_fields=("r", "i"),
+        )
+        assert array["r"].type == array["i"].type
+    assert "Complex number fields must be numbers" in str(err)
 
     # These shouldn't be recognized as complex number records because they have
     # only one of the two fields.
@@ -87,8 +87,7 @@ def test_from_json():
     array = ak.from_json(
         '[{"r": 1.1, "i": 1.0, "another": []}, {"r": 2.2, "i": 2.0, "another": [1, 2, 3]}]',
         complex_record_fields=("r", "i"))
-    assert (array["r"] + array["i"]*1j).tolist() == [(1.1 + 1j), (2.2 + 2j)]
-
+    assert array.tolist() == [(1.1 + 1j), (2.2 + 2j)]
 
 
 def test_to_json():

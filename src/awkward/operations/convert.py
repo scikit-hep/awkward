@@ -1000,6 +1000,7 @@ def from_json(
 
     See also #ak.to_json.
     """
+
     if complex_record_fields is None:
         complex_real_string = None
         complex_imag_string = None
@@ -1035,6 +1036,34 @@ def from_json(
             resize=resize,
             buffersize=buffersize,
         )
+
+    def recurse(recordnode):
+        if isinstance(recordnode, ak.layout.RecordArray):
+            keys = recordnode.keys()
+            if complex_record_fields[0] in keys and complex_record_fields[1] in keys:
+                real = recordnode[complex_record_fields[0]]
+                imag = recordnode[complex_record_fields[1]]
+                nplike = ak.nplike.of(real, imag)
+                real_array = nplike.asarray(real)
+                imag_array = nplike.asarray(imag)
+                if real_array.dtype == "object" or imag_array.dtype == "object":
+                    raise ValueError("Complex number fields must be numbers")
+
+                float_dtype = ak.nplike.numpy.result_type(real_array.dtype, imag_array.dtype, np.dtype(np.float32))
+                out = nplike.empty(2*len(recordnode), dtype=float_dtype)
+                out[::2] = real_array
+                out[1::2] = imag_array
+                complex_dtype = {
+                    np.dtype(np.float32): np.complex64,
+                    np.dtype(np.float64): np.complex128
+                }[float_dtype]
+
+                return ak.layout.NumpyArray(out.view(complex_dtype))
+            else:
+                return recordnode
+
+    if complex_imag_string is not None:
+        layout = recurse(layout)
 
     if highlevel:
         return ak._util.wrap(layout, behavior)
