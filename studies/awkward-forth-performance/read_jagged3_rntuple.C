@@ -33,10 +33,10 @@ void fillpages(T* array, V& view, int64_t& offset, int64_t length, int64_t shift
   offset += current;
 }
 
-void read_jagged3_rntuple() {
+void read_jagged3_rntuple(std::string which) {
   auto model = ROOT::Experimental::RNTupleModel::Create();
 
-  std::string name = "/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib0-rntuple-jagged3.root";
+  std::string name = std::string("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/") + which + "-jagged3.root";
 
   auto ntuple = RNTupleReader::Open(std::move(model), "rntuple", name);
   auto view3 = ntuple->GetViewCollection("field");
@@ -85,5 +85,5 @@ void read_jagged3_rntuple() {
       end_time - begin_time
   ).count();
 
-  std::cout << "rntuple zlib0-jagged3.root " << (count_nanoseconds / 1e9) << " seconds" << std::endl;
+  std::cout << "rntuple " << which << "-jagged3 " << (count_nanoseconds / 1e9) << " seconds" << std::endl;
 }

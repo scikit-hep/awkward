@@ -33,10 +33,10 @@ void fillpages(T* array, V& view, int64_t& offset, int64_t length, int64_t shift
   offset += current;
 }
 
-void read_jagged1_rntuple() {
+void read_jagged1_rntuple(std::string which) {
   auto model = ROOT::Experimental::RNTupleModel::Create();
 
-  std::string name = "/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib0-rntuple-jagged1.root";
+  std::string name = std::string("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/") + which + "-jagged1.root";
 
   auto begin_time = std::chrono::high_resolution_clock::now();
 
@@ -69,5 +69,5 @@ void read_jagged1_rntuple() {
       end_time - begin_time
   ).count();
 
-  std::cout << "rntuple zlib0-jagged1.root " << (count_nanoseconds / 1e9) << " seconds" << std::endl;
+  std::cout << "rntuple " << which << "-jagged1 " << (count_nanoseconds / 1e9) << " seconds" << std::endl;
 }

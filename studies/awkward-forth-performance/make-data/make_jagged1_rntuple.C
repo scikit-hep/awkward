@@ -13,14 +13,14 @@ using RNTupleWriteOptions = ROOT::Experimental::RNTupleWriteOptions;
 
 #define JAGGED1_CLUSTERSIZE 1342176
 
-void make_jagged1_rntuple() {
+void make_jagged1_rntuple(std::string compress_str, int compress_int) {
   auto model = RNTupleModel::Create();
   std::shared_ptr<std::vector<float>> field = model->MakeField<std::vector<float>>("field");
 
   RNTupleWriteOptions options;
-  options.SetCompression(0);
+  options.SetCompression(compress_int);
 
-  std::string name = "/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib0-rntuple-jagged1.root";
+  std::string name = std::string("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/") + compress_str + "-rntuple-jagged1.root";
   auto rntuple = RNTupleWriter::Recreate(std::move(model), "rntuple", name, options);
   rntuple->fClusterSizeEntries = JAGGED1_CLUSTERSIZE;
 
