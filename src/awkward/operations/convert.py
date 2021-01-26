@@ -3557,6 +3557,14 @@ def _form_to_layout(
 
         if length is None:
             length = len(content)
+        if length > len(mask) * 8:
+            raise ValueError(
+                "mask is too short for BitMaskedArray: content length "
+                "is {0}, mask length * 8 is {1}".format(
+                    length, len(mask) * 8
+                )
+                + ak._util.exception_suffix(__file__)
+            )
 
         return ak.layout.BitMaskedArray(
             mask,
@@ -3578,9 +3586,9 @@ def _form_to_layout(
 
         if length is None:
             length = len(mask)
-        elif length != len(mask):
+        elif length > len(mask):
             raise ValueError(
-                "ByteMaskedArray length mismatch: expected {0}, observed {1}".format(
+                "mask is too short for ByteMaskedArray: expected {0}, mask length is {1}".format(
                     length, len(mask)
                 )
                 + ak._util.exception_suffix(__file__)
@@ -3603,8 +3611,8 @@ def _form_to_layout(
     elif isinstance(form, ak.forms.EmptyForm):
         if length is not None and length != 0:
             raise ValueError(
-                "EmptyArray length mismatch: expected {0}, observed {1}".format(
-                    length, 0
+                "EmptyArray found in node with non-zero expected length: expected {0}".format(
+                    length
                 )
                 + ak._util.exception_suffix(__file__)
             )
@@ -3620,9 +3628,9 @@ def _form_to_layout(
 
         if length is None:
             length = len(index)
-        elif length != len(index):
+        elif length > len(index):
             raise ValueError(
-                "IndexedArray length mismatch: expected {0}, observed {1}".format(
+                "index too short for IndexedArray: expected {0}, index length is {1}".format(
                     length, len(index)
                 )
                 + ak._util.exception_suffix(__file__)
@@ -3652,9 +3660,9 @@ def _form_to_layout(
 
         if length is None:
             length = len(index)
-        elif length != len(index):
+        elif length > len(index):
             raise ValueError(
-                "IndexedOptionArray length mismatch: expected {0}, observed {1}".format(
+                "index too short for IndexedOptionArray: expected {0}, index length is {1}".format(
                     length, len(index)
                 )
                 + ak._util.exception_suffix(__file__)
@@ -3690,16 +3698,27 @@ def _form_to_layout(
 
         if length is None:
             length = len(starts)
-        elif length != len(starts):
+        elif length > len(starts):
             raise ValueError(
-                "ListArray length mismatch: expected {0}, observed {1}".format(
+                "starts too short for ListArray: expected {0}, starts length is {1}".format(
                     length, len(starts)
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+        elif length > len(stops):
+            raise ValueError(
+                "stops too short for ListArray: expected {0}, stops length is {1}".format(
+                    length, len(stops)
                 )
                 + ak._util.exception_suffix(__file__)
             )
 
         array_starts = numpy.asarray(starts)
-        array_stops = numpy.asarray(stops)[: len(array_starts)]
+        if len(array_starts) != length:
+            array_starts = array_starts[:length]
+        array_stops = numpy.asarray(stops)
+        if len(array_stops) != length:
+            array_stops = array_stops[:length]
         array_stops = array_stops[array_starts != array_stops]
         content = _form_to_layout(
             form.content,
@@ -3725,9 +3744,9 @@ def _form_to_layout(
 
         if length is None:
             length = len(offsets) - 1
-        elif length != len(offsets) - 1:
+        elif length > len(offsets) - 1:
             raise ValueError(
-                "ListOffsetArray length mismatch: expected {0}, observed {1}".format(
+                "offsets too short for ListOffsetArray: expected {0}, offsets length - 1 is {1}".format(
                     length, len(offsets) - 1
                 )
                 + ak._util.exception_suffix(__file__)
@@ -3757,12 +3776,18 @@ def _form_to_layout(
         else:
             dtype, inner_shape = dtype_inner_shape.subdtype
 
-        if length is None:
-            shape = (-1,) + inner_shape
-        else:
-            shape = (length,) + inner_shape
+        if length is not None:
+            actual = len(raw_array) // dtype_inner_shape.itemsize
+            if length > actual:
+                raise ValueError(
+                    "buffer is too short for NumpyArray: expected {0}, buffer "
+                    "has {1} items ({2} bytes)".format(
+                        length, actual, len(raw_array)
+                    )
+                    + ak._util.exception_suffix(__file__)
+                )
 
-        array = raw_array.view(dtype).reshape(shape)
+        array = raw_array.view(dtype).reshape((-1,) + inner_shape)
 
         return ak.layout.NumpyArray(array, identities, parameters)
 
@@ -3842,17 +3867,31 @@ def _form_to_layout(
 
         if length is None:
             length = len(tags)
-        elif length != len(tags):
+        elif length > len(tags):
             raise ValueError(
-                "UnionArray length mismatch: expected {0}, observed {1}".format(
+                "tags too short for UnionArray: expected {0}, tags length is {1}".format(
                     length, len(tags)
                 )
                 + ak._util.exception_suffix(__file__)
             )
+        elif length > len(index):
+            raise ValueError(
+                "index too short for UnionArray: expected {0}, index length is {1}".format(
+                    length, len(index)
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+
+        array_tags = numpy.asarray(tags)
+        if len(array_tags) != length:
+            array_tags = array_tags[:length]
+        array_index = numpy.asarray(index)
+        if len(array_index) != length:
+            array_index = array_index[:length]
 
         contents = []
         for i, content_form in enumerate(form.contents):
-            mine = numpy.array(index)[numpy.equal(tags, i)]
+            mine = array_index[numpy.equal(array_tags, i)]
             contents.append(
                 _form_to_layout(
                     content_form,
