@@ -36,7 +36,7 @@ Most pull requests are merged with the "squash and merge" feature, so details ab
 
 It is unnecessary to manually edit (rebase) your commit history. If, however, you do want to save a pull request as multiple commits on `main`, ask me and we'll discuss. (The default branch is named `main`, not `master`.)
 
-### Building and teseting locally
+### Building and testing locally
 
 As described in [the README](https://github.com/scikit-hep/awkward-1.0#installation-for-developers), you can build locally using
 
@@ -70,6 +70,16 @@ python dev/generate-tests.py
 python -m pytest -vv -rs tests-cuda-kernels
 python -m pytest -vv -rs tests-cuda
 ```
+
+### Formatting
+
+This project uses [pre-commit](https://pre-commit.com) to handle formatters and linters. Ideally, you should run pre-commit before you commit and make a PR (although, we can format for you if needed). Install pre-commit using your favorite package manager, such as `brew` on macOS, `pipx` on all platforms, or even `pip` (though `pipx` is designed for executables, while `pip` is designed for libraries). Then, run:
+
+```bash
+pre-commit run -a
+```
+
+To run pre-commit on all files. If you leave off the `-a`, it will run only on your current stashed changes. If you want to always run pre-commit before committing, run `pre-commit install` to install pre-commit's auto-run hooks to the current repo (if you have to bypass them, add `-n` to any git command to skip all hooks).
 
 ### Building documentation locally
 
