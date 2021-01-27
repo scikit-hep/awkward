@@ -315,7 +315,7 @@ def test_to_categorical_masked():
     assert ak.categories(categorical).tolist() == ["one", "two", "three"]
 
 
-def test_to_categorical_masked():
+def test_to_categorical_masked_again():
     content = ak.Array(
         ["one", "two", "three", "one", "one", "two", "three", "two"]
     ).layout

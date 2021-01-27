@@ -2022,7 +2022,7 @@ def test_nonzero_offset_fromarrow_RecordArray_4():
     ) == pyarrow.Array.to_pylist(ak.to_arrow(recordarray)[-3:3:-1])
 
 
-def test_nonzero_offset_fromarrow_RecordArray_4():
+def test_nonzero_offset_fromarrow_RecordArray_4_again():
     content = ak.layout.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10])
     )
@@ -2191,7 +2191,7 @@ def test_nonzero_offset_fromarrow_ArrowRecordBatch_4():
     ]
 
 
-def test_nonzero_offset_fromarrow_ArrowRecordBatch_4():
+def test_nonzero_offset_fromarrow_ArrowRecordBatch_4_again():
     a = pyarrow.RecordBatch.from_arrays(
         [
             pyarrow.array([1.1, 2.2, 3.3, 4.4, 5.5]),

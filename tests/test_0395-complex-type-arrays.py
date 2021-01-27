@@ -214,10 +214,20 @@ def test_astype_complex():
 
     content_complex64 = ak.values_astype(content_float64, "complex64", highlevel=False)
     array_complex64 = ak.layout.UnmaskedArray(content_complex64)
-    assert ak.to_list(content_complex64) == [(0.25+0j), (0.5+0j), (3.5+0j), (4.5+0j), (5.5+0j)]
+    assert ak.to_list(content_complex64) == [
+        (0.25 + 0j),
+        (0.5 + 0j),
+        (3.5 + 0j),
+        (4.5 + 0j),
+        (5.5 + 0j),
+    ]
     assert ak.to_list(ak.nplike.of(array_complex64).asarray(array_complex64)) == [
-        (0.25+0.j), (0.5 +0.j), (3.5 +0.j), (4.5 +0.j), (5.5 +0.j)
-        ]
+        (0.25 + 0.0j),
+        (0.5 + 0.0j),
+        (3.5 + 0.0j),
+        (4.5 + 0.0j),
+        (5.5 + 0.0j),
+    ]
     assert str(ak.type(content_complex64)) == "complex64"
     assert str(ak.type(ak.Array(content_complex64))) == "5 * complex64"
     assert str(ak.type(array_complex64)) == "?complex64"
@@ -225,7 +235,17 @@ def test_astype_complex():
     content = ak.layout.NumpyArray(
         np.array([1, (2.2 + 0.1j), 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
     )
-    assert ak.to_list(content) == [(1+0j), (2.2+0.1j), (3.3+0j), (4.4+0j), (5.5+0j), (6.6+0j), (7.7+0j), (8.8+0j), (9.9+0j)]
+    assert ak.to_list(content) == [
+        (1 + 0j),
+        (2.2 + 0.1j),
+        (3.3 + 0j),
+        (4.4 + 0j),
+        (5.5 + 0j),
+        (6.6 + 0j),
+        (7.7 + 0j),
+        (8.8 + 0j),
+        (9.9 + 0j),
+    ]
 
     assert content_complex64.prod() == (10.828125 + 0j)
     assert content_complex64.min() == (0.25 + 0j)
