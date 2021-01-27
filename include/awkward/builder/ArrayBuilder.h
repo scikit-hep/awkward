@@ -3,6 +3,7 @@
 #ifndef AWKWARD_ARRAYBUILDER_H_
 #define AWKWARD_ARRAYBUILDER_H_
 
+#include <complex>
 #include <string>
 #include <vector>
 
@@ -114,6 +115,10 @@ namespace awkward {
     /// @brief Adds a real value `x` to the accumulated data.
     void
       real(double x);
+
+    /// @brief Adds a complex value `x` to the accumulated data.
+    void
+      complex(std::complex<double> x);
 
     /// @brief Adds an unencoded, null-terminated bytestring value `x` to the
     /// accumulated data.

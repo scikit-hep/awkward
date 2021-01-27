@@ -17,6 +17,7 @@
 #include "awkward/builder/TupleBuilder.h"
 #include "awkward/builder/RecordBuilder.h"
 #include "awkward/builder/IndexedBuilder.h"
+#include "awkward/builder/Complex128Builder.h"
 #include "awkward/array/UnionArray.h"
 
 #include "awkward/builder/UnionBuilder.h"
@@ -191,6 +192,65 @@ namespace awkward {
     }
     else {
       contents_[(size_t)current_].get()->real(x);
+    }
+    return shared_from_this();
+  }
+
+  const BuilderPtr
+  UnionBuilder::complex(std::complex<double> x) {
+    if (current_ == -1) {
+      BuilderPtr tofill(nullptr);
+      int8_t i = 0;
+      for (auto content : contents_) {
+        if (dynamic_cast<Complex128Builder*>(content.get()) != nullptr) {
+          tofill = content;
+          break;
+        }
+        i++;
+      }
+      if (tofill.get() == nullptr) {
+        i = 0;
+        for (auto content : contents_) {
+          if (dynamic_cast<Float64Builder*>(content.get()) != nullptr) {
+            tofill = content;
+            break;
+          }
+          i++;
+        }
+        if (tofill.get() != nullptr) {
+          tofill = Complex128Builder::fromfloat64(
+            options_,
+            dynamic_cast<Float64Builder*>(tofill.get())->buffer());
+          contents_[(size_t)i] = tofill;
+        }
+      }
+      if (tofill.get() == nullptr) {
+        i = 0;
+        for (auto content : contents_) {
+          if (dynamic_cast<Int64Builder*>(content.get()) != nullptr) {
+            tofill = content;
+            break;
+          }
+          i++;
+        }
+        if (tofill.get() != nullptr) {
+          tofill = Complex128Builder::fromint64(
+            options_,
+            dynamic_cast<Int64Builder*>(tofill.get())->buffer());
+          contents_[(size_t)i] = tofill;
+        }
+      }
+      else {
+        tofill = Complex128Builder::fromempty(options_);
+        contents_.push_back(tofill);
+      }
+      int64_t length = tofill.get()->length();
+      tofill.get()->complex(x);
+      tags_.append(i);
+      index_.append(length);
+    }
+    else {
+      contents_[(size_t)current_].get()->complex(x);
     }
     return shared_from_this();
   }

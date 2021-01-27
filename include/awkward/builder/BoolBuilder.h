@@ -3,6 +3,7 @@
 #ifndef AWKWARD_BOOLBUILDER_H_
 #define AWKWARD_BOOLBUILDER_H_
 
+#include <complex>
 #include <string>
 
 #include "awkward/common.h"
@@ -61,6 +62,9 @@ namespace awkward {
 
     const BuilderPtr
       real(double x) override;
+
+    const BuilderPtr
+      complex(std::complex<double> x) override;
 
     const BuilderPtr
       string(const char* x, int64_t length, const char* encoding) override;

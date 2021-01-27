@@ -78,6 +78,9 @@ namespace awkward {
       real(double x) override;
 
     const BuilderPtr
+      complex(std::complex<double> x) override;
+
+    const BuilderPtr
       string(const char* x, int64_t length, const char* encoding) override;
 
     const BuilderPtr

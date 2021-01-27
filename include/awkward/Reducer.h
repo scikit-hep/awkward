@@ -3,6 +3,7 @@
 #ifndef AWKWARD_REDUCER_H_
 #define AWKWARD_REDUCER_H_
 
+#include <complex>
 #include <memory>
 
 #include "awkward/common.h"
@@ -176,6 +177,32 @@ namespace awkward {
       apply_float64(const double* data,
                     const Index64& parents,
                     int64_t outlength) const = 0;
+
+    /// @brief Apply the reducer algorithm to an array of complex 32-bit
+    /// floating-point values.
+    ///
+    /// @param data The array to reduce.
+    /// @param parents An integer array indicating which group each element
+    /// belongs to.
+    /// @param outlength The length of the output array (equal to the number
+    /// of groups).
+    virtual const std::shared_ptr<void>
+      apply_complex64(const std::complex<float>* data,
+                      const Index64& parents,
+                      int64_t outlength) const = 0;
+
+    /// @brief Apply the reducer algorithm to an array of complex 64-bit
+    /// floating-point values.
+    ///
+    /// @param data The array to reduce.
+    /// @param parents An integer array indicating which group each element
+    /// belongs to.
+    /// @param outlength The length of the output array (equal to the number
+    /// of groups).
+    virtual const std::shared_ptr<void>
+      apply_complex128(const std::complex<double>* data,
+                       const Index64& parents,
+                       int64_t outlength) const = 0;
   };
 
   /// @class ReducerCount
@@ -257,6 +284,16 @@ namespace awkward {
       apply_float64(const double* data,
                     const Index64& parents,
                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex64(const std::complex<float>* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex128(const std::complex<double>* data,
+                       const Index64& parents,
+                       int64_t outlength) const override;
   };
 
   /// @class ReducerCountNonzero
@@ -338,6 +375,16 @@ namespace awkward {
       apply_float64(const double* data,
                     const Index64& parents,
                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex64(const std::complex<float>* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex128(const std::complex<double>* data,
+                       const Index64& parents,
+                       int64_t outlength) const override;
   };
 
   /// @class ReducerSum
@@ -420,6 +467,16 @@ namespace awkward {
       apply_float64(const double* data,
                     const Index64& parents,
                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex64(const std::complex<float>* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex128(const std::complex<double>* data,
+                       const Index64& parents,
+                       int64_t outlength) const override;
   };
 
   /// @class ReducerProd
@@ -502,6 +559,16 @@ namespace awkward {
       apply_float64(const double* data,
                     const Index64& parents,
                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex64(const std::complex<float>* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex128(const std::complex<double>* data,
+                       const Index64& parents,
+                       int64_t outlength) const override;
   };
 
   /// @class ReducerAny
@@ -584,6 +651,16 @@ namespace awkward {
       apply_float64(const double* data,
                     const Index64& parents,
                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex64(const std::complex<float>* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex128(const std::complex<double>* data,
+                       const Index64& parents,
+                       int64_t outlength) const override;
   };
 
   /// @class ReducerAll
@@ -666,6 +743,16 @@ namespace awkward {
       apply_float64(const double* data,
                     const Index64& parents,
                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex64(const std::complex<float>* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex128(const std::complex<double>* data,
+                       const Index64& parents,
+                       int64_t outlength) const override;
   };
 
   /// @class ReducerMin
@@ -680,6 +767,10 @@ namespace awkward {
   /// ReducerMin and ReducerMax are exceptions to the no-state rule: they are
   /// parameterized by `initial`, used as an initial value in the minimization
   /// or maximization.
+  ///
+  /// For the complex numbers array it
+  /// returns the minimumm absolute value (also known as norm, modulus,
+  /// or magnitude) of a complex number.
   class LIBAWKWARD_EXPORT_SYMBOL ReducerMin: public Reducer {
   public:
     ReducerMin(double initial_f64, uint64_t initial_u64, int64_t initial_i64);
@@ -750,6 +841,15 @@ namespace awkward {
                     const Index64& parents,
                     int64_t outlength) const override;
 
+    const std::shared_ptr<void>
+      apply_complex64(const std::complex<float>* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex128(const std::complex<double>* data,
+                       const Index64& parents,
+                       int64_t outlength) const override;
   private:
     double initial_f64_;
     uint64_t initial_u64_;
@@ -769,6 +869,10 @@ namespace awkward {
   /// ReducerMin and ReducerMax are exceptions to the no-state rule: they are
   /// parameterized by `initial`, used as an initial value in the minimization
   /// or maximization.
+  ///
+  /// For the complex numbers array it
+  /// returns the minimumm absolute value (also known as norm, modulus,
+  /// or magnitude) of a complex number.
   class LIBAWKWARD_EXPORT_SYMBOL ReducerMax: public Reducer {
   public:
     ReducerMax(double initial_f64_, uint64_t initial_u64_, int64_t initial_i64_);
@@ -839,6 +943,15 @@ namespace awkward {
                     const Index64& parents,
                     int64_t outlength) const override;
 
+    const std::shared_ptr<void>
+      apply_complex64(const std::complex<float>* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex128(const std::complex<double>* data,
+                       const Index64& parents,
+                       int64_t outlength) const override;
   private:
     double initial_f64_;
     uint64_t initial_u64_;
@@ -854,6 +967,10 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
+  ///
+  /// For the complex numbers array it
+  /// returns the position of the minimumm absolute value (also known as norm,
+  /// modulus, or magnitude) of a complex number.
   class LIBAWKWARD_EXPORT_SYMBOL ReducerArgmin: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"argmin"`.
@@ -932,6 +1049,16 @@ namespace awkward {
       apply_float64(const double* data,
                     const Index64& parents,
                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex64(const std::complex<float>* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex128(const std::complex<double>* data,
+                       const Index64& parents,
+                       int64_t outlength) const override;
   };
 
   /// @class ReducerArgmax
@@ -942,6 +1069,10 @@ namespace awkward {
   /// Reducers have no parameters or state. They are classes for convenience,
   /// to separate {@link Content#reduce_next Content::reduce_next}, determining
   /// which values to combine, from the choice of reducer algorithm.
+  ///
+  /// For the complex numbers array it
+  /// returns the position of the maximum absolute value (also known as norm,
+  /// modulus, or magnitude) of a complex number.
   class LIBAWKWARD_EXPORT_SYMBOL ReducerArgmax: public Reducer {
   public:
     /// @brief Name of the reducer algorithm: `"argmax"`.
@@ -1020,6 +1151,16 @@ namespace awkward {
       apply_float64(const double* data,
                     const Index64& parents,
                     int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex64(const std::complex<float>* data,
+                      const Index64& parents,
+                      int64_t outlength) const override;
+
+    const std::shared_ptr<void>
+      apply_complex128(const std::complex<double>* data,
+                       const Index64& parents,
+                       int64_t outlength) const override;
   };
 
 }

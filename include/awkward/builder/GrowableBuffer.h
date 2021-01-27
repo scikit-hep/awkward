@@ -3,15 +3,13 @@
 #ifndef AWKWARD_GROWABLEBUFFER_H_
 #define AWKWARD_GROWABLEBUFFER_H_
 
-#include <cmath>
-#include <cstring>
-
 #include "awkward/common.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/Index.h"
 
-namespace awkward {
-  class ArrayBuilderOptions;
+#include <memory>
 
+namespace awkward {
   /// @class GrowableBuffer
   ///
   /// @brief Contiguous, one-dimensional array that can grow indefinitely

@@ -968,7 +968,9 @@ namespace awkward {
       tojson(bool pretty, int64_t maxdecimals,
              const char* nan_string = nullptr,
              const char* infinity_string = nullptr,
-             const char* minus_infinity_string = nullptr) const;
+             const char* minus_infinity_string = nullptr,
+             const char* complex_real_string = nullptr,
+             const char* complex_imag_string = nullptr) const;
 
     /// @brief Writes a JSON representation of this array to a `destination`
     /// file.
@@ -997,7 +999,9 @@ namespace awkward {
              int64_t buffersize,
              const char* nan_string = nullptr,
              const char* infinity_string = nullptr,
-             const char* minus_infinity_string = nullptr) const;
+             const char* minus_infinity_string = nullptr,
+             const char* complex_real_string = nullptr,
+             const char* complex_imag_string = nullptr) const;
 
     /// @brief The number of bytes contained in all array buffers,
     /// {@link IndexOf Index} buffers, and Identities buffers, not including

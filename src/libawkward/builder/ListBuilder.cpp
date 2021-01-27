@@ -119,6 +119,19 @@ namespace awkward {
   }
 
   const BuilderPtr
+  ListBuilder::complex(std::complex<double> x) {
+    if (!begun_) {
+      BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+      out.get()->complex(x);
+      return out;
+    }
+    else {
+      maybeupdate(content_.get()->complex(x));
+      return shared_from_this();
+    }
+  }
+
+  const BuilderPtr
   ListBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());

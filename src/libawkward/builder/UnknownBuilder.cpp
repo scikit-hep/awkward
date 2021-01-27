@@ -14,6 +14,7 @@
 #include "awkward/builder/BoolBuilder.h"
 #include "awkward/builder/Int64Builder.h"
 #include "awkward/builder/Float64Builder.h"
+#include "awkward/builder/Complex128Builder.h"
 #include "awkward/builder/StringBuilder.h"
 #include "awkward/builder/ListBuilder.h"
 #include "awkward/builder/TupleBuilder.h"
@@ -108,6 +109,16 @@ namespace awkward {
       out = OptionBuilder::fromnulls(options_, nullcount_, out);
     }
     out.get()->real(x);
+    return out;
+  }
+
+  const BuilderPtr
+  UnknownBuilder::complex(std::complex<double> x) {
+    BuilderPtr out = Complex128Builder::fromempty(options_);
+    if (nullcount_ != 0) {
+      out = OptionBuilder::fromnulls(options_, nullcount_, out);
+    }
+    out.get()->complex(x);
     return out;
   }
 

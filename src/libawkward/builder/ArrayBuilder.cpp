@@ -94,6 +94,11 @@ namespace awkward {
   }
 
   void
+  ArrayBuilder::complex(std::complex<double> x) {
+    maybeupdate(builder_.get()->complex(x));
+  }
+
+  void
   ArrayBuilder::bytestring(const char* x) {
     maybeupdate(builder_.get()->string(x, -1, no_encoding));
   }

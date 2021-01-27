@@ -87,6 +87,13 @@ namespace awkward {
   }
 
   const BuilderPtr
+  BoolBuilder::complex(std::complex<double> x) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    out.get()->complex(x);
+    return out;
+  }
+
+  const BuilderPtr
   BoolBuilder::string(const char* x, int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);

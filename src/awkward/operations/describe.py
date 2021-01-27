@@ -146,6 +146,8 @@ def type(array):
             np.uint64,
             np.float32,
             np.float64,
+            np.complex64,
+            np.complex128,
         ),
     ):
         return ak.types.PrimitiveType(type.dtype2primitive[array.dtype.type])
@@ -202,6 +204,8 @@ type.dtype2primitive = {
     np.uint64: "uint64",
     np.float32: "float32",
     np.float64: "float64",
+    np.complex64: "complex64",
+    np.complex128: "complex128",
 }
 
 

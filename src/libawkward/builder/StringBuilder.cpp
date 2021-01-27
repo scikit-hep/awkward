@@ -130,6 +130,13 @@ namespace awkward {
   }
 
   const BuilderPtr
+  StringBuilder::complex(std::complex<double> x) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    out.get()->complex(x);
+    return out;
+  }
+
+  const BuilderPtr
   StringBuilder::string(const char* x, int64_t length, const char* encoding) {
     if (length < 0) {
       for (int64_t i = 0;  x[i] != 0;  i++) {

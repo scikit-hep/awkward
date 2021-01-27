@@ -142,6 +142,24 @@ namespace awkward {
                       outlength);
   }
 
+  const std::shared_ptr<void>
+  ReducerCount::apply_complex64(const std::complex<float>* data,
+                                const Index64& parents,
+                                int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data),
+                      parents,
+                      outlength);
+  }
+
+  const std::shared_ptr<void>
+  ReducerCount::apply_complex128(const std::complex<double>* data,
+                                 const Index64& parents,
+                                 int64_t outlength) const {
+    return apply_bool(reinterpret_cast<const bool*>(data),
+                      parents,
+                      outlength);
+  }
+
   ////////// count nonzero
 
   const std::string
@@ -347,6 +365,42 @@ namespace awkward {
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
       ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_countnonzero_64<double>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerCountNonzero::apply_complex64(const std::complex<float>* data,
+                                       const Index64& parents,
+                                       int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    struct Error err = kernel::reduce_countnonzero_64<std::complex<float>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerCountNonzero::apply_complex128(const std::complex<double>* data,
+                                        const Index64& parents,
+                                        int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    struct Error err = kernel::reduce_countnonzero_64<std::complex<double>>(
       ptr_lib,
       ptr.get(),
       data,
@@ -676,6 +730,42 @@ namespace awkward {
     return ptr;
   }
 
+  const std::shared_ptr<void>
+  ReducerSum::apply_complex64(const std::complex<float>* data,
+                              const Index64& parents,
+                              int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<std::complex<float>> ptr = kernel::malloc<std::complex<float>>(
+      ptr_lib, outlength*(int64_t)sizeof(std::complex<float>));
+    struct Error err = kernel::reduce_sum_64<std::complex<float>, std::complex<float>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerSum::apply_complex128(const std::complex<double>* data,
+                               const Index64& parents,
+                               int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<std::complex<double>> ptr = kernel::malloc<std::complex<double>>(
+      ptr_lib, outlength*(int64_t)sizeof(std::complex<double>));
+    struct Error err = kernel::reduce_sum_64<std::complex<double>, std::complex<double>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
   ////////// prod (multiplication)
 
   const std::string
@@ -995,6 +1085,42 @@ namespace awkward {
     return ptr;
   }
 
+  const std::shared_ptr<void>
+  ReducerProd::apply_complex64(const std::complex<float>* data,
+                               const Index64& parents,
+                               int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<std::complex<float>> ptr = kernel::malloc<std::complex<float>>(
+      ptr_lib, outlength*(int64_t)sizeof(std::complex<float>));
+    struct Error err = kernel::reduce_prod_64<std::complex<float>, std::complex<float>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerProd::apply_complex128(const std::complex<double>* data,
+                                const Index64& parents,
+                                int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<std::complex<double>> ptr = kernel::malloc<std::complex<double>>(
+      ptr_lib, outlength*(int64_t)sizeof(std::complex<double>));
+    struct Error err = kernel::reduce_prod_64<std::complex<double>, std::complex<double>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
   ////////// any (logical or)
 
   const std::string
@@ -1210,6 +1336,42 @@ namespace awkward {
     return ptr;
   }
 
+  const std::shared_ptr<void>
+  ReducerAny::apply_complex64(const std::complex<float>* data,
+                              const Index64& parents,
+                              int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*(int64_t)sizeof(bool));
+    struct Error err = kernel::reduce_sum_bool_64<std::complex<float>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerAny::apply_complex128(const std::complex<double>* data,
+                               const Index64& parents,
+                               int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*(int64_t)sizeof(bool));
+    struct Error err = kernel::reduce_sum_bool_64<std::complex<double>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
   ////////// all (logical and)
 
   const std::string
@@ -1415,6 +1577,42 @@ namespace awkward {
     std::shared_ptr<bool> ptr = kernel::malloc<bool>(
       ptr_lib, outlength*(int64_t)sizeof(bool));
     struct Error err = kernel::reduce_prod_bool_64<double>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerAll::apply_complex64(const std::complex<float>* data,
+                              const Index64& parents,
+                              int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*(int64_t)sizeof(bool));
+    struct Error err = kernel::reduce_prod_bool_64<std::complex<float>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerAll::apply_complex128(const std::complex<double>* data,
+                               const Index64& parents,
+                               int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<bool> ptr = kernel::malloc<bool>(
+      ptr_lib, outlength*(int64_t)sizeof(bool));
+    struct Error err = kernel::reduce_prod_bool_64<std::complex<double>>(
       ptr_lib,
       ptr.get(),
       data,
@@ -1688,6 +1886,52 @@ namespace awkward {
       initial = (double)initial_f64_;
     }
     struct Error err = kernel::reduce_min_64<double, double>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength,
+      initial);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerMin::apply_complex64(const std::complex<float>* data,
+                              const Index64& parents,
+                              int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<std::complex<float>> ptr = kernel::malloc<std::complex<float>>(
+      ptr_lib, outlength*(int64_t)sizeof(std::complex<float>));
+    float initial = std::numeric_limits<float>::infinity();
+    if (has_initial_) {
+      initial = (float)initial_f64_;
+    }
+    struct Error err = kernel::reduce_min_64<std::complex<float>, std::complex<float>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength,
+      initial);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerMin::apply_complex128(const std::complex<double>* data,
+                               const Index64& parents,
+                               int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<std::complex<double>> ptr = kernel::malloc<std::complex<double>>(
+      ptr_lib, outlength*(int64_t)sizeof(std::complex<double>));
+    double initial = std::numeric_limits<double>::infinity();
+    if (has_initial_) {
+      initial = (double)initial_f64_;
+    }
+    struct Error err = kernel::reduce_min_64<std::complex<double>, std::complex<double>>(
       ptr_lib,
       ptr.get(),
       data,
@@ -1973,6 +2217,52 @@ namespace awkward {
     return ptr;
   }
 
+  const std::shared_ptr<void>
+  ReducerMax::apply_complex64(const std::complex<float>* data,
+                              const Index64& parents,
+                              int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<std::complex<float>> ptr = kernel::malloc<std::complex<float>>(
+      ptr_lib, outlength*(int64_t)sizeof(std::complex<float>));
+    float initial = 0;
+    if (has_initial_) {
+      initial = (float)initial_f64_;
+    }
+    struct Error err = kernel::reduce_max_64<std::complex<float>, std::complex<float>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength,
+      initial);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerMax::apply_complex128(const std::complex<double>* data,
+                               const Index64& parents,
+                               int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<std::complex<double>> ptr = kernel::malloc<std::complex<double>>(
+      ptr_lib, outlength*(int64_t)sizeof(std::complex<double>));
+    double initial = 0;
+    if (has_initial_) {
+      initial = (double)initial_f64_;
+    }
+    struct Error err = kernel::reduce_max_64<std::complex<double>, std::complex<double>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength,
+      initial);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
   ////////// argmin (argument minimum, in which -1 is the identity)
 
   const std::string
@@ -2193,6 +2483,42 @@ namespace awkward {
     return ptr;
   }
 
+  const std::shared_ptr<void>
+  ReducerArgmin::apply_complex64(const std::complex<float>* data,
+                                const Index64& parents,
+                                int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    struct Error err = kernel::reduce_argmin_64<int64_t, std::complex<float>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerArgmin::apply_complex128(const std::complex<double>* data,
+                                  const Index64& parents,
+                                  int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    struct Error err = kernel::reduce_argmin_64<int64_t, std::complex<double>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
   ////////// argmax (argument maximum, in which -1 is the identity)
 
   const std::string
@@ -2403,6 +2729,42 @@ namespace awkward {
     std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
       ptr_lib, outlength*(int64_t)sizeof(int64_t));
     struct Error err = kernel::reduce_argmax_64<int64_t, double>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerArgmax::apply_complex64(const std::complex<float>* data,
+                                 const Index64& parents,
+                                 int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    struct Error err = kernel::reduce_argmax_64<int64_t, std::complex<float>>(
+      ptr_lib,
+      ptr.get(),
+      data,
+      parents.data(),
+      parents.length(),
+      outlength);
+    util::handle_error(err, util::quote(name()), nullptr);
+    return ptr;
+  }
+
+  const std::shared_ptr<void>
+  ReducerArgmax::apply_complex128(const std::complex<double>* data,
+                                  const Index64& parents,
+                                  int64_t outlength) const {
+    kernel::lib ptr_lib = kernel::lib::cpu;   // DERIVE
+    std::shared_ptr<int64_t> ptr = kernel::malloc<int64_t>(
+      ptr_lib, outlength*(int64_t)sizeof(int64_t));
+    struct Error err = kernel::reduce_argmax_64<int64_t, std::complex<double>>(
       ptr_lib,
       ptr.get(),
       data,

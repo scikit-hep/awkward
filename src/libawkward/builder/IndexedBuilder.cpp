@@ -82,6 +82,14 @@ namespace awkward {
 
   template <typename T>
   const BuilderPtr
+  IndexedBuilder<T>::complex(std::complex<double> x) {
+    BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
+    out.get()->complex(x);
+    return out;
+  }
+
+  template <typename T>
+  const BuilderPtr
   IndexedBuilder<T>::string(const char* x,
                             int64_t length,
                             const char* encoding) {

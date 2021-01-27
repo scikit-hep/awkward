@@ -3,6 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/python/content.cpp", line)
 
 #include <pybind11/numpy.h>
+#include <pybind11/complex.h>
 
 #include "awkward/type/Type.h"
 #include "awkward/Reducer.h"
@@ -708,12 +709,16 @@ tojson_string(const T& self,
               const py::object& maxdecimals,
               const char* nan_string,
               const char* infinity_string,
-              const char* minus_infinity_string) {
+              const char* minus_infinity_string,
+              const char* complex_real_string,
+              const char* complex_imag_string) {
   return self.tojson(pretty,
                      check_maxdecimals(maxdecimals),
                      nan_string,
                      infinity_string,
-                     minus_infinity_string);
+                     minus_infinity_string,
+                     complex_real_string,
+                     complex_imag_string);
 }
 
 template <typename T>
@@ -725,7 +730,9 @@ tojson_file(const T& self,
             int64_t buffersize,
             const char* nan_string,
             const char* infinity_string,
-            const char* minus_infinity_string) {
+            const char* minus_infinity_string,
+            const char* complex_real_string,
+            const char* complex_imag_string) {
 #ifdef _MSC_VER
   FILE* file;
   if (fopen_s(&file, destination.c_str(), "wb") != 0) {
@@ -745,7 +752,9 @@ tojson_file(const T& self,
                 buffersize,
                 nan_string,
                 infinity_string,
-                minus_infinity_string);
+                minus_infinity_string,
+                complex_real_string,
+                complex_imag_string);
   }
   catch (...) {
     fclose(file);
@@ -803,6 +812,15 @@ getitem(const T& self, const py::object& obj) {
 
 ////////// ArrayBuilder
 
+bool
+builder_fromiter_iscomplex(const py::handle& obj) {
+#if PY_MAJOR_VERSION < 3
+  return py::isinstance(obj, py::module::import("__builtin__").attr("complex"));
+#else
+  return py::isinstance(obj, py::module::import("builtins").attr("complex"));
+#endif
+}
+
 void
 builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   if (obj.is(py::none())) {
@@ -816,6 +834,9 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   }
   else if (py::isinstance<py::float_>(obj)) {
     self.real(obj.cast<double>());
+  }
+  else if (builder_fromiter_iscomplex(obj)) {
+    self.complex(obj.cast<std::complex<double>>());
   }
   else if (py::isinstance<py::bytes>(obj)) {
     self.bytestring(obj.cast<std::string>());
@@ -906,6 +927,7 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
       .def("boolean", &ak::ArrayBuilder::boolean)
       .def("integer", &ak::ArrayBuilder::integer)
       .def("real", &ak::ArrayBuilder::real)
+      .def("complex", &ak::ArrayBuilder::complex)
       .def("bytestring",
            [](ak::ArrayBuilder& self, const py::bytes& x) -> void {
         self.bytestring(x.cast<std::string>());
@@ -1212,7 +1234,9 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                py::arg("maxdecimals") = py::none(),
                py::arg("nan_string") = nullptr,
                py::arg("infinity_string") = nullptr,
-               py::arg("minus_infinity_string") = nullptr)
+               py::arg("minus_infinity_string") = nullptr,
+               py::arg("complex_real_string") = nullptr,
+               py::arg("complex_imag_string") = nullptr)
           .def("tojson",
                &tojson_file<T>,
                py::arg("destination"),
@@ -1221,7 +1245,9 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                py::arg("buffersize") = 65536,
                py::arg("nan_string") = nullptr,
                py::arg("infinity_string") = nullptr,
-               py::arg("minus_infinity_string") = nullptr)
+               py::arg("minus_infinity_string") = nullptr,
+               py::arg("complex_real_string") = nullptr,
+               py::arg("complex_imag_string") = nullptr)
           .def_property_readonly("nbytes", &T::nbytes)
           .def("deep_copy",
                &T::deep_copy,
@@ -2295,7 +2321,9 @@ make_Record(const py::handle& m, const std::string& name) {
            py::arg("maxdecimals") = py::none(),
            py::arg("nan_string") = nullptr,
            py::arg("infinity_string") = nullptr,
-           py::arg("minus_infinity_string") = nullptr)
+           py::arg("minus_infinity_string") = nullptr,
+           py::arg("complex_real_string") = nullptr,
+           py::arg("complex_imag_string") = nullptr)
       .def("tojson",
            &tojson_file<ak::Record>,
            py::arg("destination"),
@@ -2304,7 +2332,9 @@ make_Record(const py::handle& m, const std::string& name) {
            py::arg("buffersize") = 65536,
            py::arg("nan_string") = nullptr,
            py::arg("infinity_string") = nullptr,
-           py::arg("minus_infinity_string") = nullptr)
+           py::arg("minus_infinity_string") = nullptr,
+           py::arg("complex_real_string") = nullptr,
+           py::arg("complex_imag_string") = nullptr)
 
       .def_property_readonly("array",
                              [](const ak::Record& self)

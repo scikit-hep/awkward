@@ -1051,6 +1051,30 @@ namespace awkward {
       int64_t length);
 
     template <typename FROM, typename TO>
+    ERROR NumpyArray_fill_tocomplex(
+      kernel::lib ptr_lib,
+      TO* toptr,
+      int64_t tooffset,
+      const FROM* fromptr,
+      int64_t length);
+
+    template <typename FROM, typename TO>
+    ERROR NumpyArray_fill_fromcomplex(
+      kernel::lib ptr_lib,
+      TO* toptr,
+      int64_t tooffset,
+      const FROM* fromptr,
+      int64_t length);
+
+    template <typename TO>
+    ERROR NumpyArray_fill_tocomplex_frombool(
+      kernel::lib ptr_lib,
+      TO* toptr,
+      int64_t tooffset,
+      const bool* fromptr,
+      int64_t length);
+
+    template <typename FROM, typename TO>
     ERROR ListArray_fill(
       kernel::lib ptr_lib,
       TO* tostarts,

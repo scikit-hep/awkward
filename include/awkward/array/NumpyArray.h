@@ -178,15 +178,15 @@ namespace awkward {
                const kernel::lib ptr_lib);
 
     /// @brief Creates a NumpyArray from an {@link IndexOf Index8}.
-    NumpyArray(const Index8 index);
+    explicit NumpyArray(const Index8 index);
     /// @brief Creates a NumpyArray from an {@link IndexOf IndexU8}.
-    NumpyArray(const IndexU8 index);
+    explicit NumpyArray(const IndexU8 index);
     /// @brief Creates a NumpyArray from an {@link IndexOf Index32}.
-    NumpyArray(const Index32 index);
+    explicit NumpyArray(const Index32 index);
     /// @brief Creates a NumpyArray from an {@link IndexOf IndexU32}.
-    NumpyArray(const IndexU32 index);
+    explicit NumpyArray(const IndexU32 index);
     /// @brief Creates a NumpyArray from an {@link IndexOf Index64}.
-    NumpyArray(const Index64 index);
+    explicit NumpyArray(const Index64 index);
 
     /// @brief Reference-counted pointer to the array buffer.
     const std::shared_ptr<void>
@@ -474,8 +474,9 @@ namespace awkward {
     const ContentPtr
       sort_asstrings(const Index64& offsets,
                      bool ascending,
-                     bool stable,
-                     bool unique = false) const;
+                     bool stable) const;
+    const ContentPtr
+      as_unique_strings(const Index64& offsets) const;
 
     const ContentPtr
       argsort_next(int64_t negaxis,
@@ -588,7 +589,7 @@ namespace awkward {
 
     /// @brief Returns 'true' if subranges are equal
     bool
-      is_subrange_equal(const Index64& start, const Index64& stop) const override;
+      is_subrange_equal(const Index64& starts, const Index64& stops) const override;
 
   protected:
     /// @brief Internal function that propagates the derivation of a contiguous
@@ -775,6 +776,11 @@ namespace awkward {
     void
       tojson_real(ToJson& builder, bool include_beginendlist) const;
 
+    /// @brief Internal function to fill JSON with complex values.
+    template <typename T>
+    void
+      tojson_complex(ToJson& builder, bool include_beginendlist) const;
+
     /// @brief Internal function to fill JSON with string values.
     void
       tojson_string(ToJson& builder, bool include_beginendlist) const;
@@ -792,27 +798,38 @@ namespace awkward {
                                            bool ascending,
                                            bool stable) const;
 
-      template<typename T>
-      std::tuple<const std::shared_ptr<void>, const int64_t> array_sort(const T* data,
+    template<typename T>
+    const std::shared_ptr<void> array_sort(const T* data,
+                                           int64_t length,
+                                           const Index64& starts,
+                                           const Index64& parents,
+                                           int64_t outlength,
+                                           bool ascending,
+                                           bool stable) const;
+    template<typename T>
+    const std::shared_ptr<void> array_unique(const T* data,
                                              int64_t length,
                                              const Index64& starts,
                                              const Index64& parents,
-                                             int64_t outlength,
-                                             bool ascending,
-                                             bool stable,
-                                             bool unique = false) const;
-
-     template<typename T>
-     std::tuple<const std::shared_ptr<void>, const int64_t> string_sort(const T* data,
-                                             int64_t length,
-                                             const Index64& offsets,
-                                             Index64& outoffsets,
-                                             bool ascending,
-                                             bool stable,
-                                             bool unique = false) const;
+                                             int64_t& outlength) const;
 
     template<typename T>
-    bool subranges_equal(const T* ptr,
+    const std::shared_ptr<void> string_sort(const T* data,
+                                            int64_t length,
+                                            const Index64& offsets,
+                                            Index64& outoffsets,
+                                            bool ascending,
+                                            bool stable) const;
+
+    template<typename T>
+    const std::shared_ptr<void> string_unique(const T* data,
+                                              int64_t length,
+                                              const Index64& offsets,
+                                              Index64& outoffsets,
+                                              int64_t& outlength) const;
+
+    template<typename T>
+    bool subranges_equal(const T* data,
                          int64_t length,
                          const Index64& starts,
                          const Index64& stops) const;
@@ -827,9 +844,11 @@ namespace awkward {
                                              int64_t length) const;
 
     const ContentPtr
-    sort_data(bool ascending = true,
-              bool stable = true,
-              bool unique = false) const;
+    sort_data(bool ascending,
+              bool stable) const;
+
+    const ContentPtr
+    unique_data() const;
 
     /// @brief See #ptr.
     std::shared_ptr<void> ptr_;

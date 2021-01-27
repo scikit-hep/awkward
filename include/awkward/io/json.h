@@ -3,6 +3,7 @@
 #ifndef AWKWARD_IO_JSON_H_
 #define AWKWARD_IO_JSON_H_
 
+#include <complex>
 #include <cstdio>
 #include <string>
 
@@ -35,6 +36,9 @@ namespace awkward {
     /// @brief Append a real value `x`.
     virtual void
       real(double x) = 0;
+    /// @brief Append a complex value `x`.
+    virtual void
+      complex(std::complex<double> x) = 0;
     /// @brief Append a string value `x`.
     virtual void
       string(const char* x, int64_t length) = 0;
@@ -79,10 +83,16 @@ namespace awkward {
     /// representation in JSON format
     /// @param minus_infinity_string user-defined string for a negative
     /// infinity representation in JSON format
+    /// @param complex_real_string user-defined string for a complex number
+    /// real part representation in JSON format
+    /// @param complex_imag_string user-defined string for a complex number
+    /// imaginary part representation in JSON format
     ToJsonString(int64_t maxdecimals,
                  const char* nan_string = nullptr,
                  const char* infinity_string = nullptr,
-                 const char* minus_infinity_string = nullptr);
+                 const char* minus_infinity_string = nullptr,
+                 const char* complex_real_string = nullptr,
+                 const char* complex_imag_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonString();
     void
@@ -93,6 +103,8 @@ namespace awkward {
       integer(int64_t x) override;
     void
       real(double x) override;
+    void
+      complex(std::complex<double> x) override;
     void
       string(const char* x, int64_t length) override;
     void
@@ -116,6 +128,8 @@ namespace awkward {
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
+    const char* complex_real_string_;
+    const char* complex_imag_string_;
   };
 
   /// @class ToJsonPrettyString
@@ -133,10 +147,16 @@ namespace awkward {
     /// representation in JSON format
     /// @param minus_infinity_string user-defined string for a negative
     /// infinity representation in JSON format
+    /// @param complex_real_string user-defined string for a complex number
+    /// real part representation in JSON format
+    /// @param complex_imag_string user-defined string for a complex number
+    /// imaginary part representation in JSON format
     ToJsonPrettyString(int64_t maxdecimals,
                        const char* nan_string = nullptr,
                        const char* infinity_string = nullptr,
-                       const char* minus_infinity_string = nullptr);
+                       const char* minus_infinity_string = nullptr,
+                       const char* complex_real_string = nullptr,
+                       const char* complex_imag_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonPrettyString();
     void
@@ -147,6 +167,8 @@ namespace awkward {
       integer(int64_t x) override;
     void
       real(double x) override;
+    void
+      complex(std::complex<double> x) override;
     void
       string(const char* x, int64_t length) override;
     void
@@ -170,6 +192,8 @@ namespace awkward {
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
+    const char* complex_real_string_;
+    const char* complex_imag_string_;
   };
 
   /// @class ToJsonFile
@@ -189,12 +213,18 @@ namespace awkward {
     /// representation in JSON format
     /// @param minus_infinity_string user-defined string for a negative
     /// infinity representation in JSON format
+    /// @param complex_real_string user-defined string for a complex number
+    /// real part representation in JSON format
+    /// @param complex_imag_string user-defined string for a complex number
+    /// imaginary part representation in JSON format
     ToJsonFile(FILE* destination,
                int64_t maxdecimals,
                int64_t buffersize,
                const char* nan_string = nullptr,
                const char* infinity_string = nullptr,
-               const char* minus_infinity_string = nullptr);
+               const char* minus_infinity_string = nullptr,
+               const char* complex_real_string = nullptr,
+               const char* complex_imag_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonFile();
     void
@@ -205,6 +235,8 @@ namespace awkward {
       integer(int64_t x) override;
     void
       real(double x) override;
+    void
+      complex(std::complex<double> x) override;
     void
       string(const char* x, int64_t length) override;
     void
@@ -225,6 +257,8 @@ namespace awkward {
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
+    const char* complex_real_string_;
+    const char* complex_imag_string_;
   };
 
   /// @class ToJsonPrettyFile
@@ -244,12 +278,18 @@ namespace awkward {
     /// representation in JSON format
     /// @param minus_infinity_string user-defined string for a negative
     /// infinity representation in JSON format
+    /// @param complex_real_string user-defined string for a complex number
+    /// real part representation in JSON format
+    /// @param complex_imag_string user-defined string for a complex number
+    /// imaginary part representation in JSON format
     ToJsonPrettyFile(FILE* destination,
                      int64_t maxdecimals,
                      int64_t buffersize,
                      const char* nan_string = nullptr,
                      const char* infinity_string = nullptr,
-                     const char* minus_infinity_string = nullptr);
+                     const char* minus_infinity_string = nullptr,
+                     const char* complex_real_string = nullptr,
+                     const char* complex_imag_string = nullptr);
     /// @brief Empty destructor; required for some C++ reason.
     ~ToJsonPrettyFile();
     void
@@ -260,6 +300,8 @@ namespace awkward {
       integer(int64_t x) override;
     void
       real(double x) override;
+    void
+      complex(std::complex<double> x) override;
     void
       string(const char* x, int64_t length) override;
     void
@@ -280,6 +322,8 @@ namespace awkward {
     const char* nan_string_;
     const char* infinity_string_;
     const char* minus_infinity_string_;
+    const char* complex_real_string_;
+    const char* complex_imag_string_;
   };
 
   /// @brief Convert a JSON-encoded string into a Content array using an
