@@ -86,7 +86,8 @@ def test_from_json():
     # the protocol can include a type marker, as some protocols do.
     array = ak.from_json(
         '[{"r": 1.1, "i": 1.0, "another": []}, {"r": 2.2, "i": 2.0, "another": [1, 2, 3]}]',
-        complex_record_fields=("r", "i"))
+        complex_record_fields=("r", "i"),
+    )
     assert array.tolist() == [(1.1 + 1j), (2.2 + 2j)]
 
 

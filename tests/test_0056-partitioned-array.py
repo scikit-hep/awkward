@@ -678,7 +678,7 @@ def test_indexed():
     ]
 
 
-def test_repartition():
+def test_repartition_again():
     array = ak.Array(
         [[], [1.1, 2.2, 3.3], [], [], [4.4, 5.5], [], [6.6], [7.7, 8.8, 9.9], []]
     )
