@@ -2287,19 +2287,22 @@ def test_nbit_big():
 
 
 def test_output_dup():
-    vm = awkward.forth.ForthMachine32("""
+    vm = awkward.forth.ForthMachine32(
+        """
 output stuff int32
 1 2 3 4
 stuff <- stack
 10 stuff dup
-""")
+"""
+    )
     vm.run()
     assert ak.to_list(vm["stuff"]) == [4] * 11
     assert vm.stack == [1, 2, 3]
 
 
 def test_decompile_complex():
-    read_repetition_levels = awkward.forth.ForthMachine32("""
+    read_repetition_levels = awkward.forth.ForthMachine32(
+        """
 input stream
 output replevels uint8
 
@@ -2318,8 +2321,13 @@ begin
   then
   dup stream pos 4 - <=
 until
-""".format(bit_width=2, rle_byte_width=1, rle_format="B"))
-    assert read_repetition_levels.decompiled == """input stream
+""".format(
+            bit_width=2, rle_byte_width=1, rle_format="B"
+        )
+    )
+    assert (
+        read_repetition_levels.decompiled
+        == """input stream
 output replevels uint8
 
 stream I-> stack
@@ -2349,11 +2357,17 @@ begin
   <=
 until
 """
+    )
 
 
 def test_parse_strings():
-    vm32 = awkward.forth.ForthMachine32("""
+    vm32 = awkward.forth.ForthMachine32(
+        """
 ." hello there      long space"
-""")
-    assert vm32.decompiled == """." hello there      long space"
 """
+    )
+    assert (
+        vm32.decompiled
+        == """." hello there      long space"
+"""
+    )

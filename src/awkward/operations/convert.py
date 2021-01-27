@@ -3560,9 +3560,7 @@ def _form_to_layout(
         if length > len(mask) * 8:
             raise ValueError(
                 "mask is too short for BitMaskedArray: content length "
-                "is {0}, mask length * 8 is {1}".format(
-                    length, len(mask) * 8
-                )
+                "is {0}, mask length * 8 is {1}".format(length, len(mask) * 8)
                 + ak._util.exception_suffix(__file__)
             )
 
@@ -3781,9 +3779,7 @@ def _form_to_layout(
             if length > actual:
                 raise ValueError(
                     "buffer is too short for NumpyArray: expected {0}, buffer "
-                    "has {1} items ({2} bytes)".format(
-                        length, actual, len(raw_array)
-                    )
+                    "has {1} items ({2} bytes)".format(length, actual, len(raw_array))
                     + ak._util.exception_suffix(__file__)
                 )
 

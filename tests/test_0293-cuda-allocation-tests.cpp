@@ -105,6 +105,3 @@ int main(int, char**) {
   std::cout << cpu_arr64->tostring() << "\n";
 
 }
-
-
-

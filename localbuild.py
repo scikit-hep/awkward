@@ -26,7 +26,9 @@ args.dependencies = not args.no_dependencies
 
 
 if sys.version_info[0] >= 3:
-    git_root = subprocess.run(["git", "rev-parse", "--show-toplevel"], stdout=subprocess.PIPE)
+    git_root = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"], stdout=subprocess.PIPE
+    )
     os.chdir(git_root.stdout.decode().strip())
 
 if args.clean:
@@ -36,10 +38,12 @@ if args.clean:
     sys.exit()
 
 # Changes that would trigger a recompilation.
-thisstate = {"release": args.release,
-             "ctest": args.ctest,
-             "buildpython": args.buildpython,
-             "python_executable": sys.executable}
+thisstate = {
+    "release": args.release,
+    "ctest": args.ctest,
+    "buildpython": args.buildpython,
+    "python_executable": sys.executable,
+}
 
 try:
     localbuild_time = os.stat("localbuild").st_mtime
@@ -50,18 +54,24 @@ try:
 except:
     laststate = None
 
+
 def check_call(args, env=None):
     print(" ".join(args))
     return subprocess.check_call(args, env=env)
 
+
 # Refresh the directory if any configuration has changed.
-if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
-    os.stat("localbuild.py").st_mtime >= localbuild_time or
-    os.stat("setup.py").st_mtime >= localbuild_time or
-    thisstate != laststate):
+if (
+    os.stat("CMakeLists.txt").st_mtime >= localbuild_time
+    or os.stat("localbuild.py").st_mtime >= localbuild_time
+    or os.stat("setup.py").st_mtime >= localbuild_time
+    or thisstate != laststate
+):
 
     if args.dependencies:
-        check_call(["pip", "install", "-r", "requirements.txt", "-r", "requirements-test.txt"])
+        check_call(
+            ["pip", "install", "-r", "requirements.txt", "-r", "requirements-test.txt"]
+        )
 
     if os.path.exists("localbuild"):
         shutil.rmtree("localbuild")
@@ -77,7 +87,9 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
         newdir_args.append("-DBUILD_TESTING=ON")
 
     if args.buildpython:
-        newdir_args.extend(["-DPYTHON_EXECUTABLE=" + thisstate["python_executable"], "-DPYBUILD=ON"])
+        newdir_args.extend(
+            ["-DPYTHON_EXECUTABLE=" + thisstate["python_executable"], "-DPYBUILD=ON"]
+        )
 
     check_call(["cmake"] + newdir_args)
     json.dump(thisstate, open("localbuild/laststate.json", "w"))
@@ -86,7 +98,19 @@ if (os.stat("CMakeLists.txt").st_mtime >= localbuild_time or
 check_call(["cmake", "--build", "localbuild", "--", "-j" + args.j])
 
 if args.ctest:
-    check_call(["cmake", "--build", "localbuild", "--target", "test", "--", "CTEST_OUTPUT_ON_FAILURE=1", "--no-print-directory"])
+    check_call(
+        [
+            "cmake",
+            "--build",
+            "localbuild",
+            "--target",
+            "test",
+            "--",
+            "CTEST_OUTPUT_ON_FAILURE=1",
+            "--no-print-directory",
+        ]
+    )
+
 
 def walk(directory):
     for x in os.listdir(directory):
@@ -96,6 +120,7 @@ def walk(directory):
             for y in walk(f):
                 yield y
 
+
 # Build Python (copy sources to executable tree).
 if args.buildpython:
     if os.path.exists("awkward"):
@@ -104,8 +129,8 @@ if args.buildpython:
     # Link (don't copy) the Python files into a built directory.
     for x in walk(os.path.join("src", "awkward")):
         olddir, oldfile = os.path.split(x)
-        newdir  = olddir[3 + len(os.sep):]
-        newfile = x[3 + len(os.sep):]
+        newdir = olddir[3 + len(os.sep) :]
+        newfile = x[3 + len(os.sep) :]
         if not os.path.exists(newdir):
             os.mkdir(newdir)
         if not os.path.isdir(x):
@@ -126,7 +151,11 @@ if args.buildpython:
         reminder = True
 
     # Run pytest on all or a subset of tests.
-    if args.pytest is not None and not (os.path.exists(args.pytest) and not os.path.isdir(args.pytest) and not args.pytest.endswith(".py")):
+    if args.pytest is not None and not (
+        os.path.exists(args.pytest)
+        and not os.path.isdir(args.pytest)
+        and not args.pytest.endswith(".py")
+    ):
         check_call(["python", "-m", "pytest", "-vv", "-rs", args.pytest], env=env)
 
     # If you'll be using it interactively, you'll need awkward in the library path (for some operations).

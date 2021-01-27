@@ -20,7 +20,7 @@ from setuptools import setup, Extension
 extras = {
     "cuda": ["awkward-cuda-kernels==" + open("VERSION_INFO").read().strip()],
     "test": open("requirements-test.txt").read().strip().split("\n"),
-    "dev":  open("requirements-dev.txt").read().strip().split("\n"),
+    "dev": open("requirements-dev.txt").read().strip().split("\n"),
 }
 extras["all"] = sum(extras.values(), [])
 
@@ -38,7 +38,10 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         try:
             out = subprocess.check_output(["cmake", "--version"])
         except OSError:
-            raise RuntimeError("CMake must be installed to build the following extensions: " + ", ".join(x.name for x in self.extensions))
+            raise RuntimeError(
+                "CMake must be installed to build the following extensions: "
+                + ", ".join(x.name for x in self.extensions)
+            )
 
         for x in self.extensions:
             self.build_extension(x)
@@ -54,8 +57,8 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             "-DBUILD_TESTING=OFF",
         ]
         try:
-           compiler_path = self.compiler.compiler_cxx[0]
-           cmake_args += ["-DCMAKE_CXX_COMPILER={0}".format(compiler_path)]
+            compiler_path = self.compiler.compiler_cxx[0]
+            cmake_args += ["-DCMAKE_CXX_COMPILER={0}".format(compiler_path)]
         except AttributeError:
             print("Not able to access compiler path, using CMake default")
 
@@ -69,22 +72,33 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
                 "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE",
             ]
             cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
-            if sys.maxsize > 2**32 and cmake_generator != "NMake Makefiles" and "Win64" not in cmake_generator:
+            if (
+                sys.maxsize > 2 ** 32
+                and cmake_generator != "NMake Makefiles"
+                and "Win64" not in cmake_generator
+            ):
                 cmake_args += ["-A", "x64"]
-                
+
         elif "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ:
             build_args += ["-j", str(multiprocessing.cpu_count())]
-            
-        if platform.system() == "Darwin" and "MACOSX_DEPLOYMENT_TARGET" not in os.environ:
+
+        if (
+            platform.system() == "Darwin"
+            and "MACOSX_DEPLOYMENT_TARGET" not in os.environ
+        ):
             cmake_args += ["-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9"]
 
         if not os.path.exists(self.build_temp):
-             os.makedirs(self.build_temp)
+            os.makedirs(self.build_temp)
         build_dir = self.build_temp
 
-        subprocess.check_call(["cmake", "-S", ext.sourcedir, "-B", build_dir] + cmake_args)
+        subprocess.check_call(
+            ["cmake", "-S", ext.sourcedir, "-B", build_dir] + cmake_args
+        )
         subprocess.check_call(["cmake", "--build", build_dir] + build_args)
-        subprocess.check_call(["cmake", "--build", build_dir, "--config", cfg, "--target", "install"])
+        subprocess.check_call(
+            ["cmake", "--build", build_dir, "--config", cfg, "--target", "install"]
+        )
 
 
 def tree(x):
@@ -95,9 +109,20 @@ def tree(x):
 
 
 if platform.system() == "Windows":
+
     class Install(setuptools.command.install.install):
         def run(self):
-            outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
+            outerdir = os.path.join(
+                os.path.join(
+                    "build",
+                    "lib.%s-%d.%d"
+                    % (
+                        distutils.util.get_platform(),
+                        sys.version_info[0],
+                        sys.version_info[1],
+                    ),
+                )
+            )
 
             print("--- this directory --------------------------------------------")
             for x in sorted(os.listdir(".")):
@@ -107,25 +132,54 @@ if platform.system() == "Windows":
             tree("build")
 
             print("--- copying includes ------------------------------------------")
-            shutil.copytree(os.path.join("include"), os.path.join(outerdir, "awkward", "include"))
+            shutil.copytree(
+                os.path.join("include"), os.path.join(outerdir, "awkward", "include")
+            )
 
             print("--- outerdir after copy ---------------------------------------")
             tree(outerdir)
 
             print("--- copying libraries -----------------------------------------")
-            dlldir = os.path.join(os.path.join("build", "temp.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])), "Release")
+            dlldir = os.path.join(
+                os.path.join(
+                    "build",
+                    "temp.%s-%d.%d"
+                    % (
+                        distutils.util.get_platform(),
+                        sys.version_info[0],
+                        sys.version_info[1],
+                    ),
+                ),
+                "Release",
+            )
             found = False
             for x in os.listdir(dlldir):
                 if x.endswith(".lib") or x.endswith(".exp") or x.endswith(".dll"):
-                    print("copying", os.path.join(dlldir, x), "-->", os.path.join(self.build_lib, "awkward", x))
-                    shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward", x))
+                    print(
+                        "copying",
+                        os.path.join(dlldir, x),
+                        "-->",
+                        os.path.join(self.build_lib, "awkward", x),
+                    )
+                    shutil.copyfile(
+                        os.path.join(dlldir, x),
+                        os.path.join(self.build_lib, "awkward", x),
+                    )
                     found = True
             if not found:
                 dlldir = os.path.join(dlldir, "Release")
                 for x in os.listdir(dlldir):
                     if x.endswith(".lib") or x.endswith(".exp") or x.endswith(".dll"):
-                        print("copying", os.path.join(dlldir, x), "-->", os.path.join(self.build_lib, "awkward", x))
-                        shutil.copyfile(os.path.join(dlldir, x), os.path.join(self.build_lib, "awkward", x))
+                        print(
+                            "copying",
+                            os.path.join(dlldir, x),
+                            "-->",
+                            os.path.join(self.build_lib, "awkward", x),
+                        )
+                        shutil.copyfile(
+                            os.path.join(dlldir, x),
+                            os.path.join(self.build_lib, "awkward", x),
+                        )
                         found = True
 
             print("--- deleting libraries ----------------------------------------")
@@ -138,7 +192,17 @@ if platform.system() == "Windows":
             setuptools.command.install.install.run(self)
 
         def get_outputs(self):
-            outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
+            outerdir = os.path.join(
+                os.path.join(
+                    "build",
+                    "lib.%s-%d.%d"
+                    % (
+                        distutils.util.get_platform(),
+                        sys.version_info[0],
+                        sys.version_info[1],
+                    ),
+                )
+            )
             outputdir = os.path.join(outerdir, "awkward")
             outbase = self.install_lib.rstrip(os.path.sep)
 
@@ -151,7 +215,7 @@ if platform.system() == "Windows":
                     outputs.append(original)
 
             for root, dirs, files in os.walk(outputdir):
-                root = root[len(outerdir):].lstrip(os.path.sep)
+                root = root[len(outerdir) :].lstrip(os.path.sep)
                 for file in files:
                     trial = os.path.join(outbase, os.path.join(root, file))
                     if trial not in outputs:
@@ -159,10 +223,22 @@ if platform.system() == "Windows":
 
             return outputs
 
+
 else:
+
     class Install(setuptools.command.install.install):
         def run(self):
-            outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
+            outerdir = os.path.join(
+                os.path.join(
+                    "build",
+                    "lib.%s-%d.%d"
+                    % (
+                        distutils.util.get_platform(),
+                        sys.version_info[0],
+                        sys.version_info[1],
+                    ),
+                )
+            )
 
             print("--- this directory --------------------------------------------")
             for x in sorted(os.listdir(".")):
@@ -172,7 +248,9 @@ else:
             tree("build")
 
             print("--- copying includes ------------------------------------------")
-            shutil.copytree(os.path.join("include"), os.path.join(outerdir, "awkward", "include"))
+            shutil.copytree(
+                os.path.join("include"), os.path.join(outerdir, "awkward", "include")
+            )
 
             print("--- outerdir after copy ---------------------------------------")
             tree(outerdir)
@@ -181,7 +259,17 @@ else:
             setuptools.command.install.install.run(self)
 
         def get_outputs(self):
-            outerdir = os.path.join(os.path.join("build", "lib.%s-%d.%d" % (distutils.util.get_platform(), sys.version_info[0], sys.version_info[1])))
+            outerdir = os.path.join(
+                os.path.join(
+                    "build",
+                    "lib.%s-%d.%d"
+                    % (
+                        distutils.util.get_platform(),
+                        sys.version_info[0],
+                        sys.version_info[1],
+                    ),
+                )
+            )
             outputdir = os.path.join(outerdir, "awkward")
             outbase = self.install_lib.rstrip(os.path.sep)
 
@@ -194,7 +282,7 @@ else:
                     outputs.append(original)
 
             for root, dirs, files in os.walk(outputdir):
-                root = root[len(outerdir):].lstrip(os.path.sep)
+                root = root[len(outerdir) :].lstrip(os.path.sep)
                 for file in files:
                     trial = os.path.join(outbase, os.path.join(root, file))
                     if trial not in outputs:
@@ -203,66 +291,64 @@ else:
             return outputs
 
 
-setup(name = "awkward",
-      packages = [
-          x
-          for x in setuptools.find_packages(where="src")
-          if x != "awkward_cuda_kernels"
-      ],
-      package_dir = {"awkward": "src/awkward"},
-      version = open("VERSION_INFO").read().strip(),
-      author = "Jim Pivarski",
-      author_email = "pivarski@princeton.edu",
-      maintainer = "Jim Pivarski",
-      maintainer_email = "pivarski@princeton.edu",
-      description = "Manipulate JSON-like data with NumPy-like idioms.",
-      long_description = codecs.open("README-pypi.md", encoding="utf8").read(),
-      long_description_content_type = "text/markdown",
-      url = "https://github.com/scikit-hep/awkward-1.0",
-      download_url = "https://github.com/scikit-hep/awkward-1.0/releases",
-      license = "BSD 3-clause",
-      entry_points = {
-        "numba_extensions": ["init = awkward._connect._numba:register"]
-      },
-      test_suite = "tests",
-      python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
-      install_requires = install_requires,
-      tests_require = extras["test"],
-      extras_require = extras,
-      ext_modules = [
-          CMakeExtension("awkward"),
-      ],
-      cmdclass = {
-          "build_ext": CMakeBuild,
-          "install": Install,
-      },
-      classifiers = [
-#         "Development Status :: 1 - Planning",
-#         "Development Status :: 2 - Pre-Alpha",
-#         "Development Status :: 3 - Alpha",
-#         "Development Status :: 4 - Beta",
-          "Development Status :: 5 - Production/Stable",
-#         "Development Status :: 6 - Mature",
-#         "Development Status :: 7 - Inactive",
-          "Intended Audience :: Developers",
-          "Intended Audience :: Information Technology",
-          "Intended Audience :: Science/Research",
-          "License :: OSI Approved :: BSD License",
-          "Operating System :: MacOS :: MacOS X",
-          "Operating System :: Microsoft :: Windows",
-          "Operating System :: POSIX :: Linux",
-          "Operating System :: Unix",
-          "Programming Language :: Python",
-          "Programming Language :: Python :: 2.7",
-          "Programming Language :: Python :: 3.5",
-          "Programming Language :: Python :: 3.6",
-          "Programming Language :: Python :: 3.7",
-          "Programming Language :: Python :: 3.8",
-          "Programming Language :: Python :: 3.9",
-          "Topic :: Scientific/Engineering",
-          "Topic :: Scientific/Engineering :: Information Analysis",
-          "Topic :: Scientific/Engineering :: Mathematics",
-          "Topic :: Scientific/Engineering :: Physics",
-          "Topic :: Software Development",
-          "Topic :: Utilities",
-          ])
+setup(
+    name="awkward",
+    packages=[
+        x for x in setuptools.find_packages(where="src") if x != "awkward_cuda_kernels"
+    ],
+    package_dir={"awkward": "src/awkward"},
+    version=open("VERSION_INFO").read().strip(),
+    author="Jim Pivarski",
+    author_email="pivarski@princeton.edu",
+    maintainer="Jim Pivarski",
+    maintainer_email="pivarski@princeton.edu",
+    description="Manipulate JSON-like data with NumPy-like idioms.",
+    long_description=codecs.open("README-pypi.md", encoding="utf8").read(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/scikit-hep/awkward-1.0",
+    download_url="https://github.com/scikit-hep/awkward-1.0/releases",
+    license="BSD 3-clause",
+    entry_points={"numba_extensions": ["init = awkward._connect._numba:register"]},
+    test_suite="tests",
+    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
+    install_requires=install_requires,
+    tests_require=extras["test"],
+    extras_require=extras,
+    ext_modules=[
+        CMakeExtension("awkward"),
+    ],
+    cmdclass={
+        "build_ext": CMakeBuild,
+        "install": Install,
+    },
+    classifiers=[
+        #         "Development Status :: 1 - Planning",
+        #         "Development Status :: 2 - Pre-Alpha",
+        #         "Development Status :: 3 - Alpha",
+        #         "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
+        #         "Development Status :: 6 - Mature",
+        #         "Development Status :: 7 - Inactive",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Information Technology",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX :: Linux",
+        "Operating System :: Unix",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+        "Topic :: Scientific/Engineering :: Mathematics",
+        "Topic :: Scientific/Engineering :: Physics",
+        "Topic :: Software Development",
+        "Topic :: Utilities",
+    ],
+)
