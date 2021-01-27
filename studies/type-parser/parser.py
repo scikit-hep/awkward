@@ -18,10 +18,6 @@ def rettype(infocls):
 
 
 class TreeToJson(Transformer):
-    def string(self, s):
-        (s,) = s
-        return s[1:-1]
-
     def number(self, n):
         (n,) = n
         return float(n)
