@@ -73,9 +73,9 @@ python -m pytest -vv -rs tests-cuda
 
 ### Building documentation locally
 
-We use [Sphinx](https://pypi.org/project/Sphinx/) to generate documentation.  
+We use [Sphinx](https://pypi.org/project/Sphinx/) to generate documentation.
 
-You need some additional packages installed on your system to build the documentation - 
+You need some additional packages installed on your system to build the documentation -
 * [Doxygen](https://www.doxygen.nl/download.html)
 * [pycparser](https://pypi.org/project/pycparser/)
 * [black](https://pypi.org/project/black/)
