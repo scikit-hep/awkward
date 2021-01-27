@@ -38,6 +38,11 @@ namespace awkward {
       : options_(options)
       , buffer_(buffer) { }
 
+  const GrowableBuffer<double>
+  Float64Builder::buffer() const {
+    return buffer_;
+  }
+
   const std::string
   Float64Builder::classname() const {
     return "Float64Builder";

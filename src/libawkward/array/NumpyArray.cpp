@@ -621,6 +621,59 @@ namespace awkward {
     }
   }
 
+  template <typename T>
+  void tostring_as_complex(kernel::lib ptr_lib,
+                           std::stringstream& out,
+                           T* ptr,
+                           ssize_t stride,
+                           int64_t length,
+                           util::dtype dtype) {
+    if (length <= 10) {
+      for (int64_t i = 0;  i < length;  i++) {
+        T* ptr2 = reinterpret_cast<T*>(
+            reinterpret_cast<ssize_t>(ptr) + stride*((ssize_t)i * 2));
+        T* ptr3 = reinterpret_cast<T*>(
+            reinterpret_cast<ssize_t>(ptr) + stride*((ssize_t)i * 2 + 1));
+        if (i != 0) {
+          out << " ";
+        }
+        out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+        out << "+";
+        out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr3);
+        out << "j";
+      }
+    }
+    else {
+      for (int64_t i = 0;  i < 5;  i++) {
+        T* ptr2 = reinterpret_cast<T*>(
+            reinterpret_cast<ssize_t>(ptr) + stride*((ssize_t)i) * 2);
+        T* ptr3 = reinterpret_cast<T*>(
+            reinterpret_cast<ssize_t>(ptr) + stride*((ssize_t)i * 2 + 1));
+        if (i != 0) {
+          out << " ";
+        }
+        out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+        out << "+";
+        out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr3);
+        out << "j";
+      }
+      out << " ... ";
+      for (int64_t i = length - 5;  i < length;  i++) {
+        T* ptr2 = reinterpret_cast<T*>(
+            reinterpret_cast<ssize_t>(ptr) + stride*((ssize_t)i) * 2);
+        T* ptr3 = reinterpret_cast<T*>(
+            reinterpret_cast<ssize_t>(ptr) + stride*((ssize_t)i * 2 + 1));
+        if (i != length - 5) {
+          out << " ";
+        }
+        out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr2);
+        out << "+";
+        out << kernel::NumpyArray_getitem_at0(ptr_lib, ptr3);
+        out << "j";
+      }
+    }
+  }
+
   const TypePtr
   NumpyArray::type(const util::TypeStrs& typestrs) const {
     return form(true).get()->type(typestrs);
@@ -766,6 +819,22 @@ namespace awkward {
                           strides_[0],
                           length(),
                           dtype_);
+    }
+    else if (ndim() == 1  &&  dtype_ == util::dtype::complex64) {
+      tostring_as_complex<float>(ptr_lib(),
+                                 out,
+                                 reinterpret_cast<float*>(data()),
+                                 strides_[0] >> 1,
+                                 length(),
+                                 dtype_);
+    }
+    else if (ndim() == 1  &&  dtype_ == util::dtype::complex128) {
+      tostring_as_complex<double>(ptr_lib(),
+                                  out,
+                                  reinterpret_cast<double*>(data()),
+                                  strides_[0] >> 1,
+                                  length(),
+                                  dtype_);
     }
     else {
       out << "0x ";
@@ -2579,7 +2648,7 @@ namespace awkward {
             reinterpret_cast<std::complex<float>*>(ptr.get()),
             flatlength_so_far,
             reinterpret_cast<float*>(contiguous_array.data()),
-            flatlength);
+            flatlength >> 1);
           break;
         case util::dtype::float64:
           err = kernel::NumpyArray_fill<double, std::complex<float>>(
@@ -4909,7 +4978,6 @@ namespace awkward {
           + FILENAME(__LINE__));
         break;
       case util::dtype::complex64:
-        std::cout << "numbers_as_type complex64\n";
         ptr = as_type<std::complex<float>>(reinterpret_cast<std::complex<float>*>(contiguous_self.ptr().get()),
                                            contiguous_self.length(),
                                            dtype);
@@ -5438,10 +5506,10 @@ namespace awkward {
         + FILENAME(__LINE__));
       break;
     case util::dtype::complex64:
-      ptr = cast_to_type<std::complex<float>>(data, 2*length);
+      ptr = cast_to_type<std::complex<float>>(data, length);
       break;
     case util::dtype::complex128:
-      ptr = cast_to_type<std::complex<double>>(data, 2*length);
+      ptr = cast_to_type<std::complex<double>>(data, length);
       break;
     case util::dtype::complex256:
       throw std::runtime_error(

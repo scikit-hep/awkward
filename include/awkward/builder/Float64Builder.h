@@ -39,6 +39,10 @@ namespace awkward {
     Float64Builder(const ArrayBuilderOptions& options,
                    const GrowableBuffer<double>& buffer);
 
+    /// @brief Contains the accumulated real numbers (`double`).
+    const GrowableBuffer<double>
+      buffer() const;
+
     /// @brief User-friendly name of this class: `"Float64Builder"`.
     const std::string
       classname() const override;

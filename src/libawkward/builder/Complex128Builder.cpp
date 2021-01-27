@@ -39,7 +39,7 @@ namespace awkward {
     double* oldraw = old.ptr().get();
     std::complex<double>* newraw = buffer.ptr().get();
     for (int64_t i = 0;  i < old.length();  i++) {
-      newraw[i] = {oldraw[i], 0};
+      newraw[i] = std::complex<double>(oldraw[i], 0);
     }
     buffer.set_length(old.length());
     return std::make_shared<Complex128Builder>(options, buffer);
@@ -102,13 +102,13 @@ namespace awkward {
 
   const BuilderPtr
   Complex128Builder::integer(int64_t x) {
-    buffer_.append({(double)x, 0});
+    buffer_.append(std::complex<double>((double)x, 0));
     return shared_from_this();
   }
 
   const BuilderPtr
   Complex128Builder::real(double x) {
-    buffer_.append({x, 0});
+    buffer_.append(std::complex<double>((double)x, 0));
     return shared_from_this();
   }
 

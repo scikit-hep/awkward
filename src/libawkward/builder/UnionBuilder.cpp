@@ -211,6 +211,22 @@ namespace awkward {
       if (tofill.get() == nullptr) {
         i = 0;
         for (auto content : contents_) {
+          if (dynamic_cast<Float64Builder*>(content.get()) != nullptr) {
+            tofill = content;
+            break;
+          }
+          i++;
+        }
+        if (tofill.get() != nullptr) {
+          tofill = Complex128Builder::fromfloat64(
+            options_,
+            dynamic_cast<Float64Builder*>(tofill.get())->buffer());
+          contents_[(size_t)i] = tofill;
+        }
+      }
+      if (tofill.get() == nullptr) {
+        i = 0;
+        for (auto content : contents_) {
           if (dynamic_cast<Int64Builder*>(content.get()) != nullptr) {
             tofill = content;
             break;
@@ -223,10 +239,10 @@ namespace awkward {
             dynamic_cast<Int64Builder*>(tofill.get())->buffer());
           contents_[(size_t)i] = tofill;
         }
-        else {
-          tofill = Complex128Builder::fromempty(options_);
-          contents_.push_back(tofill);
-        }
+      }
+      else {
+        tofill = Complex128Builder::fromempty(options_);
+        contents_.push_back(tofill);
       }
       int64_t length = tofill.get()->length();
       tofill.get()->complex(x);
