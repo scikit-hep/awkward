@@ -174,7 +174,11 @@ def mask(array, mask, valid_when=True, highlevel=True):
 
     behavior = ak._util.behaviorof(array, mask)
     out = ak._util.broadcast_and_apply(
-        [layoutarray, layoutmask], getfunction, behavior, pass_depth=False
+        [layoutarray, layoutmask],
+        getfunction,
+        behavior,
+        right_broadcast=False,
+        pass_depth=False,
     )
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
@@ -395,7 +399,12 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
             return None
 
     out = ak._util.broadcast_and_apply(
-        layouts, getfunction, behavior, pass_depth=True, regular_to_jagged=True
+        layouts,
+        getfunction,
+        behavior,
+        right_broadcast=False,
+        pass_depth=True,
+        regular_to_jagged=True,
     )
     assert isinstance(out, tuple) and len(out) == 1
     if highlevel:
@@ -594,7 +603,7 @@ def with_name(array, name, highlevel=True):
         return out
 
 
-def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
+def with_field(base, what, where=None, highlevel=True):
     """
     Args:
         base: Data containing records or tuples.
@@ -603,9 +612,6 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
             has no name (can be accessed as an integer slot number in a
             string); If str, the name of the new field. If iterable, it is
             interpreted as a path where to add the field in a nested record.
-        right_broadcast (bool): If True, follow rules for implicit
-            right-broadcasting, which force the dimensionality of `base` and
-            `what` to match by expanding `base` (usually undesirable).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
 
@@ -699,7 +705,7 @@ def with_field(base, what, where=None, right_broadcast=False, highlevel=True):
                 [base, what],
                 getfunction,
                 behavior,
-                right_broadcast=right_broadcast,
+                right_broadcast=False,
                 pass_depth=False,
             )
 
@@ -968,6 +974,10 @@ def broadcast_arrays(*arrays, **kwargs):
     """
     Args:
         arrays: Arrays to broadcast into the same structure.
+        left_broadcast (bool): If True, follow rules for implicit
+            left-broadcasting, as described below.
+        right_broadcast (bool): If True, follow rules for implicit
+            right-broadcasting, as described below.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.layout.Content subclass.
 
@@ -1063,7 +1073,11 @@ def broadcast_arrays(*arrays, **kwargs):
     #ak.Array.type, but it is lost when converting an array into JSON or
     Python objects.
     """
-    (highlevel,) = ak._util.extra((), kwargs, [("highlevel", True)])
+    (highlevel, left_broadcast, right_broadcast) = ak._util.extra(
+        (),
+        kwargs,
+        [("highlevel", True), ("left_broadcast", True), ("right_broadcast", True)],
+    )
 
     inputs = []
     for x in arrays:
@@ -1081,7 +1095,14 @@ def broadcast_arrays(*arrays, **kwargs):
             return None
 
     behavior = ak._util.behaviorof(*arrays)
-    out = ak._util.broadcast_and_apply(inputs, getfunction, behavior, pass_depth=False)
+    out = ak._util.broadcast_and_apply(
+        inputs,
+        getfunction,
+        behavior,
+        left_broadcast=left_broadcast,
+        right_broadcast=right_broadcast,
+        pass_depth=False,
+    )
     assert isinstance(out, tuple)
     if highlevel:
         return [ak._util.wrap(x, behavior) for x in out]
@@ -1310,6 +1331,7 @@ def concatenate(arrays, axis=0, merge=True, mergebool=True, highlevel=True):
             getfunction,
             behavior=ak._util.behaviorof(*arrays),
             allow_records=True,
+            right_broadcast=False,
             pass_depth=True,
         )[0]
 
@@ -2633,7 +2655,7 @@ def cartesian(
                 return None
 
         out = ak._util.broadcast_and_apply(
-            layouts, getfunction3, behavior, pass_depth=True
+            layouts, getfunction3, behavior, right_broadcast=False, pass_depth=True
         )
         assert isinstance(out, tuple) and len(out) == 1
         result = out[0]
