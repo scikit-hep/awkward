@@ -814,11 +814,11 @@ getitem(const T& self, const py::object& obj) {
 
 bool
 builder_fromiter_iscomplex(const py::handle& obj) {
-  try {
-    return py::isinstance(obj, py::module::import("builtins").attr("complex"));
-  }
-  catch (py::import_error err) { }
-    return py::isinstance(obj, py::module::import("__builtin__").attr("complex"));
+#if PY_MAJOR_VERSION < 3
+  return py::isinstance(obj, py::module::import("__builtin__").attr("complex"));
+#else
+  return py::isinstance(obj, py::module::import("builtins").attr("complex"));
+#endif
 }
 
 void
