@@ -6,7 +6,7 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 def clean_tests():
-    if (os.path.exists(os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py"))):
+    if os.path.exists(os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py")):
         os.remove(os.path.join(CURRENT_DIR, "..", "tests-spec", "kernels.py"))
     cpu_kernel_tests = glob.glob(
         os.path.join(CURRENT_DIR, "..", "tests-cpu-kernels", "test") + "*"
