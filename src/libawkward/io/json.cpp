@@ -818,9 +818,7 @@ namespace awkward {
                  const ArrayBuilderOptions& options,
                  const char* nan_string,
                  const char* infinity_string,
-                 const char* minus_infinity_string,
-                 const char* complex_real_string,
-                 const char* complex_imag_string) {
+                 const char* minus_infinity_string) {
     rj::Reader reader;
     rj::StringStream stream(source);
     Handler handler(options,
@@ -836,9 +834,7 @@ namespace awkward {
                int64_t buffersize,
                const char* nan_string,
                const char* infinity_string,
-               const char* minus_infinity_string,
-               const char* complex_real_string,
-               const char* complex_imag_string) {
+               const char* minus_infinity_string) {
     rj::Reader reader;
     std::shared_ptr<char> buffer = kernel::malloc<char>(kernel::lib::cpu, buffersize);
     rj::FileReadStream stream(source,

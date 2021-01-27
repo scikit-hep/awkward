@@ -83,6 +83,10 @@ namespace awkward {
     /// representation in JSON format
     /// @param minus_infinity_string user-defined string for a negative
     /// infinity representation in JSON format
+    /// @param complex_real_string user-defined string for a complex number
+    /// real part representation in JSON format
+    /// @param complex_imag_string user-defined string for a complex number
+    /// imaginary part representation in JSON format
     ToJsonString(int64_t maxdecimals,
                  const char* nan_string = nullptr,
                  const char* infinity_string = nullptr,
@@ -143,6 +147,10 @@ namespace awkward {
     /// representation in JSON format
     /// @param minus_infinity_string user-defined string for a negative
     /// infinity representation in JSON format
+    /// @param complex_real_string user-defined string for a complex number
+    /// real part representation in JSON format
+    /// @param complex_imag_string user-defined string for a complex number
+    /// imaginary part representation in JSON format
     ToJsonPrettyString(int64_t maxdecimals,
                        const char* nan_string = nullptr,
                        const char* infinity_string = nullptr,
@@ -205,6 +213,10 @@ namespace awkward {
     /// representation in JSON format
     /// @param minus_infinity_string user-defined string for a negative
     /// infinity representation in JSON format
+    /// @param complex_real_string user-defined string for a complex number
+    /// real part representation in JSON format
+    /// @param complex_imag_string user-defined string for a complex number
+    /// imaginary part representation in JSON format
     ToJsonFile(FILE* destination,
                int64_t maxdecimals,
                int64_t buffersize,
@@ -266,6 +278,10 @@ namespace awkward {
     /// representation in JSON format
     /// @param minus_infinity_string user-defined string for a negative
     /// infinity representation in JSON format
+    /// @param complex_real_string user-defined string for a complex number
+    /// real part representation in JSON format
+    /// @param complex_imag_string user-defined string for a complex number
+    /// imaginary part representation in JSON format
     ToJsonPrettyFile(FILE* destination,
                      int64_t maxdecimals,
                      int64_t buffersize,
@@ -327,9 +343,7 @@ namespace awkward {
                    const ArrayBuilderOptions& options,
                    const char* nan_string = nullptr,
                    const char* infinity_string = nullptr,
-                   const char* minus_infinity_string = nullptr,
-                   const char* complex_real_string = nullptr,
-                   const char* complex_imag_string = nullptr);
+                   const char* minus_infinity_string = nullptr);
 
   /// @brief Convert a JSON-encoded file into a Content array using an
   /// ArrayBuilder.
@@ -350,9 +364,7 @@ namespace awkward {
                  int64_t buffersize,
                  const char* nan_string = nullptr,
                  const char* infinity_string = nullptr,
-                 const char* minus_infinity_string = nullptr,
-                 const char* complex_real_string = nullptr,
-                 const char* complex_imag_string = nullptr);
+                 const char* minus_infinity_string = nullptr);
 
 }
 
