@@ -812,6 +812,15 @@ getitem(const T& self, const py::object& obj) {
 
 ////////// ArrayBuilder
 
+bool
+builder_fromiter_iscomplex(const py::handle& obj) {
+  try {
+    return py::isinstance(obj, py::module::import("builtins").attr("complex"));
+  }
+  catch (py::import_error err) { }
+    return py::isinstance(obj, py::module::import("__builtin__").attr("complex"));
+}
+
 void
 builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   if (obj.is(py::none())) {
@@ -826,8 +835,7 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   else if (py::isinstance<py::float_>(obj)) {
     self.real(obj.cast<double>());
   }
-  // FIXME: should be something like py::isinstance<py::complex_>(obj)
-  else if (obj.attr("__class__").attr("__name__").cast<std::string>() == "complex") {
+  else if (builder_fromiter_iscomplex(obj)) {
     self.complex(obj.cast<std::complex<double>>());
   }
   else if (py::isinstance<py::bytes>(obj)) {
