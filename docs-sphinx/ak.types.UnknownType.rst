@@ -12,14 +12,4 @@ an UnknownType has the following.
 ak.types.UnknownType.__init__
 =============================
 
-.. py:method:: ak.types.UnknownType.__init__(type, size, parameters=None, typestr=None)
-
-ak.types.UnknownType.type
-=========================
-
-.. py:attribute:: ak.types.UnknownType.type
-
-ak.types.UnknownType.size
-=========================
-
-.. py:attribute:: ak.types.UnknownType.size
+.. py:method:: ak.types.UnknownType.__init__(parameters=None, typestr=None)
