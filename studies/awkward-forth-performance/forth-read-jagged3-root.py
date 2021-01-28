@@ -34,7 +34,7 @@ begin
 again
 """)
 
-branch = uproot.open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/lzfour1-jagged3.root:tree/branch")
+branch = uproot.open("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib9-jagged3.root:tree/branch")
 
 begintime = time.time()
 
@@ -61,4 +61,4 @@ for basketid in range(branch.num_baskets):
     )
 
 endtime = time.time()
-print("AwkwardForth lzfour1-jagged3", stop, "entries", endtime - begintime, "seconds")
+print("AwkwardForth zlib9-jagged3", stop, "entries", endtime - begintime, "seconds")

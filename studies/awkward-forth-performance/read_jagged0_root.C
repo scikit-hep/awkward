@@ -12,7 +12,7 @@ void read_jagged0_root() {
   float data;
   data = 3.14;
 
-  TFile* f = new TFile("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/lzfour1-jagged0.root");
+  TFile* f = new TFile("/home/jpivarski/storage/data/chep-2021-jagged-jagged-jagged/zlib9-jagged0.root");
   TTree* t;
   f->GetObject("tree", t);
 
@@ -49,5 +49,5 @@ void read_jagged0_root() {
       end_time - begin_time
   ).count();
 
-  std::cout << "ROOT lzfour1-jagged0.root " << num_entries << " entries " << (count_nanoseconds / 1e9) << " seconds" << std::endl;
+  std::cout << "ROOT zlib9-jagged0.root " << num_entries << " entries " << (count_nanoseconds / 1e9) << " seconds" << std::endl;
 }
