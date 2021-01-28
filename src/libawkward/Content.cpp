@@ -866,9 +866,7 @@ namespace awkward {
                                minus_infinity_string,
                                complex_real_string,
                                complex_imag_string);
-      builder.beginlist();
       tojson_part(builder, true);
-      builder.endlist();
     }
     else {
       ToJsonFile builder(destination,
@@ -879,9 +877,7 @@ namespace awkward {
                          minus_infinity_string,
                          complex_real_string,
                          complex_imag_string);
-      builder.beginlist();
       tojson_part(builder, true);
-      builder.endlist();
     }
   }
 

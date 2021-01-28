@@ -67,7 +67,7 @@ def test_tostring():
     )
     assert (
         ak.to_json(ak.from_json("[[1.1,2.2,3],[],[4,5.5]]"))
-        == "[[1.1,2.2,3],[],[4,5.5]]"
+        == "[[1.1,2.2,3.0],[],[4.0,5.5]]"
     )
 
 
@@ -78,7 +78,7 @@ def test_tofile(tmp_path):
     )
 
     with open(os.path.join(str(tmp_path), "tmp1.json"), "r") as f:
-        assert f.read() == "[[1.1,2.2,3],[],[4,5.5]]"
+        assert f.read() == "[[1.1,2.2,3.0],[],[4.0,5.5]]"
 
 
 def test_fromiter():
