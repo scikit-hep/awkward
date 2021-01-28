@@ -1,7 +1,7 @@
 [build-system]
 requires = [
-    "setuptools>=42.0.0",
-    "wheel==0.34.2",
+    "setuptools>=42.0",
+    "wheel>=0.36.0",
     "cmake>=3.13"
 ]
 

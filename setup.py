@@ -16,6 +16,13 @@ from setuptools import setup, Extension
 import distutils.util
 
 
+try:
+    import cmake
+    CMAKE = os.path.join(cmake.CMAKE_BIN_DIR, "cmake")
+except ImportError:
+    CMAKE = "cmake"
+
+
 with open("VERSION_INFO") as f:
     VERSION_INFO = f.read().strip()
 
@@ -44,7 +51,7 @@ class CMakeExtension(Extension):
 class CMakeBuild(setuptools.command.build_ext.build_ext):
     def build_extensions(self):
         try:
-            out = subprocess.check_output(["cmake", "--version"])
+            out = subprocess.check_output([CMAKE, "--version"])
         except OSError:
             raise RuntimeError(
                 "CMake must be installed to build the following extensions: "
@@ -101,11 +108,11 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         build_dir = self.build_temp
 
         subprocess.check_call(
-            ["cmake", "-S", ext.sourcedir, "-B", build_dir] + cmake_args
+            [CMAKE, "-S", ext.sourcedir, "-B", build_dir] + cmake_args
         )
-        subprocess.check_call(["cmake", "--build", build_dir] + build_args)
+        subprocess.check_call([CMAKE, "--build", build_dir] + build_args)
         subprocess.check_call(
-            ["cmake", "--build", build_dir, "--config", cfg, "--target", "install"]
+            [CMAKE, "--build", build_dir, "--config", cfg, "--target", "install"]
         )
 
 
