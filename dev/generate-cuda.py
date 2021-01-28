@@ -81,10 +81,7 @@ def getthread_dim(pos):
     return code
 
 
-def traverse(node, args=None, forvars=None, declared=None):
-    args = args or {}
-    forvars = forvars or []
-    declared = declared or []
+def traverse(node, args={}, forvars=[], declared=[]):  # noqa: B006
     if node.__class__.__name__ == "For":
         forvars.append(traverse(node.target, args, [], declared))
         if len(forvars) == 1:
