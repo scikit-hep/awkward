@@ -117,7 +117,7 @@ def test_array_slice():
         ],
         check_valid=True,
     )
-    ak.to_list(array[ak.from_iter(["y", "x"], highlevel=False)]) == [
+    assert ak.to_list(array[ak.from_iter(["y", "x"], highlevel=False)]) == [
         {"y": 1.1, "x": 1},
         {"y": 2.2, "x": 2},
         {"y": 3.3, "x": 3},

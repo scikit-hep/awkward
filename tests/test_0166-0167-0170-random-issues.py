@@ -26,7 +26,7 @@ def test_0166_IndexedOptionArray():
     ]
 
     array = ak.Array([[[2, 3], None, [5]], [], [[7], [11]], [[13]], [None, [17], [19]]])
-    ak.to_list(ak.prod(array, axis=-1)) == [
+    assert ak.to_list(ak.prod(array, axis=-1)) == [
         [6, None, 5],
         [],
         [7, 11],
