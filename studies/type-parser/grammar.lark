@@ -1,14 +1,21 @@
 start: input
 
-input: TYPE [options]
+input: record
+     | unknown
+     | primitive
 
-options: "[" primitiveoption "]"
+record: "(" TYPE ")"
 
-primitiveoption: "parameters" "=" dict_obj
+primitive: TYPE [options]
+
+unknown: "unknown" [options]
+
+options: "[" def_option "]"
+
+def_option: "parameters" "=" dict_obj
 
 TYPE: "int64"
     | "int32"
-    | "unknown"
 
 ?json: dict_obj
     | list_obj
