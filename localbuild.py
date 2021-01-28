@@ -47,11 +47,11 @@ thisstate = {
 
 try:
     localbuild_time = os.stat("localbuild").st_mtime
-except:
+except Exception:
     localbuild_time = 0
 try:
     laststate = json.load(open("localbuild/laststate.json"))
-except:
+except Exception:
     laststate = None
 
 
