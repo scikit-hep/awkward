@@ -15,11 +15,11 @@ np = ak.nplike.NumpyMetadata.instance()
 ########## for code that's built up from strings
 
 
-def code_to_function(code, function_name, externals={}, debug=False):
+def code_to_function(code, function_name, externals=None, debug=False):
     if debug:
         print("################### " + function_name)  # noqa: T001
         print(code)  # noqa: T001
-    namespace = dict(externals)
+    namespace = {} if externals is None else dict(externals)
     exec(code, namespace)
     return namespace[function_name]
 

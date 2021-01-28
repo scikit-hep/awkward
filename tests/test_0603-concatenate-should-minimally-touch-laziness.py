@@ -9,7 +9,6 @@ import awkward as ak  # noqa: F401
 
 class Verbose(dict):
     def __getitem__(self, key):
-        print(key)
         self.touched = True
         if "data" in key:
             self.data_touched = True
