@@ -367,7 +367,6 @@ until
     )
 
     vm32 = awkward.forth.ForthMachine32("begin while repeat")
-    print(ak.to_list(vm32.bytecodes))
     assert (
         vm32.decompiled
         == """begin
@@ -377,7 +376,6 @@ repeat
     )
 
     vm32 = awkward.forth.ForthMachine32("begin 123 while 321 repeat")
-    print(ak.to_list(vm32.bytecodes))
     assert (
         vm32.decompiled
         == """begin
@@ -492,8 +490,6 @@ x i-> stack
     )
 
     vm32 = awkward.forth.ForthMachine32("input x output y int32 x i-> y")
-    print(ak.to_list(vm32.bytecodes))
-    print(vm32.decompiled)
     assert (
         vm32.decompiled
         == """input x
