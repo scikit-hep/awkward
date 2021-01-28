@@ -12,6 +12,8 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 class Argument(object):
+    __slots__ = ("name", "typename", "direction", "role")
+
     def __init__(self, name, typename, direction, role="default"):
         self.name = name
         self.typename = typename
