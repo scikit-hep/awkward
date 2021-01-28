@@ -3144,7 +3144,7 @@ def repartition(array, lengths, highlevel=True):
 def virtual(
     generate,
     args=(),
-    kwargs={},
+    kwargs=None,
     form=None,
     length=None,
     cache="new",
@@ -3319,7 +3319,9 @@ def virtual(
     elif form is not None and not isinstance(form, ak.forms.Form):
         form = ak.forms.Form.fromjson(json.dumps(form))
 
-    gen = ak.layout.ArrayGenerator(generate, args, kwargs, form=form, length=length)
+    gen = ak.layout.ArrayGenerator(
+        generate, args, kwargs or {}, form=form, length=length
+    )
     if cache == "new":
         hold_cache = ak._util.MappingProxy({})
         cache = ak.layout.ArrayCache(hold_cache)
