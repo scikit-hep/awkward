@@ -2322,7 +2322,7 @@ begin
   dup stream pos 4 - <=
 until
 """.format(
-            bit_width=2, rle_byte_width=1, rle_format="B"
+            bit_width=2, rle_format="B"
         )
     )
     assert (
