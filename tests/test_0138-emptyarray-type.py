@@ -18,17 +18,23 @@ def test():
     )
     array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]], check_valid=True)
 
-    ak.to_numpy(empty1).dtype.type is np.float64
+    assert ak.to_numpy(empty1).dtype.type is np.float64
 
-    ak.to_list(array[empty1]) == []
-    ak.to_list(
-        array[
-            empty1,
-        ]
-    ) == []
-    ak.to_list(array[empty2]) == [[], [], []]
-    ak.to_list(
-        array[
-            empty2,
-        ]
-    ) == [[], [], []]
+    assert ak.to_list(array[empty1]) == []
+    assert (
+        ak.to_list(
+            array[
+                empty1,
+            ]
+        )
+        == []
+    )
+    assert ak.to_list(array[empty2]) == [[], [], []]
+    assert (
+        ak.to_list(
+            array[
+                empty2,
+            ]
+        )
+        == [[], [], []]
+    )

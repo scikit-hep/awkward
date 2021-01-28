@@ -27,15 +27,15 @@ def test_from_iter():
     assert str(ak.from_iter([1, 2.2]).type) == "2 * float64"
     assert ak.from_iter([1, 2.2]).tolist() == [1.0, 2.2]
     builder = ak.ArrayBuilder()
-    str(ak.type(builder)) == "0 * unknown"
+    assert str(ak.type(builder)) == "0 * unknown"
     builder.integer(1)
-    str(ak.type(builder)) == "1 * int64"
+    assert str(ak.type(builder)) == "1 * int64"
     builder.real(2.2)
-    str(ak.type(builder)) == "2 * float64"
+    assert str(ak.type(builder)) == "2 * float64"
 
     # For that matter, ArrayBuilder is missing a high-level interface to complex:
     builder.complex(3 + 3j)
-    str(ak.type(builder)) == "3 * complex128"
+    assert str(ak.type(builder)) == "3 * complex128"
 
 
 def test_from_json():
