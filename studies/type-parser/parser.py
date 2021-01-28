@@ -42,9 +42,10 @@ def toast(ptnode):
         else:
             raise Exception("Unhandled UnknownType node")
     elif ptnode.data == "record":
-        infocls.arraytype = "Record"
-        for node in ptnode.children:
-            toast(node, infocls)
+        if len(ptnode.children) == 1:
+            return ak.types.RecordType((toast(ptnode.children[0]),))
+        else:
+            raise Exception("Unhandled RecordType node")
     elif ptnode.data == "def_option":
         assert len(ptnode.children) == 1
         return ptnode.children[0]
@@ -76,9 +77,13 @@ if __name__ == "__main__":
     parsedtype = toast(test.parse(text))
     assert isinstance(parsedtype, ak.types.UnknownType)
     assert parsedtype.parameters == {'"wonky"': ['"parameter"', 3.14]}
-    """
     text = "(int64)"
-    parsedtype = toast(test.parse(text), tp)
+    parsedtype = toast(test.parse(text))
     assert isinstance(parsedtype, ak.types.RecordType)
-    assert (parsedtype.types == (ak.types.PrimitiveType("int64"), ))
-    """
+    assert parsedtype.types == (ak.types.PrimitiveType("int64"),)
+    text = '(int64[parameters={"wonky": ["bla", 1, 2]}])'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.RecordType)
+    assert parsedtype.types == (
+        ak.types.PrimitiveType("int64", parameters={"wonky": ["bla", 1, 2]}),
+    )
