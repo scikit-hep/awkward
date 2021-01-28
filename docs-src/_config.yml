@@ -11,6 +11,7 @@ launch_buttons:
 
 execute:
   allow_errors: false
+  execute_notebooks: auto  # one of ("auto", "force", "cache", "off")
 
 sphinx:
   config:
@@ -21,6 +22,7 @@ sphinx:
       repository_branch: main
       path_to_docs: docs-src
       use_edit_page_button: true
+      use_repository_button: true
       use_issues_button: true
       search_bar_text: Search...
       google_analytics_id: ""
