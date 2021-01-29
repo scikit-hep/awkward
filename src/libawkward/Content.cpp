@@ -1090,15 +1090,20 @@ namespace awkward {
       parents.data(),
       length());
     util::handle_error(err, classname(), identities_.get());
-    ContentPtr next = argsort_next(negaxis,
-                                   starts,
-                                   parents,
-                                   1,
-                                   ascending,
-                                   stable,
-                                   true);
+    ContentPtr out = argsort_next(negaxis,
+                                  starts,
+                                  parents,
+                                  1,
+                                  ascending,
+                                  stable,
+                                  true);
 
-    return next.get()->getitem_at_nowrap(0);
+     if (out.get()->length() == 0) {
+       return out.get()->getitem_nothing();
+     }
+     else {
+       return out.get()->getitem_at_nowrap(0);
+     }
   }
 
   const ContentPtr
@@ -1151,15 +1156,20 @@ namespace awkward {
       length());
     util::handle_error(err, classname(), identities_.get());
 
-    ContentPtr next = sort_next(negaxis,
-                                starts,
-                                parents,
-                                1,
-                                ascending,
-                                stable,
-                                true);
+    ContentPtr out = sort_next(negaxis,
+                               starts,
+                               parents,
+                               1,
+                               ascending,
+                               stable,
+                               true);
 
-    return next.get()->getitem_at_nowrap(0);
+    if (out.get()->length() == 0) {
+      return out.get()->getitem_nothing();
+    }
+    else {
+      return out.get()->getitem_at_nowrap(0);
+    }
   }
 
   const util::Parameters

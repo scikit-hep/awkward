@@ -3232,6 +3232,10 @@ namespace awkward {
                         bool ascending,
                         bool stable,
                         bool keepdims) const {
+    if (length() == 0 ) {
+      return shallow_copy();
+    }
+
     if (shape_.empty()) {
       throw std::runtime_error(
         std::string("attempting to sort a scalar") + FILENAME(__LINE__));
@@ -3406,6 +3410,10 @@ namespace awkward {
                            bool ascending,
                            bool stable,
                            bool keepdims) const {
+    if (length() == 0 ) {
+      return shallow_copy();
+    }
+
     if (shape_.empty()) {
       throw std::runtime_error(
         std::string("attempting to argsort a scalar") + FILENAME(__LINE__));
