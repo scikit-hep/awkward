@@ -2244,6 +2244,10 @@ namespace awkward {
                                          bool ascending,
                                          bool stable,
                                          bool keepdims) const {
+    if (length() == 0 ) {
+      return shallow_copy();
+    }
+
     int64_t index_length = index_.length();
     int64_t parents_length = parents.length();
 
@@ -2372,6 +2376,10 @@ namespace awkward {
                                             bool ascending,
                                             bool stable,
                                             bool keepdims) const {
+    if (length() == 0 ) {
+      return shallow_copy();
+    }
+
     int64_t index_length = index_.length();
     int64_t parents_length = parents.length();
 

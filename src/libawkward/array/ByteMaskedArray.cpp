@@ -1236,6 +1236,10 @@ namespace awkward {
                              bool ascending,
                              bool stable,
                              bool keepdims) const {
+    if (length() == 0 ) {
+      return shallow_copy();
+    }
+
     int64_t numnull;
     struct Error err1 = kernel::ByteMaskedArray_numnull(
       kernel::lib::cpu,   // DERIVE

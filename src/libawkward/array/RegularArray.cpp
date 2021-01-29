@@ -1224,6 +1224,9 @@ namespace awkward {
                           bool ascending,
                           bool stable,
                           bool keepdims) const {
+    if (length() == 0) {
+      return shallow_copy();
+    }
     std::shared_ptr<Content> out = toListOffsetArray64(true).get()->sort_next(
                                        negaxis,
                                        starts,
@@ -1255,6 +1258,9 @@ namespace awkward {
                              bool ascending,
                              bool stable,
                              bool keepdims) const {
+    if (length() == 0) {
+      return shallow_copy();
+    }
     std::shared_ptr<Content> out = toListOffsetArray64(true).get()->argsort_next(
                                        negaxis,
                                        starts,

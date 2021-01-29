@@ -1654,6 +1654,10 @@ namespace awkward {
     bool stable,
     bool keepdims) const {
 
+    if (length() == 0 ) {
+      return shallow_copy();
+    }
+
     // if this is array of strings, axis parameter is ignored
     // and this array is sorted
     if (util::parameter_isstring(parameters_, "__array__")) {
@@ -1821,6 +1825,10 @@ namespace awkward {
                                            bool ascending,
                                            bool stable,
                                            bool keepdims) const {
+    if (length() == 0 ) {
+     return shallow_copy();
+    }
+
     // if this is array of strings, axis parameter is ignored
     // and this array is sorted
     if (util::parameter_isstring(parameters_, "__array__")) {

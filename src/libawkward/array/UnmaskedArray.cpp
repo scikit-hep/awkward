@@ -915,6 +915,9 @@ namespace awkward {
                            bool ascending,
                            bool stable,
                            bool keepdims) const {
+    if (length() == 0) {
+      return shallow_copy();
+    }
     std::shared_ptr<Content> out = content_.get()->sort_next(negaxis,
                                                              starts,
                                                              parents,
@@ -947,6 +950,9 @@ namespace awkward {
                               bool ascending,
                               bool stable,
                               bool keepdims) const {
+    if (length() == 0) {
+      return shallow_copy();
+    }
     std::shared_ptr<Content> out = content_.get()->argsort_next(negaxis,
                                                                 starts,
                                                                 parents,

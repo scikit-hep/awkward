@@ -1601,6 +1601,9 @@ namespace awkward {
                          bool ascending,
                          bool stable,
                          bool keepdims) const {
+    if (length() == 0) {
+      return shallow_copy();
+    }
     std::vector<ContentPtr> contents;
     for (auto content : contents_) {
       ContentPtr trimmed = content.get()->getitem_range_nowrap(0, length());
@@ -1628,6 +1631,9 @@ namespace awkward {
                             bool ascending,
                             bool stable,
                             bool keepdims) const {
+    if (length() == 0) {
+      return shallow_copy();
+    }
     std::vector<ContentPtr> contents;
     for (auto content : contents_) {
       ContentPtr trimmed = content.get()->getitem_range_nowrap(0, length());

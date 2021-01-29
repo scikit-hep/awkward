@@ -497,3 +497,52 @@ def test_sort_bytestrings():
         b"two",
         b"two",
     ]
+
+
+def test_sort_zero_length_arrays():
+    array = ak.layout.IndexedArray64(ak.layout.Index64([]), ak.layout.NumpyArray([1, 2, 3]))
+    assert ak.to_list(array) == []
+    assert ak.to_list(ak.sort(array)) == []
+    assert ak.to_list(ak.argsort(array)) == []
+
+    content0 = ak.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
+    content1 = ak.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
+    tags = ak.layout.Index8([])
+    index = ak.layout.Index32([])
+    array = ak.layout.UnionArray8_32(tags, index, [content0, content1])
+    assert ak.to_list(array) == []
+    assert ak.to_list(ak.sort(array)) == []
+    assert ak.to_list(ak.argsort(array)) == []
+
+    content = ak.from_iter(
+        [[0.0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]], highlevel=False
+    )
+    mask = ak.layout.Index8([])
+    array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
+    assert ak.to_list(array) == []
+    assert ak.to_list(ak.sort(array)) == []
+    assert ak.to_list(ak.argsort(array)) == []
+
+    array = ak.layout.NumpyArray([])
+    assert ak.to_list(array) == []
+    assert ak.to_list(ak.sort(array)) == []
+    assert ak.to_list(ak.argsort(array)) == []
+
+    array = ak.layout.RecordArray([])
+    assert ak.to_list(array) == []
+    assert ak.to_list(ak.sort(array)) == []
+    assert ak.to_list(ak.argsort(array)) == []
+
+    content = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+    starts1 = ak.layout.Index64([])
+    stops1 = ak.layout.Index64([])
+    offsets1 = ak.layout.Index64(np.array([0]))
+    array = ak.layout.ListArray64(starts1, stops1, content)
+    assert ak.to_list(array) == []
+    assert ak.to_list(ak.sort(array)) == []
+    assert ak.to_list(ak.argsort(array)) == []
+
+    array = ak.layout.ListOffsetArray64(offsets1, content)
+    assert ak.to_list(array) == []
+    assert ak.to_list(ak.sort(array)) == []
+    assert ak.to_list(ak.argsort(array)) == []
