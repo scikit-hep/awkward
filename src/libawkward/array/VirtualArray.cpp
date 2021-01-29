@@ -451,9 +451,7 @@ namespace awkward {
 
   void
   VirtualArray::caches(std::vector<ArrayCachePtr>& out) const {
-    if (SliceGenerator* raw = dynamic_cast<SliceGenerator*>(generator_.get())) {
-      raw->content().get()->caches(out);
-    }
+    generator_.get()->caches(out);
 
     if (cache_.get() != nullptr) {
       bool found = false;
