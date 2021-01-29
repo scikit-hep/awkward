@@ -144,6 +144,15 @@ namespace awkward {
                                         contents_);
   }
 
+  const FormPtr
+  RecordForm::with_form_key(const FormKey& form_key) const {
+    return std::make_shared<RecordForm>(has_identities_,
+                                        parameters_,
+                                        form_key,
+                                        recordlookup_,
+                                        contents_);
+  }
+
   const std::string
   RecordForm::purelist_parameter(const std::string& key) const {
     return parameter(key);

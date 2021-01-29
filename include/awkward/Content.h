@@ -71,6 +71,10 @@ namespace awkward {
     virtual const FormPtr
       shallow_copy() const = 0;
 
+    /// @brief Copies this node, adding or replacing a form_key.
+    virtual const FormPtr
+      with_form_key(const FormKey& form_key) const = 0;
+
     /// @brief Returns `true` if this Form is equal to the other Form; `false`
     /// otherwise.
     ///

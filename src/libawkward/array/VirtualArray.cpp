@@ -82,6 +82,15 @@ namespace awkward {
                                          has_length_);
   }
 
+  const FormPtr
+  VirtualForm::with_form_key(const FormKey& form_key) const {
+    return std::make_shared<VirtualForm>(has_identities_,
+                                         parameters_,
+                                         form_key,
+                                         form_,
+                                         has_length_);
+  }
+
   const std::string
   VirtualForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);

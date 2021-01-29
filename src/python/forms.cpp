@@ -105,6 +105,11 @@ form_methods(py::class_<T, std::shared_ptr<T>, ak::Form>& x) {
                          py::arg("pretty") = false,
                          py::arg("verbose") = true)
           .def_property_readonly("purelist_depth", &T::purelist_depth)
+          .def("with_form_key", [](const std::shared_ptr<ak::Form>& self,
+                               const std::string& form_key) -> ak::FormPtr {
+            ak::FormKey key = std::make_shared<std::string>(form_key);
+            return self.get()->with_form_key(key);
+          })
   ;
 }
 

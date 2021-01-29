@@ -91,6 +91,16 @@ namespace awkward {
                                             valid_when_);
   }
 
+  const FormPtr
+  ByteMaskedForm::with_form_key(const FormKey& form_key) const {
+    return std::make_shared<ByteMaskedForm>(has_identities_,
+                                            parameters_,
+                                            form_key,
+                                            mask_,
+                                            content_,
+                                            valid_when_);
+  }
+
   const std::string
   ByteMaskedForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);
