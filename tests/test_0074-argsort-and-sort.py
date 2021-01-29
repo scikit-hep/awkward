@@ -500,7 +500,7 @@ def test_sort_bytestrings():
 
 
 def test_sort_zero_length_arrays():
-    array = ak.layout.IndexedArray64(ak.layout.Index64([]), ak.layout.NumpyArray([1,2,3]))
+    array = ak.layout.IndexedArray64(ak.layout.Index64([]), ak.layout.NumpyArray([1, 2, 3]))
     assert ak.to_list(array) == []
     assert ak.to_list(ak.sort(array)) == []
     assert ak.to_list(ak.argsort(array)) == []
