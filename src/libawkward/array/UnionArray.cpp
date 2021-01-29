@@ -2077,6 +2077,9 @@ namespace awkward {
                                 bool ascending,
                                 bool stable,
                                 bool keepdims) const {
+    if (length() == 0) {
+      return shallow_copy();
+    }
     ContentPtr simplified = simplify_uniontype(true, true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
@@ -2102,6 +2105,9 @@ namespace awkward {
                                    bool ascending,
                                    bool stable,
                                    bool keepdims) const {
+    if (length() == 0) {
+      return shallow_copy();
+    }
     ContentPtr simplified = simplify_uniontype(true, true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
         dynamic_cast<UnionArray8_U32*>(simplified.get())  ||
