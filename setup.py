@@ -1,30 +1,45 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import glob
 import os
 import platform
 import subprocess
 import sys
-import distutils.util
 import multiprocessing
 import shutil
-import codecs
 
 import setuptools
 import setuptools.command.build_ext
 import setuptools.command.install
-
 from setuptools import setup, Extension
+
+# Note: never import from distutils before setuptools!
+import distutils.util
+
+
+try:
+    import cmake
+    CMAKE = os.path.join(cmake.CMAKE_BIN_DIR, "cmake")
+except ImportError:
+    CMAKE = "cmake"
+
+
+with open("VERSION_INFO") as f:
+    VERSION_INFO = f.read().strip()
+
+
+def read_requirements(name):
+    with open(name) as f:
+        return f.read().strip().split("\n")
 
 
 extras = {
-    "cuda": ["awkward-cuda-kernels==" + open("VERSION_INFO").read().strip()],
-    "test": open("requirements-test.txt").read().strip().split("\n"),
-    "dev": open("requirements-dev.txt").read().strip().split("\n"),
+    "cuda": ["awkward-cuda-kernels=={0}".format(VERSION_INFO)],
+    "test": read_requirements("requirements-test.txt"),
+    "dev": read_requirements("requirements-dev.txt"),
 }
 extras["all"] = sum(extras.values(), [])
 
-install_requires = open("requirements.txt").read().strip().split("\n")
+install_requires = read_requirements("requirements.txt")
 
 
 class CMakeExtension(Extension):
@@ -36,7 +51,7 @@ class CMakeExtension(Extension):
 class CMakeBuild(setuptools.command.build_ext.build_ext):
     def build_extensions(self):
         try:
-            out = subprocess.check_output(["cmake", "--version"])
+            out = subprocess.check_output([CMAKE, "--version"])
         except OSError:
             raise RuntimeError(
                 "CMake must be installed to build the following extensions: "
@@ -93,11 +108,11 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         build_dir = self.build_temp
 
         subprocess.check_call(
-            ["cmake", "-S", ext.sourcedir, "-B", build_dir] + cmake_args
+            [CMAKE, "-S", ext.sourcedir, "-B", build_dir] + cmake_args
         )
-        subprocess.check_call(["cmake", "--build", build_dir] + build_args)
+        subprocess.check_call([CMAKE, "--build", build_dir] + build_args)
         subprocess.check_call(
-            ["cmake", "--build", build_dir, "--config", cfg, "--target", "install"]
+            [CMAKE, "--build", build_dir, "--config", cfg, "--target", "install"]
         )
 
 
@@ -292,63 +307,8 @@ else:
 
 
 setup(
-    name="awkward",
-    packages=[
-        x for x in setuptools.find_packages(where="src") if x != "awkward_cuda_kernels"
-    ],
-    package_dir={"awkward": "src/awkward"},
-    version=open("VERSION_INFO").read().strip(),
-    author="Jim Pivarski",
-    author_email="pivarski@princeton.edu",
-    maintainer="Jim Pivarski",
-    maintainer_email="pivarski@princeton.edu",
-    description="Manipulate JSON-like data with NumPy-like idioms.",
-    long_description=codecs.open("README-pypi.md", encoding="utf8").read(),
-    long_description_content_type="text/markdown",
-    url="https://github.com/scikit-hep/awkward-1.0",
-    download_url="https://github.com/scikit-hep/awkward-1.0/releases",
-    license="BSD 3-clause",
-    entry_points={"numba_extensions": ["init = awkward._connect._numba:register"]},
-    test_suite="tests",
-    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
     install_requires=install_requires,
-    tests_require=extras["test"],
     extras_require=extras,
-    ext_modules=[
-        CMakeExtension("awkward"),
-    ],
-    cmdclass={
-        "build_ext": CMakeBuild,
-        "install": Install,
-    },
-    classifiers=[
-        #         "Development Status :: 1 - Planning",
-        #         "Development Status :: 2 - Pre-Alpha",
-        #         "Development Status :: 3 - Alpha",
-        #         "Development Status :: 4 - Beta",
-        "Development Status :: 5 - Production/Stable",
-        #         "Development Status :: 6 - Mature",
-        #         "Development Status :: 7 - Inactive",
-        "Intended Audience :: Developers",
-        "Intended Audience :: Information Technology",
-        "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: BSD License",
-        "Operating System :: MacOS :: MacOS X",
-        "Operating System :: Microsoft :: Windows",
-        "Operating System :: POSIX :: Linux",
-        "Operating System :: Unix",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Topic :: Scientific/Engineering",
-        "Topic :: Scientific/Engineering :: Information Analysis",
-        "Topic :: Scientific/Engineering :: Mathematics",
-        "Topic :: Scientific/Engineering :: Physics",
-        "Topic :: Software Development",
-        "Topic :: Utilities",
-    ],
+    ext_modules=[CMakeExtension("awkward")],
+    cmdclass={"build_ext": CMakeBuild, "install": Install},
 )
