@@ -2552,7 +2552,7 @@ def from_arrow(array, highlevel=True, behavior=None):
     return _from_arrow(array, True, highlevel=highlevel, behavior=behavior)
 
 
-def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
+def _from_arrow(array, pass_empty_field, struct_only=None, highlevel=True, behavior=None):
     pyarrow = _import_pyarrow("ak.from_arrow")
 
     def popbuffers(array, tpe, buffers):
@@ -2579,12 +2579,26 @@ def _from_arrow(array, pass_empty_field, highlevel=True, behavior=None):
             mask = buffers.pop(0)
             child_arrays = []
             keys = []
-            for i in range(tpe.num_fields):
-                content = popbuffers(array.field(tpe[i].name), tpe[i].type, buffers)
-                if not tpe[i].nullable:
-                    content = content.content
-                child_arrays.append(content)
-                keys.append(tpe[i].name)
+
+            if struct_only is None:
+                for i in range(tpe.num_fields):
+                    content = popbuffers(array.field(tpe[i].name), tpe[i].type, buffers)
+                    if not tpe[i].nullable:
+                        content = content.content
+                    child_arrays.append(content)
+                    keys.append(tpe[i].name)
+            else:
+                target = struct_only.pop()
+                found = False
+                for i in range(tpe.num_fields):
+                    if tpe[i].name == target:
+                        found = True
+                        content = popbuffers(array.field(tpe[i].name), tpe[i].type, buffers)
+                        if not tpe[i].nullable:
+                            content = content.content
+                        child_arrays.append(content)
+                        keys.append(tpe[i].name)
+                assert found
 
             out = ak.layout.RecordArray(child_arrays, keys, length=len(array))
             if mask is not None:
