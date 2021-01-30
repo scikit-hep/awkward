@@ -176,6 +176,17 @@ namespace awkward {
                                        dtype_);
   }
 
+  const FormPtr
+  NumpyForm::with_form_key(const FormKey& form_key) const {
+    return std::make_shared<NumpyForm>(has_identities_,
+                                       parameters_,
+                                       form_key,
+                                       inner_shape_,
+                                       itemsize_,
+                                       format_,
+                                       dtype_);
+  }
+
   const std::string
   NumpyForm::purelist_parameter(const std::string& key) const {
     return parameter(key);

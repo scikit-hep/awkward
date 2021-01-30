@@ -95,6 +95,15 @@ namespace awkward {
                                             content_);
   }
 
+  const FormPtr
+  ListOffsetForm::with_form_key(const FormKey& form_key) const {
+    return std::make_shared<ListOffsetForm>(has_identities_,
+                                            parameters_,
+                                            form_key,
+                                            offsets_,
+                                            content_);
+  }
+
   const std::string
   ListOffsetForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);

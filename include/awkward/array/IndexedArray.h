@@ -41,6 +41,9 @@ namespace awkward {
     const FormPtr
       shallow_copy() const override;
 
+    const FormPtr
+      with_form_key(const FormKey& form_key) const override;
+
     const std::string
       purelist_parameter(const std::string& key) const override;
 
@@ -116,6 +119,9 @@ namespace awkward {
 
     const FormPtr
       shallow_copy() const override;
+
+    const FormPtr
+      with_form_key(const FormKey& form_key) const override;
 
     const std::string
       purelist_parameter(const std::string& key) const override;

@@ -33,6 +33,9 @@ public:
   const ak::ContentPtr
     generate() const override;
 
+  void
+  caches(std::vector<ak::ArrayCachePtr>& out) const override;
+
   const std::string
     tostring_part(const std::string& indent,
                   const std::string& pre,

@@ -72,6 +72,14 @@ namespace awkward {
                                        T_);
     }
 
+    const FormPtr
+      with_form_key(const FormKey& form_key) const override {
+      return std::make_shared<RawForm>(has_identities_,
+                                       parameters_,
+                                       form_key,
+                                       T_);
+    }
+
     const std::string
       purelist_parameter(const std::string& key) const override {
       return parameter(key);

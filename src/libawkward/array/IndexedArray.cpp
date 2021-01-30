@@ -109,6 +109,15 @@ namespace awkward {
                                          content_);
   }
 
+  const FormPtr
+  IndexedForm::with_form_key(const FormKey& form_key) const {
+    return std::make_shared<IndexedForm>(has_identities_,
+                                         parameters_,
+                                         form_key,
+                                         index_,
+                                         content_);
+  }
+
   const std::string
   IndexedForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);
@@ -295,6 +304,15 @@ namespace awkward {
     return std::make_shared<IndexedOptionForm>(has_identities_,
                                                parameters_,
                                                form_key_,
+                                               index_,
+                                               content_);
+  }
+
+  const FormPtr
+  IndexedOptionForm::with_form_key(const FormKey& form_key) const {
+    return std::make_shared<IndexedOptionForm>(has_identities_,
+                                               parameters_,
+                                               form_key,
                                                index_,
                                                content_);
   }

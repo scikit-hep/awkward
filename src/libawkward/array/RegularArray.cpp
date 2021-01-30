@@ -82,6 +82,15 @@ namespace awkward {
                                          size_);
   }
 
+  const FormPtr
+  RegularForm::with_form_key(const FormKey& form_key) const {
+    return std::make_shared<RegularForm>(has_identities_,
+                                         parameters_,
+                                         form_key,
+                                         content_,
+                                         size_);
+  }
+
   const std::string
   RegularForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);
