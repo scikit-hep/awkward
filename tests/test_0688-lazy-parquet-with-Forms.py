@@ -122,11 +122,11 @@ def test_7(one, two, three, tmp_path):
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y[0]"])
     assert np.asarray(array.layout.field("x").array.offsets).tolist() == [0, 0, 1, 4]
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y[0]"])
     array.layout.field("x").array.content.field("y").array
-    assert set(array.caches[0].keys()) == set(["tmp:col:x.list.item.y[0]"])
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y[0]", "tmp:col:x.list.item.y[0]"])
     assert array.tolist() == data
 
 
@@ -142,27 +142,27 @@ def test_8(one, two, three, tmp_path):
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y[0]"])
     assert np.asarray(array.layout.field("x").array.offsets).tolist() == [0, 0, 1, 4]
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y[0]"])
     array.layout.field("x").array.content.field("y").array
-    assert set(array.caches[0].keys()) == set(["tmp:col:x.list.item.y[0]"])
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y[0]", "tmp:col:x.list.item.y[0]"])
     array.layout.field("x").array.content.field("z").array
     assert set(array.caches[0].keys()) == set(
-        ["tmp:col:x.list.item.y[0]", "tmp:col:x.list.item.z[0]"]
+        ["tmp:off:x.list.item.y[0]", "tmp:col:x.list.item.y[0]", "tmp:col:x.list.item.z[0]"]
     )
     assert array.tolist() == data
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y[0]"])
     assert np.asarray(array.layout.field("x").array.offsets).tolist() == [0, 0, 1, 4]
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y[0]"])
     array.layout.field("x").array.content.field("z").array
-    assert set(array.caches[0].keys()) == set(["tmp:col:x.list.item.z[0]"])
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y[0]", "tmp:col:x.list.item.z[0]"])
     array.layout.field("x").array.content.field("y").array
     assert set(array.caches[0].keys()) == set(
-        ["tmp:col:x.list.item.z[0]", "tmp:col:x.list.item.y[0]"]
+        ["tmp:off:x.list.item.y[0]", "tmp:col:x.list.item.z[0]", "tmp:col:x.list.item.y[0]"]
     )
     assert array.tolist() == data
 
@@ -179,13 +179,13 @@ def test_9(one, two, three, tmp_path):
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.q[0]"])
     assert np.asarray(array.layout.field("x").array.offsets).tolist() == [0, 0, 1, 4]
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.q[0]"])
     array.layout.field("x").array.content.field("y").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.q[0]"])
     array.layout.field("x").array.content.field("y").array.field("q").array
-    assert set(array.caches[0].keys()) == set(["tmp:col:x.list.item.y.q[0]"])
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.q[0]", "tmp:col:x.list.item.y.q[0]"])
     assert array.tolist() == data
 
 
@@ -207,31 +207,31 @@ def test_10(one, two, three, tmp_path):
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.q[0]"])
     assert np.asarray(array.layout.field("x").array.offsets).tolist() == [0, 0, 1, 4]
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.q[0]"])
     array.layout.field("x").array.content.field("y").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.q[0]"])
     array.layout.field("x").array.content.field("y").array.field("q").array
-    assert set(array.caches[0].keys()) == set(["tmp:col:x.list.item.y.q[0]"])
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.q[0]", "tmp:col:x.list.item.y.q[0]"])
     array.layout.field("x").array.content.field("z").array
     assert set(array.caches[0].keys()) == set(
-        ["tmp:col:x.list.item.y.q[0]", "tmp:col:x.list.item.z[0]"]
+        ["tmp:off:x.list.item.y.q[0]", "tmp:col:x.list.item.y.q[0]", "tmp:col:x.list.item.z[0]"]
     )
     assert array.tolist() == data
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.q[0]"])
     assert np.asarray(array.layout.field("x").array.offsets).tolist() == [0, 0, 1, 4]
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.q[0]"])
     array.layout.field("x").array.content.field("y").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.q[0]"])
     array.layout.field("x").array.content.field("z").array
-    assert set(array.caches[0].keys()) == set(["tmp:col:x.list.item.z[0]"])
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.q[0]", "tmp:col:x.list.item.z[0]"])
     array.layout.field("x").array.content.field("y").array.field("q").array
     assert set(array.caches[0].keys()) == set(
-        ["tmp:col:x.list.item.y.q[0]", "tmp:col:x.list.item.z[0]"]
+        ["tmp:off:x.list.item.y.q[0]", "tmp:col:x.list.item.y.q[0]", "tmp:col:x.list.item.z[0]"]
     )
     assert array.tolist() == data
 
@@ -254,31 +254,31 @@ def test_11(one, two, three, tmp_path):
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z[0]"])
     assert np.asarray(array.layout.field("x").array.offsets).tolist() == [0, 0, 1, 4]
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z[0]"])
     array.layout.field("x").array.content.field("y").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z[0]"])
     array.layout.field("x").array.content.field("y").array.field("q").array
-    assert set(array.caches[0].keys()) == set(["tmp:col:x.list.item.y.q[0]"])
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z[0]", "tmp:col:x.list.item.y.q[0]"])
     array.layout.field("x").array.content.field("z").array
     assert set(array.caches[0].keys()) == set(
-        ["tmp:col:x.list.item.y.q[0]", "tmp:col:x.list.item.z[0]"]
+        ["tmp:off:x.list.item.z[0]", "tmp:col:x.list.item.y.q[0]", "tmp:col:x.list.item.z[0]"]
     )
     assert array.tolist() == data
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z[0]"])
     assert np.asarray(array.layout.field("x").array.offsets).tolist() == [0, 0, 1, 4]
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z[0]"])
     array.layout.field("x").array.content.field("y").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z[0]"])
     array.layout.field("x").array.content.field("z").array
-    assert set(array.caches[0].keys()) == set(["tmp:col:x.list.item.z[0]"])
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.z[0]", "tmp:col:x.list.item.z[0]"])
     array.layout.field("x").array.content.field("y").array.field("q").array
     assert set(array.caches[0].keys()) == set(
-        ["tmp:col:x.list.item.y.q[0]", "tmp:col:x.list.item.z[0]"]
+        ["tmp:off:x.list.item.z[0]", "tmp:col:x.list.item.y.q[0]", "tmp:col:x.list.item.z[0]"]
     )
     assert array.tolist() == data
 
@@ -342,22 +342,60 @@ def test_14(one, two, three, tmp_path):
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.list.item[0]"])
     array.layout.field("x").array.content.field("z").array
-    assert set(array.caches[0].keys()) == set(["tmp:col:x.list.item.z[0]"])
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.list.item[0]", "tmp:col:x.list.item.z[0]"])
     array.layout.field("x").array.content.field("y").array
     assert set(array.caches[0].keys()) == set(
-        ["tmp:col:x.list.item.z[0]", "tmp:lst:x.list.item.y[0]"]
+        ["tmp:off:x.list.item.y.list.item[0]", "tmp:col:x.list.item.z[0]", "tmp:lst:x.list.item.y[0]"]
     )
     assert array.tolist() == data
     array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
     assert set(array.caches[0].keys()) == set()
     array.layout.field("x").array
-    assert set(array.caches[0].keys()) == set()
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.list.item[0]"])
     array.layout.field("x").array.content.field("y").array
-    assert set(array.caches[0].keys()) == set(["tmp:lst:x.list.item.y[0]"])
+    assert set(array.caches[0].keys()) == set(["tmp:off:x.list.item.y.list.item[0]", "tmp:lst:x.list.item.y[0]"])
     array.layout.field("x").array.content.field("z").array
     assert set(array.caches[0].keys()) == set(
-        ["tmp:lst:x.list.item.y[0]", "tmp:col:x.list.item.z[0]"]
+        ["tmp:off:x.list.item.y.list.item[0]", "tmp:lst:x.list.item.y[0]", "tmp:col:x.list.item.z[0]"]
     )
+    assert array.tolist() == data
+
+
+@pytest.mark.parametrize("one,two,three", [(1, 2, 3), ("one", "two", "three")])
+def test_15(one, two, three, tmp_path):
+    filename = os.path.join(tmp_path, "test15.parquet")
+    data = [one, two, three]
+    ak.to_parquet(ak.Array(data), filename)
+    array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
+    assert set(array.caches[0].keys()) == set()
+    array.layout.array
+    assert set(array.caches[0].keys()) == set(["tmp:col:[0]"])
+    assert array.tolist() == data
+
+
+@pytest.mark.parametrize("one,two,three", [(1, 2, 3), ("one", "two", "three")])
+def test_16(one, two, three, tmp_path):
+    filename = os.path.join(tmp_path, "test15.parquet")
+    data = [[one, two], [], [three]]
+    ak.to_parquet(ak.Array(data), filename)
+    array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
+    assert set(array.caches[0].keys()) == set()
+    assert np.asarray(array.layout.array.offsets).tolist() == [0, 2, 2, 3]
+    assert set(array.caches[0].keys()) == set(["tmp:lst:[0]"])
+    assert array.tolist() == data
+
+
+@pytest.mark.parametrize("one,two,three", [(1, 2, 3), ("one", "two", "three")])
+def test_17(one, two, three, tmp_path):
+    filename = os.path.join(tmp_path, "test15.parquet")
+    data = [[{"x": one}, {"x": two}], [], [{"x": three}]]
+    ak.to_parquet(ak.Array(data), filename)
+    array = ak.from_parquet(filename, lazy=True, lazy_cache_key="tmp")
+    assert set(array.caches[0].keys()) == set()
+    assert np.asarray(array.layout.array.offsets).tolist() == [0, 2, 2, 3]
+    assert set(array.caches[0].keys()) == set(["tmp:off:.list.item.x[0]"])
+    array.layout.array.content.field("x").array
+    assert set(array.caches[0].keys()) == set(["tmp:off:.list.item.x[0]", "tmp:col:.list.item.x[0]"])
     assert array.tolist() == data

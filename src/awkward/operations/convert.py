@@ -3133,7 +3133,24 @@ class _ParquetState(object):
             elif isinstance(form, ak.forms.ListOffsetForm):
                 struct_only = [x for x in unpack[:0:-1] if x is not None]
                 sampleform = _ParquetState_first_column(form, struct_only)
-                sample = self.get(row_group, unpack, sampleform, struct_only)
+
+                assert (
+                    sampleform.form_key.startswith("col:")
+                    or sampleform.form_key.startswith("lst:")
+                )
+                samplekey = "{0}:off:{1}[{2}]".format(
+                    lazy_cache_key, sampleform.form_key[4:], row_group
+                )
+                sample = None
+                if lazy_cache is not None:
+                    try:
+                        sample = lazy_cache.mutablemapping[samplekey]
+                    except KeyError:
+                        pass
+                if sample is None:
+                    sample = self.get(row_group, unpack, sampleform, struct_only)
+                if lazy_cache is not None:
+                    lazy_cache.mutablemapping[samplekey] = sample
 
                 offsets = [sample.offsets]
                 sublength = offsets[-1][-1]
