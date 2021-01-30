@@ -2938,33 +2938,6 @@ def to_parquet(
         writer.close()
 
 
-# class _ParquetState(object):
-#     def __init__(self, file, use_threads, source, options):
-#         self.file = file
-#         self.use_threads = use_threads
-#         self.source = source
-#         self.options = options
-
-#     def __call__(self, row_group, column):
-#         as_arrow = self.file.read_row_group(row_group, [column], self.use_threads)
-#         return _from_arrow(as_arrow, False, highlevel=False)[column]
-
-#     def __getstate__(self):
-#         return {
-#             "use_threads": self.use_threads,
-#             "source": self.source,
-#             "options": self.options,
-#         }
-
-#     def __setstate__(self, state):
-#         pyarrow = _import_pyarrow("ak.to_parquet")
-
-#         self.use_threads = state["use_threads"]
-#         self.source = state["source"]
-#         self.options = state["options"]
-#         self.file = pyarrow.parquet.ParquetFile(self.source, **self.options)
-
-
 _from_parquet_key_number = 0
 _from_parquet_key_lock = threading.Lock()
 
@@ -3328,8 +3301,8 @@ def from_parquet(
             length = file.metadata.row_group(row_group).num_rows
             offsets.append(offsets[-1] + length)
 
-            fields = []
-            names = []
+            contents = []
+            recordlookup = []
             for column in columns:
                 subform = form.contents[column].form
                 generator = ak.layout.ArrayGenerator(
@@ -3353,34 +3326,14 @@ def from_parquet(
                     cache_key = "{0}:{1}[{2}]".format(
                         lazy_cache_key, subform.form_key, row_group
                     )
-                fields.append(ak.layout.VirtualArray(generator, field_cache, cache_key))
-                names.append(column)
+                contents.append(ak.layout.VirtualArray(generator, field_cache, cache_key))
+                recordlookup.append(column)
 
             if all_columns == [""]:
-                partitions.append(fields[0])
+                partitions.append(contents[0])
             else:
-                recordarray = ak.layout.RecordArray(fields, names)
+                recordarray = ak.layout.RecordArray(contents, recordlookup, length)
                 partitions.append(recordarray)
-
-            # fields = []
-            # for column in columns:
-            #     generator = ak.layout.ArrayGenerator(
-            #         state,
-            #         (row_group, column),
-            #         # form=???      # FIXME: need Arrow schema -> Awkward Forms
-            #         length=length,
-            #     )
-            #     if all_columns == [""]:
-            #         cache_key = "{0}[{1}]".format(lazy_cache_key, row_group)
-            #     else:
-            #         cache_key = "{0}.{1}[{2}]".format(lazy_cache_key, column, row_group)
-            #     fields.append(ak.layout.VirtualArray(generator, lazy_cache, cache_key))
-
-            # if all_columns == [""]:
-            #     partitions.append(fields[0])
-            # else:
-            #     record = ak.layout.RecordArray(fields, columns, length)
-            #     partitions.append(record)
 
         if len(partitions) == 1:
             out = partitions[0]
