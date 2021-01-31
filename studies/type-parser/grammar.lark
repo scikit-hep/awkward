@@ -4,10 +4,17 @@ input: record
      | unknown
      | primitive
 
-record: "(" primitive ["," primitive]* ")"
+record: record_tuple
+      | record_tuple_param
+      | record_dict
+      | record_struct
 primitive: TYPE [options]
 unknown: "unknown" [options]
 
+record_tuple: "(" primitive ["," primitive]* ")"
+record_tuple_param: "tuple[[" primitive ["," primitive]* "]," def_option "]"
+record_dict: "{" string ":" primitive ["," string ":" primitive]* "}"
+record_struct: "struct[[" string ["," string]* "]," "[" primitive ["," primitive]* "]," def_option "]"
 options: "[" def_option "]"
 def_option: "parameters" "=" dict_obj
 TYPE: "int64"
