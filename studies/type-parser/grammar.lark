@@ -4,7 +4,7 @@ input: record
      | unknown
      | primitive
 
-record: "(" primitive ")"
+record: "(" primitive ["," primitive]* ")"
 primitive: TYPE [options]
 unknown: "unknown" [options]
 
@@ -14,15 +14,15 @@ TYPE: "int64"
     | "int32"
 ?json: dict_obj
     | list_obj
-    | STRING
+    | string
     | SIGNED_NUMBER      -> number
     | "true"             -> true
     | "false"            -> false
     | "null"             -> null
 list_obj  : "[" [json ("," json)*] "]"
 dict_obj   : "{" [pair ("," pair)*] "}"
-pair   : STRING ":" json
-STRING : /((?:"(?:[^"\n\r\\]|(?:\\u[0-9a-fA-F]{4})|(?:\\["bfnrt]))*")|(?:\\\'(?:[^\\\'\n\r\\]|(?:\\u[0-9a-fA-F]{4})|(?:\\[\'bfnrt]))*")*\\\')/
+pair   : string ":" json
+string : /((?:"(?:[^"\n\r\\]|(?:\\u[0-9a-fA-F]{4})|(?:\\["bfnrt]))*")|(?:\\\'(?:[^\\\'\n\r\\]|(?:\\u[0-9a-fA-F]{4})|(?:\\[\'bfnrt]))*")*\\\')/
 
 %import common.SIGNED_NUMBER
 %import common.WS

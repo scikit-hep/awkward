@@ -4,9 +4,16 @@ from generated_parser import Lark_StandAlone, Transformer
 
 
 class TreeToJson(Transformer):
+    def string(self, s):
+        (s,) = s
+        return s[1:-1]
+
     def number(self, n):
         (n,) = n
-        return float(n)
+        if "." in n:
+            return float(n)
+        else:
+            return int(n)
 
     list_obj = list
     pair = tuple
@@ -42,10 +49,11 @@ def toast(ptnode):
         else:
             raise Exception("Unhandled UnknownType node")
     elif ptnode.data == "record":
-        if len(ptnode.children) == 1:
-            return ak.types.RecordType((toast(ptnode.children[0]),))
-        else:
-            raise Exception("Unhandled RecordType node")
+        assert len(ptnode.children) > 0
+        content_list = []
+        for node in ptnode.children:
+            content_list.append(toast(node))
+        return ak.types.RecordType(tuple(content_list))
     elif ptnode.data == "def_option":
         assert len(ptnode.children) == 1
         return ptnode.children[0]
@@ -56,34 +64,60 @@ def toast(ptnode):
         raise Exception("Unhandled node")
 
 
-if __name__ == "__main__":
+def test_primitive_1():
     test = Lark_StandAlone(transformer=TreeToJson())
     text = "int64"
     parsedtype = toast(test.parse(text))
     assert isinstance(parsedtype, ak.types.PrimitiveType)
-    assert parsedtype.dtype == "int64"
+    assert (str(parsedtype)) == text
+
+
+def test_primitive_2():
+    test = Lark_StandAlone(transformer=TreeToJson())
     text = 'int64[parameters={"wonky": ["parameter", 3.14]}]'
     # print(test.parse(text).pretty())
     parsedtype = toast(test.parse(text))
     # print(parsedtype)
     # print(type(parsedtype))
     assert isinstance(parsedtype, ak.types.PrimitiveType)
-    assert parsedtype.dtype == "int64"
-    assert parsedtype.parameters == {'"wonky"': ['"parameter"', 3.14]}
+    assert (str(parsedtype)) == text
+
+
+def test_unknown_1():
+    test = Lark_StandAlone(transformer=TreeToJson())
     text = "unknown"
     parsedtype = toast(test.parse(text))
     assert isinstance(parsedtype, ak.types.UnknownType)
+    assert (str(parsedtype)) == text
+
+
+def test_unknown_2():
+    test = Lark_StandAlone(transformer=TreeToJson())
     text = 'unknown[parameters={"wonky": ["parameter", 3.14]}]'
     parsedtype = toast(test.parse(text))
     assert isinstance(parsedtype, ak.types.UnknownType)
-    assert parsedtype.parameters == {'"wonky"': ['"parameter"', 3.14]}
+    assert str(parsedtype) == text
+
+
+def test_record_tuple_1():
+    test = Lark_StandAlone(transformer=TreeToJson())
     text = "(int64)"
     parsedtype = toast(test.parse(text))
     assert isinstance(parsedtype, ak.types.RecordType)
-    assert parsedtype.types == (ak.types.PrimitiveType("int64"),)
+    assert str(parsedtype) == text
+
+
+def test_record_tuple_2():
+    test = Lark_StandAlone(transformer=TreeToJson())
     text = '(int64[parameters={"wonky": ["bla", 1, 2]}])'
     parsedtype = toast(test.parse(text))
     assert isinstance(parsedtype, ak.types.RecordType)
-    assert parsedtype.types == (
-        ak.types.PrimitiveType("int64", parameters={"wonky": ["bla", 1, 2]}),
-    )
+    assert str(parsedtype) == text
+
+
+def test_record_tuple_3():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = '(int64, int64[parameters={"wonky": ["bla", 1, 2]}])'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.RecordType)
+    assert str(parsedtype) == text
