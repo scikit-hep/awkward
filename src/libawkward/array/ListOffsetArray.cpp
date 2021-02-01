@@ -1966,9 +1966,9 @@ namespace awkward {
   ListOffsetArrayOf<T>::getitem_next(const SliceAt& at,
                                      const Slice& tail,
                                      const Index64& advanced) const {
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::runtime_error(
-        std::string("ListOffsetArray::getitem_next(SliceAt): advanced.length() != 0")
+        std::string("ListOffsetArray::getitem_next(SliceAt): !advanced.is_empty_advanced()")
         + FILENAME(__LINE__));
     }
     int64_t lenstarts = offsets_.length() - 1;
@@ -2033,7 +2033,7 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       return std::make_shared<ListOffsetArrayOf<T>>(
         identities_,
         parameters_,
@@ -2075,7 +2075,7 @@ namespace awkward {
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
     Index64 flathead = array.ravel();
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       Index64 nextcarry(lenstarts*flathead.length());
       Index64 nextadvanced(lenstarts*flathead.length());
       struct Error err = kernel::ListArray_getitem_next_array_64<T>(
@@ -2090,11 +2090,18 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
       ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
-      return getitem_next_array_wrap(
-               nextcontent.get()->getitem_next(nexthead,
+      if (advanced.is_empty_advanced()) {
+        return getitem_next_array_wrap(
+                 nextcontent.get()->getitem_next(nexthead,
+                                                 nexttail,
+                                                 nextadvanced),
+                 array.shape());
+      }
+      else {
+        return nextcontent.get()->getitem_next(nexthead,
                                                nexttail,
-                                               nextadvanced),
-               array.shape());
+                                               nextadvanced);
+      }
     }
     else {
       Index64 nextcarry(lenstarts);

@@ -1375,7 +1375,7 @@ namespace awkward {
                                                      1);
     SliceItemPtr nexthead = where.head();
     Slice nexttail = where.tail();
-    Index64 nextadvanced(0);
+    Index64 nextadvanced = Index64::empty_advanced();
     ContentPtr out = next.get()->getitem_next(nexthead,
                                               nexttail,
                                               nextadvanced);
@@ -1614,7 +1614,7 @@ namespace awkward {
   Content::getitem_next(const SliceMissing64& missing,
                         const Slice& tail,
                         const Index64& advanced) const {
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::invalid_argument(
         std::string("cannot mix missing values in slice with NumPy-style "
                     "advanced indexing") + FILENAME(__LINE__));

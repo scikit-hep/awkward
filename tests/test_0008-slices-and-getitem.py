@@ -198,9 +198,17 @@ def test_numpyarray_getitem_next():
 
     a = np.arange(7 * 5).reshape(7, 5)
     b = ak.layout.NumpyArray(a)
+    c1 = np.array([], np.int64)
+    c2 = np.array([], np.int64)
+    assert ak.to_list(b[c1, c2]) == ak.to_list(a[c1, c2])
+    assert ak.Array(b[c1, c2]).ndim == a[c1, c2].ndim
+
+    a = np.arange(7 * 5).reshape(7, 5)
+    b = ak.layout.NumpyArray(a)
     c1 = np.array([4, 1, 1, 3])
     c2 = np.array([2, 2, 0, 1])
     assert ak.to_list(b[c1, c2]) == ak.to_list(a[c1, c2])
+
     c1 = np.array([[4, 1], [1, 3], [0, 4]])
     c2 = np.array([[2, 2], [0, 1], [1, 3]])
     assert ak.to_list(b[c1, c2]) == ak.to_list(a[c1, c2])
