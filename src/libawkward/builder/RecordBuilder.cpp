@@ -55,7 +55,8 @@ namespace awkward {
       , length_(length)
       , begun_(begun)
       , nextindex_(nextindex)
-      , nexttotry_(nexttotry) { }
+      , nexttotry_(nexttotry)
+      , keys_size_((int64_t)keys.size()) { }
 
   const std::string
   RecordBuilder::name() const {
@@ -90,6 +91,7 @@ namespace awkward {
     begun_ = false;
     nextindex_ = -1;
     nexttotry_ = 0;
+    keys_size_ = 0;
   }
 
   const ContentPtr
@@ -414,10 +416,9 @@ namespace awkward {
     }
     else if (nextindex_ == -1  ||
              !contents_[(size_t)nextindex_].get()->active()) {
-      int64_t wrap_around = (int64_t)pointers_.size();
       int64_t i = nexttotry_;
       do {
-        if (i >= wrap_around) {
+        if (i >= keys_size_) {
           i = 0;
           if (i == nexttotry_) {
             break;
@@ -430,7 +431,7 @@ namespace awkward {
         }
         i++;
       } while (i != nexttotry_);
-      nextindex_ = wrap_around;
+      nextindex_ = keys_size_;
       nexttotry_ = 0;
       if (length_ == 0) {
         contents_.push_back(UnknownBuilder::fromempty(options_));
@@ -443,6 +444,7 @@ namespace awkward {
       }
       keys_.push_back(std::string(key));
       pointers_.push_back(key);
+      keys_size_ = (int64_t)keys_.size();
       return shared_from_this();
     }
     else {
@@ -460,10 +462,9 @@ namespace awkward {
     }
     else if (nextindex_ == -1  ||
              !contents_[(size_t)nextindex_].get()->active()) {
-      int64_t wrap_around = (int64_t)keys_.size();
       int64_t i = nexttotry_;
       do {
-        if (i >= wrap_around) {
+        if (i >= keys_size_) {
           i = 0;
           if (i == nexttotry_) {
             break;
@@ -476,7 +477,7 @@ namespace awkward {
         }
         i++;
       } while (i != nexttotry_);
-      nextindex_ = wrap_around;
+      nextindex_ = keys_size_;
       nexttotry_ = 0;
       if (length_ == 0) {
         contents_.push_back(UnknownBuilder::fromempty(options_));
@@ -489,6 +490,7 @@ namespace awkward {
       }
       keys_.push_back(std::string(key));
       pointers_.push_back(nullptr);
+      keys_size_ = (int64_t)keys_.size();
       return shared_from_this();
     }
     else {

@@ -138,6 +138,7 @@ namespace awkward {
     bool begun_;
     int64_t nextindex_;
     int64_t nexttotry_;
+    int64_t keys_size_;
 
     void
       maybeupdate(int64_t i, const BuilderPtr& tmp);
