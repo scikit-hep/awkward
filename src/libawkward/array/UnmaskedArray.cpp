@@ -68,6 +68,14 @@ namespace awkward {
                                           content_);
   }
 
+  const FormPtr
+  UnmaskedForm::with_form_key(const FormKey& form_key) const {
+    return std::make_shared<UnmaskedForm>(has_identities_,
+                                          parameters_,
+                                          form_key,
+                                          content_);
+  }
+
   const std::string
   UnmaskedForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);

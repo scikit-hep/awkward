@@ -98,6 +98,17 @@ namespace awkward {
                                            lsb_order_);
   }
 
+  const FormPtr
+  BitMaskedForm::with_form_key(const FormKey& form_key) const {
+    return std::make_shared<BitMaskedForm>(has_identities_,
+                                           parameters_,
+                                           form_key,
+                                           mask_,
+                                           content_,
+                                           valid_when_,
+                                           lsb_order_);
+  }
+
   const std::string
   BitMaskedForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);

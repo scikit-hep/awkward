@@ -45,6 +45,26 @@ PyArrayGenerator::generate() const {
   return unbox_content(layout);
 }
 
+void
+PyArrayGenerator::caches(std::vector<ak::ArrayCachePtr>& out) const {
+  for (auto arg : args_) {
+    try {
+      std::shared_ptr<PyArrayCache> ptr = arg.cast<std::shared_ptr<PyArrayCache>>();
+      bool found = false;
+      for (auto oldcache : out) {
+        if (oldcache.get() == ptr.get()) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        out.push_back(ptr);
+      }
+    }
+    catch (py::cast_error err) { }
+  }
+}
+
 const std::string
 PyArrayGenerator::tostring_part(const std::string& indent,
                                 const std::string& pre,
@@ -236,6 +256,15 @@ make_PyArrayGenerator(const py::handle& m, const std::string& name) {
           return py::cast(length);
         }
       })
+      .def_property_readonly("caches", [](PyArrayGenerator& self) -> py::object {
+        std::vector<ak::ArrayCachePtr> out;
+        self.caches(out);
+        py::list pyout;
+        for (auto item : out) {
+          pyout.append(item);
+        }
+        return pyout;
+      })
       .def("__call__", [](PyArrayGenerator& self) -> py::object {
         return box(self.generate_and_check());
       })
@@ -330,6 +359,15 @@ make_SliceGenerator(const py::handle& m, const std::string& name) {
         else {
           return py::cast(length);
         }
+      })
+      .def_property_readonly("caches", [](const ak::SliceGenerator& self) -> py::object {
+        std::vector<ak::ArrayCachePtr> out;
+        self.caches(out);
+        py::list pyout;
+        for (auto item : out) {
+          pyout.append(item);
+        }
+        return pyout;
       })
       .def_property_readonly("content", &ak::SliceGenerator::content)
       .def("__call__", [](ak::SliceGenerator& self) -> py::object {

@@ -92,6 +92,11 @@ namespace awkward {
     }
   }
 
+  void
+  SliceGenerator::caches(std::vector<ArrayCachePtr>& out) const {
+    content_.get()->caches(out);
+  }
+
   const std::string
   SliceGenerator::tostring_part(const std::string& indent,
                                 const std::string& pre,

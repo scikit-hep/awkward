@@ -5,6 +5,7 @@
 
 #include "awkward/Slice.h"
 #include "awkward/Content.h"
+#include "awkward/virtual/ArrayCache.h"
 
 namespace awkward {
   ////////// ArrayGenerator
@@ -57,6 +58,11 @@ namespace awkward {
     /// inferred from the result is saved in case it is useful later
     const ContentPtr
       generate_and_check();
+
+    /// @brief Accumulates all the unique #ArrayCache objects from nested
+    /// #VirtualArray nodes. (Uniqueness is determined by pointer value.)
+    virtual void
+      caches(std::vector<ArrayCachePtr>& out) const = 0;
 
     /// @brief Returns a string representation of this ArrayGenerator.
     virtual const std::string
@@ -113,6 +119,9 @@ namespace awkward {
 
     const ContentPtr
       generate() const override;
+
+    void
+      caches(std::vector<ArrayCachePtr>& out) const override;
 
     const std::string
       tostring_part(const std::string& indent,

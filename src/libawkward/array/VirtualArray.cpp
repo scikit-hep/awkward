@@ -82,6 +82,15 @@ namespace awkward {
                                          has_length_);
   }
 
+  const FormPtr
+  VirtualForm::with_form_key(const FormKey& form_key) const {
+    return std::make_shared<VirtualForm>(has_identities_,
+                                         parameters_,
+                                         form_key,
+                                         form_,
+                                         has_length_);
+  }
+
   const std::string
   VirtualForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);
@@ -442,9 +451,7 @@ namespace awkward {
 
   void
   VirtualArray::caches(std::vector<ArrayCachePtr>& out) const {
-    if (SliceGenerator* raw = dynamic_cast<SliceGenerator*>(generator_.get())) {
-      raw->content().get()->caches(out);
-    }
+    generator_.get()->caches(out);
 
     if (cache_.get() != nullptr) {
       bool found = false;

@@ -112,6 +112,16 @@ namespace awkward {
                                        contents_);
   }
 
+  const FormPtr
+  UnionForm::with_form_key(const FormKey& form_key) const {
+    return std::make_shared<UnionForm>(has_identities_,
+                                       parameters_,
+                                       form_key,
+                                       tags_,
+                                       index_,
+                                       contents_);
+  }
+
   const std::string
   UnionForm::purelist_parameter(const std::string& key) const {
     std::string out = parameter(key);

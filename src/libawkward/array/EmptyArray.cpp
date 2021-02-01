@@ -51,6 +51,13 @@ namespace awkward {
                                        form_key_);
   }
 
+  const FormPtr
+  EmptyForm::with_form_key(const FormKey& form_key) const {
+    return std::make_shared<EmptyForm>(has_identities_,
+                                       parameters_,
+                                       form_key);
+  }
+
   const std::string
   EmptyForm::purelist_parameter(const std::string& key) const {
     return parameter(key);
