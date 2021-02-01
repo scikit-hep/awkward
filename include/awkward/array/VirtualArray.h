@@ -435,6 +435,11 @@ namespace awkward {
     void
       set_cache_depths_from(const VirtualArray* original);
 
+    /// @brief Set the copy of depth parameters to avoid materializing an array
+    /// that can't have a Form but can know its depth (lazy slices, mostly).
+    void
+      set_cache_depths_from(const FormPtr& form);
+
     void
       add_to_cache_depths(int64_t delta);
 
