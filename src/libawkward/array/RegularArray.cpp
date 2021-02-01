@@ -492,11 +492,13 @@ namespace awkward {
                               const std::string& pre,
                               const std::string& post) const {
     std::stringstream out;
-    out << indent << pre << "<" << classname() << " size=\"" << size_
-        << "\">\n";
-    if (size_ == 0) {
-      out << indent << pre << "<" << classname() << " length=\"" << length_
+    if (size_ != 0) {
+      out << indent << pre << "<" << classname() << " size=\"" << size_
           << "\">\n";
+    }
+    else {
+      out << indent << pre << "<" << classname() << " size=\"" << size_
+          << "\" length=\"" << length_ << "\">\n";
     }
     if (identities_.get() != nullptr) {
       out << identities_.get()->tostring_part(
@@ -1297,9 +1299,9 @@ namespace awkward {
   RegularArray::getitem_next(const SliceAt& at,
                              const Slice& tail,
                              const Index64& advanced) const {
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::runtime_error(
-        std::string("RegularArray::getitem_next(SliceAt): advanced.length() != 0")
+        std::string("RegularArray::getitem_next(SliceAt): !advanced.is_empty_advanced()")
         + FILENAME(__LINE__));
     }
     int64_t len = length();
@@ -1371,7 +1373,7 @@ namespace awkward {
 
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       return std::make_shared<RegularArray>(
         identities_,
         parameters_,
@@ -1417,7 +1419,7 @@ namespace awkward {
       size_);
     util::handle_error(err, classname(), identities_.get());
 
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       Index64 nextcarry(len*flathead.length());
       Index64 nextadvanced(len*flathead.length());
 
@@ -1433,11 +1435,18 @@ namespace awkward {
 
       ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
-      return getitem_next_array_wrap(
-               nextcontent.get()->getitem_next(nexthead,
+      if (advanced.is_empty_advanced()) {
+        return getitem_next_array_wrap(
+                 nextcontent.get()->getitem_next(nexthead,
+                                                 nexttail,
+                                                 nextadvanced),
+                 array.shape());
+      }
+      else {
+        return nextcontent.get()->getitem_next(nexthead,
                                                nexttail,
-                                               nextadvanced),
-               array.shape());
+                                               nextadvanced);
+      }
     }
     else if (size_ == 0) {
       Index64 nextcarry(0);
@@ -1469,7 +1478,7 @@ namespace awkward {
   RegularArray::getitem_next(const SliceJagged64& jagged,
                              const Slice& tail,
                              const Index64& advanced) const {
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::invalid_argument(
         std::string("cannot mix jagged slice with NumPy-style advanced indexing")
         + FILENAME(__LINE__));

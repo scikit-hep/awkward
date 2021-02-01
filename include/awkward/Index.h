@@ -99,6 +99,14 @@ namespace awkward {
     /// @brief Allocates a new integer array buffer with a given #length.
     IndexOf<T>(int64_t length, kernel::lib ptr_lib = kernel::lib::cpu);
 
+    /// @brief Create a zero-length index representing an empty 'advanced' index.
+    static IndexOf<T>
+      empty_advanced();
+
+    /// @brief Returns true if this is an empty 'advanced' index.
+    bool
+      is_empty_advanced() const;
+
     /// @brief Reference-counted pointer to the integer array buffer.
     const std::shared_ptr<T>
       ptr() const;
@@ -233,6 +241,7 @@ namespace awkward {
     const int64_t offset_;
     /// @brief See #length.
     const int64_t length_;
+    bool is_empty_advanced_;
   };
 
 #ifndef AWKWARD_INDEX_NO_EXTERN_TEMPLATE

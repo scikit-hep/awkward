@@ -68,7 +68,8 @@ namespace awkward {
       : ptr_(ptr)
       , ptr_lib_(ptr_lib)
       , offset_(offset)
-      , length_(length) { }
+      , length_(length)
+      , is_empty_advanced_(false) { }
 
   template <typename T>
   const std::shared_ptr<T>
@@ -87,7 +88,8 @@ namespace awkward {
     : ptr_(kernel::malloc<T>(ptr_lib, length * (int64_t)sizeof(T)))
     , ptr_lib_(ptr_lib)
     , offset_(0)
-    , length_(length) { }
+    , length_(length)
+    , is_empty_advanced_(false) { }
 
   template <typename T>
   int64_t
@@ -161,7 +163,11 @@ namespace awkward {
       }
     }
     out << "]\" offset=\"" << offset_ << "\" length=\"" << length_
-        << "\" at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
+        << "\" ";
+    if (is_empty_advanced_) {
+      out << "is_empty_advanced=\"true\" ";
+    }
+    out << "at=\"0x" << std::hex << std::setw(12) << std::setfill('0')
         << reinterpret_cast<ssize_t>(ptr_.get());
     if (ptr_lib_ == kernel::lib::cpu) {
       out << "\"/>" << post;
@@ -369,12 +375,26 @@ namespace awkward {
     return IndexOf<T>(ptr, 0, length_, ptr_lib_);
   }
 
-  template<typename T>
+  template <typename T>
+  IndexOf<T>
+  IndexOf<T>::empty_advanced() {
+    IndexOf<T> out(0);
+    out.is_empty_advanced_ = true;
+    return out;
+  }
+
+  template <typename T>
+  bool
+  IndexOf<T>::is_empty_advanced() const {
+    return is_empty_advanced_;
+  }
+
+  template <typename T>
   kernel::lib IndexOf<T>::ptr_lib() const {
     return ptr_lib_;
   }
 
-  template<typename T>
+  template <typename T>
   const IndexOf<T>
   IndexOf<T>::copy_to(kernel::lib ptr_lib) const {
     if (ptr_lib == ptr_lib_) {

@@ -1553,9 +1553,9 @@ namespace awkward {
         identities_.get());
     }
 
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::runtime_error(
-        std::string("ListArray::getitem_next(SliceAt): advanced.length() != 0")
+        std::string("ListArray::getitem_next(SliceAt): !advanced.is_empty_advanced()")
         + FILENAME(__LINE__));
     }
     SliceItemPtr nexthead = tail.head();
@@ -1627,7 +1627,7 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       return std::make_shared<ListOffsetArrayOf<T>>(
         identities_,
         parameters_,
@@ -1677,7 +1677,7 @@ namespace awkward {
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
     Index64 flathead = array.ravel();
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       Index64 nextcarry(lenstarts*flathead.length());
       Index64 nextadvanced(lenstarts*flathead.length());
       struct Error err = kernel::ListArray_getitem_next_array_64<T>(
@@ -1692,11 +1692,18 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
       ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
-      return getitem_next_array_wrap(
-        nextcontent.get()->getitem_next(nexthead,
-                                        nexttail,
-                                        nextadvanced),
-        array.shape());
+      if (advanced.is_empty_advanced()) {
+        return getitem_next_array_wrap(
+          nextcontent.get()->getitem_next(nexthead,
+                                          nexttail,
+                                          nextadvanced),
+          array.shape());
+      }
+      else {
+        return nextcontent.get()->getitem_next(nexthead,
+                                               nexttail,
+                                               nextadvanced);
+      }
     }
     else {
       Index64 nextcarry(lenstarts);
@@ -1723,7 +1730,7 @@ namespace awkward {
   ListArrayOf<T>::getitem_next(const SliceJagged64& jagged,
                                const Slice& tail,
                                const Index64& advanced) const {
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::invalid_argument(
         std::string("cannot mix jagged slice with NumPy-style advanced indexing")
         + FILENAME(__LINE__));
@@ -1822,7 +1829,7 @@ namespace awkward {
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
     ContentPtr outcontent = nextcontent.get()->getitem_next(tail.head(),
                                                             tail.tail(),
-                                                            Index64(0));
+                                                            Index64::empty_advanced());
 
     return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                util::Parameters(),

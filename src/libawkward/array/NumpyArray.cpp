@@ -1308,7 +1308,7 @@ namespace awkward {
       Slice nexttail = where.tail();
       Index64 nextcarry(1);
       nextcarry.setitem_at_nowrap(0, 0);
-      Index64 nextadvanced(0);
+      Index64 nextadvanced = Index64::empty_advanced();
       NumpyArray out = next.getitem_next(nexthead,
                                          nexttail,
                                          nextcarry,
@@ -3735,7 +3735,7 @@ namespace awkward {
                     "ndim != 1") + FILENAME(__LINE__));
     }
 
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::invalid_argument(
         std::string("cannot mix jagged slice with NumPy-style advanced indexing")
         + FILENAME(__LINE__));
@@ -4383,7 +4383,7 @@ namespace awkward {
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
 
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       Index64 nextcarry(carry.length()*lenhead);
       struct Error err = kernel::NumpyArray_getitem_next_range_64(
         kernel::lib::cpu,   // DERIVE
@@ -4584,7 +4584,7 @@ namespace awkward {
       shape_[1]);
     util::handle_error(err1, classname(), identities_.get());
 
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()) {
       Index64 nextcarry(carry.length()*flathead.length());
       Index64 nextadvanced(carry.length()*flathead.length());
       struct Error err2 = kernel::NumpyArray_getitem_next_array_64(
