@@ -464,7 +464,7 @@ class PartitionedArray(object):
                 else:
                     return y[tail]
 
-            elif isinstance(head, Iterable) and all(
+            elif isinstance(head, Iterable) and len(head) > 0 and all(
                 (
                     isinstance(x, str)
                     or (ak._util.py27 and isinstance(x, ak._util.unicode))
@@ -516,7 +516,6 @@ class PartitionedArray(object):
                         and all(ti in int_types for ti in t.type.types)
                     )
                 ):
-
                     if isinstance(layout, PartitionedArray):
                         layout = layout.toContent()
                     return self.toContent()[(layout,) + tail]
@@ -532,9 +531,11 @@ class PartitionedArray(object):
                     inparts = self.partitions
                     headparts = layout.partitions
                     outparts = []
+                    outoffsets = [0]
                     for i in range(len(inparts)):
                         outparts.append(inparts[i][(headparts[i],) + tail])
-                    return IrregularlyPartitionedArray(outparts, stops)
+                        outoffsets.append(outoffsets[-1] + len(outparts[-1]))
+                    return IrregularlyPartitionedArray(outparts, outoffsets[1:])
 
 
 class IrregularlyPartitionedArray(PartitionedArray):

@@ -3295,6 +3295,8 @@ def virtual(
 
     Functions with a `lazy` option, such as #ak.from_parquet and #ak.from_buffers,
     construct #ak.layout.RecordArray of #ak.layout.VirtualArray in this way.
+
+    See also #ak.materialized.
     """
     if isinstance(form, str) and form in (
         "float64",
@@ -3333,6 +3335,34 @@ def virtual(
 
     if highlevel:
         return ak._util.wrap(out, behavior=behavior)
+    else:
+        return out
+
+
+def materialized(array, highlevel=True):
+    """
+    Args:
+        array: The possibly virtual array to ensure is materialized.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+
+    Returns ``array`` with all virtual array nodes fully materialized.
+
+    See also #ak.virtual.
+    """
+    def getfunction(layout):
+        if isinstance(layout, ak.layout.VirtualArray):
+            result = materialized(layout.array, highlevel=False)
+            return lambda: result
+        else:
+            return None
+
+    layout = ak.operations.convert.to_layout(array)
+    out = ak._util.recursively_apply(
+        layout, getfunction, pass_depth=False, pass_user=False
+    )
+    if highlevel:
+        return ak._util.wrap(out, ak._util.behaviorof(array))
     else:
         return out
 
