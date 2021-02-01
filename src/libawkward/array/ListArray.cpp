@@ -1819,7 +1819,7 @@ namespace awkward {
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
     ContentPtr outcontent = nextcontent.get()->getitem_next(tail.head(),
                                                             tail.tail(),
-                                                            Index64(0));
+                                                            Index64::empty_advanced());
 
     return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                util::Parameters(),

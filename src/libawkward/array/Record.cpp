@@ -548,7 +548,7 @@ namespace awkward {
 
     SliceItemPtr nexthead = where.head();
     Slice nexttail = where.tail();
-    Index64 nextadvanced(0);
+    Index64 nextadvanced = Index64::empty_advanced();
     ContentPtr out = next.get()->getitem_next(nexthead,
                                               nexttail,
                                               nextadvanced);

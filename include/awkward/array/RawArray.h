@@ -738,7 +738,7 @@ namespace awkward {
       getitem(const Slice& where) const override {
       SliceItemPtr nexthead = where.head();
       Slice nexttail = where.tail();
-      Index64 nextadvanced(0);
+      Index64 nextadvanced = Index64::empty_advanced();
       return getitem_next(nexthead, nexttail, nextadvanced);
     }
 
