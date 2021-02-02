@@ -1279,7 +1279,9 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
             return pair;
           })
           .def("getitem_nothing", &T::getitem_nothing)
-          .def("getitem_at_nowrap", &T::getitem_at_nowrap)
+          .def("getitem_at_nowrap", [](const T& self, int64_t at) -> py::object {
+            return box(self.getitem_at_nowrap(at));
+          })
           .def("getitem_range_nowrap", &T::getitem_range_nowrap)
           .def_property_readonly(
             "_persistent_shared_ptr",

@@ -195,7 +195,9 @@ class PartitionedArray(object):
         raise NotImplementedError(ak._util.exception_suffix(__file__))
 
     def withparameter(self, param, value):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+        return self.replace_partitions(
+            [x.withparameter(param, value) for x in self.partitions]
+        )
 
     def parameter(self, *args, **kwargs):
         return first(self).parameter(*args, **kwargs)
@@ -217,7 +219,7 @@ class PartitionedArray(object):
 
     @property
     def form(self):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+        return first(self).form
 
     def __len__(self):
         return len(self._ext)
@@ -391,7 +393,7 @@ class PartitionedArray(object):
 
     @property
     def caches(self):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+        return list(ak._util.find_caches(self))
 
     def tojson(self, *args, **kwargs):
         return self._ext.tojson(*args, **kwargs)
@@ -445,11 +447,15 @@ class PartitionedArray(object):
     def getitem_nothing(self, *args, **kwargs):
         return first(self).getitem_nothing(*args, **kwargs)
 
-    def getitem_at_nowrap(self, at):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+    def getitem_at_nowrap(self, where):
+        assert not isinstance(where, (bool, np.bool_)) and isinstance(
+            where, (numbers.Integral, np.integer)
+        )
+        assert where >= 0
+        return self[where]
 
-    def getitem_range_nowrap(self, range):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+    def getitem_range_nowrap(self, start, stop):
+        return self[start:stop]
 
     @property
     def _persistent_shared_ptr(self):
@@ -468,7 +474,7 @@ class PartitionedArray(object):
         return None
 
     def fillna(self, what):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+        return self.replace_partitions([x.fillna(what) for x in self.partitions])
 
     def num(self, axis):
         if first(self).axis_wrap_if_negative(axis) == 0:
@@ -480,7 +486,7 @@ class PartitionedArray(object):
         return apply(lambda x: x.flatten(*args, **kwargs), self)
 
     def offsets_and_flatten(self, axis):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+        return self.toContent().offsets_and_flatten(axis)
 
     def rpad(self, length, axis):
         if first(self).axis_wrap_if_negative(axis) == 0:
@@ -499,13 +505,20 @@ class PartitionedArray(object):
             )
 
     def mergeable(self, other):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+        if isinstance(other, PartitionedArray):
+            other = other.toContent()
+        return self.toContent().mergeable(other)
 
     def merge(self, other):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+        if isinstance(other, PartitionedArray):
+            other = other.toContent()
+        return self.toContent().merge(other)
 
-    def mergemany(self, other):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+    def mergemany(self, others):
+        others = [
+            x.toContent() if isinstance(x, PartitionedArray) else x for x in others
+        ]
+        return self.toContent().mergemany(others)
 
     def axis_wrap_if_negative(self, axis):
         out = None
@@ -593,23 +606,35 @@ class PartitionedArray(object):
                 ]
             )
 
-    def sort(self, axis):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+    def sort(self, axis, ascending, stable):
+        if first(self).axis_wrap_if_negative(axis) == 0:
+            return self.toContent().sort(axis, ascending, stable)
+        else:
+            return self.replace_partitions(
+                [x.sort(axis, ascending, stable) for x in self.partitions]
+            )
 
-    def argsort(self, axis):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+    def argsort(self, axis, ascending, stable):
+        if first(self).axis_wrap_if_negative(axis) == 0:
+            return self.toContent().argsort(axis, ascending, stable)
+        else:
+            return self.replace_partitions(
+                [x.argsort(axis, ascending, stable) for x in self.partitions]
+            )
 
-    def numbers_to_type(self, dtype):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+    def numbers_to_type(self, dtype_string):
+        return self.replace_partitions(
+            [x.numbers_to_type(dtype_string) for x in self.partitions]
+        )
 
-    def is_unique(self, dtype):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+    def is_unique(self):
+        return all([x.is_unique() for x in self.partitions])
 
     def copy_to(self, ptr_lib):
         return self.from_ext(self._ext.copy_to(ptr_lib))
 
-    def carry(self, dtype):
-        raise NotImplementedError(ak._util.exception_suffix(__file__))
+    def carry(self, carry, allow_lazy):
+        return self.toContent().carry(carry, allow_lazy)
 
 
 class IrregularlyPartitionedArray(PartitionedArray):
