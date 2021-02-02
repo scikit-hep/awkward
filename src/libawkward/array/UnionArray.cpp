@@ -2231,7 +2231,9 @@ namespace awkward {
   UnionArrayOf<T, I>::getitem_next(const SliceVarNewAxis& varnewaxis,
                                    const Slice& tail,
                                    const Index64& advanced) const {
-    throw std::runtime_error("FIXME UnionArray::getitem_next(varnewaxis)");
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: UnionArrayOf<T, I>::getitem_next")
+      + FILENAME(__LINE__));
   }
 
   template <typename T, typename I>

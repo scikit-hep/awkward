@@ -1073,12 +1073,13 @@ namespace awkward {
   UnmaskedArray::getitem_next(const SliceVarNewAxis& varnewaxis,
                               const Slice& tail,
                               const Index64& advanced) const {
-    throw std::runtime_error("FIXME UnmaskedArray::getitem_next(varnewaxis)");
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
   }
 
   const SliceJagged64
   UnmaskedArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
-    throw std::runtime_error("FIXME UnmaskedArray::varaxis_to_jagged");
+    return content_.get()->varaxis_to_jagged(varnewaxis);
   }
 
   const ContentPtr

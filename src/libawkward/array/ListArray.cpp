@@ -1982,13 +1982,33 @@ namespace awkward {
   ListArrayOf<T>::getitem_next(const SliceVarNewAxis& varnewaxis,
                                const Slice& tail,
                                const Index64& advanced) const {
-    throw std::runtime_error("FIXME ListArray::getitem_next(varnewaxis)");
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
   }
 
   template <typename T>
   const SliceJagged64
   ListArrayOf<T>::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
-    throw std::runtime_error("FIXME varaxis_to_jagged");
+    Index64 offsets = compact_offsets64(true);
+    Index64 nextcarry(offsets.getitem_at_nowrap(offsets.length() - 1));
+
+
+    // FIXME: to kernel
+    int64_t* tocarry = nextcarry.data();
+    const int64_t* fromoffsets = offsets.data();
+    int64_t len = offsets.length() - 1;
+    for (int64_t i = 0;  i < len;  i++) {
+      int64_t start = fromoffsets[i];
+      int64_t stop = fromoffsets[i + 1];
+      for (int64_t j = start;  j < stop;  j++) {
+        tocarry[j] = i;
+      }
+    }
+
+
+    SliceItemPtr nextcontent = varnewaxis.content().get()->carry(nextcarry);
+
+    return SliceJagged64(offsets, nextcontent);
   }
 
   template <typename T>

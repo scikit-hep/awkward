@@ -1223,7 +1223,8 @@ namespace awkward {
       return false;
     }
     else if (dynamic_cast<SliceMissing64*>(head.get())  ||
-             dynamic_cast<SliceJagged64*>(head.get())) {
+             dynamic_cast<SliceJagged64*>(head.get())  ||
+             dynamic_cast<SliceVarNewAxis*>(head.get())) {
       return true;
     }
     else {

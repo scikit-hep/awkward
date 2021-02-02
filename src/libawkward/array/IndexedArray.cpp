@@ -2619,13 +2619,14 @@ namespace awkward {
   IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceVarNewAxis& varnewaxis,
                                             const Slice& tail,
                                             const Index64& advanced) const {
-    throw std::runtime_error("FIXME IndexedArray::getitem_next(varnewaxis)");
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
   }
 
   template <typename T, bool ISOPTION>
   const SliceJagged64
   IndexedArrayOf<T, ISOPTION>::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
-    throw std::runtime_error("FIXME IndexedArrayOf<T, ISOPTION>::varaxis_to_jagged");
+    return content_.get()->varaxis_to_jagged(varnewaxis);
   }
 
   template <typename T, bool ISOPTION>

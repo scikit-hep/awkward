@@ -753,12 +753,26 @@ namespace awkward {
   EmptyArray::getitem_next(const SliceVarNewAxis& varnewaxis,
                            const Slice& tail,
                            const Index64& advanced) const {
-    throw std::runtime_error("FIXME EmptyArray::getitem_next(varnewaxis)");
+    util::handle_error(
+      failure("too many dimensions in slice",
+              kSliceNone,
+              kSliceNone,
+              FILENAME_C(__LINE__)),
+      classname(),
+      identities_.get());
+    return ContentPtr(nullptr);  // make Windows compiler happy
   }
 
   const SliceJagged64
   EmptyArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
-    throw std::runtime_error("FIXME EmptyArray::varaxis_to_jagged");
+    util::handle_error(
+      failure("too many dimensions in slice",
+              kSliceNone,
+              kSliceNone,
+              FILENAME_C(__LINE__)),
+      classname(),
+      identities_.get());
+    return SliceJagged64(Index64(0), SliceItemPtr(nullptr));  // make Windows compiler happy
   }
 
   const ContentPtr

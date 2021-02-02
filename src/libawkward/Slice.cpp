@@ -557,10 +557,10 @@ namespace awkward {
     util::handle_error(err3, "SliceMissingOf<T>", nullptr);
 
     SliceItemPtr nextcontent = content_.get()->carry(nextcarry);
-
     IndexOf<T> outindex(nextindex.length());
 
 
+    // FIXME: to kernel
     T* toindex = outindex.data();
     const T* fromindex = nextindex.data();
     int64_t length = nextindex.length();
@@ -579,20 +579,7 @@ namespace awkward {
 
 
 
-    if (originalmask_.length() == 0) {
-      return std::make_shared<SliceMissingOf<T>>(outindex, originalmask_, nextcontent);
-    }
-    else {
-      // FIXME: is this mask inverted? How does it compare with the originalmask_?
-      Index8 bytemask(nextindex.length());
-      struct Error err4 = kernel::IndexedArray_mask8(
-        kernel::lib::cpu,   // DERIVE
-        bytemask.data(),
-        nextindex.data(),
-        nextindex.length());
-      util::handle_error(err4, "SliceMissingOf<T>", nullptr);
-      return std::make_shared<SliceMissingOf<T>>(outindex, bytemask, nextcontent);
-    }
+    return std::make_shared<SliceMissingOf<T>>(outindex, originalmask_, nextcontent);
   }
 
   template <typename T>
@@ -693,6 +680,7 @@ namespace awkward {
     int64_t nextcontentlen = 0;
 
 
+    // FIXME: to kernel
     {
       T* tooffsets = nextoffsets.data();
       const T* fromoffsets = offsets_.data();
@@ -709,6 +697,7 @@ namespace awkward {
 
     Index64 nextcarry(nextoffsets.getitem_at_nowrap(carry.length()));
 
+    // FIXME: to kernel
     {
       int64_t* tocarry = nextcarry.data();
       const T* fromoffsets = offsets_.data();
