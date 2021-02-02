@@ -559,25 +559,12 @@ namespace awkward {
     SliceItemPtr nextcontent = content_.get()->carry(nextcarry);
     IndexOf<T> outindex(nextindex.length());
 
-
-    // FIXME: to kernel
-    T* toindex = outindex.data();
-    const T* fromindex = nextindex.data();
-    int64_t length = nextindex.length();
-
-    int64_t j = 0;
-    for (int64_t i = 0;  i < length;  i++) {
-      T index = fromindex[i];
-      if (index < 0) {
-        toindex[i] = -1;
-      }
-      else {
-        toindex[i] = j;
-        j++;
-      }
-    }
-
-
+    struct Error err = kernel::carry_SliceMissing_outindex<T>(
+      kernel::lib::cpu,   // DERIVE
+      outindex.data(),
+      nextindex.data(),
+      nextindex.length());
+    util::handle_error(err, "SliceJaggedOf<T>", nullptr);
 
     return std::make_shared<SliceMissingOf<T>>(outindex, originalmask_, nextcontent);
   }
@@ -679,43 +666,22 @@ namespace awkward {
     IndexOf<T> nextoffsets(carry.length() + 1);
     int64_t nextcontentlen = 0;
 
-
-    // FIXME: to kernel
-    {
-      T* tooffsets = nextoffsets.data();
-      const T* fromoffsets = offsets_.data();
-      const int64_t* fromcarry = carry.data();
-      int64_t carrylen = carry.length();
-
-      tooffsets[0] = 0;
-      for (int64_t i = 0;  i < carrylen;  i++) {
-        int64_t c = fromcarry[i];
-        T count = fromoffsets[c + 1] - fromoffsets[c];
-        tooffsets[i + 1] = tooffsets[i] + count;
-      }
-    }
+    struct Error err1 = kernel::carry_SliceJagged_offsets<T>(
+      kernel::lib::cpu,   // DERIVE
+      nextoffsets.data(),
+      offsets_.data(),
+      carry.data(),
+      carry.length());
+    util::handle_error(err1, "SliceJaggedOf<T>", nullptr);
 
     Index64 nextcarry(nextoffsets.getitem_at_nowrap(carry.length()));
-
-    // FIXME: to kernel
-    {
-      int64_t* tocarry = nextcarry.data();
-      const T* fromoffsets = offsets_.data();
-      const int64_t* fromcarry = carry.data();
-      int64_t carrylen = carry.length();
-
-      int64_t k = 0;
-      for (int64_t i = 0;  i < carrylen;  i++) {
-        int64_t c = fromcarry[i];
-        T start = fromoffsets[c];
-        T stop = fromoffsets[c + 1];
-        for (int64_t j = start;  j < stop;  j++) {
-          tocarry[k] = j;
-          k++;
-        }
-      }
-    }
-
+    struct Error err2 = kernel::carry_SliceJagged_nextcarry<T>(
+      kernel::lib::cpu,   // DERIVE
+      nextcarry.data(),
+      offsets_.data(),
+      carry.data(),
+      carry.length());
+    util::handle_error(err2, "SliceJaggedOf<T>", nullptr);
 
     SliceItemPtr nextcontent = content_.get()->carry(nextcarry);
     return std::make_shared<SliceJaggedOf<T>>(nextoffsets, nextcontent);

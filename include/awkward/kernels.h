@@ -3631,6 +3631,26 @@ extern "C" {
     int64_t length);
 
   EXPORT_SYMBOL ERROR
+  awkward_carry_SliceJagged64_offsets(
+    int64_t* tooffsets,
+    const int64_t* fromoffsets,
+    const int64_t* fromcarry,
+    int64_t carrylen);
+
+  EXPORT_SYMBOL ERROR
+  awkward_carry_SliceJagged64_nextcarry(
+    int64_t* tocarry,
+    const int64_t* fromoffsets,
+    const int64_t* fromcarry,
+    int64_t carrylen);
+
+  EXPORT_SYMBOL ERROR
+  awkward_carry_SliceMissing64_outindex(
+    int64_t* toindex,
+    const int64_t* fromindex,
+    int64_t length);
+
+  EXPORT_SYMBOL ERROR
   awkward_combinations_64(
     int64_t* toindex,
     int64_t n,
