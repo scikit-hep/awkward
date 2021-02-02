@@ -12363,6 +12363,29 @@ namespace awkward {
       }
     }
 
+    ERROR SliceVarNewAxis_to_SliceJagged64(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const int64_t* fromoffsets,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_SliceVarNewAxis_to_SliceJagged64(
+          tocarry,
+          fromoffsets,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for SliceVarNewAxis_to_SliceJagged64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for SliceVarNewAxis_to_SliceJagged64")
+          + FILENAME(__LINE__));
+      }
+    }
+
     template<>
     ERROR ListArray_min_range<int32_t>(
       kernel::lib ptr_lib,

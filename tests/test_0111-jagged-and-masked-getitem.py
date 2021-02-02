@@ -134,7 +134,7 @@ def test_new_slices():
 
     assert (
         ak._ext._slice_tostring(indexedarray)
-        == "[missing([0, 1, -1, ..., 3, -1, 4], array([5, 2, 3, 9, 1]))]"
+        == "[missing([0, 1, -1, 2, 3, -1, 4], array([5, 2, 3, 9, 1]))]"
     )
 
     offsets = ak.layout.Index64(np.array([0, 4, 4, 7], dtype=np.int64))
@@ -143,7 +143,7 @@ def test_new_slices():
 
     assert (
         ak._ext._slice_tostring(listoffsetarray)
-        == "[jagged([0, 4, 4, 7], array([1, 0, 9, ..., 2, 2, 5]))]"
+        == "[jagged([0, 4, 4, 7], array([1, 0, 9, 3, 2, 2, 5]))]"
     )
 
     offsets = ak.layout.Index64(np.array([1, 4, 4, 6], dtype=np.int64))

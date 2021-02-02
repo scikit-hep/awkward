@@ -3024,6 +3024,12 @@ extern "C" {
     int64_t length);
 
   EXPORT_SYMBOL ERROR
+  awkward_SliceVarNewAxis_to_SliceJagged64(
+    int64_t* tocarry,
+    const int64_t* fromoffsets,
+    int64_t length);
+
+  EXPORT_SYMBOL ERROR
   awkward_UnionArray_fillindex_to64_from32(
     int64_t* toindex,
     int64_t toindexoffset,

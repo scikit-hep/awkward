@@ -1251,6 +1251,12 @@ namespace awkward {
       int64_t size,
       int64_t length);
 
+    ERROR SliceVarNewAxis_to_SliceJagged64(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const int64_t* fromoffsets,
+      int64_t length);
+
     template <typename T>
     ERROR ListArray_min_range(
       kernel::lib ptr_lib,
