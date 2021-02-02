@@ -2224,17 +2224,24 @@ namespace awkward {
   template <typename T>
   const SliceJagged64
   ListOffsetArrayOf<T>::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
-    std::cout << tostring() << std::endl;
-    std::cout << varnewaxis.tostring() << std::endl;
-
-    // SliceJagged64 jagged(offsets_.to64(), varnewaxis.content());
+    Index64 offsets = compact_offsets64(true);
+    Index64 nextcarry(offsets.getitem_at_nowrap(offsets.length() - 1));
 
 
+    int64_t* tocarry = nextcarry.data();
+    const int64_t* fromoffsets = offsets.data();
+    int64_t len = offsets.length() - 1;
+    for (int64_t i = 0;  i < len;  i++) {
+      int64_t start = fromoffsets[i];
+      int64_t stop = fromoffsets[i + 1];
+      for (int64_t j = start;  j < stop;  j++) {
+        tocarry[j] = i;
+      }
+    }
 
 
-    // std::cout << jagged.tostring() << std::endl;
-
-    throw std::runtime_error("FIXME ListOffsetArrayOf<T>::varaxis_to_jagged");
+    SliceItemPtr nextcontent = varnewaxis.content().get()->carry(nextcarry);
+    return SliceJagged64(offsets, nextcontent);
   }
 
   template <typename T>

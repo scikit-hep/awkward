@@ -17,6 +17,11 @@ namespace awkward {
 
   SliceItem::~SliceItem() = default;
 
+  const SliceItemPtr
+  SliceItem::carry(const Index64& carry) const {
+    return shallow_copy();
+  }
+
   ////////// SliceAt
 
   SliceAt::SliceAt(int64_t at)
@@ -250,6 +255,23 @@ namespace awkward {
                                              shape_,
                                              strides_,
                                              frombool_);
+  }
+
+  template <typename T>
+  const SliceItemPtr
+  SliceArrayOf<T>::carry(const Index64& carry) const {
+    IndexOf<T> nextindex(carry.length());
+    struct Error err = kernel::IndexedArray_getitem_carry_64<T>(
+      kernel::lib::cpu,   // DERIVE
+      nextindex.data(),
+      index_.data(),
+      carry.data(),
+      index_.length(),
+      carry.length());
+    util::handle_error(err, "SliceArrayOf<T>", nullptr);
+    std::vector<int64_t> nextshape({ carry.length() });
+    nextshape.insert(nextshape.end(), shape_.begin() + 1, shape_.end());
+    return std::make_shared<SliceArrayOf<T>>(nextindex, nextshape, strides_, frombool_);
   }
 
   template <typename T>
@@ -505,6 +527,12 @@ namespace awkward {
   }
 
   template <typename T>
+  const SliceItemPtr
+  SliceMissingOf<T>::carry(const Index64& carry) const {
+    throw std::runtime_error("FIXME SliceMissingOf<T>::carry");
+  }
+
+  template <typename T>
   const std::string
   SliceMissingOf<T>::tostring() const {
     return std::string("missing(") + tostring_part() + std::string(", ")
@@ -596,6 +624,52 @@ namespace awkward {
   }
 
   template <typename T>
+  const SliceItemPtr
+  SliceJaggedOf<T>::carry(const Index64& carry) const {
+    IndexOf<T> nextoffsets(carry.length() + 1);
+    int64_t nextcontentlen = 0;
+
+
+    {
+      T* tooffsets = nextoffsets.data();
+      const T* fromoffsets = offsets_.data();
+      const int64_t* fromcarry = carry.data();
+      int64_t carrylen = carry.length();
+
+      tooffsets[0] = 0;
+      for (int64_t i = 0;  i < carrylen;  i++) {
+        int64_t c = fromcarry[i];
+        T count = fromoffsets[c + 1] - fromoffsets[c];
+        tooffsets[i + 1] = tooffsets[i] + count;
+      }
+    }
+
+    Index64 nextcarry(nextoffsets.getitem_at_nowrap(carry.length()));
+
+    {
+      int64_t* tocarry = nextcarry.data();
+      const T* fromoffsets = offsets_.data();
+      const int64_t* fromcarry = carry.data();
+      int64_t carrylen = carry.length();
+
+      int64_t k = 0;
+      for (int64_t i = 0;  i < carrylen;  i++) {
+        int64_t c = fromcarry[i];
+        T start = fromoffsets[c];
+        T stop = fromoffsets[c + 1];
+        for (int64_t j = start;  j < stop;  j++) {
+          tocarry[k] = j;
+          k++;
+        }
+      }
+    }
+
+
+    SliceItemPtr nextcontent = content_.get()->carry(nextcarry);
+    return std::make_shared<SliceJaggedOf<T>>(nextoffsets, nextcontent);
+  }
+
+  template <typename T>
   const std::string
   SliceJaggedOf<T>::tostring() const {
     return std::string("jagged(") + tostring_part() + std::string(", ")
@@ -667,6 +741,11 @@ namespace awkward {
   const SliceItemPtr
   SliceVarNewAxis::shallow_copy() const {
     return std::make_shared<SliceVarNewAxis>(content_);
+  }
+
+  const SliceItemPtr
+  SliceVarNewAxis::carry(const Index64& carry) const {
+    throw std::runtime_error("FIXME SliceVarNewAxis::carry");
   }
 
   const std::string
