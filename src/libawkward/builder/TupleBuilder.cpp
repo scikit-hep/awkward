@@ -298,6 +298,14 @@ namespace awkward {
         std::string("called 'index' without 'begin_tuple' at the same level before it")
         + FILENAME(__LINE__));
     }
+    else if (index >= (int64_t)contents_.size()) {
+      throw std::invalid_argument(
+        std::string("'index' ")
+        + std::to_string(index)
+        + (" is out of bounds for a tuple with number of fields ")
+        + std::to_string(contents_.size())
+        + FILENAME(__LINE__));
+    }
     else if (nextindex_ == -1  ||
              !contents_[(size_t)nextindex_].get()->active()) {
       nextindex_ = index;
