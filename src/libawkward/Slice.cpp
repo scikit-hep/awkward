@@ -654,6 +654,41 @@ namespace awkward {
 
   template class EXPORT_TEMPLATE_INST SliceJaggedOf<int64_t>;
 
+  ////////// SliceVarNewAxis
+
+  SliceVarNewAxis::SliceVarNewAxis(const SliceItemPtr& content)
+      : content_(content) { }
+
+  const SliceItemPtr
+  SliceVarNewAxis::content() const {
+    return content_;
+  }
+
+  const SliceItemPtr
+  SliceVarNewAxis::shallow_copy() const {
+    return std::make_shared<SliceVarNewAxis>(content_);
+  }
+
+  const std::string
+  SliceVarNewAxis::tostring() const {
+    return std::string("newaxis(") + content_.get()->tostring() + std::string(")");
+  }
+
+  bool
+  SliceVarNewAxis::preserves_type(const Index64& advanced) const {
+    return true;
+  }
+
+  bool
+  SliceVarNewAxis::referentially_equal(const SliceItemPtr& other) const {
+    if (SliceVarNewAxis* raw = dynamic_cast<SliceVarNewAxis*>(other.get())) {
+      return content_.get()->referentially_equal(raw->content());
+    }
+    else {
+      return false;
+    }
+  }
+
   ////////// Slice
 
   int64_t Slice::none() {

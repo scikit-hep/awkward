@@ -1168,6 +1168,29 @@ namespace awkward {
   }
 
   const ContentPtr
+  VirtualArray::getitem_next_jagged(const Index64& slicestarts,
+                                    const Index64& slicestops,
+                                    const SliceVarNewAxis& slicecontent,
+                                    const Slice& tail) const {
+    return array().get()->getitem_next_jagged(slicestarts,
+                                              slicestops,
+                                              slicecontent,
+                                              tail);
+  }
+
+  const ContentPtr
+  VirtualArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                             const Slice& tail,
+                             const Index64& advanced) const {
+    return array().get()->getitem_next(varnewaxis, tail, advanced);
+  }
+
+  const SliceJagged64
+  VirtualArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    return array().get()->varaxis_to_jagged(varnewaxis);
+  }
+
+  const ContentPtr
   VirtualArray::copy_to(kernel::lib ptr_lib) const {
     IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {

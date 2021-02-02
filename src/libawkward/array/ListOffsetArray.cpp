@@ -2198,6 +2198,47 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
+  ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts,
+                                            const Index64& slicestops,
+                                            const SliceVarNewAxis& slicecontent,
+                                            const Slice& tail) const {
+    ListArrayOf<T> listarray(identities_,
+                             parameters_,
+                             util::make_starts(offsets_),
+                             util::make_stops(offsets_),
+                             content_);
+    return listarray.getitem_next_jagged(slicestarts,
+                                         slicestops,
+                                         slicecontent,
+                                         tail);
+  }
+
+  template <typename T>
+  const ContentPtr
+  ListOffsetArrayOf<T>::getitem_next(const SliceVarNewAxis& varnewaxis,
+                                     const Slice& tail,
+                                     const Index64& advanced) const {
+    throw std::runtime_error("FIXME ListOffsetArray::getitem_next(varnewaxis)");
+  }
+
+  template <typename T>
+  const SliceJagged64
+  ListOffsetArrayOf<T>::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    std::cout << tostring() << std::endl;
+    std::cout << varnewaxis.tostring() << std::endl;
+
+    // SliceJagged64 jagged(offsets_.to64(), varnewaxis.content());
+
+
+
+
+    // std::cout << jagged.tostring() << std::endl;
+
+    throw std::runtime_error("FIXME ListOffsetArrayOf<T>::varaxis_to_jagged");
+  }
+
+  template <typename T>
+  const ContentPtr
   ListOffsetArrayOf<T>::copy_to(kernel::lib ptr_lib) const {
     IndexOf<T> offsets = offsets_.copy_to(ptr_lib);
     ContentPtr content = content_.get()->copy_to(ptr_lib);

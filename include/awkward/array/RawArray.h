@@ -1293,6 +1293,32 @@ namespace awkward {
     }
 
     const ContentPtr
+      getitem_next_jagged(const Index64& slicestarts,
+                          const Index64& slicestops,
+                          const SliceVarNewAxis& slicecontent,
+                          const Slice& tail) const override {
+      throw std::runtime_error(
+        std::string("undefined operation: RawArray::getitem_next_jagged(varnewaxis)")
+        + FILENAME(__LINE__));
+    }
+
+    const ContentPtr
+      getitem_next(const SliceVarNewAxis& varnewaxis,
+                   const Slice& tail,
+                   const Index64& advanced) const override {
+      throw std::runtime_error(
+        std::string("undefined operation: RawArray::getitem_next(varnewaxis)")
+        + FILENAME(__LINE__));
+    }
+
+    const SliceJagged64
+      varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const override {
+      throw std::runtime_error(
+        std::string("undefined operation: RawArray::varaxis_to_jagged(varnewaxis)")
+        + FILENAME(__LINE__));
+    }
+
+    const ContentPtr
       copy_to(kernel::lib ptr_lib) const override {
         if (ptr_lib == ptr_lib_) {
           return shallow_copy();

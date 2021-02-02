@@ -1319,6 +1319,32 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const = 0;
 
+    /// @brief Internal function that propagates a jagged array (array with
+    /// irregular-length dimensions) slice through one axis.
+    ///
+    /// See generic #getitem_next_jagged for details.
+    virtual const ContentPtr
+      getitem_next_jagged(const Index64& slicestarts,
+                          const Index64& slicestops,
+                          const SliceVarNewAxis& slicecontent,
+                          const Slice& tail) const = 0;
+
+    /// @brief Internal function that propagates a generic #getitem request
+    /// through one axis (including advanced indexing).
+    ///
+    /// See generic #getitem_next for details.
+    virtual const ContentPtr
+      getitem_next(const SliceVarNewAxis& varnewaxis,
+                   const Slice& tail,
+                   const Index64& advanced) const = 0;
+
+    /// @brief Internal function to convert a SliceVarNewAxis into the
+    /// right-sized SliceJagged64 for a given Content.
+    ///
+    /// See generic #getitem_next_jagged for details.
+    virtual const SliceJagged64
+      varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const = 0;
+
     /// @brief Internal function defining the negative axis handling for many
     /// operations.
     ///

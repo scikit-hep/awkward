@@ -740,6 +740,28 @@ namespace awkward {
   }
 
   const ContentPtr
+  EmptyArray::getitem_next_jagged(const Index64& slicestarts,
+                                  const Index64& slicestops,
+                                  const SliceVarNewAxis& slicecontent,
+                                  const Slice& tail) const {
+    throw std::runtime_error(
+      std::string("undefined operation: EmptyArray::getitem_next_jagged(varnewaxis)")
+      + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
+  EmptyArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                           const Slice& tail,
+                           const Index64& advanced) const {
+    throw std::runtime_error("FIXME EmptyArray::getitem_next(varnewaxis)");
+  }
+
+  const SliceJagged64
+  EmptyArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    throw std::runtime_error("FIXME EmptyArray::varaxis_to_jagged");
+  }
+
+  const ContentPtr
   EmptyArray::copy_to(kernel::lib ptr_lib) const {
     IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {

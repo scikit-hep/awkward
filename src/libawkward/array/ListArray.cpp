@@ -1967,6 +1967,32 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
+  ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts,
+                                      const Index64& slicestops,
+                                      const SliceVarNewAxis& slicecontent,
+                                      const Slice& tail) const {
+    throw std::runtime_error("FIXME ListArrayOf<T>::SliceVarNewAxis");
+
+    SliceJagged64 jagged = varaxis_to_jagged(slicecontent);
+    return getitem_next_jagged(slicestarts, slicestops, jagged, tail);
+  }
+
+  template <typename T>
+  const ContentPtr
+  ListArrayOf<T>::getitem_next(const SliceVarNewAxis& varnewaxis,
+                               const Slice& tail,
+                               const Index64& advanced) const {
+    throw std::runtime_error("FIXME ListArray::getitem_next(varnewaxis)");
+  }
+
+  template <typename T>
+  const SliceJagged64
+  ListArrayOf<T>::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    throw std::runtime_error("FIXME varaxis_to_jagged");
+  }
+
+  template <typename T>
+  const ContentPtr
   ListArrayOf<T>::copy_to(kernel::lib ptr_lib) const {
     IndexOf<T> starts = starts_.copy_to(ptr_lib);
     IndexOf<T> stops = stops_.copy_to(ptr_lib);

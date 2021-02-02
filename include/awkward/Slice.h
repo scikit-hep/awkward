@@ -716,6 +716,28 @@ namespace awkward {
     bool sealed_;
   };
 
+  class LIBAWKWARD_EXPORT_SYMBOL SliceVarNewAxis: public SliceItem {
+    public:
+      SliceVarNewAxis(const SliceItemPtr& content);
+
+      const SliceItemPtr
+        content() const;
+
+      const SliceItemPtr
+        shallow_copy() const override;
+
+      const std::string
+        tostring() const override;
+
+      bool
+        preserves_type(const Index64& advanced) const override;
+
+      virtual bool
+        referentially_equal(const SliceItemPtr& other) const override;
+
+  private:
+    const SliceItemPtr content_;
+  };
 }
 
 #endif // AWKWARD_SLICE_H_

@@ -935,10 +935,15 @@ namespace awkward {
 
   const SliceItemPtr
   RegularArray::asslice() const {
-    throw std::invalid_argument(
-      std::string("slice items can have all fixed-size dimensions (to follow NumPy's "
-                  "slice rules) or they can have all var-sized dimensions (for jagged "
-                  "indexing), but not both in the same slice item") + FILENAME(__LINE__));
+    if (size_ == 1) {
+      return std::make_shared<SliceVarNewAxis>(content_.get()->asslice());
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("slice items can have all fixed-size dimensions (to follow NumPy's "
+                    "slice rules) or they can have all var-sized dimensions (for jagged "
+                    "indexing), but not both in the same slice item") + FILENAME(__LINE__));
+    }
   }
 
   const ContentPtr
@@ -1551,6 +1556,31 @@ namespace awkward {
                                            slicestops,
                                            slicecontent,
                                            tail);
+  }
+
+  const ContentPtr
+  RegularArray::getitem_next_jagged(const Index64& slicestarts,
+                                    const Index64& slicestops,
+                                    const SliceVarNewAxis& slicecontent,
+                                    const Slice& tail) const {
+    ContentPtr self = toListOffsetArray64(true);
+    return self.get()->getitem_next_jagged(slicestarts,
+                                           slicestops,
+                                           slicecontent,
+                                           tail);
+  }
+
+  const ContentPtr
+  RegularArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                             const Slice& tail,
+                             const Index64& advanced) const {
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
+  }
+
+  const SliceJagged64
+  RegularArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    throw std::runtime_error("FIXME RegularArray::varaxis_to_jagged");
   }
 
   const ContentPtr

@@ -1064,6 +1064,29 @@ namespace awkward {
   }
 
   const ContentPtr
+  BitMaskedArray::getitem_next_jagged(const Index64& slicestarts,
+                                      const Index64& slicestops,
+                                      const SliceVarNewAxis& slicecontent,
+                                      const Slice& tail) const {
+    return toByteMaskedArray().get()->getitem_next_jagged(slicestarts,
+                                                          slicestops,
+                                                          slicecontent,
+                                                          tail);
+  }
+
+  const ContentPtr
+  BitMaskedArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                               const Slice& tail,
+                               const Index64& advanced) const {
+    throw std::runtime_error("FIXME BitMaskedArray::getitem_next(varnewaxis)");
+  }
+
+  const SliceJagged64
+  BitMaskedArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    throw std::runtime_error("FIXME BitMaskedArray::varaxis_to_jagged");
+  }
+
+  const ContentPtr
   BitMaskedArray::copy_to(kernel::lib ptr_lib) const {
     IndexU8 mask = mask_.copy_to(ptr_lib);
     ContentPtr content = content_.get()->copy_to(ptr_lib);
