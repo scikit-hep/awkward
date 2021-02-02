@@ -265,13 +265,16 @@ class PartitionedArray(object):
                 [x.rpad_and_clip(length, axis) for x in self.partitions]
             )
 
-    def reduce(self, name, axis, mask, keepdims):
+    def reduce(self, name, axis, mask, keepdims, initial=None):
         branch, depth = first(self).branch_depth
         negaxis = -axis
         if not branch and negaxis <= 0:
             negaxis += depth
         if not branch and negaxis == depth:
-            return getattr(self.toContent(), name)(axis, mask, keepdims)
+            if initial is None:
+                return getattr(self.toContent(), name)(axis, mask, keepdims)
+            else:
+                return getattr(self.toContent(), name)(axis, mask, keepdims, initial)
         else:
             return self.replace_partitions(
                 [getattr(x, name)(axis, mask, keepdims) for x in self.partitions]
@@ -295,11 +298,11 @@ class PartitionedArray(object):
     def all(self, axis, mask, keepdims):
         return self.reduce("all", axis, mask, keepdims)
 
-    def min(self, axis, mask, keepdims):
-        return self.reduce("min", axis, mask, keepdims)
+    def min(self, axis, mask, keepdims, initial):
+        return self.reduce("min", axis, mask, keepdims, initial)
 
-    def max(self, axis, mask, keepdims):
-        return self.reduce("max", axis, mask, keepdims)
+    def max(self, axis, mask, keepdims, initial):
+        return self.reduce("max", axis, mask, keepdims, initial)
 
     def argmin(self, axis, mask, keepdims):
         return self.reduce("argmin", axis, mask, keepdims)
