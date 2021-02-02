@@ -595,6 +595,10 @@ namespace awkward {
              dynamic_cast<SliceMissing64*>(head.get())) {
       return Content::getitem_next(*missing, tail, advanced);
     }
+    else if (SliceVarNewAxis* varnewaxis =
+             dynamic_cast<SliceVarNewAxis*>(head.get())) {
+      return UnmaskedArray::getitem_next(*varnewaxis, tail, advanced);
+    }
     else {
       throw std::runtime_error(
         std::string("unrecognized slice type") + FILENAME(__LINE__));
@@ -1052,6 +1056,30 @@ namespace awkward {
                                                       slicestops,
                                                       slicecontent,
                                                       tail);
+  }
+
+  const ContentPtr
+  UnmaskedArray::getitem_next_jagged(const Index64& slicestarts,
+                                     const Index64& slicestops,
+                                     const SliceVarNewAxis& slicecontent,
+                                     const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceVarNewAxis>(slicestarts,
+                                                        slicestops,
+                                                        slicecontent,
+                                                        tail);
+  }
+
+  const ContentPtr
+  UnmaskedArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                              const Slice& tail,
+                              const Index64& advanced) const {
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
+  }
+
+  const SliceJagged64
+  UnmaskedArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    return content_.get()->varaxis_to_jagged(varnewaxis);
   }
 
   const ContentPtr

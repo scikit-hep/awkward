@@ -464,12 +464,16 @@ class PartitionedArray(object):
                 else:
                     return y[tail]
 
-            elif isinstance(head, Iterable) and len(head) > 0 and all(
-                (
-                    isinstance(x, str)
-                    or (ak._util.py27 and isinstance(x, ak._util.unicode))
+            elif (
+                isinstance(head, Iterable)
+                and len(head) > 0
+                and all(
+                    (
+                        isinstance(x, str)
+                        or (ak._util.py27 and isinstance(x, ak._util.unicode))
+                    )
+                    for x in head
                 )
-                for x in head
             ):
                 y = IrregularlyPartitionedArray(
                     [x[list(head)] for x in self.partitions]

@@ -740,6 +740,42 @@ namespace awkward {
   }
 
   const ContentPtr
+  EmptyArray::getitem_next_jagged(const Index64& slicestarts,
+                                  const Index64& slicestops,
+                                  const SliceVarNewAxis& slicecontent,
+                                  const Slice& tail) const {
+    throw std::runtime_error(
+      std::string("undefined operation: EmptyArray::getitem_next_jagged(varnewaxis)")
+      + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
+  EmptyArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                           const Slice& tail,
+                           const Index64& advanced) const {
+    util::handle_error(
+      failure("too many dimensions in slice",
+              kSliceNone,
+              kSliceNone,
+              FILENAME_C(__LINE__)),
+      classname(),
+      identities_.get());
+    return ContentPtr(nullptr);  // make Windows compiler happy
+  }
+
+  const SliceJagged64
+  EmptyArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    util::handle_error(
+      failure("too many dimensions in slice",
+              kSliceNone,
+              kSliceNone,
+              FILENAME_C(__LINE__)),
+      classname(),
+      identities_.get());
+    return SliceJagged64(Index64(0), SliceItemPtr(nullptr));  // make Windows compiler happy
+  }
+
+  const ContentPtr
   EmptyArray::copy_to(kernel::lib ptr_lib) const {
     IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {

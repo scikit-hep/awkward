@@ -935,10 +935,15 @@ namespace awkward {
 
   const SliceItemPtr
   RegularArray::asslice() const {
-    throw std::invalid_argument(
-      std::string("slice items can have all fixed-size dimensions (to follow NumPy's "
-                  "slice rules) or they can have all var-sized dimensions (for jagged "
-                  "indexing), but not both in the same slice item") + FILENAME(__LINE__));
+    if (size_ == 1) {
+      return std::make_shared<SliceVarNewAxis>(content_.get()->asslice());
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("slice items can have all fixed-size dimensions (to follow NumPy's "
+                    "slice rules) or they can have all var-sized dimensions (for jagged "
+                    "indexing), but not both in the same slice item") + FILENAME(__LINE__));
+    }
   }
 
   const ContentPtr
@@ -1551,6 +1556,50 @@ namespace awkward {
                                            slicestops,
                                            slicecontent,
                                            tail);
+  }
+
+  const ContentPtr
+  RegularArray::getitem_next_jagged(const Index64& slicestarts,
+                                    const Index64& slicestops,
+                                    const SliceVarNewAxis& slicecontent,
+                                    const Slice& tail) const {
+    ContentPtr self = toListOffsetArray64(true);
+    return self.get()->getitem_next_jagged(slicestarts,
+                                           slicestops,
+                                           slicecontent,
+                                           tail);
+  }
+
+  const ContentPtr
+  RegularArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                             const Slice& tail,
+                             const Index64& advanced) const {
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
+  }
+
+  const SliceJagged64
+  RegularArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    Index64 offsets = compact_offsets64(true);
+    Index64 nextcarry(offsets.getitem_at_nowrap(offsets.length() - 1));
+
+
+    // FIXME: to kernel
+    int64_t* tocarry = nextcarry.data();
+    const int64_t* fromoffsets = offsets.data();
+    int64_t len = offsets.length() - 1;
+    for (int64_t i = 0;  i < len;  i++) {
+      int64_t start = fromoffsets[i];
+      int64_t stop = fromoffsets[i + 1];
+      for (int64_t j = start;  j < stop;  j++) {
+        tocarry[j] = i;
+      }
+    }
+
+
+    SliceItemPtr nextcontent = varnewaxis.content().get()->carry(nextcarry);
+
+    return SliceJagged64(offsets, nextcontent);
   }
 
   const ContentPtr

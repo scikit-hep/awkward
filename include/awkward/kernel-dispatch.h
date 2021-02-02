@@ -1251,6 +1251,12 @@ namespace awkward {
       int64_t size,
       int64_t length);
 
+    ERROR SliceVarNewAxis_to_SliceJagged64(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const int64_t* fromoffsets,
+      int64_t length);
+
     template <typename T>
     ERROR ListArray_min_range(
       kernel::lib ptr_lib,
@@ -1320,6 +1326,29 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toindex,
       int64_t size,
+      int64_t length);
+
+    template <typename T>
+    ERROR carry_SliceJagged_offsets(
+      kernel::lib ptr_lib,
+      T* tooffsets,
+      const T* fromoffsets,
+      const int64_t* fromcarry,
+      int64_t carrylen);
+
+    template <typename T>
+    ERROR carry_SliceJagged_nextcarry(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const T* fromoffsets,
+      const int64_t* fromcarry,
+      int64_t carrylen);
+
+    template <typename T>
+    ERROR carry_SliceMissing_outindex(
+      kernel::lib ptr_lib,
+      int64_t* toindex,
+      const T* fromindex,
       int64_t length);
 
     template <typename T>

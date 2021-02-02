@@ -139,7 +139,7 @@ namespace awkward {
                             const std::string& post) const {
     std::stringstream out;
     out << indent << pre << "<" << classname() << " i=\"[";
-    if (length_ <= 10) {
+    if (length_ <= 20) {
       for (int64_t i = 0;  i < length_;  i++) {
         if (i != 0) {
           out << " ";
@@ -148,15 +148,15 @@ namespace awkward {
       }
     }
     else {
-      for (int64_t i = 0; i < 5; i++) {
+      for (int64_t i = 0; i < 10; i++) {
         if (i != 0) {
           out << " ";
         }
         out << (int64_t) getitem_at_nowrap(i);
       }
       out << " ... ";
-      for (int64_t i = length_ - 5; i < length_; i++) {
-        if (i != length_ - 5) {
+      for (int64_t i = length_ - 10; i < length_; i++) {
+        if (i != length_ - 10) {
           out << " ";
         }
         out << (int64_t) getitem_at_nowrap(i);

@@ -3350,6 +3350,7 @@ def materialized(array, highlevel=True):
 
     See also #ak.virtual.
     """
+
     def getfunction(layout):
         if isinstance(layout, ak.layout.VirtualArray):
             result = materialized(layout.array, highlevel=False)
