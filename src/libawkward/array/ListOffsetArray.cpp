@@ -2241,6 +2241,7 @@ namespace awkward {
 
 
     SliceItemPtr nextcontent = varnewaxis.content().get()->carry(nextcarry);
+
     return SliceJagged64(offsets, nextcontent);
   }
 

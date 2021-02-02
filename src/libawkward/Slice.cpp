@@ -261,7 +261,7 @@ namespace awkward {
   const SliceItemPtr
   SliceArrayOf<T>::carry(const Index64& carry) const {
     IndexOf<T> nextindex(carry.length());
-    struct Error err = kernel::IndexedArray_getitem_carry_64<T>(
+    struct Error err = kernel::Index_carry_64<T>(
       kernel::lib::cpu,   // DERIVE
       nextindex.data(),
       index_.data(),
@@ -286,7 +286,7 @@ namespace awkward {
     std::stringstream out;
     out << "[";
     if (shape_.size() == 1) {
-      if (shape_[0] < 6) {
+      if (shape_[0] <= 20) {
         for (int64_t i = 0;  i < shape_[0];  i++) {
           if (i != 0) {
             out << ", ";
@@ -295,15 +295,15 @@ namespace awkward {
         }
       }
       else {
-        for (int64_t i = 0;  i < 3;  i++) {
+        for (int64_t i = 0;  i < 10;  i++) {
           if (i != 0) {
             out << ", ";
           }
           out << (T)index_.getitem_at_nowrap(i*strides_[0]);
         }
         out << ", ..., ";
-        for (int64_t i = shape_[0] - 3;  i < shape_[0];  i++) {
-          if (i != shape_[0] - 3) {
+        for (int64_t i = shape_[0] - 10;  i < shape_[0];  i++) {
+          if (i != shape_[0] - 10) {
             out << ", ";
           }
           out << (T)index_.getitem_at_nowrap(i*strides_[0]);
@@ -313,7 +313,7 @@ namespace awkward {
     else {
       std::vector<int64_t> shape(shape_.begin() + 1, shape_.end());
       std::vector<int64_t> strides(strides_.begin() + 1, strides_.end());
-      if (shape_[0] < 6) {
+      if (shape_[0] <= 20) {
         for (int64_t i = 0;  i < shape_[0];  i++) {
           if (i != 0) {
             out << ", ";
@@ -327,7 +327,7 @@ namespace awkward {
         }
       }
       else {
-        for (int64_t i = 0;  i < 3;  i++) {
+        for (int64_t i = 0;  i < 10;  i++) {
           if (i != 0) {
             out << ", ";
           }
@@ -339,8 +339,8 @@ namespace awkward {
           out << subarray.tostring_part();
         }
         out << ", ..., ";
-        for (int64_t i = shape_[0] - 3;  i < shape_[0];  i++) {
-          if (i != shape_[0] - 3) {
+        for (int64_t i = shape_[0] - 10;  i < shape_[0];  i++) {
+          if (i != shape_[0] - 10) {
             out << ", ";
           }
           IndexOf<T> index(index_.ptr(),
@@ -529,7 +529,70 @@ namespace awkward {
   template <typename T>
   const SliceItemPtr
   SliceMissingOf<T>::carry(const Index64& carry) const {
-    throw std::runtime_error("FIXME SliceMissingOf<T>::carry");
+    IndexOf<T> nextindex(carry.length());
+    struct Error err1 = kernel::Index_carry_64<T>(
+      kernel::lib::cpu,   // DERIVE
+      nextindex.data(),
+      index_.data(),
+      carry.data(),
+      index_.length(),
+      carry.length());
+    util::handle_error(err1, "SliceMissingOf<T>", nullptr);
+
+    int64_t numnull;
+    struct Error err2 = kernel::IndexedArray_numnull<T>(
+      kernel::lib::cpu,   // DERIVE
+      &numnull,
+      nextindex.data(),
+      nextindex.length());
+    util::handle_error(err2, "SliceMissingOf<T>", nullptr);
+
+    Index64 nextcarry(nextindex.length() - numnull);
+    struct Error err3 = kernel::IndexedArray_flatten_nextcarry_64<T>(
+      kernel::lib::cpu,   // DERIVE
+      nextcarry.data(),
+      nextindex.data(),
+      nextindex.length(),
+      kMaxInt64);
+    util::handle_error(err3, "SliceMissingOf<T>", nullptr);
+
+    SliceItemPtr nextcontent = content_.get()->carry(nextcarry);
+
+    IndexOf<T> outindex(nextindex.length());
+
+
+    T* toindex = outindex.data();
+    const T* fromindex = nextindex.data();
+    int64_t length = nextindex.length();
+
+    int64_t j = 0;
+    for (int64_t i = 0;  i < length;  i++) {
+      T index = fromindex[i];
+      if (index < 0) {
+        toindex[i] = -1;
+      }
+      else {
+        toindex[i] = j;
+        j++;
+      }
+    }
+
+
+
+    if (originalmask_.length() == 0) {
+      return std::make_shared<SliceMissingOf<T>>(outindex, originalmask_, nextcontent);
+    }
+    else {
+      // FIXME: is this mask inverted? How does it compare with the originalmask_?
+      Index8 bytemask(nextindex.length());
+      struct Error err4 = kernel::IndexedArray_mask8(
+        kernel::lib::cpu,   // DERIVE
+        bytemask.data(),
+        nextindex.data(),
+        nextindex.length());
+      util::handle_error(err4, "SliceMissingOf<T>", nullptr);
+      return std::make_shared<SliceMissingOf<T>>(outindex, bytemask, nextcontent);
+    }
   }
 
   template <typename T>
@@ -544,7 +607,7 @@ namespace awkward {
   SliceMissingOf<T>::tostring_part() const {
     std::stringstream out;
     out << "[";
-    if (index_.length() < 6) {
+    if (index_.length() <= 20) {
       for (int64_t i = 0;  i < index_.length();  i++) {
         if (i != 0) {
           out << ", ";
@@ -553,15 +616,15 @@ namespace awkward {
       }
     }
     else {
-      for (int64_t i = 0;  i < 3;  i++) {
+      for (int64_t i = 0;  i < 10;  i++) {
         if (i != 0) {
           out << ", ";
         }
         out << (T)index_.getitem_at_nowrap(i);
       }
       out << ", ..., ";
-      for (int64_t i = index_.length() - 3;  i < index_.length();  i++) {
-        if (i != index_.length() - 3) {
+      for (int64_t i = index_.length() - 10;  i < index_.length();  i++) {
+        if (i != index_.length() - 10) {
           out << ", ";
         }
         out << (T)index_.getitem_at_nowrap(i);
@@ -681,7 +744,7 @@ namespace awkward {
   SliceJaggedOf<T>::tostring_part() const {
     std::stringstream out;
     out << "[";
-    if (offsets_.length() < 6) {
+    if (offsets_.length() <= 20) {
       for (int64_t i = 0;  i < offsets_.length();  i++) {
         if (i != 0) {
           out << ", ";
@@ -690,15 +753,15 @@ namespace awkward {
       }
     }
     else {
-      for (int64_t i = 0;  i < 3;  i++) {
+      for (int64_t i = 0;  i < 10;  i++) {
         if (i != 0) {
           out << ", ";
         }
         out << (T)offsets_.getitem_at_nowrap(i);
       }
       out << ", ..., ";
-      for (int64_t i = offsets_.length() - 3;  i < offsets_.length();  i++) {
-        if (i != offsets_.length() - 3) {
+      for (int64_t i = offsets_.length() - 10;  i < offsets_.length();  i++) {
+        if (i != offsets_.length() - 10) {
           out << ", ";
         }
         out << (T)offsets_.getitem_at_nowrap(i);
@@ -745,7 +808,7 @@ namespace awkward {
 
   const SliceItemPtr
   SliceVarNewAxis::carry(const Index64& carry) const {
-    throw std::runtime_error("FIXME SliceVarNewAxis::carry");
+    return std::make_shared<SliceVarNewAxis>(content_.get()->carry(carry));
   }
 
   const std::string
