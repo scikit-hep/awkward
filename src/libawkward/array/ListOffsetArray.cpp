@@ -2198,6 +2198,57 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
+  ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts,
+                                            const Index64& slicestops,
+                                            const SliceVarNewAxis& slicecontent,
+                                            const Slice& tail) const {
+    ListArrayOf<T> listarray(identities_,
+                             parameters_,
+                             util::make_starts(offsets_),
+                             util::make_stops(offsets_),
+                             content_);
+    return listarray.getitem_next_jagged(slicestarts,
+                                         slicestops,
+                                         slicecontent,
+                                         tail);
+  }
+
+  template <typename T>
+  const ContentPtr
+  ListOffsetArrayOf<T>::getitem_next(const SliceVarNewAxis& varnewaxis,
+                                     const Slice& tail,
+                                     const Index64& advanced) const {
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
+  }
+
+  template <typename T>
+  const SliceJagged64
+  ListOffsetArrayOf<T>::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    Index64 offsets = compact_offsets64(true);
+    Index64 nextcarry(offsets.getitem_at_nowrap(offsets.length() - 1));
+
+
+    // FIXME: to kernel
+    int64_t* tocarry = nextcarry.data();
+    const int64_t* fromoffsets = offsets.data();
+    int64_t len = offsets.length() - 1;
+    for (int64_t i = 0;  i < len;  i++) {
+      int64_t start = fromoffsets[i];
+      int64_t stop = fromoffsets[i + 1];
+      for (int64_t j = start;  j < stop;  j++) {
+        tocarry[j] = i;
+      }
+    }
+
+
+    SliceItemPtr nextcontent = varnewaxis.content().get()->carry(nextcarry);
+
+    return SliceJagged64(offsets, nextcontent);
+  }
+
+  template <typename T>
+  const ContentPtr
   ListOffsetArrayOf<T>::copy_to(kernel::lib ptr_lib) const {
     IndexOf<T> offsets = offsets_.copy_to(ptr_lib);
     ContentPtr content = content_.get()->copy_to(ptr_lib);

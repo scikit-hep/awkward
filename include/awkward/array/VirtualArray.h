@@ -408,6 +408,20 @@ namespace awkward {
                           const Slice& tail) const override;
 
     const ContentPtr
+      getitem_next_jagged(const Index64& slicestarts,
+                          const Index64& slicestops,
+                          const SliceVarNewAxis& slicecontent,
+                          const Slice& tail) const override;
+
+    const ContentPtr
+      getitem_next(const SliceVarNewAxis& varnewaxis,
+                   const Slice& tail,
+                   const Index64& advanced) const override;
+
+    const SliceJagged64
+      varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const override;
+
+    const ContentPtr
       copy_to(kernel::lib ptr_lib) const override;
 
     const ContentPtr
@@ -434,6 +448,11 @@ namespace awkward {
     /// that can't have a Form but can know its depth (lazy slices, mostly).
     void
       set_cache_depths_from(const VirtualArray* original);
+
+    /// @brief Set the copy of depth parameters to avoid materializing an array
+    /// that can't have a Form but can know its depth (lazy slices, mostly).
+    void
+      set_cache_depths_from(const FormPtr& form);
 
     void
       add_to_cache_depths(int64_t delta);

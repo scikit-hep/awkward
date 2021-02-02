@@ -265,13 +265,16 @@ class PartitionedArray(object):
                 [x.rpad_and_clip(length, axis) for x in self.partitions]
             )
 
-    def reduce(self, name, axis, mask, keepdims):
+    def reduce(self, name, axis, mask, keepdims, initial=None):
         branch, depth = first(self).branch_depth
         negaxis = -axis
         if not branch and negaxis <= 0:
             negaxis += depth
         if not branch and negaxis == depth:
-            return getattr(self.toContent(), name)(axis, mask, keepdims)
+            if initial is None:
+                return getattr(self.toContent(), name)(axis, mask, keepdims)
+            else:
+                return getattr(self.toContent(), name)(axis, mask, keepdims, initial)
         else:
             return self.replace_partitions(
                 [getattr(x, name)(axis, mask, keepdims) for x in self.partitions]
@@ -295,11 +298,11 @@ class PartitionedArray(object):
     def all(self, axis, mask, keepdims):
         return self.reduce("all", axis, mask, keepdims)
 
-    def min(self, axis, mask, keepdims):
-        return self.reduce("min", axis, mask, keepdims)
+    def min(self, axis, mask, keepdims, initial):
+        return self.reduce("min", axis, mask, keepdims, initial)
 
-    def max(self, axis, mask, keepdims):
-        return self.reduce("max", axis, mask, keepdims)
+    def max(self, axis, mask, keepdims, initial):
+        return self.reduce("max", axis, mask, keepdims, initial)
 
     def argmin(self, axis, mask, keepdims):
         return self.reduce("argmin", axis, mask, keepdims)
@@ -464,12 +467,16 @@ class PartitionedArray(object):
                 else:
                     return y[tail]
 
-            elif isinstance(head, Iterable) and all(
-                (
-                    isinstance(x, str)
-                    or (ak._util.py27 and isinstance(x, ak._util.unicode))
+            elif (
+                isinstance(head, Iterable)
+                and len(head) > 0
+                and all(
+                    (
+                        isinstance(x, str)
+                        or (ak._util.py27 and isinstance(x, ak._util.unicode))
+                    )
+                    for x in head
                 )
-                for x in head
             ):
                 y = IrregularlyPartitionedArray(
                     [x[list(head)] for x in self.partitions]
@@ -516,7 +523,6 @@ class PartitionedArray(object):
                         and all(ti in int_types for ti in t.type.types)
                     )
                 ):
-
                     if isinstance(layout, PartitionedArray):
                         layout = layout.toContent()
                     return self.toContent()[(layout,) + tail]
@@ -532,9 +538,11 @@ class PartitionedArray(object):
                     inparts = self.partitions
                     headparts = layout.partitions
                     outparts = []
+                    outoffsets = [0]
                     for i in range(len(inparts)):
                         outparts.append(inparts[i][(headparts[i],) + tail])
-                    return IrregularlyPartitionedArray(outparts, stops)
+                        outoffsets.append(outoffsets[-1] + len(outparts[-1]))
+                    return IrregularlyPartitionedArray(outparts, outoffsets[1:])
 
 
 class IrregularlyPartitionedArray(PartitionedArray):

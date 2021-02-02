@@ -1797,6 +1797,33 @@ namespace awkward {
   }
 
   const ContentPtr
+  RecordArray::getitem_next_jagged(const Index64& slicestarts,
+                                   const Index64& slicestops,
+                                   const SliceVarNewAxis& slicecontent,
+                                   const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceVarNewAxis>(slicestarts,
+                                                        slicestops,
+                                                        slicecontent,
+                                                        tail);
+  }
+
+  const ContentPtr
+  RecordArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                            const Slice& tail,
+                            const Index64& advanced) const {
+    throw std::invalid_argument(
+      std::string("cannot slice records by a newaxis (length-1 regular dimension)")
+      + FILENAME(__LINE__));
+  }
+
+  const SliceJagged64
+  RecordArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    throw std::invalid_argument(
+      std::string("cannot slice records by a newaxis (length-1 regular dimension)")
+      + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
   RecordArray::copy_to(kernel::lib ptr_lib) const {
     ContentPtrVec contents;
     for (auto content : contents_) {

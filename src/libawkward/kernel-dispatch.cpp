@@ -12363,6 +12363,29 @@ namespace awkward {
       }
     }
 
+    ERROR SliceVarNewAxis_to_SliceJagged64(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const int64_t* fromoffsets,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_SliceVarNewAxis_to_SliceJagged64(
+          tocarry,
+          fromoffsets,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for SliceVarNewAxis_to_SliceJagged64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for SliceVarNewAxis_to_SliceJagged64")
+          + FILENAME(__LINE__));
+      }
+    }
+
     template<>
     ERROR ListArray_min_range<int32_t>(
       kernel::lib ptr_lib,
@@ -12983,6 +13006,82 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("unrecognized ptr_lib for RegularArray_localindex_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR carry_SliceJagged_offsets(
+      kernel::lib ptr_lib,
+      int64_t* tooffsets,
+      const int64_t* fromoffsets,
+      const int64_t* fromcarry,
+      int64_t carrylen) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_carry_SliceJagged64_offsets(
+          tooffsets,
+          fromoffsets,
+          fromcarry,
+          carrylen);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for carry_SliceJagged_offsets")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for carry_SliceJagged_offsets")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR carry_SliceJagged_nextcarry(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const int64_t* fromoffsets,
+      const int64_t* fromcarry,
+      int64_t carrylen) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_carry_SliceJagged64_nextcarry(
+          tocarry,
+          fromoffsets,
+          fromcarry,
+          carrylen);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for carry_SliceJagged_nextcarry")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for carry_SliceJagged_nextcarry")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR carry_SliceMissing_outindex(
+      kernel::lib ptr_lib,
+      int64_t* toindex,
+      const int64_t* fromindex,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_carry_SliceMissing64_outindex(
+          toindex,
+          fromindex,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for carry_SliceMissing_outindex")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for carry_SliceMissing_outindex")
           + FILENAME(__LINE__));
       }
     }
