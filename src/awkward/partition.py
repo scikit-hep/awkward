@@ -649,9 +649,23 @@ class IrregularlyPartitionedArray(PartitionedArray):
 
     def __init__(self, partitions, stops=None):
         if stops is None:
-            self._ext = ak._ext.IrregularlyPartitionedArray(partitions)
+            nextpartitions = [x for x in partitions if len(x) != 0]
+            if len(nextpartitions) == 0:
+                nextpartitions = partitions[:1]
+            self._ext = ak._ext.IrregularlyPartitionedArray(nextpartitions)
         else:
-            self._ext = ak._ext.IrregularlyPartitionedArray(partitions, stops)
+            nextpartitions = []
+            nextstops = []
+            start = 0
+            for partition, stop in zip(partitions, stops):
+                if stop - start != 0:
+                    nextpartitions.append(partition)
+                    nextstops.append(stop)
+                start = stop
+            if len(nextpartitions) == 0:
+                nextpartitions = partitions[:1]
+                nextstops = stops[:1]
+            self._ext = ak._ext.IrregularlyPartitionedArray(nextpartitions, nextstops)
 
     @property
     def stops(self):
