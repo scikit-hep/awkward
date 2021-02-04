@@ -3195,8 +3195,21 @@ def _ParquetState_arrow_to_awkward(table, struct_only, masked, unpack):
             out = out.content
         else:
             out = out.field(item)
-    if masked and not isinstance(out, ak.layout.ByteMaskedArray):
-        out = out.toByteMaskedArray()
+    if masked:
+        if isinstance(out, ak.layout.BitMaskedArray):
+            out = out.toByteMaskedArray()
+        elif isinstance(out, ak.layout.ListOffsetArray32) and isinstance(
+            out.content, ak.layout.BitMaskedArray
+        ):
+            out = ak.layout.ListOffsetArray32(
+                out.offsets, out.content.toByteMaskedArray()
+            )
+        elif isinstance(out, ak.layout.ListOffsetArray64) and isinstance(
+            out.content, ak.layout.BitMaskedArray
+        ):
+            out = ak.layout.ListOffsetArray64(
+                out.offsets, out.content.toByteMaskedArray()
+            )
     return out
 
 
