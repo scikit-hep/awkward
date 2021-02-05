@@ -84,3 +84,9 @@ def test_pandas(tmp_path):
     assert b.z.tolist() == ["high"] * 5 + ["low"] * 5
     assert b.y.tolist() == ["0", "1", "2", "3", "4", "0", "1", "2", "3", "4"]
     assert b.x.tolist() == [5, 6, 7, 8, 9, 0, 1, 2, 3, 4]
+
+    c = ak.from_parquet(tmp_path, include_partition_columns=False)
+    ak.fields(c) == ["x"]
+
+    d = ak.from_parquet(tmp_path, lazy=True, include_partition_columns=False)
+    ak.fields(d) == ["x"]

@@ -3459,6 +3459,7 @@ def from_parquet(
     columns=None,
     row_groups=None,
     use_threads=True,
+    include_partition_columns=True,
     lazy=False,
     lazy_cache="new",
     lazy_cache_key=None,
@@ -3470,13 +3471,16 @@ def from_parquet(
     Args:
         source (str, Path, file-like object, pyarrow.NativeFile): Where to
             get the Parquet file. If `source` is the name of a local directory
-            (str or Path), then it is interpreted as a Parquet dataset.
+            (str or Path), then it is interpreted as a partitioned Parquet dataset.
         columns (None or list of str): If None, read all columns; otherwise,
             read a specified set of columns.
         row_groups (None, int, or list of int): If None, read all row groups;
             otherwise, read a single or list of row groups.
         use_threads (bool): Passed to the pyarrow.parquet.ParquetFile.read
             functions; if True, do multithreaded reading.
+        include_partition_columns (bool): If True and `source` is a partitioned
+            Parquet dataset with subdirectory names defining partition names
+            and values, include those special columns in the output.
         lazy (bool): If True, read columns in row groups on demand (as
             #ak.layout.VirtualArray, possibly in #ak.partition.PartitionedArray
             if the file has more than one row group); if False, read all
@@ -3528,7 +3532,10 @@ def from_parquet(
                     last_filename = filename
                     paths_and_counts.append([filename, 0])
                 paths_and_counts[-1][-1] += file.metadata.row_group(i).num_rows
-            partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
+            if include_partition_columns:
+                partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
+            else:
+                partition_columns = []
             multimode = "dir"
         else:
             relative_to = source
@@ -3558,7 +3565,10 @@ def from_parquet(
             paths_and_counts.append(
                 (os.path.relpath(filename, relative_to), single_file.metadata.num_rows)
             )
-        partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
+        if include_partition_columns:
+            partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
+        else:
+            partition_columns = []
         num_row_groups = len(lookup)
         multimode = "multifile"
 
