@@ -21,7 +21,7 @@ def test_numpyarray_merge():
     )
 
     for x in [
-        np.bool,
+        np.bool_,
         np.int8,
         np.int16,
         np.int32,
@@ -34,7 +34,7 @@ def test_numpyarray_merge():
         np.float64,
     ]:
         for y in [
-            np.bool,
+            np.bool_,
             np.int8,
             np.int16,
             np.int32,
