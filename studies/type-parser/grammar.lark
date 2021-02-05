@@ -3,6 +3,7 @@ start: input
 input: record
      | unknown
      | primitive
+     | optiontype
 
 record: record_tuple
       | record_tuple_param
@@ -10,11 +11,13 @@ record: record_tuple
       | record_struct
 primitive: TYPE [options]
 unknown: "unknown" [options]
+optiontype: "?" input [options]
+          | "option" "[" input "," def_option "]"
 
-record_tuple: "(" primitive ["," primitive]* ")"
-record_tuple_param: "tuple[[" primitive ["," primitive]* "]," def_option "]"
-record_dict: "{" string ":" primitive ["," string ":" primitive]* "}"
-record_struct: "struct[[" string ["," string]* "]," "[" primitive ["," primitive]* "]," def_option "]"
+record_tuple: "(" input ["," input]* ")"
+record_tuple_param: "tuple[[" input ["," input]* "]," def_option "]"
+record_dict: "{" string ":" input ["," string ":" input]* "}"
+record_struct: "struct[[" string ["," string]* "]," "[" input ["," input]* "]," def_option "]"
 options: "[" def_option "]"
 def_option: "parameters" "=" dict_obj
 TYPE: "int64"

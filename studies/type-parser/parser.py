@@ -48,6 +48,15 @@ def toast(ptnode):
             return ak.types.UnknownType(parameters=toast(ptnode.children[0]))
         else:
             raise Exception("Unhandled UnknownType node")
+    elif ptnode.data == "optiontype":
+        if len(ptnode.children) == 1:
+            return ak.types.OptionType(toast(ptnode.children[0]))
+        elif len(ptnode.children) == 2:
+            return ak.types.OptionType(
+                toast(ptnode.children[0]), parameters=toast(ptnode.children[1])
+            )
+        else:
+            raise Exception("Unhandled OptionType node")
     elif ptnode.data == "record":
         return toast(ptnode.children[0])
     elif ptnode.data == "record_tuple":
@@ -204,4 +213,68 @@ def test_record_struct_2():
     text = 'struct[["1", "2"], [int64[parameters={"xkcd": [11, 12, 13]}], int64], parameters={"wonky": ["bla", 1, 2]}]'
     parsedtype = toast(test.parse(text))
     assert isinstance(parsedtype, ak.types.RecordType)
+    assert str(parsedtype) == text
+
+
+def test_option_numpy_1():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = "?int64"
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.OptionType)
+    assert str(parsedtype) == text
+
+
+def test_option_numpy_2():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = '?int64[parameters={"wonky": [1, 2, 3]}]'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.OptionType)
+    assert str(parsedtype) == text
+
+
+def test_option_numpy_1_parm():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = 'option[int64, parameters={"foo": "bar"}]'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.OptionType)
+    assert str(parsedtype) == text
+
+
+def test_option_numpy_2_parm():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = 'option[int64[parameters={"wonky": [1, 2]}], parameters={"foo": "bar"}]'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.OptionType)
+    assert str(parsedtype) == text
+
+
+def test_option_unknown_1():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = "?unknown"
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.OptionType)
+    assert str(parsedtype) == text
+
+
+def test_option_unknown_2():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = '?unknown[parameters={"foo": "bar"}]'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.OptionType)
+    assert str(parsedtype) == text
+
+
+def test_option_unknown_1_parm():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = 'option[unknown, parameters={"foo": "bar"}]'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.OptionType)
+    assert str(parsedtype) == text
+
+
+def test_option_unknown_2_parm():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = 'option[unknown, parameters={"foo": "bar"}]'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.OptionType)
     assert str(parsedtype) == text
