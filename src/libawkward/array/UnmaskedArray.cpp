@@ -252,6 +252,22 @@ namespace awkward {
     }
   }
 
+  const std::shared_ptr<ByteMaskedArray>
+  UnmaskedArray::toByteMaskedArray() const {
+    Index8 bytemask(length());
+    struct Error err = kernel::one_mask8(
+      kernel::lib::cpu,   // DERIVE
+      bytemask.data(),
+      length());
+    util::handle_error(err, classname(), identities_.get());
+    return std::make_shared<ByteMaskedArray>(
+      identities_,
+      parameters_,
+      bytemask,
+      content_,
+      true);
+  }
+
   const ContentPtr
   UnmaskedArray::toIndexedOptionArray64() const {
     Index64 index(length());

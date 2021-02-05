@@ -475,7 +475,7 @@ def test_bitmaskedarray():
                         True,
                         True,
                     ],
-                    dtype=np.bool,
+                    dtype=np.bool_,
                 )
             )
         ),

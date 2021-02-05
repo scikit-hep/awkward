@@ -134,6 +134,10 @@ namespace awkward {
     const ContentPtr
       simplify_optiontype() const;
 
+    /// @brief Converts this array into a ByteMaskedArray.
+    const std::shared_ptr<ByteMaskedArray>
+      toByteMaskedArray() const;
+
     /// @brief Converts this array into an
     /// {@link IndexedArrayOf IndexedOptionArray} without missing values.
     const ContentPtr

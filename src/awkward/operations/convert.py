@@ -9,6 +9,8 @@ import math
 import os
 import threading
 import distutils.version
+import glob
+import re
 
 try:
     from collections.abc import Iterable
@@ -21,6 +23,25 @@ import awkward as ak
 
 np = ak.nplike.NumpyMetadata.instance()
 numpy = ak.nplike.Numpy.instance()
+
+
+def _regularize_path(path):
+    if isinstance(path, getattr(os, "PathLike", ())):
+        path = os.fspath(path)
+
+    elif hasattr(path, "__fspath__"):
+        path = path.__fspath__()
+
+    elif path.__class__.__module__ == "pathlib":
+        import pathlib
+
+        if isinstance(path, pathlib.Path):
+            path = str(path)
+
+    if isinstance(path, str):
+        path = os.path.expanduser(path)
+
+    return path
 
 
 def from_numpy(
@@ -1038,10 +1059,20 @@ def from_json(
             keys = recordnode.keys()
             if complex_record_fields[0] in keys and complex_record_fields[1] in keys:
                 nplike = ak.nplike.of(recordnode)
-                real = nplike.asarray(recordnode[complex_record_fields[0]])
-                imag = nplike.asarray(recordnode[complex_record_fields[1]])
-                if real.dtype == "object" or imag.dtype == "object":
-                    raise ValueError("Complex number fields must be numbers")
+                real = recordnode[complex_record_fields[0]]
+                imag = recordnode[complex_record_fields[1]]
+                if (
+                    isinstance(real, ak.layout.NumpyArray)
+                    and len(real.shape) == 1
+                    and isinstance(imag, ak.layout.NumpyArray)
+                    and len(imag.shape) == 1
+                ):
+                    return lambda: nplike.asarray(real) + nplike.asarray(imag) * 1j
+                else:
+                    raise ValueError(
+                        "Complex number fields must be numbers"
+                        + ak._util.exception_suffix(__file__)
+                    )
                 return lambda: ak.layout.NumpyArray(real + imag * 1j)
             else:
                 return None
@@ -2824,6 +2855,19 @@ def _from_arrow(
             else:
                 return ak.operations.structure.concatenate(chunks, highlevel=False)
 
+        elif isinstance(obj, Iterable) and all(
+            isinstance(x, pyarrow.lib.RecordBatch) for x in obj
+        ):
+            chunks = []
+            for batch in obj:
+                chunk = handle_arrow(batch)
+                if len(chunk) > 0:
+                    chunks.append(chunk)
+            if len(chunks) == 1:
+                return chunks[0]
+            else:
+                return ak.operations.structure.concatenate(chunks, highlevel=False)
+
         else:
             raise TypeError(
                 "unrecognized Arrow type: {0}".format(type(obj))
@@ -2874,6 +2918,21 @@ def to_parquet(
     missing" and "not option-type" at all levels, including the top level. However,
     there is no distinction between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type.
     Be aware of these type distinctions when passing data through Arrow or Parquet.
+
+    To make a partitioned Parquet dataset, use this function to write each Parquet
+    file to a directory (as separate invocations, probably in parallel with multiple
+    processes), then give them common metadata by calling `ak.to_parquet.dataset`.
+
+        >>> ak.to_parquet(array1, "directory-name/file1.parquet")
+        >>> ak.to_parquet(array2, "directory-name/file2.parquet")
+        >>> ak.to_parquet(array3, "directory-name/file3.parquet")
+        >>> ak.to_parquet.dataset("directory-name")
+
+    Then all of the flies in the collection can be addressed as one array. For example,
+
+        >>> dataset = ak.from_parquet("directory_name", lazy=True)
+
+    (If it is large, you will likely want to load it lazily.)
 
     See also #ak.to_arrow, which is used as an intermediate step.
     See also #ak.from_parquet.
@@ -2941,6 +3000,83 @@ def to_parquet(
                 writer.write_table(pyarrow.Table.from_batches([record_batch]))
     finally:
         writer.close()
+
+
+def _common_parquet_schema(pq, filenames, relpaths):
+    assert len(filenames) != 0
+
+    schema = None
+    metadata_collector = []
+    for filename, relpath in zip(filenames, relpaths):
+        if schema is None:
+            schema = pq.ParquetFile(filename).schema_arrow
+            first_filename = filename
+        elif schema != pq.ParquetFile(filename).schema_arrow:
+            raise ValueError(
+                "schema in {0} differs from the first schema (in {1})".format(
+                    repr(filename), repr(first_filename)
+                )
+                + ak._util.exception_suffix(__file__)
+            )
+        metadata_collector.append(pq.read_metadata(filename))
+        metadata_collector[-1].set_file_path(relpath)
+    return schema, metadata_collector
+
+
+def _to_parquet_dataset(directory, filenames=None, filename_extension=".parquet"):
+    """
+    Args:
+        directory (str or Path): A local directory in which to write `_common_metadata`
+            and `_metadata`, making the directory of Parquet files into a dataset.
+        filenames (None or list of str or Path): If None, the `directory` will be
+            recursively searched for files ending in `filename_extension` and
+            sorted lexicographically. Otherwise, this explicit list of files is
+            taken and row-groups are concatenated in its given order. If any
+            filenames are relative, they are interpreted relative to `directory`.
+        filename_extension (str): Filename extension (including `.`) to use to
+            search for files recursively. Ignored if `filenames` is None.
+
+    Creates a `_common_metadata` and a `_metadata` in a directory of Parquet files.
+
+    The `_common_metadata` contains the schema that all files share. (If the files
+    have different schemas, this function raises an exception.)
+
+    The `_metadata` contains row-group metadata used to seek to specific row-groups
+    within the multi-file dataset.
+    """
+    pyarrow = _import_pyarrow("ak.to_parquet.dataset")
+    import pyarrow.parquet
+
+    directory = _regularize_path(directory)
+    if not os.path.isdir(directory):
+        raise ValueError(
+            "{0} is not a local filesystem directory".format(repr(directory))
+            + ak._util.exception_suffix(__file__)
+        )
+
+    if filenames is None:
+        filenames = sorted(
+            glob.glob(directory + "/**/*{0}".format(filename_extension), recursive=True)
+        )
+    else:
+        filenames = [_regularize_path(x) for x in filenames]
+        filenames = [
+            x if os.path.isabs(x) else os.path.join(directory, x) for x in filenames
+        ]
+    relpaths = [os.path.relpath(x, directory) for x in filenames]
+
+    schema, metadata_collector = _common_parquet_schema(
+        pyarrow.parquet, filenames, relpaths
+    )
+    pyarrow.parquet.write_metadata(schema, os.path.join(directory, "_common_metadata"))
+    pyarrow.parquet.write_metadata(
+        schema,
+        os.path.join(directory, "_metadata"),
+        metadata_collector=metadata_collector,
+    )
+
+
+to_parquet.dataset = _to_parquet_dataset
 
 
 _from_parquet_key_number = 0
@@ -3054,9 +3190,9 @@ def _parquet_schema_to_form(schema):
                 "cannot convert {0}.{1} to an equivalent Awkward Form".format(
                     type(arrow_type).__module__, type(arrow_type).__name__
                 )
+                + ak._util.exception_suffix(__file__)
             )
 
-    schema = schema.to_arrow_schema()
     contents = []
     for index, name in enumerate(schema.names):
         field = schema.field(index)
@@ -3066,12 +3202,10 @@ def _parquet_schema_to_form(schema):
     return ak.forms.RecordForm(contents, schema.names)
 
 
-class _ParquetState(object):
-    def __init__(self, file, use_threads, source, options):
+class _ParquetFile(object):
+    def __init__(self, file, use_threads):
         self.file = file
         self.use_threads = use_threads
-        self.source = source
-        self.options = options
 
     def __call__(self, row_group, unpack, length, form, lazy_cache, lazy_cache_key):
         if form.form_key is None:
@@ -3110,7 +3244,7 @@ class _ParquetState(object):
 
             elif isinstance(form, ak.forms.ListOffsetForm):
                 struct_only = [x for x in unpack[:0:-1] if x is not None]
-                sampleform = _ParquetState_first_column(form, struct_only)
+                sampleform = _ParquetFile_first_column(form, struct_only)
 
                 assert sampleform.form_key.startswith(
                     "col:"
@@ -3150,11 +3284,17 @@ class _ParquetState(object):
                     elif isinstance(off, ak.layout.Index64):
                         out = ak.layout.ListOffsetArray64(off, out)
                     else:
-                        raise AssertionError("unexpected Index type: {0}".format(off))
+                        raise AssertionError(
+                            "unexpected Index type: {0}".format(off)
+                            + ak._util.exception_suffix(__file__)
+                        )
                 return out
 
             else:
-                raise AssertionError("unexpected Form: {0}".format(type(form)))
+                raise AssertionError(
+                    "unexpected Form: {0}".format(type(form))
+                    + ak._util.exception_suffix(__file__)
+                )
 
         else:
             assert form.form_key.startswith("col:") or form.form_key.startswith("lst:")
@@ -3162,10 +3302,10 @@ class _ParquetState(object):
             masked = isinstance(form, ak.forms.ByteMaskedForm)
             if masked:
                 form = form.content
-            table = self.file.read_row_group(row_group, [column_name])
+            table = self.read(row_group, column_name)
             struct_only = [column_name.split(".")[-1]]
             struct_only.extend([x for x in unpack[:0:-1] if x is not None])
-            return _ParquetState_arrow_to_awkward(table, struct_only, masked, unpack)
+            return _ParquetFile_arrow_to_awkward(table, struct_only, masked, unpack)
 
     def get(self, row_group, unpack, form, struct_only):
         assert form.form_key.startswith("col:") or form.form_key.startswith("lst:")
@@ -3173,27 +3313,123 @@ class _ParquetState(object):
         masked = isinstance(form, ak.forms.ByteMaskedForm)
         if masked:
             form = form.content
-        table = self.file.read_row_group(row_group, [column_name])
-        return _ParquetState_arrow_to_awkward(table, struct_only, masked, unpack)
+        table = self.read(row_group, column_name)
+        return _ParquetFile_arrow_to_awkward(table, struct_only, masked, unpack)
+
+    def read(self, row_group, column_name):
+        return self.file.read_row_group(
+            row_group, [column_name], use_threads=self.use_threads
+        )
 
 
-def _ParquetState_first_column(form, struct_only):
+def _parquet_partition_values(path):
+    dirname, filename = os.path.split(path)
+    m = re.match("([^=]+)=([^=]*)$", filename)
+    if m is None:
+        pair = ()
+    else:
+        pair = (m.groups(),)
+    if dirname == "" or dirname == "/":
+        return pair
+    else:
+        return _parquet_partition_values(dirname) + pair
+
+
+def _parquet_partitions_to_awkward(paths_and_counts):
+    path, count = paths_and_counts[0]
+    columns = [column for column, value in _parquet_partition_values(path)]
+    values = [[] for column in columns]
+    indexes = [[] for column in columns]
+    for path, count in paths_and_counts:
+        for i, (column, value) in enumerate(_parquet_partition_values(path)):
+            if i >= len(columns) or column != columns[i]:
+                raise ValueError(
+                    "inconsistent partition column names in Parquet directory paths"
+                    + ak._util.exception_suffix(__file__)
+                )
+            try:
+                j = values[i].index(value)
+            except ValueError:
+                j = len(values[i])
+                values[i].append(value)
+            indexes[i].append(numpy.full(count, j, np.int32))
+    indexedarrays = []
+    for column, vals, idx in zip(columns, values, indexes):
+        indexedarrays.append(
+            (
+                column,
+                ak.layout.IndexedArray32(
+                    ak.layout.Index32(numpy.concatenate(idx)),
+                    ak.operations.convert.from_iter(vals, highlevel=False),
+                ),
+            )
+        )
+    return indexedarrays
+
+
+class _ParquetDataset(_ParquetFile):
+    def __init__(self, pq, directory, metadata_file, use_threads, options):
+        self.pq = pq
+        self.use_threads = use_threads
+        self.options = options
+
+        self.lookup = []
+        for i in range(metadata_file.num_row_groups):
+            filename = metadata_file.metadata.row_group(i).column(0).file_path
+            if i == 0:
+                if filename == "":
+                    raise ValueError(
+                        "Parquet _metadata file does not contain file paths "
+                        "(e.g. was not made with 'set_file_path')"
+                        + ak._util.exception_suffix(__file__)
+                    )
+                last_filename = filename
+                start_i = 0
+            elif filename != "" and last_filename != filename:
+                last_filename = filename
+                start_i = i
+            self.lookup.append((os.path.join(directory, last_filename), i - start_i))
+
+        self.open_files = {}
+
+    def read(self, row_group, column_name):
+        filename, local_row_group = self.lookup[row_group]
+        if filename not in self.open_files:
+            self.open_files[filename] = self.pq.ParquetFile(filename, **self.options)
+        return self.open_files[filename].read_row_group(
+            local_row_group, [column_name], use_threads=self.use_threads
+        )
+
+
+class _ParquetDatasetOfFiles(_ParquetFile):
+    def __init__(self, lookup, use_threads):
+        self.lookup = lookup
+        self.use_threads = use_threads
+
+    def read(self, row_group, column_name):
+        file, local_row_group = self.lookup[row_group]
+        return file.read_row_group(
+            local_row_group, [column_name], use_threads=self.use_threads
+        )
+
+
+def _ParquetFile_first_column(form, struct_only):
     if isinstance(form, ak.forms.VirtualForm):
-        return _ParquetState_first_column(form.form, struct_only)
+        return _ParquetFile_first_column(form.form, struct_only)
     elif isinstance(form, ak.forms.RecordForm):
         assert form.numfields != 0
         struct_only.insert(0, form.key(0))
-        return _ParquetState_first_column(form.content(0), struct_only)
+        return _ParquetFile_first_column(form.content(0), struct_only)
     elif isinstance(form, ak.forms.ListOffsetForm):
         if form.parameter("__array__") in ("string", "bytestring"):
             return form
         else:
-            return _ParquetState_first_column(form.content, struct_only)
+            return _ParquetFile_first_column(form.content, struct_only)
     else:
         return form
 
 
-def _ParquetState_arrow_to_awkward(table, struct_only, masked, unpack):
+def _ParquetFile_arrow_to_awkward(table, struct_only, masked, unpack):
     out = _from_arrow(table, False, struct_only=struct_only, highlevel=False)
     for item in unpack:
         if item is None:
@@ -3201,16 +3437,16 @@ def _ParquetState_arrow_to_awkward(table, struct_only, masked, unpack):
         else:
             out = out.field(item)
     if masked:
-        if isinstance(out, ak.layout.BitMaskedArray):
+        if isinstance(out, (ak.layout.BitMaskedArray, ak.layout.UnmaskedArray)):
             out = out.toByteMaskedArray()
         elif isinstance(out, ak.layout.ListOffsetArray32) and isinstance(
-            out.content, ak.layout.BitMaskedArray
+            out.content, (ak.layout.BitMaskedArray, ak.layout.UnmaskedArray)
         ):
             out = ak.layout.ListOffsetArray32(
                 out.offsets, out.content.toByteMaskedArray()
             )
         elif isinstance(out, ak.layout.ListOffsetArray64) and isinstance(
-            out.content, ak.layout.BitMaskedArray
+            out.content, (ak.layout.BitMaskedArray, ak.layout.UnmaskedArray)
         ):
             out = ak.layout.ListOffsetArray64(
                 out.offsets, out.content.toByteMaskedArray()
@@ -3223,6 +3459,7 @@ def from_parquet(
     columns=None,
     row_groups=None,
     use_threads=True,
+    include_partition_columns=True,
     lazy=False,
     lazy_cache="new",
     lazy_cache_key=None,
@@ -3233,13 +3470,17 @@ def from_parquet(
     """
     Args:
         source (str, Path, file-like object, pyarrow.NativeFile): Where to
-            get the Parquet file.
+            get the Parquet file. If `source` is the name of a local directory
+            (str or Path), then it is interpreted as a partitioned Parquet dataset.
         columns (None or list of str): If None, read all columns; otherwise,
             read a specified set of columns.
         row_groups (None, int, or list of int): If None, read all row groups;
             otherwise, read a single or list of row groups.
         use_threads (bool): Passed to the pyarrow.parquet.ParquetFile.read
             functions; if True, do multithreaded reading.
+        include_partition_columns (bool): If True and `source` is a partitioned
+            Parquet dataset with subdirectory names defining partition names
+            and values, include those special columns in the output.
         lazy (bool): If True, read columns in row groups on demand (as
             #ak.layout.VirtualArray, possibly in #ak.partition.PartitionedArray
             if the file has more than one row group); if False, read all
@@ -3266,8 +3507,78 @@ def from_parquet(
     pyarrow = _import_pyarrow("ak.from_parquet")
     import pyarrow.parquet
 
-    file = pyarrow.parquet.ParquetFile(source, **options)
-    schema = file.schema.to_arrow_schema()
+    source = _regularize_path(source)
+    relative_to = None
+    multimode = None
+    if isinstance(source, str) and os.path.isdir(source):
+        metadata_filename = os.path.join(source, "_metadata")
+        if os.path.exists(metadata_filename):
+            file = pyarrow.parquet.ParquetFile(metadata_filename, **options)
+            schema = file.schema_arrow
+            num_row_groups = file.num_row_groups
+            paths_and_counts = []
+            for i in range(file.num_row_groups):
+                filename = file.metadata.row_group(i).column(0).file_path
+                if i == 0:
+                    if filename == "":
+                        raise ValueError(
+                            "Parquet _metadata file does not contain file paths "
+                            "(e.g. was not made with 'set_file_path')"
+                            + ak._util.exception_suffix(__file__)
+                        )
+                    last_filename = filename
+                    paths_and_counts.append([filename, 0])
+                elif filename != "" and last_filename != filename:
+                    last_filename = filename
+                    paths_and_counts.append([filename, 0])
+                paths_and_counts[-1][-1] += file.metadata.row_group(i).num_rows
+            if include_partition_columns:
+                partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
+            else:
+                partition_columns = []
+            multimode = "dir"
+        else:
+            relative_to = source
+            source = sorted(glob.glob(source + "/**/*.parquet", recursive=True))
+
+    if not isinstance(source, str) and isinstance(source, Iterable):
+        source = [_regularize_path(x) for x in source]
+        if relative_to is None:
+            relative_to = os.path.commonpath(source)
+        schema = None
+        lookup = []
+        paths_and_counts = []
+        for filename in source:
+            single_file = pyarrow.parquet.ParquetFile(filename)
+            if schema is None:
+                schema = single_file.schema_arrow
+                first_filename = filename
+            elif schema != single_file.schema_arrow:
+                raise ValueError(
+                    "schema in {0} differs from the first schema (in {1})".format(
+                        repr(filename), repr(first_filename)
+                    )
+                    + ak._util.exception_suffix(__file__)
+                )
+            for i in range(single_file.num_row_groups):
+                lookup.append((single_file, i))
+            paths_and_counts.append(
+                (os.path.relpath(filename, relative_to), single_file.metadata.num_rows)
+            )
+        if include_partition_columns:
+            partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
+        else:
+            partition_columns = []
+        num_row_groups = len(lookup)
+        multimode = "multifile"
+
+    if multimode is None:
+        file = pyarrow.parquet.ParquetFile(source, **options)
+        schema = file.schema_arrow
+        partition_columns = []
+        num_row_groups = file.num_row_groups
+        multimode = "single"
+
     all_columns = schema.names
 
     if columns is None:
@@ -3275,11 +3586,11 @@ def from_parquet(
     for x in columns:
         if x not in all_columns:
             raise ValueError(
-                "column {0} does not exist in file {1}".format(repr(x), repr(source))
+                "column {0} not found in schema".format(repr(x))
                 + ak._util.exception_suffix(__file__)
             )
 
-    if file.num_row_groups == 0:
+    if num_row_groups == 0:
         out = ak.layout.RecordArray(
             [ak.layout.EmptyArray() for x in columns], columns, 0
         )
@@ -3290,7 +3601,23 @@ def from_parquet(
 
     hold_cache = None
     if lazy:
-        state = _ParquetState(file, use_threads, source, options)
+        if multimode == "dir":
+            state = _ParquetDataset(pyarrow.parquet, source, file, use_threads, options)
+            lengths = [
+                file.metadata.row_group(i).num_rows for i in range(num_row_groups)
+            ]
+
+        elif multimode == "multifile":
+            state = _ParquetDatasetOfFiles(lookup, use_threads)
+            lengths = []
+            for single_file, local_row_group in lookup:
+                lengths.append(single_file.metadata.row_group(local_row_group).num_rows)
+
+        else:
+            state = _ParquetFile(file, use_threads)
+            lengths = [
+                file.metadata.row_group(i).num_rows for i in range(num_row_groups)
+            ]
 
         if lazy_cache == "new":
             hold_cache = ak._util.MappingProxy({})
@@ -3310,12 +3637,12 @@ def from_parquet(
         if lazy_cache_key is None:
             lazy_cache_key = "ak.from_parquet:{0}".format(_from_parquet_key())
 
-        form = _parquet_schema_to_form(file.schema)
+        form = _parquet_schema_to_form(schema)
 
         partitions = []
         offsets = [0]
-        for row_group in range(file.num_row_groups):
-            length = file.metadata.row_group(row_group).num_rows
+        for row_group in range(num_row_groups):
+            length = lengths[row_group]
             offsets.append(offsets[-1] + length)
 
             contents = []
@@ -3348,10 +3675,17 @@ def from_parquet(
                 )
                 recordlookup.append(column)
 
-            if all_columns == [""]:
+            if partition_columns == [] and all_columns == [""]:
                 partitions.append(contents[0])
             else:
-                recordarray = ak.layout.RecordArray(contents, recordlookup, length)
+                if partition_columns == []:
+                    field_names = recordlookup
+                    fields = contents
+                else:
+                    start, stop = offsets[row_group], offsets[row_group + 1]
+                    field_names = [x[0] for x in partition_columns] + recordlookup
+                    fields = [x[1][start:stop] for x in partition_columns] + contents
+                recordarray = ak.layout.RecordArray(fields, field_names, length)
                 partitions.append(recordarray)
 
         if len(partitions) == 1:
@@ -3364,14 +3698,59 @@ def from_parquet(
             return out
 
     else:
-        out = _from_arrow(
-            file.read(columns, use_threads=use_threads),
-            False,
-            highlevel=highlevel,
-            behavior=behavior,
-        )
-        if all_columns == [""]:
-            return out[""]
+        if multimode == "dir":
+            batches = []
+            for i in range(file.num_row_groups):
+                filename = file.metadata.row_group(i).column(0).file_path
+                if i == 0:
+                    if filename == "":
+                        raise ValueError(
+                            "Parquet _metadata file does not contain file paths "
+                            "(e.g. was not made with 'set_file_path')"
+                            + ak._util.exception_suffix(__file__)
+                        )
+                    local_file = pyarrow.parquet.ParquetFile(
+                        os.path.join(source, filename), **options
+                    )
+                    last_filename = filename
+                    start_i = 0
+                elif filename != "" and last_filename != filename:
+                    local_file = pyarrow.parquet.ParquetFile(
+                        os.path.join(source, filename), **options
+                    )
+                    last_filename = filename
+                    start_i = i
+                batches.extend(
+                    local_file.read_row_group(
+                        i - start_i, columns, use_threads=use_threads
+                    ).to_batches()
+                )
+
+        elif multimode == "multifile":
+            batches = []
+            for single_file, local_row_group in lookup:
+                batches.extend(
+                    single_file.read_row_group(
+                        local_row_group, columns, use_threads=use_threads
+                    ).to_batches()
+                )
+
+        else:
+            batches = file.read(columns, use_threads=use_threads)
+
+        out = _from_arrow(batches, False, highlevel=False)
+        assert isinstance(out, ak.layout.RecordArray) and not out.istuple
+
+        if partition_columns == [] and all_columns == [""]:
+            out = out[""]
+
+        if partition_columns != []:
+            field_names = [x[0] for x in partition_columns] + out.keys()
+            fields = [x[1] for x in partition_columns] + out.contents
+            out = ak.layout.RecordArray(fields, field_names)
+
+        if highlevel:
+            return ak._util.wrap(out, behavior)
         else:
             return out
 

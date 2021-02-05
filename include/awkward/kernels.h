@@ -5039,5 +5039,10 @@ extern "C" {
     int8_t* tomask,
     int64_t length);
 
+  EXPORT_SYMBOL ERROR
+  awkward_one_mask8(
+    int8_t* tomask,
+    int64_t length);
+
 }
 #endif

@@ -954,6 +954,11 @@ namespace awkward {
       int8_t* tomask,
       int64_t length);
 
+    ERROR one_mask8(
+      kernel::lib ptr_lib,
+      int8_t* tomask,
+      int64_t length);
+
     template <typename T>
     ERROR IndexedArray_simplify32_to64(
       kernel::lib ptr_lib,

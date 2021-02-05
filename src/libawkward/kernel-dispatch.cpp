@@ -5872,6 +5872,26 @@ namespace awkward {
       }
     }
 
+    ERROR one_mask8(
+      kernel::lib ptr_lib,
+      int8_t *tomask,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_one_mask8(tomask, length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        CREATE_KERNEL(awkward_one_mask8, ptr_lib);
+        return (*awkward_one_mask8_fcn)(
+          tomask,
+          length);
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for one_mask8")
+          + FILENAME(__LINE__));
+      }
+    }
+
     template<>
     ERROR IndexedArray_simplify32_to64<int32_t>(
       kernel::lib ptr_lib,

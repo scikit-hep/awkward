@@ -22,7 +22,7 @@ def test_toarrow_ByteMaskedArray_1():
     content = ak.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
     ).layout
-    bytemask = ak.layout.Index8(np.array([False, True, False], dtype=np.bool))
+    bytemask = ak.layout.Index8(np.array([False, True, False], dtype=np.bool_))
     array = ak.layout.ByteMaskedArray(bytemask, content, True)
     assert ak.to_arrow(array).to_pylist() == ak.to_list(array)
 
