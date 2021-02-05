@@ -1760,6 +1760,10 @@ make_UnmaskedArray(const py::handle& m, const std::string& name) {
       .def("simplify", [](const ak::UnmaskedArray& self) {
         return box(self.simplify_optiontype());
       })
+      .def("toByteMaskedArray",
+           &ak::UnmaskedArray::toByteMaskedArray)
+      .def("toIndexedOptionArray64",
+           &ak::UnmaskedArray::toIndexedOptionArray64)
   );
 }
 

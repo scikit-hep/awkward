@@ -1058,10 +1058,20 @@ def from_json(
             keys = recordnode.keys()
             if complex_record_fields[0] in keys and complex_record_fields[1] in keys:
                 nplike = ak.nplike.of(recordnode)
-                real = nplike.asarray(recordnode[complex_record_fields[0]])
-                imag = nplike.asarray(recordnode[complex_record_fields[1]])
-                if real.dtype == "object" or imag.dtype == "object":
-                    raise ValueError("Complex number fields must be numbers")
+                real = recordnode[complex_record_fields[0]]
+                imag = recordnode[complex_record_fields[1]]
+                if (
+                    isinstance(real, ak.layout.NumpyArray)
+                    and len(real.shape) == 1
+                    and isinstance(imag, ak.layout.NumpyArray)
+                    and len(imag.shape) == 1
+                ):
+                    return lambda: nplike.asarray(real) + nplike.asarray(imag) * 1j
+                else:
+                    raise ValueError(
+                        "Complex number fields must be numbers"
+                        + ak._util.exception_suffix(__file__)
+                    )
                 return lambda: ak.layout.NumpyArray(real + imag * 1j)
             else:
                 return None
@@ -2908,6 +2918,21 @@ def to_parquet(
     there is no distinction between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type.
     Be aware of these type distinctions when passing data through Arrow or Parquet.
 
+    To make a partitioned Parquet dataset, use this function to write each Parquet
+    file to a directory (as separate invocations, probably in parallel with multiple
+    processes), then give them common metadata by calling `ak.to_parquet.dataset`.
+
+        >>> ak.to_parquet(array1, "directory-name/file1.parquet")
+        >>> ak.to_parquet(array2, "directory-name/file2.parquet")
+        >>> ak.to_parquet(array3, "directory-name/file3.parquet")
+        >>> ak.to_parquet.dataset("directory-name")
+
+    Then all of the flies in the collection can be addressed as one array. For example,
+
+        >>> dataset = ak.from_parquet("directory_name", lazy=True)
+
+    (If it is large, you will likely want to load it lazily.)
+
     See also #ak.to_arrow, which is used as an intermediate step.
     See also #ak.from_parquet.
     """
@@ -3366,16 +3391,16 @@ def _ParquetFile_arrow_to_awkward(table, struct_only, masked, unpack):
         else:
             out = out.field(item)
     if masked:
-        if isinstance(out, ak.layout.BitMaskedArray):
+        if isinstance(out, (ak.layout.BitMaskedArray, ak.layout.UnmaskedArray)):
             out = out.toByteMaskedArray()
         elif isinstance(out, ak.layout.ListOffsetArray32) and isinstance(
-            out.content, ak.layout.BitMaskedArray
+            out.content, (ak.layout.BitMaskedArray, ak.layout.UnmaskedArray)
         ):
             out = ak.layout.ListOffsetArray32(
                 out.offsets, out.content.toByteMaskedArray()
             )
         elif isinstance(out, ak.layout.ListOffsetArray64) and isinstance(
-            out.content, ak.layout.BitMaskedArray
+            out.content, (ak.layout.BitMaskedArray, ak.layout.UnmaskedArray)
         ):
             out = ak.layout.ListOffsetArray64(
                 out.offsets, out.content.toByteMaskedArray()
