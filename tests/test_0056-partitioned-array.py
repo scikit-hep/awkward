@@ -451,14 +451,14 @@ def test_getitem_first_dimension_field():
             array.tojson()
             == '[{"x":0.0,"y":[]},{"x":1.1,"y":[1]},{"x":2.2,"y":[2,2]},{"x":3.3,"y":[3,3,3]},{"x":4.4,"y":[4,4,4,4]}]'
         )
-        assert array["y", :, :2].tojson() == "[[],[1],[2,2],[3,3],[4,4]]"
-        assert (
-            array[["y"], :, :2].tojson()
-            == '[{"y":[]},{"y":[1]},{"y":[2,2]},{"y":[3,3]},{"y":[4,4]}]'
-        )
-        assert array[:, "y", :2].tojson() == "[[],[1],[2,2],[3,3],[4,4]]"
-        assert array["y", ..., :2].tojson() == "[[],[1],[2,2],[3,3],[4,4]]"
-        assert array[np.newaxis, "y", :, :2].tojson() == "[[[],[1],[2,2],[3,3],[4,4]]]"
+    assert array["y", :, :2].tojson() == "[[],[1],[2,2],[3,3],[4,4]]"
+    assert (
+        array[["y"], :, :2].tojson()
+        == '[{"y":[]},{"y":[1]},{"y":[2,2]},{"y":[3,3]},{"y":[4,4]}]'
+    )
+    assert array[:, "y", :2].tojson() == "[[],[1],[2,2],[3,3],[4,4]]"
+    assert array["y", ..., :2].tojson() == "[[],[1],[2,2],[3,3],[4,4]]"
+    assert array[np.newaxis, "y", :, :2].tojson() == "[[[],[1],[2,2],[3,3],[4,4]]]"
 
 
 def test_getitem_first_dimension_intarray():
