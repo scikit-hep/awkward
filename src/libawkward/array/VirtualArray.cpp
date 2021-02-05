@@ -637,10 +637,6 @@ namespace awkward {
       if (record != std::string("null")) {
         params["__record__"] = record;
       }
-      std::string array = sliceform.get()->purelist_parameter("__array__");
-      if (array != std::string("null")) {
-        params["__array__"] = array;
-      }
       std::string doc = sliceform.get()->purelist_parameter("__doc__");
       if (doc != std::string("null")) {
         params["__doc__"] = doc;
@@ -1239,10 +1235,6 @@ namespace awkward {
     std::string record = purelist_parameter("__record__");
     if (record != std::string("null")) {
       params["__record__"] = record;
-    }
-    std::string array = purelist_parameter("__array__");
-    if (array != std::string("null")) {
-      params["__array__"] = array;
     }
     std::string doc = purelist_parameter("__doc__");
     if (doc != std::string("null")) {
