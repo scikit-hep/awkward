@@ -2453,6 +2453,11 @@ def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
         elif isinstance(layout, (ak.layout.VirtualArray)):
             return recurse(layout.array, None, False)
 
+        elif isinstance(layout, (ak.partition.PartitionedArray)):
+            return pyarrow.chunked_array(
+                [recurse(x, None, False) for x in layout.partitions]
+            )
+
         else:
             raise TypeError(
                 "unrecognized array type: {0}".format(repr(layout))
