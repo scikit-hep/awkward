@@ -9,6 +9,9 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
+pyarrow = pytest.importorskip("pyarrow")
+
+
 def test_no_fields(tmp_path):
     one = ak.Array([[1, 2, 3], [], [4, 5]])
     two = ak.Array([[6], [7, 8, 9, 10]])
@@ -61,3 +64,23 @@ def test_with_fields(tmp_path):
 
     with_metadata_lazy = ak.from_parquet(tmp_path, lazy=True)
     assert with_metadata_lazy.tolist() == one_list + two_list
+
+
+pandas = pytest.importorskip("pandas")
+
+
+def test_pandas(tmp_path):
+    df = pandas.DataFrame(
+        {"x": np.arange(10), "y": np.arange(10) % 5, "z": ["low"] * 5 + ["high"] * 5}
+    )
+    df.to_parquet(tmp_path, partition_cols=["z", "y"])
+
+    a = ak.from_parquet(tmp_path)
+    assert a.z.tolist() == ["high"] * 5 + ["low"] * 5  # alphabetical
+    assert a.y.tolist() == ["0", "1", "2", "3", "4", "0", "1", "2", "3", "4"]
+    assert a.x.tolist() == [5, 6, 7, 8, 9, 0, 1, 2, 3, 4]
+
+    b = ak.from_parquet(tmp_path, lazy=True)
+    assert b.z.tolist() == ["high"] * 5 + ["low"] * 5
+    assert b.y.tolist() == ["0", "1", "2", "3", "4", "0", "1", "2", "3", "4"]
+    assert b.x.tolist() == [5, 6, 7, 8, 9, 0, 1, 2, 3, 4]
