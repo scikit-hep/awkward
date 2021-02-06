@@ -456,11 +456,9 @@ toslice_part(ak::Slice& slice, py::object obj) {
     slice.append(std::make_shared<ak::SliceRange>(start, stop, step));
   }
 
-#if PY_MAJOR_VERSION >= 3
   else if (py::isinstance<py::ellipsis>(obj)) {
     slice.append(std::make_shared<ak::SliceEllipsis>());
   }
-#endif
 
   else if (obj.is(py::module::import("numpy").attr("newaxis"))) {
     slice.append(std::make_shared<ak::SliceNewAxis>());

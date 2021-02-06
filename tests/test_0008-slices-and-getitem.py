@@ -15,8 +15,7 @@ def test_slice():
     assert ak._ext._slice_tostring(slice(1, None)) == "[1:]"
     assert ak._ext._slice_tostring(slice(None, None, 2)) == "[::2]"
     assert ak._ext._slice_tostring(slice(1, 2, 3)) == "[1:2:3]"
-    if not ak._util.py27:
-        assert ak._ext._slice_tostring(Ellipsis) == "[...]"
+    assert ak._ext._slice_tostring(Ellipsis) == "[...]"
     assert ak._ext._slice_tostring(np.newaxis) == "[newaxis]"
     assert ak._ext._slice_tostring(None) == "[newaxis]"
     assert ak._ext._slice_tostring([1, 2, 3]) == "[array([1, 2, 3])]"
