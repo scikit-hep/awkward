@@ -2668,9 +2668,7 @@ def _from_arrow(
                 numpy.frombuffer(buffers.pop(0), dtype=np.int64)
             )
             content = popbuffers(array.values, tpe.value_type, buffers)
-            # https://issues.apache.org/jira/browse/ARROW-10930
-            # if not tpe.value_field.nullable:
-            if str(tpe).endswith(" not null>"):
+            if not tpe.value_field.nullable:
                 content = content.content
 
             out = ak.layout.ListOffsetArray64(offsets, content)
