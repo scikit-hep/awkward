@@ -85,6 +85,9 @@ namespace awkward {
     const FormPtr
       getitem_fields(const std::vector<std::string>& keys) const override;
 
+    const FormPtr
+      simplify_optiontype() const;
+
   private:
     const FormPtr content_;
   };
