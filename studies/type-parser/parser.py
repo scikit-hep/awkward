@@ -91,6 +91,17 @@ def toast(ptnode):
             keys=content_keys,
             parameters=toast(ptnode.children[-1]),
         )
+    elif ptnode.data == "regular":
+        assert (len(ptnode.children)) == 1
+        return toast(ptnode.children[0])
+    elif ptnode.data == "regular_inparm":
+        assert len(ptnode.children) == 2
+        return ak.types.RegularType(toast(ptnode.children[1]), ptnode.children[0])
+    elif ptnode.data == "regular_outparm":
+        assert len(ptnode.children) == 3
+        return ak.types.RegularType(
+            toast(ptnode.children[1]), ptnode.children[0], toast(ptnode.children[2])
+        )
     elif ptnode.data == "def_option":
         assert len(ptnode.children) == 1
         return ptnode.children[0]
@@ -277,4 +288,36 @@ def test_option_unknown_2_parm():
     text = 'option[unknown, parameters={"foo": "bar"}]'
     parsedtype = toast(test.parse(text))
     assert isinstance(parsedtype, ak.types.OptionType)
+    assert str(parsedtype) == text
+
+
+def test_regular_numpy_1():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = "5 * int64"
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.RegularType)
+    assert str(parsedtype) == text
+
+
+def test_regular_numpy_2():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = '5 * int64[parameters={"bar": "foo"}]'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.RegularType)
+    assert str(parsedtype) == text
+
+
+def test_regular_numpy_2_parm():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = '[0 * int64[parameters={"foo": "bar"}], parameters={"bla": "bloop"}]'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.RegularType)
+    assert str(parsedtype) == text
+
+
+def test_regular_unknown_1_parm():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = '[0 * unknown, parameters={"foo": "bar"}]'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.RegularType)
     assert str(parsedtype) == text

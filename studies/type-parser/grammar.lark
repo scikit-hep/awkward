@@ -4,6 +4,7 @@ input: record
      | unknown
      | primitive
      | optiontype
+     | regular
 
 record: record_tuple
       | record_tuple_param
@@ -13,26 +14,31 @@ primitive: TYPE [options]
 unknown: "unknown" [options]
 optiontype: "?" input [options]
           | "option" "[" input "," def_option "]"
+regular: regular_inparm
+       | regular_outparm
 
 record_tuple: "(" input ["," input]* ")"
 record_tuple_param: "tuple[[" input ["," input]* "]," def_option "]"
 record_dict: "{" string ":" input ["," string ":" input]* "}"
 record_struct: "struct[[" string ["," string]* "]," "[" input ["," input]* "]," def_option "]"
+regular_inparm: number "*" input
+regular_outparm: "[" number "*" input "," def_option "]"
 options: "[" def_option "]"
 def_option: "parameters" "=" dict_obj
 TYPE: "int64"
     | "int32"
 ?json: dict_obj
-    | list_obj
-    | string
-    | SIGNED_NUMBER      -> number
-    | "true"             -> true
-    | "false"            -> false
-    | "null"             -> null
-list_obj  : "[" [json ("," json)*] "]"
-dict_obj   : "{" [pair ("," pair)*] "}"
-pair   : string ":" json
-string : /((?:"(?:[^"\n\r\\]|(?:\\u[0-9a-fA-F]{4})|(?:\\["bfnrt]))*")|(?:\\\'(?:[^\\\'\n\r\\]|(?:\\u[0-9a-fA-F]{4})|(?:\\[\'bfnrt]))*")*\\\')/
+     | list_obj
+     | string
+     | number
+     | "true"             -> true
+     | "false"            -> false
+     | "null"             -> null
+list_obj: "[" [json ("," json)*] "]"
+dict_obj: "{" [pair ("," pair)*] "}"
+pair: string ":" json
+string: /((?:"(?:[^"\n\r\\]|(?:\\u[0-9a-fA-F]{4})|(?:\\["bfnrt]))*")|(?:\\\'(?:[^\\\'\n\r\\]|(?:\\u[0-9a-fA-F]{4})|(?:\\[\'bfnrt]))*")*\\\')/
+number: SIGNED_NUMBER
 
 %import common.SIGNED_NUMBER
 %import common.WS
