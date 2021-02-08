@@ -105,6 +105,7 @@ addtest(test0016 tests/test_0016-finish-getitem-for-rawarray.cpp)
 addtest(test0019 tests/test_0019-use-json-library.cpp)
 addtest(test0030 tests/test_0030-recordarray-in-numba.cpp)
 addtest(test0074 tests/test_0074-argsort-and-sort-rawarray.cpp)
+addtest(test0707 tests/test_0710-typed-array-builder.cpp)
 
 # Third tier: Python modules.
 if (PYBUILD)
