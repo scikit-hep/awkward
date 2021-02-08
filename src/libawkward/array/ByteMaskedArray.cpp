@@ -208,24 +208,43 @@ namespace awkward {
 
   const FormPtr
   ByteMaskedForm::getitem_field(const std::string& key) const {
-    return std::make_shared<ByteMaskedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      mask_,
-      content_.get()->getitem_field(key),
-      valid_when_);
+    ByteMaskedForm step1(has_identities_,
+                         util::Parameters(),
+                         FormKey(nullptr),
+                         mask_,
+                         content_.get()->getitem_field(key),
+                         valid_when_);
+    return step1.simplify_optiontype();
   }
 
   const FormPtr
   ByteMaskedForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<ByteMaskedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      mask_,
-      content_.get()->getitem_fields(keys),
-      valid_when_);
+    ByteMaskedForm step1(has_identities_,
+                         util::Parameters(),
+                         FormKey(nullptr),
+                         mask_,
+                         content_.get()->getitem_fields(keys),
+                         valid_when_);
+    return step1.simplify_optiontype();
+  }
+
+  const FormPtr
+  ByteMaskedForm::simplify_optiontype() const {
+    if (dynamic_cast<IndexedForm*>(content_.get())         ||
+        dynamic_cast<IndexedOptionForm*>(content_.get())   ||
+        dynamic_cast<ByteMaskedForm*>(content_.get())      ||
+        dynamic_cast<BitMaskedForm*>(content_.get())       ||
+        dynamic_cast<UnmaskedForm*>(content_.get())) {
+      IndexedOptionForm step1(has_identities_,
+                              parameters_,
+                              form_key_,
+                              Index::Form::i64,
+                              content_);
+      return step1.simplify_optiontype();
+    }
+    else {
+      return shallow_copy();
+    }
   }
 
   ////////// ByteMaskedArray
@@ -644,44 +663,44 @@ namespace awkward {
 
   const ContentPtr
   ByteMaskedArray::getitem_field(const std::string& key) const {
-    return std::make_shared<ByteMaskedArray>(
-      identities_,
-      util::Parameters(),
-      mask_,
-      content_.get()->getitem_field(key),
-      valid_when_);
+    ByteMaskedArray step1(identities_,
+                          util::Parameters(),
+                          mask_,
+                          content_.get()->getitem_field(key),
+                          valid_when_);
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   ByteMaskedArray::getitem_field(const std::string& key,
                                  const Slice& only_fields) const {
-    return std::make_shared<ByteMaskedArray>(
-      identities_,
-      util::Parameters(),
-      mask_,
-      content_.get()->getitem_field(key, only_fields),
-      valid_when_);
+    ByteMaskedArray step1(identities_,
+                          util::Parameters(),
+                          mask_,
+                          content_.get()->getitem_field(key, only_fields),
+                          valid_when_);
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   ByteMaskedArray::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<ByteMaskedArray>(
-      identities_,
-      util::Parameters(),
-      mask_,
-      content_.get()->getitem_fields(keys),
-      valid_when_);
+    ByteMaskedArray step1(identities_,
+                          util::Parameters(),
+                          mask_,
+                          content_.get()->getitem_fields(keys),
+                          valid_when_);
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   ByteMaskedArray::getitem_fields(const std::vector<std::string>& keys,
                                   const Slice& only_fields) const {
-    return std::make_shared<ByteMaskedArray>(
-      identities_,
-      util::Parameters(),
-      mask_,
-      content_.get()->getitem_fields(keys, only_fields),
-      valid_when_);
+    ByteMaskedArray step1(identities_,
+                          util::Parameters(),
+                          mask_,
+                          content_.get()->getitem_fields(keys, only_fields),
+                          valid_when_);
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr

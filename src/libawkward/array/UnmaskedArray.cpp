@@ -181,20 +181,34 @@ namespace awkward {
 
   const FormPtr
   UnmaskedForm::getitem_field(const std::string& key) const {
-    return std::make_shared<UnmaskedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      content_.get()->getitem_field(key));
+    UnmaskedForm step1(has_identities_,
+                       util::Parameters(),
+                       FormKey(nullptr),
+                       content_.get()->getitem_field(key));
+    return step1.simplify_optiontype();
   }
 
   const FormPtr
   UnmaskedForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<UnmaskedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      content_.get()->getitem_fields(keys));
+    UnmaskedForm step1(has_identities_,
+                       util::Parameters(),
+                       FormKey(nullptr),
+                       content_.get()->getitem_fields(keys));
+    return step1.simplify_optiontype();
+  }
+
+  const FormPtr
+  UnmaskedForm::simplify_optiontype() const {
+    if (dynamic_cast<IndexedForm*>(content_.get())         ||
+        dynamic_cast<IndexedOptionForm*>(content_.get())   ||
+        dynamic_cast<ByteMaskedForm*>(content_.get())      ||
+        dynamic_cast<BitMaskedForm*>(content_.get())       ||
+        dynamic_cast<UnmaskedForm*>(content_.get())) {
+      return content_;
+    }
+    else {
+      return shallow_copy();
+    }
   }
 
   ////////// UnmaskedArray
@@ -543,36 +557,36 @@ namespace awkward {
 
   const ContentPtr
   UnmaskedArray::getitem_field(const std::string& key) const {
-    return std::make_shared<UnmaskedArray>(
-      identities_,
-      util::Parameters(),
-      content_.get()->getitem_field(key));
+    UnmaskedArray step1(identities_,
+                        util::Parameters(),
+                        content_.get()->getitem_field(key));
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   UnmaskedArray::getitem_field(const std::string& key,
                                const Slice& only_fields) const {
-    return std::make_shared<UnmaskedArray>(
-      identities_,
-      util::Parameters(),
-      content_.get()->getitem_field(key, only_fields));
+    UnmaskedArray step1(identities_,
+                        util::Parameters(),
+                        content_.get()->getitem_field(key, only_fields));
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   UnmaskedArray::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<UnmaskedArray>(
-      identities_,
-      util::Parameters(),
-      content_.get()->getitem_fields(keys));
+    UnmaskedArray step1(identities_,
+                        util::Parameters(),
+                        content_.get()->getitem_fields(keys));
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   UnmaskedArray::getitem_fields(const std::vector<std::string>& keys,
                                 const Slice& only_fields) const {
-    return std::make_shared<UnmaskedArray>(
-      identities_,
-      util::Parameters(),
-      content_.get()->getitem_fields(keys, only_fields));
+    UnmaskedArray step1(identities_,
+                        util::Parameters(),
+                        content_.get()->getitem_fields(keys, only_fields));
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr

@@ -224,22 +224,69 @@ namespace awkward {
 
   const FormPtr
   IndexedForm::getitem_field(const std::string& key) const {
-    return std::make_shared<IndexedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      index_,
-      content_.get()->getitem_field(key));
+    IndexedForm step1(has_identities_,
+                      util::Parameters(),
+                      FormKey(nullptr),
+                      index_,
+                      content_.get()->getitem_field(key));
+    return step1.simplify_optiontype();
   }
 
   const FormPtr
   IndexedForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<IndexedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      index_,
-      content_.get()->getitem_fields(keys));
+    IndexedForm step1(has_identities_,
+                      util::Parameters(),
+                      FormKey(nullptr),
+                      index_,
+                      content_.get()->getitem_fields(keys));
+    return step1.simplify_optiontype();
+  }
+
+  const FormPtr
+  IndexedForm::simplify_optiontype() const {
+    if (IndexedForm* rawcontent = dynamic_cast<IndexedForm*>(content_.get())) {
+      return std::make_shared<IndexedForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (IndexedOptionForm* rawcontent = dynamic_cast<IndexedOptionForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (ByteMaskedForm* rawcontent = dynamic_cast<ByteMaskedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (BitMaskedForm* rawcontent = dynamic_cast<BitMaskedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (UnmaskedForm* rawcontent = dynamic_cast<UnmaskedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else {
+      return shallow_copy();
+    }
   }
 
   ////////// IndexedOptionForm
@@ -423,22 +470,69 @@ namespace awkward {
 
   const FormPtr
   IndexedOptionForm::getitem_field(const std::string& key) const {
-    return std::make_shared<IndexedOptionForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      index_,
-      content_.get()->getitem_field(key));
+    IndexedOptionForm step1(has_identities_,
+                            util::Parameters(),
+                            FormKey(nullptr),
+                            index_,
+                            content_.get()->getitem_field(key));
+    return step1.simplify_optiontype();
   }
 
   const FormPtr
   IndexedOptionForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<IndexedOptionForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      index_,
-      content_.get()->getitem_fields(keys));
+    IndexedOptionForm step1(has_identities_,
+                            util::Parameters(),
+                            FormKey(nullptr),
+                            index_,
+                            content_.get()->getitem_fields(keys));
+    return step1.simplify_optiontype();
+  }
+
+  const FormPtr
+  IndexedOptionForm::simplify_optiontype() const {
+    if (IndexedForm* rawcontent = dynamic_cast<IndexedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (IndexedOptionForm* rawcontent = dynamic_cast<IndexedOptionForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (ByteMaskedForm* rawcontent = dynamic_cast<ByteMaskedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (BitMaskedForm* rawcontent = dynamic_cast<BitMaskedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (UnmaskedForm* rawcontent = dynamic_cast<UnmaskedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else {
+      return shallow_copy();
+    }
   }
 
   ////////// IndexedArray
@@ -1236,33 +1330,33 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::getitem_field(const std::string& key) const {
-    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(
-      identities_,
-      util::Parameters(),
-      index_,
-      content_.get()->getitem_field(key));
+    IndexedArrayOf<T, ISOPTION> step1(identities_,
+                                      util::Parameters(),
+                                      index_,
+                                      content_.get()->getitem_field(key));
+    return step1.simplify_optiontype();
   }
 
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::getitem_field(const std::string& key,
                                              const Slice& only_fields) const {
-    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(
-      identities_,
-      util::Parameters(),
-      index_,
-      content_.get()->getitem_field(key, only_fields));
+    IndexedArrayOf<T, ISOPTION> step1(identities_,
+                                      util::Parameters(),
+                                      index_,
+                                      content_.get()->getitem_field(key, only_fields));
+    return step1.simplify_optiontype();
   }
 
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::getitem_fields(
     const std::vector<std::string>& keys) const {
-    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(
-      identities_,
-      util::Parameters(),
-      index_,
-      content_.get()->getitem_fields(keys));
+    IndexedArrayOf<T, ISOPTION> step1(identities_,
+                                      util::Parameters(),
+                                      index_,
+                                      content_.get()->getitem_fields(keys));
+    return step1.simplify_optiontype();
   }
 
   template <typename T, bool ISOPTION>
@@ -1270,11 +1364,11 @@ namespace awkward {
   IndexedArrayOf<T, ISOPTION>::getitem_fields(
     const std::vector<std::string>& keys,
     const Slice& only_fields) const {
-    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(
-      identities_,
-      util::Parameters(),
-      index_,
-      content_.get()->getitem_fields(keys, only_fields));
+    IndexedArrayOf<T, ISOPTION> step1(identities_,
+                                      util::Parameters(),
+                                      index_,
+                                      content_.get()->getitem_fields(keys, only_fields));
+    return step1.simplify_optiontype();
   }
 
   template <typename T, bool ISOPTION>
