@@ -5,5 +5,5 @@ jaxlib>=0.1.57;python_version>="3.6" and sys_platform != "win32"
 numba>=0.50.0;python_version>="3.6"
 numexpr;python_version>="3.6"
 pandas>=0.24.0;python_version>="3.6"
-pyarrow>=2.0.0;python_version>="3.6" and sys_platform != "win32"
+pyarrow>=3.0.0;python_version>="3.6" and sys_platform != "win32"
 PyYAML
