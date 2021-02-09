@@ -68,7 +68,7 @@ def copy(array):
     return ak._util.wrap(layout.deep_copy(), ak._util.behaviorof(array))
 
 
-def mask(array, mask, valid_when=True, highlevel=True):
+def mask(array, mask, valid_when=True, highlevel=True, behavior=None):
     """
     Args:
         array: Data to mask, rather than filter.
@@ -79,6 +79,8 @@ def mask(array, mask, valid_when=True, highlevel=True):
             values in `mask` are considered valid.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns an array for which
 
@@ -172,7 +174,7 @@ def mask(array, mask, valid_when=True, highlevel=True):
         mask, allow_record=True, allow_other=False
     )
 
-    behavior = ak._util.behaviorof(array, mask)
+    behavior = ak._util.behaviorof(array, mask, behavior=behavior)
     out = ak._util.broadcast_and_apply(
         [layoutarray, layoutmask],
         getfunction,
@@ -187,7 +189,7 @@ def mask(array, mask, valid_when=True, highlevel=True):
         return out[0]
 
 
-def num(array, axis=1, highlevel=True):
+def num(array, axis=1, highlevel=True, behavior=None):
     """
     Args:
         array: Data containing nested lists to count.
@@ -197,6 +199,8 @@ def num(array, axis=1, highlevel=True):
             dimension, `-2` is the next level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns an array of integers specifying the number of elements at a
     particular level.
@@ -251,12 +255,21 @@ def num(array, axis=1, highlevel=True):
     )
     out = layout.num(axis=axis)
     if highlevel:
-        return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
+        return ak._util.wrap(
+            out, behavior=ak._util.behaviorof(array, behavior=behavior)
+        )
     else:
         return out
 
 
-def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=True):
+def zip(
+    arrays,
+    depth_limit=None,
+    parameters=None,
+    with_name=None,
+    highlevel=True,
+    behavior=None,
+):
     """
     Args:
         arrays (dict or iterable of arrays): Arrays to combine into a
@@ -273,6 +286,8 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Combines `arrays` into a single structure as the fields of a collection
     of records or the slots of a collection of tuples. If the `arrays` have
@@ -350,7 +365,7 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
         )
 
     if isinstance(arrays, dict):
-        behavior = ak._util.behaviorof(*arrays.values())
+        behavior = ak._util.behaviorof(*arrays.values(), behavior=behavior)
         recordlookup = []
         layouts = []
         for n, x in arrays.items():
@@ -362,7 +377,7 @@ def zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=Tru
             )
 
     else:
-        behavior = ak._util.behaviorof(*arrays)
+        behavior = ak._util.behaviorof(*arrays, behavior=behavior)
         recordlookup = None
         layouts = []
         for x in arrays:
@@ -439,7 +454,7 @@ def unzip(array):
         return tuple(array[n] for n in fields)
 
 
-def to_regular(array, axis=1, highlevel=True):
+def to_regular(array, axis=1, highlevel=True, behavior=None):
     """
     Args:
         array: Array to convert.
@@ -449,6 +464,8 @@ def to_regular(array, axis=1, highlevel=True):
             dimension, `-2` is the next level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Converts a variable-length axis into a regular one, if possible.
 
@@ -497,12 +514,12 @@ def to_regular(array, axis=1, highlevel=True):
         )
 
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
-def from_regular(array, axis=1, highlevel=True):
+def from_regular(array, axis=1, highlevel=True, behavior=None):
     """
     Args:
         array: Array to convert.
@@ -512,6 +529,8 @@ def from_regular(array, axis=1, highlevel=True):
             dimension, `-2` is the next level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Converts a regular axis into an irregular one.
 
@@ -554,12 +573,12 @@ def from_regular(array, axis=1, highlevel=True):
         )
 
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
-def with_name(array, name, highlevel=True):
+def with_name(array, name, highlevel=True, behavior=None):
     """
     Args:
         base: Data containing records or tuples.
@@ -567,6 +586,8 @@ def with_name(array, name, highlevel=True):
             the `"__record__"` parameter.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns an #ak.Array or #ak.Record (or low-level equivalent, if
     `highlevel=False`) with a new name. This function does not change the
@@ -598,12 +619,12 @@ def with_name(array, name, highlevel=True):
         ak.operations.convert.to_layout(array), getfunction, pass_depth=False
     )
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
-def with_field(base, what, where=None, highlevel=True):
+def with_field(base, what, where=None, highlevel=True, behavior=None):
     """
     Args:
         base: Data containing records or tuples.
@@ -614,6 +635,8 @@ def with_field(base, what, where=None, highlevel=True):
             interpreted as a path where to add the field in a nested record.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns an #ak.Array or #ak.Record (or low-level equivalent, if
     `highlevel=False`) with a new field attached. This function does not
@@ -646,15 +669,22 @@ def with_field(base, what, where=None, highlevel=True):
     ):
         return with_field(
             base,
-            with_field(base[where[0]], what, where=where[1:], highlevel=highlevel),
+            with_field(
+                base[where[0]],
+                what,
+                where=where[1:],
+                highlevel=highlevel,
+                behavior=behavior,
+            ),
             where=where[0],
             highlevel=highlevel,
+            behavior=behavior,
         )
     else:
         if not (isinstance(where, str) or where is None):
             where = where[0]
 
-        behavior = ak._util.behaviorof(base, what)
+        behavior = ak._util.behaviorof(base, what, behavior=behavior)
         base = ak.operations.convert.to_layout(
             base, allow_record=True, allow_other=False
         )
@@ -717,7 +747,7 @@ def with_field(base, what, where=None, highlevel=True):
             return out[0]
 
 
-def with_parameter(array, parameter, value, highlevel=True):
+def with_parameter(array, parameter, value, highlevel=True, behavior=None):
     """
     Args:
         array: Data convertible into an Awkward Array.
@@ -725,6 +755,8 @@ def with_parameter(array, parameter, value, highlevel=True):
         value (JSON): Value of the parameter to set on that array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     This function returns a new array with a parameter set on the outermost
     node of its #ak.Array.layout.
@@ -747,17 +779,21 @@ def with_parameter(array, parameter, value, highlevel=True):
         out = layout.withparameter(parameter, value)
 
     if highlevel:
-        return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
+        return ak._util.wrap(
+            out, behavior=ak._util.behaviorof(array, behavior=behavior)
+        )
     else:
         return out
 
 
-def without_parameters(array, highlevel=True):
+def without_parameters(array, highlevel=True, behavior=None):
     """
     Args:
         array: Data convertible into an Awkward Array.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     This function returns a new array without any parameters in its
     #ak.Array.layout, on nodes of any level of depth.
@@ -774,7 +810,9 @@ def without_parameters(array, highlevel=True):
     )
 
     if highlevel:
-        return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
+        return ak._util.wrap(
+            out, behavior=ak._util.behaviorof(array, behavior=behavior)
+        )
     else:
         return out
 
@@ -783,12 +821,14 @@ _ZEROS = object()
 
 
 @ak._connect._numpy.implements("zeros_like")
-def zeros_like(array, highlevel=True):
+def zeros_like(array, highlevel=True, behavior=None):
     """
     Args:
         array: Array to use as a model for a replacement that contains only `0`.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     This is the equivalent of NumPy's `np.zeros_like` for Awkward Arrays.
 
@@ -797,16 +837,18 @@ def zeros_like(array, highlevel=True):
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
-    return full_like(array, _ZEROS, highlevel=highlevel)
+    return full_like(array, _ZEROS, highlevel=highlevel, behavior=behavior)
 
 
 @ak._connect._numpy.implements("ones_like")
-def ones_like(array, highlevel=True):
+def ones_like(array, highlevel=True, behavior=None):
     """
     Args:
         array: Array to use as a model for a replacement that contains only `1`.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     This is the equivalent of NumPy's `np.ones_like` for Awkward Arrays.
 
@@ -815,11 +857,11 @@ def ones_like(array, highlevel=True):
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
-    return full_like(array, 1, highlevel=highlevel)
+    return full_like(array, 1, highlevel=highlevel, behavior=behavior)
 
 
 @ak._connect._numpy.implements("full_like")
-def full_like(array, fill_value, highlevel=True):
+def full_like(array, fill_value, highlevel=True, behavior=None):
     """
     Args:
         array: Array to use as a model for a replacement that contains only
@@ -827,6 +869,8 @@ def full_like(array, fill_value, highlevel=True):
         fill_value: Value to fill new new array with.
         highlevel (bool, default is True): If True, return an #ak.Array;
             otherwise, return a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
 
@@ -964,7 +1008,7 @@ def full_like(array, fill_value, highlevel=True):
 
     out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
@@ -1111,7 +1155,9 @@ def broadcast_arrays(*arrays, **kwargs):
 
 
 @ak._connect._numpy.implements("concatenate")
-def concatenate(arrays, axis=0, merge=True, mergebool=True, highlevel=True):
+def concatenate(
+    arrays, axis=0, merge=True, mergebool=True, highlevel=True, behavior=None
+):
     """
     Args:
         arrays: Arrays to concatenate along any dimension.
@@ -1128,6 +1174,8 @@ def concatenate(arrays, axis=0, merge=True, mergebool=True, highlevel=True):
             distinct types (using an #ak.layout.UnionArray8_64).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns an array with `arrays` concatenated. For `axis=0`, this means that
     one whole array follows another. For `axis=1`, it means that the `arrays`
@@ -1193,7 +1241,9 @@ def concatenate(arrays, axis=0, merge=True, mergebool=True, highlevel=True):
                     partitions.append(content)
                     offsets.append(offsets[-1] + len(content))
                 else:
-                    partitions.append(ak.operations.convert.from_iter([content]))
+                    partitions.append(
+                        ak.operations.convert.from_iter([content], highlevel=False)
+                    )
                     offsets.append(offsets[-1] + 1)
 
             out = ak.partition.IrregularlyPartitionedArray(partitions, offsets[1:])
@@ -1329,14 +1379,16 @@ def concatenate(arrays, axis=0, merge=True, mergebool=True, highlevel=True):
         out = ak._util.broadcast_and_apply(
             contents,
             getfunction,
-            behavior=ak._util.behaviorof(*arrays),
+            behavior=ak._util.behaviorof(*arrays, behavior=behavior),
             allow_records=True,
             right_broadcast=False,
             pass_depth=True,
         )[0]
 
     if highlevel:
-        return ak._util.wrap(out, behavior=ak._util.behaviorof(*arrays))
+        return ak._util.wrap(
+            out, behavior=ak._util.behaviorof(*arrays, behavior=behavior)
+        )
     else:
         return out
 
@@ -1452,7 +1504,7 @@ def where(condition, *args, **kwargs):
         )
 
 
-def flatten(array, axis=1, highlevel=True):
+def flatten(array, axis=1, highlevel=True, behavior=None):
     """
     Args:
         array: Data containing nested lists to flatten.
@@ -1464,6 +1516,8 @@ def flatten(array, axis=1, highlevel=True):
             level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns an array with one level of nesting removed by erasing the
     boundaries between consecutive lists. Since this operates on a level of
@@ -1603,7 +1657,9 @@ def flatten(array, axis=1, highlevel=True):
             out = apply(layout)
 
         if highlevel:
-            return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
+            return ak._util.wrap(
+                out, behavior=ak._util.behaviorof(array, behavior=behavior)
+            )
         else:
             return out
 
@@ -1611,12 +1667,12 @@ def flatten(array, axis=1, highlevel=True):
         out = layout.flatten(axis)
 
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
-def unflatten(array, counts, highlevel=True):
+def unflatten(array, counts, highlevel=True, behavior=None):
     """
     Args:
         array: Data to create an array with an additional level from.
@@ -1625,6 +1681,8 @@ def unflatten(array, counts, highlevel=True):
             it will consist of variable-length lists with the given lengths.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns an array with an additional level of nesting. This is roughly the
     inverse of #ak.flatten, where `counts` were obtained by #ak.num (both with
@@ -1659,7 +1717,7 @@ def unflatten(array, counts, highlevel=True):
             counts, allow_record=False, allow_other=False
         )
         ptr_lib = ak.operations.convert.kernels(array)
-        counts = ak.operations.convert.to_kernels(counts, ptr_lib)
+        counts = ak.operations.convert.to_kernels(counts, ptr_lib, highlevel=False)
         if ptr_lib == "cpu":
             counts = ak.operations.convert.to_numpy(counts, allow_missing=True)
             mask = ak.nplike.numpy.ma.getmask(counts)
@@ -1696,12 +1754,12 @@ def unflatten(array, counts, highlevel=True):
             out = ak.layout.ByteMaskedArray(index, out, valid_when=False)
 
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
-def local_index(array, axis=-1, highlevel=True):
+def local_index(array, axis=-1, highlevel=True, behavior=None):
     """
     Args:
         array: Array to index.
@@ -1711,6 +1769,8 @@ def local_index(array, axis=-1, highlevel=True):
             dimension, `-2` is the next level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     For example,
 
@@ -1770,13 +1830,13 @@ def local_index(array, axis=-1, highlevel=True):
     )
     out = layout.localindex(axis)
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
 @ak._connect._numpy.implements("sort")
-def sort(array, axis=-1, ascending=True, stable=True, highlevel=True):
+def sort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=None):
     """
     Args:
         array: Data to sort, possibly within nested lists.
@@ -1793,6 +1853,8 @@ def sort(array, axis=-1, ascending=True, stable=True, highlevel=True):
             (heapsort).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     For example,
 
@@ -1804,13 +1866,13 @@ def sort(array, axis=-1, ascending=True, stable=True, highlevel=True):
     )
     out = layout.sort(axis, ascending, stable)
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
 @ak._connect._numpy.implements("argsort")
-def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True):
+def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True, behavior=None):
     """
     Args:
         array: Data for which to get a sorting index, possibly within nested
@@ -1828,6 +1890,8 @@ def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True):
             (heapsort).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     For example,
 
@@ -1849,29 +1913,12 @@ def argsort(array, axis=-1, ascending=True, stable=True, highlevel=True):
     )
     out = layout.argsort(axis, ascending, stable)
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
-def is_unique(array, highlevel=True):
-    """
-    Args:
-        array: Data to check on uniqueness, possibly within nested lists.
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.layout.Content subclass.
-    """
-    layout = ak.operations.convert.to_layout(
-        array, allow_record=False, allow_other=False
-    )
-    out = layout.is_unique()
-    if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
-    else:
-        return out
-
-
-def pad_none(array, target, axis=1, clip=False, highlevel=True):
+def pad_none(array, target, axis=1, clip=False, highlevel=True, behavior=None):
     """
     Args:
         array: Data containing nested lists to pad to a target length.
@@ -1888,6 +1935,8 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True):
             (#ak.types.ListType) of at least `target`.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Increase the lengths of lists to a target length by adding None values.
 
@@ -1993,18 +2042,20 @@ def pad_none(array, target, axis=1, clip=False, highlevel=True):
     else:
         out = layout.rpad(target, axis)
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
-def fill_none(array, value, highlevel=True):
+def fill_none(array, value, highlevel=True, behavior=None):
     """
     Args:
         array: Data in which to replace None with a given value.
         value: Data with which to replace None.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Replaces missing values (None) with a given `value`.
 
@@ -2069,12 +2120,12 @@ def fill_none(array, value, highlevel=True):
         out = arraylayout.fillna(valuelayout)
 
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
-def is_none(array, axis=0, highlevel=True):
+def is_none(array, axis=0, highlevel=True, behavior=None):
     """
     Args:
         array: Data to check for missing values (None).
@@ -2084,6 +2135,8 @@ def is_none(array, axis=0, highlevel=True):
             dimension, `-2` is the next level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns an array whose value is True where an element of `array` is None;
     False otherwise (at a given `axis` depth).
@@ -2120,18 +2173,20 @@ def is_none(array, axis=0, highlevel=True):
     )
 
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
-def singletons(array, highlevel=True):
+def singletons(array, highlevel=True, behavior=None):
     """
     Args:
         array: Data to wrap in lists of length 1 if present and length 0
             if missing (None).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns a singleton list (length 1) wrapping each non-missing value and
     an empty list (length 0) in place of each missing value.
@@ -2164,12 +2219,12 @@ def singletons(array, highlevel=True):
     out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
 
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
-def firsts(array, axis=1, highlevel=True):
+def firsts(array, axis=1, highlevel=True, behavior=None):
     """
     Args:
         array: Data from which to select the first elements from nested lists.
@@ -2179,6 +2234,8 @@ def firsts(array, axis=1, highlevel=True):
             dimension, `-2` is the next level up, etc.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Selects the first element of each non-empty list and inserts None for each
     empty list.
@@ -2224,13 +2281,19 @@ def firsts(array, axis=1, highlevel=True):
         ]
 
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
 def cartesian(
-    arrays, axis=1, nested=None, parameters=None, with_name=None, highlevel=True
+    arrays,
+    axis=1,
+    nested=None,
+    parameters=None,
+    with_name=None,
+    highlevel=True,
+    behavior=None,
 ):
     """
     Args:
@@ -2254,6 +2317,8 @@ def cartesian(
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Computes a Cartesian product (i.e. cross product) of data from a set of
     `arrays`. This operation creates records (if `arrays` is a dict) or tuples
@@ -2432,7 +2497,7 @@ def cartesian(
     """
     is_partitioned = False
     if isinstance(arrays, dict):
-        behavior = ak._util.behaviorof(*arrays.values())
+        behavior = ak._util.behaviorof(*arrays.values(), behavior=behavior)
         nplike = ak.nplike.of(*arrays.values())
         new_arrays = {}
         for n, x in arrays.items():
@@ -2442,7 +2507,7 @@ def cartesian(
             if isinstance(new_arrays[n], ak.partition.PartitionedArray):
                 is_partitioned = True
     else:
-        behavior = ak._util.behaviorof(*arrays)
+        behavior = ak._util.behaviorof(*arrays, behavior=behavior)
         nplike = ak.nplike.of(*arrays)
         new_arrays = []
         for x in arrays:
@@ -2671,7 +2736,13 @@ def cartesian(
 
 
 def argcartesian(
-    arrays, axis=1, nested=None, parameters=None, with_name=None, highlevel=True
+    arrays,
+    axis=1,
+    nested=None,
+    parameters=None,
+    with_name=None,
+    highlevel=True,
+    behavior=None,
 ):
     """
     Args:
@@ -2695,6 +2766,8 @@ def argcartesian(
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Computes a Cartesian product (i.e. cross product) of data from a set of
     `arrays`, like #ak.cartesian, but returning integer indexes for
@@ -2735,7 +2808,7 @@ def argcartesian(
 
     else:
         if isinstance(arrays, dict):
-            behavior = ak._util.behaviorof(*arrays.values())
+            behavior = ak._util.behaviorof(*arrays.values(), behavior=behavior)
             layouts = dict(
                 (
                     n,
@@ -2746,7 +2819,7 @@ def argcartesian(
                 for n, x in arrays.items()
             )
         else:
-            behavior = ak._util.behaviorof(*arrays)
+            behavior = ak._util.behaviorof(*arrays, behavior=behavior)
             layouts = [
                 ak.operations.convert.to_layout(
                     x, allow_record=False, allow_other=False
@@ -2780,6 +2853,7 @@ def combinations(
     parameters=None,
     with_name=None,
     highlevel=True,
+    behavior=None,
 ):
     """
     Args:
@@ -2803,6 +2877,8 @@ def combinations(
             (overriding `parameters`, if necessary).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Computes a Cartesian product (i.e. cross product) of `array` with itself
     that is restricted to combinations sampled without replacement. If the
@@ -2931,7 +3007,9 @@ def combinations(
         n, replacement=replacement, keys=fields, parameters=parameters, axis=axis
     )
     if highlevel:
-        return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
+        return ak._util.wrap(
+            out, behavior=ak._util.behaviorof(array, behavior=behavior)
+        )
     else:
         return out
 
@@ -2945,6 +3023,7 @@ def argcombinations(
     parameters=None,
     with_name=None,
     highlevel=True,
+    behavior=None,
 ):
     """
     Args:
@@ -2998,7 +3077,9 @@ def argcombinations(
             n, replacement=replacement, keys=fields, parameters=parameters, axis=axis
         )
         if highlevel:
-            return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
+            return ak._util.wrap(
+                out, behavior=ak._util.behaviorof(array, behavior=behavior)
+            )
         else:
             return out
 
@@ -3067,7 +3148,7 @@ def partitioned(arrays, highlevel=True, behavior=None):
         return out
 
 
-def repartition(array, lengths, highlevel=True):
+def repartition(array, lengths, highlevel=True, behavior=None):
     """
     Args:
         array: A possibly-partitioned array.
@@ -3081,6 +3162,8 @@ def repartition(array, lengths, highlevel=True):
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content or #ak.partition.PartitionedArray
             subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns a possibly-partitioned array: unpartitioned if `lengths` is None;
     partitioned otherwise.
@@ -3136,7 +3219,9 @@ def repartition(array, lengths, highlevel=True):
             out = ak.partition.IrregularlyPartitionedArray.toPartitioned(layout, stops)
 
     if highlevel:
-        return ak._util.wrap(out, behavior=ak._util.behaviorof(array))
+        return ak._util.wrap(
+            out, behavior=ak._util.behaviorof(array, behavior=behavior)
+        )
     else:
         return out
 
@@ -3339,12 +3424,14 @@ def virtual(
         return out
 
 
-def materialized(array, highlevel=True):
+def materialized(array, highlevel=True, behavior=None):
     """
     Args:
         array: The possibly virtual array to ensure is materialized.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Returns ``array`` with all virtual array nodes fully materialized.
 
@@ -3363,12 +3450,12 @@ def materialized(array, highlevel=True):
         layout, getfunction, pass_depth=False, pass_user=False
     )
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
 
-def with_cache(array, cache, highlevel=True):
+def with_cache(array, cache, highlevel=True, behavior=None):
     """
     Args:
         array: Data to search for nested virtual arrays.
@@ -3380,6 +3467,8 @@ def with_cache(array, cache, highlevel=True):
             TTL, etc.). If "new", a new dict (keep-forever cache) is created.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Remove caches from all virtual arrays nested within `array` if `cache` is
     None; adds a cache otherwise.
@@ -3436,7 +3525,7 @@ def with_cache(array, cache, highlevel=True):
         ak.operations.convert.to_layout(array), getfunction, pass_depth=False
     )
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 
@@ -3604,13 +3693,15 @@ if hasattr(np, "complex256"):
     _dtype_to_string[np.dtype(np.complex256)] = "complex256"
 
 
-def values_astype(array, to, highlevel=True):
+def values_astype(array, to, highlevel=True, behavior=None):
     """
     Args:
         array: Array whose numbers should be converted to a new numeric type.
         to (dtype or dtype specifier): Type to convert the numbers into.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Converts all numbers in the array to a new type, leaving the structure
     untouched.
@@ -3629,7 +3720,7 @@ def values_astype(array, to, highlevel=True):
     out = layout.numbers_to_type(to_str)
 
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 

@@ -204,13 +204,13 @@ def test_astype_complex():
     assert str(ak.type(array_float64)) == "?float64"
     assert str(ak.type(ak.Array(array_float64))) == "5 * ?float64"
 
-    assert np.can_cast(np.float32, np.float64) == True
-    assert np.can_cast(np.float64, np.float32, "unsafe") == True
-    assert np.can_cast(np.float64, np.int8, "unsafe") == True
-    assert np.can_cast(np.float64, np.complex64, "unsafe") == True
-    assert np.can_cast(np.float64, np.complex128, "unsafe") == True
-    assert np.can_cast(np.complex64, np.float64, "unsafe") == True
-    assert np.can_cast(np.complex128, np.float64, "unsafe") == True
+    assert np.can_cast(np.float32, np.float64) is True
+    assert np.can_cast(np.float64, np.float32, "unsafe") is True
+    assert np.can_cast(np.float64, np.int8, "unsafe") is True
+    assert np.can_cast(np.float64, np.complex64, "unsafe") is True
+    assert np.can_cast(np.float64, np.complex128, "unsafe") is True
+    assert np.can_cast(np.complex64, np.float64, "unsafe") is True
+    assert np.can_cast(np.complex128, np.float64, "unsafe") is True
 
     content_complex64 = ak.values_astype(content_float64, "complex64", highlevel=False)
     array_complex64 = ak.layout.UnmaskedArray(content_complex64)

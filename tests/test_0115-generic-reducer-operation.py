@@ -1412,7 +1412,7 @@ def test_highlevel():
         check_valid=True,
     )
 
-    assert ak.any(array) == True
+    assert ak.any(array) is np.bool_(True)
     assert ak.to_list(ak.any(array, axis=-1)) == [
         [True, False, False, True],
         [],
@@ -1420,7 +1420,7 @@ def test_highlevel():
     ]
     assert ak.to_list(ak.any(array, axis=-2)) == [[True, False, True], [], [True, True]]
 
-    assert ak.all(array) == False
+    assert ak.all(array) is np.bool_(False)
     assert ak.to_list(ak.all(array, axis=-1)) == [
         [False, True, False, True],
         [],

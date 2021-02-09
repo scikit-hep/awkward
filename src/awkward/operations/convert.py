@@ -1888,7 +1888,7 @@ def to_layout(
         return array
 
 
-def regularize_numpyarray(array, allow_empty=True, highlevel=True):
+def regularize_numpyarray(array, allow_empty=True, highlevel=True, behavior=None):
     """
     Args:
         array: Data to convert into an Awkward Array.
@@ -1896,6 +1896,8 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True):
             otherwise, convert empty arrays into #ak.layout.NumpyArray.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
     Converts any multidimensional #ak.layout.NumpyArray.shape into nested
     #ak.layout.RegularArray nodes. The output may have any Awkward data type:
@@ -1919,7 +1921,7 @@ def regularize_numpyarray(array, allow_empty=True, highlevel=True):
 
     out = ak._util.recursively_apply(to_layout(array), getfunction, pass_depth=False)
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array))
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
         return out
 

@@ -25,7 +25,7 @@ def test_forms():
     assert form.inner_shape == []
     assert form.itemsize == 8
     assert form.primitive == "float64"
-    assert form.has_identities == False
+    assert form.has_identities is False
     assert form.parameters == {}
     assert form.form_key is None
     assert json.loads(form.tojson(False, True)) == {
@@ -60,7 +60,7 @@ def test_forms():
     assert form.inner_shape == [1, 2, 3]
     assert form.itemsize == 8
     assert form.primitive == "float64"
-    assert form.has_identities == True
+    assert form.has_identities is True
     assert form.parameters == {"hey": ["you", {"there": 3}]}
     assert form.parameter("hey") == ["you", {"there": 3}]
     assert form.form_key == "yowzers"
@@ -132,9 +132,9 @@ def test_forms():
         "format": "d",
         "primitive": "float64",
     }
-    assert form.valid_when == True
-    assert form.lsb_order == False
-    assert form.has_identities == False
+    assert form.valid_when is True
+    assert form.lsb_order is False
+    assert form.has_identities is False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
     assert form.form_key == "yowzers"
@@ -183,8 +183,8 @@ def test_forms():
         "format": "d",
         "primitive": "float64",
     }
-    assert form.valid_when == True
-    assert form.has_identities == False
+    assert form.valid_when is True
+    assert form.has_identities is False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
     assert form.form_key == "yowzers"
@@ -205,7 +205,7 @@ def test_forms():
         "parameters": {"hey": ["you"]},
         "form_key": "yowzers",
     }
-    assert form.has_identities == False
+    assert form.has_identities is False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
     assert form.form_key == "yowzers"
@@ -251,7 +251,7 @@ def test_forms():
         "format": "d",
         "primitive": "float64",
     }
-    assert form.has_identities == False
+    assert form.has_identities is False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
     assert form.form_key == "yowzers"
@@ -297,7 +297,7 @@ def test_forms():
         "format": "d",
         "primitive": "float64",
     }
-    assert form.has_identities == False
+    assert form.has_identities is False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
     assert form.form_key == "yowzers"
@@ -347,7 +347,7 @@ def test_forms():
         "format": "d",
         "primitive": "float64",
     }
-    assert form.has_identities == False
+    assert form.has_identities is False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
     assert form.form_key == "yowzers"
@@ -393,7 +393,7 @@ def test_forms():
         "format": "d",
         "primitive": "float64",
     }
-    assert form.has_identities == False
+    assert form.has_identities is False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
     assert form.form_key == "yowzers"
@@ -490,7 +490,7 @@ def test_forms():
             "format": "?",
             "primitive": "bool",
         }
-    assert form.has_identities == False
+    assert form.has_identities is False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
     assert form.form_key == "yowzers"
@@ -575,7 +575,7 @@ def test_forms():
         "format": "?",
         "primitive": "bool",
     }
-    assert form.has_identities == False
+    assert form.has_identities is False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
     assert form.form_key == "yowzers"
@@ -621,7 +621,7 @@ def test_forms():
         "primitive": "float64",
     }
     assert form.size == 10
-    assert form.has_identities == False
+    assert form.has_identities is False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
     assert form.form_key == "yowzers"
@@ -693,7 +693,7 @@ def test_forms():
         "format": "?",
         "primitive": "bool",
     }
-    assert form.has_identities == False
+    assert form.has_identities is False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
     assert form.form_key == "yowzers"
@@ -733,7 +733,7 @@ def test_forms():
         "format": "d",
         "primitive": "float64",
     }
-    assert form.has_identities == False
+    assert form.has_identities is False
     assert form.parameters == {"hey": ["you"]}
     assert form.parameter("hey") == ["you"]
     assert form.form_key == "yowzers"
@@ -746,7 +746,7 @@ def test_forms():
     assert form.form.inner_shape == []
     assert form.form.itemsize == 8
     assert form.form.primitive == "float64"
-    assert form.form.has_identities == False
+    assert form.form.has_identities is False
     assert form.form.parameters == {}
     assert form.has_length is True
     assert form.parameters == {}
