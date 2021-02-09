@@ -2,7 +2,48 @@
 requires = [
     "setuptools>=42.0",
     "wheel>=0.36.0",
-    "cmake>=3.13"
+    "cmake>=3.13",
 ]
 
 build-backend = "setuptools.build_meta"
+
+
+[tool.check-manifest]
+ignore = [
+    # Hidden files
+    ".*",
+    ".*/**",
+    "**/.*",
+    "**/.*/**",
+
+    # Local files
+    "dependent-project/**",
+    "docs*/**",
+    "dev/**",
+    "studies/**",
+
+    "cuda-build.sh",
+    "kernel-specification.yml",
+    "localbuild.py",
+
+    # Extern files
+    "pybind11/*.*",
+    "pybind11/pybind11/**",
+    "*/example/**",
+    "*/doc/**",
+    "*/tests/**",
+    "*/test/**",
+    "*/bin/**",
+    "**/Makefile",
+    "rapidjson/*.md",
+    "rapidjson/docker/*",
+    "dlpack/apps/**",
+    "dlpack/**/*.md",
+    "rapidjson/**/*.json",
+    "rapidjson/**/*.yml",
+    "rapidjson/**/*.js",
+    "rapidjson/**/*.sh",
+    "rapidjson/**/*.autopkg",
+    "rapidjson/thirdparty/**",
+    "rapidjson/docker/**",
+]
