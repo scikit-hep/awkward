@@ -1219,8 +1219,8 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                 out2[i] = py::cast(ptr);
               }
               else {
-                throw std::invalid_argument(
-                  std::string("VirtualArray's cache is not a Python MutableMapping")
+                throw std::runtime_error(
+                  std::string("VirtualArray's cache is not a PyArrayCache")
                   + FILENAME(__LINE__));
               }
             }
@@ -2312,8 +2312,8 @@ make_Record(const py::handle& m, const std::string& name) {
             out2[i] = py::cast(ptr);
           }
           else {
-            throw std::invalid_argument(
-              std::string("VirtualArray's cache is not a Python MutableMapping")
+            throw std::runtime_error(
+              std::string("VirtualArray's cache is not a PyArrayCache")
               + FILENAME(__LINE__));
           }
         }
@@ -2772,8 +2772,8 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           return py::cast(ptr);
         }
         else {
-          throw std::invalid_argument(
-            std::string("VirtualArray's cache is not a Python MutableMapping")
+          throw std::runtime_error(
+            std::string("VirtualArray's cache is not a PyArrayCache")
             + FILENAME(__LINE__));
         }
       })
