@@ -14,10 +14,10 @@ def test_NumpyArray():
         np.array(["1chchc", "1chchc", "2sss", "3", "4", "5"], dtype=object),
         parameters={"__array__": "categorical"},
     )
-    assert ak.is_valid(ak.Array(array)) == False
-    # FIXME? assert array.is_unique() == False
+    assert ak.is_valid(ak.Array(array)) is False
+    # FIXME? assert array.is_unique() is False
     array2 = ak.layout.NumpyArray(np.array([5, 6, 1, 3, 4, 5]))
-    assert array2.is_unique() == False
+    assert array2.is_unique() is False
 
 
 def test_ListOffsetArray():
@@ -29,7 +29,7 @@ def test_ListOffsetArray():
         "three",
         "two",
     ]
-    assert array.is_unique() == True
+    assert array.is_unique() is True
 
     array2 = ak.from_iter(["one", "two", "one", "four", "two"], highlevel=False)
     assert ak.to_list(array2.sort(0, True, True)) == [
@@ -39,7 +39,7 @@ def test_ListOffsetArray():
         "two",
         "two",
     ]
-    assert array2.is_unique() == False
+    assert array2.is_unique() is False
 
     content = ak.layout.NumpyArray(
         np.array([3.3, 1.1, 2.2, 0.0, 4.4, 9.9, 6.6, 7.7, 8.8, 5.5])
@@ -54,7 +54,7 @@ def test_ListOffsetArray():
         [6.6, 7.7, 8.8, 5.5],
         [],
     ]
-    assert listoffsetarray.is_unique() == True
+    assert listoffsetarray.is_unique() is True
 
     content = ak.layout.NumpyArray(
         np.array([3.3, 1.1, 2.2, 0.0, 4.4, 9.9, 2.2, 3.3, 1.1, 5.5])
@@ -69,7 +69,7 @@ def test_ListOffsetArray():
         [2.2, 3.3, 1.1],
         [5.5],
     ]
-    assert listoffsetarray.is_unique() == False
+    assert listoffsetarray.is_unique() is False
 
     content2 = ak.layout.NumpyArray(
         np.array([0.0, 1.1, 2.2, 3.3, 1.1, 5.5, 6.6, 7.7, 2.2, 9.9])
@@ -84,7 +84,7 @@ def test_ListOffsetArray():
         [6.6, 7.7, 2.2, 9.9],
         [],
     ]
-    assert listoffsetarray2.is_unique() == True
+    assert listoffsetarray2.is_unique() is True
 
 
 def test_RegularArray():
@@ -123,7 +123,7 @@ def test_RegularArray():
         [2.2, 1.5, 1.6],
         [3.6, None, 6.7],
     ]
-    assert regular_array.is_unique() == True
+    assert regular_array.is_unique() is True
 
     index2 = ak.layout.Index64(
         np.array([13, 9, 13, 9, 13, 13, -1, -1, -1, 2, 8], dtype=np.int64)
@@ -135,7 +135,7 @@ def test_RegularArray():
         [3.9, 6.9, 6.9],
         [None, None, None],
     ]
-    assert regular_array2.is_unique() == False
+    assert regular_array2.is_unique() is False
 
 
 def test_IndexedArray():
@@ -146,13 +146,13 @@ def test_IndexedArray():
     indexedarray = ak.layout.IndexedArray64(index, content)
 
     assert ak.to_list(indexedarray) == [0.0, 2.2, 4.4, 6.6, 8.8, 9.9]
-    assert indexedarray.is_unique() == True
+    assert indexedarray.is_unique() is True
 
     index2 = ak.layout.Index64(np.array([0, 2, 9, 6, 0, 9], dtype=np.int64))
     indexedarray2 = ak.layout.IndexedArray64(index2, content)
 
     assert ak.to_list(indexedarray2) == [0.0, 2.2, 9.9, 6.6, 0.0, 9.9]
-    assert indexedarray2.is_unique() == False
+    assert indexedarray2.is_unique() is False
 
 
 def test_RecordArray():
@@ -170,9 +170,9 @@ def test_RecordArray():
         ]
     )
 
-    assert ak.is_unique(array) == True
-    assert ak.is_unique(array.x) == False
-    assert ak.is_unique(array.y) == True
+    assert array.layout.is_unique() is True
+    assert array.x.layout.is_unique() is False
+    assert array.y.layout.is_unique() is True
 
 
 def test_same_categories():
@@ -195,9 +195,9 @@ def test_same_categories():
         "two",
         "two",
     ]
-    assert categorical1.is_unique() == False
-    assert categorical1.content.is_unique() == True
-    assert categorical2.is_unique() == False
+    assert categorical1.is_unique() is False
+    assert categorical1.content.is_unique() is True
+    assert categorical2.is_unique() is False
 
     array1 = ak.Array(categorical1)
     assert array1.tolist() == [
