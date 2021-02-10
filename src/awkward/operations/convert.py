@@ -2608,7 +2608,8 @@ def _from_arrow(
 
             if isinstance(index, ak.layout.BitMaskedArray):
                 return ak.layout.BitMaskedArray(
-                    index.mask, out, True, len(index), True
+                    index.mask, out, True, len(index), True,
+                    parameters={"__array__": "categorical"},
                 ).simplify()
             else:
                 return out
