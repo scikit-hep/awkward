@@ -1560,8 +1560,18 @@ namespace awkward {
 
   template <typename S>
   const ContentPtr ByteMaskedArray::getitem_next_jagged_generic(
-      const Index64& slicestarts, const Index64& slicestops,
-      const S& slicecontent, const Slice& tail) const {
+      const Index64& slicestarts,
+      const Index64& slicestops,
+      const S& slicecontent,
+      const Slice& tail) const {
+    if (slicestarts.length() != length()) {
+      throw std::invalid_argument(
+        std::string("cannot fit jagged slice with length ")
+        + std::to_string(slicestarts.length()) + std::string(" into ")
+        + classname() + std::string(" of size ") + std::to_string(length())
+        + FILENAME(__LINE__));
+    }
+
     int64_t numnull;
     std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
     Index64 nextcarry = pair.first;
