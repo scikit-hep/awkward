@@ -972,6 +972,15 @@ namespace awkward {
                                                         offsets_,
                                                         pair.second));
       }
+      else if (offsets_.length() == 1) {
+        Index64 tooffsets = inneroffsets.getitem_range_nowrap(0, 1);
+        return std::pair<Index64, ContentPtr>(
+                 Index64(0),
+                 std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                     util::Parameters(),
+                                                     tooffsets,
+                                                     pair.second));
+      }
       else {
         Index64 tooffsets(offsets_.length());
         struct Error err = kernel::ListOffsetArray_flatten_offsets_64<T>(
