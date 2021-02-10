@@ -1827,21 +1827,31 @@ namespace awkward {
     }
 
     if (parameter_equals("__array__", "\"categorical\"")) {
-      if (dynamic_cast<const IndexedArray32*>(this)  ||
-          dynamic_cast<const IndexedArrayU32*>(this)  ||
-          dynamic_cast<const IndexedArray64*>(this)  ||
-          dynamic_cast<const IndexedOptionArray32*>(this)  ||
-          dynamic_cast<const IndexedOptionArray64*>(this)) {
-        if (!is_unique()) {
-          return (std::string("at ") + path + std::string(" (") + classname()
-                  + std::string("): __array__ = \"categorical\" requires contents "
-                                "to be unique"));
-        }
+      ContentPtr content(nullptr);
+      if (const IndexedArray32* raw = dynamic_cast<const IndexedArray32*>(this)) {
+        content = raw->content();
+      }
+      else if (const IndexedArrayU32* raw = dynamic_cast<const IndexedArrayU32*>(this)) {
+        content = raw->content();
+      }
+      else if (const IndexedArray64* raw = dynamic_cast<const IndexedArray64*>(this)) {
+        content = raw->content();
+      }
+      else if (const IndexedOptionArray32* raw = dynamic_cast<const IndexedOptionArray32*>(this)) {
+        content = raw->content();
+      }
+      else if (const IndexedOptionArray64* raw = dynamic_cast<const IndexedOptionArray64*>(this)) {
+        content = raw->content();
       }
       else {
         return (std::string("at ") + path + std::string(" (") + classname()
                 + std::string("): __array__ = \"categorical\" only allowed for "
                               "IndexedArray and IndexedOptionArray"));
+      }
+      if (!content.get()->is_unique()) {
+        return (std::string("at ") + path + std::string(" (") + classname()
+            + std::string("): __array__ = \"categorical\" requires contents "
+                            "to be unique"));
       }
     }
 
