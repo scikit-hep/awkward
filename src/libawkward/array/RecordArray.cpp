@@ -1870,7 +1870,8 @@ namespace awkward {
     else {
       ContentPtrVec contents;
       for (auto content : contents_) {
-        contents.push_back(content.get()->getitem_next_jagged(slicestarts,
+        ContentPtr trimmed = content.get()->getitem_range_nowrap(0, length());
+        contents.push_back(trimmed.get()->getitem_next_jagged(slicestarts,
                                                               slicestops,
                                                               slicecontent,
                                                               tail));

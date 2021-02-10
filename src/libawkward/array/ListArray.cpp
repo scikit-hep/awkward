@@ -1781,14 +1781,12 @@ namespace awkward {
                                       const Index64& slicestops,
                                       const SliceArray64& slicecontent,
                                       const Slice& tail) const {
-    if (starts_.length() < slicestarts.length()) {
-      util::handle_error(
-        failure("jagged slice length differs from array length",
-                kSliceNone,
-                kSliceNone,
-                FILENAME_C(__LINE__)),
-        classname(),
-        identities_.get());
+    if (slicestarts.length() != length()) {
+      throw std::invalid_argument(
+        std::string("cannot fit jagged slice with length ")
+        + std::to_string(slicestarts.length()) + std::string(" into ")
+        + classname() + std::string(" of size ") + std::to_string(length())
+        + FILENAME(__LINE__));
     }
     if (stops_.length() < starts_.length()) {
       util::handle_error(
@@ -1843,6 +1841,13 @@ namespace awkward {
                                       const Index64& slicestops,
                                       const SliceMissing64& slicecontent,
                                       const Slice& tail) const {
+    if (slicestarts.length() != length()) {
+      throw std::invalid_argument(
+        std::string("cannot fit jagged slice with length ")
+        + std::to_string(slicestarts.length()) + std::string(" into ")
+        + classname() + std::string(" of size ") + std::to_string(length())
+        + FILENAME(__LINE__));
+    }
     if (starts_.length() < slicestarts.length()) {
       util::handle_error(
         failure("jagged slice length differs from array length",
@@ -1924,14 +1929,12 @@ namespace awkward {
                                       const Index64& slicestops,
                                       const SliceJagged64& slicecontent,
                                       const Slice& tail) const {
-    if (starts_.length() < slicestarts.length()) {
-      util::handle_error(
-        failure("jagged slice length differs from array length",
-                kSliceNone,
-                kSliceNone,
-                FILENAME_C(__LINE__)),
-        classname(),
-        identities_.get());
+    if (slicestarts.length() != length()) {
+      throw std::invalid_argument(
+        std::string("cannot fit jagged slice with length ")
+        + std::to_string(slicestarts.length()) + std::string(" into ")
+        + classname() + std::string(" of size ") + std::to_string(length())
+        + FILENAME(__LINE__));
     }
 
     Index64 outoffsets(slicestarts.length() + 1);
@@ -1971,7 +1974,13 @@ namespace awkward {
                                       const Index64& slicestops,
                                       const SliceVarNewAxis& slicecontent,
                                       const Slice& tail) const {
-    throw std::runtime_error("FIXME ListArrayOf<T>::SliceVarNewAxis");
+    throw std::runtime_error(
+      "FIXME ListArrayOf<T>::SliceVarNewAxis. "
+      "2021-02-10 Was this left over from development? If so, it's not getting tested. "
+      "If anyone out there encounters this error, please report it so that "
+      "we can properly validate this code path and include it in the tests. "
+      "https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=bug+%28unverified%29&template=bug-report.md&title="
+    );
 
     SliceJagged64 jagged = varaxis_to_jagged(slicecontent);
     return getitem_next_jagged(slicestarts, slicestops, jagged, tail);
