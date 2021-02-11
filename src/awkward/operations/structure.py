@@ -1674,52 +1674,52 @@ def flatten(array, axis=1, highlevel=True, behavior=None):
 
 def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
     """
-        Args:
-            array: Data to create an array with an additional level from.
-            counts (int or array): Number of elements the new level should have.
-                If an integer, the new level will be regularly sized; otherwise,
-                it will consist of variable-length lists with the given lengths.
-            axis (int): The dimension at which this operation is applied. The
-                outermost dimension is `0`, followed by `1`, etc., and negative
-                values count backward from the innermost: `-1` is the innermost
-                dimension, `-2` is the next level up, etc.
-            highlevel (bool): If True, return an #ak.Array; otherwise, return
-                a low-level #ak.layout.Content subclass.
-            behavior (None or dict): Custom #ak.behavior for the output array, if
-                high-level.
+    Args:
+        array: Data to create an array with an additional level from.
+        counts (int or array): Number of elements the new level should have.
+            If an integer, the new level will be regularly sized; otherwise,
+            it will consist of variable-length lists with the given lengths.
+        axis (int): The dimension at which this operation is applied. The
+            outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
 
-        Returns an array with an additional level of nesting. This is roughly the
-        inverse of #ak.flatten, where `counts` were obtained by #ak.num (both with
-        `axis=1`).
+    Returns an array with an additional level of nesting. This is roughly the
+    inverse of #ak.flatten, where `counts` were obtained by #ak.num (both with
+    `axis=1`).
 
-        For example,
+    For example,
 
-            >>> original = ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]])
-            >>> counts = ak.num(original)
-            >>> array = ak.flatten(original)
-            >>> counts
-            <Array [3, 0, 2, 1, 4] type='5 * int64'>
-            >>> array
-            <Array [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] type='10 * int64'>
-            >>> ak.unflatten(array, counts)
-            <Array [[0, 1, 2], [], ... [5], [6, 7, 8, 9]] type='5 * var * int64'>
+        >>> original = ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]])
+        >>> counts = ak.num(original)
+        >>> array = ak.flatten(original)
+        >>> counts
+        <Array [3, 0, 2, 1, 4] type='5 * int64'>
+        >>> array
+        <Array [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] type='10 * int64'>
+        >>> ak.unflatten(array, counts)
+        <Array [[0, 1, 2], [], ... [5], [6, 7, 8, 9]] type='5 * var * int64'>
 
-        An inner dimension can be unflattened by setting the `axis` parameter, but
-        operations like this constrain the `counts` more tightly.
+    An inner dimension can be unflattened by setting the `axis` parameter, but
+    operations like this constrain the `counts` more tightly.
 
-        For example, we can subdivide an already divided list:
+    For example, we can subdivide an already divided list:
 
-            >>> original = ak.Array([[1, 2, 3, 4], [], [5, 6, 7], [8, 9]])
-            >>> print(ak.unflatten(original, [2, 2, 1, 2, 1, 1], axis=1))
-            [[[1, 2], [3, 4]], [], [[5], [6, 7]], [[8], [9]]]
+        >>> original = ak.Array([[1, 2, 3, 4], [], [5, 6, 7], [8, 9]])
+        >>> print(ak.unflatten(original, [2, 2, 1, 2, 1, 1], axis=1))
+        [[[1, 2], [3, 4]], [], [[5], [6, 7]], [[8], [9]]]
 
-        But the counts have to add up to the lengths of those lists. We can't mix
-        values from the first `[1, 2, 3, 4]` with values from the next `[5, 6, 7]`.
+    But the counts have to add up to the lengths of those lists. We can't mix
+    values from the first `[1, 2, 3, 4]` with values from the next `[5, 6, 7]`.
 
-            >>> print(ak.unflatten(original, [2, 1, 2, 2, 1, 1], axis=1))
-            Traceback (most recent call last):
-            ...
-            ValueError: structure imposed by 'counts' does not fit in the array at axis=1
+        >>> print(ak.unflatten(original, [2, 1, 2, 2, 1, 1], axis=1))
+        Traceback (most recent call last):
+        ...
+        ValueError: structure imposed by 'counts' does not fit in the array at axis=1
     """
     nplike = ak.nplike.of(array)
 
