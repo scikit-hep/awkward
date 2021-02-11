@@ -2608,7 +2608,11 @@ def _from_arrow(
 
             if isinstance(index, ak.layout.BitMaskedArray):
                 return ak.layout.BitMaskedArray(
-                    index.mask, out, True, len(index), True,
+                    index.mask,
+                    out,
+                    True,
+                    len(index),
+                    True,
                     parameters={"__array__": "categorical"},
                 ).simplify()
             else:
@@ -2846,15 +2850,15 @@ def _from_arrow(
                 return ak.layout.RecordArray(child_array, obj.schema.names)
 
         elif isinstance(obj, pyarrow.lib.Table):
-            chunks = []
-            for batch in obj.to_batches():
-                chunk = handle_arrow(batch)
-                if len(chunk) > 0:
-                    chunks.append(chunk)
-            if len(chunks) == 1:
-                return chunks[0]
+            batches = []
+            for record_batch in obj.combine_chunks().to_batches():
+                batch = handle_arrow(record_batch)
+                if len(batch) > 0:
+                    batches.append(batch)
+            if len(batches) == 1:
+                return batches[0]
             else:
-                return ak.operations.structure.concatenate(chunks, highlevel=False)
+                return ak.operations.structure.concatenate(batches, highlevel=False)
 
         elif isinstance(obj, Iterable) and all(
             isinstance(x, pyarrow.lib.RecordBatch) for x in obj
