@@ -2860,9 +2860,12 @@ def _from_arrow(
                 arrays = [handle_arrow(batch) for batch in batches if len(batch) > 0]
                 return ak.operations.structure.concatenate(arrays, highlevel=False)
 
-        elif isinstance(obj, Iterable) and len(obj) > 0 and all(
-            isinstance(x, pyarrow.lib.RecordBatch) for x in obj
-        ) and any(len(x) > 0 for x in obj):
+        elif (
+            isinstance(obj, Iterable)
+            and len(obj) > 0
+            and all(isinstance(x, pyarrow.lib.RecordBatch) for x in obj)
+            and any(len(x) > 0 for x in obj)
+        ):
             chunks = []
             for batch in obj:
                 chunk = handle_arrow(batch)
