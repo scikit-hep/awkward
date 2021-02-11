@@ -1454,6 +1454,14 @@ namespace awkward {
     if (paramcheck != std::string("")) {
       return paramcheck;
     }
+    for (int64_t i = 0;  i < numcontents();  i++) {
+      if (dynamic_cast<UnionArray8_32*>(content(i).get())  ||
+          dynamic_cast<UnionArray8_U32*>(content(i).get())  ||
+          dynamic_cast<UnionArray8_64*>(content(i).get())) {
+        return classname() + " contains " + content(i).get()->classname() +
+               ", the operation that made it might have forgotten to call 'simplify_uniontype()'";
+      }
+    }
     if (index_.length() < tags_.length()) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string("len(index) < len(tags)")

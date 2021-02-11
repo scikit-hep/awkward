@@ -492,7 +492,14 @@ namespace awkward {
                                     const SliceItemPtr& content)
       : index_(index)
       , originalmask_(originalmask)
-      , content_(content) { }
+      , content_(content) {
+    if (dynamic_cast<SliceMissingOf<int64_t>*>(content.get())) {
+      throw std::runtime_error(
+        std::string("constructing SliceMissing directly inside of SliceMissing; "
+                    "is the array used as a slice valid (ak.validity_error(slice_array))?")
+        + FILENAME(__LINE__));
+    }
+  }
 
   template <typename T>
   int64_t

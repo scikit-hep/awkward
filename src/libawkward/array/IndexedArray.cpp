@@ -1533,14 +1533,25 @@ namespace awkward {
       index_.length(),
       content_.get()->length(),
       ISOPTION);
-    if (err.str == nullptr) {
-      return content_.get()->validityerror(path + std::string(".content"));
-    }
-    else {
+    if (err.str != nullptr) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string(err.str)
               + std::string(" at i=") + std::to_string(err.identity)
               + std::string(err.filename == nullptr ? "" : err.filename));
+    }
+    else if (dynamic_cast<BitMaskedArray*>(content_.get())  ||
+             dynamic_cast<ByteMaskedArray*>(content_.get())  ||
+             dynamic_cast<IndexedArray32*>(content_.get())  ||
+             dynamic_cast<IndexedArrayU32*>(content_.get())  ||
+             dynamic_cast<IndexedArray64*>(content_.get())  ||
+             dynamic_cast<IndexedOptionArray32*>(content_.get())  ||
+             dynamic_cast<IndexedOptionArray64*>(content_.get())  ||
+             dynamic_cast<UnmaskedArray*>(content_.get())) {
+      return classname() + " contains " + content_.get()->classname() +
+             ", the operation that made it might have forgotten to call 'simplify_optiontype()'";
+    }
+    else {
+      return content_.get()->validityerror(path + std::string(".content"));
     }
   }
 
@@ -2417,11 +2428,11 @@ namespace awkward {
         next_length);
     util::handle_error(err3, classname(), identities_.get());
 
-    out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
-            Identities::none(),
-            parameters_,
-            nextoutindex,
-            out);
+    IndexedArrayOf<int64_t, ISOPTION> tmp(Identities::none(),
+                                          parameters_,
+                                          nextoutindex,
+                                          out);
+    out = tmp.simplify_optiontype();
 
     if (inject_nones) {
       out = std::make_shared<RegularArray>(Identities::none(),
@@ -2456,15 +2467,15 @@ namespace awkward {
           outindex.length());
         util::handle_error(err4, classname(), identities_.get());
 
+        IndexedArrayOf<int64_t, ISOPTION> tmp(Identities::none(),
+                                              parameters_,
+                                              outindex,
+                                              raw->content());
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
-            Identities::none(),
-            parameters_,
-            outindex,
-            raw->content()));
+          tmp.simplify_optiontype());
       }
       if (IndexedArrayOf<int64_t, ISOPTION>* raw =
         dynamic_cast<IndexedArrayOf<int64_t, ISOPTION>*>(out.get())) {
@@ -2549,11 +2560,11 @@ namespace awkward {
       next_length);
     util::handle_error(err3, classname(), identities_.get());
 
-    out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
-        Identities::none(),
-        util::Parameters(),
-        nextoutindex,
-        out);
+    IndexedArrayOf<int64_t, ISOPTION> tmp(Identities::none(),
+                                          util::Parameters(),
+                                          nextoutindex,
+                                          out);
+    out = tmp.simplify_optiontype();
 
     if (inject_nones) {
       out = std::make_shared<RegularArray>(Identities::none(),
@@ -2588,15 +2599,15 @@ namespace awkward {
           outindex.length());
         util::handle_error(err4, classname(), identities_.get());
 
+        IndexedArrayOf<int64_t, ISOPTION> tmp(Identities::none(),
+                                              util::Parameters(),
+                                              outindex,
+                                              raw->content());
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
-            Identities::none(),
-            util::Parameters(),
-            outindex,
-            raw->content()));
+          tmp.simplify_optiontype());
       }
       if (IndexedArrayOf<int64_t, ISOPTION>* raw =
         dynamic_cast<IndexedArrayOf<int64_t, ISOPTION>*>(out.get())) {
