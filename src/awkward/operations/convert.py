@@ -2850,19 +2850,19 @@ def _from_arrow(
                 return ak.layout.RecordArray(child_array, obj.schema.names)
 
         elif isinstance(obj, pyarrow.lib.Table):
-            batches = []
-            for record_batch in obj.combine_chunks().to_batches():
-                batch = handle_arrow(record_batch)
-                if len(batch) > 0:
-                    batches.append(batch)
-            if len(batches) == 1:
-                return batches[0]
+            batches = obj.combine_chunks().to_batches()
+            if len(batches) == 0:
+                # zero-length array with the right type
+                return from_buffers(_parquet_schema_to_form(obj.schema), 0, {})
+            elif len(batches) == 1:
+                return handle_arrow(batches[0])
             else:
-                return ak.operations.structure.concatenate(batches, highlevel=False)
+                arrays = [handle_arrow(batch) for batch in batches if len(batch) > 0]
+                return ak.operations.structure.concatenate(arrays, highlevel=False)
 
-        elif isinstance(obj, Iterable) and all(
+        elif isinstance(obj, Iterable) and len(obj) > 0 and all(
             isinstance(x, pyarrow.lib.RecordBatch) for x in obj
-        ):
+        ) and any(len(x) > 0 for x in obj):
             chunks = []
             for batch in obj:
                 chunk = handle_arrow(batch)
