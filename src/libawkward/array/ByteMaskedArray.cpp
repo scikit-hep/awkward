@@ -836,6 +836,17 @@ namespace awkward {
               + std::string("): ") + std::string("len(content) < len(mask)")
               + FILENAME(__LINE__));
     }
+    else if (dynamic_cast<BitMaskedArray*>(content_.get())  ||
+             dynamic_cast<ByteMaskedArray*>(content_.get())  ||
+             dynamic_cast<IndexedArray32*>(content_.get())  ||
+             dynamic_cast<IndexedArrayU32*>(content_.get())  ||
+             dynamic_cast<IndexedArray64*>(content_.get())  ||
+             dynamic_cast<IndexedOptionArray32*>(content_.get())  ||
+             dynamic_cast<IndexedOptionArray64*>(content_.get())  ||
+             dynamic_cast<UnmaskedArray*>(content_.get())) {
+      return classname() + " contains " + content_.get()->classname() +
+             ", the operation that made it might have forgotten to call 'simplify_optiontype()'";
+    }
     else {
       return content_.get()->validityerror(path + std::string(".content"));
     }
@@ -1331,14 +1342,15 @@ namespace awkward {
           outindex.length());
         util::handle_error(err3, classname(), identities_.get());
 
+        IndexedOptionArray64 tmp(Identities::none(),
+                                 parameters_,
+                                 outindex,
+                                 raw->content());
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                 parameters_,
-                                                 outindex,
-                                                 raw->content()));
+          tmp.simplify_optiontype());
       }
       else {
         throw std::runtime_error(
@@ -1416,14 +1428,15 @@ namespace awkward {
           outindex.length());
         util::handle_error(err3, classname(), identities_.get());
 
+        IndexedOptionArray64 tmp(Identities::none(),
+                                 util::Parameters(),
+                                 outindex,
+                                 raw->content());
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                 util::Parameters(),
-                                                 outindex,
-                                                 raw->content()));
+          tmp.simplify_optiontype());
       }
       else {
         throw std::runtime_error(

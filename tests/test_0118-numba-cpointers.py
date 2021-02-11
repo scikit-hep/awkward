@@ -1213,7 +1213,8 @@ def test_IndexedArray_deep_at():
     indexedarray2 = ak.layout.IndexedArray64(index2, indexedarray1)
     index3 = ak.layout.Index32(np.array([1, 2], dtype=np.int32))
     indexedarray3 = ak.layout.IndexedArray32(index3, indexedarray2)
-    array = ak.Array(indexedarray3, check_valid=True)
+    # This is not a valid array (IndexedArray inside IndexedArray), but instructive!  :)
+    array = ak.Array(indexedarray3, check_valid=False)
 
     @numba.njit
     def f1(x):

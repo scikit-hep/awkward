@@ -7,7 +7,7 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-def test():
+def test_first_issue():
     a = ak.layout.NumpyArray(np.arange(122))
     idx = ak.layout.Index64([0, 2, 4, 6, 8, 10, 12])
     a = ak.layout.ListOffsetArray64(idx, a)
@@ -25,4 +25,26 @@ def test():
         [],
         [],
         [],
+    ]
+
+
+def test_second_issue():
+    a = ak.layout.NumpyArray(np.arange(122))
+    idx = ak.layout.Index64([0, 2, 4, 6, 8, 10, 12])
+    a = ak.layout.ListOffsetArray64(idx, a)
+    idx = ak.layout.Index64([0, -1, 1, 2, -1, 3, 4, 5])
+    a = ak.layout.IndexedOptionArray64(idx, a)
+    a = ak.Array(a)
+    assert ak.is_valid(a)
+
+    assert ak.is_valid(ak.argsort(a))
+    assert a[ak.argsort(a)].tolist() == [
+        [0, 1],
+        None,
+        [2, 3],
+        [4, 5],
+        None,
+        [6, 7],
+        [8, 9],
+        [10, 11],
     ]

@@ -700,7 +700,20 @@ namespace awkward {
     if (paramcheck != std::string("")) {
       return paramcheck;
     }
-    return content_.get()->validityerror(path + std::string(".content"));
+    if (dynamic_cast<BitMaskedArray*>(content_.get())  ||
+        dynamic_cast<ByteMaskedArray*>(content_.get())  ||
+        dynamic_cast<IndexedArray32*>(content_.get())  ||
+        dynamic_cast<IndexedArrayU32*>(content_.get())  ||
+        dynamic_cast<IndexedArray64*>(content_.get())  ||
+        dynamic_cast<IndexedOptionArray32*>(content_.get())  ||
+        dynamic_cast<IndexedOptionArray64*>(content_.get())  ||
+        dynamic_cast<UnmaskedArray*>(content_.get())) {
+      return classname() + " contains " + content_.get()->classname() +
+             ", the operation that made it might have forgotten to call 'simplify_optiontype()'";
+    }
+    else {
+      return content_.get()->validityerror(path + std::string(".content"));
+    }
   }
 
   const ContentPtr
@@ -968,14 +981,13 @@ namespace awkward {
                                                              stable,
                                                              keepdims);
     if (RegularArray* raw = dynamic_cast<RegularArray*>(out.get())) {
-      std::shared_ptr<Content> wrapped = std::make_shared<UnmaskedArray>(
-          Identities::none(),
-          parameters_,
-          raw->content());
+      UnmaskedArray tmp(Identities::none(),
+                        parameters_,
+                        raw->content());
       return std::make_shared<RegularArray>(
           raw->identities(),
           raw->parameters(),
-          wrapped,
+          tmp.simplify_optiontype(),
           raw->size(),
           length());
     }
@@ -1003,14 +1015,13 @@ namespace awkward {
                                                                 stable,
                                                                 keepdims);
     if (RegularArray* raw = dynamic_cast<RegularArray*>(out.get())) {
-      std::shared_ptr<Content> wrapped = std::make_shared<UnmaskedArray>(
-          Identities::none(),
-          parameters_,
-          raw->content());
+      UnmaskedArray tmp(Identities::none(),
+                        parameters_,
+                        raw->content());
       return std::make_shared<RegularArray>(
           raw->identities(),
           raw->parameters(),
-          wrapped,
+          tmp.simplify_optiontype(),
           raw->size(),
           length());
     }
