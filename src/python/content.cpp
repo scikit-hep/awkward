@@ -1798,6 +1798,7 @@ make_ListArrayOf(const py::handle& m, const std::string& name) {
            &ak::ListArrayOf<T>::compact_offsets64,
            py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::ListArrayOf<T>::broadcast_tooffsets64)
+      .def("toListOffsetArray64", &ak::ListArrayOf<T>::toListOffsetArray64)
       .def("toRegularArray", &ak::ListArrayOf<T>::toRegularArray)
       .def("simplify", [](const ak::ListArrayOf<T>& self) {
         return box(self.shallow_simplify());
@@ -1854,6 +1855,7 @@ make_ListOffsetArrayOf(const py::handle& m, const std::string& name) {
            py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64",
            &ak::ListOffsetArrayOf<T>::broadcast_tooffsets64)
+      .def("toListOffsetArray64", &ak::ListOffsetArrayOf<T>::toListOffsetArray64)
       .def("toRegularArray", &ak::ListOffsetArrayOf<T>::toRegularArray)
       .def("simplify", [](const ak::ListOffsetArrayOf<T>& self) {
         return box(self.shallow_simplify());
@@ -2606,6 +2608,7 @@ make_RegularArray(const py::handle& m, const std::string& name) {
            py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::RegularArray::broadcast_tooffsets64)
       .def("toListOffsetArray64", &ak::RegularArray::toListOffsetArray64)
+      .def("toRegularArray", &ak::RegularArray::toRegularArray)
       .def("simplify", [](const ak::RegularArray& self) {
         return box(self.shallow_simplify());
       })
