@@ -367,6 +367,13 @@ def run_lengths(array, highlevel=True, behavior=None):
             if isinstance(layout, ak._util.indexedtypes):
                 layout = layout.project()
 
+            if (
+                layout.parameter("__array__") == "string"
+                or layout.parameter("__array__") == "bytestring"
+            ):
+                nextcontent, _ = lengths_of(ak.highlevel.Array(layout), None)
+                return lambda: ak.layout.NumpyArray(nextcontent)
+
             if not isinstance(layout, (ak.layout.NumpyArray, ak.layout.EmptyArray)):
                 raise NotImplementedError(
                     "run_lengths on "
@@ -378,47 +385,6 @@ def run_lengths(array, highlevel=True, behavior=None):
             return lambda: ak.layout.NumpyArray(nextcontent)
 
         elif layout.branch_depth == (False, 2):
-            if isinstance(layout, ak._util.indexedtypes):
-                layout = layout.project()
-
-            if not isinstance(layout, ak._util.listtypes):
-                raise NotImplementedError(
-                    "run_lengths on "
-                    + type(layout).__name__
-                    + ak._util.exception_suffix(__file__)
-                )
-
-            if (
-                layout.parameter("__array__") == "string"
-                or layout.parameter("__array__") == "bytestring"
-            ):
-                nextcontent, _ = lengths_of(ak.highlevel.Array(layout), None)
-                return lambda: ak.layout.NumpyArray(nextcontent)
-
-            listoffsetarray = layout.toListOffsetArray64(False)
-            offsets = nplike.asarray(listoffsetarray.offsets)
-            content = listoffsetarray.content[offsets[0] : offsets[-1]]
-
-            if isinstance(content, ak._util.indexedtypes):
-                content = content.project()
-
-            if not isinstance(content, (ak.layout.NumpyArray, ak.layout.EmptyArray)):
-                raise NotImplementedError(
-                    "run_lengths on "
-                    + type(layout).__name__
-                    + " with content "
-                    + type(content).__name__
-                    + ak._util.exception_suffix(__file__)
-                )
-
-            nextcontent, nextoffsets = lengths_of(
-                nplike.asarray(content), offsets - offsets[0]
-            )
-            return lambda: ak.layout.ListOffsetArray64(
-                ak.layout.Index64(nextoffsets), ak.layout.NumpyArray(nextcontent)
-            )
-
-        elif layout.branch_depth == (False, 3):
             if isinstance(layout, ak._util.indexedtypes):
                 layout = layout.project()
 
@@ -447,8 +413,28 @@ def run_lengths(array, highlevel=True, behavior=None):
                     ak.layout.Index64(nextoffsets), ak.layout.NumpyArray(nextcontent)
                 )
 
-            else:
-                return None
+            listoffsetarray = layout.toListOffsetArray64(False)
+            offsets = nplike.asarray(listoffsetarray.offsets)
+            content = listoffsetarray.content[offsets[0] : offsets[-1]]
+
+            if isinstance(content, ak._util.indexedtypes):
+                content = content.project()
+
+            if not isinstance(content, (ak.layout.NumpyArray, ak.layout.EmptyArray)):
+                raise NotImplementedError(
+                    "run_lengths on "
+                    + type(layout).__name__
+                    + " with content "
+                    + type(content).__name__
+                    + ak._util.exception_suffix(__file__)
+                )
+
+            nextcontent, nextoffsets = lengths_of(
+                nplike.asarray(content), offsets - offsets[0]
+            )
+            return lambda: ak.layout.ListOffsetArray64(
+                ak.layout.Index64(nextoffsets), ak.layout.NumpyArray(nextcontent)
+            )
 
         else:
             return None
