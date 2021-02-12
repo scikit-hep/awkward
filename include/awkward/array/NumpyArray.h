@@ -477,7 +477,8 @@ namespace awkward {
     const ContentPtr
       sort_asstrings(const Index64& offsets,
                      bool ascending,
-                     bool stable) const;
+                     bool stable,
+                     const util::Parameters& parameters) const;
     const ContentPtr
       as_unique_strings(const Index64& offsets) const;
 

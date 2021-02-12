@@ -895,7 +895,15 @@ namespace awkward {
       starts.length(),
       content_.get()->length());
     if (err.str == nullptr) {
-      return content_.get()->validityerror(path + std::string(".content"));
+      if (parameter_equals("__array__", "\"string\"")  ||
+          parameter_equals("__array__", "\"bytestring\"")) {
+        // The content has already been checked and we don't want to trigger the
+        // unnested-char/byte error.
+        return std::string("");
+      }
+      else {
+        return content_.get()->validityerror(path + std::string(".content"));
+      }
     }
     else {
       return (std::string("at ") + path + std::string(" (") + classname()
@@ -1682,7 +1690,8 @@ namespace awkward {
       if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
         ContentPtr out = content->sort_asstrings(offsets_,
                                                  ascending,
-                                                 stable);
+                                                 stable,
+                                                 parameters_);
         return std::make_shared<RegularArray>(Identities::none(),
                                               util::Parameters(),
                                               out,

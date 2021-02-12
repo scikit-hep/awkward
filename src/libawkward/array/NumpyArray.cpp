@@ -3603,7 +3603,8 @@ namespace awkward {
   const ContentPtr
   NumpyArray::sort_asstrings(const Index64& offsets,
                              bool ascending,
-                             bool stable) const {
+                             bool stable,
+                             const util::Parameters& parameters) const {
     std::shared_ptr<Content> out;
     std::shared_ptr<void> ptr;
     int64_t offsets_length = offsets.length();
@@ -3635,7 +3636,7 @@ namespace awkward {
                                        ptr_lib_);
 
     return std::make_shared<ListOffsetArray64>(Identities::none(),
-                                               util::Parameters(),
+                                               parameters,
                                                outoffsets,
                                                out);
   }
