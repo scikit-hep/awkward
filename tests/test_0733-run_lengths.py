@@ -57,3 +57,13 @@ def test_groupby():
         [[{"x": 1, "y": 1.1}, {"x": 1, "y": 1.1}], [{"x": 2, "y": 2.2}]],
         [[{"x": 1, "y": 1.1}], [{"x": 2, "y": 2.2}], [{"x": 3, "y": 3.3}]],
     ]
+
+
+def test_onstrings1():
+    data = ak.Array(["one", "one", "one", "two", "two", "three", "two", "two"])
+    assert ak.run_lengths(data).tolist() == [3, 2, 1, 2]
+
+
+def test_onstrings2():
+    data = ak.Array([["one", "one"], ["one", "two", "two"], ["three", "two", "two"]])
+    assert ak.run_lengths(data).tolist() == [[2], [1, 2], [1, 2]]

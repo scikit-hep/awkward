@@ -147,8 +147,14 @@ def _string_equal(one, two):
     return ak._util.wrap(ak.layout.NumpyArray(out), behavior)
 
 
+def _string_notequal(one, two):
+    return ~_string_equal(one, two)
+
+
 ak.behavior[ak.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
 ak.behavior[ak.nplike.numpy.equal, "string", "string"] = _string_equal
+ak.behavior[ak.nplike.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
+ak.behavior[ak.nplike.numpy.not_equal, "string", "string"] = _string_notequal
 
 
 def _string_broadcast(layout, offsets):
