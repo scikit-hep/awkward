@@ -1,3 +1,5 @@
+import pytest
+
 import awkward as ak
 
 from generated_parser import Lark_StandAlone, Transformer
@@ -370,4 +372,196 @@ def test_union_numpy_empty_1_parm():
     text = 'union[float64[parameters={"wonky": "boop"}], unknown, parameters={"pratyush": "das"}]'
     parsedtype = toast(test.parse(text))
     assert isinstance(parsedtype, ak.types.UnionType)
+    assert str(parsedtype) == text
+
+
+@pytest.mark.skip(reason="strings not handled yet")
+def test_jim1():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.Array([["one", "two", "three"], [], ["four", "five"]]).type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+@pytest.mark.skip(reason="bytestrings not handled yet")
+def test_jim2():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.Array([[b"one", b"two", b"three"], [], [b"four", b"five"]]).type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+@pytest.mark.skip(reason="categoricals not handled yet")
+def test_jim3():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.to_categorical(ak.Array(["one", "one", "two", "three", "one", "three"])).type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+@pytest.mark.skip(reason="categoricals not handled yet")
+def test_jim4():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.to_categorical(ak.Array([1.1, 1.1, 2.2, 3.3, 1.1, 3.3])).type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+@pytest.mark.skip(reason="record names not handled yet")
+def test_jim5():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], with_name="Thingy").type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+@pytest.mark.skip(reason="record names not handled yet")
+def test_jim6():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.Array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}], [], [{"x": 3, "y": 3.3}]], with_name="Thingy").type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+@pytest.mark.skip(reason="option-type lists not handled yet")
+def test_jim7():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.Array([[1, 2, 3], None, [4, 5]]).type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim8():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.with_parameter(ak.Array([[1, 2, 3], [], [4, 5]]), "wonky", "string").type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim9():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.with_parameter(ak.Array([[1, 2, 3], [], [4, 5]]), "wonky", {"other": "JSON"}).type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim10():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.with_parameter(ak.Array([[1, 2, 3], None, [4, 5]]), "wonky", "string").type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim11():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.with_parameter(ak.Array([1, 2, 3, None, 4, 5]), "wonky", "string").type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim12():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.with_parameter(ak.Array([1, 2, 3, 4, 5]), "wonky", "string").type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim13():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.Array([1, 2, 3, None, 4, 5]).type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim14():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.with_parameter(ak.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]), "wonky", "string").type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim15():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.Array([(1, 1.1), (2, 2.2), (3, 3.3)]).type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim16():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.with_parameter(ak.Array([(1, 1.1), (2, 2.2), (3, 3.3)]), "wonky", "string").type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim17():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.Array([[(1, 1.1), (2, 2.2)], [], [(3, 3.3)]]).type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim18():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.to_regular(ak.Array([[1, 2], [3, 4], [5, 6]])).type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim19():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.with_parameter(ak.to_regular(ak.Array([[1, 2], [3, 4], [5, 6]])), "wonky", "string").type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim20():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.with_parameter(ak.Array([1, 2, 3, [1], [1, 2], [1, 2, 3]]), "wonky", "string").type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+@pytest.mark.skip(reason="option of union with parameters not handled yet")
+def test_jim21():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.with_parameter(ak.Array([1, 2, 3, None, [1], [1, 2], [1, 2, 3]]), "wonky", "string").type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim22():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.Array([1, 2, 3, None, [1], [1, 2], [1, 2, 3]]).type)
+    print(text)
+    parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_jim23():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = str(ak.Array([1, 2, 3, None, [], [], []]).type)
+    print(text)
+    parsedtype = toast(test.parse(text))
     assert str(parsedtype) == text
