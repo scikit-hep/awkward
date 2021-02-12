@@ -1827,7 +1827,7 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 
         if isinstance(layout, ak.partition.PartitionedArray):
             outparts = []
-            for i, part in enumerate(layout.partitions):
+            for part in layout.partitions:
                 outparts.append(
                     ak._util.recursively_apply(
                         part,
