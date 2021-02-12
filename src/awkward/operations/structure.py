@@ -1723,6 +1723,8 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 
     Also note that new lists created by this function cannot cross partitions
     (which is only possible at `axis=0`, anyway).
+
+    See also #ak.num and #ak.flatten.
     """
     nplike = ak.nplike.of(array)
 
