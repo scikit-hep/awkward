@@ -1686,9 +1686,11 @@ namespace awkward {
 
     // if this is array of strings, axis parameter is ignored
     // and this array is sorted
-    if (util::parameter_isstring(parameters_, "__array__")) {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
       if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
-        ContentPtr out = content->sort_asstrings(offsets_,
+        ContentPtr out = content->sort_asstrings(util::make_starts(offsets_),
+                                                 util::make_stops(offsets_),
                                                  ascending,
                                                  stable,
                                                  parameters_);
@@ -1856,14 +1858,26 @@ namespace awkward {
      return shallow_copy();
     }
 
-    // if this is array of strings, axis parameter is ignored
-    // and this array is sorted
-    if (util::parameter_isstring(parameters_, "__array__")) {
-      throw std::runtime_error(
-        std::string("not implemented yet: argsort for strings") + FILENAME(__LINE__));
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      std::cout << "branch " << branchdepth.first << " negaxis " << negaxis << " depth " << branchdepth.second << std::endl;
+
+      if (branchdepth.first  ||  negaxis != branchdepth.second) {
+        throw std::invalid_argument(
+          std::string("array with strings can only be sorted with axis=-1")
+          + FILENAME(__LINE__));
+      }
+
+      if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
+        return content->argsort_asstrings(util::make_starts(offsets_),
+                                          util::make_stops(offsets_),
+                                          ascending,
+                                          stable);
+      }
     }
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error(
@@ -2314,7 +2328,8 @@ namespace awkward {
 
   template <>
   bool ListOffsetArrayOf<int64_t>::is_unique() const {
-    if (util::parameter_isstring(parameters_, "__array__")) {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
       if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
         ContentPtr out = content->as_unique_strings(offsets_);
         return (out.get()->length() == length());

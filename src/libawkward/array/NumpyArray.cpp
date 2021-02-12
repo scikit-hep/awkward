@@ -3601,44 +3601,59 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::sort_asstrings(const Index64& offsets,
+  NumpyArray::sort_asstrings(const Index64& starts,
+                             const Index64& stops,
                              bool ascending,
                              bool stable,
                              const util::Parameters& parameters) const {
-    std::shared_ptr<Content> out;
-    std::shared_ptr<void> ptr;
-    int64_t offsets_length = offsets.length();
+    throw std::runtime_error("need to rewrite");
+  }
 
-    Index64 outoffsets(offsets_length);
-
-    if (dtype_ == util::dtype::uint8) {
-      ptr = string_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
-                                 length(),
-                                 offsets,
-                                 outoffsets,
-                                 ascending,
-                                 stable);
-    } else {
+  const ContentPtr
+  NumpyArray::argsort_asstrings(const Index64& starts,
+                                const Index64& stops,
+                                bool ascending,
+                                bool stable) const {
+    if (dtype_ != util::dtype::uint8) {
       throw std::invalid_argument(
-        std::string("cannot sort NumpyArray as strings with format \"")
+        std::string("dtype for string/bytestring NumpyArray must be \"uint8\", not \"")
         + format_ + std::string("\"") + FILENAME(__LINE__));
     }
 
-    out = std::make_shared<NumpyArray>(identities_,
-                                       parameters_,
-                                       ptr,
-                                       shape_,
-                                       strides_,
-                                       0,
-                                       itemsize_,
-                                       format_,
-                                       dtype_,
-                                       ptr_lib_);
+    std::shared_ptr<int64_t> ptr =
+        kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
+                                starts.length()*(int64_t)sizeof(int64_t));
 
-    return std::make_shared<ListOffsetArray64>(Identities::none(),
-                                               parameters,
-                                               outoffsets,
-                                               out);
+
+    int64_t* tocarry = ptr.get();
+    const int64_t* fromstarts = starts.data();
+    const int64_t* fromstops = stops.data();
+    int64_t length = starts.length();
+
+    for (int64_t i = 0;  i < length;  i++) {
+
+
+
+
+
+
+      tocarry[i] = i;
+    }
+
+    util::dtype dtype = util::dtype::int64;
+    const std::vector<ssize_t> shape({ starts.length() });
+    const std::vector<ssize_t> strides({ sizeof(int64_t) });
+
+    return std::make_shared<NumpyArray>(Identities::none(),
+                                        util::Parameters(),
+                                        ptr,
+                                        shape,
+                                        strides,
+                                        0,
+                                        sizeof(int64_t),
+                                        util::dtype_to_format(dtype),
+                                        dtype,
+                                        ptr_lib_);
   }
 
   const ContentPtr
@@ -5464,35 +5479,6 @@ namespace awkward {
       &outlength
     );
     util::handle_error(err5, classname(), nullptr);
-
-    return ptr;
-  }
-
-  template<typename T>
-  const std::shared_ptr<void>
-  NumpyArray::string_sort(const T* data,
-                          int64_t length,
-                          const Index64& offsets,
-                          Index64& outoffsets,
-                          bool ascending,
-                          bool stable) const {
-    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
-                                               length*((int64_t)sizeof(T)));
-
-    if (length == 0) {
-      return ptr;
-    }
-
-    struct Error err1 = kernel::NumpyArray_sort_asstrings(
-      kernel::lib::cpu,   // DERIVE
-      ptr.get(),
-      data,
-      offsets.data(),
-      offsets.length(),
-      outoffsets.data(),
-      ascending,
-      stable);
-    util::handle_error(err1, classname(), nullptr);
 
     return ptr;
   }
