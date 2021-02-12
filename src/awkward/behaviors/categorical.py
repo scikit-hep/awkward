@@ -237,7 +237,6 @@ def to_categorical(array, highlevel=True):
     """
 
     def getfunction(layout):
-        p = layout.purelist_parameter("__array__")
         if layout.purelist_depth == 1:
             if isinstance(layout, ak._util.optiontypes):
                 layout = layout.simplify()
