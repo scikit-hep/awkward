@@ -5,6 +5,8 @@ input: record
      | primitive
      | optiontype
      | regular
+     | listtype
+     | uniontype
 
 record: record_tuple
       | record_tuple_param
@@ -16,7 +18,15 @@ optiontype: "?" input [options]
           | "option" "[" input "," def_option "]"
 regular: regular_inparm
        | regular_outparm
+listtype: list_single
+        | list_parm
+uniontype: union_single
+         | union_parm
 
+union_single: "union" "[" input [ "," input]* "]"
+union_parm: "union" "[" input [ "," input]* "," def_option "]"
+list_parm: "[" "var" "*" input "," def_option "]"
+list_single: "var" "*" input
 record_tuple: "(" input ["," input]* ")"
 record_tuple_param: "tuple[[" input ["," input]* "]," def_option "]"
 record_dict: "{" string ":" input ["," string ":" input]* "}"
@@ -27,6 +37,7 @@ options: "[" def_option "]"
 def_option: "parameters" "=" dict_obj
 TYPE: "int64"
     | "int32"
+    | "float64"
 ?json: dict_obj
      | list_obj
      | string

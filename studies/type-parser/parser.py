@@ -48,6 +48,24 @@ def toast(ptnode):
             return ak.types.UnknownType(parameters=toast(ptnode.children[0]))
         else:
             raise Exception("Unhandled UnknownType node")
+    elif ptnode.data == "listtype":
+        return toast(ptnode.children[0])
+    elif ptnode.data == "list_single":
+        return ak.types.ListType(toast(ptnode.children[0]))
+    elif ptnode.data == "list_parm":
+        return ak.types.ListType(toast(ptnode.children[0]), toast(ptnode.children[1]))
+    elif ptnode.data == "uniontype":
+        return toast(ptnode.children[0])
+    elif ptnode.data == "union_single":
+        content_list = []
+        for node in ptnode.children:
+            content_list.append(toast(node))
+        return ak.types.UnionType(content_list)
+    elif ptnode.data == "union_parm":
+        content_list = []
+        for node in ptnode.children[:-1]:
+            content_list.append(toast(node))
+        return ak.types.UnionType(content_list, toast(ptnode.children[-1]))
     elif ptnode.data == "optiontype":
         if len(ptnode.children) == 1:
             return ak.types.OptionType(toast(ptnode.children[0]))
@@ -320,4 +338,36 @@ def test_regular_unknown_1_parm():
     text = '[0 * unknown, parameters={"foo": "bar"}]'
     parsedtype = toast(test.parse(text))
     assert isinstance(parsedtype, ak.types.RegularType)
+    assert str(parsedtype) == text
+
+
+def test_list_numpy_1():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = "var * float64"
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.ListType)
+    assert str(parsedtype) == text
+
+
+def test_list_numpy_1_parm():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = '[var * float64[parameters={"wonky": "boop"}], parameters={"foo": "bar"}]'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.ListType)
+    assert str(parsedtype) == text
+
+
+def test_union_numpy_empty_1():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = 'union[float64[parameters={"wonky": "boop"}], unknown]'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.UnionType)
+    assert str(parsedtype) == text
+
+
+def test_union_numpy_empty_1_parm():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = 'union[float64[parameters={"wonky": "boop"}], unknown, parameters={"pratyush": "das"}]'
+    parsedtype = toast(test.parse(text))
+    assert isinstance(parsedtype, ak.types.UnionType)
     assert str(parsedtype) == text
