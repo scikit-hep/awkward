@@ -123,7 +123,7 @@ def _string_equal(one, two):
     nplike = ak.nplike.of(one, two)
     behavior = ak._util.behaviorof(one, two)
 
-    one, two = one.layout, two.layout
+    one, two = ak.without_parameters(one).layout, ak.without_parameters(two).layout
 
     # first condition: string lengths must be the same
     counts1 = nplike.asarray(one.count(axis=-1))
@@ -136,10 +136,10 @@ def _string_equal(one, two):
     possible_counts = counts1[possible]
 
     if len(possible_counts) > 0:
-        onepossible = ak.without_parameters(one[possible])
-        twopossible = ak.without_parameters(two[possible])
+        onepossible = one[possible]
+        twopossible = two[possible]
 
-        reduced = ak.all(onepossible == twopossible, axis=-1).layout
+        reduced = ak.all(ak.Array(onepossible) == ak.Array(twopossible), axis=-1).layout
 
         # update same-length strings with a verdict about their characters
         out[possible] = reduced

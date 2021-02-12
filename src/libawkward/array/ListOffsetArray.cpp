@@ -122,6 +122,10 @@ namespace awkward {
 
   int64_t
   ListOffsetForm::purelist_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return 1;
+    }
     return content_.get()->purelist_depth() + 1;
   }
 
@@ -132,6 +136,10 @@ namespace awkward {
 
   const std::pair<int64_t, int64_t>
   ListOffsetForm::minmax_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
     return std::pair<int64_t, int64_t>(content_depth.first + 1,
                                        content_depth.second + 1);
@@ -139,6 +147,10 @@ namespace awkward {
 
   const std::pair<bool, int64_t>
   ListOffsetForm::branch_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<bool, int64_t>(false, 1);
+    }
     std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
     return std::pair<bool, int64_t>(content_depth.first,
                                     content_depth.second + 1);
@@ -825,12 +837,20 @@ namespace awkward {
   template <typename T>
   int64_t
   ListOffsetArrayOf<T>::purelist_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return 1;
+    }
     return content_.get()->purelist_depth() + 1;
   }
 
   template <typename T>
   const std::pair<int64_t, int64_t>
   ListOffsetArrayOf<T>::minmax_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
     return std::pair<int64_t, int64_t>(content_depth.first + 1,
                                        content_depth.second + 1);
@@ -839,6 +859,10 @@ namespace awkward {
   template <typename T>
   const std::pair<bool, int64_t>
   ListOffsetArrayOf<T>::branch_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<bool, int64_t>(false, 1);
+    }
     std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
     return std::pair<bool, int64_t>(content_depth.first,
                                     content_depth.second + 1);
