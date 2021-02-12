@@ -9,7 +9,7 @@ a UnionType has the following.
 ak.types.UnionType.__init__
 ===========================
 
-.. py:method:: ak.types.UnionType.__init__(types, keys=None, parameters=None, typestr=None)
+.. py:method:: ak.types.UnionType.__init__(types, parameters=None, typestr=None)
 
 ak.types.UnionType.types
 ========================
