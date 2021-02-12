@@ -1720,6 +1720,9 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
         Traceback (most recent call last):
         ...
         ValueError: structure imposed by 'counts' does not fit in the array at axis=1
+
+    Also note that new lists created by this function cannot cross partitions
+    (which is only possible at `axis=0`, anyway).
     """
     nplike = ak.nplike.of(array)
 
