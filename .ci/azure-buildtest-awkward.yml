@@ -100,6 +100,7 @@ jobs:
           python -m pip install flake8 flake8-print
           python -m flake8
         displayName: "Run flake8"
+        condition: "and(succeeded(), ne(variables['python.version'], '2.7'))"
 
       - script: |
           python -m pip install -v .[test]
@@ -192,6 +193,7 @@ jobs:
           python -m pip install flake8 flake8-print
           python -m flake8
         displayName: "Run flake8"
+        condition: "and(succeeded(), ne(variables['python.version'], '2.7'))"
 
       - script: |
           python -m pip install -v .[test]
@@ -336,6 +338,7 @@ jobs:
           python -m pip install flake8 flake8-print
           python -m flake8
         displayName: "Run flake8"
+        condition: "and(succeeded(), ne(variables['python.version'], '2.7'))"
 
       - script: |
           python -m pip install -v .[test]
