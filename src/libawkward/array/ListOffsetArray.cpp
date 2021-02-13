@@ -1694,10 +1694,47 @@ namespace awkward {
           + FILENAME(__LINE__));
       }
 
-      throw std::runtime_error("FIXME sort_next strings");
+      std::string validity_error = validityerror("");
+      if (!validity_error.empty()) {
+        throw std::invalid_argument(validity_error + FILENAME(__LINE__));
+      }
+      NumpyArray* rawcontent = dynamic_cast<NumpyArray*>(content_.get());
+
+      Index64 tocarry(parents.length());
+      struct Error err = kernel::ListOffsetArray_argsort_strings(
+        kernel::lib::cpu,   // DERIVE
+        tocarry.data(),
+        parents.data(),
+        parents.length(),
+        reinterpret_cast<uint8_t*>(rawcontent->data()),
+        util::make_starts(offsets_).data(),
+        util::make_stops(offsets_).data(),
+        stable,
+        ascending,
+        false);
+      util::handle_error(err, classname(), identities_.get());
+
+      ContentPtr out = carry(tocarry, false);
+
+      if (keepdims) {
+        return std::make_shared<RegularArray>(Identities::none(),
+                                              util::Parameters(),
+                                              out,
+                                              out.get()->length());
+      }
+      else {
+        return out;
+      }
     }
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+      if (purelist_parameter("__array__") == "\"string\""  ||
+          purelist_parameter("__array__") == "\"bytestring\"") {
+        throw std::invalid_argument(
+          std::string("array with strings can only be sorted with axis=-1")
+          + FILENAME(__LINE__));
+      }
+
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error(
           std::string("offsets_.length() - 1 != parents.length()" + FILENAME(__LINE__)));
@@ -1855,8 +1892,6 @@ namespace awkward {
 
     if (parameter_equals("__array__", "\"string\"")  ||
         parameter_equals("__array__", "\"bytestring\"")) {
-      std::cout << "do string " << negaxis << std::endl;
-
       if (branchdepth.first  ||  negaxis != branchdepth.second) {
         throw std::invalid_argument(
           std::string("array with strings can only be sorted with axis=-1")
@@ -1879,7 +1914,8 @@ namespace awkward {
         util::make_starts(offsets_).data(),
         util::make_stops(offsets_).data(),
         stable,
-        ascending);
+        ascending,
+        true);
       util::handle_error(err, classname(), identities_.get());
 
       ContentPtr out = std::make_shared<NumpyArray>(output);

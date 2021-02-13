@@ -4714,6 +4714,7 @@ kernels:
           - {name: stringstops, type: "Const[List[int64_t]]", dir: in}
           - {name: is_stable, type: "bool", dir: in}
           - {name: is_ascending, type: "bool", dir: in}
+          - {name: is_local, type: "bool", dir: in}
     description: null
     definition: |
       Insert Python definition here

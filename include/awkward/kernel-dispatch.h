@@ -1788,7 +1788,8 @@ namespace awkward {
       const int64_t* stringstarts,
       const int64_t* stringstops,
       bool is_stable,
-      bool is_ascending);
+      bool is_ascending,
+      bool is_local);
 
     template <typename T>
     ERROR NumpyArray_sort_asstrings(

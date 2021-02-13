@@ -2825,7 +2825,8 @@ extern "C" {
     const int64_t* stringstarts,
     const int64_t* stringstops,
     bool is_stable,
-    bool is_ascending);
+    bool is_ascending,
+    bool is_local);
 
   EXPORT_SYMBOL ERROR
   awkward_NumpyArray_sort_asstrings_uint8(

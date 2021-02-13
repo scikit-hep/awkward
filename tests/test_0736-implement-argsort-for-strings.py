@@ -7,8 +7,8 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-# def test_but_first_fix_sort():
-#     assert ak.is_valid(ak.sort(ak.Array(["one", "two", "three"])))
+def test_but_first_fix_sort():
+    assert ak.is_valid(ak.sort(ak.Array(["one", "two", "three"]), axis=0))
 
 
 def test_argsort():
@@ -24,3 +24,19 @@ def test_argsort():
         [[["twotwo", "two"], ["three"]], [["four", "five"]], [], [["six"], ["seven", "eight"]]]
     )
     assert ak.argsort(array, axis=2).tolist() == [[[1, 0], [0]], [[1, 0]], [], [[0], [1, 0]]]
+
+def test_sort():
+    array = ak.Array(["one", "two", "three", "four", "five", "six", "seven", "eight"])
+    assert ak.sort(array, axis=0).tolist() == ['eight', 'five', 'four', 'one', 'seven', 'six', 'three', 'two']
+
+    array = ak.Array(
+        [["twotwo", "two", "three"], ["four", "five"], [], ["six", "seven", "eight"]]
+    )
+    assert ak.sort(array, axis=1).tolist() == [
+        ["three", "two", "twotwo"], ["five", "four"], [], ["eight", "seven", "six"]
+    ]
+
+    array = ak.Array(
+        [[["twotwo", "two"], ["three"]], [["four", "five"]], [], [["six"], ["seven", "eight"]]]
+    )
+    assert ak.sort(array, axis=2).tolist() == [[["two", "twotwo"], ["three"]], [["five", "four"]], [], [["six"], ["eight", "seven"]]]

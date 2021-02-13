@@ -20167,7 +20167,8 @@ namespace awkward {
       const int64_t* stringstarts,
       const int64_t* stringstops,
       bool is_stable,
-      bool is_ascending) {
+      bool is_ascending,
+      bool is_local) {
       if (ptr_lib == kernel::lib::cpu) {
         return awkward_ListOffsetArray_argsort_strings(
           tocarry,
@@ -20177,7 +20178,8 @@ namespace awkward {
           stringstarts,
           stringstops,
           is_stable,
-          is_ascending);
+          is_ascending,
+          is_local);
       }
       else if (ptr_lib == kernel::lib::cuda) {
         throw std::runtime_error(

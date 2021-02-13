@@ -9,7 +9,7 @@
 
 #include "awkward/kernels.h"
 
-template <bool is_stable, bool is_ascending>
+template <bool is_stable, bool is_ascending, bool is_local>
 ERROR awkward_ListOffsetArray_argsort_strings_impl(
   int64_t* tocarry,
   const int64_t* fromparents,
@@ -53,7 +53,12 @@ ERROR awkward_ListOffsetArray_argsort_strings_impl(
         std::sort(index.begin(), index.end(), sorter);
       }
       for (int64_t j = 0;  j < (int64_t)index.size();  j++) {
-        tocarry[firstindex + j] = index[j] - firstindex;
+        if (is_local) {
+          tocarry[firstindex + j] = index[j] - firstindex;
+        }
+        else {
+          tocarry[firstindex + j] = index[j];
+        }
       }
       index.clear();
     }
@@ -78,25 +83,50 @@ ERROR awkward_ListOffsetArray_argsort_strings(
   const int64_t* stringstarts,
   const int64_t* stringstops,
   bool is_stable,
-  bool is_ascending) {
+  bool is_ascending,
+  bool is_local) {
   if (is_stable) {
     if (is_ascending) {
-      return awkward_ListOffsetArray_argsort_strings_impl<true, true>(
-        tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+      if (is_local) {
+        return awkward_ListOffsetArray_argsort_strings_impl<true, true, true>(
+          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+      }
+      else {
+        return awkward_ListOffsetArray_argsort_strings_impl<true, true, false>(
+          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+      }
     }
     else {
-      return awkward_ListOffsetArray_argsort_strings_impl<true, false>(
-        tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+      if (is_local) {
+        return awkward_ListOffsetArray_argsort_strings_impl<true, false, true>(
+          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+      }
+      else {
+        return awkward_ListOffsetArray_argsort_strings_impl<true, false, false>(
+          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+      }
     }
   }
   else {
     if (is_ascending) {
-      return awkward_ListOffsetArray_argsort_strings_impl<false, true>(
-        tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+      if (is_local) {
+        return awkward_ListOffsetArray_argsort_strings_impl<false, true, true>(
+          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+      }
+      else {
+        return awkward_ListOffsetArray_argsort_strings_impl<false, true, false>(
+          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+      }
     }
     else {
-      return awkward_ListOffsetArray_argsort_strings_impl<false, false>(
-        tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+      if (is_local) {
+        return awkward_ListOffsetArray_argsort_strings_impl<false, false, true>(
+          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+      }
+      else {
+        return awkward_ListOffsetArray_argsort_strings_impl<false, false, false>(
+          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+      }
     }
   }
 }
