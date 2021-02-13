@@ -475,19 +475,6 @@ namespace awkward {
                 bool keepdims) const override;
 
     const ContentPtr
-      sort_asstrings(const Index64& starts,
-                     const Index64& stops,
-                     bool ascending,
-                     bool stable,
-                     const util::Parameters& parameters) const;
-
-    const ContentPtr
-      argsort_asstrings(const Index64& starts,
-                        const Index64& stops,
-                        bool ascending,
-                        bool stable) const;
-
-    const ContentPtr
       as_unique_strings(const Index64& offsets) const;
 
     const ContentPtr

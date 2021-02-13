@@ -1684,25 +1684,18 @@ namespace awkward {
       return shallow_copy();
     }
 
-    // if this is array of strings, axis parameter is ignored
-    // and this array is sorted
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+
     if (parameter_equals("__array__", "\"string\"")  ||
         parameter_equals("__array__", "\"bytestring\"")) {
-      if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
-        ContentPtr out = content->sort_asstrings(util::make_starts(offsets_),
-                                                 util::make_stops(offsets_),
-                                                 ascending,
-                                                 stable,
-                                                 parameters_);
-        return std::make_shared<RegularArray>(Identities::none(),
-                                              util::Parameters(),
-                                              out,
-                                              out.get()->length(),
-                                              length());
+      if (branchdepth.first  ||  negaxis != branchdepth.second) {
+        throw std::invalid_argument(
+          std::string("array with strings can only be sorted with axis=-1")
+          + FILENAME(__LINE__));
       }
-    }
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
+      throw std::runtime_error("FIXME sort_next strings");
+    }
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
       if (offsets_.length() - 1 != parents.length()) {
@@ -1862,20 +1855,73 @@ namespace awkward {
 
     if (parameter_equals("__array__", "\"string\"")  ||
         parameter_equals("__array__", "\"bytestring\"")) {
-      std::cout << "branch " << branchdepth.first << " negaxis " << negaxis << " depth " << branchdepth.second << std::endl;
-
       if (branchdepth.first  ||  negaxis != branchdepth.second) {
         throw std::invalid_argument(
           std::string("array with strings can only be sorted with axis=-1")
           + FILENAME(__LINE__));
       }
 
-      if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
-        return content->argsort_asstrings(util::make_starts(offsets_),
-                                          util::make_stops(offsets_),
-                                          ascending,
-                                          stable);
+      std::string validity_error = validityerror("");
+      if (!validity_error.empty()) {
+        throw std::invalid_argument(validity_error + FILENAME(__LINE__));
       }
+      NumpyArray* rawcontent = dynamic_cast<NumpyArray*>(content_.get());
+
+      Index64 output(parents.length());
+
+      int64_t* tocarry = output.data();
+      const int64_t* fromparents = parents.data();
+      int64_t length = parents.length();
+      const char* stringdata = reinterpret_cast<char*>(rawcontent->data());
+      const int64_t* stringstarts = util::make_starts(offsets_).data();
+      const int64_t* stringstops = util::make_stops(offsets_).data();
+      bool is_stable = stable;
+      bool is_ascending = ascending;
+
+      auto sorter =
+            [&stringdata, &stringstarts, &stringstops, &is_ascending](int left, int right) -> bool {
+              size_t left_n = stringstops[left] - stringstarts[left];
+              size_t right_n = stringstops[right] - stringstarts[right];
+              const char* left_str = &stringdata[stringstarts[left]];
+              const char* right_str = &stringdata[stringstarts[right]];
+              int cmp = strncmp(left_str, right_str, std::min(left_n, right_n));
+              bool out;
+              if (cmp == 0) {
+                out = left_n < right_n;
+              }
+              else {
+                out = cmp < 0;
+              }
+              return is_ascending ? out : !out;
+            };
+
+      int64_t firstindex = 0;
+      int64_t lastparent = -1;
+      int64_t k = 0;
+      std::vector<int64_t> index;
+      for (int64_t i = 0;  i < length + 1;  i++) {
+        if (i == length  ||  fromparents[i] != lastparent) {
+          if (is_stable) {
+            std::stable_sort(index.begin(), index.end(), sorter);
+          }
+          else {
+            std::sort(index.begin(), index.end(), sorter);
+          }
+          for (int64_t j = 0;  j < (int64_t)index.size();  j++) {
+            tocarry[firstindex + j] = index[j] - firstindex;
+          }
+          index.clear();
+        }
+        if (i != length) {
+          if (index.empty()) {
+            firstindex = i;
+          }
+          index.push_back(i);
+          lastparent = fromparents[i];
+        }
+      }
+
+      return std::make_shared<NumpyArray>(output);
     }
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {

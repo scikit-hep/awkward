@@ -3601,62 +3601,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::sort_asstrings(const Index64& starts,
-                             const Index64& stops,
-                             bool ascending,
-                             bool stable,
-                             const util::Parameters& parameters) const {
-    throw std::runtime_error("need to rewrite");
-  }
-
-  const ContentPtr
-  NumpyArray::argsort_asstrings(const Index64& starts,
-                                const Index64& stops,
-                                bool ascending,
-                                bool stable) const {
-    if (dtype_ != util::dtype::uint8) {
-      throw std::invalid_argument(
-        std::string("dtype for string/bytestring NumpyArray must be \"uint8\", not \"")
-        + format_ + std::string("\"") + FILENAME(__LINE__));
-    }
-
-    std::shared_ptr<int64_t> ptr =
-        kernel::malloc<int64_t>(kernel::lib::cpu,   // DERIVE
-                                starts.length()*(int64_t)sizeof(int64_t));
-
-
-    int64_t* tocarry = ptr.get();
-    const int64_t* fromstarts = starts.data();
-    const int64_t* fromstops = stops.data();
-    int64_t length = starts.length();
-
-    for (int64_t i = 0;  i < length;  i++) {
-
-
-
-
-
-
-      tocarry[i] = i;
-    }
-
-    util::dtype dtype = util::dtype::int64;
-    const std::vector<ssize_t> shape({ starts.length() });
-    const std::vector<ssize_t> strides({ sizeof(int64_t) });
-
-    return std::make_shared<NumpyArray>(Identities::none(),
-                                        util::Parameters(),
-                                        ptr,
-                                        shape,
-                                        strides,
-                                        0,
-                                        sizeof(int64_t),
-                                        util::dtype_to_format(dtype),
-                                        dtype,
-                                        ptr_lib_);
-  }
-
-  const ContentPtr
   NumpyArray::as_unique_strings(const Index64& offsets) const {
     std::shared_ptr<Content> out;
     std::shared_ptr<void> ptr;

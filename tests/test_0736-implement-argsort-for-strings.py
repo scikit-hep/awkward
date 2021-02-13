@@ -13,7 +13,7 @@ import awkward as ak  # noqa: F401
 
 def test_argsort():
     # array = ak.Array(["one", "two", "three", "four", "five", "six", "seven", "eight"])
-    array = ak.Array([["one", "two", "three"], ["four", "five"], ["six", "seven", "eight"]])
+    array = ak.Array([["twotwo", "two", "three"], ["four", "five"], ["six", "seven", "eight"]])
 
     print(ak.argsort(array, axis=1))
     raise Exception
