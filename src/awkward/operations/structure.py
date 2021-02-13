@@ -297,6 +297,12 @@ def run_lengths(array, highlevel=True, behavior=None):
         >>> ak.run_lengths(array)
         <Array [[3, 1, 1], [1, 1], [1, 1]] type='3 * var * int64'>
 
+    This function recognizes strings as distinguishable values.
+
+        >>> array = ak.Array([["one", "one"], ["one", "two", "two"], ["three", "two", "two"]])
+        >>> ak.run_lengths(array)
+        <Array [[2], [1, 2], [1, 2]] type='3 * var * int64'>
+
     Note that this can be combined with #ak.argsort and #ak.unflatten to compute
     a "group by" operation:
 
@@ -340,6 +346,8 @@ def run_lengths(array, highlevel=True, behavior=None):
             return nplike.empty(0, np.int64), offsets
         else:
             diffs = data[1:] != data[:-1]
+            if isinstance(diffs, ak.highlevel.Array):
+                diffs = nplike.asarray(diffs)
             if offsets is not None:
                 diffs[offsets[1:-1] - 1] = True
             positions = nplike.nonzero(diffs)[0]
@@ -359,6 +367,13 @@ def run_lengths(array, highlevel=True, behavior=None):
             if isinstance(layout, ak._util.indexedtypes):
                 layout = layout.project()
 
+            if (
+                layout.parameter("__array__") == "string"
+                or layout.parameter("__array__") == "bytestring"
+            ):
+                nextcontent, _ = lengths_of(ak.highlevel.Array(layout), None)
+                return lambda: ak.layout.NumpyArray(nextcontent)
+
             if not isinstance(layout, (ak.layout.NumpyArray, ak.layout.EmptyArray)):
                 raise NotImplementedError(
                     "run_lengths on "
@@ -370,11 +385,32 @@ def run_lengths(array, highlevel=True, behavior=None):
             return lambda: ak.layout.NumpyArray(nextcontent)
 
         elif layout.branch_depth == (False, 2):
+            if isinstance(layout, ak._util.indexedtypes):
+                layout = layout.project()
+
             if not isinstance(layout, ak._util.listtypes):
                 raise NotImplementedError(
                     "run_lengths on "
                     + type(layout).__name__
                     + ak._util.exception_suffix(__file__)
+                )
+
+            if (
+                layout.content.parameter("__array__") == "string"
+                or layout.content.parameter("__array__") == "bytestring"
+            ):
+                listoffsetarray = layout.toListOffsetArray64(False)
+                offsets = nplike.asarray(listoffsetarray.offsets)
+                content = listoffsetarray.content[offsets[0] : offsets[-1]]
+
+                if isinstance(content, ak._util.indexedtypes):
+                    content = content.project()
+
+                nextcontent, nextoffsets = lengths_of(
+                    ak.highlevel.Array(content), offsets - offsets[0]
+                )
+                return lambda: ak.layout.ListOffsetArray64(
+                    ak.layout.Index64(nextoffsets), ak.layout.NumpyArray(nextcontent)
                 )
 
             listoffsetarray = layout.toListOffsetArray64(False)

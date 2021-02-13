@@ -132,6 +132,10 @@ namespace awkward {
 
   int64_t
   ListForm::purelist_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return 1;
+    }
     return content_.get()->purelist_depth() + 1;
   }
 
@@ -142,6 +146,10 @@ namespace awkward {
 
   const std::pair<int64_t, int64_t>
   ListForm::minmax_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
     return std::pair<int64_t, int64_t>(content_depth.first + 1,
                                        content_depth.second + 1);
@@ -149,6 +157,10 @@ namespace awkward {
 
   const std::pair<bool, int64_t>
   ListForm::branch_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<bool, int64_t>(false, 1);
+    }
     std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
     return std::pair<bool, int64_t>(content_depth.first,
                                     content_depth.second + 1);
@@ -827,12 +839,20 @@ namespace awkward {
   template <typename T>
   int64_t
   ListArrayOf<T>::purelist_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return 1;
+    }
     return content_.get()->purelist_depth() + 1;
   }
 
   template <typename T>
   const std::pair<int64_t, int64_t>
   ListArrayOf<T>::minmax_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
     return std::pair<int64_t, int64_t>(content_depth.first + 1,
                                        content_depth.second + 1);
@@ -841,6 +861,10 @@ namespace awkward {
   template <typename T>
   const std::pair<bool, int64_t>
   ListArrayOf<T>::branch_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<bool, int64_t>(false, 1);
+    }
     std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
     return std::pair<bool, int64_t>(content_depth.first,
                                     content_depth.second + 1);
