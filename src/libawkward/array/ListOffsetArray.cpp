@@ -1868,58 +1868,17 @@ namespace awkward {
       NumpyArray* rawcontent = dynamic_cast<NumpyArray*>(content_.get());
 
       Index64 output(parents.length());
-
-      int64_t* tocarry = output.data();
-      const int64_t* fromparents = parents.data();
-      int64_t length = parents.length();
-      const char* stringdata = reinterpret_cast<char*>(rawcontent->data());
-      const int64_t* stringstarts = util::make_starts(offsets_).data();
-      const int64_t* stringstops = util::make_stops(offsets_).data();
-      bool is_stable = stable;
-      bool is_ascending = ascending;
-
-      auto sorter =
-            [&stringdata, &stringstarts, &stringstops, &is_ascending](int left, int right) -> bool {
-              size_t left_n = stringstops[left] - stringstarts[left];
-              size_t right_n = stringstops[right] - stringstarts[right];
-              const char* left_str = &stringdata[stringstarts[left]];
-              const char* right_str = &stringdata[stringstarts[right]];
-              int cmp = strncmp(left_str, right_str, std::min(left_n, right_n));
-              bool out;
-              if (cmp == 0) {
-                out = left_n < right_n;
-              }
-              else {
-                out = cmp < 0;
-              }
-              return is_ascending ? out : !out;
-            };
-
-      int64_t firstindex = 0;
-      int64_t lastparent = -1;
-      int64_t k = 0;
-      std::vector<int64_t> index;
-      for (int64_t i = 0;  i < length + 1;  i++) {
-        if (i == length  ||  fromparents[i] != lastparent) {
-          if (is_stable) {
-            std::stable_sort(index.begin(), index.end(), sorter);
-          }
-          else {
-            std::sort(index.begin(), index.end(), sorter);
-          }
-          for (int64_t j = 0;  j < (int64_t)index.size();  j++) {
-            tocarry[firstindex + j] = index[j] - firstindex;
-          }
-          index.clear();
-        }
-        if (i != length) {
-          if (index.empty()) {
-            firstindex = i;
-          }
-          index.push_back(i);
-          lastparent = fromparents[i];
-        }
-      }
+      struct Error err = kernel::ListOffsetArray_argsort_strings(
+        kernel::lib::cpu,   // DERIVE
+        output.data(),
+        parents.data(),
+        parents.length(),
+        reinterpret_cast<uint8_t*>(rawcontent->data()),
+        util::make_starts(offsets_).data(),
+        util::make_stops(offsets_).data(),
+        stable,
+        ascending);
+      util::handle_error(err, classname(), identities_.get());
 
       return std::make_shared<NumpyArray>(output);
     }
