@@ -1855,6 +1855,8 @@ namespace awkward {
 
     if (parameter_equals("__array__", "\"string\"")  ||
         parameter_equals("__array__", "\"bytestring\"")) {
+      std::cout << "do string " << negaxis << std::endl;
+
       if (branchdepth.first  ||  negaxis != branchdepth.second) {
         throw std::invalid_argument(
           std::string("array with strings can only be sorted with axis=-1")
@@ -1880,10 +1882,27 @@ namespace awkward {
         ascending);
       util::handle_error(err, classname(), identities_.get());
 
-      return std::make_shared<NumpyArray>(output);
+      ContentPtr out = std::make_shared<NumpyArray>(output);
+
+      if (keepdims) {
+        return std::make_shared<RegularArray>(Identities::none(),
+                                              util::Parameters(),
+                                              out,
+                                              out.get()->length());
+      }
+      else {
+        return out;
+      }
     }
 
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+      if (purelist_parameter("__array__") == "\"string\""  ||
+          purelist_parameter("__array__") == "\"bytestring\"") {
+        throw std::invalid_argument(
+          std::string("array with strings can only be sorted with axis=-1")
+          + FILENAME(__LINE__));
+      }
+
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error(
           std::string("offsets_.length() - 1 != parents.length()") + FILENAME(__LINE__));
