@@ -794,7 +794,15 @@ namespace awkward {
               + std::string("): ") + std::string("size < 0")
               + FILENAME(__LINE__));
     }
-    return content_.get()->validityerror(path + std::string(".content"));
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      // The content has already been checked and we don't want to trigger the
+      // unnested-char/byte error.
+      return std::string("");
+    }
+    else {
+      return content_.get()->validityerror(path + std::string(".content"));
+    }
   }
 
   const ContentPtr

@@ -427,10 +427,11 @@ def test_ByteMaskedArray():
     ]
 
 
-@pytest.mark.skip(reason="need to fix sorting of strings in the next PR")
 def test_UnionArray():
     content0 = ak.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
-    content1 = ak.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
+    content1 = ak.from_iter(
+        [["one"], ["two"], ["three"], ["four"], ["five"]], highlevel=False
+    )
     tags = ak.layout.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
     index = ak.layout.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
     array = ak.layout.UnionArray8_32(tags, index, [content0, content1])
@@ -440,7 +441,6 @@ def test_UnionArray():
     assert str(err.value).startswith("cannot sort UnionArray8_32")
 
 
-@pytest.mark.skip(reason="need to fix sorting of strings in the next PR")
 def test_sort_strings():
     content1 = ak.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
     assert ak.to_list(content1) == ["one", "two", "three", "four", "five"]
@@ -460,23 +460,7 @@ def test_sort_strings():
         "five",
     ]
 
-    assert ak.to_list(content1.sort(1, True, False)) == [
-        "five",
-        "four",
-        "one",
-        "three",
-        "two",
-    ]
-    assert ak.to_list(content1.sort(1, False, False)) == [
-        "two",
-        "three",
-        "one",
-        "four",
-        "five",
-    ]
 
-
-@pytest.mark.skip(reason="need to fix sorting of strings in the next PR")
 def test_sort_bytestrings():
     array = ak.from_iter(
         [b"one", b"two", b"three", b"two", b"two", b"one", b"three"], highlevel=False

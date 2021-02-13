@@ -3601,46 +3601,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::sort_asstrings(const Index64& offsets,
-                             bool ascending,
-                             bool stable) const {
-    std::shared_ptr<Content> out;
-    std::shared_ptr<void> ptr;
-    int64_t offsets_length = offsets.length();
-
-    Index64 outoffsets(offsets_length);
-
-    if (dtype_ == util::dtype::uint8) {
-      ptr = string_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
-                                 length(),
-                                 offsets,
-                                 outoffsets,
-                                 ascending,
-                                 stable);
-    } else {
-      throw std::invalid_argument(
-        std::string("cannot sort NumpyArray as strings with format \"")
-        + format_ + std::string("\"") + FILENAME(__LINE__));
-    }
-
-    out = std::make_shared<NumpyArray>(identities_,
-                                       parameters_,
-                                       ptr,
-                                       shape_,
-                                       strides_,
-                                       0,
-                                       itemsize_,
-                                       format_,
-                                       dtype_,
-                                       ptr_lib_);
-
-    return std::make_shared<ListOffsetArray64>(Identities::none(),
-                                               util::Parameters(),
-                                               outoffsets,
-                                               out);
-  }
-
-  const ContentPtr
   NumpyArray::as_unique_strings(const Index64& offsets) const {
     std::shared_ptr<Content> out;
     std::shared_ptr<void> ptr;
@@ -5463,35 +5423,6 @@ namespace awkward {
       &outlength
     );
     util::handle_error(err5, classname(), nullptr);
-
-    return ptr;
-  }
-
-  template<typename T>
-  const std::shared_ptr<void>
-  NumpyArray::string_sort(const T* data,
-                          int64_t length,
-                          const Index64& offsets,
-                          Index64& outoffsets,
-                          bool ascending,
-                          bool stable) const {
-    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
-                                               length*((int64_t)sizeof(T)));
-
-    if (length == 0) {
-      return ptr;
-    }
-
-    struct Error err1 = kernel::NumpyArray_sort_asstrings(
-      kernel::lib::cpu,   // DERIVE
-      ptr.get(),
-      data,
-      offsets.data(),
-      offsets.length(),
-      outoffsets.data(),
-      ascending,
-      stable);
-    util::handle_error(err1, classname(), nullptr);
 
     return ptr;
   }

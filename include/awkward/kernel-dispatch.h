@@ -1779,6 +1779,18 @@ namespace awkward {
       bool ascending,
       bool stable);
 
+    ERROR ListOffsetArray_argsort_strings(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const int64_t* fromparents,
+      int64_t length,
+      const uint8_t* stringdata,
+      const int64_t* stringstarts,
+      const int64_t* stringstops,
+      bool is_stable,
+      bool is_ascending,
+      bool is_local);
+
     template <typename T>
     ERROR NumpyArray_sort_asstrings(
       kernel::lib ptr_lib,

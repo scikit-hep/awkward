@@ -919,7 +919,15 @@ namespace awkward {
       starts.length(),
       content_.get()->length());
     if (err.str == nullptr) {
-      return content_.get()->validityerror(path + std::string(".content"));
+      if (parameter_equals("__array__", "\"string\"")  ||
+          parameter_equals("__array__", "\"bytestring\"")) {
+        // The content has already been checked and we don't want to trigger the
+        // unnested-char/byte error.
+        return std::string("");
+      }
+      else {
+        return content_.get()->validityerror(path + std::string(".content"));
+      }
     }
     else {
       return (std::string("at ") + path + std::string(" (") + classname()
@@ -1700,24 +1708,57 @@ namespace awkward {
       return shallow_copy();
     }
 
-    // if this is array of strings, axis parameter is ignored
-    // and this array is sorted
-    if (util::parameter_isstring(parameters_, "__array__")) {
-      if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
-        ContentPtr out = content->sort_asstrings(offsets_,
-                                                 ascending,
-                                                 stable);
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      if (branchdepth.first  ||  negaxis != branchdepth.second) {
+        throw std::invalid_argument(
+          std::string("array with strings can only be sorted with axis=-1")
+          + FILENAME(__LINE__));
+      }
+
+      std::string validity_error = validityerror("");
+      if (!validity_error.empty()) {
+        throw std::invalid_argument(validity_error + FILENAME(__LINE__));
+      }
+      NumpyArray* rawcontent = dynamic_cast<NumpyArray*>(content_.get());
+
+      Index64 tocarry(parents.length());
+      struct Error err = kernel::ListOffsetArray_argsort_strings(
+        kernel::lib::cpu,   // DERIVE
+        tocarry.data(),
+        parents.data(),
+        parents.length(),
+        reinterpret_cast<uint8_t*>(rawcontent->data()),
+        util::make_starts(offsets_).data(),
+        util::make_stops(offsets_).data(),
+        stable,
+        ascending,
+        false);
+      util::handle_error(err, classname(), identities_.get());
+
+      ContentPtr out = carry(tocarry, false);
+
+      if (keepdims) {
         return std::make_shared<RegularArray>(Identities::none(),
                                               util::Parameters(),
                                               out,
-                                              out.get()->length(),
-                                              length());
+                                              out.get()->length());
+      }
+      else {
+        return out;
       }
     }
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
-
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+      if (purelist_parameter("__array__") == "\"string\""  ||
+          purelist_parameter("__array__") == "\"bytestring\"") {
+        throw std::invalid_argument(
+          std::string("array with strings can only be sorted with axis=-1")
+          + FILENAME(__LINE__));
+      }
+
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error(
           std::string("offsets_.length() - 1 != parents.length()" + FILENAME(__LINE__)));
@@ -1871,15 +1912,57 @@ namespace awkward {
      return shallow_copy();
     }
 
-    // if this is array of strings, axis parameter is ignored
-    // and this array is sorted
-    if (util::parameter_isstring(parameters_, "__array__")) {
-      throw std::runtime_error(
-        std::string("not implemented yet: argsort for strings") + FILENAME(__LINE__));
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      if (branchdepth.first  ||  negaxis != branchdepth.second) {
+        throw std::invalid_argument(
+          std::string("array with strings can only be sorted with axis=-1")
+          + FILENAME(__LINE__));
+      }
+
+      std::string validity_error = validityerror("");
+      if (!validity_error.empty()) {
+        throw std::invalid_argument(validity_error + FILENAME(__LINE__));
+      }
+      NumpyArray* rawcontent = dynamic_cast<NumpyArray*>(content_.get());
+
+      Index64 output(parents.length());
+      struct Error err = kernel::ListOffsetArray_argsort_strings(
+        kernel::lib::cpu,   // DERIVE
+        output.data(),
+        parents.data(),
+        parents.length(),
+        reinterpret_cast<uint8_t*>(rawcontent->data()),
+        util::make_starts(offsets_).data(),
+        util::make_stops(offsets_).data(),
+        stable,
+        ascending,
+        true);
+      util::handle_error(err, classname(), identities_.get());
+
+      ContentPtr out = std::make_shared<NumpyArray>(output);
+
+      if (keepdims) {
+        return std::make_shared<RegularArray>(Identities::none(),
+                                              util::Parameters(),
+                                              out,
+                                              out.get()->length());
+      }
+      else {
+        return out;
+      }
     }
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+      if (purelist_parameter("__array__") == "\"string\""  ||
+          purelist_parameter("__array__") == "\"bytestring\"") {
+        throw std::invalid_argument(
+          std::string("array with strings can only be sorted with axis=-1")
+          + FILENAME(__LINE__));
+      }
+
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error(
           std::string("offsets_.length() - 1 != parents.length()") + FILENAME(__LINE__));
@@ -2329,7 +2412,8 @@ namespace awkward {
 
   template <>
   bool ListOffsetArrayOf<int64_t>::is_unique() const {
-    if (util::parameter_isstring(parameters_, "__array__")) {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
       if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
         ContentPtr out = content->as_unique_strings(offsets_);
         return (out.get()->length() == length());

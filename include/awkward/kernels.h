@@ -2817,6 +2817,18 @@ extern "C" {
     int64_t outlength);
 
   EXPORT_SYMBOL ERROR
+  awkward_ListOffsetArray_argsort_strings(
+    int64_t* tocarry,
+    const int64_t* fromparents,
+    int64_t length,
+    const uint8_t* stringdata,
+    const int64_t* stringstarts,
+    const int64_t* stringstops,
+    bool is_stable,
+    bool is_ascending,
+    bool is_local);
+
+  EXPORT_SYMBOL ERROR
   awkward_NumpyArray_sort_asstrings_uint8(
     uint8_t* toptr,
     const uint8_t* fromptr,

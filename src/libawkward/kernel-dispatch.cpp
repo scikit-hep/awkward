@@ -20158,6 +20158,41 @@ namespace awkward {
       }
     }
 
+    ERROR ListOffsetArray_argsort_strings(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const int64_t* fromparents,
+      int64_t length,
+      const uint8_t* stringdata,
+      const int64_t* stringstarts,
+      const int64_t* stringstops,
+      bool is_stable,
+      bool is_ascending,
+      bool is_local) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListOffsetArray_argsort_strings(
+          tocarry,
+          fromparents,
+          length,
+          stringdata,
+          stringstarts,
+          stringstops,
+          is_stable,
+          is_ascending,
+          is_local);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_argsort_strings")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for ListOffsetArray_argsort_strings")
+          + FILENAME(__LINE__));
+      }
+    }
+
     template<>
     ERROR NumpyArray_sort_asstrings<uint8_t>(
       kernel::lib ptr_lib,

@@ -4702,6 +4702,25 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_ListOffsetArray_argsort_strings
+    specializations:
+      - name: awkward_ListOffsetArray_argsort_strings
+        args:
+          - {name: tocarry, type: "List[int64_t]", dir: out}
+          - {name: fromparents, type: "Const[List[int64_t]]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+          - {name: stringdata, type: "Const[List[uint8_t]]", dir: in}
+          - {name: stringstarts, type: "Const[List[int64_t]]", dir: in}
+          - {name: stringstops, type: "Const[List[int64_t]]", dir: in}
+          - {name: is_stable, type: "bool", dir: in}
+          - {name: is_ascending, type: "bool", dir: in}
+          - {name: is_local, type: "bool", dir: in}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_NumpyArray_sort_asstrings_uint8
     specializations:
       - name: awkward_NumpyArray_sort_asstrings_uint8

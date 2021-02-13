@@ -475,10 +475,6 @@ namespace awkward {
                 bool keepdims) const override;
 
     const ContentPtr
-      sort_asstrings(const Index64& offsets,
-                     bool ascending,
-                     bool stable) const;
-    const ContentPtr
       as_unique_strings(const Index64& offsets) const;
 
     const ContentPtr
@@ -829,14 +825,6 @@ namespace awkward {
                                              const Index64& starts,
                                              const Index64& parents,
                                              int64_t& outlength) const;
-
-    template<typename T>
-    const std::shared_ptr<void> string_sort(const T* data,
-                                            int64_t length,
-                                            const Index64& offsets,
-                                            Index64& outoffsets,
-                                            bool ascending,
-                                            bool stable) const;
 
     template<typename T>
     const std::shared_ptr<void> string_unique(const T* data,
