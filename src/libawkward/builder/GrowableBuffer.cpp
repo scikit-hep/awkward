@@ -104,6 +104,8 @@ namespace awkward {
   void
   GrowableBuffer<T>::set_reserved(int64_t minreserved) {
     if (minreserved > reserved_) {
+      std::cout << "GrowableBuffer<T>::set_reserved to " << typeid(T).name() << " " << minreserved << "\n";
+
       std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu, minreserved*(int64_t)sizeof(T));
       memcpy(ptr.get(), ptr_.get(), (size_t)length_ * sizeof(T));
       ptr_ = ptr;
