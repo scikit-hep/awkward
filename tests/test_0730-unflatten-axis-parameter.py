@@ -33,3 +33,11 @@ def test():
         [[5], [6, 7]],
         [[8], [9]],
     ]
+
+
+def test_issue742():
+    assert ak.unflatten(ak.Array(["a", "b", "c"]), [1, 2, 0]).tolist() == [
+        ["a"],
+        ["b", "c"],
+        [],
+    ]

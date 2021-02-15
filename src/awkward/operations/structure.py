@@ -1991,7 +1991,9 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
             out = ak.layout.RegularArray(layout, counts)
 
         else:
-            position = nplike.searchsorted(current_offsets[0], len(layout), side="left")
+            position = (
+                nplike.searchsorted(current_offsets[0], len(layout), side="right") - 1
+            )
             if position >= len(current_offsets[0]) or current_offsets[0][
                 position
             ] != len(layout):
@@ -2034,7 +2036,9 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
                 else:
                     inneroffsets = nplike.asarray(content.offsets)
 
-                positions = nplike.searchsorted(inneroffsets, outeroffsets, side="left")
+                positions = (
+                    nplike.searchsorted(inneroffsets, outeroffsets, side="right") - 1
+                )
                 if not nplike.array_equal(inneroffsets[positions], outeroffsets):
                     raise ValueError(
                         "structure imposed by 'counts' does not fit in the array or partition "
