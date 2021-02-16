@@ -142,7 +142,7 @@ namespace awkward {
     length_ = length;
   }
 
-  ///
+  /// @brief
   BitMaskedArrayBuilder::BitMaskedArrayBuilder(const BitMaskedFormPtr& form,
                                                const DataPtr& data,
                                                const int64_t length)
@@ -153,30 +153,27 @@ namespace awkward {
 
   const std::string
   BitMaskedArrayBuilder::classname() const {
-    return "BitMaskedArray";
+    return "BitMaskedArrayBuilder";
   }
 
   const ContentPtr
   BitMaskedArrayBuilder::snapshot() const {
-    // FIXME:
-    return std::make_shared<EmptyArray>(Identities::none(),
-                                        form_.get()->parameters());
-
-    // if(content_ != nullptr) {
-    //   return std::make_shared<BitMaskedArray>(Identities::none(),
-    //                                           form_.get()->parameters(),
-    //                                           form_.get()->mask(),
-    //                                           content_.get()->snapshot(),
-    //                                           form_.get()->valid_when(),
-    //                                           length_,
-    //                                           form_.get()->lsb_order());
-    // }
-    // else {
-    //   throw std::invalid_argument(
-    //     std::string("Form ") + classname()
-    //     + std::string(" needs another Form as its content")
-    //     + FILENAME(__LINE__));
-    // }
+    if(content_ != nullptr) {
+      const IndexU8 mask(std::static_pointer_cast<uint8_t>(data_), 0, length_, kernel::lib::cpu);
+      return std::make_shared<BitMaskedArray>(Identities::none(),
+                                              form_.get()->parameters(),
+                                              mask,
+                                              content_.get()->snapshot(),
+                                              form_.get()->valid_when(),
+                                              length_,
+                                              form_.get()->lsb_order());
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("Form of a ") + classname()
+        + std::string(" needs another Form as its content")
+        + FILENAME(__LINE__));
+    }
   }
 
   bool
@@ -186,7 +183,7 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        std::string("Form ") + classname()
+        std::string("Form of a ") + classname()
         + std::string(" expects another Form")
         + FILENAME(__LINE__));
     }
@@ -204,27 +201,25 @@ namespace awkward {
 
   const std::string
   ByteMaskedArrayBuilder::classname() const {
-    return "ByteMaskedArray";
+    return "ByteMaskedArrayBuilder";
   }
 
   const ContentPtr
   ByteMaskedArrayBuilder::snapshot() const {
-    // FIXME:
-    return std::make_shared<EmptyArray>(Identities::none(),
-                                        form_.get()->parameters());
-    // if(content_ != nullptr) {
-    //   return std::make_shared<ByteMaskedArray>(Identities::none(),
-    //                                            form_.get()->parameters(),
-    //                                            form_.get()->mask(),
-    //                                            content_.get()->snapshot(),
-    //                                            form_.get()->valid_when());
-    //  }
-    //  else {
-    //    throw std::invalid_argument(
-    //      std::string("Form ") + classname()
-    //      + std::string(" needs another Form as its content")
-    //      + FILENAME(__LINE__));
-    //  }
+    if(content_ != nullptr) {
+      const Index8 mask(std::static_pointer_cast<int8_t>(data_), 0, length_, kernel::lib::cpu);
+      return std::make_shared<ByteMaskedArray>(Identities::none(),
+                                               form_.get()->parameters(),
+                                               mask,
+                                               content_.get()->snapshot(),
+                                               form_.get()->valid_when());
+     }
+     else {
+       throw std::invalid_argument(
+         std::string("Form of a ") + classname()
+         + std::string(" needs another Form as its content")
+         + FILENAME(__LINE__));
+     }
   }
 
   bool
@@ -234,7 +229,7 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        std::string("Form ") + classname()
+        std::string("Form of a ") + classname()
         + std::string(" expects another Form")
         + FILENAME(__LINE__));
     }
@@ -251,7 +246,7 @@ namespace awkward {
 
   const std::string
   EmptyArrayBuilder::classname() const {
-    return "EmptyArray";
+    return "EmptyArrayBuilder";
   }
 
   const ContentPtr
@@ -263,7 +258,7 @@ namespace awkward {
   bool
   EmptyArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
     throw std::invalid_argument(
-      std::string("Form ") + classname()
+      std::string("Form of a ") + classname()
       + std::string(" can not embed another Form")
       + FILENAME(__LINE__));
   }
@@ -279,7 +274,7 @@ namespace awkward {
 
   const std::string
   IndexedArrayBuilder::classname() const {
-    return "IndexedArray";
+    return "IndexedArrayBuilder";
   }
 
   const ContentPtr
@@ -293,7 +288,7 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        std::string("Form ") + classname()
+        std::string("Form of a ") + classname()
         + std::string(" needs another Form as its content")
         + FILENAME(__LINE__));
     }
@@ -306,7 +301,7 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        std::string("Form ") + classname()
+        std::string("Form of a ") + classname()
         + std::string(" expects another Form")
         + FILENAME(__LINE__));
     }
@@ -324,7 +319,7 @@ namespace awkward {
 
   const std::string
   IndexedOptionArrayBuilder::classname() const {
-    return "IndexedOptionArray";
+    return "IndexedOptionArrayBuilder";
   }
 
   const ContentPtr
@@ -338,7 +333,7 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        std::string("Form ") + classname()
+        std::string("Form of a ") + classname()
         + std::string(" needs another Form as its content")
         + FILENAME(__LINE__));
     }
@@ -351,13 +346,14 @@ namespace awkward {
     }
     else {
       throw std::invalid_argument(
-        std::string("Form ") + classname()
+        std::string("Form of a ") + classname()
         + std::string(" expects another Form")
         + FILENAME(__LINE__));
     }
     return true;
   }
 
+  ///
   ListArrayBuilder::ListArrayBuilder(const ListFormPtr& form,
                                      const DataPtr& data,
                                      int64_t length,
@@ -368,44 +364,45 @@ namespace awkward {
       content_(nullptr),
       copyarrays_(copyarrays) { }
 
-    const std::string
-    ListArrayBuilder::classname() const {
-      return "ListArray";
-    }
+  const std::string
+  ListArrayBuilder::classname() const {
+    return "ListArrayBuilder";
+  }
 
-    const ContentPtr
-    ListArrayBuilder::snapshot() const {
-      if(content_ != nullptr) {
-        Index64 starts(std::static_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
-        Index64 stops(std::static_pointer_cast<int64_t>(data_), length_, length_, kernel::lib::cpu);
-        return std::make_shared<ListArray64>(Identities::none(),
-                                             form_.get()->parameters(),
-                                             starts,
-                                             stops,
-                                             content_.get()->snapshot());
-      }
-      else {
-        throw std::invalid_argument(
-          std::string("Form ") + classname()
-          + std::string(" needs another Form as its content")
-          + FILENAME(__LINE__));
-      }
+  const ContentPtr
+  ListArrayBuilder::snapshot() const {
+    if(content_ != nullptr) {
+      Index64 starts(std::static_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
+      Index64 stops(std::static_pointer_cast<int64_t>(data_), length_, length_, kernel::lib::cpu);
+      return std::make_shared<ListArray64>(Identities::none(),
+                                           form_.get()->parameters(),
+                                           starts,
+                                           stops,
+                                           content_.get()->snapshot());
     }
-
-    bool
-    ListArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
-      if (form_.get()->content().get()->equal(form, false, false, false, false)) {
-        content_ = formBuilderFromA(form, data, length);
-      }
-      else {
-        throw std::invalid_argument(
-          std::string("Form ") + classname()
-          + std::string(" expects another Form")
-          + FILENAME(__LINE__));
-      }
-      return true;
+    else {
+      throw std::invalid_argument(
+        std::string("Form of a ") + classname()
+        + std::string(" needs another Form as its content")
+        + FILENAME(__LINE__));
     }
+  }
 
+  bool
+  ListArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
+    if (form_.get()->content().get()->equal(form, false, false, false, false)) {
+      content_ = formBuilderFromA(form, data, length);
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("Form of a ") + classname()
+        + std::string(" expects another Form")
+        + FILENAME(__LINE__));
+    }
+    return true;
+  }
+
+  ///
   ListOffsetArrayBuilder::ListOffsetArrayBuilder(const ListOffsetFormPtr& form,
                                                  const DataPtr& data,
                                                  int64_t length,
@@ -416,41 +413,41 @@ namespace awkward {
       content_(nullptr),
       copyarrays_(copyarrays) { }
 
-    const std::string
-    ListOffsetArrayBuilder::classname() const {
-      return "ListOffsetArray";
-    }
+  const std::string
+  ListOffsetArrayBuilder::classname() const {
+    return "ListOffsetArrayBuilder";
+  }
 
-    const ContentPtr
-    ListOffsetArrayBuilder::snapshot() const {
-      if(content_ != nullptr) {
-        Index64 offsets(std::static_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
-        return std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                   form_.get()->parameters(),
-                                                   offsets,
-                                                   content_.get()->snapshot());
-      }
-      else {
-        throw std::invalid_argument(
-          std::string("Form ") + classname()
-          + std::string(" needs another Form as its content")
-          + FILENAME(__LINE__));
-      }
+  const ContentPtr
+  ListOffsetArrayBuilder::snapshot() const {
+    if(content_ != nullptr) {
+      Index64 offsets(std::static_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
+      return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                 form_.get()->parameters(),
+                                                 offsets,
+                                                 content_.get()->snapshot());
     }
+    else {
+      throw std::invalid_argument(
+        std::string("Form of a ") + classname()
+        + std::string(" needs another Form as its content")
+        + FILENAME(__LINE__));
+    }
+  }
 
-    bool
-    ListOffsetArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
-      if (form_.get()->content().get()->equal(form, false, false, false, false)) {
-        content_ = formBuilderFromA(form, data, length);
-      }
-      else {
-        throw std::invalid_argument(
-          std::string("Form ") + classname()
-          + std::string(" expects another Form")
-          + FILENAME(__LINE__));
-      }
-      return true;
+  bool
+  ListOffsetArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
+    if (form_.get()->content().get()->equal(form, false, false, false, false)) {
+      content_ = formBuilderFromA(form, data, length);
     }
+    else {
+      throw std::invalid_argument(
+        std::string("Form of a ") + classname()
+        + std::string(" expects another Form")
+        + FILENAME(__LINE__));
+    }
+    return true;
+  }
 
   ///
   NumpyArrayBuilder::NumpyArrayBuilder(const NumpyFormPtr& form,
@@ -464,7 +461,7 @@ namespace awkward {
 
   const std::string
   NumpyArrayBuilder::classname() const {
-    return "NumpyArray";
+    return "NumpyArrayBuilder";
   }
 
   const ContentPtr
@@ -524,7 +521,7 @@ namespace awkward {
   bool
   NumpyArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
     throw std::invalid_argument(
-      std::string("Form ") + classname()
+      std::string("Form of a ") + classname()
       + std::string(" can not embed another Form")
       + FILENAME(__LINE__));
   }
@@ -539,22 +536,31 @@ namespace awkward {
 
   const std::string
   RecordArrayBuilder::classname() const {
-    return "RecordArray";
+    return "RecordArrayBuilder";
   }
 
   const ContentPtr
   RecordArrayBuilder::snapshot() const {
-    // FIXME:
-    return std::make_shared<EmptyArray>(Identities::none(),
-                                        form_.get()->parameters());
-      // return std::make_shared<RecordArray>(Identities::none(),
-      //                                      form_.get()->parameters());
+    ContentPtrVec contents;
+    util::RecordLookupPtr recordlookup =
+      std::make_shared<util::RecordLookup>();
+    for (size_t i = 0;  i < contents_.size();  i++) {
+      contents.push_back(contents_[i].get()->snapshot());
+      recordlookup.get()->push_back(keys_[i]);
+    }
+    std::vector<ArrayCachePtr> caches;  // nothing is virtual here
+    return std::make_shared<RecordArray>(Identities::none(),
+                                         form_.get()->parameters(),
+                                         contents,
+                                         recordlookup,
+                                         length_,
+                                         caches);
   }
 
   bool
   RecordArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
     throw std::invalid_argument(
-      std::string("Form ") + classname()
+      std::string("Form of a ") + classname()
       + std::string(" can not embed another Form")
       + FILENAME(__LINE__));
   }
@@ -565,28 +571,42 @@ namespace awkward {
                                            const int64_t length)
     : form_(form),
       data_(data),
-      length_(length) { }
+      length_(length),
+      content_(nullptr) { }
 
   const std::string
   RegularArrayBuilder::classname() const {
-    return "EmptyArray";
+    return "RegularArrayBuilder";
   }
 
   const ContentPtr
   RegularArrayBuilder::snapshot() const {
-    // FIXME:
-    return std::make_shared<EmptyArray>(Identities::none(),
-                                        form_.get()->parameters());
-      // return std::make_shared<RegularArray>(Identities::none(),
-      //                                       form_.get()->parameters());
+    if(content_ != nullptr) {
+      return std::make_shared<RegularArray>(Identities::none(),
+                                            form_.get()->parameters(),
+                                            content_.get()->snapshot(),
+                                            length_);
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("Form of a ") + classname()
+        + std::string(" needs another Form as its content")
+        + FILENAME(__LINE__));
+    }
   }
 
   bool
   RegularArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
-    throw std::invalid_argument(
-      std::string("Form ") + classname()
-      + std::string(" can not embed another Form")
-      + FILENAME(__LINE__));
+    if (form_.get()->content().get()->equal(form, false, false, false, false)) {
+      content_ = formBuilderFromA(form, data, length);
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("Form of a ") + classname()
+        + std::string(" expects another Form")
+        + FILENAME(__LINE__));
+    }
+    return true;
   }
 
   ///
@@ -614,7 +634,7 @@ namespace awkward {
   bool
   UnionArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
     throw std::invalid_argument(
-      std::string("Form ") + classname()
+      std::string("Form of a ") + classname()
       + std::string(" can not embed another Form")
       + FILENAME(__LINE__));
   }
@@ -642,7 +662,7 @@ namespace awkward {
   bool
   UnmaskedArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
     throw std::invalid_argument(
-      std::string("Form ") + classname()
+      std::string("Form of a ") + classname()
       + std::string(" can not embed another Form")
       + FILENAME(__LINE__));
   }
@@ -670,7 +690,7 @@ namespace awkward {
   bool
   VirtualArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
     throw std::invalid_argument(
-      std::string("Form ") + classname()
+      std::string("Form of a ") + classname()
       + std::string(" can not embed another Form")
       + FILENAME(__LINE__));
   }

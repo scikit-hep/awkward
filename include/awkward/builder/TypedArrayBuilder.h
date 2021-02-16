@@ -129,9 +129,16 @@ namespace awkward {
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
+    /// @brief BitMaskedForm that defines the BitMaskedArray.
     const BitMaskedFormPtr form_;
+
+    /// @brief Accumulated data is an IndexU8 mask.
     DataPtr data_;
+
+    /// @brief Number of elements in the mask array.
     int64_t length_;
+
+    /// @brief Content
     FormBuilderPtr content_;
   };
 
@@ -512,6 +519,8 @@ namespace awkward {
     const RecordFormPtr form_;
     DataPtr data_;
     int64_t length_;
+    std::vector<FormBuilderPtr> contents_;
+    std::vector<std::string> keys_;
   };
 
   /// @class RegularArrayBuilder
@@ -551,6 +560,7 @@ namespace awkward {
     const RegularFormPtr form_;
     DataPtr data_;
     int64_t length_;
+    FormBuilderPtr content_;
   };
 
   /// @class UnionArrayBuilder
