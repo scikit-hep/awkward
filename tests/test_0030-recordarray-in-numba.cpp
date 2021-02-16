@@ -14,7 +14,6 @@ int main(int, char**) {
   // create builder
   ak::ArrayBuilder myarray(ak::ArrayBuilderOptions(1024, 2.0));
 
-for (int64_t i = 0; i < 10000; i++) {
   // populate builder with lists
   myarray.beginrecord();
   myarray.field_check("one");
@@ -42,12 +41,12 @@ for (int64_t i = 0; i < 10000; i++) {
   myarray.field_check("three");
   myarray.real(3.3);
   myarray.endrecord();
-}
+
   // take a snapshot
   std::shared_ptr<ak::Content> array = myarray.snapshot();
 
-  // check output
-  // if (array.get()->tojson(false,1) != "[{\"one\":true,\"two\":1,\"three\":1.1},{\"one\":false,\"two\":2,\"three\":2.2},{\"one\":true,\"two\":3,\"three\":3.3}]")
-  //   {return -1;}
+  check output
+  if (array.get()->tojson(false,1) != "[{\"one\":true,\"two\":1,\"three\":1.1},{\"one\":false,\"two\":2,\"three\":2.2},{\"one\":true,\"two\":3,\"three\":3.3}]")
+    {return -1;}
   return 0;
 }
