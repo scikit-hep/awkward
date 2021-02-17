@@ -2002,7 +2002,10 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
 
         else:
             position = (
-                nplike.searchsorted(current_offsets[0], len(layout), side="right") - 1
+                nplike.searchsorted(
+                    current_offsets[0], nplike.array([len(layout)]), side="right"
+                )[0]
+                - 1
             )
             if position >= len(current_offsets[0]) or current_offsets[0][
                 position
