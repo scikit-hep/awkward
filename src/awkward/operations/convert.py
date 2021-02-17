@@ -3382,9 +3382,10 @@ class _ParquetDataset(_ParquetFile):
         self.options = options
 
         self.lookup = []
+        last_filename = None
         for i in range(metadata_file.num_row_groups):
             filename = metadata_file.metadata.row_group(i).column(0).file_path
-            if i == 0:
+            if last_filename is None:
                 if filename == "":
                     raise ValueError(
                         "Parquet _metadata file does not contain file paths "
@@ -3515,6 +3516,9 @@ def from_parquet(
     pyarrow = _import_pyarrow("ak.from_parquet")
     import pyarrow.parquet
 
+    if isinstance(row_groups, (numbers.Integral, np.integer)):
+        row_groups = [row_groups]
+
     source = _regularize_path(source)
     relative_to = None
     multimode = None
@@ -3525,9 +3529,12 @@ def from_parquet(
             schema = file.schema_arrow
             num_row_groups = file.num_row_groups
             paths_and_counts = []
-            for i in range(file.num_row_groups):
+            if row_groups is None:
+                row_groups = range(file.num_row_groups)
+            last_filename = None
+            for i in row_groups:
                 filename = file.metadata.row_group(i).column(0).file_path
-                if i == 0:
+                if last_filename is None:
                     if filename == "":
                         raise ValueError(
                             "Parquet _metadata file does not contain file paths "
@@ -3573,11 +3580,18 @@ def from_parquet(
             paths_and_counts.append(
                 (os.path.relpath(filename, relative_to), single_file.metadata.num_rows)
             )
+        if row_groups is None:
+            row_groups = range(len(lookup))
+            sublookup = lookup
+        else:
+            sublookup = []
+            for row_group in row_groups:
+                sublookup.append(lookup[row_group])
         if include_partition_columns:
             partition_columns = _parquet_partitions_to_awkward(paths_and_counts)
         else:
             partition_columns = []
-        num_row_groups = len(lookup)
+        num_row_groups = len(sublookup)
         multimode = "multifile"
 
     if multimode is None:
@@ -3585,6 +3599,8 @@ def from_parquet(
         schema = file.schema_arrow
         partition_columns = []
         num_row_groups = file.num_row_groups
+        if row_groups is None:
+            row_groups = range(num_row_groups)
         multimode = "single"
 
     all_columns = schema.names
@@ -3598,7 +3614,7 @@ def from_parquet(
                 + ak._util.exception_suffix(__file__)
             )
 
-    if num_row_groups == 0:
+    if len(row_groups) == 0:
         out = ak.layout.RecordArray(
             [ak.layout.EmptyArray() for x in columns], columns, 0
         )
@@ -3611,21 +3627,17 @@ def from_parquet(
     if lazy:
         if multimode == "dir":
             state = _ParquetDataset(pyarrow.parquet, source, file, use_threads, options)
-            lengths = [
-                file.metadata.row_group(i).num_rows for i in range(num_row_groups)
-            ]
+            lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
 
         elif multimode == "multifile":
             state = _ParquetDatasetOfFiles(lookup, use_threads)
             lengths = []
-            for single_file, local_row_group in lookup:
+            for single_file, local_row_group in sublookup:
                 lengths.append(single_file.metadata.row_group(local_row_group).num_rows)
 
         else:
             state = _ParquetFile(file, use_threads)
-            lengths = [
-                file.metadata.row_group(i).num_rows for i in range(num_row_groups)
-            ]
+            lengths = [file.metadata.row_group(i).num_rows for i in row_groups]
 
         if lazy_cache == "new":
             hold_cache = ak._util.MappingProxy({})
@@ -3649,8 +3661,8 @@ def from_parquet(
 
         partitions = []
         offsets = [0]
-        for row_group in range(num_row_groups):
-            length = lengths[row_group]
+        for length_index, row_group in enumerate(row_groups):
+            length = lengths[length_index]
             offsets.append(offsets[-1] + length)
 
             contents = []
@@ -3708,9 +3720,10 @@ def from_parquet(
     else:
         if multimode == "dir":
             batches = []
-            for i in range(file.num_row_groups):
+            last_filename = None
+            for i in row_groups:
                 filename = file.metadata.row_group(i).column(0).file_path
-                if i == 0:
+                if last_filename is None:
                     if filename == "":
                         raise ValueError(
                             "Parquet _metadata file does not contain file paths "
@@ -3736,7 +3749,7 @@ def from_parquet(
 
         elif multimode == "multifile":
             batches = []
-            for single_file, local_row_group in lookup:
+            for single_file, local_row_group in sublookup:
                 batches.extend(
                     single_file.read_row_group(
                         local_row_group, columns, use_threads=use_threads
@@ -3744,7 +3757,7 @@ def from_parquet(
                 )
 
         else:
-            batches = file.read(columns, use_threads=use_threads)
+            batches = file.read_row_groups(row_groups, columns=columns, use_threads=use_threads)
 
         out = _from_arrow(batches, False, highlevel=False)
         assert isinstance(out, ak.layout.RecordArray) and not out.istuple
