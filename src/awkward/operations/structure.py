@@ -1591,7 +1591,11 @@ def concatenate(
                 )
                 return lambda: (out,)
 
-            elif any(x.purelist_depth == 1 for x in inputs):
+            elif any(
+                x.minmax_depth == (1, 1)
+                for x in inputs
+                if isinstance(x, ak.layout.Content)
+            ):
                 raise ValueError(
                     "at least one array is not deep enough to concatenate at "
                     "axis={0}".format(axis) + ak._util.exception_suffix(__file__)
