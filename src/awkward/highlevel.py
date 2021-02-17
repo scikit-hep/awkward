@@ -426,25 +426,20 @@ class Array(
         Converts this Array into Python objects; same as #ak.to_list
         (but without the underscore, like NumPy's
         [tolist](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html)).
-
-        Awkward Array types have the following Pythonic translations.
-
-           * #ak.types.PrimitiveType: converted into bool, int, float.
-           * #ak.types.OptionType: missing values are converted into None.
-           * #ak.types.ListType: converted into list.
-           * #ak.types.RegularType: also converted into list. Python (and JSON)
-             forms lose information about the regularity of list lengths.
-           * #ak.types.ListType with parameter `"__array__"` equal to
-             `"__bytestring__"`: converted into bytes.
-           * #ak.types.ListType with parameter `"__array__"` equal to
-             `"__string__"`: converted into str.
-           * #ak.types.RecordArray without field names: converted into tuple.
-           * #ak.types.RecordArray with field names: converted into dict.
-           * #ak.types.UnionArray: Python data are naturally heterogeneous.
-
-        See also #ak.to_list and #ak.from_iter.
         """
         return ak.operations.convert.to_list(self)
+
+    def to_list(self):
+        """
+        Converts this Array into Python objects; same as #ak.to_list.
+        """
+        return ak.operations.convert.to_list(self)
+
+    def to_numpy(self, allow_missing=True):
+        """
+        Converts this Array into a NumPy array, if possible; same as #ak.to_numpy.
+        """
+        return ak.operations.convert.to_numpy(self, allow_missing=allow_missing)
 
     @property
     def nbytes(self):
@@ -500,50 +495,13 @@ class Array(
     @property
     def type(self):
         """
-        The high-level type of this array.
+        The high-level type of this Array; same as #ak.type.
 
-        The high-level type ignores #layout differences like
-        #ak.layout.ListArray64 versus #ak.layout.ListOffsetArray64, but
-        not differences like "regular-sized lists" (i.e.
-        #ak.layout.RegularArray) versus "variable-sized lists" (i.e.
-        #ak.layout.ListArray64 and similar).
+        Note that the outermost element of an Array's type is always an
+        #ak.types.ArrayType, which specifies the number of elements in the array.
 
-        Types are rendered as [Datashape](https://datashape.readthedocs.io/)
-        strings, which makes the same distinctions.
-
-        For example,
-
-            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
-                      [],
-                      [{"x": 3.3, "y": [3, 3, 3]}]])
-
-        has type
-
-            3 * var * {"x": float64, "y": var * int64}
-
-        but
-
-            ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
-
-        has type
-
-            2 * 3 * 5 * int64
-
-        Some cases, like heterogeneous data, require [extensions beyond the
-        Datashape specification](https://github.com/blaze/datashape/issues/237).
-        For example,
-
-            ak.Array([1, "two", [3, 3, 3]])
-
-        has type
-
-            3 * union[int64, string, var * int64]
-
-        but "union" is not a Datashape type-constructor. (Its syntax is
-        similar to existing type-constructors, so it's a plausible addition
-        to the language.)
-
-        See also #ak.type.
+        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        wrapped by an #ak.types.ArrayType.
         """
         return ak.operations.describe.type(self)
 
@@ -1675,24 +1633,15 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
 
     def tolist(self):
         """
-        Converts this Record into Python objects.
+        Converts this Record into Python objects; same as #ak.to_list
+        (but without the underscore, like NumPy's
+        [tolist](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html)).
+        """
+        return ak.operations.convert.to_list(self)
 
-        Awkward Array types have the following Pythonic translations.
-
-           * #ak.types.PrimitiveType: converted into bool, int, float.
-           * #ak.types.OptionType: missing values are converted into None.
-           * #ak.types.ListType: converted into list.
-           * #ak.types.RegularType: also converted into list. Python (and JSON)
-             forms lose information about the regularity of list lengths.
-           * #ak.types.ListType with parameter `"__array__"` equal to
-             `"__bytestring__"`: converted into bytes.
-           * #ak.types.ListType with parameter `"__array__"` equal to
-             `"__string__"`: converted into str.
-           * #ak.types.RecordArray without field names: converted into tuple.
-           * #ak.types.RecordArray with field names: converted into dict.
-           * #ak.types.UnionArray: Python data are naturally heterogeneous.
-
-        See also #ak.to_list and #ak.from_iter.
+    def to_list(self):
+        """
+        Converts this Record into Python objects; same as #ak.to_list.
         """
         return ak.operations.convert.to_list(self)
 
@@ -1731,10 +1680,10 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
     @property
     def type(self):
         """
-        The high-level type of this record, like the `type` of an array, but
-        the outermost structure is a record-type, not a number of elements.
+        The high-level type of this Record; same as #ak.type.
 
-        See also #ak.type.
+        Note that the outermost element of a Record's type is always a
+        #ak.types.RecordType.
         """
         return ak.operations.describe.type(self)
 
