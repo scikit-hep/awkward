@@ -875,12 +875,7 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     self.endlist();
   }
   else if (py::isinstance<py::array>(obj)) {
-    py::iterable seq = obj.attr("tolist")().cast<py::iterable>();
-    self.beginlist();
-    for (auto x : seq) {
-      builder_fromiter(self, x);
-    }
-    self.endlist();
+    builder_fromiter(self, obj.attr("tolist")());
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("bool_"))) {
     self.boolean(obj.cast<bool>());
