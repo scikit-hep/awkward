@@ -114,6 +114,7 @@ namespace awkward {
                                        const int64_t length)
     : initial_(initial),
       builder_(nullptr),
+      current_builder_(nullptr),
       data_(data),
       length_(length) { }
 
@@ -121,6 +122,7 @@ namespace awkward {
   TypedArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
     if (builder_ != nullptr) {
       int64_t offset = builder_.get()->apply(form, data, length);
+      data_ = data;
       length_ += offset;
 
       /// FIXME: remember to put a boundary check here
@@ -128,6 +130,8 @@ namespace awkward {
     }
     else {
       builder_ = formBuilderFromA(form, data, length);
+      data_ = data;
+      length_ = length;
     }
   }
 
@@ -150,6 +154,90 @@ namespace awkward {
       builder_.get()->set_data_length(length);
     }
     length_ = length;
+  }
+
+  void
+  TypedArrayBuilder::field_check(const char* key) {
+    if (builder_ != nullptr) {
+      current_builder_ = builder_.get()->field_check(key);
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("FormBuilder is not defined")
+        + FILENAME(__LINE__));
+    }
+  }
+
+  void
+  TypedArrayBuilder::integer(int64_t x) {
+    if (builder_ != nullptr) {
+      if (builder_.get()->accepts(util::dtype::int64)) {
+        builder_.get()->integer(x);
+      }
+      else if (current_builder_ != nullptr  &&
+               current_builder_.get()->accepts(util::dtype::int64)) {
+        current_builder_.get()->integer(x);
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("FormBuilder ") + builder_.get()->classname()
+          + std::string(" does not accept integers")
+          + FILENAME(__LINE__));
+      }
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("FormBuilder is not defined")
+        + FILENAME(__LINE__));
+    }
+  }
+
+  void
+  TypedArrayBuilder::boolean(bool x) {
+    if (builder_ != nullptr) {
+      if (builder_.get()->accepts(util::dtype::boolean)) {
+        builder_.get()->boolean(x);
+      }
+      else if (current_builder_ != nullptr  &&
+               current_builder_.get()->accepts(util::dtype::boolean)) {
+        current_builder_.get()->boolean(x);
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("FormBuilder ") + builder_.get()->classname()
+          + std::string(" does not accept boolean")
+          + FILENAME(__LINE__));
+      }
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("FormBuilder is not defined")
+        + FILENAME(__LINE__));
+    }
+  }
+
+  void
+  TypedArrayBuilder::real(double x) {
+    if (builder_ != nullptr) {
+      if (builder_.get()->accepts(util::dtype::float64)) {
+        builder_.get()->real(x);
+      }
+      else if (current_builder_ != nullptr  &&
+               current_builder_.get()->accepts(util::dtype::float64)) {
+        current_builder_.get()->real(x);
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("FormBuilder ") + builder_.get()->classname()
+          + std::string(" does not accept real")
+          + FILENAME(__LINE__));
+      }
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("FormBuilder is not defined")
+        + FILENAME(__LINE__));
+    }
   }
 
   /// @brief
@@ -467,7 +555,8 @@ namespace awkward {
                                        const int64_t length,
                                        bool copyarrays)
     : form_(form),
-      copyarrays_(copyarrays) {
+      copyarrays_(copyarrays),
+      length_(length) {
       if(data != nullptr) {
         data_.push_back(std::unique_ptr<Data>(new Data(data, length)));
       }
@@ -482,13 +571,14 @@ namespace awkward {
   NumpyArrayBuilder::snapshot() const {
     auto identities = Identities::none();
 
-    Sum s = std::for_each(data_.begin(), data_.end(), Sum());
+    // FIXME: check that length_ is always equal to
+    // Sum s = std::for_each(data_.begin(), data_.end(), Sum());
 
     // FIXME:
     // nothing to be done if all data pointers hold the same memory address
     // otherwise, copy the data into a single continous memory
     //
-    std::vector<ssize_t> shape = { (ssize_t)s.length };
+    std::vector<ssize_t> shape = { (ssize_t)length_ };
     std::vector<ssize_t> strides = { (ssize_t)dtype_to_itemsize(form_.get()->dtype()) };
 
     if (copyarrays_) {
@@ -542,13 +632,68 @@ namespace awkward {
   NumpyArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
     if (form_.get()->equal(form, true, true, true, true)) {
       data_.push_back(std::unique_ptr<Data>(new Data(data, length)));
-      Sum s = std::for_each(data_.begin(), data_.end(), Sum());
-      return dtype_to_itemsize(form_.get()->dtype()) * s.length;
+      length_ += length;
+      return dtype_to_itemsize(form_.get()->dtype()) * length_;
     }
     else {
       throw std::invalid_argument(
         std::string("Form of a ") + classname()
         + std::string(" can not embed another Form")
+        + FILENAME(__LINE__));
+    }
+  }
+
+  bool
+  NumpyArrayBuilder::accepts(util::dtype dt) const {
+    return (form_.get()->dtype() == dt);
+  }
+
+  int64_t
+  NumpyArrayBuilder::length() const {
+    return data_.back().get()->length;
+  }
+
+  void
+  NumpyArrayBuilder::integer(int64_t x) {
+    if (!data_.empty()) {
+      reinterpret_cast<int64_t*>(data_.back()->ptr.get())[length_] = x;
+      data_.back().get()->length += 1;
+      length_ += 1;
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("FormBuilder ") + classname()
+        + std::string(" needs a data buffer")
+        + FILENAME(__LINE__));
+    }
+  }
+
+  void
+  NumpyArrayBuilder::boolean(bool x) {
+    if (!data_.empty()) {
+      reinterpret_cast<bool*>(data_.back()->ptr.get())[length_] = x;
+      data_.back().get()->length += 1;
+      length_ += 1;
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("FormBuilder ") + classname()
+        + std::string(" needs a data buffer")
+        + FILENAME(__LINE__));
+    }
+  }
+
+  void
+  NumpyArrayBuilder::real(double x) {
+    if (!data_.empty()) {
+      reinterpret_cast<double*>(data_.back()->ptr.get())[length_] = x;
+      data_.back().get()->length += 1;
+      length_ += 1;
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("FormBuilder ") + classname()
+        + std::string(" needs a data buffer")
         + FILENAME(__LINE__));
     }
   }
@@ -614,6 +759,22 @@ namespace awkward {
     }
     /// FIXME: every record's data buffer has a different length
     return length_;
+  }
+
+  const FormBuilderPtr&
+  RecordArrayBuilder::field_check(const char* key) const {
+    auto pos = distance(keys_.begin(), find(keys_.begin(), keys_.end(), key));
+    if (pos >= keys_.size()) {
+      // key is not found
+      throw std::invalid_argument(
+        std::string("FormBuilder ") + classname()
+        + std::string(" does not have a content with a key \"")
+        + std::string(key) + std::string("\"")
+        + FILENAME(__LINE__));
+    }
+    else {
+      return contents_[pos];
+    }
   }
 
   ///

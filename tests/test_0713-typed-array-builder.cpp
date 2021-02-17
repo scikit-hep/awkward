@@ -124,6 +124,8 @@ int main(int, char**) {
     // create another builder
     ak::TypedArrayBuilder myarray(1024);
     myarray.apply(numpy_form, ptr, 10);
+    myarray.real(999.999);
+    myarray.real(-999.999);
 
     // take a snapshot
     std::shared_ptr<ak::Content> array = myarray.snapshot();
@@ -177,14 +179,29 @@ int main(int, char**) {
 
     // create another builder
     ak::TypedArrayBuilder myarray(1024);
-    myarray.apply(record_form, nullptr, 0);
-    myarray.apply(numpy_bool_form, nullptr, 0);
+    myarray.apply(record_form);
+
+    // FIXME: if this is allowed, e.g. a data buffer is a nullptr
+    // an extra check is needed downstream
+    myarray.apply(numpy_bool_form);
+
     myarray.apply(numpy_int_form, index, 5);
     myarray.apply(numpy_int_form, index, 5);
     myarray.apply(numpy_int_form, index, 2);
 
+    myarray.field_check("two");
+    myarray.integer(999);
+    myarray.integer(-999);
+
     myarray.apply(numpy_bool_form, booleans, 3);
     myarray.apply(numpy_bool_form, booleans, 5);
+
+    myarray.field_check("one");
+    myarray.boolean(true);
+    myarray.boolean(false);
+
+    // The following will throw an exception
+    // myarray.field_check("three");
 
     // take a snapshot
     std::shared_ptr<ak::Content> array = myarray.snapshot();

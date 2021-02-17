@@ -4,6 +4,7 @@
 #define AWKWARD_TYPEDARRAYBUILDER_H_
 
 #include "awkward/common.h"
+#include "awkward/util.h"
 
 namespace awkward {
   class Content;
@@ -100,12 +101,49 @@ namespace awkward {
     virtual void
       set_data_length(int64_t length) = 0;
 
+    /// @brief (FIXME: ?)
+    virtual int64_t
+      length() const { return 0; }
+
     /// @brief Add a Form to interpret the accumulated data.
     ///
     /// Creates a nested FormBuilder if the given Form is accepted by this
     /// builder Form.
     virtual int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) = 0;
+
+    /// @brief
+    virtual bool
+      accepts(awkward::util::dtype dt) const { return false; }
+
+    /// @brief
+    virtual void
+      integer(int64_t x) {
+        throw std::runtime_error(
+          std::string("FIXME: 'integer' is not implemented "));
+    }
+
+    /// @brief
+    virtual void
+      boolean(bool x) {
+        throw std::runtime_error(
+          std::string("FIXME: 'boolean' is not implemented "));
+    }
+
+    /// @brief
+    virtual void
+      real(double x) {
+        throw std::runtime_error(
+          std::string("FIXME: 'real' is not implemented "));
+    }
+
+    /// @brief
+    virtual const FormBuilderPtr&
+      field_check(const char* key) const {
+        throw std::invalid_argument(
+          std::string("FIXME: 'field_check' is not implemented "));
+    }
+
   };
 
   /// @class BitMaskedArrayBuilder
@@ -443,14 +481,35 @@ namespace awkward {
         // FIXME:
     }
 
+    /// @brief (FIXME: ?)
+    int64_t
+      length() const override;
+
     /// @brief A NumpyForm does not accept other Forms.
     /// An 'invalid_argument' exception is thrown.
     int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
+    /// @brief Checks if the dtype is accepted by the Form.
+    bool
+      accepts(awkward::util::dtype dt) const override;
+
+    /// @brief
+    void
+      integer(int64_t x) override;
+
+    /// @brief
+    void
+      boolean(bool x) override;
+
+    /// @brief
+    void
+      real(double x) override;
+
   private:
     const NumpyFormPtr form_;
     std::vector<std::unique_ptr<Data>> data_;
+    int64_t length_;
     bool copyarrays_;
   };
 
@@ -528,6 +587,9 @@ namespace awkward {
     /// builder Form.
     int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
+
+    const FormBuilderPtr&
+      field_check(const char* key) const override;
 
   private:
     const RecordFormPtr form_;
@@ -713,7 +775,7 @@ namespace awkward {
     /// Creates a Root node of the FormBuilder if it has not been defined,
     /// e.g. a 'nullptr', otherwise passes it to the FormBuilder.
     void
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length);
+      apply(const FormPtr& form, const DataPtr& data = nullptr, const int64_t length = 0);
 
     /// @brief Turns the accumulated data into a Content array.
     ///
@@ -743,12 +805,31 @@ namespace awkward {
         return length_;
       }
 
+    /// @brief
+    void
+      field_check(const char* key);
+
+    /// @brief
+    void
+      integer(int64_t x);
+
+    /// @brief
+    void
+      boolean(bool x);
+
+    /// @brief
+    void
+      real(double x);
+
   private:
     /// See #initial.
     int64_t initial_;
 
     /// @brief Root node of the FormBuilder tree.
     std::shared_ptr<FormBuilder> builder_;
+
+    /// @brief Current node of the FormBuilder tree.
+    std::shared_ptr<FormBuilder> current_builder_;
 
     /// @brief Pointer to an Input buffer. (FIXME: ?)
     DataPtr data_;
