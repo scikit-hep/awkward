@@ -59,6 +59,21 @@ namespace awkward {
   class VirtualForm;
   using VirtualFormPtr = std::shared_ptr<VirtualForm>;
 
+  struct Data {
+    Data(const DataPtr& iptr, const int64_t ilength)
+      : ptr(iptr),
+        length(ilength) {}
+
+    const DataPtr ptr;
+    int64_t length;
+  };
+
+  struct Sum
+  {
+    void operator()(const std::unique_ptr<Data>& data) { length += data->length; }
+    int64_t length {0};
+  };
+
   /// @class FormBuilder
   ///
   /// @brief Abstract base class for nodes within a TypedArrayBuilder
@@ -89,7 +104,7 @@ namespace awkward {
     ///
     /// Creates a nested FormBuilder if the given Form is accepted by this
     /// builder Form.
-    virtual bool
+    virtual int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) = 0;
   };
 
@@ -125,7 +140,7 @@ namespace awkward {
 
     /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
     /// builder Form.
-    bool
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
@@ -174,7 +189,7 @@ namespace awkward {
 
     /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
     /// builder Form.
-    bool
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
@@ -216,7 +231,7 @@ namespace awkward {
 
     /// @brief An EmptyForm does not accept other Forms.
     /// It throws an 'invalid_argument' exception.
-    bool
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
@@ -257,7 +272,7 @@ namespace awkward {
 
     /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
     /// builder Form.
-    bool
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
@@ -299,7 +314,7 @@ namespace awkward {
 
     /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
     /// builder Form.
-    bool
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
@@ -342,7 +357,7 @@ namespace awkward {
 
     /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
     /// builder Form.
-    bool
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
@@ -386,7 +401,7 @@ namespace awkward {
 
     /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
     /// builder Form.
-    bool
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
@@ -419,24 +434,23 @@ namespace awkward {
     /// @brief (FIXME: ?)
     void
       set_input_buffer(const DataPtr& data) override {
-        data_ = data;
+        // FIXME:
     }
 
     /// @brief (FIXME: ?)
     void
       set_data_length(int64_t length) override {
-        length_ = length;
+        // FIXME:
     }
 
     /// @brief A NumpyForm does not accept other Forms.
     /// An 'invalid_argument' exception is thrown.
-    bool
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
     const NumpyFormPtr form_;
-    DataPtr data_;
-    int64_t length_;
+    std::vector<std::unique_ptr<Data>> data_;
     bool copyarrays_;
   };
 
@@ -471,7 +485,7 @@ namespace awkward {
     }
 
     /// @brief
-    bool
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
@@ -512,7 +526,7 @@ namespace awkward {
 
     /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
     /// builder Form.
-    bool
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
@@ -553,7 +567,7 @@ namespace awkward {
         length_ = length;
     }
 
-    bool
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
@@ -593,13 +607,15 @@ namespace awkward {
         length_ = length;
     }
 
-    bool
+    /// @brief (FIXME: ?)
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
     const UnionFormPtr form_;
     DataPtr data_;
     int64_t length_;
+    std::vector<FormBuilderPtr> contents_;
   };
 
   /// @class UnmaskedArrayBuilder
@@ -632,7 +648,7 @@ namespace awkward {
         length_ = length;
     }
 
-    bool
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
@@ -671,7 +687,7 @@ namespace awkward {
         length_ = length;
     }
 
-    bool
+    int64_t
       apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
 
   private:
@@ -688,7 +704,9 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL TypedArrayBuilder {
   public:
     /// @brief Creates an TypedArrayBuilder from a full set of parameters.
-    TypedArrayBuilder(const DataPtr& data = nullptr, const int64_t length = 0);
+    ///
+    /// @param initial The initial number of entries for a buffer.
+    TypedArrayBuilder(int64_t initial, const DataPtr& data = nullptr, const int64_t length = 0);
 
     /// @brief Add a Form to interpret the accumulated data.
     ///
@@ -726,6 +744,9 @@ namespace awkward {
       }
 
   private:
+    /// See #initial.
+    int64_t initial_;
+
     /// @brief Root node of the FormBuilder tree.
     std::shared_ptr<FormBuilder> builder_;
 
