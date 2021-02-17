@@ -17,12 +17,27 @@ def test(tmp_path):
     ak.to_parquet(ak.repartition(range(8), 2), filename)
 
     assert ak.from_parquet(filename, row_groups=[1, 3]).tolist() == [2, 3, 6, 7]
-    assert ak.from_parquet(filename, row_groups=[1, 3], lazy=True).tolist() == [2, 3, 6, 7]
+    assert ak.from_parquet(filename, row_groups=[1, 3], lazy=True).tolist() == [
+        2,
+        3,
+        6,
+        7,
+    ]
 
     assert ak.from_parquet(tmp_path, row_groups=[1, 3]).tolist() == [2, 3, 6, 7]
-    assert ak.from_parquet(tmp_path, row_groups=[1, 3], lazy=True).tolist() == [2, 3, 6, 7]
+    assert ak.from_parquet(tmp_path, row_groups=[1, 3], lazy=True).tolist() == [
+        2,
+        3,
+        6,
+        7,
+    ]
 
     ak.to_parquet.dataset(tmp_path)
 
     assert ak.from_parquet(tmp_path, row_groups=[1, 3]).tolist() == [2, 3, 6, 7]
-    assert ak.from_parquet(tmp_path, row_groups=[1, 3], lazy=True).tolist() == [2, 3, 6, 7]
+    assert ak.from_parquet(tmp_path, row_groups=[1, 3], lazy=True).tolist() == [
+        2,
+        3,
+        6,
+        7,
+    ]

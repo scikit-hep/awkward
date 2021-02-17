@@ -3757,7 +3757,9 @@ def from_parquet(
                 )
 
         else:
-            batches = file.read_row_groups(row_groups, columns=columns, use_threads=use_threads)
+            batches = file.read_row_groups(
+                row_groups, columns=columns, use_threads=use_threads
+            )
 
         out = _from_arrow(batches, False, highlevel=False)
         assert isinstance(out, ak.layout.RecordArray) and not out.istuple
