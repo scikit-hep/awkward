@@ -655,10 +655,7 @@ namespace awkward {
                              const std::string& pre,
                              const std::string& post) const {
     std::stringstream out;
-    out << indent << pre << "<" << classname();
-    if (contents_.empty()) {
-      out << " length=\"" << length_ << "\"";
-    }
+    out << indent << pre << "<" << classname() << " length=\"" << length_ << "\"";
     out << ">\n";
     if (identities_.get() != nullptr) {
       out << identities_.get()->tostring_part(
