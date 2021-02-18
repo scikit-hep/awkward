@@ -8,5 +8,5 @@ import awkward as ak  # noqa: F401
 
 
 def test():
-    array = ak.repartition([{"x": x, "y": x*10} for x in range(10)], 2)
+    array = ak.repartition([{"x": x, "y": x * 10} for x in range(10)], 2)
     assert ak.to_list(ak.num(array.layout, axis=0)) == {"x": 10, "y": 10}
