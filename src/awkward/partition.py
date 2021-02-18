@@ -478,7 +478,24 @@ class PartitionedArray(object):
 
     def num(self, axis):
         if first(self).axis_wrap_if_negative(axis) == 0:
-            return sum(x.num(axis) for x in self.partitions)
+            prepared = [x.num(axis) for x in self.partitions]
+            if any(isinstance(x, ak.layout.Record) for x in prepared):
+                names = None
+                counts = None
+                for x in prepared:
+                    assert isinstance(x, ak.layout.Record)
+                    n = ak.operations.describe.fields(x)
+                    c = ak.operations.structure.unzip(x)
+                    if names is None:
+                        names, counts = n, list(c)
+                    else:
+                        assert n == names
+                        for i, ci in enumerate(c):
+                            counts[i] += ci
+                arraycounts = [ak.layout.NumpyArray(numpy.array([x])) for x in counts]
+                return ak.layout.Record(ak.layout.RecordArray(arraycounts, names), 0)
+            else:
+                return sum(prepared)
         else:
             return self.replace_partitions([x.num(axis) for x in self.partitions])
 
