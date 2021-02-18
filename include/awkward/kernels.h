@@ -1715,6 +1715,15 @@ extern "C" {
     const int64_t* pos);
 
   EXPORT_SYMBOL ERROR
+  awkward_NumpyArray_contiguous_copy_from_many_64(
+    uint8_t* toptr,
+    const uint8_t** fromptrs,
+    int64_t* fromlens,
+    int64_t len,
+    int64_t stride,
+    const int64_t* pos);
+
+  EXPORT_SYMBOL ERROR
   awkward_NumpyArray_contiguous_init_64(
     int64_t* toptr,
     int64_t skip,
@@ -5047,12 +5056,12 @@ extern "C" {
     int64_t parentslength);
 
   EXPORT_SYMBOL ERROR
-  awkward_zero_mask8(
+  awkward_one_mask8(
     int8_t* tomask,
     int64_t length);
 
   EXPORT_SYMBOL ERROR
-  awkward_one_mask8(
+  awkward_zero_mask8(
     int8_t* tomask,
     int64_t length);
 

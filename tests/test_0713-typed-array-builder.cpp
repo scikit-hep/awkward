@@ -127,6 +127,23 @@ int main(int, char**) {
     myarray.real(999.999);
     myarray.real(-999.999);
 
+    const std::shared_ptr<void> ptr2 = ak::kernel::malloc<void>(
+      ak::kernel::lib::cpu, 1024);
+
+    reinterpret_cast<double*>(ptr2.get())[0] = -1.1;
+    reinterpret_cast<double*>(ptr2.get())[1] = -2.2;
+    reinterpret_cast<double*>(ptr2.get())[2] = -3.3;
+    reinterpret_cast<double*>(ptr2.get())[3] = -4.4;
+    reinterpret_cast<double*>(ptr2.get())[4] = -5.5;
+    reinterpret_cast<double*>(ptr2.get())[5] = -6.6;
+    reinterpret_cast<double*>(ptr2.get())[6] = -7.7;
+    reinterpret_cast<double*>(ptr2.get())[7] = -8.8;
+    reinterpret_cast<double*>(ptr2.get())[8] = -9.9;
+    reinterpret_cast<double*>(ptr2.get())[9] = -10.10;
+
+    myarray.apply(numpy_form, ptr2, 5);
+    myarray.apply(numpy_form, ptr2, 5);
+
     // take a snapshot
     std::shared_ptr<ak::Content> array = myarray.snapshot();
 

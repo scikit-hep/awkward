@@ -555,10 +555,15 @@ namespace awkward {
                                        const int64_t length,
                                        bool copyarrays)
     : form_(form),
-      copyarrays_(copyarrays),
-      length_(length) {
-      if(data != nullptr) {
-        data_.push_back(std::unique_ptr<Data>(new Data(data, length)));
+      length_(length),
+      copyarrays_(copyarrays) {
+      if (data != nullptr) {
+        if (!data_.empty()  &&  data_.back()->ptr == data) {
+          data_.back()->length += length;
+        }
+        else {
+          data_.push_back(std::unique_ptr<Data>(new Data(data, length)));
+        }
       }
     }
 
@@ -590,13 +595,25 @@ namespace awkward {
         strides[0]);
       util::handle_error(err1, classname(), identities.get());
 
+      Index64 data_lens((int64_t)data_.size());
+
       std::shared_ptr<void> ptr(
         kernel::malloc<void>(kernel::lib::cpu, bytepos.length()*strides[0]));
 
-      struct Error err2 = kernel::NumpyArray_contiguous_copy_64(
+      // FIXME: move it to kernel?
+      const uint8_t* data_ptrs[data_.size()];
+      int64_t indx = 0;
+      for (const auto& it : data_) {
+        data_ptrs[indx] = reinterpret_cast<uint8_t*>(it->ptr.get());
+        data_lens.data()[indx] = it->length;
+        indx++;
+      }
+
+      struct Error err2 = kernel::NumpyArray_contiguous_copy_from_many_64(
         kernel::lib::cpu,   // DERIVE
         reinterpret_cast<uint8_t*>(ptr.get()),
-        reinterpret_cast<uint8_t*>(data_.front()->ptr.get()),
+        data_ptrs,
+        data_lens.data(),
         bytepos.length(),
         strides[0],
         bytepos.data());
@@ -631,7 +648,14 @@ namespace awkward {
   int64_t
   NumpyArrayBuilder::apply(const FormPtr& form, const DataPtr& data, const int64_t length) {
     if (form_.get()->equal(form, true, true, true, true)) {
-      data_.push_back(std::unique_ptr<Data>(new Data(data, length)));
+      if (data != nullptr) {
+        if (!data_.empty()  &&  data_.back()->ptr == data) {
+          data_.back()->length += length;
+        }
+        else {
+          data_.push_back(std::unique_ptr<Data>(new Data(data, length)));
+        }
+      }
       length_ += length;
       return dtype_to_itemsize(form_.get()->dtype()) * length_;
     }
