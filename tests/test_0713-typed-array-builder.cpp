@@ -10,12 +10,13 @@
 #include "awkward/array/ListOffsetArray.h"
 #include "awkward/array/RecordArray.h"
 #include "awkward/forth/ForthInputBuffer.h"
-
+#include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/builder/TypedArrayBuilder.h"
 
 namespace ak = awkward;
 
 int main(int, char**) {
+  auto options = ak::ArrayBuilderOptions(1024, 2);
 
   const ak::FormPtr empty_form = std::make_shared<ak::EmptyForm>(
     false,
@@ -54,7 +55,7 @@ int main(int, char**) {
     std::vector<ak::FormPtr>());
 
   // FIXME: this should come from ak::ForthMachine
-  const std::shared_ptr<void> ptr = ak::kernel::malloc<void>(
+  const std::shared_ptr<uint8_t> ptr = ak::kernel::malloc<uint8_t>(
     ak::kernel::lib::cpu, 1024);
 
   reinterpret_cast<double*>(ptr.get())[0] = 1.1;
@@ -68,7 +69,7 @@ int main(int, char**) {
   reinterpret_cast<double*>(ptr.get())[8] = 9.9;
   reinterpret_cast<double*>(ptr.get())[9] = 10.10;
 
-  const std::shared_ptr<void> index = ak::kernel::malloc<void>(
+  const std::shared_ptr<uint8_t> index = ak::kernel::malloc<uint8_t>(
     ak::kernel::lib::cpu, 1024);
 
   reinterpret_cast<int64_t*>(index.get())[0] = 0;
@@ -84,7 +85,7 @@ int main(int, char**) {
   reinterpret_cast<int64_t*>(index.get())[10] = 800;
   reinterpret_cast<int64_t*>(index.get())[11] = 900;
 
-  const std::shared_ptr<void> starts_stops = ak::kernel::malloc<void>(
+  const std::shared_ptr<uint8_t> starts_stops = ak::kernel::malloc<uint8_t>(
     ak::kernel::lib::cpu, 1024);
 
   reinterpret_cast<int64_t*>(starts_stops.get())[0] = 0;
@@ -94,7 +95,7 @@ int main(int, char**) {
   reinterpret_cast<int64_t*>(starts_stops.get())[4] = 6;
   reinterpret_cast<int64_t*>(starts_stops.get())[5] = 9;
 
-  const std::shared_ptr<void> booleans = ak::kernel::malloc<void>(
+  const std::shared_ptr<uint8_t> booleans = ak::kernel::malloc<uint8_t>(
     ak::kernel::lib::cpu, 1024);
 
   reinterpret_cast<bool*>(booleans.get())[0] = true;
@@ -112,7 +113,7 @@ int main(int, char**) {
 
   {
     // create builder
-    ak::TypedArrayBuilder myarray(1024);
+    ak::TypedArrayBuilder myarray(options);
     myarray.apply(empty_form, ptr, 20);
 
     // take a snapshot
@@ -122,13 +123,13 @@ int main(int, char**) {
   }
   {
     // create another builder
-    ak::TypedArrayBuilder myarray(1024);
+    ak::TypedArrayBuilder myarray(options);
     myarray.apply(numpy_form, ptr, 10);
     myarray.real(999.999);
     myarray.real(-999.999);
 
     // add another data buffer
-    const std::shared_ptr<void> ptr2 = ak::kernel::malloc<void>(
+    const std::shared_ptr<uint8_t> ptr2 = ak::kernel::malloc<uint8_t>(
       ak::kernel::lib::cpu, 1024);
 
     reinterpret_cast<double*>(ptr2.get())[0] = -1.1;
@@ -152,7 +153,7 @@ int main(int, char**) {
   }
   {
     // create another builder
-    ak::TypedArrayBuilder myarray(1024);
+    ak::TypedArrayBuilder myarray(options);
     myarray.apply(list_offset_form, index, 6);
     myarray.apply(numpy_form, ptr, 10);
 
@@ -163,7 +164,7 @@ int main(int, char**) {
   }
   {
     // create another builder
-    ak::TypedArrayBuilder myarray(1024);
+    ak::TypedArrayBuilder myarray(options);
     myarray.apply(list_form, starts_stops, 3);
     myarray.apply(numpy_form, ptr, 10);
 
@@ -196,7 +197,7 @@ int main(int, char**) {
       ak::util::dtype::int64);
 
     // create another builder
-    ak::TypedArrayBuilder myarray(1024);
+    ak::TypedArrayBuilder myarray(options);
     myarray.apply(record_form);
 
     // FIXME: if this is allowed, e.g. a data buffer is a nullptr

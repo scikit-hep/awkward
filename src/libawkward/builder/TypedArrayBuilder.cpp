@@ -3,6 +3,8 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/TypedArrayBuilder.cpp", line)
 
 #include "awkward/builder/TypedArrayBuilder.h"
+#include "awkward/builder/ArrayBuilderOptions.h"
+#include "awkward/type/Type.h"
 #include "awkward/array/BitMaskedArray.h"
 #include "awkward/array/ByteMaskedArray.h"
 #include "awkward/array/EmptyArray.h"
@@ -109,10 +111,10 @@ namespace awkward {
     }
   }
 
-  TypedArrayBuilder::TypedArrayBuilder(int64_t initial,
+  TypedArrayBuilder::TypedArrayBuilder(const ArrayBuilderOptions& options,
                                        const DataPtr& data,
                                        const int64_t length)
-    : initial_(initial),
+    : initial_(options.initial()),
       builder_(nullptr),
       current_builder_(nullptr),
       data_(data),
@@ -141,9 +143,95 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  TypedArrayBuilder::form() const {
+    if (builder_ != nullptr) {
+      return builder_.get()->form();
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("Form is not defined")
+        + FILENAME(__LINE__));
+    }
+  }
+
+  const std::string
+  TypedArrayBuilder::tostring() const {
+    util::TypeStrs typestrs;
+    typestrs["char"] = "char";
+    typestrs["string"] = "string";
+    std::stringstream out;
+    out << "<TypedArrayBuilder length=\"" << length() << "\" type=\""
+        << type(typestrs).get()->tostring() << "\"/>";
+    return out.str();
+  }
+
+  int64_t
+  TypedArrayBuilder::length() const {
+    return length_; // FIXME: builder_.get()->length();
+  }
+
+  void
+  TypedArrayBuilder::clear() {
+    if (builder_ != nullptr) {
+      throw std::runtime_error(
+        std::string("FormBuilder 'clear' is not implemented yet")
+        + FILENAME(__LINE__));
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("FormBuilder is not defined")
+        + FILENAME(__LINE__));
+    }
+  }
+
+  const TypePtr
+  TypedArrayBuilder::type(const util::TypeStrs& typestrs) const {
+    if (builder_ != nullptr) {
+      return builder_.get()->snapshot().get()->type(typestrs);
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("FormBuilder is not defined")
+        + FILENAME(__LINE__));
+    }
+  }
+
   const ContentPtr
   TypedArrayBuilder::snapshot() const {
-    return builder_.get()->snapshot();
+    if (builder_ != nullptr) {
+      return builder_.get()->snapshot();
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("FormBuilder is not defined")
+        + FILENAME(__LINE__));
+    }
+  }
+
+  const ContentPtr
+  TypedArrayBuilder::getitem_at(int64_t at) const {
+    return snapshot().get()->getitem_at(at);
+  }
+
+  const ContentPtr
+  TypedArrayBuilder::getitem_range(int64_t start, int64_t stop) const {
+    return snapshot().get()->getitem_range(start, stop);
+  }
+
+  const ContentPtr
+  TypedArrayBuilder::getitem_field(const std::string& key) const {
+    return snapshot().get()->getitem_field(key);
+  }
+
+  const ContentPtr
+  TypedArrayBuilder::getitem_fields(const std::vector<std::string>& keys) const {
+    return snapshot().get()->getitem_fields(keys);
+  }
+
+  const ContentPtr
+  TypedArrayBuilder::getitem(const Slice& where) const {
+    return snapshot().get()->getitem(where);
   }
 
   void
@@ -163,9 +251,28 @@ namespace awkward {
   }
 
   void
-  TypedArrayBuilder::field_check(const char* key) {
+  TypedArrayBuilder::null() {
+    throw std::runtime_error(
+      std::string("FormBuilder 'null' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::boolean(bool x) {
     if (builder_ != nullptr) {
-      current_builder_ = builder_.get()->field_check(key);
+      if (builder_.get()->accepts(util::dtype::boolean)) {
+        builder_.get()->boolean(x);
+      }
+      else if (current_builder_ != nullptr  &&
+               current_builder_.get()->accepts(util::dtype::boolean)) {
+        current_builder_.get()->boolean(x);
+      }
+      else {
+        throw std::invalid_argument(
+          std::string("FormBuilder ") + builder_.get()->classname()
+          + std::string(" does not accept boolean")
+          + FILENAME(__LINE__));
+      }
     }
     else {
       throw std::invalid_argument(
@@ -188,30 +295,6 @@ namespace awkward {
         throw std::invalid_argument(
           std::string("FormBuilder ") + builder_.get()->classname()
           + std::string(" does not accept integers")
-          + FILENAME(__LINE__));
-      }
-    }
-    else {
-      throw std::invalid_argument(
-        std::string("FormBuilder is not defined")
-        + FILENAME(__LINE__));
-    }
-  }
-
-  void
-  TypedArrayBuilder::boolean(bool x) {
-    if (builder_ != nullptr) {
-      if (builder_.get()->accepts(util::dtype::boolean)) {
-        builder_.get()->boolean(x);
-      }
-      else if (current_builder_ != nullptr  &&
-               current_builder_.get()->accepts(util::dtype::boolean)) {
-        current_builder_.get()->boolean(x);
-      }
-      else {
-        throw std::invalid_argument(
-          std::string("FormBuilder ") + builder_.get()->classname()
-          + std::string(" does not accept boolean")
           + FILENAME(__LINE__));
       }
     }
@@ -246,6 +329,169 @@ namespace awkward {
     }
   }
 
+  void
+  TypedArrayBuilder::complex(std::complex<double> x) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'complex' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::bytestring(const char* x) {
+    //builder_.get()->string(x, -1, no_encoding);
+    throw std::runtime_error(
+      std::string("FormBuilder 'bytestring' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::bytestring(const char* x, int64_t length) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::bytestring(const std::string& x) {
+    bytestring(x.c_str(), (int64_t)x.length());
+  }
+
+  void
+  TypedArrayBuilder::string(const char* x) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::string(const char* x, int64_t length) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::string(const std::string& x) {
+    string(x.c_str(), (int64_t)x.length());
+  }
+
+  void
+  TypedArrayBuilder::beginlist() {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::endlist() {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::begintuple(int64_t numfields) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::index(int64_t index) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::endtuple() {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::beginrecord() {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::beginrecord_fast(const char* name) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::beginrecord_check(const char* name) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::beginrecord_check(const std::string& name) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::field_fast(const char* key) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::field_check(const char* key) {
+    if (builder_ != nullptr) {
+      current_builder_ = builder_.get()->field_check(key);
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("FormBuilder is not defined")
+        + FILENAME(__LINE__));
+    }
+  }
+
+  void
+  TypedArrayBuilder::field_check(const std::string& key) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::endrecord() {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::append(const ContentPtr& array, int64_t at) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::append_nowrap(const ContentPtr& array, int64_t at) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::extend(const ContentPtr& array) {
+    throw std::runtime_error(
+      std::string("FormBuilder 'clear' is not implemented yet")
+      + FILENAME(__LINE__));
+  }
+
   /// @brief
   BitMaskedArrayBuilder::BitMaskedArrayBuilder(const BitMaskedFormPtr& form,
                                                const DataPtr& data,
@@ -263,7 +509,7 @@ namespace awkward {
   const ContentPtr
   BitMaskedArrayBuilder::snapshot() const {
     if(content_ != nullptr) {
-      const IndexU8 mask(std::static_pointer_cast<uint8_t>(data_), 0, length_, kernel::lib::cpu);
+      const IndexU8 mask(data_, 0, length_, kernel::lib::cpu);
       return std::make_shared<BitMaskedArray>(Identities::none(),
                                               form_.get()->parameters(),
                                               mask,
@@ -295,6 +541,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  BitMaskedArrayBuilder::form() const {
+    return std::static_pointer_cast<Form>(form_);
+  }
+
   ///
   ByteMaskedArrayBuilder::ByteMaskedArrayBuilder(const ByteMaskedFormPtr& form,
                                                  const DataPtr& data,
@@ -312,7 +563,7 @@ namespace awkward {
   const ContentPtr
   ByteMaskedArrayBuilder::snapshot() const {
     if(content_ != nullptr) {
-      const Index8 mask(std::static_pointer_cast<int8_t>(data_), 0, length_, kernel::lib::cpu);
+      const Index8 mask(reinterpret_pointer_cast<int8_t>(data_), 0, length_, kernel::lib::cpu);
       return std::make_shared<ByteMaskedArray>(Identities::none(),
                                                form_.get()->parameters(),
                                                mask,
@@ -339,6 +590,11 @@ namespace awkward {
         + std::string(" expects another Form")
         + FILENAME(__LINE__));
     }
+  }
+
+  const FormPtr
+  ByteMaskedArrayBuilder::form() const {
+    return std::static_pointer_cast<Form>(form_);
   }
 
   ///
@@ -368,6 +624,11 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
+  const FormPtr
+  EmptyArrayBuilder::form() const {
+    return std::static_pointer_cast<Form>(form_);
+  }
+
   ///
   IndexedArrayBuilder::IndexedArrayBuilder(const IndexedFormPtr& form,
                                            const DataPtr& data,
@@ -385,7 +646,7 @@ namespace awkward {
   const ContentPtr
   IndexedArrayBuilder::snapshot() const {
     if(content_ != nullptr) {
-      Index64 index(std::static_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
+      Index64 index(reinterpret_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
       return std::make_shared<IndexedArray64>(Identities::none(),
                                               form_.get()->parameters(),
                                               index,
@@ -414,6 +675,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  IndexedArrayBuilder::form() const {
+    return std::static_pointer_cast<Form>(form_);
+  }
+
   ///
   IndexedOptionArrayBuilder::IndexedOptionArrayBuilder(const IndexedOptionFormPtr& form,
                                                        const DataPtr& data,
@@ -431,7 +697,7 @@ namespace awkward {
   const ContentPtr
   IndexedOptionArrayBuilder::snapshot() const {
     if(content_ != nullptr) {
-      Index64 index(std::static_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
+      Index64 index(reinterpret_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
       return std::make_shared<IndexedOptionArray64>(Identities::none(),
                                                     form_.get()->parameters(),
                                                     index,
@@ -459,6 +725,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  IndexedOptionArrayBuilder::form() const {
+    return std::static_pointer_cast<Form>(form_);
+  }
+
   ///
   ListArrayBuilder::ListArrayBuilder(const ListFormPtr& form,
                                      const DataPtr& data,
@@ -478,8 +749,8 @@ namespace awkward {
   const ContentPtr
   ListArrayBuilder::snapshot() const {
     if(content_ != nullptr) {
-      Index64 starts(std::static_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
-      Index64 stops(std::static_pointer_cast<int64_t>(data_), length_, length_, kernel::lib::cpu);
+      Index64 starts(reinterpret_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
+      Index64 stops(reinterpret_pointer_cast<int64_t>(data_), length_, length_, kernel::lib::cpu);
       return std::make_shared<ListArray64>(Identities::none(),
                                            form_.get()->parameters(),
                                            starts,
@@ -508,6 +779,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  ListArrayBuilder::form() const {
+    return std::static_pointer_cast<Form>(form_);
+  }
+
   ///
   ListOffsetArrayBuilder::ListOffsetArrayBuilder(const ListOffsetFormPtr& form,
                                                  const DataPtr& data,
@@ -527,7 +803,7 @@ namespace awkward {
   const ContentPtr
   ListOffsetArrayBuilder::snapshot() const {
     if(content_ != nullptr) {
-      Index64 offsets(std::static_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
+      Index64 offsets(reinterpret_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
       return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                  form_.get()->parameters(),
                                                  offsets,
@@ -553,6 +829,11 @@ namespace awkward {
         + std::string(" expects another Form")
         + FILENAME(__LINE__));
     }
+  }
+
+  const FormPtr
+  ListOffsetArrayBuilder::form() const {
+    return std::static_pointer_cast<Form>(form_);
   }
 
   ///
@@ -682,6 +963,11 @@ namespace awkward {
     }
   }
 
+  const FormPtr
+  NumpyArrayBuilder::form() const {
+    return std::static_pointer_cast<Form>(form_);
+  }
+
   bool
   NumpyArrayBuilder::accepts(util::dtype dt) const {
     return (form_.get()->dtype() == dt);
@@ -803,6 +1089,11 @@ namespace awkward {
     return length_;
   }
 
+  const FormPtr
+  RecordArrayBuilder::form() const {
+    return std::static_pointer_cast<Form>(form_);
+  }
+
   const FormBuilderPtr&
   RecordArrayBuilder::field_check(const char* key) const {
     auto const& pos = distance(keys_.begin(), find(keys_.begin(), keys_.end(), key));
@@ -867,6 +1158,11 @@ namespace awkward {
     return length_;
   }
 
+  const FormPtr
+  RegularArrayBuilder::form() const {
+    return std::static_pointer_cast<Form>(form_);
+  }
+
   ///
   UnionArrayBuilder::UnionArrayBuilder(const UnionFormPtr& form,
                                        const DataPtr& data,
@@ -897,6 +1193,11 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
+  const FormPtr
+  UnionArrayBuilder::form() const {
+    return std::static_pointer_cast<Form>(form_);
+  }
+
   ///
   UnmaskedArrayBuilder::UnmaskedArrayBuilder(const UnmaskedFormPtr& form,
                                              const DataPtr& data,
@@ -925,6 +1226,11 @@ namespace awkward {
       + FILENAME(__LINE__));
   }
 
+  const FormPtr
+  UnmaskedArrayBuilder::form() const {
+    return std::static_pointer_cast<Form>(form_);
+  }
+
   ///
   VirtualArrayBuilder::VirtualArrayBuilder(const VirtualFormPtr& form,
                                            const DataPtr& data,
@@ -951,6 +1257,11 @@ namespace awkward {
       std::string("Form of a ") + classname()
       + std::string(" can not embed another Form")
       + FILENAME(__LINE__));
+  }
+
+  const FormPtr
+  VirtualArrayBuilder::form() const {
+    return std::static_pointer_cast<Form>(form_);
   }
 
 }

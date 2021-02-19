@@ -13,6 +13,7 @@ from awkward._ext import Identities64
 
 from awkward._ext import Iterator
 from awkward._ext import ArrayBuilder
+from awkward._ext import TypedArrayBuilder
 from awkward._ext import _PersistentSharedPtr
 
 from awkward._ext import Content
