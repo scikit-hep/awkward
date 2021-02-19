@@ -127,6 +127,7 @@ int main(int, char**) {
     myarray.real(999.999);
     myarray.real(-999.999);
 
+    // add another data buffer
     const std::shared_ptr<void> ptr2 = ak::kernel::malloc<void>(
       ak::kernel::lib::cpu, 1024);
 

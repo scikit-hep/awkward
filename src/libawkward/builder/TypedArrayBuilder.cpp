@@ -24,79 +24,79 @@ namespace awkward {
   ///
   FormBuilderPtr
   formBuilderFromA(const FormPtr& form, const DataPtr& data, int64_t length) {
-    if (auto downcasted_form = std::dynamic_pointer_cast<BitMaskedForm>(form)) {
+    if (auto const& downcasted_form = std::dynamic_pointer_cast<BitMaskedForm>(form)) {
       return std::make_shared<BitMaskedArrayBuilder>(
         downcasted_form,
         data,
         length);
     }
-    else if (auto downcasted_form = std::dynamic_pointer_cast<ByteMaskedForm>(form)) {
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<ByteMaskedForm>(form)) {
       return std::make_shared<ByteMaskedArrayBuilder>(
         downcasted_form,
         data,
         length);
     }
-    else if (auto downcasted_form = std::dynamic_pointer_cast<EmptyForm>(form)) {
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<EmptyForm>(form)) {
       return std::make_shared<EmptyArrayBuilder>(
         downcasted_form,
         data,
         length);
     }
-    else if (auto downcasted_form = std::dynamic_pointer_cast<IndexedForm>(form)) {
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedForm>(form)) {
       return std::make_shared<IndexedArrayBuilder>(
         downcasted_form,
         data,
         length);
     }
-    else if (auto downcasted_form = std::dynamic_pointer_cast<IndexedOptionForm>(form)) {
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedOptionForm>(form)) {
       return std::make_shared<IndexedOptionArrayBuilder>(
         downcasted_form,
         data,
         length);
     }
-    else if (auto downcasted_form = std::dynamic_pointer_cast<ListForm>(form)) {
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<ListForm>(form)) {
       return std::make_shared<ListArrayBuilder>(
         downcasted_form,
         data,
         length);
     }
-    else if (auto downcasted_form = std::dynamic_pointer_cast<ListOffsetForm>(form)) {
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<ListOffsetForm>(form)) {
       return std::make_shared<ListOffsetArrayBuilder>(
         downcasted_form,
         data,
         length);
     }
-    else if (auto downcasted_form = std::dynamic_pointer_cast<NumpyForm>(form)) {
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<NumpyForm>(form)) {
       return std::make_shared<NumpyArrayBuilder>(
         downcasted_form,
         data,
         length);
     }
-    else if (auto downcasted_form = std::dynamic_pointer_cast<RecordForm>(form)) {
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<RecordForm>(form)) {
       return std::make_shared<RecordArrayBuilder>(
         downcasted_form,
         data,
         length);
     }
-    else if (auto downcasted_form = std::dynamic_pointer_cast<RegularForm>(form)) {
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<RegularForm>(form)) {
       return std::make_shared<RegularArrayBuilder>(
         downcasted_form,
         data,
         length);
     }
-    else if (auto downcasted_form = std::dynamic_pointer_cast<UnionForm>(form)) {
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<UnionForm>(form)) {
       return std::make_shared<UnionArrayBuilder>(
         downcasted_form,
         data,
         length);
     }
-    else if (auto downcasted_form = std::dynamic_pointer_cast<UnmaskedForm>(form)) {
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<UnmaskedForm>(form)) {
       return std::make_shared<UnmaskedArrayBuilder>(
         downcasted_form,
         data,
         length);
     }
-    else if (auto downcasted_form = std::dynamic_pointer_cast<VirtualForm>(form)) {
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<VirtualForm>(form)) {
       return std::make_shared<VirtualArrayBuilder>(
         downcasted_form,
         data,
@@ -126,6 +126,12 @@ namespace awkward {
       length_ += offset;
 
       /// FIXME: remember to put a boundary check here
+      if (length_ >= initial_) {
+        // take a snapshot
+        std::shared_ptr<Content> array = snapshot();
+
+        std::cout << array.get()->tostring() << "\n";
+      }
       assert(length_ < initial_);
     }
     else {
@@ -574,15 +580,18 @@ namespace awkward {
 
   const ContentPtr
   NumpyArrayBuilder::snapshot() const {
-    auto identities = Identities::none();
+    if (data_.empty()) {
+      throw std::invalid_argument(
+        std::string("FormBuilder ") + classname()
+        + std::string(" needs a data buffer")
+        + FILENAME(__LINE__));
+    }
+
+    auto const& identities = Identities::none();
 
     // FIXME: check that length_ is always equal to
     // Sum s = std::for_each(data_.begin(), data_.end(), Sum());
 
-    // FIXME:
-    // nothing to be done if all data pointers hold the same memory address
-    // otherwise, copy the data into a single continous memory
-    //
     std::vector<ssize_t> shape = { (ssize_t)length_ };
     std::vector<ssize_t> strides = { (ssize_t)dtype_to_itemsize(form_.get()->dtype()) };
 
@@ -595,15 +604,17 @@ namespace awkward {
         strides[0]);
       util::handle_error(err1, classname(), identities.get());
 
-      Index64 data_lens((int64_t)data_.size());
-
       std::shared_ptr<void> ptr(
         kernel::malloc<void>(kernel::lib::cpu, bytepos.length()*strides[0]));
 
       // FIXME: move it to kernel?
+      // nothing to be done if all data pointers hold the same memory address
+      // otherwise, copy the data into a single contiguous memory
+      //
+      Index64 data_lens((int64_t)data_.size());
       const uint8_t* data_ptrs[data_.size()];
       int64_t indx = 0;
-      for (const auto& it : data_) {
+      for (auto const& it : data_) {
         data_ptrs[indx] = reinterpret_cast<uint8_t*>(it->ptr.get());
         data_lens.data()[indx] = it->length;
         indx++;
@@ -631,10 +642,14 @@ namespace awkward {
                                           kernel::lib::cpu);
     }
     else {
+      // FIXME: this is to peek at the last data buffer
+      //
+      std::vector<ssize_t> last_shape = { (ssize_t)data_.back()->length };
+
       return std::make_shared<NumpyArray>(identities,
                                           form_.get()->parameters(),
-                                          data_.front()->ptr,
-                                          shape,
+                                          data_.back()->ptr,
+                                          last_shape,
                                           strides,
                                           0,
                                           dtype_to_itemsize(form_.get()->dtype()),
@@ -771,14 +786,17 @@ namespace awkward {
     }
     else {
       const std::string& key = *form.get()->form_key();
-      auto pos = distance(keys_.begin(), find(keys_.begin(), keys_.end(), key));
-      if (pos >= keys_.size()) {
+      auto const& pos = distance(keys_.begin(), find(keys_.begin(), keys_.end(), key));
+      // Note, 'pos' is the number of increments needed to go from first to last.
+      // The value may be negative if random-access iterators are used and
+      // first is reachable from last.
+      if (pos >= (int64_t)keys_.size()) {
         // key is not found
         keys_.push_back(*form.get()->form_key());
         contents_.push_back(formBuilderFromA(form, data, length));
       }
       else {
-        return contents_[pos].get()->apply(form, data, length);
+        return std::next(contents_.begin(), pos)->get()->apply(form, data, length);
       }
     }
     /// FIXME: every record's data buffer has a different length
@@ -787,8 +805,11 @@ namespace awkward {
 
   const FormBuilderPtr&
   RecordArrayBuilder::field_check(const char* key) const {
-    auto pos = distance(keys_.begin(), find(keys_.begin(), keys_.end(), key));
-    if (pos >= keys_.size()) {
+    auto const& pos = distance(keys_.begin(), find(keys_.begin(), keys_.end(), key));
+    // Note, 'pos' is the number of increments needed to go from first to last.
+    // The value may be negative if random-access iterators are used and
+    // first is reachable from last.
+    if (pos >= (int64_t)keys_.size()) {
       // key is not found
       throw std::invalid_argument(
         std::string("FormBuilder ") + classname()
@@ -797,7 +818,7 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else {
-      return contents_[pos];
+      return *std::next(contents_.begin(), pos);
     }
   }
 
