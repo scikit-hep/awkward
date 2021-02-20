@@ -914,9 +914,7 @@ def broadcast_and_apply(  # noqa: C901
         elif any(isinstance(x, recordtypes) for x in inputs):
             if not allow_records:
                 raise ValueError(
-                    "cannot broadcast: {0}".format(
-                        ", ".join(repr(type(x)) for x in inputs)
-                    )
+                    "cannot broadcast records in this type of operation"
                     + exception_suffix(__file__)
                 )
 
