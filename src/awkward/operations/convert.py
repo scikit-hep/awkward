@@ -1950,49 +1950,6 @@ or
         return pyarrow
 
 
-def _listarray_to_listoffsetarray(layout):
-    if isinstance(layout, ak.layout.ListArray32):
-        cls, index_cls = ak.layout.ListOffsetArray32, ak.layout.Index32
-    elif isinstance(layout, ak.layout.ListArrayU32):
-        cls, index_cls = ak.layout.ListOffsetArrayU32, ak.layout.IndexU32
-    elif isinstance(layout, ak.layout.ListArray64):
-        cls, index_cls = ak.layout.ListOffsetArray64, ak.layout.Index64
-    else:
-        cls = None
-
-    if cls is not None and layout.starts.ptr_lib == "cpu":
-        if numpy._module.array_equal(layout.starts[1:], layout.stops[:-1]):
-            offsets = index_cls(
-                numpy._module.append(numpy.asarray(layout.starts[1:]), layout.stops[-1])
-            )
-            return cls(offsets, layout.content, layout.identities, layout.parameters)
-
-    return layout
-
-
-def _regulararray_to_listoffsetarray(layout):
-    if isinstance(layout, ak.layout.RegularArray):
-        if layout.size == 0:
-            offsets = numpy.zeros(len(layout), dtype=np.int32)
-            cls, index_cls = ak.layout.ListOffsetArray32, ak.layout.Index32
-        else:
-            last = layout.size * (len(layout) + 1)
-            if last <= np.iinfo(np.int32).max:
-                offsets = numpy.arange(0, last, layout.size, dtype=np.int32)
-                cls, index_cls = ak.layout.ListOffsetArray32, ak.layout.Index32
-            elif last <= np.iinfo(np.uint32).max:
-                offsets = numpy.arange(0, last, layout.size, dtype=np.uint32)
-                cls, index_cls = ak.layout.ListOffsetArrayU32, ak.layout.IndexU32
-            else:
-                offsets = numpy.arange(0, last, layout.size, dtype=np.int64)
-                cls, index_cls = ak.layout.ListOffsetArray64, ak.layout.Index64
-            return cls(
-                index_cls(offsets), layout.content, layout.identities, layout.parameters
-            )
-
-    return layout
-
-
 def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
     """
     Args:
@@ -2022,8 +1979,6 @@ def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
     layout = to_layout(array, allow_record=False, allow_other=False)
 
     def recurse(layout, mask, is_option):
-        layout = _regulararray_to_listoffsetarray(_listarray_to_listoffsetarray(layout))
-
         if isinstance(layout, ak.layout.NumpyArray):
             numpy_arr = numpy.asarray(layout)
             length = len(numpy_arr)

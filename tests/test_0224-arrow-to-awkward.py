@@ -110,7 +110,7 @@ def test_toarrow_ListArray_RegularArray():
         [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]],
     ]
 
-    assert isinstance(ak.to_arrow(regulararray), (pyarrow.ListArray))
+    assert isinstance(ak.to_arrow(regulararray), (pyarrow.LargeListArray))
     assert ak.to_arrow(regulararray).to_pylist() == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],
