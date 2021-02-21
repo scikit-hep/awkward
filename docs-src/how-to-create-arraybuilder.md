@@ -225,11 +225,176 @@ array.type
 Nested tuples
 -------------
 
-The same is true for tuples, but 
+The same is true for tuples, but the next field to fill is selected by "`index`" (integer), rather than "`field`" (string), and the tuple size has to be given up-front.
 
-+++
+```{code-cell} ipython3
+builder = ak.ArrayBuilder()
+
+with builder.tuple(3):
+    builder.index(0).append(1)
+    builder.index(1).append(2.2)
+    builder.index(2).append("three")
+
+builder
+```
 
 Records and unions
 ------------------
 
-remember that naming changes the behavior
+If the set of fields changes while collecting records, the builder algorithm could handle it one of two possible ways:
+
+   1. Assume that the new field or fields have simply been missing up to this point, and that any now-unspecified fields are also missing.
+   2. Assume that a different set of fields means a different type and make a union.
+
+By default, [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) follows policy (1), but it can be made to follow policy (2) if the names of the records are different.
+
+```{code-cell} ipython3
+policy1 = ak.ArrayBuilder()
+
+with policy1.record():
+    policy1.field("x").append(1)
+    policy1.field("y").append(1.1)
+
+with policy1.record():
+    policy1.field("y").append(2.2)
+    policy1.field("z").append("three")
+
+print(policy1)
+policy1.type
+```
+
+```{code-cell} ipython3
+policy2 = ak.ArrayBuilder()
+
+with policy2.record("First"):
+    policy2.field("x").append(1)
+    policy2.field("y").append(1.1)
+
+with policy2.record("Second"):
+    policy2.field("y").append(2.2)
+    policy2.field("z").append("three")
+
+print(policy2)
+policy2.type
+```
+
+Comments on union-type
+----------------------
+
+Although it's easy to make [union-type](https://awkward-array.readthedocs.io/en/latest/ak.types.UnionType.html) data with [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html), the applications of union-type data are more limited. For instance, we can select a field that belongs to _all_ types of the union, but not any fields that don't share that field.
+
+```{code-cell} ipython3
+array2 = policy2.snapshot()
+array2
+```
+
+```{code-cell} ipython3
+array2.y
+```
+
+```{code-cell} ipython3
+:tags: [raises-exception]
+
+array2.x
+```
+
+The above would be no problem for records collected using policy 1 (see previous section).
+
+```{code-cell} ipython3
+array1 = policy1.snapshot()
+array1
+```
+
+```{code-cell} ipython3
+array1.y
+```
+
+```{code-cell} ipython3
+array1.x
+```
+
+At the time of writing, [union-types](https://awkward-array.readthedocs.io/en/latest/ak.types.UnionType.html) are not supported in Numba ([issue 174](https://github.com/scikit-hep/awkward-1.0/issues/174)).
+
++++
+
+Use in Numba
+------------
+
+[ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) can be used in Numba-compiled functions, and that can often be the most convenient way to build up an array, relatively quickly (see below).
+
+There are a few limitations, though:
+
+   * At the time of writing, [Numba doesn't support Python's `with` statement](https://numba.pydata.org/numba-doc/dev/reference/pysupported.html#language) (context manager), so `begin_list`/`end_list` will have to be used instead.
+   * Builders cannot be constructed inside of the compiled function; they have to be passed in.
+   * The `snapshot` method cannot be called inside of the compiled function; it has to be applied to the output.
+
+Therefore, a common pattern is:
+
+```{code-cell} ipython3
+import numba as nb
+
+@nb.jit
+def build(builder):
+    builder.begin_list()
+    builder.append(1.1)
+    builder.append(2.2)
+    builder.append(3.3)
+    builder.end_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.append(4.4)
+    builder.append(5.5)
+    builder.end_list()
+    return builder
+
+array = build(ak.ArrayBuilder()).snapshot()
+array
+```
+
+Appending parts of an existing array
+------------------------------------
+
+If the argument of the `append` function is part of another Awkward Array, that array will be *linked into* the new array, rather than reconstructing the original by iterating over it. That can be a performance advantage (appending records with 1000 fields takes as much time as appending records with 1 field), but it can prevent large data structures from being garbage-collected, because a reference to them exists in the new array.
+
+```{code-cell} ipython3
+original = ak.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}])
+
+builder = ak.ArrayBuilder()
+builder.append(original[2])
+builder.append(original[1])
+builder.append(original[0])
+builder.append(original[1])
+builder.append(original[1])
+builder.append(original[0])
+builder.append(original[2])
+builder.append(original[2])
+
+new_array = builder.snapshot()
+new_array
+```
+
+```{code-cell} ipython3
+new_array.layout
+```
+
+Above, we see that `new_array` is just making references ([ak.layout.IndexedArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.IndexedArray.html)) of an [ak.layout.RecordArray](https://awkward-array.readthedocs.io/en/latest/ak.layout.RecordArray.html) with `x = [1, 2, 3]` and `y = [1.1, 2.2, 3.3]`.
+
++++
+
+Comments on performance
+-----------------------
+
+Although [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) is implemented in C++, it is dynamically typed by design. The advantage of compiled code over interpreted code often comes in the knowledge of data types at compile-time, enabling fewer runtime checks and more compiler optimizations.
+
+If you're using a builder in Python, there's also the overhead of calling from Python.
+
+If you're using a builder in Numba, the builder calls are external function calls and LLVM can't inline them for optimizations.
+
+Whenever you have a choice between
+
+   1. using the [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html),
+   2. constructing an array manually from layouts (next chapter), or
+   3. filling a NumPy array and using it as an index,
+
+the alternatives are often faster. The point of [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) is that it is *easy*.
