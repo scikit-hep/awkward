@@ -18,6 +18,11 @@ If you're not getting data from a file or conversion from another format, you ma
 
 The biggest difference between an [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) and an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html) is that you can append data to a builder, but an array is immutable ([see qualifications on mutability](how-to-convert-numpy.html#mutability-of-awkward-arrays-from-numpy)). It's a bit like a Python list, which has an `append` method, but [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) has many methods for appending different types of structures.
 
++++
+
+Appending
+---------
+
 ```{code-cell} ipython3
 import awkward as ak
 ```
@@ -61,8 +66,11 @@ builder
 ```
 
 ```{code-cell} ipython3
-ak.type(builder)
+builder.type
 ```
+
+Nested appending
+----------------
 
 We've been using "`append`" because it is generic (it recognizes the types of its arguments and builds that), but there are also methods for building structure explicitly.
 
@@ -75,6 +83,51 @@ builder.complex(3+1j)
 builder.null()
 builder.string("five")
 builder
+```
+
+```{code-cell} ipython3
+builder.type
+```
+
+The most useful of these create nested data structures:
+
+   * `begin_list`/`end_list`
+   * `begin_record`/`end_record`
+   * `begin_tuple`/`end_tuple`
+
+which switch into a mode that starts filling inside of a list, record, or tuple. For records and tuples, you additionally have to specify the `field` or `index` of the record or tuple (respectively).
+
+```{code-cell} ipython3
+builder = ak.ArrayBuilder()
+
+builder.begin_list()
+builder.append(1.1)
+builder.append(2.2)
+builder.append(3.3)
+builder.end_list()
+
+builder.begin_list()
+builder.end_list()
+
+builder.begin_list()
+builder.append(4.4)
+builder.append(5.5)
+builder.end_list()
+
+builder
+```
+
+Appending after the `begin_list` puts data inside the list, rather than outside:
+
+```{code-cell} ipython3
+builder.append(9.9)
+builder
+```
+
+This `9.9` is outside of the lists, and hence the type is now "lists of numbers *or* numbers."
+
+```{code-cell} ipython3
+builder.type
 ```
 
 ```{code-cell} ipython3
