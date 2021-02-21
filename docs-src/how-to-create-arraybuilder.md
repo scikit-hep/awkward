@@ -69,9 +69,6 @@ builder
 builder.type
 ```
 
-Nested appending
-----------------
-
 We've been using "`append`" because it is generic (it recognizes the types of its arguments and builds that), but there are also methods for building structure explicitly.
 
 ```{code-cell} ipython3
@@ -88,6 +85,23 @@ builder
 ```{code-cell} ipython3
 builder.type
 ```
+
+Snapshot
+--------
+
+To turn an [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) into an [ak.Array](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Array.html), call `snapshot`. This is an inexpensive operation (may be done multiple times; the builder is unaffacted).
+
+```{code-cell} ipython3
+array = builder.snapshot()
+array
+```
+
+Builders don't have all the high-level methods that arrays do, so if you want to use the array for normal analysis, remember to take a snapshot.
+
++++
+
+Nested lists
+------------
 
 The most useful of these create nested data structures:
 
@@ -163,3 +177,59 @@ builder
 ```
 
 (Note that the Python `with` statement, a.k.a. "context manager," is not available in Numba jit-compiled functions, in case you're using [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) in Numba.)
+
++++
+
+Nested records
+--------------
+
+When using `begin_record`/`end_record` (or the equivalent `record` in the `with` statement), you have to specify which field each "`append`" is associated with.
+
+   * `field("fieldname")`: switches to fill a field with a given name (and returns the builder, for convenience).
+
+```{code-cell} ipython3
+builder = ak.ArrayBuilder()
+
+with builder.record():
+    builder.field("x").append(1)
+    builder.field("y").append(2.2)
+    builder.field("z").append("three")
+
+builder
+```
+
+The record type can also be given a name.
+
+```{code-cell} ipython3
+builder = ak.ArrayBuilder()
+
+with builder.record("Point"):
+    builder.field("x").real(1.1)
+    builder.field("y").real(2.2)
+    builder.field("z").real(3.3)
+
+builder
+```
+
+This gives the resulting records a type named "`Point`", which might have [specialized behaviors](how-to-specialize.html).
+
+```{code-cell} ipython3
+array = builder.snapshot()
+array
+```
+
+```{code-cell} ipython3
+array.type
+```
+
+Nested tuples
+-------------
+
+The same is true for tuples, but 
+
++++
+
+Records and unions
+------------------
+
+remember that naming changes the behavior
