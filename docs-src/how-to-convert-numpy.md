@@ -325,6 +325,8 @@ ak_array1 == ak_array2
 ```
 
 ```{code-cell} ipython3
+:tags: [raises-exception]
+
 ak.all(ak_array1 == ak_array2)
 ```
 

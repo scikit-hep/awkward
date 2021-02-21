@@ -130,6 +130,36 @@ This `9.9` is outside of the lists, and hence the type is now "lists of numbers 
 builder.type
 ```
 
-```{code-cell} ipython3
+Since `begin_list` and `end_list` are imperative, the nesting structure of an array can be determined by program flow:
 
+```{code-cell} ipython3
+def arbitrary_nesting(builder, depth):
+    if depth == 0:
+        builder.append(1)
+        builder.append(2)
+        builder.append(3)
+    else:
+        builder.begin_list()
+        arbitrary_nesting(builder, depth - 1)
+        builder.end_list()
+
+builder = ak.ArrayBuilder()
+arbitrary_nesting(builder, 5)
+builder
 ```
+
+Often, you'll know the exact depth of nesting you want. The Python `with` statement can be used to restrict the generality (nd free you from having to remember to `end` what you `begin`).
+
+```{code-cell} ipython3
+builder = ak.ArrayBuilder()
+
+with builder.list():
+    with builder.list():
+        builder.append(1)
+        builder.append(2)
+        builder.append(3)
+
+builder
+```
+
+(Note that the Python `with` statement, a.k.a. "context manager," is not available in Numba jit-compiled functions, in case you're using [ak.ArrayBuilder](https://awkward-array.readthedocs.io/en/latest/_auto/ak.ArrayBuilder.html) in Numba.)
