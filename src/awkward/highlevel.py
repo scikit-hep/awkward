@@ -2294,7 +2294,9 @@ class ArrayBuilder(Iterable, Sized):
 
         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
         typestrs = ak._util.typestrs(self._behavior)
-        typestr = repr(str(ak.types.ArrayType(snapshot.layout.type(typestrs), len(self))))
+        typestr = repr(
+            str(ak.types.ArrayType(snapshot.layout.type(typestrs), len(self)))
+        )
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
@@ -2628,7 +2630,9 @@ class ArrayBuilder(Iterable, Sized):
                 - len(self._name)
             )
             typestrs = ak._util.typestrs(self._arraybuilder._behavior)
-            typestr = repr(str(ak.types.ArrayType(snapshot.layout.type(typestrs), len(self))))
+            typestr = repr(
+                str(ak.types.ArrayType(snapshot.layout.type(typestrs), len(self)))
+            )
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
