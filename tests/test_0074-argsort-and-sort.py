@@ -31,6 +31,8 @@ def test_EmptyArray():
     array = ak.layout.EmptyArray()
     assert ak.to_list(array.sort(0, True, False)) == []
     assert ak.to_list(array.argsort(0, True, False)) == []
+    assert str(ak.type(array.sort(0, True, False))) == "float64"
+    assert str(ak.type(array.argsort(0, True, False))) == "int64"
 
 
 def test_NumpyArray():
