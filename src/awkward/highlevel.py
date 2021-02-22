@@ -2215,6 +2215,19 @@ class ArrayBuilder(Iterable, Sized):
                 "behavior must be None or a dict" + ak._util.exception_suffix(__file__)
             )
 
+    @property
+    def type(self):
+        """
+        The high-level type of the accumulated array; same as #ak.type.
+
+        Note that the outermost element of an Array's type is always an
+        #ak.types.ArrayType, which specifies the number of elements in the array.
+
+        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        wrapped by an #ak.types.ArrayType.
+        """
+        return ak.operations.describe.type(self)
+
     def __len__(self):
         """
         The current length of the accumulated array.
@@ -2281,7 +2294,9 @@ class ArrayBuilder(Iterable, Sized):
 
         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
         typestrs = ak._util.typestrs(self._behavior)
-        typestr = repr(str(snapshot.layout.type(typestrs)))
+        typestr = repr(
+            str(ak.types.ArrayType(snapshot.layout.type(typestrs), len(self)))
+        )
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
@@ -2615,7 +2630,9 @@ class ArrayBuilder(Iterable, Sized):
                 - len(self._name)
             )
             typestrs = ak._util.typestrs(self._arraybuilder._behavior)
-            typestr = repr(str(snapshot.layout.type(typestrs)))
+            typestr = repr(
+                str(ak.types.ArrayType(snapshot.layout.type(typestrs), len(self)))
+            )
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 

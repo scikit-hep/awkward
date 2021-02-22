@@ -313,18 +313,26 @@ In the above, the internal [NumpyArray](https://awkward-array.readthedocs.io/en/
 This distinction is technical: `ak_array1` and `ak_array2` have the same [ak.type](https://awkward-array.readthedocs.io/en/latest/_auto/ak.type.html) and behave identically (including broadcasting rules).
 
 ```{code-cell} ipython3
+:tags: [raises-exception]
+
 ak.type(ak_array1)
 ```
 
 ```{code-cell} ipython3
+:tags: [raises-exception]
+
 ak.type(ak_array2)
 ```
 
 ```{code-cell} ipython3
+:tags: [raises-exception]
+
 ak_array1 == ak_array2
 ```
 
 ```{code-cell} ipython3
+:tags: [raises-exception]
+
 ak.all(ak_array1 == ak_array2)
 ```
 
