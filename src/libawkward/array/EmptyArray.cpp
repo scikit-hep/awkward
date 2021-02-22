@@ -623,7 +623,9 @@ namespace awkward {
                            bool ascending,
                            bool stable,
                            bool keepdims) const {
-    ContentPtr asnumpy = toNumpyArray("d", 8, util::dtype::float64);
+    ContentPtr asnumpy = toNumpyArray(util::dtype_to_format(util::dtype::int64),
+                                      8,
+                                      util::dtype::int64);
     ContentPtr out = asnumpy.get()->argsort_next(negaxis,
                                                  starts,
                                                  parents,
