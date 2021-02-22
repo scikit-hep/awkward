@@ -3739,6 +3739,7 @@ def to_buffers(
     partition_start=0,
     form_key="node{id}",
     key_format="part{partition}-{form_key}-{attribute}",
+    virtual="materialize",
 ):
     """
     Args:
@@ -3762,6 +3763,12 @@ def to_buffers(
             `form_key` is the result of applying `form_key` (above), and the
             `attribute` is a hard-coded string representing the buffer's function
             (e.g. `"data"`, `"offsets"`, `"index"`).
+        virtual (str): If `"materialize"`, any virtual arrays will be materialized
+            and the materialized data will be included in the container. If `"pass"`,
+            a virtual array's Form is passed through as a #ak.forms.VirtualForm,
+            assuming that it contains `form_keys` that can be found in the
+            container (e.g. by a previous pass through this function). No other
+            values are allowed for this function argument.
 
     Decomposes an Awkward Array into a Form and a collection of memory buffers,
     so that data can be losslessly written to file formats and storage devices
@@ -4109,7 +4116,21 @@ def to_buffers(
             )
 
         elif isinstance(layout, ak.layout.VirtualArray):
-            return fill(layout.array, part)
+            if virtual == "materialize":
+                return fill(layout.array, part)
+            elif virtual == "pass":
+                return ak.forms.VirtualForm(
+                    layout.form,
+                    layout.generator.length is not None,
+                    layout.identities is not None,
+                    layout.parameters,
+                    None,
+                )
+            else:
+                raise ValueError(
+                    "unrecognized value for 'virtual': " + str(virtual)
+                    + ak._util.exception_suffix(__file__)
+                )
 
         else:
             raise AssertionError(
