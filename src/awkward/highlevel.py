@@ -270,7 +270,7 @@ class Array(
         if check_valid:
             ak.operations.describe.validity_error(self, exception=True)
 
-        self._caches = ak._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self.layout)
 
     @property
     def layout(self):
@@ -378,7 +378,7 @@ class Array(
             limit_value -= len(suffix)
 
             value = ak._util.minimally_touching_string(
-                limit_value, self._array._layout, self._array._behavior
+                limit_value, self._array.layout, self._array._behavior
             )
 
             try:
@@ -389,7 +389,7 @@ class Array(
             typestr = repr(
                 str(
                     ak._util.highlevel_type(
-                        self._array._layout, self._array._behavior, True
+                        self._array.layout, self._array._behavior, True
                     )
                 )
             )
@@ -426,25 +426,20 @@ class Array(
         Converts this Array into Python objects; same as #ak.to_list
         (but without the underscore, like NumPy's
         [tolist](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html)).
-
-        Awkward Array types have the following Pythonic translations.
-
-           * #ak.types.PrimitiveType: converted into bool, int, float.
-           * #ak.types.OptionType: missing values are converted into None.
-           * #ak.types.ListType: converted into list.
-           * #ak.types.RegularType: also converted into list. Python (and JSON)
-             forms lose information about the regularity of list lengths.
-           * #ak.types.ListType with parameter `"__array__"` equal to
-             `"__bytestring__"`: converted into bytes.
-           * #ak.types.ListType with parameter `"__array__"` equal to
-             `"__string__"`: converted into str.
-           * #ak.types.RecordArray without field names: converted into tuple.
-           * #ak.types.RecordArray with field names: converted into dict.
-           * #ak.types.UnionArray: Python data are naturally heterogeneous.
-
-        See also #ak.to_list and #ak.from_iter.
         """
         return ak.operations.convert.to_list(self)
+
+    def to_list(self):
+        """
+        Converts this Array into Python objects; same as #ak.to_list.
+        """
+        return ak.operations.convert.to_list(self)
+
+    def to_numpy(self, allow_missing=True):
+        """
+        Converts this Array into a NumPy array, if possible; same as #ak.to_numpy.
+        """
+        return ak.operations.convert.to_numpy(self, allow_missing=allow_missing)
 
     @property
     def nbytes(self):
@@ -464,7 +459,7 @@ class Array(
         the (small) C++ nodes or Python objects that reference the (large)
         array buffers.
         """
-        return self._layout.nbytes
+        return self.layout.nbytes
 
     @property
     def ndim(self):
@@ -500,50 +495,13 @@ class Array(
     @property
     def type(self):
         """
-        The high-level type of this array.
+        The high-level type of this Array; same as #ak.type.
 
-        The high-level type ignores #layout differences like
-        #ak.layout.ListArray64 versus #ak.layout.ListOffsetArray64, but
-        not differences like "regular-sized lists" (i.e.
-        #ak.layout.RegularArray) versus "variable-sized lists" (i.e.
-        #ak.layout.ListArray64 and similar).
+        Note that the outermost element of an Array's type is always an
+        #ak.types.ArrayType, which specifies the number of elements in the array.
 
-        Types are rendered as [Datashape](https://datashape.readthedocs.io/)
-        strings, which makes the same distinctions.
-
-        For example,
-
-            ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
-                      [],
-                      [{"x": 3.3, "y": [3, 3, 3]}]])
-
-        has type
-
-            3 * var * {"x": float64, "y": var * int64}
-
-        but
-
-            ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
-
-        has type
-
-            2 * 3 * 5 * int64
-
-        Some cases, like heterogeneous data, require [extensions beyond the
-        Datashape specification](https://github.com/blaze/datashape/issues/237).
-        For example,
-
-            ak.Array([1, "two", [3, 3, 3]])
-
-        has type
-
-            3 * union[int64, string, var * int64]
-
-        but "union" is not a Datashape type-constructor. (Its syntax is
-        similar to existing type-constructors, so it's a plausible addition
-        to the language.)
-
-        See also #ak.type.
+        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        wrapped by an #ak.types.ArrayType.
         """
         return ak.operations.describe.type(self)
 
@@ -557,7 +515,7 @@ class Array(
 
         is `3`, not `5`.
         """
-        return len(self._layout)
+        return len(self.layout)
 
     def __iter__(self):
         """
@@ -589,7 +547,7 @@ class Array(
 
         See also #ak.to_list.
         """
-        for x in self._layout:
+        for x in self.layout:
             yield ak._util.wrap(x, self._behavior)
 
     def __getitem__(self, where):
@@ -1004,7 +962,7 @@ class Array(
         acting at the last level, while the higher levels of the indexer all
         have the same dimension as the array being indexed.
         """
-        return ak._util.wrap(self._layout[where], self._behavior)
+        return ak._util.wrap(self.layout[where], self._behavior)
 
     def __setitem__(self, where, what):
         """
@@ -1065,9 +1023,9 @@ class Array(
                 "only fields may be assigned in-place (by field name)"
                 + ak._util.exception_suffix(__file__)
             )
-        array = ak.operations.structure.with_field(self._layout, what, where)
+        array = ak.operations.structure.with_field(self.layout, what, where)
         self._layout = array.layout
-        self._caches = ak._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self.layout)
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -1112,7 +1070,7 @@ class Array(
         if where in dir(type(self)):
             return super(Array, self).__getattribute__(where)
         else:
-            if where in self._layout.keys():
+            if where in self.layout.keys():
                 try:
                     return self[where]
                 except Exception as err:
@@ -1137,7 +1095,7 @@ class Array(
                 dir(super(Array, self))
                 + [
                     x
-                    for x in self._layout.keys()
+                    for x in self.layout.keys()
                     if _dir_pattern.match(x) and not keyword.iskeyword(x)
                 ]
             )
@@ -1303,7 +1261,7 @@ class Array(
 
     def _str(self, limit_value=85):
         return ak._util.minimally_touching_string(
-            limit_value, self._layout, self._behavior
+            limit_value, self.layout, self._behavior
         )
 
     def _repr(self, limit_value=40, limit_total=85):
@@ -1311,7 +1269,7 @@ class Array(
         limit_value -= len(suffix)
 
         value = ak._util.minimally_touching_string(
-            limit_value, self._layout, self._behavior
+            limit_value, self.layout, self._behavior
         )
 
         try:
@@ -1319,7 +1277,7 @@ class Array(
         except AttributeError:
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(str(ak._util.highlevel_type(self._layout, self._behavior, True)))
+        typestr = repr(str(ak._util.highlevel_type(self.layout, self._behavior, True)))
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
@@ -1350,7 +1308,7 @@ class Array(
         nested lists in a NumPy `"O"` array are severed from the array and
         cannot be sliced as dimensions.
         """
-        return ak._connect._numpy.convert_to_array(self._layout, args, kwargs)
+        return ak._connect._numpy.convert_to_array(self.layout, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -1450,7 +1408,7 @@ class Array(
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, length, container = ak.operations.convert.to_buffers(self._layout)
+        form, length, container = ak.operations.convert.to_buffers(self.layout)
         if self._behavior is ak.behavior:
             behavior = None
         else:
@@ -1472,13 +1430,13 @@ class Array(
             self.__class__ = ak._util.arrayclass(layout, behavior)
         self.layout = layout
         self.behavior = behavior
-        self._caches = ak._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self.layout)
 
     def __copy__(self):
-        return Array(self._layout, behavior=self._behavior)
+        return Array(self.layout, behavior=self._behavior)
 
     def __deepcopy__(self, memo):
-        return Array(self._layout.deep_copy(), behavior=self._behavior)
+        return Array(self.layout.deep_copy(), behavior=self._behavior)
 
     def __bool__(self):
         if len(self) == 1:
@@ -1490,7 +1448,7 @@ class Array(
             )
 
     def __contains__(self, element):
-        for test in ak._util.completely_flatten(self._layout):
+        for test in ak._util.completely_flatten(self.layout):
             if element in test:
                 return True
         return False
@@ -1588,7 +1546,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         if check_valid:
             ak.operations.describe.validity_error(self, exception=True)
 
-        self._caches = ak._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self.layout)
 
     @property
     def layout(self):
@@ -1675,24 +1633,15 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
 
     def tolist(self):
         """
-        Converts this Record into Python objects.
+        Converts this Record into Python objects; same as #ak.to_list
+        (but without the underscore, like NumPy's
+        [tolist](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html)).
+        """
+        return ak.operations.convert.to_list(self)
 
-        Awkward Array types have the following Pythonic translations.
-
-           * #ak.types.PrimitiveType: converted into bool, int, float.
-           * #ak.types.OptionType: missing values are converted into None.
-           * #ak.types.ListType: converted into list.
-           * #ak.types.RegularType: also converted into list. Python (and JSON)
-             forms lose information about the regularity of list lengths.
-           * #ak.types.ListType with parameter `"__array__"` equal to
-             `"__bytestring__"`: converted into bytes.
-           * #ak.types.ListType with parameter `"__array__"` equal to
-             `"__string__"`: converted into str.
-           * #ak.types.RecordArray without field names: converted into tuple.
-           * #ak.types.RecordArray with field names: converted into dict.
-           * #ak.types.UnionArray: Python data are naturally heterogeneous.
-
-        See also #ak.to_list and #ak.from_iter.
+    def to_list(self):
+        """
+        Converts this Record into Python objects; same as #ak.to_list.
         """
         return ak.operations.convert.to_list(self)
 
@@ -1714,7 +1663,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         the (small) C++ nodes or Python objects that reference the (large)
         array buffers.
         """
-        return self._layout.nbytes
+        return self.layout.nbytes
 
     @property
     def fields(self):
@@ -1731,10 +1680,10 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
     @property
     def type(self):
         """
-        The high-level type of this record, like the `type` of an array, but
-        the outermost structure is a record-type, not a number of elements.
+        The high-level type of this Record; same as #ak.type.
 
-        See also #ak.type.
+        Note that the outermost element of a Record's type is always a
+        #ak.types.RecordType.
         """
         return ak.operations.describe.type(self)
 
@@ -1764,7 +1713,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
             >>> record["y", 1]
             2
         """
-        return ak._util.wrap(self._layout[where], self._behavior)
+        return ak._util.wrap(self.layout[where], self._behavior)
 
     def __setitem__(self, where, what):
         """
@@ -1792,9 +1741,9 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
                 "only fields may be assigned in-place (by field name)"
                 + ak._util.exception_suffix(__file__)
             )
-        array = ak.operations.structure.with_field(self._layout, what, where)
+        array = ak.operations.structure.with_field(self.layout, what, where)
         self._layout = array.layout
-        self._caches = ak._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self.layout)
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -1828,7 +1777,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         if where in dir(type(self)):
             return super(Record, self).__getattribute__(where)
         else:
-            if where in self._layout.keys():
+            if where in self.layout.keys():
                 try:
                     return self[where]
                 except Exception as err:
@@ -1853,7 +1802,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
                 dir(super(Record, self))
                 + [
                     x
-                    for x in self._layout.keys()
+                    for x in self.layout.keys()
                     if _dir_pattern.match(x) and not keyword.iskeyword(x)
                 ]
             )
@@ -1987,7 +1936,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
 
     def _str(self, limit_value=85):
         return ak._util.minimally_touching_string(
-            limit_value + 2, self._layout, self._behavior
+            limit_value + 2, self.layout, self._behavior
         )[1:-1]
 
     def _repr(self, limit_value=40, limit_total=85):
@@ -1995,7 +1944,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         limit_value -= len(suffix)
 
         value = ak._util.minimally_touching_string(
-            limit_value + 2, self._layout, self._behavior
+            limit_value + 2, self.layout, self._behavior
         )[1:-1]
 
         try:
@@ -2003,9 +1952,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         except AttributeError:
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(
-            str(ak._util.highlevel_type(self._layout, self._behavior, False))
-        )
+        typestr = repr(str(ak._util.highlevel_type(self.layout, self._behavior, False)))
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
@@ -2047,12 +1994,12 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, length, container = ak.operations.convert.to_buffers(self._layout.array)
+        form, length, container = ak.operations.convert.to_buffers(self.layout.array)
         if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
-        return form, length, container, behavior, self._layout.at
+        return form, length, container, behavior, self.layout.at
 
     def __setstate__(self, state):
         if isinstance(state[1], dict):
@@ -2070,13 +2017,13 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
             self.__class__ = ak._util.recordclass(layout, behavior)
         self.layout = layout
         self.behavior = behavior
-        self._caches = ak._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self.layout)
 
     def __copy__(self):
-        return Record(self._layout, behavior=self._behavior)
+        return Record(self.layout, behavior=self._behavior)
 
     def __deepcopy__(self, memo):
-        return Record(self._layout.deep_copy(), behavior=self._behavior)
+        return Record(self.layout.deep_copy(), behavior=self._behavior)
 
     def __bool__(self):
         raise ValueError(
@@ -2085,7 +2032,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         )
 
     def __contains__(self, element):
-        for test in ak._util.completely_flatten(self._layout):
+        for test in ak._util.completely_flatten(self.layout):
             if element in test:
                 return True
         return False
@@ -2266,6 +2213,19 @@ class ArrayBuilder(Iterable, Sized):
                 "behavior must be None or a dict" + ak._util.exception_suffix(__file__)
             )
 
+    @property
+    def type(self):
+        """
+        The high-level type of the accumulated array; same as #ak.type.
+
+        Note that the outermost element of an Array's type is always an
+        #ak.types.ArrayType, which specifies the number of elements in the array.
+
+        The type of a #ak.layout.Content (from #ak.Array.layout) is not
+        wrapped by an #ak.types.ArrayType.
+        """
+        return ak.operations.describe.type(self)
+
     def __len__(self):
         """
         The current length of the accumulated array.
@@ -2332,7 +2292,9 @@ class ArrayBuilder(Iterable, Sized):
 
         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
         typestrs = ak._util.typestrs(self._behavior)
-        typestr = repr(str(snapshot.layout.type(typestrs)))
+        typestr = repr(
+            str(ak.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
+        )
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
@@ -2666,7 +2628,9 @@ class ArrayBuilder(Iterable, Sized):
                 - len(self._name)
             )
             typestrs = ak._util.typestrs(self._arraybuilder._behavior)
-            typestr = repr(str(snapshot.layout.type(typestrs)))
+            typestr = repr(
+                str(ak.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
+            )
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 

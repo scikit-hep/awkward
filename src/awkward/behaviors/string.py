@@ -123,7 +123,7 @@ def _string_equal(one, two):
     nplike = ak.nplike.of(one, two)
     behavior = ak._util.behaviorof(one, two)
 
-    one, two = one.layout, two.layout
+    one, two = ak.without_parameters(one).layout, ak.without_parameters(two).layout
 
     # first condition: string lengths must be the same
     counts1 = nplike.asarray(one.count(axis=-1))
@@ -136,10 +136,10 @@ def _string_equal(one, two):
     possible_counts = counts1[possible]
 
     if len(possible_counts) > 0:
-        onepossible = ak.without_parameters(one[possible])
-        twopossible = ak.without_parameters(two[possible])
+        onepossible = one[possible]
+        twopossible = two[possible]
 
-        reduced = ak.all(onepossible == twopossible, axis=-1).layout
+        reduced = ak.all(ak.Array(onepossible) == ak.Array(twopossible), axis=-1).layout
 
         # update same-length strings with a verdict about their characters
         out[possible] = reduced
@@ -147,8 +147,14 @@ def _string_equal(one, two):
     return ak._util.wrap(ak.layout.NumpyArray(out), behavior)
 
 
+def _string_notequal(one, two):
+    return ~_string_equal(one, two)
+
+
 ak.behavior[ak.nplike.numpy.equal, "bytestring", "bytestring"] = _string_equal
 ak.behavior[ak.nplike.numpy.equal, "string", "string"] = _string_equal
+ak.behavior[ak.nplike.numpy.not_equal, "bytestring", "bytestring"] = _string_notequal
+ak.behavior[ak.nplike.numpy.not_equal, "string", "string"] = _string_notequal
 
 
 def _string_broadcast(layout, offsets):

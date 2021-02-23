@@ -109,6 +109,10 @@ namespace awkward {
 
   int64_t
   RegularForm::purelist_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return 1;
+    }
     return content_.get()->purelist_depth() + 1;
   }
 
@@ -119,6 +123,10 @@ namespace awkward {
 
   const std::pair<int64_t, int64_t>
   RegularForm::minmax_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
     return std::pair<int64_t, int64_t>(content_depth.first + 1,
                                        content_depth.second + 1);
@@ -126,6 +134,10 @@ namespace awkward {
 
   const std::pair<bool, int64_t>
   RegularForm::branch_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<bool, int64_t>(false, 1);
+    }
     std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
     return std::pair<bool, int64_t>(content_depth.first,
                                     content_depth.second + 1);
@@ -492,11 +504,13 @@ namespace awkward {
                               const std::string& pre,
                               const std::string& post) const {
     std::stringstream out;
-    out << indent << pre << "<" << classname() << " size=\"" << size_
-        << "\">\n";
-    if (size_ == 0) {
-      out << indent << pre << "<" << classname() << " length=\"" << length_
+    if (size_ != 0) {
+      out << indent << pre << "<" << classname() << " size=\"" << size_
           << "\">\n";
+    }
+    else {
+      out << indent << pre << "<" << classname() << " size=\"" << size_
+          << "\" length=\"" << length_ << "\">\n";
     }
     if (identities_.get() != nullptr) {
       out << identities_.get()->tostring_part(
@@ -715,11 +729,19 @@ namespace awkward {
 
   int64_t
   RegularArray::purelist_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return 1;
+    }
     return content_.get()->purelist_depth() + 1;
   }
 
   const std::pair<int64_t, int64_t>
   RegularArray::minmax_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
     return std::pair<int64_t, int64_t>(content_depth.first + 1,
                                        content_depth.second + 1);
@@ -727,6 +749,10 @@ namespace awkward {
 
   const std::pair<bool, int64_t>
   RegularArray::branch_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<bool, int64_t>(false, 1);
+    }
     std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
     return std::pair<bool, int64_t>(content_depth.first,
                                     content_depth.second + 1);
@@ -768,7 +794,15 @@ namespace awkward {
               + std::string("): ") + std::string("size < 0")
               + FILENAME(__LINE__));
     }
-    return content_.get()->validityerror(path + std::string(".content"));
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      // The content has already been checked and we don't want to trigger the
+      // unnested-char/byte error.
+      return std::string("");
+    }
+    else {
+      return content_.get()->validityerror(path + std::string(".content"));
+    }
   }
 
   const ContentPtr
@@ -933,10 +967,15 @@ namespace awkward {
 
   const SliceItemPtr
   RegularArray::asslice() const {
-    throw std::invalid_argument(
-      std::string("slice items can have all fixed-size dimensions (to follow NumPy's "
-                  "slice rules) or they can have all var-sized dimensions (for jagged "
-                  "indexing), but not both in the same slice item") + FILENAME(__LINE__));
+    if (size_ == 1) {
+      return std::make_shared<SliceVarNewAxis>(content_.get()->asslice());
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("slice items can have all fixed-size dimensions (to follow NumPy's "
+                    "slice rules) or they can have all var-sized dimensions (for jagged "
+                    "indexing), but not both in the same slice item") + FILENAME(__LINE__));
+    }
   }
 
   const ContentPtr
@@ -1297,9 +1336,9 @@ namespace awkward {
   RegularArray::getitem_next(const SliceAt& at,
                              const Slice& tail,
                              const Index64& advanced) const {
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::runtime_error(
-        std::string("RegularArray::getitem_next(SliceAt): advanced.length() != 0")
+        std::string("RegularArray::getitem_next(SliceAt): !advanced.is_empty_advanced()")
         + FILENAME(__LINE__));
     }
     int64_t len = length();
@@ -1371,7 +1410,7 @@ namespace awkward {
 
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       return std::make_shared<RegularArray>(
         identities_,
         parameters_,
@@ -1417,7 +1456,7 @@ namespace awkward {
       size_);
     util::handle_error(err, classname(), identities_.get());
 
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       Index64 nextcarry(len*flathead.length());
       Index64 nextadvanced(len*flathead.length());
 
@@ -1433,11 +1472,18 @@ namespace awkward {
 
       ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
-      return getitem_next_array_wrap(
-               nextcontent.get()->getitem_next(nexthead,
+      if (advanced.is_empty_advanced()) {
+        return getitem_next_array_wrap(
+                 nextcontent.get()->getitem_next(nexthead,
+                                                 nexttail,
+                                                 nextadvanced),
+                 array.shape());
+      }
+      else {
+        return nextcontent.get()->getitem_next(nexthead,
                                                nexttail,
-                                               nextadvanced),
-               array.shape());
+                                               nextadvanced);
+      }
     }
     else if (size_ == 0) {
       Index64 nextcarry(0);
@@ -1469,7 +1515,7 @@ namespace awkward {
   RegularArray::getitem_next(const SliceJagged64& jagged,
                              const Slice& tail,
                              const Index64& advanced) const {
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::invalid_argument(
         std::string("cannot mix jagged slice with NumPy-style advanced indexing")
         + FILENAME(__LINE__));
@@ -1542,6 +1588,50 @@ namespace awkward {
                                            slicestops,
                                            slicecontent,
                                            tail);
+  }
+
+  const ContentPtr
+  RegularArray::getitem_next_jagged(const Index64& slicestarts,
+                                    const Index64& slicestops,
+                                    const SliceVarNewAxis& slicecontent,
+                                    const Slice& tail) const {
+    ContentPtr self = toListOffsetArray64(true);
+    return self.get()->getitem_next_jagged(slicestarts,
+                                           slicestops,
+                                           slicecontent,
+                                           tail);
+  }
+
+  const ContentPtr
+  RegularArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                             const Slice& tail,
+                             const Index64& advanced) const {
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
+  }
+
+  const SliceJagged64
+  RegularArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    Index64 offsets = compact_offsets64(true);
+    Index64 nextcarry(offsets.getitem_at_nowrap(offsets.length() - 1));
+
+
+    // FIXME: to kernel
+    int64_t* tocarry = nextcarry.data();
+    const int64_t* fromoffsets = offsets.data();
+    int64_t len = offsets.length() - 1;
+    for (int64_t i = 0;  i < len;  i++) {
+      int64_t start = fromoffsets[i];
+      int64_t stop = fromoffsets[i + 1];
+      for (int64_t j = start;  j < stop;  j++) {
+        tocarry[j] = i;
+      }
+    }
+
+
+    SliceItemPtr nextcontent = varnewaxis.content().get()->carry(nextcarry);
+
+    return SliceJagged64(offsets, nextcontent);
   }
 
   const ContentPtr

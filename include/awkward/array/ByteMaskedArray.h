@@ -96,6 +96,9 @@ namespace awkward {
     const FormPtr
       getitem_fields(const std::vector<std::string>& keys) const override;
 
+    const FormPtr
+      simplify_optiontype() const;
+
   private:
     Index::Form mask_;
     const FormPtr content_;
@@ -414,6 +417,20 @@ namespace awkward {
                           const Index64& slicestops,
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
+
+    const ContentPtr
+      getitem_next_jagged(const Index64& slicestarts,
+                          const Index64& slicestops,
+                          const SliceVarNewAxis& slicecontent,
+                          const Slice& tail) const override;
+
+    const ContentPtr
+      getitem_next(const SliceVarNewAxis& varnewaxis,
+                   const Slice& tail,
+                   const Index64& advanced) const override;
+
+    const SliceJagged64
+      varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const override;
 
     const ContentPtr
       copy_to(kernel::lib ptr_lib) const override;

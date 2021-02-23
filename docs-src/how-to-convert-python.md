@@ -442,9 +442,7 @@ ak.Record({"x": 1, "y": [1, 2], "z": 3.3})
 The same is not true for tuples. The [ak.Record](https://awkward-array.readthedocs.io/en/latest/_auto/ak.Record.html) constructor expects named fields.
 
 ```{code-cell} ipython3
-:tags: [raises-exception]
-
-ak.Record((1, [1, 2], 3.3))
+# ak.Record((1, [1, 2], 3.3))   would raise TypeError
 ```
 
 Missing values: Python None

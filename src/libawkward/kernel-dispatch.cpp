@@ -5872,6 +5872,26 @@ namespace awkward {
       }
     }
 
+    ERROR one_mask8(
+      kernel::lib ptr_lib,
+      int8_t *tomask,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_one_mask8(tomask, length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        CREATE_KERNEL(awkward_one_mask8, ptr_lib);
+        return (*awkward_one_mask8_fcn)(
+          tomask,
+          length);
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for one_mask8")
+          + FILENAME(__LINE__));
+      }
+    }
+
     template<>
     ERROR IndexedArray_simplify32_to64<int32_t>(
       kernel::lib ptr_lib,
@@ -12363,6 +12383,29 @@ namespace awkward {
       }
     }
 
+    ERROR SliceVarNewAxis_to_SliceJagged64(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const int64_t* fromoffsets,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_SliceVarNewAxis_to_SliceJagged64(
+          tocarry,
+          fromoffsets,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for SliceVarNewAxis_to_SliceJagged64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for SliceVarNewAxis_to_SliceJagged64")
+          + FILENAME(__LINE__));
+      }
+    }
+
     template<>
     ERROR ListArray_min_range<int32_t>(
       kernel::lib ptr_lib,
@@ -12983,6 +13026,82 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("unrecognized ptr_lib for RegularArray_localindex_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR carry_SliceJagged_offsets(
+      kernel::lib ptr_lib,
+      int64_t* tooffsets,
+      const int64_t* fromoffsets,
+      const int64_t* fromcarry,
+      int64_t carrylen) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_carry_SliceJagged64_offsets(
+          tooffsets,
+          fromoffsets,
+          fromcarry,
+          carrylen);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for carry_SliceJagged_offsets")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for carry_SliceJagged_offsets")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR carry_SliceJagged_nextcarry(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const int64_t* fromoffsets,
+      const int64_t* fromcarry,
+      int64_t carrylen) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_carry_SliceJagged64_nextcarry(
+          tocarry,
+          fromoffsets,
+          fromcarry,
+          carrylen);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for carry_SliceJagged_nextcarry")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for carry_SliceJagged_nextcarry")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    template<>
+    ERROR carry_SliceMissing_outindex(
+      kernel::lib ptr_lib,
+      int64_t* toindex,
+      const int64_t* fromindex,
+      int64_t length) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_carry_SliceMissing64_outindex(
+          toindex,
+          fromindex,
+          length);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for carry_SliceMissing_outindex")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for carry_SliceMissing_outindex")
           + FILENAME(__LINE__));
       }
     }
@@ -20035,6 +20154,41 @@ namespace awkward {
       else {
         throw std::runtime_error(
           std::string("unrecognized ptr_lib for NumpyArray_sort<double>")
+          + FILENAME(__LINE__));
+      }
+    }
+
+    ERROR ListOffsetArray_argsort_strings(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const int64_t* fromparents,
+      int64_t length,
+      const uint8_t* stringdata,
+      const int64_t* stringstarts,
+      const int64_t* stringstops,
+      bool is_stable,
+      bool is_ascending,
+      bool is_local) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_ListOffsetArray_argsort_strings(
+          tocarry,
+          fromparents,
+          length,
+          stringdata,
+          stringstarts,
+          stringstops,
+          is_stable,
+          is_ascending,
+          is_local);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for ListOffsetArray_argsort_strings")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for ListOffsetArray_argsort_strings")
           + FILENAME(__LINE__));
       }
     }

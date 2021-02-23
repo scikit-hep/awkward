@@ -132,6 +132,10 @@ namespace awkward {
 
   int64_t
   ListForm::purelist_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return 1;
+    }
     return content_.get()->purelist_depth() + 1;
   }
 
@@ -142,6 +146,10 @@ namespace awkward {
 
   const std::pair<int64_t, int64_t>
   ListForm::minmax_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
     return std::pair<int64_t, int64_t>(content_depth.first + 1,
                                        content_depth.second + 1);
@@ -149,6 +157,10 @@ namespace awkward {
 
   const std::pair<bool, int64_t>
   ListForm::branch_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<bool, int64_t>(false, 1);
+    }
     std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
     return std::pair<bool, int64_t>(content_depth.first,
                                     content_depth.second + 1);
@@ -827,12 +839,20 @@ namespace awkward {
   template <typename T>
   int64_t
   ListArrayOf<T>::purelist_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return 1;
+    }
     return content_.get()->purelist_depth() + 1;
   }
 
   template <typename T>
   const std::pair<int64_t, int64_t>
   ListArrayOf<T>::minmax_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
     return std::pair<int64_t, int64_t>(content_depth.first + 1,
                                        content_depth.second + 1);
@@ -841,6 +861,10 @@ namespace awkward {
   template <typename T>
   const std::pair<bool, int64_t>
   ListArrayOf<T>::branch_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<bool, int64_t>(false, 1);
+    }
     std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
     return std::pair<bool, int64_t>(content_depth.first,
                                     content_depth.second + 1);
@@ -895,7 +919,15 @@ namespace awkward {
       starts_.length(),
       content_.get()->length());
     if (err.str == nullptr) {
-      return content_.get()->validityerror(path + std::string(".content"));
+      if (parameter_equals("__array__", "\"string\"")  ||
+          parameter_equals("__array__", "\"bytestring\"")) {
+        // The content has already been checked and we don't want to trigger the
+        // unnested-char/byte error.
+        return std::string("");
+      }
+      else {
+        return content_.get()->validityerror(path + std::string(".content"));
+      }
     }
     else {
       return (std::string("at ") + path + std::string(" (") + classname()
@@ -1553,9 +1585,9 @@ namespace awkward {
         identities_.get());
     }
 
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::runtime_error(
-        std::string("ListArray::getitem_next(SliceAt): advanced.length() != 0")
+        std::string("ListArray::getitem_next(SliceAt): !advanced.is_empty_advanced()")
         + FILENAME(__LINE__));
     }
     SliceItemPtr nexthead = tail.head();
@@ -1627,7 +1659,7 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       return std::make_shared<ListOffsetArrayOf<T>>(
         identities_,
         parameters_,
@@ -1677,7 +1709,7 @@ namespace awkward {
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
     Index64 flathead = array.ravel();
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       Index64 nextcarry(lenstarts*flathead.length());
       Index64 nextadvanced(lenstarts*flathead.length());
       struct Error err = kernel::ListArray_getitem_next_array_64<T>(
@@ -1692,11 +1724,18 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
       ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
-      return getitem_next_array_wrap(
-        nextcontent.get()->getitem_next(nexthead,
-                                        nexttail,
-                                        nextadvanced),
-        array.shape());
+      if (advanced.is_empty_advanced()) {
+        return getitem_next_array_wrap(
+          nextcontent.get()->getitem_next(nexthead,
+                                          nexttail,
+                                          nextadvanced),
+          array.shape());
+      }
+      else {
+        return nextcontent.get()->getitem_next(nexthead,
+                                               nexttail,
+                                               nextadvanced);
+      }
     }
     else {
       Index64 nextcarry(lenstarts);
@@ -1723,7 +1762,7 @@ namespace awkward {
   ListArrayOf<T>::getitem_next(const SliceJagged64& jagged,
                                const Slice& tail,
                                const Index64& advanced) const {
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::invalid_argument(
         std::string("cannot mix jagged slice with NumPy-style advanced indexing")
         + FILENAME(__LINE__));
@@ -1774,14 +1813,12 @@ namespace awkward {
                                       const Index64& slicestops,
                                       const SliceArray64& slicecontent,
                                       const Slice& tail) const {
-    if (starts_.length() < slicestarts.length()) {
-      util::handle_error(
-        failure("jagged slice length differs from array length",
-                kSliceNone,
-                kSliceNone,
-                FILENAME_C(__LINE__)),
-        classname(),
-        identities_.get());
+    if (slicestarts.length() != length()) {
+      throw std::invalid_argument(
+        std::string("cannot fit jagged slice with length ")
+        + std::to_string(slicestarts.length()) + std::string(" into ")
+        + classname() + std::string(" of size ") + std::to_string(length())
+        + FILENAME(__LINE__));
     }
     if (stops_.length() < starts_.length()) {
       util::handle_error(
@@ -1822,7 +1859,7 @@ namespace awkward {
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
     ContentPtr outcontent = nextcontent.get()->getitem_next(tail.head(),
                                                             tail.tail(),
-                                                            Index64(0));
+                                                            Index64::empty_advanced());
 
     return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                util::Parameters(),
@@ -1836,6 +1873,13 @@ namespace awkward {
                                       const Index64& slicestops,
                                       const SliceMissing64& slicecontent,
                                       const Slice& tail) const {
+    if (slicestarts.length() != length()) {
+      throw std::invalid_argument(
+        std::string("cannot fit jagged slice with length ")
+        + std::to_string(slicestarts.length()) + std::string(" into ")
+        + classname() + std::string(" of size ") + std::to_string(length())
+        + FILENAME(__LINE__));
+    }
     if (starts_.length() < slicestarts.length()) {
       util::handle_error(
         failure("jagged slice length differs from array length",
@@ -1917,14 +1961,12 @@ namespace awkward {
                                       const Index64& slicestops,
                                       const SliceJagged64& slicecontent,
                                       const Slice& tail) const {
-    if (starts_.length() < slicestarts.length()) {
-      util::handle_error(
-        failure("jagged slice length differs from array length",
-                kSliceNone,
-                kSliceNone,
-                FILENAME_C(__LINE__)),
-        classname(),
-        identities_.get());
+    if (slicestarts.length() != length()) {
+      throw std::invalid_argument(
+        std::string("cannot fit jagged slice with length ")
+        + std::to_string(slicestarts.length()) + std::string(" into ")
+        + classname() + std::string(" of size ") + std::to_string(length())
+        + FILENAME(__LINE__));
     }
 
     Index64 outoffsets(slicestarts.length() + 1);
@@ -1956,6 +1998,48 @@ namespace awkward {
                                                util::Parameters(),
                                                outoffsets,
                                                outcontent);
+  }
+
+  template <typename T>
+  const ContentPtr
+  ListArrayOf<T>::getitem_next_jagged(const Index64& slicestarts,
+                                      const Index64& slicestops,
+                                      const SliceVarNewAxis& slicecontent,
+                                      const Slice& tail) const {
+    throw std::runtime_error(
+      "FIXME ListArrayOf<T>::SliceVarNewAxis. "
+      "2021-02-10 Was this left over from development? If so, it's not getting tested. "
+      "If anyone out there encounters this error, please report it so that "
+      "we can properly validate this code path and include it in the tests. "
+      "https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&labels=bug+%28unverified%29&template=bug-report.md&title="
+    );
+
+    SliceJagged64 jagged = varaxis_to_jagged(slicecontent);
+    return getitem_next_jagged(slicestarts, slicestops, jagged, tail);
+  }
+
+  template <typename T>
+  const ContentPtr
+  ListArrayOf<T>::getitem_next(const SliceVarNewAxis& varnewaxis,
+                               const Slice& tail,
+                               const Index64& advanced) const {
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
+  }
+
+  template <typename T>
+  const SliceJagged64
+  ListArrayOf<T>::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    Index64 offsets = compact_offsets64(true);
+    Index64 nextcarry(offsets.getitem_at_nowrap(offsets.length() - 1));
+    struct Error err = kernel::SliceVarNewAxis_to_SliceJagged64(
+      kernel::lib::cpu,   // DERIVE
+      nextcarry.data(),
+      offsets.data(),
+      offsets.length() - 1);
+    util::handle_error(err, classname(), identities_.get());
+    SliceItemPtr nextcontent = varnewaxis.content().get()->carry(nextcarry);
+    return SliceJagged64(offsets, nextcontent);
   }
 
   template <typename T>

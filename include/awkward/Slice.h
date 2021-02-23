@@ -29,6 +29,11 @@ namespace awkward {
     virtual const SliceItemPtr
       shallow_copy() const = 0;
 
+    /// @brief For SliceVarNewAxis to spread the slice in a way similar to
+    /// Content::carry.
+    virtual const SliceItemPtr
+      carry(const Index64& carry) const;
+
     /// @brief Returns a string representation of this slice item (single-line
     /// custom format).
     virtual const std::string
@@ -295,6 +300,9 @@ namespace awkward {
     const SliceItemPtr
       shallow_copy() const override;
 
+    const SliceItemPtr
+      carry(const Index64& carry) const override;
+
     const std::string
       tostring() const override;
 
@@ -468,6 +476,9 @@ namespace awkward {
     const SliceItemPtr
       shallow_copy() const override;
 
+    const SliceItemPtr
+      carry(const Index64& carry) const override;
+
     const std::string
       tostring() const override;
 
@@ -547,6 +558,9 @@ namespace awkward {
 
     const SliceItemPtr
       shallow_copy() const override;
+
+    const SliceItemPtr
+      carry(const Index64& carry) const override;
 
     const std::string
       tostring() const override;
@@ -716,6 +730,31 @@ namespace awkward {
     bool sealed_;
   };
 
+  class LIBAWKWARD_EXPORT_SYMBOL SliceVarNewAxis: public SliceItem {
+  public:
+    SliceVarNewAxis(const SliceItemPtr& content);
+
+    const SliceItemPtr
+      content() const;
+
+    const SliceItemPtr
+      shallow_copy() const override;
+
+    const SliceItemPtr
+      carry(const Index64& carry) const override;
+
+    const std::string
+      tostring() const override;
+
+    bool
+      preserves_type(const Index64& advanced) const override;
+
+    virtual bool
+      referentially_equal(const SliceItemPtr& other) const override;
+
+  private:
+    const SliceItemPtr content_;
+  };
 }
 
 #endif // AWKWARD_SLICE_H_

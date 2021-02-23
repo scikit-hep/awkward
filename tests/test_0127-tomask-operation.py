@@ -180,7 +180,7 @@ def test_ByteMaskedArray_to_slice():
 
     assert (
         ak._ext._slice_tostring(maskedarray)
-        == "[missing([0, 1, -1, ..., 3, -1, 4], array([5, 2, 3, 9, 1]))]"
+        == "[missing([0, 1, -1, 2, 3, -1, 4], array([5, 2, 3, 9, 1]))]"
     )
 
 

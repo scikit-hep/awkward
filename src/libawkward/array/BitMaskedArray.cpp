@@ -228,26 +228,45 @@ namespace awkward {
 
   const FormPtr
   BitMaskedForm::getitem_field(const std::string& key) const {
-    return std::make_shared<BitMaskedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      mask_,
-      content_.get()->getitem_field(key),
-      valid_when_,
-      lsb_order_);
+    BitMaskedForm step1(has_identities_,
+                        util::Parameters(),
+                        FormKey(nullptr),
+                        mask_,
+                        content_.get()->getitem_field(key),
+                        valid_when_,
+                        lsb_order_);
+    return step1.simplify_optiontype();
   }
 
   const FormPtr
   BitMaskedForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<BitMaskedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      mask_,
-      content_.get()->getitem_fields(keys),
-      valid_when_,
-      lsb_order_);
+    BitMaskedForm step1(has_identities_,
+                        util::Parameters(),
+                        FormKey(nullptr),
+                        mask_,
+                        content_.get()->getitem_fields(keys),
+                        valid_when_,
+                        lsb_order_);
+    return step1.simplify_optiontype();
+  }
+
+  const FormPtr
+  BitMaskedForm::simplify_optiontype() const {
+    if (dynamic_cast<IndexedForm*>(content_.get())         ||
+        dynamic_cast<IndexedOptionForm*>(content_.get())   ||
+        dynamic_cast<ByteMaskedForm*>(content_.get())      ||
+        dynamic_cast<BitMaskedForm*>(content_.get())       ||
+        dynamic_cast<UnmaskedForm*>(content_.get())) {
+      IndexedOptionForm step1(has_identities_,
+                              parameters_,
+                              form_key_,
+                              Index::Form::i64,
+                              content_);
+      return step1.simplify_optiontype();
+    }
+    else {
+      return shallow_copy();
+    }
   }
 
   ////////// BitMaskedArray
@@ -662,52 +681,52 @@ namespace awkward {
 
   const ContentPtr
   BitMaskedArray::getitem_field(const std::string& key) const {
-    return std::make_shared<BitMaskedArray>(
-      identities_,
-      util::Parameters(),
-      mask_,
-      content_.get()->getitem_field(key),
-      valid_when_,
-      length_,
-      lsb_order_);
+    BitMaskedArray step1(identities_,
+                         util::Parameters(),
+                         mask_,
+                         content_.get()->getitem_field(key),
+                         valid_when_,
+                         length_,
+                         lsb_order_);
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   BitMaskedArray::getitem_field(const std::string& key,
                                 const Slice& only_fields) const {
-    return std::make_shared<BitMaskedArray>(
-      identities_,
-      util::Parameters(),
-      mask_,
-      content_.get()->getitem_field(key, only_fields),
-      valid_when_,
-      length_,
-      lsb_order_);
+    BitMaskedArray step1(identities_,
+                         util::Parameters(),
+                         mask_,
+                         content_.get()->getitem_field(key, only_fields),
+                         valid_when_,
+                         length_,
+                         lsb_order_);
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   BitMaskedArray::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<BitMaskedArray>(
-      identities_,
-      util::Parameters(),
-      mask_,
-      content_.get()->getitem_fields(keys),
-      valid_when_,
-      length_,
-      lsb_order_);
+    BitMaskedArray step1(identities_,
+                         util::Parameters(),
+                         mask_,
+                         content_.get()->getitem_fields(keys),
+                         valid_when_,
+                         length_,
+                         lsb_order_);
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   BitMaskedArray::getitem_fields(const std::vector<std::string>& keys,
                                  const Slice& only_fields) const {
-    return std::make_shared<BitMaskedArray>(
-      identities_,
-      util::Parameters(),
-      mask_,
-      content_.get()->getitem_fields(keys, only_fields),
-      valid_when_,
-      length_,
-      lsb_order_);
+    BitMaskedArray step1(identities_,
+                         util::Parameters(),
+                         mask_,
+                         content_.get()->getitem_fields(keys, only_fields),
+                         valid_when_,
+                         length_,
+                         lsb_order_);
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
@@ -785,6 +804,17 @@ namespace awkward {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string("len(content) < length")
               + FILENAME(__LINE__));
+    }
+    else if (dynamic_cast<BitMaskedArray*>(content_.get())  ||
+             dynamic_cast<ByteMaskedArray*>(content_.get())  ||
+             dynamic_cast<IndexedArray32*>(content_.get())  ||
+             dynamic_cast<IndexedArrayU32*>(content_.get())  ||
+             dynamic_cast<IndexedArray64*>(content_.get())  ||
+             dynamic_cast<IndexedOptionArray32*>(content_.get())  ||
+             dynamic_cast<IndexedOptionArray64*>(content_.get())  ||
+             dynamic_cast<UnmaskedArray*>(content_.get())) {
+      return classname() + " contains " + content_.get()->classname() +
+             ", the operation that made it might have forgotten to call 'simplify_optiontype()'";
     }
     else {
       return content_.get()->validityerror(path + std::string(".content"));
@@ -1061,6 +1091,30 @@ namespace awkward {
                                                           slicestops,
                                                           slicecontent,
                                                           tail);
+  }
+
+  const ContentPtr
+  BitMaskedArray::getitem_next_jagged(const Index64& slicestarts,
+                                      const Index64& slicestops,
+                                      const SliceVarNewAxis& slicecontent,
+                                      const Slice& tail) const {
+    return toByteMaskedArray().get()->getitem_next_jagged(slicestarts,
+                                                          slicestops,
+                                                          slicecontent,
+                                                          tail);
+  }
+
+  const ContentPtr
+  BitMaskedArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                               const Slice& tail,
+                               const Index64& advanced) const {
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
+  }
+
+  const SliceJagged64
+  BitMaskedArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    return content_.get()->varaxis_to_jagged(varnewaxis);
   }
 
   const ContentPtr

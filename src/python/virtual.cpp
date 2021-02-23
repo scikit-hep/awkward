@@ -50,15 +50,17 @@ PyArrayGenerator::caches(std::vector<ak::ArrayCachePtr>& out) const {
   for (auto arg : args_) {
     try {
       std::shared_ptr<PyArrayCache> ptr = arg.cast<std::shared_ptr<PyArrayCache>>();
-      bool found = false;
-      for (auto oldcache : out) {
-        if (oldcache.get() == ptr.get()) {
-          found = true;
-          break;
+      if (ptr != nullptr) {
+        bool found = false;
+        for (auto oldcache : out) {
+          if (oldcache.get() == ptr.get()) {
+            found = true;
+            break;
+          }
         }
-      }
-      if (!found) {
-        out.push_back(ptr);
+        if (!found) {
+          out.push_back(ptr);
+        }
       }
     }
     catch (py::cast_error err) { }

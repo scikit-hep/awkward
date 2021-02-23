@@ -1271,6 +1271,10 @@ namespace awkward {
              dynamic_cast<SliceMissing64*>(head.get())) {
       return Content::getitem_next(*missing, tail, advanced);
     }
+    else if (SliceVarNewAxis* varnewaxis =
+             dynamic_cast<SliceVarNewAxis*>(head.get())) {
+      return UnionArrayOf<T, I>::getitem_next(*varnewaxis, tail, advanced);
+    }
     else {
       throw std::runtime_error(
         std::string("unrecognized slice type") + FILENAME(__LINE__));
@@ -1449,6 +1453,14 @@ namespace awkward {
     const std::string paramcheck = validityerror_parameters(path);
     if (paramcheck != std::string("")) {
       return paramcheck;
+    }
+    for (int64_t i = 0;  i < numcontents();  i++) {
+      if (dynamic_cast<UnionArray8_32*>(content(i).get())  ||
+          dynamic_cast<UnionArray8_U32*>(content(i).get())  ||
+          dynamic_cast<UnionArray8_64*>(content(i).get())) {
+        return classname() + " contains " + content(i).get()->classname() +
+               ", the operation that made it might have forgotten to call 'simplify_uniontype()'";
+      }
     }
     if (index_.length() < tags_.length()) {
       return (std::string("at ") + path + std::string(" (") + classname()
@@ -2210,6 +2222,35 @@ namespace awkward {
                                                       tail);
   }
 
+  template <typename T, typename I>
+  const ContentPtr
+  UnionArrayOf<T, I>::getitem_next_jagged(const Index64& slicestarts,
+                                          const Index64& slicestops,
+                                          const SliceVarNewAxis& slicecontent,
+                                          const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceVarNewAxis>(slicestarts,
+                                                        slicestops,
+                                                        slicecontent,
+                                                        tail);
+  }
+
+  template <typename T, typename I>
+  const ContentPtr
+  UnionArrayOf<T, I>::getitem_next(const SliceVarNewAxis& varnewaxis,
+                                   const Slice& tail,
+                                   const Index64& advanced) const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: UnionArrayOf<T, I>::getitem_next")
+      + FILENAME(__LINE__));
+  }
+
+  template <typename T, typename I>
+  const SliceJagged64
+  UnionArrayOf<T, I>::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    throw std::runtime_error(
+      std::string("FIXME: operation not yet implemented: UnionArrayOf<T, I>::varaxis_to_jagged")
+      + FILENAME(__LINE__));
+  }
 
   template <typename T, typename I>
   const ContentPtr

@@ -181,20 +181,34 @@ namespace awkward {
 
   const FormPtr
   UnmaskedForm::getitem_field(const std::string& key) const {
-    return std::make_shared<UnmaskedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      content_.get()->getitem_field(key));
+    UnmaskedForm step1(has_identities_,
+                       util::Parameters(),
+                       FormKey(nullptr),
+                       content_.get()->getitem_field(key));
+    return step1.simplify_optiontype();
   }
 
   const FormPtr
   UnmaskedForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<UnmaskedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      content_.get()->getitem_fields(keys));
+    UnmaskedForm step1(has_identities_,
+                       util::Parameters(),
+                       FormKey(nullptr),
+                       content_.get()->getitem_fields(keys));
+    return step1.simplify_optiontype();
+  }
+
+  const FormPtr
+  UnmaskedForm::simplify_optiontype() const {
+    if (dynamic_cast<IndexedForm*>(content_.get())         ||
+        dynamic_cast<IndexedOptionForm*>(content_.get())   ||
+        dynamic_cast<ByteMaskedForm*>(content_.get())      ||
+        dynamic_cast<BitMaskedForm*>(content_.get())       ||
+        dynamic_cast<UnmaskedForm*>(content_.get())) {
+      return content_;
+    }
+    else {
+      return shallow_copy();
+    }
   }
 
   ////////// UnmaskedArray
@@ -250,6 +264,22 @@ namespace awkward {
     else {
       return shallow_copy();
     }
+  }
+
+  const std::shared_ptr<ByteMaskedArray>
+  UnmaskedArray::toByteMaskedArray() const {
+    Index8 bytemask(length());
+    struct Error err = kernel::one_mask8(
+      kernel::lib::cpu,   // DERIVE
+      bytemask.data(),
+      length());
+    util::handle_error(err, classname(), identities_.get());
+    return std::make_shared<ByteMaskedArray>(
+      identities_,
+      parameters_,
+      bytemask,
+      content_,
+      true);
   }
 
   const ContentPtr
@@ -527,36 +557,36 @@ namespace awkward {
 
   const ContentPtr
   UnmaskedArray::getitem_field(const std::string& key) const {
-    return std::make_shared<UnmaskedArray>(
-      identities_,
-      util::Parameters(),
-      content_.get()->getitem_field(key));
+    UnmaskedArray step1(identities_,
+                        util::Parameters(),
+                        content_.get()->getitem_field(key));
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   UnmaskedArray::getitem_field(const std::string& key,
                                const Slice& only_fields) const {
-    return std::make_shared<UnmaskedArray>(
-      identities_,
-      util::Parameters(),
-      content_.get()->getitem_field(key, only_fields));
+    UnmaskedArray step1(identities_,
+                        util::Parameters(),
+                        content_.get()->getitem_field(key, only_fields));
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   UnmaskedArray::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<UnmaskedArray>(
-      identities_,
-      util::Parameters(),
-      content_.get()->getitem_fields(keys));
+    UnmaskedArray step1(identities_,
+                        util::Parameters(),
+                        content_.get()->getitem_fields(keys));
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   UnmaskedArray::getitem_fields(const std::vector<std::string>& keys,
                                 const Slice& only_fields) const {
-    return std::make_shared<UnmaskedArray>(
-      identities_,
-      util::Parameters(),
-      content_.get()->getitem_fields(keys, only_fields));
+    UnmaskedArray step1(identities_,
+                        util::Parameters(),
+                        content_.get()->getitem_fields(keys, only_fields));
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
@@ -594,6 +624,10 @@ namespace awkward {
     else if (SliceMissing64* missing =
              dynamic_cast<SliceMissing64*>(head.get())) {
       return Content::getitem_next(*missing, tail, advanced);
+    }
+    else if (SliceVarNewAxis* varnewaxis =
+             dynamic_cast<SliceVarNewAxis*>(head.get())) {
+      return UnmaskedArray::getitem_next(*varnewaxis, tail, advanced);
     }
     else {
       throw std::runtime_error(
@@ -666,7 +700,20 @@ namespace awkward {
     if (paramcheck != std::string("")) {
       return paramcheck;
     }
-    return content_.get()->validityerror(path + std::string(".content"));
+    if (dynamic_cast<BitMaskedArray*>(content_.get())  ||
+        dynamic_cast<ByteMaskedArray*>(content_.get())  ||
+        dynamic_cast<IndexedArray32*>(content_.get())  ||
+        dynamic_cast<IndexedArrayU32*>(content_.get())  ||
+        dynamic_cast<IndexedArray64*>(content_.get())  ||
+        dynamic_cast<IndexedOptionArray32*>(content_.get())  ||
+        dynamic_cast<IndexedOptionArray64*>(content_.get())  ||
+        dynamic_cast<UnmaskedArray*>(content_.get())) {
+      return classname() + " contains " + content_.get()->classname() +
+             ", the operation that made it might have forgotten to call 'simplify_optiontype()'";
+    }
+    else {
+      return content_.get()->validityerror(path + std::string(".content"));
+    }
   }
 
   const ContentPtr
@@ -934,14 +981,13 @@ namespace awkward {
                                                              stable,
                                                              keepdims);
     if (RegularArray* raw = dynamic_cast<RegularArray*>(out.get())) {
-      std::shared_ptr<Content> wrapped = std::make_shared<UnmaskedArray>(
-          Identities::none(),
-          parameters_,
-          raw->content());
+      UnmaskedArray tmp(Identities::none(),
+                        parameters_,
+                        raw->content());
       return std::make_shared<RegularArray>(
           raw->identities(),
           raw->parameters(),
-          wrapped,
+          tmp.simplify_optiontype(),
           raw->size(),
           length());
     }
@@ -969,14 +1015,13 @@ namespace awkward {
                                                                 stable,
                                                                 keepdims);
     if (RegularArray* raw = dynamic_cast<RegularArray*>(out.get())) {
-      std::shared_ptr<Content> wrapped = std::make_shared<UnmaskedArray>(
-          Identities::none(),
-          parameters_,
-          raw->content());
+      UnmaskedArray tmp(Identities::none(),
+                        parameters_,
+                        raw->content());
       return std::make_shared<RegularArray>(
           raw->identities(),
           raw->parameters(),
-          wrapped,
+          tmp.simplify_optiontype(),
           raw->size(),
           length());
     }
@@ -1052,6 +1097,30 @@ namespace awkward {
                                                       slicestops,
                                                       slicecontent,
                                                       tail);
+  }
+
+  const ContentPtr
+  UnmaskedArray::getitem_next_jagged(const Index64& slicestarts,
+                                     const Index64& slicestops,
+                                     const SliceVarNewAxis& slicecontent,
+                                     const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceVarNewAxis>(slicestarts,
+                                                        slicestops,
+                                                        slicecontent,
+                                                        tail);
+  }
+
+  const ContentPtr
+  UnmaskedArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                              const Slice& tail,
+                              const Index64& advanced) const {
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
+  }
+
+  const SliceJagged64
+  UnmaskedArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    return content_.get()->varaxis_to_jagged(varnewaxis);
   }
 
   const ContentPtr

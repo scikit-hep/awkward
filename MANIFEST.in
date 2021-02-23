@@ -1,11 +1,19 @@
-include requirements*.txt VERSION_INFO CMakeLists.txt LICENSE README*.md CONTRIBUTING.md
+include requirements*.txt VERSION_INFO CMakeLists.txt LICENSE README*.md CONTRIBUTING.md runtime.txt
 recursive-include include *.h
-recursive-include src *.cpp
-recursive-include src/awkward *.py
+recursive-include src *.cpp *.py *.cu
 recursive-include tests *.cpp *.py samples/*
-include *.dll
+recursive-include tests-cpu-kernels *.py
+recursive-include tests-cuda-kernels *.py
+recursive-include tests-cuda *.py
+recursive-include tests-spec *.py
+
+recursive-include dlpack *.c *.cc *.h *.in
+include dlpack/LICENSE dlpack/CMakeLists.txt
+
+recursive-include rapidjson/include *
+recursive-include rapidjson *.cmake *.in CMakeLists.txt
+include rapidjson/license.txt
 
 recursive-include pybind11/include/pybind11 *
 recursive-include pybind11/tools *
-recursive-include rapidjson/include *
 include pybind11/CMakeLists.txt pybind11/LICENSE pybind11/README.md pybind11/CONTRIBUTING.md

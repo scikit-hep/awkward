@@ -29,14 +29,14 @@
       title: "ArrayBuilder (easy & general)"
     - file: how-to-create-layout
       title: "Layout (faster)"
+    - file: how-to-create-unflatten-group
+      title: "Unflattening and grouping"
     - file: how-to-create-records
       title: "Arrays of records"
     - file: how-to-create-strings
       title: "Arrays of strings"
     - file: how-to-create-categorical
       title: "Arrays of categories"
-    - file: how-to-create-cross-references
-      title: "Cross-references"
     - file: how-to-create-lazy
       title: "Lazy arrays"
     - file: how-to-create-partitioned

@@ -637,10 +637,6 @@ namespace awkward {
       if (record != std::string("null")) {
         params["__record__"] = record;
       }
-      std::string array = sliceform.get()->purelist_parameter("__array__");
-      if (array != std::string("null")) {
-        params["__array__"] = array;
-      }
       std::string doc = sliceform.get()->purelist_parameter("__doc__");
       if (doc != std::string("null")) {
         params["__doc__"] = doc;
@@ -655,7 +651,7 @@ namespace awkward {
                                               params,
                                               generator,
                                               cache);
-    out.get()->set_cache_depths_from(this);
+    out.get()->set_cache_depths_from(sliceform);
     return out;
   }
 
@@ -689,7 +685,7 @@ namespace awkward {
                                               util::Parameters(),
                                               generator,
                                               cache);
-    out.get()->set_cache_depths_from(this);
+    out.get()->set_cache_depths_from(sliceform);
     return out;
   }
 
@@ -1168,6 +1164,29 @@ namespace awkward {
   }
 
   const ContentPtr
+  VirtualArray::getitem_next_jagged(const Index64& slicestarts,
+                                    const Index64& slicestops,
+                                    const SliceVarNewAxis& slicecontent,
+                                    const Slice& tail) const {
+    return array().get()->getitem_next_jagged(slicestarts,
+                                              slicestops,
+                                              slicecontent,
+                                              tail);
+  }
+
+  const ContentPtr
+  VirtualArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                             const Slice& tail,
+                             const Index64& advanced) const {
+    return array().get()->getitem_next(varnewaxis, tail, advanced);
+  }
+
+  const SliceJagged64
+  VirtualArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    return array().get()->varaxis_to_jagged(varnewaxis);
+  }
+
+  const ContentPtr
   VirtualArray::copy_to(kernel::lib ptr_lib) const {
     IdentitiesPtr identities(nullptr);
     if (identities_.get() != nullptr) {
@@ -1217,10 +1236,6 @@ namespace awkward {
     if (record != std::string("null")) {
       params["__record__"] = record;
     }
-    std::string array = purelist_parameter("__array__");
-    if (array != std::string("null")) {
-      params["__array__"] = array;
-    }
     std::string doc = purelist_parameter("__doc__");
     if (doc != std::string("null")) {
       params["__doc__"] = doc;
@@ -1232,8 +1247,21 @@ namespace awkward {
   VirtualArray::set_cache_depths_from(const VirtualArray* original) {
     FormPtr form = original->generator().get()->form();
     if (form.get() != nullptr) {
+      set_cache_depths_from(form);
+    }
+    else if (!original->cache_depths_.empty()) {
       cache_depths_.clear();
+      cache_depths_.insert(cache_depths_.end(),
+                           original->cache_depths_.begin(),
+                           original->cache_depths_.end());
+    }
+  }
 
+  void
+  VirtualArray::set_cache_depths_from(const FormPtr& form) {
+    cache_depths_.clear();
+
+    if (form.get() != nullptr) {
       cache_depths_.push_back(form.get()->purelist_depth());
 
       const std::pair<int64_t, int64_t> minmax = form.get()->minmax_depth();
@@ -1244,13 +1272,6 @@ namespace awkward {
       cache_depths_.push_back(branch.first);
       cache_depths_.push_back(branch.second);
     }
-
-    else if (!original->cache_depths_.empty()) {
-      cache_depths_.clear();
-      cache_depths_.insert(cache_depths_.end(),
-                           original->cache_depths_.begin(),
-                           original->cache_depths_.end());
-    }
   }
 
   void
@@ -1259,6 +1280,7 @@ namespace awkward {
       cache_depths_[0] += delta;
       cache_depths_[1] += delta;
       cache_depths_[2] += delta;
+      // Slot 3 represents a boolean, not to be added.
       // cache_depths_[3];
       cache_depths_[4] += delta;
     }

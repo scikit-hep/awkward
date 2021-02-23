@@ -954,6 +954,11 @@ namespace awkward {
       int8_t* tomask,
       int64_t length);
 
+    ERROR one_mask8(
+      kernel::lib ptr_lib,
+      int8_t* tomask,
+      int64_t length);
+
     template <typename T>
     ERROR IndexedArray_simplify32_to64(
       kernel::lib ptr_lib,
@@ -1251,6 +1256,12 @@ namespace awkward {
       int64_t size,
       int64_t length);
 
+    ERROR SliceVarNewAxis_to_SliceJagged64(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const int64_t* fromoffsets,
+      int64_t length);
+
     template <typename T>
     ERROR ListArray_min_range(
       kernel::lib ptr_lib,
@@ -1320,6 +1331,29 @@ namespace awkward {
       kernel::lib ptr_lib,
       int64_t* toindex,
       int64_t size,
+      int64_t length);
+
+    template <typename T>
+    ERROR carry_SliceJagged_offsets(
+      kernel::lib ptr_lib,
+      T* tooffsets,
+      const T* fromoffsets,
+      const int64_t* fromcarry,
+      int64_t carrylen);
+
+    template <typename T>
+    ERROR carry_SliceJagged_nextcarry(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const T* fromoffsets,
+      const int64_t* fromcarry,
+      int64_t carrylen);
+
+    template <typename T>
+    ERROR carry_SliceMissing_outindex(
+      kernel::lib ptr_lib,
+      int64_t* toindex,
+      const T* fromindex,
       int64_t length);
 
     template <typename T>
@@ -1744,6 +1778,18 @@ namespace awkward {
       int64_t parentslength,
       bool ascending,
       bool stable);
+
+    ERROR ListOffsetArray_argsort_strings(
+      kernel::lib ptr_lib,
+      int64_t* tocarry,
+      const int64_t* fromparents,
+      int64_t length,
+      const uint8_t* stringdata,
+      const int64_t* stringstarts,
+      const int64_t* stringstops,
+      bool is_stable,
+      bool is_ascending,
+      bool is_local);
 
     template <typename T>
     ERROR NumpyArray_sort_asstrings(

@@ -31,6 +31,8 @@ def test_EmptyArray():
     array = ak.layout.EmptyArray()
     assert ak.to_list(array.sort(0, True, False)) == []
     assert ak.to_list(array.argsort(0, True, False)) == []
+    assert str(ak.type(array.sort(0, True, False))) == "float64"
+    assert str(ak.type(array.argsort(0, True, False))) == "int64"
 
 
 def test_NumpyArray():
@@ -429,7 +431,9 @@ def test_ByteMaskedArray():
 
 def test_UnionArray():
     content0 = ak.from_iter([[1.1, 2.2, 3.3], [], [4.4, 5.5]], highlevel=False)
-    content1 = ak.from_iter(["one", "two", "three", "four", "five"], highlevel=False)
+    content1 = ak.from_iter(
+        [["one"], ["two"], ["three"], ["four"], ["five"]], highlevel=False
+    )
     tags = ak.layout.Index8(np.array([1, 1, 0, 0, 1, 0, 1, 1], dtype=np.int8))
     index = ak.layout.Index32(np.array([0, 1, 0, 1, 2, 2, 4, 3], dtype=np.int32))
     array = ak.layout.UnionArray8_32(tags, index, [content0, content1])
@@ -451,21 +455,6 @@ def test_sort_strings():
         "two",
     ]
     assert ak.to_list(content1.sort(0, False, False)) == [
-        "two",
-        "three",
-        "one",
-        "four",
-        "five",
-    ]
-
-    assert ak.to_list(content1.sort(1, True, False)) == [
-        "five",
-        "four",
-        "one",
-        "three",
-        "two",
-    ]
-    assert ak.to_list(content1.sort(1, False, False)) == [
         "two",
         "three",
         "one",
@@ -500,7 +489,9 @@ def test_sort_bytestrings():
 
 
 def test_sort_zero_length_arrays():
-    array = ak.layout.IndexedArray64(ak.layout.Index64([]), ak.layout.NumpyArray([1, 2, 3]))
+    array = ak.layout.IndexedArray64(
+        ak.layout.Index64([]), ak.layout.NumpyArray([1, 2, 3])
+    )
     assert ak.to_list(array) == []
     assert ak.to_list(ak.sort(array)) == []
     assert ak.to_list(ak.argsort(array)) == []
@@ -533,7 +524,9 @@ def test_sort_zero_length_arrays():
     assert ak.to_list(ak.sort(array)) == []
     assert ak.to_list(ak.argsort(array)) == []
 
-    content = ak.layout.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]))
+    content = ak.layout.NumpyArray(
+        np.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    )
     starts1 = ak.layout.Index64([])
     stops1 = ak.layout.Index64([])
     offsets1 = ak.layout.Index64(np.array([0]))

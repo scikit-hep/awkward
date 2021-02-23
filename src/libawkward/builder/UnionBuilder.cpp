@@ -239,10 +239,10 @@ namespace awkward {
             dynamic_cast<Int64Builder*>(tofill.get())->buffer());
           contents_[(size_t)i] = tofill;
         }
-      }
-      else {
-        tofill = Complex128Builder::fromempty(options_);
-        contents_.push_back(tofill);
+        else {
+          tofill = Complex128Builder::fromempty(options_);
+          contents_.push_back(tofill);
+        }
       }
       int64_t length = tofill.get()->length();
       tofill.get()->complex(x);

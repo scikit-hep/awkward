@@ -3,16 +3,16 @@ jupytext:
   text_representation:
     extension: .md
     format_name: myst
-    format_version: '0.10'
-    jupytext_version: 1.5.2
+    format_version: 0.12
+    jupytext_version: 1.6.0
 kernelspec:
   display_name: Python 3
   language: python
   name: python3
 ---
 
-How to create cross-references
-==============================
+How to create arrays by "unflattening" or "grouping"
+====================================================
 
 **This is a stub:** I intend to write this article, but haven't yet.
 

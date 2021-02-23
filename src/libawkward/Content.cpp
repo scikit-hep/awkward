@@ -1375,7 +1375,7 @@ namespace awkward {
                                                      1);
     SliceItemPtr nexthead = where.head();
     Slice nexttail = where.tail();
-    Index64 nextadvanced(0);
+    Index64 nextadvanced = Index64::empty_advanced();
     ContentPtr out = next.get()->getitem_next(nexthead,
                                               nexttail,
                                               nextadvanced);
@@ -1431,6 +1431,10 @@ namespace awkward {
              dynamic_cast<SliceJagged64*>(head.get())) {
       return getitem_next(*jagged, tail, advanced);
     }
+    else if (SliceVarNewAxis* varnewaxis =
+             dynamic_cast<SliceVarNewAxis*>(head.get())) {
+      return getitem_next(*varnewaxis, tail, advanced);
+    }
     else {
       throw std::runtime_error(
         std::string("unrecognized slice type") + FILENAME(__LINE__));
@@ -1453,6 +1457,10 @@ namespace awkward {
     else if (SliceJagged64* jagged =
              dynamic_cast<SliceJagged64*>(slicecontent.get())) {
       return getitem_next_jagged(slicestarts, slicestops, *jagged, tail);
+    }
+    else if (SliceVarNewAxis* varnewaxis =
+             dynamic_cast<SliceVarNewAxis*>(slicecontent.get())) {
+      return getitem_next_jagged(slicestarts, slicestops, *varnewaxis, tail);
     }
     else {
       throw std::runtime_error(
@@ -1614,7 +1622,7 @@ namespace awkward {
   Content::getitem_next(const SliceMissing64& missing,
                         const Slice& tail,
                         const Index64& advanced) const {
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::invalid_argument(
         std::string("cannot mix missing values in slice with NumPy-style "
                     "advanced indexing") + FILENAME(__LINE__));
@@ -1737,6 +1745,26 @@ namespace awkward {
                 + std::string("): __array__ = \"string\" must directly contain "
                               "a node with __array__ = \"char\""));
       }
+      if (const NumpyArray* raw = dynamic_cast<const NumpyArray*>(content.get())) {
+        if (raw->dtype() != util::dtype::uint8) {
+          return (std::string("at ") + path + std::string(" (") + raw->classname()
+                  + std::string("): __array__ = \"char\" requires dtype == uint8"));
+        }
+        if (raw->shape().size() != 1) {
+          return (std::string("at ") + path + std::string(" (") + raw->classname()
+                  + std::string("): __array__ = \"char\" must be one-dimensional"));
+        }
+        /// I don't think this is strictly required.
+        // if (raw->stride() != raw->itemsize()) {
+        //   return (std::string("at ") + path + std::string(" (") + classname()
+        //           + std::string("): __array__ = \"char\" must be contiguous"));
+        // }
+      }
+      else {
+        return (std::string("at ") + path + std::string(" (") + raw->classname()
+                + std::string("): __array__ = \"char\" only allowed for NumpyArray"));
+      }
+      return std::string("");
     }
 
     if (parameter_equals("__array__", "\"bytestring\"")) {
@@ -1772,68 +1800,66 @@ namespace awkward {
                 + std::string("): __array__ = \"bytestring\" must directly contain "
                               "a node with __array__ = \"byte\""));
       }
-    }
-
-    if (parameter_equals("__array__", "\"char\"")) {
-      if (const NumpyArray* raw = dynamic_cast<const NumpyArray*>(this)) {
+      if (const NumpyArray* raw = dynamic_cast<const NumpyArray*>(content.get())) {
         if (raw->dtype() != util::dtype::uint8) {
-          return (std::string("at ") + path + std::string(" (") + classname()
-                  + std::string("): __array__ = \"char\" requires dtype == uint8"));
-        }
-        if (raw->shape().size() != 1) {
-          return (std::string("at ") + path + std::string(" (") + classname()
-                  + std::string("): __array__ = \"char\" must be one-dimensional"));
-        }
-        /// I don't think this is strictly required.
-        // if (raw->stride() != raw->itemsize()) {
-        //   return (std::string("at ") + path + std::string(" (") + classname()
-        //           + std::string("): __array__ = \"char\" must be contiguous"));
-        // }
-      }
-      else {
-        return (std::string("at ") + path + std::string(" (") + classname()
-                + std::string("): __array__ = \"char\" only allowed for NumpyArray"));
-      }
-    }
-
-    if (parameter_equals("__array__", "\"byte\"")) {
-      if (const NumpyArray* raw = dynamic_cast<const NumpyArray*>(this)) {
-        if (raw->dtype() != util::dtype::uint8) {
-          return (std::string("at ") + path + std::string(" (") + classname()
+          return (std::string("at ") + path + std::string(" (") + raw->classname()
                   + std::string("): __array__ = \"byte\" requires dtype == uint8"));
         }
         if (raw->shape().size() != 1) {
-          return (std::string("at ") + path + std::string(" (") + classname()
+          return (std::string("at ") + path + std::string(" (") + raw->classname()
                   + std::string("): __array__ = \"byte\" must be one-dimensional"));
         }
         /// I don't think this is strictly required.
         // if (raw->stride() != raw->itemsize()) {
-        //   return (std::string("at ") + path + std::string(" (") + classname()
+        //   return (std::string("at ") + path + std::string(" (") + raw->classname()
         //           + std::string("): __array__ = \"byte\" must be contiguous"));
         // }
       }
       else {
-        return (std::string("at ") + path + std::string(" (") + classname()
+        return (std::string("at ") + path + std::string(" (") + raw->classname()
                 + std::string("): __array__ = \"byte\" only allowed for NumpyArray"));
       }
+      return std::string("");
+    }
+
+    if (parameter_equals("__array__", "\"char\"")) {
+      return (std::string("at ") + path + std::string(" (") + classname()
+              + std::string("): __array__ = \"char\" must be directly inside "
+                            "__array__ = \"string\""));
+    }
+
+    if (parameter_equals("__array__", "\"byte\"")) {
+      return (std::string("at ") + path + std::string(" (") + classname()
+              + std::string("): __array__ = \"byte\" must be directly inside "
+                            "__array__ = \"bytestring\""));
     }
 
     if (parameter_equals("__array__", "\"categorical\"")) {
-      if (dynamic_cast<const IndexedArray32*>(this)  ||
-          dynamic_cast<const IndexedArrayU32*>(this)  ||
-          dynamic_cast<const IndexedArray64*>(this)  ||
-          dynamic_cast<const IndexedOptionArray32*>(this)  ||
-          dynamic_cast<const IndexedOptionArray64*>(this)) {
-        if (!is_unique()) {
-          return (std::string("at ") + path + std::string(" (") + classname()
-                  + std::string("): __array__ = \"categorical\" requires contents "
-                                "to be unique"));
-        }
+      ContentPtr content(nullptr);
+      if (const IndexedArray32* raw = dynamic_cast<const IndexedArray32*>(this)) {
+        content = raw->content();
+      }
+      else if (const IndexedArrayU32* raw = dynamic_cast<const IndexedArrayU32*>(this)) {
+        content = raw->content();
+      }
+      else if (const IndexedArray64* raw = dynamic_cast<const IndexedArray64*>(this)) {
+        content = raw->content();
+      }
+      else if (const IndexedOptionArray32* raw = dynamic_cast<const IndexedOptionArray32*>(this)) {
+        content = raw->content();
+      }
+      else if (const IndexedOptionArray64* raw = dynamic_cast<const IndexedOptionArray64*>(this)) {
+        content = raw->content();
       }
       else {
         return (std::string("at ") + path + std::string(" (") + classname()
                 + std::string("): __array__ = \"categorical\" only allowed for "
                               "IndexedArray and IndexedOptionArray"));
+      }
+      if (!content.get()->is_unique()) {
+        return (std::string("at ") + path + std::string(" (") + classname()
+            + std::string("): __array__ = \"categorical\" requires contents "
+                            "to be unique"));
       }
     }
 

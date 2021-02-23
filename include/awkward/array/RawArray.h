@@ -746,7 +746,7 @@ namespace awkward {
       getitem(const Slice& where) const override {
       SliceItemPtr nexthead = where.head();
       Slice nexttail = where.tail();
-      Index64 nextadvanced(0);
+      Index64 nextadvanced = Index64::empty_advanced();
       return getitem_next(nexthead, nexttail, nextadvanced);
     }
 
@@ -1289,6 +1289,32 @@ namespace awkward {
                           const Slice& tail) const override {
       throw std::runtime_error(
         std::string("undefined operation: RawArray::getitem_next_jagged(jagged)")
+        + FILENAME(__LINE__));
+    }
+
+    const ContentPtr
+      getitem_next_jagged(const Index64& slicestarts,
+                          const Index64& slicestops,
+                          const SliceVarNewAxis& slicecontent,
+                          const Slice& tail) const override {
+      throw std::runtime_error(
+        std::string("undefined operation: RawArray::getitem_next_jagged(varnewaxis)")
+        + FILENAME(__LINE__));
+    }
+
+    const ContentPtr
+      getitem_next(const SliceVarNewAxis& varnewaxis,
+                   const Slice& tail,
+                   const Index64& advanced) const override {
+      throw std::runtime_error(
+        std::string("undefined operation: RawArray::getitem_next(varnewaxis)")
+        + FILENAME(__LINE__));
+    }
+
+    const SliceJagged64
+      varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const override {
+      throw std::runtime_error(
+        std::string("undefined operation: RawArray::varaxis_to_jagged(varnewaxis)")
         + FILENAME(__LINE__));
     }
 

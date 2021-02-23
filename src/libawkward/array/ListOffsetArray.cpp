@@ -122,6 +122,10 @@ namespace awkward {
 
   int64_t
   ListOffsetForm::purelist_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return 1;
+    }
     return content_.get()->purelist_depth() + 1;
   }
 
@@ -132,6 +136,10 @@ namespace awkward {
 
   const std::pair<int64_t, int64_t>
   ListOffsetForm::minmax_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
     return std::pair<int64_t, int64_t>(content_depth.first + 1,
                                        content_depth.second + 1);
@@ -139,6 +147,10 @@ namespace awkward {
 
   const std::pair<bool, int64_t>
   ListOffsetForm::branch_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<bool, int64_t>(false, 1);
+    }
     std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
     return std::pair<bool, int64_t>(content_depth.first,
                                     content_depth.second + 1);
@@ -825,12 +837,20 @@ namespace awkward {
   template <typename T>
   int64_t
   ListOffsetArrayOf<T>::purelist_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return 1;
+    }
     return content_.get()->purelist_depth() + 1;
   }
 
   template <typename T>
   const std::pair<int64_t, int64_t>
   ListOffsetArrayOf<T>::minmax_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<int64_t, int64_t>(1, 1);
+    }
     std::pair<int64_t, int64_t> content_depth = content_.get()->minmax_depth();
     return std::pair<int64_t, int64_t>(content_depth.first + 1,
                                        content_depth.second + 1);
@@ -839,6 +859,10 @@ namespace awkward {
   template <typename T>
   const std::pair<bool, int64_t>
   ListOffsetArrayOf<T>::branch_depth() const {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      return std::pair<bool, int64_t>(false, 1);
+    }
     std::pair<bool, int64_t> content_depth = content_.get()->branch_depth();
     return std::pair<bool, int64_t>(content_depth.first,
                                     content_depth.second + 1);
@@ -895,7 +919,15 @@ namespace awkward {
       starts.length(),
       content_.get()->length());
     if (err.str == nullptr) {
-      return content_.get()->validityerror(path + std::string(".content"));
+      if (parameter_equals("__array__", "\"string\"")  ||
+          parameter_equals("__array__", "\"bytestring\"")) {
+        // The content has already been checked and we don't want to trigger the
+        // unnested-char/byte error.
+        return std::string("");
+      }
+      else {
+        return content_.get()->validityerror(path + std::string(".content"));
+      }
     }
     else {
       return (std::string("at ") + path + std::string(" (") + classname()
@@ -971,6 +1003,15 @@ namespace awkward {
                                                         util::Parameters(),
                                                         offsets_,
                                                         pair.second));
+      }
+      else if (offsets_.length() == 1) {
+        Index64 tooffsets = inneroffsets.getitem_range_nowrap(0, 1);
+        return std::pair<Index64, ContentPtr>(
+                 Index64(0),
+                 std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                     util::Parameters(),
+                                                     tooffsets,
+                                                     pair.second));
       }
       else {
         Index64 tooffsets(offsets_.length());
@@ -1667,24 +1708,57 @@ namespace awkward {
       return shallow_copy();
     }
 
-    // if this is array of strings, axis parameter is ignored
-    // and this array is sorted
-    if (util::parameter_isstring(parameters_, "__array__")) {
-      if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
-        ContentPtr out = content->sort_asstrings(offsets_,
-                                                 ascending,
-                                                 stable);
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      if (branchdepth.first  ||  negaxis != branchdepth.second) {
+        throw std::invalid_argument(
+          std::string("array with strings can only be sorted with axis=-1")
+          + FILENAME(__LINE__));
+      }
+
+      std::string validity_error = validityerror("");
+      if (!validity_error.empty()) {
+        throw std::invalid_argument(validity_error + FILENAME(__LINE__));
+      }
+      NumpyArray* rawcontent = dynamic_cast<NumpyArray*>(content_.get());
+
+      Index64 tocarry(parents.length());
+      struct Error err = kernel::ListOffsetArray_argsort_strings(
+        kernel::lib::cpu,   // DERIVE
+        tocarry.data(),
+        parents.data(),
+        parents.length(),
+        reinterpret_cast<uint8_t*>(rawcontent->data()),
+        util::make_starts(offsets_).data(),
+        util::make_stops(offsets_).data(),
+        stable,
+        ascending,
+        false);
+      util::handle_error(err, classname(), identities_.get());
+
+      ContentPtr out = carry(tocarry, false);
+
+      if (keepdims) {
         return std::make_shared<RegularArray>(Identities::none(),
                                               util::Parameters(),
                                               out,
-                                              out.get()->length(),
-                                              length());
+                                              out.get()->length());
+      }
+      else {
+        return out;
       }
     }
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
-
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+      if (purelist_parameter("__array__") == "\"string\""  ||
+          purelist_parameter("__array__") == "\"bytestring\"") {
+        throw std::invalid_argument(
+          std::string("array with strings can only be sorted with axis=-1")
+          + FILENAME(__LINE__));
+      }
+
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error(
           std::string("offsets_.length() - 1 != parents.length()" + FILENAME(__LINE__)));
@@ -1838,15 +1912,57 @@ namespace awkward {
      return shallow_copy();
     }
 
-    // if this is array of strings, axis parameter is ignored
-    // and this array is sorted
-    if (util::parameter_isstring(parameters_, "__array__")) {
-      throw std::runtime_error(
-        std::string("not implemented yet: argsort for strings") + FILENAME(__LINE__));
+    std::pair<bool, int64_t> branchdepth = branch_depth();
+
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
+      if (branchdepth.first  ||  negaxis != branchdepth.second) {
+        throw std::invalid_argument(
+          std::string("array with strings can only be sorted with axis=-1")
+          + FILENAME(__LINE__));
+      }
+
+      std::string validity_error = validityerror("");
+      if (!validity_error.empty()) {
+        throw std::invalid_argument(validity_error + FILENAME(__LINE__));
+      }
+      NumpyArray* rawcontent = dynamic_cast<NumpyArray*>(content_.get());
+
+      Index64 output(parents.length());
+      struct Error err = kernel::ListOffsetArray_argsort_strings(
+        kernel::lib::cpu,   // DERIVE
+        output.data(),
+        parents.data(),
+        parents.length(),
+        reinterpret_cast<uint8_t*>(rawcontent->data()),
+        util::make_starts(offsets_).data(),
+        util::make_stops(offsets_).data(),
+        stable,
+        ascending,
+        true);
+      util::handle_error(err, classname(), identities_.get());
+
+      ContentPtr out = std::make_shared<NumpyArray>(output);
+
+      if (keepdims) {
+        return std::make_shared<RegularArray>(Identities::none(),
+                                              util::Parameters(),
+                                              out,
+                                              out.get()->length());
+      }
+      else {
+        return out;
+      }
     }
 
-    std::pair<bool, int64_t> branchdepth = branch_depth();
     if (!branchdepth.first  &&  negaxis == branchdepth.second) {
+      if (purelist_parameter("__array__") == "\"string\""  ||
+          purelist_parameter("__array__") == "\"bytestring\"") {
+        throw std::invalid_argument(
+          std::string("array with strings can only be sorted with axis=-1")
+          + FILENAME(__LINE__));
+      }
+
       if (offsets_.length() - 1 != parents.length()) {
         throw std::runtime_error(
           std::string("offsets_.length() - 1 != parents.length()") + FILENAME(__LINE__));
@@ -1975,9 +2091,9 @@ namespace awkward {
   ListOffsetArrayOf<T>::getitem_next(const SliceAt& at,
                                      const Slice& tail,
                                      const Index64& advanced) const {
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::runtime_error(
-        std::string("ListOffsetArray::getitem_next(SliceAt): advanced.length() != 0")
+        std::string("ListOffsetArray::getitem_next(SliceAt): !advanced.is_empty_advanced()")
         + FILENAME(__LINE__));
     }
     int64_t lenstarts = offsets_.length() - 1;
@@ -2042,7 +2158,7 @@ namespace awkward {
     util::handle_error(err2, classname(), identities_.get());
     ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
 
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       return std::make_shared<ListOffsetArrayOf<T>>(
         identities_,
         parameters_,
@@ -2084,7 +2200,7 @@ namespace awkward {
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
     Index64 flathead = array.ravel();
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       Index64 nextcarry(lenstarts*flathead.length());
       Index64 nextadvanced(lenstarts*flathead.length());
       struct Error err = kernel::ListArray_getitem_next_array_64<T>(
@@ -2099,11 +2215,18 @@ namespace awkward {
         content_.get()->length());
       util::handle_error(err, classname(), identities_.get());
       ContentPtr nextcontent = content_.get()->carry(nextcarry, true);
-      return getitem_next_array_wrap(
-               nextcontent.get()->getitem_next(nexthead,
+      if (advanced.is_empty_advanced()) {
+        return getitem_next_array_wrap(
+                 nextcontent.get()->getitem_next(nexthead,
+                                                 nexttail,
+                                                 nextadvanced),
+                 array.shape());
+      }
+      else {
+        return nextcontent.get()->getitem_next(nexthead,
                                                nexttail,
-                                               nextadvanced),
-               array.shape());
+                                               nextadvanced);
+      }
     }
     else {
       Index64 nextcarry(lenstarts);
@@ -2191,6 +2314,57 @@ namespace awkward {
 
   template <typename T>
   const ContentPtr
+  ListOffsetArrayOf<T>::getitem_next_jagged(const Index64& slicestarts,
+                                            const Index64& slicestops,
+                                            const SliceVarNewAxis& slicecontent,
+                                            const Slice& tail) const {
+    ListArrayOf<T> listarray(identities_,
+                             parameters_,
+                             util::make_starts(offsets_),
+                             util::make_stops(offsets_),
+                             content_);
+    return listarray.getitem_next_jagged(slicestarts,
+                                         slicestops,
+                                         slicecontent,
+                                         tail);
+  }
+
+  template <typename T>
+  const ContentPtr
+  ListOffsetArrayOf<T>::getitem_next(const SliceVarNewAxis& varnewaxis,
+                                     const Slice& tail,
+                                     const Index64& advanced) const {
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
+  }
+
+  template <typename T>
+  const SliceJagged64
+  ListOffsetArrayOf<T>::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    Index64 offsets = compact_offsets64(true);
+    Index64 nextcarry(offsets.getitem_at_nowrap(offsets.length() - 1));
+
+
+    // FIXME: to kernel
+    int64_t* tocarry = nextcarry.data();
+    const int64_t* fromoffsets = offsets.data();
+    int64_t len = offsets.length() - 1;
+    for (int64_t i = 0;  i < len;  i++) {
+      int64_t start = fromoffsets[i];
+      int64_t stop = fromoffsets[i + 1];
+      for (int64_t j = start;  j < stop;  j++) {
+        tocarry[j] = i;
+      }
+    }
+
+
+    SliceItemPtr nextcontent = varnewaxis.content().get()->carry(nextcarry);
+
+    return SliceJagged64(offsets, nextcontent);
+  }
+
+  template <typename T>
+  const ContentPtr
   ListOffsetArrayOf<T>::copy_to(kernel::lib ptr_lib) const {
     IndexOf<T> offsets = offsets_.copy_to(ptr_lib);
     ContentPtr content = content_.get()->copy_to(ptr_lib);
@@ -2238,7 +2412,8 @@ namespace awkward {
 
   template <>
   bool ListOffsetArrayOf<int64_t>::is_unique() const {
-    if (util::parameter_isstring(parameters_, "__array__")) {
+    if (parameter_equals("__array__", "\"string\"")  ||
+        parameter_equals("__array__", "\"bytestring\"")) {
       if (NumpyArray* content = dynamic_cast<NumpyArray*>(content_.get())) {
         ContentPtr out = content->as_unique_strings(offsets_);
         return (out.get()->length() == length());

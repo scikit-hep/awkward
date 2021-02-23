@@ -1223,7 +1223,8 @@ namespace awkward {
       return false;
     }
     else if (dynamic_cast<SliceMissing64*>(head.get())  ||
-             dynamic_cast<SliceJagged64*>(head.get())) {
+             dynamic_cast<SliceJagged64*>(head.get())  ||
+             dynamic_cast<SliceVarNewAxis*>(head.get())) {
       return true;
     }
     else {
@@ -1308,7 +1309,7 @@ namespace awkward {
       Slice nexttail = where.tail();
       Index64 nextcarry(1);
       nextcarry.setitem_at_nowrap(0, 0);
-      Index64 nextadvanced(0);
+      Index64 nextadvanced = Index64::empty_advanced();
       NumpyArray out = next.getitem_next(nexthead,
                                          nexttail,
                                          nextcarry,
@@ -2672,7 +2673,8 @@ namespace awkward {
         default:
           throw std::runtime_error(
             std::string("dtype not in {boolean, int8, int16, int32, int64, "
-                        "uint8, uint16, uint32, uint64, float16, float32, float64}")
+                        "uint8, uint16, uint32, uint64, float16, float32, float64, "
+                        "complex64}")
             + FILENAME(__LINE__));
         }
         break;
@@ -2776,7 +2778,8 @@ namespace awkward {
         default:
           throw std::runtime_error(
             std::string("dtype not in {boolean, int8, int16, int32, int64, "
-                        "uint8, uint16, uint32, uint64, float16, float32, float64}")
+                        "uint8, uint16, uint32, uint64, float16, float32, float64, "
+                        "complex64, complex128}")
             + FILENAME(__LINE__));
         }
         break;
@@ -3600,46 +3603,6 @@ namespace awkward {
   }
 
   const ContentPtr
-  NumpyArray::sort_asstrings(const Index64& offsets,
-                             bool ascending,
-                             bool stable) const {
-    std::shared_ptr<Content> out;
-    std::shared_ptr<void> ptr;
-    int64_t offsets_length = offsets.length();
-
-    Index64 outoffsets(offsets_length);
-
-    if (dtype_ == util::dtype::uint8) {
-      ptr = string_sort<uint8_t>(reinterpret_cast<uint8_t*>(data()),
-                                 length(),
-                                 offsets,
-                                 outoffsets,
-                                 ascending,
-                                 stable);
-    } else {
-      throw std::invalid_argument(
-        std::string("cannot sort NumpyArray as strings with format \"")
-        + format_ + std::string("\"") + FILENAME(__LINE__));
-    }
-
-    out = std::make_shared<NumpyArray>(identities_,
-                                       parameters_,
-                                       ptr,
-                                       shape_,
-                                       strides_,
-                                       0,
-                                       itemsize_,
-                                       format_,
-                                       dtype_,
-                                       ptr_lib_);
-
-    return std::make_shared<ListOffsetArray64>(Identities::none(),
-                                               util::Parameters(),
-                                               outoffsets,
-                                               out);
-  }
-
-  const ContentPtr
   NumpyArray::as_unique_strings(const Index64& offsets) const {
     std::shared_ptr<Content> out;
     std::shared_ptr<void> ptr;
@@ -3735,7 +3698,7 @@ namespace awkward {
                     "ndim != 1") + FILENAME(__LINE__));
     }
 
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::invalid_argument(
         std::string("cannot mix jagged slice with NumPy-style advanced indexing")
         + FILENAME(__LINE__));
@@ -3797,6 +3760,24 @@ namespace awkward {
       throw std::runtime_error(
         std::string("undefined operation: NumpyArray::getitem_next_jagged("
                     "jagged) for ndim == ") + std::to_string(ndim())
+        + FILENAME(__LINE__));
+    }
+  }
+
+  const ContentPtr
+  NumpyArray::getitem_next_jagged(const Index64& slicestarts,
+                                  const Index64& slicestops,
+                                  const SliceVarNewAxis& slicecontent,
+                                  const Slice& tail) const {
+    if (ndim() == 1) {
+      throw std::invalid_argument(
+        std::string("too many jagged slice dimensions for array")
+        + FILENAME(__LINE__));
+    }
+    else {
+      throw std::runtime_error(
+        std::string("undefined operation: NumpyArray::getitem_next_jagged("
+                    "varnewaxis) for ndim == ") + std::to_string(ndim())
         + FILENAME(__LINE__));
     }
   }
@@ -4253,6 +4234,13 @@ namespace awkward {
       throw std::runtime_error(
         std::string("FIXME: NumpyArray::getitem_next(jagged)") + FILENAME(__LINE__));
     }
+    else if (SliceVarNewAxis* varnewaxis =
+             dynamic_cast<SliceVarNewAxis*>(head.get())) {
+      throw std::runtime_error(
+        std::string("undefined operation: NumpyArray::getitem_next(varnewaxis) "
+                    "(defer to Content::getitem_next(varnewaxis))")
+        + FILENAME(__LINE__));
+    }
     else {
       throw std::runtime_error(
         std::string("unrecognized slice item type") + FILENAME(__LINE__));
@@ -4383,7 +4371,7 @@ namespace awkward {
     SliceItemPtr nexthead = tail.head();
     Slice nexttail = tail.tail();
 
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()  ||  advanced.length() == 0) {
       Index64 nextcarry(carry.length()*lenhead);
       struct Error err = kernel::NumpyArray_getitem_next_range_64(
         kernel::lib::cpu,   // DERIVE
@@ -4584,7 +4572,7 @@ namespace awkward {
       shape_[1]);
     util::handle_error(err1, classname(), identities_.get());
 
-    if (advanced.length() == 0) {
+    if (advanced.is_empty_advanced()) {
       Index64 nextcarry(carry.length()*flathead.length());
       Index64 nextadvanced(carry.length()*flathead.length());
       struct Error err2 = kernel::NumpyArray_getitem_next_array_64(
@@ -4871,6 +4859,38 @@ namespace awkward {
         numpy.tojson_string(builder, true);
       }
       builder.endlist();
+    }
+  }
+
+  const ContentPtr
+  NumpyArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                           const Slice& tail,
+                           const Index64& advanced) const {
+    if (ndim() == 1) {
+      throw std::invalid_argument(
+        std::string("too many slice dimensions for array")
+        + FILENAME(__LINE__));
+    }
+    else {
+      throw std::runtime_error(
+        std::string("undefined operation: NumpyArray::getitem_next("
+                    "varnewaxis) for ndim == ") + std::to_string(ndim())
+        + FILENAME(__LINE__));
+    }
+  }
+
+  const SliceJagged64
+  NumpyArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    if (ndim() == 1) {
+      throw std::invalid_argument(
+        std::string("too many slice dimensions for array")
+        + FILENAME(__LINE__));
+    }
+    else {
+      throw std::runtime_error(
+        std::string("undefined operation: NumpyArray::varaxis_to_jagged("
+                    "varnewaxis) for ndim == ") + std::to_string(ndim())
+        + FILENAME(__LINE__));
     }
   }
 
@@ -5405,35 +5425,6 @@ namespace awkward {
       &outlength
     );
     util::handle_error(err5, classname(), nullptr);
-
-    return ptr;
-  }
-
-  template<typename T>
-  const std::shared_ptr<void>
-  NumpyArray::string_sort(const T* data,
-                          int64_t length,
-                          const Index64& offsets,
-                          Index64& outoffsets,
-                          bool ascending,
-                          bool stable) const {
-    std::shared_ptr<T> ptr = kernel::malloc<T>(kernel::lib::cpu,   // DERIVE
-                                               length*((int64_t)sizeof(T)));
-
-    if (length == 0) {
-      return ptr;
-    }
-
-    struct Error err1 = kernel::NumpyArray_sort_asstrings(
-      kernel::lib::cpu,   // DERIVE
-      ptr.get(),
-      data,
-      offsets.data(),
-      offsets.length(),
-      outoffsets.data(),
-      ascending,
-      stable);
-    util::handle_error(err1, classname(), nullptr);
 
     return ptr;
   }

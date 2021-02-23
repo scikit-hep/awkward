@@ -81,8 +81,10 @@ def test_silly_stuff():
         a[b]
 
     a = ak.Array([[0, 1, 2], [3, 4], [5, 6], [7]])
-    b = ak.Array([[0, 2], None])
-    assert ak.to_list(a[b]) == [[0, 2], None]
+    ### This should not be allowed. I don't know why it was here.
+    # b = ak.Array([[0, 2], None])
+    b = ak.Array([[0, 2], None, [1], None])
+    assert ak.to_list(a[b]) == [[0, 2], None, [6], None]
     b = ak.Array([[0, 2], None, None, None, None, None])
     with pytest.raises(ValueError):
         a[b]

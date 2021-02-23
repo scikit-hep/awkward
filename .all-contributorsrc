@@ -218,6 +218,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "drahnreb",
+      "name": ".hard",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25883607?v=4",
+      "profile": "https://github.com/drahnreb",
+      "contributions": [
+        "code",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,

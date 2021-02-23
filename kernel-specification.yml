@@ -4702,6 +4702,25 @@ kernels:
     automatic-tests: true
     manual-tests: []
 
+  - name: awkward_ListOffsetArray_argsort_strings
+    specializations:
+      - name: awkward_ListOffsetArray_argsort_strings
+        args:
+          - {name: tocarry, type: "List[int64_t]", dir: out}
+          - {name: fromparents, type: "Const[List[int64_t]]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+          - {name: stringdata, type: "Const[List[uint8_t]]", dir: in}
+          - {name: stringstarts, type: "Const[List[int64_t]]", dir: in}
+          - {name: stringstops, type: "Const[List[int64_t]]", dir: in}
+          - {name: is_stable, type: "bool", dir: in}
+          - {name: is_ascending, type: "bool", dir: in}
+          - {name: is_local, type: "bool", dir: in}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_NumpyArray_sort_asstrings_uint8
     specializations:
       - name: awkward_NumpyArray_sort_asstrings_uint8
@@ -5106,6 +5125,24 @@ kernels:
               for j in range(shorter, target):
                   toindex[(i * target) + j] = -1
     automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_SliceVarNewAxis_to_SliceJagged64
+    specializations:
+      - name: awkward_SliceVarNewAxis_to_SliceJagged64
+        args:
+          - {name: tocarry, type: "List[int64_t]", dir: out}
+          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+    description: null
+    definition: |
+      def awkward_SliceVarNewAxis_to_SliceJagged64(tocarry, fromoffsets, length):
+        for i in range(length):
+          start = fromoffsets[i]
+          stop = fromoffsets[i + 1]
+          for j in range(start, stop):
+            tocarry[j] = i
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_UnionArray_fillindex
@@ -5926,6 +5963,69 @@ kernels:
           for i in range(length):
               toptr[i] = i
     automatic-tests: true
+    manual-tests: []
+
+  - name: awkward_carry_SliceJagged64_offsets
+    specializations:
+      - name: awkward_carry_SliceJagged64_offsets
+        args:
+          - {name: tooffsets, type: "List[int64_t]", dir: out}
+          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in}
+          - {name: fromcarry, type: "Const[List[int64_t]]", dir: in}
+          - {name: carrylen, type: "int64_t", dir: in}
+    description: null
+    definition: |
+      def awkward_carry_SliceJagged64_offsets(tooffsets, fromoffsets, fromcarry, carrylen):
+        tooffsets[0] = 0
+        for i in range(carrylen):
+          c = fromcarry[i]
+          count = fromoffsets[c + 1] - fromoffsets[c]
+          tooffsets[i + 1] = tooffsets[i] + count
+    automatic-tests: false
+    manual-tests: []
+
+  - name: awkward_carry_SliceJagged64_nextcarry
+    specializations:
+      - name: awkward_carry_SliceJagged64_nextcarry
+        args:
+          - {name: tocarry, type: "List[int64_t]", dir: out}
+          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in}
+          - {name: fromcarry, type: "Const[List[int64_t]]", dir: in}
+          - {name: carrylen, type: "int64_t", dir: in}
+    description: null
+    definition: |
+      def awkward_carry_SliceJagged64_nextcarry(tocarry, fromoffsets, fromcarry, carrylen):
+        k = 0
+        for i in range(carrylen):
+          c = fromcarry[i]
+          start = fromoffsets[c]
+          stop = fromoffsets[c + 1]
+          for j in range(start, stop):
+            tocarry[k] = j
+            k += 1
+    automatic-tests: false
+    manual-tests: []
+
+  - name: awkward_carry_SliceMissing64_outindex
+    specializations:
+      - name: awkward_carry_SliceMissing64_outindex
+        args:
+          - {name: toindex, type: "List[int64_t]", dir: out}
+          - {name: fromindex, type: "Const[List[int64_t]]", dir: in}
+          - {name: length, type: "int64_t", dir: in}
+    description: null
+    definition: |
+      def awkward_carry_SliceMissing64_outindex(toindex, fromindex, length):
+        k = 0
+        j = 0
+        for i in range(length):
+          index = fromindex[i]
+          if index < 0:
+            toindex[i] = -1
+          else:
+            toindex[i] = j
+            j += 1
+    automatic-tests: false
     manual-tests: []
 
   - name: awkward_combinations

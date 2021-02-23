@@ -2817,6 +2817,18 @@ extern "C" {
     int64_t outlength);
 
   EXPORT_SYMBOL ERROR
+  awkward_ListOffsetArray_argsort_strings(
+    int64_t* tocarry,
+    const int64_t* fromparents,
+    int64_t length,
+    const uint8_t* stringdata,
+    const int64_t* stringstarts,
+    const int64_t* stringstops,
+    bool is_stable,
+    bool is_ascending,
+    bool is_local);
+
+  EXPORT_SYMBOL ERROR
   awkward_NumpyArray_sort_asstrings_uint8(
     uint8_t* toptr,
     const uint8_t* fromptr,
@@ -3021,6 +3033,12 @@ extern "C" {
     int64_t* toindex,
     int64_t target,
     int64_t size,
+    int64_t length);
+
+  EXPORT_SYMBOL ERROR
+  awkward_SliceVarNewAxis_to_SliceJagged64(
+    int64_t* tocarry,
+    const int64_t* fromoffsets,
     int64_t length);
 
   EXPORT_SYMBOL ERROR
@@ -3622,6 +3640,26 @@ extern "C" {
   EXPORT_SYMBOL ERROR
   awkward_carry_arangeU32(
     uint32_t* toptr,
+    int64_t length);
+
+  EXPORT_SYMBOL ERROR
+  awkward_carry_SliceJagged64_offsets(
+    int64_t* tooffsets,
+    const int64_t* fromoffsets,
+    const int64_t* fromcarry,
+    int64_t carrylen);
+
+  EXPORT_SYMBOL ERROR
+  awkward_carry_SliceJagged64_nextcarry(
+    int64_t* tocarry,
+    const int64_t* fromoffsets,
+    const int64_t* fromcarry,
+    int64_t carrylen);
+
+  EXPORT_SYMBOL ERROR
+  awkward_carry_SliceMissing64_outindex(
+    int64_t* toindex,
+    const int64_t* fromindex,
     int64_t length);
 
   EXPORT_SYMBOL ERROR
@@ -5010,6 +5048,11 @@ extern "C" {
 
   EXPORT_SYMBOL ERROR
   awkward_zero_mask8(
+    int8_t* tomask,
+    int64_t length);
+
+  EXPORT_SYMBOL ERROR
+  awkward_one_mask8(
     int8_t* tomask,
     int64_t length);
 

@@ -224,22 +224,69 @@ namespace awkward {
 
   const FormPtr
   IndexedForm::getitem_field(const std::string& key) const {
-    return std::make_shared<IndexedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      index_,
-      content_.get()->getitem_field(key));
+    IndexedForm step1(has_identities_,
+                      util::Parameters(),
+                      FormKey(nullptr),
+                      index_,
+                      content_.get()->getitem_field(key));
+    return step1.simplify_optiontype();
   }
 
   const FormPtr
   IndexedForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<IndexedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      index_,
-      content_.get()->getitem_fields(keys));
+    IndexedForm step1(has_identities_,
+                      util::Parameters(),
+                      FormKey(nullptr),
+                      index_,
+                      content_.get()->getitem_fields(keys));
+    return step1.simplify_optiontype();
+  }
+
+  const FormPtr
+  IndexedForm::simplify_optiontype() const {
+    if (IndexedForm* rawcontent = dynamic_cast<IndexedForm*>(content_.get())) {
+      return std::make_shared<IndexedForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (IndexedOptionForm* rawcontent = dynamic_cast<IndexedOptionForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (ByteMaskedForm* rawcontent = dynamic_cast<ByteMaskedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (BitMaskedForm* rawcontent = dynamic_cast<BitMaskedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (UnmaskedForm* rawcontent = dynamic_cast<UnmaskedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else {
+      return shallow_copy();
+    }
   }
 
   ////////// IndexedOptionForm
@@ -423,22 +470,69 @@ namespace awkward {
 
   const FormPtr
   IndexedOptionForm::getitem_field(const std::string& key) const {
-    return std::make_shared<IndexedOptionForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      index_,
-      content_.get()->getitem_field(key));
+    IndexedOptionForm step1(has_identities_,
+                            util::Parameters(),
+                            FormKey(nullptr),
+                            index_,
+                            content_.get()->getitem_field(key));
+    return step1.simplify_optiontype();
   }
 
   const FormPtr
   IndexedOptionForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<IndexedOptionForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      index_,
-      content_.get()->getitem_fields(keys));
+    IndexedOptionForm step1(has_identities_,
+                            util::Parameters(),
+                            FormKey(nullptr),
+                            index_,
+                            content_.get()->getitem_fields(keys));
+    return step1.simplify_optiontype();
+  }
+
+  const FormPtr
+  IndexedOptionForm::simplify_optiontype() const {
+    if (IndexedForm* rawcontent = dynamic_cast<IndexedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (IndexedOptionForm* rawcontent = dynamic_cast<IndexedOptionForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (ByteMaskedForm* rawcontent = dynamic_cast<ByteMaskedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (BitMaskedForm* rawcontent = dynamic_cast<BitMaskedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else if (UnmaskedForm* rawcontent = dynamic_cast<UnmaskedForm*>(content_.get())) {
+      return std::make_shared<IndexedOptionForm>(
+        has_identities_,
+        parameters_,
+        form_key_,
+        Index::Form::i64,
+        rawcontent->content());
+    }
+    else {
+      return shallow_copy();
+    }
   }
 
   ////////// IndexedArray
@@ -1236,33 +1330,33 @@ namespace awkward {
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::getitem_field(const std::string& key) const {
-    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(
-      identities_,
-      util::Parameters(),
-      index_,
-      content_.get()->getitem_field(key));
+    IndexedArrayOf<T, ISOPTION> step1(identities_,
+                                      util::Parameters(),
+                                      index_,
+                                      content_.get()->getitem_field(key));
+    return step1.simplify_optiontype();
   }
 
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::getitem_field(const std::string& key,
                                              const Slice& only_fields) const {
-    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(
-      identities_,
-      util::Parameters(),
-      index_,
-      content_.get()->getitem_field(key, only_fields));
+    IndexedArrayOf<T, ISOPTION> step1(identities_,
+                                      util::Parameters(),
+                                      index_,
+                                      content_.get()->getitem_field(key, only_fields));
+    return step1.simplify_optiontype();
   }
 
   template <typename T, bool ISOPTION>
   const ContentPtr
   IndexedArrayOf<T, ISOPTION>::getitem_fields(
     const std::vector<std::string>& keys) const {
-    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(
-      identities_,
-      util::Parameters(),
-      index_,
-      content_.get()->getitem_fields(keys));
+    IndexedArrayOf<T, ISOPTION> step1(identities_,
+                                      util::Parameters(),
+                                      index_,
+                                      content_.get()->getitem_fields(keys));
+    return step1.simplify_optiontype();
   }
 
   template <typename T, bool ISOPTION>
@@ -1270,11 +1364,11 @@ namespace awkward {
   IndexedArrayOf<T, ISOPTION>::getitem_fields(
     const std::vector<std::string>& keys,
     const Slice& only_fields) const {
-    return std::make_shared<IndexedArrayOf<T, ISOPTION>>(
-      identities_,
-      util::Parameters(),
-      index_,
-      content_.get()->getitem_fields(keys, only_fields));
+    IndexedArrayOf<T, ISOPTION> step1(identities_,
+                                      util::Parameters(),
+                                      index_,
+                                      content_.get()->getitem_fields(keys, only_fields));
+    return step1.simplify_optiontype();
   }
 
   template <typename T, bool ISOPTION>
@@ -1337,6 +1431,10 @@ namespace awkward {
     else if (SliceMissing64* missing =
              dynamic_cast<SliceMissing64*>(head.get())) {
       return Content::getitem_next(*missing, tail, advanced);
+    }
+    else if (SliceVarNewAxis* varnewaxis =
+             dynamic_cast<SliceVarNewAxis*>(head.get())) {
+      return IndexedArrayOf<T, ISOPTION>::getitem_next(*varnewaxis, tail, advanced);
     }
     else {
       throw std::runtime_error(
@@ -1435,14 +1533,25 @@ namespace awkward {
       index_.length(),
       content_.get()->length(),
       ISOPTION);
-    if (err.str == nullptr) {
-      return content_.get()->validityerror(path + std::string(".content"));
-    }
-    else {
+    if (err.str != nullptr) {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string(err.str)
               + std::string(" at i=") + std::to_string(err.identity)
               + std::string(err.filename == nullptr ? "" : err.filename));
+    }
+    else if (dynamic_cast<BitMaskedArray*>(content_.get())  ||
+             dynamic_cast<ByteMaskedArray*>(content_.get())  ||
+             dynamic_cast<IndexedArray32*>(content_.get())  ||
+             dynamic_cast<IndexedArrayU32*>(content_.get())  ||
+             dynamic_cast<IndexedArray64*>(content_.get())  ||
+             dynamic_cast<IndexedOptionArray32*>(content_.get())  ||
+             dynamic_cast<IndexedOptionArray64*>(content_.get())  ||
+             dynamic_cast<UnmaskedArray*>(content_.get())) {
+      return classname() + " contains " + content_.get()->classname() +
+             ", the operation that made it might have forgotten to call 'simplify_optiontype()'";
+    }
+    else {
+      return content_.get()->validityerror(path + std::string(".content"));
     }
   }
 
@@ -2319,11 +2428,11 @@ namespace awkward {
         next_length);
     util::handle_error(err3, classname(), identities_.get());
 
-    out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
-            Identities::none(),
-            parameters_,
-            nextoutindex,
-            out);
+    IndexedArrayOf<int64_t, ISOPTION> tmp(Identities::none(),
+                                          parameters_,
+                                          nextoutindex,
+                                          out);
+    out = tmp.simplify_optiontype();
 
     if (inject_nones) {
       out = std::make_shared<RegularArray>(Identities::none(),
@@ -2358,15 +2467,15 @@ namespace awkward {
           outindex.length());
         util::handle_error(err4, classname(), identities_.get());
 
+        IndexedArrayOf<int64_t, ISOPTION> tmp(Identities::none(),
+                                              parameters_,
+                                              outindex,
+                                              raw->content());
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
-            Identities::none(),
-            parameters_,
-            outindex,
-            raw->content()));
+          tmp.simplify_optiontype());
       }
       if (IndexedArrayOf<int64_t, ISOPTION>* raw =
         dynamic_cast<IndexedArrayOf<int64_t, ISOPTION>*>(out.get())) {
@@ -2451,11 +2560,11 @@ namespace awkward {
       next_length);
     util::handle_error(err3, classname(), identities_.get());
 
-    out = std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
-        Identities::none(),
-        util::Parameters(),
-        nextoutindex,
-        out);
+    IndexedArrayOf<int64_t, ISOPTION> tmp(Identities::none(),
+                                          util::Parameters(),
+                                          nextoutindex,
+                                          out);
+    out = tmp.simplify_optiontype();
 
     if (inject_nones) {
       out = std::make_shared<RegularArray>(Identities::none(),
@@ -2490,15 +2599,15 @@ namespace awkward {
           outindex.length());
         util::handle_error(err4, classname(), identities_.get());
 
+        IndexedArrayOf<int64_t, ISOPTION> tmp(Identities::none(),
+                                              util::Parameters(),
+                                              outindex,
+                                              raw->content());
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          std::make_shared<IndexedArrayOf<int64_t, ISOPTION>>(
-            Identities::none(),
-            util::Parameters(),
-            outindex,
-            raw->content()));
+          tmp.simplify_optiontype());
       }
       if (IndexedArrayOf<int64_t, ISOPTION>* raw =
         dynamic_cast<IndexedArrayOf<int64_t, ISOPTION>*>(out.get())) {
@@ -2599,6 +2708,34 @@ namespace awkward {
 
   template <typename T, bool ISOPTION>
   const ContentPtr
+  IndexedArrayOf<T, ISOPTION>::getitem_next_jagged(
+    const Index64& slicestarts,
+    const Index64& slicestops,
+    const SliceVarNewAxis& slicecontent,
+    const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceVarNewAxis>(slicestarts,
+                                                        slicestops,
+                                                        slicecontent,
+                                                        tail);
+  }
+
+  template <typename T, bool ISOPTION>
+  const ContentPtr
+  IndexedArrayOf<T, ISOPTION>::getitem_next(const SliceVarNewAxis& varnewaxis,
+                                            const Slice& tail,
+                                            const Index64& advanced) const {
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
+  }
+
+  template <typename T, bool ISOPTION>
+  const SliceJagged64
+  IndexedArrayOf<T, ISOPTION>::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    return content_.get()->varaxis_to_jagged(varnewaxis);
+  }
+
+  template <typename T, bool ISOPTION>
+  const ContentPtr
   IndexedArrayOf<T, ISOPTION>::copy_to(kernel::lib ptr_lib) const {
     IndexOf<T> index = index_.copy_to(ptr_lib);
     ContentPtr content = content_.get()->copy_to(ptr_lib);
@@ -2636,6 +2773,14 @@ namespace awkward {
     const Index64& slicestops,
     const S& slicecontent,
     const Slice& tail) const {
+    if (slicestarts.length() != length()) {
+      throw std::invalid_argument(
+        std::string("cannot fit jagged slice with length ")
+        + std::to_string(slicestarts.length()) + std::string(" into ")
+        + classname() + std::string(" of size ") + std::to_string(length())
+        + FILENAME(__LINE__));
+    }
+
     if (ISOPTION) {
       int64_t numnull;
       std::pair<Index64, IndexOf<T>> pair = nextcarry_outindex(numnull);

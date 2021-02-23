@@ -208,24 +208,43 @@ namespace awkward {
 
   const FormPtr
   ByteMaskedForm::getitem_field(const std::string& key) const {
-    return std::make_shared<ByteMaskedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      mask_,
-      content_.get()->getitem_field(key),
-      valid_when_);
+    ByteMaskedForm step1(has_identities_,
+                         util::Parameters(),
+                         FormKey(nullptr),
+                         mask_,
+                         content_.get()->getitem_field(key),
+                         valid_when_);
+    return step1.simplify_optiontype();
   }
 
   const FormPtr
   ByteMaskedForm::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<ByteMaskedForm>(
-      has_identities_,
-      util::Parameters(),
-      FormKey(nullptr),
-      mask_,
-      content_.get()->getitem_fields(keys),
-      valid_when_);
+    ByteMaskedForm step1(has_identities_,
+                         util::Parameters(),
+                         FormKey(nullptr),
+                         mask_,
+                         content_.get()->getitem_fields(keys),
+                         valid_when_);
+    return step1.simplify_optiontype();
+  }
+
+  const FormPtr
+  ByteMaskedForm::simplify_optiontype() const {
+    if (dynamic_cast<IndexedForm*>(content_.get())         ||
+        dynamic_cast<IndexedOptionForm*>(content_.get())   ||
+        dynamic_cast<ByteMaskedForm*>(content_.get())      ||
+        dynamic_cast<BitMaskedForm*>(content_.get())       ||
+        dynamic_cast<UnmaskedForm*>(content_.get())) {
+      IndexedOptionForm step1(has_identities_,
+                              parameters_,
+                              form_key_,
+                              Index::Form::i64,
+                              content_);
+      return step1.simplify_optiontype();
+    }
+    else {
+      return shallow_copy();
+    }
   }
 
   ////////// ByteMaskedArray
@@ -644,44 +663,44 @@ namespace awkward {
 
   const ContentPtr
   ByteMaskedArray::getitem_field(const std::string& key) const {
-    return std::make_shared<ByteMaskedArray>(
-      identities_,
-      util::Parameters(),
-      mask_,
-      content_.get()->getitem_field(key),
-      valid_when_);
+    ByteMaskedArray step1(identities_,
+                          util::Parameters(),
+                          mask_,
+                          content_.get()->getitem_field(key),
+                          valid_when_);
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   ByteMaskedArray::getitem_field(const std::string& key,
                                  const Slice& only_fields) const {
-    return std::make_shared<ByteMaskedArray>(
-      identities_,
-      util::Parameters(),
-      mask_,
-      content_.get()->getitem_field(key, only_fields),
-      valid_when_);
+    ByteMaskedArray step1(identities_,
+                          util::Parameters(),
+                          mask_,
+                          content_.get()->getitem_field(key, only_fields),
+                          valid_when_);
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   ByteMaskedArray::getitem_fields(const std::vector<std::string>& keys) const {
-    return std::make_shared<ByteMaskedArray>(
-      identities_,
-      util::Parameters(),
-      mask_,
-      content_.get()->getitem_fields(keys),
-      valid_when_);
+    ByteMaskedArray step1(identities_,
+                          util::Parameters(),
+                          mask_,
+                          content_.get()->getitem_fields(keys),
+                          valid_when_);
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
   ByteMaskedArray::getitem_fields(const std::vector<std::string>& keys,
                                   const Slice& only_fields) const {
-    return std::make_shared<ByteMaskedArray>(
-      identities_,
-      util::Parameters(),
-      mask_,
-      content_.get()->getitem_fields(keys, only_fields),
-      valid_when_);
+    ByteMaskedArray step1(identities_,
+                          util::Parameters(),
+                          mask_,
+                          content_.get()->getitem_fields(keys, only_fields),
+                          valid_when_);
+    return step1.simplify_optiontype();
   }
 
   const ContentPtr
@@ -725,6 +744,10 @@ namespace awkward {
     else if (SliceMissing64* missing =
              dynamic_cast<SliceMissing64*>(head.get())) {
       return Content::getitem_next(*missing, tail, advanced);
+    }
+    else if (SliceVarNewAxis* varnewaxis =
+             dynamic_cast<SliceVarNewAxis*>(head.get())) {
+      return ByteMaskedArray::getitem_next(*varnewaxis, tail, advanced);
     }
     else {
       throw std::runtime_error(
@@ -812,6 +835,17 @@ namespace awkward {
       return (std::string("at ") + path + std::string(" (") + classname()
               + std::string("): ") + std::string("len(content) < len(mask)")
               + FILENAME(__LINE__));
+    }
+    else if (dynamic_cast<BitMaskedArray*>(content_.get())  ||
+             dynamic_cast<ByteMaskedArray*>(content_.get())  ||
+             dynamic_cast<IndexedArray32*>(content_.get())  ||
+             dynamic_cast<IndexedArrayU32*>(content_.get())  ||
+             dynamic_cast<IndexedArray64*>(content_.get())  ||
+             dynamic_cast<IndexedOptionArray32*>(content_.get())  ||
+             dynamic_cast<IndexedOptionArray64*>(content_.get())  ||
+             dynamic_cast<UnmaskedArray*>(content_.get())) {
+      return classname() + " contains " + content_.get()->classname() +
+             ", the operation that made it might have forgotten to call 'simplify_optiontype()'";
     }
     else {
       return content_.get()->validityerror(path + std::string(".content"));
@@ -1308,14 +1342,15 @@ namespace awkward {
           outindex.length());
         util::handle_error(err3, classname(), identities_.get());
 
+        IndexedOptionArray64 tmp(Identities::none(),
+                                 parameters_,
+                                 outindex,
+                                 raw->content());
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                 parameters_,
-                                                 outindex,
-                                                 raw->content()));
+          tmp.simplify_optiontype());
       }
       else {
         throw std::runtime_error(
@@ -1393,14 +1428,15 @@ namespace awkward {
           outindex.length());
         util::handle_error(err3, classname(), identities_.get());
 
+        IndexedOptionArray64 tmp(Identities::none(),
+                                 util::Parameters(),
+                                 outindex,
+                                 raw->content());
         return std::make_shared<ListOffsetArray64>(
           raw->identities(),
           raw->parameters(),
           outoffsets,
-          std::make_shared<IndexedOptionArray64>(Identities::none(),
-                                                 util::Parameters(),
-                                                 outindex,
-                                                 raw->content()));
+          tmp.simplify_optiontype());
       }
       else {
         throw std::runtime_error(
@@ -1482,6 +1518,30 @@ namespace awkward {
   }
 
   const ContentPtr
+  ByteMaskedArray::getitem_next_jagged(const Index64& slicestarts,
+                                       const Index64& slicestops,
+                                       const SliceVarNewAxis& slicecontent,
+                                       const Slice& tail) const {
+    return getitem_next_jagged_generic<SliceVarNewAxis>(slicestarts,
+                                                        slicestops,
+                                                        slicecontent,
+                                                        tail);
+  }
+
+  const ContentPtr
+  ByteMaskedArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                                const Slice& tail,
+                                const Index64& advanced) const {
+    SliceJagged64 jagged = content_.get()->varaxis_to_jagged(varnewaxis);
+    return getitem_next(jagged, tail, advanced);
+  }
+
+  const SliceJagged64
+  ByteMaskedArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    return content_.get()->varaxis_to_jagged(varnewaxis);
+  }
+
+  const ContentPtr
   ByteMaskedArray::copy_to(kernel::lib ptr_lib) const {
     Index8 mask = mask_.copy_to(ptr_lib);
     ContentPtr content = content_.get()->copy_to(ptr_lib);
@@ -1513,8 +1573,18 @@ namespace awkward {
 
   template <typename S>
   const ContentPtr ByteMaskedArray::getitem_next_jagged_generic(
-      const Index64& slicestarts, const Index64& slicestops,
-      const S& slicecontent, const Slice& tail) const {
+      const Index64& slicestarts,
+      const Index64& slicestops,
+      const S& slicecontent,
+      const Slice& tail) const {
+    if (slicestarts.length() != length()) {
+      throw std::invalid_argument(
+        std::string("cannot fit jagged slice with length ")
+        + std::to_string(slicestarts.length()) + std::string(" into ")
+        + classname() + std::string(" of size ") + std::to_string(length())
+        + FILENAME(__LINE__));
+    }
+
     int64_t numnull;
     std::pair<Index64, Index64> pair = nextcarry_outindex(numnull);
     Index64 nextcarry = pair.first;

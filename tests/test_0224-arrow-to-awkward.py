@@ -22,7 +22,7 @@ def test_toarrow_ByteMaskedArray_1():
     content = ak.Array(
         ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
     ).layout
-    bytemask = ak.layout.Index8(np.array([False, True, False], dtype=np.bool))
+    bytemask = ak.layout.Index8(np.array([False, True, False], dtype=np.bool_))
     array = ak.layout.ByteMaskedArray(bytemask, content, True)
     assert ak.to_arrow(array).to_pylist() == ak.to_list(array)
 
@@ -110,7 +110,7 @@ def test_toarrow_ListArray_RegularArray():
         [[[3.3, 4.4], [5.5]], [[6.6, 7.7, 8.8, 9.9], []]],
     ]
 
-    assert isinstance(ak.to_arrow(regulararray), (pyarrow.ListArray))
+    assert isinstance(ak.to_arrow(regulararray), (pyarrow.LargeListArray))
     assert ak.to_arrow(regulararray).to_pylist() == [
         [[0.0, 1.1, 2.2], []],
         [[3.3, 4.4], [5.5]],

@@ -456,11 +456,9 @@ toslice_part(ak::Slice& slice, py::object obj) {
     slice.append(std::make_shared<ak::SliceRange>(start, stop, step));
   }
 
-#if PY_MAJOR_VERSION >= 3
   else if (py::isinstance<py::ellipsis>(obj)) {
     slice.append(std::make_shared<ak::SliceEllipsis>());
   }
-#endif
 
   else if (obj.is(py::module::import("numpy").attr("newaxis"))) {
     slice.append(std::make_shared<ak::SliceNewAxis>());
@@ -877,12 +875,7 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     self.endlist();
   }
   else if (py::isinstance<py::array>(obj)) {
-    py::iterable seq = obj.attr("tolist")().cast<py::iterable>();
-    self.beginlist();
-    for (auto x : seq) {
-      builder_fromiter(self, x);
-    }
-    self.endlist();
+    builder_fromiter(self, obj.attr("tolist")());
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("bool_"))) {
     self.boolean(obj.cast<bool>());
@@ -1221,8 +1214,8 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
                 out2[i] = py::cast(ptr);
               }
               else {
-                throw std::invalid_argument(
-                  std::string("VirtualArray's cache is not a Python MutableMapping")
+                throw std::runtime_error(
+                  std::string("VirtualArray's cache is not a PyArrayCache")
                   + FILENAME(__LINE__));
               }
             }
@@ -1279,7 +1272,9 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
             return pair;
           })
           .def("getitem_nothing", &T::getitem_nothing)
-          .def("getitem_at_nowrap", &T::getitem_at_nowrap)
+          .def("getitem_at_nowrap", [](const T& self, int64_t at) -> py::object {
+            return box(self.getitem_at_nowrap(at));
+          })
           .def("getitem_range_nowrap", &T::getitem_range_nowrap)
           .def_property_readonly(
             "_persistent_shared_ptr",
@@ -1758,6 +1753,10 @@ make_UnmaskedArray(const py::handle& m, const std::string& name) {
       .def("simplify", [](const ak::UnmaskedArray& self) {
         return box(self.simplify_optiontype());
       })
+      .def("toByteMaskedArray",
+           &ak::UnmaskedArray::toByteMaskedArray)
+      .def("toIndexedOptionArray64",
+           &ak::UnmaskedArray::toIndexedOptionArray64)
   );
 }
 
@@ -1794,6 +1793,7 @@ make_ListArrayOf(const py::handle& m, const std::string& name) {
            &ak::ListArrayOf<T>::compact_offsets64,
            py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::ListArrayOf<T>::broadcast_tooffsets64)
+      .def("toListOffsetArray64", &ak::ListArrayOf<T>::toListOffsetArray64)
       .def("toRegularArray", &ak::ListArrayOf<T>::toRegularArray)
       .def("simplify", [](const ak::ListArrayOf<T>& self) {
         return box(self.shallow_simplify());
@@ -1850,6 +1850,7 @@ make_ListOffsetArrayOf(const py::handle& m, const std::string& name) {
            py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64",
            &ak::ListOffsetArrayOf<T>::broadcast_tooffsets64)
+      .def("toListOffsetArray64", &ak::ListOffsetArrayOf<T>::toListOffsetArray64)
       .def("toRegularArray", &ak::ListOffsetArrayOf<T>::toRegularArray)
       .def("simplify", [](const ak::ListOffsetArrayOf<T>& self) {
         return box(self.shallow_simplify());
@@ -2308,8 +2309,8 @@ make_Record(const py::handle& m, const std::string& name) {
             out2[i] = py::cast(ptr);
           }
           else {
-            throw std::invalid_argument(
-              std::string("VirtualArray's cache is not a Python MutableMapping")
+            throw std::runtime_error(
+              std::string("VirtualArray's cache is not a PyArrayCache")
               + FILENAME(__LINE__));
           }
         }
@@ -2602,6 +2603,7 @@ make_RegularArray(const py::handle& m, const std::string& name) {
            py::arg("start_at_zero") = true)
       .def("broadcast_tooffsets64", &ak::RegularArray::broadcast_tooffsets64)
       .def("toListOffsetArray64", &ak::RegularArray::toListOffsetArray64)
+      .def("toRegularArray", &ak::RegularArray::toRegularArray)
       .def("simplify", [](const ak::RegularArray& self) {
         return box(self.shallow_simplify());
       })
@@ -2768,8 +2770,8 @@ make_VirtualArray(const py::handle& m, const std::string& name) {
           return py::cast(ptr);
         }
         else {
-          throw std::invalid_argument(
-            std::string("VirtualArray's cache is not a Python MutableMapping")
+          throw std::runtime_error(
+            std::string("VirtualArray's cache is not a PyArrayCache")
             + FILENAME(__LINE__));
         }
       })

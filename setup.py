@@ -18,6 +18,7 @@ import distutils.util
 
 try:
     import cmake
+
     CMAKE = os.path.join(cmake.CMAKE_BIN_DIR, "cmake")
 except ImportError:
     CMAKE = "cmake"

@@ -475,10 +475,6 @@ namespace awkward {
                 bool keepdims) const override;
 
     const ContentPtr
-      sort_asstrings(const Index64& offsets,
-                     bool ascending,
-                     bool stable) const;
-    const ContentPtr
       as_unique_strings(const Index64& offsets) const;
 
     const ContentPtr
@@ -573,6 +569,14 @@ namespace awkward {
       getitem_next(const SliceJagged64& jagged,
                    const Slice& tail,
                    const Index64& advanced) const override;
+
+    const ContentPtr
+      getitem_next(const SliceVarNewAxis& varnewaxis,
+                   const Slice& tail,
+                   const Index64& advanced) const override;
+
+    const SliceJagged64
+      varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const override;
 
     /// @brief An utility function to create a new instance of NumpyArray on the
     /// GPU identical to this one.
@@ -765,6 +769,12 @@ namespace awkward {
                           const SliceJagged64& slicecontent,
                           const Slice& tail) const override;
 
+    const ContentPtr
+      getitem_next_jagged(const Index64& slicestarts,
+                          const Index64& slicestops,
+                          const SliceVarNewAxis& slicecontent,
+                          const Slice& tail) const override;
+
     /// @brief Internal function to fill JSON with boolean values.
     void
       tojson_boolean(ToJson& builder, bool include_beginendlist) const;
@@ -815,14 +825,6 @@ namespace awkward {
                                              const Index64& starts,
                                              const Index64& parents,
                                              int64_t& outlength) const;
-
-    template<typename T>
-    const std::shared_ptr<void> string_sort(const T* data,
-                                            int64_t length,
-                                            const Index64& offsets,
-                                            Index64& outoffsets,
-                                            bool ascending,
-                                            bool stable) const;
 
     template<typename T>
     const std::shared_ptr<void> string_unique(const T* data,

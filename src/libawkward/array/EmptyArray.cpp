@@ -623,7 +623,9 @@ namespace awkward {
                            bool ascending,
                            bool stable,
                            bool keepdims) const {
-    ContentPtr asnumpy = toNumpyArray("d", 8, util::dtype::float64);
+    ContentPtr asnumpy = toNumpyArray(util::dtype_to_format(util::dtype::int64),
+                                      8,
+                                      util::dtype::int64);
     ContentPtr out = asnumpy.get()->argsort_next(negaxis,
                                                  starts,
                                                  parents,
@@ -700,7 +702,7 @@ namespace awkward {
   EmptyArray::getitem_next(const SliceJagged64& jagged,
                            const Slice& tail,
                            const Index64& advanced) const {
-    if (advanced.length() != 0) {
+    if (!advanced.is_empty_advanced()) {
       throw std::invalid_argument(
         std::string("cannot mix jagged slice with NumPy-style advanced indexing")
         + FILENAME(__LINE__));
@@ -737,6 +739,42 @@ namespace awkward {
     throw std::runtime_error(
       std::string("undefined operation: EmptyArray::getitem_next_jagged(jagged)")
       + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
+  EmptyArray::getitem_next_jagged(const Index64& slicestarts,
+                                  const Index64& slicestops,
+                                  const SliceVarNewAxis& slicecontent,
+                                  const Slice& tail) const {
+    throw std::runtime_error(
+      std::string("undefined operation: EmptyArray::getitem_next_jagged(varnewaxis)")
+      + FILENAME(__LINE__));
+  }
+
+  const ContentPtr
+  EmptyArray::getitem_next(const SliceVarNewAxis& varnewaxis,
+                           const Slice& tail,
+                           const Index64& advanced) const {
+    util::handle_error(
+      failure("too many dimensions in slice",
+              kSliceNone,
+              kSliceNone,
+              FILENAME_C(__LINE__)),
+      classname(),
+      identities_.get());
+    return ContentPtr(nullptr);  // make Windows compiler happy
+  }
+
+  const SliceJagged64
+  EmptyArray::varaxis_to_jagged(const SliceVarNewAxis& varnewaxis) const {
+    util::handle_error(
+      failure("too many dimensions in slice",
+              kSliceNone,
+              kSliceNone,
+              FILENAME_C(__LINE__)),
+      classname(),
+      identities_.get());
+    return SliceJagged64(Index64(0), SliceItemPtr(nullptr));  // make Windows compiler happy
   }
 
   const ContentPtr
