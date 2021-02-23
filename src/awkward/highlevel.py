@@ -270,7 +270,7 @@ class Array(
         if check_valid:
             ak.operations.describe.validity_error(self, exception=True)
 
-        self._caches = ak._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self.layout)
 
     @property
     def layout(self):
@@ -378,7 +378,7 @@ class Array(
             limit_value -= len(suffix)
 
             value = ak._util.minimally_touching_string(
-                limit_value, self._array._layout, self._array._behavior
+                limit_value, self._array.layout, self._array._behavior
             )
 
             try:
@@ -389,7 +389,7 @@ class Array(
             typestr = repr(
                 str(
                     ak._util.highlevel_type(
-                        self._array._layout, self._array._behavior, True
+                        self._array.layout, self._array._behavior, True
                     )
                 )
             )
@@ -459,7 +459,7 @@ class Array(
         the (small) C++ nodes or Python objects that reference the (large)
         array buffers.
         """
-        return self._layout.nbytes
+        return self.layout.nbytes
 
     @property
     def ndim(self):
@@ -515,7 +515,7 @@ class Array(
 
         is `3`, not `5`.
         """
-        return len(self._layout)
+        return len(self.layout)
 
     def __iter__(self):
         """
@@ -547,7 +547,7 @@ class Array(
 
         See also #ak.to_list.
         """
-        for x in self._layout:
+        for x in self.layout:
             yield ak._util.wrap(x, self._behavior)
 
     def __getitem__(self, where):
@@ -962,7 +962,7 @@ class Array(
         acting at the last level, while the higher levels of the indexer all
         have the same dimension as the array being indexed.
         """
-        return ak._util.wrap(self._layout[where], self._behavior)
+        return ak._util.wrap(self.layout[where], self._behavior)
 
     def __setitem__(self, where, what):
         """
@@ -1023,9 +1023,9 @@ class Array(
                 "only fields may be assigned in-place (by field name)"
                 + ak._util.exception_suffix(__file__)
             )
-        array = ak.operations.structure.with_field(self._layout, what, where)
+        array = ak.operations.structure.with_field(self.layout, what, where)
         self._layout = array.layout
-        self._caches = ak._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self.layout)
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -1070,7 +1070,7 @@ class Array(
         if where in dir(type(self)):
             return super(Array, self).__getattribute__(where)
         else:
-            if where in self._layout.keys():
+            if where in self.layout.keys():
                 try:
                     return self[where]
                 except Exception as err:
@@ -1095,7 +1095,7 @@ class Array(
                 dir(super(Array, self))
                 + [
                     x
-                    for x in self._layout.keys()
+                    for x in self.layout.keys()
                     if _dir_pattern.match(x) and not keyword.iskeyword(x)
                 ]
             )
@@ -1261,7 +1261,7 @@ class Array(
 
     def _str(self, limit_value=85):
         return ak._util.minimally_touching_string(
-            limit_value, self._layout, self._behavior
+            limit_value, self.layout, self._behavior
         )
 
     def _repr(self, limit_value=40, limit_total=85):
@@ -1269,7 +1269,7 @@ class Array(
         limit_value -= len(suffix)
 
         value = ak._util.minimally_touching_string(
-            limit_value, self._layout, self._behavior
+            limit_value, self.layout, self._behavior
         )
 
         try:
@@ -1277,7 +1277,7 @@ class Array(
         except AttributeError:
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(str(ak._util.highlevel_type(self._layout, self._behavior, True)))
+        typestr = repr(str(ak._util.highlevel_type(self.layout, self._behavior, True)))
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
@@ -1308,7 +1308,7 @@ class Array(
         nested lists in a NumPy `"O"` array are severed from the array and
         cannot be sliced as dimensions.
         """
-        return ak._connect._numpy.convert_to_array(self._layout, args, kwargs)
+        return ak._connect._numpy.convert_to_array(self.layout, args, kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -1408,7 +1408,7 @@ class Array(
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, length, container = ak.operations.convert.to_buffers(self._layout)
+        form, length, container = ak.operations.convert.to_buffers(self.layout)
         if self._behavior is ak.behavior:
             behavior = None
         else:
@@ -1430,13 +1430,13 @@ class Array(
             self.__class__ = ak._util.arrayclass(layout, behavior)
         self.layout = layout
         self.behavior = behavior
-        self._caches = ak._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self.layout)
 
     def __copy__(self):
-        return Array(self._layout, behavior=self._behavior)
+        return Array(self.layout, behavior=self._behavior)
 
     def __deepcopy__(self, memo):
-        return Array(self._layout.deep_copy(), behavior=self._behavior)
+        return Array(self.layout.deep_copy(), behavior=self._behavior)
 
     def __bool__(self):
         if len(self) == 1:
@@ -1448,7 +1448,7 @@ class Array(
             )
 
     def __contains__(self, element):
-        for test in ak._util.completely_flatten(self._layout):
+        for test in ak._util.completely_flatten(self.layout):
             if element in test:
                 return True
         return False
@@ -1546,7 +1546,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         if check_valid:
             ak.operations.describe.validity_error(self, exception=True)
 
-        self._caches = ak._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self.layout)
 
     @property
     def layout(self):
@@ -1663,7 +1663,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         the (small) C++ nodes or Python objects that reference the (large)
         array buffers.
         """
-        return self._layout.nbytes
+        return self.layout.nbytes
 
     @property
     def fields(self):
@@ -1713,7 +1713,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
             >>> record["y", 1]
             2
         """
-        return ak._util.wrap(self._layout[where], self._behavior)
+        return ak._util.wrap(self.layout[where], self._behavior)
 
     def __setitem__(self, where, what):
         """
@@ -1741,9 +1741,9 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
                 "only fields may be assigned in-place (by field name)"
                 + ak._util.exception_suffix(__file__)
             )
-        array = ak.operations.structure.with_field(self._layout, what, where)
+        array = ak.operations.structure.with_field(self.layout, what, where)
         self._layout = array.layout
-        self._caches = ak._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self.layout)
         self._numbaview = None
 
     def __getattr__(self, where):
@@ -1777,7 +1777,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         if where in dir(type(self)):
             return super(Record, self).__getattribute__(where)
         else:
-            if where in self._layout.keys():
+            if where in self.layout.keys():
                 try:
                     return self[where]
                 except Exception as err:
@@ -1802,7 +1802,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
                 dir(super(Record, self))
                 + [
                     x
-                    for x in self._layout.keys()
+                    for x in self.layout.keys()
                     if _dir_pattern.match(x) and not keyword.iskeyword(x)
                 ]
             )
@@ -1936,7 +1936,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
 
     def _str(self, limit_value=85):
         return ak._util.minimally_touching_string(
-            limit_value + 2, self._layout, self._behavior
+            limit_value + 2, self.layout, self._behavior
         )[1:-1]
 
     def _repr(self, limit_value=40, limit_total=85):
@@ -1944,7 +1944,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         limit_value -= len(suffix)
 
         value = ak._util.minimally_touching_string(
-            limit_value + 2, self._layout, self._behavior
+            limit_value + 2, self.layout, self._behavior
         )[1:-1]
 
         try:
@@ -1952,9 +1952,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         except AttributeError:
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(
-            str(ak._util.highlevel_type(self._layout, self._behavior, False))
-        )
+        typestr = repr(str(ak._util.highlevel_type(self.layout, self._behavior, False)))
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
@@ -1996,12 +1994,12 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         return numba.typeof(self._numbaview)
 
     def __getstate__(self):
-        form, length, container = ak.operations.convert.to_buffers(self._layout.array)
+        form, length, container = ak.operations.convert.to_buffers(self.layout.array)
         if self._behavior is ak.behavior:
             behavior = None
         else:
             behavior = self._behavior
-        return form, length, container, behavior, self._layout.at
+        return form, length, container, behavior, self.layout.at
 
     def __setstate__(self, state):
         if isinstance(state[1], dict):
@@ -2019,13 +2017,13 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
             self.__class__ = ak._util.recordclass(layout, behavior)
         self.layout = layout
         self.behavior = behavior
-        self._caches = ak._util.find_caches(self._layout)
+        self._caches = ak._util.find_caches(self.layout)
 
     def __copy__(self):
-        return Record(self._layout, behavior=self._behavior)
+        return Record(self.layout, behavior=self._behavior)
 
     def __deepcopy__(self, memo):
-        return Record(self._layout.deep_copy(), behavior=self._behavior)
+        return Record(self.layout.deep_copy(), behavior=self._behavior)
 
     def __bool__(self):
         raise ValueError(
@@ -2034,7 +2032,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         )
 
     def __contains__(self, element):
-        for test in ak._util.completely_flatten(self._layout):
+        for test in ak._util.completely_flatten(self.layout):
             if element in test:
                 return True
         return False
@@ -2295,7 +2293,7 @@ class ArrayBuilder(Iterable, Sized):
         limit_type = limit_total - len(value) - len("<ArrayBuilder  type=>")
         typestrs = ak._util.typestrs(self._behavior)
         typestr = repr(
-            str(ak.types.ArrayType(snapshot.layout.type(typestrs), len(self)))
+            str(ak.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
         )
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
@@ -2631,7 +2629,7 @@ class ArrayBuilder(Iterable, Sized):
             )
             typestrs = ak._util.typestrs(self._arraybuilder._behavior)
             typestr = repr(
-                str(ak.types.ArrayType(snapshot.layout.type(typestrs), len(self)))
+                str(ak.types.ArrayType(snapshot._layout.type(typestrs), len(self)))
             )
             if len(typestr) > limit_type:
                 typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
