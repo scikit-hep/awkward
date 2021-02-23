@@ -1458,6 +1458,14 @@ namespace awkward {
     }
 
     else if (posaxis == depth + 1) {
+      if (parameter_equals("__array__", "\"string\"")  ||
+          parameter_equals("__array__", "\"bytestring\"")) {
+        throw std::invalid_argument(
+          std::string("ak.combinations does not compute combinations of the "
+                      "characters of a string; please split it into lists")
+          + FILENAME(__LINE__));
+      }
+
       int64_t totallen;
       Index64 offsets(length() + 1);
       struct Error err1 = kernel::ListArray_combinations_length_64<T>(

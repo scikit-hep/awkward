@@ -1601,6 +1601,14 @@ namespace awkward {
     }
 
     else if (posaxis == depth + 1) {
+      if (parameter_equals("__array__", "\"string\"")  ||
+          parameter_equals("__array__", "\"bytestring\"")) {
+        throw std::invalid_argument(
+          std::string("ak.combinations does not compute combinations of the "
+                      "characters of a string; please split it into lists")
+          + FILENAME(__LINE__));
+      }
+
       IndexOf<T> starts = util::make_starts(offsets_);
       IndexOf<T> stops = util::make_stops(offsets_);
 
