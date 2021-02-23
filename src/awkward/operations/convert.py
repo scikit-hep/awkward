@@ -4128,7 +4128,8 @@ def to_buffers(
                 )
             else:
                 raise ValueError(
-                    "unrecognized value for 'virtual': " + str(virtual)
+                    "unrecognized value for 'virtual': "
+                    + str(virtual)
                     + ak._util.exception_suffix(__file__)
                 )
 

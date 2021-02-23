@@ -1952,9 +1952,7 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
         except AttributeError:
             name = type(self).__name__
         limit_type = limit_total - (len(value) + len(name) + len("<  type=>"))
-        typestr = repr(
-            str(ak._util.highlevel_type(self.layout, self._behavior, False))
-        )
+        typestr = repr(str(ak._util.highlevel_type(self.layout, self._behavior, False)))
         if len(typestr) > limit_type:
             typestr = typestr[: (limit_type - 4)] + "..." + typestr[-1]
 
