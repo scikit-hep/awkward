@@ -2997,6 +2997,15 @@ def cartesian(
                 if depth == posaxis:
                     inside = len(new_arrays) - i - 1
                     outside = i
+                    if (
+                        layout.parameter("__array__") == "string"
+                        or layout.parameter("__array__") == "bytestring"
+                    ):
+                        raise ValueError(
+                            "ak.cartesian does not compute combinations of the "
+                            "characters of a string; please split it into lists"
+                            + ak._util.exception_suffix(__file__)
+                        )
                     nextlayout = ak._util.recursively_apply(
                         layout, getgetfunction1(inside), pass_depth=True
                     )
