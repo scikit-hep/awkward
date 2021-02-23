@@ -11,7 +11,7 @@ launch_buttons:
 
 execute:
   allow_errors: false
-  execute_notebooks: auto  # one of ("auto", "force", "cache", "off")
+  execute_notebooks: "force"  # one of ("auto", "force", "cache", "off")
 
 sphinx:
   config:

@@ -3,8 +3,8 @@ jupytext:
   text_representation:
     extension: .md
     format_name: myst
-    format_version: 0.12
-    jupytext_version: 1.6.0
+    format_version: '0.10'
+    jupytext_version: 1.5.2
 kernelspec:
   display_name: Python 3
   language: python
@@ -211,7 +211,7 @@ with builder.record("Point"):
 builder
 ```
 
-This gives the resulting records a type named "`Point`", which might have [specialized behaviors](how-to-specialize.html).
+This gives the resulting records a type named "`Point`", which might have specialized behaviors.
 
 ```{code-cell} ipython3
 array = builder.snapshot()
