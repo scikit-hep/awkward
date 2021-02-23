@@ -30,18 +30,6 @@ class AuxData(object):
             and self.datakeys == other.datakeys
         )
 
-class CannotMaterialize(np.ndarray):
-    def __init__(self, length):
-        self.length = length
-
-    def __len__(self):
-        return self.length
-
-    def __array_finalize__(self, obj):
-        raise ValueError(
-            "this operation cannot be performed in a JAX-compiled or JAX-differentiated function"
-        )
-
 class DifferentiableArray(ak.Array):
     def __init__(self, aux_data, tracers):
         self.aux_data = aux_data
