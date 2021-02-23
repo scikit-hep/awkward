@@ -32,10 +32,34 @@ form = ak.forms.Form.fromjson("""
 """)
 
 class TypedArrayBuilder:
-    def __init__(self, form):
+    def __init__(self, form, assertions=True):
         # pretend we used 'form' to determine how to create 'vm' and 'fsm'
 
         self.form = form
+
+        self.assertions = assertions
+        if assertions:
+            require_pause = "pause"
+            require_begin_list = """
+                {begin_list} <> if
+                    halt
+                then
+            """.format(begin_list=2)
+            require_begin_record = """
+                {begin_record} <> if
+                    halt
+                then
+            """.format(begin_record=4)
+            require_end_record = """
+                {end_record} <> if
+                    halt
+                then
+            """.format(end_record=5)
+        else:
+            require_pause = ""
+            require_begin_list = ""
+            require_begin_record = ""
+            require_end_record = ""
 
         self.vm = awkward.forth.ForthMachine32("""
             input data
@@ -45,8 +69,6 @@ class TypedArrayBuilder:
             output part0-node4-data int64
 
             : node4-int64
-                ( no pause because this is first after a begin_list )
-
                 {int64} = if
                     0 data seek
                     data q-> part0-node4-data
@@ -56,27 +78,23 @@ class TypedArrayBuilder:
             ;
 
             : node3-list
-                pause
-                {begin_list} <> if
-                    halt
-                then
+                {require_begin_list}
 
-                0   ( initialize the node3 list counter )
+                0
                 begin
                     pause
                     dup {end_list} = if
                         drop
-                        part0-node3-offsets +<- stack ( absorbs node3 counter )
+                        part0-node3-offsets +<- stack
                         exit
                     else
                         node4-int64
-                        1+   ( increment the node3 list counter )
+                        1+
                     then
                 again
             ;
 
             : node2-float64
-                pause
                 {float64} = if
                     0 data seek
                     data d-> part0-node2-data
@@ -86,37 +104,25 @@ class TypedArrayBuilder:
             ;
 
             : node1-record
-                ( no pause because this is first after a begin_list )
-
-                {begin_record} <> if
-                    halt
-                then
-
-                node2-float64
-                node3-list
-
-                pause
-                {end_record} <> if
-                    halt
-                then
+                                {require_begin_record}
+                {require_pause} node2-float64
+                {require_pause} node3-list
+                {require_pause} {require_end_record}
             ;
 
             : node0-list
-                pause
-                {begin_list} <> if
-                    halt
-                then
+                {require_begin_list}
 
-                0   ( initialize the node0 list counter )
+                0
                 begin
                     pause
                     dup {end_list} = if
                         drop
-                        part0-node0-offsets +<- stack ( absorbs node0 counter )
+                        part0-node0-offsets +<- stack
                         exit
                     else
                         node1-record
-                        1+   ( increment the node0 list counter )
+                        1+
                     then
                 again
             ;
@@ -124,12 +130,12 @@ class TypedArrayBuilder:
             0 part0-node0-offsets <- stack
             0 part0-node3-offsets <- stack
 
-            0    ( initialize the total counter )
+            0
             begin
-                node0-list
-                1+   ( increment the total counter )
+                {require_pause} node0-list
+                1+
             again
-        """.format(int64=0, float64=1, begin_list=2, end_list=3, begin_record=4, end_record=5))
+        """.format(int64=0, float64=1, end_list=3, **locals()))
 
         self.data = np.empty(8, np.uint8)
         self.vm.run({"data": self.data})
@@ -145,20 +151,23 @@ class TypedArrayBuilder:
         self.vm.resume()
 
     def begin_list(self):
-        self.vm.stack_push(2)
-        self.vm.resume()
+        if self.assertions:
+            self.vm.stack_push(2)
+            self.vm.resume()
 
     def end_list(self):
         self.vm.stack_push(3)
         self.vm.resume()
 
     def begin_record(self):
-        self.vm.stack_push(4)
-        self.vm.resume()
+        if self.assertions:
+            self.vm.stack_push(4)
+            self.vm.resume()
 
     def end_record(self):
-        self.vm.stack_push(5)
-        self.vm.resume()
+        if self.assertions:
+            self.vm.stack_push(5)
+            self.vm.resume()
 
     def snapshot(self):
         return ak.from_buffers(self.form, self.vm.stack[0], self.vm.outputs)
@@ -176,7 +185,7 @@ class TypedArrayBuilder:
 #     [{"x": 3.3, "y": [1, 2, 3]}],
 # ])
 
-builder = TypedArrayBuilder(form)
+builder = TypedArrayBuilder(form, assertions=False)
 builder.debug_step()
 
 builder.begin_list()
