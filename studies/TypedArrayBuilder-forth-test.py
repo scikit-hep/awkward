@@ -49,10 +49,6 @@ class TypedArrayBuilder:
             0   ( initialize the total counter )
             0   ( initialize the node0 list counter )
 
-            : goto-0
-                0   ( every routine ends with new FSM state )
-            ;
-
             : fill-node1-goto-1
                 0 data seek
                 data d-> part0-node1-data
@@ -65,10 +61,6 @@ class TypedArrayBuilder:
                 1+  ( increment the total counter )
                 0   ( initialize the node0 list counter )
                 0   ( every routine ends with new FSM state )
-            ;
-
-            : goto-1
-                1   ( every routine ends with new FSM state )
             ;
 
             : fill-node3-inc-node2-goto-1
@@ -92,14 +84,11 @@ class TypedArrayBuilder:
         self.fsm = [
             # 0
             {
-                "begin_list": "goto-0",
-                "begin_record": "goto-0",
                 "float64": "fill-node1-goto-1",
                 "end_list": "fill-node0-inc-total-goto-0",
             },
             # 1
             {
-                "begin_list": "goto-1",
                 "int64": "fill-node3-inc-node2-goto-1",
                 "end_list": "fill-node2-goto-2",
             },
@@ -129,24 +118,10 @@ class TypedArrayBuilder:
         self.vm.call(word)
         self.state = self.vm.stack_pop()
 
-    def begin_list(self):
-        word = self.fsm[self.state].get("begin_list")
-        if word is None:
-            raise ValueError("can't call 'begin_list' at this point in the process")
-        self.vm.call(word)
-        self.state = self.vm.stack_pop()
-
     def end_list(self):
         word = self.fsm[self.state].get("end_list")
         if word is None:
             raise ValueError("can't call 'end_list' at this point in the process")
-        self.vm.call(word)
-        self.state = self.vm.stack_pop()
-
-    def begin_record(self):
-        word = self.fsm[self.state].get("begin_record")
-        if word is None:
-            raise ValueError("can't call 'begin_record' at this point in the process")
         self.vm.call(word)
         self.state = self.vm.stack_pop()
 
@@ -156,10 +131,6 @@ class TypedArrayBuilder:
             raise ValueError("can't call 'end_record' at this point in the process")
         self.vm.call(word)
         self.state = self.vm.stack_pop()
-
-    def field(self, name):
-        # ignored; fields must be supplied in the right order
-        pass
 
     def snapshot(self):
         return ak.from_buffers(self.form, self.vm.stack[0], self.vm.outputs)
