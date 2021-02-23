@@ -32,34 +32,10 @@ form = ak.forms.Form.fromjson("""
 """)
 
 class TypedArrayBuilder:
-    def __init__(self, form, assertions=True):
+    def __init__(self, form):
         # pretend we used 'form' to determine how to create 'vm' and 'fsm'
 
         self.form = form
-
-        self.assertions = assertions
-        if assertions:
-            require_pause = "pause"
-            require_begin_list = """
-                {begin_list} <> if
-                    halt
-                then
-            """.format(begin_list=2)
-            require_begin_record = """
-                {begin_record} <> if
-                    halt
-                then
-            """.format(begin_record=4)
-            require_end_record = """
-                {end_record} <> if
-                    halt
-                then
-            """.format(end_record=5)
-        else:
-            require_pause = ""
-            require_begin_list = ""
-            require_begin_record = ""
-            require_end_record = ""
 
         self.vm = awkward.forth.ForthMachine32("""
             input data
@@ -78,11 +54,13 @@ class TypedArrayBuilder:
             ;
 
             : node3-list
-                {require_begin_list}
+                {begin_list} <> if
+                    halt
+                then
 
                 0
                 begin
-                    pause
+                    pause ( always pause before each list item )
                     dup {end_list} = if
                         drop
                         part0-node3-offsets +<- stack
@@ -104,18 +82,18 @@ class TypedArrayBuilder:
             ;
 
             : node1-record
-                                {require_begin_record}
-                {require_pause} node2-float64
-                {require_pause} node3-list
-                {require_pause} {require_end_record}
+                node2-float64 pause ( pause after each field item except the last )
+                node3-list
             ;
 
             : node0-list
-                {require_begin_list}
+                {begin_list} <> if
+                    halt
+                then
 
                 0
                 begin
-                    pause
+                    pause ( always pause before each list item )
                     dup {end_list} = if
                         drop
                         part0-node0-offsets +<- stack
@@ -132,10 +110,11 @@ class TypedArrayBuilder:
 
             0
             begin
-                {require_pause} node0-list
+                pause  ( always pause before each outermost array item )
+                node0-list
                 1+
             again
-        """.format(int64=0, float64=1, end_list=3, **locals()))
+        """.format(int64=0, float64=1, begin_list=2, end_list=3))
 
         self.data = np.empty(8, np.uint8)
         self.vm.run({"data": self.data})
@@ -151,23 +130,12 @@ class TypedArrayBuilder:
         self.vm.resume()
 
     def begin_list(self):
-        if self.assertions:
-            self.vm.stack_push(2)
-            self.vm.resume()
+        self.vm.stack_push(2)
+        self.vm.resume()
 
     def end_list(self):
         self.vm.stack_push(3)
         self.vm.resume()
-
-    def begin_record(self):
-        if self.assertions:
-            self.vm.stack_push(4)
-            self.vm.resume()
-
-    def end_record(self):
-        if self.assertions:
-            self.vm.stack_push(5)
-            self.vm.resume()
 
     def snapshot(self):
         return ak.from_buffers(self.form, self.vm.stack[0], self.vm.outputs)
@@ -185,13 +153,10 @@ class TypedArrayBuilder:
 #     [{"x": 3.3, "y": [1, 2, 3]}],
 # ])
 
-builder = TypedArrayBuilder(form, assertions=False)
+builder = TypedArrayBuilder(form)
 builder.debug_step()
 
 builder.begin_list()
-builder.debug_step()
-
-builder.begin_record()
 builder.debug_step()
 
 builder.float64(1.1)
@@ -204,12 +169,6 @@ builder.int64(1)
 builder.debug_step()
 
 builder.end_list()
-builder.debug_step()
-
-builder.end_record()
-builder.debug_step()
-
-builder.begin_record()
 builder.debug_step()
 
 builder.float64(2.2)
@@ -227,9 +186,6 @@ builder.debug_step()
 builder.end_list()
 builder.debug_step()
 
-builder.end_record()
-builder.debug_step()
-
 builder.end_list()
 builder.debug_step()
 
@@ -240,9 +196,6 @@ builder.end_list()
 builder.debug_step()
 
 builder.begin_list()
-builder.debug_step()
-
-builder.begin_record()
 builder.debug_step()
 
 builder.float64(3.3)
@@ -261,9 +214,6 @@ builder.int64(3)
 builder.debug_step()
 
 builder.end_list()
-builder.debug_step()
-
-builder.end_record()
 builder.debug_step()
 
 builder.end_list()
