@@ -45,9 +45,9 @@ class TypedArrayBuilder:
             output part0-node4-data int64
 
             : node4-int64
-                ." node4-int64" cr
-                ( no pause because this is first after an implicit begin_list )
-                0 = if ( int64 )
+                ( no pause because this is first after a begin_list )
+
+                {int64} = if
                     0 data seek
                     data q-> part0-node4-data
                 else
@@ -56,11 +56,15 @@ class TypedArrayBuilder:
             ;
 
             : node3-list
-                ." node3-list" cr
+                pause
+                {begin_list} <> if
+                    halt
+                then
+
                 0   ( initialize the node3 list counter )
                 begin
                     pause
-                    dup 2 = if ( end_list )
+                    dup {end_list} = if
                         drop
                         part0-node3-offsets +<- stack ( absorbs node3 counter )
                         exit
@@ -72,9 +76,8 @@ class TypedArrayBuilder:
             ;
 
             : node2-float64
-                ." node2-float64" cr
-                ( no pause because this is first after an implicit begin_list )
-                1 = if ( float64 )
+                pause
+                {float64} = if
                     0 data seek
                     data d-> part0-node2-data
                 else
@@ -83,23 +86,31 @@ class TypedArrayBuilder:
             ;
 
             : node1-record
-                ." node1-record" cr
+                ( no pause because this is first after a begin_list )
+
+                {begin_record} <> if
+                    halt
+                then
+
                 node2-float64
                 node3-list
 
-                ( hmm... end_record is superfluous, too )
                 pause
-                3 <> if ( end_record )
+                {end_record} <> if
                     halt
                 then
             ;
 
             : node0-list
-                ." node0-list" cr
+                pause
+                {begin_list} <> if
+                    halt
+                then
+
                 0   ( initialize the node0 list counter )
                 begin
                     pause
-                    dup 2 = if ( end_list )
+                    dup {end_list} = if
                         drop
                         part0-node0-offsets +<- stack ( absorbs node0 counter )
                         exit
@@ -118,7 +129,7 @@ class TypedArrayBuilder:
                 node0-list
                 1+   ( increment the total counter )
             again
-        """)
+        """.format(int64=0, float64=1, begin_list=2, end_list=3, begin_record=4, end_record=5))
 
         self.data = np.empty(8, np.uint8)
         self.vm.run({"data": self.data})
@@ -133,12 +144,20 @@ class TypedArrayBuilder:
         self.vm.stack_push(1)
         self.vm.resume()
 
-    def end_list(self):
+    def begin_list(self):
         self.vm.stack_push(2)
         self.vm.resume()
 
-    def end_record(self):
+    def end_list(self):
         self.vm.stack_push(3)
+        self.vm.resume()
+
+    def begin_record(self):
+        self.vm.stack_push(4)
+        self.vm.resume()
+
+    def end_record(self):
+        self.vm.stack_push(5)
         self.vm.resume()
 
     def snapshot(self):
@@ -160,7 +179,16 @@ class TypedArrayBuilder:
 builder = TypedArrayBuilder(form)
 builder.debug_step()
 
+builder.begin_list()
+builder.debug_step()
+
+builder.begin_record()
+builder.debug_step()
+
 builder.float64(1.1)
+builder.debug_step()
+
+builder.begin_list()
 builder.debug_step()
 
 builder.int64(1)
@@ -172,7 +200,13 @@ builder.debug_step()
 builder.end_record()
 builder.debug_step()
 
+builder.begin_record()
+builder.debug_step()
+
 builder.float64(2.2)
+builder.debug_step()
+
+builder.begin_list()
 builder.debug_step()
 
 builder.int64(1)
@@ -190,10 +224,22 @@ builder.debug_step()
 builder.end_list()
 builder.debug_step()
 
+builder.begin_list()
+builder.debug_step()
+
 builder.end_list()
 builder.debug_step()
 
+builder.begin_list()
+builder.debug_step()
+
+builder.begin_record()
+builder.debug_step()
+
 builder.float64(3.3)
+builder.debug_step()
+
+builder.begin_list()
 builder.debug_step()
 
 builder.int64(1)
