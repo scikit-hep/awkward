@@ -293,9 +293,7 @@ array2.y
 ```
 
 ```{code-cell} ipython3
-:tags: [raises-exception]
-
-array2.x
+# array2.x    would raise AttributeError
 ```
 
 The above would be no problem for records collected using policy 1 (see previous section).

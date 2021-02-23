@@ -108,9 +108,7 @@ ak_array
 ```
 
 ```{code-cell} ipython3
-:tags: [raises-exception]
-
-ak.to_numpy(ak_array)
+# ak.to_numpy(ak_array)    would raise ValueError
 ```
 
 One might argue that such arrays should become NumPy arrays with `dtype="O"`. However, this is usually undesirable because these "NumPy object arrays" are just arrays of pointers to Python objects, and all the performance issues of dealing with Python objects apply.
@@ -151,9 +149,7 @@ ak_array
 ```
 
 ```{code-cell} ipython3
-:tags: [raises-exception]
-
-np.array(ak_array)
+# np.array(ak_array)   would raise ValueError
 ```
 
 NumPy's structured arrays
@@ -192,9 +188,7 @@ ak_array["x", 2]
 ```
 
 ```{code-cell} ipython3
-:tags: [raises-exception]
-
-np_array["x", 2]
+# np_array["x", 2]   would raise IndexError
 ```
 
 ```{code-cell} ipython3
@@ -275,9 +269,7 @@ ak.to_numpy(ak_array2).tolist()
 Finally, it is possible to prevent the [ak.to_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_numpy.html) function from creating NumPy masked arrays by passing `allow_missing=False`.
 
 ```{code-cell} ipython3
-:tags: [raises-exception]
-
-ak.to_numpy(ak_array, allow_missing=False)
+# ak.to_numpy(ak_array, allow_missing=False)   would raise ValueError
 ```
 
 You might want to do this to be sure that the output of [ak.to_numpy](https://awkward-array.readthedocs.io/en/latest/_auto/ak.to_numpy.html) has type `np.ndarray` (or die trying).
