@@ -5,6 +5,7 @@
 
 #include "awkward/common.h"
 #include "awkward/util.h"
+#include "awkward/forth/ForthMachine.h"
 
 #include <complex>
 
@@ -19,6 +20,8 @@ namespace awkward {
 
   class Form;
   using FormPtr = std::shared_ptr<Form>;
+
+  using ForthOtputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
 
   class FormBuilder;
   using FormBuilderPtr = std::shared_ptr<FormBuilder>;
@@ -105,30 +108,7 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     virtual const ContentPtr
-      snapshot() const = 0;
-
-    /// @brief (FIXME: ?)
-    virtual void
-      set_input_buffer(const DataPtr& data) = 0;
-
-    /// @brief (FIXME: ?)
-    virtual void
-      set_data_length(int64_t length) = 0;
-
-    /// @brief (FIXME: ?)
-    virtual int64_t
-      length() const { return 0; }
-
-    /// @brief Add a Form to interpret the accumulated data.
-    ///
-    /// Creates a nested FormBuilder if the given Form is accepted by this
-    /// builder Form.
-    virtual int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) = 0;
-
-    /// @brief
-    virtual bool
-      accepts(awkward::util::dtype dt) const { return false; }
+      snapshot(const ForthOtputBufferMap& outputs) const = 0;
 
     /// @brief
     virtual const FormPtr
@@ -170,9 +150,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL BitMaskedArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a BitMaskedArrayBuilder from a full set of parameters.
-    BitMaskedArrayBuilder(const BitMaskedFormPtr& form,
-                          const DataPtr& data,
-                          int64_t length);
+    BitMaskedArrayBuilder(const BitMaskedFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -180,37 +158,16 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
-
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        data_ = data;
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        length_ = length;
-    }
-
-    /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
-    /// builder Form.
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
     /// @brief
-    const FormPtr form() const override;
+    const FormPtr
+      form() const override;
 
   private:
     /// @brief BitMaskedForm that defines the BitMaskedArray.
     const BitMaskedFormPtr form_;
-
-    /// @brief Accumulated data is an IndexU8 mask.
-    DataPtr data_;
-
-    /// @brief Number of elements in the mask array.
-    int64_t length_;
+    const FormKey form_key_;
 
     /// @brief Content
     FormBuilderPtr content_;
@@ -222,9 +179,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL ByteMaskedArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a ByteMaskedArrayBuilder from a full set of parameters.
-    ByteMaskedArrayBuilder(const ByteMaskedFormPtr& form,
-                           const DataPtr& data,
-                           int64_t length);
+    ByteMaskedArrayBuilder(const ByteMaskedFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -232,32 +187,16 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
-
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        data_ = data;
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        length_ = length;
-    }
-
-    /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
-    /// builder Form.
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
     /// @brief
-    const FormPtr form() const override;
+    const FormPtr
+      form() const override;
 
   private:
     const ByteMaskedFormPtr form_;
-    DataPtr data_;
-    int64_t length_;
+    const FormKey form_key_;
+
     FormBuilderPtr content_;
   };
 
@@ -267,9 +206,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL EmptyArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an EmptyArrayBuilder from a full set of parameters.
-    EmptyArrayBuilder(const EmptyFormPtr& form,
-                      const DataPtr& data,
-                      int64_t length);
+    EmptyArrayBuilder(const EmptyFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -277,32 +214,15 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
-
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        data_ = data;
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        length_ = length;
-    }
-
-    /// @brief An EmptyForm does not accept other Forms.
-    /// It throws an 'invalid_argument' exception.
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
     /// @brief
-    const FormPtr form() const override;
+    const FormPtr
+      form() const override;
 
   private:
     const EmptyFormPtr form_;
-    DataPtr data_;
-    int64_t length_;
+    const FormKey form_key_;
   };
 
   /// @class IndexedArrayBuilder
@@ -311,9 +231,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL IndexedArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an IndexedArrayBuilder from a full set of parameters.
-    IndexedArrayBuilder(const IndexedFormPtr& form,
-                        const DataPtr& data,
-                        int64_t length);
+    IndexedArrayBuilder(const IndexedFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -321,32 +239,15 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
-
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        data_ = data;
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        length_ = length;
-    }
-
-    /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
-    /// builder Form.
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
     /// @brief
-    const FormPtr form() const override;
+    const FormPtr
+      form() const override;
 
   private:
     const IndexedFormPtr form_;
-    DataPtr data_;
-    int64_t length_;
+    const FormKey form_key_;
     FormBuilderPtr content_;
   };
 
@@ -356,9 +257,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL IndexedOptionArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an IndexedOptionArrayBuilder from a full set of parameters.
-    IndexedOptionArrayBuilder(const IndexedOptionFormPtr& form,
-                              const DataPtr& data,
-                              int64_t length);
+    IndexedOptionArrayBuilder(const IndexedOptionFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -366,32 +265,15 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
-
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        data_ = data;
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        length_ = length;
-    }
-
-    /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
-    /// builder Form.
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
     /// @brief
-    const FormPtr form() const override;
+    const FormPtr
+      form() const override;
 
   private:
     const IndexedOptionFormPtr form_;
-    DataPtr data_;
-    int64_t length_;
+    const FormKey form_key_;
     FormBuilderPtr content_;
   };
 
@@ -402,8 +284,6 @@ namespace awkward {
   public:
     /// @brief Creates a ListArrayBuilder from a full set of parameters.
     ListArrayBuilder(const ListFormPtr& form,
-                     const DataPtr& data,
-                     int64_t length,
                      bool copyarrays = true);
 
     /// @brief User-friendly name of this class.
@@ -412,32 +292,15 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
-
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        data_ = data;
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        length_ = length;
-    }
-
-    /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
-    /// builder Form.
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
     /// @brief
-    const FormPtr form() const override;
+    const FormPtr
+      form() const override;
 
   private:
     const ListFormPtr form_;
-    DataPtr data_;
-    int64_t length_;
+    const FormKey form_key_;
     FormBuilderPtr content_;
     bool copyarrays_;
   };
@@ -449,8 +312,6 @@ namespace awkward {
   public:
     /// @brief Creates a ListOffsetArrayBuilder from a full set of parameters.
     ListOffsetArrayBuilder(const ListOffsetFormPtr& form,
-                           const DataPtr& data,
-                           int64_t length,
                            bool copyarrays = true);
 
     /// @brief User-friendly name of this class.
@@ -459,32 +320,15 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
-
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        data_ = data;
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        length_ = length;
-    }
-
-    /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
-    /// builder Form.
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
     /// @brief
-    const FormPtr form() const override;
+    const FormPtr
+      form() const override;
 
   private:
     const ListOffsetFormPtr form_;
-    DataPtr data_;
-    int64_t length_;
+    const FormKey form_key_;
     FormBuilderPtr content_;
     bool copyarrays_;
   };
@@ -496,8 +340,6 @@ namespace awkward {
   public:
     /// @brief Creates a NumpyArrayBuilder from a full set of parameters.
     NumpyArrayBuilder(const NumpyFormPtr& form,
-                      const DataPtr& data,
-                      int64_t length,
                       bool copyarrays = true);
 
     /// @brief User-friendly name of this class.
@@ -506,52 +348,27 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        // FIXME:
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        // FIXME:
-    }
-
-    /// @brief (FIXME: ?)
-    int64_t
-      length() const override;
-
-    /// @brief A NumpyForm does not accept other Forms.
-    /// An 'invalid_argument' exception is thrown.
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
-
-    /// @brief Checks if the dtype is accepted by the Form.
-    bool
-      accepts(awkward::util::dtype dt) const override;
+    // /// @brief
+    // void
+    //   integer(int64_t x) override;
+    //
+    // /// @brief
+    // void
+    //   boolean(bool x) override;
+    //
+    // /// @brief
+    // void
+    //   real(double x) override;
 
     /// @brief
-    const FormPtr form() const override;
-
-    /// @brief
-    void
-      integer(int64_t x) override;
-
-    /// @brief
-    void
-      boolean(bool x) override;
-
-    /// @brief
-    void
-      real(double x) override;
+    const FormPtr
+      form() const override;
 
   private:
     const NumpyFormPtr form_;
-    std::vector<std::unique_ptr<Data>> data_;
-    int64_t length_;
+    const FormKey form_key_;
     bool copyarrays_;
   };
 
@@ -561,9 +378,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL RawArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a RawArrayBuilder from a full set of parameters.
-    RawArrayBuilder(const EmptyFormPtr& form,
-                    const DataPtr& data,
-                    int64_t length);
+    RawArrayBuilder(const RawFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -571,34 +386,15 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
-
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        data_ = data;
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        length_ = length;
-    }
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
     /// @brief
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
-
-    /// @brief
-    const FormPtr form() const override {
-      throw std::runtime_error(
-        std::string("RawForm builder 'form' is not implemented yet"));
-    }
+    const FormPtr
+      form() const override;
 
   private:
     const RawFormPtr form_;
-    DataPtr data_;
-    int64_t length_;
+    const FormKey form_key_;
   };
 
   /// @class RecordArrayBuilder
@@ -607,9 +403,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL RecordArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a RecordArrayBuilder from a full set of parameters.
-    RecordArrayBuilder(const RecordFormPtr& form,
-                       const DataPtr& data,
-                       int64_t length);
+    RecordArrayBuilder(const RecordFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -617,35 +411,18 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        data_ = data;
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        length_ = length;
-    }
-
-    /// @brief Creates a 'content' FormBuilder if the 'form' is accepted by this
-    /// builder Form.
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
+    // const FormBuilderPtr&
+    //   field_check(const char* key) const override;
 
     /// @brief
-    const FormPtr form() const override;
-
-    const FormBuilderPtr&
-      field_check(const char* key) const override;
+    const FormPtr
+      form() const override;
 
   private:
     const RecordFormPtr form_;
-    DataPtr data_;
-    int64_t length_;
+    const FormKey form_key_;
     std::vector<FormBuilderPtr> contents_;
     std::vector<std::string> keys_;
   };
@@ -656,9 +433,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL RegularArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a RegularArrayBuilder from a full set of parameters.
-    RegularArrayBuilder(const RegularFormPtr& form,
-                        const DataPtr& data,
-                        int64_t length);
+    RegularArrayBuilder(const RegularFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -666,30 +441,15 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
-
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        data_ = data;
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        length_ = length;
-    }
-
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
     /// @brief
-    const FormPtr form() const override;
+    const FormPtr
+      form() const override;
 
   private:
     const RegularFormPtr form_;
-    DataPtr data_;
-    int64_t length_;
+    const FormKey form_key_;
     FormBuilderPtr content_;
   };
 
@@ -699,9 +459,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL UnionArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a UnionArrayBuilder from a full set of parameters.
-    UnionArrayBuilder(const UnionFormPtr& form,
-                      const DataPtr& data,
-                      int64_t length);
+    UnionArrayBuilder(const UnionFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -709,31 +467,15 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
-
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        data_ = data;
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        length_ = length;
-    }
-
-    /// @brief (FIXME: ?)
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
     /// @brief
-    const FormPtr form() const override;
+    const FormPtr
+      form() const override;
 
   private:
     const UnionFormPtr form_;
-    DataPtr data_;
-    int64_t length_;
+    const FormKey form_key_;
     std::vector<FormBuilderPtr> contents_;
   };
 
@@ -743,9 +485,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL UnmaskedArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an UnmaskedArrayBuilder from a full set of parameters.
-    UnmaskedArrayBuilder(const UnmaskedFormPtr& form,
-                         const DataPtr& data,
-                         int64_t length);
+    UnmaskedArrayBuilder(const UnmaskedFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -753,30 +493,15 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
-
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        data_ = data;
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        length_ = length;
-    }
-
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
     /// @brief
-    const FormPtr form() const override;
+    const FormPtr
+      form() const override;
 
   private:
     const UnmaskedFormPtr form_;
-    DataPtr data_;
-    int64_t length_;
+    const FormKey form_key_;
   };
 
   /// @class VirtualArrayBuilder
@@ -785,9 +510,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL VirtualArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a VirtualArrayBuilder from a full set of parameters.
-    VirtualArrayBuilder(const VirtualFormPtr& form,
-                        const DataPtr& data,
-                        int64_t length);
+    VirtualArrayBuilder(const VirtualFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -795,30 +518,39 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot() const override;
-
-    /// @brief (FIXME: ?)
-    void
-      set_input_buffer(const DataPtr& data) override {
-        data_ = data;
-    }
-
-    /// @brief (FIXME: ?)
-    void
-      set_data_length(int64_t length) override {
-        length_ = length;
-    }
-
-    int64_t
-      apply(const FormPtr& form, const DataPtr& data, const int64_t length) override;
+      snapshot(const ForthOtputBufferMap& outputs) const override;
 
     /// @brief
-    const FormPtr form() const override;
+    const FormPtr
+      form() const override;
 
   private:
     const VirtualFormPtr form_;
-    DataPtr data_;
-    int64_t length_;
+    const FormKey form_key_;
+  };
+
+  /// @class UnknownFormBuilder
+  ///
+  /// @brief
+  class LIBAWKWARD_EXPORT_SYMBOL UnknownFormBuilder : public FormBuilder {
+  public:
+    /// @brief Creates a VirtualArrayBuilder from a full set of parameters.
+    UnknownFormBuilder(const FormPtr& form);
+
+    /// @brief User-friendly name of this class.
+    const std::string
+      classname() const override;
+
+    /// @brief Turns the accumulated data into a Content array.
+    const ContentPtr
+      snapshot(const ForthOtputBufferMap& outputs) const override;
+
+    /// @brief
+    const FormPtr
+      form() const override;
+
+    private:
+      const FormPtr form_;
   };
 
   /// @class TypedArrayBuilder
@@ -831,32 +563,25 @@ namespace awkward {
     /// @brief Creates an TypedArrayBuilder from a full set of parameters.
     ///
     /// @param initial The initial number of entries for a buffer.
-    TypedArrayBuilder(const ArrayBuilderOptions& options, const DataPtr& data = nullptr, const int64_t length = 0);
+    TypedArrayBuilder(const FormPtr& form, const ArrayBuilderOptions& options);
 
-    /// @brief Add a Form to interpret the accumulated data.
-    ///
-    /// Creates a Root node of the FormBuilder if it has not been defined,
-    /// e.g. a 'nullptr', otherwise passes it to the FormBuilder.
+    /// @brief
     void
-      apply(const FormPtr& form, const DataPtr& data = nullptr, const int64_t length = 0);
+      connect(const std::shared_ptr<ForthMachine32>& vm);
+
+    /// @brief
+    void
+      debug_step() const;
+
+    /// @brief
+    const std::shared_ptr<ForthMachine32>&
+      vm() const {
+        return vm_;
+      }
 
     /// @brief
     const FormPtr
       form() const;
-
-    /// @brief Sets an Input buffer (FIXME: growable?)
-    void
-      set_input_buffer(const DataPtr& data);
-
-    /// @brief Sets an Input buffer length (FIXME: when it's done?)
-    void
-      set_data_length(const int64_t length);
-
-    /// @brief Access to the internal buffer (FIXME: ?)
-    const DataPtr&
-      data_buffer() const {
-        return data_;
-      }
 
     /// @brief Returns a string representation of this array (single-line XML
     /// indicating the length and type).
@@ -976,6 +701,11 @@ namespace awkward {
       string(const std::string& x);
 
     /// @brief Begins building a nested list.
+    ///
+    /// The first 'beginlist' puts AwkwardForth VM into a state that expects
+    /// another 'beginlist' or 'endlist'.
+    /// The second puts the VM into a state that expects 'integer', etc.
+    /// or 'endlist'.
     void
       beginlist();
 
@@ -1124,6 +854,7 @@ namespace awkward {
   private:
     /// See #initial.
     int64_t initial_;
+    int64_t length_;
 
     /// @brief Root node of the FormBuilder tree.
     std::shared_ptr<FormBuilder> builder_;
@@ -1131,11 +862,12 @@ namespace awkward {
     /// @brief Current node of the FormBuilder tree.
     std::shared_ptr<FormBuilder> current_builder_;
 
-    /// @brief Pointer to an Input buffer. (FIXME: ?)
-    DataPtr data_;
+    /// @brief
+    enum class state : std::int32_t {int64 = 0, float64 = 1, begin_list = 2, end_list = 3};
+    using utype = std::underlying_type<state>::type;
 
-    /// @brief Length of a Content array. (FIXME: ?)
-    int64_t length_;
+    std::shared_ptr<ForthMachine32> vm_;
+    std::map<std::string, std::shared_ptr<ForthInputBuffer>> vm_inputs_map_;
   };
 
 }

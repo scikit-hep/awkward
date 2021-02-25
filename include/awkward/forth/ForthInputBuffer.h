@@ -45,7 +45,7 @@ namespace awkward {
     int64_t
       len() const noexcept;
 
-  private:
+  //private:
     std::shared_ptr<void> ptr_;
     int64_t offset_;
     int64_t length_;

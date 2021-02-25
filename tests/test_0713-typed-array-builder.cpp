@@ -21,12 +21,12 @@ int main(int, char**) {
   const ak::FormPtr empty_form = std::make_shared<ak::EmptyForm>(
     false,
     ak::util::Parameters(),
-    ak::FormKey(nullptr));
+    std::make_shared<std::string>("node0"));
 
   const ak::FormPtr numpy_form = std::make_shared<ak::NumpyForm>(
     false,
     ak::util::Parameters(),
-    ak::FormKey(nullptr),
+    std::make_shared<std::string>("node1"),
     std::vector<int64_t>(),
     8,
     "d",
@@ -35,14 +35,14 @@ int main(int, char**) {
   ak::FormPtr list_offset_form = std::make_shared<ak::ListOffsetForm>(
     false,
     ak::util::Parameters(),
-    ak::FormKey(nullptr),
+    std::make_shared<std::string>("node2"),
     ak::Index::Form::i64,
     numpy_form);
 
   ak::FormPtr list_form = std::make_shared<ak::ListForm>(
     false,
     ak::util::Parameters(),
-    ak::FormKey(nullptr),
+    std::make_shared<std::string>("node3"),
     ak::Index::Form::i64,
     ak::Index::Form::i64,
     numpy_form);
@@ -50,71 +50,19 @@ int main(int, char**) {
   ak::FormPtr record_form = std::make_shared<ak::RecordForm>(
     false,
     ak::util::Parameters(),
-    ak::FormKey(nullptr),
+    std::make_shared<std::string>("node4"),
     nullptr,
     std::vector<ak::FormPtr>());
 
-  // FIXME: this should come from ak::ForthMachine
-  const std::shared_ptr<uint8_t> ptr = ak::kernel::malloc<uint8_t>(
-    ak::kernel::lib::cpu, 1024);
-
-  reinterpret_cast<double*>(ptr.get())[0] = 1.1;
-  reinterpret_cast<double*>(ptr.get())[1] = 2.2;
-  reinterpret_cast<double*>(ptr.get())[2] = 3.3;
-  reinterpret_cast<double*>(ptr.get())[3] = 4.4;
-  reinterpret_cast<double*>(ptr.get())[4] = 5.5;
-  reinterpret_cast<double*>(ptr.get())[5] = 6.6;
-  reinterpret_cast<double*>(ptr.get())[6] = 7.7;
-  reinterpret_cast<double*>(ptr.get())[7] = 8.8;
-  reinterpret_cast<double*>(ptr.get())[8] = 9.9;
-  reinterpret_cast<double*>(ptr.get())[9] = 10.10;
-
-  const std::shared_ptr<uint8_t> index = ak::kernel::malloc<uint8_t>(
-    ak::kernel::lib::cpu, 1024);
-
-  reinterpret_cast<int64_t*>(index.get())[0] = 0;
-  reinterpret_cast<int64_t*>(index.get())[1] = 3;
-  reinterpret_cast<int64_t*>(index.get())[2] = 3;
-  reinterpret_cast<int64_t*>(index.get())[3] = 5;
-  reinterpret_cast<int64_t*>(index.get())[4] = 8;
-  reinterpret_cast<int64_t*>(index.get())[5] = 9;
-  reinterpret_cast<int64_t*>(index.get())[6] = 100;
-  reinterpret_cast<int64_t*>(index.get())[7] = 300;
-  reinterpret_cast<int64_t*>(index.get())[8] = 300;
-  reinterpret_cast<int64_t*>(index.get())[9] = 500;
-  reinterpret_cast<int64_t*>(index.get())[10] = 800;
-  reinterpret_cast<int64_t*>(index.get())[11] = 900;
-
-  const std::shared_ptr<uint8_t> starts_stops = ak::kernel::malloc<uint8_t>(
-    ak::kernel::lib::cpu, 1024);
-
-  reinterpret_cast<int64_t*>(starts_stops.get())[0] = 0;
-  reinterpret_cast<int64_t*>(starts_stops.get())[1] = 3;
-  reinterpret_cast<int64_t*>(starts_stops.get())[2] = 7;
-  reinterpret_cast<int64_t*>(starts_stops.get())[3] = 2;
-  reinterpret_cast<int64_t*>(starts_stops.get())[4] = 6;
-  reinterpret_cast<int64_t*>(starts_stops.get())[5] = 9;
-
-  const std::shared_ptr<uint8_t> booleans = ak::kernel::malloc<uint8_t>(
-    ak::kernel::lib::cpu, 1024);
-
-  reinterpret_cast<bool*>(booleans.get())[0] = true;
-  reinterpret_cast<bool*>(booleans.get())[1] = false;
-  reinterpret_cast<bool*>(booleans.get())[2] = true;
-  reinterpret_cast<bool*>(booleans.get())[3] = true;
-  reinterpret_cast<bool*>(booleans.get())[4] = true;
-  reinterpret_cast<bool*>(booleans.get())[5] = false;
-
-
-  // auto input = ak::ForthInputBuffer(ptr, 0, 1024);
-  // ak::util::ForthError err;
-  // std::cout << "input buffer length is " << input.len() << "\n";
-  // auto data = input.read(1024, err);
-
   {
     // create builder
-    ak::TypedArrayBuilder myarray(options);
-    myarray.apply(empty_form, ptr, 20);
+    ak::TypedArrayBuilder myarray(empty_form, options);
+    const std::shared_ptr<ak::ForthMachine32> vm =
+      std::make_shared<ak::ForthMachine32>(std::string("begin\n")
+                                          .append("pause\n")
+                                          .append("again\n"));
+
+    myarray.connect(vm);
 
     // take a snapshot
     std::shared_ptr<ak::Content> array = myarray.snapshot();
@@ -123,29 +71,30 @@ int main(int, char**) {
   }
   {
     // create another builder
-    ak::TypedArrayBuilder myarray(options);
-    myarray.apply(numpy_form, ptr, 10);
+    ak::TypedArrayBuilder myarray(numpy_form, options);
+
+    const std::shared_ptr<ak::ForthMachine32> vm =
+      std::make_shared<ak::ForthMachine32>(std::string("input data\n")
+                                          .append("output part0-node1-data float64\n")
+                                          .append("\n")
+                                          .append(": node1-float64\n")
+                                          .append("1 = if\n")
+                                          .append("0 data seek\n")
+                                          .append("data d-> part0-node1-data\n")
+                                          .append("else\n")
+                                          .append("halt\n")
+                                          .append("then\n")
+                                          .append(";\n")
+                                          .append("\n")
+                                          .append("begin\n")
+                                          .append("node1-float64 pause\n")
+                                          .append("again\n"));
+
+    myarray.connect(vm);
+
     myarray.real(999.999);
     myarray.real(-999.999);
 
-    // add another data buffer
-    const std::shared_ptr<uint8_t> ptr2 = ak::kernel::malloc<uint8_t>(
-      ak::kernel::lib::cpu, 1024);
-
-    reinterpret_cast<double*>(ptr2.get())[0] = -1.1;
-    reinterpret_cast<double*>(ptr2.get())[1] = -2.2;
-    reinterpret_cast<double*>(ptr2.get())[2] = -3.3;
-    reinterpret_cast<double*>(ptr2.get())[3] = -4.4;
-    reinterpret_cast<double*>(ptr2.get())[4] = -5.5;
-    reinterpret_cast<double*>(ptr2.get())[5] = -6.6;
-    reinterpret_cast<double*>(ptr2.get())[6] = -7.7;
-    reinterpret_cast<double*>(ptr2.get())[7] = -8.8;
-    reinterpret_cast<double*>(ptr2.get())[8] = -9.9;
-    reinterpret_cast<double*>(ptr2.get())[9] = -10.10;
-
-    myarray.apply(numpy_form, ptr2, 5);
-    myarray.apply(numpy_form, ptr2, 5);
-
     // take a snapshot
     std::shared_ptr<ak::Content> array = myarray.snapshot();
 
@@ -153,79 +102,125 @@ int main(int, char**) {
   }
   {
     // create another builder
-    ak::TypedArrayBuilder myarray(options);
-    myarray.apply(list_offset_form, index, 6);
-    myarray.apply(numpy_form, ptr, 10);
+    ak::TypedArrayBuilder myarray(list_offset_form, options);
+
+    const std::shared_ptr<ak::ForthMachine32> vm =
+      std::make_shared<ak::ForthMachine32>(std::string("input data\n")
+                                          .append("output part0-node1-data float64\n")
+                                          .append("output part0-node2-offsets int64\n")
+                                          .append("\n")
+                                          .append(": node1-float64\n")
+                                          .append("1 = if\n") // real = 1
+                                          .append("0 data seek\n")
+                                          .append("data d-> part0-node1-data\n")
+                                          .append("else\n")
+                                          .append("halt\n")
+                                          .append("then\n")
+                                          .append(";\n")
+                                          .append(": node2-list\n")
+                                          .append("2 <> if\n") // beginlist = 2
+                                          .append("halt\n")
+                                          .append("then\n")
+                                          .append("\n")
+                                          .append("0\n")
+                                          .append("begin\n")
+                                          .append("pause\n")
+                                          .append("dup 3 = if\n") // endlist = 3
+                                          .append("drop\n")
+                                          .append("part0-node2-offsets +<- stack\n")
+                                          .append("exit\n")
+                                          .append("else\n")
+                                          .append("node1-float64\n")
+                                          .append("1+\n")
+                                          .append("then\n")
+                                          .append("again\n")
+                                          .append(";\n")
+                                          .append("\n")
+                                          .append("begin\n")
+                                          .append("pause\n")
+                                          .append("node2-list\n")
+                                          .append("+1\n")
+                                          .append("again\n"));
+
+    myarray.connect(vm);
+
+    myarray.beginlist();
+    myarray.real(1.1);
+    myarray.real(2.2);
+    myarray.endlist();
+
+    myarray.beginlist();
+    myarray.real(3.3);
+    myarray.real(4.4);
+    myarray.real(5.5);
+    myarray.real(6.6);
+    myarray.endlist();
+
+    myarray.beginlist();
+    myarray.real(7.7);
+    myarray.real(8.8);
+    myarray.real(9.9);
+    myarray.real(10.1);
+    myarray.endlist();
 
     // take a snapshot
     std::shared_ptr<ak::Content> array = myarray.snapshot();
 
     std::cout << array.get()->tostring() << "\n";
   }
-  {
-    // create another builder
-    ak::TypedArrayBuilder myarray(options);
-    myarray.apply(list_form, starts_stops, 3);
-    myarray.apply(numpy_form, ptr, 10);
-
-    // take a snapshot
-    std::shared_ptr<ak::Content> array = myarray.snapshot();
-
-    std::cout << array.get()->tostring() << "\n";
-  }
-  {
-    ak::FormKey numpy_bool_form_key = std::make_shared<std::string>("one");
-
-    const ak::FormPtr numpy_bool_form = std::make_shared<ak::NumpyForm>(
-      false,
-      ak::util::Parameters(),
-      numpy_bool_form_key,
-      std::vector<int64_t>(),
-      ak::util::dtype_to_itemsize(ak::util::dtype::boolean),
-      ak::util::dtype_to_format(ak::util::dtype::boolean),
-      ak::util::dtype::boolean);
-
-    ak::FormKey numpy_int_form_key = std::make_shared<std::string>("two");
-
-    const ak::FormPtr numpy_int_form = std::make_shared<ak::NumpyForm>(
-      false,
-      ak::util::Parameters(),
-      numpy_int_form_key,
-      std::vector<int64_t>(),
-      ak::util::dtype_to_itemsize(ak::util::dtype::int64),
-      ak::util::dtype_to_format(ak::util::dtype::int64),
-      ak::util::dtype::int64);
-
-    // create another builder
-    ak::TypedArrayBuilder myarray(options);
-    myarray.apply(record_form);
-
-    // FIXME: if this is allowed, e.g. a data buffer is a nullptr
-    // an extra check is needed downstream
-    myarray.apply(numpy_bool_form);
-
-    myarray.apply(numpy_int_form, index, 5);
-    myarray.apply(numpy_int_form, index, 5);
-    myarray.apply(numpy_int_form, index, 2);
-
-    myarray.field_check("two");
-    myarray.integer(999);
-    myarray.integer(-999);
-
-    myarray.apply(numpy_bool_form, booleans, 3);
-    myarray.apply(numpy_bool_form, booleans, 5);
-
-    myarray.field_check("one");
-    myarray.boolean(true);
-    myarray.boolean(false);
-
-    // The following will throw an exception
-    // myarray.field_check("three");
-
-    // take a snapshot
-    std::shared_ptr<ak::Content> array = myarray.snapshot();
-
-    std::cout << array.get()->tostring() << "\n";
-  }
+  // {
+  //   // create another builder
+  //   ak::TypedArrayBuilder myarray(list_form, options);
+  //
+  //   // take a snapshot
+  //   std::shared_ptr<ak::Content> array = myarray.snapshot();
+  //
+  //   std::cout << array.get()->tostring() << "\n";
+  // }
+  // {
+  //   ak::FormKey numpy_bool_form_key = std::make_shared<std::string>("one");
+  //
+  //   const ak::FormPtr numpy_bool_form = std::make_shared<ak::NumpyForm>(
+  //     false,
+  //     ak::util::Parameters(),
+  //     numpy_bool_form_key,
+  //     std::vector<int64_t>(),
+  //     ak::util::dtype_to_itemsize(ak::util::dtype::boolean),
+  //     ak::util::dtype_to_format(ak::util::dtype::boolean),
+  //     ak::util::dtype::boolean);
+  //
+  //   ak::FormKey numpy_int_form_key = std::make_shared<std::string>("two");
+  //
+  //   const ak::FormPtr numpy_int_form = std::make_shared<ak::NumpyForm>(
+  //     false,
+  //     ak::util::Parameters(),
+  //     numpy_int_form_key,
+  //     std::vector<int64_t>(),
+  //     ak::util::dtype_to_itemsize(ak::util::dtype::int64),
+  //     ak::util::dtype_to_format(ak::util::dtype::int64),
+  //     ak::util::dtype::int64);
+  //
+  //   // create another builder
+  //   ak::TypedArrayBuilder myarray(record_form, options);
+  //   //
+  //   // myarray.field_check("two");
+  //   // myarray.integer(999);
+  //   // myarray.integer(-999);
+  //   //
+  //   // myarray.apply(numpy_bool_form, booleans, 3);
+  //   // myarray.apply(numpy_bool_form, booleans, 5);
+  //   //
+  //   // myarray.field_check("one");
+  //   // myarray.boolean(true);
+  //   // myarray.boolean(false);
+  //
+  //   // The following will throw an exception
+  //   // myarray.field_check("three");
+  //
+  //   // take a snapshot
+  //   std::shared_ptr<ak::Content> array = myarray.snapshot();
+  //
+  //   std::cout << array.get()->tostring() << "\n";
+  // }
   return 0;
 }
