@@ -37,10 +37,15 @@ class DifferentiableArray(ak.Array):
 
     @property
     def layout(self):
+        # print(self.tracers)
         buffers = dict(self.aux_data.indexes)
         for key, tracer in zip(self.aux_data.datakeys, self.tracers):
             if hasattr(tracer, "primal"):
                 buffers[key] = tracer.primal
+            elif hasattr(tracer, "val"):
+                buffers[key] = tracer.val
+            else:
+                buffers[key] = ak.CannotMaterialize(tracer.shape)
         return ak.from_buffers(
             self.aux_data.form, self.aux_data.length, buffers, highlevel=False
         )
@@ -165,7 +170,7 @@ jax.tree_util.register_pytree_node(DifferentiableArray, special_flatten, special
 ###############################################################################
 
 def func(array):
-    return 2*array.y[0] + 10
+    return 2*array.y[0, 0, 0] + 10
 
 primal = ak.Array([
     [{"x": 1.1, "y": [1.0]}, {"x": 2.2, "y": [1.0, 2.2]}],
@@ -187,3 +192,8 @@ print(tangent_result)
 jit_result = jax.jit(func)(primal)
 print("resulting type", type(jit_result))
 print(jit_result)
+# def func(x):
+#     return x[0] ** 2 
+# tree = ak.Array([1., 2., 3., 4.])
+# basis = ak.Array([0., 1., 0., 0.])
+# print(jax.jvp(func, (tree,), (basis,)))
