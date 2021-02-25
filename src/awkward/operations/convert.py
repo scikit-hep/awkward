@@ -4699,14 +4699,15 @@ class CannotMaterialize(np.ndarray):
         return prod(self.shape)
 
     def __array_finalize__(self, obj):
-        if obj is None: 
+        if obj is None:
             return
-        elif isinstance(obj, np.ndarray): 
+        elif isinstance(obj, np.ndarray):
             return ak.Array(obj)
         else:
             raise ValueError(
                 "this operation cannot be performed in a JAX-compiled or JAX-differentiated function"
             )
+
 
 def from_buffers(
     form,
