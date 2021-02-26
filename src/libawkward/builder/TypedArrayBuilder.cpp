@@ -196,7 +196,7 @@ namespace awkward {
     vm_source_.append(builder_.get()->vm_output()).append("\n");
     vm_source_.append(builder_.get()->vm_func()).append("\n");
     vm_source_.append(builder_.get()->vm_from_stack()).append("\n");
-    
+
     vm_source_.append("0\n").append("begin\n")
     .append("pause\n")
     .append(builder_.get()->vm_func_name())
@@ -321,21 +321,21 @@ namespace awkward {
 
   void
   TypedArrayBuilder::boolean(bool x) {
-    reinterpret_cast<bool*>(vm_inputs_map_[vm_input_data_]->ptr_.get())[0] = x;
+    reinterpret_cast<bool*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = x;
     vm_.get()->stack_push(static_cast<utype>(state::boolean));
     vm_.get()->resume();
   }
 
   void
   TypedArrayBuilder::integer(int64_t x) {
-    reinterpret_cast<int64_t*>(vm_inputs_map_[vm_input_data_]->ptr_.get())[0] = x;
+    reinterpret_cast<int64_t*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = x;
     vm_.get()->stack_push(static_cast<utype>(state::int64));
     vm_.get()->resume();
   }
 
   void
   TypedArrayBuilder::real(double x) {
-    reinterpret_cast<double*>(vm_inputs_map_[vm_input_data_]->ptr_.get())[0] = x;
+    reinterpret_cast<double*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = x;
     vm_.get()->stack_push(static_cast<utype>(state::float64));
     vm_.get()->resume();
   }

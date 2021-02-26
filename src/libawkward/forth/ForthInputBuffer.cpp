@@ -63,4 +63,9 @@ namespace awkward {
     return length_;
   }
 
+  std::shared_ptr<void>
+  ForthInputBuffer::ptr() noexcept {
+    return ptr_;
+  }
+
 }
