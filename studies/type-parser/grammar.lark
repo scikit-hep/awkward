@@ -7,6 +7,7 @@ input: record
      | regular
      | listtype
      | uniontype
+     | predefined_typestr
 
 record: record_tuple
       | record_tuple_param
@@ -14,23 +15,28 @@ record: record_tuple
       | record_struct
 primitive: TYPE [options]
 unknown: "unknown" [options]
-optiontype: "?" input [options]
-          | "option" "[" input "," def_option "]"
+optiontype: option_single
+          | option_parm
 regular: regular_inparm
        | regular_outparm
 listtype: list_single
         | list_parm
 uniontype: union_single
          | union_parm
+predefined_typestr: HARDCODED
 
+HARDCODED: "string"
+         | "char"
+option_single: "?" input [options]
+option_parm: "option" "[" input "," def_option "]"
 union_single: "union" "[" input [ "," input]* "]"
 union_parm: "union" "[" input [ "," input]* "," def_option "]"
 list_parm: "[" "var" "*" input "," def_option "]"
 list_single: "var" "*" input
 record_tuple: "(" input ["," input]* ")"
-record_tuple_param: "tuple[[" input ["," input]* "]," def_option "]"
+record_tuple_param: "tuple" "[" "[" input ["," input]* "]," def_option "]"
 record_dict: "{" string ":" input ["," string ":" input]* "}"
-record_struct: "struct[[" string ["," string]* "]," "[" input ["," input]* "]," def_option "]"
+record_struct: "struct" "[" "[" string ["," string]* "]," "[" input ["," input]* "]," def_option "]"
 regular_inparm: number "*" input
 regular_outparm: "[" number "*" input "," def_option "]"
 options: "[" def_option "]"

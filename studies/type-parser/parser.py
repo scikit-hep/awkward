@@ -1,8 +1,7 @@
 import pytest
+from generated_parser import Lark_StandAlone, Transformer
 
 import awkward as ak
-
-from generated_parser import Lark_StandAlone, Transformer
 
 
 class TreeToJson(Transformer):
@@ -34,6 +33,21 @@ def toast(ptnode):
     elif ptnode.data == "input":
         assert len(ptnode.children) == 1
         return toast(ptnode.children[0])
+    elif ptnode.data == "predefined_typestr":
+        if ptnode.children[0] == "string":
+            return ak.types.ListType(
+                ak.types.PrimitiveType(
+                    "uint8", parameters={"__array__": "char"}, typestr="char"
+                ),
+                parameters={"__array__": "string"},
+                typestr="string",
+            )
+        elif ptnode.children[0] == "char":
+            return ak.types.PrimitiveType(
+                "uint8", parameters={"__array    __": "char"}, typestr="char"
+            )
+        else:
+            raise Exception("Unhandled typestring {0}".format(ptnode.children[0]))
     elif ptnode.data == "primitive":
         if len(ptnode.children) == 1:
             return ak.types.PrimitiveType(toast(ptnode.children[0]))
@@ -69,14 +83,13 @@ def toast(ptnode):
             content_list.append(toast(node))
         return ak.types.UnionType(content_list, toast(ptnode.children[-1]))
     elif ptnode.data == "optiontype":
-        if len(ptnode.children) == 1:
-            return ak.types.OptionType(toast(ptnode.children[0]))
-        elif len(ptnode.children) == 2:
-            return ak.types.OptionType(
-                toast(ptnode.children[0]), parameters=toast(ptnode.children[1])
-            )
-        else:
-            raise Exception("Unhandled OptionType node")
+        return toast(ptnode.children[0])
+    elif ptnode.data == "option_single":
+        return ak.types.OptionType(toast(ptnode.children[0]))
+    elif ptnode.data == "option_parm":
+        return ak.types.OptionType(
+            toast(ptnode.children[0]), parameters=toast(ptnode.children[1])
+        )
     elif ptnode.data == "record":
         return toast(ptnode.children[0])
     elif ptnode.data == "record_tuple":
@@ -396,7 +409,9 @@ def test_jim2():
 @pytest.mark.skip(reason="categoricals not handled yet")
 def test_jim3():
     test = Lark_StandAlone(transformer=TreeToJson())
-    text = str(ak.to_categorical(ak.Array(["one", "one", "two", "three", "one", "three"])).type)
+    text = str(
+        ak.to_categorical(ak.Array(["one", "one", "two", "three", "one", "three"])).type
+    )
     print(text)
     parsedtype = toast(test.parse(text))
     assert str(parsedtype) == text
@@ -414,7 +429,12 @@ def test_jim4():
 @pytest.mark.skip(reason="record names not handled yet")
 def test_jim5():
     test = Lark_StandAlone(transformer=TreeToJson())
-    text = str(ak.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}], with_name="Thingy").type)
+    text = str(
+        ak.Array(
+            [{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}],
+            with_name="Thingy",
+        ).type
+    )
     print(text)
     parsedtype = toast(test.parse(text))
     assert str(parsedtype) == text
@@ -423,7 +443,12 @@ def test_jim5():
 @pytest.mark.skip(reason="record names not handled yet")
 def test_jim6():
     test = Lark_StandAlone(transformer=TreeToJson())
-    text = str(ak.Array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}], [], [{"x": 3, "y": 3.3}]], with_name="Thingy").type)
+    text = str(
+        ak.Array(
+            [[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}], [], [{"x": 3, "y": 3.3}]],
+            with_name="Thingy",
+        ).type
+    )
     print(text)
     parsedtype = toast(test.parse(text))
     assert str(parsedtype) == text
@@ -440,7 +465,9 @@ def test_jim7():
 
 def test_jim8():
     test = Lark_StandAlone(transformer=TreeToJson())
-    text = str(ak.with_parameter(ak.Array([[1, 2, 3], [], [4, 5]]), "wonky", "string").type)
+    text = str(
+        ak.with_parameter(ak.Array([[1, 2, 3], [], [4, 5]]), "wonky", "string").type
+    )
     print(text)
     parsedtype = toast(test.parse(text))
     assert str(parsedtype) == text
@@ -448,7 +475,11 @@ def test_jim8():
 
 def test_jim9():
     test = Lark_StandAlone(transformer=TreeToJson())
-    text = str(ak.with_parameter(ak.Array([[1, 2, 3], [], [4, 5]]), "wonky", {"other": "JSON"}).type)
+    text = str(
+        ak.with_parameter(
+            ak.Array([[1, 2, 3], [], [4, 5]]), "wonky", {"other": "JSON"}
+        ).type
+    )
     print(text)
     parsedtype = toast(test.parse(text))
     assert str(parsedtype) == text
@@ -456,7 +487,9 @@ def test_jim9():
 
 def test_jim10():
     test = Lark_StandAlone(transformer=TreeToJson())
-    text = str(ak.with_parameter(ak.Array([[1, 2, 3], None, [4, 5]]), "wonky", "string").type)
+    text = str(
+        ak.with_parameter(ak.Array([[1, 2, 3], None, [4, 5]]), "wonky", "string").type
+    )
     print(text)
     parsedtype = toast(test.parse(text))
     assert str(parsedtype) == text
@@ -464,7 +497,9 @@ def test_jim10():
 
 def test_jim11():
     test = Lark_StandAlone(transformer=TreeToJson())
-    text = str(ak.with_parameter(ak.Array([1, 2, 3, None, 4, 5]), "wonky", "string").type)
+    text = str(
+        ak.with_parameter(ak.Array([1, 2, 3, None, 4, 5]), "wonky", "string").type
+    )
     print(text)
     parsedtype = toast(test.parse(text))
     assert str(parsedtype) == text
@@ -488,7 +523,13 @@ def test_jim13():
 
 def test_jim14():
     test = Lark_StandAlone(transformer=TreeToJson())
-    text = str(ak.with_parameter(ak.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]), "wonky", "string").type)
+    text = str(
+        ak.with_parameter(
+            ak.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 3, "y": 3.3}]),
+            "wonky",
+            "string",
+        ).type
+    )
     print(text)
     parsedtype = toast(test.parse(text))
     assert str(parsedtype) == text
@@ -504,7 +545,11 @@ def test_jim15():
 
 def test_jim16():
     test = Lark_StandAlone(transformer=TreeToJson())
-    text = str(ak.with_parameter(ak.Array([(1, 1.1), (2, 2.2), (3, 3.3)]), "wonky", "string").type)
+    text = str(
+        ak.with_parameter(
+            ak.Array([(1, 1.1), (2, 2.2), (3, 3.3)]), "wonky", "string"
+        ).type
+    )
     print(text)
     parsedtype = toast(test.parse(text))
     assert str(parsedtype) == text
@@ -528,7 +573,11 @@ def test_jim18():
 
 def test_jim19():
     test = Lark_StandAlone(transformer=TreeToJson())
-    text = str(ak.with_parameter(ak.to_regular(ak.Array([[1, 2], [3, 4], [5, 6]])), "wonky", "string").type)
+    text = str(
+        ak.with_parameter(
+            ak.to_regular(ak.Array([[1, 2], [3, 4], [5, 6]])), "wonky", "string"
+        ).type
+    )
     print(text)
     parsedtype = toast(test.parse(text))
     assert str(parsedtype) == text
@@ -536,7 +585,11 @@ def test_jim19():
 
 def test_jim20():
     test = Lark_StandAlone(transformer=TreeToJson())
-    text = str(ak.with_parameter(ak.Array([1, 2, 3, [1], [1, 2], [1, 2, 3]]), "wonky", "string").type)
+    text = str(
+        ak.with_parameter(
+            ak.Array([1, 2, 3, [1], [1, 2], [1, 2, 3]]), "wonky", "string"
+        ).type
+    )
     print(text)
     parsedtype = toast(test.parse(text))
     assert str(parsedtype) == text
@@ -545,7 +598,11 @@ def test_jim20():
 @pytest.mark.skip(reason="option of union with parameters not handled yet")
 def test_jim21():
     test = Lark_StandAlone(transformer=TreeToJson())
-    text = str(ak.with_parameter(ak.Array([1, 2, 3, None, [1], [1, 2], [1, 2, 3]]), "wonky", "string").type)
+    text = str(
+        ak.with_parameter(
+            ak.Array([1, 2, 3, None, [1], [1, 2], [1, 2, 3]]), "wonky", "string"
+        ).type
+    )
     print(text)
     parsedtype = toast(test.parse(text))
     assert str(parsedtype) == text
@@ -564,4 +621,13 @@ def test_jim23():
     text = str(ak.Array([1, 2, 3, None, [], [], []]).type)
     print(text)
     parsedtype = toast(test.parse(text))
+    assert str(parsedtype) == text
+
+
+def test_string():
+    test = Lark_StandAlone(transformer=TreeToJson())
+    text = "string"
+    parsedtype = toast(test.parse(text))
+    print(type(parsedtype))
+    assert isinstance(parsedtype, ak.types.ListType)
     assert str(parsedtype) == text
