@@ -120,7 +120,6 @@ def test_jims_example():
     builder = ak.layout.TypedArrayBuilder(form)
 
     # initialise
-    # builder.apply(form)
     builder.connect(vm)
     builder.debug_step()
 
@@ -191,94 +190,8 @@ def test_jims_example():
 
     assert builder.form() == form
 
-    builder.snapshot()
-    # assert ak.to_list(builder.snapshot()) == [
-    #     [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}],
-    #     [],
-    #     [{"x": 3.3, "y": [1, 2, 3]}],
-    # ]
-
-# def test_typed_builder_form():
-#     numpy_form = ak.forms.NumpyForm([], 8, "d")
-#
-#     # FIXME: generate it from a Form
-#     vm_command = "input real\noutput content " + numpy_form.primitive + "\nreal i-> content"
-#
-#     vm32 = ak.forth.ForthMachine32(vm_command)
-#
-#     assert ak.to_list(vm32.bytecodes) == [[-34, 0, 0]]
-#     assert (
-#         vm32.decompiled == """input real
-# output content float64
-#
-# real i-> content
-# """
-#     )
-#
-#     builder = ak.layout.TypedArrayBuilder()
-#
-#     # initialise
-#     builder.apply(numpy_form)
-#     #builder.connect(vm32)
-#
-#     #builder.real(5.5);
-#
-#     #assert ak.to_list(builder.snapshot()) == [5.5]
-#
-# def test_record_form_structure():
-#
-#     numpy_form = """{
-# "class": "NumpyArray",
-# "itemsize": 8,
-# "format": "d",
-# "primitive": "float64"
-# }"""
-#
-#     list_offset_form = """{
-# "class": "ListOffsetArray64",
-# "offsets": "i64",
-# "content": "int64"
-# }"""
-#
-#     record_form = """{
-# "class": "RecordArray",
-# "contents": {
-# "x": "float64",
-# "y": {
-# "class": "ListOffsetArray64",
-# "offsets": "i64",
-# "content": "int64"
-# }
-# }
-# }"""
-#
-#     builder = ak.layout.ArrayBuilder()
-#
-#     builder.beginrecord()
-#     builder.field("one")
-#     builder.integer(1)
-#     builder.field("two")
-#     builder.real(1.1)
-#     builder.endrecord()
-#
-#     builder.beginrecord()
-#     builder.field("two")
-#     builder.real(2.2)
-#     builder.field("one")
-#     builder.integer(2)
-#     builder.endrecord()
-#
-#     builder.beginrecord()
-#     builder.field("one")
-#     builder.integer(3)
-#     builder.field("two")
-#     builder.real(3.3)
-#     builder.endrecord()
-#
-#     typestrs = {}
-#     assert str(builder.type(typestrs)) == '{"one": int64, "two": float64}'
-#     assert ak.to_list(builder.snapshot()) == [
-#         {"one": 1, "two": 1.1},
-#         {"one": 2, "two": 2.2},
-#         {"one": 3, "two": 3.3},
-#     ]
+    assert ak.to_list(builder.snapshot()) == [
+        [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}],
+        [],
+        [{"x": 3.3, "y": [1, 2, 3]}],
+    ]

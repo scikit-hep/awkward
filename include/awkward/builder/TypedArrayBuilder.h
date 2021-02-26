@@ -370,6 +370,8 @@ namespace awkward {
     const NumpyFormPtr form_;
     const FormKey form_key_;
     bool copyarrays_;
+    std::string vm_source_;
+    std::string vm_output_;
   };
 
   /// @class RawArrayBuilder
@@ -582,6 +584,10 @@ namespace awkward {
     /// @brief
     const FormPtr
       form() const;
+
+    /// @brief
+    const std::string
+      to_vm() const;
 
     /// @brief Returns a string representation of this array (single-line XML
     /// indicating the length and type).
@@ -855,6 +861,8 @@ namespace awkward {
     /// See #initial.
     int64_t initial_;
     int64_t length_;
+
+    std::string vm_source_;
 
     /// @brief Root node of the FormBuilder tree.
     std::shared_ptr<FormBuilder> builder_;

@@ -73,7 +73,8 @@ namespace awkward {
   TypedArrayBuilder::TypedArrayBuilder(const FormPtr& form,
                                        const ArrayBuilderOptions& options)
     : initial_(options.initial()),
-      builder_(formBuilderFromA(form)) {}
+      builder_(formBuilderFromA(form)),
+      vm_source_("input data\n") { }
 
   void
   TypedArrayBuilder::connect(const std::shared_ptr<ForthMachine32>& vm) {
@@ -103,6 +104,11 @@ namespace awkward {
   const FormPtr
   TypedArrayBuilder::form() const {
     return builder_.get()->form();
+  }
+
+  const std::string
+  TypedArrayBuilder::to_vm() const {
+
   }
 
   const std::string
@@ -149,12 +155,7 @@ namespace awkward {
 
   const ContentPtr
   TypedArrayBuilder::snapshot() const {
-    std::cout << "TypedArrayBuilder::snapshot of a " << builder_.get()->classname() << "\n";
-    ContentPtr out = builder_.get()->snapshot(vm_.get()->outputs());
-    std::cout << out.get()->tostring() << "\n";
-    std::cout << "TypedArrayBuilder::snapshot is done!\n";
-
-    return out;
+    return builder_.get()->snapshot(vm_.get()->outputs());
   }
 
   const ContentPtr
@@ -192,7 +193,6 @@ namespace awkward {
   void
   TypedArrayBuilder::boolean(bool x) {
     // reinterpret_cast<bool*>(vm_inputs_map_["data"]->ptr_.get())[0] = x;
-    // std::cout << reinterpret_cast<int64_t*>(vm_inputs_map_["data"]->ptr_.get())[0] << "\n";
     // vm_.get()->stack_push(0);
     // vm_.get()->resume();
   }
@@ -200,7 +200,6 @@ namespace awkward {
   void
   TypedArrayBuilder::integer(int64_t x) {
     reinterpret_cast<int64_t*>(vm_inputs_map_["data"]->ptr_.get())[0] = x;
-    std::cout << reinterpret_cast<int64_t*>(vm_inputs_map_["data"]->ptr_.get())[0] << "\n";
     vm_.get()->stack_push(0);
     vm_.get()->resume();
   }
@@ -208,7 +207,6 @@ namespace awkward {
   void
   TypedArrayBuilder::real(double x) {
     reinterpret_cast<double*>(vm_inputs_map_["data"]->ptr_.get())[0] = x;
-    std::cout << reinterpret_cast<double*>(vm_inputs_map_["data"]->ptr_.get())[0] << "\n";
     vm_.get()->stack_push(1);
     vm_.get()->resume();
   }
@@ -574,23 +572,17 @@ namespace awkward {
 
   const ContentPtr
   ListOffsetArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    std::cout << "ListOffsetArrayBuilder::snapshot for " << *form_key_ << "\n";
-    ContentPtr out;
     auto search = outputs.find(std::string("part0-").append(*form_key_).append("-offsets"));
     if (search != outputs.end()) {
-      std::cout << "Again " << search->second.get()->toIndex64().tostring() << "\n";
-      out = std::make_shared<ListOffsetArray64>(Identities::none(),
+      return std::make_shared<ListOffsetArray64>(Identities::none(),
                                                 form_.get()->parameters(),
                                                 search->second.get()->toIndex64(),
                                                 content_.get()->snapshot(outputs));
-      std::cout << out.get()->tostring() << "\n";
     }
-    // throw std::invalid_argument(
-    //     std::string("Form of a ") + classname()
-    //     + std::string(" needs another Form as its content")
-    //     + FILENAME(__LINE__));
-
-    return out;
+    throw std::invalid_argument(
+        std::string("Snapshot of a ") + classname()
+        + std::string(" needs offsets")
+        + FILENAME(__LINE__));
   }
 
   const FormPtr
@@ -612,14 +604,15 @@ namespace awkward {
 
   const ContentPtr
   NumpyArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    std::cout << "NumpyArrayBuilder::snapshot " << *form_key_ << "\n";
-    ContentPtr out;
     auto search = outputs.find(std::string("part0-").append(*form_key_).append("-data"));
     if (search != outputs.end()) {
-      out = search->second.get()->toNumpyArray();
-      std::cout << out.get()->tostring() << "\n";
+      return search->second.get()->toNumpyArray();
     }
-    return out;
+    throw std::invalid_argument(
+        std::string("Snapshot of a ") + classname()
+        + std::string(" needs data")
+        + FILENAME(__LINE__));
+        
     // auto const& identities = Identities::none();
     //
     // // FIXME: check that length_ is always equal to
@@ -747,11 +740,6 @@ namespace awkward {
   RecordArrayBuilder::RecordArrayBuilder(const RecordFormPtr& form)
     : form_(form),
       form_key_(form.get()->form_key()) {
-    std::cout << "RecordArrayBuilder::RecordArrayBuilder\n";
-    for (auto const& key : form.get()->keys()) {
-      std::cout << key << "\n";
-      keys_.push_back(key);
-    }
     for (auto const& content : form.get()->contents()) {
       contents_.push_back(formBuilderFromA(content));
     }
@@ -764,28 +752,14 @@ namespace awkward {
 
   const ContentPtr
   RecordArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    std::cout << "RecordArrayBuilder::snapshot for " << *form_key_ << "\n";
-    ContentPtr out;
-    if (! contents_.empty()) {
-      ContentPtrVec contents;
-      util::RecordLookupPtr recordlookup =
-        std::make_shared<util::RecordLookup>();
-      for (size_t i = 0;  i < contents_.size();  i++) {
-        contents.push_back(contents_[i].get()->snapshot(outputs));
-        recordlookup.get()->push_back(keys_[i]);
-      }
-      ContentPtr out = std::make_shared<RecordArray>(Identities::none(),
-                                                     form_.get()->parameters(),
-                                                     contents,
-                                                     recordlookup);
-      std::cout << out.get()->tostring() << "\n";
+    ContentPtrVec contents;
+    for (size_t i = 0;  i < contents_.size();  i++) {
+      contents.push_back(contents_[i].get()->snapshot(outputs));
     }
-    // throw std::invalid_argument(
-    //     std::string("Form of a ") + classname()
-    //     + std::string(" needs another Form as its content")
-    //     + FILENAME(__LINE__));
-
-    return out;
+    return std::make_shared<RecordArray>(Identities::none(),
+                                                   form_.get()->parameters(),
+                                                   contents,
+                                                   form_.get()->recordlookup());
   }
 
   const FormPtr
