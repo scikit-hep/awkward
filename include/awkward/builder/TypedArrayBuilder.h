@@ -70,28 +70,6 @@ namespace awkward {
   class VirtualForm;
   using VirtualFormPtr = std::shared_ptr<VirtualForm>;
 
-  struct Data {
-    Data(const DataPtr& iptr, const int64_t ilength)
-      : ptr(iptr),
-        length(ilength) {}
-
-    const DataPtr ptr;
-    int64_t length;
-  };
-
-  struct Sum
-  {
-    void operator()(const std::unique_ptr<Data>& data) { length += data->length; }
-    int64_t length {0};
-  };
-
-  template< class T, class U >
-  std::shared_ptr<T> reinterpret_pointer_cast(const std::shared_ptr<U>& r) noexcept
-  {
-    auto p = reinterpret_cast<typename std::shared_ptr<T>::element_type*>(r.get());
-    return std::shared_ptr<T>(r, p);
-  }
-
   /// @class FormBuilder
   ///
   /// @brief Abstract base class for nodes within a TypedArrayBuilder
@@ -115,33 +93,22 @@ namespace awkward {
       form() const = 0;
 
     /// @brief
-    virtual void
-      integer(int64_t x) {
-        throw std::runtime_error(
-          std::string("FIXME: 'integer' is not implemented "));
-    }
+    virtual const std::string
+      vm_output() const = 0;
 
     /// @brief
-    virtual void
-      boolean(bool x) {
-        throw std::runtime_error(
-          std::string("FIXME: 'boolean' is not implemented "));
-    }
+    virtual const std::string
+      vm_func() const = 0;
 
     /// @brief
-    virtual void
-      real(double x) {
-        throw std::runtime_error(
-          std::string("FIXME: 'real' is not implemented "));
-    }
+    virtual const std::string
+      vm_func_name() const = 0;
 
     /// @brief
-    virtual const FormBuilderPtr&
-      field_check(const char* key) const {
-        throw std::invalid_argument(
-          std::string("FIXME: 'field_check' is not implemented "));
+    virtual const std::string
+      vm_from_stack() const {
+        return std::string();
     }
-
   };
 
   /// @class BitMaskedArrayBuilder
@@ -164,6 +131,18 @@ namespace awkward {
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
   private:
     /// @brief BitMaskedForm that defines the BitMaskedArray.
     const BitMaskedFormPtr form_;
@@ -171,6 +150,11 @@ namespace awkward {
 
     /// @brief Content
     FormBuilderPtr content_;
+
+    std::string vm_output_data_;
+    std::string vm_output_;
+    std::string vm_func_name_;
+    std::string vm_func_;
   };
 
   /// @class ByteMaskedArrayBuilder
@@ -193,11 +177,28 @@ namespace awkward {
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
   private:
     const ByteMaskedFormPtr form_;
     const FormKey form_key_;
 
     FormBuilderPtr content_;
+
+    std::string vm_output_data_;
+    std::string vm_output_;
+    std::string vm_func_name_;
+    std::string vm_func_;
   };
 
   /// @class EmptyArrayBuilder
@@ -220,9 +221,23 @@ namespace awkward {
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
   private:
     const EmptyFormPtr form_;
     const FormKey form_key_;
+
+    std::string vm_empty_command_;
   };
 
   /// @class IndexedArrayBuilder
@@ -245,10 +260,27 @@ namespace awkward {
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
   private:
     const IndexedFormPtr form_;
     const FormKey form_key_;
     FormBuilderPtr content_;
+
+    std::string vm_output_data_;
+    std::string vm_output_;
+    std::string vm_func_name_;
+    std::string vm_func_;
   };
 
   /// @class IndexedOptionArrayBuilder
@@ -271,10 +303,27 @@ namespace awkward {
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
   private:
     const IndexedOptionFormPtr form_;
     const FormKey form_key_;
     FormBuilderPtr content_;
+
+    std::string vm_output_data_;
+    std::string vm_output_;
+    std::string vm_func_name_;
+    std::string vm_func_;
   };
 
   /// @class ListArrayBuilder
@@ -283,8 +332,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL ListArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a ListArrayBuilder from a full set of parameters.
-    ListArrayBuilder(const ListFormPtr& form,
-                     bool copyarrays = true);
+    ListArrayBuilder(const ListFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -298,11 +346,27 @@ namespace awkward {
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
   private:
     const ListFormPtr form_;
     const FormKey form_key_;
     FormBuilderPtr content_;
-    bool copyarrays_;
+
+    std::string vm_output_data_;
+    std::string vm_output_;
+    std::string vm_func_name_;
+    std::string vm_func_;
   };
 
   /// @class ListOffsetArrayBuilder
@@ -311,8 +375,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL ListOffsetArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a ListOffsetArrayBuilder from a full set of parameters.
-    ListOffsetArrayBuilder(const ListOffsetFormPtr& form,
-                           bool copyarrays = true);
+    ListOffsetArrayBuilder(const ListOffsetFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -326,11 +389,32 @@ namespace awkward {
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
+    /// @brief
+    const std::string
+      vm_from_stack() const override;
+
   private:
     const ListOffsetFormPtr form_;
     const FormKey form_key_;
     FormBuilderPtr content_;
-    bool copyarrays_;
+
+    std::string vm_output_;
+    std::string vm_output_data_;
+    std::string vm_func_;
+    std::string vm_func_name_;
+    std::string vm_data_from_stack_;
   };
 
   /// @class NumpyArrayBuilder
@@ -339,8 +423,7 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL NumpyArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a NumpyArrayBuilder from a full set of parameters.
-    NumpyArrayBuilder(const NumpyFormPtr& form,
-                      bool copyarrays = true);
+    NumpyArrayBuilder(const NumpyFormPtr& form);
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -350,28 +433,34 @@ namespace awkward {
     const ContentPtr
       snapshot(const ForthOtputBufferMap& outputs) const override;
 
-    // /// @brief
-    // void
-    //   integer(int64_t x) override;
-    //
-    // /// @brief
-    // void
-    //   boolean(bool x) override;
-    //
-    // /// @brief
-    // void
-    //   real(double x) override;
-
     /// @brief
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
+    /// @brief
+    const std::string
+      vm_from_stack() const override;
+
   private:
     const NumpyFormPtr form_;
     const FormKey form_key_;
-    bool copyarrays_;
-    std::string vm_source_;
+
     std::string vm_output_;
+    std::string vm_output_data_;
+    std::string vm_func_;
+    std::string vm_func_name_;
   };
 
   /// @class RawArrayBuilder
@@ -394,9 +483,26 @@ namespace awkward {
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
   private:
     const RawFormPtr form_;
     const FormKey form_key_;
+
+    std::string vm_output_data_;
+    std::string vm_output_;
+    std::string vm_func_name_;
+    std::string vm_func_;
   };
 
   /// @class RecordArrayBuilder
@@ -415,18 +521,36 @@ namespace awkward {
     const ContentPtr
       snapshot(const ForthOtputBufferMap& outputs) const override;
 
-    // const FormBuilderPtr&
-    //   field_check(const char* key) const override;
-
     /// @brief
     const FormPtr
       form() const override;
+
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
+    /// @brief
+    const std::string
+      vm_from_stack() const override;
 
   private:
     const RecordFormPtr form_;
     const FormKey form_key_;
     std::vector<FormBuilderPtr> contents_;
-    std::vector<std::string> keys_;
+
+    std::string vm_output_data_;
+    std::string vm_output_;
+    std::string vm_func_name_;
+    std::string vm_func_;
+    std::string vm_from_stack_;
   };
 
   /// @class RegularArrayBuilder
@@ -449,10 +573,27 @@ namespace awkward {
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
   private:
     const RegularFormPtr form_;
     const FormKey form_key_;
     FormBuilderPtr content_;
+
+    std::string vm_output_data_;
+    std::string vm_output_;
+    std::string vm_func_name_;
+    std::string vm_func_;
   };
 
   /// @class UnionArrayBuilder
@@ -475,10 +616,27 @@ namespace awkward {
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
   private:
     const UnionFormPtr form_;
     const FormKey form_key_;
     std::vector<FormBuilderPtr> contents_;
+
+    std::string vm_output_data_;
+    std::string vm_output_;
+    std::string vm_func_name_;
+    std::string vm_func_;
   };
 
   /// @class UnmaskedArrayBuilder
@@ -501,9 +659,26 @@ namespace awkward {
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
   private:
     const UnmaskedFormPtr form_;
     const FormKey form_key_;
+
+    std::string vm_output_data_;
+    std::string vm_output_;
+    std::string vm_func_name_;
+    std::string vm_func_;
   };
 
   /// @class VirtualArrayBuilder
@@ -526,9 +701,26 @@ namespace awkward {
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
   private:
     const VirtualFormPtr form_;
     const FormKey form_key_;
+
+    std::string vm_output_data_;
+    std::string vm_output_;
+    std::string vm_func_name_;
+    std::string vm_func_;
   };
 
   /// @class UnknownFormBuilder
@@ -551,8 +743,21 @@ namespace awkward {
     const FormPtr
       form() const override;
 
+    /// @brief
+    const std::string
+      vm_output() const override;
+
+    /// @brief
+    const std::string
+      vm_func() const override;
+
+    /// @brief
+    const std::string
+      vm_func_name() const override;
+
     private:
       const FormPtr form_;
+      std::string vm_empty_command_;
   };
 
   /// @class TypedArrayBuilder
@@ -574,12 +779,6 @@ namespace awkward {
     /// @brief
     void
       debug_step() const;
-
-    /// @brief
-    const std::shared_ptr<ForthMachine32>&
-      vm() const {
-        return vm_;
-      }
 
     /// @brief
     const FormPtr
@@ -862,6 +1061,7 @@ namespace awkward {
     int64_t initial_;
     int64_t length_;
 
+    std::string vm_input_data_;
     std::string vm_source_;
 
     /// @brief Root node of the FormBuilder tree.
@@ -869,10 +1069,6 @@ namespace awkward {
 
     /// @brief Current node of the FormBuilder tree.
     std::shared_ptr<FormBuilder> current_builder_;
-
-    /// @brief
-    enum class state : std::int32_t {int64 = 0, float64 = 1, begin_list = 2, end_list = 3};
-    using utype = std::underlying_type<state>::type;
 
     std::shared_ptr<ForthMachine32> vm_;
     std::map<std::string, std::shared_ptr<ForthInputBuffer>> vm_inputs_map_;

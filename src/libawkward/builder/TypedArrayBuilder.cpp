@@ -70,11 +70,140 @@ namespace awkward {
     }
   }
 
+  const std::string
+  index_form_to_name(Index::Form form) {
+    switch (form) {
+    case Index::Form::i8:
+      return "int8";
+    case Index::Form::u8:
+      return "uint8";
+    case Index::Form::i32:
+      return "int32";
+    case Index::Form::u32:
+      return "uint32";
+    case Index::Form::i64:
+      return "int64";
+    default:
+      throw std::runtime_error(
+        std::string("unrecognized Index::Form") + FILENAME(__LINE__));
+    }
+  }
+
+  enum class state : std::int32_t {
+    int64 = 0,
+    float64 = 1,
+    begin_list = 2,
+    end_list = 3,
+    boolean = 4,
+    int8 = 5,
+    int16 = 6,
+    int32 = 7,
+    uint8 = 8,
+    uint16 = 9,
+    uint32 = 10,
+    uint64 = 11,
+    float16 = 12,
+    float32 = 13,
+    float128 = 14,
+    complex64 = 15,
+    complex128 = 16,
+    complex256 = 17
+  };
+  using utype = std::underlying_type<state>::type;
+
+  const std::string
+  dtype_to_state(util::dtype dt) {
+    switch (dt) {
+    case util::dtype::boolean:
+      return std::to_string(static_cast<utype>(state::boolean));
+    case util::dtype::int8:
+      return std::to_string(static_cast<utype>(state::int8));
+    case util::dtype::int16:
+      return std::to_string(static_cast<utype>(state::int16));
+    case util::dtype::int32:
+      return std::to_string(static_cast<utype>(state::int32));
+    case util::dtype::int64:
+      return std::to_string(static_cast<utype>(state::int64));
+    case util::dtype::uint8:
+      return std::to_string(static_cast<utype>(state::uint8));
+    case util::dtype::uint16:
+      return std::to_string(static_cast<utype>(state::uint16));
+    case util::dtype::uint32:
+      return std::to_string(static_cast<utype>(state::uint32));
+    case util::dtype::uint64:
+      return std::to_string(static_cast<utype>(state::uint64));
+    case util::dtype::float16:
+      return std::to_string(static_cast<utype>(state::float16));
+    case util::dtype::float32:
+      return std::to_string(static_cast<utype>(state::float32));
+    case util::dtype::float64:
+      return std::to_string(static_cast<utype>(state::float64));
+    case util::dtype::float128:
+      return std::to_string(static_cast<utype>(state::float128));
+    case util::dtype::complex64:
+      return std::to_string(static_cast<utype>(state::complex64));
+    case util::dtype::complex128:
+      return std::to_string(static_cast<utype>(state::complex128));
+    case util::dtype::complex256:
+      return std::to_string(static_cast<utype>(state::complex256));
+      // case datetime64:
+      //   return static_cast<utype>(state::datetime64);
+      // case timedelta64:
+      //   return static_cast<utype>(state::timedelta64);
+    default:
+      return std::to_string(-1);
+    }
+  };
+
+  const std::string
+  dtype_to_vm_format(util::dtype dt) {
+    switch (dt) {
+    case util::dtype::boolean:
+    case util::dtype::int8:
+    case util::dtype::int16:
+    case util::dtype::int32:
+    case util::dtype::int64:
+    case util::dtype::uint8:
+    case util::dtype::uint16:
+    case util::dtype::uint32:
+    case util::dtype::uint64:
+      return "q";
+    case util::dtype::float16:
+    case util::dtype::float32:
+    case util::dtype::float64:
+    case util::dtype::float128:
+    case util::dtype::complex64:
+    case util::dtype::complex128:
+    case util::dtype::complex256:
+ // case datetime64:
+ // case timedelta64:
+      return "d";
+    default:
+      return "FIXME";
+    }
+  };
+
   TypedArrayBuilder::TypedArrayBuilder(const FormPtr& form,
                                        const ArrayBuilderOptions& options)
     : initial_(options.initial()),
-      builder_(formBuilderFromA(form)),
-      vm_source_("input data\n") { }
+      vm_input_data_("data"),
+      vm_source_(),
+      builder_(formBuilderFromA(form)) {
+    vm_source_.append("input ")
+      .append(vm_input_data_)
+      .append("\n");
+
+    vm_source_.append(builder_.get()->vm_output()).append("\n");
+    vm_source_.append(builder_.get()->vm_func()).append("\n");
+    vm_source_.append(builder_.get()->vm_from_stack()).append("\n");
+    
+    vm_source_.append("0\n").append("begin\n")
+    .append("pause\n")
+    .append(builder_.get()->vm_func_name())
+    .append("\n")
+    .append("1+\n")
+    .append("again\n");
+  }
 
   void
   TypedArrayBuilder::connect(const std::shared_ptr<ForthMachine32>& vm) {
@@ -83,7 +212,7 @@ namespace awkward {
     std::shared_ptr<void> ptr(
       kernel::malloc<void>(kernel::lib::cpu, 8*sizeof(uint8_t)));
 
-    vm_inputs_map_["data"] = std::make_shared<ForthInputBuffer>(ptr, 0, length_);
+    vm_inputs_map_[vm_input_data_] = std::make_shared<ForthInputBuffer>(ptr, 0, length_);
     vm.get()->run(vm_inputs_map_);
   }
 
@@ -108,7 +237,7 @@ namespace awkward {
 
   const std::string
   TypedArrayBuilder::to_vm() const {
-
+    return vm_source_;
   }
 
   const std::string
@@ -192,22 +321,22 @@ namespace awkward {
 
   void
   TypedArrayBuilder::boolean(bool x) {
-    // reinterpret_cast<bool*>(vm_inputs_map_["data"]->ptr_.get())[0] = x;
-    // vm_.get()->stack_push(0);
-    // vm_.get()->resume();
+    reinterpret_cast<bool*>(vm_inputs_map_[vm_input_data_]->ptr_.get())[0] = x;
+    vm_.get()->stack_push(static_cast<utype>(state::boolean));
+    vm_.get()->resume();
   }
 
   void
   TypedArrayBuilder::integer(int64_t x) {
-    reinterpret_cast<int64_t*>(vm_inputs_map_["data"]->ptr_.get())[0] = x;
-    vm_.get()->stack_push(0);
+    reinterpret_cast<int64_t*>(vm_inputs_map_[vm_input_data_]->ptr_.get())[0] = x;
+    vm_.get()->stack_push(static_cast<utype>(state::int64));
     vm_.get()->resume();
   }
 
   void
   TypedArrayBuilder::real(double x) {
-    reinterpret_cast<double*>(vm_inputs_map_["data"]->ptr_.get())[0] = x;
-    vm_.get()->stack_push(1);
+    reinterpret_cast<double*>(vm_inputs_map_[vm_input_data_]->ptr_.get())[0] = x;
+    vm_.get()->stack_push(static_cast<utype>(state::float64));
     vm_.get()->resume();
   }
 
@@ -259,13 +388,13 @@ namespace awkward {
 
   void
   TypedArrayBuilder::beginlist() {
-    vm_.get()->stack_push(2);
+    vm_.get()->stack_push(static_cast<utype>(state::begin_list));
     vm_.get()->resume();
   }
 
   void
   TypedArrayBuilder::endlist() {
-    vm_.get()->stack_push(3);
+    vm_.get()->stack_push(static_cast<utype>(state::end_list));
     vm_.get()->resume();
   }
 
@@ -371,7 +500,22 @@ namespace awkward {
   BitMaskedArrayBuilder::BitMaskedArrayBuilder(const BitMaskedFormPtr& form)
     : form_(form),
       form_key_(form.get()->form_key()),
-      content_(formBuilderFromA(form.get()->content())) { }
+      content_(formBuilderFromA(form.get()->content())) {
+    // FIXME: generate a key if this FormKey is empty
+    // or already exists
+    vm_output_data_ = std::string("part0-").append(*form_key_).append("-mask");
+
+    vm_func_name_ = std::string(*form_key_).append("-").append("bitmask");
+
+    vm_func_ = std::string(": ")
+      .append(vm_func_name_).append("\n")
+      .append(";").append("\n");
+
+    vm_output_ = std::string("output ")
+      .append(vm_output_data_)
+      .append(" ")
+      .append("FIXME-type").append("\n");
+  }
 
   const std::string
   BitMaskedArrayBuilder::classname() const {
@@ -382,7 +526,7 @@ namespace awkward {
   BitMaskedArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
     ContentPtr out;
     int64_t length = 0; // FIXME
-    auto search = outputs.find(std::string("part0-").append(*form_key_).append("-mask"));
+    auto search = outputs.find(vm_output_data_);
     if (search != outputs.end()) {
       out = std::make_shared<BitMaskedArray>(Identities::none(),
                                              form_.get()->parameters(),
@@ -400,11 +544,30 @@ namespace awkward {
     return std::static_pointer_cast<Form>(form_);
   }
 
+  const std::string
+  BitMaskedArrayBuilder::vm_output() const {
+    return vm_output_;
+  }
+
+  const std::string
+  BitMaskedArrayBuilder::vm_func() const {
+    return vm_func_;
+  }
+
+  const std::string
+  BitMaskedArrayBuilder::vm_func_name() const {
+    return vm_func_name_;
+  }
+
   ///
   ByteMaskedArrayBuilder::ByteMaskedArrayBuilder(const ByteMaskedFormPtr& form)
     : form_(form),
       form_key_(form.get()->form_key()),
-      content_(formBuilderFromA(form.get()->content())) { }
+      content_(formBuilderFromA(form.get()->content())) {
+    // FIXME: generate a key if this FormKey is empty
+    // or already exists
+    vm_output_data_ = std::string("part0-").append(*form_key_).append("-mask");
+  }
 
   const std::string
   ByteMaskedArrayBuilder::classname() const {
@@ -414,7 +577,7 @@ namespace awkward {
   const ContentPtr
   ByteMaskedArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
     ContentPtr out;
-    auto search = outputs.find(std::string("part0-").append(*form_key_).append("-mask"));
+    auto search = outputs.find(vm_output_data_);
     if (search != outputs.end()) {
       out = std::make_shared<ByteMaskedArray>(Identities::none(),
                                               form_.get()->parameters(),
@@ -428,6 +591,29 @@ namespace awkward {
   const FormPtr
   ByteMaskedArrayBuilder::form() const {
     return std::static_pointer_cast<Form>(form_);
+  }
+
+  const std::string
+  ByteMaskedArrayBuilder::vm_output() const {
+    return std::string("output ")
+      .append(vm_output_data_)
+      .append("\n");
+  }
+
+  const std::string
+  ByteMaskedArrayBuilder::vm_func() const {
+    return std::string(": ")
+      .append(vm_func_name())
+      .append(";\n");
+  }
+
+  const std::string
+  ByteMaskedArrayBuilder::vm_func_name() const {
+    std::string out;
+    out.append(*form_key_)
+      .append("-")
+      .append("bytemask");
+    return out;
   }
 
   ///
@@ -451,11 +637,30 @@ namespace awkward {
     return std::static_pointer_cast<Form>(form_);
   }
 
+  const std::string
+  EmptyArrayBuilder::vm_output() const {
+    return vm_empty_command_;
+  }
+
+  const std::string
+  EmptyArrayBuilder::vm_func() const {
+    return vm_empty_command_;
+  }
+
+  const std::string
+  EmptyArrayBuilder::vm_func_name() const {
+    return vm_empty_command_;
+  }
+
   ///
   IndexedArrayBuilder::IndexedArrayBuilder(const IndexedFormPtr& form)
     : form_(form),
       form_key_(form.get()->form_key()),
-      content_(formBuilderFromA(form.get()->content())) { }
+      content_(formBuilderFromA(form.get()->content())) {
+    // FIXME: generate a key if this FormKey is empty
+    // or already exists
+    vm_output_data_ = std::string("part0-").append(*form_key_).append("-index");
+  }
 
   const std::string
   IndexedArrayBuilder::classname() const {
@@ -483,6 +688,27 @@ namespace awkward {
   const FormPtr
   IndexedArrayBuilder::form() const {
     return std::static_pointer_cast<Form>(form_);
+  }
+
+  const std::string
+  IndexedArrayBuilder::vm_output() const {
+    return std::string("output ")
+      .append(vm_output_data_)
+      .append("\n");
+  }
+
+  const std::string
+  IndexedArrayBuilder::vm_func() const {
+    return std::string(": ")
+      .append(vm_func_name())
+      .append(";\n");
+  }
+
+  const std::string
+  IndexedArrayBuilder::vm_func_name() const {
+    return std::string (*form_key_)
+      .append("-")
+      .append("index");
   }
 
   ///
@@ -519,13 +745,30 @@ namespace awkward {
     return std::static_pointer_cast<Form>(form_);
   }
 
+  const std::string
+  IndexedOptionArrayBuilder::vm_output() const {
+    return std::string("\n");
+  }
+
+  const std::string
+  IndexedOptionArrayBuilder::vm_func() const {
+    return std::string(": ")
+      .append(vm_func_name())
+      .append(";\n");
+  }
+
+  const std::string
+  IndexedOptionArrayBuilder::vm_func_name() const {
+    return std::string(*form_key_)
+      .append("-")
+      .append("index");
+  }
+
   ///
-  ListArrayBuilder::ListArrayBuilder(const ListFormPtr& form,
-                                     bool copyarrays)
+  ListArrayBuilder::ListArrayBuilder(const ListFormPtr& form)
     : form_(form),
       form_key_(form.get()->form_key()),
-      content_(formBuilderFromA(form.get()->content())),
-      copyarrays_(copyarrays) { }
+      content_(formBuilderFromA(form.get()->content())) { }
 
   const std::string
   ListArrayBuilder::classname() const {
@@ -557,13 +800,71 @@ namespace awkward {
     return std::static_pointer_cast<Form>(form_);
   }
 
+  const std::string
+  ListArrayBuilder::vm_output() const {
+    return std::string("\n");
+  }
+
+  const std::string
+  ListArrayBuilder::vm_func() const {
+    return std::string(": ")
+      .append(vm_func_name())
+      .append(";\n");
+  }
+
+  const std::string
+  ListArrayBuilder::vm_func_name() const {
+    std::string out;
+    out.append(*form_key_)
+      .append("-")
+      .append("list");
+    return out;
+  }
+
   ///
-  ListOffsetArrayBuilder::ListOffsetArrayBuilder(const ListOffsetFormPtr& form,
-                                                 bool copyarrays)
+  ListOffsetArrayBuilder::ListOffsetArrayBuilder(const ListOffsetFormPtr& form)
     : form_(form),
       form_key_(form.get()->form_key()),
-      content_(formBuilderFromA(form.get()->content())),
-      copyarrays_(copyarrays) { }
+      content_(formBuilderFromA(form.get()->content())) {
+    // FIXME: generate a key if this FormKey is empty
+    // or already exists
+    vm_output_data_ = std::string("part0-").append(*form_key_).append("-offsets");
+
+    vm_func_name_ = std::string(*form_key_).append("-").append("list");
+
+    vm_output_ = std::string("output ")
+      .append(vm_output_data_)
+      .append(" ")
+      .append(index_form_to_name(form_.get()->offsets()))
+      .append("\n")
+      .append(content_.get()->vm_output());
+
+    vm_func_.append(content_.get()->vm_func())
+      .append(": ").append(vm_func_name()).append("\n")
+      .append(std::to_string(static_cast<utype>(state::begin_list)))
+      .append(" <> if").append("\n")
+      .append("halt").append("\n")
+      .append("then").append("\n")
+      .append("\n")
+      .append("0").append("\n")
+      .append("begin").append("\n")
+      .append("pause").append("\n")
+      .append("dup ")
+      .append(std::to_string(static_cast<utype>(state::end_list)))
+      .append(" = if").append("\n")
+      .append("drop").append("\n")
+      .append(vm_output_data_).append(" +<- stack").append("\n")
+      .append("exit").append("\n")
+      .append("else").append("\n")
+      .append(content_.get()->vm_func_name()).append("\n")
+      .append("1+").append("\n")
+      .append("then").append("\n")
+      .append("again").append("\n")
+      .append(";").append("\n");
+
+    vm_data_from_stack_ = std::string(content_.get()->vm_from_stack())
+      .append("0 ").append(vm_output_data_).append(" <- stack").append("\n");
+  }
 
   const std::string
   ListOffsetArrayBuilder::classname() const {
@@ -572,12 +873,12 @@ namespace awkward {
 
   const ContentPtr
   ListOffsetArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    auto search = outputs.find(std::string("part0-").append(*form_key_).append("-offsets"));
+    auto search = outputs.find(vm_output_data_);
     if (search != outputs.end()) {
       return std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                form_.get()->parameters(),
-                                                search->second.get()->toIndex64(),
-                                                content_.get()->snapshot(outputs));
+                                                 form_.get()->parameters(),
+                                                 search->second.get()->toIndex64(),
+                                                 content_.get()->snapshot(outputs));
     }
     throw std::invalid_argument(
         std::string("Snapshot of a ") + classname()
@@ -590,12 +891,54 @@ namespace awkward {
     return std::static_pointer_cast<Form>(form_);
   }
 
+  const std::string
+  ListOffsetArrayBuilder::vm_output() const {
+    return vm_output_;
+  }
+
+  const std::string
+  ListOffsetArrayBuilder::vm_func() const {
+    return vm_func_;
+  }
+
+  const std::string
+  ListOffsetArrayBuilder::vm_func_name() const {
+    return vm_func_name_;
+  }
+
+  const std::string
+  ListOffsetArrayBuilder::vm_from_stack() const {
+    return vm_data_from_stack_;
+  }
+
   ///
-  NumpyArrayBuilder::NumpyArrayBuilder(const NumpyFormPtr& form,
-                                       bool copyarrays)
+  NumpyArrayBuilder::NumpyArrayBuilder(const NumpyFormPtr& form)
     : form_(form),
-      form_key_(form.get()->form_key()),
-      copyarrays_(copyarrays) { }
+      form_key_(form.get()->form_key()) {
+    // FIXME: generate a key if this FormKey is empty
+    // or already exists
+    vm_output_data_ = std::string("part0-").append(*form_key_).append("-data");
+
+    vm_output_ = std::string("output ")
+      .append(vm_output_data_)
+      .append(" ")
+      .append(dtype_to_name(form_.get()->dtype())).append("\n");
+
+    vm_func_name_ = std::string(*form_key_)
+      .append("-")
+      .append(dtype_to_name(form_.get()->dtype()));
+
+    vm_func_ = std::string(": ").append(vm_func_name()).append("\n")
+      .append(dtype_to_state(form_.get()->dtype()))
+      .append(" = if").append("\n")
+      .append("0 data seek").append("\n")
+      .append("data ").append(dtype_to_vm_format(form_.get()->dtype()))
+      .append("-> ").append(vm_output_data_).append("\n")
+      .append("else").append("\n")
+      .append("halt").append("\n")
+      .append("then").append("\n")
+      .append(";").append("\n");
+  }
 
   const std::string
   NumpyArrayBuilder::classname() const {
@@ -604,7 +947,7 @@ namespace awkward {
 
   const ContentPtr
   NumpyArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    auto search = outputs.find(std::string("part0-").append(*form_key_).append("-data"));
+    auto search = outputs.find(vm_output_data_);
     if (search != outputs.end()) {
       return search->second.get()->toNumpyArray();
     }
@@ -612,78 +955,6 @@ namespace awkward {
         std::string("Snapshot of a ") + classname()
         + std::string(" needs data")
         + FILENAME(__LINE__));
-        
-    // auto const& identities = Identities::none();
-    //
-    // // FIXME: check that length_ is always equal to
-    // // Sum s = std::for_each(data_.begin(), data_.end(), Sum());
-    //
-    // std::vector<ssize_t> shape = { (ssize_t)length_ };
-    // std::vector<ssize_t> strides = { (ssize_t)dtype_to_itemsize(form_.get()->dtype()) };
-    //
-    // if (copyarrays_) {
-    //   Index64 bytepos(shape[0]);
-    //   struct Error err1 = kernel::NumpyArray_contiguous_init_64(
-    //     kernel::lib::cpu,   // DERIVE
-    //     bytepos.data(),
-    //     shape[0],
-    //     strides[0]);
-    //   util::handle_error(err1, classname(), identities.get());
-    //
-    //   std::shared_ptr<void> ptr(
-    //     kernel::malloc<void>(kernel::lib::cpu, bytepos.length()*strides[0]));
-    //
-    //   // FIXME: move it to kernel?
-    //   // nothing to be done if all data pointers hold the same memory address
-    //   // otherwise, copy the data into a single contiguous memory
-    //   //
-    //   Index64 data_lens((int64_t)data_.size());
-    //   const uint8_t* data_ptrs[data_.size()];
-    //   int64_t indx = 0;
-    //   for (auto const& it : data_) {
-    //     data_ptrs[indx] = reinterpret_cast<uint8_t*>(it->ptr.get());
-    //     data_lens.data()[indx] = it->length;
-    //     indx++;
-    //   }
-    //
-    //   struct Error err2 = kernel::NumpyArray_contiguous_copy_from_many_64(
-    //     kernel::lib::cpu,   // DERIVE
-    //     reinterpret_cast<uint8_t*>(ptr.get()),
-    //     data_ptrs,
-    //     data_lens.data(),
-    //     bytepos.length(),
-    //     strides[0],
-    //     bytepos.data());
-    //   util::handle_error(err2, classname(), identities.get());
-    //
-    //   return std::make_shared<NumpyArray>(identities,
-    //                                       form_.get()->parameters(),
-    //                                       ptr,
-    //                                       shape,
-    //                                       strides,
-    //                                       0,
-    //                                       dtype_to_itemsize(form_.get()->dtype()),
-    //                                       form_.get()->format(),
-    //                                       form_.get()->dtype(),
-    //                                       kernel::lib::cpu);
-    // }
-    // else {
-    //   // FIXME: this is to peek at the last data buffer
-    //   //
-    //   std::vector<ssize_t> last_shape = { (ssize_t)data_.back()->length };
-    //
-    //   return std::make_shared<NumpyArray>(identities,
-    //                                       form_.get()->parameters(),
-    //                                       data_.back()->ptr,
-    //                                       last_shape,
-    //                                       strides,
-    //                                       0,
-    //                                       dtype_to_itemsize(form_.get()->dtype()),
-    //                                       form_.get()->format(),
-    //                                       form_.get()->dtype(),
-    //                                       kernel::lib::cpu);
-    //
-    // }
   }
 
   const FormPtr
@@ -691,50 +962,25 @@ namespace awkward {
     return std::static_pointer_cast<Form>(form_);
   }
 
-  // void
-  // NumpyArrayBuilder::integer(int64_t x) {
-  //   if (!data_.empty()) {
-  //     reinterpret_cast<int64_t*>(data_.back()->ptr.get())[length_] = x;
-  //     data_.back().get()->length += 1;
-  //     length_ += 1;
-  //   }
-  //   else {
-  //     throw std::invalid_argument(
-  //       std::string("FormBuilder ") + classname()
-  //       + std::string(" needs a data buffer")
-  //       + FILENAME(__LINE__));
-  //   }
-  // }
-  //
-  // void
-  // NumpyArrayBuilder::boolean(bool x) {
-  //   if (!data_.empty()) {
-  //     reinterpret_cast<bool*>(data_.back()->ptr.get())[length_] = x;
-  //     data_.back().get()->length += 1;
-  //     length_ += 1;
-  //   }
-  //   else {
-  //     throw std::invalid_argument(
-  //       std::string("FormBuilder ") + classname()
-  //       + std::string(" needs a data buffer")
-  //       + FILENAME(__LINE__));
-  //   }
-  // }
-  //
-  // void
-  // NumpyArrayBuilder::real(double x) {
-  //   if (!data_.empty()) {
-  //     reinterpret_cast<double*>(data_.back()->ptr.get())[length_] = x;
-  //     data_.back().get()->length += 1;
-  //     length_ += 1;
-  //   }
-  //   else {
-  //     throw std::invalid_argument(
-  //       std::string("FormBuilder ") + classname()
-  //       + std::string(" needs a data buffer")
-  //       + FILENAME(__LINE__));
-  //   }
-  // }
+  const std::string
+  NumpyArrayBuilder::vm_output() const {
+    return vm_output_;
+  }
+
+  const std::string
+  NumpyArrayBuilder::vm_func() const {
+    return vm_func_;
+  }
+
+  const std::string
+  NumpyArrayBuilder::vm_func_name() const {
+    return vm_func_name_;
+  }
+
+  const std::string
+  NumpyArrayBuilder::vm_from_stack() const {
+    return std::string();
+  }
 
   ///
   RecordArrayBuilder::RecordArrayBuilder(const RecordFormPtr& form)
@@ -743,6 +989,29 @@ namespace awkward {
     for (auto const& content : form.get()->contents()) {
       contents_.push_back(formBuilderFromA(content));
     }
+
+    for (auto const& content : contents_) {
+      vm_output_.append(content.get()->vm_output());
+    }
+    for (auto const& content : contents_) {
+      vm_from_stack_.append(content.get()->vm_from_stack());
+    }
+
+    vm_func_name_ = std::string(*form_key_).append("-record");
+
+    for (auto const& content : contents_) {
+      vm_func_.append(content.get()->vm_func());
+    }
+    vm_func_.append(": ")
+      .append(vm_func_name_);
+
+    for (auto const& content : contents_) {
+      vm_func_.append("\n    ").append(content.get()->vm_func_name())
+        .append(" pause");
+    }
+    // Remove the last pause
+    vm_func_.erase(vm_func_.end() - 6, vm_func_.end());
+    vm_func_.append("\n;\n\n");
   }
 
   const std::string
@@ -757,9 +1026,9 @@ namespace awkward {
       contents.push_back(contents_[i].get()->snapshot(outputs));
     }
     return std::make_shared<RecordArray>(Identities::none(),
-                                                   form_.get()->parameters(),
-                                                   contents,
-                                                   form_.get()->recordlookup());
+                                         form_.get()->parameters(),
+                                         contents,
+                                         form_.get()->recordlookup());
   }
 
   const FormPtr
@@ -767,24 +1036,25 @@ namespace awkward {
     return std::static_pointer_cast<Form>(form_);
   }
 
-  // const FormBuilderPtr&
-  // RecordArrayBuilder::field_check(const char* key) const {
-  //   auto const& pos = distance(keys_.begin(), find(keys_.begin(), keys_.end(), key));
-  //   // Note, 'pos' is the number of increments needed to go from first to last.
-  //   // The value may be negative if random-access iterators are used and
-  //   // first is reachable from last.
-  //   if (pos >= (int64_t)keys_.size()) {
-  //     // key is not found
-  //     throw std::invalid_argument(
-  //       std::string("FormBuilder ") + classname()
-  //       + std::string(" does not have a content with a key \"")
-  //       + std::string(key) + std::string("\"")
-  //       + FILENAME(__LINE__));
-  //   }
-  //   else {
-  //     return *std::next(contents_.begin(), pos);
-  //   }
-  // }
+  const std::string
+  RecordArrayBuilder::vm_output() const {
+    return vm_output_;
+  }
+
+  const std::string
+  RecordArrayBuilder::vm_func() const {
+    return vm_func_;
+  }
+
+  const std::string
+  RecordArrayBuilder::vm_func_name() const {
+    return vm_func_name_;
+  }
+
+  const std::string
+  RecordArrayBuilder::vm_from_stack() const {
+    return vm_from_stack_;
+  }
 
   ///
   RegularArrayBuilder::RegularArrayBuilder(const RegularFormPtr& form)
@@ -814,10 +1084,32 @@ namespace awkward {
     return std::static_pointer_cast<Form>(form_);
   }
 
+  const std::string
+  RegularArrayBuilder::vm_output() const {
+    return std::string("\n");
+  }
+
+  const std::string
+  RegularArrayBuilder::vm_func() const {
+    return std::string(": ")
+      .append(vm_func_name())
+      .append("\n");
+  }
+
+  const std::string
+  RegularArrayBuilder::vm_func_name() const {
+    return std::string(*form_key_)
+      .append("-reg");
+  }
+
   ///
   UnionArrayBuilder::UnionArrayBuilder(const UnionFormPtr& form)
     : form_(form),
-      form_key_(form.get()->form_key()) { }
+      form_key_(form.get()->form_key()) {
+    // FIXME: generate a key if this FormKey is empty
+    // or already exists
+    vm_output_data_ = std::string("part0-").append(*form_key_).append("-tags");
+ }
 
   const std::string
   UnionArrayBuilder::classname() const {
@@ -838,10 +1130,35 @@ namespace awkward {
     return std::static_pointer_cast<Form>(form_);
   }
 
+  const std::string
+  UnionArrayBuilder::vm_output() const {
+    return std::string("output ")
+      .append(vm_output_data_)
+      .append("\n");
+  }
+
+  const std::string
+  UnionArrayBuilder::vm_func() const {
+    return std::string(": ")
+      .append(*form_key_)
+      .append("-")
+      .append("union\n");
+  }
+
+  const std::string
+  UnionArrayBuilder::vm_func_name() const {
+    return std::string(*form_key_)
+      .append("-union");
+  }
+
   ///
   UnmaskedArrayBuilder::UnmaskedArrayBuilder(const UnmaskedFormPtr& form)
     : form_(form),
-      form_key_(form.get()->form_key()) { }
+      form_key_(form.get()->form_key()) {
+    // FIXME: generate a key if this FormKey is empty
+    // or already exists
+    vm_output_data_ = std::string("part0-").append(*form_key_).append("-mask");
+  }
 
   const std::string
   UnmaskedArrayBuilder::classname() const {
@@ -858,6 +1175,27 @@ namespace awkward {
   const FormPtr
   UnmaskedArrayBuilder::form() const {
     return std::static_pointer_cast<Form>(form_);
+  }
+
+  const std::string
+  UnmaskedArrayBuilder::vm_output() const {
+    return std::string("output ")
+      .append(vm_output_data_)
+      .append("\n");
+  }
+
+  const std::string
+  UnmaskedArrayBuilder::vm_func() const {
+    return std::string(": ")
+      .append(*form_key_)
+      .append("-")
+      .append("unmasked\n");
+  }
+
+  const std::string
+  UnmaskedArrayBuilder::vm_func_name() const {
+    return std::string(*form_key_)
+      .append("-unmasked");
   }
 
   ///
@@ -882,6 +1220,21 @@ namespace awkward {
     return std::static_pointer_cast<Form>(form_);
   }
 
+  const std::string
+  VirtualArrayBuilder::vm_output() const {
+    return vm_output_;
+  }
+
+  const std::string
+  VirtualArrayBuilder::vm_func() const {
+    return vm_func_;
+  }
+
+  const std::string
+  VirtualArrayBuilder::vm_func_name() const {
+    return vm_func_name_;
+  }
+
   ///
   UnknownFormBuilder::UnknownFormBuilder(const FormPtr& form)
     : form_(form) {}
@@ -899,6 +1252,21 @@ namespace awkward {
   const FormPtr
   UnknownFormBuilder::form() const {
     return form_;
+  }
+
+  const std::string
+  UnknownFormBuilder::vm_output() const {
+    return vm_empty_command_;
+  }
+
+  const std::string
+  UnknownFormBuilder::vm_func() const {
+    return vm_empty_command_;
+  }
+
+  const std::string
+  UnknownFormBuilder::vm_func_name() const {
+    return vm_empty_command_;
   }
 
 }

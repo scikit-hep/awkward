@@ -1106,9 +1106,9 @@ make_TypedArrayBuilder(const py::handle& m, const std::string& name) {
               const std::shared_ptr<ak::ForthMachine32>& vm) -> void {
         self.connect(vm);
       })
-      .def("vm",
-           [](ak::TypedArrayBuilder& self) -> const std::shared_ptr<ak::ForthMachine32> {
-        return self.vm();
+      .def("to_vm",
+           [](ak::TypedArrayBuilder& self) -> const std::string {
+        return self.to_vm();
       })
       .def("debug_step",
            [](const ak::TypedArrayBuilder& self) -> void {
