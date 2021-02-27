@@ -42,12 +42,11 @@ record_tuple: "(" input ["," input]* ")"
 record_tuple_param: "tuple" "[" "[" input ["," input]* "]," def_option "]"
 record_dict: "{" string ":" input ["," string ":" input]* "}"
 record_struct: "struct" "[" "[" string ["," string]* "]," "[" input ["," input]* "]," def_option "]"
-record_highlevel: custom_string "[" string ":" input ["," string ":" input]* "]"
+record_highlevel: UNQUOTED_STRING "[" string ":" input ["," string ":" input]* "]"
 regular_inparm: number "*" input
 regular_outparm: "[" number "*" input "," def_option "]"
 options: "[" def_option "]"
 def_option: "parameters" "=" dict_obj
-custom_string: UNQUOTED_STRING
 TYPE: "int64"
     | "int32"
     | "float64"

@@ -157,7 +157,7 @@ def toast(ptnode, high_level):
         return ak.types.RecordType(
             tuple(content_list),
             keys=content_keys,
-            parameters={"__record__": ptnode.children[0].children[0]},
+            parameters={"__record__": ptnode.children[0]},
         )
     elif ptnode.data == "regular":
         assert (len(ptnode.children)) == 1
