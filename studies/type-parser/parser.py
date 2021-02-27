@@ -276,7 +276,7 @@ def toast(ptnode, high_level, categorical):
 
 def deduce_type(typestr, high_level=False):
     parseobj = Lark_StandAlone(transformer=TreeToJson())
-    return toast(parseobj.parse(typestr), high_level, {})
+    return toast(parseobj.parse(typestr), high_level, False)
 
 
 def test_primitive_1():
