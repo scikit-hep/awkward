@@ -39,9 +39,9 @@ union_parm: "union" "[" input [ "," input]* "," def_option "]"
 list_parm: "[" "var" "*" input "," def_option "]"
 list_single: "var" "*" input
 record_tuple: "(" input ["," input]* ")"
-record_tuple_param: "tuple" "[" "[" input ["," input]* "]," def_option "]"
+record_tuple_param: "tuple" "[" "[" input ["," input]* "]" "," def_option "]"
 record_dict: "{" string ":" input ["," string ":" input]* "}"
-record_struct: "struct" "[" "[" string ["," string]* "]," "[" input ["," input]* "]," def_option "]"
+record_struct: "struct" "[" "[" string ["," string]* "]" "," "[" input ["," input]* "]" "," def_option "]"
 record_highlevel: UNQUOTED_STRING "[" string ":" input ["," string ":" input]* "]"
 regular_inparm: number "*" input
 regular_outparm: "[" number "*" input "," def_option "]"

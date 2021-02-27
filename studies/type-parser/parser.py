@@ -111,6 +111,7 @@ def toast(ptnode, high_level):
     elif ptnode.data == "option_highlevel":
         assert high_level == True
         return ak.types.OptionType(toast(ptnode.children[0], high_level))
+    # elif ptnode.data == "option_highlevel_parm":
     elif ptnode.data == "record":
         return toast(ptnode.children[0], high_level)
     elif ptnode.data == "record_tuple":
@@ -595,7 +596,6 @@ def test_jim20():
     assert str(parsedtype) == text
 
 
-@pytest.mark.skip(reason="option of union with parameters not handled yet")
 def test_jim21():
     text = str(
         ak.with_parameter(
@@ -639,4 +639,18 @@ def test_record_highlevel():
     text = 'Thingy["x": int64, "y": float64]'
     parsedtype = deduce_type(text, True)
     assert isinstance(parsedtype, ak.types.RecordType)
+    assert str(parsedtype) == text
+
+
+def test_union_for_highlevel():
+    text = "union[int64, var * int64]"
+    parsedtype = deduce_type(text)
+    assert isinstance(parsedtype, ak.types.UnionType)
+    assert str(parsedtype) == text
+
+
+def test_option_for_highlevel():
+    text = 'option[union[int64, var * int64], parameters={"wonky": "bar"}]'
+    parsedtype = deduce_type(text)
+    assert isinstance(parsedtype, ak.types.OptionType)
     assert str(parsedtype) == text
