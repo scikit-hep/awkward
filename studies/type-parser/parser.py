@@ -108,6 +108,9 @@ def toast(ptnode, high_level):
             toast(ptnode.children[0], high_level),
             parameters=toast(ptnode.children[1], high_level),
         )
+    elif ptnode.data == "option_highlevel":
+        assert high_level == True
+        return ak.types.OptionType(toast(ptnode.children[0], high_level))
     elif ptnode.data == "record":
         return toast(ptnode.children[0], high_level)
     elif ptnode.data == "record_tuple":
@@ -143,6 +146,7 @@ def toast(ptnode, high_level):
             parameters=toast(ptnode.children[-1], high_level),
         )
     elif ptnode.data == "record_highlevel":
+        assert high_level == True
         content_list = []
         content_keys = []
         for node in ptnode.children[1:]:
@@ -464,7 +468,6 @@ def test_jim6():
     assert str(parsedtype) == text
 
 
-@pytest.mark.skip(reason="option-type lists not handled yet")
 def test_jim7():
     text = str(ak.Array([[1, 2, 3], None, [4, 5]]).type)
     print(text)

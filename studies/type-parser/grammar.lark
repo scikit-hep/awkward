@@ -18,6 +18,7 @@ primitive: TYPE [options]
 unknown: "unknown" [options]
 optiontype: option_single
           | option_parm
+          | option_highlevel
 regular: regular_inparm
        | regular_outparm
 listtype: list_single
@@ -32,6 +33,7 @@ HARDCODED: "string"
          | "byte"
 option_single: "?" input [options]
 option_parm: "option" "[" input "," def_option "]"
+option_highlevel: "option" "[" input "]"
 union_single: "union" "[" input [ "," input]* "]"
 union_parm: "union" "[" input [ "," input]* "," def_option "]"
 list_parm: "[" "var" "*" input "," def_option "]"
