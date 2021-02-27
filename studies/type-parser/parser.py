@@ -1,5 +1,4 @@
 import awkward as ak
-import pytest
 
 from generated_parser import Lark_StandAlone, Transformer
 
@@ -25,173 +24,259 @@ class TreeToJson(Transformer):
     false = lambda self, _: False
 
 
-def toast(ptnode, high_level):
+def toast(ptnode, high_level, categorical):
     if ptnode.__class__.__name__ == "Token":
         return ptnode.value
     elif ptnode.data == "start":
-        return toast(ptnode.children[0], high_level)
+        return toast(ptnode.children[0], high_level, categorical)
     elif ptnode.data == "input":
         assert len(ptnode.children) == 1
-        return toast(ptnode.children[0], high_level)
+        return toast(ptnode.children[0], high_level, categorical)
     elif ptnode.data == "predefined_typestr":
         if ptnode.children[0] == "string":
+            parms = {"__array__": "string"}
+            if categorical:
+                parms.update({"__categorical__": True})
+                categorical = False
             return ak.types.ListType(
                 ak.types.PrimitiveType(
                     "uint8", parameters={"__array__": "char"}, typestr="char"
                 ),
-                parameters={"__array__": "string"},
+                parameters=parms,
                 typestr="string",
             )
         elif ptnode.children[0] == "char":
-            return ak.types.PrimitiveType(
-                "uint8", parameters={"__array__": "char"}, typestr="char"
-            )
+            parms = {"__array__": "char"}
+            if categorical:
+                parms.update({"__categorical__": True})
+                categorical = False
+            return ak.types.PrimitiveType("uint8", parameters=parms, typestr="char")
         elif ptnode.children[0] == "byte":
-            return ak.types.PrimitiveType(
-                "uint8", parameters={"__array__": "byte"}, typestr="byte"
-            )
+            parms = {"__array__": "byte"}
+            if categorical:
+                parms.update({"__categorical__": True})
+                categorical = False
+            return ak.types.PrimitiveType("uint8", parameters=parms, typestr="byte")
         elif ptnode.children[0] == "bytes":
+            parms = {"__array__": "bytestring"}
+            if categorical:
+                parms.update({"__categorical__": True})
+                categorical = False
             return ak.types.ListType(
                 ak.types.PrimitiveType(
                     "uint8", parameters={"__array__": "byte"}, typestr="byte"
                 ),
-                parameters={"__array__": "bytestring"},
+                parameters=parms,
                 typestr="bytes",
             )
         else:
             raise Exception("Unhandled typestring {0}".format(ptnode.children[0]))
     elif ptnode.data == "primitive":
         if len(ptnode.children) == 1:
-            return ak.types.PrimitiveType(toast(ptnode.children[0], high_level))
-        elif len(ptnode.children) == 2:
+            parms = {}
+            if categorical:
+                parms.update({"__categorical__": True})
+                categorical = False
             return ak.types.PrimitiveType(
-                toast(ptnode.children[0], high_level),
-                toast(ptnode.children[1], high_level),
+                toast(ptnode.children[0], high_level, False), parameters=parms
+            )
+        elif len(ptnode.children) == 2:
+            parms = toast(ptnode.children[1], high_level, False)
+            if categorical:
+                parms.update({"__categorical__": True})
+                categorical = False
+            return ak.types.PrimitiveType(
+                toast(ptnode.children[0], high_level, categorical),
+                parms,
             )
         else:
             raise Exception("Unhandled PrimitiveType node")
+    elif ptnode.data == "categories":
+        assert high_level == True
+        return toast(ptnode.children[0], high_level, True)
     elif ptnode.data == "unknown":
         if len(ptnode.children) == 0:
-            return ak.types.UnknownType()
+            parms = {}
+            if categorical:
+                parms.update({"__categorical__": True})
+                categorical = False
+            return ak.types.UnknownType(parameters=parms)
         elif len(ptnode.children) == 1:
-            return ak.types.UnknownType(
-                parameters=toast(ptnode.children[0], high_level)
-            )
+            parms = toast(ptnode.children[0], high_level, False)
+            if categorical:
+                parms.update({"__categorical__": True})
+                categorical = False
+            return ak.types.UnknownType(parameters=parms)
         else:
             raise Exception("Unhandled UnknownType node")
     elif ptnode.data == "listtype":
-        return toast(ptnode.children[0], high_level)
+        return toast(ptnode.children[0], high_level, categorical)
     elif ptnode.data == "list_single":
-        return ak.types.ListType(toast(ptnode.children[0], high_level))
-    elif ptnode.data == "list_parm":
+        parms = {}
+        if categorical:
+            parms.update({"__categorical__": True})
+            categorical = False
         return ak.types.ListType(
-            toast(ptnode.children[0], high_level), toast(ptnode.children[1], high_level)
+            toast(ptnode.children[0], high_level, False), parameters=parms
+        )
+    elif ptnode.data == "list_parm":
+        parms = toast(ptnode.children[1], high_level, False)
+        if categorical:
+            parms.update({"__categorical__": True})
+            categorical = False
+        return ak.types.ListType(
+            toast(ptnode.children[0], high_level, categorical), parms
         )
     elif ptnode.data == "uniontype":
-        return toast(ptnode.children[0], high_level)
+        return toast(ptnode.children[0], high_level, categorical)
     elif ptnode.data == "union_single":
+        parms = {}
+        if categorical:
+            parms.update({"__categorical__": True})
+            categorical = False
         content_list = []
         for node in ptnode.children:
-            content_list.append(toast(node, high_level))
-        return ak.types.UnionType(content_list)
+            content_list.append(toast(node, high_level, False))
+        return ak.types.UnionType(content_list, parameters=parms)
     elif ptnode.data == "union_parm":
+        parms = toast(ptnode.children[-1], high_level, False)
+        if categorical:
+            parms.update({"__categorical__": True})
+            categorical = False
         content_list = []
         for node in ptnode.children[:-1]:
-            content_list.append(toast(node, high_level))
-        return ak.types.UnionType(content_list, toast(ptnode.children[-1], high_level))
+            content_list.append(toast(node, high_level, False))
+        return ak.types.UnionType(content_list, parms)
     elif ptnode.data == "optiontype":
-        return toast(ptnode.children[0], high_level)
+        return toast(ptnode.children[0], high_level, categorical)
     elif ptnode.data == "option_single":
-        return ak.types.OptionType(toast(ptnode.children[0], high_level))
-    elif ptnode.data == "option_parm":
+        parms = {}
+        if categorical:
+            parms.update({"__categorical__": True})
+            categorical = False
         return ak.types.OptionType(
-            toast(ptnode.children[0], high_level),
-            parameters=toast(ptnode.children[1], high_level),
+            toast(ptnode.children[0], high_level, False), parameters=parms
+        )
+    elif ptnode.data == "option_parm":
+        parms = toast(ptnode.children[1], high_level, False)
+        if categorical:
+            parms.update({"__categorical__": true})
+            categorical = False
+        return ak.types.OptionType(
+            toast(ptnode.children[0], high_level, False),
+            parameters=parms,
         )
     elif ptnode.data == "option_highlevel":
         assert high_level == True
-        return ak.types.OptionType(toast(ptnode.children[0], high_level))
-    # elif ptnode.data == "option_highlevel_parm":
+        parms = {}
+        if categorical:
+            parms.update({"__categorical__": True})
+            categorical = False
+        return ak.types.OptionType(
+            toast(ptnode.children[0], high_level, False), parameters=parms
+        )
     elif ptnode.data == "record":
-        return toast(ptnode.children[0], high_level)
+        return toast(ptnode.children[0], high_level, categorical)
     elif ptnode.data == "record_tuple":
+        parms = {}
+        if categorical:
+            parms.update({"__categorical__": True})
+            categorical = False
         content_list = []
         for node in ptnode.children:
-            content_list.append(toast(node, high_level))
-        return ak.types.RecordType(tuple(content_list))
+            content_list.append(toast(node, high_level, categorical))
+        return ak.types.RecordType(tuple(content_list), parameters=parms)
     elif ptnode.data == "record_dict":
+        parms = {}
+        if categorical:
+            parms.update({"__categorical__": True})
+            categorical = False
         content_types = []
         content_keys = []
         for i in range(0, len(ptnode.children), 2):
             content_keys.append(ptnode.children[i])
-            content_types.append(toast(ptnode.children[i + 1], high_level))
-        return ak.types.RecordType(content_types, content_keys)
+            content_types.append(toast(ptnode.children[i + 1], high_level, categorical))
+        return ak.types.RecordType(content_types, content_keys, parameters=parms)
     elif ptnode.data == "record_tuple_param":
+        parms = toast(ptnode.children[-1], high_level, False)
+        if categorical:
+            parms.update({"__categorical__": true})
+            categorical = False
         content_list = []
         for node in ptnode.children[:-1]:
-            content_list.append(toast(node, high_level))
-        return ak.types.RecordType(
-            tuple(content_list), parameters=toast(ptnode.children[-1], high_level)
-        )
+            content_list.append(toast(node, high_level, False))
+        return ak.types.RecordType(tuple(content_list), parameters=parms)
     elif ptnode.data == "record_struct":
+        parms = toast(ptnode.children[-1], high_level, False)
+        if categorical:
+            parms.update({"__categorical__": true})
+            categorical = False
         content_list = []
         content_keys = []
         for node in ptnode.children[:-1]:
             if isinstance(node, str):
                 content_keys.append(node)
             else:
-                content_list.append(toast(node, high_level))
+                content_list.append(toast(node, high_level, False))
         return ak.types.RecordType(
             tuple(content_list),
             keys=content_keys,
-            parameters=toast(ptnode.children[-1], high_level),
+            parameters=parms,
         )
     elif ptnode.data == "record_highlevel":
         assert high_level == True
+        parms = {"__record__": ptnode.children[0]}
+        if categorical:
+            parms.update({"__categorical__": true})
+            categorical = False
         content_list = []
         content_keys = []
         for node in ptnode.children[1:]:
             if isinstance(node, str):
                 content_keys.append(node)
             else:
-                content_list.append(toast(node, high_level))
+                content_list.append(toast(node, high_level, False))
         return ak.types.RecordType(
             tuple(content_list),
             keys=content_keys,
-            parameters={"__record__": ptnode.children[0]},
+            parameters=parms,
         )
     elif ptnode.data == "regular":
         assert (len(ptnode.children)) == 1
-        return toast(ptnode.children[0], high_level)
+        return toast(ptnode.children[0], high_level, categorical)
     elif ptnode.data == "regular_inparm":
         assert len(ptnode.children) == 2
         if high_level:
             return ak.types.ArrayType(
-                toast(ptnode.children[1], high_level), ptnode.children[0]
+                toast(ptnode.children[1], high_level, categorical), ptnode.children[0]
             )
         return ak.types.RegularType(
-            toast(ptnode.children[1], high_level), ptnode.children[0]
+            toast(ptnode.children[1], high_level, categorical), ptnode.children[0]
         )
     elif ptnode.data == "regular_outparm":
         assert len(ptnode.children) == 3
+        parms = toast(ptnode.children[2], high_level, False)
+        if categorical:
+            parms.update({"__categorical__": True})
+            categorical = False
         return ak.types.RegularType(
-            toast(ptnode.children[1], high_level),
+            toast(ptnode.children[1], high_level, False),
             ptnode.children[0],
-            toast(ptnode.children[2], high_level),
+            parms,
         )
     elif ptnode.data == "def_option":
         assert len(ptnode.children) == 1
         return ptnode.children[0]
     elif ptnode.data == "options":
         assert len(ptnode.children) == 1
-        return toast(ptnode.children[0], high_level)
+        return toast(ptnode.children[0], high_level, categorical)
     else:
         raise Exception("Unhandled node")
 
 
 def deduce_type(typestr, high_level=False):
     parseobj = Lark_StandAlone(transformer=TreeToJson())
-    return toast(parseobj.parse(typestr), high_level)
+    return toast(parseobj.parse(typestr), high_level, {})
 
 
 def test_primitive_1():
@@ -423,7 +508,6 @@ def test_jim2():
     assert str(parsedtype) == text
 
 
-@pytest.mark.skip(reason="categoricals not handled yet")
 def test_jim3():
     text = str(
         ak.to_categorical(ak.Array(["one", "one", "two", "three", "one", "three"])).type
@@ -434,7 +518,6 @@ def test_jim3():
     assert str(parsedtype) == text
 
 
-@pytest.mark.skip(reason="categoricals not handled yet")
 def test_jim4():
     text = str(ak.to_categorical(ak.Array([1.1, 1.1, 2.2, 3.3, 1.1, 3.3])).type)
     print(text)
@@ -639,18 +722,4 @@ def test_record_highlevel():
     text = 'Thingy["x": int64, "y": float64]'
     parsedtype = deduce_type(text, True)
     assert isinstance(parsedtype, ak.types.RecordType)
-    assert str(parsedtype) == text
-
-
-def test_union_for_highlevel():
-    text = "union[int64, var * int64]"
-    parsedtype = deduce_type(text)
-    assert isinstance(parsedtype, ak.types.UnionType)
-    assert str(parsedtype) == text
-
-
-def test_option_for_highlevel():
-    text = 'option[union[int64, var * int64], parameters={"wonky": "bar"}]'
-    parsedtype = deduce_type(text)
-    assert isinstance(parsedtype, ak.types.OptionType)
     assert str(parsedtype) == text

@@ -8,6 +8,7 @@ input: record
      | listtype
      | uniontype
      | predefined_typestr
+     | categories
 
 record: record_tuple
       | record_tuple_param
@@ -25,6 +26,7 @@ listtype: list_single
         | list_parm
 uniontype: union_single
          | union_parm
+categories: "categorical" "[" "type" "=" input "]"
 predefined_typestr: HARDCODED
 
 HARDCODED: "string"
