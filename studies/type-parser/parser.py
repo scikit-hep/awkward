@@ -1,7 +1,7 @@
-import pytest
-from generated_parser import Lark_StandAlone, Transformer
-
 import awkward as ak
+import pytest
+
+from generated_parser import Lark_StandAlone, Transformer
 
 
 class TreeToJson(Transformer):
@@ -141,6 +141,19 @@ def toast(ptnode, high_level):
             tuple(content_list),
             keys=content_keys,
             parameters=toast(ptnode.children[-1], high_level),
+        )
+    elif ptnode.data == "record_highlevel":
+        content_list = []
+        content_keys = []
+        for node in ptnode.children[1:]:
+            if isinstance(node, str):
+                content_keys.append(node)
+            else:
+                content_list.append(toast(node, high_level))
+        return ak.types.RecordType(
+            tuple(content_list),
+            keys=content_keys,
+            parameters={"__record__": ptnode.children[0].children[0]},
         )
     elif ptnode.data == "regular":
         assert (len(ptnode.children)) == 1
@@ -425,7 +438,6 @@ def test_jim4():
     assert str(parsedtype) == text
 
 
-@pytest.mark.skip(reason="record names not handled yet")
 def test_jim5():
     text = str(
         ak.Array(
@@ -439,7 +451,6 @@ def test_jim5():
     assert str(parsedtype) == text
 
 
-@pytest.mark.skip(reason="record names not handled yet")
 def test_jim6():
     text = str(
         ak.Array(
@@ -618,4 +629,11 @@ def test_hardcoded():
     text = "var * string"
     parsedtype = deduce_type(text)
     assert isinstance(parsedtype, ak.types.ListType)
+    assert str(parsedtype) == text
+
+
+def test_record_highlevel():
+    text = 'Thingy["x": int64, "y": float64]'
+    parsedtype = deduce_type(text, True)
+    assert isinstance(parsedtype, ak.types.RecordType)
     assert str(parsedtype) == text
