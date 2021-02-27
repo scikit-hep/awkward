@@ -46,6 +46,18 @@ def toast(ptnode, high_level):
             return ak.types.PrimitiveType(
                 "uint8", parameters={"__array__": "char"}, typestr="char"
             )
+        elif ptnode.children[0] == "byte":
+            return ak.types.PrimitiveType(
+                "uint8", parameters={"__array__": "byte"}, typestr="byte"
+            )
+        elif ptnode.children[0] == "bytes":
+            return ak.types.ListType(
+                ak.types.PrimitiveType(
+                    "uint8", parameters={"__array__": "byte"}, typestr="byte"
+                ),
+                parameters={"__array__": "bytestring"},
+                typestr="bytes",
+            )
         else:
             raise Exception("Unhandled typestring {0}".format(ptnode.children[0]))
     elif ptnode.data == "primitive":
@@ -385,7 +397,6 @@ def test_jim1():
     assert str(parsedtype) == text
 
 
-@pytest.mark.skip(reason="bytestrings not handled yet")
 def test_jim2():
     text = str(ak.Array([[b"one", b"two", b"three"], [], [b"four", b"five"]]).type)
     print(text)

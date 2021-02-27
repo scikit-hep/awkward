@@ -27,6 +27,8 @@ predefined_typestr: HARDCODED
 
 HARDCODED: "string"
          | "char"
+         | "bytes"
+         | "byte"
 option_single: "?" input [options]
 option_parm: "option" "[" input "," def_option "]"
 union_single: "union" "[" input [ "," input]* "]"
