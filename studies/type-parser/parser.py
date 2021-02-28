@@ -1,3 +1,5 @@
+import sys
+
 import awkward as ak
 
 from generated_parser import Lark_StandAlone, Transformer
@@ -6,6 +8,8 @@ from generated_parser import Lark_StandAlone, Transformer
 class TreeToJson(Transformer):
     def string(self, s):
         (s,) = s
+        if sys.version_info[0] == 2:
+            s = s.encode("utf-8")
         return s[1:-1]
 
     def number(self, n):
@@ -160,7 +164,7 @@ def toast(ptnode, high_level, categorical):
     elif ptnode.data == "option_parm":
         parms = toast(ptnode.children[1], high_level, False)
         if categorical:
-            parms.update({"__categorical__": true})
+            parms.update({"__categorical__": True})
             categorical = False
         return ak.types.OptionType(
             toast(ptnode.children[0], high_level, False),
@@ -200,7 +204,7 @@ def toast(ptnode, high_level, categorical):
     elif ptnode.data == "record_tuple_param":
         parms = toast(ptnode.children[-1], high_level, False)
         if categorical:
-            parms.update({"__categorical__": true})
+            parms.update({"__categorical__": True})
             categorical = False
         content_list = []
         for node in ptnode.children[:-1]:
@@ -209,7 +213,7 @@ def toast(ptnode, high_level, categorical):
     elif ptnode.data == "record_struct":
         parms = toast(ptnode.children[-1], high_level, False)
         if categorical:
-            parms.update({"__categorical__": true})
+            parms.update({"__categorical__": True})
             categorical = False
         content_list = []
         content_keys = []
@@ -227,7 +231,7 @@ def toast(ptnode, high_level, categorical):
         assert high_level == True
         parms = {"__record__": ptnode.children[0]}
         if categorical:
-            parms.update({"__categorical__": true})
+            parms.update({"__categorical__": True})
             categorical = False
         content_list = []
         content_keys = []
