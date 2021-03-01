@@ -305,6 +305,14 @@ Within the narrow scope of a function, there is no attempt to maintain immutabil
 
 When adding a new kernel to the codebase, it's specification must be added to the `kernel-specification.yml` file. The new kernel specification must be added in the correct place as the `kernel-specification.yml` file is ordered by kernel and specialization name (use `dev/kernel-diagnostics.py` to check for discrepancies).
 
+### Modifying type parser grammar
+
+If you want to edit the grammar for the type parser in `src/awkward/type-grammar.lark`, the [lark-parser](https://pypi.org/project/lark-parser/) package must be installed. 
+
+Do not edit the `src/awkward/_typeparser.py` file by hand.
+
+After making your changes to `src/awkward/type-grammar.lark`, execute - `python -m lark.tools.standalone src/awkward/type-grammar.lark > src/awkward/_typeparser.py` from the root directory to automatically generate `src/awkward/_typeparser.py` based on your modified grammar.
+
 ------------
 
 Thanks again for contributing to Awkward Array. We all look forward to what you have to add.

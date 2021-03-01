@@ -1,0 +1,72 @@
+start: input
+
+input: record
+     | unknown
+     | primitive
+     | optiontype
+     | regular
+     | listtype
+     | uniontype
+     | predefined_typestr
+     | categories
+
+record: record_tuple
+      | record_tuple_param
+      | record_dict
+      | record_struct
+      | record_highlevel
+primitive: TYPE [options]
+unknown: "unknown" [options]
+optiontype: option_single
+          | option_parm
+          | option_highlevel
+regular: regular_inparm
+       | regular_outparm
+listtype: list_single
+        | list_parm
+uniontype: union_single
+         | union_parm
+categories: "categorical" "[" "type" "=" input "]"
+predefined_typestr: HARDCODED
+
+HARDCODED: "string"
+         | "char"
+         | "bytes"
+         | "byte"
+option_single: "?" input [options]
+option_parm: "option" "[" input "," def_option "]"
+option_highlevel: "option" "[" input "]"
+union_single: "union" "[" input [ "," input]* "]"
+union_parm: "union" "[" input [ "," input]* "," def_option "]"
+list_parm: "[" "var" "*" input "," def_option "]"
+list_single: "var" "*" input
+record_tuple: "(" input ["," input]* ")"
+record_tuple_param: "tuple" "[" "[" input ["," input]* "]" "," def_option "]"
+record_dict: "{" string ":" input ["," string ":" input]* "}"
+record_struct: "struct" "[" "[" string ["," string]* "]" "," "[" input ["," input]* "]" "," def_option "]"
+record_highlevel: UNQUOTED_STRING "[" string ":" input ["," string ":" input]* "]"
+regular_inparm: number "*" input
+regular_outparm: "[" number "*" input "," def_option "]"
+options: "[" def_option "]"
+def_option: "parameters" "=" dict_obj
+TYPE: "int64"
+    | "int32"
+    | "float64"
+?json: dict_obj
+     | list_obj
+     | string
+     | number
+     | "true"             -> true
+     | "false"            -> false
+     | "null"             -> null
+list_obj: "[" [json ("," json)*] "]"
+dict_obj: "{" [pair ("," pair)*] "}"
+pair: string ":" json
+string: /((?:"(?:[^"\n\r\\]|(?:\\u[0-9a-fA-F]{4})|(?:\\["bfnrt]))*")|(?:\\\'(?:[^\\\'\n\r\\]|(?:\\u[0-9a-fA-F]{4})|(?:\\[\'bfnrt]))*")*\\\')/
+UNQUOTED_STRING.-1: /[a-zA-Z]+/
+number: SIGNED_NUMBER
+
+%import common.SIGNED_NUMBER
+%import common.WS
+
+%ignore WS
