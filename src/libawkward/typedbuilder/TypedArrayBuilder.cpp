@@ -18,6 +18,22 @@
 #include "awkward/array/UnmaskedArray.h"
 #include "awkward/array/VirtualArray.h"
 
+#include "awkward/typedbuilder/BitMaskedArrayBuilder.h"
+#include "awkward/typedbuilder/ByteMaskedArrayBuilder.h"
+#include "awkward/typedbuilder/EmptyArrayBuilder.h"
+#include "awkward/typedbuilder/IndexedArrayBuilder.h"
+#include "awkward/typedbuilder/IndexedOptionArrayBuilder.h"
+#include "awkward/typedbuilder/ListArrayBuilder.h"
+#include "awkward/typedbuilder/ListOffsetArrayBuilder.h"
+#include "awkward/typedbuilder/NumpyArrayBuilder.h"
+#include "awkward/typedbuilder/RecordArrayBuilder.h"
+#include "awkward/typedbuilder/RegularArrayBuilder.h"
+#include "awkward/typedbuilder/UnionArrayBuilder.h"
+#include "awkward/typedbuilder/UnmaskedArrayBuilder.h"
+#include "awkward/typedbuilder/VirtualArrayBuilder.h"
+#include "awkward/typedbuilder/UnknownFormBuilder.h"
+
+
 namespace awkward {
   FormBuilder::~FormBuilder() = default;
 
