@@ -53,7 +53,7 @@ namespace awkward {
 
     std::string vm_empty_command_;
   };
-  
+
 }
 
 #endif // AWKWARD_EMPTYARRAYBUILDER_H_

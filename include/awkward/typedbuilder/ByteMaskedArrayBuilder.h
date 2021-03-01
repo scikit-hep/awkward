@@ -53,7 +53,7 @@ namespace awkward {
     std::string vm_func_name_;
     std::string vm_func_;
   };
-  
+
 }
 
 #endif // AWKWARD_BYTEMASKEDARRAYBUILDER_H_
