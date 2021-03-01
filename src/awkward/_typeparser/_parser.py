@@ -6,6 +6,7 @@ import awkward as ak
 
 from ak._typeparser._generated_parser import Lark_StandAlone, Transformer
 
+
 class _TreeToJson(Transformer):
     def string(self, s):
         (s,) = s
