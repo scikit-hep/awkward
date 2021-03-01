@@ -45,7 +45,7 @@ namespace awkward {
     int64_t
       len() const noexcept;
 
-    /// @brief FIXME 
+    /// @brief FIXME
     std::shared_ptr<void>
       ptr() noexcept;
 

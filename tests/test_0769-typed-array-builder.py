@@ -8,8 +8,10 @@ import awkward as ak  # noqa: F401
 
 import awkward.forth
 
+
 def test_jims_example():
-    form = ak.forms.Form.fromjson("""
+    form = ak.forms.Form.fromjson(
+        """
 {
     "class": "ListOffsetArray64",
     "offsets": "i64",
@@ -36,7 +38,8 @@ def test_jims_example():
     },
     "form_key": "node0"
 }
-""")
+"""
+    )
 
     builder = ak.layout.TypedArrayBuilder(form)
     vm = awkward.forth.ForthMachine32(builder.to_vm())
