@@ -307,7 +307,7 @@ When adding a new kernel to the codebase, it's specification must be added to th
 
 ### Modifying type parser grammar
 
-If you want to edit the grammar for the type parser in `src/awkward/type-grammar.lark`, the [lark-parser](https://pypi.org/project/lark-parser/) package must be installed. 
+If you want to edit the grammar for the type parser in `src/awkward/type-grammar.lark`, the [lark-parser](https://pypi.org/project/lark-parser/) package must be installed.
 
 Do not edit the `src/awkward/_typeparser.py` file by hand.
 
