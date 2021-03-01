@@ -2,7 +2,7 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/TypedArrayBuilder.cpp", line)
 
-#include "awkward/builder/TypedArrayBuilder.h"
+#include "awkward/typedbuilder/TypedArrayBuilder.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
 #include "awkward/type/Type.h"
 #include "awkward/array/BitMaskedArray.h"

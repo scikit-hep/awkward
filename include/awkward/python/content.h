@@ -7,7 +7,7 @@
 #include <pybind11/stl.h>
 
 #include "awkward/builder/ArrayBuilder.h"
-#include "awkward/builder/TypedArrayBuilder.h"
+#include "awkward/typedbuilder/TypedArrayBuilder.h"
 #include "awkward/Iterator.h"
 #include "awkward/Content.h"
 #include "awkward/array/EmptyArray.h"

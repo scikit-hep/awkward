@@ -528,10 +528,6 @@ toslice_part(ak::Slice& slice, py::object obj) {
         content = unbox_content(obj.attr("snapshot")().attr("layout"));
       }
       else if (py::isinstance(obj, py::module::import("awkward")
-                                              .attr("TypedArrayBuilder"))) {
-        content = unbox_content(obj.attr("snapshot")().attr("layout"));
-      }
-      else if (py::isinstance(obj, py::module::import("awkward")
                                               .attr("partition")
                                               .attr("PartitionedArray"))) {
         content = unbox_content(obj.attr("toContent")());

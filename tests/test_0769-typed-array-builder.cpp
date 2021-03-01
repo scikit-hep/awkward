@@ -11,7 +11,7 @@
 #include "awkward/array/RecordArray.h"
 #include "awkward/forth/ForthInputBuffer.h"
 #include "awkward/builder/ArrayBuilderOptions.h"
-#include "awkward/builder/TypedArrayBuilder.h"
+#include "awkward/typedbuilder/TypedArrayBuilder.h"
 
 namespace ak = awkward;
 
