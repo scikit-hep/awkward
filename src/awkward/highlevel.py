@@ -230,9 +230,18 @@ class Array(
         elif isinstance(data, dict):
             keys = []
             contents = []
+            length = None
             for k, v in data.items():
                 keys.append(k)
                 contents.append(Array(v).layout)
+                if length is None:
+                    length = len(contents[-1])
+                elif length != len(contents[-1]):
+                    raise ValueError(
+                        "dict of arrays in ak.Array constructor must have arrays "
+                        "of equal length ({0} vs {1})".format(length, len(contents[-1]))
+                        + ak._util.exception_suffix(__file__)
+                    )
             parameters = None
             if with_name is not None:
                 parameters = {"__record__": with_name}

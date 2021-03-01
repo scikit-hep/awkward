@@ -8,7 +8,7 @@ import awkward as ak  # noqa: F401
 
 
 def test_pandas_style_constructor():
-    a = ak.Array({"x": [1, 2, 3, 4], "y": [[1, 2, 3], [], [4, 5]]})
+    a = ak.Array({"x": [1, 2, 3], "y": [[1, 2, 3], [], [4, 5]]})
     assert ak.to_list(a) == [
         {"x": 1, "y": [1, 2, 3]},
         {"x": 2, "y": []},
