@@ -8,10 +8,8 @@ import awkward as ak  # noqa: F401
 
 import awkward.forth
 
-
-def test_jims_example():
-    form = ak.forms.Form.fromjson(
-        """
+def test_list_offset_form():
+    form = ak.forms.Form.fromjson("""
 {
     "class": "ListOffsetArray64",
     "offsets": "i64",
@@ -38,8 +36,7 @@ def test_jims_example():
     },
     "form_key": "node0"
 }
-"""
-    )
+""")
 
     builder = ak.layout.TypedArrayBuilder(form)
     vm = awkward.forth.ForthMachine32(builder.to_vm())
@@ -76,3 +73,64 @@ def test_jims_example():
         [],
         [{"x": 3.3, "y": [1, 2, 3]}],
     ]
+
+def test_indexed_form():
+    form = ak.forms.Form.fromjson("""
+{
+    "class": "IndexedArray64",
+    "index": "i64",
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "int64",
+            "form_key": "node1"
+        },
+    "form_key": "node0"
+}
+""")
+
+    builder = ak.layout.TypedArrayBuilder(form)
+    vm = awkward.forth.ForthMachine32(builder.to_vm())
+
+    # initialise
+    builder.connect(vm)
+    builder.integer(11)
+    builder.integer(22)
+    builder.integer(33)
+    builder.integer(44)
+    builder.integer(55)
+    builder.integer(66)
+    builder.integer(77)
+
+    assert ak.to_list(builder.snapshot()) == [11, 22, 33, 44, 55, 66, 77]
+
+def test_indexed_option_form():
+    form = ak.forms.Form.fromjson("""
+{
+    "class": "IndexedOptionArray64",
+    "index": "i64",
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "int64",
+            "form_key": "node1"
+        },
+    "form_key": "node0"
+}
+""")
+
+    builder = ak.layout.TypedArrayBuilder(form)
+    vm = awkward.forth.ForthMachine32(builder.to_vm())
+
+    # initialise
+    builder.connect(vm)
+    builder.integer(11)
+    builder.integer(22)
+    builder.null()
+    builder.integer(33)
+    builder.integer(44)
+    builder.null()
+    builder.integer(55)
+    builder.integer(66)
+    builder.integer(77)
+
+    #assert ak.to_list(builder.snapshot()) == [11, 22, None, 33, 44, None, 55, 66, 77]
+    assert ak.to_list(builder.snapshot()) == [11, 22, 33, 44, 55, 66, 77]

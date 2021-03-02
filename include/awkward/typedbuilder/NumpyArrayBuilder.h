@@ -54,6 +54,7 @@ namespace awkward {
     std::string vm_output_data_;
     std::string vm_func_;
     std::string vm_func_name_;
+    std::string vm_data_from_stack_;
   };
 
 }

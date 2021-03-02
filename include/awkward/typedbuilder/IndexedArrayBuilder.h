@@ -45,6 +45,9 @@ namespace awkward {
     const std::string
       vm_func_name() const override;
 
+    const std::string
+      vm_from_stack() const override;
+      
   private:
     const IndexedFormPtr form_;
     const FormKey form_key_;
@@ -54,6 +57,7 @@ namespace awkward {
     std::string vm_output_;
     std::string vm_func_name_;
     std::string vm_func_;
+    std::string vm_data_from_stack_;
   };
 
 }
