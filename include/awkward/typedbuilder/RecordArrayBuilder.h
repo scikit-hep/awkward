@@ -9,9 +9,7 @@ namespace awkward {
 
   class RecordForm;
   using RecordFormPtr = std::shared_ptr<RecordForm>;
-
-  class RegularForm;
-  using RegularFormPtr = std::shared_ptr<RegularForm>;
+  using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class RecordArrayBuilder
   ///
@@ -27,7 +25,7 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot(const ForthOtputBufferMap& outputs) const override;
+      snapshot(const ForthOutputBufferMap& outputs) const override;
 
     /// @brief
     const FormPtr

@@ -9,6 +9,7 @@ namespace awkward {
 
   class UnionForm;
   using UnionFormPtr = std::shared_ptr<UnionForm>;
+  using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class UnionArrayBuilder
   ///
@@ -24,7 +25,7 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot(const ForthOtputBufferMap& outputs) const override;
+      snapshot(const ForthOutputBufferMap& outputs) const override;
 
     /// @brief
     const FormPtr

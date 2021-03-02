@@ -9,6 +9,7 @@ namespace awkward {
 
   class IndexedOptionForm;
   using IndexedOptionFormPtr = std::shared_ptr<IndexedOptionForm>;
+  using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class IndexedOptionArrayBuilder
   ///
@@ -24,7 +25,7 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot(const ForthOtputBufferMap& outputs) const override;
+      snapshot(const ForthOutputBufferMap& outputs) const override;
 
     /// @brief
     const FormPtr

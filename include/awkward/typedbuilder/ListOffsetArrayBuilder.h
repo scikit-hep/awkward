@@ -9,6 +9,7 @@ namespace awkward {
 
   class ListOffsetForm;
   using ListOffsetFormPtr = std::shared_ptr<ListOffsetForm>;
+  using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class ListOffsetArrayBuilder
   ///
@@ -24,7 +25,7 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot(const ForthOtputBufferMap& outputs) const override;
+      snapshot(const ForthOutputBufferMap& outputs) const override;
 
     /// @brief
     const FormPtr

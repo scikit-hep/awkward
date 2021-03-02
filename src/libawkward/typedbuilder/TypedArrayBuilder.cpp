@@ -35,56 +35,55 @@
 
 
 namespace awkward {
-  FormBuilder::~FormBuilder() = default;
 
   /// FIXME: implement Form morfing
   /// for example, ListForm to ListOffsetForm
   ///
-  FormBuilderPtr
-  formBuilderFromA(const FormPtr& form) {
-    if (auto const& downcasted_form = std::dynamic_pointer_cast<BitMaskedForm>(form)) {
-      return std::make_shared<BitMaskedArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<ByteMaskedForm>(form)) {
-      return std::make_shared<ByteMaskedArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<EmptyForm>(form)) {
-      return std::make_shared<EmptyArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedForm>(form)) {
-      return std::make_shared<IndexedArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedOptionForm>(form)) {
-      return std::make_shared<IndexedOptionArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<ListForm>(form)) {
-      return std::make_shared<ListArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<ListOffsetForm>(form)) {
-      return std::make_shared<ListOffsetArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<NumpyForm>(form)) {
-      return std::make_shared<NumpyArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<RecordForm>(form)) {
-      return std::make_shared<RecordArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<RegularForm>(form)) {
-      return std::make_shared<RegularArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<UnionForm>(form)) {
-      return std::make_shared<UnionArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<UnmaskedForm>(form)) {
-      return std::make_shared<UnmaskedArrayBuilder>(downcasted_form);
-    }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<VirtualForm>(form)) {
-      return std::make_shared<VirtualArrayBuilder>(downcasted_form);
-    }
-    else {
-      return std::make_shared<UnknownFormBuilder>(form);
-    }
-  }
+  // FormBuilderPtr
+  // formBuilderFromA(const FormPtr& form) {
+  //   if (auto const& downcasted_form = std::dynamic_pointer_cast<BitMaskedForm>(form)) {
+  //     return std::make_shared<BitMaskedArrayBuilder>(downcasted_form);
+  //   }
+  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<ByteMaskedForm>(form)) {
+  //     return std::make_shared<ByteMaskedArrayBuilder>(downcasted_form);
+  //   }
+  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<EmptyForm>(form)) {
+  //     return std::make_shared<EmptyArrayBuilder>(downcasted_form);
+  //   }
+  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedForm>(form)) {
+  //     return std::make_shared<IndexedArrayBuilder>(downcasted_form);
+  //   }
+  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedOptionForm>(form)) {
+  //     return std::make_shared<IndexedOptionArrayBuilder>(downcasted_form);
+  //   }
+  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<ListForm>(form)) {
+  //     return std::make_shared<ListArrayBuilder>(downcasted_form);
+  //   }
+  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<ListOffsetForm>(form)) {
+  //     return std::make_shared<ListOffsetArrayBuilder>(downcasted_form);
+  //   }
+  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<NumpyForm>(form)) {
+  //     return std::make_shared<NumpyArrayBuilder>(downcasted_form);
+  //   }
+  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<RecordForm>(form)) {
+  //     return std::make_shared<RecordArrayBuilder>(downcasted_form);
+  //   }
+  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<RegularForm>(form)) {
+  //     return std::make_shared<RegularArrayBuilder>(downcasted_form);
+  //   }
+  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<UnionForm>(form)) {
+  //     return std::make_shared<UnionArrayBuilder>(downcasted_form);
+  //   }
+  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<UnmaskedForm>(form)) {
+  //     return std::make_shared<UnmaskedArrayBuilder>(downcasted_form);
+  //   }
+  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<VirtualForm>(form)) {
+  //     return std::make_shared<VirtualArrayBuilder>(downcasted_form);
+  //   }
+  //   else {
+  //     return std::make_shared<UnknownFormBuilder>(form);
+  //   }
+  // }
 
   const std::string
   index_form_to_name(Index::Form form) {
@@ -104,28 +103,6 @@ namespace awkward {
         std::string("unrecognized Index::Form") + FILENAME(__LINE__));
     }
   }
-
-  enum class state : std::int32_t {
-    int64 = 0,
-    float64 = 1,
-    begin_list = 2,
-    end_list = 3,
-    boolean = 4,
-    int8 = 5,
-    int16 = 6,
-    int32 = 7,
-    uint8 = 8,
-    uint16 = 9,
-    uint32 = 10,
-    uint64 = 11,
-    float16 = 12,
-    float32 = 13,
-    float128 = 14,
-    complex64 = 15,
-    complex128 = 16,
-    complex256 = 17
-  };
-  using utype = std::underlying_type<state>::type;
 
   const std::string
   dtype_to_state(util::dtype dt) {
@@ -219,6 +196,52 @@ namespace awkward {
     .append("\n")
     .append("1+\n")
     .append("again\n");
+  }
+
+  FormBuilderPtr
+  TypedArrayBuilder::formBuilderFromA(const FormPtr& form) {
+    if (auto const& downcasted_form = std::dynamic_pointer_cast<BitMaskedForm>(form)) {
+      return std::make_shared<BitMaskedArrayBuilder>(downcasted_form);
+    }
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<ByteMaskedForm>(form)) {
+      return std::make_shared<ByteMaskedArrayBuilder>(downcasted_form);
+    }
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<EmptyForm>(form)) {
+      return std::make_shared<EmptyArrayBuilder>(downcasted_form);
+    }
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedForm>(form)) {
+      return std::make_shared<IndexedArrayBuilder>(downcasted_form);
+    }
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedOptionForm>(form)) {
+      return std::make_shared<IndexedOptionArrayBuilder>(downcasted_form);
+    }
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<ListForm>(form)) {
+      return std::make_shared<ListArrayBuilder>(downcasted_form);
+    }
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<ListOffsetForm>(form)) {
+      return std::make_shared<ListOffsetArrayBuilder>(downcasted_form);
+    }
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<NumpyForm>(form)) {
+      return std::make_shared<NumpyArrayBuilder>(downcasted_form);
+    }
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<RecordForm>(form)) {
+      return std::make_shared<RecordArrayBuilder>(downcasted_form);
+    }
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<RegularForm>(form)) {
+      return std::make_shared<RegularArrayBuilder>(downcasted_form);
+    }
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<UnionForm>(form)) {
+      return std::make_shared<UnionArrayBuilder>(downcasted_form);
+    }
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<UnmaskedForm>(form)) {
+      return std::make_shared<UnmaskedArrayBuilder>(downcasted_form);
+    }
+    else if (auto const& downcasted_form = std::dynamic_pointer_cast<VirtualForm>(form)) {
+      return std::make_shared<VirtualArrayBuilder>(downcasted_form);
+    }
+    else {
+      return std::make_shared<UnknownFormBuilder>(form);
+    }
   }
 
   void
@@ -510,779 +533,6 @@ namespace awkward {
     throw std::runtime_error(
       std::string("FormBuilder 'extend' is not implemented yet")
       + FILENAME(__LINE__));
-  }
-
-  /// @brief
-  BitMaskedArrayBuilder::BitMaskedArrayBuilder(const BitMaskedFormPtr& form)
-    : form_(form),
-      form_key_(form.get()->form_key()),
-      content_(formBuilderFromA(form.get()->content())) {
-    // FIXME: generate a key if this FormKey is empty
-    // or already exists
-    vm_output_data_ = std::string("part0-").append(*form_key_).append("-mask");
-
-    vm_func_name_ = std::string(*form_key_).append("-").append("bitmask");
-
-    vm_func_ = std::string(": ")
-      .append(vm_func_name_).append("\n")
-      .append(";").append("\n");
-
-    vm_output_ = std::string("output ")
-      .append(vm_output_data_)
-      .append(" ")
-      .append("FIXME-type").append("\n");
-  }
-
-  const std::string
-  BitMaskedArrayBuilder::classname() const {
-    return "BitMaskedArrayBuilder";
-  }
-
-  const ContentPtr
-  BitMaskedArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    ContentPtr out;
-    int64_t length = 0; // FIXME
-    auto search = outputs.find(vm_output_data_);
-    if (search != outputs.end()) {
-      out = std::make_shared<BitMaskedArray>(Identities::none(),
-                                             form_.get()->parameters(),
-                                             search->second.get()->toIndexU8(),
-                                             content_.get()->snapshot(outputs),
-                                             form_.get()->valid_when(),
-                                             length, // FIXME
-                                             form_.get()->lsb_order());
-    }
-    return out;
-  }
-
-  const FormPtr
-  BitMaskedArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
-  const std::string
-  BitMaskedArrayBuilder::vm_output() const {
-    return vm_output_;
-  }
-
-  const std::string
-  BitMaskedArrayBuilder::vm_func() const {
-    return vm_func_;
-  }
-
-  const std::string
-  BitMaskedArrayBuilder::vm_func_name() const {
-    return vm_func_name_;
-  }
-
-  ///
-  ByteMaskedArrayBuilder::ByteMaskedArrayBuilder(const ByteMaskedFormPtr& form)
-    : form_(form),
-      form_key_(form.get()->form_key()),
-      content_(formBuilderFromA(form.get()->content())) {
-    // FIXME: generate a key if this FormKey is empty
-    // or already exists
-    vm_output_data_ = std::string("part0-").append(*form_key_).append("-mask");
-  }
-
-  const std::string
-  ByteMaskedArrayBuilder::classname() const {
-    return "ByteMaskedArrayBuilder";
-  }
-
-  const ContentPtr
-  ByteMaskedArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    ContentPtr out;
-    auto search = outputs.find(vm_output_data_);
-    if (search != outputs.end()) {
-      out = std::make_shared<ByteMaskedArray>(Identities::none(),
-                                              form_.get()->parameters(),
-                                              search->second.get()->toIndex8(),
-                                              content_.get()->snapshot(outputs),
-                                              form_.get()->valid_when());
-    }
-    return out;
-  }
-
-  const FormPtr
-  ByteMaskedArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
-  const std::string
-  ByteMaskedArrayBuilder::vm_output() const {
-    return std::string("output ")
-      .append(vm_output_data_)
-      .append("\n");
-  }
-
-  const std::string
-  ByteMaskedArrayBuilder::vm_func() const {
-    return std::string(": ")
-      .append(vm_func_name())
-      .append(";\n");
-  }
-
-  const std::string
-  ByteMaskedArrayBuilder::vm_func_name() const {
-    std::string out;
-    out.append(*form_key_)
-      .append("-")
-      .append("bytemask");
-    return out;
-  }
-
-  ///
-  EmptyArrayBuilder::EmptyArrayBuilder(const EmptyFormPtr& form)
-    : form_(form),
-      form_key_(form.get()->form_key()) { }
-
-  const std::string
-  EmptyArrayBuilder::classname() const {
-    return "EmptyArrayBuilder";
-  }
-
-  const ContentPtr
-  EmptyArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-      return std::make_shared<EmptyArray>(Identities::none(),
-                                          form_.get()->parameters());
-  }
-
-  const FormPtr
-  EmptyArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
-  const std::string
-  EmptyArrayBuilder::vm_output() const {
-    return vm_empty_command_;
-  }
-
-  const std::string
-  EmptyArrayBuilder::vm_func() const {
-    return vm_empty_command_;
-  }
-
-  const std::string
-  EmptyArrayBuilder::vm_func_name() const {
-    return vm_empty_command_;
-  }
-
-  ///
-  IndexedArrayBuilder::IndexedArrayBuilder(const IndexedFormPtr& form)
-    : form_(form),
-      form_key_(form.get()->form_key()),
-      content_(formBuilderFromA(form.get()->content())) {
-    // FIXME: generate a key if this FormKey is empty
-    // or already exists
-    vm_output_data_ = std::string("part0-").append(*form_key_).append("-index");
-  }
-
-  const std::string
-  IndexedArrayBuilder::classname() const {
-    return "IndexedArrayBuilder";
-  }
-
-  const ContentPtr
-  IndexedArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    // if(content_ != nullptr) {
-    //   Index64 index(reinterpret_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
-    //   return std::make_shared<IndexedArray64>(Identities::none(),
-    //                                           form_.get()->parameters(),
-    //                                           index,
-    //                                           content_.get()->snapshot(outputs));
-    // }
-    // else {
-    //   throw std::invalid_argument(
-    //     std::string("Form of a ") + classname()
-    //     + std::string(" needs another Form as its content")
-    //     + FILENAME(__LINE__));
-    // }
-    return nullptr;
-  }
-
-  const FormPtr
-  IndexedArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
-  const std::string
-  IndexedArrayBuilder::vm_output() const {
-    return std::string("output ")
-      .append(vm_output_data_)
-      .append("\n");
-  }
-
-  const std::string
-  IndexedArrayBuilder::vm_func() const {
-    return std::string(": ")
-      .append(vm_func_name())
-      .append(";\n");
-  }
-
-  const std::string
-  IndexedArrayBuilder::vm_func_name() const {
-    return std::string (*form_key_)
-      .append("-")
-      .append("index");
-  }
-
-  ///
-  IndexedOptionArrayBuilder::IndexedOptionArrayBuilder(const IndexedOptionFormPtr& form)
-    : form_(form),
-      form_key_(form.get()->form_key()),
-      content_(formBuilderFromA(form.get()->content())) { }
-
-  const std::string
-  IndexedOptionArrayBuilder::classname() const {
-    return "IndexedOptionArrayBuilder";
-  }
-
-  const ContentPtr
-  IndexedOptionArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    // if(content_ != nullptr) {
-    //   Index64 index(reinterpret_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
-    //   return std::make_shared<IndexedOptionArray64>(Identities::none(),
-    //                                                 form_.get()->parameters(),
-    //                                                 index,
-    //                                                 content_.get()->snapshot(outputs));
-    // }
-    // else {
-    //   throw std::invalid_argument(
-    //     std::string("Form of a ") + classname()
-    //     + std::string(" needs another Form as its content")
-    //     + FILENAME(__LINE__));
-    // }
-    return nullptr;
-  }
-
-  const FormPtr
-  IndexedOptionArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
-  const std::string
-  IndexedOptionArrayBuilder::vm_output() const {
-    return std::string("\n");
-  }
-
-  const std::string
-  IndexedOptionArrayBuilder::vm_func() const {
-    return std::string(": ")
-      .append(vm_func_name())
-      .append(";\n");
-  }
-
-  const std::string
-  IndexedOptionArrayBuilder::vm_func_name() const {
-    return std::string(*form_key_)
-      .append("-")
-      .append("index");
-  }
-
-  ///
-  ListArrayBuilder::ListArrayBuilder(const ListFormPtr& form)
-    : form_(form),
-      form_key_(form.get()->form_key()),
-      content_(formBuilderFromA(form.get()->content())) { }
-
-  const std::string
-  ListArrayBuilder::classname() const {
-    return "ListArrayBuilder";
-  }
-
-  const ContentPtr
-  ListArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    // if(content_ != nullptr) {
-    //   Index64 starts(reinterpret_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
-    //   Index64 stops(reinterpret_pointer_cast<int64_t>(data_), length_, length_, kernel::lib::cpu);
-    //   return std::make_shared<ListArray64>(Identities::none(),
-    //                                        form_.get()->parameters(),
-    //                                        starts,
-    //                                        stops,
-    //                                        content_.get()->snapshot(outputs));
-    // }
-    // else {
-    //   throw std::invalid_argument(
-    //     std::string("Form of a ") + classname()
-    //     + std::string(" needs another Form as its content")
-    //     + FILENAME(__LINE__));
-    // }
-    return nullptr;
-  }
-
-  const FormPtr
-  ListArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
-  const std::string
-  ListArrayBuilder::vm_output() const {
-    return std::string("\n");
-  }
-
-  const std::string
-  ListArrayBuilder::vm_func() const {
-    return std::string(": ")
-      .append(vm_func_name())
-      .append(";\n");
-  }
-
-  const std::string
-  ListArrayBuilder::vm_func_name() const {
-    std::string out;
-    out.append(*form_key_)
-      .append("-")
-      .append("list");
-    return out;
-  }
-
-  ///
-  ListOffsetArrayBuilder::ListOffsetArrayBuilder(const ListOffsetFormPtr& form)
-    : form_(form),
-      form_key_(form.get()->form_key()),
-      content_(formBuilderFromA(form.get()->content())) {
-    // FIXME: generate a key if this FormKey is empty
-    // or already exists
-    vm_output_data_ = std::string("part0-").append(*form_key_).append("-offsets");
-
-    vm_func_name_ = std::string(*form_key_).append("-").append("list");
-
-    vm_output_ = std::string("output ")
-      .append(vm_output_data_)
-      .append(" ")
-      .append(index_form_to_name(form_.get()->offsets()))
-      .append("\n")
-      .append(content_.get()->vm_output());
-
-    vm_func_.append(content_.get()->vm_func())
-      .append(": ").append(vm_func_name()).append("\n")
-      .append(std::to_string(static_cast<utype>(state::begin_list)))
-      .append(" <> if").append("\n")
-      .append("halt").append("\n")
-      .append("then").append("\n")
-      .append("\n")
-      .append("0").append("\n")
-      .append("begin").append("\n")
-      .append("pause").append("\n")
-      .append("dup ")
-      .append(std::to_string(static_cast<utype>(state::end_list)))
-      .append(" = if").append("\n")
-      .append("drop").append("\n")
-      .append(vm_output_data_).append(" +<- stack").append("\n")
-      .append("exit").append("\n")
-      .append("else").append("\n")
-      .append(content_.get()->vm_func_name()).append("\n")
-      .append("1+").append("\n")
-      .append("then").append("\n")
-      .append("again").append("\n")
-      .append(";").append("\n");
-
-    vm_data_from_stack_ = std::string(content_.get()->vm_from_stack())
-      .append("0 ").append(vm_output_data_).append(" <- stack").append("\n");
-  }
-
-  const std::string
-  ListOffsetArrayBuilder::classname() const {
-    return "ListOffsetArrayBuilder";
-  }
-
-  const ContentPtr
-  ListOffsetArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    auto search = outputs.find(vm_output_data_);
-    if (search != outputs.end()) {
-      return std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                 form_.get()->parameters(),
-                                                 search->second.get()->toIndex64(),
-                                                 content_.get()->snapshot(outputs));
-    }
-    throw std::invalid_argument(
-        std::string("Snapshot of a ") + classname()
-        + std::string(" needs offsets")
-        + FILENAME(__LINE__));
-  }
-
-  const FormPtr
-  ListOffsetArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
-  const std::string
-  ListOffsetArrayBuilder::vm_output() const {
-    return vm_output_;
-  }
-
-  const std::string
-  ListOffsetArrayBuilder::vm_func() const {
-    return vm_func_;
-  }
-
-  const std::string
-  ListOffsetArrayBuilder::vm_func_name() const {
-    return vm_func_name_;
-  }
-
-  const std::string
-  ListOffsetArrayBuilder::vm_from_stack() const {
-    return vm_data_from_stack_;
-  }
-
-  ///
-  NumpyArrayBuilder::NumpyArrayBuilder(const NumpyFormPtr& form)
-    : form_(form),
-      form_key_(form.get()->form_key()) {
-    // FIXME: generate a key if this FormKey is empty
-    // or already exists
-    vm_output_data_ = std::string("part0-").append(*form_key_).append("-data");
-
-    vm_output_ = std::string("output ")
-      .append(vm_output_data_)
-      .append(" ")
-      .append(dtype_to_name(form_.get()->dtype())).append("\n");
-
-    vm_func_name_ = std::string(*form_key_)
-      .append("-")
-      .append(dtype_to_name(form_.get()->dtype()));
-
-    vm_func_ = std::string(": ").append(vm_func_name()).append("\n")
-      .append(dtype_to_state(form_.get()->dtype()))
-      .append(" = if").append("\n")
-      .append("0 data seek").append("\n")
-      .append("data ").append(dtype_to_vm_format(form_.get()->dtype()))
-      .append("-> ").append(vm_output_data_).append("\n")
-      .append("else").append("\n")
-      .append("halt").append("\n")
-      .append("then").append("\n")
-      .append(";").append("\n");
-  }
-
-  const std::string
-  NumpyArrayBuilder::classname() const {
-    return "NumpyArrayBuilder";
-  }
-
-  const ContentPtr
-  NumpyArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    auto search = outputs.find(vm_output_data_);
-    if (search != outputs.end()) {
-      return search->second.get()->toNumpyArray();
-    }
-    throw std::invalid_argument(
-        std::string("Snapshot of a ") + classname()
-        + std::string(" needs data")
-        + FILENAME(__LINE__));
-  }
-
-  const FormPtr
-  NumpyArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
-  const std::string
-  NumpyArrayBuilder::vm_output() const {
-    return vm_output_;
-  }
-
-  const std::string
-  NumpyArrayBuilder::vm_func() const {
-    return vm_func_;
-  }
-
-  const std::string
-  NumpyArrayBuilder::vm_func_name() const {
-    return vm_func_name_;
-  }
-
-  const std::string
-  NumpyArrayBuilder::vm_from_stack() const {
-    return std::string();
-  }
-
-  ///
-  RecordArrayBuilder::RecordArrayBuilder(const RecordFormPtr& form)
-    : form_(form),
-      form_key_(form.get()->form_key()) {
-    for (auto const& content : form.get()->contents()) {
-      contents_.push_back(formBuilderFromA(content));
-    }
-
-    for (auto const& content : contents_) {
-      vm_output_.append(content.get()->vm_output());
-    }
-    for (auto const& content : contents_) {
-      vm_from_stack_.append(content.get()->vm_from_stack());
-    }
-
-    vm_func_name_ = std::string(*form_key_).append("-record");
-
-    for (auto const& content : contents_) {
-      vm_func_.append(content.get()->vm_func());
-    }
-    vm_func_.append(": ")
-      .append(vm_func_name_);
-
-    for (auto const& content : contents_) {
-      vm_func_.append("\n    ").append(content.get()->vm_func_name())
-        .append(" pause");
-    }
-    // Remove the last pause
-    vm_func_.erase(vm_func_.end() - 6, vm_func_.end());
-    vm_func_.append("\n;\n\n");
-  }
-
-  const std::string
-  RecordArrayBuilder::classname() const {
-    return "RecordArrayBuilder";
-  }
-
-  const ContentPtr
-  RecordArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    ContentPtrVec contents;
-    for (size_t i = 0;  i < contents_.size();  i++) {
-      contents.push_back(contents_[i].get()->snapshot(outputs));
-    }
-    return std::make_shared<RecordArray>(Identities::none(),
-                                         form_.get()->parameters(),
-                                         contents,
-                                         form_.get()->recordlookup());
-  }
-
-  const FormPtr
-  RecordArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
-  const std::string
-  RecordArrayBuilder::vm_output() const {
-    return vm_output_;
-  }
-
-  const std::string
-  RecordArrayBuilder::vm_func() const {
-    return vm_func_;
-  }
-
-  const std::string
-  RecordArrayBuilder::vm_func_name() const {
-    return vm_func_name_;
-  }
-
-  const std::string
-  RecordArrayBuilder::vm_from_stack() const {
-    return vm_from_stack_;
-  }
-
-  ///
-  RegularArrayBuilder::RegularArrayBuilder(const RegularFormPtr& form)
-    : form_(form),
-      form_key_(form.get()->form_key()) { }
-
-  const std::string
-  RegularArrayBuilder::classname() const {
-    return "RegularArrayBuilder";
-  }
-
-  const ContentPtr
-  RegularArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    ContentPtr out;
-    if(content_ != nullptr) {
-      int64_t length = 0; // outputs.len(); // FIXME
-      out = std::make_shared<RegularArray>(Identities::none(),
-                                           form_.get()->parameters(),
-                                           content_.get()->snapshot(outputs),
-                                           length); // FIXME
-    }
-    return out;
-  }
-
-  const FormPtr
-  RegularArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
-  const std::string
-  RegularArrayBuilder::vm_output() const {
-    return std::string("\n");
-  }
-
-  const std::string
-  RegularArrayBuilder::vm_func() const {
-    return std::string(": ")
-      .append(vm_func_name())
-      .append("\n");
-  }
-
-  const std::string
-  RegularArrayBuilder::vm_func_name() const {
-    return std::string(*form_key_)
-      .append("-reg");
-  }
-
-  ///
-  UnionArrayBuilder::UnionArrayBuilder(const UnionFormPtr& form)
-    : form_(form),
-      form_key_(form.get()->form_key()) {
-    // FIXME: generate a key if this FormKey is empty
-    // or already exists
-    vm_output_data_ = std::string("part0-").append(*form_key_).append("-tags");
- }
-
-  const std::string
-  UnionArrayBuilder::classname() const {
-    return "UnionArrayBuilder";
-  }
-
-  const ContentPtr
-  UnionArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    // FIXME:
-    return std::make_shared<EmptyArray>(Identities::none(),
-                                        form_.get()->parameters());
-      // return std::make_shared<UnionArray8_64>(Identities::none(),
-      //                                         form_.get()->parameters());
-  }
-
-  const FormPtr
-  UnionArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
-  const std::string
-  UnionArrayBuilder::vm_output() const {
-    return std::string("output ")
-      .append(vm_output_data_)
-      .append("\n");
-  }
-
-  const std::string
-  UnionArrayBuilder::vm_func() const {
-    return std::string(": ")
-      .append(*form_key_)
-      .append("-")
-      .append("union\n");
-  }
-
-  const std::string
-  UnionArrayBuilder::vm_func_name() const {
-    return std::string(*form_key_)
-      .append("-union");
-  }
-
-  ///
-  UnmaskedArrayBuilder::UnmaskedArrayBuilder(const UnmaskedFormPtr& form)
-    : form_(form),
-      form_key_(form.get()->form_key()) {
-    // FIXME: generate a key if this FormKey is empty
-    // or already exists
-    vm_output_data_ = std::string("part0-").append(*form_key_).append("-mask");
-  }
-
-  const std::string
-  UnmaskedArrayBuilder::classname() const {
-    return "UnmaskedArrayBuilder";
-  }
-
-  const ContentPtr
-  UnmaskedArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    // FIXME
-      return std::make_shared<EmptyArray>(Identities::none(),
-                                          form_.get()->parameters());
-  }
-
-  const FormPtr
-  UnmaskedArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
-  const std::string
-  UnmaskedArrayBuilder::vm_output() const {
-    return std::string("output ")
-      .append(vm_output_data_)
-      .append("\n");
-  }
-
-  const std::string
-  UnmaskedArrayBuilder::vm_func() const {
-    return std::string(": ")
-      .append(*form_key_)
-      .append("-")
-      .append("unmasked\n");
-  }
-
-  const std::string
-  UnmaskedArrayBuilder::vm_func_name() const {
-    return std::string(*form_key_)
-      .append("-unmasked");
-  }
-
-  ///
-  VirtualArrayBuilder::VirtualArrayBuilder(const VirtualFormPtr& form)
-    : form_(form),
-      form_key_(form.get()->form_key()) { }
-
-  const std::string
-  VirtualArrayBuilder::classname() const {
-    return "VirtualArrayBuilder";
-  }
-
-  const ContentPtr
-  VirtualArrayBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    // FIXME:
-    return std::make_shared<EmptyArray>(Identities::none(),
-                                        form_.get()->parameters());
-  }
-
-  const FormPtr
-  VirtualArrayBuilder::form() const {
-    return std::static_pointer_cast<Form>(form_);
-  }
-
-  const std::string
-  VirtualArrayBuilder::vm_output() const {
-    return vm_output_;
-  }
-
-  const std::string
-  VirtualArrayBuilder::vm_func() const {
-    return vm_func_;
-  }
-
-  const std::string
-  VirtualArrayBuilder::vm_func_name() const {
-    return vm_func_name_;
-  }
-
-  ///
-  UnknownFormBuilder::UnknownFormBuilder(const FormPtr& form)
-    : form_(form) {}
-
-  const std::string
-  UnknownFormBuilder::classname() const {
-    return "UnknownFormBuilder";
-  }
-
-  const ContentPtr
-  UnknownFormBuilder::snapshot(const ForthOtputBufferMap& outputs) const {
-    return nullptr;
-  }
-
-  const FormPtr
-  UnknownFormBuilder::form() const {
-    return form_;
-  }
-
-  const std::string
-  UnknownFormBuilder::vm_output() const {
-    return vm_empty_command_;
-  }
-
-  const std::string
-  UnknownFormBuilder::vm_func() const {
-    return vm_empty_command_;
-  }
-
-  const std::string
-  UnknownFormBuilder::vm_func_name() const {
-    return vm_empty_command_;
   }
 
 }

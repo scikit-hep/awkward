@@ -9,6 +9,7 @@ namespace awkward {
 
   class BitMaskedForm;
   using BitMaskedFormPtr = std::shared_ptr<BitMaskedForm>;
+  using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class BitMaskedArrayBuilder
   ///
@@ -24,7 +25,7 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     const ContentPtr
-      snapshot(const ForthOtputBufferMap& outputs) const override;
+      snapshot(const ForthOutputBufferMap& outputs) const override;
 
     /// @brief
     const FormPtr

@@ -3,11 +3,16 @@
 #ifndef AWKWARD_FORMBUILDER_H_
 #define AWKWARD_FORMBUILDER_H_
 
+#include <map>
+#include <memory>
+#include <string>
+#include "awkward/forth/ForthOutputBuffer.h"
+
 namespace awkward {
 
   class Content;
   using ContentPtr = std::shared_ptr<Content>;
-  using ForthOtputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
+  using ForthOutputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
 
   /// @class FormBuilder
   ///
@@ -25,7 +30,7 @@ namespace awkward {
 
     /// @brief Turns the accumulated data into a Content array.
     virtual const ContentPtr
-      snapshot(const ForthOtputBufferMap& outputs) const = 0;
+      snapshot(const ForthOutputBufferMap& outputs) const = 0;
 
     /// @brief
     virtual const FormPtr

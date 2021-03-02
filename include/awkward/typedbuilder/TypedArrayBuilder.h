@@ -27,6 +27,37 @@ namespace awkward {
   class FormBuilder;
   using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
+  const std::string
+    index_form_to_name(Index::Form form);
+
+    enum class state : std::int32_t {
+      int64 = 0,
+      float64 = 1,
+      begin_list = 2,
+      end_list = 3,
+      boolean = 4,
+      int8 = 5,
+      int16 = 6,
+      int32 = 7,
+      uint8 = 8,
+      uint16 = 9,
+      uint32 = 10,
+      uint64 = 11,
+      float16 = 12,
+      float32 = 13,
+      float128 = 14,
+      complex64 = 15,
+      complex128 = 16,
+      complex256 = 17
+    };
+  using utype = std::underlying_type<state>::type;
+
+  const std::string
+    dtype_to_state(util::dtype dt);
+
+  const std::string
+    dtype_to_vm_format(util::dtype dt);
+
   /// @class TypedArrayBuilder
   ///
   /// @brief User interface to the FormBuilder system: the TypedArrayBuilder is a
@@ -38,6 +69,9 @@ namespace awkward {
     ///
     /// @param initial The initial number of entries for a buffer.
     TypedArrayBuilder(const FormPtr& form, const ArrayBuilderOptions& options);
+
+    static FormBuilderPtr
+      formBuilderFromA(const FormPtr& form);
 
     /// @brief
     void
