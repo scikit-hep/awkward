@@ -48,7 +48,11 @@ namespace awkward {
       float128 = 14,
       complex64 = 15,
       complex128 = 16,
-      complex256 = 17
+      complex256 = 17,
+      null = 18,
+      begin_tuple = 19,
+      end_tuple = 20,
+      index = 21
     };
   using utype = std::underlying_type<state>::type;
 
@@ -69,9 +73,6 @@ namespace awkward {
     ///
     /// @param initial The initial number of entries for a buffer.
     TypedArrayBuilder(const FormPtr& form, const ArrayBuilderOptions& options);
-
-    static FormBuilderPtr
-      formBuilderFromA(const FormPtr& form);
 
     /// @brief
     void
@@ -357,22 +358,32 @@ namespace awkward {
     void
       extend(const ContentPtr& array);
 
+    /// @brief
+    static FormBuilderPtr
+      formBuilderFromA(const FormPtr& form);
+
   private:
     /// See #initial.
     int64_t initial_;
-    int64_t length_;
 
-    std::string vm_input_data_;
-    std::string vm_source_;
+    /// @brief length of an input buffer
+    int64_t length_;
 
     /// @brief Root node of the FormBuilder tree.
     std::shared_ptr<FormBuilder> builder_;
 
-    /// @brief Current node of the FormBuilder tree.
-    std::shared_ptr<FormBuilder> current_builder_;
-
+    /// @brief
     std::shared_ptr<ForthMachine32> vm_;
+
+    /// @brief
     std::map<std::string, std::shared_ptr<ForthInputBuffer>> vm_inputs_map_;
+
+    /// @brief
+    std::string vm_input_data_;
+
+    /// @brief
+    std::string vm_source_;
+
   };
 
 }

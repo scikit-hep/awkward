@@ -9,6 +9,9 @@
 namespace awkward {
 
   ///
+  /// FIXME: implement Form morfing
+  /// ListForm to ListOffsetForm
+  ///
   ListArrayBuilder::ListArrayBuilder(const ListFormPtr& form)
     : form_(form),
       form_key_(form.get()->form_key()),

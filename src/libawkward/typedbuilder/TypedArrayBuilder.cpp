@@ -36,55 +36,6 @@
 
 namespace awkward {
 
-  /// FIXME: implement Form morfing
-  /// for example, ListForm to ListOffsetForm
-  ///
-  // FormBuilderPtr
-  // formBuilderFromA(const FormPtr& form) {
-  //   if (auto const& downcasted_form = std::dynamic_pointer_cast<BitMaskedForm>(form)) {
-  //     return std::make_shared<BitMaskedArrayBuilder>(downcasted_form);
-  //   }
-  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<ByteMaskedForm>(form)) {
-  //     return std::make_shared<ByteMaskedArrayBuilder>(downcasted_form);
-  //   }
-  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<EmptyForm>(form)) {
-  //     return std::make_shared<EmptyArrayBuilder>(downcasted_form);
-  //   }
-  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedForm>(form)) {
-  //     return std::make_shared<IndexedArrayBuilder>(downcasted_form);
-  //   }
-  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedOptionForm>(form)) {
-  //     return std::make_shared<IndexedOptionArrayBuilder>(downcasted_form);
-  //   }
-  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<ListForm>(form)) {
-  //     return std::make_shared<ListArrayBuilder>(downcasted_form);
-  //   }
-  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<ListOffsetForm>(form)) {
-  //     return std::make_shared<ListOffsetArrayBuilder>(downcasted_form);
-  //   }
-  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<NumpyForm>(form)) {
-  //     return std::make_shared<NumpyArrayBuilder>(downcasted_form);
-  //   }
-  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<RecordForm>(form)) {
-  //     return std::make_shared<RecordArrayBuilder>(downcasted_form);
-  //   }
-  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<RegularForm>(form)) {
-  //     return std::make_shared<RegularArrayBuilder>(downcasted_form);
-  //   }
-  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<UnionForm>(form)) {
-  //     return std::make_shared<UnionArrayBuilder>(downcasted_form);
-  //   }
-  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<UnmaskedForm>(form)) {
-  //     return std::make_shared<UnmaskedArrayBuilder>(downcasted_form);
-  //   }
-  //   else if (auto const& downcasted_form = std::dynamic_pointer_cast<VirtualForm>(form)) {
-  //     return std::make_shared<VirtualArrayBuilder>(downcasted_form);
-  //   }
-  //   else {
-  //     return std::make_shared<UnknownFormBuilder>(form);
-  //   }
-  // }
-
   const std::string
   index_form_to_name(Index::Form form) {
     switch (form) {
@@ -100,7 +51,7 @@ namespace awkward {
       return "int64";
     default:
       throw std::runtime_error(
-        std::string("unrecognized Index::Form") + FILENAME(__LINE__));
+        std::string("unrecognized Index::Form ") + FILENAME(__LINE__));
     }
   }
 
@@ -144,7 +95,8 @@ namespace awkward {
       // case timedelta64:
       //   return static_cast<utype>(state::timedelta64);
     default:
-      return std::to_string(-1);
+      throw std::runtime_error(
+        std::string("unrecognized util::dtype ") + FILENAME(__LINE__));
     }
   };
 
@@ -172,16 +124,17 @@ namespace awkward {
  // case timedelta64:
       return "d";
     default:
-      return "FIXME";
+      throw std::runtime_error(
+        std::string("unrecognized util::dtype ") + FILENAME(__LINE__));
     }
   };
 
   TypedArrayBuilder::TypedArrayBuilder(const FormPtr& form,
                                        const ArrayBuilderOptions& options)
     : initial_(options.initial()),
+      builder_(formBuilderFromA(form)),
       vm_input_data_("data"),
-      vm_source_(),
-      builder_(formBuilderFromA(form)) {
+      vm_source_() {
     vm_source_.append("input ")
       .append(vm_input_data_)
       .append("\n");
@@ -292,7 +245,7 @@ namespace awkward {
 
   int64_t
   TypedArrayBuilder::length() const {
-    return length_; // FIXME: builder_.get()->length();
+    return length_;
   }
 
   void
@@ -311,14 +264,7 @@ namespace awkward {
 
   const TypePtr
   TypedArrayBuilder::type(const util::TypeStrs& typestrs) const {
-    if (builder_ != nullptr) {
-      return builder_.get()->snapshot(vm_.get()->outputs()).get()->type(typestrs);
-    }
-    else {
-      throw std::invalid_argument(
-        std::string("FormBuilder is not defined")
-        + FILENAME(__LINE__));
-    }
+    return builder_.get()->snapshot(vm_.get()->outputs()).get()->type(typestrs);
   }
 
   const ContentPtr
@@ -353,9 +299,9 @@ namespace awkward {
 
   void
   TypedArrayBuilder::null() {
-    throw std::runtime_error(
-      std::string("FormBuilder 'null' is not implemented yet")
-      + FILENAME(__LINE__));
+    reinterpret_cast<int64_t*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = -1;
+    vm_.get()->stack_push(static_cast<utype>(state::null));
+    vm_.get()->resume();
   }
 
   void
@@ -381,23 +327,23 @@ namespace awkward {
 
   void
   TypedArrayBuilder::complex(std::complex<double> x) {
-    throw std::runtime_error(
-      std::string("FormBuilder 'complex' is not implemented yet")
-      + FILENAME(__LINE__));
+    reinterpret_cast<std::complex<double>*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = x;
+    vm_.get()->stack_push(static_cast<utype>(state::complex128));
+    vm_.get()->resume();
   }
 
   void
   TypedArrayBuilder::bytestring(const char* x) {
     //builder_.get()->string(x, -1, no_encoding);
     throw std::runtime_error(
-      std::string("FormBuilder 'bytestring' is not implemented yet")
+      std::string("TypedArrayBuilder 'bytestring' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
   void
   TypedArrayBuilder::bytestring(const char* x, int64_t length) {
     throw std::runtime_error(
-      std::string("FormBuilder 'clear' is not implemented yet")
+      std::string("TypedArrayBuilder 'bytestring' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
@@ -409,14 +355,14 @@ namespace awkward {
   void
   TypedArrayBuilder::string(const char* x) {
     throw std::runtime_error(
-      std::string("FormBuilder 'clear' is not implemented yet")
+      std::string("TypedArrayBuilder 'string' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
   void
   TypedArrayBuilder::string(const char* x, int64_t length) {
     throw std::runtime_error(
-      std::string("FormBuilder 'clear' is not implemented yet")
+      std::string("TypedArrayBuilder 'string' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
@@ -439,99 +385,97 @@ namespace awkward {
 
   void
   TypedArrayBuilder::begintuple(int64_t numfields) {
-    throw std::runtime_error(
-      std::string("FormBuilder 'clear' is not implemented yet")
-      + FILENAME(__LINE__));
+    vm_.get()->stack_push(static_cast<utype>(state::begin_tuple));
+    vm_.get()->resume();
   }
 
   void
   TypedArrayBuilder::index(int64_t index) {
-    throw std::runtime_error(
-      std::string("FormBuilder 'clear' is not implemented yet")
-      + FILENAME(__LINE__));
+    reinterpret_cast<int64_t*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = index;
+    vm_.get()->stack_push(static_cast<utype>(state::index));
+    vm_.get()->resume();
   }
 
   void
   TypedArrayBuilder::endtuple() {
-    throw std::runtime_error(
-      std::string("FormBuilder 'clear' is not implemented yet")
-      + FILENAME(__LINE__));
+    vm_.get()->stack_push(static_cast<utype>(state::end_tuple));
+    vm_.get()->resume();
   }
 
   void
   TypedArrayBuilder::beginrecord() {
     throw std::runtime_error(
-      std::string("FormBuilder 'clear' is not implemented yet")
+      std::string("TypedArrayBuilder 'beginrecord' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
   void
   TypedArrayBuilder::beginrecord_fast(const char* name) {
     throw std::runtime_error(
-      std::string("FormBuilder 'clear' is not implemented yet")
+      std::string("TypedArrayBuilder 'beginrecord_fast' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
   void
   TypedArrayBuilder::beginrecord_check(const char* name) {
     throw std::runtime_error(
-      std::string("FormBuilder 'clear' is not implemented yet")
+      std::string("TypedArrayBuilder 'beginrecord_check' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
   void
   TypedArrayBuilder::beginrecord_check(const std::string& name) {
     throw std::runtime_error(
-      std::string("FormBuilder 'clear' is not implemented yet")
+      std::string("TypedArrayBuilder 'beginrecord_check' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
   void
   TypedArrayBuilder::field_fast(const char* key) {
     throw std::runtime_error(
-      std::string("FormBuilder 'clear' is not implemented yet")
+      std::string("TypedArrayBuilder 'field_fast' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
   void
   TypedArrayBuilder::field_check(const char* key) {
     throw std::runtime_error(
-      std::string("FormBuilder 'field_check' is not implemented yet")
+      std::string("TypedArrayBuilder 'field_check' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
   void
   TypedArrayBuilder::field_check(const std::string& key) {
     throw std::runtime_error(
-      std::string("FormBuilder 'field_check' is not implemented yet")
+      std::string("TypedArrayBuilder 'field_check' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
   void
   TypedArrayBuilder::endrecord() {
     throw std::runtime_error(
-      std::string("FormBuilder 'endrecord' is not implemented yet")
+      std::string("TypedArrayBuilder 'endrecord' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
   void
   TypedArrayBuilder::append(const ContentPtr& array, int64_t at) {
     throw std::runtime_error(
-      std::string("FormBuilder 'clear' is not implemented yet")
+      std::string("TypedArrayBuilder 'append' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
   void
   TypedArrayBuilder::append_nowrap(const ContentPtr& array, int64_t at) {
     throw std::runtime_error(
-      std::string("FormBuilder 'append' is not implemented yet")
+      std::string("TypedArrayBuilder 'append_nowrap' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
   void
   TypedArrayBuilder::extend(const ContentPtr& array) {
     throw std::runtime_error(
-      std::string("FormBuilder 'extend' is not implemented yet")
+      std::string("TypedArrayBuilder 'extend' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
