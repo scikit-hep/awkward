@@ -7852,7 +7852,7 @@ kernels:
     definition: |
       def awkward_one_mask(tomask, length):
           for i in range(length):
-              tomask[i] = 0
+              tomask[i] = 1
     automatic-tests: true
     manual-tests: []
 
