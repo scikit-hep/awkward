@@ -122,6 +122,7 @@ def test_indexed_option_form():
 
     # initialise
     builder.connect(vm)
+    builder.null()
     builder.integer(11)
     builder.integer(22)
     builder.null()
@@ -132,5 +133,4 @@ def test_indexed_option_form():
     builder.integer(66)
     builder.integer(77)
 
-    #assert ak.to_list(builder.snapshot()) == [11, 22, None, 33, 44, None, 55, 66, 77]
-    assert ak.to_list(builder.snapshot()) == [11, 22, 33, 44, 55, 66, 77]
+    assert ak.to_list(builder.snapshot()) == [None, 11, 22, None, 33, 44, None, 55, 66, 77]

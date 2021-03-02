@@ -299,7 +299,6 @@ namespace awkward {
 
   void
   TypedArrayBuilder::null() {
-    reinterpret_cast<int64_t*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = -1;
     vm_.get()->stack_push(static_cast<utype>(state::null));
     vm_.get()->resume();
   }

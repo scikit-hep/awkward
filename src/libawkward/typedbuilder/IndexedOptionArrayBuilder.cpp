@@ -28,22 +28,18 @@ namespace awkward {
 
     vm_func_.append(content_.get()->vm_func())
       .append(": ").append(vm_func_name()).append("\n")
-      .append(std::to_string(static_cast<utype>(state::null)))
-      .append(" <> if").append("\n")
-      .append("\n0\n")
-      .append("begin\n")
-      .append("pause\n\n")
-      .append(content_.get()->vm_func_name()).append("\n")
-      .append("variable index").append("\n")
-      .append("1 index +!").append("\n")
-      .append("index @ ")
-      .append(vm_output_data_).append(" <- stack").append("\n")
-      .append("again\n")
-      .append("else").append("\n\n")
-      .append("variable null").append("\n")
-      .append("0 null !").append("\n")
+      .append("dup ").append(std::to_string(static_cast<utype>(state::null)))
+      .append(" = if").append("\n")
+      .append("drop\n")
+      .append("variable null    -1 null !").append("\n")
       .append("null @ ")
       .append(vm_output_data_).append(" <- stack").append("\n")
+      .append("exit\n")
+      .append("else\n")
+      .append("variable index    1 index +!").append("\n")
+      .append("index @ 1- ")
+      .append(vm_output_data_).append(" <- stack").append("\n")
+      .append(content_.get()->vm_func_name()).append("\n")
       .append("then\n")
       .append(";").append("\n");
 
@@ -61,9 +57,11 @@ namespace awkward {
   IndexedOptionArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_data_);
     if (search != outputs.end()) {
-       // FIXME: search->second.get()->toIndex64() length is 1 more then needed here
+       // FIXME: search->second.get()->toIndex64()
+       // length is 1 more then needed here
+       // and the first element is always 0!
       Index64 index(std::static_pointer_cast<int64_t>(search->second.get()->ptr()),
-                    0,
+                    1,
                     search->second.get()->len() - 1,
                     kernel::lib::cpu);
       return std::make_shared<IndexedOptionArray64>(Identities::none(),

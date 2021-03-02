@@ -28,11 +28,10 @@ namespace awkward {
 
     vm_func_.append(content_.get()->vm_func())
       .append(": ").append(vm_func_name()).append("\n")
-      .append(content_.get()->vm_func_name()).append("\n")
-      .append("variable index").append("\n")
-      .append("1 index +!").append("\n")
+      .append("variable index    1 index +!").append("\n")
       .append("index @ ")
       .append(vm_output_data_).append(" <- stack").append("\n")
+      .append(content_.get()->vm_func_name()).append("\n")
       .append(";").append("\n");
 
     vm_data_from_stack_ = std::string(content_.get()->vm_from_stack())
