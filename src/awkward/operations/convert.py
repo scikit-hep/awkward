@@ -4491,7 +4491,7 @@ def _form_to_layout(
                 )
 
         array = raw_array.view(dtype).reshape((-1,) + inner_shape)
-
+ 
         return ak.layout.NumpyArray(array, identities, parameters)
 
     elif isinstance(form, ak.forms.RecordForm):
@@ -4689,24 +4689,6 @@ def _wrap_record_with_virtual(input_form):
     form = json.loads(input_form.tojson())
     modify(form)
     return ak.forms.Form.fromjson(json.dumps(form))
-
-
-class CannotMaterialize(np.ndarray):
-    def __init__(self, shape):
-        self.shape = shape
-
-    def __len__(self):
-        return prod(self.shape)
-
-    def __array_finalize__(self, obj):
-        if obj is None: 
-            return
-        elif isinstance(obj, np.ndarray): 
-            return ak.Array(obj)
-        else:
-            raise ValueError(
-                "this operation cannot be performed in a JAX-compiled or JAX-differentiated function"
-            )
 
 def from_buffers(
     form,

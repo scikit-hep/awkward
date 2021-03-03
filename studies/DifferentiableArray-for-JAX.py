@@ -37,18 +37,14 @@ class DifferentiableArray(ak.Array):
 
     @property
     def layout(self):
-        # print(self.tracers)
         buffers = dict(self.aux_data.indexes)
         for key, tracer in zip(self.aux_data.datakeys, self.tracers):
             if hasattr(tracer, "primal"):
-                buffers[key] = tracer.primal
-            elif hasattr(tracer, "val"):
-                buffers[key] = tracer.val
-            else:
-                buffers[key] = ak.CannotMaterialize(tracer.shape)
+                if isinstance(tracer.primal, jax.interpreters.xla._DeviceArray) or isinstance(tracer.primal, np.ndarray):
+                    buffers[key] = tracer.primal
         return ak.from_buffers(
             self.aux_data.form, self.aux_data.length, buffers, highlevel=False
-        )
+        ) 
 
     @layout.setter
     def layout(self, layout):
@@ -58,14 +54,21 @@ class DifferentiableArray(ak.Array):
 
     def __getitem__(self, where):
         out = self.layout[where]
+        
         if isinstance(out, ak.layout.Content):
             form, length, indexes = ak.to_buffers(
                 out, form_key="getitem_node{id}", virtual="pass"
             )
             aux_data = AuxData(form, length, indexes, self.aux_data.datakeys)
             return DifferentiableArray(aux_data, self.tracers)
-        else:
-            return out
+        else: 
+            form, length, children = ak.to_buffers(self.layout)
+            child_buf_key = self.aux_data.datakeys.index(list(children.keys())[0])
+            if np.isscalar(out):  
+                if np.isscalar(where):
+                    return self.tracers[child_buf_key][where]
+                else:
+                    return NotImplementedError
 
     def __setitem__(self, where, what):
         raise ValueError(
@@ -159,7 +162,10 @@ def special_unflatten(aux_data, children):
         return DifferentiableArray(aux_data, children)
     else:
         buffers = dict(aux_data.indexes)
+
         buffers.update(zip(aux_data.datakeys, children))
+        print(buffers)
+        print(aux_data.form)
         return ak.from_buffers(aux_data.form, aux_data.length, buffers)
 
 jax.tree_util.register_pytree_node(ak.Array, special_flatten, special_unflatten)
@@ -170,8 +176,13 @@ jax.tree_util.register_pytree_node(DifferentiableArray, special_flatten, special
 ###############################################################################
 
 def func(array):
-    return 2*array.y[0, 0, 0] + 10
+    return 2*array.y[2][0] + 10
 
+# def fun1(array):
+#     return 2 * array[0][0] ** 2
+
+# primal1 = ak.Array([[1., 2., 3.], [4.], [5., 6.]])
+# tangent1 = ak.Array([[1., 1., 1.], [0.], [0., 0.]])
 primal = ak.Array([
     [{"x": 1.1, "y": [1.0]}, {"x": 2.2, "y": [1.0, 2.2]}],
     [],
@@ -184,16 +195,21 @@ tangent = ak.Array([
     [{"x": 1.5, "y": [2.0, 0.5, 1.0]}]
 ])
 
+# print(primal.y)
+# print(tangent.y)
+print(func(primal))
+form, length, children = ak.to_buffers(primal)
 primal_result, tangent_result = jax.jvp(func, (primal,), (tangent,))
 print("resulting types", type(primal_result), type(tangent_result))
 print(primal_result)
 print(tangent_result)
 
-jit_result = jax.jit(func)(primal)
-print("resulting type", type(jit_result))
-print(jit_result)
+# jit_result = jax.jit(func)(primal)
+# print("resulting type", type(jit_result))
+# print(jit_result)
 # def func(x):
-#     return x[0] ** 2 
+#     return x[0] ** 2 + x[1] ** 2 
 # tree = ak.Array([1., 2., 3., 4.])
 # basis = ak.Array([0., 1., 0., 0.])
+# # print(jax.vjp(func, tree)[1](1.))
 # print(jax.jvp(func, (tree,), (basis,)))
