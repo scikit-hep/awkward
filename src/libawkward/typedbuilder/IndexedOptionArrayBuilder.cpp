@@ -9,15 +9,20 @@
 namespace awkward {
 
   ///
-  IndexedOptionArrayBuilder::IndexedOptionArrayBuilder(const IndexedOptionFormPtr& form)
+  IndexedOptionArrayBuilder::IndexedOptionArrayBuilder(const IndexedOptionFormPtr& form,
+                                                       const std::string attribute,
+                                                       const std::string partition)
     : form_(form),
       form_key_(form.get()->form_key()),
+      attribute_(attribute),
+      partition_(partition),
       content_(TypedArrayBuilder::formBuilderFromA(form.get()->content())) {
-    // FIXME: generate a key if this FormKey is empty
-    // or already exists
-    vm_output_data_ = std::string("part0-").append(*form_key_).append("-index");
+    vm_output_data_ = std::string("part")
+      .append(partition_).append("-")
+      .append(*form_key_).append("-")
+      .append(attribute_);
 
-    vm_func_name_ = std::string(*form_key_).append("-").append("index");
+    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
 
     vm_output_ = std::string("output ")
       .append(vm_output_data_)

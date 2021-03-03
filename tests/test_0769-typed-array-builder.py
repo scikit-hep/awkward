@@ -134,3 +134,37 @@ def test_indexed_option_form():
     builder.integer(77)
 
     assert ak.to_list(builder.snapshot()) == [None, 11, 22, None, 33, 44, None, 55, 66, 77]
+
+def test_regular_form():
+    form = ak.forms.Form.fromjson("""
+{
+    "class": "RegularArray",
+    "size": 3,
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "int64",
+            "form_key": "node1"
+        },
+    "form_key": "node0"
+}
+""")
+
+    builder = ak.layout.TypedArrayBuilder(form)
+    vm = awkward.forth.ForthMachine32(builder.to_vm())
+
+    # initialise
+    builder.connect(vm)
+    builder.integer(11)
+    builder.integer(22)
+    builder.integer(33)
+    builder.integer(44)
+    builder.integer(55)
+    builder.integer(66)
+    builder.integer(77)
+
+    assert ak.to_list(builder.snapshot()) == [[11, 22, 33], [44, 55, 66]]
+
+    builder.integer(88)
+    builder.integer(99)
+
+    assert ak.to_list(builder.snapshot()) == [[11, 22, 33], [44, 55, 66], [77, 88, 99]]

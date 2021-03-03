@@ -17,7 +17,9 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL RecordArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates a RecordArrayBuilder from a full set of parameters.
-    RecordArrayBuilder(const RecordFormPtr& form);
+    RecordArrayBuilder(const RecordFormPtr& form,
+                       const std::string attribute = "record",
+                       const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -49,9 +51,18 @@ namespace awkward {
 
   private:
     const RecordFormPtr form_;
+
+    /// @brief an output buffer name is
+    /// "part{partition}-{form_key}-{attribute}"
     const FormKey form_key_;
+    const std::string attribute_;
+    const std::string partition_;
+
+    /// @brief This Form content builders
     std::vector<FormBuilderPtr> contents_;
 
+    /// @brief Forth virtual machine instructions
+    /// generated from the Form
     std::string vm_output_data_;
     std::string vm_output_;
     std::string vm_func_name_;

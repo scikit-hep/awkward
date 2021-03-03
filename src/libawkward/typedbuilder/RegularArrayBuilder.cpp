@@ -9,9 +9,28 @@
 namespace awkward {
 
   ///
-  RegularArrayBuilder::RegularArrayBuilder(const RegularFormPtr& form)
+  RegularArrayBuilder::RegularArrayBuilder(const RegularFormPtr& form,
+                                           const std::string attribute,
+                                           const std::string partition)
     : form_(form),
-      form_key_(form.get()->form_key()) { }
+      form_key_(form.get()->form_key()),
+      attribute_(attribute),
+      partition_(partition),
+      content_(TypedArrayBuilder::formBuilderFromA(form.get()->content())) {
+    vm_output_data_ = std::string("part")
+      .append(partition_).append("-")
+      .append(*form_key_).append("-")
+      .append(attribute_);
+
+    vm_output_ = content_.get()->vm_output();
+
+    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
+
+    vm_func_.append(content_.get()->vm_func())
+      .append(": ").append(vm_func_name()).append("\n")
+      .append(content_.get()->vm_func_name()).append("\n")
+      .append(";").append("\n");
+  }
 
   const std::string
   RegularArrayBuilder::classname() const {
@@ -22,11 +41,10 @@ namespace awkward {
   RegularArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
     ContentPtr out;
     if(content_ != nullptr) {
-      int64_t length = 0; // outputs.len(); // FIXME
       out = std::make_shared<RegularArray>(Identities::none(),
                                            form_.get()->parameters(),
                                            content_.get()->snapshot(outputs),
-                                           length); // FIXME
+                                           form_.get()->size());
     }
     return out;
   }
@@ -38,20 +56,22 @@ namespace awkward {
 
   const std::string
   RegularArrayBuilder::vm_output() const {
-    return std::string("\n");
+    return vm_output_;
   }
 
   const std::string
   RegularArrayBuilder::vm_func() const {
-    return std::string(": ")
-      .append(vm_func_name())
-      .append("\n");
+    return vm_func_;
   }
 
   const std::string
   RegularArrayBuilder::vm_func_name() const {
-    return std::string(*form_key_)
-      .append("-reg");
+    return vm_func_name_;
+  }
+
+  const std::string
+  RegularArrayBuilder::vm_from_stack() const {
+    return vm_data_from_stack_;
   }
 
 }

@@ -19,7 +19,9 @@ namespace awkward {
   class LIBAWKWARD_EXPORT_SYMBOL IndexedArrayBuilder : public FormBuilder {
   public:
     /// @brief Creates an IndexedArrayBuilder from a full set of parameters.
-    IndexedArrayBuilder(const IndexedFormPtr& form);
+    IndexedArrayBuilder(const IndexedFormPtr& form,
+                        const std::string attribute = "index",
+                        const std::string partition = "0");
 
     /// @brief User-friendly name of this class.
     const std::string
@@ -47,12 +49,22 @@ namespace awkward {
 
     const std::string
       vm_from_stack() const override;
-      
+
   private:
+    /// @brief This builder Form
     const IndexedFormPtr form_;
+
+    /// @brief an output buffer name is
+    /// "part{partition}-{form_key}-{attribute}"
     const FormKey form_key_;
+    const std::string attribute_;
+    const std::string partition_;
+
+    /// @brief This Form content builder
     FormBuilderPtr content_;
 
+    /// @brief Forth virtual machine instructions
+    /// generated from the Form
     std::string vm_output_data_;
     std::string vm_output_;
     std::string vm_func_name_;

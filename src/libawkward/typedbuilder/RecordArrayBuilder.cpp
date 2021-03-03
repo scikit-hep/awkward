@@ -9,9 +9,13 @@
 namespace awkward {
 
   ///
-  RecordArrayBuilder::RecordArrayBuilder(const RecordFormPtr& form)
+  RecordArrayBuilder::RecordArrayBuilder(const RecordFormPtr& form,
+                                         const std::string attribute,
+                                         const std::string partition)
     : form_(form),
-      form_key_(form.get()->form_key()) {
+      form_key_(form.get()->form_key()),
+      attribute_(attribute),
+      partition_(partition) {
     for (auto const& content : form.get()->contents()) {
       contents_.push_back(TypedArrayBuilder::formBuilderFromA(content));
     }
@@ -23,7 +27,7 @@ namespace awkward {
       vm_from_stack_.append(content.get()->vm_from_stack());
     }
 
-    vm_func_name_ = std::string(*form_key_).append("-record");
+    vm_func_name_ = std::string(*form_key_).append(attribute_);
 
     for (auto const& content : contents_) {
       vm_func_.append(content.get()->vm_func());

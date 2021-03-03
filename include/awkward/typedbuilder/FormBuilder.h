@@ -17,6 +17,9 @@ namespace awkward {
   /// @class FormBuilder
   ///
   /// @brief Abstract base class for nodes within a TypedArrayBuilder
+  /// FIXME: Every builder will have an output buffer based on the
+  /// key_format="part{partition}-{form_key}-{attribute}"
+  ///
   class LIBAWKWARD_EXPORT_SYMBOL FormBuilder {
   public:
     /// @brief Virtual destructor acts as a first non-inline virtual function

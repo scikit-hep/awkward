@@ -9,13 +9,54 @@
 namespace awkward {
 
   ///
-  /// FIXME: implement Form morfing
-  /// ListForm to ListOffsetForm
-  ///
-  ListArrayBuilder::ListArrayBuilder(const ListFormPtr& form)
+  ListArrayBuilder::ListArrayBuilder(const ListFormPtr& form,
+                                     const std::string attribute,
+                                     const std::string partition)
     : form_(form),
       form_key_(form.get()->form_key()),
-      content_(TypedArrayBuilder::formBuilderFromA(form.get()->content())) { }
+      attribute_(attribute),
+      partition_(partition),
+      content_(TypedArrayBuilder::formBuilderFromA(form.get()->content())) {
+    vm_output_data_ = std::string("part")
+      .append(partition_).append("-")
+      .append(*form_key_).append("-")
+      .append(attribute_);
+
+    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
+
+    vm_output_ = std::string("output ")
+      .append(vm_output_data_)
+      .append(" ")
+      .append(index_form_to_name(form_.get()->starts()))
+      .append("\n")
+      .append(content_.get()->vm_output());
+
+    vm_func_.append(content_.get()->vm_func())
+      .append(": ").append(vm_func_name()).append("\n")
+      .append(std::to_string(static_cast<utype>(state::begin_list)))
+      .append(" <> if").append("\n")
+      .append("halt").append("\n")
+      .append("then").append("\n")
+      .append("\n")
+      .append("0").append("\n")
+      .append("begin").append("\n")
+      .append("pause").append("\n")
+      .append("dup ")
+      .append(std::to_string(static_cast<utype>(state::end_list)))
+      .append(" = if").append("\n")
+      .append("drop").append("\n")
+      .append(vm_output_data_).append(" +<- stack").append("\n")
+      .append("exit").append("\n")
+      .append("else").append("\n")
+      .append(content_.get()->vm_func_name()).append("\n")
+      .append("1+").append("\n")
+      .append("then").append("\n")
+      .append("again").append("\n")
+      .append(";").append("\n");
+
+    vm_data_from_stack_ = std::string(content_.get()->vm_from_stack())
+      .append("0 ").append(vm_output_data_).append(" <- stack").append("\n");
+ }
 
   const std::string
   ListArrayBuilder::classname() const {
@@ -24,22 +65,21 @@ namespace awkward {
 
   const ContentPtr
   ListArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    // if(content_ != nullptr) {
-    //   Index64 starts(reinterpret_pointer_cast<int64_t>(data_), 0, length_, kernel::lib::cpu);
-    //   Index64 stops(reinterpret_pointer_cast<int64_t>(data_), length_, length_, kernel::lib::cpu);
-    //   return std::make_shared<ListArray64>(Identities::none(),
-    //                                        form_.get()->parameters(),
-    //                                        starts,
-    //                                        stops,
-    //                                        content_.get()->snapshot(outputs));
-    // }
-    // else {
-    //   throw std::invalid_argument(
-    //     std::string("Form of a ") + classname()
-    //     + std::string(" needs another Form as its content")
-    //     + FILENAME(__LINE__));
-    // }
-    return nullptr;
+    auto search = outputs.find(vm_output_data_);
+    if (search != outputs.end()) {
+      Index64 offsets = search->second.get()->toIndex64();
+      Index64 starts = util::make_starts(offsets);
+      Index64 stops = util::make_stops(offsets);
+      return std::make_shared<ListArray64>(Identities::none(),
+                                           form_.get()->parameters(),
+                                           starts,
+                                           stops,
+                                           content_.get()->snapshot(outputs));
+    }
+    throw std::invalid_argument(
+        std::string("Snapshot of a ") + classname()
+        + std::string(" needs offsets")
+        + FILENAME(__LINE__));
   }
 
   const FormPtr
@@ -54,18 +94,17 @@ namespace awkward {
 
   const std::string
   ListArrayBuilder::vm_func() const {
-    return std::string(": ")
-      .append(vm_func_name())
-      .append(";\n");
+    return vm_output_;
   }
 
   const std::string
   ListArrayBuilder::vm_func_name() const {
-    std::string out;
-    out.append(*form_key_)
-      .append("-")
-      .append("list");
-    return out;
+    return vm_func_;
+  }
+
+  const std::string
+  ListArrayBuilder::vm_from_stack() const {
+    return vm_data_from_stack_;
   }
 
 }

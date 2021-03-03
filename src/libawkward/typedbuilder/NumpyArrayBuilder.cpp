@@ -9,12 +9,17 @@
 namespace awkward {
 
   ///
-  NumpyArrayBuilder::NumpyArrayBuilder(const NumpyFormPtr& form)
+  NumpyArrayBuilder::NumpyArrayBuilder(const NumpyFormPtr& form,
+                                       const std::string attribute,
+                                       const std::string partition)
     : form_(form),
-      form_key_(form.get()->form_key()) {
-    // FIXME: generate a key if this FormKey is empty
-    // or already exists
-    vm_output_data_ = std::string("part0-").append(*form_key_).append("-data");
+      form_key_(form.get()->form_key()),
+      attribute_(attribute),
+      partition_(partition) {
+    vm_output_data_ = std::string("part")
+      .append(partition_).append("-")
+      .append(*form_key_).append("-")
+      .append(attribute_);
 
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
