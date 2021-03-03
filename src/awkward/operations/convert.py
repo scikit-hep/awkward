@@ -4690,28 +4690,6 @@ def _wrap_record_with_virtual(input_form):
     modify(form)
     return ak.forms.Form.fromjson(json.dumps(form))
 
-<<<<<<< HEAD
-=======
-
-class CannotMaterialize(np.ndarray):
-    def __init__(self, shape):
-        self.shape = shape
-
-    def __len__(self):
-        return prod(self.shape)
-
-    def __array_finalize__(self, obj):
-        if obj is None:
-            return
-        elif isinstance(obj, np.ndarray):
-            return ak.Array(obj)
-        else:
-            raise ValueError(
-                "this operation cannot be performed in a JAX-compiled or JAX-differentiated function"
-            )
-
-
->>>>>>> aabfec866124c95ab5d713fa9b985c9bc0bdb3dd
 def from_buffers(
     form,
     length,

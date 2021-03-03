@@ -162,10 +162,7 @@ def special_unflatten(aux_data, children):
         return DifferentiableArray(aux_data, children)
     else:
         buffers = dict(aux_data.indexes)
-
         buffers.update(zip(aux_data.datakeys, children))
-        print(buffers)
-        print(aux_data.form)
         return ak.from_buffers(aux_data.form, aux_data.length, buffers)
 
 jax.tree_util.register_pytree_node(ak.Array, special_flatten, special_unflatten)
