@@ -562,7 +562,7 @@ class NumpyArrayType(ContentType):
         elif form.primitive == "uint8":
             arraytype = numba.types.Array(numba.uint8, 1, "A")
         elif form.primitive == "bool":
-            arraytype = numba.types.Array(numba.bool, 1, "A")
+            arraytype = numba.types.Array(numba.boolean, 1, "A")
         else:
             raise ValueError(
                 "unrecognized NumpyForm.primitive type: {0}".format(form.primitive)
@@ -2595,7 +2595,7 @@ class VirtualArrayType(ContentType):
                 elif form.primitive == "uint8":
                     return numba.uint8
                 elif form.primitive == "bool":
-                    return numba.bool
+                    return numba.boolean
                 else:
                     raise ValueError(
                         "unrecognized NumpyForm.primitive type: {0}".format(
