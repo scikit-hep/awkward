@@ -203,9 +203,7 @@ def toast(ptnode, high_level, categorical):
         content_keys = []
         for i in range(0, len(ptnode.children), 2):
             content_keys.append(ptnode.children[i])
-            content_types.append(
-                toast(ptnode.children[i + 1], high_level, categorical)
-            )
+            content_types.append(toast(ptnode.children[i + 1], high_level, categorical))
         return ak.types.RecordType(content_types, content_keys, parameters=parms)
     elif ptnode.data == "record_tuple_param":
         parms = toast(ptnode.children[-1], high_level, False)
