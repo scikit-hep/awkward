@@ -1,4 +1,4 @@
-exclude: ^(docs|studies|tests/samples)
+exclude: ^(docs|studies|tests/samples|src/awkward/_typeparser/generated_parser.py)
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v3.4.0
