@@ -98,7 +98,7 @@ jobs:
 
       - script: |
           python -m pip install flake8 flake8-print
-          python -m flake8
+          python -m flake8 --exclude src/awkward/_typeparser/generated_parser.py
         displayName: "Run flake8"
         condition: "and(succeeded(), ne(variables['python.version'], '2.7'))"
 
@@ -191,7 +191,7 @@ jobs:
 
       - script: |
           python -m pip install flake8 flake8-print
-          python -m flake8
+          python -m flake8 --exclude src/awkward/_typeparser/generated_parser.py
         displayName: "Run flake8"
         condition: "and(succeeded(), ne(variables['python.version'], '2.7'))"
 
@@ -336,7 +336,7 @@ jobs:
 
       - script: |
           python -m pip install flake8 flake8-print
-          python -m flake8
+          python -m flake8 --exclude src/awkward/_typeparser/generated_parser.py
         displayName: "Run flake8"
         condition: "and(succeeded(), ne(variables['python.version'], '2.7'))"
 
