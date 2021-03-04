@@ -2,6 +2,10 @@
 
 from __future__ import absolute_import
 
+# Typeparser
+from awkward._typeparser.parser import from_datashape
+
+# Types
 from awkward._ext import Type
 from awkward._ext import ArrayType
 from awkward._ext import PrimitiveType
@@ -11,6 +15,3 @@ from awkward._ext import ListType
 from awkward._ext import OptionType
 from awkward._ext import UnionType
 from awkward._ext import RecordType
-
-import awkward._typeparser
-from awkward._typeparser.parser import from_datatype

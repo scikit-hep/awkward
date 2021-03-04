@@ -6,7 +6,7 @@ import sys
 
 import awkward as ak
 
-from generated_parser import Lark_StandAlone, Transformer
+from awkward._typeparser.generated_parser import Lark_StandAlone, Transformer
 
 
 class TreeToJson(Transformer):
@@ -27,9 +27,14 @@ class TreeToJson(Transformer):
     pair = tuple
     dict_obj = dict
 
-    null = lambda self, _: None
-    true = lambda self, _: True
-    false = lambda self, _: False
+    def null(self, s):
+        return None
+
+    def true(self, s):
+        return True
+
+    def false(self, s):
+        return False
 
 
 def toast(ptnode, high_level, categorical):
@@ -203,9 +208,7 @@ def toast(ptnode, high_level, categorical):
         content_keys = []
         for i in range(0, len(ptnode.children), 2):
             content_keys.append(ptnode.children[i])
-            content_types.append(
-                toast(ptnode.children[i + 1], high_level, categorical)
-            )
+            content_types.append(toast(ptnode.children[i + 1], high_level, categorical))
         return ak.types.RecordType(content_types, content_keys, parameters=parms)
     elif ptnode.data == "record_tuple_param":
         parms = toast(ptnode.children[-1], high_level, False)

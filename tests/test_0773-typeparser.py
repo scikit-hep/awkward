@@ -3,7 +3,6 @@
 from __future__ import absolute_import
 
 import pytest  # noqa: F401
-import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
@@ -282,7 +281,7 @@ def test_arraytype_2():
     text = str(
         ak.with_parameter(ak.Array([[1, 2, 3], [], [4, 5]]), "wonky", "string").type
     )
-    parsedtype = ak.types.from_datashape(text)
+    parsedtype = ak.types.from_datashape(text, True)
     assert isinstance(parsedtype, ak.types.ArrayType)
     assert str(parsedtype) == text
 
