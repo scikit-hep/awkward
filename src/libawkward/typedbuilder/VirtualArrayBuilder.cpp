@@ -12,7 +12,10 @@ namespace awkward {
   ///
   VirtualArrayBuilder::VirtualArrayBuilder(const VirtualFormPtr& form)
     : form_(form),
-      form_key_(form.get()->form_key()) { }
+      form_key_(!form.get()->form_key() ?
+        std::make_shared<std::string>(std::string("node-id")
+        + std::to_string(TypedArrayBuilder::next_id()))
+        : form.get()->form_key()) { }
 
   const std::string
   VirtualArrayBuilder::classname() const {
@@ -44,6 +47,16 @@ namespace awkward {
   const std::string
   VirtualArrayBuilder::vm_func_name() const {
     return vm_func_name_;
+  }
+
+  const std::string
+  VirtualArrayBuilder::vm_func_type() const {
+    return vm_func_type_;
+  }
+
+  const std::string
+  VirtualArrayBuilder::vm_from_stack() const {
+    return vm_data_from_stack_;
   }
 
 }

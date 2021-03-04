@@ -104,17 +104,26 @@ namespace awkward {
   dtype_to_vm_format(util::dtype dt) {
     switch (dt) {
     case util::dtype::boolean:
+      return "?";
     case util::dtype::int8:
+      return "b";
     case util::dtype::int16:
+      return "h";
     case util::dtype::int32:
+      return "i";
     case util::dtype::int64:
-    case util::dtype::uint8:
-    case util::dtype::uint16:
-    case util::dtype::uint32:
-    case util::dtype::uint64:
       return "q";
+    case util::dtype::uint8:
+      return "B";
+    case util::dtype::uint16:
+      return "H";
+    case util::dtype::uint32:
+      return "I";
+    case util::dtype::uint64:
+      return "Q";
     case util::dtype::float16:
     case util::dtype::float32:
+      return "f";
     case util::dtype::float64:
     case util::dtype::float128:
     case util::dtype::complex64:
@@ -128,6 +137,8 @@ namespace awkward {
         std::string("unrecognized util::dtype ") + FILENAME(__LINE__));
     }
   };
+
+  int64_t TypedArrayBuilder::next_node_id = 0;
 
   TypedArrayBuilder::TypedArrayBuilder(const FormPtr& form,
                                        const ArrayBuilderOptions& options)
@@ -241,6 +252,11 @@ namespace awkward {
     out << "<TypedArrayBuilder length=\"" << length() << "\" type=\""
         << type(typestrs).get()->tostring() << "\"/>";
     return out.str();
+  }
+
+  int64_t
+  TypedArrayBuilder::next_id() {
+    return TypedArrayBuilder::next_node_id++;
   }
 
   int64_t

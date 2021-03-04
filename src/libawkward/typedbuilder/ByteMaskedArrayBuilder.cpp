@@ -9,13 +9,32 @@
 namespace awkward {
 
   ///
-  ByteMaskedArrayBuilder::ByteMaskedArrayBuilder(const ByteMaskedFormPtr& form)
+  ByteMaskedArrayBuilder::ByteMaskedArrayBuilder(const ByteMaskedFormPtr& form,
+                                                 const std::string attribute,
+                                                 const std::string partition)
     : form_(form),
-      form_key_(form.get()->form_key()),
+      form_key_(!form.get()->form_key() ?
+        std::make_shared<std::string>(std::string("node-id")
+        + std::to_string(TypedArrayBuilder::next_id()))
+        : form.get()->form_key()),
+      attribute_(attribute),
+      partition_(partition),
       content_(TypedArrayBuilder::formBuilderFromA(form.get()->content())) {
-    // FIXME: generate a key if this FormKey is empty
-    // or already exists
-    vm_output_data_ = std::string("part0-").append(*form_key_).append("-mask");
+    vm_output_data_ = std::string("part")
+      .append(partition_).append("-")
+      .append(*form_key_).append("-")
+      .append(attribute_);
+
+    vm_func_name_ = std::string(*form_key_).append("-").append("bytemask");
+
+    vm_func_ = std::string(": ")
+      .append(vm_func_name_).append("\n")
+      .append(";").append("\n");
+
+    vm_output_ = std::string("output ")
+      .append(vm_output_data_)
+      .append(" ")
+      .append("FIXME-type").append("\n");
   }
 
   const std::string
@@ -44,25 +63,27 @@ namespace awkward {
 
   const std::string
   ByteMaskedArrayBuilder::vm_output() const {
-    return std::string("output ")
-      .append(vm_output_data_)
-      .append("\n");
+    return vm_output_;
   }
 
   const std::string
   ByteMaskedArrayBuilder::vm_func() const {
-    return std::string(": ")
-      .append(vm_func_name())
-      .append(";\n");
+    return vm_func_;
   }
 
   const std::string
   ByteMaskedArrayBuilder::vm_func_name() const {
-    std::string out;
-    out.append(*form_key_)
-      .append("-")
-      .append("bytemask");
-    return out;
+    return vm_func_name_;
+  }
+
+  const std::string
+  ByteMaskedArrayBuilder::vm_func_type() const {
+    return vm_func_type_;
+  }
+
+  const std::string
+  ByteMaskedArrayBuilder::vm_from_stack() const {
+    return vm_data_from_stack_;
   }
 
 }

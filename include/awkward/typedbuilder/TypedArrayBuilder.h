@@ -358,9 +358,19 @@ namespace awkward {
     void
       extend(const ContentPtr& array);
 
-    /// @brief
+    /// @brief Generates an Array builder from a Form
     static FormBuilderPtr
       formBuilderFromA(const FormPtr& form);
+
+    /// @brief Generates next unique ID
+    static int64_t
+      next_id();
+
+  protected:
+    /// @brief A unique ID to use when Form nodes do not have Form key
+    /// defined
+    static int64_t
+      next_node_id;
 
   private:
     /// See #initial.

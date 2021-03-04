@@ -47,6 +47,14 @@ namespace awkward {
     const std::string
       vm_func_name() const override;
 
+    /// @brief
+    const std::string
+      vm_func_type() const override;
+
+    /// @brief
+    const std::string
+      vm_from_stack() const override;
+
   private:
     const EmptyFormPtr form_;
     const FormKey form_key_;

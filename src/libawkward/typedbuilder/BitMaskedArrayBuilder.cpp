@@ -9,13 +9,21 @@
 namespace awkward {
 
   /// @brief
-  BitMaskedArrayBuilder::BitMaskedArrayBuilder(const BitMaskedFormPtr& form)
+  BitMaskedArrayBuilder::BitMaskedArrayBuilder(const BitMaskedFormPtr& form,
+                                               const std::string attribute,
+                                               const std::string partition)
     : form_(form),
-      form_key_(form.get()->form_key()),
+      form_key_(!form.get()->form_key() ?
+        std::make_shared<std::string>(std::string("node-id")
+        + std::to_string(TypedArrayBuilder::next_id()))
+        : form.get()->form_key()),
+      attribute_(attribute),
+      partition_(partition),
       content_(TypedArrayBuilder::formBuilderFromA(form.get()->content())) {
-    // FIXME: generate a key if this FormKey is empty
-    // or already exists
-    vm_output_data_ = std::string("part0-").append(*form_key_).append("-mask");
+    vm_output_data_ = std::string("part")
+      .append(partition_).append("-")
+      .append(*form_key_).append("-")
+      .append(attribute_);
 
     vm_func_name_ = std::string(*form_key_).append("-").append("bitmask");
 
@@ -69,6 +77,16 @@ namespace awkward {
   const std::string
   BitMaskedArrayBuilder::vm_func_name() const {
     return vm_func_name_;
+  }
+
+  const std::string
+  BitMaskedArrayBuilder::vm_func_type() const {
+    return vm_func_type_;
+  }
+
+  const std::string
+  BitMaskedArrayBuilder::vm_from_stack() const {
+    return vm_data_from_stack_;
   }
 
 }

@@ -47,6 +47,10 @@ namespace awkward {
 
     /// @brief
     const std::string
+      vm_func_type() const override;
+
+    /// @brief
+    const std::string
       vm_from_stack() const override;
 
   private:
@@ -67,6 +71,7 @@ namespace awkward {
     std::string vm_output_data_;
     std::string vm_func_;
     std::string vm_func_name_;
+    std::string vm_func_type_;
     std::string vm_data_from_stack_;
   };
 

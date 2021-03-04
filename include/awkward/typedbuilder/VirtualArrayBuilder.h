@@ -42,14 +42,26 @@ namespace awkward {
     const std::string
       vm_func_name() const override;
 
+    /// @brief
+    const std::string
+      vm_func_type() const override;
+
+    /// @brief
+    const std::string
+      vm_from_stack() const override;
+
   private:
     const VirtualFormPtr form_;
     const FormKey form_key_;
 
+    /// @brief Forth virtual machine instructions
+    /// generated from the Form
     std::string vm_output_data_;
     std::string vm_output_;
     std::string vm_func_name_;
     std::string vm_func_;
+    std::string vm_func_type_;
+    std::string vm_data_from_stack_;
   };
 
 }

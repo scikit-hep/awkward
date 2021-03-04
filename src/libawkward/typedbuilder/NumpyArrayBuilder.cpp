@@ -13,7 +13,10 @@ namespace awkward {
                                        const std::string attribute,
                                        const std::string partition)
     : form_(form),
-      form_key_(form.get()->form_key()),
+      form_key_(!form.get()->form_key() ?
+        std::make_shared<std::string>(std::string("node-id")
+        + std::to_string(TypedArrayBuilder::next_id()))
+        : form.get()->form_key()),
       attribute_(attribute),
       partition_(partition) {
     vm_output_data_ = std::string("part")
@@ -30,8 +33,10 @@ namespace awkward {
       .append("-")
       .append(dtype_to_name(form_.get()->dtype()));
 
+    vm_func_type_ = dtype_to_state(form_.get()->dtype());
+
     vm_func_ = std::string(": ").append(vm_func_name()).append("\n")
-      .append(dtype_to_state(form_.get()->dtype()))
+      .append(vm_func_type())
       .append(" = if").append("\n")
       .append("0 data seek").append("\n")
       .append("data ").append(dtype_to_vm_format(form_.get()->dtype()))
@@ -77,6 +82,11 @@ namespace awkward {
   const std::string
   NumpyArrayBuilder::vm_func_name() const {
     return vm_func_name_;
+  }
+
+  const std::string
+  NumpyArrayBuilder::vm_func_type() const {
+    return vm_func_type_;
   }
 
   const std::string

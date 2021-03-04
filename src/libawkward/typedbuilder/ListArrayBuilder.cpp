@@ -13,7 +13,10 @@ namespace awkward {
                                      const std::string attribute,
                                      const std::string partition)
     : form_(form),
-      form_key_(form.get()->form_key()),
+      form_key_(!form.get()->form_key() ?
+        std::make_shared<std::string>(std::string("node-id")
+        + std::to_string(TypedArrayBuilder::next_id()))
+        : form.get()->form_key()),
       attribute_(attribute),
       partition_(partition),
       content_(TypedArrayBuilder::formBuilderFromA(form.get()->content())) {
@@ -100,6 +103,11 @@ namespace awkward {
   const std::string
   ListArrayBuilder::vm_func_name() const {
     return vm_func_;
+  }
+
+  const std::string
+  ListArrayBuilder::vm_func_type() const {
+    return vm_func_type_;
   }
 
   const std::string

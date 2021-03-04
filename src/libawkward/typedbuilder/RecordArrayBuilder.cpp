@@ -13,25 +13,21 @@ namespace awkward {
                                          const std::string attribute,
                                          const std::string partition)
     : form_(form),
-      form_key_(form.get()->form_key()),
+      form_key_(!form.get()->form_key() ?
+        std::make_shared<std::string>(std::string("node-id")
+        + std::to_string(TypedArrayBuilder::next_id()))
+        : form.get()->form_key()),
       attribute_(attribute),
       partition_(partition) {
     for (auto const& content : form.get()->contents()) {
       contents_.push_back(TypedArrayBuilder::formBuilderFromA(content));
-    }
-
-    for (auto const& content : contents_) {
-      vm_output_.append(content.get()->vm_output());
-    }
-    for (auto const& content : contents_) {
-      vm_from_stack_.append(content.get()->vm_from_stack());
+      vm_output_.append(contents_.back().get()->vm_output());
+      vm_data_from_stack_.append(contents_.back().get()->vm_from_stack());
+      vm_func_.append(contents_.back().get()->vm_func());
     }
 
     vm_func_name_ = std::string(*form_key_).append(attribute_);
 
-    for (auto const& content : contents_) {
-      vm_func_.append(content.get()->vm_func());
-    }
     vm_func_.append(": ")
       .append(vm_func_name_);
 
@@ -82,8 +78,13 @@ namespace awkward {
   }
 
   const std::string
+  RecordArrayBuilder::vm_func_type() const {
+    return vm_func_type_;
+  }
+
+  const std::string
   RecordArrayBuilder::vm_from_stack() const {
-    return vm_from_stack_;
+    return vm_data_from_stack_;
   }
 
 }

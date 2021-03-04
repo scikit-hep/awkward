@@ -10,12 +10,20 @@
 namespace awkward {
 
   ///
-  UnmaskedArrayBuilder::UnmaskedArrayBuilder(const UnmaskedFormPtr& form)
+  UnmaskedArrayBuilder::UnmaskedArrayBuilder(const UnmaskedFormPtr& form,
+                                             const std::string attribute,
+                                             const std::string partition)
     : form_(form),
-      form_key_(form.get()->form_key()) {
-    // FIXME: generate a key if this FormKey is empty
-    // or already exists
-    vm_output_data_ = std::string("part0-").append(*form_key_).append("-mask");
+      form_key_(!form.get()->form_key() ?
+        std::make_shared<std::string>(std::string("node-id")
+        + std::to_string(TypedArrayBuilder::next_id()))
+        : form.get()->form_key()),
+      attribute_(attribute),
+      partition_(partition) {
+    vm_output_data_ = std::string("part")
+      .append(partition_).append("-")
+      .append(*form_key_).append("-")
+      .append(attribute_);
   }
 
   const std::string
@@ -26,8 +34,8 @@ namespace awkward {
   const ContentPtr
   UnmaskedArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
     // FIXME
-      return std::make_shared<EmptyArray>(Identities::none(),
-                                          form_.get()->parameters());
+    return std::make_shared<EmptyArray>(Identities::none(),
+                                        form_.get()->parameters());
   }
 
   const FormPtr
@@ -37,23 +45,27 @@ namespace awkward {
 
   const std::string
   UnmaskedArrayBuilder::vm_output() const {
-    return std::string("output ")
-      .append(vm_output_data_)
-      .append("\n");
+    return vm_output_;
   }
 
   const std::string
   UnmaskedArrayBuilder::vm_func() const {
-    return std::string(": ")
-      .append(*form_key_)
-      .append("-")
-      .append("unmasked\n");
+    return vm_func_;
   }
 
   const std::string
   UnmaskedArrayBuilder::vm_func_name() const {
-    return std::string(*form_key_)
-      .append("-unmasked");
+    return vm_func_name_;
+  }
+
+  const std::string
+  UnmaskedArrayBuilder::vm_func_type() const {
+    return vm_func_type_;
+  }
+
+  const std::string
+  UnmaskedArrayBuilder::vm_from_stack() const {
+    return vm_data_from_stack_;
   }
 
 }

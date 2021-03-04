@@ -17,7 +17,7 @@ namespace awkward {
   /// @class FormBuilder
   ///
   /// @brief Abstract base class for nodes within a TypedArrayBuilder
-  /// FIXME: Every builder will have an output buffer based on the
+  /// Every builder will have an output buffer based on the
   /// key_format="part{partition}-{form_key}-{attribute}"
   ///
   class LIBAWKWARD_EXPORT_SYMBOL FormBuilder {
@@ -53,9 +53,11 @@ namespace awkward {
 
     /// @brief
     virtual const std::string
-      vm_from_stack() const {
-        return std::string();
-    }
+      vm_func_type() const = 0;
+
+    /// @brief
+    virtual const std::string
+      vm_from_stack() const = 0;
   };
 }
 
