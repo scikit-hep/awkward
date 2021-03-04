@@ -4491,7 +4491,7 @@ def _form_to_layout(
                 )
 
         array = raw_array.view(dtype).reshape((-1,) + inner_shape)
- 
+
         return ak.layout.NumpyArray(array, identities, parameters)
 
     elif isinstance(form, ak.forms.RecordForm):
@@ -4690,6 +4690,7 @@ def _wrap_record_with_virtual(input_form):
     form = json.loads(input_form.tojson())
     modify(form)
     return ak.forms.Form.fromjson(json.dumps(form))
+
 
 def from_buffers(
     form,
