@@ -12,4 +12,5 @@ from awkward._ext import OptionType
 from awkward._ext import UnionType
 from awkward._ext import RecordType
 
-from awkward._typeparser._parser import from_datashape
+import awkward._typeparser
+from awkward._typeparser.parser import from_datatype
