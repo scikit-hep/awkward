@@ -4634,6 +4634,7 @@ def _form_to_layout(
             lazy_cache,
             lazy_cache_key,
         )
+
         generator = ak.layout.ArrayGenerator(
             _form_to_layout,
             args,
