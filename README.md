@@ -238,6 +238,8 @@ See the [prioritized list of open issues](https://github.com/scikit-hep/awkward-
 
 Support for this work was provided by NSF cooperative agreement OAC-1836650 (IRIS-HEP), grant OAC-1450377 (DIANA/HEP) and PHY-1520942 (US-CMS LHC Ops).
 
+We would also like to thank @erezsh and the developers of [lark](https://github.com/lark-parser/lark) for creating the [lark standalone parser generator](https://github.com/lark-parser/lark/blob/master/lark/tools/standalone.py), that we use in our type parser.
+
 Thanks especially to the gracious help of Awkward Array contributors (including the [original repository](https://github.com/scikit-hep/awkward-0.x)).
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
