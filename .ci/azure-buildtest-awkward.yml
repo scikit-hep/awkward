@@ -20,7 +20,6 @@ trigger:
       - studies/*
       - src/cuda-kernels
       - cuda-kernels
-      - src/awkward/_typeparser/generated_parser.py
 
 pr:
   branches:
