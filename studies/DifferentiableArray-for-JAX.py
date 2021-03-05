@@ -1,8 +1,6 @@
 import json
-
-import jax
-import jax.tree_util
-
+import jax 
+import jax.tree_util 
 import awkward as ak
 import numpy as np
 
@@ -10,14 +8,12 @@ jax.config.update("jax_platform_name", "cpu")
 jax.config.update("jax_enable_x64", True)
 
 class AuxData(object):
-    def __init__(self, form, form_stack, length, length_stack, indexes, indexes_stack, datakeys):
+    def __init__(self, form, length, indexes, datakeys, where_list):
         self.form = form
-        self.form_stack = form_stack
         self.length = length
-        self.length_stack = length_stack
         self.indexes = indexes
-        self.indexes_stack = indexes_stack
         self.datakeys = datakeys
+        self.where_list = where_list
 
     def __eq__(self, other):
         # AuxData is an object so that JAX can naively call __eq__ on it
@@ -63,11 +59,9 @@ class DifferentiableArray(ak.Array):
             form, length, indexes = ak.to_buffers(
                 out, form_key="getitem_node{id}", virtual="pass"
             )
-            self.aux_data.form_stack.append(form)
-            self.aux_data.indexes_stack.append(indexes)
-            self.aux_data.length_stack.append(length)
+            self.aux_data.where_list.append(where)
             
-            aux_data = AuxData(form, self.aux_data.form_stack, length, self.aux_data.length_stack, indexes, self.aux_data.indexes_stack, self.aux_data.datakeys)
+            aux_data = AuxData(self.aux_data.form, self.aux_data.length, self.aux_data.indexes, self.aux_data.datakeys, self.aux_data.where_list)
             return DifferentiableArray(aux_data, self.tracers)
         else: 
             # form, length, children = ak.to_buffers(self.layout)
@@ -161,36 +155,20 @@ def special_flatten(array):
                 node = ak.forms.Form.fromjson(json.dumps(nodejson))
                 datakeys.append(key)
         nextform = ak.forms.Form.fromjson(json.dumps(formjson))
-        aux_data = AuxData(nextform, [nextform], length, [length], indexes, [indexes], datakeys)
+        aux_data = AuxData(nextform, length, indexes, datakeys, [])
         children = [jax.numpy.asarray(buffers[x], buffers[x].dtype) for x in datakeys]
     return children, aux_data
 
 def special_unflatten(aux_data, children):
-    print("---------------------------------------")
     if any(isinstance(x, jax.core.Tracer) for x in children):
         return DifferentiableArray(aux_data, children)
     else:  
-        buffers = dict(aux_data.indexes_stack[0])
-        buffers.update(zip(aux_data.datakeys, children))
-        for i in range(len(aux_data.form_stack)):
-            
-            arr = ak.from_buffers(aux_data.form_stack[i], aux_data.length_stack[i], buffers)
-            form, length, children1 = ak.to_buffers(arr)
-            
-            if i + 1 < len(aux_data.indexes_stack):
-                # aux_data.form_stack[i+1] = form
-                # aux_data.length_stack[i+1] = length
-                print("Children", children1)
-                buffers.update(children1)
-                buffers.update(aux_data.indexes_stack[i + 1])
-            print(arr)
-
-
-        # Not returning the internal arr, will 
         buffers = dict(aux_data.indexes)
         buffers.update(zip(aux_data.datakeys, children))
 
         arr = ak.from_buffers(aux_data.form, aux_data.length, buffers)
+        for where in aux_data.where_list:
+            arr = arr.__getitem__(where)
         return arr
 
 jax.tree_util.register_pytree_node(ak.Array, special_flatten, special_unflatten)
@@ -201,7 +179,7 @@ jax.tree_util.register_pytree_node(DifferentiableArray, special_flatten, special
 ###############################################################################
 
 def func(array):
-    return 2*array.y[2][0] + 10
+    return 2*array.y[0][1] + 10
 
 # def fun1(array):
 #     return 2 * array[0][0] ** 2
@@ -220,6 +198,7 @@ tangent = ak.Array([
     [{"x": 1.5, "y": [2.0, 0.5, 1.0]}]
 ])
 
+print(primal.y[0][1])
 # print(tangent.y)
 # print(func(primal))
 # form, length, children = ak.to_buffers(primal.y[2])
