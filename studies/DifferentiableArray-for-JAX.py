@@ -3,6 +3,7 @@ import jax
 import jax.tree_util 
 import awkward as ak
 import numpy as np
+from numbers import Integral, Real
 
 jax.config.update("jax_platform_name", "cpu")
 jax.config.update("jax_enable_x64", True)
@@ -66,11 +67,11 @@ class DifferentiableArray(ak.Array):
         else: 
             # form, length, children = ak.to_buffers(self.layout)
             # child_buf_key = self.aux_data.datakeys.index(list(children.keys())[0])
-            if isinstance(where, (numbers.Integral, np.integer)) and isinstance(self.layout, ak.layout.NumpyArray): 
+            if isinstance(where, (Integral, np.integer)) and isinstance(self.layout, ak.layout.NumpyArray): 
                 assert len(self.tracers) == 1
                 return self.tracers[0][where]
             else:
-                return NotImplementedError
+                raise NotImplementedError
 
     def __setitem__(self, where, what):
         raise ValueError(
@@ -178,14 +179,42 @@ jax.tree_util.register_pytree_node(DifferentiableArray, special_flatten, special
 #  TESTING
 ###############################################################################
 
-def func(array):
-    return 2*array.y[0][1] + 10
+def func1_1(array):
+    return 2 * array.y[2][0][0] + 10
 
-# def fun1(array):
-#     return 2 * array[0][0] ** 2
+def func1_2(array):
+    return 2 * array.y[0][0][0] ** 2
 
-# primal1 = ak.Array([[1., 2., 3.], [4.], [5., 6.]])
-# tangent1 = ak.Array([[1., 1., 1.], [0.], [0., 0.]])
+def func2_1(array):
+    return 2 * array.y[2][0] + 10
+
+def func2_2(array):
+    return 2 * array.y[0][0] ** 2
+
+def func3_1(array):
+    return 2 * array.y[2] + 10
+
+def func3_2(array):
+    return 2 * array.y[0] ** 2
+
+def func4_1(array):
+    return 2 * array.y[2] + 10
+
+def func4_2(array):
+    return 2 * array.y[0] ** 2
+
+def func5_1(array):
+    return 2 * array.y
+
+def func5_2(array):
+    return 2 * array.y ** 2
+
+def func6_1(array):
+    return 2 * array
+
+def func6_2(array):
+    return 2 * array ** 2
+
 primal = ak.Array([
     [{"x": 1.1, "y": [1.0]}, {"x": 2.2, "y": [1.0, 2.2]}],
     [],
@@ -198,24 +227,15 @@ tangent = ak.Array([
     [{"x": 1.5, "y": [2.0, 0.5, 1.0]}]
 ])
 
-print(primal.y[0][1])
-# print(tangent.y)
-# print(func(primal))
-# form, length, children = ak.to_buffers(primal.y[2])
-# print(form, length, children)
-# form, length, children = ak.to_buffers(primal.y[2,0])
-# print(form, length, children)
-primal_result, tangent_result = jax.jvp(func, (primal,), (tangent,))
-print("resulting types", type(primal_result), type(tangent_result))
-print(primal_result)
-print(tangent_result)
-
-# jit_result = jax.jit(func)(primal)
-# print("resulting type", type(jit_result))
-# print(jit_result)
-# def func(x):
-#     return x[0] ** 2 + x[1] ** 2 
-# tree = ak.Array([1., 2., 3., 4.])
-# basis = ak.Array([0., 1., 0., 0.])
-# # print(jax.vjp(func, tree)[1](1.))
-# print(jax.jvp(func, (tree,), (basis,)))
+print(jax.jvp(func1_1, (primal,), (tangent,)))
+print(jax.jvp(func1_2, (primal,), (tangent,)))
+print(jax.jvp(func2_1, (primal,), (tangent,)))
+print(jax.jvp(func2_2, (primal,), (tangent,)))
+print(jax.jvp(func3_1, (primal,), (tangent,)))
+print(jax.jvp(func3_2, (primal,), (tangent,)))
+print(jax.jvp(func4_1, (primal,), (tangent,)))
+print(jax.jvp(func4_2, (primal,), (tangent,)))
+print(jax.jvp(func5_2, (primal,), (tangent,)))
+print(jax.jvp(func5_2, (primal,), (tangent,)))
+print(jax.jvp(func6_2, (primal,), (tangent,)))
+print(jax.jvp(func6_2, (primal,), (tangent,)))
