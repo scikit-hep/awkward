@@ -9,6 +9,85 @@ import awkward as ak  # noqa: F401
 import awkward.forth
 
 
+def test_bit_masked_form():
+    form = ak.forms.BitMaskedForm(
+        "i8",
+        ak.forms.NumpyForm([], 8, "d"),
+        True,
+        False,
+        form_key="node0",
+    )
+    builder = ak.layout.TypedArrayBuilder(form)
+    print(builder.to_vm())
+    vm = awkward.forth.ForthMachine32(builder.to_vm())
+
+    # initialise
+    builder.connect(vm)
+
+    builder.real(1.1)
+    builder.real(2.2)
+    builder.real(3.3)
+
+    assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+
+
+def test_byte_masked_form():
+    form = ak.forms.ByteMaskedForm(
+        "i8",
+        ak.forms.NumpyForm([], 8, "d"),
+        True,
+        form_key="node0",
+    )
+    builder = ak.layout.TypedArrayBuilder(form)
+    print(builder.to_vm())
+    vm = awkward.forth.ForthMachine32(builder.to_vm())
+
+    # initialise
+    builder.connect(vm)
+
+    builder.real(1.1)
+    builder.real(2.2)
+    builder.real(3.3)
+
+    assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+
+
+def test_unmasked_form():
+    form = ak.forms.UnmaskedForm(
+        ak.forms.NumpyForm([], 8, "d"),
+        form_key="node0",
+    )
+    builder = ak.layout.TypedArrayBuilder(form)
+    print(builder.to_vm())
+    vm = awkward.forth.ForthMachine32(builder.to_vm())
+
+    # initialise
+    builder.connect(vm)
+
+    builder.real(1.1)
+    builder.real(2.2)
+    builder.real(3.3)
+
+    assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+
+
+def test_virtual_form():
+    form = ak.forms.VirtualForm(ak.forms.NumpyForm([], 8, "d"), True)
+
+    builder = ak.layout.TypedArrayBuilder(form)
+    print(builder.to_vm())
+    vm = awkward.forth.ForthMachine32(builder.to_vm())
+
+    # initialise
+    builder.connect(vm)
+
+    builder.real(1.1)
+    builder.real(2.2)
+    builder.real(3.3)
+
+    assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+
+
 def test_list_offset_form():
     form = ak.forms.Form.fromjson(
         """

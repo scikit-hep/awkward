@@ -20,21 +20,15 @@ namespace awkward {
       attribute_(attribute),
       partition_(partition),
       content_(TypedArrayBuilder::formBuilderFromA(form.get()->content())) {
-    vm_output_data_ = std::string("part")
-      .append(partition_).append("-")
-      .append(*form_key_).append("-")
-      .append(attribute_);
+    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
 
-    vm_func_name_ = std::string(*form_key_).append("-").append("bytemask");
-
-    vm_func_ = std::string(": ")
+    vm_func_.append(content_.get()->vm_func())
+      .append(": ")
       .append(vm_func_name_).append("\n")
+      .append(content_.get()->vm_func_name()).append("\n")
       .append(";").append("\n");
 
-    vm_output_ = std::string("output ")
-      .append(vm_output_data_)
-      .append(" ")
-      .append("FIXME-type").append("\n");
+    vm_output_ = content_.get()->vm_output();
   }
 
   const std::string
@@ -44,16 +38,8 @@ namespace awkward {
 
   const ContentPtr
   ByteMaskedArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    ContentPtr out;
-    auto search = outputs.find(vm_output_data_);
-    if (search != outputs.end()) {
-      out = std::make_shared<ByteMaskedArray>(Identities::none(),
-                                              form_.get()->parameters(),
-                                              search->second.get()->toIndex8(),
-                                              content_.get()->snapshot(outputs),
-                                              form_.get()->valid_when());
-    }
-    return out;
+    // FIXME: how to define a mask? is it needed?
+    return content_.get()->snapshot(outputs);
   }
 
   const FormPtr

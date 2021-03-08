@@ -5,7 +5,6 @@
 #include "awkward/typedbuilder/UnmaskedArrayBuilder.h"
 #include "awkward/typedbuilder/TypedArrayBuilder.h"
 #include "awkward/array/UnmaskedArray.h"
-#include "awkward/array/EmptyArray.h"
 
 namespace awkward {
 
@@ -19,11 +18,17 @@ namespace awkward {
         + std::to_string(TypedArrayBuilder::next_id()))
         : form.get()->form_key()),
       attribute_(attribute),
-      partition_(partition) {
-    vm_output_data_ = std::string("part")
-      .append(partition_).append("-")
-      .append(*form_key_).append("-")
-      .append(attribute_);
+      partition_(partition),
+      content_(TypedArrayBuilder::formBuilderFromA(form.get()->content())) {
+    vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
+
+    vm_func_.append(content_.get()->vm_func())
+      .append(": ")
+      .append(vm_func_name_).append("\n")
+      .append(content_.get()->vm_func_name()).append("\n")
+      .append(";").append("\n");
+
+    vm_output_ = content_.get()->vm_output();
   }
 
   const std::string
@@ -33,9 +38,8 @@ namespace awkward {
 
   const ContentPtr
   UnmaskedArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    // FIXME
-    return std::make_shared<EmptyArray>(Identities::none(),
-                                        form_.get()->parameters());
+    // FIXME: how to define a mask? is it needed?
+    return content_.get()->snapshot(outputs);
   }
 
   const FormPtr

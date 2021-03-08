@@ -9,6 +9,7 @@ namespace awkward {
 
   class VirtualForm;
   using VirtualFormPtr = std::shared_ptr<VirtualForm>;
+  using FormBuilderPtr = std::shared_ptr<FormBuilder>;
 
   /// @class VirtualArrayBuilder
   ///
@@ -53,6 +54,9 @@ namespace awkward {
   private:
     const VirtualFormPtr form_;
     const FormKey form_key_;
+
+    /// @brief This Form content builder
+    FormBuilderPtr content_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form

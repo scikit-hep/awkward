@@ -15,7 +15,19 @@ namespace awkward {
       form_key_(!form.get()->form_key() ?
         std::make_shared<std::string>(std::string("node-id")
         + std::to_string(TypedArrayBuilder::next_id()))
-        : form.get()->form_key()) { }
+        : form.get()->form_key()),
+        content_(TypedArrayBuilder::formBuilderFromA(form.get()->form())) {
+    vm_func_name_ = std::string(*form_key_).append("-").append("virtual");
+
+    vm_func_.append(content_.get()->vm_func())
+      .append(": ")
+      .append(vm_func_name_).append("\n")
+      .append(content_.get()->vm_func_name()).append("\n")
+      .append(";").append("\n");
+
+    vm_output_ = content_.get()->vm_output();
+
+  }
 
   const std::string
   VirtualArrayBuilder::classname() const {
@@ -24,9 +36,7 @@ namespace awkward {
 
   const ContentPtr
   VirtualArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
-    // FIXME:
-    return std::make_shared<EmptyArray>(Identities::none(),
-                                        form_.get()->parameters());
+    return content_.get()->snapshot(outputs);
   }
 
   const FormPtr
