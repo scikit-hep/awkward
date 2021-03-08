@@ -18,7 +18,6 @@ def test_bit_masked_form():
         form_key="node0",
     )
     builder = ak.layout.TypedArrayBuilder(form)
-    print(builder.to_vm())
     vm = awkward.forth.ForthMachine32(builder.to_vm())
 
     # initialise
@@ -39,7 +38,6 @@ def test_byte_masked_form():
         form_key="node0",
     )
     builder = ak.layout.TypedArrayBuilder(form)
-    print(builder.to_vm())
     vm = awkward.forth.ForthMachine32(builder.to_vm())
 
     # initialise
@@ -58,7 +56,6 @@ def test_unmasked_form():
         form_key="node0",
     )
     builder = ak.layout.TypedArrayBuilder(form)
-    print(builder.to_vm())
     vm = awkward.forth.ForthMachine32(builder.to_vm())
 
     # initialise
@@ -75,7 +72,6 @@ def test_virtual_form():
     form = ak.forms.VirtualForm(ak.forms.NumpyForm([], 8, "d"), True)
 
     builder = ak.layout.TypedArrayBuilder(form)
-    print(builder.to_vm())
     vm = awkward.forth.ForthMachine32(builder.to_vm())
 
     # initialise
@@ -281,7 +277,6 @@ def test_union_form():
     )
 
     builder = ak.layout.TypedArrayBuilder(form)
-    print(builder.to_vm())
     vm = awkward.forth.ForthMachine32(builder.to_vm())
 
     # initialise
@@ -322,72 +317,7 @@ def test_union3_form():
     )
 
     builder = ak.layout.TypedArrayBuilder(form)
-    print(builder.to_vm())
     vm = awkward.forth.ForthMachine32(builder.to_vm())
-
-    #     vm = awkward.forth.ForthMachine32("""
-    # input data
-    # output part0-node-id2-data float64
-    # output part0-node-id3-data bool
-    # output part0-node-id4-data int64
-    # output part0-node0-tags int8
-    # variable tag
-    #
-    # : node-id2-float64
-    # 1 = if
-    # 0 data seek
-    # data d-> part0-node-id2-data
-    # else
-    # halt
-    # then
-    # ;
-    # : node-id3-bool
-    # 4 = if
-    # 0 data seek
-    # data ?-> part0-node-id3-data
-    # else
-    # halt
-    # then
-    # ;
-    # : node-id4-int64
-    # 0 = if
-    # 0 data seek
-    # data q-> part0-node-id4-data
-    # else
-    # halt
-    # then
-    # ;
-    #
-    # : node0-union
-    # dup 1 = if
-    # 0 tag !
-    # tag @ part0-node0-tags <- stack
-    # node-id2-float64
-    # exit
-    # then
-    # dup 4 = if
-    # 1 tag !
-    # tag @ part0-node0-tags <- stack
-    # node-id3-bool
-    # exit
-    # then
-    # dup 0 = if
-    # 2 tag !
-    # tag @ part0-node0-tags <- stack
-    # node-id4-int64
-    # exit
-    # then
-    # ;
-    #
-    # 0 part0-node0-tags <- stack
-    #
-    # 0
-    # begin
-    # pause
-    # node0-union
-    # 1+
-    # again
-    # """)
 
     # initialise
     builder.connect(vm)
@@ -417,4 +347,30 @@ def test_union3_form():
         False,
         True,
         -2.2,
+    ]
+
+
+def test_record_form():
+
+    form = ak.forms.RecordForm(
+        {"one": ak.forms.NumpyForm([], 8, "d"), "two": ak.forms.NumpyForm([], 8, "d")},
+        form_key="node0",
+    )
+    builder = ak.layout.TypedArrayBuilder(form)
+    vm = awkward.forth.ForthMachine32(builder.to_vm())
+
+    # initialise
+    builder.connect(vm)
+
+    # if record contents have the same type,
+    # the fields alternate
+    builder.real(1.1)  # "one"
+    builder.real(2.2)  # "two"
+    builder.real(3.3)  # "one"
+    builder.real(4.4)  # "two"
+    # etc.
+
+    assert ak.to_list(builder.snapshot()) == [
+        {"one": 1.1, "two": 2.2},
+        {"one": 3.3, "two": 4.4},
     ]

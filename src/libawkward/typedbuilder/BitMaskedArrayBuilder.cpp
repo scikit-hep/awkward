@@ -22,6 +22,8 @@ namespace awkward {
       content_(TypedArrayBuilder::formBuilderFromA(form.get()->content())) {
     vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
 
+    vm_func_type_ = content_.get()->vm_func_type();
+
     vm_func_.append(content_.get()->vm_func())
       .append(": ")
       .append(vm_func_name_).append("\n")

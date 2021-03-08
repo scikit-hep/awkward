@@ -29,6 +29,8 @@ namespace awkward {
       .append(attribute_).append("-")
       .append(index_form_to_name(form_.get()->index()));
 
+    vm_func_type_ = content_.get()->vm_func_type();
+
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
       .append(" ")

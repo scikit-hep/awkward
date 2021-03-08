@@ -27,6 +27,8 @@ namespace awkward {
 
     vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
 
+    vm_func_type_ = content_.get()->vm_func_type();
+
     vm_output_ = std::string("output ")
       .append(vm_output_data_)
       .append(" ")
