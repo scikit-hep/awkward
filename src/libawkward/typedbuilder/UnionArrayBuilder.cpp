@@ -50,17 +50,20 @@ namespace awkward {
     int64_t tag = 0;
     for (auto const& content : contents_) {
       vm_func_.append("dup ").append(content.get()->vm_func_type())
-        .append(" = if").append("\n");
+        .append(" = if").append("\n")
+        .append(std::to_string(tag++))
+        .append(" tag !").append("\n");
+
+      vm_func_.append("tag @ ")
+        .append(vm_output_tags_).append(" <- stack").append("\n");
 
       vm_func_.append(content.get()->vm_func_name())
         .append("\n")
-        .append(std::to_string(tag++))
-        .append(" tag !").append("\n");
-        vm_func_.append("then").append("\n");
+        .append("exit").append("\n");
+
+      vm_func_.append("then").append("\n");
 
     }
-    vm_func_.append("tag @ ")
-    .append(vm_output_tags_).append(" <- stack").append("\n");
 
     vm_func_.append("\n;\n\n");
 
@@ -100,7 +103,7 @@ namespace awkward {
                             util::Parameters(),
                             tags,
                             outindex,
-                            contents).simplify_uniontype(true, false);
+                            contents).simplify_uniontype(false, false);
     }
     throw std::invalid_argument(
         std::string("Snapshot of a ") + classname()

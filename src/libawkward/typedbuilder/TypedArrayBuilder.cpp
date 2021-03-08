@@ -231,6 +231,7 @@ namespace awkward {
       std::cout << i.second.get()->toNumpyArray().get()->tostring();
       std::cout << "\n";
     }
+    std::cout << "array:\n" << snapshot().get()->tostring() << "\n";
   }
 
   const FormPtr

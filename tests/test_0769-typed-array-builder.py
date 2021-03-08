@@ -228,3 +228,114 @@ def test_union_form():
         True,
         -2.2,
     ]
+
+
+def test_union3_form():
+    form = ak.forms.UnionForm(
+        "i8",
+        "i64",
+        [
+            ak.forms.NumpyForm([], 8, "d"),
+            ak.forms.NumpyForm([], 1, "?"),
+            ak.forms.NumpyForm([], 8, "q"),
+        ],
+        form_key="node0",
+    )
+
+    builder = ak.layout.TypedArrayBuilder(form)
+    print(builder.to_vm())
+    vm = awkward.forth.ForthMachine32(builder.to_vm())
+
+    #     vm = awkward.forth.ForthMachine32("""
+    # input data
+    # output part0-node-id2-data float64
+    # output part0-node-id3-data bool
+    # output part0-node-id4-data int64
+    # output part0-node0-tags int8
+    # variable tag
+    #
+    # : node-id2-float64
+    # 1 = if
+    # 0 data seek
+    # data d-> part0-node-id2-data
+    # else
+    # halt
+    # then
+    # ;
+    # : node-id3-bool
+    # 4 = if
+    # 0 data seek
+    # data ?-> part0-node-id3-data
+    # else
+    # halt
+    # then
+    # ;
+    # : node-id4-int64
+    # 0 = if
+    # 0 data seek
+    # data q-> part0-node-id4-data
+    # else
+    # halt
+    # then
+    # ;
+    #
+    # : node0-union
+    # dup 1 = if
+    # 0 tag !
+    # tag @ part0-node0-tags <- stack
+    # node-id2-float64
+    # exit
+    # then
+    # dup 4 = if
+    # 1 tag !
+    # tag @ part0-node0-tags <- stack
+    # node-id3-bool
+    # exit
+    # then
+    # dup 0 = if
+    # 2 tag !
+    # tag @ part0-node0-tags <- stack
+    # node-id4-int64
+    # exit
+    # then
+    # ;
+    #
+    # 0 part0-node0-tags <- stack
+    #
+    # 0
+    # begin
+    # pause
+    # node0-union
+    # 1+
+    # again
+    # """)
+
+    # initialise
+    builder.connect(vm)
+    builder.real(1.1)
+    builder.boolean(False)
+    builder.integer(11)
+    builder.real(2.2)
+    builder.boolean(False)
+    builder.real(2.2)
+    builder.real(3.3)
+    builder.boolean(True)
+    builder.real(4.4)
+    builder.boolean(False)
+    builder.boolean(True)
+    builder.real(-2.2)
+
+    assert ak.to_list(builder.snapshot()) == [
+        1.1,
+        False,
+        11,
+        2.2,
+        False,
+        2.2,
+        3.3,
+        True,
+        4.4,
+        False,
+        True,
+        -2.2,
+    ]
