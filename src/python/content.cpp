@@ -973,7 +973,7 @@ typed_builder_fromiter(ak::TypedArrayBuilder& self, const py::handle& obj) {
     self.boolean(obj.cast<bool>());
   }
   else if (py::isinstance<py::int_>(obj)) {
-    self.integer(obj.cast<int64_t>());
+    self.int64(obj.cast<int64_t>());
   }
   else if (py::isinstance<py::float_>(obj)) {
     self.real(obj.cast<double>());
@@ -1031,7 +1031,7 @@ typed_builder_fromiter(ak::TypedArrayBuilder& self, const py::handle& obj) {
     self.boolean(obj.cast<bool>());
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("integer"))) {
-    self.integer(obj.cast<int64_t>());
+    self.int64(obj.cast<int64_t>());
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("floating"))) {
     self.real(obj.cast<double>());
@@ -1068,7 +1068,7 @@ make_TypedArrayBuilder(const py::handle& m, const std::string& name) {
       })
       .def("null", &ak::TypedArrayBuilder::null)
       .def("boolean", &ak::TypedArrayBuilder::boolean)
-      .def("integer", &ak::TypedArrayBuilder::integer)
+      .def("int64", &ak::TypedArrayBuilder::int64)
       .def("real", &ak::TypedArrayBuilder::real)
       .def("complex", &ak::TypedArrayBuilder::complex)
       .def("bytestring",

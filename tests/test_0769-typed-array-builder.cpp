@@ -135,7 +135,7 @@ int main(int, char**) {
 
     myarray.connect(vm);
 
-    myarray.integer(1);
+    myarray.int64(1);
     myarray.beginlist();
     myarray.real(1.1);
     myarray.real(2.2);

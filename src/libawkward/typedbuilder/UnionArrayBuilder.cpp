@@ -65,7 +65,7 @@ namespace awkward {
 
     }
 
-    vm_func_.append("\n;\n\n");
+    vm_func_.append("halt\n;\n\n");
 
     vm_data_from_stack_.append("0 ").append(vm_output_tags_).append(" <- stack").append("\n");
   }

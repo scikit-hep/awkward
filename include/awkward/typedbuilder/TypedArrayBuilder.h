@@ -163,7 +163,7 @@ namespace awkward {
 
     /// @brief Adds an integer value `x` to the accumulated data.
     void
-      integer(int64_t x);
+      int64(int64_t x);
 
     /// @brief Adds a real value `x` to the accumulated data.
     void
@@ -211,7 +211,7 @@ namespace awkward {
     ///
     /// The first 'beginlist' puts AwkwardForth VM into a state that expects
     /// another 'beginlist' or 'endlist'.
-    /// The second puts the VM into a state that expects 'integer', etc.
+    /// The second puts the VM into a state that expects 'int64', etc.
     /// or 'endlist'.
     void
       beginlist();

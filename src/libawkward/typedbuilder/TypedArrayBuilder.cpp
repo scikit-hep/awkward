@@ -328,7 +328,7 @@ namespace awkward {
   }
 
   void
-  TypedArrayBuilder::integer(int64_t x) {
+  TypedArrayBuilder::int64(int64_t x) {
     reinterpret_cast<int64_t*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = x;
     vm_.get()->stack_push(static_cast<utype>(state::int64));
     vm_.get()->resume();
