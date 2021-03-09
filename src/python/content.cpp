@@ -1097,15 +1097,6 @@ make_TypedArrayBuilder(const py::handle& m, const std::string& name) {
         self.field_check(x);
       })
       .def("endrecord", &ak::TypedArrayBuilder::endrecord)
-      .def("connect",
-           [](ak::TypedArrayBuilder& self,
-              const std::shared_ptr<ak::ForthMachine32>& vm) -> void {
-        self.connect(vm);
-      })
-      .def("to_vm",
-           [](ak::TypedArrayBuilder& self) -> const std::string {
-        return self.to_vm();
-      })
       .def("debug_step",
            [](const ak::TypedArrayBuilder& self) -> void {
         return self.debug_step();

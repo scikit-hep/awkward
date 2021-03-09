@@ -76,19 +76,11 @@ namespace awkward {
 
     /// @brief
     void
-      connect(const std::shared_ptr<ForthMachine32>& vm);
-
-    /// @brief
-    void
       debug_step() const;
 
     /// @brief
     const FormPtr
       form() const;
-
-    /// @brief
-    const std::string
-      to_vm() const;
 
     /// @brief Returns a string representation of this array (single-line XML
     /// indicating the length and type).
@@ -373,6 +365,14 @@ namespace awkward {
       next_node_id;
 
   private:
+    /// @brief
+    const std::string
+      to_vm() const;
+
+    /// @ brief
+    void
+      initialise();
+
     /// See #initial.
     int64_t initial_;
 

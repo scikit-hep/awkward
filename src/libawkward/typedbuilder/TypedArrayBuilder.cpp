@@ -160,6 +160,8 @@ namespace awkward {
     .append("\n")
     .append("1+\n")
     .append("again\n");
+
+    initialise();
   }
 
   FormBuilderPtr
@@ -209,14 +211,15 @@ namespace awkward {
   }
 
   void
-  TypedArrayBuilder::connect(const std::shared_ptr<ForthMachine32>& vm) {
+  TypedArrayBuilder::initialise() {
+    vm_ = std::make_shared<ForthMachine32>(to_vm());
     length_ = 8;
-    vm_ = vm;
+
     std::shared_ptr<void> ptr(
       kernel::malloc<void>(kernel::lib::cpu, 8*sizeof(uint8_t)));
 
     vm_inputs_map_[vm_input_data_] = std::make_shared<ForthInputBuffer>(ptr, 0, length_);
-    vm.get()->run(vm_inputs_map_);
+    vm_.get()->run(vm_inputs_map_);
   }
 
   void

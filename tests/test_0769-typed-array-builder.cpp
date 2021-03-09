@@ -66,10 +66,6 @@ int main(int, char**) {
   {
     // create builder
     ak::TypedArrayBuilder myarray(empty_form, options);
-    const std::shared_ptr<ak::ForthMachine32> vm =
-      std::make_shared<ak::ForthMachine32>(myarray.to_vm());
-
-    myarray.connect(vm);
 
     // take a snapshot
     std::shared_ptr<ak::Content> array = myarray.snapshot();
@@ -79,11 +75,6 @@ int main(int, char**) {
   {
     // create another builder
     ak::TypedArrayBuilder myarray(numpy_form_float64, options);
-
-    const std::shared_ptr<ak::ForthMachine32> vm =
-      std::make_shared<ak::ForthMachine32>(myarray.to_vm());
-
-    myarray.connect(vm);
 
     myarray.real(999.999);
     myarray.real(-999.999);
@@ -96,11 +87,6 @@ int main(int, char**) {
   {
     // create another builder
     ak::TypedArrayBuilder myarray(list_offset_form, options);
-
-    const std::shared_ptr<ak::ForthMachine32> vm =
-      std::make_shared<ak::ForthMachine32>(myarray.to_vm());
-
-    myarray.connect(vm);
 
     myarray.beginlist();
     myarray.real(1.1);
@@ -129,11 +115,6 @@ int main(int, char**) {
   {
     // create another builder
     ak::TypedArrayBuilder myarray(record_form, options);
-
-    const std::shared_ptr<ak::ForthMachine32> vm =
-      std::make_shared<ak::ForthMachine32>(myarray.to_vm());
-
-    myarray.connect(vm);
 
     myarray.int64(1);
     myarray.beginlist();

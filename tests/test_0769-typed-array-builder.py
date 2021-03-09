@@ -8,6 +8,7 @@ import awkward as ak  # noqa: F401
 
 import awkward.forth
 
+
 def test_bit_masked_form():
     form = ak.forms.BitMaskedForm(
         "i8",
@@ -17,16 +18,13 @@ def test_bit_masked_form():
         form_key="node0",
     )
     builder = ak.layout.TypedArrayBuilder(form)
-    vm = awkward.forth.ForthMachine32(builder.to_vm())
-
-    # initialise
-    builder.connect(vm)
 
     builder.real(1.1)
     builder.real(2.2)
     builder.real(3.3)
 
     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+
 
 def test_byte_masked_form():
     form = ak.forms.ByteMaskedForm(
@@ -36,16 +34,13 @@ def test_byte_masked_form():
         form_key="node0",
     )
     builder = ak.layout.TypedArrayBuilder(form)
-    vm = awkward.forth.ForthMachine32(builder.to_vm())
-
-    # initialise
-    builder.connect(vm)
 
     builder.real(1.1)
     builder.real(2.2)
     builder.real(3.3)
 
     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+
 
 def test_unmasked_form():
     form = ak.forms.UnmaskedForm(
@@ -53,25 +48,18 @@ def test_unmasked_form():
         form_key="node0",
     )
     builder = ak.layout.TypedArrayBuilder(form)
-    vm = awkward.forth.ForthMachine32(builder.to_vm())
-
-    # initialise
-    builder.connect(vm)
 
     builder.real(1.1)
     builder.real(2.2)
     builder.real(3.3)
 
     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+
 
 def test_virtual_form():
     form = ak.forms.VirtualForm(ak.forms.NumpyForm([], 8, "d"), True)
 
     builder = ak.layout.TypedArrayBuilder(form)
-    vm = awkward.forth.ForthMachine32(builder.to_vm())
-
-    # initialise
-    builder.connect(vm)
 
     builder.real(1.1)
     builder.real(2.2)
@@ -79,8 +67,10 @@ def test_virtual_form():
 
     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
 
+
 def test_list_offset_form():
-    form = ak.forms.Form.fromjson("""
+    form = ak.forms.Form.fromjson(
+        """
 {
     "class": "ListOffsetArray64",
     "offsets": "i64",
@@ -107,13 +97,10 @@ def test_list_offset_form():
     },
     "form_key": "node0"
 }
-""")
+"""
+    )
 
     builder = ak.layout.TypedArrayBuilder(form)
-    vm = awkward.forth.ForthMachine32(builder.to_vm())
-
-    # initialise
-    builder.connect(vm)
 
     builder.beginlist()
     builder.real(1.1)
@@ -145,8 +132,10 @@ def test_list_offset_form():
         [{"x": 3.3, "y": [1, 2, 3]}],
     ]
 
+
 def test_indexed_form():
-    form = ak.forms.Form.fromjson("""
+    form = ak.forms.Form.fromjson(
+        """
 {
     "class": "IndexedArray64",
     "index": "i64",
@@ -157,13 +146,11 @@ def test_indexed_form():
         },
     "form_key": "node0"
 }
-""")
+"""
+    )
 
     builder = ak.layout.TypedArrayBuilder(form)
-    vm = awkward.forth.ForthMachine32(builder.to_vm())
 
-    # initialise
-    builder.connect(vm)
     builder.int64(11)
     builder.int64(22)
     builder.int64(33)
@@ -174,8 +161,10 @@ def test_indexed_form():
 
     assert ak.to_list(builder.snapshot()) == [11, 22, 33, 44, 55, 66, 77]
 
+
 def test_indexed_option_form():
-    form = ak.forms.Form.fromjson("""
+    form = ak.forms.Form.fromjson(
+        """
 {
     "class": "IndexedOptionArray64",
     "index": "i64",
@@ -186,13 +175,11 @@ def test_indexed_option_form():
         },
     "form_key": "node0"
 }
-""")
+"""
+    )
 
     builder = ak.layout.TypedArrayBuilder(form)
-    vm = awkward.forth.ForthMachine32(builder.to_vm())
 
-    # initialise
-    builder.connect(vm)
     builder.null()
     builder.int64(11)
     builder.int64(22)
@@ -204,10 +191,23 @@ def test_indexed_option_form():
     builder.int64(66)
     builder.int64(77)
 
-    assert ak.to_list(builder.snapshot()) == [None, 11, 22, None, 33, 44, None, 55, 66, 77]
+    assert ak.to_list(builder.snapshot()) == [
+        None,
+        11,
+        22,
+        None,
+        33,
+        44,
+        None,
+        55,
+        66,
+        77,
+    ]
+
 
 def test_regular_form():
-    form = ak.forms.Form.fromjson("""
+    form = ak.forms.Form.fromjson(
+        """
 {
     "class": "RegularArray",
     "size": 3,
@@ -218,13 +218,11 @@ def test_regular_form():
         },
     "form_key": "node0"
 }
-""")
+"""
+    )
 
     builder = ak.layout.TypedArrayBuilder(form)
-    vm = awkward.forth.ForthMachine32(builder.to_vm())
 
-    # initialise
-    builder.connect(vm)
     builder.int64(11)
     builder.int64(22)
     builder.int64(33)
@@ -240,6 +238,7 @@ def test_regular_form():
 
     assert ak.to_list(builder.snapshot()) == [[11, 22, 33], [44, 55, 66], [77, 88, 99]]
 
+
 def test_union_form():
     form = ak.forms.UnionForm(
         "i8",
@@ -249,11 +248,7 @@ def test_union_form():
     )
 
     builder = ak.layout.TypedArrayBuilder(form)
-    print(builder.to_vm())
-    vm = awkward.forth.ForthMachine32(builder.to_vm())
 
-    # initialise
-    builder.connect(vm)
     builder.real(1.1)
     builder.boolean(False)
     builder.real(2.2)
@@ -264,22 +259,33 @@ def test_union_form():
     builder.boolean(True)
     builder.real(-2.2)
 
-    assert ak.to_list(builder.snapshot()) == [1.1, False, 2.2, 3.3, True, 4.4, False, True, -2.2]
+    assert ak.to_list(builder.snapshot()) == [
+        1.1,
+        False,
+        2.2,
+        3.3,
+        True,
+        4.4,
+        False,
+        True,
+        -2.2,
+    ]
+
 
 def test_union3_form():
     form = ak.forms.UnionForm(
         "i8",
         "i64",
-        [ak.forms.NumpyForm([], 8, "d"), ak.forms.NumpyForm([], 1, "?"),
-        ak.forms.NumpyForm([], 8, "q")],
+        [
+            ak.forms.NumpyForm([], 8, "d"),
+            ak.forms.NumpyForm([], 1, "?"),
+            ak.forms.NumpyForm([], 8, "q"),
+        ],
         form_key="node0",
     )
 
     builder = ak.layout.TypedArrayBuilder(form)
-    vm = awkward.forth.ForthMachine32(builder.to_vm())
 
-    # initialise
-    builder.connect(vm)
     builder.real(1.1)
     builder.boolean(False)
     builder.int64(11)
@@ -293,7 +299,21 @@ def test_union3_form():
     builder.boolean(True)
     builder.real(-2.2)
 
-    assert ak.to_list(builder.snapshot()) == [1.1, False, 11, 2.2, False, 2.2, 3.3, True, 4.4, False, True, -2.2]
+    assert ak.to_list(builder.snapshot()) == [
+        1.1,
+        False,
+        11,
+        2.2,
+        False,
+        2.2,
+        3.3,
+        True,
+        4.4,
+        False,
+        True,
+        -2.2,
+    ]
+
 
 def test_record_form():
 
@@ -302,17 +322,13 @@ def test_record_form():
         form_key="node0",
     )
     builder = ak.layout.TypedArrayBuilder(form)
-    vm = awkward.forth.ForthMachine32(builder.to_vm())
-
-    # initialise
-    builder.connect(vm)
 
     # if record contents have the same type,
     # the fields alternate
-    builder.real(1.1) # "one"
-    builder.real(2.2) # "two"
-    builder.real(3.3) # "one"
-    builder.real(4.4) # "two"
+    builder.real(1.1)  # "one"
+    builder.real(2.2)  # "two"
+    builder.real(3.3)  # "one"
+    builder.real(4.4)  # "two"
     builder.int64(11)
 
     # etc.
