@@ -9,11 +9,12 @@ jax.config.update("jax_platform_name", "cpu")
 jax.config.update("jax_enable_x64", True)
 
 class AuxData(object):
-    def __init__(self, form, length, indexes, datakeys, layout):
+    def __init__(self, form, length, indexes, datakeys, hash_ptrs, layout):
         self.form = form
         self.length = length
         self.indexes = indexes
         self.datakeys = datakeys
+        self.hash_ptrs = hash_ptrs
         self.layout = layout
 
     def __eq__(self, other):
@@ -37,11 +38,7 @@ class DifferentiableArray(ak.Array):
 
     @property
     def layout(self):
-        buffers = dict(self.aux_data.indexes)
-        arr = ak.from_buffers(
-            self.aux_data.form, self.aux_data.length, buffers, highlevel=False
-        ) 
-        return arr
+        return self.aux_data.layout
 
     @layout.setter
     def layout(self, layout):
@@ -50,25 +47,27 @@ class DifferentiableArray(ak.Array):
         )
 
     def __getitem__(self, where):
-        # out = self.aux_data.layout[where]
-        # indices = np.asarray(out.identities)
+        out = self.layout[where]
+        assert len(self.tracers) == len(self.aux_data.hash_ptrs)
+        map_ptrs_to_tracers = dict(zip(self.aux_data.hash_ptrs, self.tracers))
 
-        # if isinstance(out, ak.layout.Content):
-        #     form, length, indexes = ak.to_buffers(
-        #         out, form_key="getitem_node{id}", virtual="pass"
-        #     )
-        #     self.aux_data.where_list.append(where)
-            
-        #     aux_data = AuxData(self.aux_data.form, self.aux_data.length, self.aux_data.indexes, self.aux_data.datakeys, self.aux_data.where_list)
-        #     return DifferentiableArray(aux_data, self.tracers)
-        # else: 
-        #     # form, length, children = ak.to_buffers(self.layout)
-        #     # child_buf_key = self.aux_data.datakeys.index(list(children.keys())[0])
-        #     if isinstance(where, (Integral, np.integer)) and isinstance(self.layout, ak.layout.NumpyArray): 
-        #         assert len(self.tracers) == 1
-        #         return self.tracers[0][where]
-        #     else:
-        raise NotImplementedError
+        if np.isscalar(out):
+            """
+            TODO: Recurse here for scalars
+            """
+            # def recurse(array, recurse_where, children = []):
+            #     if recurse_where is None:
+            #         if isinstance(array, ak.layout.NumpyArray):
+            #             tracer = dict[array.ptr]
+            #             children.append(tracer[where])
+
+            return self.tracers[0][where]
+
+        else:
+            """
+            Implement index tracer fetching with identities here
+            """
+            raise NotImplementedError
 
     def __setitem__(self, where, what):
         raise ValueError(
@@ -103,6 +102,13 @@ def special_flatten(array):
     if isinstance(array, DifferentiableArray):
         aux_data, children = array.aux_data, array.tracers
     else:
+        def find_nparray_ptrs(node, depth, hash_ptrs):
+            if isinstance(node, ak.layout.NumpyArray):
+                hash_ptrs.append(node.ptr) 
+        
+        hash_ptrs = []
+        ak._util.recursive_walk(array.layout, find_nparray_ptrs, args=(hash_ptrs,))
+
         form, length, buffers = ak.to_buffers(array)
         formjson = json.loads(form.tojson())
         indexes = {k: v for k, v in buffers.items() if not k.endswith("-data")}
@@ -112,8 +118,8 @@ def special_flatten(array):
             if role == "data":
                 datakeys.append(key)
 
-        # array.layout.setidentities()
-        aux_data = AuxData(form, length, indexes, datakeys, array.layout) 
+        array.layout.setidentities()
+        aux_data = AuxData(form, length, indexes, datakeys, hash_ptrs, array.layout) 
         children = [jax.numpy.asarray(buffers[x], buffers[x].dtype) for x in datakeys]
 
     return children, aux_data
@@ -169,7 +175,7 @@ def func6_1(array):
     return 2 * array
 
 def func6_2(array):
-    return 2 * array ** 2
+    return 2 * array[2] ** 2
 
 def func7_1(array):
     return array.y[2][0][0] ** 2 + array.y[2][0][1] ** 2
@@ -188,7 +194,6 @@ tangent = ak.Array([
 
 primal_nparray = ak.Array([1., 2., 3., 4., 5.])
 tangent_nparray = ak.Array([0., 0., 1., 0., 0.])
-
 # print(jax.jvp(func1_1, (primal,), (tangent,)))
 # print(jax.jvp(func1_2, (primal,), (tangent,)))
 # print(jax.jvp(func2_1, (primal,), (tangent,)))
@@ -199,7 +204,7 @@ tangent_nparray = ak.Array([0., 0., 1., 0., 0.])
 # print(jax.jvp(func4_2, (primal,), (tangent,)))
 # print(jax.jvp(func5_2, (primal,), (tangent,)))
 # print(jax.jvp(func5_2, (primal,), (tangent,)))
-# print(jax.jvp(func6_2, (primal,), (tangent,)))
+# print(jax.vjp(func6_2, primal_nparray))
 print(jax.jvp(func6_2, (primal_nparray,), (tangent_nparray,)))
 # print(jax.jit(func6_2)(primal_nparray))
 # print(jax.grad(func6_2)(primal_nparray))
