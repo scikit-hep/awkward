@@ -2169,6 +2169,10 @@ make_NumpyArray(const py::handle& m, const std::string& name) {
       .def_property_readonly("isempty", &ak::NumpyArray::isempty)
       .def("toRegularArray", &ak::NumpyArray::toRegularArray)
 
+      .def_property_readonly("ptr", [](ak::NumpyArray& self) {
+        return reinterpret_cast<int64_t>(self.ptr().get());
+      })
+
       .def_property_readonly("ptr_lib", [](const ak::NumpyArray& self) {
         if (self.ptr_lib() == ak::kernel::lib::cpu) {
           return py::cast("cpu");

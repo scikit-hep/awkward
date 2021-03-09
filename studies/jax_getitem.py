@@ -112,7 +112,7 @@ def special_flatten(array):
             if role == "data":
                 datakeys.append(key)
 
-        array.layout.setidentities()
+        # array.layout.setidentities()
         aux_data = AuxData(form, length, indexes, datakeys, array.layout) 
         children = [jax.numpy.asarray(buffers[x], buffers[x].dtype) for x in datakeys]
 
@@ -121,6 +121,8 @@ def special_flatten(array):
 def special_unflatten(aux_data, children):
     if any(isinstance(x, jax.core.Tracer) for x in children):
         return DifferentiableArray(aux_data, children)
+    elif all(child is None for child in children):
+        return None
     else:  
         buffers = dict(aux_data.indexes)
         buffers.update(zip(aux_data.datakeys, children))
@@ -184,6 +186,9 @@ tangent = ak.Array([
     [{"x": 1.5, "y": [2.0, 0.5, 1.0]}]
 ])
 
+primal_nparray = ak.Array([1., 2., 3., 4., 5.])
+tangent_nparray = ak.Array([0., 0., 1., 0., 0.])
+
 # print(jax.jvp(func1_1, (primal,), (tangent,)))
 # print(jax.jvp(func1_2, (primal,), (tangent,)))
 # print(jax.jvp(func2_1, (primal,), (tangent,)))
@@ -195,5 +200,7 @@ tangent = ak.Array([
 # print(jax.jvp(func5_2, (primal,), (tangent,)))
 # print(jax.jvp(func5_2, (primal,), (tangent,)))
 # print(jax.jvp(func6_2, (primal,), (tangent,)))
-print(jax.jvp(func6_2, (primal,), (tangent,)))
+print(jax.jvp(func6_2, (primal_nparray,), (tangent_nparray,)))
+# print(jax.jit(func6_2)(primal_nparray))
+# print(jax.grad(func6_2)(primal_nparray))
 # print(jax.jvp(func7_1, (primal,), (tangent,)))
