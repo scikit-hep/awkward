@@ -210,6 +210,10 @@ namespace awkward {
       output_Index64_at(int64_t index) const;
 
     /// @brief HERE
+    const std::string
+      string_at(int64_t index) const noexcept;
+
+    /// @brief HERE
     void
       reset();
 
