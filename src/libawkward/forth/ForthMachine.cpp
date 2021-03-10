@@ -61,7 +61,7 @@ namespace awkward {
   #define CODE_LEN_OUTPUT 22
   #define CODE_REWIND 23
   // generic builtin instructions
-  #define CODE_STRING_ERROR 24
+  #define CODE_STRING 24
   #define CODE_PRINT_STRING 25
   #define CODE_PRINT 26
   #define CODE_PRINT_CR 27
@@ -570,7 +570,7 @@ namespace awkward {
           int64_t out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
           return output_names_[(IndexTypeOf<int64_t>)out_num] + " rewind";
         }
-        case CODE_STRING_ERROR: {
+        case CODE_STRING: {
           int64_t string_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
           return "s\" " + strings_[(IndexTypeOf<int64_t>)string_num] + "\"";
         }
@@ -1270,13 +1270,9 @@ namespace awkward {
             "call 'begin' to 'step' again (note: check 'is_done')");
         }
         case util::ForthError::user_halt: {
-          std::string error_message("'user halt' in AwkwardForth runtime: user-defined error or stopping "
-          "condition");
-          if (stack_can_pop()) {
-            error_message = string_at(stack().back()).empty() ? error_message :
-              string_at(stack().back());
-          }
-          throw std::invalid_argument(error_message);
+          throw std::invalid_argument(
+            "'user halt' in AwkwardForth runtime: user-defined error or stopping "
+            "condition");
         }
         case util::ForthError::recursion_depth_exceeded: {
           throw std::invalid_argument(
@@ -1562,7 +1558,7 @@ namespace awkward {
         case CODE_WRITE_DUP:
         case CODE_LEN_OUTPUT:
         case CODE_REWIND:
-        case CODE_STRING_ERROR:
+        case CODE_STRING:
         case CODE_PRINT_STRING:
           return 2;
         default:
@@ -2555,7 +2551,7 @@ namespace awkward {
       }
 
       else if (word == "s\"") {
-        bytecodes.push_back(CODE_STRING_ERROR);
+        bytecodes.push_back(CODE_STRING);
         bytecodes.push_back((int32_t)strings_.size());
 
         if (pos + 1 >= stop) {
@@ -3345,9 +3341,13 @@ namespace awkward {
               break;
             }
 
-            case CODE_STRING_ERROR: {
+            case CODE_STRING: {
               I string_num = bytecode_get();
               bytecodes_pointer_where()++;
+              if (stack_cannot_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
               stack_push(string_num);
               break;
             }

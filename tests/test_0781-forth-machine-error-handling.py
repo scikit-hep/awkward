@@ -47,7 +47,8 @@ again
     )
     with pytest.raises(ValueError) as err:
         vm32.run()
-    assert str(err.value) == "variable x reached its maximum 10"
+    assert vm32.stack[-1] == 0
+    assert vm32.string_at(vm32.stack[-1]) == "variable x reached its maximum 10"
 
 
 def test_undefined_error():
