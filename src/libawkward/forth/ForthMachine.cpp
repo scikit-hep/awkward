@@ -130,7 +130,7 @@ namespace awkward {
     "<-", "+<-", "stack", "rewind",
     // print (for debugging)
     ".\"",
-    // errors
+    // user defined strings
     "s\""
   });
 
@@ -999,7 +999,8 @@ namespace awkward {
   const std::string
   ForthMachineOf<T, I>::string_at(int64_t index) const noexcept {
     return (index < (int64_t)strings_.size() ?
-      strings_[(IndexTypeOf<int64_t>)index] : std::string(""));
+      strings_[(IndexTypeOf<int64_t>)index] : std::string("a string at ")
+      + std::to_string(index) + std::string(" is undefined"));
   }
 
   template <typename T, typename I>

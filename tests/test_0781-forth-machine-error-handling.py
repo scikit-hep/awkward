@@ -22,6 +22,37 @@ s" this is an error"
 """
     )
 
+def test_user_defined_strings():
+    vm32 = awkward.forth.ForthMachine32(
+        """
+s" this is a first string"
+s" this is a second string"
+s" this is a third string"
+s" this is a forth string"
+"""
+    )
+
+    assert (
+        vm32.string_at(0)
+        == "this is a first string"
+    )
+    assert (
+        vm32.string_at(1)
+        == "this is a second string"
+    )
+    assert (
+        vm32.string_at(2)
+        == "this is a third string"
+    )
+    assert (
+        vm32.string_at(3)
+        == "this is a forth string"
+    )
+    assert (
+        vm32.string_at(4)
+        == "a string at 4 is undefined"
+    )
+
 
 def test_user_defined_exception():
     vm32 = awkward.forth.ForthMachine32(
