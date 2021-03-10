@@ -16,7 +16,7 @@
 namespace ak = awkward;
 
 int main(int, char**) {
-  auto options = ak::ArrayBuilderOptions(1024, 2);
+  auto options = ak::ArrayBuilderOptions(8, 2);
 
   const ak::FormPtr empty_form = std::make_shared<ak::EmptyForm>(
     false,

@@ -16,7 +16,6 @@
 #include "awkward/array/RegularArray.h"
 #include "awkward/array/UnionArray.h"
 #include "awkward/array/UnmaskedArray.h"
-#include "awkward/array/VirtualArray.h"
 
 #include "awkward/typedbuilder/BitMaskedArrayBuilder.h"
 #include "awkward/typedbuilder/ByteMaskedArrayBuilder.h"
@@ -30,7 +29,6 @@
 #include "awkward/typedbuilder/RegularArrayBuilder.h"
 #include "awkward/typedbuilder/UnionArrayBuilder.h"
 #include "awkward/typedbuilder/UnmaskedArrayBuilder.h"
-#include "awkward/typedbuilder/VirtualArrayBuilder.h"
 #include "awkward/typedbuilder/UnknownFormBuilder.h"
 
 
@@ -143,23 +141,23 @@ namespace awkward {
   TypedArrayBuilder::TypedArrayBuilder(const FormPtr& form,
                                        const ArrayBuilderOptions& options)
     : initial_(options.initial()),
+      length_(0),
       builder_(formBuilderFromA(form)),
       vm_input_data_("data"),
       vm_source_() {
     vm_source_.append("input ")
-      .append(vm_input_data_)
-      .append("\n");
+      .append(vm_input_data_).append("\n");
 
     vm_source_.append(builder_.get()->vm_output()).append("\n");
     vm_source_.append(builder_.get()->vm_func()).append("\n");
     vm_source_.append(builder_.get()->vm_from_stack()).append("\n");
 
-    vm_source_.append("0\n").append("begin\n")
-    .append("pause\n")
-    .append(builder_.get()->vm_func_name())
-    .append("\n")
-    .append("1+\n")
-    .append("again\n");
+    vm_source_.append("0").append("\n")
+      .append("begin").append("\n")
+      .append("pause").append("\n")
+      .append(builder_.get()->vm_func_name()).append("\n")
+      .append("1+").append("\n")
+      .append("again").append("\n");
 
     initialise();
   }
@@ -202,9 +200,6 @@ namespace awkward {
     else if (auto const& downcasted_form = std::dynamic_pointer_cast<UnmaskedForm>(form)) {
       return std::make_shared<UnmaskedArrayBuilder>(downcasted_form);
     }
-    else if (auto const& downcasted_form = std::dynamic_pointer_cast<VirtualForm>(form)) {
-      return std::make_shared<VirtualArrayBuilder>(downcasted_form);
-    }
     else {
       return std::make_shared<UnknownFormBuilder>(form);
     }
@@ -212,13 +207,16 @@ namespace awkward {
 
   void
   TypedArrayBuilder::initialise() {
-    vm_ = std::make_shared<ForthMachine32>(to_vm());
-    length_ = 8;
+    if (std::dynamic_pointer_cast<UnknownFormBuilder>(builder_)) {
+      throw std::invalid_argument(
+        std::string("unrecognized Form ") + FILENAME(__LINE__));
+    }
+    vm_ = std::make_shared<ForthMachine32>(vm_source());
 
     std::shared_ptr<void> ptr(
-      kernel::malloc<void>(kernel::lib::cpu, 8*sizeof(uint8_t)));
+      kernel::malloc<void>(kernel::lib::cpu, initial_*(int64_t)sizeof(uint8_t)));
 
-    vm_inputs_map_[vm_input_data_] = std::make_shared<ForthInputBuffer>(ptr, 0, length_);
+    vm_inputs_map_[vm_input_data_] = std::make_shared<ForthInputBuffer>(ptr, 0, initial_);
     vm_.get()->run(vm_inputs_map_);
   }
 
@@ -249,7 +247,7 @@ namespace awkward {
   }
 
   const std::string
-  TypedArrayBuilder::to_vm() const {
+  TypedArrayBuilder::vm_source() const {
     return vm_source_;
   }
 

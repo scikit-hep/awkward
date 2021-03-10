@@ -12,7 +12,7 @@ namespace awkward {
   /// @brief
   class LIBAWKWARD_EXPORT_SYMBOL UnknownFormBuilder : public FormBuilder {
   public:
-    /// @brief Creates a VirtualArrayBuilder from a full set of parameters.
+    /// @brief Creates an UnknownArrayBuilder.
     UnknownFormBuilder(const FormPtr& form);
 
     /// @brief User-friendly name of this class.

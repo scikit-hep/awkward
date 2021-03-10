@@ -56,16 +56,11 @@ def test_unmasked_form():
     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
 
 
-def test_virtual_form():
+def test_unsupported_form():
     form = ak.forms.VirtualForm(ak.forms.NumpyForm([], 8, "d"), True)
 
-    builder = ak.layout.TypedArrayBuilder(form)
-
-    builder.float64(1.1)
-    builder.float64(2.2)
-    builder.float64(3.3)
-
-    assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+    with pytest.raises(ValueError):
+        builder = ak.layout.TypedArrayBuilder(form)
 
 
 def test_list_offset_form():

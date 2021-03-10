@@ -82,6 +82,11 @@ namespace awkward {
     const FormPtr
       form() const;
 
+    /// @brief Returns an AwkwardForth source code generated rom the 'Form' and
+    /// passed to the 'ForthMachine' virtual machine.
+    const std::string
+      vm_source() const;
+
     /// @brief Returns a string representation of this array (single-line XML
     /// indicating the length and type).
     const std::string
@@ -365,10 +370,6 @@ namespace awkward {
       next_node_id;
 
   private:
-    /// @brief
-    const std::string
-      to_vm() const;
-
     /// @ brief
     void
       initialise();
