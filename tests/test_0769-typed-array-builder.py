@@ -19,9 +19,9 @@ def test_bit_masked_form():
     )
     builder = ak.layout.TypedArrayBuilder(form)
 
-    builder.real(1.1)
-    builder.real(2.2)
-    builder.real(3.3)
+    builder.float64(1.1)
+    builder.float64(2.2)
+    builder.float64(3.3)
 
     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
 
@@ -35,9 +35,9 @@ def test_byte_masked_form():
     )
     builder = ak.layout.TypedArrayBuilder(form)
 
-    builder.real(1.1)
-    builder.real(2.2)
-    builder.real(3.3)
+    builder.float64(1.1)
+    builder.float64(2.2)
+    builder.float64(3.3)
 
     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
 
@@ -49,9 +49,9 @@ def test_unmasked_form():
     )
     builder = ak.layout.TypedArrayBuilder(form)
 
-    builder.real(1.1)
-    builder.real(2.2)
-    builder.real(3.3)
+    builder.float64(1.1)
+    builder.float64(2.2)
+    builder.float64(3.3)
 
     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
 
@@ -61,9 +61,9 @@ def test_virtual_form():
 
     builder = ak.layout.TypedArrayBuilder(form)
 
-    builder.real(1.1)
-    builder.real(2.2)
-    builder.real(3.3)
+    builder.float64(1.1)
+    builder.float64(2.2)
+    builder.float64(3.3)
 
     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
 
@@ -103,11 +103,11 @@ def test_list_offset_form():
     builder = ak.layout.TypedArrayBuilder(form)
 
     builder.beginlist()
-    builder.real(1.1)
+    builder.float64(1.1)
     builder.beginlist()
     builder.int64(1)
     builder.endlist()
-    builder.real(2.2)
+    builder.float64(2.2)
     builder.beginlist()
     builder.int64(1)
     builder.int64(2)
@@ -116,7 +116,7 @@ def test_list_offset_form():
     builder.beginlist()
     builder.endlist()
     builder.beginlist()
-    builder.real(3.3)
+    builder.float64(3.3)
     builder.beginlist()
     builder.int64(1)
     builder.int64(2)
@@ -249,15 +249,15 @@ def test_union_form():
 
     builder = ak.layout.TypedArrayBuilder(form)
 
-    builder.real(1.1)
+    builder.float64(1.1)
     builder.boolean(False)
-    builder.real(2.2)
-    builder.real(3.3)
+    builder.float64(2.2)
+    builder.float64(3.3)
     builder.boolean(True)
-    builder.real(4.4)
+    builder.float64(4.4)
     builder.boolean(False)
     builder.boolean(True)
-    builder.real(-2.2)
+    builder.float64(-2.2)
 
     assert ak.to_list(builder.snapshot()) == [
         1.1,
@@ -286,18 +286,18 @@ def test_union3_form():
 
     builder = ak.layout.TypedArrayBuilder(form)
 
-    builder.real(1.1)
+    builder.float64(1.1)
     builder.boolean(False)
     builder.int64(11)
-    builder.real(2.2)
+    builder.float64(2.2)
     builder.boolean(False)
-    builder.real(2.2)
-    builder.real(3.3)
+    builder.float64(2.2)
+    builder.float64(3.3)
     builder.boolean(True)
-    builder.real(4.4)
+    builder.float64(4.4)
     builder.boolean(False)
     builder.boolean(True)
-    builder.real(-2.2)
+    builder.float64(-2.2)
 
     assert ak.to_list(builder.snapshot()) == [
         1.1,
@@ -325,11 +325,10 @@ def test_record_form():
 
     # if record contents have the same type,
     # the fields alternate
-    builder.real(1.1)  # "one"
-    builder.real(2.2)  # "two"
-    builder.real(3.3)  # "one"
-    builder.real(4.4)  # "two"
-    builder.int64(11)
+    builder.float64(1.1)  # "one"
+    builder.float64(2.2)  # "two"
+    builder.float64(3.3)  # "one"
+    builder.float64(4.4)  # "two"
 
     # etc.
 
@@ -337,3 +336,22 @@ def test_record_form():
         {"one": 1.1, "two": 2.2},
         {"one": 3.3, "two": 4.4},
     ]
+
+
+def test_error_in_record_form():
+
+    form = ak.forms.RecordForm(
+        {"one": ak.forms.NumpyForm([], 8, "d"), "two": ak.forms.NumpyForm([], 8, "d")},
+        form_key="node0",
+    )
+    builder = ak.layout.TypedArrayBuilder(form)
+
+    # if record contents have the same type,
+    # the fields alternate
+    builder.float64(1.1)  # "one"
+    builder.float64(2.2)  # "two"
+    builder.int64(11)
+
+    builder.float64(3.3)  # "one"
+    builder.float64(4.4)  # "two"
+    builder.int64(11)

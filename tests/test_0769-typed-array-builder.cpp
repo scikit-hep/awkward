@@ -76,8 +76,8 @@ int main(int, char**) {
     // create another builder
     ak::TypedArrayBuilder myarray(numpy_form_float64, options);
 
-    myarray.real(999.999);
-    myarray.real(-999.999);
+    myarray.float64(999.999);
+    myarray.float64(-999.999);
 
     // take a snapshot
     std::shared_ptr<ak::Content> array = myarray.snapshot();
@@ -89,22 +89,22 @@ int main(int, char**) {
     ak::TypedArrayBuilder myarray(list_offset_form, options);
 
     myarray.beginlist();
-    myarray.real(1.1);
-    myarray.real(2.2);
+    myarray.float64(1.1);
+    myarray.float64(2.2);
     myarray.endlist();
 
     myarray.beginlist();
-    myarray.real(3.3);
-    myarray.real(4.4);
-    myarray.real(5.5);
-    myarray.real(6.6);
+    myarray.float64(3.3);
+    myarray.float64(4.4);
+    myarray.float64(5.5);
+    myarray.float64(6.6);
     myarray.endlist();
 
     myarray.beginlist();
-    myarray.real(7.7);
-    myarray.real(8.8);
-    myarray.real(9.9);
-    myarray.real(10.1);
+    myarray.float64(7.7);
+    myarray.float64(8.8);
+    myarray.float64(9.9);
+    myarray.float64(10.1);
     myarray.endlist();
 
     // take a snapshot
@@ -118,22 +118,22 @@ int main(int, char**) {
 
     myarray.int64(1);
     myarray.beginlist();
-    myarray.real(1.1);
-    myarray.real(2.2);
+    myarray.float64(1.1);
+    myarray.float64(2.2);
     myarray.endlist();
 
     myarray.beginlist();
-    myarray.real(3.3);
-    myarray.real(4.4);
-    myarray.real(5.5);
-    myarray.real(6.6);
+    myarray.float64(3.3);
+    myarray.float64(4.4);
+    myarray.float64(5.5);
+    myarray.float64(6.6);
     myarray.endlist();
 
     myarray.beginlist();
-    myarray.real(7.7);
-    myarray.real(8.8);
-    myarray.real(9.9);
-    myarray.real(10.1);
+    myarray.float64(7.7);
+    myarray.float64(8.8);
+    myarray.float64(9.9);
+    myarray.float64(10.1);
     myarray.endlist();
 
     // take a snapshot

@@ -222,6 +222,12 @@ namespace awkward {
     vm_.get()->run(vm_inputs_map_);
   }
 
+  template<typename T>
+  void
+  TypedArrayBuilder::set_data(T x) {
+    reinterpret_cast<T*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = x;
+  }
+
   void
   TypedArrayBuilder::debug_step() const {
     std::cout << "stack ";
@@ -289,6 +295,9 @@ namespace awkward {
 
   const ContentPtr
   TypedArrayBuilder::snapshot() const {
+    // FIXME: a better message?
+    std::set<util::ForthError> ignore;
+    vm_.get()->maybe_throw(util::ForthError::user_halt, ignore);
     return builder_.get()->snapshot(vm_.get()->outputs());
   }
 
@@ -325,28 +334,28 @@ namespace awkward {
 
   void
   TypedArrayBuilder::boolean(bool x) {
-    reinterpret_cast<bool*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = x;
+    set_data<bool>(x);
     vm_.get()->stack_push(static_cast<utype>(state::boolean));
     vm_.get()->resume();
   }
 
   void
   TypedArrayBuilder::int64(int64_t x) {
-    reinterpret_cast<int64_t*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = x;
+    set_data<int64_t>(x);
     vm_.get()->stack_push(static_cast<utype>(state::int64));
     vm_.get()->resume();
   }
 
   void
-  TypedArrayBuilder::real(double x) {
-    reinterpret_cast<double*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = x;
+  TypedArrayBuilder::float64(double x) {
+    set_data<double>(x);
     vm_.get()->stack_push(static_cast<utype>(state::float64));
     vm_.get()->resume();
   }
 
   void
   TypedArrayBuilder::complex(std::complex<double> x) {
-    reinterpret_cast<std::complex<double>*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = x;
+    set_data<std::complex<double>>(x);
     vm_.get()->stack_push(static_cast<utype>(state::complex128));
     vm_.get()->resume();
   }

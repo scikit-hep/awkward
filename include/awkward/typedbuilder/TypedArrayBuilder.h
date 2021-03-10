@@ -159,7 +159,7 @@ namespace awkward {
 
     /// @brief Adds a real value `x` to the accumulated data.
     void
-      real(double x);
+      float64(double x);
 
     /// @brief Adds a complex value `x` to the accumulated data.
     void
@@ -372,6 +372,11 @@ namespace awkward {
     /// @ brief
     void
       initialise();
+
+    /// @brief
+    template <typename T>
+    void
+      set_data(T x);
 
     /// See #initial.
     int64_t initial_;

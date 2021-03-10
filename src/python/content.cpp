@@ -976,7 +976,7 @@ typed_builder_fromiter(ak::TypedArrayBuilder& self, const py::handle& obj) {
     self.int64(obj.cast<int64_t>());
   }
   else if (py::isinstance<py::float_>(obj)) {
-    self.real(obj.cast<double>());
+    self.float64(obj.cast<double>());
   }
   else if (builder_fromiter_iscomplex(obj)) {
     self.complex(obj.cast<std::complex<double>>());
@@ -1034,7 +1034,7 @@ typed_builder_fromiter(ak::TypedArrayBuilder& self, const py::handle& obj) {
     self.int64(obj.cast<int64_t>());
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("floating"))) {
-    self.real(obj.cast<double>());
+    self.float64(obj.cast<double>());
   }
   else {
     throw std::invalid_argument(
@@ -1069,7 +1069,7 @@ make_TypedArrayBuilder(const py::handle& m, const std::string& name) {
       .def("null", &ak::TypedArrayBuilder::null)
       .def("boolean", &ak::TypedArrayBuilder::boolean)
       .def("int64", &ak::TypedArrayBuilder::int64)
-      .def("real", &ak::TypedArrayBuilder::real)
+      .def("float64", &ak::TypedArrayBuilder::float64)
       .def("complex", &ak::TypedArrayBuilder::complex)
       .def("bytestring",
            [](ak::TypedArrayBuilder& self, const py::bytes& x) -> void {
