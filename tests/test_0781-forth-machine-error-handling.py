@@ -38,6 +38,7 @@ s" this is a forth string"
     assert vm32.string_at(2) == "this is a third string"
     assert vm32.string_at(3) == "this is a forth string"
     assert vm32.string_at(4) == "a string at 4 is undefined"
+    assert vm32.string_at(-1) == "a string at -1 is undefined"
 
 
 def test_user_defined_exception():
