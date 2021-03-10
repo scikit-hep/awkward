@@ -209,6 +209,11 @@ namespace awkward {
     const Index64
       output_Index64_at(int64_t index) const;
 
+    /// @brief Returns a string at 'index'.
+    /// The strings are defined with an 's"' core word.
+    const std::string
+      string_at(int64_t index) const noexcept;
+
     /// @brief HERE
     void
       reset();

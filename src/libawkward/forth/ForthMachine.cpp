@@ -61,49 +61,50 @@ namespace awkward {
   #define CODE_LEN_OUTPUT 22
   #define CODE_REWIND 23
   // generic builtin instructions
-  #define CODE_PRINT_STRING 24
-  #define CODE_PRINT 25
-  #define CODE_PRINT_CR 26
-  #define CODE_PRINT_STACK 27
-  #define CODE_I 28
-  #define CODE_J 29
-  #define CODE_K 30
-  #define CODE_DUP 31
-  #define CODE_DROP 32
-  #define CODE_SWAP 33
-  #define CODE_OVER 34
-  #define CODE_ROT 35
-  #define CODE_NIP 36
-  #define CODE_TUCK 37
-  #define CODE_ADD 38
-  #define CODE_SUB 39
-  #define CODE_MUL 40
-  #define CODE_DIV 41
-  #define CODE_MOD 42
-  #define CODE_DIVMOD 43
-  #define CODE_NEGATE 44
-  #define CODE_ADD1 45
-  #define CODE_SUB1 46
-  #define CODE_ABS 47
-  #define CODE_MIN 48
-  #define CODE_MAX 49
-  #define CODE_EQ 50
-  #define CODE_NE 51
-  #define CODE_GT 52
-  #define CODE_GE 53
-  #define CODE_LT 54
-  #define CODE_LE 55
-  #define CODE_EQ0 56
-  #define CODE_INVERT 57
-  #define CODE_AND 58
-  #define CODE_OR 59
-  #define CODE_XOR 60
-  #define CODE_LSHIFT 61
-  #define CODE_RSHIFT 62
-  #define CODE_FALSE 63
-  #define CODE_TRUE 64
+  #define CODE_STRING 24
+  #define CODE_PRINT_STRING 25
+  #define CODE_PRINT 26
+  #define CODE_PRINT_CR 27
+  #define CODE_PRINT_STACK 28
+  #define CODE_I 29
+  #define CODE_J 30
+  #define CODE_K 31
+  #define CODE_DUP 32
+  #define CODE_DROP 33
+  #define CODE_SWAP 34
+  #define CODE_OVER 35
+  #define CODE_ROT 36
+  #define CODE_NIP 37
+  #define CODE_TUCK 38
+  #define CODE_ADD 39
+  #define CODE_SUB 40
+  #define CODE_MUL 41
+  #define CODE_DIV 42
+  #define CODE_MOD 43
+  #define CODE_DIVMOD 44
+  #define CODE_NEGATE 45
+  #define CODE_ADD1 46
+  #define CODE_SUB1 47
+  #define CODE_ABS 48
+  #define CODE_MIN 49
+  #define CODE_MAX 50
+  #define CODE_EQ 51
+  #define CODE_NE 52
+  #define CODE_GT 53
+  #define CODE_GE 54
+  #define CODE_LT 55
+  #define CODE_LE 56
+  #define CODE_EQ0 57
+  #define CODE_INVERT 58
+  #define CODE_AND 59
+  #define CODE_OR 60
+  #define CODE_XOR 61
+  #define CODE_LSHIFT 62
+  #define CODE_RSHIFT 63
+  #define CODE_FALSE 64
+  #define CODE_TRUE 65
   // beginning of the user-defined dictionary
-  #define BOUND_DICTIONARY 65
+  #define BOUND_DICTIONARY 66
 
   const std::set<std::string> reserved_words_({
     // comments
@@ -128,7 +129,9 @@ namespace awkward {
     // output actions
     "<-", "+<-", "stack", "rewind",
     // print (for debugging)
-    ".\""
+    ".\"",
+    // user defined strings
+    "s\""
   });
 
   const std::set<std::string> input_parser_words_({
@@ -567,6 +570,10 @@ namespace awkward {
           int64_t out_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
           return output_names_[(IndexTypeOf<int64_t>)out_num] + " rewind";
         }
+        case CODE_STRING: {
+          int64_t string_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
+          return "s\" " + strings_[(IndexTypeOf<int64_t>)string_num] + "\"";
+        }
         case CODE_PRINT_STRING: {
           int64_t string_num = bytecodes_[(IndexTypeOf<int64_t>)bytecode_position + 1];
           return ".\" " + strings_[(IndexTypeOf<int64_t>)string_num] + "\"";
@@ -986,6 +993,14 @@ namespace awkward {
   const Index64
   ForthMachineOf<T, I>::output_Index64_at(int64_t index) const {
     return current_outputs_[(IndexTypeOf<int64_t>)index].get()->toIndex64();
+  }
+
+  template <typename T, typename I>
+  const std::string
+  ForthMachineOf<T, I>::string_at(int64_t index) const noexcept {
+    return ((index >= 0  &&  index < (int64_t)strings_.size()) ?
+      strings_[(IndexTypeOf<int64_t>)index] : std::string("a string at ")
+      + std::to_string(index) + std::string(" is undefined"));
   }
 
   template <typename T, typename I>
@@ -1544,6 +1559,7 @@ namespace awkward {
         case CODE_WRITE_DUP:
         case CODE_LEN_OUTPUT:
         case CODE_REWIND:
+        case CODE_STRING:
         case CODE_PRINT_STRING:
           return 2;
         default:
@@ -1634,11 +1650,12 @@ namespace awkward {
       stop++;
       colstop++;
 
-      if (!tokenized.empty()  &&  tokenized[tokenized.size() - 1] == ".\"") {
+      if (!tokenized.empty()  &&  (tokenized[tokenized.size() - 1] == ".\""
+        ||  tokenized[tokenized.size() - 1] == "s\"")) {
         // Strings are tokenized differently.
         if (stop == source_.size()) {
           throw std::invalid_argument(
-            std::string("unclosed string after .\" word") + FILENAME(__LINE__));
+            std::string("unclosed string after .\" or s\" word") + FILENAME(__LINE__));
         }
         int64_t nextline = line;
         current = source_[stop];
@@ -1653,7 +1670,7 @@ namespace awkward {
           colstop++;
           if (stop == source_.size()) {
             throw std::invalid_argument(
-              std::string("unclosed string after .\" word") + FILENAME(__LINE__));
+              std::string("unclosed string after .\" or s\" word") + FILENAME(__LINE__));
           }
           current = source_[stop];
         }
@@ -1669,7 +1686,7 @@ namespace awkward {
           colstop++;
           if (stop == source_.size()) {
             throw std::invalid_argument(
-              std::string("unclosed string after .\" word") + FILENAME(__LINE__));
+              std::string("unclosed string after .\" or s\" word") + FILENAME(__LINE__));
           }
           current = source_[stop];
         }
@@ -2534,6 +2551,21 @@ namespace awkward {
         }
       }
 
+      else if (word == "s\"") {
+        bytecodes.push_back(CODE_STRING);
+        bytecodes.push_back((int32_t)strings_.size());
+
+        if (pos + 1 >= stop) {
+          throw std::invalid_argument(
+            err_linecol(linecol, pos, pos + 2, "unclosed string after s\" word")
+            + FILENAME(__LINE__)
+          );
+        }
+        strings_.push_back(tokenized[(IndexTypeOf<std::string>)pos + 1]);
+
+        pos += 2;
+      }
+
       else if (word == ".\"") {
         bytecodes.push_back(CODE_PRINT_STRING);
         bytecodes.push_back((int32_t)strings_.size());
@@ -3307,6 +3339,17 @@ namespace awkward {
               if (current_error_ != util::ForthError::none) {
                 return;
               }
+              break;
+            }
+
+            case CODE_STRING: {
+              I string_num = bytecode_get();
+              bytecodes_pointer_where()++;
+              if (stack_cannot_push()) {
+                current_error_ = util::ForthError::stack_overflow;
+                return;
+              }
+              stack_push(string_num);
               break;
             }
 

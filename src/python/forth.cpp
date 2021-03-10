@@ -172,6 +172,10 @@ make_ForthMachineOf(const py::handle& m, const std::string& name) {
               return self.stack_pop();
           })
           .def("stack_clear", &ak::ForthMachineOf<T, I>::stack_clear)
+          .def("string_at", [](ak::ForthMachineOf<T, I>& self,
+                               int64_t at) -> py::str {
+            return self.string_at(at);
+          })
           .def_property_readonly("variables", &ak::ForthMachineOf<T, I>::variables)
           .def("input_position", [](ak::ForthMachineOf<T, I>& self,
                                     const std::string& name) -> int64_t {
