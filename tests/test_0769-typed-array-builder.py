@@ -287,7 +287,7 @@ def test_union2_form():
     builder.debug_step()
 
     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
-    raise ValueError
+    # raise ValueError
 
 
 def test_union3_form():

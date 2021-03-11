@@ -83,27 +83,69 @@ namespace awkward {
                   1,
                   search_tags->second.get()->len() - 1,
                   kernel::lib::cpu);
-      int64_t lentags = tags.length();
-      Index64 current(lentags);
-      Index64 outindex(lentags);
-      struct Error err = kernel::UnionArray_regular_index<int8_t, int64_t>(
-        kernel::lib::cpu,   // DERIVE
-        outindex.data(),
-        current.data(),
-        lentags,
-        tags.data(),
-        lentags);
-      util::handle_error(err, "UnionArray", nullptr);
 
       ContentPtrVec contents;
       for (auto content : contents_) {
         contents.push_back(content.get()->snapshot(outputs));
       }
-      return UnionArray8_64(Identities::none(),
-                            util::Parameters(),
-                            tags,
-                            outindex,
-                            contents).simplify_uniontype(false, false);
+
+      int64_t lentags = tags.length();
+
+      if (form_.get()->index() == Index::Form::i32) {
+        Index32 current(lentags);
+        Index32 outindex(lentags);
+        struct Error err = kernel::UnionArray_regular_index<int8_t, int32_t>(
+          kernel::lib::cpu,   // DERIVE
+          outindex.data(),
+          current.data(),
+          lentags,
+          tags.data(),
+          lentags);
+        util::handle_error(err, "UnionArray", nullptr);
+
+        return UnionArray8_32(Identities::none(),
+                              util::Parameters(),
+                              tags,
+                              outindex,
+                              contents).simplify_uniontype(false, false);
+
+      }
+      else if (form_.get()->index() == Index::Form::u32) {
+        IndexU32 current(lentags);
+        IndexU32 outindex(lentags);
+        struct Error err = kernel::UnionArray_regular_index<int8_t, uint32_t>(
+          kernel::lib::cpu,   // DERIVE
+          outindex.data(),
+          current.data(),
+          lentags,
+          tags.data(),
+          lentags);
+        util::handle_error(err, "UnionArray", nullptr);
+
+        return UnionArray8_U32(Identities::none(),
+                               util::Parameters(),
+                               tags,
+                               outindex,
+                               contents).simplify_uniontype(false, false);
+      }
+      else if (form_.get()->index() == Index::Form::i64) {
+        Index64 current(lentags);
+        Index64 outindex(lentags);
+        struct Error err = kernel::UnionArray_regular_index<int8_t, int64_t>(
+          kernel::lib::cpu,   // DERIVE
+          outindex.data(),
+          current.data(),
+          lentags,
+          tags.data(),
+          lentags);
+        util::handle_error(err, "UnionArray", nullptr);
+
+        return UnionArray8_64(Identities::none(),
+                              util::Parameters(),
+                              tags,
+                              outindex,
+                              contents).simplify_uniontype(false, false);
+      }
     }
     throw std::invalid_argument(
         std::string("Snapshot of a ") + classname()

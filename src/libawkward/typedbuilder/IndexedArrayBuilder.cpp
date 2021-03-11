@@ -59,15 +59,40 @@ namespace awkward {
   IndexedArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_data_);
     if (search != outputs.end()) {
-       // FIXME: search->second.get()->toIndex64() length is 1 more then needed here
-      Index64 index(std::static_pointer_cast<int64_t>(search->second.get()->ptr()),
+      switch (form_.get()->index()) {
+     // case Index::Form::i8:
+     // case Index::Form::u8:
+        case Index::Form::i32:
+          return std::make_shared<IndexedArray32>(
+            Identities::none(),
+            form_.get()->parameters(),
+            Index32(std::static_pointer_cast<int32_t>(search->second.get()->ptr()),
                     0,
                     search->second.get()->len() - 1,
-                    kernel::lib::cpu);
-      return std::make_shared<IndexedArray64>(Identities::none(),
-                                              form_.get()->parameters(),
-                                              index,
-                                              content_.get()->snapshot(outputs));
+                    kernel::lib::cpu),
+            content_.get()->snapshot(outputs));
+        case Index::Form::u32:
+          return std::make_shared<IndexedArrayU32>(
+            Identities::none(),
+            form_.get()->parameters(),
+            IndexU32(std::static_pointer_cast<uint32_t>(search->second.get()->ptr()),
+                     0,
+                     search->second.get()->len() - 1,
+                     kernel::lib::cpu),
+            content_.get()->snapshot(outputs));
+        case Index::Form::i64:
+          // FIXME: search->second.get()->toIndex64() length is 1 more then needed here
+          return std::make_shared<IndexedArray64>(
+            Identities::none(),
+            form_.get()->parameters(),
+            Index64(std::static_pointer_cast<int64_t>(search->second.get()->ptr()),
+                    0,
+                    search->second.get()->len() - 1,
+                    kernel::lib::cpu),
+            content_.get()->snapshot(outputs));
+        default:
+          break;
+      };
     }
     throw std::invalid_argument(
         std::string("Snapshot of a ") + classname()

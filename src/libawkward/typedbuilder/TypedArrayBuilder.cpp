@@ -174,7 +174,15 @@ namespace awkward {
       return std::make_shared<EmptyArrayBuilder>(downcasted_form);
     }
     else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedForm>(form)) {
-      return std::make_shared<IndexedArrayBuilder>(downcasted_form);
+      switch (downcasted_form.get()->index()) {
+      // case Index::Form::i8:
+      // case Index::Form::u8:
+      case Index::Form::i32:
+      case Index::Form::u32:
+      case Index::Form::i64:
+      default:
+        return std::make_shared<IndexedArrayBuilder>(downcasted_form);
+      };
     }
     else if (auto const& downcasted_form = std::dynamic_pointer_cast<IndexedOptionForm>(form)) {
       return std::make_shared<IndexedOptionArrayBuilder>(downcasted_form);

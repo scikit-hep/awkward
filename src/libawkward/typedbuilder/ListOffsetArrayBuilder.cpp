@@ -70,10 +70,24 @@ namespace awkward {
   ListOffsetArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_data_);
     if (search != outputs.end()) {
-      return std::make_shared<ListOffsetArray64>(Identities::none(),
-                                                 form_.get()->parameters(),
-                                                 search->second.get()->toIndex64(),
-                                                 content_.get()->snapshot(outputs));
+      if (form_.get()->offsets() == Index::Form::i32) {
+        return std::make_shared<ListOffsetArray32>(Identities::none(),
+                                                   form_.get()->parameters(),
+                                                   search->second.get()->toIndex32(),
+                                                   content_.get()->snapshot(outputs));
+      }
+      else if (form_.get()->offsets() == Index::Form::u32) {
+        return std::make_shared<ListOffsetArrayU32>(Identities::none(),
+                                                   form_.get()->parameters(),
+                                                   search->second.get()->toIndexU32(),
+                                                   content_.get()->snapshot(outputs));
+      }
+      else if (form_.get()->offsets() == Index::Form::i64) {
+        return std::make_shared<ListOffsetArray64>(Identities::none(),
+                                                   form_.get()->parameters(),
+                                                   search->second.get()->toIndex64(),
+                                                   content_.get()->snapshot(outputs));
+      }
     }
     throw std::invalid_argument(
         std::string("Snapshot of a ") + classname()
