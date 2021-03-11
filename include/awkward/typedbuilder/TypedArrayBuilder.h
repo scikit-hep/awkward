@@ -52,7 +52,8 @@ namespace awkward {
       null = 18,
       begin_tuple = 19,
       end_tuple = 20,
-      index = 21
+      index = 21,
+      tag = 22
     };
   using utype = std::underlying_type<state>::type;
 
@@ -326,6 +327,11 @@ namespace awkward {
     /// @brief Ends a record.
     void
       endrecord();
+
+    /// @brief Sets the pointer to a given tag `tag`; the next
+    /// command will fill that slot.
+    void
+      tag(int64_t tag);
 
     /// @brief Append an element `at` a given index of an arbitrary `array`
     /// (Content instance) to the accumulated data, handling

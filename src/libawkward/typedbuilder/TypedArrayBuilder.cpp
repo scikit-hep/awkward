@@ -417,7 +417,7 @@ namespace awkward {
 
   void
   TypedArrayBuilder::index(int64_t index) {
-    reinterpret_cast<int64_t*>(vm_inputs_map_[vm_input_data_]->ptr().get())[0] = index;
+    set_data<int64_t>(index);
     vm_.get()->stack_push(static_cast<utype>(state::index));
     vm_.get()->resume();
   }
@@ -482,6 +482,13 @@ namespace awkward {
     throw std::runtime_error(
       std::string("TypedArrayBuilder 'endrecord' is not implemented yet")
       + FILENAME(__LINE__));
+  }
+
+  void
+  TypedArrayBuilder::tag(int64_t tag) {
+    set_data<int64_t>(tag);
+    vm_.get()->stack_push(static_cast<utype>(state::tag));
+    vm_.get()->resume();
   }
 
   void

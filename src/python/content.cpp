@@ -1097,10 +1097,17 @@ make_TypedArrayBuilder(const py::handle& m, const std::string& name) {
         self.field_check(x);
       })
       .def("endrecord", &ak::TypedArrayBuilder::endrecord)
+      .def("tag", [](ak::TypedArrayBuilder& self, int64_t tag) -> void {
+        self.tag(tag);
+      })
       .def("debug_step",
            [](const ak::TypedArrayBuilder& self) -> void {
         return self.debug_step();
       })
+      .def("vm_source",
+            [](ak::TypedArrayBuilder& self) -> const std::string {
+         return self.vm_source();
+       })
       .def("form",
            [](const ak::TypedArrayBuilder& self)
            -> std::shared_ptr<ak::Form> {

@@ -267,6 +267,29 @@ def test_union_form():
     ]
 
 
+def test_union2_form():
+    form = ak.forms.UnionForm(
+        "i8",
+        "i64",
+        [ak.forms.NumpyForm([], 8, "d"), ak.forms.NumpyForm([], 8, "d")],
+        form_key="node0",
+    )
+
+    builder = ak.layout.TypedArrayBuilder(form)
+    print(builder.vm_source())
+
+    builder.debug_step()
+    builder.float64(1.1)
+    builder.debug_step()
+    builder.float64(2.2)
+    builder.debug_step()
+    builder.float64(3.3)
+    builder.debug_step()
+
+    assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
+    raise ValueError
+
+
 def test_union3_form():
     form = ak.forms.UnionForm(
         "i8",
