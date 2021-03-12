@@ -34,7 +34,7 @@ namespace awkward {
     if (length_ >= 0  &&  length_ > out.get()->length()) {
       throw std::invalid_argument(
           std::string(
-              "generated array does not have sufficient length: expected") +
+              "generated array does not have sufficient length: expected ") +
           std::to_string(length_) + std::string(" but generated ") +
           std::to_string(out.get()->length()) + FILENAME(__LINE__));
     }
