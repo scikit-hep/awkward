@@ -8,7 +8,7 @@ import pytest  # noqa: F401
 import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
-pyarrow = pytest.importorskip("pyarrow")
+pytest.importorskip("pyarrow")
 
 
 def test_list_to_arrow():
@@ -186,6 +186,9 @@ def test_to_arrow_table():
     assert ak.from_arrow(
         ak.to_arrow_table(ak.Array([{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}]))
     ).tolist() == [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}]
+
+
+pytest.importorskip("pyarrow.parquet")
 
 
 def test_to_parquet(tmp_path):

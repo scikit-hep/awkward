@@ -9,7 +9,7 @@ import numpy as np  # noqa: F401
 import awkward as ak  # noqa: F401
 
 
-pyarrow = pytest.importorskip("pyarrow")
+pytest.importorskip("pyarrow.parquet")
 
 
 def test_no_fields(tmp_path):

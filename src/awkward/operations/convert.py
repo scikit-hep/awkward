@@ -3212,8 +3212,11 @@ class _ParquetFile(object):
                 assert sampleform.form_key.startswith(
                     "col:"
                 ) or sampleform.form_key.startswith("lst:")
-                samplekey = "{0}:off:{1}[{2}]".format(
-                    lazy_cache_key, sampleform.form_key[4:], row_group
+                samplekey = "{0}:off:{1}:{2}[{3}]".format(
+                    lazy_cache_key,
+                    sampleform.form_key[4:],
+                    ".".join("" if x is None else x for x in unpack),
+                    row_group,
                 )
                 sample = None
                 if lazy_cache is not None:
