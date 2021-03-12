@@ -9,27 +9,35 @@ jax.config.update("jax_platform_name", "cpu")
 jax.config.update("jax_enable_x64", True)
 
 class AuxData(object):
-    def __init__(self, form, length, indexes, datakeys, hash_ptrs, layout):
-        self.form = form
-        self.length = length
-        self.indexes = indexes
-        self.datakeys = datakeys
-        self.hash_ptrs = hash_ptrs
+    def __init__(self, layout):
+        def find_nparray_ptrs(node, depth, hash_ptrs):
+            if isinstance(node, ak.layout.NumpyArray):
+                hash_ptrs.append(node.ptr) 
+
+        self.hash_ptrs = []
+        ak._util.recursive_walk(layout, find_nparray_ptrs, args=(self.hash_ptrs,))
         self.layout = layout
 
     def __eq__(self, other):
         # AuxData is an object so that JAX can naively call __eq__ on it
-        return (
-            self.form == other.form
-            and self.length == other.length
-            and self.indexes.keys() == other.indexes.keys()
-            and all(
-                # normally, array equality would be a problem for __eq__ (in an if-statement)
-                np.array_equal(self.indexes[k], other.indexes[k])
-                for k in self.indexes.keys()
-            )
-            and self.datakeys == other.datakeys
-        )
+        def is_layout_equal(layout1, layout2):
+            # TODO: Recurse through each object and check for equality. Bonus: Try doing it through recursive_walk
+            if layout1.form == layout2.form:
+                if isinstance(layout1, (ak.layout.ListOffsetArray32,
+                                        ak.layout.ListOffsetArray64,
+                                        ak.layout.ListOffsetArrayU32)):
+                    if isinstance(layout2, (ak.layout.ListOffsetArray32,
+                                            ak.layout.ListOffsetArray64,
+                                            ak.layout.ListOffsetArrayU32)):
+                        if np.array_equal(np.asarray(layout1.offsets), np.asarray(layout2.offsets)) and len(layout1) == len(layout2):
+                            return is_layout_equal(layout1.content, layout2.content)
+
+                elif isinstance(layout1, ak.layout.NumpyArray):
+                    if isinstance(layout2, ak.layout.NumpyArray):
+                        return layout1.shape == layout2.shape and layout1.strides == layout2.strides and layout1.ndim == layout2.ndim 
+            return False
+        
+        return is_layout_equal(self.layout, other.layout)
 
 class DifferentiableArray(ak.Array):
     def __init__(self, aux_data, tracers):
@@ -54,19 +62,48 @@ class DifferentiableArray(ak.Array):
         if np.isscalar(out):
             """
             TODO: Recurse here for scalars
+            If where is a scalar, find ptr of self.layout, get the corresponding tracers from the dict and return tracer[where]
+            If where is a iterable, and assuming the slicing doesn't change the pointer location, go one back in the slice, and get the scalar case
             """
-            # def recurse(array, recurse_where, children = []):
-            #     if recurse_where is None:
-            #         if isinstance(array, ak.layout.NumpyArray):
-            #             tracer = dict[array.ptr]
-            #             children.append(tracer[where])
-
-            return self.tracers[0][where]
-
+            def recurse(array, recurse_where):
+                if np.isscalar(recurse_where):
+                    if isinstance(array, ak.layout.NumpyArray):
+                        tracer = map_ptrs_to_tracers[array.ptr]
+                        return tracer[recurse_where]
+                elif isinstance(where, tuple):
+                    return recurse(array[where[:-1]], where[len(where) - 1])
+                    
+            return recurse(self.layout, where)
         else:
             """
             Implement index tracer fetching with identities here
             """
+            # if isinstance(out, ak.layout.ListOffsetArray32,
+            #                    ak.layout.ListOffsetArray64,
+            #                    ak.layout.ListOffsetArrayU32):
+                
+            def fetch_indices_layout(layout):
+                if isinstance(layout, ak.layout.NumpyArray):
+                    return np.asarray(layout.identities)
+                elif isinstance(layout, (ak.layout.ListOffsetArray32, ak.layout.ListOffsetArray64, ak.layout.ListOffsetArrayU32)):
+                    return fetch_indices_layout(layout.content)
+                else:
+                    raise NotImplementedError
+
+            if isinstance(out, ak.layout.NumpyArray):
+                if out.ptr in map_ptrs_to_tracers:
+                    tracer = map_ptrs_to_tracers[out.ptr]
+                    indices = np.where(np.all(fetch_indices_layout(self.aux_data.layout) == np.asarray(out.identities), axis = 1))[0]
+                    children = [jax.numpy.take(tracer, indices)]
+                    out.setidentities()
+                    aux_data = AuxData(out)
+                    return DifferentiableArray(aux_data, children)
+                else:
+                    """
+                    TODO: If the control reaches here, it means the slicing is copying data, handle that here
+                    """
+                    raise NotImplementedError
+
             raise NotImplementedError
 
     def __setitem__(self, where, what):
@@ -102,25 +139,16 @@ def special_flatten(array):
     if isinstance(array, DifferentiableArray):
         aux_data, children = array.aux_data, array.tracers
     else:
-        def find_nparray_ptrs(node, depth, hash_ptrs):
+        def create_databuffers(node, depth, databuffers):
             if isinstance(node, ak.layout.NumpyArray):
-                hash_ptrs.append(node.ptr) 
+                databuffers.append(node) 
         
-        hash_ptrs = []
-        ak._util.recursive_walk(array.layout, find_nparray_ptrs, args=(hash_ptrs,))
-
-        form, length, buffers = ak.to_buffers(array)
-        formjson = json.loads(form.tojson())
-        indexes = {k: v for k, v in buffers.items() if not k.endswith("-data")}
-        datakeys = []
-        for key in buffers:
-            partition, form_key, role = key.split("-")
-            if role == "data":
-                datakeys.append(key)
+        databuffers = []
+        ak._util.recursive_walk(array.layout, create_databuffers, args=(databuffers,))
 
         array.layout.setidentities()
-        aux_data = AuxData(form, length, indexes, datakeys, hash_ptrs, array.layout) 
-        children = [jax.numpy.asarray(buffers[x], buffers[x].dtype) for x in datakeys]
+        aux_data = AuxData(array.layout) 
+        children = [jax.numpy.asarray(x) for x in databuffers]
 
     return children, aux_data
 
@@ -130,9 +158,13 @@ def special_unflatten(aux_data, children):
     elif all(child is None for child in children):
         return None
     else:  
-        buffers = dict(aux_data.indexes)
-        buffers.update(zip(aux_data.datakeys, children))
-        return ak.from_buffers(aux_data.form, aux_data.length, buffers)
+        """
+        TODO: Change Form here to has_identities: False
+        """
+        form_json = json.loads(aux_data.layout.form.tojson())
+        del form_json["has_identities"]
+        form = ak.forms.Form.fromjson(json.dumps(form_json))
+        return ak.from_buffers(form, len(aux_data.layout), children)
 
 jax.tree_util.register_pytree_node(ak.Array, special_flatten, special_unflatten)
 jax.tree_util.register_pytree_node(DifferentiableArray, special_flatten, special_unflatten)
@@ -175,7 +207,7 @@ def func6_1(array):
     return 2 * array
 
 def func6_2(array):
-    return 2 * array[2] ** 2
+    return 2 * array[0, 0] ** 2
 
 def func7_1(array):
     return array.y[2][0][0] ** 2 + array.y[2][0][1] ** 2
@@ -192,8 +224,8 @@ tangent = ak.Array([
     [{"x": 1.5, "y": [2.0, 0.5, 1.0]}]
 ])
 
-primal_nparray = ak.Array([1., 2., 3., 4., 5.])
-tangent_nparray = ak.Array([0., 0., 1., 0., 0.])
+primal_nparray = ak.Array([[1., 2., 3., 4., 5.]])
+tangent_nparray = ak.Array([[0., 0., 1., 0., 0.]])
 # print(jax.jvp(func1_1, (primal,), (tangent,)))
 # print(jax.jvp(func1_2, (primal,), (tangent,)))
 # print(jax.jvp(func2_1, (primal,), (tangent,)))
