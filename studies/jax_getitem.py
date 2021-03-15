@@ -81,6 +81,8 @@ class DifferentiableArray(ak.Array):
             # if isinstance(out, ak.layout.ListOffsetArray32,
             #                    ak.layout.ListOffsetArray64,
             #                    ak.layout.ListOffsetArrayU32):
+
+            children = []
                 
             def fetch_indices_layout(layout):
                 if isinstance(layout, ak.layout.NumpyArray):
@@ -93,8 +95,13 @@ class DifferentiableArray(ak.Array):
             if isinstance(out, ak.layout.NumpyArray):
                 if out.ptr in map_ptrs_to_tracers:
                     tracer = map_ptrs_to_tracers[out.ptr]
-                    indices = np.where(np.all(fetch_indices_layout(self.aux_data.layout) == np.asarray(out.identities), axis = 1))[0]
-                    children = [jax.numpy.take(tracer, indices)]
+
+                    indices = []
+                    layout_indices = fetch_indices_layout(self.aux_data.layout)
+                    for i in np.asarray(out.identities):
+                        indices.append(np.where((layout_indices == i).all(axis=1))[0][0])
+
+                    children.append(jax.numpy.take(tracer, indices))
                     out.setidentities()
                     aux_data = AuxData(out)
                     return DifferentiableArray(aux_data, children)
@@ -158,13 +165,25 @@ def special_unflatten(aux_data, children):
     elif all(child is None for child in children):
         return None
     else:  
-        """
-        TODO: Change Form here to has_identities: False
-        """
         form_json = json.loads(aux_data.layout.form.tojson())
         del form_json["has_identities"]
         form = ak.forms.Form.fromjson(json.dumps(form_json))
-        return ak.from_buffers(form, len(aux_data.layout), children)
+
+        """
+        TODO: Write the full implementaion of datakeys here
+        """
+        def find_datakeyes(node, depth, datakeys = [], nodenum = 0):
+            if isinstance(node, ak.layout.NumpyArray):
+                datakeys.append(str("part0-None-data"))
+                nodenum = nodenum + 1
+
+        datakeys = []
+        ak._util.recursive_walk(aux_data.layout, find_datakeyes, args=(datakeys,))
+
+        assert len(children) == len(datakeys)
+        buffers = dict(zip(datakeys, children))
+
+        return ak.from_buffers(form, len(aux_data.layout), buffers)
 
 jax.tree_util.register_pytree_node(ak.Array, special_flatten, special_unflatten)
 jax.tree_util.register_pytree_node(DifferentiableArray, special_flatten, special_unflatten)
@@ -207,7 +226,7 @@ def func6_1(array):
     return 2 * array
 
 def func6_2(array):
-    return 2 * array[0, 0] ** 2
+    return 2 * array[0][:-1] ** 2
 
 def func7_1(array):
     return array.y[2][0][0] ** 2 + array.y[2][0][1] ** 2
@@ -226,6 +245,7 @@ tangent = ak.Array([
 
 primal_nparray = ak.Array([[1., 2., 3., 4., 5.]])
 tangent_nparray = ak.Array([[0., 0., 1., 0., 0.]])
+print(primal_nparray[0][:-1])
 # print(jax.jvp(func1_1, (primal,), (tangent,)))
 # print(jax.jvp(func1_2, (primal,), (tangent,)))
 # print(jax.jvp(func2_1, (primal,), (tangent,)))
@@ -236,8 +256,8 @@ tangent_nparray = ak.Array([[0., 0., 1., 0., 0.]])
 # print(jax.jvp(func4_2, (primal,), (tangent,)))
 # print(jax.jvp(func5_2, (primal,), (tangent,)))
 # print(jax.jvp(func5_2, (primal,), (tangent,)))
-# print(jax.vjp(func6_2, primal_nparray))
+print(jax.vjp(func6_2, primal_nparray))
 print(jax.jvp(func6_2, (primal_nparray,), (tangent_nparray,)))
-# print(jax.jit(func6_2)(primal_nparray))
+print(jax.jit(func6_2)(primal_nparray))
 # print(jax.grad(func6_2)(primal_nparray))
 # print(jax.jvp(func7_1, (primal,), (tangent,)))
