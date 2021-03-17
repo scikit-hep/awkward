@@ -187,3 +187,7 @@ print(tangent_result)
 jit_result = jax.jit(func)(primal)
 print("resulting type", type(jit_result))
 print(jit_result)
+
+val, func = jax.vjp(func, primal)
+
+print(func(val))
