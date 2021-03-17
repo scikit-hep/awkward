@@ -30,31 +30,34 @@ namespace awkward {
   const std::string
     index_form_to_name(Index::Form form);
 
-    enum class state : std::int32_t {
-      int64 = 0,
-      float64 = 1,
-      begin_list = 2,
-      end_list = 3,
-      boolean = 4,
-      int8 = 5,
-      int16 = 6,
-      int32 = 7,
-      uint8 = 8,
-      uint16 = 9,
-      uint32 = 10,
-      uint64 = 11,
-      float16 = 12,
-      float32 = 13,
-      float128 = 14,
-      complex64 = 15,
-      complex128 = 16,
-      complex256 = 17,
-      null = 18,
-      begin_tuple = 19,
-      end_tuple = 20,
-      index = 21,
-      tag = 22
-    };
+  const std::string
+    index_form_to_vm_format(Index::Form form);
+
+  enum class state : std::int32_t {
+    int64 = 0,
+    float64 = 1,
+    begin_list = 2,
+    end_list = 3,
+    boolean = 4,
+    int8 = 5,
+    int16 = 6,
+    int32 = 7,
+    uint8 = 8,
+    uint16 = 9,
+    uint32 = 10,
+    uint64 = 11,
+    float16 = 12,
+    float32 = 13,
+    float128 = 14,
+    complex64 = 15,
+    complex128 = 16,
+    complex256 = 17,
+    null = 18,
+    begin_tuple = 19,
+    end_tuple = 20,
+    index = 21,
+    tag = 22
+  };
   using utype = std::underlying_type<state>::type;
 
   const std::string
@@ -73,7 +76,13 @@ namespace awkward {
     /// @brief Creates an TypedArrayBuilder from a full set of parameters.
     ///
     /// @param initial The initial number of entries for a buffer.
-    TypedArrayBuilder(const FormPtr& form, const ArrayBuilderOptions& options);
+    TypedArrayBuilder(const FormPtr& form,
+                      const ArrayBuilderOptions& options,
+                      bool vm_init = true);
+
+    /// @brief
+    void
+      connect(const std::shared_ptr<ForthMachine32>& vm);
 
     /// @brief
     void
@@ -331,7 +340,7 @@ namespace awkward {
     /// @brief Sets the pointer to a given tag `tag`; the next
     /// command will fill that slot.
     void
-      tag(int64_t tag);
+      tag(int8_t tag);
 
     /// @brief Append an element `at` a given index of an arbitrary `array`
     /// (Content instance) to the accumulated data, handling

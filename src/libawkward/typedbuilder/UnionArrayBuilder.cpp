@@ -20,6 +20,8 @@ namespace awkward {
         : form.get()->form_key()),
       attribute_(attribute),
       partition_(partition) {
+    vm_func_type_ = std::to_string(static_cast<utype>(state::tag));
+
     for (auto const& content : form.get()->contents()) {
       contents_.push_back(TypedArrayBuilder::formBuilderFromA(content));
       vm_output_.append(contents_.back().get()->vm_output());
@@ -38,24 +40,37 @@ namespace awkward {
       .append(index_form_to_name(form_.get()->tags()))
       .append("\n");
 
-    vm_output_.append("variable tag").append("\n");
-
     vm_func_name_ = std::string(*form_key_).append("-").append(attribute_);
     for (auto const& content : contents_) {
       vm_func_.append(content.get()->vm_func());
     }
     vm_func_.append(": ")
-      .append(vm_func_name_).append("\n");
+      .append(vm_func_name_).append("\n")
+      .append(vm_func_type())
+      .append(" = if").append("\n");
+
+    vm_func_.append("0 data seek\n")
+      .append("data ").append(index_form_to_vm_format(form_.get()->tags()))
+      .append("-> stack dup ").append(vm_output_tags_).append(" <- stack\n");
 
     int64_t tag = 0;
+    int64_t contents_size = contents_.size();
+    bool drop = true;
     for (auto const& content : contents_) {
-      vm_func_.append("dup ").append(content.get()->vm_func_type())
-        .append(" = if").append("\n")
-        .append(std::to_string(tag++))
-        .append(" tag !").append("\n");
+      drop = (tag < contents_size) ? true : false;
+      if (drop) {
+        vm_func_.append("dup ");
+      }
 
-      vm_func_.append("tag @ ")
-        .append(vm_output_tags_).append(" <- stack").append("\n");
+      vm_func_.append(std::to_string(tag++))
+        .append(" = if").append("\n");
+
+      if (drop) {
+        vm_func_.append("drop").append("\n");
+        drop = false;
+      }
+
+      vm_func_.append("pause").append("\n");
 
       vm_func_.append(content.get()->vm_func_name())
         .append("\n")
@@ -65,9 +80,7 @@ namespace awkward {
 
     }
 
-    vm_func_.append("halt\n;\n\n");
-
-    vm_data_from_stack_.append("0 ").append(vm_output_tags_).append(" <- stack").append("\n");
+    vm_func_.append("halt\nthen\n;\n\n");
   }
 
   const std::string
@@ -80,8 +93,8 @@ namespace awkward {
     auto search_tags = outputs.find(vm_output_tags_);
     if (search_tags != outputs.end()) {
       Index8 tags(std::static_pointer_cast<int8_t>(search_tags->second.get()->ptr()),
-                  1,
-                  search_tags->second.get()->len() - 1,
+                  0,
+                  search_tags->second.get()->len(),
                   kernel::lib::cpu);
 
       ContentPtrVec contents;

@@ -54,6 +54,25 @@ namespace awkward {
   }
 
   const std::string
+  index_form_to_vm_format(Index::Form form) {
+    switch (form) {
+    case Index::Form::i8:
+      return "b";
+    case Index::Form::u8:
+      return "B";
+    case Index::Form::i32:
+      return "i";
+    case Index::Form::u32:
+      return "I";
+    case Index::Form::i64:
+      return "q";
+    default:
+      throw std::runtime_error(
+        std::string("unrecognized Index::Form ") + FILENAME(__LINE__));
+    }
+  }
+
+  const std::string
   dtype_to_state(util::dtype dt) {
     switch (dt) {
     case util::dtype::boolean:
@@ -139,9 +158,10 @@ namespace awkward {
   int64_t TypedArrayBuilder::next_node_id = 0;
 
   TypedArrayBuilder::TypedArrayBuilder(const FormPtr& form,
-                                       const ArrayBuilderOptions& options)
+                                       const ArrayBuilderOptions& options,
+                                       bool vm_init)
     : initial_(options.initial()),
-      length_(0),
+      length_(8),
       builder_(formBuilderFromA(form)),
       vm_input_data_("data"),
       vm_source_() {
@@ -159,7 +179,9 @@ namespace awkward {
       .append("1+").append("\n")
       .append("again").append("\n");
 
-    initialise();
+    if (vm_init) {
+      initialise();
+    }
   }
 
   FormBuilderPtr
@@ -211,6 +233,17 @@ namespace awkward {
     else {
       return std::make_shared<UnknownFormBuilder>(form);
     }
+  }
+
+  void
+  TypedArrayBuilder::connect(const std::shared_ptr<ForthMachine32>& vm) {
+    vm_ = vm;
+
+    std::shared_ptr<void> ptr(
+      kernel::malloc<void>(kernel::lib::cpu, 8*sizeof(uint8_t)));
+
+    vm_inputs_map_[vm_input_data_] = std::make_shared<ForthInputBuffer>(ptr, 0, 8);
+    vm_.get()->run(vm_inputs_map_);
   }
 
   void
@@ -493,8 +526,8 @@ namespace awkward {
   }
 
   void
-  TypedArrayBuilder::tag(int64_t tag) {
-    set_data<int64_t>(tag);
+  TypedArrayBuilder::tag(int8_t x) {
+    set_data<int8_t>(x);
     vm_.get()->stack_push(static_cast<utype>(state::tag));
     vm_.get()->resume();
   }

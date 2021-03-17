@@ -1048,9 +1048,9 @@ typed_builder_fromiter(ak::TypedArrayBuilder& self, const py::handle& obj) {
 py::class_<ak::TypedArrayBuilder>
 make_TypedArrayBuilder(const py::handle& m, const std::string& name) {
   return (py::class_<ak::TypedArrayBuilder>(m, name.c_str())
-      .def(py::init([](ak::FormPtr form, int64_t initial, double resize) -> ak::TypedArrayBuilder {
-        return ak::TypedArrayBuilder(form, ak::ArrayBuilderOptions(initial, resize));
-      }), py::arg("form"), py::arg("initial") = 1024, py::arg("resize") = 1.5)
+      .def(py::init([](ak::FormPtr form, int64_t initial, double resize, bool vm_init) -> ak::TypedArrayBuilder {
+        return ak::TypedArrayBuilder(form, ak::ArrayBuilderOptions(initial, resize), vm_init);
+      }), py::arg("form"), py::arg("initial") = 8, py::arg("resize") = 1.5, py::arg("vm_init") = true)
       .def_property_readonly("_ptr",
                              [](const ak::TypedArrayBuilder* self) -> size_t {
         return reinterpret_cast<size_t>(self);
@@ -1107,7 +1107,12 @@ make_TypedArrayBuilder(const py::handle& m, const std::string& name) {
       .def("vm_source",
             [](ak::TypedArrayBuilder& self) -> const std::string {
          return self.vm_source();
-       })
+      })
+      .def("connect",
+           [](ak::TypedArrayBuilder& self,
+              const std::shared_ptr<ak::ForthMachine32>& vm) -> void {
+        self.connect(vm);
+      })
       .def("form",
            [](const ak::TypedArrayBuilder& self)
            -> std::shared_ptr<ak::Form> {

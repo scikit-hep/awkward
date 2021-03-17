@@ -244,14 +244,23 @@ def test_union_form():
 
     builder = ak.layout.TypedArrayBuilder(form)
 
+    builder.tag(0)
     builder.float64(1.1)
+    builder.tag(1)
     builder.boolean(False)
+    builder.tag(0)
     builder.float64(2.2)
+    builder.tag(0)
     builder.float64(3.3)
+    builder.tag(1)
     builder.boolean(True)
+    builder.tag(0)
     builder.float64(4.4)
+    builder.tag(1)
     builder.boolean(False)
+    builder.tag(1)
     builder.boolean(True)
+    builder.tag(0)
     builder.float64(-2.2)
 
     assert ak.to_list(builder.snapshot()) == [
@@ -276,18 +285,17 @@ def test_union2_form():
     )
 
     builder = ak.layout.TypedArrayBuilder(form)
-    print(builder.vm_source())
 
-    builder.debug_step()
+    builder.tag(0)
     builder.float64(1.1)
-    builder.debug_step()
+
+    builder.tag(1)
     builder.float64(2.2)
-    builder.debug_step()
+
+    builder.tag(1)
     builder.float64(3.3)
-    builder.debug_step()
 
     assert ak.to_list(builder.snapshot()) == [1.1, 2.2, 3.3]
-    # raise ValueError
 
 
 def test_union3_form():
@@ -304,17 +312,29 @@ def test_union3_form():
 
     builder = ak.layout.TypedArrayBuilder(form)
 
+    builder.tag(0)
     builder.float64(1.1)
+    builder.tag(1)
     builder.boolean(False)
+    builder.tag(2)
     builder.int64(11)
+    builder.tag(0)
     builder.float64(2.2)
+    builder.tag(1)
     builder.boolean(False)
+    builder.tag(0)
     builder.float64(2.2)
+    builder.tag(0)
     builder.float64(3.3)
+    builder.tag(1)
     builder.boolean(True)
+    builder.tag(0)
     builder.float64(4.4)
+    builder.tag(1)
     builder.boolean(False)
+    builder.tag(1)
     builder.boolean(True)
+    builder.tag(0)
     builder.float64(-2.2)
 
     assert ak.to_list(builder.snapshot()) == [
