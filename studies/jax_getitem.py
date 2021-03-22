@@ -11,39 +11,28 @@ jax.config.update("jax_enable_x64", True)
 
 class AuxData(object):
     def __init__(self, layout):
-        def find_nparray_ptrs(node, depth, hash_ptrs):
-            if isinstance(node, ak.layout.NumpyArray):
-                hash_ptrs.append(node.ptr) 
-
-        self.hash_ptrs = []
-        ak._util.recursive_walk(layout, find_nparray_ptrs, args=(self.hash_ptrs,))
         self.layout = layout
 
     def __eq__(self, other):
-        # AuxData is an object so that JAX can naively call __eq__ on it
-        # def is_layout_equal(layout1, layout2):
-            # TODO: Recurse through each object and check for equality. Bonus: Try doing it through recursive_walk
         return self.layout.form == other.layout.form
-        #         if isinstance(layout1, (ak.layout.ListOffsetArray32,
-        #                                 ak.layout.ListOffsetArray64,
-        #                                 ak.layout.ListOffsetArrayU32)):
-        #             if isinstance(layout2, (ak.layout.ListOffsetArray32,
-        #                                     ak.layout.ListOffsetArray64,
-        #                                     ak.layout.ListOffsetArrayU32)):
-        #                 if np.array_equal(np.asarray(layout1.offsets), np.asarray(layout2.offsets)) and len(layout1) == len(layout2):
-        #                     return is_layout_equal(layout1.content, layout2.content)
 
-        #         elif isinstance(layout1, ak.layout.NumpyArray):
-        #             if isinstance(layout2, ak.layout.NumpyArray):
-        #                 return layout1.shape == layout2.shape and layout1.strides == layout2.strides and layout1.ndim == layout2.ndim 
-        #     return False
-        
-        # return is_layout_equal(self.layout, other.layout)
+def find_dataptrs(layout):
+    def find_nparray_ptrs(node, depth, data_ptrs):
+        if isinstance(node, ak.layout.NumpyArray):
+            data_ptrs.append(node.ptr) 
+    data_ptrs = []
+    ak._util.recursive_walk(layout, find_nparray_ptrs, args=(data_ptrs,))
+
+    return data_ptrs
 
 class DifferentiableArray(ak.Array):
     def __init__(self, aux_data, tracers):
         self.aux_data = aux_data
         self.tracers = tracers
+        self.data_ptrs = find_dataptrs(self.aux_data.layout)
+
+        assert len(self.tracers) == len(self.data_ptrs)
+        self.map_ptrs_to_tracers = dict(zip(self.data_ptrs, self.tracers))
     
     @property
     def layout(self):
@@ -57,84 +46,110 @@ class DifferentiableArray(ak.Array):
 
     def __getitem__(self, where):
         out = self.layout[where]
-        assert len(self.tracers) == len(self.aux_data.hash_ptrs)
-        map_ptrs_to_tracers = dict(zip(self.aux_data.hash_ptrs, self.tracers))
+        
+        def find_nparray_node_newptr(layout, outlayout):
+            outlayout_fieldloc = outlayout.identities.fieldloc
+            def find_nparray_node(node, depth, fieldloc, nodenum, nodenum_index):
+                if isinstance(node, ak.layout.NumpyArray):
+                    if node.identities.fieldloc == fieldloc:
+                        nodenum_index = nodenum
+                        return
+                    else:
+                        nodenum = nodenum + 1
+            nodenum_index = -1
+            ak._util.recursive_walk(layout, find_nparray_node, args=(outlayout_fieldloc, 0, nodenum_index))
+            return nodenum_index
 
-        if np.isscalar(out):
-            """
-            TODO: Recurse here for scalars
-            If where is a scalar, find ptr of self.layout, get the corresponding tracers from the dict and return tracer[where]
-            If where is a iterable, and assuming the slicing doesn't change the pointer location, go one back in the slice, and get the scalar case
-            """
+        if not isinstance(out, ak.layout.Content):
             def recurse(array, recurse_where):
-                if np.isscalar(recurse_where):
-                    if isinstance(array, ak.layout.NumpyArray):
-                        tracer = map_ptrs_to_tracers[array.ptr]
+                if isinstance(recurse_where, Integral) or isinstance(recurse_where, str):
+                    if isinstance(array.layout, ak.layout.NumpyArray):
+                        if array.layout.ptr in self.map_ptrs_to_tracers:
+                            tracer = self.map_ptrs_to_tracers[array.layout.ptr]
+                        else:
+                            tracer = array.tracers[find_nparray_node_newptr(self.layout, array.layout)]
                         return tracer[recurse_where]
                 elif isinstance(where, tuple):
                     return recurse(array[where[:-1]], where[len(where) - 1])
+                else:
+                    raise ValueError("Can't slice the array with {0}".format(where))
                     
-            return recurse(self.layout, where)
+            return recurse(self, where)
         else:
-            """
-            Implement index tracer fetching with identities here
-            """
-            # if isinstance(out, ak.layout.ListOffsetArray32,
-            #                    ak.layout.ListOffsetArray64,
-            #                    ak.layout.ListOffsetArrayU32):
-
-            children = []
-                
             def fetch_indices_layout(layout):
                 if isinstance(layout, ak.layout.NumpyArray):
-                    return np.asarray(layout.identities)
-                elif isinstance(layout, (ak.layout.ListOffsetArray32, ak.layout.ListOffsetArray64, ak.layout.ListOffsetArrayU32)):
+                    return [np.asarray(layout.identities)]
+                elif isinstance(layout, ak._util.listtypes):
+                    return fetch_indices_layout(layout.content)
+                elif isinstance(layout, ak._util.indexedtypes):
+                    return fetch_indices_layout(layout.project())
+                elif isinstance(layout, ak._util.uniontypes):
+                    raise ValueError("Can't differntiate an UnionArray type {0}".format(layout))
+                elif isinstance(layout, ak._util.recordtypes):
+                    indices = []
+                    for content in layout.contents:
+                        indices = indices + fetch_indices_layout(content) 
+                    return indices
+                elif isinstance(layout, ak._util.indexedtypes):
+                    return fetch_indices_layout(layout.content)
+                elif isinstance(layout, ak._util.indexedoptiontypes):
+                    return fetch_indices_layout(layout.content)
+                elif isinstance(layout, (ak.layout.BitMaskedArray, 
+                                         ak.layout.ByteMaskedArray, 
+                                         ak.layout.UnmaskedArray)):
                     return fetch_indices_layout(layout.content)
                 else:
                     raise NotImplementedError
+            
+            def fetch_children_tracer(layout, preslice_identities, children = []):
+                if isinstance(layout, ak.layout.NumpyArray):
+                    def find_intersection_indices(preslice_identities, layout_identities):
+                        indices = [] 
+                        for i in preslice_identities:
+                            for j in np.asarray(layout_identities):
+                                if np.shape(i)[i.ndim - 1] == np.shape(j)[j.ndim - 1]:
+                                    indices.append(np.where((i == j).all(axis=1))[0][0])
+                            if len(indices) != 0:
+                                break
+                        
+                        return indices
 
-            if isinstance(out, ak.layout.NumpyArray):
-                if out.ptr in map_ptrs_to_tracers:
-                    tracer = map_ptrs_to_tracers[out.ptr]
+                    if layout.ptr in self.map_ptrs_to_tracers:
+                        tracer = self.map_ptrs_to_tracers[layout.ptr]
+                        indices = find_intersection_indices(preslice_identities, layout.identities)
+                        children.append(jax.numpy.take(tracer, indices))
+                        return children
+                    else:
+                        tracer = self.tracers[find_nparray_node_newptr(self.layout, layout)]
+                        indices = find_intersection_indices(preslice_identities, layout.identities)
+                        children.append(jax.numpy.take(tracer, indices))
+                        return children
 
-                    indices = []
-                    layout_indices = fetch_indices_layout(self.aux_data.layout)
-                    for i in np.asarray(out.identities):
-                        indices.append(np.where((layout_indices == i).all(axis=1))[0][0])
-
-                    children.append(jax.numpy.take(tracer, indices))
-                    out.setidentities()
-                    aux_data = AuxData(out)
-                    return DifferentiableArray(aux_data, children)
+                elif isinstance(layout, ak._util.listtypes):
+                    return fetch_children_tracer(layout.content, preslice_identities)
+                elif isinstance(layout, ak._util.uniontypes):
+                    raise ValueError("Can't differntiate an UnionArray type {0}".format(layout))
+                elif isinstance(layout, ak._util.recordtypes):
+                    children = []
+                    for content in layout.contents:
+                        children = children + fetch_children_tracer(content, preslice_identities)
+                    return children
+                elif isinstance(layout, ak._util.indexedtypes):
+                    return fetch_children_tracer(layout.content, preslice_identities)
+                elif isinstance(layout, ak._util.indexedoptiontypes):
+                    return fetch_children_tracer(layout.content, preslice_identities)
+                elif isinstance(layout, (ak.layout.BitMaskedArray, 
+                                         ak.layout.ByteMaskedArray, 
+                                         ak.layout.UnmaskedArray)):
+                    return fetch_children_tracer(layout.content, preslice_identities)
                 else:
-                    """
-                    TODO: If the control reaches here, it means the slicing is copying data, handle that here
-                    """
-                    out_fieldloc = out.identities.fieldloc
-
-                    def find_nparray_node(node, depth, fieldloc, nodenum, nodenum_index):
-                        if isinstance(node, ak.layout.NumpyArray):
-                            if node.identities.fieldloc == fieldloc:
-                                nodenum_index = nodenum
-                                return
-                            else:
-                                nodenum = nodenum + 1
-                    nodenum_index = -1
-                    ak._util.recursive_walk(self.aux_data.layout, find_nparray_node, args=(out_fieldloc, 0, nodenum_index))
-
-                    tracer = self.tracers[nodenum_index]
-                    indices = []
-                    layout_indices = fetch_indices_layout(self.aux_data.layout)
-                    for i in np.asarray(out.identities):
-                        indices.append(np.where((layout_indices == i).all(axis=1))[0][0])
-                    
-                    children.append(jax.numpy.take(tracer, indices))
-                    out.setidentities()
-                    aux_data = AuxData(out)
-
-                    return DifferentiableArray(aux_data, children)
-
-            raise NotImplementedError
+                    raise NotImplementedError("fetch_children_tracer not completely implemented yet for {0}".format(layout))
+                
+            children = fetch_children_tracer(out, fetch_indices_layout(self.aux_data.layout))
+            out = out.deep_copy()
+            out.setidentities()
+            aux_data = AuxData(out)
+            return DifferentiableArray(aux_data, children)
 
     def __setitem__(self, where, what):
         raise ValueError(
@@ -194,7 +209,6 @@ def special_unflatten(aux_data, children):
                 return lambda: ak.layout.NumpyArray(children[num - 1])
         
         arr = ak._util.recursively_apply(aux_data.layout, function, pass_depth=False)
-
         return ak.Array(arr)
 
 jax.tree_util.register_pytree_node(ak.Array, special_flatten, special_unflatten)
@@ -204,85 +218,96 @@ jax.tree_util.register_pytree_node(DifferentiableArray, special_flatten, special
 #  TESTING
 ###############################################################################
 
-def func1_1(array):
-    return 2 * array.y[2][0][0] + 10
+#### ak.layout.NumpyArray ####
+test_numpyarray = ak.Array(np.arange(10, dtype=np.float64))
+test_numpyarray_tangent = ak.Array(np.arange(10, dtype=np.float64))
 
-def func1_2(array):
-    return 2 * array.y[0][0][0] ** 2
+def func_numpyarray_1(x):
+    return x[4] ** 2
 
-def func2_1(array):
-    return 2 * array.y[2][0] + 10
+def func_numpyarray_2(x):
+    return x[2:5] ** 2 + x[1:4] ** 2
 
-def func2_2(array):
-    return 2 * array.y[0][0] ** 2
+def func_numpyarray_3(x):
+    return x[::-1]
 
-def func3_1(array):
-    return 2 * array.y[2] + 10
+#### ak.layout.ListOffsetArray ####
+test_listoffsetarray = ak.Array([[1., 2., 3.], [], [4., 5.]])
+test_listoffsetarray_tangent = ak.Array([[0., 0., 0.], [], [0., 1.]])
 
-def func3_2(array):
-    return 2 * array.y[0] ** 2
+def func_listoffsetarray_1(x):
+    return x[2] * 2
 
-def func4_1(array):
-    return 2 * array.y[2] + 10
+def func_listoffsetarray_2(x):
+    return x * x
 
-def func4_2(array):
-    return 2 * array.y[0] ** 2
+def func_listoffsetarray_3(x):
+    return x[0, 0] * x[2, 1]
 
-def func5_1(array):
-    return 2 * array.y
+def func_listoffsetarray_4(x):
+    return x[::-1] ** 2
 
-def func5_2(array):
-    return 2 * array.y ** 2
+def func_listoffsetarray_5(x):
+    return 2 * x[:-1]
 
-def func6_1(array):
-    return 2 * array
+def func_listoffsetarray_6(x):
+    return x[0][0] * x[2][1]
 
-def func6_2(array):
-    return 2 * array ** 2
+#### ak.layout.RecordArray ####
 
-def func7_1(array):
-    return array.y[2][0][0] ** 2 + array.y[2][0][1] ** 2
-
-primal = ak.Array([
+test_recordarray = ak.Array([
     [{"x": 1.1, "y": [1.0]}, {"x": 2.2, "y": [1.0, 2.2]}],
     [],
     [{"x": 3.3, "y": [1.0, 2.0, 3.0]}]
 ])
-
-tangent = ak.Array([
+test_recordarray_tangent = ak.Array([
     [{"x": 0.0, "y": [1.0]}, {"x": 2.0, "y": [1.5, 0.0]}],
     [],
     [{"x": 1.5, "y": [2.0, 0.5, 1.0]}]
 ])
 
-primal_nparray = ak.Array([[1., 2., 3., 4., 5.]])
-tangent_nparray = ak.Array([[0., 0., 1., 0., 0.]])
+def func_recordarray_1(array):
+    return 2 * array.y[2][0][1] + 10
+    
+def func_recordarray_2(array):
+    return 2 * array.y[0][0][0] ** 2
 
-value_flat, value_tree = jax.tree_util.tree_flatten(primal_nparray)
-# print(primal_nparray[0][:-1])
-# print(jax.jvp(func1_1, (primal,), (tangent,)))
-# print(jax.jvp(func1_2, (primal,), (tangent,)))
-# print(jax.jvp(func2_1, (primal,), (tangent,)))
-# print(jax.jvp(func2_2, (primal,), (tangent,)))
-# print(jax.jvp(func3_1, (primal,), (tangent,)))
-# print(jax.jvp(func3_2, (primal,), (tangent,)))
-# print(jax.jvp(func4_1, (primal,), (tangent,)))
-# print(jax.jvp(func4_2, (primal,), (tangent,)))
-# print(jax.jvp(func5_2, (primal,), (tangent,)))
-# print(jax.jvp(func5_2, (primal,), (tangent,)))
-# pdb.set_trace()
+def func_recordarray_3(array):
+    return 2 * array.y[2][0] + 10
 
-# children, aux_data = special_flatten(primal_nparray)
-# diffarr = DifferentiableArray(aux_data, children)
-# val, func = jax.vjp(func6_2, diffarr)
-# # print(diffarr)
-# children, aux_data = special_flatten(val)
-# diffarr = DifferentiableArray(aux_data, children)
-# print(aux_data, children)
-# # pdb.set_trace()
-# print(func(diffarr))
-# print(funceaval))
-print(jax.jvp(func6_2, (primal_nparray,), (tangent_nparray,)))
-# print(jax.jit(func6_2)(primal_nparray))
-# print(jax.grad(func6_2)(primal_nparray))
-# print(jax.jvp(func7_1, (primal,), (tangent,)))
+def func_recordarray_4(array):
+    return 2 * array.y[0][0] ** 2
+
+def func_recordarray_5(array):
+    return 2 * array.y[2] + 10
+
+def func_recordarray_6(array):
+    return 2 * array.y[0] ** 2
+
+def func_recordarray_7(array):
+    return 2 * array.y
+
+def func_recordarray_8(array):
+    return 2 * array.y ** 2
+
+def func_recordarray_9(array):
+    return 2 * array.y[2, 0, 1] + 10
+
+def func_recordarray_10(array):
+    return 2 * array.y[0, 0, 0] ** 2
+
+def func_recordarray_11(array):
+    return 2 * array.y[2, 0] + 10
+
+def func_recordarray_12(array):
+    return 2 * array.y[0, 0] ** 2
+
+value_jvp, jvp_grad = jax.jvp(func_recordarray_12, (test_recordarray,), (test_recordarray_tangent,))
+jit_value = jax.jit(func_recordarray_12)(test_recordarray)
+value_vjp, vjp_func = jax.vjp(func_recordarray_12, test_recordarray)
+# value, grad = jax.value_and_grad(func_numpyarray_2)(test_nparray)
+
+print("Value and Grad are {0} and {1}".format(value_jvp, jvp_grad))
+print("JIT value is {0}".format(jit_value))
+# print("VJP value and grad is {0} and {1}".format(value_vjp, vjp_func(test_nparray)))
+# print("Value and grad are {0} and {1}".format(value, grad))
