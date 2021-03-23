@@ -61,10 +61,6 @@ jobs:
           python.version: "3.7"
           python.architecture: "x64"
           numpy.version: "latest"
-        "py38-32bit":
-          python.version: "3.8"
-          python.architecture: "x86"
-          numpy.version: "latest"
         "py38-64bit":
           python.version: "3.8"
           python.architecture: "x64"
@@ -97,40 +93,24 @@ jobs:
         displayName: "Print versions"
 
       - script: |
-          python -m pip install flake8 flake8-print
-          python -m flake8
-        displayName: "Run flake8"
-        condition: "and(succeeded(), ne(variables['python.version'], '2.7'))"
-
-      - script: |
-          python -m pip install -v .[test]
-        displayName: "Build for 3.9"
-        condition: "and(succeeded(), eq(variables['python.version'], '3.9'))"
-
-      - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python dev/kernel-diagnostics.py --check-spec-sorted
         displayName: "Check if kernel specification is sorted"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python dev/generate-tests.py
         displayName: "Generate Kernel tests"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests-spec
         displayName: "Test specification"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests-cpu-kernels
         displayName: "Test CPU kernels"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests
@@ -190,40 +170,24 @@ jobs:
         displayName: "Print versions"
 
       - script: |
-          python -m pip install flake8 flake8-print
-          python -m flake8
-        displayName: "Run flake8"
-        condition: "and(succeeded(), ne(variables['python.version'], '2.7'))"
-
-      - script: |
-          python -m pip install -v .[test]
-        displayName: "Build for 3.9"
-        condition: "and(succeeded(), eq(variables['python.version'], '3.9'))"
-
-      - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python dev/kernel-diagnostics.py --check-spec-sorted
         displayName: "Check if kernel specification is sorted"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python dev/generate-tests.py
         displayName: "Generate Kernel tests"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests-spec
         displayName: "Test specification"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests-cpu-kernels
         displayName: "Test CPU kernels"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests
@@ -335,40 +299,24 @@ jobs:
         displayName: "Print versions"
 
       - script: |
-          python -m pip install flake8 flake8-print
-          python -m flake8
-        displayName: "Run flake8"
-        condition: "and(succeeded(), ne(variables['python.version'], '2.7'))"
-
-      - script: |
-          python -m pip install -v .[test]
-        displayName: "Build for 3.9"
-        condition: "and(succeeded(), eq(variables['python.version'], '3.9'))"
-
-      - script: |
           python -m pip install -v .[test,dev]
         displayName: "Build"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python dev/kernel-diagnostics.py --check-spec-sorted
         displayName: "Check if kernel specification is sorted"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python dev/generate-tests.py
         displayName: "Generate Kernel tests"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests-spec
         displayName: "Test specification"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests-cpu-kernels
         displayName: "Test CPU kernels"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           python -m pytest -vv -rs tests
@@ -396,7 +344,6 @@ jobs:
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
         workingDirectory: dependent-project
         displayName: "Test dependent project 1"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           rm -f minimal
@@ -407,7 +354,6 @@ jobs:
           ./minimal "[[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]]" -2
         workingDirectory: dependent-project
         displayName: "Test dependent project 2"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
 
       - script: |
           which python
@@ -422,4 +368,3 @@ jobs:
           python -m pytest -vv test-python.py
         workingDirectory: dependent-project
         displayName: "Test dependent project 3"
-        condition: "and(succeeded(), ne(variables['python.version'], '3.9'))"
