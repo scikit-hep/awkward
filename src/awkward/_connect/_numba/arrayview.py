@@ -964,9 +964,11 @@ def register_unary_operator(unaryop):
                     left = args[0].arrayviewtype.type
                     behavior = args[0].arrayviewtype.behavior
 
-                for typer, lower in ak._util.numba_unaryops(unaryop, left, behavior):
-                    numba.extending.lower_builtin(unaryop, *args)(lower)
-                    return typer(unaryop, args[0])
+                    for typer, lower in ak._util.numba_unaryops(
+                        unaryop, left, behavior
+                    ):
+                        numba.extending.lower_builtin(unaryop, *args)(lower)
+                        return typer(unaryop, args[0])
 
 
 for unaryop in (
@@ -997,9 +999,12 @@ def register_binary_operator(binop):
                     if behavior is None:
                         behavior = args[1].arrayviewtype.behavior
 
-                for typer, lower in ak._util.numba_binops(binop, left, right, behavior):
-                    numba.extending.lower_builtin(binop, *args)(lower)
-                    return typer(binop, args[0], args[1])
+                if left is not None or right is not None:
+                    for typer, lower in ak._util.numba_binops(
+                        binop, left, right, behavior
+                    ):
+                        numba.extending.lower_builtin(binop, *args)(lower)
+                        return typer(binop, args[0], args[1])
 
 
 for binop in (
