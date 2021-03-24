@@ -54,15 +54,17 @@ class DifferentiableArray(ak.Array):
         
         def find_nparray_node_newptr(layout, outlayout):
             outlayout_fieldloc = outlayout.identities.fieldloc
-            def find_nparray_node(node, depth, fieldloc, nodenum, nodenum_index):
+            def find_nparray_node(node, depth, fieldloc, shape, nodenum, nodenum_index):
                 if isinstance(node, ak.layout.NumpyArray):
-                    if node.identities.fieldloc == fieldloc:
+                    if node.identities.fieldloc == fieldloc and np.asarray(node.identities).shape[1] == shape[1]:
                         nodenum_index = nodenum
                         return
                     else:
                         nodenum = nodenum + 1
             nodenum_index = -1
-            ak._util.recursive_walk(layout, find_nparray_node, args=(outlayout_fieldloc, 0, nodenum_index))
+            ak._util.recursive_walk(layout, find_nparray_node, args=(outlayout_fieldloc, np.asarray(outlayout).shape, 0, nodenum_index))
+            if nodenum_index == -1:
+                raise ValueError("Couldn't find the node in new slice")
             return nodenum_index
 
         if not isinstance(out, ak.layout.Content):
@@ -111,11 +113,11 @@ class DifferentiableArray(ak.Array):
             
             def fetch_children_tracer(layout, preslice_identities, children = []):
                 if isinstance(layout, ak.layout.NumpyArray):
-                    def find_intersection_indices(preslice_identities, layout_identities):
-                        indices = [] 
-                        for j in np.asarray(layout_identities):
-                            indices.append(np.where((preslice_identities == j).all(axis=1))[0][0])
-                        return indices
+                    def find_intersection_indices(preslice_identities, postslice_identities):
+                        multiplier = np.append(np.cumprod((np.max(preslice_identities, axis=0) + 1)[::-1])[-2::-1], 1)
+                        haystack = np.sum(preslice_identities * multiplier, axis=1)
+                        needle = np.sum(postslice_identities * multiplier, axis=1)
+                        return np.searchsorted(haystack, needle)
                     
                     def find_corresponding_identity(postslice_identities, preslice_identities):
                         for identity in preslice_identities:
@@ -125,12 +127,12 @@ class DifferentiableArray(ak.Array):
 
                     if layout.ptr in self.map_ptrs_to_tracers:
                         tracer = self.map_ptrs_to_tracers[layout.ptr]
-                        indices = find_intersection_indices(find_corresponding_identity((layout.identities.fieldloc, np.asarray(layout.identities).shape[1]), preslice_identities), layout.identities)
+                        indices = find_intersection_indices(find_corresponding_identity((layout.identities.fieldloc, np.asarray(layout.identities).shape[1]), preslice_identities), np.asarray(layout.identities))
                         children.append(jax.numpy.take(tracer, indices))
                         return children
                     else:
                         tracer = self.tracers[find_nparray_node_newptr(self.layout, layout)]
-                        indices = find_intersection_indices(find_corresponding_identity((layout.identities.fieldloc, np.asarray(layout.identities).shape[1]), preslice_identities), layout.identities)
+                        indices = find_intersection_indices(find_corresponding_identity((layout.identities.fieldloc, np.asarray(layout.identities).shape[1]), preslice_identities), np.asarray(layout.identities))
                         children.append(jax.numpy.take(tracer, indices))
                         return children
 
