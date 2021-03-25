@@ -4027,6 +4027,99 @@ def atleast_1d(*arrays):
     return nplike.atleast_1d(*[ak.operations.convert.to_numpy(x) for x in arrays])
 
 
+@ak._connect._numpy.implements("nan_to_num")
+def nan_to_num(array, copy=True, nan=0.0, posinf=None, neginf=None, highlevel=True, behavior=None):
+    """
+    Args:
+        array: Array whose `NaN` values should be converted to a number.
+        copy (bool): Ignored (Awkward Arrays are immutable).
+        nan (int or float): Value to be used to fill `NaN` values.
+        posinf (int, float, or None): Value to be used to fill positive infinity
+            values. If None, positive infinities are replaced with a very large number.
+        neginf (int, float, or None): Value to be used to fill negative infinity
+            values. If None, negative infinities are replaced with a very small number.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Implements [np.nan_to_num](https://numpy.org/doc/stable/reference/generated/numpy.nan_to_num.html)
+    for Awkward Arrays.
+    """
+    layout = ak.operations.convert.to_layout(array)
+    nplike = ak.nplike.of(layout)
+
+    def getfunction(layout):
+        if isinstance(layout, ak.layout.NumpyArray):
+            return lambda: ak.layout.NumpyArray(
+                nplike.nan_to_num(
+                    nplike.asarray(layout),
+                    nan=nan,
+                    posinf=posinf,
+                    neginf=neginf,
+                )
+            )
+        else:
+            return None
+
+    out = ak._util.recursively_apply(
+        layout, getfunction, pass_depth=False, pass_user=False
+    )
+    if highlevel:
+        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
+    else:
+        return out
+
+
+@ak._connect._numpy.implements("isclose")
+def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False, highlevel=True, behavior=None):
+    """
+    Args:
+        a: First array to compare.
+        b: Second array to compare.
+        rtol (float): The relative tolerance parameter.
+        atol (float): The absolute tolerance parameter.
+        equal_nan (bool): Whether to compare `NaN` as equal. If True, `NaN` in `a`
+            will be considered equal to `NaN` in `b`.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.layout.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+
+    Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
+    for Awkward Arrays.
+    """
+    one = ak.operations.convert.to_layout(a)
+    two = ak.operations.convert.to_layout(b)
+    nplike = ak.nplike.of(one, two)
+
+    def getfunction(inputs):
+        if isinstance(inputs[0], ak.layout.NumpyArray) and isinstance(inputs[1], ak.layout.NumpyArray):
+            return lambda: (ak.layout.NumpyArray(
+                nplike.isclose(
+                    nplike.asarray(inputs[0]),
+                    nplike.asarray(inputs[1]),
+                    rtol=rtol,
+                    atol=atol,
+                    equal_nan=equal_nan,
+                )
+            ),)
+        else:
+            return None
+
+    behavior = ak._util.behaviorof(one, two, behavior=behavior)
+    out = ak._util.broadcast_and_apply(
+        [one, two], getfunction, behavior, pass_depth=False
+    )
+    assert isinstance(out, tuple) and len(out) == 1
+    result = out[0]
+
+    if highlevel:
+        return ak._util.wrap(result, behavior)
+    else:
+        return result
+
+
 _dtype_to_string = {
     np.dtype(np.bool_): "bool",
     np.dtype(np.int8): "int8",
