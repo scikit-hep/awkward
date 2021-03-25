@@ -941,7 +941,7 @@ namespace awkward {
     }
     if (allow_lazy) {
       return std::make_shared<IndexedArray64>(identities,
-                                              parameters_,
+                                              util::Parameters(),
                                               carry,
                                               shallow_copy());
     }
