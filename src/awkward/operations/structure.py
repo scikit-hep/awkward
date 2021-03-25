@@ -836,10 +836,19 @@ def with_name(array, name, highlevel=True, behavior=None):
     out = ak._util.recursively_apply(
         ak.operations.convert.to_layout(array), getfunction, pass_depth=False
     )
+
+    def getfunction2(layout):
+        if isinstance(layout, ak._util.uniontypes):
+            return lambda: layout.simplify(merge=True, mergebool=False)
+        else:
+            return None
+
+    out2 = ak._util.recursively_apply(out, getfunction2, pass_depth=False)
+
     if highlevel:
-        return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
+        return ak._util.wrap(out2, ak._util.behaviorof(array, behavior=behavior))
     else:
-        return out
+        return out2
 
 
 def with_field(base, what, where=None, highlevel=True, behavior=None):
