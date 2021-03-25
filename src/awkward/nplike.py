@@ -263,6 +263,16 @@ class NumpyLike(Singleton):
         # array
         return self._module.ceil(*args, **kwargs)
 
+    ############################ almost-ufuncs
+
+    def nan_to_num(self, *args, **kwargs):
+        # array, copy=True, nan=0.0, posinf=None, neginf=None
+        return self._module.nan_to_num(*args, **kwargs)
+
+    def isclose(self, *args, **kwargs):
+        # a, b, rtol=1e-05, atol=1e-08, equal_nan=False
+        return self._module.isclose(*args, **kwargs)
+
     ############################ reducers
 
     def all(self, *args, **kwargs):
@@ -372,12 +382,14 @@ or
         return self._module.array(np_array)
 
     def array_equal(self, array1, array2):
+        # CuPy issue?
         if array1.shape != array2.shape:
             return False
         else:
             return self._module.all(array1 - array2 == 0)
 
     def repeat(self, array, repeats):
+        # https://github.com/cupy/cupy/issues/3849
         if isinstance(repeats, self._module.ndarray):
             all_stops = self._module.cumsum(repeats)
             parents = self._module.zeros(all_stops[-1].item(), dtype=int)
@@ -387,6 +399,28 @@ or
             return array[parents]
         else:
             return self._module.repeat(array, repeats)
+
+    def nan_to_num(self, array, copy=True, nan=0.0, posinf=None, neginf=None):
+        # https://github.com/cupy/cupy/issues/4867
+        if copy:
+            array = self._module.copy(array)
+        if posinf is None:
+            if array.dtype.kind == "f":
+                posinf = numpy.finfo(array.dtype.type).max
+            else:
+                posinf = numpy.iinfo(array.dtype.type).max
+        if neginf is None:
+            if array.dtype.kind == "f":
+                neginf = numpy.finfo(array.dtype.type).min
+            else:
+                neginf = numpy.iinfo(array.dtype.type).min
+
+        array[self._module.isnan(array)] = nan
+        array[self._module.isinf(array) & (array > 0)] = posinf
+        array[self._module.isinf(array) & (array < 0)] = neginf
+        return array
+
+    # For all reducers: https://github.com/cupy/cupy/issues/3819
 
     def all(self, array, axis=None):
         out = self._module.all(array, axis=axis)
