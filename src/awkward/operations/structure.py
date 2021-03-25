@@ -4028,7 +4028,9 @@ def atleast_1d(*arrays):
 
 
 @ak._connect._numpy.implements("nan_to_num")
-def nan_to_num(array, copy=True, nan=0.0, posinf=None, neginf=None, highlevel=True, behavior=None):
+def nan_to_num(
+    array, copy=True, nan=0.0, posinf=None, neginf=None, highlevel=True, behavior=None
+):
     """
     Args:
         array: Array whose `NaN` values should be converted to a number.
@@ -4072,7 +4074,9 @@ def nan_to_num(array, copy=True, nan=0.0, posinf=None, neginf=None, highlevel=Tr
 
 
 @ak._connect._numpy.implements("isclose")
-def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False, highlevel=True, behavior=None):
+def isclose(
+    a, b, rtol=1e-05, atol=1e-08, equal_nan=False, highlevel=True, behavior=None
+):
     """
     Args:
         a: First array to compare.
@@ -4094,16 +4098,20 @@ def isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False, highlevel=True, behav
     nplike = ak.nplike.of(one, two)
 
     def getfunction(inputs):
-        if isinstance(inputs[0], ak.layout.NumpyArray) and isinstance(inputs[1], ak.layout.NumpyArray):
-            return lambda: (ak.layout.NumpyArray(
-                nplike.isclose(
-                    nplike.asarray(inputs[0]),
-                    nplike.asarray(inputs[1]),
-                    rtol=rtol,
-                    atol=atol,
-                    equal_nan=equal_nan,
-                )
-            ),)
+        if isinstance(inputs[0], ak.layout.NumpyArray) and isinstance(
+            inputs[1], ak.layout.NumpyArray
+        ):
+            return lambda: (
+                ak.layout.NumpyArray(
+                    nplike.isclose(
+                        nplike.asarray(inputs[0]),
+                        nplike.asarray(inputs[1]),
+                        rtol=rtol,
+                        atol=atol,
+                        equal_nan=equal_nan,
+                    )
+                ),
+            )
         else:
             return None
 
