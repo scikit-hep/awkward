@@ -35,6 +35,7 @@ import awkward._connect._numpy
 import awkward._connect._numba
 import awkward._connect._numexpr
 import awkward._connect._autograd
+import awkward._connect._jax
 
 # high-level interface
 behavior = {}

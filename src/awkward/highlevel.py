@@ -1044,6 +1044,7 @@ class Array(
                 return nodenum_index
 
             if not isinstance(out, ak.layout.Content):
+                from numbers import Integral, Real
                 def recurse(array, recurse_where):
                     if isinstance(recurse_where, Integral) or isinstance(recurse_where, str):
                         if isinstance(array.layout, ak.layout.NumpyArray):
