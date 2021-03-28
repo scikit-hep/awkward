@@ -206,6 +206,7 @@ class Array(
         check_valid=False,
         cache=None,
         kernels=None,
+        tracers=None
     ):
         if cache is not None:
             raise TypeError("__init__() got an unexpected keyword argument 'cache'")
@@ -249,37 +250,69 @@ class Array(
 
         elif isinstance(data, str):
             layout = ak.operations.convert.from_json(data, highlevel=False)
+        
+        elif data is None and tracers is not None:
+            layout = None
 
         else:
             layout = ak.operations.convert.from_iter(
                 data, highlevel=False, allow_record=False
             )
 
-        if not isinstance(layout, (ak.layout.Content, ak.partition.PartitionedArray)):
+        if not (isinstance(layout, (ak.layout.Content, ak.partition.PartitionedArray)) 
+                or (layout is None and tracers is not None)):
             raise TypeError(
                 "could not convert data into an ak.Array"
                 + ak._util.exception_suffix(__file__)
             )
 
-        if with_name is not None:
-            layout = ak.operations.structure.with_name(
-                layout, with_name, highlevel=False
-            )
-        if self.__class__ is Array:
-            self.__class__ = ak._util.arrayclass(layout, behavior)
+        if layout is not None:
+            if with_name is not None:
+                layout = ak.operations.structure.with_name(
+                    layout, with_name, highlevel=False
+                )
+            if self.__class__ is Array:
+                self.__class__ = ak._util.arrayclass(layout, behavior)
 
-        if kernels is not None and kernels != ak.operations.convert.kernels(layout):
-            layout = ak.operations.convert.to_kernels(layout, kernels, highlevel=False)
+            if kernels is not None and kernels != ak.operations.convert.kernels(layout):
+                layout = ak.operations.convert.to_kernels(layout, kernels, highlevel=False)
 
+        if tracers is not None:
+            import jax
+            if not all(isinstance(tracer, jax.core.Tracer) for tracer in tracers):
+                raise TypeError(
+                    "the tracers attribute is reserved for JAX Tracers"
+                    + ak._util.exception_suffix(__file__)
+                )
+            def find_dataptrs(layout):
+                def find_nparray_ptrs(node, depth, data_ptrs):
+                    if isinstance(node, ak.layout.NumpyArray):
+                        data_ptrs.append(node.ptr) 
+                data_ptrs = []
+                ak._util.recursive_walk(layout, find_nparray_ptrs, args=(data_ptrs,))
+            
+                return data_ptrs
+
+            if layout is not None:
+                self.data_ptrs = find_dataptrs(layout)
+                assert len(tracers) == len(self.data_ptrs)
+                self.map_ptrs_to_tracers = dict(zip(self.data_ptrs, self.tracers))
+            else:
+                self.data_ptrs = None
+                self.map_ptrs_to_tracers = None
+        
+        self.tracers = tracers
         self.layout = layout
         self.behavior = behavior
-        docstr = self.layout.purelist_parameter("__doc__")
-        if isinstance(docstr, str):
-            self.__doc__ = docstr
-        if check_valid:
-            ak.operations.describe.validity_error(self, exception=True)
+        
+        if self.layout is not None:
+            docstr = self.layout.purelist_parameter("__doc__")
+            if isinstance(docstr, str):
+                self.__doc__ = docstr
+            if check_valid:
+                ak.operations.describe.validity_error(self, exception=True)
 
-        self._caches = ak._util.find_caches(self.layout)
+            self._caches = ak._util.find_caches(self.layout)
 
     @property
     def layout(self):
@@ -335,6 +368,14 @@ class Array(
                 "layout must be a subclass of ak.layout.Content"
                 + ak._util.exception_suffix(__file__)
             )
+
+    @property
+    def tracers(self):
+        return self._tracers
+
+    @tracers.setter
+    def tracers(self, tracers):
+        self._tracers = tracers
 
     @property
     def behavior(self):
@@ -971,7 +1012,131 @@ class Array(
         acting at the last level, while the higher levels of the indexer all
         have the same dimension as the array being indexed.
         """
-        return ak._util.wrap(self.layout[where], self._behavior)
+        if self.tracers is None:
+           return ak._util.wrap(self.layout[where], self._behavior)
+        else:
+            import jax
+
+            jax.config.update("jax_platform_name", "cpu")
+            jax.config.update("jax_enable_x64", True)
+            
+            if self.layout is None:
+                raise TypeError(
+                    "Cannot slice a JAX Differentiated or JAX JIT Compiled scalar"
+                    + ak._util.exception_suffix(__file__)
+                    )
+
+            out = self.layout[where]
+            
+            def find_nparray_node_newptr(layout, outlayout):
+                outlayout_fieldloc = outlayout.identities.fieldloc
+                def find_nparray_node(node, depth, fieldloc, shape, nodenum, nodenum_index):
+                    if isinstance(node, ak.layout.NumpyArray):
+                        if node.identities.fieldloc == fieldloc and np.asarray(node.identities).shape[1] == shape[1]:
+                            nodenum_index = nodenum
+                            return
+                        else:
+                            nodenum = nodenum + 1
+                nodenum_index = -1
+                ak._util.recursive_walk(layout, find_nparray_node, args=(outlayout_fieldloc, np.asarray(outlayout).shape, 0, nodenum_index))
+                if nodenum_index == -1:
+                    raise ValueError("Couldn't find the node in new slice")
+                return nodenum_index
+
+            if not isinstance(out, ak.layout.Content):
+                def recurse(array, recurse_where):
+                    if isinstance(recurse_where, Integral) or isinstance(recurse_where, str):
+                        if isinstance(array.layout, ak.layout.NumpyArray):
+                            if array.layout.ptr in self.map_ptrs_to_tracers:
+                                tracer = self.map_ptrs_to_tracers[array.layout.ptr]
+                            else:
+                                tracer = array.tracers[find_nparray_node_newptr(self.layout, array.layout)]
+                            return tracer[recurse_where]
+                    elif isinstance(where, tuple):
+                        return recurse(array[where[:-1]], where[len(where) - 1])
+                    else:
+                        raise ValueError("Can't slice the array with {0}".format(where))
+                        
+                child = [recurse(self, where)]
+                return ak.layout(None, child)
+
+            else:
+                def fetch_indices_and_fieldloc_layout(layout):
+                    if isinstance(layout, ak.layout.NumpyArray):
+                        return [((layout.identities.fieldloc, np.asarray(layout.identities).shape[1]), np.asarray(layout.identities))]
+                    elif isinstance(layout, ak._util.listtypes):
+                        return fetch_indices_and_fieldloc_layout(layout.content)
+                    elif isinstance(layout, ak._util.indexedtypes):
+                        return fetch_indices_and_fieldloc_layout(layout.project())
+                    elif isinstance(layout, ak._util.uniontypes):
+                        raise ValueError("Can't differntiate an array of type: {0}".format(type(layout)))
+                    elif isinstance(layout, ak._util.recordtypes):
+                        indices = []
+                        for content in layout.contents:
+                            indices = indices + fetch_indices_and_fieldloc_layout(content) 
+                        return indices
+                    elif isinstance(layout, ak._util.indexedtypes):
+                        return fetch_indices_and_fieldloc_layout(layout.content)
+                    elif isinstance(layout, ak._util.indexedoptiontypes):
+                        return fetch_indices_and_fieldloc_layout(layout.content)
+                    elif isinstance(layout, (ak.layout.BitMaskedArray, 
+                                             ak.layout.ByteMaskedArray, 
+                                             ak.layout.UnmaskedArray)):
+                        return fetch_indices_and_fieldloc_layout(layout.content)
+                    else:
+                        raise NotImplementedError("Can't differentiate array of type: {0}".format(type(layout)))
+                
+                def fetch_children_tracer(layout, preslice_identities, children = []):
+                    if isinstance(layout, ak.layout.NumpyArray):
+                        def find_intersection_indices(preslice_identities, postslice_identities):
+                            multiplier = np.append(np.cumprod((np.max(preslice_identities, axis=0) + 1)[::-1])[-2::-1], 1)
+                            haystack = np.sum(preslice_identities * multiplier, axis=1)
+                            needle = np.sum(postslice_identities * multiplier, axis=1)
+                            return np.searchsorted(haystack, needle)
+                        
+                        def find_corresponding_identity(postslice_identities, preslice_identities):
+                            for identity in preslice_identities:
+                                if identity[0] == postslice_identities:
+                                    return identity[1]
+                            raise ValueError("Couldn't find postslice identities in preslice identities")
+
+                        if layout.ptr in self.map_ptrs_to_tracers:
+                            tracer = self.map_ptrs_to_tracers[layout.ptr]
+                            indices = find_intersection_indices(find_corresponding_identity((layout.identities.fieldloc, np.asarray(layout.identities).shape[1]), preslice_identities), np.asarray(layout.identities))
+                            children.append(jax.numpy.take(tracer, indices))
+                            return children
+                        else:
+                            tracer = self.tracers[find_nparray_node_newptr(self.layout, layout)]
+                            indices = find_intersection_indices(find_corresponding_identity((layout.identities.fieldloc, np.asarray(layout.identities).shape[1]), preslice_identities), np.asarray(layout.identities))
+                            children.append(jax.numpy.take(tracer, indices))
+                            return children
+
+                    elif isinstance(layout, ak._util.listtypes):
+                        return fetch_children_tracer(layout.content, preslice_identities)
+                    elif isinstance(layout, ak._util.uniontypes):
+                        raise ValueError("Can't differntiate an UnionArray type {0}".format(layout))
+                    elif isinstance(layout, ak._util.recordtypes):
+                        children = []
+                        for content in layout.contents:
+                            children = children + fetch_children_tracer(content, preslice_identities)
+                        return children
+                    elif isinstance(layout, ak._util.indexedtypes):
+                        return fetch_children_tracer(layout.content, preslice_identities)
+                    elif isinstance(layout, ak._util.indexedoptiontypes):
+                        return fetch_children_tracer(layout.content, preslice_identities)
+                    elif isinstance(layout, (ak.layout.BitMaskedArray, 
+                                             ak.layout.ByteMaskedArray, 
+                                             ak.layout.UnmaskedArray)):
+                        return fetch_children_tracer(layout.content, preslice_identities)
+                    else:
+                        raise NotImplementedError("fetch_children_tracer not completely implemented yet for {0}".format(layout))
+                    
+                children = fetch_children_tracer(out, fetch_indices_and_fieldloc_layout(self.layout))
+
+                out = out.deep_copy()
+                out.setidentities()
+
+                return ak.Array(out, children)
 
     def __setitem__(self, where, what):
         """
@@ -1376,7 +1541,34 @@ class Array(
 
         See also #__array_function__.
         """
-        return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        if self.tracers is None:
+            return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        else:
+            # optional sanity-check (i.e. sanity is optional)
+            for x in inputs:
+                if isinstance(x, ak.Array):
+                    if self.layout is not None:
+                        assert x.layout.form == self.layout.form
+                    else:
+                        assert x.layout == self.layout
+                    assert len(x.tracers) == len(self.tracers)
+
+            # ak.Array __add__, etc. map to the NumPy functions, switch to JAX
+            for name, np_ufunc in np.core.umath.__dict__.items():
+                if ufunc is np_ufunc:
+                    ufunc = getattr(jax.numpy, name)
+
+            # need to apply the ufunc to the same argument list for each tracer separately
+            nexttracers = []
+            for i in range(len(self.tracers)):
+                nextinputs = [
+                    x.tracers[i] if isinstance(x, ak.Array) else x
+                    for x in inputs
+                ]
+                nexttracers.append(getattr(ufunc, method)(*nextinputs, **kwargs))
+
+            # and return a new DifferentiableArray (keep it wrapped!)
+            return ak.Array(self.layout, nexttracers)
 
     def __array_function__(self, func, types, args, kwargs):
         """
