@@ -7,15 +7,17 @@ import jax
 test_numpyarray = ak.Array(np.arange(10, dtype=np.float64))
 test_numpyarray_tangent = ak.Array(np.arange(10, dtype=np.float64))
 
+
 def func_numpyarray_1(x):
     return x[4] ** 2
+
 
 def func_numpyarray_2(x):
     return x[2:5] ** 2 + x[1:4] ** 2
 
+
 def func_numpyarray_3(x):
     return x[::-1]
-
 
 
 # value_jvp, jvp_grad = jax.jvp(func_numpyarray_1, (test_numpyarray,), (test_numpyarray_tangent,))
