@@ -3073,6 +3073,13 @@ def cartesian(
 
         def getfunction3(inputs, depth):
             if depth == posaxis + len(new_arrays):
+                if all(len(x) == 0 for x in inputs):
+                    inputs = [
+                        x.content
+                        if isinstance(x, ak.layout.RegularArray) and x.size == 1
+                        else x
+                        for x in inputs
+                    ]
                 return lambda: (
                     ak.layout.RecordArray(inputs, recordlookup, parameters=parameters),
                 )
