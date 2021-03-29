@@ -35,13 +35,16 @@ import awkward._connect._numpy
 import awkward._connect._numba
 import awkward._connect._numexpr
 import awkward._connect._autograd
-import awkward._connect._jax
+
+
 
 # high-level interface
 behavior = {}
 from awkward.highlevel import Array
 from awkward.highlevel import Record
 from awkward.highlevel import ArrayBuilder
+
+import awkward._connect._jax
 
 # behaviors
 from awkward.behaviors.mixins import *

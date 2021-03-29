@@ -16,7 +16,7 @@ class AuxData(object):
         self.layout = layout
 
     def __eq__(self, other):
-        if self.layout is not None:
+        if self.layout is not None and other.layout is not None:
             return self.layout.form == other.layout.form
         else:
             return self.layout == other.layout
@@ -59,5 +59,3 @@ def special_unflatten(aux_data, children):
         return ak.Array(arr)
 
 jax.tree_util.register_pytree_node(ak.Array, special_flatten, special_unflatten)
-
-ak.jax = types.ModuleType("jax")

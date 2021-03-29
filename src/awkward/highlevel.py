@@ -296,7 +296,7 @@ class Array(
             if layout is not None:
                 self.data_ptrs = find_dataptrs(layout)
                 assert len(tracers) == len(self.data_ptrs)
-                self.map_ptrs_to_tracers = dict(zip(self.data_ptrs, self.tracers))
+                self.map_ptrs_to_tracers = dict(zip(self.data_ptrs, tracers))
             else:
                 self.data_ptrs = None
                 self.map_ptrs_to_tracers = None
@@ -360,7 +360,7 @@ class Array(
 
     @layout.setter
     def layout(self, layout):
-        if isinstance(layout, (ak.layout.Content, ak.partition.PartitionedArray)):
+        if isinstance(layout, (ak.layout.Content, ak.partition.PartitionedArray)) or (layout is None and self.tracers is not None):
             self._layout = layout
             self._numbaview = None
         else:
@@ -1016,6 +1016,7 @@ class Array(
            return ak._util.wrap(self.layout[where], self._behavior)
         else:
             import jax
+            import numpy as np
 
             jax.config.update("jax_platform_name", "cpu")
             jax.config.update("jax_enable_x64", True)
@@ -1029,16 +1030,19 @@ class Array(
             out = self.layout[where]
             
             def find_nparray_node_newptr(layout, outlayout):
-                outlayout_fieldloc = outlayout.identities.fieldloc
                 def find_nparray_node(node, depth, fieldloc, shape, nodenum, nodenum_index):
                     if isinstance(node, ak.layout.NumpyArray):
                         if node.identities.fieldloc == fieldloc and np.asarray(node.identities).shape[1] == shape[1]:
-                            nodenum_index = nodenum
-                            return
+                            nodenum_index = nodenum 
+                            return 
                         else:
                             nodenum = nodenum + 1
+                
                 nodenum_index = -1
-                ak._util.recursive_walk(layout, find_nparray_node, args=(outlayout_fieldloc, np.asarray(outlayout).shape, 0, nodenum_index))
+                outlayout_fieldloc = outlayout.identities.fieldloc
+
+                ak._util.recursive_walk(layout, find_nparray_node, args=(outlayout_fieldloc, np.asarray(outlayout.identities).shape, 0, nodenum_index))
+
                 if nodenum_index == -1:
                     raise ValueError("Couldn't find the node in new slice")
                 return nodenum_index
@@ -1059,7 +1063,7 @@ class Array(
                         raise ValueError("Can't slice the array with {0}".format(where))
                         
                 child = [recurse(self, where)]
-                return ak.layout(None, child)
+                return ak.Array(None, tracers=child)
 
             else:
                 def fetch_indices_and_fieldloc_layout(layout):
@@ -1137,7 +1141,7 @@ class Array(
                 out = out.deep_copy()
                 out.setidentities()
 
-                return ak.Array(out, children)
+                return ak.Array(out, tracers=children)
 
     def __setitem__(self, where, what):
         """
@@ -1545,6 +1549,12 @@ class Array(
         if self.tracers is None:
             return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
         else:
+            import numpy as np
+            import jax
+            
+            jax.config.update("jax_platform_name", "cpu")
+            jax.config.update("jax_enable_x64", True)
+            
             # optional sanity-check (i.e. sanity is optional)
             for x in inputs:
                 if isinstance(x, ak.Array):
@@ -1569,7 +1579,7 @@ class Array(
                 nexttracers.append(getattr(ufunc, method)(*nextinputs, **kwargs))
 
             # and return a new DifferentiableArray (keep it wrapped!)
-            return ak.Array(self.layout, nexttracers)
+            return ak.Array(self.layout, tracers=nexttracers)
 
     def __array_function__(self, func, types, args, kwargs):
         """
