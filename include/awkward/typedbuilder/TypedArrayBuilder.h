@@ -106,11 +106,6 @@ namespace awkward {
     int64_t
       length() const;
 
-    /// @brief Removes all accumulated data without resetting the type
-    /// knowledge.
-    void
-      clear();
-
     /// @brief Current high level Type of the accumulated array.
     ///
     /// @param typestrs A mapping from `"__record__"` parameters to string
@@ -221,154 +216,16 @@ namespace awkward {
     /// The second puts the VM into a state that expects 'int64', etc.
     /// or 'endlist'.
     void
-      beginlist();
+      begin_list();
 
     /// @brief Ends a nested list.
     void
-      endlist();
-
-    /// @brief Begins building a tuple with a fixed number of fields.
-    void
-      begintuple(int64_t numfields);
-
-    /// @brief Sets the pointer to a given tuple field index; the next
-    /// command will fill that slot.
-    void
-      index(int64_t index);
-
-    /// @brief Ends a tuple.
-    void
-      endtuple();
-
-    /// @brief Begins building a record without a name.
-    ///
-    /// See #beginrecord_fast and #beginrecord_check.
-    void
-      beginrecord();
-
-    /// @brief Begins building a record with a name.
-    ///
-    /// @param name This name is used to distinguish
-    /// records of different types in heterogeneous data (to build a
-    /// union of record arrays, rather than a record array with union
-    /// fields and optional values) and it also sets the `"__record__"`
-    /// parameter to later add custom behaviors in Python.
-    ///
-    /// In the `_fast` version of this method, a string comparison is not
-    /// performed: the same pointer is assumed to have the same value each time
-    /// (safe for string literals).
-    ///
-    /// See #beginrecord and #beginrecord_check.
-    void
-      beginrecord_fast(const char* name);
-
-    /// @brief Begins building a record with a name.
-    ///
-    /// @param name This name is used to distinguish
-    /// records of different types in heterogeneous data (to build a
-    /// union of record arrays, rather than a record array with union
-    /// fields and optional values) and it also sets the `"__record__"`
-    /// parameter to later add custom behaviors in Python.
-    ///
-    /// In the `_check` version of this method, a string comparison is
-    /// performed every time it is called to verify that the `name` matches
-    /// a stored `name`.
-    ///
-    /// See #beginrecord and #beginrecord_fast.
-    void
-      beginrecord_check(const char* name);
-
-    /// @brief Begins building a record with a name.
-    ///
-    /// @param name This name is used to distinguish
-    /// records of different types in heterogeneous data (to build a
-    /// union of record arrays, rather than a record array with union
-    /// fields and optional values) and it also sets the `"__record__"`
-    /// parameter to later add custom behaviors in Python.
-    ///
-    /// In the `_check` version of this method, a string comparison is
-    /// performed every time it is called to verify that the `name` matches
-    /// a stored `name`.
-    ///
-    /// See #beginrecord and #beginrecord_fast.
-    void
-      beginrecord_check(const std::string& name);
-
-    /// @brief Sets the pointer to a given record field `key`; the next
-    /// command will fill that slot.
-    ///
-    /// In the `_fast` version of this method, a string comparison is not
-    /// performed: the same pointer is assumed to have the same value each time
-    /// (safe for string literals). See #field_check.
-    ///
-    /// Record keys are checked in round-robin order. The best performance
-    /// will be achieved by filling them in the same order for each record.
-    /// Lookup time for random order scales with the number of fields.
-    void
-      field_fast(const char* key);
-
-    /// @brief Sets the pointer to a given record field `key`; the next
-    /// command will fill that slot.
-    ///
-    /// In the `_check` version of this method, a string comparison is
-    /// performed every time it is called to verify that the `key` matches
-    /// a stored `key`. See #field_fast.
-    ///
-    /// Record keys are checked in round-robin order. The best performance
-    /// will be achieved by filling them in the same order for each record.
-    /// Lookup time for random order scales with the number of fields.
-    void
-      field_check(const char* key);
-
-    /// @brief Sets the pointer to a given record field `key`; the next
-    /// command will fill that slot.
-    ///
-    /// In the `_check` version of this method, a string comparison is
-    /// performed every time it is called to verify that the `key` matches
-    /// a stored `key`. See #field_fast.
-    ///
-    /// Record keys are checked in round-robin order. The best performance
-    /// will be achieved by filling them in the same order for each record.
-    /// Lookup time for random order scales with the number of fields.
-    void
-      field_check(const std::string& key);
-
-    /// @brief Ends a record.
-    void
-      endrecord();
+      end_list();
 
     /// @brief Sets the pointer to a given tag `tag`; the next
     /// command will fill that slot.
     void
       tag(int8_t tag);
-
-    /// @brief Append an element `at` a given index of an arbitrary `array`
-    /// (Content instance) to the accumulated data, handling
-    /// negative indexing and bounds-checking like Python.
-    ///
-    /// The first item in the array is at `0`, the second at `1`, the last at
-    /// `-1`, the penultimate at `-2`, etc.
-    ///
-    /// The resulting #snapshot will be an {@link IndexedArrayOf IndexedArray}
-    /// that shares data with the provided `array`.
-    void
-      append(const ContentPtr& array, int64_t at);
-
-    /// @brief Append an element `at` a given index of an arbitrary `array`
-    /// (Content instance) to the accumulated data, without
-    /// handling negative indexing or bounds-checking.
-    ///
-    /// The resulting #snapshot will be an {@link IndexedArrayOf IndexedArray}
-    /// that shares data with the provided `array`.
-    void
-      append_nowrap(const ContentPtr& array, int64_t at);
-
-    /// @brief Extend the accumulated data with an entire `array`.
-    ///
-    /// The resulting #snapshot will be an {@link IndexedArrayOf IndexedArray}
-    /// that shares data with the provided `array`.
-    void
-      extend(const ContentPtr& array);
 
     /// @brief Generates an Array builder from a Form
     static FormBuilderPtr
@@ -378,11 +235,19 @@ namespace awkward {
     static int64_t
       next_id();
 
+    /// @brief Generates next unique ID
+    static int64_t
+      next_error_id();
+
   protected:
     /// @brief A unique ID to use when Form nodes do not have Form key
     /// defined
     static int64_t
       next_node_id;
+
+    /// @brief
+    static int64_t
+      error_id;
 
   private:
     /// @ brief
@@ -393,6 +258,10 @@ namespace awkward {
     template <typename T>
     void
       set_data(T x);
+
+    /// @brief
+    void
+      resume() const;
 
     /// See #initial.
     int64_t initial_;
@@ -414,6 +283,9 @@ namespace awkward {
 
     /// @brief
     std::string vm_source_;
+
+    /// @brief
+    std::set<util::ForthError> ignore_;
 
   };
 

@@ -38,7 +38,7 @@ namespace awkward {
       .append(": ").append(vm_func_name()).append("\n")
       .append(std::to_string(static_cast<utype>(state::begin_list)))
       .append(" <> if").append("\n")
-      .append("halt").append("\n")
+      .append(std::to_string(TypedArrayBuilder::next_error_id())).append(" err ! err @ halt").append("\n")
       .append("then").append("\n")
       .append("\n")
       .append("0").append("\n")
@@ -59,6 +59,9 @@ namespace awkward {
 
     vm_data_from_stack_ = std::string(content_.get()->vm_from_stack())
       .append("0 ").append(vm_output_data_).append(" <- stack").append("\n");
+
+    vm_error_.append(content_.get()->vm_error());
+    vm_error_.append("s\"ListArray Builder needs begin_list\"").append("\n");
  }
 
   const std::string
@@ -135,6 +138,11 @@ namespace awkward {
   const std::string
   ListArrayBuilder::vm_from_stack() const {
     return vm_data_from_stack_;
+  }
+
+  const std::string
+  ListArrayBuilder::vm_error() const {
+    return vm_error_;
   }
 
 }

@@ -88,24 +88,24 @@ int main(int, char**) {
     // create another builder
     ak::TypedArrayBuilder myarray(list_offset_form, options);
 
-    myarray.beginlist();
+    myarray.begin_list();
     myarray.float64(1.1);
     myarray.float64(2.2);
-    myarray.endlist();
+    myarray.end_list();
 
-    myarray.beginlist();
+    myarray.begin_list();
     myarray.float64(3.3);
     myarray.float64(4.4);
     myarray.float64(5.5);
     myarray.float64(6.6);
-    myarray.endlist();
+    myarray.end_list();
 
-    myarray.beginlist();
+    myarray.begin_list();
     myarray.float64(7.7);
     myarray.float64(8.8);
     myarray.float64(9.9);
     myarray.float64(10.1);
-    myarray.endlist();
+    myarray.end_list();
 
     // take a snapshot
     std::shared_ptr<ak::Content> array = myarray.snapshot();
@@ -117,24 +117,24 @@ int main(int, char**) {
     ak::TypedArrayBuilder myarray(record_form, options);
 
     myarray.int64(1);
-    myarray.beginlist();
+    myarray.begin_list();
     myarray.float64(1.1);
     myarray.float64(2.2);
-    myarray.endlist();
+    myarray.end_list();
 
-    myarray.beginlist();
+    myarray.begin_list();
     myarray.float64(3.3);
     myarray.float64(4.4);
     myarray.float64(5.5);
     myarray.float64(6.6);
-    myarray.endlist();
+    myarray.end_list();
 
-    myarray.beginlist();
+    myarray.begin_list();
     myarray.float64(7.7);
     myarray.float64(8.8);
     myarray.float64(9.9);
     myarray.float64(10.1);
-    myarray.endlist();
+    myarray.end_list();
 
     // take a snapshot
     std::shared_ptr<ak::Content> array = myarray.snapshot();

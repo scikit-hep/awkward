@@ -53,6 +53,10 @@ namespace awkward {
     const std::string
       vm_from_stack() const override;
 
+    /// @brief
+    const std::string
+      vm_error() const override;
+
   private:
     const UnionFormPtr form_;
 
@@ -75,6 +79,7 @@ namespace awkward {
     std::string vm_data_from_stack_;
     std::string vm_output_index_;
     std::string vm_output_tags_;
+    std::string vm_error_;
   };
 
 }

@@ -156,6 +156,7 @@ namespace awkward {
   };
 
   int64_t TypedArrayBuilder::next_node_id = 0;
+  int64_t TypedArrayBuilder::error_id = 0;
 
   TypedArrayBuilder::TypedArrayBuilder(const FormPtr& form,
                                        const ArrayBuilderOptions& options,
@@ -165,9 +166,12 @@ namespace awkward {
       builder_(formBuilderFromA(form)),
       vm_input_data_("data"),
       vm_source_() {
+    TypedArrayBuilder::error_id = 0;
+    vm_source_ = std::string("variable err").append("\n");
     vm_source_.append("input ")
       .append(vm_input_data_).append("\n");
 
+    vm_source_.append(builder_.get()->vm_error()).append("\n");
     vm_source_.append(builder_.get()->vm_output()).append("\n");
     vm_source_.append(builder_.get()->vm_func()).append("\n");
     vm_source_.append(builder_.get()->vm_from_stack()).append("\n");
@@ -268,6 +272,13 @@ namespace awkward {
   }
 
   void
+  TypedArrayBuilder::resume() const {
+    if (vm_.get()->resume() == util::ForthError::user_halt) {
+      throw std::invalid_argument(vm_.get()->string_at(vm_.get()->stack().back()));
+    }
+  }
+
+  void
   TypedArrayBuilder::debug_step() const {
     std::cout << "stack ";
     for (auto const& i : vm_.get()->stack()) {
@@ -309,22 +320,13 @@ namespace awkward {
   }
 
   int64_t
-  TypedArrayBuilder::length() const {
-    return length_;
+  TypedArrayBuilder::next_error_id() {
+    return TypedArrayBuilder::error_id++;
   }
 
-  void
-  TypedArrayBuilder::clear() {
-    if (builder_ != nullptr) {
-      throw std::runtime_error(
-        std::string("FormBuilder 'clear' is not implemented yet")
-        + FILENAME(__LINE__));
-    }
-    else {
-      throw std::invalid_argument(
-        std::string("FormBuilder is not defined")
-        + FILENAME(__LINE__));
-    }
+  int64_t
+  TypedArrayBuilder::length() const {
+    return length_;
   }
 
   const TypePtr
@@ -334,9 +336,7 @@ namespace awkward {
 
   const ContentPtr
   TypedArrayBuilder::snapshot() const {
-    // FIXME: a better message?
-    std::set<util::ForthError> ignore;
-    vm_.get()->maybe_throw(util::ForthError::user_halt, ignore);
+    vm_.get()->maybe_throw(util::ForthError::user_halt, ignore_);
     return builder_.get()->snapshot(vm_.get()->outputs());
   }
 
@@ -368,35 +368,35 @@ namespace awkward {
   void
   TypedArrayBuilder::null() {
     vm_.get()->stack_push(static_cast<utype>(state::null));
-    vm_.get()->resume();
+    resume();
   }
 
   void
   TypedArrayBuilder::boolean(bool x) {
     set_data<bool>(x);
     vm_.get()->stack_push(static_cast<utype>(state::boolean));
-    vm_.get()->resume();
+    resume();
   }
 
   void
   TypedArrayBuilder::int64(int64_t x) {
     set_data<int64_t>(x);
     vm_.get()->stack_push(static_cast<utype>(state::int64));
-    vm_.get()->resume();
+    resume();
   }
 
   void
   TypedArrayBuilder::float64(double x) {
     set_data<double>(x);
     vm_.get()->stack_push(static_cast<utype>(state::float64));
-    vm_.get()->resume();
+    resume();
   }
 
   void
   TypedArrayBuilder::complex(std::complex<double> x) {
     set_data<std::complex<double>>(x);
     vm_.get()->stack_push(static_cast<utype>(state::complex128));
-    vm_.get()->resume();
+    resume();
   }
 
   void
@@ -439,90 +439,15 @@ namespace awkward {
   }
 
   void
-  TypedArrayBuilder::beginlist() {
+  TypedArrayBuilder::begin_list() {
     vm_.get()->stack_push(static_cast<utype>(state::begin_list));
     vm_.get()->resume();
   }
 
   void
-  TypedArrayBuilder::endlist() {
+  TypedArrayBuilder::end_list() {
     vm_.get()->stack_push(static_cast<utype>(state::end_list));
     vm_.get()->resume();
-  }
-
-  void
-  TypedArrayBuilder::begintuple(int64_t numfields) {
-    vm_.get()->stack_push(static_cast<utype>(state::begin_tuple));
-    vm_.get()->resume();
-  }
-
-  void
-  TypedArrayBuilder::index(int64_t index) {
-    set_data<int64_t>(index);
-    vm_.get()->stack_push(static_cast<utype>(state::index));
-    vm_.get()->resume();
-  }
-
-  void
-  TypedArrayBuilder::endtuple() {
-    vm_.get()->stack_push(static_cast<utype>(state::end_tuple));
-    vm_.get()->resume();
-  }
-
-  void
-  TypedArrayBuilder::beginrecord() {
-    throw std::runtime_error(
-      std::string("TypedArrayBuilder 'beginrecord' is not implemented yet")
-      + FILENAME(__LINE__));
-  }
-
-  void
-  TypedArrayBuilder::beginrecord_fast(const char* name) {
-    throw std::runtime_error(
-      std::string("TypedArrayBuilder 'beginrecord_fast' is not implemented yet")
-      + FILENAME(__LINE__));
-  }
-
-  void
-  TypedArrayBuilder::beginrecord_check(const char* name) {
-    throw std::runtime_error(
-      std::string("TypedArrayBuilder 'beginrecord_check' is not implemented yet")
-      + FILENAME(__LINE__));
-  }
-
-  void
-  TypedArrayBuilder::beginrecord_check(const std::string& name) {
-    throw std::runtime_error(
-      std::string("TypedArrayBuilder 'beginrecord_check' is not implemented yet")
-      + FILENAME(__LINE__));
-  }
-
-  void
-  TypedArrayBuilder::field_fast(const char* key) {
-    throw std::runtime_error(
-      std::string("TypedArrayBuilder 'field_fast' is not implemented yet")
-      + FILENAME(__LINE__));
-  }
-
-  void
-  TypedArrayBuilder::field_check(const char* key) {
-    throw std::runtime_error(
-      std::string("TypedArrayBuilder 'field_check' is not implemented yet")
-      + FILENAME(__LINE__));
-  }
-
-  void
-  TypedArrayBuilder::field_check(const std::string& key) {
-    throw std::runtime_error(
-      std::string("TypedArrayBuilder 'field_check' is not implemented yet")
-      + FILENAME(__LINE__));
-  }
-
-  void
-  TypedArrayBuilder::endrecord() {
-    throw std::runtime_error(
-      std::string("TypedArrayBuilder 'endrecord' is not implemented yet")
-      + FILENAME(__LINE__));
   }
 
   void
@@ -530,27 +455,6 @@ namespace awkward {
     set_data<int8_t>(x);
     vm_.get()->stack_push(static_cast<utype>(state::tag));
     vm_.get()->resume();
-  }
-
-  void
-  TypedArrayBuilder::append(const ContentPtr& array, int64_t at) {
-    throw std::runtime_error(
-      std::string("TypedArrayBuilder 'append' is not implemented yet")
-      + FILENAME(__LINE__));
-  }
-
-  void
-  TypedArrayBuilder::append_nowrap(const ContentPtr& array, int64_t at) {
-    throw std::runtime_error(
-      std::string("TypedArrayBuilder 'append_nowrap' is not implemented yet")
-      + FILENAME(__LINE__));
-  }
-
-  void
-  TypedArrayBuilder::extend(const ContentPtr& array) {
-    throw std::runtime_error(
-      std::string("TypedArrayBuilder 'extend' is not implemented yet")
-      + FILENAME(__LINE__));
   }
 
 }

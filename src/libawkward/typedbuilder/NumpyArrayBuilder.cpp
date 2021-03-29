@@ -19,6 +19,9 @@ namespace awkward {
         : form.get()->form_key()),
       attribute_(attribute),
       partition_(partition) {
+    vm_error_ = std::string("s\" NumpyForm builder accepts only ")
+      .append(dtype_to_name(form_.get()->dtype())).append("\"\n");
+
     vm_output_data_ = std::string("part")
       .append(partition_).append("-")
       .append(*form_key_).append("-")
@@ -42,7 +45,7 @@ namespace awkward {
       .append("data ").append(dtype_to_vm_format(form_.get()->dtype()))
       .append("-> ").append(vm_output_data_).append("\n")
       .append("else").append("\n")
-      .append("halt").append("\n")
+      .append(std::to_string(TypedArrayBuilder::next_error_id())).append(" err ! err @ halt").append("\n")
       .append("then").append("\n")
       .append(";").append("\n");
   }
@@ -92,6 +95,11 @@ namespace awkward {
   const std::string
   NumpyArrayBuilder::vm_from_stack() const {
     return std::string();
+  }
+
+  const std::string
+  NumpyArrayBuilder::vm_error() const {
+    return vm_error_;
   }
 
 }

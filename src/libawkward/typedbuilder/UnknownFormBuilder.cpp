@@ -10,7 +10,8 @@ namespace awkward {
   ///
   UnknownFormBuilder::UnknownFormBuilder(const FormPtr& form)
     : form_(form),
-      vm_empty_command_("( This does nothing. )\n"){}
+      vm_empty_command_("( This does nothing. )\n"),
+      vm_error_("s\"Unknown Form Builder error\"") { }
 
   const std::string
   UnknownFormBuilder::classname() const {
@@ -50,6 +51,11 @@ namespace awkward {
   const std::string
   UnknownFormBuilder::vm_from_stack() const {
     return vm_empty_command_;
+  }
+
+  const std::string
+  UnknownFormBuilder::vm_error() const {
+    return vm_error_;
   }
 
 }

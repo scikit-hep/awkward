@@ -33,6 +33,8 @@ namespace awkward {
       .append(": ").append(vm_func_name()).append("\n")
       .append(content_.get()->vm_func_name()).append("\n")
       .append(";").append("\n");
+
+    vm_error_.append(content_.get()->vm_error());
   }
 
   const std::string
@@ -80,6 +82,11 @@ namespace awkward {
   const std::string
   RegularArrayBuilder::vm_from_stack() const {
     return vm_data_from_stack_;
+  }
+
+  const std::string
+  RegularArrayBuilder::vm_error() const {
+    return vm_error_;
   }
 
 }

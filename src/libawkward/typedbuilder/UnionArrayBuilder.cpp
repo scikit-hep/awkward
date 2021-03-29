@@ -26,6 +26,7 @@ namespace awkward {
       contents_.push_back(TypedArrayBuilder::formBuilderFromA(content));
       vm_output_.append(contents_.back().get()->vm_output());
       vm_data_from_stack_.append(contents_.back().get()->vm_from_stack());
+      vm_error_.append(contents_.back().get()->vm_error());
     }
 
     vm_output_tags_ = std::string("part")
@@ -54,7 +55,7 @@ namespace awkward {
       .append("-> stack dup ").append(vm_output_tags_).append(" <- stack\n");
 
     int64_t tag = 0;
-    int64_t contents_size = contents_.size();
+    int64_t contents_size = (int64_t)contents_.size();
     bool drop = true;
     for (auto const& content : contents_) {
       drop = (tag < contents_size) ? true : false;
@@ -77,10 +78,12 @@ namespace awkward {
         .append("exit").append("\n");
 
       vm_func_.append("then").append("\n");
-
     }
+    vm_func_.append(std::to_string(TypedArrayBuilder::next_error_id()))
+    .append(" err ! err @ halt").append("\n")
+    .append("then\n;\n\n");
 
-    vm_func_.append("halt\nthen\n;\n\n");
+    vm_error_.append("s\" Union Array Builder error\"\n");
   }
 
   const std::string
@@ -194,6 +197,11 @@ namespace awkward {
   const std::string
   UnionArrayBuilder::vm_from_stack() const {
     return vm_data_from_stack_;
+  }
+
+  const std::string
+  UnionArrayBuilder::vm_error() const {
+    return vm_error_;
   }
 
 }

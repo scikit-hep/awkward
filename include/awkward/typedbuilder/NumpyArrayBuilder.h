@@ -52,6 +52,10 @@ namespace awkward {
     const std::string
       vm_from_stack() const override;
 
+    /// @brief
+    const std::string
+      vm_error() const override;
+
   private:
     const NumpyFormPtr form_;
 
@@ -67,6 +71,7 @@ namespace awkward {
     std::string vm_func_name_;
     std::string vm_func_type_;
     std::string vm_data_from_stack_;
+    std::string vm_error_;
   };
 
 }

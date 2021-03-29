@@ -56,6 +56,7 @@ namespace awkward {
     vm_data_from_stack_ = std::string(content_.get()->vm_from_stack())
       .append("0 ").append(vm_output_data_).append(" <- stack").append("\n");
 
+    vm_error_ = content_.get()->vm_error();
   }
 
   const std::string
@@ -128,6 +129,11 @@ namespace awkward {
   const std::string
   IndexedOptionArrayBuilder::vm_from_stack() const {
     return vm_data_from_stack_;
+  }
+
+  const std::string
+  IndexedOptionArrayBuilder::vm_error() const {
+    return vm_error_;
   }
 
 }

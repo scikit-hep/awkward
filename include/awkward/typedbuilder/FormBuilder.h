@@ -58,6 +58,10 @@ namespace awkward {
     /// @brief
     virtual const std::string
       vm_from_stack() const = 0;
+
+    /// @brief
+    virtual const std::string
+      vm_error() const = 0;
   };
 }
 

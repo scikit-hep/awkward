@@ -24,6 +24,7 @@ namespace awkward {
       vm_output_.append(contents_.back().get()->vm_output());
       vm_data_from_stack_.append(contents_.back().get()->vm_from_stack());
       vm_func_.append(contents_.back().get()->vm_func());
+      vm_error_.append(contents_.back().get()->vm_error());
     }
 
     vm_func_name_ = std::string(*form_key_).append(attribute_);
@@ -85,6 +86,11 @@ namespace awkward {
   const std::string
   RecordArrayBuilder::vm_from_stack() const {
     return vm_data_from_stack_;
+  }
+
+  const std::string
+  RecordArrayBuilder::vm_error() const {
+    return vm_error_;
   }
 
 }

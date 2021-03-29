@@ -96,28 +96,29 @@ def test_list_offset_form():
     )
 
     builder = ak.layout.TypedArrayBuilder(form)
+    print(builder.vm_source())
 
-    builder.beginlist()
+    builder.begin_list()
     builder.float64(1.1)
-    builder.beginlist()
+    builder.begin_list()
     builder.int64(1)
-    builder.endlist()
+    builder.end_list()
     builder.float64(2.2)
-    builder.beginlist()
+    builder.begin_list()
     builder.int64(1)
     builder.int64(2)
-    builder.endlist()
-    builder.endlist()
-    builder.beginlist()
-    builder.endlist()
-    builder.beginlist()
+    builder.end_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
     builder.float64(3.3)
-    builder.beginlist()
+    builder.begin_list()
     builder.int64(1)
     builder.int64(2)
     builder.int64(3)
-    builder.endlist()
-    builder.endlist()
+    builder.end_list()
+    builder.end_list()
 
     assert builder.form() == form
 
@@ -243,6 +244,7 @@ def test_union_form():
     )
 
     builder = ak.layout.TypedArrayBuilder(form)
+    print(builder.vm_source())
 
     builder.tag(0)
     builder.float64(1.1)
@@ -383,13 +385,25 @@ def test_error_in_record_form():
         form_key="node0",
     )
     builder = ak.layout.TypedArrayBuilder(form)
+    print(builder.vm_source())
 
     # if record contents have the same type,
     # the fields alternate
     builder.float64(1.1)  # "one"
     builder.float64(2.2)  # "two"
-    builder.int64(11)
+    with pytest.raises(ValueError) as err:
+        builder.int64(11)
+    assert str(err.value) == "NumpyForm builder accepts only float64"
 
-    builder.float64(3.3)  # "one"
-    builder.float64(4.4)  # "two"
-    builder.int64(11)
+
+def test_error_in_numpy_form():
+
+    form = ak.forms.NumpyForm([], 8, "d")
+
+    builder = ak.layout.TypedArrayBuilder(form)
+
+    builder.float64(1.1)
+    builder.float64(2.2)
+    with pytest.raises(ValueError) as err:
+        builder.int64(11)
+    assert str(err.value) == "NumpyForm builder accepts only float64"

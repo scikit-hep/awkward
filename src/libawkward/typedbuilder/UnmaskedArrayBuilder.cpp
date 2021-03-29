@@ -31,6 +31,7 @@ namespace awkward {
       .append(";").append("\n");
 
     vm_output_ = content_.get()->vm_output();
+    vm_error_.append(content_.get()->vm_error());
   }
 
   const std::string
@@ -72,6 +73,11 @@ namespace awkward {
   const std::string
   UnmaskedArrayBuilder::vm_from_stack() const {
     return vm_data_from_stack_;
+  }
+
+  const std::string
+  UnmaskedArrayBuilder::vm_error() const {
+    return vm_error_;
   }
 
 }

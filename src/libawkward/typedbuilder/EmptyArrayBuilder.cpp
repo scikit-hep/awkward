@@ -15,7 +15,8 @@ namespace awkward {
         std::make_shared<std::string>(std::string("node-id")
         + std::to_string(TypedArrayBuilder::next_id()))
         : form.get()->form_key()),
-      vm_empty_command_("( This does nothing. )\n") { }
+      vm_empty_command_("( This does nothing. )\n"),
+      vm_error_("s\"EmptyArray Builder error\"") { }
 
   const std::string
   EmptyArrayBuilder::classname() const {
@@ -56,6 +57,11 @@ namespace awkward {
   const std::string
   EmptyArrayBuilder::vm_from_stack() const {
     return vm_empty_command_;
+  }
+
+  const std::string
+  EmptyArrayBuilder::vm_error() const {
+    return vm_error_;
   }
 
 }

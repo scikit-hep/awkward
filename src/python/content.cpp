@@ -964,87 +964,6 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
 
 ////////// TypedArrayBuilder
 
-void
-typed_builder_fromiter(ak::TypedArrayBuilder& self, const py::handle& obj) {
-  if (obj.is(py::none())) {
-    self.null();
-  }
-  else if (py::isinstance<py::bool_>(obj)) {
-    self.boolean(obj.cast<bool>());
-  }
-  else if (py::isinstance<py::int_>(obj)) {
-    self.int64(obj.cast<int64_t>());
-  }
-  else if (py::isinstance<py::float_>(obj)) {
-    self.float64(obj.cast<double>());
-  }
-  else if (builder_fromiter_iscomplex(obj)) {
-    self.complex(obj.cast<std::complex<double>>());
-  }
-  else if (py::isinstance<py::bytes>(obj)) {
-    self.bytestring(obj.cast<std::string>());
-  }
-  else if (py::isinstance<py::str>(obj)) {
-    self.string(obj.cast<std::string>());
-  }
-  else if (py::isinstance<py::tuple>(obj)) {
-    py::tuple tup = obj.cast<py::tuple>();
-    self.begintuple(tup.size());
-    for (size_t i = 0;  i < tup.size();  i++) {
-      self.index((int64_t)i);
-      typed_builder_fromiter(self, tup[i]);
-    }
-    self.endtuple();
-  }
-  else if (py::isinstance<py::dict>(obj)) {
-    py::dict dict = obj.cast<py::dict>();
-    self.beginrecord();
-    for (auto pair : dict) {
-      if (!py::isinstance<py::str>(pair.first)) {
-        throw std::invalid_argument(
-          std::string("keys of dicts in 'fromiter' must all be strings")
-          + FILENAME(__LINE__));
-      }
-      std::string key = pair.first.cast<std::string>();
-      self.field_check(key.c_str());
-      typed_builder_fromiter(self, pair.second);
-    }
-    self.endrecord();
-  }
-  else if (py::isinstance<py::iterable>(obj)) {
-    py::iterable seq = obj.cast<py::iterable>();
-    self.beginlist();
-    for (auto x : seq) {
-      typed_builder_fromiter(self, x);
-    }
-    self.endlist();
-  }
-  else if (py::isinstance<py::array>(obj)) {
-    py::iterable seq = obj.attr("tolist")().cast<py::iterable>();
-    self.beginlist();
-    for (auto x : seq) {
-      typed_builder_fromiter(self, x);
-    }
-    self.endlist();
-  }
-  else if (py::isinstance(obj, py::module::import("numpy").attr("bool_"))) {
-    self.boolean(obj.cast<bool>());
-  }
-  else if (py::isinstance(obj, py::module::import("numpy").attr("integer"))) {
-    self.int64(obj.cast<int64_t>());
-  }
-  else if (py::isinstance(obj, py::module::import("numpy").attr("floating"))) {
-    self.float64(obj.cast<double>());
-  }
-  else {
-    throw std::invalid_argument(
-      std::string("cannot convert ")
-      + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ")
-      + obj.attr("__class__").attr("__name__").cast<std::string>()
-      + std::string(") to an array element") + FILENAME(__LINE__));
-  }
-}
-
 py::class_<ak::TypedArrayBuilder>
 make_TypedArrayBuilder(const py::handle& m, const std::string& name) {
   return (py::class_<ak::TypedArrayBuilder>(m, name.c_str())
@@ -1057,7 +976,6 @@ make_TypedArrayBuilder(const py::handle& m, const std::string& name) {
       })
       .def("__repr__", &ak::TypedArrayBuilder::tostring)
       .def("__len__", &ak::TypedArrayBuilder::length)
-      .def("clear", &ak::TypedArrayBuilder::clear)
       .def("type", &ak::TypedArrayBuilder::type)
       .def("snapshot", [](const ak::TypedArrayBuilder& self) -> py::object {
         return box(self.snapshot());
@@ -1078,25 +996,8 @@ make_TypedArrayBuilder(const py::handle& m, const std::string& name) {
       .def("string", [](ak::TypedArrayBuilder& self, const py::str& x) -> void {
         self.string(x.cast<std::string>());
       })
-      .def("beginlist", &ak::TypedArrayBuilder::beginlist)
-      .def("endlist", &ak::TypedArrayBuilder::endlist)
-      .def("begintuple", &ak::TypedArrayBuilder::begintuple)
-      .def("index", &ak::TypedArrayBuilder::index)
-      .def("endtuple", &ak::TypedArrayBuilder::endtuple)
-      .def("beginrecord",
-           [](ak::TypedArrayBuilder& self, const py::object& name) -> void {
-        if (name.is(py::none())) {
-          self.beginrecord();
-        }
-        else {
-          std::string cppname = name.cast<std::string>();
-          self.beginrecord_check(cppname.c_str());
-        }
-      }, py::arg("name") = py::none())
-      .def("field", [](ak::TypedArrayBuilder& self, const std::string& x) -> void {
-        self.field_check(x);
-      })
-      .def("endrecord", &ak::TypedArrayBuilder::endrecord)
+      .def("begin_list", &ak::TypedArrayBuilder::begin_list)
+      .def("end_list", &ak::TypedArrayBuilder::end_list)
       .def("tag", [](ak::TypedArrayBuilder& self, int64_t tag) -> void {
         self.tag(tag);
       })
@@ -1118,18 +1019,6 @@ make_TypedArrayBuilder(const py::handle& m, const std::string& name) {
            -> std::shared_ptr<ak::Form> {
         return self.form();
       })
-      .def("append",
-           [](ak::TypedArrayBuilder& self,
-              const std::shared_ptr<ak::Content>& array,
-              int64_t at) {
-        self.append(array, at);
-      })
-      .def("extend",
-           [](ak::TypedArrayBuilder& self,
-              const std::shared_ptr<ak::Content>& array) {
-        self.extend(array);
-      })
-      .def("fromiter", &typed_builder_fromiter)
   );
 }
 
