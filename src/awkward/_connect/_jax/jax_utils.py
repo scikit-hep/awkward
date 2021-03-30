@@ -8,9 +8,6 @@ import jax.tree_util
 import awkward as ak
 import numpy as np
 
-jax.config.update("jax_platform_name", "cpu")
-jax.config.update("jax_enable_x64", True)
-
 class AuxData(object):
     def __init__(self, layout):
         self.layout = layout
