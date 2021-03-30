@@ -157,6 +157,19 @@ def arrayclass(layout, behavior):
     return ak.highlevel.Array
 
 
+def custom_cast(obj, behavior):
+    behavior = Behavior(ak.behavior, behavior)
+    for key, fcn in behavior.items():
+        if (
+            isinstance(key, tuple)
+            and len(key) == 2
+            and key[0] == "__cast__"
+            and isinstance(obj, key[1])
+        ):
+            return fcn
+    return None
+
+
 def custom_broadcast(layout, behavior):
     layout = ak.partition.first(layout)
     behavior = Behavior(ak.behavior, behavior)

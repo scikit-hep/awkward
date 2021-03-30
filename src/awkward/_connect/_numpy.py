@@ -41,10 +41,16 @@ def array_ufunc(ufunc, method, inputs, kwargs):
         return NotImplemented
 
     behavior = ak._util.behaviorof(*inputs)
-    inputs = [
-        ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
-        for x in inputs
-    ]
+
+    nextinputs = []
+    for x in inputs:
+        cast_fcn = ak._util.custom_cast(x, behavior)
+        if cast_fcn is not None:
+            x = cast_fcn(x)
+        nextinputs.append(
+            ak.operations.convert.to_layout(x, allow_record=True, allow_other=True)
+        )
+    inputs = nextinputs
 
     def adjust(custom, inputs, kwargs):
         args = [
