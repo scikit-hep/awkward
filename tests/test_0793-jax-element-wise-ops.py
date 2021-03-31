@@ -17,7 +17,6 @@
 #     return x[::-1]
 
 
-
 # # value_jvp, jvp_grad = jax.jvp(func_numpyarray_1, (test_numpyarray,), (test_numpyarray_tangent,))
 # # jit_value = jax.jit(func_numpyarray_3)(test_numpyarray)
 # value_vjp, vjp_func = jax.vjp(func_numpyarray_1, test_numpyarray)

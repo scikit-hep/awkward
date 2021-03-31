@@ -13,7 +13,7 @@ checked_version = False
 def register_and_check():
     global checked_version
     try:
-        import jax 
+        import jax
     except ImportError:
         raise ImportError(
             """install the 'jax' package with:
@@ -30,14 +30,16 @@ or
         ) < distutils.version.LooseVersion("0.2.0"):
             raise ImportError(
                 "Awkward Array can only work with jax 0.2.9 or later "
-                "(you have version {0})".format(numba.__version__)
+                "(you have version {0})".format(jax.__version__)
             )
         checked_version = True
         register()
 
+
 def register():
     import jax
     import awkward._connect._jax.jax_utils
+
 
 ak.jax = types.ModuleType("jax")
 ak.jax.register = register

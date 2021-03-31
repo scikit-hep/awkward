@@ -192,6 +192,10 @@ class NumpyLike(Singleton):
         # arrays[, out=]
         return self._module.cumsum(*args, **kwargs)
 
+    def cumprod(self, *args, **kwargs):
+        # arrays[, out=]
+        return self._module.cumprod(*args, **kwargs)
+
     def nonzero(self, *args, **kwargs):
         # array
         return self._module.nonzero(*args, **kwargs)
@@ -232,6 +236,10 @@ class NumpyLike(Singleton):
     def broadcast_to(self, *args, **kwargs):
         # array, shape
         return self._module.broadcast_to(*args, **kwargs)
+
+    def append(self, *args, **kwargs):
+        # array, element
+        return self._module.append(*args, **kwargs)
 
     ############################ ufuncs
 

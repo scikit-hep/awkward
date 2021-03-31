@@ -327,13 +327,18 @@ class Array(
 
     @layout.setter
     def layout(self, layout):
-        if isinstance(layout, (ak.layout.Content, ak.partition.PartitionedArray)):
-            self._layout = layout
-            self._numbaview = None
+        if not hasattr(self, "_tracers"):
+            if isinstance(layout, (ak.layout.Content, ak.partition.PartitionedArray)):
+                self._layout = layout
+                self._numbaview = None
+            else:
+                raise TypeError(
+                    "layout must be a subclass of ak.layout.Content"
+                    + ak._util.exception_suffix(__file__)
+                )
         else:
-            raise TypeError(
-                "layout must be a subclass of ak.layout.Content"
-                + ak._util.exception_suffix(__file__)
+            raise ValueError(
+                "this operation cannot be performed in a JAX-compiled or JAX-differentiated function"
             )
 
     @property
@@ -363,6 +368,20 @@ class Array(
             raise TypeError(
                 "behavior must be None or a dict" + ak._util.exception_suffix(__file__)
             )
+
+    @classmethod
+    def set_jaxtracers(cls, instance, jaxtracers):
+        arr_withtracers = cls(instance)
+        arr_withtracers._tracers = jaxtracers
+        (
+            _dataptrs,
+            _map_ptrs_to_tracers,
+        ) = ak._connect._jax._jax_utils.find_dataptrs_and_map(
+            instance.layout, jaxtracers
+        )
+        arr_withtracers._dataptrs = _dataptrs
+        arr_withtracers._map_ptrs_to_tracers = _map_ptrs_to_tracers
+        return arr_withtracers
 
     @property
     def caches(self):
@@ -1024,18 +1043,23 @@ class Array(
         in-place. (Internally, this method uses #ak.with_field, so performance
         is not a factor in choosing one over the other.)
         """
-        if not (
-            isinstance(where, str)
-            or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
-        ):
-            raise TypeError(
-                "only fields may be assigned in-place (by field name)"
-                + ak._util.exception_suffix(__file__)
+        if not hasattr(self, "_tracers"):
+            if not (
+                isinstance(where, str)
+                or (isinstance(where, tuple) and all(isinstance(x, str) for x in where))
+            ):
+                raise TypeError(
+                    "only fields may be assigned in-place (by field name)"
+                    + ak._util.exception_suffix(__file__)
+                )
+            array = ak.operations.structure.with_field(self.layout, what, where)
+            self._layout = array.layout
+            self._caches = ak._util.find_caches(self.layout)
+            self._numbaview = None
+        else:
+            raise ValueError(
+                "this operation cannot be performed in a JAX-compiled or JAX-differentiated function"
             )
-        array = ak.operations.structure.with_field(self.layout, what, where)
-        self._layout = array.layout
-        self._caches = ak._util.find_caches(self.layout)
-        self._numbaview = None
 
     def __getattr__(self, where):
         """
@@ -1376,7 +1400,10 @@ class Array(
 
         See also #__array_function__.
         """
-        return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        if not hasattr(self, "_tracers"):
+            return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
+        else:
+            return ak._connect._jax.array_ufunc(self, ufunc, method, inputs, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
         """
