@@ -383,8 +383,9 @@ namespace awkward {
     builder_.get()->int64(x, this);
   }
 
+  template<>
   void
-  TypedArrayBuilder::add_int64(int64_t x) {
+  TypedArrayBuilder::add<int64_t>(int64_t x) {
     set_data<int64_t>(x);
     vm_.get()->stack_push(static_cast<utype>(state::int64));
     resume();
@@ -445,6 +446,14 @@ namespace awkward {
     builder_.get()->string(x, this);
   }
 
+  template<>
+  void
+  TypedArrayBuilder::add<const std::string&>(const std::string& x) {
+    begin_list();
+    string(x.c_str(), (int64_t)x.length());
+    end_list();
+  }
+
   void
   TypedArrayBuilder::begin_list() {
     vm_.get()->stack_push(static_cast<utype>(state::begin_list));
@@ -462,23 +471,6 @@ namespace awkward {
     vm_.get()->stack_push((int32_t)x);
     vm_.get()->stack_push(static_cast<utype>(state::index));
     vm_.get()->resume();
-  }
-
-  bool
-  TypedArrayBuilder::find_index_of(int64_t x, const std::string& vm_output_data) {
-    auto const& outputs = vm_.get()->outputs();
-    auto search = outputs.find(vm_output_data);
-    if (search != outputs.end()) {
-      auto data = std::static_pointer_cast<int64_t>(search->second.get()->ptr());
-      auto size = search->second.get()->len();
-      for (int64_t i = 0; i < size; i++) {
-        if (data.get()[i] == x) {
-          index(i);
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   void

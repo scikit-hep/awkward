@@ -38,15 +38,12 @@ namespace awkward {
       .append(index_form_to_name(form_.get()->index()))
       .append("\n")
       .append(content_.get()->vm_output())
-      .append("variable index").append("\n")
-      .append("variable at").append("\n");
+      .append("variable index").append("\n");
 
     vm_func_.append(content_.get()->vm_func())
       .append(": ").append(vm_func_name()).append("\n")
       .append("dup 21 = if").append("\n")
       .append("drop").append("\n")
-      .append("at !").append("\n")
-      .append("at @ ")
       .append(vm_output_data_).append(" <- stack").append("\n")
       .append("else").append("\n")
       .append("1 index +!").append("\n")
@@ -90,7 +87,6 @@ namespace awkward {
                      kernel::lib::cpu),
             content_.get()->snapshot(outputs));
         case Index::Form::i64:
-          // FIXME: search->second.get()->toIndex64() length is 1 more then needed here
           return std::make_shared<IndexedArray64>(
             Identities::none(),
             form_.get()->parameters(),
@@ -152,8 +148,8 @@ namespace awkward {
   void
   IndexedArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
     if (is_categorical_) {
-      auto data = content_.get()->vm_output_data();
-      if (builder->find_index_of(x, data)) {
+      auto const& data = content_.get()->vm_output_data();
+      if (builder->find_index_of<int64_t>(x, data)) {
         return;
       }
     }

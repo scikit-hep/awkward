@@ -167,10 +167,6 @@ namespace awkward {
     void
       int64(int64_t x);
 
-    /// @brief Adds an integer value `x` to the accumulated data.
-    void
-      add_int64(int64_t x);
-
     /// @brief Adds a real value `x` to the accumulated data.
     void
       float64(double x);
@@ -236,8 +232,28 @@ namespace awkward {
       index(int64_t x);
 
     /// @brief
+    template <typename T>
     bool
-      find_index_of(int64_t x, const std::string& vm_output_data);
+      find_index_of(T x, const std::string& vm_output_data) {
+        auto const& outputs = vm_.get()->outputs();
+        auto search = outputs.find(vm_output_data);
+        if (search != outputs.end()) {
+          auto data = std::static_pointer_cast<T>(search->second.get()->ptr());
+          auto size = search->second.get()->len();
+          for (int64_t i = 0; i < size; i++) {
+            if (data.get()[i] == x) {
+              index(i);
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+    /// @brief Adds an integer value `x` to the accumulated data.
+    template <typename T>
+    void
+      add(T x);
 
     /// @brief Generates an Array builder from a Form
     static FormBuilderPtr

@@ -100,7 +100,7 @@ namespace awkward {
 
   void
   RecordArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
-    builder->add_int64(x);
+    builder->add<int64_t>(x);
   }
 
   void

@@ -57,6 +57,17 @@ namespace awkward {
       .append("0 ").append(vm_output_data_).append(" <- stack").append("\n");
 
     vm_error_ = content_.get()->vm_error();
+    validate();
+  }
+
+  void
+  IndexedOptionArrayBuilder::validate() const {
+    if (form_.get()->parameter_equals("__array__", "\"categorical\"")) {
+      throw std::invalid_argument(
+        std::string("categorical form of a ") + classname()
+        + std::string(" is not supported yet ")
+        + FILENAME(__LINE__));
+    }
   }
 
   const std::string
@@ -68,9 +79,6 @@ namespace awkward {
   IndexedOptionArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_data_);
     if (search != outputs.end()) {
-       // FIXME: search->second.get()->toIndex64()
-       // length is 1 more then needed here
-       // and the first element is always 0!
       switch (form_.get()->index()) {
        // case Index::Form::i8:
           case Index::Form::i32:

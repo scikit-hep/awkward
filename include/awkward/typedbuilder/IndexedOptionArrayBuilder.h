@@ -71,6 +71,8 @@ namespace awkward {
       string(const std::string& x, TypedArrayBuilder* builder) override;
 
   private:
+    void validate() const;
+
     /// @brief This builder Form
     const IndexedOptionFormPtr form_;
 

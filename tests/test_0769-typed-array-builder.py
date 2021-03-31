@@ -430,8 +430,25 @@ def test_categorical_form():
     builder.int64(2021)
     builder.int64(2020)
     builder.int64(2019)
+    builder.int64(2020)
+    builder.int64(2020)
+    builder.int64(2020)
+    builder.int64(2020)
+    builder.int64(2020)
 
-    assert ak.to_list(builder.snapshot()) == [2019, 2020, 2021, 2020, 2019]
+    assert ak.to_list(builder.snapshot()) == [
+        2019,
+        2020,
+        2021,
+        2020,
+        2019,
+        2020,
+        2020,
+        2020,
+        2020,
+        2020,
+    ]
+    assert str(ak.type(ak.Array(builder.snapshot()))) == "10 * categorical[type=int64]"
 
 
 def test_char_form():

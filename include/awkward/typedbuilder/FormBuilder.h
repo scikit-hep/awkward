@@ -3,6 +3,7 @@
 #ifndef AWKWARD_FORMBUILDER_H_
 #define AWKWARD_FORMBUILDER_H_
 
+#include <complex>
 #include <map>
 #include <memory>
 #include <string>
@@ -15,6 +16,9 @@ namespace awkward {
   using ContentPtr = std::shared_ptr<Content>;
   using ForthOutputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
   class TypedArrayBuilder;
+
+  typedef void (TypedArrayBuilder::*int64)(int64_t x);
+  typedef void (TypedArrayBuilder::*add_int64)(int64_t x);
 
   /// @class FormBuilder
   ///
@@ -76,11 +80,40 @@ namespace awkward {
           std::string("FormBuilder 'tag' is not implemented yet"));
       }
 
+    /// @brief Adds a boolean value `x` to the accumulated data.
+    virtual void
+      boolean(bool x, TypedArrayBuilder* builder) {
+        throw std::runtime_error(
+          std::string("FormBuilder 'boolean' is not implemented yet"));
+      }
+
     /// @brief Adds an integer value `x` to the accumulated data.
     virtual void
       int64(int64_t x, TypedArrayBuilder* builder) {
         throw std::runtime_error(
           std::string("FormBuilder 'int64' is not implemented yet"));
+      }
+
+    /// @brief Adds a real value `x` to the accumulated data.
+    virtual void
+      float64(double x, TypedArrayBuilder* builder) {
+        throw std::runtime_error(
+          std::string("FormBuilder 'float64' is not implemented yet"));
+      }
+
+    /// @brief Adds a complex value `x` to the accumulated data.
+    virtual void
+      complex(std::complex<double> x, TypedArrayBuilder* builder) {
+        throw std::runtime_error(
+          std::string("FormBuilder 'complex' is not implemented yet"));
+      }
+
+    /// @brief Adds an unencoded bytestring `x` in STL format to the
+    /// accumulated data.
+    virtual void
+      bytestring(const std::string& x, TypedArrayBuilder* builder) {
+        throw std::runtime_error(
+          std::string("FormBuilder 'bytestring' is not implemented yet"));
       }
 
     /// @brief Adds a UTF-8 encoded bytestring `x` in STL format to the

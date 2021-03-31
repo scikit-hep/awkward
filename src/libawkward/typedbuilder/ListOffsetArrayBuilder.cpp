@@ -146,9 +146,7 @@ namespace awkward {
   void
   ListOffsetArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
     if (is_string_builder_) {
-      builder->begin_list();
-      builder->string(x.c_str(), (int64_t)x.length());
-      builder->end_list();
+      builder->add<const std::string&>(x);
     }
     else {
       content_.get()->string(x, builder);
