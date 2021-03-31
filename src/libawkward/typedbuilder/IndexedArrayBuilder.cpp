@@ -13,6 +13,7 @@ namespace awkward {
                                            const std::string attribute,
                                            const std::string partition)
     : form_(form),
+      is_categorical_(form.get()->parameter_equals("__array__", "\"categorical\"")),
       form_key_(!form.get()->form_key() ?
         std::make_shared<std::string>(std::string("node-id")
         + std::to_string(TypedArrayBuilder::next_id()))
@@ -36,18 +37,24 @@ namespace awkward {
       .append(" ")
       .append(index_form_to_name(form_.get()->index()))
       .append("\n")
-      .append(content_.get()->vm_output());
+      .append(content_.get()->vm_output())
+      .append("variable index").append("\n")
+      .append("variable at").append("\n");
 
     vm_func_.append(content_.get()->vm_func())
       .append(": ").append(vm_func_name()).append("\n")
-      .append("variable index    1 index +!").append("\n")
-      .append("index @ ")
+      .append("dup 21 = if").append("\n")
+      .append("drop").append("\n")
+      .append("at !").append("\n")
+      .append("at @ ")
+      .append(vm_output_data_).append(" <- stack").append("\n")
+      .append("else").append("\n")
+      .append("1 index +!").append("\n")
+      .append("index @ 1- ")
       .append(vm_output_data_).append(" <- stack").append("\n")
       .append(content_.get()->vm_func_name()).append("\n")
+      .append("then").append("\n")
       .append(";").append("\n");
-
-    vm_data_from_stack_ = std::string(content_.get()->vm_from_stack())
-      .append("0 ").append(vm_output_data_).append(" <- stack").append("\n");
 
     vm_error_ = content_.get()->vm_error();
   }
@@ -70,7 +77,7 @@ namespace awkward {
             form_.get()->parameters(),
             Index32(std::static_pointer_cast<int32_t>(search->second.get()->ptr()),
                     0,
-                    search->second.get()->len() - 1,
+                    search->second.get()->len(),
                     kernel::lib::cpu),
             content_.get()->snapshot(outputs));
         case Index::Form::u32:
@@ -79,7 +86,7 @@ namespace awkward {
             form_.get()->parameters(),
             IndexU32(std::static_pointer_cast<uint32_t>(search->second.get()->ptr()),
                      0,
-                     search->second.get()->len() - 1,
+                     search->second.get()->len(),
                      kernel::lib::cpu),
             content_.get()->snapshot(outputs));
         case Index::Form::i64:
@@ -89,7 +96,7 @@ namespace awkward {
             form_.get()->parameters(),
             Index64(std::static_pointer_cast<int64_t>(search->second.get()->ptr()),
                     0,
-                    search->second.get()->len() - 1,
+                    search->second.get()->len(),
                     kernel::lib::cpu),
             content_.get()->snapshot(outputs));
         default:
@@ -110,6 +117,11 @@ namespace awkward {
   const std::string
   IndexedArrayBuilder::vm_output() const {
     return vm_output_;
+  }
+
+  const std::string
+  IndexedArrayBuilder::vm_output_data() const {
+    return vm_output_data_;
   }
 
   const std::string
@@ -135,6 +147,22 @@ namespace awkward {
   const std::string
   IndexedArrayBuilder::vm_error() const {
     return vm_error_;
+  }
+
+  void
+  IndexedArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
+    if (is_categorical_) {
+      auto data = content_.get()->vm_output_data();
+      if (builder->find_index_of(x, data)) {
+        return;
+      }
+    }
+    content_.get()->int64(x, builder);
+  }
+
+  void
+  IndexedArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
+    content_.get()->string(x, builder);
   }
 
 }

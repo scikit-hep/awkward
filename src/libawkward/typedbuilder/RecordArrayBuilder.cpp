@@ -69,6 +69,11 @@ namespace awkward {
   }
 
   const std::string
+  RecordArrayBuilder::vm_output_data() const {
+    return vm_output_data_;
+  }
+
+  const std::string
   RecordArrayBuilder::vm_func() const {
     return vm_func_;
   }
@@ -91,6 +96,17 @@ namespace awkward {
   const std::string
   RecordArrayBuilder::vm_error() const {
     return vm_error_;
+  }
+
+  void
+  RecordArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
+    builder->add_int64(x);
+  }
+
+  void
+  RecordArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
+    // FIXME:
+    //content.get()->string(x, builder);
   }
 
 }

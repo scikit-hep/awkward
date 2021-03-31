@@ -56,6 +56,11 @@ namespace awkward {
   }
 
   const std::string
+  BitMaskedArrayBuilder::vm_output_data() const {
+    return vm_output_data_;
+  }
+
+  const std::string
   BitMaskedArrayBuilder::vm_func() const {
     return vm_func_;
   }
@@ -78,6 +83,16 @@ namespace awkward {
   const std::string
   BitMaskedArrayBuilder::vm_error() const {
     return vm_error_;
+  }
+
+  void
+  BitMaskedArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
+    content_.get()->int64(x, builder);
+  }
+
+  void
+  BitMaskedArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
+    content_.get()->string(x, builder);
   }
 
 }

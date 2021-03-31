@@ -407,3 +407,81 @@ def test_error_in_numpy_form():
     with pytest.raises(ValueError) as err:
         builder.int64(11)
     assert str(err.value) == "NumpyForm builder accepts only float64"
+
+
+def test_categorical_form():
+    form = ak.forms.Form.fromjson(
+        """
+{
+    "class": "IndexedArray64",
+    "index": "i64",
+    "content": "int64",
+    "parameters": {
+        "__array__": "categorical"
+    }
+}
+"""
+    )
+
+    builder = ak.layout.TypedArrayBuilder(form)
+
+    builder.int64(2019)
+    builder.int64(2020)
+    builder.int64(2021)
+    builder.int64(2020)
+    builder.int64(2019)
+
+    assert ak.to_list(builder.snapshot()) == [2019, 2020, 2021, 2020, 2019]
+
+
+def test_char_form():
+    form = ak.forms.Form.fromjson(
+        """
+{
+    "class": "NumpyArray",
+    "itemsize": 1,
+    "format": "B",
+    "primitive": "uint8",
+    "parameters": {
+        "__array__": "char"
+    }
+}"""
+    )
+
+    builder = ak.layout.TypedArrayBuilder(form)
+
+    builder.string("one")
+    builder.string("two")
+    builder.string("three")
+
+    assert ak.to_list(builder.snapshot()) == "onetwothree"
+
+
+def test_string_form():
+    form = ak.forms.Form.fromjson(
+        """
+{
+    "class": "ListOffsetArray64",
+    "offsets": "i64",
+    "content": {
+        "class": "NumpyArray",
+        "itemsize": 1,
+        "format": "B",
+        "primitive": "uint8",
+        "parameters": {
+            "__array__": "char"
+        }
+    },
+    "parameters": {
+        "__array__": "string"
+    }
+}"""
+    )
+
+    builder = ak.layout.TypedArrayBuilder(form)
+
+    builder.string("one")
+    builder.string("two")
+    builder.string("three")
+
+    assert ak.to_list(builder.snapshot()) == ["one", "two", "three"]

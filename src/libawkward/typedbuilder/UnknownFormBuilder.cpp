@@ -34,6 +34,10 @@ namespace awkward {
   }
 
   const std::string
+  UnknownFormBuilder::vm_output_data() const {
+    return vm_empty_command_;
+  }
+  const std::string
   UnknownFormBuilder::vm_func() const {
     return vm_empty_command_;
   }

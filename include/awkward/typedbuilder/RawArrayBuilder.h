@@ -36,6 +36,10 @@ namespace awkward {
 
     /// @brief
     const std::string
+      vm_output_data() const override;
+
+    /// @brief
+    const std::string
       vm_func() const override;
 
     /// @brief
@@ -53,6 +57,15 @@ namespace awkward {
     /// @brief
     const std::string
       vm_error() const override;
+
+    /// @brief Adds an integer value `x` to the accumulated data.
+    void
+      int64(int64_t x, TypedArrayBuilder* builder) override;
+
+    /// @brief Adds a UTF-8 encoded bytestring `x` in STL format to the
+    /// accumulated data.
+    void
+      string(const std::string& x, TypedArrayBuilder* builder) override;
 
   private:
     const RawFormPtr form_;

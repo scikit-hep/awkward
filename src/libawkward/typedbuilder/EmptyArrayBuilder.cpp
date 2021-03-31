@@ -40,6 +40,11 @@ namespace awkward {
   }
 
   const std::string
+  EmptyArrayBuilder::vm_output_data() const {
+    return vm_empty_command_;
+  }
+
+  const std::string
   EmptyArrayBuilder::vm_func() const {
     return vm_empty_command_;
   }
@@ -63,5 +68,18 @@ namespace awkward {
   EmptyArrayBuilder::vm_error() const {
     return vm_error_;
   }
+
+  void
+  EmptyArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
+    throw std::invalid_argument(
+      std::string("EmptyArrayBuilder does not accept 'int64'"));
+  }
+
+  void
+  EmptyArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
+    throw std::invalid_argument(
+      std::string("EmptyArrayBuilder does not accept 'string'"));
+  }
+
 
 }

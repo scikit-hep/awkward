@@ -13,6 +13,7 @@ namespace awkward {
                                                  const std::string attribute,
                                                  const std::string partition)
     : form_(form),
+      is_string_builder_(form.get()->parameter_equals("__array__", "\"string\"")),
       form_key_(!form.get()->form_key() ?
         std::make_shared<std::string>(std::string("node-id")
         + std::to_string(TypedArrayBuilder::next_id()))
@@ -109,6 +110,10 @@ namespace awkward {
   }
 
   const std::string
+  ListOffsetArrayBuilder::vm_output_data() const {
+    return vm_output_data_;
+  }
+  const std::string
   ListOffsetArrayBuilder::vm_func() const {
     return vm_func_;
   }
@@ -131,6 +136,23 @@ namespace awkward {
   const std::string
   ListOffsetArrayBuilder::vm_error() const {
     return vm_error_;
+  }
+
+  void
+  ListOffsetArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
+    content_.get()->int64(x, builder);
+  }
+
+  void
+  ListOffsetArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
+    if (is_string_builder_) {
+      builder->begin_list();
+      builder->string(x.c_str(), (int64_t)x.length());
+      builder->end_list();
+    }
+    else {
+      content_.get()->string(x, builder);
+    }
   }
 
 }

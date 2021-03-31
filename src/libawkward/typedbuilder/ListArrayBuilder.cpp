@@ -117,17 +117,22 @@ namespace awkward {
 
   const std::string
   ListArrayBuilder::vm_output() const {
-    return std::string("\n");
-  }
-
-  const std::string
-  ListArrayBuilder::vm_func() const {
     return vm_output_;
   }
 
   const std::string
-  ListArrayBuilder::vm_func_name() const {
+  ListArrayBuilder::vm_output_data() const {
+    return vm_output_data_;
+  }
+
+  const std::string
+  ListArrayBuilder::vm_func() const {
     return vm_func_;
+  }
+
+  const std::string
+  ListArrayBuilder::vm_func_name() const {
+    return vm_func_name_;
   }
 
   const std::string
@@ -143,6 +148,16 @@ namespace awkward {
   const std::string
   ListArrayBuilder::vm_error() const {
     return vm_error_;
+  }
+
+  void
+  ListArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
+    content_.get()->int64(x, builder);
+  }
+
+  void
+  ListArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
+    content_.get()->string(x, builder);
   }
 
 }

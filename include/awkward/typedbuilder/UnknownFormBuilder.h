@@ -33,6 +33,10 @@ namespace awkward {
 
     /// @brief
     const std::string
+      vm_output_data() const override;
+
+    /// @brief
+    const std::string
       vm_func() const override;
 
     /// @brief

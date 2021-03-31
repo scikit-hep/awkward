@@ -59,7 +59,19 @@ namespace awkward {
   NumpyArrayBuilder::snapshot(const ForthOutputBufferMap& outputs) const {
     auto search = outputs.find(vm_output_data_);
     if (search != outputs.end()) {
-      return search->second.get()->toNumpyArray();
+      std::vector<ssize_t> shape = { (ssize_t)search->second.get()->len() };
+      std::vector<ssize_t> strides = { (ssize_t)form_.get()->itemsize() };
+
+      return std::make_shared<NumpyArray>(Identities::none(),
+                                          form_.get()->parameters(),
+                                          search->second.get()->ptr(),
+                                          shape,
+                                          strides,
+                                          0,
+                                          form_.get()->itemsize(),
+                                          form_.get()->format(),
+                                          util::format_to_dtype(form_.get()->format(), form_.get()->itemsize()),
+                                          kernel::lib::cpu);
     }
     throw std::invalid_argument(
         std::string("Snapshot of a ") + classname()
@@ -75,6 +87,11 @@ namespace awkward {
   const std::string
   NumpyArrayBuilder::vm_output() const {
     return vm_output_;
+  }
+
+  const std::string
+  NumpyArrayBuilder::vm_output_data() const {
+    return vm_output_data_;
   }
 
   const std::string
@@ -100,6 +117,16 @@ namespace awkward {
   const std::string
   NumpyArrayBuilder::vm_error() const {
     return vm_error_;
+  }
+
+  void
+  NumpyArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
+    builder->add_int64(x);
+  }
+
+  void
+  NumpyArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
+    builder->string(x.c_str(), (int64_t)x.length());
   }
 
 }

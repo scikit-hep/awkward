@@ -14,6 +14,7 @@ namespace awkward {
                                        const std::string attribute,
                                        const std::string partition)
     : form_(form),
+      tag_(0),
       form_key_(!form.get()->form_key() ?
         std::make_shared<std::string>(std::string("node-id")
         + std::to_string(TypedArrayBuilder::next_id()))
@@ -180,6 +181,11 @@ namespace awkward {
   }
 
   const std::string
+  UnionArrayBuilder::vm_output_data() const {
+    return vm_output_data_;
+  }
+
+  const std::string
   UnionArrayBuilder::vm_func() const {
     return vm_func_;
   }
@@ -202,6 +208,21 @@ namespace awkward {
   const std::string
   UnionArrayBuilder::vm_error() const {
     return vm_error_;
+  }
+
+  void
+  UnionArrayBuilder::tag(int8_t x) {
+    tag_ = x;
+  }
+
+  void
+  UnionArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
+    contents_[(size_t)tag_].get()->int64(x, builder);
+  }
+
+  void
+  UnionArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
+    contents_[(size_t)tag_].get()->string(x, builder);
   }
 
 }

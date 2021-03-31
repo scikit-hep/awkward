@@ -167,6 +167,10 @@ namespace awkward {
     void
       int64(int64_t x);
 
+    /// @brief Adds an integer value `x` to the accumulated data.
+    void
+      add_int64(int64_t x);
+
     /// @brief Adds a real value `x` to the accumulated data.
     void
       float64(double x);
@@ -227,6 +231,14 @@ namespace awkward {
     void
       tag(int8_t tag);
 
+    /// @brief Issues an index vm command
+    void
+      index(int64_t x);
+
+    /// @brief
+    bool
+      find_index_of(int64_t x, const std::string& vm_output_data);
+
     /// @brief Generates an Array builder from a Form
     static FormBuilderPtr
       formBuilderFromA(const FormPtr& form);
@@ -235,7 +247,7 @@ namespace awkward {
     static int64_t
       next_id();
 
-    /// @brief Generates next unique ID
+    /// @brief Generates a user-defined error ID
     static int64_t
       next_error_id();
 
@@ -245,7 +257,7 @@ namespace awkward {
     static int64_t
       next_node_id;
 
-    /// @brief
+    /// @brief An error ID
     static int64_t
       error_id;
 

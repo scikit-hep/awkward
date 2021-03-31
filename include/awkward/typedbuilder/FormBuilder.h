@@ -6,6 +6,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include "awkward/forth/ForthMachine.h"
 #include "awkward/forth/ForthOutputBuffer.h"
 
 namespace awkward {
@@ -13,6 +14,7 @@ namespace awkward {
   class Content;
   using ContentPtr = std::shared_ptr<Content>;
   using ForthOutputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
+  class TypedArrayBuilder;
 
   /// @class FormBuilder
   ///
@@ -45,6 +47,10 @@ namespace awkward {
 
     /// @brief
     virtual const std::string
+      vm_output_data() const = 0;
+
+    /// @brief
+    virtual const std::string
       vm_func() const = 0;
 
     /// @brief
@@ -62,6 +68,29 @@ namespace awkward {
     /// @brief
     virtual const std::string
       vm_error() const = 0;
+
+    /// @brief Adds an integer value `x` to the accumulated data.
+    virtual void
+      tag(int8_t x) {
+        throw std::runtime_error(
+          std::string("FormBuilder 'tag' is not implemented yet"));
+      }
+
+    /// @brief Adds an integer value `x` to the accumulated data.
+    virtual void
+      int64(int64_t x, TypedArrayBuilder* builder) {
+        throw std::runtime_error(
+          std::string("FormBuilder 'int64' is not implemented yet"));
+      }
+
+    /// @brief Adds a UTF-8 encoded bytestring `x` in STL format to the
+    /// accumulated data.
+    virtual void
+      string(const std::string& x, TypedArrayBuilder* builder) {
+        throw std::runtime_error(
+          std::string("FormBuilder 'string' is not implemented yet"));
+      }
+
   };
 }
 
