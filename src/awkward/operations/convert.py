@@ -1950,7 +1950,9 @@ or
         return pyarrow
 
 
-def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
+def to_arrow(
+    array, list_to32=False, string_to32=True, bytestring_to32=True, allow_tensor=True
+):
     """
     Args:
         array: Data to convert to an Apache Arrow array.
@@ -1960,6 +1962,9 @@ def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
             all others map to Arrow `LargeListType`.
         string_to32 (bool): Same as the above for Arrow `string` and `large_string`.
         bytestring_to32 (bool): Same as the above for Arrow `binary` and `large_binary`.
+        allow_tensor (bool): If True, convert regular-length lists to `pyarrow.lib.Tensor`;
+            otherwise, make `pyarrow.lib.ListArray` (generating offsets). This is used
+            by #ak.to_parquet, since Parquet files can't contain regular-length tensors.
 
     Converts an Awkward Array into an Apache Arrow array.
 
@@ -2008,8 +2013,14 @@ def to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True):
                     return pyarrow.Array.from_buffers(
                         arrow_type, length, [None, pyarrow.py_buffer(numpy_arr)]
                     )
-            else:
+            elif allow_tensor:
                 return pyarrow.Tensor.from_numpy(numpy_arr)
+            else:
+                return recurse(
+                    from_numpy(numpy_arr, regulararray=True, highlevel=False),
+                    mask,
+                    is_option,
+                )
 
         elif isinstance(layout, ak.layout.EmptyArray):
             return pyarrow.Array.from_buffers(pyarrow.float64(), 0, [None, None])
@@ -2930,6 +2941,7 @@ def to_parquet(
                         list_to32=list_to32,
                         string_to32=string_to32,
                         bytestring_to32=bytestring_to32,
+                        allow_tensor=False,
                     )
                 )
                 pa_fields.append(
