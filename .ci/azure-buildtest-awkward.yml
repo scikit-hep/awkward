@@ -26,6 +26,13 @@ pr:
     exclude:
       - "*"
 
+schedules:
+  - cron: "0 12 1 * *"
+    displayName: Monthly build for status badge
+    branches:
+      include:
+        - main
+
 jobs:
   - job: Windows
 
