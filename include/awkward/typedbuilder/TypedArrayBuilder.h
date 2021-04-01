@@ -75,24 +75,28 @@ namespace awkward {
   public:
     /// @brief Creates an TypedArrayBuilder from a full set of parameters.
     ///
-    /// @param initial The initial number of entries for a buffer.
+    /// @param form The Form that defines the Array to be build.
+    /// @param options The Array builder options.
+    /// @param vm_init If 'true' the Virtual Machine is instantiated on
+    /// construction. If 'false' an external Virtial Machine must be connected
+    /// to the builder. The flag is used for debugging.
     TypedArrayBuilder(const FormPtr& form,
                       const ArrayBuilderOptions& options,
                       bool vm_init = true);
 
-    /// @brief
+    /// @brief Connects a Virtual Machine if it was not initialized before.
     void
       connect(const std::shared_ptr<ForthMachine32>& vm);
 
-    /// @brief
+    /// @brief Prints debug information from the Virtual Machine stack.
     void
       debug_step() const;
 
-    /// @brief
+    /// @brief Returns the Form used to build the Array.
     const FormPtr
       form() const;
 
-    /// @brief Returns an AwkwardForth source code generated rom the 'Form' and
+    /// @brief Returns an AwkwardForth source code generated from the 'Form' and
     /// passed to the 'ForthMachine' virtual machine.
     const std::string
       vm_source() const;
@@ -227,11 +231,16 @@ namespace awkward {
     void
       tag(int8_t tag);
 
-    /// @brief Issues an index vm command
+    /// @brief Issues an 'index' vm command. The value 'x' is pushed to
+    /// the VM stack, it is not added to the accumulated data, e.g.
+    /// the VM output buffer.
+    ///
+    /// This is used to build a 'categorical' array.
     void
       index(int64_t x);
 
-    /// @brief
+    /// @brief Finds an index of a data in a VM output buffer.
+    /// This is used to build a 'categorical' array.
     template <typename T>
     bool
       find_index_of(T x, const std::string& vm_output_data) {
@@ -269,25 +278,25 @@ namespace awkward {
 
   protected:
     /// @brief A unique ID to use when Form nodes do not have Form key
-    /// defined
+    /// defined.
     static int64_t
       next_node_id;
 
-    /// @brief An error ID
+    /// @brief An error ID to be used to generate a user 'halt' message.
     static int64_t
       error_id;
 
   private:
-    /// @ brief
+    /// @ brief Initialise Virtual machine.
     void
       initialise();
 
-    /// @brief
+    /// @brief Place data of a type 'T' to the VM output buffer.
     template <typename T>
     void
       set_data(T x);
 
-    /// @brief
+    /// @brief Resume Virtual machine run.
     void
       resume() const;
 
@@ -300,19 +309,19 @@ namespace awkward {
     /// @brief Root node of the FormBuilder tree.
     std::shared_ptr<FormBuilder> builder_;
 
-    /// @brief
+    /// @brief Virtual machine.
     std::shared_ptr<ForthMachine32> vm_;
 
-    /// @brief
+    /// @brief Virtual machine input buffers.
     std::map<std::string, std::shared_ptr<ForthInputBuffer>> vm_inputs_map_;
 
-    /// @brief
+    /// @brief Input data label.
     std::string vm_input_data_;
 
-    /// @brief
+    /// @brief Virtual machine source code.
     std::string vm_source_;
 
-    /// @brief
+    /// @brief Virtual machine errors to ignore.
     std::set<util::ForthError> ignore_;
 
   };

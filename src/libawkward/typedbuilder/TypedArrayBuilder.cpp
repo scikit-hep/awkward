@@ -164,6 +164,7 @@ namespace awkward {
     : initial_(options.initial()),
       length_(8),
       builder_(formBuilderFromA(form)),
+      vm_(nullptr),
       vm_input_data_("data"),
       vm_source_() {
     TypedArrayBuilder::error_id = 0;
@@ -241,13 +242,20 @@ namespace awkward {
 
   void
   TypedArrayBuilder::connect(const std::shared_ptr<ForthMachine32>& vm) {
-    vm_ = vm;
+    if (vm_ == nullptr) {
+      vm_ = vm;
 
-    std::shared_ptr<void> ptr(
-      kernel::malloc<void>(kernel::lib::cpu, 8*sizeof(uint8_t)));
+      std::shared_ptr<void> ptr(
+        kernel::malloc<void>(kernel::lib::cpu, 8*sizeof(uint8_t)));
 
-    vm_inputs_map_[vm_input_data_] = std::make_shared<ForthInputBuffer>(ptr, 0, 8);
-    vm_.get()->run(vm_inputs_map_);
+      vm_inputs_map_[vm_input_data_] = std::make_shared<ForthInputBuffer>(ptr, 0, 8);
+      vm_.get()->run(vm_inputs_map_);
+    }
+    else {
+      throw std::invalid_argument(
+        std::string("TypedArrayBuilder is already connected to a Virtual Machine ")
+        + FILENAME(__LINE__));
+    }
   }
 
   void
