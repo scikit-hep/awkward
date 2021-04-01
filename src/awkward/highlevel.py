@@ -327,18 +327,13 @@ class Array(
 
     @layout.setter
     def layout(self, layout):
-        if not hasattr(self, "_tracers"):
-            if isinstance(layout, (ak.layout.Content, ak.partition.PartitionedArray)):
-                self._layout = layout
-                self._numbaview = None
-            else:
-                raise TypeError(
-                    "layout must be a subclass of ak.layout.Content"
-                    + ak._util.exception_suffix(__file__)
-                )
+        if isinstance(layout, (ak.layout.Content, ak.partition.PartitionedArray)):
+            self._layout = layout
+            self._numbaview = None
         else:
-            raise ValueError(
-                "this operation cannot be performed in a JAX-compiled or JAX-differentiated function"
+            raise TypeError(
+                "layout must be a subclass of ak.layout.Content"
+                + ak._util.exception_suffix(__file__)
             )
 
     @property
@@ -370,15 +365,19 @@ class Array(
             )
 
     @classmethod
-    def set_jaxtracers(cls, instance, jaxtracers):
-        arr_withtracers = cls(instance)
+    def set_jaxtracers(cls, layout, jaxtracers, isscalar=False):
+        if isscalar:
+            arr_withtracers = cls(numpy.asarray(layout))
+        else:
+            arr_withtracers = cls(layout)
         arr_withtracers._tracers = jaxtracers
         (
             _dataptrs,
             _map_ptrs_to_tracers,
-        ) = ak._connect._jax._jax_utils.find_dataptrs_and_map(
-            instance.layout, jaxtracers
+        ) = ak._connect._jax.jax_utils._find_dataptrs_and_map(
+            layout, jaxtracers, isscalar
         )
+        arr_withtracers._isscalar = isscalar
         arr_withtracers._dataptrs = _dataptrs
         arr_withtracers._map_ptrs_to_tracers = _map_ptrs_to_tracers
         return arr_withtracers
@@ -990,7 +989,10 @@ class Array(
         acting at the last level, while the higher levels of the indexer all
         have the same dimension as the array being indexed.
         """
-        return ak._util.wrap(self.layout[where], self._behavior)
+        if not hasattr(self, "_tracers"):
+            return ak._util.wrap(self.layout[where], self._behavior)
+        else:
+            return ak._connect._jax.jax_utils._jaxtracers_getitem(self, where)
 
     def __setitem__(self, where, what):
         """
@@ -1403,7 +1405,7 @@ class Array(
         if not hasattr(self, "_tracers"):
             return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
         else:
-            return ak._connect._jax.array_ufunc(self, ufunc, method, inputs, kwargs)
+            return ak._connect._jax.jax_utils.array_ufunc(self, ufunc, method, inputs, kwargs)
 
     def __array_function__(self, func, types, args, kwargs):
         """

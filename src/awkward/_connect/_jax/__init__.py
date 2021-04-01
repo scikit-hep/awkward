@@ -37,9 +37,8 @@ or
 
 
 def register():
-    import jax
     import awkward._connect._jax.jax_utils
 
 
 ak.jax = types.ModuleType("jax")
-ak.jax.register = register
+ak.jax.register = register_and_check
