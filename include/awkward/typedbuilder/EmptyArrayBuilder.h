@@ -63,9 +63,26 @@ namespace awkward {
     const std::string
       vm_error() const override;
 
+    /// @brief Adds a boolean value `x` to the accumulated data.
+    void
+      boolean(bool x, TypedArrayBuilder* builder) override;
+
     /// @brief Adds an integer value `x` to the accumulated data.
     void
       int64(int64_t x, TypedArrayBuilder* builder) override;
+
+    /// @brief Adds a real value `x` to the accumulated data.
+    void
+      float64(double x, TypedArrayBuilder* builder) override;
+
+    /// @brief Adds a complex value `x` to the accumulated data.
+    void
+      complex(std::complex<double> x, TypedArrayBuilder* builder) override;
+
+    /// @brief Adds an unencoded bytestring `x` in STL format to the
+    /// accumulated data.
+    void
+      bytestring(const std::string& x, TypedArrayBuilder* builder) override;
 
     /// @brief Adds a UTF-8 encoded bytestring `x` in STL format to the
     /// accumulated data.

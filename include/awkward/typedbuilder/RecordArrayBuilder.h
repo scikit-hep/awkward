@@ -61,9 +61,26 @@ namespace awkward {
     const std::string
       vm_error() const override;
 
+    /// @brief Adds a boolean value `x` to the accumulated data.
+    void
+      boolean(bool x, TypedArrayBuilder* builder) override;
+
     /// @brief Adds an integer value `x` to the accumulated data.
     void
       int64(int64_t x, TypedArrayBuilder* builder) override;
+
+    /// @brief Adds a real value `x` to the accumulated data.
+    void
+      float64(double x, TypedArrayBuilder* builder) override;
+
+    /// @brief Adds a complex value `x` to the accumulated data.
+    void
+      complex(std::complex<double> x, TypedArrayBuilder* builder) override;
+
+    /// @brief Adds an unencoded bytestring `x` in STL format to the
+    /// accumulated data.
+    void
+      bytestring(const std::string& x, TypedArrayBuilder* builder) override;
 
     /// @brief Adds a UTF-8 encoded bytestring `x` in STL format to the
     /// accumulated data.
@@ -71,16 +88,17 @@ namespace awkward {
       string(const std::string& x, TypedArrayBuilder* builder) override;
 
   private:
+    int64_t field_index();
+
     const RecordFormPtr form_;
+    int64_t field_index_;
+    int64_t contents_size_;
 
     /// @brief an output buffer name is
     /// "part{partition}-{form_key}-{attribute}"
     const FormKey form_key_;
     const std::string attribute_;
     const std::string partition_;
-
-    /// @brief This Form content builders
-    std::vector<FormBuilderPtr> contents_;
 
     /// @brief Forth virtual machine instructions
     /// generated from the Form
@@ -91,6 +109,9 @@ namespace awkward {
     std::string vm_func_type_;
     std::string vm_data_from_stack_;
     std::string vm_error_;
+
+    /// @brief This Form content builders
+    std::vector<FormBuilderPtr> contents_;
   };
 
 }

@@ -86,8 +86,28 @@ namespace awkward {
   }
 
   void
+  UnmaskedArrayBuilder::boolean(bool x, TypedArrayBuilder* builder) {
+    content_.get()->boolean(x, builder);
+  }
+
+  void
   UnmaskedArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
     content_.get()->int64(x, builder);
+  }
+
+  void
+  UnmaskedArrayBuilder::float64(double x, TypedArrayBuilder* builder) {
+    content_.get()->float64(x, builder);
+  }
+
+  void
+  UnmaskedArrayBuilder::complex(std::complex<double> x, TypedArrayBuilder* builder) {
+    content_.get()->complex(x, builder);
+  }
+
+  void
+  UnmaskedArrayBuilder::bytestring(const std::string& x, TypedArrayBuilder* builder) {
+    content_.get()->bytestring(x, builder);
   }
 
   void

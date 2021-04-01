@@ -5,7 +5,6 @@
 #include "awkward/typedbuilder/UnionArrayBuilder.h"
 #include "awkward/typedbuilder/TypedArrayBuilder.h"
 #include "awkward/array/UnionArray.h"
-#include "awkward/array/EmptyArray.h"
 
 namespace awkward {
 
@@ -216,8 +215,28 @@ namespace awkward {
   }
 
   void
+  UnionArrayBuilder::boolean(bool x, TypedArrayBuilder* builder) {
+    contents_[(size_t)tag_].get()->boolean(x, builder);
+  }
+
+  void
   UnionArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
     contents_[(size_t)tag_].get()->int64(x, builder);
+  }
+
+  void
+  UnionArrayBuilder::float64(double x, TypedArrayBuilder* builder) {
+    contents_[(size_t)tag_].get()->float64(x, builder);
+  }
+
+  void
+  UnionArrayBuilder::complex(std::complex<double> x, TypedArrayBuilder* builder) {
+    contents_[(size_t)tag_].get()->complex(x, builder);
+  }
+
+  void
+  UnionArrayBuilder::bytestring(const std::string& x, TypedArrayBuilder* builder) {
+    contents_[(size_t)tag_].get()->bytestring(x, builder);
   }
 
   void

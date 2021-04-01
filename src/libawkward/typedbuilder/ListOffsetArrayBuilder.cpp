@@ -13,7 +13,8 @@ namespace awkward {
                                                  const std::string attribute,
                                                  const std::string partition)
     : form_(form),
-      is_string_builder_(form.get()->parameter_equals("__array__", "\"string\"")),
+      is_string_builder_(form.get()->parameter_equals("__array__", "\"string\"")
+        ||  form.get()->parameter_equals("__array__", "\"bytestring\"")),
       form_key_(!form.get()->form_key() ?
         std::make_shared<std::string>(std::string("node-id")
         + std::to_string(TypedArrayBuilder::next_id()))
@@ -139,8 +140,33 @@ namespace awkward {
   }
 
   void
+  ListOffsetArrayBuilder::boolean(bool x, TypedArrayBuilder* builder) {
+    content_.get()->boolean(x, builder);
+  }
+
+  void
   ListOffsetArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
     content_.get()->int64(x, builder);
+  }
+
+  void
+  ListOffsetArrayBuilder::float64(double x, TypedArrayBuilder* builder) {
+    content_.get()->float64(x, builder);
+  }
+
+  void
+  ListOffsetArrayBuilder::complex(std::complex<double> x, TypedArrayBuilder* builder) {
+    content_.get()->complex(x, builder);
+  }
+
+  void
+  ListOffsetArrayBuilder::bytestring(const std::string& x, TypedArrayBuilder* builder) {
+    if (is_string_builder_) {
+      builder->add<const std::string&>(x);
+    }
+    else {
+      content_.get()->bytestring(x, builder);
+    }
   }
 
   void

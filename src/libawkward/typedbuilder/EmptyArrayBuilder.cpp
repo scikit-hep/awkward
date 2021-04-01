@@ -70,9 +70,33 @@ namespace awkward {
   }
 
   void
+  EmptyArrayBuilder::boolean(bool x, TypedArrayBuilder* builder) {
+    throw std::invalid_argument(
+      std::string("EmptyArrayBuilder does not accept 'bool'"));
+  }
+
+  void
   EmptyArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
     throw std::invalid_argument(
       std::string("EmptyArrayBuilder does not accept 'int64'"));
+  }
+
+  void
+  EmptyArrayBuilder::float64(double x, TypedArrayBuilder* builder) {
+    throw std::invalid_argument(
+      std::string("EmptyArrayBuilder does not accept 'float64'"));
+  }
+
+  void
+  EmptyArrayBuilder::complex(std::complex<double> x, TypedArrayBuilder* builder) {
+    throw std::invalid_argument(
+      std::string("EmptyArrayBuilder does not accept 'complex'"));
+  }
+
+  void
+  EmptyArrayBuilder::bytestring(const std::string& x, TypedArrayBuilder* builder) {
+    throw std::invalid_argument(
+      std::string("EmptyArrayBuilder does not accept 'bytestring'"));
   }
 
   void

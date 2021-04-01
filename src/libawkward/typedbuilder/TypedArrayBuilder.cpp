@@ -381,6 +381,12 @@ namespace awkward {
 
   void
   TypedArrayBuilder::boolean(bool x) {
+    builder_.get()->boolean(x, this);
+  }
+
+  template<>
+  void
+  TypedArrayBuilder::add<bool>(bool x) {
     set_data<bool>(x);
     vm_.get()->stack_push(static_cast<utype>(state::boolean));
     resume();
@@ -401,6 +407,12 @@ namespace awkward {
 
   void
   TypedArrayBuilder::float64(double x) {
+    builder_.get()->float64(x, this);
+  }
+
+  template<>
+  void
+  TypedArrayBuilder::add<double>(double x) {
     set_data<double>(x);
     vm_.get()->stack_push(static_cast<utype>(state::float64));
     resume();
@@ -408,6 +420,12 @@ namespace awkward {
 
   void
   TypedArrayBuilder::complex(std::complex<double> x) {
+    builder_.get()->complex(x, this);
+  }
+
+  template<>
+  void
+  TypedArrayBuilder::add<std::complex<double>>(std::complex<double> x) {
     set_data<std::complex<double>>(x);
     vm_.get()->stack_push(static_cast<utype>(state::complex128));
     resume();
@@ -417,26 +435,28 @@ namespace awkward {
   TypedArrayBuilder::bytestring(const char* x) {
     //builder_.get()->string(x, -1, no_encoding);
     throw std::runtime_error(
-      std::string("TypedArrayBuilder 'bytestring' is not implemented yet")
+      std::string("TypedArrayBuilder a null terminated 'bytestring' is not implemented yet")
       + FILENAME(__LINE__));
   }
 
   void
   TypedArrayBuilder::bytestring(const char* x, int64_t length) {
-    throw std::runtime_error(
-      std::string("TypedArrayBuilder 'bytestring' is not implemented yet")
-      + FILENAME(__LINE__));
+    for (int64_t i = 0; i < length; i++) {
+      set_data<uint8_t>((uint8_t)x[i]);
+      vm_.get()->stack_push(static_cast<utype>(state::uint8));
+      resume();
+    }
   }
 
   void
   TypedArrayBuilder::bytestring(const std::string& x) {
-    bytestring(x.c_str(), (int64_t)x.length());
+    builder_.get()->bytestring(x, this);
   }
 
   void
   TypedArrayBuilder::string(const char* x) {
     throw std::runtime_error(
-      std::string("TypedArrayBuilder 'string' is not implemented yet")
+      std::string("TypedArrayBuilder a null terminated 'string' is not implemented yet")
       + FILENAME(__LINE__));
   }
 

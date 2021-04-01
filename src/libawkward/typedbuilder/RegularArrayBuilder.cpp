@@ -95,8 +95,28 @@ namespace awkward {
   }
 
   void
+  RegularArrayBuilder::boolean(bool x, TypedArrayBuilder* builder) {
+    content_.get()->boolean(x, builder);
+  }
+
+  void
   RegularArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
     content_.get()->int64(x, builder);
+  }
+
+  void
+  RegularArrayBuilder::float64(double x, TypedArrayBuilder* builder) {
+    content_.get()->float64(x, builder);
+  }
+
+  void
+  RegularArrayBuilder::complex(std::complex<double> x, TypedArrayBuilder* builder) {
+    content_.get()->complex(x, builder);
+  }
+
+  void
+  RegularArrayBuilder::bytestring(const std::string& x, TypedArrayBuilder* builder) {
+    content_.get()->bytestring(x, builder);
   }
 
   void

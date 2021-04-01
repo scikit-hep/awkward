@@ -17,9 +17,6 @@ namespace awkward {
   using ForthOutputBufferMap = std::map<std::string, std::shared_ptr<ForthOutputBuffer>>;
   class TypedArrayBuilder;
 
-  typedef void (TypedArrayBuilder::*int64)(int64_t x);
-  typedef void (TypedArrayBuilder::*add_int64)(int64_t x);
-
   /// @class FormBuilder
   ///
   /// @brief Abstract base class for nodes within a TypedArrayBuilder

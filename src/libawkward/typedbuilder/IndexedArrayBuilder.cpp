@@ -42,7 +42,8 @@ namespace awkward {
 
     vm_func_.append(content_.get()->vm_func())
       .append(": ").append(vm_func_name()).append("\n")
-      .append("dup 21 = if").append("\n")
+      .append("dup ").append(std::to_string(static_cast<utype>(state::index)))
+      .append(" = if").append("\n")
       .append("drop").append("\n")
       .append(vm_output_data_).append(" <- stack").append("\n")
       .append("else").append("\n")
@@ -146,6 +147,17 @@ namespace awkward {
   }
 
   void
+  IndexedArrayBuilder::boolean(bool x, TypedArrayBuilder* builder) {
+    if (is_categorical_) {
+      auto const& data = content_.get()->vm_output_data();
+      if (builder->find_index_of<bool>(x, data)) {
+        return;
+      }
+    }
+    content_.get()->boolean(x, builder);
+  }
+
+  void
   IndexedArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
     if (is_categorical_) {
       auto const& data = content_.get()->vm_output_data();
@@ -157,7 +169,44 @@ namespace awkward {
   }
 
   void
+  IndexedArrayBuilder::float64(double x, TypedArrayBuilder* builder) {
+    if (is_categorical_) {
+      auto const& data = content_.get()->vm_output_data();
+      if (builder->find_index_of<double>(x, data)) {
+        return;
+      }
+    }
+    content_.get()->float64(x, builder);
+  }
+
+  void
+  IndexedArrayBuilder::complex(std::complex<double> x, TypedArrayBuilder* builder) {
+    if (is_categorical_) {
+      auto const& data = content_.get()->vm_output_data();
+      if (builder->find_index_of<std::complex<double>>(x, data)) {
+        return;
+      }
+    }
+    content_.get()->complex(x, builder);
+  }
+
+  void
+  IndexedArrayBuilder::bytestring(const std::string& x, TypedArrayBuilder* builder) {
+    if (is_categorical_) {
+      throw std::runtime_error(
+        std::string("IndexedArrayBuilder categorical 'bytestring' is not implemented yet")
+        + FILENAME(__LINE__));
+    }
+    content_.get()->bytestring(x, builder);
+  }
+
+  void
   IndexedArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
+    if (is_categorical_) {
+      throw std::runtime_error(
+        std::string("IndexedArrayBuilder categorical 'string' is not implemented yet")
+        + FILENAME(__LINE__));
+    }
     content_.get()->string(x, builder);
   }
 

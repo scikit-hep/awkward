@@ -120,8 +120,28 @@ namespace awkward {
   }
 
   void
+  NumpyArrayBuilder::boolean(bool x, TypedArrayBuilder* builder) {
+    builder->add<bool>(x);
+  }
+
+  void
   NumpyArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
     builder->add<int64_t>(x);
+  }
+
+  void
+  NumpyArrayBuilder::float64(double x, TypedArrayBuilder* builder) {
+    builder->add<double>(x);
+  }
+
+  void
+  NumpyArrayBuilder::complex(std::complex<double> x, TypedArrayBuilder* builder) {
+    builder->add<std::complex<double>>(x);
+  }
+
+  void
+  NumpyArrayBuilder::bytestring(const std::string& x, TypedArrayBuilder* builder) {
+    builder->bytestring(x.c_str(), (int64_t)x.length());
   }
 
   void
