@@ -82,10 +82,11 @@ def _jaxtracers_getitem(array, where):
                     if outarray.layout.ptr in array._map_ptrs_to_tracers:
                         tracer = array._map_ptrs_to_tracers[outarray.layout.ptr]
                     else:
-                        tracer = array._tracers[find_nparray_node_newptr(array.layout, outlayout)]
+                        # print(outarray.layout.identities)
+                        tracer = array._tracers[find_nparray_node_newptr(array.layout, outarray.layout)]
                     return tracer[recurse_where]
             elif isinstance(where, tuple):
-                return recurse(outlayout[where[:-1]], where[len(where) - 1])
+                return recurse(array[where[:-1]], where[len(where) - 1])
             else:
                 raise ValueError("Can't slice the array with {0}".format(where))
 
@@ -211,9 +212,11 @@ def _jaxtracers_getitem(array, where):
                 )
 
         children = fetch_children_tracer(out, fetch_indices_and_fieldloc_layout(array.layout))
-        out = out.deep_copy()
-        out.setidentities()
-        return ak.Array.set_jaxtracers(out, children, isscalar=False)
+        print("IF AK.Content", out)
+        print(children)
+        out_new = out.deep_copy()
+        out_new.setidentities()
+        return ak.Array.set_jaxtracers(out_new, children, isscalar=False)
 
 
 def array_ufunc(array, ufunc, method, inputs, kwargs):
@@ -280,11 +283,8 @@ def special_unflatten(aux_data, children):
     else:
         if aux_data.array._isscalar:
             assert len(children) == 1
-            import numpy 
-            arr = ak.Array(numpy.asarray(children[0]))
-            arr.layout = numpy.ndarray.item(numpy.asarray(children[0]))
-            print("HELLO EVERYNYAN")
-            return arr
+            import numpy
+            return numpy.ndarray.item(numpy.asarray(children[0]))
 
         def function(layout, num=0):
             if isinstance(layout, ak.layout.NumpyArray):
