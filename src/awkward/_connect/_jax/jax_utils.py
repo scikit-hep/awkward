@@ -283,7 +283,8 @@ def special_unflatten(aux_data, children):
     else:
         if aux_data.array._isscalar:
             assert len(children) == 1
-            import numpy
+            return children[0]
+            # import numpy
             return numpy.ndarray.item(numpy.asarray(children[0]))
 
         def function(layout, num=0):

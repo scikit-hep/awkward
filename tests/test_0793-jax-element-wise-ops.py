@@ -13,19 +13,21 @@ test_numpyarray_tangent = ak.Array(np.arange(10, dtype=np.float64))
 test_numpyarray_jax = jax.numpy.arange(10, dtype=np.float64)
 test_numpyarray_tangent_jax = jax.numpy.arange(10, dtype=np.float64)
 
-# def test_numpyarray_grad_1():
-#     def func_numpyarray_1(x):
-#         return x[4] ** 2
+def test_numpyarray_grad_1():
+    def func_numpyarray_1(x):
+        return x[4] ** 2
 
-#     value_jvp, jvp_grad = jax.jvp(func_numpyarray_1, (test_numpyarray,), (test_numpyarray_tangent,))
-#     jit_value = jax.jit(func_numpyarray_1)(test_numpyarray)
-#     value_vjp, vjp_func = jax.vjp(func_numpyarray_1, test_numpyarray)
+    value_jvp, jvp_grad = jax.jvp(func_numpyarray_1, (test_numpyarray,), (test_numpyarray_tangent,))
+    jit_value = jax.jit(func_numpyarray_1)(test_numpyarray)
+    value_vjp, vjp_func = jax.vjp(func_numpyarray_1, test_numpyarray)
     
-#     assert value_jvp == 16.0
-#     assert value_vjp == 16.0
-#     assert jit_value == 16.0
-#     assert jvp_grad == 32.0
-#     assert vjp_func(value_vjp)[0] == [0.0, 10.0, 72.0, 228.0, 200.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    assert value_jvp == 16.0
+    assert value_vjp == 16.0
+    assert jit_value == 16.0
+    assert jvp_grad == 32.0
+    print(type(value_vjp))
+    print(vjp_func(value_vjp)[0])
+    assert vjp_func(value_vjp)[0] == [0.0, 10.0, 72.0, 228.0, 200.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 def test_numpyarray_grad_2():
     def func_numpyarray_2(x):
