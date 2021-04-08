@@ -685,13 +685,13 @@ def broadcast_and_apply(  # noqa: C901
 
             tags = nplike.empty(length, dtype=np.int8)
             index = nplike.empty(length, dtype=np.int64)
+            numoutputs = None
             outcontents = []
             for tag, combo in enumerate(nplike.unique(combos)):
                 mask = combos == combo
                 tags[mask] = tag
                 index[mask] = nplike.arange(nplike.count_nonzero(mask))
                 nextinputs = []
-                numoutputs = None
                 i = 0
                 for x in inputs:
                     if isinstance(x, uniontypes):
@@ -707,15 +707,44 @@ def broadcast_and_apply(  # noqa: C901
                     assert numoutputs == len(outcontents[-1])
                 numoutputs = len(outcontents[-1])
 
-            tags = ak.layout.Index8(tags)
-            index = ak.layout.Index64(index)
+            if numoutputs is None:
 
-            return tuple(
-                ak.layout.UnionArray8_64(
-                    tags, index, [x[i] for x in outcontents]
-                ).simplify()
-                for i in range(numoutputs)
-            )
+                def copy_listtypes(contents):
+                    if all(
+                        isinstance(x, ak.layout.RegularArray) for x in contents
+                    ) and all(x.size == contents[0].size for x in contents):
+                        return ak.layout.RegularArray(
+                            copy_listtypes([x.content for x in contents]),
+                            contents[0].size,
+                            0,
+                        )
+                    elif all(isinstance(x, listtypes) for x in contents):
+                        return ak.layout.ListOffsetArray64(
+                            ak.layout.Index64(nplike.empty(0, dtype=np.int64)),
+                            copy_listtypes([x.content for x in contents]),
+                        )
+                    else:
+                        return ak.layout.EmptyArray()
+
+                nextinputs = []
+                for x in inputs:
+                    if isinstance(x, uniontypes):
+                        nextinputs.append(copy_listtypes(x.contents))
+                    elif isinstance(x, ak.layout.Content):
+                        nextinputs.append(x[0:0])
+                    else:
+                        nextinputs.append(x)
+                return apply(nextinputs, depth, user)
+
+            else:
+                tags = ak.layout.Index8(tags)
+                index = ak.layout.Index64(index)
+                return tuple(
+                    ak.layout.UnionArray8_64(
+                        tags, index, [x[i] for x in outcontents]
+                    ).simplify()
+                    for i in range(numoutputs)
+                )
 
         elif any(isinstance(x, optiontypes) for x in inputs):
             mask = None
