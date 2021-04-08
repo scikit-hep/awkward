@@ -37,3 +37,10 @@ def test_cartesian():
         (None, None),
         (None, None),
     ]
+
+    result = ak.cartesian([candidate, ak.Array([[1, 2, 3], []])], axis=1)
+    assert ak.to_list(result) == [None, None]
+
+    one, two = ak.broadcast_arrays(candidate, ak.Array([[1, 2, 3], []]))
+    assert ak.to_list(one) == [None, None]
+    assert ak.to_list(two) == [None, None]
