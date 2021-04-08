@@ -2987,7 +2987,7 @@ def cartesian(
     else:
         # 'posaxis' > 0: check if given 'axis' does not exceed the array depth
         for x in new_arrays:
-            if x.minmax_depth[0] == x.minmax_depth[1] == posaxis:
+            if isinstance(x, ak.layout.EmptyArray):
                 raise ValueError(
                     "cartesian-product of empty arrays?\n"
                     "Please, set 'axis=0' for a cartesian-product of the arrays with "
@@ -2996,6 +2996,16 @@ def cartesian(
                     + "'"
                     + ak._util.exception_suffix(__file__)
                 )
+            elif isinstance(x, ak.layout.IndexedOptionArray64):
+                if x.minmax_depth[0] == x.minmax_depth[1] == posaxis:
+                    raise ValueError(
+                        "cartesian-product of empty arrays?\n"
+                        "Please, set 'axis=0' for a cartesian-product of the arrays with "
+                        "min and max depths that are equal to a given 'axis="
+                        + str(posaxis)
+                        + "'"
+                        + ak._util.exception_suffix(__file__)
+                    )
 
         def newaxis(layout, i):
             if i == 0:
