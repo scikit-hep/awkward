@@ -685,13 +685,13 @@ def broadcast_and_apply(  # noqa: C901
 
             tags = nplike.empty(length, dtype=np.int8)
             index = nplike.empty(length, dtype=np.int64)
+            numoutputs = None
             outcontents = []
             for tag, combo in enumerate(nplike.unique(combos)):
                 mask = combos == combo
                 tags[mask] = tag
                 index[mask] = nplike.arange(nplike.count_nonzero(mask))
                 nextinputs = []
-                numoutputs = None
                 i = 0
                 for x in inputs:
                     if isinstance(x, uniontypes):
@@ -707,15 +707,19 @@ def broadcast_and_apply(  # noqa: C901
                     assert numoutputs == len(outcontents[-1])
                 numoutputs = len(outcontents[-1])
 
-            tags = ak.layout.Index8(tags)
-            index = ak.layout.Index64(index)
-
-            return tuple(
-                ak.layout.UnionArray8_64(
-                    tags, index, [x[i] for x in outcontents]
-                ).simplify()
-                for i in range(numoutputs)
-            )
+            if numoutputs is None:
+                return tuple(
+                    x[0:0] if isinstance(x, ak.layout.Content) else x for x in inputs
+                )
+            else:
+                tags = ak.layout.Index8(tags)
+                index = ak.layout.Index64(index)
+                return tuple(
+                    ak.layout.UnionArray8_64(
+                        tags, index, [x[i] for x in outcontents]
+                    ).simplify()
+                    for i in range(numoutputs)
+                )
 
         elif any(isinstance(x, optiontypes) for x in inputs):
             mask = None
