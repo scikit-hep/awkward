@@ -1048,7 +1048,7 @@ _ZEROS = object()
 
 
 @ak._connect._numpy.implements("zeros_like")
-def zeros_like(array, highlevel=True, behavior=None):
+def zeros_like(array, highlevel=True, behavior=None, dtype=None):
     """
     Args:
         array: Array to use as a model for a replacement that contains only `0`.
@@ -1056,6 +1056,7 @@ def zeros_like(array, highlevel=True, behavior=None):
             otherwise, return a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        dtype (None or type): Overrides the data type of the result.
 
     This is the equivalent of NumPy's `np.zeros_like` for Awkward Arrays.
 
@@ -1064,11 +1065,12 @@ def zeros_like(array, highlevel=True, behavior=None):
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
-    return full_like(array, _ZEROS, highlevel=highlevel, behavior=behavior)
+    return full_like(array, _ZEROS, highlevel=highlevel, behavior=behavior,
+                     dtype=dtype)
 
 
 @ak._connect._numpy.implements("ones_like")
-def ones_like(array, highlevel=True, behavior=None):
+def ones_like(array, highlevel=True, behavior=None, dtype=None):
     """
     Args:
         array: Array to use as a model for a replacement that contains only `1`.
@@ -1076,6 +1078,7 @@ def ones_like(array, highlevel=True, behavior=None):
             otherwise, return a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        dtype (None or type): Overrides the data type of the result.
 
     This is the equivalent of NumPy's `np.ones_like` for Awkward Arrays.
 
@@ -1084,11 +1087,12 @@ def ones_like(array, highlevel=True, behavior=None):
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
-    return full_like(array, 1, highlevel=highlevel, behavior=behavior)
+    return full_like(array, 1, highlevel=highlevel, behavior=behavior,
+                     dtype=dtype)
 
 
 @ak._connect._numpy.implements("full_like")
-def full_like(array, fill_value, highlevel=True, behavior=None):
+def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
     """
     Args:
         array: Array to use as a model for a replacement that contains only
@@ -1098,6 +1102,7 @@ def full_like(array, fill_value, highlevel=True, behavior=None):
             otherwise, return a low-level #ak.layout.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
+        dtype (None or type): Overrides the data type of the result.
 
     This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
 
@@ -1234,6 +1239,8 @@ def full_like(array, fill_value, highlevel=True, behavior=None):
             return None
 
     out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
+    if dtype is not None:
+        out = values_astype(out, dtype)
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
     else:
