@@ -2139,14 +2139,13 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("cannot sort ") + classname() + FILENAME(__LINE__));
     }
-    ContentPtr out = simplified.get()->argsort_next(negaxis,
+    return simplified.get()->argsort_next(negaxis,
                                           starts,
                                           parents,
                                           outlength,
                                           ascending,
                                           stable,
                                           keepdims);
-    return out;
   }
 
   template <typename T, typename I>
