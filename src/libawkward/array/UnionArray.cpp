@@ -2128,7 +2128,9 @@ namespace awkward {
                                    bool stable,
                                    bool keepdims) const {
     if (length() == 0) {
-      return shallow_copy();
+      Index64 out(1);
+      out.setitem_at_nowrap(0, length());
+      return NumpyArray(out).getitem_nothing();
     }
     ContentPtr simplified = simplify_uniontype(true, true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||
@@ -2137,13 +2139,14 @@ namespace awkward {
       throw std::invalid_argument(
         std::string("cannot sort ") + classname() + FILENAME(__LINE__));
     }
-    return simplified.get()->argsort_next(negaxis,
+    ContentPtr out = simplified.get()->argsort_next(negaxis,
                                           starts,
                                           parents,
                                           outlength,
                                           ascending,
                                           stable,
                                           keepdims);
+    return out;
   }
 
   template <typename T, typename I>
