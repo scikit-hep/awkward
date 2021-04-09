@@ -87,7 +87,7 @@ def _jaxtracers_getitem(array, where):
                 raise ValueError("Can't slice the array with {0}".format(where))
 
         child = [recurse(array, where)]
-        return ak.Array.set_jaxtracers(out, child, isscalar=True)
+        return ak.Array._internal_for_jax(out, child, isscalar=True)
 
     else:
 
@@ -219,7 +219,7 @@ def _jaxtracers_getitem(array, where):
         )
         out = out.deep_copy()
         out.setidentities()
-        return ak.Array.set_jaxtracers(out, children, isscalar=False)
+        return ak.Array._internal_for_jax(out, children, isscalar=False)
 
 
 def array_ufunc(array, ufunc, method, inputs, kwargs):
@@ -243,7 +243,7 @@ def array_ufunc(array, ufunc, method, inputs, kwargs):
         ]
         nexttracers.append(getattr(ufunc, method)(*nextinputs, **kwargs))
 
-    return ak.Array.set_jaxtracers(array.layout, nexttracers, array._isscalar)
+    return ak.Array._internal_for_jax(array.layout, nexttracers, array._isscalar)
 
 
 class AuxData(object):
@@ -268,7 +268,7 @@ def special_flatten(array):
 
         array.layout.setidentities()
         children = [jax.numpy.asarray(x) for x in databuffers]
-        aux_data = AuxData(ak.Array.set_jaxtracers(array.layout, children))
+        aux_data = AuxData(ak.Array._internal_for_jax(array.layout, children))
     else:
         raise ValueError(
             "Can only differentiate Awkward Arrays, recieved array of type {0}".format(
@@ -281,7 +281,7 @@ def special_flatten(array):
 
 def special_unflatten(aux_data, children):
     if any(isinstance(x, jax.core.Tracer) for x in children):
-        return ak.Array.set_jaxtracers(aux_data.array.layout, children)
+        return ak.Array._internal_for_jax(aux_data.array.layout, children)
     elif all(child is None for child in children):
         return None
     else:

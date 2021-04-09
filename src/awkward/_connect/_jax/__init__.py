@@ -27,9 +27,9 @@ or
     else:
         if not checked_version and distutils.version.LooseVersion(
             jax.__version__
-        ) < distutils.version.LooseVersion("0.2.0"):
+        ) < distutils.version.LooseVersion("0.2.7"):
             raise ImportError(
-                "Awkward Array can only work with jax 0.2.9 or later "
+                "Awkward Array can only work with jax 0.2.7 or later "
                 "(you have version {0})".format(jax.__version__)
             )
         checked_version = True

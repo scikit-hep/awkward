@@ -365,7 +365,7 @@ class Array(
             )
 
     @classmethod
-    def set_jaxtracers(cls, layout, jaxtracers, isscalar=False):
+    def _internal_for_jax(cls, layout, jaxtracers, isscalar=False):
         if isscalar:
             arr_withtracers = cls(numpy.asarray(layout))
         else:
@@ -1060,7 +1060,7 @@ class Array(
             self._numbaview = None
         else:
             raise ValueError(
-                "this operation cannot be performed in a JAX-compiled or JAX-differentiated function"
+                "fields cannot be assigned to data involved in a JAX-compiled or JAX-differentiated function"
             )
 
     def __getattr__(self, where):
