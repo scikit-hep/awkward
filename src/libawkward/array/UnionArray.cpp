@@ -2128,7 +2128,7 @@ namespace awkward {
                                    bool stable,
                                    bool keepdims) const {
     if (length() == 0) {
-      return shallow_copy();
+      return std::make_shared<NumpyArray>(Index64(0));
     }
     ContentPtr simplified = simplify_uniontype(true, true);
     if (dynamic_cast<UnionArray8_32*>(simplified.get())  ||

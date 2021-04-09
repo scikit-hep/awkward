@@ -1315,7 +1315,7 @@ namespace awkward {
                              bool stable,
                              bool keepdims) const {
     if (length() == 0) {
-      return shallow_copy();
+      return std::make_shared<NumpyArray>(Index64(0));
     }
     std::shared_ptr<Content> out = toListOffsetArray64(true).get()->argsort_next(
                                        negaxis,
