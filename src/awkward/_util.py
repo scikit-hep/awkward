@@ -6,6 +6,7 @@ import re
 import sys
 import os
 import warnings
+import itertools
 
 try:
     from collections.abc import Mapping
@@ -663,10 +664,12 @@ def broadcast_and_apply(  # noqa: C901
 
         elif any(isinstance(x, uniontypes) for x in inputs):
             tagslist = []
+            numtags = []
             length = None
             for x in inputs:
                 if isinstance(x, uniontypes):
                     tagslist.append(nplike.asarray(x.tags))
+                    numtags.append(len(x.contents))
                     if length is None:
                         length = len(tagslist[-1])
                     elif length != len(tagslist[-1]):
@@ -679,6 +682,12 @@ def broadcast_and_apply(  # noqa: C901
                         )
 
             combos = nplike.stack(tagslist, axis=-1)
+
+            all_combos = nplike.array(
+                list(itertools.product(*[range(x) for x in numtags])),
+                dtype=[(str(i), combos.dtype) for i in range(len(tagslist))],
+            )
+
             combos = combos.view(
                 [(str(i), combos.dtype) for i in range(len(tagslist))]
             ).reshape(length)
@@ -687,7 +696,7 @@ def broadcast_and_apply(  # noqa: C901
             index = nplike.empty(length, dtype=np.int64)
             numoutputs = None
             outcontents = []
-            for tag, combo in enumerate(nplike.unique(combos)):
+            for tag, combo in enumerate(all_combos):
                 mask = combos == combo
                 tags[mask] = tag
                 index[mask] = nplike.arange(nplike.count_nonzero(mask))
@@ -707,44 +716,16 @@ def broadcast_and_apply(  # noqa: C901
                     assert numoutputs == len(outcontents[-1])
                 numoutputs = len(outcontents[-1])
 
-            if numoutputs is None:
+            assert numoutputs is not None
 
-                def copy_listtypes(contents):
-                    if all(
-                        isinstance(x, ak.layout.RegularArray) for x in contents
-                    ) and all(x.size == contents[0].size for x in contents):
-                        return ak.layout.RegularArray(
-                            copy_listtypes([x.content for x in contents]),
-                            contents[0].size,
-                            0,
-                        )
-                    elif all(isinstance(x, listtypes) for x in contents):
-                        return ak.layout.ListOffsetArray64(
-                            ak.layout.Index64(nplike.empty(0, dtype=np.int64)),
-                            copy_listtypes([x.content for x in contents]),
-                        )
-                    else:
-                        return ak.layout.EmptyArray()
-
-                nextinputs = []
-                for x in inputs:
-                    if isinstance(x, uniontypes):
-                        nextinputs.append(copy_listtypes(x.contents))
-                    elif isinstance(x, ak.layout.Content):
-                        nextinputs.append(x[0:0])
-                    else:
-                        nextinputs.append(x)
-                return apply(nextinputs, depth, user)
-
-            else:
-                tags = ak.layout.Index8(tags)
-                index = ak.layout.Index64(index)
-                return tuple(
-                    ak.layout.UnionArray8_64(
-                        tags, index, [x[i] for x in outcontents]
-                    ).simplify()
-                    for i in range(numoutputs)
-                )
+            tags = ak.layout.Index8(tags)
+            index = ak.layout.Index64(index)
+            return tuple(
+                ak.layout.UnionArray8_64(
+                    tags, index, [x[i] for x in outcontents]
+                ).simplify()
+                for i in range(numoutputs)
+            )
 
         elif any(isinstance(x, optiontypes) for x in inputs):
             mask = None
