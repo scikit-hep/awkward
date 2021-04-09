@@ -2504,9 +2504,7 @@ namespace awkward {
                                             bool stable,
                                             bool keepdims) const {
     if (length() == 0 ) {
-      Index64 out(1);
-      out.setitem_at_nowrap(0, length());
-      return NumpyArray(out).getitem_nothing();
+      return std::make_shared<NumpyArray>(Index64(0));
     }
 
     int64_t index_length = index_.length();
