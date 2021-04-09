@@ -38,55 +38,58 @@ def _find_dataptrs_and_map(layout, jaxtracers, isscalar):
 
 
 def _jaxtracers_getitem(array, where):
-    if  array._isscalar:
+    if array._isscalar:
         raise TypeError("Cannot slice a scalar")
 
     out = array.layout[where]
 
     def find_nparray_node_newptr(layout, outlayout):
-        def find_nparray_node(node, depth, fieldloc, shape, nodenum, nodenum_index):
+        def find_nparray_node(
+            node, depth, outlayout, fieldloc, shape, nodenum, nodenum_index
+        ):
             if isinstance(node, ak.layout.NumpyArray):
-                if (
-                    node.identities.fieldloc == fieldloc
-                    and numpy.asarray(node.identities).shape[1] == shape[1]
-                ):
-                    nodenum_index = nodenum
-                    return
+                if node.identities.fieldloc == fieldloc:
+                    nodenum_index.append(nodenum)
                 else:
                     nodenum = nodenum + 1
 
         outlayout_fieldloc = outlayout.identities.fieldloc
-        nodenum_index = -1
+        nodenum_index = []
+
         ak._util.recursive_walk(
             layout,
             find_nparray_node,
             args=(
+                outlayout,
                 outlayout_fieldloc,
                 numpy.asarray(outlayout.identities).shape,
                 0,
                 nodenum_index,
             ),
         )
-        return 0
-        if nodenum_index == -1:
+        if len(nodenum_index) == 0:
             raise ValueError("Couldn't find the node in new slice")
-        return nodenum_index
+        return nodenum_index[0]
 
     if not isinstance(out, ak.layout.Content):
 
         def recurse(outarray, recurse_where):
+
             if isinstance(recurse_where, numbers.Integral) or isinstance(
                 recurse_where, str
             ):
                 if isinstance(outarray.layout, ak.layout.NumpyArray):
-                    if outarray.layout.ptr in array._map_ptrs_to_tracers:
-                        tracer = array._map_ptrs_to_tracers[outarray.layout.ptr]
-                    else:
-                        # print(outarray.layout.identities)
-                        tracer = array._tracers[find_nparray_node_newptr(array.layout, outarray.layout)]
+                    # if outarray.layout.ptr in array._map_ptrs_to_tracers:
+                    #     tracer = outarray._map_ptrs_to_tracers[outarray.layout.ptr]
+                    # else:
+                    #     tracer = outarray._tracers[
+                    #         find_nparray_node_newptr(array.layout, outarray.layout)
+                    #     ]
+                    return outarray._tracers[0][recurse_where]
                     return tracer[recurse_where]
             elif isinstance(where, tuple):
                 return recurse(array[where[:-1]], where[len(where) - 1])
+
             else:
                 raise ValueError("Can't slice the array with {0}".format(where))
 
@@ -149,7 +152,12 @@ def _jaxtracers_getitem(array, where):
                     )
                     haystack = numpy.sum(preslice_identities * multiplier, axis=1)
                     needle = numpy.sum(postslice_identities * multiplier, axis=1)
-                    return numpy.searchsorted(haystack, needle)
+                    haystack_argsort = numpy.argsort(haystack)
+                    indices = numpy.searchsorted(
+                        haystack, needle, sorter=haystack_argsort
+                    )
+                    final_indices = haystack_argsort[indices]
+                    return final_indices
 
                 def find_corresponding_identity(
                     postslice_identities, preslice_identities
@@ -157,6 +165,7 @@ def _jaxtracers_getitem(array, where):
                     for identity in preslice_identities:
                         if identity[0] == postslice_identities:
                             return identity[1]
+
                     raise ValueError(
                         "Couldn't find postslice identities in preslice identities"
                     )
@@ -174,7 +183,9 @@ def _jaxtracers_getitem(array, where):
                 if outlayout.ptr in array._map_ptrs_to_tracers:
                     tracer = array._map_ptrs_to_tracers[outlayout.ptr]
                 else:
-                    tracer = array._tracers[find_nparray_node_newptr(array.layout, outlayout)]
+                    tracer = array._tracers[
+                        find_nparray_node_newptr(array.layout, outlayout)
+                    ]
                 children.append(jax.numpy.take(tracer, indices))
                 return children
 
@@ -211,12 +222,12 @@ def _jaxtracers_getitem(array, where):
                     )
                 )
 
-        children = fetch_children_tracer(out, fetch_indices_and_fieldloc_layout(array.layout))
-        print("IF AK.Content", out)
-        print(children)
-        out_new = out.deep_copy()
-        out_new.setidentities()
-        return ak.Array.set_jaxtracers(out_new, children, isscalar=False)
+        children = fetch_children_tracer(
+            out, fetch_indices_and_fieldloc_layout(array.layout)
+        )
+        out = out.deep_copy()
+        out.setidentities()
+        return ak.Array.set_jaxtracers(out, children, isscalar=False)
 
 
 def array_ufunc(array, ufunc, method, inputs, kwargs):
@@ -242,12 +253,13 @@ def array_ufunc(array, ufunc, method, inputs, kwargs):
 
     return ak.Array.set_jaxtracers(array.layout, nexttracers, array._isscalar)
 
+
 class AuxData(object):
     def __init__(self, array):
-        self.array = array 
+        self.array = array
 
     def __eq__(self, other):
-        return True
+        return self.array.layout.form == other.array.layout.form
 
 
 def special_flatten(array):
@@ -283,16 +295,21 @@ def special_unflatten(aux_data, children):
     else:
         if aux_data.array._isscalar:
             assert len(children) == 1
-            return children[0]
-            # import numpy
+            # return children[0]
+            import numpy
+
             return numpy.ndarray.item(numpy.asarray(children[0]))
+        children = list(children)
 
-        def function(layout, num=0):
+        def function(layout):
             if isinstance(layout, ak.layout.NumpyArray):
-                num = num + 1
-                return lambda: ak.layout.NumpyArray(children[num - 1])
+                buffer = children[0]
+                children.pop(0)
+                return lambda: ak.layout.NumpyArray(buffer)
 
-        arr = ak._util.recursively_apply(aux_data.array.layout, function, pass_depth=False)
+        arr = ak._util.recursively_apply(
+            aux_data.array.layout, function, pass_depth=False
+        )
         return ak.Array(arr)
 
 

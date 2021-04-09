@@ -1405,7 +1405,9 @@ class Array(
         if not hasattr(self, "_tracers"):
             return ak._connect._numpy.array_ufunc(ufunc, method, inputs, kwargs)
         else:
-            return ak._connect._jax.jax_utils.array_ufunc(self, ufunc, method, inputs, kwargs)
+            return ak._connect._jax.jax_utils.array_ufunc(
+                self, ufunc, method, inputs, kwargs
+            )
 
     def __array_function__(self, func, types, args, kwargs):
         """

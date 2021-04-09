@@ -125,7 +125,7 @@ class NumpyLike(Singleton):
     def asarray(self, *args, **kwargs):
         # array[, dtype=]
         return self._module.asarray(*args, **kwargs)
-    
+
     def isscalar(self, *args, **kwargs):
         return self._module.isscalar(*args, **kwargs)
 
@@ -184,6 +184,9 @@ class NumpyLike(Singleton):
     def searchsorted(self, *args, **kwargs):
         # haystack, needle, side="right"
         return self._module.searchsorted(*args, **kwargs)
+
+    def argsort(self, *args, **kwargs):
+        return self._module.argsort(*args, **kwargs)
 
     ############################ manipulation
 
