@@ -79,14 +79,7 @@ def _jaxtracers_getitem(array, where):
                 recurse_where, str
             ):
                 if isinstance(outarray.layout, ak.layout.NumpyArray):
-                    # if outarray.layout.ptr in array._map_ptrs_to_tracers:
-                    #     tracer = outarray._map_ptrs_to_tracers[outarray.layout.ptr]
-                    # else:
-                    #     tracer = outarray._tracers[
-                    #         find_nparray_node_newptr(array.layout, outarray.layout)
-                    #     ]
                     return outarray._tracers[0][recurse_where]
-                    return tracer[recurse_where]
             elif isinstance(where, tuple):
                 return recurse(array[where[:-1]], where[len(where) - 1])
 
@@ -138,7 +131,7 @@ def _jaxtracers_getitem(array, where):
             else:
                 raise NotImplementedError
 
-        def fetch_children_tracer(outlayout, preslice_identities, children=[]):
+        def fetch_children_tracer(outlayout, preslice_identities):
             if isinstance(outlayout, ak.layout.NumpyArray):
 
                 def find_intersection_indices(
@@ -186,14 +179,13 @@ def _jaxtracers_getitem(array, where):
                     tracer = array._tracers[
                         find_nparray_node_newptr(array.layout, outlayout)
                     ]
-                children.append(jax.numpy.take(tracer, indices))
-                return children
+                return [jax.numpy.take(tracer, indices)]
 
             elif isinstance(outlayout, ak._util.listtypes):
                 return fetch_children_tracer(outlayout.content, preslice_identities)
             elif isinstance(outlayout, ak._util.uniontypes):
                 raise ValueError(
-                    "Can't differntiate an UnionArray type {0}".format(layout)
+                    "Can't differntiate an UnionArray type {0}".format(outlayout)
                 )
             elif isinstance(outlayout, ak._util.recordtypes):
                 children = []
