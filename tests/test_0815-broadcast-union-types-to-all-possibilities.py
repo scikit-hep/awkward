@@ -9,7 +9,7 @@ import awkward as ak  # noqa: F401
 
 def test():
     @ak.mixin_class(ak.behavior)
-    class Point:
+    class Point(object):
         @ak.mixin_class_method(np.add, {"Point"})
         def point_add(self, other):
             return ak.zip(
