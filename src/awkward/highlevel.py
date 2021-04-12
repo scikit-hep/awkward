@@ -1536,13 +1536,12 @@ class Record(ak._connect._numpy.NDArrayOperatorsMixin):
                 + ak._util.exception_suffix(__file__)
             )
 
-        if self.__class__ is Record:
-            self.__class__ = ak._util.recordclass(layout, behavior)
-
         if with_name is not None:
             layout = ak.operations.structure.with_name(
                 layout, with_name, highlevel=False
             )
+        if self.__class__ is Record:
+            self.__class__ = ak._util.recordclass(layout, behavior)
 
         if kernels is not None and kernels != ak.operations.convert.kernels(layout):
             layout = ak.operations.convert.to_kernels(layout, kernels, highlevel=False)
