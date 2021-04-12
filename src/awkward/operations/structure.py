@@ -2055,6 +2055,10 @@ def unflatten(array, counts, axis=0, highlevel=True, behavior=None):
                 content = doit(listoffsetarray.content[: outeroffsets[-1]])
                 if isinstance(content, ak.layout.ByteMaskedArray):
                     inneroffsets = nplike.asarray(content.content.offsets)
+                elif isinstance(content, ak.layout.RegularArray):
+                    inneroffsets = nplike.asarray(
+                        content.toListOffsetArray64(True).offsets
+                    )
                 else:
                     inneroffsets = nplike.asarray(content.offsets)
 
