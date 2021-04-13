@@ -1210,6 +1210,35 @@ namespace awkward {
       }
     }
 
+    ERROR NumpyArray_contiguous_copy_from_many_64(
+      kernel::lib ptr_lib,
+      uint8_t *toptr,
+      const uint8_t **fromptrs,
+      int64_t *fromlens,
+      int64_t len,
+      int64_t stride,
+      const int64_t *pos) {
+      if (ptr_lib == kernel::lib::cpu) {
+        return awkward_NumpyArray_contiguous_copy_from_many_64(
+          toptr,
+          fromptrs,
+          fromlens,
+          len,
+          stride,
+          pos);
+      }
+      else if (ptr_lib == kernel::lib::cuda) {
+        throw std::runtime_error(
+          std::string("not implemented: ptr_lib == cuda_kernels for NumpyArray_contiguous_copy_from_many_64")
+          + FILENAME(__LINE__));
+      }
+      else {
+        throw std::runtime_error(
+          std::string("unrecognized ptr_lib for NumpyArray_contiguous_copy_from_many_64")
+          + FILENAME(__LINE__));
+      }
+    }
+
     ERROR NumpyArray_contiguous_next_64(
       kernel::lib ptr_lib,
       int64_t *topos,

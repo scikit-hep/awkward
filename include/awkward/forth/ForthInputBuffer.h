@@ -45,6 +45,10 @@ namespace awkward {
     int64_t
       len() const noexcept;
 
+    /// @brief Returns a shared pointer to an AwkwardForth input buffer.
+    std::shared_ptr<void>
+      ptr() noexcept;
+
   private:
     std::shared_ptr<void> ptr_;
     int64_t offset_;

@@ -962,6 +962,66 @@ make_ArrayBuilder(const py::handle& m, const std::string& name) {
   );
 }
 
+////////// TypedArrayBuilder
+
+py::class_<ak::TypedArrayBuilder>
+make_TypedArrayBuilder(const py::handle& m, const std::string& name) {
+  return (py::class_<ak::TypedArrayBuilder>(m, name.c_str())
+      .def(py::init([](ak::FormPtr form, int64_t initial, double resize, bool vm_init) -> ak::TypedArrayBuilder {
+        return ak::TypedArrayBuilder(form, ak::ArrayBuilderOptions(initial, resize), vm_init);
+      }), py::arg("form"), py::arg("initial") = 8, py::arg("resize") = 1.5, py::arg("vm_init") = true)
+      .def_property_readonly("_ptr",
+                             [](const ak::TypedArrayBuilder* self) -> size_t {
+        return reinterpret_cast<size_t>(self);
+      })
+      .def("__repr__", &ak::TypedArrayBuilder::tostring)
+      .def("__len__", &ak::TypedArrayBuilder::length)
+      .def("type", &ak::TypedArrayBuilder::type)
+      .def("snapshot", [](const ak::TypedArrayBuilder& self) -> py::object {
+        return box(self.snapshot());
+      })
+      .def("__getitem__", &getitem<ak::TypedArrayBuilder>)
+      .def("__iter__", [](const ak::TypedArrayBuilder& self) -> ak::Iterator {
+        return ak::Iterator(self.snapshot());
+      })
+      .def("null", &ak::TypedArrayBuilder::null)
+      .def("boolean", &ak::TypedArrayBuilder::boolean)
+      .def("int64", &ak::TypedArrayBuilder::int64)
+      .def("float64", &ak::TypedArrayBuilder::float64)
+      .def("complex", &ak::TypedArrayBuilder::complex)
+      .def("bytestring",
+           [](ak::TypedArrayBuilder& self, const py::bytes& x) -> void {
+        self.bytestring(x.cast<std::string>());
+      })
+      .def("string", [](ak::TypedArrayBuilder& self, const py::str& x) -> void {
+        self.string(x.cast<std::string>());
+      })
+      .def("begin_list", &ak::TypedArrayBuilder::begin_list)
+      .def("end_list", &ak::TypedArrayBuilder::end_list)
+      .def("tag", [](ak::TypedArrayBuilder& self, int64_t tag) -> void {
+        self.tag(tag);
+      })
+      .def("debug_step",
+           [](const ak::TypedArrayBuilder& self) -> void {
+        return self.debug_step();
+      })
+      .def("vm_source",
+            [](ak::TypedArrayBuilder& self) -> const std::string {
+         return self.vm_source();
+      })
+      .def("connect",
+           [](ak::TypedArrayBuilder& self,
+              const std::shared_ptr<ak::ForthMachine32>& vm) -> void {
+        self.connect(vm);
+      })
+      .def("form",
+           [](const ak::TypedArrayBuilder& self)
+           -> std::shared_ptr<ak::Form> {
+        return self.form();
+      })
+  );
+}
+
 ////////// Iterator
 
 py::class_<ak::Iterator, std::shared_ptr<ak::Iterator>>

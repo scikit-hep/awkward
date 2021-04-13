@@ -13,6 +13,9 @@
 #include "awkward/Content.h"
 
 namespace awkward {
+
+  class ByteMaskedArray;
+
   /// @class UnmaskedForm
   ///
   /// @brief Form describing UnmaskedArray.

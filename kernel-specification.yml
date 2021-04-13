@@ -3395,6 +3395,22 @@ kernels:
     automatic-tests: false
     manual-tests: []
 
+  - name: awkward_NumpyArray_contiguous_copy_from_many
+    specializations:
+      - name: awkward_NumpyArray_contiguous_copy_from_many_64
+        args:
+          - {name: toptr, type: "List[uint8_t]", dir: out}
+          - {name: fromptrs, type: "Const[List[List[uint8_t]]]", dir: in, role: NumpyArray-ptr}
+          - {name: fromlens, type: "List[int64_t]", dir: in, role: default}
+          - {name: len, type: "int64_t", dir: in, role: default}
+          - {name: stride, type: "int64_t", dir: in, role: default}
+          - {name: pos, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+    description: null
+    definition: |
+      Insert Python definition here
+    automatic-tests: false
+    manual-tests: []
+
   - name: awkward_NumpyArray_contiguous_init
     specializations:
       - name: awkward_NumpyArray_contiguous_init_64
@@ -7824,6 +7840,20 @@ kernels:
     definition: |
       Insert Python definition here
     automatic-tests: false
+    manual-tests: []
+
+  - name: awkward_one_mask
+    specializations:
+      - name: awkward_one_mask8
+        args:
+          - {name: tomask, type: "List[int8_t]", dir: out}
+          - {name: length, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_one_mask(tomask, length):
+          for i in range(length):
+              tomask[i] = 1
+    automatic-tests: true
     manual-tests: []
 
   - name: awkward_zero_mask
