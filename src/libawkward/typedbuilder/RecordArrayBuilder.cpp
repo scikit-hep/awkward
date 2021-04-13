@@ -106,12 +106,6 @@ namespace awkward {
       field_index_++ : (field_index_ = 0);
   }
 
-  int64_t
-  RecordArrayBuilder::next_field_index() {
-    return (field_index_ < contents_size_ - 1) ?
-      field_index_ + 1 : 0;
-  }
-
   void
   RecordArrayBuilder::boolean(bool x, TypedArrayBuilder* builder) {
     contents_[(size_t)field_index()].get()->boolean(x, builder);
@@ -158,9 +152,14 @@ namespace awkward {
 
   bool
   RecordArrayBuilder::active() {
-    for(auto content : contents_) {
-      if (content.get()->active()) {
-        return true;
+    if (!list_field_index_.empty()) {
+      return contents_[(size_t)list_field_index_.back()].get()->active();
+    }
+    else {
+      for(auto content : contents_) {
+        if (content.get()->active()) {
+          return true;
+        }
       }
     }
     return false;

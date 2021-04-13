@@ -102,8 +102,8 @@ namespace awkward {
       active() override;
 
   private:
+    /// @brief Keeps track of a field index.
     int64_t field_index();
-    int64_t next_field_index();
 
     /// @brief This builder Form
     const RecordFormPtr form_;
