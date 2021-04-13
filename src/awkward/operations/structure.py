@@ -1065,6 +1065,9 @@ def zeros_like(array, highlevel=True, behavior=None, dtype=None):
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
+    if dtype is not None:
+        return full_like(array, 0, highlevel=highlevel, behavior=behavior,
+                         dtype=dtype)
     return full_like(array, _ZEROS, highlevel=highlevel, behavior=behavior,
                      dtype=dtype)
 
@@ -1155,6 +1158,13 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
+    if dtype is not None:
+        # In the case of strings and byte strings,
+        # converting first avoids a ValueError.
+        fill_value = dtype(fill_value)
+        # Also, if the fill_value cannot be converted to the dtype
+        # this should throw a clear, early, error.
+
     layout = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
     )
@@ -1240,6 +1250,7 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
 
     out = ak._util.recursively_apply(layout, getfunction, pass_depth=False)
     if dtype is not None:
+        out = strings_astype(out, dtype)
         out = values_astype(out, dtype)
     if highlevel:
         return ak._util.wrap(out, ak._util.behaviorof(array, behavior=behavior))
