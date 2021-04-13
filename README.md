@@ -277,6 +277,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
     <td align="center"><a href="https://gitlab.com/nikoladze"><img src="https://avatars0.githubusercontent.com/u/3707225?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nikolai Hartmann</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=nikoladze" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/sjperkins"><img src="https://avatars3.githubusercontent.com/u/3530212?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Simon Perkins</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=sjperkins" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/drahnreb"><img src="https://avatars.githubusercontent.com/u/25883607?v=4?s=100" width="100px;" alt=""/><br /><sub><b>.hard</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=drahnreb" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward-1.0/commits?author=drahnreb" title="Tests">⚠️</a></td>
+    <td align="center"><a href="https://github.com/HenryDayHall"><img src="https://avatars.githubusercontent.com/u/12996763?v=4?s=100" width="100px;" alt=""/><br /><sub><b>HenryDayHall</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward-1.0/commits?author=HenryDayHall" title="Code">💻</a></td>
   </tr>
 </table>
 
