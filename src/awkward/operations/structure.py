@@ -1159,10 +1159,13 @@ def full_like(array, fill_value, highlevel=True, behavior=None, dtype=None):
     """
     if dtype is not None:
         # In the case of strings and byte strings,
-        # converting first avoids a ValueError.
+        # converting the fill avoids a ValueError.
         fill_value = dtype(fill_value)
         # Also, if the fill_value cannot be converted to the dtype
         # this should throw a clear, early, error.
+        if dtype is bool:
+            # then for bools, only 0 and 1 give correct string behavior
+            fill_value = int(fill_value)
 
     layout = ak.operations.convert.to_layout(
         array, allow_record=True, allow_other=False
