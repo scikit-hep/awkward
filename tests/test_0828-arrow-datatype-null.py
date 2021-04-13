@@ -11,5 +11,9 @@ pyarrow = pytest.importorskip("pyarrow")
 
 
 def test():
-    assert ak.from_arrow(pyarrow.Table.from_pydict({"x": [None, None, None]})).tolist() == [{"x": None}, {"x": None}, {"x": None}]
-    assert ak.from_arrow(pyarrow.Table.from_pydict({"x": [[None, None], [], [None]]})).tolist() == [{"x": [None, None]}, {"x": []}, {"x": [None]}]
+    assert ak.from_arrow(
+        pyarrow.Table.from_pydict({"x": [None, None, None]})
+    ).tolist() == [{"x": None}, {"x": None}, {"x": None}]
+    assert ak.from_arrow(
+        pyarrow.Table.from_pydict({"x": [[None, None], [], [None]]})
+    ).tolist() == [{"x": [None, None]}, {"x": []}, {"x": [None]}]
