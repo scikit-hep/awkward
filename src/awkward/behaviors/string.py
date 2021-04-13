@@ -76,7 +76,7 @@ class CharBehavior(ak.highlevel.Array):
             return False
 
     def __ne__(self, other):
-        return not self.__eq__(self, other)
+        return not self.__eq__(other)
 
     def __add__(self, other):
         if isinstance(other, (str, CharBehavior)):
