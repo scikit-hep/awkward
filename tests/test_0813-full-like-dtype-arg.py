@@ -24,24 +24,24 @@ def test():
 
     def assert_array_type(new_array, intended_type):
         """helper function to check each part of the array took the intended type"""
-        assert isinstance(new_array[0][0]['x'], intended_type)
-        assert isinstance(new_array[0][1]['x'], intended_type)
-        assert isinstance(new_array[0][1]['y'][0], intended_type)
-        assert isinstance(new_array[0][2]['x'], intended_type)
-        assert isinstance(new_array[0][2]['y'][0], intended_type)
-        assert isinstance(new_array[0][2]['y'][1], intended_type)
-        assert isinstance(new_array[2][0]['x'], intended_type)
-        assert isinstance(new_array[2][0]['y'][0], intended_type)
-        assert isinstance(new_array[2][0]['y'][1], intended_type)
-        assert isinstance(new_array[2][0]['y'][3], intended_type)
+        assert isinstance(new_array[0][0]["x"], intended_type)
+        assert isinstance(new_array[0][1]["x"], intended_type)
+        assert isinstance(new_array[0][1]["y"][0], intended_type)
+        assert isinstance(new_array[0][2]["x"], intended_type)
+        assert isinstance(new_array[0][2]["y"][0], intended_type)
+        assert isinstance(new_array[0][2]["y"][1], intended_type)
+        assert isinstance(new_array[2][0]["x"], intended_type)
+        assert isinstance(new_array[2][0]["y"][0], intended_type)
+        assert isinstance(new_array[2][0]["y"][1], intended_type)
+        assert isinstance(new_array[2][0]["y"][3], intended_type)
         assert isinstance(new_array[2][1], intended_type)
         assert isinstance(new_array[2][2], intended_type)
         assert isinstance(new_array[2][3], intended_type)
-        assert isinstance(new_array[2][4]['x'], intended_type)
-        assert isinstance(new_array[2][4]['y'][0], intended_type)
-        assert isinstance(new_array[2][4]['y'][1], intended_type)
-        assert isinstance(new_array[2][4]['y'][3], intended_type)
-        assert isinstance(new_array[2][4]['y'][4], intended_type)
+        assert isinstance(new_array[2][4]["x"], intended_type)
+        assert isinstance(new_array[2][4]["y"][0], intended_type)
+        assert isinstance(new_array[2][4]["y"][1], intended_type)
+        assert isinstance(new_array[2][4]["y"][3], intended_type)
+        assert isinstance(new_array[2][4]["y"][4], intended_type)
 
     int_type = ak.full_like(array, 12, dtype=int)
     float_type = ak.full_like(array, 12, dtype=float)
@@ -120,6 +120,3 @@ def test():
     assert_array_type(int_type, int)
     assert_array_type(float_type, float)
     assert_array_type(bool_type, bool)
-
-
-
