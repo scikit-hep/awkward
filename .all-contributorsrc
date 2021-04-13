@@ -228,6 +228,15 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "HenryDayHall",
+      "name": "HenryDayHall",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12996763?v=4",
+      "profile": "https://github.com/HenryDayHall",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
