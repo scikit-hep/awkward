@@ -1090,8 +1090,7 @@ def ones_like(array, highlevel=True, behavior=None, dtype=None):
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
     """
-    return full_like(array, 1, highlevel=highlevel, behavior=behavior,
-                     dtype=dtype)
+    return full_like(array, 1, highlevel=highlevel, behavior=behavior, dtype=dtype)
 
 
 @ak._connect._numpy.implements("full_like")
