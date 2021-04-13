@@ -1066,10 +1066,8 @@ def zeros_like(array, highlevel=True, behavior=None, dtype=None):
     are immutable.)
     """
     if dtype is not None:
-        return full_like(array, 0, highlevel=highlevel, behavior=behavior,
-                         dtype=dtype)
-    return full_like(array, _ZEROS, highlevel=highlevel, behavior=behavior,
-                     dtype=dtype)
+        return full_like(array, 0, highlevel=highlevel, behavior=behavior, dtype=dtype)
+    return full_like(array, _ZEROS, highlevel=highlevel, behavior=behavior, dtype=dtype)
 
 
 @ak._connect._numpy.implements("ones_like")
