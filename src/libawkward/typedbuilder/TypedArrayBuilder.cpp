@@ -29,7 +29,6 @@
 #include "awkward/typedbuilder/RegularArrayBuilder.h"
 #include "awkward/typedbuilder/UnionArrayBuilder.h"
 #include "awkward/typedbuilder/UnmaskedArrayBuilder.h"
-#include "awkward/typedbuilder/UnknownFormBuilder.h"
 
 
 namespace awkward {
@@ -236,7 +235,9 @@ namespace awkward {
       return std::make_shared<UnmaskedArrayBuilder>(downcasted_form);
     }
     else {
-      return std::make_shared<UnknownFormBuilder>(form);
+      throw std::invalid_argument(
+        std::string("TypedArrayBuilder does not recognise the Form ")
+        + FILENAME(__LINE__));
     }
   }
 
@@ -260,10 +261,6 @@ namespace awkward {
 
   void
   TypedArrayBuilder::initialise() {
-    if (std::dynamic_pointer_cast<UnknownFormBuilder>(builder_)) {
-      throw std::invalid_argument(
-        std::string("unrecognized Form ") + FILENAME(__LINE__));
-    }
     vm_ = std::make_shared<ForthMachine32>(vm_source());
 
     std::shared_ptr<void> ptr(

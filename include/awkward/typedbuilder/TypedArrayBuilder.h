@@ -54,8 +54,7 @@ namespace awkward {
     complex256 = 17,
     null = 18,
     index = 19,
-    tag = 20,
-    offset = 21
+    tag = 20
   };
   using utype = std::underlying_type<state>::type;
 

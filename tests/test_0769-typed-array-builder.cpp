@@ -122,6 +122,7 @@ int main(int, char**) {
     myarray.float64(2.2);
     myarray.end_list();
 
+    myarray.int64(2);
     myarray.begin_list();
     myarray.float64(3.3);
     myarray.float64(4.4);
@@ -129,6 +130,7 @@ int main(int, char**) {
     myarray.float64(6.6);
     myarray.end_list();
 
+    myarray.int64(3);
     myarray.begin_list();
     myarray.float64(7.7);
     myarray.float64(8.8);
