@@ -2753,6 +2753,17 @@ def _from_arrow(
             out = ak.layout.NumpyArray(as_bytes.view(np.bool_))
             # No return yet!
 
+        elif isinstance(tpe, pyarrow.lib.DataType) and tpe.num_buffers == 1:
+            # This is a DataType(null)
+            mask = buffers.pop(0)
+            assert tpe.num_fields == 0
+            assert mask is None
+            out = ak.layout.IndexedOptionArray64(
+                ak.layout.Index64(numpy.full(len(array), -1, dtype=np.int64)),
+                ak.layout.EmptyArray(),
+            )
+            # No return yet!
+
         elif isinstance(tpe, pyarrow.lib.DataType):
             assert tpe.num_buffers == 2
             mask = buffers.pop(0)
