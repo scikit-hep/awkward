@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/TypedArrayBuilder.cpp", line)
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/RecordArrayBuilder.cpp", line)
 
 #include "awkward/typedbuilder/RecordArrayBuilder.h"
 #include "awkward/typedbuilder/TypedArrayBuilder.h"
@@ -100,54 +100,70 @@ namespace awkward {
     return vm_error_;
   }
 
-  /// FIXME: Is this check necessary - VM should handle it?
-  /// performance degrades to
-  /// 6.79 µs ± 0 ns per loop (mean ± std. dev. of 1 run, 100000 loops each)
-  /// from
-  /// 6.56 µs ± 0 ns per loop (mean ± std. dev. of 1 run, 100000 loops each)
-  ///
-  /// Before this extra percolation:
-  /// 6.4 µs ± 0 ns per loop (mean ± std. dev. of 1 run, 100000 loops each)
   int64_t
   RecordArrayBuilder::field_index() {
     return (field_index_ < contents_size_ - 1) ?
       field_index_++ : (field_index_ = 0);
   }
 
+  int64_t
+  RecordArrayBuilder::next_field_index() {
+    return (field_index_ < contents_size_ - 1) ?
+      field_index_ + 1 : 0;
+  }
+
   void
   RecordArrayBuilder::boolean(bool x, TypedArrayBuilder* builder) {
     contents_[(size_t)field_index()].get()->boolean(x, builder);
-    // see FIXME builder->add<bool>(x);
   }
 
   void
   RecordArrayBuilder::int64(int64_t x, TypedArrayBuilder* builder) {
     contents_[(size_t)field_index()].get()->int64(x, builder);
-    // see FIXME builder->add<int64_t>(x);
   }
 
   void
   RecordArrayBuilder::float64(double x, TypedArrayBuilder* builder) {
     contents_[(size_t)field_index()].get()->float64(x, builder);
-    // see FIXME builder->add<double>(x);
   }
 
   void
   RecordArrayBuilder::complex(std::complex<double> x, TypedArrayBuilder* builder) {
     contents_[(size_t)field_index()].get()->complex(x, builder);
-    // see FIXME builder->add<std::complex<double>>(x);
   }
 
   void
   RecordArrayBuilder::bytestring(const std::string& x, TypedArrayBuilder* builder) {
     contents_[(size_t)field_index()].get()->bytestring(x, builder);
-    // see FIXME builder->add<const std::string&>(x);
   }
 
   void
   RecordArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
     contents_[(size_t)field_index()].get()->string(x, builder);
-    // see FIXME builder->add<const std::string&>(x);
+  }
+
+  void
+  RecordArrayBuilder::begin_list(TypedArrayBuilder* builder) {
+    list_field_index_.emplace_back(field_index_);
+    contents_[(size_t)field_index_].get()->begin_list(builder);
+  }
+
+  void
+  RecordArrayBuilder::end_list(TypedArrayBuilder* builder) {
+    field_index_ = list_field_index_.back();
+    contents_[(size_t)field_index_].get()->end_list(builder);
+    list_field_index_.pop_back();
+    field_index();
+  }
+
+  bool
+  RecordArrayBuilder::active() {
+    for(auto content : contents_) {
+      if (content.get()->active()) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

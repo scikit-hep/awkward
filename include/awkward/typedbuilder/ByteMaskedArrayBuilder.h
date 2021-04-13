@@ -88,6 +88,14 @@ namespace awkward {
     void
       string(const std::string& x, TypedArrayBuilder* builder) override;
 
+    /// @brief Begins building a nested list.
+    void
+      begin_list(TypedArrayBuilder* builder) override;
+
+    /// @brief Ends a nested list.
+    void
+      end_list(TypedArrayBuilder* builder) override;
+
   private:
     /// @brief ByteMaskedForm that defines the BitMaskedArray.
     const ByteMaskedFormPtr form_;

@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/TypedArrayBuilder.cpp", line)
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/EmptyArrayBuilder.cpp", line)
 
 #include "awkward/typedbuilder/EmptyArrayBuilder.h"
 #include "awkward/typedbuilder/TypedArrayBuilder.h"
@@ -16,7 +16,7 @@ namespace awkward {
         + std::to_string(TypedArrayBuilder::next_id()))
         : form.get()->form_key()),
       vm_empty_command_("( This does nothing. )\n"),
-      vm_error_("s\"EmptyArray Builder error\"") { }
+      vm_error_("s\" EmptyArray Builder error\"") { }
 
   const std::string
   EmptyArrayBuilder::classname() const {
@@ -105,5 +105,16 @@ namespace awkward {
       std::string("EmptyArrayBuilder does not accept 'string'"));
   }
 
+  void
+  EmptyArrayBuilder::begin_list(TypedArrayBuilder* builder) {
+    throw std::invalid_argument(
+      std::string("EmptyArrayBuilder does not accept 'begin_list'"));
+  }
+
+  void
+  EmptyArrayBuilder::end_list(TypedArrayBuilder* builder) {
+    throw std::invalid_argument(
+      std::string("EmptyArrayBuilder does not accept 'end_list'"));
+  }
 
 }

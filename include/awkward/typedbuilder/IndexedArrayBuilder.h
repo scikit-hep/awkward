@@ -31,34 +31,36 @@ namespace awkward {
     const ContentPtr
       snapshot(const ForthOutputBufferMap& outputs) const override;
 
-    /// @brief
+    /// @brief The Form describing the array.
     const FormPtr
       form() const override;
 
-    /// @brief
+    /// @brief AwkwardForth virtual machine instructions of the data outputs.
     const std::string
       vm_output() const override;
 
-    /// @brief
+    /// @brief AwkwardForth virtual machine data output key.
     const std::string
       vm_output_data() const override;
 
-    /// @brief
+    /// @brief AwkwardForth virtual machine instructions of the array builder function.
     const std::string
       vm_func() const override;
 
-    /// @brief
+    /// @brief The array builder VM function name.
     const std::string
       vm_func_name() const override;
 
-    /// @brief
+    /// @brief The array builder VM function type.
     const std::string
       vm_func_type() const override;
 
+    /// @brief AwkwardForth virtual machine instructions to retrieve the data from
+    /// the VM stack.
     const std::string
       vm_from_stack() const override;
 
-    /// @brief
+    /// @brief Error messages in the AwkwardForth virtual machine instructions.
     const std::string
       vm_error() const override;
 
@@ -88,11 +90,19 @@ namespace awkward {
     void
       string(const std::string& x, TypedArrayBuilder* builder) override;
 
+    /// @brief Begins building a nested list.
+    void
+      begin_list(TypedArrayBuilder* builder) override;
+
+    /// @brief Ends a nested list.
+    void
+      end_list(TypedArrayBuilder* builder) override;
+
   private:
     /// @brief This builder Form
     const IndexedFormPtr form_;
 
-    /// @brief
+    /// @brief If 'true', this array type is categorical.
     bool is_categorical_;
 
     /// @brief an output buffer name is
@@ -104,7 +114,7 @@ namespace awkward {
     /// @brief This Form content builder
     FormBuilderPtr content_;
 
-    /// @brief Forth virtual machine instructions
+    /// @brief AwkwardForth virtual machine instructions
     /// generated from the Form
     std::string vm_output_data_;
     std::string vm_output_;

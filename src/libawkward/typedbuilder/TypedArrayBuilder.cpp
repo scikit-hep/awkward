@@ -433,7 +433,6 @@ namespace awkward {
 
   void
   TypedArrayBuilder::bytestring(const char* x) {
-    //builder_.get()->string(x, -1, no_encoding);
     throw std::runtime_error(
       std::string("TypedArrayBuilder a null terminated 'bytestring' is not implemented yet")
       + FILENAME(__LINE__));
@@ -484,12 +483,22 @@ namespace awkward {
 
   void
   TypedArrayBuilder::begin_list() {
+    builder_.get()->begin_list(this);
+  }
+
+  void
+  TypedArrayBuilder::add_begin_list() {
     vm_.get()->stack_push(static_cast<utype>(state::begin_list));
     vm_.get()->resume();
   }
 
   void
   TypedArrayBuilder::end_list() {
+    builder_.get()->end_list(this);
+  }
+
+  void
+  TypedArrayBuilder::add_end_list() {
     vm_.get()->stack_push(static_cast<utype>(state::end_list));
     vm_.get()->resume();
   }

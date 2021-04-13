@@ -53,10 +53,9 @@ namespace awkward {
     complex128 = 16,
     complex256 = 17,
     null = 18,
-    begin_tuple = 19,
-    end_tuple = 20,
-    index = 21,
-    tag = 22
+    index = 19,
+    tag = 20,
+    offset = 21
   };
   using utype = std::underlying_type<state>::type;
 
@@ -222,9 +221,17 @@ namespace awkward {
     void
       begin_list();
 
+    /// @brief Begins building a nested list.
+    void
+      add_begin_list();
+
     /// @brief Ends a nested list.
     void
       end_list();
+
+    /// @brief Ends a nested list.
+    void
+      add_end_list();
 
     /// @brief Sets the pointer to a given tag `tag`; the next
     /// command will fill that slot.
@@ -276,6 +283,10 @@ namespace awkward {
     static int64_t
       next_error_id();
 
+    /// @brief Resume Virtual machine run.
+    void
+      resume() const;
+
   protected:
     /// @brief A unique ID to use when Form nodes do not have Form key
     /// defined.
@@ -295,10 +306,6 @@ namespace awkward {
     template <typename T>
     void
       set_data(T x);
-
-    /// @brief Resume Virtual machine run.
-    void
-      resume() const;
 
     /// See #initial.
     int64_t initial_;

@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/TypedArrayBuilder.cpp", line)
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/NumpyArrayBuilder.cpp", line)
 
 #include "awkward/typedbuilder/NumpyArrayBuilder.h"
 #include "awkward/typedbuilder/TypedArrayBuilder.h"
@@ -147,6 +147,14 @@ namespace awkward {
   void
   NumpyArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
     builder->string(x.c_str(), (int64_t)x.length());
+  }
+
+  void
+  NumpyArrayBuilder::begin_list(TypedArrayBuilder* builder) {
+  }
+
+  void
+  NumpyArrayBuilder::end_list(TypedArrayBuilder* builder) {
   }
 
 }

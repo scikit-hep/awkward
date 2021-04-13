@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/TypedArrayBuilder.cpp", line)
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/UnknownFormBuilder.cpp", line)
 
 #include "awkward/typedbuilder/UnknownFormBuilder.h"
 #include "awkward/typedbuilder/TypedArrayBuilder.h"

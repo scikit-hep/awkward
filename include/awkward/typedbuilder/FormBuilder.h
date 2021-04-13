@@ -38,35 +38,36 @@ namespace awkward {
     virtual const ContentPtr
       snapshot(const ForthOutputBufferMap& outputs) const = 0;
 
-    /// @brief
+    /// @brief The Form describing the array.
     virtual const FormPtr
       form() const = 0;
 
-    /// @brief
+    /// @brief AwkwardForth virtual machine instructions of the data outputs.
     virtual const std::string
       vm_output() const = 0;
 
-    /// @brief
+    /// @brief AwkwardForth virtual machine data output key.
     virtual const std::string
       vm_output_data() const = 0;
 
-    /// @brief
+    /// @brief AwkwardForth virtual machine instructions of the array builder function.
     virtual const std::string
       vm_func() const = 0;
 
-    /// @brief
+    /// @brief The array builder VM function name.
     virtual const std::string
       vm_func_name() const = 0;
 
-    /// @brief
+    /// @brief The array builder VM function type.
     virtual const std::string
       vm_func_type() const = 0;
 
-    /// @brief
+    /// @brief AwkwardForth virtual machine instructions to retrieve the data from
+    /// the VM stack.
     virtual const std::string
       vm_from_stack() const = 0;
 
-    /// @brief
+    /// @brief Error messages in the AwkwardForth virtual machine instructions.
     virtual const std::string
       vm_error() const = 0;
 
@@ -119,6 +120,27 @@ namespace awkward {
       string(const std::string& x, TypedArrayBuilder* builder) {
         throw std::runtime_error(
           std::string("FormBuilder 'string' is not implemented yet"));
+      }
+
+    /// @brief Begins building a nested list.
+    virtual void
+      begin_list(TypedArrayBuilder* builder) {
+        throw std::runtime_error(
+          std::string("FormBuilder 'begin_list' is not implemented yet"));
+      }
+
+    /// @brief Ends a nested list.
+    virtual void
+      end_list(TypedArrayBuilder* builder) {
+        throw std::runtime_error(
+          std::string("FormBuilder 'end_list' is not implemented yet"));
+      }
+
+    /// @brief If `true`, this node has started but has not finished a
+    /// multi-step command (e.g. `begin_list ... end_list`).
+    virtual bool
+      active() {
+        return false;
       }
 
   };

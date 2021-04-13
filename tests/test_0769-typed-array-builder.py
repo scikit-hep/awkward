@@ -96,7 +96,6 @@ def test_list_offset_form():
     )
 
     builder = ak.layout.TypedArrayBuilder(form)
-    print(builder.vm_source())
 
     builder.begin_list()
     builder.float64(1.1)
@@ -109,8 +108,10 @@ def test_list_offset_form():
     builder.int64(2)
     builder.end_list()
     builder.end_list()
+
     builder.begin_list()
     builder.end_list()
+
     builder.begin_list()
     builder.float64(3.3)
     builder.begin_list()
@@ -244,7 +245,6 @@ def test_union_form():
     )
 
     builder = ak.layout.TypedArrayBuilder(form)
-    print(builder.vm_source())
 
     builder.tag(0)
     builder.float64(1.1)
@@ -385,7 +385,6 @@ def test_error_in_record_form():
         form_key="node0",
     )
     builder = ak.layout.TypedArrayBuilder(form)
-    print(builder.vm_source())
 
     # if record contents have the same type,
     # the fields alternate
@@ -502,3 +501,44 @@ def test_string_form():
     builder.string("three")
 
     assert ak.to_list(builder.snapshot()) == ["one", "two", "three"]
+
+
+def test_empty_form():
+    form = ak.forms.ListOffsetForm(
+        "i64",
+        ak.forms.ListOffsetForm(
+            "i64",
+            ak.forms.EmptyForm(),
+            form_key="node1",
+        ),
+        form_key="node0",
+    )
+
+    builder = ak.layout.TypedArrayBuilder(form)
+
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.end_list()
+    builder.begin_list()
+    builder.begin_list()
+    # builder.int64(1)
+    # will fail with ValueError: EmptyArrayBuilder does not accept 'int64'
+    builder.end_list()
+    builder.end_list()
+
+    assert ak.to_list(builder.snapshot()) == [[], [[], [], []], [[], []], [], [[]]]

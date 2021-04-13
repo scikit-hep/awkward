@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/TypedArrayBuilder.cpp", line)
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/ListOffsetArrayBuilder.cpp", line)
 
 #include "awkward/typedbuilder/ListOffsetArrayBuilder.h"
 #include "awkward/typedbuilder/TypedArrayBuilder.h"
@@ -15,6 +15,7 @@ namespace awkward {
     : form_(form),
       is_string_builder_(form.get()->parameter_equals("__array__", "\"string\"")
         ||  form.get()->parameter_equals("__array__", "\"bytestring\"")),
+      begun_(false),
       form_key_(!form.get()->form_key() ?
         std::make_shared<std::string>(std::string("node-id")
         + std::to_string(TypedArrayBuilder::next_id()))
@@ -63,12 +64,14 @@ namespace awkward {
       .append("0 ").append(vm_output_data_).append(" <- stack").append("\n");
 
     vm_error_.append(content_.get()->vm_error());
-    vm_error_.append("s\" ListOffsetArray Builder needs begin_list\"").append("\n");
+    vm_error_.append("s\" ListOffsetArray Builder ")
+      .append(vm_func_name_)
+      .append(" needs begin_list\"").append("\n");
   }
 
   const std::string
   ListOffsetArrayBuilder::classname() const {
-    return "ListOffsetArrayBuilder";
+    return std::string("ListOffsetArrayBuilder ") + vm_func_name();
   }
 
   const ContentPtr
@@ -177,6 +180,38 @@ namespace awkward {
     else {
       content_.get()->string(x, builder);
     }
+  }
+
+  void
+  ListOffsetArrayBuilder::begin_list(TypedArrayBuilder* builder) {
+    if (!begun_) {
+      begun_ = true;
+      builder->add_begin_list();
+    }
+    else {
+      content_.get()->begin_list(builder);
+    }
+  }
+
+  void
+  ListOffsetArrayBuilder::end_list(TypedArrayBuilder* builder) {
+    if (!begun_) {
+      throw std::invalid_argument(
+        std::string("called 'end_list' without 'begin_list' at the same level before it")
+        + FILENAME(__LINE__));
+    }
+    else if (!content_.get()->active()) {
+      builder->add_end_list();
+      begun_ = false;
+    }
+    else {
+      content_.get()->end_list(builder);
+    }
+  }
+
+  bool
+  ListOffsetArrayBuilder::active() {
+    return begun_;
   }
 
 }

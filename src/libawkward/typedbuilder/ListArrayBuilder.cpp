@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/TypedArrayBuilder.cpp", line)
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/ListArrayBuilder.cpp", line)
 
 #include "awkward/typedbuilder/ListArrayBuilder.h"
 #include "awkward/typedbuilder/TypedArrayBuilder.h"
@@ -13,6 +13,7 @@ namespace awkward {
                                      const std::string attribute,
                                      const std::string partition)
     : form_(form),
+      begun_(false),
       form_key_(!form.get()->form_key() ?
         std::make_shared<std::string>(std::string("node-id")
         + std::to_string(TypedArrayBuilder::next_id()))
@@ -178,6 +179,43 @@ namespace awkward {
   void
   ListArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
     content_.get()->string(x, builder);
+  }
+
+  void
+  ListArrayBuilder::begin_list(TypedArrayBuilder* builder) {
+    if (!begun_) {
+      throw std::invalid_argument(
+        std::string("called 'end_list' without 'begin_list' at the same level before it")
+        + FILENAME(__LINE__));
+    }
+    else if (!content_.get()->active()) {
+      builder->add_end_list();
+      begun_ = false;
+    }
+    else {
+      content_.get()->end_list(builder);
+    }
+  }
+
+  void
+  ListArrayBuilder::end_list(TypedArrayBuilder* builder) {
+    if (!begun_) {
+      throw std::invalid_argument(
+        std::string("called 'end_list' without 'begin_list' at the same level before it")
+        + FILENAME(__LINE__));
+    }
+    else if (!content_.get()->active()) {
+      builder->add_end_list();
+      begun_ = false;
+    }
+    else {
+      content_.get()->end_list(builder);
+    }
+  }
+
+  bool
+  ListArrayBuilder::active() {
+    return begun_;
   }
 
 }

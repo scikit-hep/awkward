@@ -1,6 +1,6 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/TypedArrayBuilder.cpp", line)
+#define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/builder/IndexedOptionArrayBuilder.cpp", line)
 
 #include "awkward/typedbuilder/IndexedOptionArrayBuilder.h"
 #include "awkward/typedbuilder/TypedArrayBuilder.h"
@@ -177,6 +177,16 @@ namespace awkward {
   void
   IndexedOptionArrayBuilder::string(const std::string& x, TypedArrayBuilder* builder) {
     content_.get()->string(x, builder);
+  }
+
+  void
+  IndexedOptionArrayBuilder::begin_list(TypedArrayBuilder* builder) {
+    content_.get()->begin_list(builder);
+  }
+
+  void
+  IndexedOptionArrayBuilder::end_list(TypedArrayBuilder* builder) {
+    content_.get()->end_list(builder);
   }
 
 }

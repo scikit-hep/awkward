@@ -37,7 +37,7 @@ namespace awkward {
     const std::string
       vm_output() const override;
 
-    /// @brief The data output key.
+    /// @brief AwkwardForth virtual machine data output key.
     const std::string
       vm_output_data() const override;
 
@@ -87,6 +87,14 @@ namespace awkward {
     /// accumulated data.
     void
       string(const std::string& x, TypedArrayBuilder* builder) override;
+
+    /// @brief Begins building a nested list.
+    void
+      begin_list(TypedArrayBuilder* builder) override;
+
+    /// @brief Ends a nested list.
+    void
+      end_list(TypedArrayBuilder* builder) override;
 
   private:
     /// @brief BitMaskedForm that defines the BitMaskedArray.
