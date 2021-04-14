@@ -1,4 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+from __future__ import print_function
 
 import os
 import platform
@@ -12,8 +13,12 @@ import setuptools.command.build_ext
 import setuptools.command.install
 from setuptools import setup, Extension
 
-# Note: never import from distutils before setuptools!
-import distutils.util
+
+if sys.version_info < (3,):
+    # Note: never import from distutils before setuptools!
+    from distutils.util import get_platform
+else:
+    from sysconfig import get_platform
 
 
 try:
@@ -118,50 +123,48 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
 
 def tree(x):
-    print(x + (" (dir)" if os.path.isdir(x) else ""))
+    print(("{} (dir)" if os.path.isdir(x) else "{}").format(x))
     if os.path.isdir(x):
         for y in os.listdir(x):
             tree(os.path.join(x, y))
 
 
-if platform.system() == "Windows":
-
-    class Install(setuptools.command.install.install):
-        def run(self):
-            outerdir = os.path.join(
-                os.path.join(
-                    "build",
-                    "lib.%s-%d.%d"
-                    % (
-                        distutils.util.get_platform(),
-                        sys.version_info[0],
-                        sys.version_info[1],
-                    ),
-                )
+class Install(setuptools.command.install.install):
+    def run(self):
+        outerdir = os.path.join(
+            os.path.join(
+                "build",
+                "lib.{}-{}.{}".format(
+                    get_platform(),
+                    sys.version_info[0],
+                    sys.version_info[1],
+                ),
             )
+        )
 
-            print("--- this directory --------------------------------------------")
-            for x in sorted(os.listdir(".")):
-                print(x)
+        print("--- this directory --------------------------------------------")
+        for x in sorted(os.listdir(".")):
+            print(x)
 
-            print("--- build directory -------------------------------------------")
-            tree("build")
+        print("--- build directory -------------------------------------------")
+        tree("build")
 
-            print("--- copying includes ------------------------------------------")
-            shutil.copytree(
-                os.path.join("include"), os.path.join(outerdir, "awkward", "include")
-            )
+        print("--- copying includes ------------------------------------------")
+        shutil.copytree(
+            os.path.join("include"), os.path.join(outerdir, "awkward", "include")
+        )
 
-            print("--- outerdir after copy ---------------------------------------")
-            tree(outerdir)
+        print("--- outerdir after copy ---------------------------------------")
+        tree(outerdir)
 
+        if platform.system() == "Windows":
             print("--- copying libraries -----------------------------------------")
             dlldir = os.path.join(
                 os.path.join(
                     "build",
                     "temp.%s-%d.%d"
                     % (
-                        distutils.util.get_platform(),
+                        get_platform(),
                         sys.version_info[0],
                         sys.version_info[1],
                     ),
@@ -204,107 +207,39 @@ if platform.system() == "Windows":
                     print("deleting", os.path.join(outerdir, x))
                     os.remove(os.path.join(outerdir, x))
 
-            print("--- begin normal install --------------------------------------")
-            setuptools.command.install.install.run(self)
+        print("--- begin normal install --------------------------------------")
+        setuptools.command.install.install.run(self)
 
-        def get_outputs(self):
-            outerdir = os.path.join(
-                os.path.join(
-                    "build",
-                    "lib.%s-%d.%d"
-                    % (
-                        distutils.util.get_platform(),
-                        sys.version_info[0],
-                        sys.version_info[1],
-                    ),
-                )
+    def get_outputs(self):
+        outerdir = os.path.join(
+            os.path.join(
+                "build",
+                "lib.{}-{}.{}".format(
+                    get_platform(),
+                    sys.version_info[0],
+                    sys.version_info[1],
+                ),
             )
-            outputdir = os.path.join(outerdir, "awkward")
-            outbase = self.install_lib.rstrip(os.path.sep)
+        )
+        outputdir = os.path.join(outerdir, "awkward")
+        outbase = self.install_lib.rstrip(os.path.sep)
 
-            outputs = []
+        outputs = []
 
-            for original in setuptools.command.install.install.get_outputs(self):
-                if "egg-info" in original:
-                    outputs.append(original)
-                if original.startswith(os.path.join(outbase, "awkward") + os.path.sep):
-                    outputs.append(original)
+        for original in setuptools.command.install.install.get_outputs(self):
+            if "egg-info" in original:
+                outputs.append(original)
+            if original.startswith(os.path.join(outbase, "awkward") + os.path.sep):
+                outputs.append(original)
 
-            for root, dirs, files in os.walk(outputdir):
-                root = root[len(outerdir) :].lstrip(os.path.sep)
-                for file in files:
-                    trial = os.path.join(outbase, os.path.join(root, file))
-                    if trial not in outputs:
-                        outputs.append(trial)
+        for root, dirs, files in os.walk(outputdir):
+            root = root[len(outerdir) :].lstrip(os.path.sep)
+            for file in files:
+                trial = os.path.join(outbase, os.path.join(root, file))
+                if trial not in outputs:
+                    outputs.append(trial)
 
-            return outputs
-
-
-else:
-
-    class Install(setuptools.command.install.install):
-        def run(self):
-            outerdir = os.path.join(
-                os.path.join(
-                    "build",
-                    "lib.%s-%d.%d"
-                    % (
-                        distutils.util.get_platform(),
-                        sys.version_info[0],
-                        sys.version_info[1],
-                    ),
-                )
-            )
-
-            print("--- this directory --------------------------------------------")
-            for x in sorted(os.listdir(".")):
-                print(x)
-
-            print("--- build directory -------------------------------------------")
-            tree("build")
-
-            print("--- copying includes ------------------------------------------")
-            shutil.copytree(
-                os.path.join("include"), os.path.join(outerdir, "awkward", "include")
-            )
-
-            print("--- outerdir after copy ---------------------------------------")
-            tree(outerdir)
-
-            print("--- begin normal install --------------------------------------")
-            setuptools.command.install.install.run(self)
-
-        def get_outputs(self):
-            outerdir = os.path.join(
-                os.path.join(
-                    "build",
-                    "lib.%s-%d.%d"
-                    % (
-                        distutils.util.get_platform(),
-                        sys.version_info[0],
-                        sys.version_info[1],
-                    ),
-                )
-            )
-            outputdir = os.path.join(outerdir, "awkward")
-            outbase = self.install_lib.rstrip(os.path.sep)
-
-            outputs = []
-
-            for original in setuptools.command.install.install.get_outputs(self):
-                if "egg-info" in original:
-                    outputs.append(original)
-                if original.startswith(os.path.join(outbase, "awkward") + os.path.sep):
-                    outputs.append(original)
-
-            for root, dirs, files in os.walk(outputdir):
-                root = root[len(outerdir) :].lstrip(os.path.sep)
-                for file in files:
-                    trial = os.path.join(outbase, os.path.join(root, file))
-                    if trial not in outputs:
-                        outputs.append(trial)
-
-            return outputs
+        return outputs
 
 
 setup(
