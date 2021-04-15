@@ -8,7 +8,10 @@ string(STRIP ${VERSION_INFO} VERSION_INFO)
 string(REPLACE "rc" "." VERSION_INFO_SIMPLE "${VERSION_INFO}")
 
 # Project must be near the top
-project(awkward LANGUAGES CXX VERSION ${VERSION_INFO_SIMPLE})
+project(
+  awkward
+  LANGUAGES CXX
+  VERSION ${VERSION_INFO_SIMPLE})
 
 message(STATUS "CMake version ${CMAKE_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
@@ -26,8 +29,8 @@ else()
   set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 endif()
 
-
-# Three tiers: [cpu-kernels (extern "C" interface), cuda-kernels (extern "C" interface)], libawkward (C++), and Python modules.
+# Three tiers: [cpu-kernels (extern "C" interface), cuda-kernels (extern "C" interface)],
+# libawkward (C++), and Python modules.
 file(GLOB CPU_KERNEL_SOURCES CONFIGURE_DEPENDS "src/cpu-kernels/*.cpp")
 file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 
@@ -40,7 +43,6 @@ target_compile_features(awkward-parent INTERFACE cxx_std_11)
 # C++ dependencies (header-only): RapidJSON and dlpack
 target_include_directories(awkward-parent INTERFACE rapidjson/include dlpack/include)
 
-
 # First tier: cpu-kernels (object files, static library, and dynamic library).
 add_library(awkward-cpu-kernels-objects OBJECT ${CPU_KERNEL_SOURCES})
 set_target_properties(awkward-cpu-kernels-objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -50,18 +52,27 @@ add_library(awkward-cpu-kernels-static STATIC $<TARGET_OBJECTS:awkward-cpu-kerne
 set_property(TARGET awkward-cpu-kernels-static PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(awkward-cpu-kernels-static PUBLIC awkward-parent)
 
-add_library(awkward-cpu-kernels        SHARED $<TARGET_OBJECTS:awkward-cpu-kernels-objects>)
+add_library(awkward-cpu-kernels SHARED $<TARGET_OBJECTS:awkward-cpu-kernels-objects>)
 target_link_libraries(awkward-cpu-kernels PUBLIC awkward-parent)
 
 # Second tier: libawkward (object files, static library, and dynamic library).
 add_library(awkward-objects OBJECT ${LIBAWKWARD_SOURCES})
 set_target_properties(awkward-objects PROPERTIES POSITION_INDEPENDENT_CODE 1)
 target_compile_definitions(awkward-objects PRIVATE LIBAWKWARD_EXPORT_SYMBOL=EXPORT_SYMBOL)
-if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
   # Avoid emitting vtables in the dependent libraries
-  target_compile_options(awkward-objects PRIVATE
-    -Werror=weak-vtables -Wweak-vtables -Wshorten-64-to-32 -Wsign-compare -Wsign-conversion
-    -Wshift-sign-overflow -Wreorder -Wrange-loop-analysis -Wconversion -Wunused)
+  target_compile_options(
+    awkward-objects
+    PRIVATE -Werror=weak-vtables
+            -Wweak-vtables
+            -Wshorten-64-to-32
+            -Wsign-compare
+            -Wsign-conversion
+            -Wshift-sign-overflow
+            -Wreorder
+            -Wrange-loop-analysis
+            -Wconversion
+            -Wunused)
 endif()
 target_link_libraries(awkward-objects PUBLIC awkward-parent)
 
@@ -70,38 +81,37 @@ set_property(TARGET awkward-static PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(awkward-static PRIVATE awkward-cpu-kernels-static ${CMAKE_DL_LIBS})
 target_link_libraries(awkward-static PUBLIC awkward-parent)
 
-add_library(awkward        SHARED $<TARGET_OBJECTS:awkward-objects>)
-target_link_libraries(awkward        PRIVATE awkward-cpu-kernels-static ${CMAKE_DL_LIBS})
+add_library(awkward SHARED $<TARGET_OBJECTS:awkward-objects>)
+target_link_libraries(awkward PRIVATE awkward-cpu-kernels-static ${CMAKE_DL_LIBS})
 target_link_libraries(awkward PUBLIC awkward-parent)
 
-
-
-# Tests
-# Macro to add C++ tests (part of CMake build, distinct from pytests in Python).
+# Tests Macro to add C++ tests (part of CMake build, distinct from pytests in Python).
 include(CTest)
 
 if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
-
 option(PYBUILD "Build Python modules")
 
 # Third tier: Python modules.
-if (PYBUILD)
+if(PYBUILD)
   add_subdirectory(pybind11)
 
   file(GLOB LAYOUT_SOURCES "src/python/*.cpp")
   pybind11_add_module(_ext ${LAYOUT_SOURCES})
   target_link_libraries(_ext PRIVATE awkward-static)
 
-  install(TARGETS awkward-static awkward awkward-parent awkward-cpu-kernels awkward-cpu-kernels-static _ext
-          LIBRARY DESTINATION awkward
-          ARCHIVE DESTINATION awkward)
+  install(
+    TARGETS awkward-static awkward awkward-parent awkward-cpu-kernels awkward-cpu-kernels-static
+            _ext
+    LIBRARY DESTINATION awkward
+    ARCHIVE DESTINATION awkward)
 
   # Third tier: install without Python modules.
 else()
-  install(TARGETS awkward-static awkward awkward-parent awkward-cpu-kernels awkward-cpu-kernels-static
-          LIBRARY DESTINATION lib
-          ARCHIVE DESTINATION lib)
+  install(
+    TARGETS awkward-static awkward awkward-parent awkward-cpu-kernels awkward-cpu-kernels-static
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib)
 endif()

@@ -1,4 +1,3 @@
-
 macro(addtest name filename)
   if(BUILD_TESTING)
     add_executable(${name} ${filename})
