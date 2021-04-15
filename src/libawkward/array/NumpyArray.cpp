@@ -1633,15 +1633,15 @@ namespace awkward {
         return false;
       }
 
-      // if (dtype_ != rawother->dtype()  &&
-      //     (dtype_ == util::dtype::datetime64  ||  rawother->dtype() == util::dtype::datetime64)) {
-      //   return false;
-      // }
+      if (dtype_ != rawother->dtype()  &&
+          (dtype_ == util::dtype::datetime64  ||  rawother->dtype() == util::dtype::datetime64)) {
+        return false;
+      }
 
-      // if (dtype_ != rawother->dtype()  &&
-      //     (dtype_ == util::dtype::timediff64  ||  rawother->dtype() == util::dtype::timediff64)) {
-      //   return false;
-      // }
+      if (dtype_ != rawother->dtype()  &&
+          (dtype_ == util::dtype::timedelta64  ||  rawother->dtype() == util::dtype::timedelta64)) {
+        return false;
+      }
 
       if (!(dtype_ == util::dtype::boolean  ||
             dtype_ == util::dtype::int8  ||

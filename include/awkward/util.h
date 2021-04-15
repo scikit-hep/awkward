@@ -41,8 +41,8 @@ namespace awkward {
         complex64,
         complex128,
         complex256,
-        // datetime64,
-        // timedelta64,
+        datetime64,
+        timedelta64,
         size
     };
 

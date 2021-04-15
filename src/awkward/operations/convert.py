@@ -121,6 +121,22 @@ def from_numpy(
             )
             for i in range(len(array.shape) - 1, 0, -1):
                 data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
+        elif array.dtype.kind == "M":
+            asbytes = array.reshape(-1)
+            itemsize = asbytes.dtype.itemsize
+            data = ak.layout.NumpyArray(
+                asbytes.view("i8"), parameters={"__array__": "datetime64"}
+            )
+            for i in range(len(array.shape) - 1, 0, -1):
+                data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
+        elif array.dtype.kind == "m":
+            asbytes = array.reshape(-1)
+            itemsize = asbytes.dtype.itemsize
+            data = ak.layout.NumpyArray(
+                asbytes.view("i8"), parameters={"__array__": "timedelta64"}
+            )
+            for i in range(len(array.shape) - 1, 0, -1):
+                data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
         else:
             data = ak.layout.NumpyArray(array)
 
