@@ -665,8 +665,10 @@ namespace awkward {
     /// value is set to `0` on the array node where the user starts the
     /// process and is increased at each level of list-depth (instead of
     /// decreasing the user-specified `axis`).
+    /// @param lists If `true`, flatten lists at the desired axis.
+    /// @param nones If `true`, flatten missing values at the desired axis.
     virtual const std::pair<Index64, ContentPtr>
-      offsets_and_flattened(int64_t axis, int64_t depth) const = 0;
+      offsets_and_flattened(int64_t axis, int64_t depth, bool lists, bool nones) const = 0;
 
     /// @brief Returns `true` if this array can be merged with the `other`;
     /// `false` otherwise.

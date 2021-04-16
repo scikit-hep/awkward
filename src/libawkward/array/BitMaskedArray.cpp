@@ -832,8 +832,8 @@ namespace awkward {
   }
 
   const std::pair<Index64, ContentPtr>
-  BitMaskedArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    return toByteMaskedArray().get()->offsets_and_flattened(axis, depth);
+  BitMaskedArray::offsets_and_flattened(int64_t axis, int64_t depth, bool lists, bool nones) const {
+    return toByteMaskedArray().get()->offsets_and_flattened(axis, depth, lists, nones);
   }
 
   bool

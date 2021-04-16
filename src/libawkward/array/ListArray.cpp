@@ -970,8 +970,8 @@ namespace awkward {
 
   template <typename T>
   const std::pair<Index64, ContentPtr>
-  ListArrayOf<T>::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    return toListOffsetArray64(true).get()->offsets_and_flattened(axis, depth);
+  ListArrayOf<T>::offsets_and_flattened(int64_t axis, int64_t depth, bool lists, bool nones) const {
+    return toListOffsetArray64(true).get()->offsets_and_flattened(axis, depth, lists, nones);
   }
 
   template <typename T>

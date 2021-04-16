@@ -737,7 +737,7 @@ namespace awkward {
   }
 
   const std::pair<Index64, ContentPtr>
-  UnmaskedArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+  UnmaskedArray::offsets_and_flattened(int64_t axis, int64_t depth, bool lists, bool nones) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
       throw std::invalid_argument(
@@ -745,7 +745,7 @@ namespace awkward {
     }
     else {
       std::pair<Index64, ContentPtr> offsets_flattened =
-        content_.get()->offsets_and_flattened(posaxis, depth);
+        content_.get()->offsets_and_flattened(posaxis, depth, lists, nones);
       Index64 offsets = offsets_flattened.first;
       ContentPtr flattened = offsets_flattened.second;
       if (offsets.length() == 0) {

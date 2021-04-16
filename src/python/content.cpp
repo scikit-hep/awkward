@@ -1364,13 +1364,13 @@ content_methods(py::class_<T, std::shared_ptr<T>, ak::Content>& x) {
           }, py::arg("axis") = 1)
           .def("flatten", [](const T& self, int64_t axis) -> py::object {
             std::pair<ak::Index64, std::shared_ptr<ak::Content>> pair =
-              self.offsets_and_flattened(axis, 0);
+              self.offsets_and_flattened(axis, 0, true, true);
             return box(pair.second);
           }, py::arg("axis") = 1)
           .def("offsets_and_flatten",
                [](const T& self, int64_t axis) -> py::object {
             std::pair<ak::Index64, std::shared_ptr<ak::Content>> pair =
-              self.offsets_and_flattened(axis, 0);
+              self.offsets_and_flattened(axis, 0, true, true);
             return py::make_tuple(py::cast(pair.first), box(pair.second));
           }, py::arg("axis") = 1)
           .def("rpad",

@@ -1526,7 +1526,9 @@ namespace awkward {
   template <typename T, typename I>
   const std::pair<Index64, ContentPtr>
   UnionArrayOf<T, I>::offsets_and_flattened(int64_t axis,
-                                            int64_t depth) const {
+                                            int64_t depth,
+                                            bool lists,
+                                            bool nones) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
       throw std::invalid_argument(
@@ -1539,7 +1541,7 @@ namespace awkward {
       ContentPtrVec contents;
       for (auto content : contents_) {
         std::pair<Index64, ContentPtr> pair =
-          content.get()->offsets_and_flattened(posaxis, depth);
+          content.get()->offsets_and_flattened(posaxis, depth, lists, nones);
         Index64 offsets = pair.first;
         offsetsptrs.push_back(offsets.ptr());
         offsetsraws.push_back(offsets.data());

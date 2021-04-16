@@ -883,7 +883,7 @@ namespace awkward {
     }
 
     const std::pair<Index64, ContentPtr>
-      offsets_and_flattened(int64_t axis, int64_t depth) const override {
+      offsets_and_flattened(int64_t axis, int64_t depth, bool lists, bool nones) const override {
       int64_t toaxis = axis_wrap_if_negative(axis);
       if (toaxis == depth) {
         throw std::invalid_argument(

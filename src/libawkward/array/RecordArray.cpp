@@ -1095,7 +1095,7 @@ namespace awkward {
   }
 
   const std::pair<Index64, ContentPtr>
-  RecordArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
+  RecordArray::offsets_and_flattened(int64_t axis, int64_t depth, bool lists, bool nones) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
       throw std::invalid_argument(
@@ -1111,7 +1111,7 @@ namespace awkward {
       for (auto content : contents_) {
         ContentPtr trimmed = content.get()->getitem_range(0, length());
         std::pair<Index64, ContentPtr> pair =
-          trimmed.get()->offsets_and_flattened(posaxis, depth);
+          trimmed.get()->offsets_and_flattened(posaxis, depth, lists, nones);
         if (pair.first.length() != 0) {
           throw std::runtime_error(
             std::string("RecordArray content with axis > depth + 1 returned a non-empty "

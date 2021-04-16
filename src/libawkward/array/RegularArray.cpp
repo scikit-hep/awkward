@@ -839,8 +839,8 @@ namespace awkward {
   }
 
   const std::pair<Index64, ContentPtr>
-  RegularArray::offsets_and_flattened(int64_t axis, int64_t depth) const {
-    return toListOffsetArray64(true).get()->offsets_and_flattened(axis, depth);
+  RegularArray::offsets_and_flattened(int64_t axis, int64_t depth, bool lists, bool nones) const {
+    return toListOffsetArray64(true).get()->offsets_and_flattened(axis, depth, lists, nones);
   }
 
   bool

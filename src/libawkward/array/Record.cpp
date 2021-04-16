@@ -323,7 +323,7 @@ namespace awkward {
   }
 
   const std::pair<Index64, ContentPtr>
-  Record::offsets_and_flattened(int64_t axis, int64_t depth) const {
+  Record::offsets_and_flattened(int64_t axis, int64_t depth, bool lists, bool nones) const {
     throw std::invalid_argument(
       std::string("Record cannot be flattened because it is not an array")
       + FILENAME(__LINE__));

@@ -260,7 +260,7 @@ namespace awkward {
   }
 
   const std::pair<Index64, ContentPtr>
-  None::offsets_and_flattened(int64_t axis, int64_t depth) const {
+  None::offsets_and_flattened(int64_t axis, int64_t depth, bool lists, bool nones) const {
     throw std::runtime_error(
       std::string("undefined operation: None::offsets_and_flattened")
       + FILENAME(__LINE__));

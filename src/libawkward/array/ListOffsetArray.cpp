@@ -978,7 +978,9 @@ namespace awkward {
   template <typename T>
   const std::pair<Index64, ContentPtr>
   ListOffsetArrayOf<T>::offsets_and_flattened(int64_t axis,
-                                              int64_t depth) const {
+                                              int64_t depth,
+                                              bool lists,
+                                              bool nones) const {
     int64_t posaxis = axis_wrap_if_negative(axis);
     if (posaxis == depth) {
       throw std::invalid_argument(
@@ -994,7 +996,7 @@ namespace awkward {
     }
     else {
       std::pair<Index64, ContentPtr> pair =
-        content_.get()->offsets_and_flattened(posaxis, depth + 1);
+        content_.get()->offsets_and_flattened(posaxis, depth + 1, lists, nones);
       Index64 inneroffsets = pair.first;
       if (inneroffsets.length() == 0) {
         return std::pair<Index64, ContentPtr>(
