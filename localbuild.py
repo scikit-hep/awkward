@@ -135,7 +135,7 @@ if args.buildpython:
             os.mkdir(newdir)
         if not os.path.isdir(x):
             where = x
-            for i in range(olddir.count(os.sep)):
+            for _ in range(olddir.count(os.sep)):
                 where = os.path.join("..", where)
             os.symlink(where, newfile)
 

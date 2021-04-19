@@ -278,7 +278,7 @@ def matmul_for_numba(lefts, rights, dtype):
 
         outer[outer_i] = outer[outer_i - 1] + rows
         outer_i += 1
-        for i in range(rows):
+        for _ in range(rows):
             inner[inner_i] = inner[inner_i - 1] + cols
             inner_i += 1
         content_i += rows * cols

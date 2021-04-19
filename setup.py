@@ -232,7 +232,7 @@ class Install(setuptools.command.install.install):
             if original.startswith(os.path.join(outbase, "awkward") + os.path.sep):
                 outputs.append(original)
 
-        for root, dirs, files in os.walk(outputdir):
+        for root, _, files in os.walk(outputdir):
             root = root[len(outerdir) :].lstrip(os.path.sep)
             for file in files:
                 trial = os.path.join(outbase, os.path.join(root, file))
