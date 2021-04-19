@@ -43,15 +43,15 @@ from awkward.highlevel import Record
 from awkward.highlevel import ArrayBuilder
 
 # behaviors
-from awkward.behaviors.mixins import *
-from awkward.behaviors.string import *
-from awkward.behaviors.categorical import *
+from awkward.behaviors.mixins import *  # noqa: F403
+from awkward.behaviors.string import *  # noqa: F403
+from awkward.behaviors.categorical import *  # noqa: F403
 
 # operations
-from awkward.operations.convert import *
-from awkward.operations.describe import *
-from awkward.operations.structure import *
-from awkward.operations.reducers import *
+from awkward.operations.convert import *  # noqa: F403
+from awkward.operations.describe import *  # noqa: F403
+from awkward.operations.structure import *  # noqa: F403
+from awkward.operations.reducers import *  # noqa: F403
 
 # version
 __version__ = awkward._ext.__version__
