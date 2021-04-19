@@ -4282,7 +4282,6 @@ def strings_astype(array, to, highlevel=True, behavior=None):
 
     See also #ak.numbers_astype.
     """
-    nplike = ak.nplike.of(array)
     to_dtype = np.dtype(to)
 
     def getfunction(layout):

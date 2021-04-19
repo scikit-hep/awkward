@@ -63,7 +63,7 @@ begin
 again
 """
     )
-    with pytest.raises(ValueError) as err:
+    with pytest.raises(ValueError):
         vm32.run()
     assert vm32.stack[-1] == 0
     assert vm32.string_at(vm32.stack[-1]) == "variable x reached its maximum 10"

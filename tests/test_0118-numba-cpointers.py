@@ -484,7 +484,7 @@ def test_refcount():
             return x, x
 
         for j in range(10):
-            y = f3(array)
+            y = f3(array)  # noqa: F841 (checking reference count)
             assert [
                 sys.getrefcount(x) == 2
                 for x in (
@@ -808,7 +808,7 @@ def test_RecordView_refcount():
             return x, x
 
         for j in range(10):
-            y = f3(record)
+            y = f3(record)  # noqa: F841 (checking reference count)
             assert [
                 sys.getrefcount(x) == 2
                 for x in (
