@@ -342,9 +342,7 @@ def from_categorical(array, highlevel=True):
 
 
 __all__ = [
-    x
-    for x in list(globals())
-    if not x.startswith("_") and x not in ("ak", "np")
+    x for x in list(globals()) if not x.startswith("_") and x not in ("ak", "np")
 ]
 
 
