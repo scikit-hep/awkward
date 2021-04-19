@@ -4,3 +4,6 @@ from __future__ import absolute_import
 
 from awkward._ext import fromjson
 from awkward._ext import uproot_issue_90
+
+
+__all__ = ["fromjson", "uproot_issue_90"]

@@ -15,3 +15,17 @@ from awkward._ext import ListType
 from awkward._ext import OptionType
 from awkward._ext import UnionType
 from awkward._ext import RecordType
+
+
+__all__ = [
+    "from_datashape",
+    "Type",
+    "ArrayType",
+    "PrimitiveType",
+    "RegularType",
+    "UnknownType",
+    "ListType",
+    "OptionType",
+    "UnionType",
+    "RecordType",
+]
