@@ -34,3 +34,7 @@ __all__ = [
     "UnmaskedForm",
     "VirtualForm",
 ]
+
+
+def __dir__():
+    return __all__

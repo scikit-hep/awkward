@@ -268,5 +268,9 @@ __all__ = [
     x
     for x in list(globals())
     if not x.startswith("_")
-    and x not in ("absolute_import", "numbers", "numpy", "np", "awkward")
+    and x not in ("numbers", "numpy", "ak", "np")
 ]
+
+
+def __dir__():
+    return __all__

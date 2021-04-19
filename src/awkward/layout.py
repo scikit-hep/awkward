@@ -98,3 +98,7 @@ __all__ = [
     "ArrayCache",
     "kernel_lib",
 ]
+
+
+def __dir__():
+    return __all__

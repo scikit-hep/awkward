@@ -4326,12 +4326,14 @@ __all__ = [
     if not x.startswith("_")
     and x
     not in (
-        "absolute_import",
         "numbers",
         "json",
         "Iterable",
-        "MutableMapping",
+        "ak",
         "np",
-        "awkward",
     )
 ]
+
+
+def __dir__():
+    return __all__

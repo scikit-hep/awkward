@@ -29,3 +29,7 @@ __all__ = [
     "UnionType",
     "RecordType",
 ]
+
+
+def __dir__():
+    return __all__

@@ -92,5 +92,9 @@ def mixin_class_method(ufunc, rhs=None, transpose=True):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_") and x not in ("absolute_import", "awkward", "sys")
+    if not x.startswith("_") and x not in ("sys", "ak")
 ]
+
+
+def __dir__():
+    return __all__
