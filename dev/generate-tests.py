@@ -6,7 +6,7 @@ from collections import OrderedDict
 from itertools import product
 
 import yaml
-from numpy import uint8
+from numpy import uint8  # noqa: F401 (used in evaluated strings)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 

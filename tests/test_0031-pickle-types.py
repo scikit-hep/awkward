@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 
-import sys
 import pickle
 
 import pytest  # noqa: F401

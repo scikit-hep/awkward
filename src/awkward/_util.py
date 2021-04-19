@@ -130,8 +130,8 @@ class Behavior(Mapping):
                 yield n, x
 
     def __iter__(self):
-        for n, x in self.items():
-            yield n
+        for x in self.keys():
+            yield x
 
     def __len__(self):
         return len(set(self.defaults) | set(self.overrides))

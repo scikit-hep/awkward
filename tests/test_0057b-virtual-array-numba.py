@@ -320,13 +320,13 @@ def test_indexedoptionarray():
     assert ak.to_list(f2(array, 3)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert ak.to_list(f2(array, 4)) == None
+    assert ak.to_list(f2(array, 4)) is None
     assert counter[0] == 1
 
     assert ak.to_list(f2(array, 3)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert ak.to_list(f2(array, 4)) == None
+    assert ak.to_list(f2(array, 4)) is None
     assert counter[0] == 1
 
     assert ak.to_list(f3(array)) == [
@@ -417,13 +417,13 @@ def test_bytemaskedarray():
     assert ak.to_list(f2(array, 3)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert ak.to_list(f2(array, 4)) == None
+    assert ak.to_list(f2(array, 4)) is None
     assert counter[0] == 1
 
     assert ak.to_list(f2(array, 3)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert ak.to_list(f2(array, 4)) == None
+    assert ak.to_list(f2(array, 4)) is None
     assert counter[0] == 1
 
     assert ak.to_list(f3(array)) == [
@@ -537,13 +537,13 @@ def test_bitmaskedarray():
     assert ak.to_list(f2(array, 3)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert ak.to_list(f2(array, 4)) == None
+    assert ak.to_list(f2(array, 4)) is None
     assert counter[0] == 1
 
     assert ak.to_list(f2(array, 3)) == [4.4, 5.5]
     assert counter[0] == 1
 
-    assert ak.to_list(f2(array, 4)) == None
+    assert ak.to_list(f2(array, 4)) is None
     assert counter[0] == 1
 
     assert ak.to_list(f3(array)) == [

@@ -98,7 +98,7 @@ def test_list_offset_array_concatenate():
         [0.99],
     ]
 
-    with pytest.raises(ValueError) as err:
+    with pytest.raises(ValueError):
         assert ak.to_list(ak.concatenate([one, two], 2))
 
     assert ak.to_list(ak.concatenate([three, four], 0)) == [
@@ -168,10 +168,10 @@ def test_records_concatenate():
         {"y": [], "x": 4},
         {"y": [3, 2, 1], "x": 5},
     ]
-    with pytest.raises(ValueError) as err:
+    with pytest.raises(ValueError):
         ak.to_list(ak.concatenate([one, two], 1))
 
-    with pytest.raises(ValueError) as err:
+    with pytest.raises(ValueError):
         ak.to_list(ak.concatenate([one, two], 2))
 
 
@@ -191,7 +191,7 @@ def test_indexed_array_concatenate():
         8,
     ]
 
-    with pytest.raises(ValueError) as err:
+    with pytest.raises(ValueError):
         ak.to_list(ak.concatenate([one, three], 1))
 
     assert ak.to_list(ak.concatenate([one, four], 1)) == [
@@ -222,7 +222,7 @@ def test_bytemasked_concatenate():
         9,
     ]
 
-    with pytest.raises(ValueError) as err:
+    with pytest.raises(ValueError):
         ak.to_list(ak.concatenate([one, two], 1))
 
 
@@ -257,8 +257,6 @@ def test_listoffsetarray_concatenate():
 
 
 def test_numpyarray_concatenate_axis0():
-    emptyarray = ak.layout.EmptyArray()
-
     np1 = np.arange(2 * 7 * 5, dtype=np.float64).reshape(2, 7, 5)
     np2 = np.arange(3 * 7 * 5, dtype=np.int64).reshape(3, 7, 5)
     ak1 = ak.layout.NumpyArray(np1)

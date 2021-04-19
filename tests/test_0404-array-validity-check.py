@@ -2,9 +2,6 @@
 
 from __future__ import absolute_import
 
-import sys
-
-import pytest
 import numpy as np
 import awkward as ak
 

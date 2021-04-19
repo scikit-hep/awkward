@@ -67,3 +67,7 @@ __all__ = [
     for x in list(globals())
     if not x.startswith("_") and x not in ("distutils", "numpy")
 ]
+
+
+def __dir__():
+    return __all__

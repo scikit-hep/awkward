@@ -37,7 +37,7 @@ or
 
 
 def register():
-    import awkward._connect._jax.jax_utils
+    import awkward._connect._jax.jax_utils  # noqa: F401
 
 
 ak.jax = types.ModuleType("jax")

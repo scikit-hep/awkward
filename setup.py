@@ -57,7 +57,7 @@ class CMakeExtension(Extension):
 class CMakeBuild(setuptools.command.build_ext.build_ext):
     def build_extensions(self):
         try:
-            out = subprocess.check_output([CMAKE, "--version"])
+            subprocess.check_output([CMAKE, "--version"])
         except OSError:
             raise RuntimeError(
                 "CMake must be installed to build the following extensions: "
@@ -232,7 +232,7 @@ class Install(setuptools.command.install.install):
             if original.startswith(os.path.join(outbase, "awkward") + os.path.sep):
                 outputs.append(original)
 
-        for root, dirs, files in os.walk(outputdir):
+        for root, _, files in os.walk(outputdir):
             root = root[len(outerdir) :].lstrip(os.path.sep)
             for file in files:
                 trial = os.path.join(outbase, os.path.join(root, file))

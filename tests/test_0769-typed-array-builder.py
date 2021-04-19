@@ -60,7 +60,7 @@ def test_unsupported_form():
     form = ak.forms.VirtualForm(ak.forms.NumpyForm([], 8, "d"), True)
 
     with pytest.raises(ValueError):
-        builder = ak.layout.TypedArrayBuilder(form)
+        ak.layout.TypedArrayBuilder(form)
 
 
 def test_list_offset_form():
