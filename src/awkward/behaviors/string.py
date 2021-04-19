@@ -264,9 +264,7 @@ ak.behavior["__numba_lower__", "string"] = _string_numba_lower
 
 
 __all__ = [
-    x
-    for x in list(globals())
-    if not x.startswith("_") and x not in ("ak", "np")
+    x for x in list(globals()) if not x.startswith("_") and x not in ("ak", "np")
 ]
 
 

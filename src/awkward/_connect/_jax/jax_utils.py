@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 
-import types
 import awkward as ak
 import numbers
 

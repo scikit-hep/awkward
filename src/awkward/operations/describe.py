@@ -267,8 +267,7 @@ def fields(array):
 __all__ = [
     x
     for x in list(globals())
-    if not x.startswith("_")
-    and x not in ("numbers", "numpy", "ak", "np")
+    if not x.startswith("_") and x not in ("numbers", "numpy", "ak", "np")
 ]
 
 
