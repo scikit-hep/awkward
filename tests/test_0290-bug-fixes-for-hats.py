@@ -75,4 +75,4 @@ def test_indexed_2():
     assert f1(array, 100).tolist() == {"x": 100}
     assert f1(array, 101).tolist() == {"x": 101}
     assert f1(array, 102).tolist() == {"x": 102}
-    assert f1(array, 12345) == None
+    assert f1(array, 12345) is None

@@ -15,7 +15,7 @@ def test_ByteMaskedArray():
     array = ak.layout.ByteMaskedArray(mask, content, valid_when=False)
     assert ak.to_list(array) == [[0.0, 1.1, 2.2], [], None, None, [6.6, 7.7, 8.8, 9.9]]
     assert ak.to_list(array[-1]) == [6.6, 7.7, 8.8, 9.9]
-    assert ak.to_list(array[-2]) == None
+    assert ak.to_list(array[-2]) is None
     assert ak.to_list(array[1:]) == [[], None, None, [6.6, 7.7, 8.8, 9.9]]
     assert array[4, 1] == 7.7
     assert ak.to_list(array[2:, 1]) == [None, None, 7.7]
