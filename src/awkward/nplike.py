@@ -101,6 +101,7 @@ class NumpyMetadata(Singleton):
     nat = numpy.datetime64("NaT")
     datetime_data = numpy.datetime_data
 
+
 if hasattr(numpy, "float16"):
     NumpyMetadata.float16 = numpy.float16
 
