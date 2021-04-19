@@ -125,7 +125,10 @@ def from_numpy(
             asbytes = array.reshape(-1)
             itemsize = asbytes.dtype.itemsize
             data = ak.layout.NumpyArray(
-                asbytes.view("i8"), parameters={"__array__": "datetime64"}
+                asbytes.view("i8"), parameters={
+                    "__array__": "datetime64",
+                    "__datetime64_data__" : array.dtype.str,
+                    "__datetime64_unit__" : np.datetime_data(array.dtype)[0] }
             )
             for i in range(len(array.shape) - 1, 0, -1):
                 data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
@@ -133,7 +136,10 @@ def from_numpy(
             asbytes = array.reshape(-1)
             itemsize = asbytes.dtype.itemsize
             data = ak.layout.NumpyArray(
-                asbytes.view("i8"), parameters={"__array__": "timedelta64"}
+                asbytes.view("i8"), parameters={
+                    "__array__": "timedelta64",
+                    "__timedelta64_data__" : array.dtype.str,
+                    "__timedelta64_unit__" : np.datetime_data(array.dtype)[0] }
             )
             for i in range(len(array.shape) - 1, 0, -1):
                 data = ak.layout.RegularArray(data, array.shape[i], array.shape[i - 1])
@@ -244,6 +250,22 @@ def to_numpy(array, allow_missing=True):
         return numpy.array(
             [
                 ak.behaviors.string.CharBehavior(array[i]).__str__()
+                for i in range(len(array))
+            ]
+        )
+
+    elif ak.operations.describe.parameters(array).get("__array__") == "datetime64":
+        return numpy.array(
+            [
+                np.datetime64(array[i], ak.operations.describe.parameters(array).get("__datetime64_unit__"))
+                for i in range(len(array))
+            ]
+        )
+
+    elif ak.operations.describe.parameters(array).get("__array__") == "timedelta64":
+        return numpy.array(
+            [
+                np.datetime64(array[i], ak.operations.describe.parameters(array).get("__timedelta64_unit__"))
                 for i in range(len(array))
             ]
         )
@@ -485,6 +507,15 @@ def to_cupy(array):
             + ak._util.exception_suffix(__file__)
         )
 
+    elif (
+        ak.operations.describe.parameters(array).get("__array__") == "datetime64"
+        or ak.operations.describe.parameters(array).get("__array__") == "timedelta64"
+    ):
+        raise ValueError(
+            "CuPy does not support arrays of datetime64/timedelta64"
+            + ak._util.exception_suffix(__file__)
+        )
+
     elif isinstance(array, ak.partition.PartitionedArray):
         return cupy.concatenate([to_cupy(x) for x in array.partitions])
 
@@ -660,6 +691,15 @@ def to_jax(array):
     ):
         raise ValueError(
             "JAX does not support arrays of strings"
+            + ak._util.exception_suffix(__file__)
+        )
+
+    elif (
+        ak.operations.describe.parameters(array).get("__array__") == "datetime64"
+        or ak.operations.describe.parameters(array).get("__array__") == "timedelta64"
+    ):
+        raise ValueError(
+            "FIXME: Does JAX support arrays of datetime64/timedelta64?"
             + ak._util.exception_suffix(__file__)
         )
 
@@ -954,6 +994,13 @@ def to_list(array):
 
     elif ak.operations.describe.parameters(array).get("__array__") == "char":
         return ak.behaviors.string.CharBehavior(array).__str__()
+
+    elif ak.operations.describe.parameters(array).get("__array__") == "datetime64":
+        tmp = to_numpy(array)
+        return [
+            numpy.datetime_as_string(tmp[i])
+            for i in range(len(tmp))
+        ]
 
     elif isinstance(array, ak.highlevel.Array):
         return [to_list(x) for x in array]
